@@ -1,8 +1,13 @@
 """Utility functions for FedPara."""
+
+import os
+import pickle
 import random
+import time
 from pathlib import Path
 from secrets import token_hex
-from typing import Optional, Union
+from typing import Optional
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -10,7 +15,7 @@ from flwr.common import NDArrays
 from flwr.server import History
 from omegaconf import DictConfig
 from torch.nn import Module
-import time, os, pickle
+
 
 def plot_metric_from_history(
     hist: History,
@@ -34,10 +39,9 @@ def plot_metric_from_history(
     suffix: Optional
         Optional string to add at the end of the filename for the plot.
     """
-    metric_type = "centralized"
     metric_dict = (
         hist.metrics_centralized
-        if metric_type == "centralized"
+        if hist.metrics_centralized
         else hist.metrics_distributed
     )
     _, axs = plt.subplots()
@@ -45,16 +49,14 @@ def plot_metric_from_history(
     r_cc = (i * 2 * model_size * int(cfg.clients_per_round) / 1024 for i in rounds)
 
     # Set the title
-    title = f"{cfg.strategy.algorithm} | parameters: {cfg.model.conv_type} | "
-    title += (
-        f"{cfg.dataset_config.name} {cfg.dataset_config.partition} | Seed {cfg.seed}"
-    )
+    # make the suffix space seperated not underscore seperated
+    title = " ".join(suffix.split("_"))
     axs.set_title(title)
     axs.grid(True)
     axs.plot(np.asarray([*r_cc]), np.asarray(values_accuracy))
     axs.set_ylabel("Accuracy")
     axs.set_xlabel("Communication Cost (GB)")
-    fig_name = "_".join([metric_type, "metrics", suffix]) + ".png"
+    fig_name = suffix + ".png"
     plt.savefig(Path(save_plot_path) / Path(fig_name))
     plt.close()
 
@@ -71,9 +73,11 @@ def get_parameters(net: Module) -> NDArrays:
     """Get the parameters of the network."""
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
+
 def save_results_as_pickle(
     history: History,
-    default_filename: Optional[str] = "results.pkl",
+    file_path: str,
+    default_filename: Optional[str] = "history.pkl",
 ) -> None:
     """Save results from simulation to pickle.
 
@@ -94,7 +98,6 @@ def save_results_as_pickle(
         File used by default if file_path points to a directory instead
         to a file. Default: "results.pkl"
     """
-    file_path = set_client_state_save_path("./outputs/")
     path = Path(file_path)
 
     # ensure path exists
@@ -132,9 +135,23 @@ def set_client_state_save_path(path: str) -> str:
     """Set the client state save path."""
     client_state_save_path = time.strftime("%Y-%m-%d")
     client_state_sub_path = time.strftime("%H-%M-%S")
-    client_state_save_path = (
-        f"{path}{client_state_save_path}/{client_state_sub_path}"
-    )
+    client_state_save_path = f"{path}{client_state_save_path}/{client_state_sub_path}"
     if not os.path.exists(client_state_save_path):
         os.makedirs(client_state_save_path)
     return client_state_save_path
+
+
+def get_keys_state_dict(model, algorithm, mode: str = "local") -> list[str]:
+    match algorithm:
+        case "fedper":
+            if mode == "local":
+                return list(filter(lambda x: "fc1" not in x, model.state_dict().keys()))
+            elif mode == "global":
+                return list(filter(lambda x: "fc1" in x, model.state_dict().keys()))
+        case "pfedpara":
+            if mode == "local":
+                return list(filter(lambda x: "w2" in x, model.state_dict().keys()))
+            elif mode == "global":
+                return list(filter(lambda x: "w1" in x, model.state_dict().keys()))
+        case _:
+            raise NotImplementedError(f"algorithm {algorithm} not implemented")

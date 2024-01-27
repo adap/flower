@@ -6,13 +6,14 @@ first download the dataset and partition it and then run the experiments, please
 uncomment the lines below and tell us in the README.md (see the "Running the Experiment"
 block) that this file should be executed first.
 """
+
 import random
 from collections import defaultdict
 
 import numpy as np
+import torch
 from torch.utils.data import Dataset
-import logging
-from collections import Counter
+
 
 class DatasetSplit(Dataset):
     """An abstract Dataset class wrapped around Pytorch Dataset class."""
@@ -99,14 +100,60 @@ def noniid(dataset, no_participants, alpha=0.5):
             clas_weight[i, j] = float(datasize[i, j]) / float((train_img_size[i]))
     return per_participant_list, clas_weight
 
-def mnist_niid(dataset: Dataset, num_clients: int, shard_size: int, seed: int) -> np.ndarray:
-    """ Partitioning technique as mentioned in https://arxiv.org/pdf/1602.05629.pdf"""
-    indices = dataset.targets[np.argsort(dataset.targets)].numpy()
-    logging.debug(Counter(dataset.targets[indices].numpy()))
-    silos = np.array_split(indices, len(dataset) // shard_size)# randomly assign silos to clients
-    np.random.seed(seed+17)
-    np.random.shuffle(silos)
-    clients = np.array(np.array_split(silos, num_clients)).reshape(num_clients, -1)
-    logging.debug(clients.shape)
-    logging.debug(Counter([len(Counter(dataset.targets[client].numpy())) for client in clients]))
-    return clients
+
+def data_to_tensor(data):
+    """Loads dataset to memory, applies transform."""
+    loader = torch.utils.data.DataLoader(data, batch_size=len(data))
+    img, label = next(iter(loader))
+    return img, label
+
+
+def noniid_partition_loader(data, m_per_shard=300, n_shards_per_client=2):
+    """semi-pathological client sample partition
+    1. sort examples by label, form shards of size 300 by grouping points
+    successively
+    2. each client is 2 random shards
+    most clients will have 2 digits, at most 4
+    """
+    # load data into memory
+    img, label = data_to_tensor(data)
+
+    # sort
+    idx = torch.argsort(label)
+    img = img[idx]
+    label = label[idx]
+
+    # split into n_shards of size m_per_shard
+    m = len(data)
+    assert m % m_per_shard == 0
+    n_shards = m // m_per_shard
+    shards_idx = [
+        torch.arange(m_per_shard * i, m_per_shard * (i + 1)) for i in range(n_shards)
+    ]
+    random.shuffle(shards_idx)  # shuffle shards
+
+    # pick shards to create a dataset for each client
+    assert n_shards % n_shards_per_client == 0
+    n_clients = n_shards // n_shards_per_client
+    client_data = [
+        torch.utils.data.TensorDataset(
+            torch.cat(
+                [
+                    img[shards_idx[j]]
+                    for j in range(
+                        i * n_shards_per_client, (i + 1) * n_shards_per_client
+                    )
+                ]
+            ),
+            torch.cat(
+                [
+                    label[shards_idx[j]]
+                    for j in range(
+                        i * n_shards_per_client, (i + 1) * n_shards_per_client
+                    )
+                ]
+            ),
+        )
+        for i in range(n_clients)
+    ]
+    return client_data

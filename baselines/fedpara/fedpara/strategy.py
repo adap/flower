@@ -1,20 +1,7 @@
-"""FedPara strategy."""
-
-
+# FedPara uses FedAvg as the default strategy
 from flwr.server.strategy import FedAvg
 
 
-class FedPara(FedAvg):
-    """FedPara strategy."""
-
-    def __init__(
-        self,
-        algorithm: str,
-        **kwargs,
-    ) -> None:
+class FedAvg(FedAvg):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.algorithm = algorithm
-
-    def __repr__(self) -> str:
-        """Return the name of the strategy."""
-        return self.algorithm

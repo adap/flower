@@ -5,12 +5,19 @@ import hydra
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
+
 from fedpara import client, server, utils
 from fedpara.dataset import load_datasets
-from fedpara.utils import get_parameters, save_results_as_pickle, seed_everything, set_client_state_save_path
+from fedpara.server import weighted_average
+from fedpara.utils import (
+    get_parameters,
+    save_results_as_pickle,
+    seed_everything,
+    set_client_state_save_path,
+)
 
 
-@hydra.main(config_path="conf", config_name="mnist", version_base=None)
+@hydra.main(config_path="conf", config_name="cifar100", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 
@@ -23,8 +30,10 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     seed_everything(cfg.seed)
     OmegaConf.to_container(cfg, resolve=True)
-    if 'state_path' in cfg: state_path=set_client_state_save_path(cfg.state_path)
-    else: state_path = None
+    if "state_path" in cfg:
+        state_path = set_client_state_save_path(cfg.state_path)
+    else:
+        state_path = None
 
     # 2. Prepare dataset
     train_loaders, test_loader = load_datasets(
@@ -41,7 +50,7 @@ def main(cfg: DictConfig) -> None:
         test_loader=test_loader,
         model=cfg.model,
         num_epochs=cfg.num_epochs,
-        args={"device": cfg.client_device, "algorithm": cfg.algorithm},
+        args={"algorithm": cfg.algorithm},
         state_path=state_path,
     )
 
@@ -60,24 +69,27 @@ def main(cfg: DictConfig) -> None:
         strategy = instantiate(
             cfg.strategy,
             on_fit_config_fn=get_on_fit_config(),
-            initial_parameters=fl.common.ndarrays_to_parameters(get_parameters(net_glob)),
+            initial_parameters=fl.common.ndarrays_to_parameters(
+                get_parameters(net_glob)
+            ),
+            evaluate_metrics_aggregation_fn=weighted_average,
         )
 
-    else :
+    else:
         evaluate_fn = server.gen_evaluate_fn(
             num_clients=cfg.num_clients,
             test_loader=test_loader,
             model=cfg.model,
             device=cfg.server_device,
-            state_path=cfg.state_path,
         )
         strategy = instantiate(
             cfg.strategy,
             evaluate_fn=evaluate_fn,
             on_fit_config_fn=get_on_fit_config(),
-            initial_parameters=fl.common.ndarrays_to_parameters(get_parameters(net_glob)),
+            initial_parameters=fl.common.ndarrays_to_parameters(
+                get_parameters(net_glob)
+            ),
         )
-
 
     # 5. Start Simulation
     history = fl.simulation.start_simulation(
@@ -92,21 +104,12 @@ def main(cfg: DictConfig) -> None:
             "_memory": 30 * 1024 * 1024 * 1024,
         },
     )
-    save_results_as_pickle(history)
-    
-    # 6. Save results
     save_path = HydraConfig.get().runtime.output_dir
-    file_suffix = "_".join(
-        [
-            repr(strategy),
-            cfg.dataset_config.name,
-            f"{cfg.seed}",
-            f"{cfg.dataset_config.alpha}",
-            f"{cfg.num_clients}",
-            f"{cfg.num_rounds}",
-            f"{cfg.clients_per_round}",
-        ]
-    )
+
+    save_results_as_pickle(history, file_path=save_path)
+
+    # 6. Save results
+    file_suffix = "_".join([(net_glob).__class__.__name__, f"{cfg.exp_id}"])
 
     utils.plot_metric_from_history(
         hist=history,

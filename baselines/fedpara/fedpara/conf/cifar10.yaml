@@ -6,6 +6,7 @@ num_rounds: 200
 clients_per_round: 16
 num_epochs: 5
 batch_size: 64
+algorithm: FedPara
 
 server_device: cuda
 
@@ -22,8 +23,7 @@ dataset_config:
 model:
   _target_: fedpara.models.VGG
   num_classes: ${dataset_config.num_classes}
-  conv_type: lowrank # lowrank or standard
-  activation: relu # relu or leaky_relu
+  param_type: lowrank # lowrank or standard
   ratio: 0.1 # lowrank ratio
 
 hyperparams:
@@ -32,8 +32,7 @@ hyperparams:
 
 
 strategy:
-  _target_: fedpara.strategy.FedPara
-  algorithm: FedPara
+  _target_: fedpara.strategy.FedAvg
   fraction_fit: 0.00001
   fraction_evaluate: 0.0
   min_evaluate_clients: 0
@@ -41,3 +40,4 @@ strategy:
   min_available_clients: ${clients_per_round}
   accept_failures: false
 
+exp_id: ${algorithm}_${dataset_config.name}_${seed}_${dataset_config.partition}_${dataset_config.alpha}_${model.param_type}_${model.ratio}

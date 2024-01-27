@@ -2,6 +2,7 @@
 
 import math
 from typing import Dict, Tuple
+
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -10,100 +11,94 @@ from torch import nn
 from torch.nn import init
 from torch.utils.data import DataLoader
 
+
 class LowRankNN(nn.Module):
-    def __init__(self,input, output, rank,activation: str = "relu",) -> None:
+    """Fedpara Low-rank weight systhesis for fully connected layer."""
+
+    def __init__(self, input, output, rank) -> None:
         super(LowRankNN, self).__init__()
-        
+
         self.X = nn.Parameter(
             torch.empty(size=(input, rank)),
             requires_grad=True,
         )
-        self.Y = nn.Parameter(
-            torch.empty(size=(output,rank)), requires_grad=True
-        )
+        self.Y = nn.Parameter(torch.empty(size=(output, rank)), requires_grad=True)
 
-        if activation == "leakyrelu":
-            activation = "leaky_relu"
-        init.kaiming_normal_(self.X, mode="fan_out", nonlinearity=activation)
-        init.kaiming_normal_(self.Y, mode="fan_out", nonlinearity=activation)
-    
+        init.kaiming_normal_(self.X, mode="fan_out", nonlinearity="relu")
+        init.kaiming_normal_(self.Y, mode="fan_out", nonlinearity="relu")
+
     def forward(self):
-        out = torch.einsum("yr,xr->yx",self.Y, self.X)
+        out = torch.einsum("yr,xr->yx", self.Y, self.X)
         return out
-    
+
+
 class Linear(nn.Module):
-    def __init__(self, input, output, ratio, activation: str = "relu",bias= True, pfedpara=True) -> None:
+    """Low-rank fully connected layer module for personalized scheme."""
+
+    def __init__(self, input, output, ratio, bias=True) -> None:
         super(Linear, self).__init__()
-        rank = self._calc_from_ratio(ratio,input, output)
-        self.w1 = LowRankNN(input, output, rank, activation)
-        self.w2 = LowRankNN(input, output, rank, activation)
+        rank = self._calc_from_ratio(ratio, input, output)
+        self.w1 = LowRankNN(input, output, rank)
+        self.w2 = LowRankNN(input, output, rank)
         # make the bias for each layer
         if bias:
             self.bias = nn.Parameter(torch.zeros(output))
-        self.pfedpara = pfedpara
 
-    def _calc_from_ratio(self, ratio,input, output):
+    def _calc_from_ratio(self, ratio, input, output):
         # Return the low-rank of sub-matrices given the compression ratio
         # minimum possible parameter
         r1 = int(np.ceil(np.sqrt(output)))
         r2 = int(np.ceil(np.sqrt(input)))
         r = np.min((r1, r2))
-        # maximum possible rank, 
+        # maximum possible rank,
         """
-        To solve it we need to know the roots of quadratic equation: ax^2+bx+c=0
-        a = kernel**2
-        b = out channel+ in channel
-        c = - num_target_params/2
-        r3 is floored because we cannot take the ceil as it results a bigger number of parameters than the original problem 
+        To solve it we need to know the roots of quadratic equation: 2*r*(m+n)=m*n
         """
-        num_target_params = (
-            output * input
-        )
-        a, b, c = input, output,- num_target_params/2
-        discriminant = b**2 - 4 * a * c
-        r3 = math.floor((-b+math.sqrt(discriminant))/(2*a))
-        rank=math.ceil((1-ratio)*r+ ratio*r3)
+        r3 = math.floor((output * input) / (2 * (output + input)))
+        rank = math.ceil((1 - ratio) * r + ratio * r3)
         return rank
-    
-    def forward(self,x):
+
+    def forward(self, x):
         # personalized
-        if self.pfedpara:
-            w = self.w1() * self.w2() + self.w1()
-        else:
-            w = self.w1() * self.w2()
-        out = F.linear(x, w,self.bias)
+        w = self.w1() * self.w2() + self.w1()
+        out = F.linear(x, w, self.bias)
         return out
 
-        
+
 class FC(nn.Module):
-    def __init__(self, input_size=28**2, hidden_size=256, num_classes=10, ratio=0.5, param_type="lowrank",activation: str = "relu",algorithm="pfedpara"):
+    """2NN Fully connected layer as in the paper: https://arxiv.org/abs/1602.05629"""
+
+    def __init__(
+        self,
+        input_size=28**2,
+        hidden_size=200,
+        num_classes=10,
+        ratio=0.5,
+        param_type="standard",
+    ):
         super(FC, self).__init__()
         self.input_size = input_size
-        self.method = algorithm.lower()
         if param_type == "standard":
-            self.fc1 = nn.Linear(input_size, hidden_size) 
-            self.relu = nn.ReLU()
-            self.fc2 = nn.Linear(hidden_size, num_classes)
-            self.softmax = nn.Softmax(dim=1)
+            self.fc1 = nn.Linear(input_size, hidden_size)
+            self.fc2 = nn.Linear(hidden_size, 256)
+            self.out = nn.Linear(256, num_classes)
+
         elif param_type == "lowrank":
-            pfedpara = False
-            if self.method == "pfedpara":
-                pfedpara = True
-            
-            self.fc1 = Linear(input_size, hidden_size, ratio, activation, pfedpara=pfedpara)
-            self.relu = nn.ReLU()
-            self.fc2 = Linear(hidden_size, num_classes, ratio, activation, pfedpara=pfedpara)
-            self.softmax = nn.Softmax(dim=1)
+            self.fc1 = Linear(input_size, hidden_size, ratio)
+            self.fc2 = Linear(hidden_size, 256, ratio)
+            self.out = Linear(256, num_classes, ratio)
+
         else:
             raise ValueError("param_type must be either standard or lowrank")
 
     @property
     def model_size(self):
+        """Return the total number of trainable parameters (in million paramaters) and
+        the size of the model in MB.
         """
-        Return the total number of trainable parameters (in million paramaters) and the size of the model in MB.
-        """
-        total_trainable_params = sum(
-        p.numel() for p in self.parameters() if p.requires_grad)/1e6
+        total_trainable_params = (
+            sum(p.numel() for p in self.parameters() if p.requires_grad) / 1e6
+        )
         param_size = 0
         for param in self.parameters():
             param_size += param.nelement() * param.element_size()
@@ -112,17 +107,17 @@ class FC(nn.Module):
             buffer_size += buffer.nelement() * buffer.element_size()
         size_all_mb = (param_size + buffer_size) / 1024**2
         return total_trainable_params, size_all_mb
-    
-    def forward(self,x):
+
+    def forward(self, x):
         x = x.view(-1, self.input_size)
-        out = self.fc1(x)
-        out = self.relu(out)
-        out = self.fc2(out)
-        out = self.softmax(out)
-        return out
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.out(x)
+        return x
+
 
 class LowRank(nn.Module):
-    """Low-rank convolutional layer."""
+    """Fedpara Low-rank weight systhesis for Convolution layer."""
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -130,7 +125,6 @@ class LowRank(nn.Module):
         out_channels: int,
         low_rank: int,
         kernel_size: int,
-        activation: str = "relu",
     ):
         super().__init__()
         self.T = nn.Parameter(
@@ -143,11 +137,9 @@ class LowRank(nn.Module):
         self.Y = nn.Parameter(
             torch.empty(size=(low_rank, in_channels)), requires_grad=True
         )
-        if activation == "leakyrelu":
-            activation = "leaky_relu"
-        init.kaiming_normal_(self.T, mode="fan_out", nonlinearity=activation)
-        init.kaiming_normal_(self.X, mode="fan_out", nonlinearity=activation)
-        init.kaiming_normal_(self.Y, mode="fan_out", nonlinearity=activation)
+        init.kaiming_normal_(self.T, mode="fan_out", nonlinearity="relu")
+        init.kaiming_normal_(self.X, mode="fan_out", nonlinearity="relu")
+        init.kaiming_normal_(self.Y, mode="fan_out", nonlinearity="relu")
 
     def forward(self):
         """Forward pass."""
@@ -169,7 +161,6 @@ class Conv2d(nn.Module):
         bias: bool = False,
         ratio: float = 0.1,
         add_nonlinear: bool = False,
-        activation: str = "relu",
     ):
         super().__init__()
         self.in_channels = in_channels
@@ -181,13 +172,8 @@ class Conv2d(nn.Module):
         self.ratio = ratio
         self.low_rank = self._calc_from_ratio()
         self.add_nonlinear = add_nonlinear
-        self.activation = activation
-        self.W1 = LowRank(
-            in_channels, out_channels, self.low_rank, kernel_size, activation
-        )
-        self.W2 = LowRank(
-            in_channels, out_channels, self.low_rank, kernel_size, activation
-        )
+        self.W1 = LowRank(in_channels, out_channels, self.low_rank, kernel_size)
+        self.W2 = LowRank(in_channels, out_channels, self.low_rank, kernel_size)
         self.bias = nn.Parameter(torch.zeros(out_channels)) if bias else None
         self.tanh = nn.Tanh()
 
@@ -207,9 +193,7 @@ class Conv2d(nn.Module):
         # r3 is floored because we cannot take the ceil as it results a bigger number
         # of parameters than the original problem
 
-        num_target_params = (
-            self.out_channels * self.in_channels * (self.kernel_size**2)
-        )
+        num_target_params = self.out_channels * self.in_channels * (self.kernel_size**2)
         a, b, c = (
             self.kernel_size**2,
             self.out_channels + self.in_channels,
@@ -242,16 +226,11 @@ class VGG(nn.Module):
         num_classes,
         num_groups=2,
         ratio=0.1,
-        activation="relu",
-        conv_type="lowrank",
+        param_type="lowrank",
         add_nonlinear=False,
     ):
         super().__init__()
-        if activation == "relu":
-            self.activation = nn.ReLU(inplace=True)
-        elif activation == "leaky_relu":
-            self.activation = nn.LeakyReLU(inplace=True)
-        self.conv_type = conv_type
+        self.param_type = param_type
         self.num_groups = num_groups
         self.num_classes = num_classes
         self.ratio = ratio
@@ -281,10 +260,10 @@ class VGG(nn.Module):
         self.classifier = nn.Sequential(
             nn.Dropout(),
             nn.Linear(512, 512),
-            self.activation,
+            nn.ReLU(inplace=True),
             nn.Dropout(),
             nn.Linear(512, 512),
-            self.activation,
+            nn.ReLU(inplace=True),
             nn.Linear(512, num_classes),
         )
         self._init_weights()
@@ -294,7 +273,7 @@ class VGG(nn.Module):
         for name, module in self.features.named_children():
             module = getattr(self.features, name)
             if isinstance(module, nn.Conv2d):
-                if self.conv_type == "lowrank":
+                if self.param_type == "lowrank":
                     num_channels = module.in_channels
                     setattr(
                         self.features,
@@ -309,10 +288,9 @@ class VGG(nn.Module):
                             ratio=self.ratio,
                             add_nonlinear=self.add_nonlinear,
                             # send the activation function to the Conv2d class
-                            activation=self.activation.__class__.__name__.lower(),
                         ),
                     )
-                elif self.conv_type == "standard":
+                elif self.param_type == "standard":
                     n = (
                         module.kernel_size[0]
                         * module.kernel_size[1]
@@ -333,10 +311,10 @@ class VGG(nn.Module):
                     layers += [
                         conv2d,
                         nn.GroupNorm(self.num_groups, v),
-                        self.activation,
+                        nn.ReLU(inplace=True),
                     ]
                 else:
-                    layers += [conv2d, self.activation]
+                    layers += [conv2d, nn.ReLU(inplace=True)]
                 in_channels = v
         return nn.Sequential(*layers)
 
@@ -490,6 +468,6 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
 
 
 if __name__ == "__main__":
-    model = VGG(num_classes=10, num_groups=2, conv_type="standard", ratio=0.4)
+    model = VGG(num_classes=10, num_groups=2, param_type="standard", ratio=0.4)
     # Print the modified VGG16GN model architecture
     print(model.model_size)

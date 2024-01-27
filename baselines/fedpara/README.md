@@ -2,7 +2,7 @@
 title: "FedPara: Low-rank Hadamard Product for Communication-Efficient Federated Learning"
 url:  https://openreview.net/forum?id=d71n4ftoCBy
 labels: [image classification, personalization, low-rank training, tensor decomposition]
-dataset: [CIFAR-10, CIFAR-100, FEMNIST]
+dataset: [CIFAR-10, CIFAR-100, MNIST]
 ---
 
 # FedPara: Low-rank Hadamard Product for Communication-Efficient Federated Learning 
@@ -29,10 +29,10 @@ page: https://github.com/South-hw/FedPara_ICLR22
 
 **What’s implemented:**  The code in this directory replicates the experiments in FedPara paper implementing the Low-rank scheme for Convolution module.
 
-Specifically, it replicates the results for CIFAR-10  and CIFAR-100  in Figure 3 and the results for Feminist in Figure 5(a).
+Specifically, it replicates the results for CIFAR-10  and CIFAR-100  in Figure 3 and the results for MNIST in Figure 5(c).
 
 
-**Datasets:**  CIFAR-10, CIFAR-100, FEMNIST from PyTorch's Torchvision
+**Datasets:**  CIFAR-10, CIFAR-100, MNIST from PyTorch's Torchvision
 
 **Hardware Setup:** The experiments have been conducted on our server with the following specs:
 
@@ -62,7 +62,7 @@ On a machine with RTX 3090Ti (24GB VRAM) it takes approximately 1h to run each C
 
 **Training Hyperparameters:**
 
-|   |   Cifar10 IID   | Cifar10 Non-IID      | Cifar100 IID     | Cifar100 Non-IID      | FEMNIST        |
+|   |   Cifar10 IID   | Cifar10 Non-IID      | Cifar100 IID     | Cifar100 Non-IID      | MNIST        |
 |---|-------|-------|------|-------|----------|
 | Fraction of client (K) | 16    | 16    | 8    | 8     | 10       |
 | Total rounds (T) | 200   | 200   | 400  | 400   | 100      |
@@ -143,6 +143,12 @@ python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standar
 python -m fedpara.main --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid 
 # To run fedpara for iid CIFAR-100 on vgg16 for lowrank and original schemes
 python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid
+# To run fedavg for non-iid MINST on FC 
+python -m fedpara.main --config-name mnist_fedavg 
+# To run fedper for non-iid MINST on FC 
+python -m fedpara.main --config-name mnist_fedper 
+# To run pfedpara for non-iid MINST on FC 
+python -m fedpara.main --config-name mnist_pfedpara 
 ```
 
 #### Communication Cost: 
@@ -163,3 +169,7 @@ Communication costs as measured as described in the paper:
 | IID | Non-IID |
 |:----:|:----:|
 |![CIFAR10 iid](_static/Cifar10_iid.jpeg) | ![CIFAR10 non-iid](_static/Cifar10_noniid.jpeg) |
+
+### NON-IID MINST (FedAvg vs FedPer vs pFedPara)
+**Important Note: The only federated averaging (FedAvg) implementation replicates the results outlined in the paper. However, challenges with convergence were encountered when applying pFedPara and FedPer methods.**
+![Personalization algorithms](_static/non-iid_mnist_personalization.png) 

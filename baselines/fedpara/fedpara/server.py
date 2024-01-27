@@ -1,12 +1,14 @@
 """Global evaluation function."""
 
 from collections import OrderedDict
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
+
 import torch
-from flwr.common import NDArrays, Scalar
+from flwr.common import Metrics, NDArrays, Scalar
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
+
 from fedpara.models import test
 
 
@@ -16,6 +18,7 @@ def get_on_fit_config(hypearparams: Dict):
     def fit_config_fn(server_round: int):
         hypearparams["curr_round"] = server_round
         return hypearparams
+
     return fit_config_fn
 
 
@@ -62,3 +65,12 @@ def gen_evaluate_fn(
         return loss, {"accuracy": accuracy}
 
     return evaluate
+
+
+def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
+    # Multiply accuracy of each client by number of examples used
+    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
+    examples = [num_examples for num_examples, _ in metrics]
+    print(f"accuracies: {sum(accuracies) / sum(examples)}")
+    # Aggregate and return custom metric (weighted average)
+    return {"accuracy": sum(accuracies) / sum(examples)}
