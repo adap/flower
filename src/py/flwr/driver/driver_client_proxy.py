@@ -75,7 +75,7 @@ class DriverClientProxy(ClientProxy):
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         # Ins to RecordSet
-        out_recordset = compat.fitins_to_recordset(ins, keep_input=False)
+        out_recordset = compat.fitins_to_recordset(ins, keep_input=True)
         # Fetch response
         in_recordset = self._send_receive_recordset(
             out_recordset, TASK_TYPE_FIT, timeout
@@ -88,7 +88,7 @@ class DriverClientProxy(ClientProxy):
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
         # Ins to RecordSet
-        out_recordset = compat.evaluateins_to_recordset(ins, keep_input=False)
+        out_recordset = compat.evaluateins_to_recordset(ins, keep_input=True)
         # Fetch response
         in_recordset = self._send_receive_recordset(
             out_recordset, TASK_TYPE_EVALUATE, timeout
