@@ -222,6 +222,9 @@ class Flanders(FedAvg):
                 beta=self.beta,
             )
 
+            print("Ground truth: ", ground_truth)
+            print("Predicted matrix: ", predicted_matrix[:, :, 0])
+
             log(INFO, "Computing anomaly scores")
             anomaly_scores = self.distance_function(
                 ground_truth, predicted_matrix[:, :, 0]
@@ -235,8 +238,22 @@ class Flanders(FedAvg):
             malicious_clients_idx = sorted(
                 np.argsort(anomaly_scores)[self.num_clients_to_keep :]
             )  # noqa
+
+            # TODO: remove this
+            good_clients_idx = [2,3,4]
+            malicious_clients_idx = [0,1]
+            # Compute the average anomaly score for the good clients
+            avg_anomaly_score_gc = np.mean(anomaly_scores[good_clients_idx])
+            print("avg anomaly score for good clients", avg_anomaly_score_gc)
+            avg_anomaly_score_m = np.mean(anomaly_scores[malicious_clients_idx])
+            print("avg anomaly score for malicious clients", avg_anomaly_score_m)
+            ##########################################
+
             results = np.array(results)[good_clients_idx].tolist()
             log(INFO, "Good clients: %s", good_clients_idx)
+            # Save the avg anomaly score into a file
+            with open("anomaly_scores.txt", "a") as f:
+                f.write(f"{server_round},{avg_anomaly_score_gc},{avg_anomaly_score_m}\n")
 
         log(INFO, "Applying FedAvg")
         # Convert results

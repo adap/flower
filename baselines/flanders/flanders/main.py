@@ -19,6 +19,7 @@ from .client import CifarClient, HouseClient, IncomeClient, MnistClient
 from .dataset import (
     do_fl_partitioning,
     get_cifar_10,
+    get_mnist,
     get_partitioned_house,
     get_partitioned_income,
 )
@@ -28,6 +29,7 @@ from .utils import (
     house_evaluate,
     income_evaluate,
     l2_norm,
+    cosine_distance,
     mnist_evaluate,
 )
 
@@ -78,6 +80,16 @@ def main(cfg: DictConfig) -> None:
             val_ratio=0.5,
             seed=1234,
         )
+    elif dataset_name == "mnist":
+        train_path, _ = get_mnist()
+        fed_dir = do_fl_partitioning(
+            train_path,
+            pool_size=cfg.server.pool_size,
+            alpha=10000,
+            num_classes=10,
+            val_ratio=0.5,
+            seed=1234,
+        )
     elif dataset_name == "income":
         x_train, x_test, y_train, y_test = get_partitioned_income(
             "flanders/datasets_files/adult.csv", cfg.server.pool_size
@@ -92,10 +104,8 @@ def main(cfg: DictConfig) -> None:
     def client_fn(cid: str, pool_size: int = 10, dataset_name: str = dataset_name):
         client = clients[dataset_name][0]
         cid_idx = int(cid)
-        if dataset_name == "cifar":
+        if dataset_name == "cifar" or dataset_name == "mnist":
             return client(cid, fed_dir)
-        elif dataset_name == "mnist":
-            return client(cid, pool_size)
         elif dataset_name == "income":
             return client(
                 cid,

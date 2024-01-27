@@ -11,7 +11,7 @@ from flwr.common.typing import Scalar
 from sklearn.linear_model import ElasticNet, LogisticRegression
 from sklearn.metrics import accuracy_score, log_loss
 
-from .dataset import get_dataloader, get_mnist
+from .dataset import get_dataloader, get_mnist, cifar10_transformation, mnist_transformation
 from .models import CifarNet, MnistNet, test_cifar, test_mnist, train_cifar, train_mnist
 
 XY = Tuple[np.ndarray, np.ndarray]
@@ -86,78 +86,6 @@ def set_initial_params_linear_regr(model):
 
 
 # Adapted from Pytorch quickstart example
-class MnistClient(fl.client.NumPyClient):
-    """Flower client implementing MNIST image classification using PyTorch."""
-
-    def __init__(self, cid: str, pool_size: int):
-        """Instantiate a client for the MNIST dataset."""
-        self.cid = cid
-        self.properties: Dict[str, Scalar] = {"tensor_type": "numpy.ndarray"}
-        self.net = MnistNet()
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.pool_size = pool_size
-
-    def get_parameters(self, config):
-        """Get model parameters as a list of NumPy ndarrays."""
-        return get_params(self.net)
-
-    def fit(self, parameters, config):
-        """Set model parameters from a list of NumPy ndarrays."""
-        set_params(self.net, parameters)
-
-        # Load data for this client and get trainloader
-        num_workers = 1
-
-        trainloader = get_mnist(
-            "flanders/datasets_files",
-            32,
-            self.cid,
-            nb_clients=self.pool_size,
-            is_train=True,
-            workers=num_workers,
-        )
-
-        # Send model to device
-        self.net.to(self.device)
-
-        # Train
-        train_mnist(self.net, trainloader, epochs=config["epochs"], device=self.device)
-
-        new_parameters = self.get_parameters(config={})
-
-        # Return local model and statistics
-        return (
-            new_parameters,
-            len(trainloader.dataset),
-            {"malicious": config["malicious"], "cid": self.cid},
-        )
-
-    def evaluate(self, parameters, config):
-        """Evaluate using local test dataset."""
-        set_params(self.net, parameters)
-
-        # Load data for this client and get trainloader
-        num_workers = len(ray.worker.get_resource_ids()["CPU"])
-        testloader = get_mnist(
-            "flanders/datasets_files",
-            32,
-            self.cid,
-            nb_clients=self.pool_size,
-            is_train=False,
-            workers=num_workers,
-        )
-
-        # Send model to device
-        self.net.to(self.device)
-
-        # Evaluate
-        loss, accuracy = test_mnist(self.net, testloader, device=self.device)
-
-        # Return statistics
-        return float(loss), len(testloader), {"accuracy": float(accuracy)}
-
-
-# Adapted from Pytorch quickstart example
 class CifarClient(fl.client.NumPyClient):
     """Implementation of CIFAR-10 image classification using PyTorch."""
 
@@ -190,6 +118,7 @@ class CifarClient(fl.client.NumPyClient):
             is_train=True,
             batch_size=config["batch_size"],
             workers=num_workers,
+            transform=cifar10_transformation,
         )
 
         self.net.to(self.device)
@@ -208,7 +137,7 @@ class CifarClient(fl.client.NumPyClient):
         # Load data for this client and get trainloader
         num_workers = len(ray.worker.get_resource_ids()["CPU"])
         valloader = get_dataloader(
-            self.fed_dir, self.cid, is_train=False, batch_size=50, workers=num_workers
+            self.fed_dir, self.cid, is_train=False, batch_size=50, workers=num_workers, transform=cifar10_transformation
         )
 
         self.net.to(self.device)
@@ -216,6 +145,64 @@ class CifarClient(fl.client.NumPyClient):
 
         return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
 
+class MnistClient(fl.client.NumPyClient):
+    """Implementation of MNIST image classification using PyTorch."""
+
+    def __init__(self, cid, fed_dir_data):
+        """Instantiate a client for the MNIST dataset."""
+        self.cid = cid
+        self.fed_dir = Path(fed_dir_data)
+        self.properties = {"tensor_type": "numpy.ndarray"}
+
+        # Instantiate model
+        self.net = MnistNet()
+
+        # Determine device
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("mps")
+
+    def get_parameters(self, config):
+        """Get model parameters as a list of NumPy ndarrays."""
+        return get_params(self.net)
+
+    def fit(self, parameters, config):
+        """Set model parameters from a list of NumPy ndarrays."""
+        set_params(self.net, parameters)
+
+        # Load data for this client and get trainloader
+        num_workers = 1
+        trainloader = get_dataloader(
+            self.fed_dir,
+            self.cid,
+            is_train=True,
+            batch_size=config["batch_size"],
+            workers=num_workers,
+            transform=mnist_transformation,
+        )
+
+        self.net.to(self.device)
+        train_mnist(self.net, trainloader, epochs=config["epochs"], device=self.device)
+
+        return (
+            get_params(self.net),
+            len(trainloader.dataset),
+            {"malicious": config["malicious"], "cid": self.cid},
+        )
+
+    def evaluate(self, parameters, config):
+        """Evaluate using local test dataset."""
+        set_params(self.net, parameters)
+
+        # Load data for this client and get trainloader
+        num_workers = len(ray.worker.get_resource_ids()["CPU"])
+        valloader = get_dataloader(
+            self.fed_dir, self.cid, is_train=False, batch_size=50, workers=num_workers, transform=mnist_transformation
+        )
+
+        self.net.to(self.device)
+        loss, accuracy = test_mnist(self.net, valloader, device=self.device)
+
+        return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
 
 class IncomeClient(fl.client.NumPyClient):
     """Implementation income classification using scikit-learn."""

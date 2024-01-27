@@ -38,20 +38,20 @@ class Data(torch.utils.data.Dataset):
         return self.len
 
 
-def get_dataset(path_to_data: Path, cid: str, partition: str):
+def get_dataset(path_to_data: Path, cid: str, partition: str, transform=None):
     """Return TorchVisionFL dataset object."""
     # generate path to cid's data
     path_to_data = path_to_data / cid / (partition + ".pt")
 
-    return TorchVisionFL(path_to_data, transform=cifar10_transformation())
+    return TorchVisionFL(path_to_data, transform=transform)
 
 
 def get_dataloader(
-    path_to_data: str, cid: str, is_train: bool, batch_size: int, workers: int
+    path_to_data: str, cid: str, is_train: bool, batch_size: int, workers: int, transform=None
 ):
     """Generate trainset/valset object and returns appropiate dataloader."""
     partition = "train" if is_train else "val"
-    dataset = get_dataset(Path(path_to_data), str(cid), partition)
+    dataset = get_dataset(Path(path_to_data), str(cid), partition, transform=transform)
 
     # we use as number of workers all the cpu cores assigned to this actor
     kwargs = {"num_workers": workers, "pin_memory": True, "drop_last": False}
@@ -109,7 +109,7 @@ def do_fl_partitioning(
         shutil.rmtree(splits_dir)
     Path.mkdir(splits_dir, parents=True)
 
-    for _, idx in enumerate(pool_size):
+    for idx in range(pool_size):
         labels = partitions[idx][1]
         image_idx = partitions[idx][0]
         imgs = images[image_idx]
@@ -136,14 +136,23 @@ def do_fl_partitioning(
     return splits_dir
 
 
-def cifar10_transformation():
+def cifar10_transformation(img):
     """Return a torchvision.transforms object for CIFAR10 dataset."""
     return transforms.Compose(
         [
             transforms.ToTensor(),
             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
         ]
-    )
+    )(img)
+
+def mnist_transformation(img):
+    """Return TorchVision transformation for MNIST."""
+    return transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(mean=(0.5,), std=(0.5,)),
+        ]
+    )(img)
 
 
 class TorchVisionFL(VisionDataset):
@@ -211,61 +220,84 @@ def get_cifar_10(path_to_data="flanders/datasets_files/cifar_10/data"):
     torch.save([train_set.data, np.array(train_set.targets)], training_data)
 
     test_set = datasets.CIFAR10(
-        root=path_to_data, train=False, transform=cifar10_transformation()
+        root=path_to_data, train=False, transform=cifar10_transformation
     )
 
     # returns path where training data is and testset
     return training_data, test_set
 
+def get_mnist(path_to_data="flanders/datasets_files/mnist/data"):
+    """Download MNIST dataset."""
+    # download dataset and load train set
+    train_set = datasets.MNIST(root=path_to_data, train=True, download=True)
 
-def get_mnist(
-    data_root: str,
-    batch_size: int,
-    cid: int,
-    workers=1,
-    nb_clients=10,
-    is_train=True,
-):
-    """Load both training and test datasets for MNIST.
+    # fuse all data splits into a single "training.pt"
+    data_loc = Path(path_to_data) / "MNIST"
+    training_data = data_loc / "training.pt"
+    print("Generating unified MNIST dataset")
+    torch.save([train_set.data, np.array(train_set.targets)], training_data)
 
-    Parameters
-    ----------
-    data_root: str
-        Directory where MNIST dataset will be stored.
-    train_batch_size: int
-        Mini-batch size for training set.
-    test_batch_size: int
-        Mini-batch size for test set.
-    cid: int
-        Client ID used to select a specific partition.
-    nb_clients: int
-        Total number of clients launched during training.
-        This value dictates the number of unique to be created.
-
-    Returns
-    -------
-    (train_loader, test_loader): Tuple[DataLoader, DataLoader]
-        Tuple contaning DataLoaders for training and test sets.
-    """
-    transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
-    )
-    if is_train:
-        dataset = datasets.MNIST(
-            data_root, train=True, download=True, transform=transform
-        )
-    else:
-        dataset = datasets.MNIST(data_root, train=False, transform=transform)
-
-    loader = dataset_partitioner(
-        dataset=dataset,
-        batch_size=batch_size,
-        client_id=cid,
-        number_of_clients=nb_clients,
-        workers=workers,
+    test_set = datasets.MNIST(
+        root=path_to_data, train=False, transform=mnist_transformation
     )
 
-    return loader
+    # Print the first image's shape and data type
+    image, label = test_set[0]
+    print("Image Shape:", image.shape)
+    print("Image Data Type:", image.dtype)
+
+    # returns path where training data is and testset
+    return training_data, test_set
+
+
+#def get_mnist(
+#    data_root: str,
+#    batch_size: int,
+#    cid: int,
+#    workers=1,
+#    nb_clients=10,
+#    is_train=True,
+#):
+#    """Load both training and test datasets for MNIST.
+#
+#    Parameters
+#    ----------
+#    data_root: str
+#        Directory where MNIST dataset will be stored.
+#    train_batch_size: int
+#        Mini-batch size for training set.
+#    test_batch_size: int
+#        Mini-batch size for test set.
+#    cid: int
+#        Client ID used to select a specific partition.
+#    nb_clients: int
+#        Total number of clients launched during training.
+#        This value dictates the number of unique to be created.
+#
+#    Returns
+#    -------
+#    (train_loader, test_loader): Tuple[DataLoader, DataLoader]
+#        Tuple contaning DataLoaders for training and test sets.
+#    """
+#    transform = transforms.Compose(
+#        [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+#    )
+#    if is_train:
+#        dataset = datasets.MNIST(
+#            data_root, train=True, download=True, transform=transform
+#        )
+#    else:
+#        dataset = datasets.MNIST(data_root, train=False, transform=transform)
+#
+#    loader = dataset_partitioner(
+#        dataset=dataset,
+#        batch_size=batch_size,
+#        client_id=cid,
+#        number_of_clients=nb_clients,
+#        workers=workers,
+#    )
+#
+#    return loader
 
 
 def dataset_partitioner(

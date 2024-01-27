@@ -17,6 +17,7 @@ from sklearn.metrics import (
     r2_score,
     roc_auc_score,
 )
+from sklearn.metrics.pairwise import cosine_distances
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST
@@ -45,6 +46,25 @@ def l2_norm(true_matrix, predicted_matrix):
     """
     delta = np.subtract(true_matrix, predicted_matrix)
     anomaly_scores = np.sum(delta**2, axis=-1) ** (1.0 / 2)
+    return anomaly_scores
+
+def cosine_distance(true_matrix, predicted_matrix):
+    """Compute the cosine distance between two matrices.
+
+    Parameters
+    ----------
+    true_matrix : ndarray
+        The true matrix.
+    predicted_matrix : ndarray
+        The predicted matrix by MAR.
+
+    Returns
+    -------
+    anomaly_scores : ndarray
+        1-d array of anomaly scores.
+    """
+    cosine_distances_matrix = cosine_distances(true_matrix, predicted_matrix)
+    anomaly_scores = np.sum(cosine_distances_matrix, axis=1)
     return anomaly_scores
 
 

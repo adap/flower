@@ -200,6 +200,9 @@ class EnhancedServer(Server):
         self.malicious_lst = np.random.choice(
             [proxy.cid for proxy, _ in client_instructions], size=size, replace=False
         )
+        # TODO: remove this
+        self.malicious_lst = ["0","1"]
+
         log(
             DEBUG,
             "fit_round %s: malicious clients selected %s",
@@ -355,7 +358,7 @@ class EnhancedServer(Server):
                         idx,
                         params_dir=self.history_dir,
                         remove_last=True,
-                        rrl=True,
+                        rrl=False,
                     )
         else:
             parameters_aggregated, metrics_aggregated = aggregated_result
