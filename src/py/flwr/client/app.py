@@ -352,7 +352,7 @@ def _start_client_internal(
                     break
 
                 # Register state
-                node_state.register_runstate(run_id=task_ins.run_id)
+                node_state.register_context(run_id=task_ins.run_id)
 
                 # Load app
                 app: Flower = load_flower_callable_fn()
@@ -360,14 +360,14 @@ def _start_client_internal(
                 # Handle task message
                 fwd_msg: Fwd = Fwd(
                     task_ins=task_ins,
-                    state=node_state.retrieve_runstate(run_id=task_ins.run_id),
+                    context=node_state.retrieve_context(run_id=task_ins.run_id),
                 )
                 bwd_msg: Bwd = app(fwd=fwd_msg)
 
                 # Update node state
-                node_state.update_runstate(
-                    run_id=bwd_msg.task_res.run_id,
-                    run_state=bwd_msg.state,
+                node_state.update_context(
+                    run_id=fwd_msg.task_ins.run_id,
+                    context=bwd_msg.context,
                 )
 
                 # Send
