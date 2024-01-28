@@ -85,9 +85,7 @@ class EnhancedServer(Server):
         self.history_dir = history_dir
         self.dataset_name = dataset_name
         self.magnitude = magnitude
-        self.malicious_selected = False
         self.threshold = threshold
-        self.old_lambda = 0.0
         self.to_keep = to_keep
         self.omniscent = omniscent
         self.malicious_lst: List = []
@@ -202,19 +200,23 @@ class EnhancedServer(Server):
         )
         # TODO: remove this
         self.malicious_lst = ["0","1"]
+        ####################
 
+        # Create dict clients_state to keep track of malicious clients
+        clients_state = dict()
+        for idx, (proxy, _) in enumerate(client_instructions):
+            clients_state[proxy.cid] = False
+            if proxy.cid in self.malicious_lst:
+                clients_state[proxy.cid] = True
+        # Sort clients states
+        clients_state = {k: clients_state[k] for k in sorted(clients_state)}
         log(
             DEBUG,
-            "fit_round %s: malicious clients selected %s",
+            "fit_round %s: malicious clients selected %s, clients_state %s",
             server_round,
             self.malicious_lst,
+            clients_state,
         )
-        # Save instruction for malicious clients into FitIns
-        for proxy, ins in client_instructions:
-            if proxy.cid in self.malicious_lst:
-                ins.config["malicious"] = True
-            else:
-                ins.config["malicious"] = False
 
         # Collect `fit` results from all clients participating in this round
         results, failures = fit_clients(
@@ -230,16 +232,9 @@ class EnhancedServer(Server):
             len(failures),
         )
 
-        clients_state = (
-            {}
-        )  # dictionary of clients representing wether they are malicious or not
-
         # Save parameters of each client as time series
         ordered_results = [0 for _ in range(len(results))]
-        cids = np.array([])
         for proxy, fitres in results:
-            cids = np.append(cids, int(fitres.metrics["cid"]))
-            clients_state[fitres.metrics["cid"]] = fitres.metrics["malicious"]
             params = flatten_params(parameters_to_ndarrays(fitres.parameters))
             if self.sampling > 0:
                 # if the sampling number is greater than the number of
@@ -258,6 +253,8 @@ class EnhancedServer(Server):
             # Re-arrange results in the same order as clients' cids impose
             ordered_results[int(fitres.metrics["cid"])] = (proxy, fitres)
 
+        log(INFO, "Clients state: %s", clients_state)
+
         # Initialize aggregated_parameters if it is the first round
         if self.aggregated_parameters == []:
             for key, val in clients_state.items():
@@ -269,6 +266,9 @@ class EnhancedServer(Server):
 
         # Apply attack function
         # the server simulates an attacker that controls a fraction of the clients
+        print(f"params shape: {self.aggregated_parameters[0].shape}")
+        print(f"params len: {len(self.aggregated_parameters)}")
+        print(f"num layers: {len(self.aggregated_parameters[0])}")
         if self.attack_fn is not None and server_round > self.warmup_rounds:
             log(INFO, "Applying attack function")
             results, others = self.attack_fn(
@@ -277,19 +277,17 @@ class EnhancedServer(Server):
                 omniscent=self.omniscent,
                 magnitude=self.magnitude,
                 w_re=self.aggregated_parameters,
-                malicious_selected=self.malicious_selected,
                 threshold=self.threshold,
                 d=len(self.aggregated_parameters),
-                old_lambda=self.old_lambda,
                 dataset_name=self.dataset_name,
                 to_keep=self.to_keep,
                 malicious_num=self.num_malicious,
+                num_layers=len(self.aggregated_parameters),
             )
-            self.old_lambda = others.get("lambda", 0.0)
 
             # Update saved parameters time series after the attack
             for _, fitres in results:
-                if fitres.metrics["malicious"]:
+                if clients_state[fitres.metrics["cid"]]:
                     if self.sampling > 0:
                         params = flatten_params(
                             parameters_to_ndarrays(fitres.parameters)
@@ -300,7 +298,7 @@ class EnhancedServer(Server):
                         )
                     log(
                         INFO,
-                        "Saving parameters of client %s with shape %s",
+                        "Saving parameters of client %s with shape %s after the attack",
                         fitres.metrics["cid"],
                         params.shape,
                     )
@@ -313,10 +311,6 @@ class EnhancedServer(Server):
         else:
             results = ordered_results
             others = {}
-
-        # Sort clients states
-        clients_state = {k: clients_state[k] for k in sorted(clients_state)}
-        log(INFO, "Clients state: %s", clients_state)
 
         # Aggregate training results
         log(INFO, "fit_round - Aggregating training results")
@@ -332,11 +326,6 @@ class EnhancedServer(Server):
             log(INFO, "Malicious clients: %s", malicious_clients_idx)
 
             log(INFO, "clients_state: %s", clients_state)
-            for idx in good_clients_idx:
-                if clients_state[str(idx)]:
-                    self.malicious_selected = True
-                    break
-                self.malicious_selected = False
 
             # For clients detected as malicious, replace the last params in
             # their history with tha current global model, otherwise the

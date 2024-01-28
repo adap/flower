@@ -127,7 +127,7 @@ class CifarClient(fl.client.NumPyClient):
         return (
             get_params(self.net),
             len(trainloader.dataset),
-            {"malicious": config["malicious"], "cid": self.cid},
+            {"cid": self.cid},
         )
 
     def evaluate(self, parameters, config):
@@ -186,7 +186,7 @@ class MnistClient(fl.client.NumPyClient):
         return (
             get_params(self.net),
             len(trainloader.dataset),
-            {"malicious": config["malicious"], "cid": self.cid},
+            {"cid": self.cid},
         )
 
     def evaluate(self, parameters, config):
@@ -233,7 +233,7 @@ class IncomeClient(fl.client.NumPyClient):
         return (
             new_parameters,
             len(self.x_train),
-            {"malicious": config["malicious"], "cid": self.cid},
+            {"cid": self.cid},
         )
 
     def evaluate(self, parameters, config):
@@ -272,7 +272,7 @@ class HouseClient(fl.client.NumPyClient):
         return (
             new_parameters,
             len(self.x_train),
-            {"malicious": config["malicious"], "cid": self.cid},
+            {"cid": self.cid},
         )
 
     def evaluate(self, parameters, config):

@@ -58,6 +58,9 @@ class Flanders(FedAvg):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         num_clients_to_keep: int = 1,
+        aggregate_fn: Callable[
+            [List[Tuple[NDArrays, int]]], NDArrays
+        ] = aggregate,
         window: int = 0,
         maxiter: int = 100,
         alpha: float = 1,
@@ -104,6 +107,9 @@ class Flanders(FedAvg):
         num_clients_to_keep : int, optional
             Number of clients to keep (i.e., to classify as "good"), by default
             1
+        aggregate_fn : Callable[[List[Tuple[NDArrays, int]]], NDArrays],
+        optional
+            Function to aggregate the parameters, by default FedAvg
         window : int, optional
             Sliding window size used as a "training set" of MAR, by default 0
         maxiter : int, optional
@@ -136,7 +142,6 @@ class Flanders(FedAvg):
         self.alpha = alpha
         self.beta = beta
         self.params_indexes = None
-        self.malicious_selected = False
         self.distance_function = distance_function
 
     @typing.no_type_check
@@ -261,7 +266,7 @@ class Flanders(FedAvg):
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+        parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results))
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}

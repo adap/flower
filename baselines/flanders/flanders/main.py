@@ -153,6 +153,21 @@ def main(cfg: DictConfig) -> None:
             min_evaluate_clients=0,
             num_clients_to_keep=cfg.strategy.strategy.num_clients_to_keep,
             min_available_clients=cfg.server.pool_size,
+            num_malicious_clients=num_malicious,
+        )
+    elif cfg.strategy.name == "dnc":
+        strategy = instantiate(
+            cfg.strategy.strategy,
+            evaluate_fn=clients[dataset_name][1],
+            on_fit_config_fn=fit_config,
+            fraction_fit=1,
+            fraction_evaluate=0,
+            min_fit_clients=cfg.server.pool_size,
+            min_evaluate_clients=0,
+            min_available_clients=cfg.server.pool_size,
+            c=cfg.strategy.strategy.c,
+            niters=cfg.strategy.strategy.niters,
+            num_malicious_clients=num_malicious,
         )
     else:
         raise ValueError("Strategy not supported")
