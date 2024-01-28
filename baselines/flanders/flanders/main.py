@@ -178,7 +178,7 @@ def main(cfg: DictConfig) -> None:
     # Save results as .csv in the output directory of this experiment as well as
     # in outputs/all_results.csv. For the latter results are appended if the file
     # already exists. This is useful when running multiruns.
-    path_to_save = [os.path.join(save_path,"results.csv"), "outputs/all_results.csv"]
+    path_to_save = [os.path.join(save_path, "results.csv"), "outputs/all_results.csv"]
 
     for file_name in path_to_save:
         data = pd.DataFrame(

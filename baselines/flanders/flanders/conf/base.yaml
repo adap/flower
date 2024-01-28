@@ -11,10 +11,6 @@ defaults:
   - _self_
   - strategy: flanders
 
-hydra:
-  output_subdir: null
-  run:
-    dir: .
 
 dataset: mnist
 
