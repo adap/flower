@@ -23,6 +23,12 @@ from unittest.mock import patch
 
 import grpc
 
+from flwr.common import recordset_compat as compat
+from flwr.common import serde
+from flwr.common.configsrecord import ConfigsRecord
+from flwr.common.constant import TASK_TYPE_GET_PROPERTIES
+from flwr.common.recordset import RecordSet
+from flwr.common.typing import Code, GetPropertiesRes, Status
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
@@ -35,11 +41,21 @@ from .connection import grpc_connection
 
 EXPECTED_NUM_SERVER_MESSAGE = 10
 
-SERVER_MESSAGE = ServerMessage()
+SERVER_MESSAGE = ServerMessage(get_properties_ins=ServerMessage.GetPropertiesIns())
 SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect_ins=ServerMessage.ReconnectIns())
 
-CLIENT_MESSAGE = ClientMessage()
-CLIENT_MESSAGE_DISCONNECT = ClientMessage(disconnect_res=ClientMessage.DisconnectRes())
+TASK_GET_PROPERTIES = Task(
+    task_type=TASK_TYPE_GET_PROPERTIES,
+    recordset=serde.recordset_to_proto(
+        compat.getpropertiesres_to_recordset(GetPropertiesRes(Status(Code.OK, ""), {}))
+    ),
+)
+TASK_DISCONNECT = Task(
+    task_type="reconnect",
+    recordset=serde.recordset_to_proto(
+        RecordSet(configs={"config": ConfigsRecord({"reason": 0})})
+    ),
+)
 
 
 def unused_tcp_port() -> int:
@@ -104,31 +120,14 @@ def test_integration_connection() -> None:
                 # Block until server responds with a message
                 task_ins = receive()
 
-                if task_ins is None:
-                    raise ValueError("Unexpected None value")
-
-                # pylint: disable=no-member
-                if task_ins.HasField("task") and task_ins.task.HasField(
-                    "legacy_server_message"
-                ):
-                    server_message = task_ins.task.legacy_server_message
-                else:
-                    server_message = None
-                # pylint: enable=no-member
-
-                if server_message is None:
-                    raise ValueError("Unexpected None value")
-
                 messages_received += 1
-                if server_message.HasField("reconnect_ins"):
-                    task_res = TaskRes(
-                        task=Task(legacy_client_message=CLIENT_MESSAGE_DISCONNECT)
-                    )
+                if task_ins.task.task_type == "reconnect":  # type: ignore
+                    task_res = TaskRes(task=TASK_DISCONNECT)
                     send(task_res)
                     break
 
                 # Process server_message and send client_message...
-                task_res = TaskRes(task=Task(legacy_client_message=CLIENT_MESSAGE))
+                task_res = TaskRes(task=TASK_GET_PROPERTIES)
                 send(task_res)
 
         return messages_received

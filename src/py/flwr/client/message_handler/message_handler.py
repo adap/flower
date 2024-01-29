@@ -15,29 +15,37 @@
 """Client-side message handler."""
 
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, cast
 
 from flwr.client.client import (
-    Client,
     maybe_call_evaluate,
     maybe_call_fit,
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
-from flwr.client.message_handler.task_handler import (
-    get_server_message_from_task_ins,
-    wrap_client_message_in_task_res,
-)
-from flwr.client.secure_aggregation import SecureAggregationHandler
 from flwr.client.typing import ClientFn
 from flwr.common import serde
-from flwr.common.context import Context
-from flwr.proto.task_pb2 import (  # pylint: disable=E0611
-    SecureAggregation,
-    Task,
-    TaskIns,
-    TaskRes,
+from flwr.common.configsrecord import ConfigsRecord
+from flwr.common.constant import (
+    TASK_TYPE_EVALUATE,
+    TASK_TYPE_FIT,
+    TASK_TYPE_GET_PARAMETERS,
+    TASK_TYPE_GET_PROPERTIES,
 )
+from flwr.common.context import Context
+from flwr.common.message import Message, Metadata
+from flwr.common.recordset import RecordSet
+from flwr.common.recordset_compat import (
+    evaluateres_to_recordset,
+    fitres_to_recordset,
+    getparametersres_to_recordset,
+    getpropertiesres_to_recordset,
+    recordset_to_evaluateins,
+    recordset_to_fitins,
+    recordset_to_getparametersins,
+    recordset_to_getpropertiesins,
+)
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     Reason,
@@ -63,118 +71,92 @@ def handle_control_message(task_ins: TaskIns) -> Tuple[Optional[TaskRes], int]:
 
     Returns
     -------
+    task_res : Optional[TaskRes]
+        TaskRes to be sent back to the server. If None, the client should
+        continue to process messages from the server.
     sleep_duration : int
         Number of seconds that the client should disconnect from the server.
-    keep_going : bool
-        Flag that indicates whether the client should continue to process the
-        next message from the server (True) or disconnect and optionally
-        reconnect later (False).
     """
-    server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
-
-    # SecAgg message
-    if server_msg is None:
-        return None, 0
-
-    # ReconnectIns message
-    field = server_msg.WhichOneof("msg")
-    if field == "reconnect_ins":
-        disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect_ins)
-        task_res = wrap_client_message_in_task_res(disconnect_msg)
+    if task_ins.task.task_type == "reconnect":
+        # Retrieve ReconnectIns from recordset
+        recordset = serde.recordset_from_proto(task_ins.task.recordset)
+        seconds = cast(int, recordset.get_configs("config")["seconds"])
+        # Construct ReconnectIns and call _reconnect
+        disconnect_msg, sleep_duration = _reconnect(
+            ServerMessage.ReconnectIns(seconds=seconds)
+        )
+        # Store DisconnectRes in recordset
+        reason = cast(int, disconnect_msg.disconnect_res.reason)
+        recordset = RecordSet()
+        recordset.set_configs("config", ConfigsRecord({"reason": reason}))
+        task_res = TaskRes(
+            task=Task(
+                task_type="reconnect",
+                recordset=serde.recordset_to_proto(recordset),
+            )
+        )
+        # Return TaskRes and sleep duration
         return task_res, sleep_duration
 
     # Any other message
     return None, 0
 
 
-def handle(
-    client_fn: ClientFn, context: Context, task_ins: TaskIns
-) -> Tuple[TaskRes, Context]:
-    """Handle incoming TaskIns from the server.
-
-    Parameters
-    ----------
-    client_fn : ClientFn
-        A callable that instantiates a Client.
-    context : Context
-        A dataclass storing the context for the run being executed by the client.
-    task_ins: TaskIns
-        The task instruction coming from the server, to be processed by the client.
-
-    Returns
-    -------
-    task_res : TaskRes
-        The task response that should be returned to the server.
-    """
-    server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
-    if server_msg is None:
-        # Instantiate the client
-        client = client_fn("-1")
-        client.set_context(context)
-        # Secure Aggregation
-        if task_ins.task.HasField("sa") and isinstance(
-            client, SecureAggregationHandler
-        ):
-            # pylint: disable-next=invalid-name
-            named_values = serde.named_values_from_proto(task_ins.task.sa.named_values)
-            res = client.handle_secure_aggregation(named_values)
-            task_res = TaskRes(
-                task_id="",
-                group_id="",
-                run_id=0,
-                task=Task(
-                    ancestry=[],
-                    sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
-                ),
-            )
-            return task_res, client.get_context()
-        raise NotImplementedError()
-    client_msg, updated_context = handle_legacy_message(client_fn, context, server_msg)
-    task_res = wrap_client_message_in_task_res(client_msg)
-    return task_res, updated_context
-
-
-def handle_legacy_message(
-    client_fn: ClientFn, context: Context, server_msg: ServerMessage
-) -> Tuple[ClientMessage, Context]:
-    """Handle incoming messages from the server.
-
-    Parameters
-    ----------
-    client_fn : ClientFn
-        A callable that instantiates a Client.
-    context : Context
-        A dataclass storing the context for the run being executed by the client.
-    server_msg: ServerMessage
-        The message coming from the server, to be processed by the client.
-
-    Returns
-    -------
-    client_msg : ClientMessage
-        The result message that should be returned to the server.
-    """
-    field = server_msg.WhichOneof("msg")
-
-    # Must be handled elsewhere
-    if field == "reconnect_ins":
-        raise UnexpectedServerMessage()
-
-    # Instantiate the client
+def handle_legacy_message_from_tasktype(
+    client_fn: ClientFn, message: Message, context: Context
+) -> Message:
+    """Handle legacy message in the inner most middleware layer."""
     client = client_fn("-1")
+
     client.set_context(context)
-    # Execute task
-    message = None
-    if field == "get_properties_ins":
-        message = _get_properties(client, server_msg.get_properties_ins)
-    if field == "get_parameters_ins":
-        message = _get_parameters(client, server_msg.get_parameters_ins)
-    if field == "fit_ins":
-        message = _fit(client, server_msg.fit_ins)
-    if field == "evaluate_ins":
-        message = _evaluate(client, server_msg.evaluate_ins)
-    if message:
-        return message, client.get_context()
-    raise UnknownServerMessage()
+
+    task_type = message.metadata.task_type
+
+    # Handle GetPropertiesIns
+    if task_type == TASK_TYPE_GET_PROPERTIES:
+        get_properties_res = maybe_call_get_properties(
+            client=client,
+            get_properties_ins=recordset_to_getpropertiesins(message.message),
+        )
+        out_recordset = getpropertiesres_to_recordset(get_properties_res)
+    # Handle GetParametersIns
+    elif task_type == TASK_TYPE_GET_PARAMETERS:
+        get_parameters_res = maybe_call_get_parameters(
+            client=client,
+            get_parameters_ins=recordset_to_getparametersins(message.message),
+        )
+        out_recordset = getparametersres_to_recordset(
+            get_parameters_res, keep_input=True
+        )
+    # Handle FitIns
+    elif task_type == TASK_TYPE_FIT:
+        fit_res = maybe_call_fit(
+            client=client,
+            fit_ins=recordset_to_fitins(message.message, keep_input=True),
+        )
+        out_recordset = fitres_to_recordset(fit_res, keep_input=True)
+    # Handle EvaluateIns
+    elif task_type == TASK_TYPE_EVALUATE:
+        evaluate_res = maybe_call_evaluate(
+            client=client,
+            evaluate_ins=recordset_to_evaluateins(message.message, keep_input=True),
+        )
+        out_recordset = evaluateres_to_recordset(evaluate_res)
+    else:
+        raise ValueError(f"Invalid task type: {task_type}")
+
+    # Return Message
+    out_message = Message(
+        metadata=Metadata(
+            run_id=0,  # Non-user defined
+            task_id="",  # Non-user defined
+            group_id="",  # Non-user defined
+            ttl="",
+            task_type=task_type,
+        ),
+        message=out_recordset,
+    )
+    return out_message
 
 
 def _reconnect(
@@ -189,67 +171,3 @@ def _reconnect(
     # Build DisconnectRes message
     disconnect_res = ClientMessage.DisconnectRes(reason=reason)
     return ClientMessage(disconnect_res=disconnect_res), sleep_duration
-
-
-def _get_properties(
-    client: Client, get_properties_msg: ServerMessage.GetPropertiesIns
-) -> ClientMessage:
-    # Deserialize `get_properties` instruction
-    get_properties_ins = serde.get_properties_ins_from_proto(get_properties_msg)
-
-    # Request properties
-    get_properties_res = maybe_call_get_properties(
-        client=client,
-        get_properties_ins=get_properties_ins,
-    )
-
-    # Serialize response
-    get_properties_res_proto = serde.get_properties_res_to_proto(get_properties_res)
-    return ClientMessage(get_properties_res=get_properties_res_proto)
-
-
-def _get_parameters(
-    client: Client, get_parameters_msg: ServerMessage.GetParametersIns
-) -> ClientMessage:
-    # Deserialize `get_parameters` instruction
-    get_parameters_ins = serde.get_parameters_ins_from_proto(get_parameters_msg)
-
-    # Request parameters
-    get_parameters_res = maybe_call_get_parameters(
-        client=client,
-        get_parameters_ins=get_parameters_ins,
-    )
-
-    # Serialize response
-    get_parameters_res_proto = serde.get_parameters_res_to_proto(get_parameters_res)
-    return ClientMessage(get_parameters_res=get_parameters_res_proto)
-
-
-def _fit(client: Client, fit_msg: ServerMessage.FitIns) -> ClientMessage:
-    # Deserialize fit instruction
-    fit_ins = serde.fit_ins_from_proto(fit_msg)
-
-    # Perform fit
-    fit_res = maybe_call_fit(
-        client=client,
-        fit_ins=fit_ins,
-    )
-
-    # Serialize fit result
-    fit_res_proto = serde.fit_res_to_proto(fit_res)
-    return ClientMessage(fit_res=fit_res_proto)
-
-
-def _evaluate(client: Client, evaluate_msg: ServerMessage.EvaluateIns) -> ClientMessage:
-    # Deserialize evaluate instruction
-    evaluate_ins = serde.evaluate_ins_from_proto(evaluate_msg)
-
-    # Perform evaluation
-    evaluate_res = maybe_call_evaluate(
-        client=client,
-        evaluate_ins=evaluate_ins,
-    )
-
-    # Serialize evaluate result
-    evaluate_res_proto = serde.evaluate_res_to_proto(evaluate_res)
-    return ClientMessage(evaluate_res=evaluate_res_proto)

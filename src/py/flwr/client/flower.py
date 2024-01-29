@@ -18,9 +18,13 @@
 import importlib
 from typing import List, Optional, cast
 
-from flwr.client.message_handler.message_handler import handle
+from flwr.client.message_handler.message_handler import (
+    handle_legacy_message_from_tasktype,
+)
 from flwr.client.middleware.utils import make_ffn
-from flwr.client.typing import Bwd, ClientFn, Fwd, Layer
+from flwr.client.typing import ClientFn, Layer
+from flwr.common.context import Context
+from flwr.common.message import Message
 
 
 class Flower:
@@ -55,20 +59,21 @@ class Flower:
         layers: Optional[List[Layer]] = None,
     ) -> None:
         # Create wrapper function for `handle`
-        def ffn(fwd: Fwd) -> Bwd:  # pylint: disable=invalid-name
-            task_res, context_updated = handle(
-                client_fn=client_fn,
-                context=fwd.context,
-                task_ins=fwd.task_ins,
+        def ffn(
+            message: Message,
+            context: Context,
+        ) -> Message:  # pylint: disable=invalid-name
+            out_message = handle_legacy_message_from_tasktype(
+                client_fn=client_fn, message=message, context=context
             )
-            return Bwd(task_res=task_res, context=context_updated)
+            return out_message
 
         # Wrap middleware layers around the wrapped handle function
         self._call = make_ffn(ffn, layers if layers is not None else [])
 
-    def __call__(self, fwd: Fwd) -> Bwd:
+    def __call__(self, message: Message, context: Context) -> Message:
         """."""
-        return self._call(fwd)
+        return self._call(message, context)
 
 
 class LoadCallableError(Exception):
