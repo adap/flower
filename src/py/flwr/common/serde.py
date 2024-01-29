@@ -601,12 +601,15 @@ T = TypeVar("T")
 def _record_value_to_proto(
     value: Any, allowed_types: List[type], proto_class: Type[T]
 ) -> T:
-    """Serialize `*RecordValue` to ProtoBuf."""
+    """Serialize `*RecordValue` to ProtoBuf.
+
+    Note: `bool` MUST be put in the front of allowd_types if it exists.
+    """
     arg = {}
     for t in allowed_types:
         # Single element
         # Note: `isinstance(False, int) == True`.
-        if type(value) == t:  # pylint: disable=C0123
+        if isinstance(value, t):
             arg[_type_to_field[t]] = value
             return proto_class(**arg)
         # List
@@ -634,7 +637,14 @@ def _record_value_from_proto(value_proto: GrpcMessage) -> Any:
 def _record_value_dict_to_proto(
     value_dict: Dict[str, Any], allowed_types: List[type], value_proto_class: Type[T]
 ) -> Dict[str, T]:
-    """Serialize the record value dict to ProtoBuf."""
+    """Serialize the record value dict to ProtoBuf.
+
+    Note: `bool` MUST be put in the front of allowd_types if it exists.
+    """
+    # Move bool to the front
+    if bool in allowed_types and allowed_types[0] != bool:
+        allowed_types.remove(bool)
+        allowed_types.insert(0, bool)
 
     def proto(_v: Any) -> T:
         return _record_value_to_proto(_v, allowed_types, value_proto_class)
@@ -708,7 +718,7 @@ def configs_record_to_proto(record: ConfigsRecord) -> ProtoConfigsRecord:
     """Serialize ConfigsRecord to ProtoBuf."""
     return ProtoConfigsRecord(
         data=_record_value_dict_to_proto(
-            record.data, [int, float, bool, str, bytes], ProtoConfigsRecordValue
+            record.data, [bool, int, float, str, bytes], ProtoConfigsRecordValue
         )
     )
 
