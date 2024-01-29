@@ -24,7 +24,7 @@ from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.client.client import Client
 from flwr.client.flower import Flower
-from flwr.client.typing import Bwd, ClientFn, Fwd
+from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
@@ -34,8 +34,8 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
 )
-from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.common.logger import log, warn_experimental_feature, warn_experimental_feature
+from flwr.common.message import Message
 
 from .flower import load_flower_callable
 from .grpc_client.connection import grpc_connection
@@ -340,38 +340,37 @@ def _start_client_internal(
 
             while True:
                 # Receive
-                task_ins = receive()
-                if task_ins is None:
+                message = receive()
+                if message is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
                 # Handle control message
-                task_res, sleep_duration = handle_control_message(task_ins=task_ins)
-                if task_res:
-                    send(task_res)
+                out_message, sleep_duration = handle_control_message(message)
+                if out_message:
+                    send(out_message)
                     break
 
-                # Register state
-                node_state.register_context(run_id=task_ins.run_id)
+                # Register context for this run
+                node_state.register_context(run_id=message.metadata.run_id)
+
+                # Retrieve context for this run
+                context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
                 # Load app
                 app: Flower = load_flower_callable_fn()
 
                 # Handle task message
-                fwd_msg: Fwd = Fwd(
-                    task_ins=task_ins,
-                    context=node_state.retrieve_context(run_id=task_ins.run_id),
-                )
-                bwd_msg: Bwd = app(fwd=fwd_msg)
+                out_message = app(message=message, context=context)
 
                 # Update node state
                 node_state.update_context(
-                    run_id=fwd_msg.task_ins.run_id,
-                    context=bwd_msg.context,
+                    run_id=message.metadata.run_id,
+                    context=context,
                 )
 
                 # Send
-                send(bwd_msg.task_res)
+                send(out_message)
 
             # Unregister node
             if delete_node is not None:
@@ -497,8 +496,8 @@ def _init_connection(
         [str, bool, int, Union[bytes, str, None]],
         ContextManager[
             Tuple[
-                Callable[[], Optional[TaskIns]],
-                Callable[[TaskRes], None],
+                Callable[[], Optional[Message]],
+                Callable[[Message], None],
                 Optional[Callable[[], None]],
                 Optional[Callable[[], None]],
             ]
