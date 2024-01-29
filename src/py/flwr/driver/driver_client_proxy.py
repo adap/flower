@@ -16,19 +16,19 @@
 
 
 import time
-from typing import List, Optional, cast
+from typing import Optional, cast
 
 from flwr import common
 from flwr.common import serde
-from flwr.proto import (  # pylint: disable=E0611
-    driver_pb2,
-    node_pb2,
-    task_pb2,
-    transport_pb2,
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    ServerMessage,
 )
 from flwr.server.client_proxy import ClientProxy
 
-from .grpc_driver import GrpcDriver
+from .driver import Driver
 
 SLEEP_TIME = 1
 
@@ -36,21 +36,18 @@ SLEEP_TIME = 1
 class DriverClientProxy(ClientProxy):
     """Flower client proxy which delegates work using the Driver API."""
 
-    def __init__(self, node_id: int, driver: GrpcDriver, anonymous: bool, run_id: int):
+    def __init__(self, node_id: int, driver: Driver, anonymous: bool):
         super().__init__(str(node_id))
         self.node_id = node_id
         self.driver = driver
-        self.run_id = run_id
         self.anonymous = anonymous
 
     def get_properties(
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
-        server_message_proto: transport_pb2.ServerMessage = (  # pylint: disable=E1101
-            serde.server_message_to_proto(
-                server_message=common.ServerMessage(get_properties_ins=ins)
-            )
+        server_message_proto: ServerMessage = serde.server_message_to_proto(
+            server_message=common.ServerMessage(get_properties_ins=ins)
         )
         return cast(
             common.GetPropertiesRes,
@@ -61,10 +58,8 @@ class DriverClientProxy(ClientProxy):
         self, ins: common.GetParametersIns, timeout: Optional[float]
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
-        server_message_proto: transport_pb2.ServerMessage = (  # pylint: disable=E1101
-            serde.server_message_to_proto(
-                server_message=common.ServerMessage(get_parameters_ins=ins)
-            )
+        server_message_proto: ServerMessage = serde.server_message_to_proto(
+            server_message=common.ServerMessage(get_parameters_ins=ins)
         )
         return cast(
             common.GetParametersRes,
@@ -73,10 +68,8 @@ class DriverClientProxy(ClientProxy):
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
-        server_message_proto: transport_pb2.ServerMessage = (  # pylint: disable=E1101
-            serde.server_message_to_proto(
-                server_message=common.ServerMessage(fit_ins=ins)
-            )
+        server_message_proto: ServerMessage = serde.server_message_to_proto(
+            server_message=common.ServerMessage(fit_ins=ins)
         )
         return cast(
             common.FitRes,
@@ -87,10 +80,8 @@ class DriverClientProxy(ClientProxy):
         self, ins: common.EvaluateIns, timeout: Optional[float]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-        server_message_proto: transport_pb2.ServerMessage = (  # pylint: disable=E1101
-            serde.server_message_to_proto(
-                server_message=common.ServerMessage(evaluate_ins=ins)
-            )
+        server_message_proto: ServerMessage = serde.server_message_to_proto(
+            server_message=common.ServerMessage(evaluate_ins=ins)
         )
         return cast(
             common.EvaluateRes,
@@ -104,37 +95,29 @@ class DriverClientProxy(ClientProxy):
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
 
     def _send_receive_msg(
-        self,
-        server_message: transport_pb2.ServerMessage,  # pylint: disable=E1101
-        timeout: Optional[float],
-    ) -> transport_pb2.ClientMessage:  # pylint: disable=E1101
-        task_ins = task_pb2.TaskIns(  # pylint: disable=E1101
-            task_id="",
-            group_id="",
-            run_id=self.run_id,
-            task=task_pb2.Task(  # pylint: disable=E1101
-                producer=node_pb2.Node(  # pylint: disable=E1101
+        self, server_message: ServerMessage, timeout: Optional[float]
+    ) -> ClientMessage:
+        task_ins = TaskIns(
+            task=Task(
+                producer=Node(
                     node_id=0,
                     anonymous=True,
                 ),
-                consumer=node_pb2.Node(  # pylint: disable=E1101
+                consumer=Node(
                     node_id=self.node_id,
                     anonymous=self.anonymous,
                 ),
                 legacy_server_message=server_message,
             ),
         )
-        push_task_ins_req = driver_pb2.PushTaskInsRequest(  # pylint: disable=E1101
-            task_ins_list=[task_ins]
-        )
 
         # Send TaskIns to Driver API
-        push_task_ins_res = self.driver.push_task_ins(req=push_task_ins_req)
+        task_ids = self.driver.push_task_ins([task_ins])
 
-        if len(push_task_ins_res.task_ids) != 1:
+        if len(task_ids) != 1:
             raise ValueError("Unexpected number of task_ids")
 
-        task_id = push_task_ins_res.task_ids[0]
+        task_id = task_ids[0]
         if task_id == "":
             raise ValueError(f"Failed to schedule task for node {self.node_id}")
 
@@ -142,17 +125,9 @@ class DriverClientProxy(ClientProxy):
             start_time = time.time()
 
         while True:
-            pull_task_res_req = driver_pb2.PullTaskResRequest(  # pylint: disable=E1101
-                node=node_pb2.Node(node_id=0, anonymous=True),  # pylint: disable=E1101
-                task_ids=[task_id],
-            )
-
             # Ask Driver API for TaskRes
-            pull_task_res_res = self.driver.pull_task_res(req=pull_task_res_req)
+            task_res_list = self.driver.pull_task_res([task_id])
 
-            task_res_list: List[task_pb2.TaskRes] = list(  # pylint: disable=E1101
-                pull_task_res_res.task_res_list
-            )
             if len(task_res_list) == 1:
                 task_res = task_res_list[0]
                 return serde.client_message_from_proto(  # type: ignore

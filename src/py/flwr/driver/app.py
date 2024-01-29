@@ -20,20 +20,19 @@ import threading
 import time
 from logging import INFO
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log
-from flwr.proto import driver_pb2  # pylint: disable=E0611
 from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.strategy import Strategy
 
+from .driver import Driver
 from .driver_client_proxy import DriverClientProxy
-from .grpc_driver import GrpcDriver
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -110,9 +109,6 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     # Create the Driver
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
-    driver = GrpcDriver(driver_service_address=address, certificates=root_certificates)
-    driver.connect()
-    lock = threading.Lock()
 
     # Initialize the Driver API server and config
     initialized_server, initialized_config = init_defaults(
@@ -128,12 +124,13 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     )
 
     # Start the thread updating nodes
+    ref_exit_flag = [False]
     thread = threading.Thread(
         target=update_client_manager,
         args=(
-            driver,
+            Driver(driver_service_address=address, certificates=root_certificates),
             initialized_server.client_manager(),
-            lock,
+            ref_exit_flag,
         ),
     )
     thread.start()
@@ -145,8 +142,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     )
 
     # Stop the Driver API server and the thread
-    with lock:
-        driver.disconnect()
+    ref_exit_flag[0] = True
     thread.join()
 
     event(EventType.START_SERVER_LEAVE)
@@ -155,9 +151,9 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
 
 def update_client_manager(
-    driver: GrpcDriver,
+    driver: Driver,
     client_manager: ClientManager,
-    lock: threading.Lock,
+    ref_exit_flag: List[bool],
 ) -> None:
     """Update the nodes list in the client manager.
 
@@ -169,22 +165,10 @@ def update_client_manager(
     and dead nodes will be removed from the ClientManager via
     `client_manager.unregister()`.
     """
-    # Request for run_id
-    run_id = driver.create_run(
-        driver_pb2.CreateRunRequest()  # pylint: disable=E1101
-    ).run_id
-
-    # Loop until the driver is disconnected
+    # Loop until exit_flag is set to True
     registered_nodes: Dict[int, DriverClientProxy] = {}
-    while True:
-        with lock:
-            # End the while loop if the driver is disconnected
-            if driver.stub is None:
-                break
-            get_nodes_res = driver.get_nodes(
-                req=driver_pb2.GetNodesRequest(run_id=run_id)  # pylint: disable=E1101
-            )
-        all_node_ids = {node.node_id for node in get_nodes_res.nodes}
+    while not ref_exit_flag[0]:
+        all_node_ids = {node.node_id for node in driver.get_nodes()}
         dead_nodes = set(registered_nodes).difference(all_node_ids)
         new_nodes = all_node_ids.difference(registered_nodes)
 
@@ -200,7 +184,6 @@ def update_client_manager(
                 node_id=node_id,
                 driver=driver,
                 anonymous=False,
-                run_id=run_id,
             )
             if client_manager.register(client_proxy):
                 registered_nodes[node_id] = client_proxy
