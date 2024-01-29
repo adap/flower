@@ -157,9 +157,14 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
         self.assertEqual(len(full), dataset_length)
 
 
-class ArtificialDatasetTest(unittest.TestCase):
-    """Test using small artificial dataset, mocked load_dataset."""
+class ShufflingResplittingOnArtificialDatasetTest(unittest.TestCase):
+    """Test shuffling and resplitting using small artificial dataset.
 
+     The purpose of this class is to ensure the order of samples remains as
+     expected.
+
+     The load_dataset method is mocked and the artificial dataset is returned.
+     """
     # pylint: disable=no-self-use
     def _dummy_setup(self, train_rows: int = 10, test_rows: int = 5) -> DatasetDict:
         """Create a dummy DatasetDict with train, test splits."""
@@ -365,6 +370,30 @@ def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
 
     return True
 
+# my_module.py
+
+
+import unittest
+from unittest.mock import patch
+from parameterized import parameterized
+from my_module import  MyClass
+class TestMyClass(unittest.TestCase):
+
+    @parameterized.expand([
+        ('test1', 'expected_result1'),
+        ('test2', 'expected_result2'),
+    ])
+    @patch('my_module.MyClass.my_method')
+    def test_my_method(self, input_value, expected_result, mock_my_method):
+        # Configure the mock to return a specific value
+        mock_my_method.return_value = expected_result
+
+        # Create an instance of MyClass
+        my_class_instance = MyClass()
+
+        # Call the method and assert the result
+        result = my_class_instance.my_method(input_value)
+        self.assertEqual(result, expected_result)
 
 if __name__ == "__main__":
     unittest.main()
