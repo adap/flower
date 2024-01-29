@@ -159,7 +159,9 @@ class RayActorClientProxy(ClientProxy):
         self, ins: common.EvaluateIns, timeout: Optional[float]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
-        recordset = evaluateins_to_recordset(ins, keep_input=True)
+        recordset = evaluateins_to_recordset(
+            ins, keep_input=True
+        )  # This must stay TRUE since ins are in-memory
         message = Message(
             message=recordset,
             metadata=Metadata(
