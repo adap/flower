@@ -25,7 +25,7 @@ from typing import Dict, Optional, Union
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log
-from flwr.proto import driver_pb2
+from flwr.proto import driver_pb2  # pylint: disable=E0611
 from flwr.server.app import ServerConfig, init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
@@ -72,11 +72,10 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         An implementation of the abstract base class
         `flwr.server.strategy.Strategy`. If no strategy is provided, then
         `start_server` will use `flwr.server.strategy.FedAvg`.
-    client_manager : Optional[flwr.driver.DriverClientManager] (default: None)
-        An implementation of the class
-        `flwr.driver.driver_client_manager.DriverClientManager`. If no
+    client_manager : Optional[flwr.server.DriverClientManager] (default: None)
+        An implementation of the class `flwr.server.ClientManager`. If no
         implementation is provided, then `start_driver` will use
-        `flwr.driver.driver_client_manager.DriverClientManager`.
+        `flwr.server.SimpleClientManager`.
     root_certificates : Optional[Union[bytes, str]] (default: None)
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
@@ -171,7 +170,9 @@ def update_client_manager(
     `client_manager.unregister()`.
     """
     # Request for run_id
-    run_id = driver.create_run(driver_pb2.CreateRunRequest()).run_id
+    run_id = driver.create_run(
+        driver_pb2.CreateRunRequest()  # pylint: disable=E1101
+    ).run_id
 
     # Loop until the driver is disconnected
     registered_nodes: Dict[int, DriverClientProxy] = {}
@@ -181,7 +182,7 @@ def update_client_manager(
             if driver.stub is None:
                 break
             get_nodes_res = driver.get_nodes(
-                req=driver_pb2.GetNodesRequest(run_id=run_id)
+                req=driver_pb2.GetNodesRequest(run_id=run_id)  # pylint: disable=E1101
             )
         all_node_ids = {node.node_id for node in get_nodes_res.nodes}
         dead_nodes = set(registered_nodes).difference(all_node_ids)
