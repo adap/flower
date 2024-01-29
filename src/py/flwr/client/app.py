@@ -24,7 +24,7 @@ from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.client.client import Client
 from flwr.client.flower import Flower
-from flwr.client.typing import Bwd, ClientFn, Fwd
+from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
@@ -35,7 +35,10 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
 )
 from flwr.common.logger import log, warn_experimental_feature
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.common.message import Message
+from flwr.common.recordset import RecordSet
+from flwr.common.serde import message_from_taskins, message_to_taskres
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 from .flower import load_flower_callable
 from .grpc_client.connection import grpc_connection
@@ -351,43 +354,48 @@ def _start_client_internal(
                     send(task_res)
                     break
 
-                # Register state
-                node_state.register_runstate(run_id=task_ins.run_id)
+                # Register context for this run
+                node_state.register_context(run_id=task_ins.run_id)
+
+                # Retrieve context for this run
+                context = node_state.retrieve_context(run_id=task_ins.run_id)
+
+                # Get Message from TaskIns
+                message = message_from_taskins(task_ins)
 
                 # Load app
                 app: Flower = load_flower_callable_fn()
 
                 # Handle task message
-                fwd_msg: Fwd = Fwd(
-                    task_ins=task_ins,
-                    state=node_state.retrieve_runstate(run_id=task_ins.run_id),
-                )
                 try:
-                    bwd_msg: Bwd = app(fwd=fwd_msg)
-                except Exception as ex:
-                    log(ERROR, "FlowerCallable raised the following exception:\n\n", ex)
+                    out_message = app(message=message, context=context)
+                except Exception as ex:  # pylint: disable=broad-exception-caught
+                    log(ERROR, "FlowerCallable raised an exception", exc_info=ex)
 
                     # Don't update/change RunState
-                    # Return empty TaskRes
-                    error_task_res = TaskRes(
-                        task_id="",
-                        group_id="",
-                        run_id=0,
-                        task=Task(
-                            ancestry=[],
-                        ),
+                    # Return empty Message
+
+                    error_out_message = Message(
+                        metadata=message.metadata,
+                        message=RecordSet(),
                     )
+
+                    # Construct TaskRes from out_message
+                    error_task_res = message_to_taskres(error_out_message)
                     send(error_task_res)
                     continue
 
                 # Update node state
-                node_state.update_runstate(
-                    run_id=bwd_msg.task_res.run_id,
-                    run_state=bwd_msg.state,
+                node_state.update_context(
+                    run_id=message.metadata.run_id,
+                    context=context,
                 )
 
+                # Construct TaskRes from out_message
+                task_res = message_to_taskres(out_message)
+
                 # Send
-                send(bwd_msg.task_res)
+                send(task_res)
 
             # Unregister node
             if delete_node is not None:
