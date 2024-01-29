@@ -17,7 +17,8 @@
 
 
 import unittest
-from typing import Dict, Union
+from typing import Dict, Union, Any
+from unittest import mock
 from unittest.mock import Mock, patch
 
 import pytest
@@ -27,32 +28,64 @@ import datasets
 from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.federated_dataset import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
+from mock_utils import mock_dict_dataset, mock_cifar100, load_mocked_dataset
+
+mocked_datasets = ["cifar100", "svhn", "sentiment140"]
 
 
 @parameterized_class(
-    [
-        {"dataset_name": "mnist", "test_split": "test"},
-        {"dataset_name": "cifar10", "test_split": "test"},
-        {"dataset_name": "fashion_mnist", "test_split": "test"},
-        {"dataset_name": "sasha/dog-food", "test_split": "test"},
-        {"dataset_name": "zh-plus/tiny-imagenet", "test_split": "valid"},
-    ]
-)
-class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
+    ("dataset_name", "test_split", "subset"), [
+        # Downloaded
+        # #Image datasets
+        ("mnist", "test", None),
+        ("cifar10", "test", None),
+        ("fashion_mnist", "test", None),
+        ("sasha/dog-food", "test", None),
+        ("zh-plus/tiny-imagenet", "valid", None),
+
+        # Text
+        ("scikit-learn/adult-census-income", None, None),
+
+        # Mocked
+        # #Image
+        ("cifar100", "test", None),
+        # Note: there's also the extra split and full_numbers subset
+        ("svhn", "test", "cropped_digits"),
+
+        # Text
+        ("sentiment140", "test", None),  # aka twitter
+
+    ])
+class BaseFederatedDatasetsTest(unittest.TestCase):
     """Test Real Dataset (MNIST, CIFAR10) in FederatedDatasets."""
 
     dataset_name = ""
     test_split = ""
+    subset = ""
+
+    def setUp(self):
+        if self.dataset_name in mocked_datasets:
+            self.patcher = patch("datasets.load_dataset")
+            self.mock_load_dataset = self.patcher.start()
+            self.mock_load_dataset.return_value = load_mocked_dataset(self.dataset_name, [200, 100],
+                                                                    ["train",
+                                                                     self.test_split],
+                                                                    self.subset)
+
+    def tearDown(self):
+        # Stop the patch after each test
+        if self.dataset_name in mocked_datasets:
+            patch.stopall()
 
     @parameterized.expand(  # type: ignore
         [
             (
-                "10",
-                10,
+                    "10",
+                    10,
             ),
             (
-                "100",
-                100,
+                    "100",
+                    100,
             ),
         ]
     )
@@ -69,6 +102,8 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
 
     def test_load_full(self) -> None:
         """Test if the load_full works with the correct split name."""
+        if self.test_split is None:
+            return
         dataset_fds = FederatedDataset(
             dataset=self.dataset_name, partitioners={"train": 100}
         )
@@ -78,6 +113,8 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
 
     def test_multiple_partitioners(self) -> None:
         """Test if the dataset works when multiple partitioners are specified."""
+        if self.test_split is None:
+            return
         num_train_partitions = 100
         num_test_partitions = 100
         dataset_fds = FederatedDataset(
@@ -109,6 +146,8 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
 
     def test_resplit_dataset_into_one(self) -> None:
         """Test resplit into a single dataset."""
+        if self.test_split is None:
+            return
         dataset = datasets.load_dataset(self.dataset_name)
         dataset_length = sum([len(ds) for ds in dataset.values()])
         fds = FederatedDataset(
@@ -122,6 +161,8 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
     # pylint: disable=protected-access
     def test_resplit_dataset_to_change_names(self) -> None:
         """Test resplitter to change the names of the partitions."""
+        if self.test_split is None:
+            return
         fds = FederatedDataset(
             dataset=self.dataset_name,
             partitioners={"new_train": 100},
@@ -138,6 +179,8 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
 
     def test_resplit_dataset_by_callable(self) -> None:
         """Test resplitter to change the names of the partitions."""
+        if self.test_split is None:
+            return
 
         def resplit(dataset: DatasetDict) -> DatasetDict:
             return DatasetDict(
@@ -165,6 +208,7 @@ class ShufflingResplittingOnArtificialDatasetTest(unittest.TestCase):
 
      The load_dataset method is mocked and the artificial dataset is returned.
      """
+
     # pylint: disable=no-self-use
     def _dummy_setup(self, train_rows: int = 10, test_rows: int = 5) -> DatasetDict:
         """Create a dummy DatasetDict with train, test splits."""
@@ -370,30 +414,14 @@ def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
 
     return True
 
-# my_module.py
 
+def mock_dataset(mock_load_dataset, dataset_name):
+    if dataset_name in mocked_datasets:
+        mock_load_dataset.return_value = mock_dict_dataset([200, 100],
+                                                           ["train", "test"],
+                                                           mock_cifar100)
+    return mock_load_dataset
 
-import unittest
-from unittest.mock import patch
-from parameterized import parameterized
-from my_module import  MyClass
-class TestMyClass(unittest.TestCase):
-
-    @parameterized.expand([
-        ('test1', 'expected_result1'),
-        ('test2', 'expected_result2'),
-    ])
-    @patch('my_module.MyClass.my_method')
-    def test_my_method(self, input_value, expected_result, mock_my_method):
-        # Configure the mock to return a specific value
-        mock_my_method.return_value = expected_result
-
-        # Create an instance of MyClass
-        my_class_instance = MyClass()
-
-        # Call the method and assert the result
-        result = my_class_instance.my_method(input_value)
-        self.assertEqual(result, expected_result)
 
 if __name__ == "__main__":
     unittest.main()
