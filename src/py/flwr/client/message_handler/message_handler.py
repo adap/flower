@@ -72,7 +72,7 @@ def handle_control_message(task_ins: TaskIns) -> Tuple[Optional[TaskRes], int]:
     Returns
     -------
     task_res : Optional[TaskRes]
-        TaskRes to be returned to the server. If None, the client should
+        TaskRes to be sent back to the server. If None, the client should
         continue to process messages from the server.
     sleep_duration : int
         Number of seconds that the client should disconnect from the server.
