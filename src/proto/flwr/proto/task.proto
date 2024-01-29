@@ -31,8 +31,6 @@ message Task {
   string task_type = 7;
   RecordSet recordset = 8;
 
-  ServerMessage legacy_server_message = 101 [ deprecated = true ];
-  ClientMessage legacy_client_message = 102 [ deprecated = true ];
   SecureAggregation sa = 103 [ deprecated = true ];
 }
 
