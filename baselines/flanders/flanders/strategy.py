@@ -58,9 +58,8 @@ class Flanders(FedAvg):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         num_clients_to_keep: int = 1,
-        aggregate_fn: Callable[
-            [List[Tuple[NDArrays, int]]], NDArrays
-        ] = aggregate,
+        aggregate_fn: Callable = aggregate,
+        aggregate_parameters: Dict[str, Scalar] = {},
         window: int = 0,
         maxiter: int = 100,
         alpha: float = 1,
@@ -143,6 +142,10 @@ class Flanders(FedAvg):
         self.beta = beta
         self.params_indexes = None
         self.distance_function = distance_function
+        self.aggregate_fn = aggregate_fn
+        print(f"aggregate_fn {aggregate_fn}")
+        self.aggregate_parameters = aggregate_parameters
+        print(aggregate_parameters)
 
     @typing.no_type_check
     def configure_fit(
@@ -206,16 +209,15 @@ class Flanders(FedAvg):
         good_clients_idx = []
         malicious_clients_idx = []
         if server_round > 1:
-            win = self.window
             if server_round < self.window:
-                win = server_round
+                self.window = server_round
             params_tensor = load_all_time_series(
-                params_dir="clients_params", window=win
+                params_dir="clients_params", window=self.window
             )
             params_tensor = np.transpose(
                 params_tensor, (0, 2, 1)
             )  # (clients, params, time)
-
+            print("-- params_tensor", params_tensor.shape)
             ground_truth = params_tensor[:, :, -1].copy()
             pred_step = 1
             log(INFO, "Computing MAR on params_tensor %s", params_tensor.shape)
@@ -245,14 +247,14 @@ class Flanders(FedAvg):
             )  # noqa
 
             # TODO: remove this
-            good_clients_idx = [2,3,4]
-            malicious_clients_idx = [0,1]
+            #good_clients_idx = [2,3,4]
+            #malicious_clients_idx = [0,1]
+            ##########################################
             # Compute the average anomaly score for the good clients
             avg_anomaly_score_gc = np.mean(anomaly_scores[good_clients_idx])
             print("avg anomaly score for good clients", avg_anomaly_score_gc)
             avg_anomaly_score_m = np.mean(anomaly_scores[malicious_clients_idx])
             print("avg anomaly score for malicious clients", avg_anomaly_score_m)
-            ##########################################
 
             results = np.array(results)[good_clients_idx].tolist()
             log(INFO, "Good clients: %s", good_clients_idx)
@@ -260,13 +262,13 @@ class Flanders(FedAvg):
             with open("anomaly_scores.txt", "a") as f:
                 f.write(f"{server_round},{avg_anomaly_score_gc},{avg_anomaly_score_m}\n")
 
-        log(INFO, "Applying FedAvg")
+        log(INFO, "Applying aggregate_fn")
         # Convert results
         weights_results = [
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results))
+        parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results, **self.aggregate_parameters))
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
@@ -285,7 +287,7 @@ class Flanders(FedAvg):
 
 
 # pylint: disable=too-many-locals, too-many-arguments, invalid-name
-def mar(X, pred_step, alpha=1, beta=1, maxiter=100, window=0):
+def mar(X, pred_step, alpha=1, beta=1, maxiter=100):
     """Forecast the next tensor of params.
 
     Forecast the next tensor of params by using MAR algorithm.
@@ -298,8 +300,6 @@ def mar(X, pred_step, alpha=1, beta=1, maxiter=100, window=0):
     """
     m, n, T = X.shape
     start = 0
-    if window > 0:
-        start = T - window
 
     A = np.random.randn(m, m)
     B = np.random.randn(n, n)

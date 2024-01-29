@@ -199,7 +199,7 @@ class EnhancedServer(Server):
             [proxy.cid for proxy, _ in client_instructions], size=size, replace=False
         )
         # TODO: remove this
-        self.malicious_lst = ["0","1"]
+        #self.malicious_lst = ["0","1"]
         ####################
 
         # Create dict clients_state to keep track of malicious clients

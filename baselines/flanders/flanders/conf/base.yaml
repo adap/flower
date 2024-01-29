@@ -9,12 +9,8 @@
 
 defaults:
   - _self_
-  - strategy: flanders
-
-hydra:
-  output_subdir: null
-  run:
-    dir: .
+  - strategy: fedavg
+  - aggregate_fn: fedavg
 
 dataset: mnist
 
@@ -32,6 +28,7 @@ server:
   omniscent: True
  
 server_device: cpu
+seed: 33
  
 client_resources:
   num_cpus: 10

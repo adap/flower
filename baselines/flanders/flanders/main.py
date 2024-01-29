@@ -5,8 +5,12 @@ model is going to be evaluated, etc. At the end, this script saves the results.
 """
 import os
 import shutil
+import importlib
+import random
 
 import flwr as fl
+import numpy as np
+import torch
 import hydra
 import pandas as pd
 from flwr.server.client_manager import SimpleClientManager
@@ -44,6 +48,14 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
+    # 0. Set random seed
+    seed = cfg.seed
+    np.random.seed(seed)
+    np.random.set_state(np.random.RandomState(seed).get_state())
+    random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
 
@@ -75,7 +87,7 @@ def main(cfg: DictConfig) -> None:
         fed_dir = do_fl_partitioning(
             train_path,
             pool_size=cfg.server.pool_size,
-            alpha=10000,
+            alpha=0.5,
             num_classes=10,
             val_ratio=0.5,
             seed=1234,
@@ -85,7 +97,7 @@ def main(cfg: DictConfig) -> None:
         fed_dir = do_fl_partitioning(
             train_path,
             pool_size=cfg.server.pool_size,
-            alpha=10000,
+            alpha=0.5,
             num_classes=10,
             val_ratio=0.5,
             seed=1234,
@@ -128,6 +140,12 @@ def main(cfg: DictConfig) -> None:
     # 4. Define your strategy
     strategy = None
     if cfg.strategy.name == "flanders":
+        function_path = cfg.aggregate_fn.aggregate_fn.function
+        print(f"Using aggregation function: {function_path}")
+        module_name, function_name = function_path.rsplit('.', 1)
+        module = importlib.import_module(module_name)
+        aggregation_fn = getattr(module, function_name)
+
         strategy = instantiate(
             cfg.strategy.strategy,
             evaluate_fn=clients[dataset_name][1],
@@ -137,10 +155,14 @@ def main(cfg: DictConfig) -> None:
             min_fit_clients=cfg.server.pool_size,
             min_evaluate_clients=0,
             num_clients_to_keep=cfg.strategy.strategy.num_clients_to_keep,
+            aggregate_fn=aggregation_fn,
+            aggregate_parameters=cfg.aggregate_fn.aggregate_fn.parameters,
             min_available_clients=cfg.server.pool_size,
             window=cfg.server.warmup_rounds,
             distance_function=l2_norm,
             maxiter=cfg.strategy.strategy.maxiter,
+            alpha=cfg.strategy.strategy.alpha,
+            beta=int(cfg.strategy.strategy.beta),
         )
     elif cfg.strategy.name == "krum":
         strategy = instantiate(
@@ -168,6 +190,17 @@ def main(cfg: DictConfig) -> None:
             c=cfg.strategy.strategy.c,
             niters=cfg.strategy.strategy.niters,
             num_malicious_clients=num_malicious,
+        )
+    elif cfg.strategy.name == "fedavg":
+        strategy = instantiate(
+            cfg.strategy.strategy,
+            evaluate_fn=clients[dataset_name][1],
+            on_fit_config_fn=fit_config,
+            fraction_fit=1,
+            fraction_evaluate=0,
+            min_fit_clients=cfg.server.pool_size,
+            min_evaluate_clients=0,
+            min_available_clients=cfg.server.pool_size,
         )
     else:
         raise ValueError("Strategy not supported")
@@ -200,28 +233,25 @@ def main(cfg: DictConfig) -> None:
     _, test_accuracy = zip(*history.metrics_centralized["accuracy"])
     _, test_auc = zip(*history.metrics_centralized["auc"])
 
-    file_name = os.path.join(
-        save_path,
-        "outputs/all_results.csv",
-    )
+    path_to_save = [os.path.join(save_path,"results.csv"), "outputs/all_results.csv"]
 
-    data = pd.DataFrame(
-        {
-            "round": rounds,
-            "test_loss": test_loss,
-            "test_accuracy": test_accuracy,
-            "test_auc": test_auc,
-            "attack": [attack_fn for _ in range(len(rounds))],
-            "dataset_name": [dataset_name for _ in range(len(rounds))],
-            "num_malicious": [num_malicious for _ in range(len(rounds))],
-            "strategy": [cfg.strategy.name for _ in range(len(rounds))],
-        }
-    )
-
-    if os.path.exists(file_name):
-        data.to_csv(file_name, mode="a", header=False, index=False)
-    else:
-        data.to_csv(file_name, index=False, header=True)
+    for file_name in path_to_save:
+        data = pd.DataFrame(
+            {
+                "round": rounds,
+                "loss": test_loss,
+                "accuracy": test_accuracy,
+                "auc": test_auc,
+                "attack_fn": [attack_fn for _ in range(len(rounds))],
+                "dataset_name": [dataset_name for _ in range(len(rounds))],
+                "num_malicious": [num_malicious for _ in range(len(rounds))],
+                "strategy": [cfg.strategy.name for _ in range(len(rounds))],
+            }
+        )
+        if os.path.exists(file_name):
+            data.to_csv(file_name, mode="a", header=False, index=False)
+        else:
+            data.to_csv(file_name, index=False, header=True)
 
 
 # pylint: disable=unused-argument
