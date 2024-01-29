@@ -272,7 +272,7 @@ def minmax_attack(
     """
     dataset_name = kwargs.get("dataset_name", None)
     threshold = kwargs.get("threshold", 1e-5)
-    lambda_init = kwargs.get("old_lambda", 5.0)
+    lambda_init = kwargs.get("lambda", 5.0)
     malicious_num = kwargs.get("malicious_num", 0)
 
     results = ordered_results.copy()

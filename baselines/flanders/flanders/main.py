@@ -143,8 +143,13 @@ def main(cfg: DictConfig) -> None:
         function_path = cfg.aggregate_fn.aggregate_fn.function
         print(f"Using aggregation function: {function_path}")
         module_name, function_name = function_path.rsplit('.', 1)
-        module = importlib.import_module(module_name)
+        module = importlib.import_module(module_name, package=__package__)
         aggregation_fn = getattr(module, function_name)
+        print(f"module_name {module_name}")
+        print(f"function_name {function_name}")
+        print(f"module {module}")
+        print(f"Aggr function {aggregation_fn}")
+        print(f"Aggr parameters {cfg.aggregate_fn.aggregate_fn.parameters}")
 
         strategy = instantiate(
             cfg.strategy.strategy,
@@ -154,7 +159,7 @@ def main(cfg: DictConfig) -> None:
             fraction_evaluate=0,
             min_fit_clients=cfg.server.pool_size,
             min_evaluate_clients=0,
-            num_clients_to_keep=cfg.strategy.strategy.num_clients_to_keep,
+            num_clients_to_keep=cfg.server.pool_size - num_malicious,
             aggregate_fn=aggregation_fn,
             aggregate_parameters=cfg.aggregate_fn.aggregate_fn.parameters,
             min_available_clients=cfg.server.pool_size,
@@ -208,7 +213,6 @@ def main(cfg: DictConfig) -> None:
     # 5. Start Simulation
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
-        client_resources=cfg.client_resources,
         num_clients=cfg.server.pool_size,
         server=EnhancedServer(
             warmup_rounds=cfg.server.warmup_rounds,
@@ -232,6 +236,10 @@ def main(cfg: DictConfig) -> None:
     rounds, test_loss = zip(*history.losses_centralized)
     _, test_accuracy = zip(*history.metrics_centralized["accuracy"])
     _, test_auc = zip(*history.metrics_centralized["auc"])
+    _, tp = zip(*history.metrics_centralized["TP"])
+    _, tn = zip(*history.metrics_centralized["TN"])
+    _, fp = zip(*history.metrics_centralized["FP"])
+    _, fn = zip(*history.metrics_centralized["FN"])
 
     path_to_save = [os.path.join(save_path,"results.csv"), "outputs/all_results.csv"]
 
@@ -242,10 +250,15 @@ def main(cfg: DictConfig) -> None:
                 "loss": test_loss,
                 "accuracy": test_accuracy,
                 "auc": test_auc,
+                "TP": tp,
+                "TN": tn,
+                "FP": fp,
+                "FN": fn,
                 "attack_fn": [attack_fn for _ in range(len(rounds))],
                 "dataset_name": [dataset_name for _ in range(len(rounds))],
                 "num_malicious": [num_malicious for _ in range(len(rounds))],
                 "strategy": [cfg.strategy.name for _ in range(len(rounds))],
+                "aggregate_fn": [cfg.aggregate_fn.aggregate_fn.function for _ in range(len(rounds))],
             }
         )
         if os.path.exists(file_name):

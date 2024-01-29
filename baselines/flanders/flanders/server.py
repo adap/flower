@@ -15,7 +15,7 @@ from flwr.server.history import History
 from flwr.server.server import Server, fit_clients
 
 from .strategy import Flanders
-from .utils import flatten_params, save_params
+from .utils import flatten_params, save_params, update_confusion_matrix
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -89,6 +89,10 @@ class EnhancedServer(Server):
         self.to_keep = to_keep
         self.omniscent = omniscent
         self.malicious_lst: List = []
+        self.confusion_matrix = {"TP": 0, "TN": 0, "FP": 0, "FN": 0}
+        self.clients_state = {}
+        self.good_clients_idx = []
+        self.malicious_clients_idx = []
 
     # pylint: disable=too-many-locals
     def fit(self, num_rounds, timeout):
@@ -108,6 +112,10 @@ class EnhancedServer(Server):
                 res[0],
                 res[1],
             )
+            res[1]["TP"] = 0
+            res[1]["TN"] = 0
+            res[1]["FP"] = 0
+            res[1]["FN"] = 0
             history.add_loss_centralized(server_round=0, loss=res[0])
             history.add_metrics_centralized(server_round=0, metrics=res[1])
 
@@ -133,6 +141,22 @@ class EnhancedServer(Server):
             res_cen = self.strategy.evaluate(current_round, parameters=self.parameters)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
+                # Update confusion matrix
+                self.confusion_matrix = update_confusion_matrix(
+                    self.confusion_matrix,
+                    self.clients_state,
+                    self.malicious_clients_idx,
+                    self.good_clients_idx,
+                )
+                metrics_cen["TP"] = self.confusion_matrix["TP"]
+                metrics_cen["TN"] = self.confusion_matrix["TN"]
+                metrics_cen["FP"] = self.confusion_matrix["FP"]
+                metrics_cen["FN"] = self.confusion_matrix["FN"]
+                if current_round <= self.warmup_rounds:
+                    metrics_cen["TP"] = 0
+                    metrics_cen["TN"] = 0
+                    metrics_cen["FP"] = 0
+                    metrics_cen["FN"] = 0
                 log(
                     INFO,
                     "fit progress: (%s, %s, %s, %s)",
@@ -192,7 +216,7 @@ class EnhancedServer(Server):
 
         # Randomly decide which client is malicious
         size = self.num_malicious
-        if self.warmup_rounds > server_round:
+        if server_round <= self.warmup_rounds:
             size = 0
         log(INFO, "Selecting %s malicious clients", size)
         self.malicious_lst = np.random.choice(
@@ -312,11 +336,10 @@ class EnhancedServer(Server):
             results = ordered_results
             others = {}
 
-        # Aggregate training results
-        log(INFO, "fit_round - Aggregating training results")
-        aggregated_result = self.strategy.aggregate_fit(server_round, results, failures)
-
         if isinstance(self.strategy, Flanders):
+            # Aggregate training results
+            log(INFO, "fit_round - Aggregating training results")
+            aggregated_result = self.strategy.aggregate_fit(server_round, results, failures, clients_state)
             (
                 parameters_aggregated,
                 metrics_aggregated,
@@ -350,6 +373,12 @@ class EnhancedServer(Server):
                         rrl=False,
                     )
         else:
+            # Aggregate training results
+            log(INFO, "fit_round - Aggregating training results")
+            aggregated_result = self.strategy.aggregate_fit(server_round, results, failures)
             parameters_aggregated, metrics_aggregated = aggregated_result
 
+        self.clients_state = clients_state
+        self.good_clients_idx = good_clients_idx
+        self.malicious_clients_idx = malicious_clients_idx
         return parameters_aggregated, metrics_aggregated, (results, failures)

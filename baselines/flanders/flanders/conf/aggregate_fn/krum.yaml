@@ -4,5 +4,4 @@ name: krum
 aggregate_fn:
   function: flwr.server.strategy.aggregate.aggregate_krum
   parameters:
-    to_keep: 2
-    num_malicious: ${server.num_malicious}
+    to_keep: 10

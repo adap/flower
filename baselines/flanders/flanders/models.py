@@ -90,35 +90,6 @@ def train_mnist(model, dataloader, epochs, device):
                     f"Loss: {loss.item():.4f}"
                 )
 
-#def train_mnist(model, dataloader, epochs, device):
-#    """Train the network on the training set."""
-#    n_total_steps = len(dataloader)
-#    criterion = nn.CrossEntropyLoss()
-#    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-#    for epoch in range(epochs):
-#        for i, (images, labels) in enumerate(dataloader):
-#            # origin shape: [100, 1, 28, 28]
-#            # resized: [100, 784]
-#            images = images.reshape(-1, 28 * 28).to(device)
-#            labels = labels.to(device)
-#
-#            # Forward pass
-#            outputs = model(images)
-#            loss = criterion(outputs, labels)
-#
-#            # Backward and optimize
-#            optimizer.zero_grad()
-#            loss.backward()
-#            optimizer.step()
-#
-#            if (i + 1) % 100 == 0:
-#                print(
-#                    f"Epoch [{epoch+1}/{epochs}], "
-#                    f"Step [{i+1}/{n_total_steps}], "
-#                    f"Loss: {loss.item():.4f}"
-#                )
-
-
 # pylint: disable=too-many-locals
 def test_mnist(model, dataloader, device):
     """Validate the network on the entire test set."""

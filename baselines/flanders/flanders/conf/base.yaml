@@ -21,7 +21,7 @@ server:
   warmup_rounds: 30
   sampling: 500
   history_dir: clients_params
-  magnitude: 100
+  magnitude: 10
   threshold: 1e-05
   attack_fn: gaussian
   num_malicious: 0

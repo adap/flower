@@ -3,6 +3,6 @@ name: dnc
 
 strategy:
   _target_: flanders.strategies.dnc.DnC
-  num_malicious_clients: 2
+  num_malicious_clients: $(server.num_malicious)
   niters: 5
   c: 1

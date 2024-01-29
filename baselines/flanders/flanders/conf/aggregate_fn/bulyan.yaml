@@ -1,0 +1,9 @@
+---
+name: bulyan
+
+aggregate_fn:
+  function: flwr.server.strategy.aggregate.aggregate_bulyan
+  parameters:
+    aggregation_name: aggregate_krum
+    aggregation_module_name: flwr.server.strategy.aggregate
+    to_keep: 0 # if 0, normal Krum is applied

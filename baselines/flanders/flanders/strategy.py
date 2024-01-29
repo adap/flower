@@ -3,6 +3,7 @@
 import typing
 from logging import INFO, WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
+import importlib
 
 import numpy as np
 from flwr.common import (
@@ -143,9 +144,7 @@ class Flanders(FedAvg):
         self.params_indexes = None
         self.distance_function = distance_function
         self.aggregate_fn = aggregate_fn
-        print(f"aggregate_fn {aggregate_fn}")
         self.aggregate_parameters = aggregate_parameters
-        print(aggregate_parameters)
 
     @typing.no_type_check
     def configure_fit(
@@ -185,6 +184,7 @@ class Flanders(FedAvg):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        clients_state: Dict[str, bool],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Apply MAR forecasting to exclude malicious clients from FedAvg.
 
@@ -229,8 +229,8 @@ class Flanders(FedAvg):
                 beta=self.beta,
             )
 
-            print("Ground truth: ", ground_truth)
-            print("Predicted matrix: ", predicted_matrix[:, :, 0])
+            #print("Ground truth: ", ground_truth)
+            #print("Predicted matrix: ", predicted_matrix[:, :, 0])
 
             log(INFO, "Computing anomaly scores")
             anomaly_scores = self.distance_function(
@@ -268,7 +268,24 @@ class Flanders(FedAvg):
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results, **self.aggregate_parameters))
+
+        # check that self.aggregate_fn has num_malicious parameter
+        if "num_malicious" in self.aggregate_fn.__code__.co_varnames:
+            # count the number of malicious clients in good_clients_idx by checking clients_state
+            num_malicious = sum([clients_state[str(cid)] for cid in good_clients_idx])
+            print("Number of malicious clients in good_clients_idx after FLANDERS filtering", num_malicious)
+            self.aggregate_parameters["num_malicious"] = num_malicious
+        if "aggregation_rule" in self.aggregate_fn.__code__.co_varnames:
+            module = importlib.import_module(self.aggregate_parameters["aggregation_module_name"])
+            function_name = self.aggregate_parameters["aggregation_name"]
+            self.aggregate_parameters["aggregation_rule"] = getattr(module, function_name)
+            # remove aggregation_module_name and aggregation_name from self.aggregate_parameters
+            aggregate_parameters = self.aggregate_parameters.copy()
+            del aggregate_parameters["aggregation_module_name"]
+            del aggregate_parameters["aggregation_name"]
+            parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results, **aggregate_parameters))
+        else:
+            parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results, **self.aggregate_parameters))
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
@@ -284,6 +301,20 @@ class Flanders(FedAvg):
             good_clients_idx,
             malicious_clients_idx,
         )
+
+    def evaluate(
+        self, server_round: int, parameters: Parameters
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate model parameters using an evaluation function."""
+        if self.evaluate_fn is None:
+            # No evaluation function provided
+            return None
+        parameters_ndarrays = parameters_to_ndarrays(parameters)
+        eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {})
+        if eval_res is None:
+            return None
+        loss, metrics = eval_res
+        return loss, metrics
 
 
 # pylint: disable=too-many-locals, too-many-arguments, invalid-name
