@@ -107,7 +107,7 @@ def test_cid_consistency_one_at_a_time() -> None:
     # submit jobs one at a time
     for prox in proxies:
         res = prox._submit_job(  # pylint: disable=protected-access
-            job_fn=job_fn(prox.cid), timeout=None
+            message=job_fn(prox.cid), timeout=None
         )
 
         res = cast(GetPropertiesRes, res)
