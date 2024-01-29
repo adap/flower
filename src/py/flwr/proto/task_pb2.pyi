@@ -23,7 +23,6 @@ class Task(google.protobuf.message.Message):
     ANCESTRY_FIELD_NUMBER: builtins.int
     TASK_TYPE_FIELD_NUMBER: builtins.int
     RECORDSET_FIELD_NUMBER: builtins.int
-    SA_FIELD_NUMBER: builtins.int
     @property
     def producer(self) -> flwr.proto.node_pb2.Node: ...
     @property
@@ -36,8 +35,6 @@ class Task(google.protobuf.message.Message):
     task_type: typing.Text
     @property
     def recordset(self) -> flwr.proto.recordset_pb2.RecordSet: ...
-    @property
-    def sa(self) -> global___SecureAggregation: ...
     def __init__(self,
         *,
         producer: typing.Optional[flwr.proto.node_pb2.Node] = ...,
@@ -48,10 +45,9 @@ class Task(google.protobuf.message.Message):
         ancestry: typing.Optional[typing.Iterable[typing.Text]] = ...,
         task_type: typing.Text = ...,
         recordset: typing.Optional[flwr.proto.recordset_pb2.RecordSet] = ...,
-        sa: typing.Optional[global___SecureAggregation] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["consumer",b"consumer","producer",b"producer","recordset",b"recordset","sa",b"sa"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["ancestry",b"ancestry","consumer",b"consumer","created_at",b"created_at","delivered_at",b"delivered_at","producer",b"producer","recordset",b"recordset","sa",b"sa","task_type",b"task_type","ttl",b"ttl"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["consumer",b"consumer","producer",b"producer","recordset",b"recordset"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ancestry",b"ancestry","consumer",b"consumer","created_at",b"created_at","delivered_at",b"delivered_at","producer",b"producer","recordset",b"recordset","task_type",b"task_type","ttl",b"ttl"]) -> None: ...
 global___Task = Task
 
 class TaskIns(google.protobuf.message.Message):
@@ -97,79 +93,3 @@ class TaskRes(google.protobuf.message.Message):
     def HasField(self, field_name: typing_extensions.Literal["task",b"task"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["group_id",b"group_id","run_id",b"run_id","task",b"task","task_id",b"task_id"]) -> None: ...
 global___TaskRes = TaskRes
-
-class Value(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    DOUBLE_FIELD_NUMBER: builtins.int
-    SINT64_FIELD_NUMBER: builtins.int
-    BOOL_FIELD_NUMBER: builtins.int
-    STRING_FIELD_NUMBER: builtins.int
-    BYTES_FIELD_NUMBER: builtins.int
-    DOUBLE_LIST_FIELD_NUMBER: builtins.int
-    SINT64_LIST_FIELD_NUMBER: builtins.int
-    BOOL_LIST_FIELD_NUMBER: builtins.int
-    STRING_LIST_FIELD_NUMBER: builtins.int
-    BYTES_LIST_FIELD_NUMBER: builtins.int
-    double: builtins.float
-    """Single element"""
-
-    sint64: builtins.int
-    bool: builtins.bool
-    string: typing.Text
-    bytes: builtins.bytes
-    @property
-    def double_list(self) -> flwr.proto.recordset_pb2.DoubleList:
-        """List types"""
-        pass
-    @property
-    def sint64_list(self) -> flwr.proto.recordset_pb2.Sint64List: ...
-    @property
-    def bool_list(self) -> flwr.proto.recordset_pb2.BoolList: ...
-    @property
-    def string_list(self) -> flwr.proto.recordset_pb2.StringList: ...
-    @property
-    def bytes_list(self) -> flwr.proto.recordset_pb2.BytesList: ...
-    def __init__(self,
-        *,
-        double: builtins.float = ...,
-        sint64: builtins.int = ...,
-        bool: builtins.bool = ...,
-        string: typing.Text = ...,
-        bytes: builtins.bytes = ...,
-        double_list: typing.Optional[flwr.proto.recordset_pb2.DoubleList] = ...,
-        sint64_list: typing.Optional[flwr.proto.recordset_pb2.Sint64List] = ...,
-        bool_list: typing.Optional[flwr.proto.recordset_pb2.BoolList] = ...,
-        string_list: typing.Optional[flwr.proto.recordset_pb2.StringList] = ...,
-        bytes_list: typing.Optional[flwr.proto.recordset_pb2.BytesList] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","value",b"value"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","value",b"value"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","bool","string","bytes","double_list","sint64_list","bool_list","string_list","bytes_list"]]: ...
-global___Value = Value
-
-class SecureAggregation(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    class NamedValuesEntry(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        KEY_FIELD_NUMBER: builtins.int
-        VALUE_FIELD_NUMBER: builtins.int
-        key: typing.Text
-        @property
-        def value(self) -> global___Value: ...
-        def __init__(self,
-            *,
-            key: typing.Text = ...,
-            value: typing.Optional[global___Value] = ...,
-            ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
-
-    NAMED_VALUES_FIELD_NUMBER: builtins.int
-    @property
-    def named_values(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Value]: ...
-    def __init__(self,
-        *,
-        named_values: typing.Optional[typing.Mapping[typing.Text, global___Value]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["named_values",b"named_values"]) -> None: ...
-global___SecureAggregation = SecureAggregation
