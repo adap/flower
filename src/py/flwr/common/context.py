@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Run state."""
+"""Context."""
+
 
 from dataclasses import dataclass
-from typing import Dict
+
+from .recordset import RecordSet
 
 
 @dataclass
-class RunState:
-    """State of a run executed by a client node."""
+class Context:
+    """State of your run.
 
-    state: Dict[str, str]
+    Parameters
+    ----------
+    state : RecordSet
+        Holds records added by the entity in a given run and that will stay local.
+        This means that the data it holds will never leave the system it's running from.
+        This can be used as an intermediate storage or scratchpad when
+        executing middleware layers. It can also be used as a memory to access
+        at different points during the lifecycle of this entity (e.g. across
+        multiple rounds)
+    """
+
+    state: RecordSet

@@ -18,6 +18,7 @@ syntax = "proto3";
 package flwr.proto;
 
 import "flwr/proto/node.proto";
+import "flwr/proto/recordset.proto";
 import "flwr/proto/transport.proto";
 
 message Task {
@@ -27,10 +28,12 @@ message Task {
   string delivered_at = 4;
   string ttl = 5;
   repeated string ancestry = 6;
-  SecureAggregation sa = 7;
+  string task_type = 7;
+  RecordSet recordset = 8;
 
   ServerMessage legacy_server_message = 101 [ deprecated = true ];
   ClientMessage legacy_client_message = 102 [ deprecated = true ];
+  SecureAggregation sa = 103 [ deprecated = true ];
 }
 
 message TaskIns {
@@ -48,12 +51,6 @@ message TaskRes {
 }
 
 message Value {
-  message DoubleList { repeated double vals = 1; }
-  message Sint64List { repeated sint64 vals = 1; }
-  message BoolList { repeated bool vals = 1; }
-  message StringList { repeated string vals = 1; }
-  message BytesList { repeated bytes vals = 1; }
-
   oneof value {
     // Single element
     double double = 1;

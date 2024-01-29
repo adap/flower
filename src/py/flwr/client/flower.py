@@ -56,12 +56,12 @@ class Flower:
     ) -> None:
         # Create wrapper function for `handle`
         def ffn(fwd: Fwd) -> Bwd:  # pylint: disable=invalid-name
-            task_res, state_updated = handle(
+            task_res, context_updated = handle(
                 client_fn=client_fn,
-                state=fwd.state,
+                context=fwd.context,
                 task_ins=fwd.task_ins,
             )
-            return Bwd(task_res=task_res, state=state_updated)
+            return Bwd(task_res=task_res, context=context_updated)
 
         # Wrap middleware layers around the wrapped handle function
         self._call = make_ffn(ffn, layers if layers is not None else [])
