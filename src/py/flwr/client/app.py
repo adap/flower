@@ -34,7 +34,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
 )
-from flwr.common.logger import log, warn_experimental_feature, warn_experimental_feature
+from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
 from flwr.common.message import Message
 
 from .flower import load_flower_callable
