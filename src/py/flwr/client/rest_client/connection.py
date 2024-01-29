@@ -256,9 +256,7 @@ def http_request_response(
         task_ins: Optional[TaskIns] = get_task_ins(pull_task_ins_response_proto)
 
         # Discard the current TaskIns if not valid
-        if task_ins is not None and not validate_task_ins(
-            task_ins, discard_reconnect_ins=True
-        ):
+        if task_ins is not None and not validate_task_ins(task_ins):
             task_ins = None
 
         # Remember `task_ins` until `task_res` is available

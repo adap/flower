@@ -23,11 +23,8 @@ from typing import List
 from uuid import uuid4
 
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
-    ClientMessage,
-    ServerMessage,
-)
 from flwr.server.state import InMemoryState, SqliteState, State
 
 
@@ -421,9 +418,8 @@ def create_task_ins(
             delivered_at=delivered_at,
             producer=Node(node_id=0, anonymous=True),
             consumer=consumer,
-            legacy_server_message=ServerMessage(
-                reconnect_ins=ServerMessage.ReconnectIns()
-            ),
+            task_type="mock",
+            recordset=RecordSet(parameters={}, metrics={}, configs={}),
         ),
     )
     return task
@@ -444,9 +440,8 @@ def create_task_res(
             producer=Node(node_id=producer_node_id, anonymous=anonymous),
             consumer=Node(node_id=0, anonymous=True),
             ancestry=ancestry,
-            legacy_client_message=ClientMessage(
-                disconnect_res=ClientMessage.DisconnectRes()
-            ),
+            task_type="mock",
+            recordset=RecordSet(parameters={}, metrics={}, configs={}),
         ),
     )
     return task_res

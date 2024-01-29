@@ -33,7 +33,6 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
-    TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
@@ -44,13 +43,8 @@ from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
-from flwr.proto.transport_pb2_grpc import (  # pylint: disable=E0611
-    add_FlowerServiceServicer_to_server,
-)
 from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.driver.driver_servicer import DriverServicer
-from flwr.server.fleet.grpc_bidi.driver_client_manager import DriverClientManager
-from flwr.server.fleet.grpc_bidi.flower_service_servicer import FlowerServiceServicer
 from flwr.server.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
@@ -319,19 +313,6 @@ def run_fleet_api() -> None:
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
-    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_BIDI:
-        address_arg = args.grpc_fleet_api_address
-        parsed_address = parse_address(address_arg)
-        if not parsed_address:
-            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, is_v6 = parsed_address
-        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-        fleet_server = _run_fleet_api_grpc_bidi(
-            address=address,
-            state_factory=state_factory,
-            certificates=certificates,
-        )
-        grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
         address_arg = args.grpc_rere_fleet_api_address
         parsed_address = parse_address(address_arg)
@@ -418,19 +399,6 @@ def run_server() -> None:
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
-    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_BIDI:
-        address_arg = args.grpc_bidi_fleet_api_address
-        parsed_address = parse_address(address_arg)
-        if not parsed_address:
-            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, is_v6 = parsed_address
-        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-        fleet_server = _run_fleet_api_grpc_bidi(
-            address=address,
-            state_factory=state_factory,
-            certificates=certificates,
-        )
-        grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
         address_arg = args.grpc_rere_fleet_api_address
         parsed_address = parse_address(address_arg)
@@ -554,35 +522,6 @@ def _run_driver_api_grpc(
     driver_grpc_server.start()
 
     return driver_grpc_server
-
-
-def _run_fleet_api_grpc_bidi(
-    address: str,
-    state_factory: StateFactory,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
-) -> grpc.Server:
-    """Run Fleet API (gRPC, bidirectional streaming)."""
-    # DriverClientManager
-    driver_client_manager = DriverClientManager(
-        state_factory=state_factory,
-    )
-
-    # Create (legacy) Fleet API gRPC server
-    fleet_servicer = FlowerServiceServicer(
-        client_manager=driver_client_manager,
-    )
-    fleet_add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
-    fleet_grpc_server = generic_create_grpc_server(
-        servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
-        server_address=address,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=certificates,
-    )
-
-    log(INFO, "Flower ECE: Starting Fleet API (gRPC-bidi) on %s", address)
-    fleet_grpc_server.start()
-
-    return fleet_grpc_server
 
 
 def _run_fleet_api_grpc_rere(
@@ -785,13 +724,6 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         const=TRANSPORT_TYPE_REST,
         help="Start a Fleet API server (REST, experimental)",
     )
-    ex_group.add_argument(
-        "--grpc-bidi",
-        action="store_const",
-        dest="fleet_api_type",
-        const=TRANSPORT_TYPE_GRPC_BIDI,
-        help="Start a Fleet API server (gRPC-bidi)",
-    )
 
     # Fleet API gRPC-rere options
     grpc_rere_group = parser.add_argument_group(
@@ -827,14 +759,4 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="Set the number of concurrent workers for the Fleet API REST server.",
         type=int,
         default=1,
-    )
-
-    # Fleet API gRPC-bidi options
-    grpc_bidi_group = parser.add_argument_group(
-        "Fleet API (gRPC-bidi) server options", ""
-    )
-    grpc_bidi_group.add_argument(
-        "--grpc-bidi-fleet-api-address",
-        help="Fleet API (gRPC-bidi) server address (IPv4, IPv6, or a domain name)",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
     )
