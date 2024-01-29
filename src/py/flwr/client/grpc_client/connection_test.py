@@ -24,12 +24,11 @@ from unittest.mock import patch
 import grpc
 
 from flwr.common import recordset_compat as compat
-from flwr.common import serde
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import TASK_TYPE_GET_PROPERTIES
+from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.typing import Code, GetPropertiesRes, Status
-from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     ServerMessage,
@@ -44,17 +43,27 @@ EXPECTED_NUM_SERVER_MESSAGE = 10
 SERVER_MESSAGE = ServerMessage(get_properties_ins=ServerMessage.GetPropertiesIns())
 SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect_ins=ServerMessage.ReconnectIns())
 
-TASK_GET_PROPERTIES = Task(
-    task_type=TASK_TYPE_GET_PROPERTIES,
-    recordset=serde.recordset_to_proto(
-        compat.getpropertiesres_to_recordset(GetPropertiesRes(Status(Code.OK, ""), {}))
+MESSAGE_GET_PROPERTIES = Message(
+    metadata=Metadata(
+        run_id=0,
+        task_id="",
+        group_id="",
+        ttl="",
+        task_type=TASK_TYPE_GET_PROPERTIES,
+    ),
+    message=compat.getpropertiesres_to_recordset(
+        GetPropertiesRes(Status(Code.OK, ""), {})
     ),
 )
-TASK_DISCONNECT = Task(
-    task_type="reconnect",
-    recordset=serde.recordset_to_proto(
-        RecordSet(configs={"config": ConfigsRecord({"reason": 0})})
+MESSAGE_DISCONNECT = Message(
+    metadata=Metadata(
+        run_id=0,
+        task_id="",
+        group_id="",
+        ttl="",
+        task_type="reconnect",
     ),
+    message=RecordSet(configs={"config": ConfigsRecord({"reason": 0})}),
 )
 
 
@@ -118,17 +127,15 @@ def test_integration_connection() -> None:
             # Setup processing loop
             while True:
                 # Block until server responds with a message
-                task_ins = receive()
+                message = receive()
 
                 messages_received += 1
-                if task_ins.task.task_type == "reconnect":  # type: ignore
-                    task_res = TaskRes(task=TASK_DISCONNECT)
-                    send(task_res)
+                if message.metadata.task_type == "reconnect":  # type: ignore
+                    send(MESSAGE_DISCONNECT)
                     break
 
                 # Process server_message and send client_message...
-                task_res = TaskRes(task=TASK_GET_PROPERTIES)
-                send(task_res)
+                send(MESSAGE_GET_PROPERTIES)
 
         return messages_received
 
