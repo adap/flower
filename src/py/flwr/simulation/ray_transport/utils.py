@@ -71,7 +71,7 @@ def check_clientfn_returns_client(client: Client) -> Client:
     """
     if not isinstance(client, Client):
         mssg = (
-            " Ensure your client is of type `Client`. Please convert it"
+            " Ensure your client is of type `flwr.client.Client`. Please convert it"
             " using the `.to_client()` method before returning it"
             " in the `client_fn` you pass to `start_simulation`."
             " We have applied this conversion on your behalf."
