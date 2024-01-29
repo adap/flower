@@ -47,7 +47,7 @@ SQL_CREATE_TABLE_TASK_INS = """
 CREATE TABLE IF NOT EXISTS task_ins(
     task_id                 TEXT UNIQUE,
     group_id                TEXT,
-    run_id             INTEGER,
+    run_id                  INTEGER,
     producer_anonymous      BOOLEAN,
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
@@ -56,8 +56,8 @@ CREATE TABLE IF NOT EXISTS task_ins(
     delivered_at            TEXT,
     ttl                     TEXT,
     ancestry                TEXT,
-    legacy_server_message   BLOB,
-    legacy_client_message   BLOB,
+    task_type               TEXT,
+    recordset               BLOB,
     FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
@@ -67,7 +67,7 @@ SQL_CREATE_TABLE_TASK_RES = """
 CREATE TABLE IF NOT EXISTS task_res(
     task_id                 TEXT UNIQUE,
     group_id                TEXT,
-    run_id             INTEGER,
+    run_id                  INTEGER,
     producer_anonymous      BOOLEAN,
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
@@ -76,8 +76,8 @@ CREATE TABLE IF NOT EXISTS task_res(
     delivered_at            TEXT,
     ttl                     TEXT,
     ancestry                TEXT,
-    legacy_server_message   BLOB,
-    legacy_client_message   BLOB,
+    task_type               TEXT,
+    recordset               BLOB,
     FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
