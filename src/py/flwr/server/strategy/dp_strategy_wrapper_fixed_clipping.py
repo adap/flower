@@ -219,3 +219,50 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
     ) -> None:
         for i, _ in enumerate(self.current_round_params):
             client_param[i] = self.current_round_params[i] + client_update[i]
+
+class DPStrategyWrapperClientSideFixedClipping(Strategy):
+    """Wrapper for Configuring a Strategy for Central DP.
+
+        The clipping is at the client side.
+
+        Parameters
+        ----------
+        strategy: Strategy
+            The strategy to which DP functionalities will be added by this wrapper.
+        noise_multiplier: float
+            The noise multiplier for the Gaussian mechanism for model updates.
+            A value of 1.0 or higher is recommended for strong privacy.
+        clipping_threshold: float
+            The value of the clipping threshold.
+        num_sampled_clients: int
+            The number of clients that are sampled on each round.
+        """
+
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
+    def __init__(
+            self,
+            strategy: Strategy,
+            noise_multiplier: float,
+            clipping_threshold: float,
+            num_sampled_clients: int,
+    ) -> None:
+        super().__init__()
+
+        self.strategy = strategy
+
+        if noise_multiplier < 0:
+            raise Exception("The noise multiplier should be a non-negative value.")
+
+        if clipping_threshold <= 0:
+            raise Exception("The clipping threshold should be a positive value.")
+
+        if num_sampled_clients <= 0:
+            raise Exception("The number of sampled clients should be a positive value.")
+
+        self.noise_multiplier = noise_multiplier
+        self.clipping_threshold = clipping_threshold
+        self.num_sampled_clients = num_sampled_clients
+
+        self.current_round_params: NDArrays = []
+
+
