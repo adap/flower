@@ -1,12 +1,12 @@
 import random
 import string
 from datetime import datetime, timedelta
-from typing import List, Any, Union, Tuple, Callable
+from typing import List, Any, Union, Tuple, Callable, Optional
 
 import datasets
 import numpy as np
 from PIL import Image
-from datasets import Features, Value, ClassLabel
+from datasets import Features, Value, ClassLabel, DatasetDict
 import io
 
 
@@ -223,6 +223,23 @@ def mock_dict_dataset(num_rows: List[int], split_names: List[str], function: Cal
     dataset_dict = {}
     for params in zip(num_rows, split_names):
         dataset_dict[params[1]] = function(params[0])
+    return datasets.DatasetDict(dataset_dict)
+
+
+dataset_name_to_mock_function = {
+    "cifar100": mock_cifar100,
+    "sentiment140": mock_sentiment140,
+    "svhn_cropped_digits": mock_svhn_cropped_digits
+}
+
+
+def load_mocked_dataset(dataset_name: str, num_rows: List[int], split_names: List[str],
+                        subset: Optional[str] = "", ) -> DatasetDict:
+    dataset_dict = {}
+    name = dataset_name if subset is "" else dataset_name + "_" + subset
+    dataset_creation_fnc = dataset_name_to_mock_function[name]
+    for params in zip(num_rows, split_names):
+        dataset_dict[params[1]] = dataset_creation_fnc(params[0])
     return datasets.DatasetDict(dataset_dict)
 
 
