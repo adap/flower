@@ -4,6 +4,7 @@ isort:skip_file
 """
 import builtins
 import flwr.proto.node_pb2
+import flwr.proto.recordset_pb2
 import flwr.proto.transport_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
@@ -21,9 +22,11 @@ class Task(google.protobuf.message.Message):
     DELIVERED_AT_FIELD_NUMBER: builtins.int
     TTL_FIELD_NUMBER: builtins.int
     ANCESTRY_FIELD_NUMBER: builtins.int
-    SA_FIELD_NUMBER: builtins.int
+    TASK_TYPE_FIELD_NUMBER: builtins.int
+    RECORDSET_FIELD_NUMBER: builtins.int
     LEGACY_SERVER_MESSAGE_FIELD_NUMBER: builtins.int
     LEGACY_CLIENT_MESSAGE_FIELD_NUMBER: builtins.int
+    SA_FIELD_NUMBER: builtins.int
     @property
     def producer(self) -> flwr.proto.node_pb2.Node: ...
     @property
@@ -33,12 +36,15 @@ class Task(google.protobuf.message.Message):
     ttl: typing.Text
     @property
     def ancestry(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
+    task_type: typing.Text
     @property
-    def sa(self) -> global___SecureAggregation: ...
+    def recordset(self) -> flwr.proto.recordset_pb2.RecordSet: ...
     @property
     def legacy_server_message(self) -> flwr.proto.transport_pb2.ServerMessage: ...
     @property
     def legacy_client_message(self) -> flwr.proto.transport_pb2.ClientMessage: ...
+    @property
+    def sa(self) -> global___SecureAggregation: ...
     def __init__(self,
         *,
         producer: typing.Optional[flwr.proto.node_pb2.Node] = ...,
@@ -47,12 +53,14 @@ class Task(google.protobuf.message.Message):
         delivered_at: typing.Text = ...,
         ttl: typing.Text = ...,
         ancestry: typing.Optional[typing.Iterable[typing.Text]] = ...,
-        sa: typing.Optional[global___SecureAggregation] = ...,
+        task_type: typing.Text = ...,
+        recordset: typing.Optional[flwr.proto.recordset_pb2.RecordSet] = ...,
         legacy_server_message: typing.Optional[flwr.proto.transport_pb2.ServerMessage] = ...,
         legacy_client_message: typing.Optional[flwr.proto.transport_pb2.ClientMessage] = ...,
+        sa: typing.Optional[global___SecureAggregation] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["consumer",b"consumer","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer","sa",b"sa"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["ancestry",b"ancestry","consumer",b"consumer","created_at",b"created_at","delivered_at",b"delivered_at","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer","sa",b"sa","ttl",b"ttl"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["consumer",b"consumer","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer","recordset",b"recordset","sa",b"sa"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ancestry",b"ancestry","consumer",b"consumer","created_at",b"created_at","delivered_at",b"delivered_at","legacy_client_message",b"legacy_client_message","legacy_server_message",b"legacy_server_message","producer",b"producer","recordset",b"recordset","sa",b"sa","task_type",b"task_type","ttl",b"ttl"]) -> None: ...
 global___Task = Task
 
 class TaskIns(google.protobuf.message.Message):
@@ -101,61 +109,6 @@ global___TaskRes = TaskRes
 
 class Value(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    class DoubleList(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        VALS_FIELD_NUMBER: builtins.int
-        @property
-        def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.float]: ...
-        def __init__(self,
-            *,
-            vals: typing.Optional[typing.Iterable[builtins.float]] = ...,
-            ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-
-    class Sint64List(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        VALS_FIELD_NUMBER: builtins.int
-        @property
-        def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
-        def __init__(self,
-            *,
-            vals: typing.Optional[typing.Iterable[builtins.int]] = ...,
-            ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-
-    class BoolList(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        VALS_FIELD_NUMBER: builtins.int
-        @property
-        def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bool]: ...
-        def __init__(self,
-            *,
-            vals: typing.Optional[typing.Iterable[builtins.bool]] = ...,
-            ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-
-    class StringList(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        VALS_FIELD_NUMBER: builtins.int
-        @property
-        def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
-        def __init__(self,
-            *,
-            vals: typing.Optional[typing.Iterable[typing.Text]] = ...,
-            ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-
-    class BytesList(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor
-        VALS_FIELD_NUMBER: builtins.int
-        @property
-        def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
-        def __init__(self,
-            *,
-            vals: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
-            ) -> None: ...
-        def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-
     DOUBLE_FIELD_NUMBER: builtins.int
     SINT64_FIELD_NUMBER: builtins.int
     BOOL_FIELD_NUMBER: builtins.int
@@ -174,17 +127,17 @@ class Value(google.protobuf.message.Message):
     string: typing.Text
     bytes: builtins.bytes
     @property
-    def double_list(self) -> global___Value.DoubleList:
+    def double_list(self) -> flwr.proto.recordset_pb2.DoubleList:
         """List types"""
         pass
     @property
-    def sint64_list(self) -> global___Value.Sint64List: ...
+    def sint64_list(self) -> flwr.proto.recordset_pb2.Sint64List: ...
     @property
-    def bool_list(self) -> global___Value.BoolList: ...
+    def bool_list(self) -> flwr.proto.recordset_pb2.BoolList: ...
     @property
-    def string_list(self) -> global___Value.StringList: ...
+    def string_list(self) -> flwr.proto.recordset_pb2.StringList: ...
     @property
-    def bytes_list(self) -> global___Value.BytesList: ...
+    def bytes_list(self) -> flwr.proto.recordset_pb2.BytesList: ...
     def __init__(self,
         *,
         double: builtins.float = ...,
@@ -192,11 +145,11 @@ class Value(google.protobuf.message.Message):
         bool: builtins.bool = ...,
         string: typing.Text = ...,
         bytes: builtins.bytes = ...,
-        double_list: typing.Optional[global___Value.DoubleList] = ...,
-        sint64_list: typing.Optional[global___Value.Sint64List] = ...,
-        bool_list: typing.Optional[global___Value.BoolList] = ...,
-        string_list: typing.Optional[global___Value.StringList] = ...,
-        bytes_list: typing.Optional[global___Value.BytesList] = ...,
+        double_list: typing.Optional[flwr.proto.recordset_pb2.DoubleList] = ...,
+        sint64_list: typing.Optional[flwr.proto.recordset_pb2.Sint64List] = ...,
+        bool_list: typing.Optional[flwr.proto.recordset_pb2.BoolList] = ...,
+        string_list: typing.Optional[flwr.proto.recordset_pb2.StringList] = ...,
+        bytes_list: typing.Optional[flwr.proto.recordset_pb2.BytesList] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","value",b"value"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","value",b"value"]) -> None: ...
