@@ -29,15 +29,15 @@ from flwr.client.message_handler.task_handler import (
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log, warn_experimental_feature
-from flwr.proto.fleet_pb2 import (
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
     PullTaskInsRequest,
     PushTaskResRequest,
 )
-from flwr.proto.fleet_pb2_grpc import FleetStub
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 KEY_NODE = "node"
 KEY_TASK_INS = "current_task_ins"
@@ -148,9 +148,7 @@ def grpc_request_response(
         task_ins: Optional[TaskIns] = get_task_ins(response)
 
         # Discard the current TaskIns if not valid
-        if task_ins is not None and not validate_task_ins(
-            task_ins, discard_reconnect_ins=True
-        ):
+        if task_ins is not None and not validate_task_ins(task_ins):
             task_ins = None
 
         # Remember `task_ins` until `task_res` is available

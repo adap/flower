@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""DPWrapper_fixed_clipping tests."""
+"""dp_strategy_wrapper_fixed_clipping tests."""
 
 import numpy as np
 
@@ -20,33 +20,6 @@ from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 
 from .dp_strategy_wrapper_fixed_clipping import DPStrategyWrapperServerSideFixedClipping
 from .fedavg import FedAvg
-
-
-def test_add_gaussian_noise() -> None:
-    """Test add_gaussian_noise function."""
-    # Prepare
-    strategy = FedAvg()
-    dp_wrapper = DPStrategyWrapperServerSideFixedClipping(strategy, 1.5, 1.5, 5)
-
-    update = [np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])]
-    std_dev = 0.1
-
-    # Execute
-    update_noised = dp_wrapper.add_gaussian_noise(update, std_dev)
-
-    # Assert
-    # Check that the shape of the result is the same as the input
-    for layer, layer_noised in zip(update, update_noised):
-        assert layer.shape == layer_noised.shape
-
-    # Check that the values have been changed and is not equal to the original update
-    for layer, layer_noised in zip(update, update_noised):
-        assert not np.array_equal(layer, layer_noised)
-
-    # Check that the noise has been added
-    for layer, layer_noised in zip(update, update_noised):
-        noise_added = layer_noised - layer
-        assert np.any(np.abs(noise_added) > 0)
 
 
 def test_add_noise_to_updates() -> None:
@@ -68,46 +41,76 @@ def test_add_noise_to_updates() -> None:
         assert not np.array_equal(layer, parameters[0])  # Check if noise was added
 
 
-def test_get_update_norm() -> None:
-    """Test get_update_norm function."""
-    # Prepare
-    strategy = FedAvg()
-    dp_wrapper = DPStrategyWrapperServerSideFixedClipping(strategy, 1.5, 1.5, 5)
-    update = [np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])]
-
-    # Execute
-    result = dp_wrapper.get_update_norm(update)
-
-    expected = float(
-        np.linalg.norm(np.concatenate([sub_update.flatten() for sub_update in update]))
-    )
-
-    # Assert
-    assert expected == result
-
-
-def test_clip_model_updates() -> None:
-    """Test _clip_model_updates method."""
+def test_compute_model_updates() -> None:
+    """Test _compute_model_updates method."""
     # Prepare
     strategy = FedAvg()
     dp_wrapper = DPStrategyWrapperServerSideFixedClipping(strategy, 1.5, 1.5, 5)
 
-    updates = [
-        np.array([[1.5, -0.5], [2.0, -1.0]]),
-        np.array([0.5, -0.5]),
-        np.array([[-0.5, 1.5], [-1.0, 2.0]]),
-        np.array([-0.5, 0.5]),
+    client_params = [
+        [np.array([2, 3, 4]), np.array([5, 6, 7])],
+        [np.array([3, 4, 5]), np.array([6, 7, 8])],
     ]
+    current_round_params = [np.array([1, 2, 3]), np.array([4, 5, 6])]
+
+    expected_updates = [
+        [
+            np.subtract(client_params[0][0], current_round_params[0]),
+            np.subtract(client_params[0][1], current_round_params[1]),
+        ],
+        [
+            np.subtract(client_params[1][0], current_round_params[0]),
+            np.subtract(client_params[1][1], current_round_params[1]),
+        ],
+    ]
+    # Set current model parameters in the wrapper
+    dp_wrapper.current_round_params = current_round_params
 
     # Execute
     # pylint: disable-next=protected-access
-    clipped_updates = dp_wrapper._clip_model_update(updates)
+    computed_updates = dp_wrapper._compute_model_updates(client_params)
+
+    for expected, actual in zip(expected_updates, computed_updates):
+        for e, a in zip(expected, actual):
+            np.testing.assert_array_equal(e, a)
+
+
+def test_update_clients_params() -> None:
+    """Test _update_clients_params method."""
+    # Prepare
+    strategy = FedAvg()
+    dp_wrapper = DPStrategyWrapperServerSideFixedClipping(strategy, 1.5, 1.5, 5)
+
+    client_params = [
+        [np.array([2, 3, 4]), np.array([5, 6, 7])],
+        [np.array([3, 4, 5]), np.array([6, 7, 8])],
+    ]
+    client_update = [
+        [np.array([1, 1, 1]), np.array([1, 1, 1])],
+        [np.array([1, 1, 1]), np.array([1, 1, 1])],
+    ]
+    current_round_params = [np.array([1, 2, 3]), np.array([4, 5, 6])]
+
+    # Set current model parameters in the wrapper
+    dp_wrapper.current_round_params = current_round_params
+
+    # Execute
+    for params, update in zip(client_params, client_update):
+        # pylint: disable-next=protected-access
+        dp_wrapper._update_clients_params(params, update)
 
     # Assert
-    assert len(clipped_updates) == len(updates)
+    expected_params = [
+        [
+            np.add(current_round_params[0], client_update[0][0]),
+            np.add(current_round_params[1], client_update[0][1]),
+        ],
+        [
+            np.add(current_round_params[0], client_update[1][0]),
+            np.add(current_round_params[1], client_update[1][1]),
+        ],
+    ]
 
-    for clipped_update, original_update in zip(clipped_updates, updates):
-        clip_norm = np.linalg.norm(original_update)
-        assert np.all(clipped_update <= clip_norm) and np.all(
-            clipped_update >= -clip_norm
-        )
+    for expected, actual in zip(expected_params, client_params):
+        for e, a in zip(expected, actual):
+            np.testing.assert_array_equal(e, a)

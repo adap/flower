@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Central DP.
+"""Central differential privacy with fixed clipping.
 
 Papers: https://arxiv.org/pdf/1712.07557.pdf, https://arxiv.org/pdf/1710.06963.pdf
-Note: unlike the above papers, we moved the clipping part to the server side.
 """
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -32,15 +31,15 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.common.differential_privacy import add_gaussian_noise, clip_inputs
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
 
 
 class DPStrategyWrapperServerSideFixedClipping(Strategy):
-    """Wrapper for Configuring a Strategy for Central DP.
-
-    The clipping is at the server side.
+    """Wrapper for Configuring a Strategy for Central DP with Server Side Fixed
+    Clipping.
 
     Parameters
     ----------
@@ -49,8 +48,8 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
     noise_multiplier: float
         The noise multiplier for the Gaussian mechanism for model updates.
         A value of 1.0 or higher is recommended for strong privacy.
-    clipping_threshold: float
-        The value of the clipping threshold.
+    clipping_norm: float
+        The value of the clipping norm.
     num_sampled_clients: int
         The number of clients that are sampled on each round.
     """
@@ -60,7 +59,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         self,
         strategy: Strategy,
         noise_multiplier: float,
-        clipping_threshold: float,
+        clipping_norm: float,
         num_sampled_clients: int,
     ) -> None:
         super().__init__()
@@ -68,16 +67,18 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         self.strategy = strategy
 
         if noise_multiplier < 0:
-            raise Exception("The noise multiplier should be a non-negative value.")
+            raise ValueError("The noise multiplier should be a non-negative value.")
 
-        if clipping_threshold <= 0:
-            raise Exception("The clipping threshold should be a positive value.")
+        if clipping_norm <= 0:
+            raise ValueError("The clipping threshold should be a positive value.")
 
         if num_sampled_clients <= 0:
-            raise Exception("The number of sampled clients should be a positive value.")
+            raise ValueError(
+                "The number of sampled clients should be a positive value."
+            )
 
         self.noise_multiplier = noise_multiplier
-        self.clipping_threshold = clipping_threshold
+        self.clipping_norm = clipping_norm
         self.num_sampled_clients = num_sampled_clients
 
         self.current_round_params: NDArrays = []
@@ -114,7 +115,11 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Aggregate training results using unweighted aggregation."""
+        """Compute the updates, clip them, and pass them to the child strategy for
+        aggregation.
+
+        Afterward, add noise to the aggregated parameters.
+        """
         if failures:
             return None, {}
 
@@ -128,7 +133,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
         # Clip updates
         for client_update in all_clients_updates:
-            client_update = self._clip_model_update(client_update)
+            client_update = clip_inputs(client_update, self.clipping_norm)
 
         # Compute the new parameters with the clipped updates
         for client_param, client_update in zip(clients_params, all_clients_updates):
@@ -139,15 +144,15 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
             res[1].parameters = ndarrays_to_parameters(params)
 
         # Pass the new parameters for aggregation
-        aggregated_updates, metrics = self.strategy.aggregate_fit(
+        aggregated_params, metrics = self.strategy.aggregate_fit(
             server_round, results, failures
         )
 
         # Add Gaussian noise to the aggregated parameters
-        if aggregated_updates:
-            aggregated_updates = self._add_noise_to_updates(aggregated_updates)
+        if aggregated_params:
+            aggregated_params = self._add_noise_to_updates(aggregated_params)
 
-        return aggregated_updates, metrics
+        return aggregated_params, metrics
 
     def aggregate_evaluate(
         self,
@@ -164,47 +169,23 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
-    def _clip_model_update(self, update: NDArrays) -> NDArrays:
-        """Clip model update based on the computed clipping_threshold.
-
-        FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
-        """
-        update_norm = self.get_update_norm(update)
-        scaling_factor = min(1, self.clipping_threshold / update_norm)
-        update_clipped: NDArrays = [layer * scaling_factor for layer in update]
-        return update_clipped
-
-    @staticmethod
-    def get_update_norm(update: NDArrays) -> float:
-        """Compute the L2 norm of the flattened update."""
-        flattened_update = np.concatenate(
-            [np.asarray(sub_update).flatten() for sub_update in update]
-        )
-        return float(np.linalg.norm(flattened_update))
-
     def _add_noise_to_updates(self, parameters: Parameters) -> Parameters:
         """Add Gaussian noise to model params."""
         return ndarrays_to_parameters(
-            self.add_gaussian_noise(
+            add_gaussian_noise(
                 parameters_to_ndarrays(parameters),
                 float(
-                    (self.noise_multiplier * self.clipping_threshold)
-                    / self.num_sampled_clients ** (0.5)
+                    (self.noise_multiplier * self.clipping_norm)
+                    / self.num_sampled_clients
                 ),
             )
         )
 
-    @staticmethod
-    def add_gaussian_noise(update: NDArrays, std_dev: float) -> NDArrays:
-        """Add Gaussian noise to each element of the provided update."""
-        update_noised = [
-            layer + np.random.normal(0, std_dev, layer.shape) for layer in update
-        ]
-        return update_noised
-
     def _compute_model_updates(
         self, all_clients_params: List[NDArrays]
     ) -> List[NDArrays]:
+        """Compute model updates for each client based on the current round
+        parameters."""
         all_client_updates = []
         for client_param in all_clients_params:
             client_update = [
@@ -217,6 +198,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
     def _update_clients_params(
         self, client_param: NDArrays, client_update: NDArrays
     ) -> None:
+        """Update the client parameters based on the model updates."""
         for i, _ in enumerate(self.current_round_params):
             client_param[i] = self.current_round_params[i] + client_update[i]
 
