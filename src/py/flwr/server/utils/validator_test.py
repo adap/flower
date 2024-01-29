@@ -94,6 +94,7 @@ def create_task_ins(
             delivered_at=delivered_at,
             producer=Node(node_id=0, anonymous=True),
             consumer=consumer,
+            task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
         ),
     )
@@ -114,6 +115,7 @@ def create_task_res(
             producer=Node(node_id=producer_node_id, anonymous=anonymous),
             consumer=Node(node_id=0, anonymous=True),
             ancestry=ancestry,
+            task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
         ),
     )

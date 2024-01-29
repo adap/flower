@@ -24,6 +24,12 @@ import numpy as np
 import flwr
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
+from flwr.common.constant import (
+    TASK_TYPE_EVALUATE,
+    TASK_TYPE_FIT,
+    TASK_TYPE_GET_PARAMETERS,
+    TASK_TYPE_GET_PROPERTIES,
+)
 from flwr.common.typing import (
     Code,
     Config,
@@ -38,12 +44,7 @@ from flwr.common.typing import (
     Status,
 )
 from flwr.driver.driver_client_proxy import DriverClientProxy
-from flwr.proto import (  # pylint: disable=E0611
-    driver_pb2,
-    node_pb2,
-    recordset_pb2,
-    task_pb2,
-)
+from flwr.proto import driver_pb2, node_pb2, task_pb2  # pylint: disable=E0611
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
 
@@ -51,20 +52,27 @@ CLIENT_PROPERTIES = cast(Properties, {"tensor_type": "numpy.ndarray"})
 CLIENT_STATUS = Status(code=Code.OK, message="OK")
 
 
-def _make_recordset_proto(
+def _make_task(
     res: Union[GetParametersRes, GetPropertiesRes, FitRes, EvaluateRes]
-) -> recordset_pb2.RecordSet:  # pylint: disable=E1101
+) -> task_pb2.Task:  # pylint: disable=E1101
     if isinstance(res, GetParametersRes):
+        task_type = TASK_TYPE_GET_PARAMETERS
         recordset = compat.getparametersres_to_recordset(res, True)
     elif isinstance(res, GetPropertiesRes):
+        task_type = TASK_TYPE_GET_PROPERTIES
         recordset = compat.getpropertiesres_to_recordset(res)
     elif isinstance(res, FitRes):
+        task_type = TASK_TYPE_FIT
         recordset = compat.fitres_to_recordset(res, True)
     elif isinstance(res, EvaluateRes):
+        task_type = TASK_TYPE_EVALUATE
         recordset = compat.evaluateres_to_recordset(res)
     else:
         raise ValueError(f"Unsupported type: {type(res)}")
-    return serde.recordset_to_proto(recordset)
+    return task_pb2.Task(  # pylint: disable=E1101
+        task_type=task_type,
+        recordset=serde.recordset_to_proto(recordset),
+    )
 
 
 class DriverClientProxyTestCase(unittest.TestCase):
@@ -96,11 +104,9 @@ class DriverClientProxyTestCase(unittest.TestCase):
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                         group_id="",
                         run_id=0,
-                        task=task_pb2.Task(  # pylint: disable=E1101
-                            recordset=_make_recordset_proto(
-                                GetPropertiesRes(
-                                    status=CLIENT_STATUS, properties=CLIENT_PROPERTIES
-                                )
+                        task=_make_task(
+                            GetPropertiesRes(
+                                status=CLIENT_STATUS, properties=CLIENT_PROPERTIES
                             )
                         ),
                     )
@@ -136,12 +142,10 @@ class DriverClientProxyTestCase(unittest.TestCase):
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                         group_id="",
                         run_id=0,
-                        task=task_pb2.Task(  # pylint: disable=E1101
-                            recordset=_make_recordset_proto(
-                                GetParametersRes(
-                                    status=CLIENT_STATUS,
-                                    parameters=MESSAGE_PARAMETERS,
-                                )
+                        task=_make_task(
+                            GetParametersRes(
+                                status=CLIENT_STATUS,
+                                parameters=MESSAGE_PARAMETERS,
                             )
                         ),
                     )
@@ -176,14 +180,12 @@ class DriverClientProxyTestCase(unittest.TestCase):
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                         group_id="",
                         run_id=0,
-                        task=task_pb2.Task(  # pylint: disable=E1101
-                            recordset=_make_recordset_proto(
-                                FitRes(
-                                    status=CLIENT_STATUS,
-                                    parameters=MESSAGE_PARAMETERS,
-                                    num_examples=10,
-                                    metrics={},
-                                )
+                        task=_make_task(
+                            FitRes(
+                                status=CLIENT_STATUS,
+                                parameters=MESSAGE_PARAMETERS,
+                                num_examples=10,
+                                metrics={},
                             )
                         ),
                     )
@@ -219,14 +221,12 @@ class DriverClientProxyTestCase(unittest.TestCase):
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                         group_id="",
                         run_id=0,
-                        task=task_pb2.Task(  # pylint: disable=E1101
-                            recordset=_make_recordset_proto(
-                                EvaluateRes(
-                                    status=CLIENT_STATUS,
-                                    loss=0.0,
-                                    num_examples=0,
-                                    metrics={},
-                                )
+                        task=_make_task(
+                            EvaluateRes(
+                                status=CLIENT_STATUS,
+                                loss=0.0,
+                                num_examples=0,
+                                metrics={},
                             )
                         ),
                     )

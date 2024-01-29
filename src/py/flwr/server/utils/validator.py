@@ -64,6 +64,8 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
             validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
 
         # Content check
+        if tasks_ins_res.task.task_type == "":
+            validation_errors.append("`task_type` MUST be set")
         if not tasks_ins_res.task.HasField("recordset"):
             validation_errors.append("`recordset` MUST be set")
 
@@ -102,6 +104,8 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
             validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
 
         # Content check
+        if tasks_ins_res.task.task_type == "":
+            validation_errors.append("`task_type` MUST be set")
         if not tasks_ins_res.task.HasField("recordset"):
             validation_errors.append("`recordset` MUST be set")
 
