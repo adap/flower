@@ -30,8 +30,6 @@ message Task {
   repeated string ancestry = 6;
   string task_type = 7;
   RecordSet recordset = 8;
-
-  SecureAggregation sa = 103 [ deprecated = true ];
 }
 
 message TaskIns {
@@ -47,23 +45,3 @@ message TaskRes {
   sint64 run_id = 3;
   Task task = 4;
 }
-
-message Value {
-  oneof value {
-    // Single element
-    double double = 1;
-    sint64 sint64 = 2;
-    bool bool = 3;
-    string string = 4;
-    bytes bytes = 5;
-
-    // List types
-    DoubleList double_list = 21;
-    Sint64List sint64_list = 22;
-    BoolList bool_list = 23;
-    StringList string_list = 24;
-    BytesList bytes_list = 25;
-  }
-}
-
-message SecureAggregation { map<string, Value> named_values = 1; }
