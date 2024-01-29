@@ -150,7 +150,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params = self._add_noise_to_updates(aggregated_params)
+            aggregated_params = self._add_noise_to_params(aggregated_params)
 
         return aggregated_params, metrics
 
@@ -169,7 +169,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
-    def _add_noise_to_updates(self, parameters: Parameters) -> Parameters:
+    def _add_noise_to_params(self, parameters: Parameters) -> Parameters:
         """Add Gaussian noise to model params."""
         return ndarrays_to_parameters(
             add_gaussian_noise(

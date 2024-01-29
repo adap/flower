@@ -22,8 +22,8 @@ from .dp_strategy_wrapper_fixed_clipping import DPStrategyWrapperServerSideFixed
 from .fedavg import FedAvg
 
 
-def test_add_noise_to_updates() -> None:
-    """Test _add_noise_to_updates method."""
+def test_add_noise_to_params() -> None:
+    """Test _add_noise_to_params method."""
     # Prepare
     strategy = FedAvg()
     dp_wrapper = DPStrategyWrapperServerSideFixedClipping(strategy, 1.5, 1.5, 5)
@@ -32,7 +32,7 @@ def test_add_noise_to_updates() -> None:
     # Execute
     result = parameters_to_ndarrays(
         # pylint: disable-next=protected-access
-        dp_wrapper._add_noise_to_updates(ndarrays_to_parameters(parameters))
+        dp_wrapper._add_noise_to_params(ndarrays_to_parameters(parameters))
     )
 
     # Assert
