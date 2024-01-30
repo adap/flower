@@ -173,7 +173,9 @@ Communication costs as measured as described in the paper:
 |![CIFAR10 iid](_static/Cifar10_iid.jpeg) | ![CIFAR10 non-iid](_static/Cifar10_noniid.jpeg) |
 
 ### NON-IID MINST (FedAvg vs FedPer vs pFedPara)
-**Important Note: The only federated averaging (FedAvg) implementation replicates the results outlined in the paper. However, challenges with convergence were encountered when applying pFedPara and FedPer methods.**
+
+The only federated averaging (FedAvg) implementation replicates the results outlined in the paper. However, challenges with convergence were encountered when applying `pFedPara` and `FedPer` methods.
+
 ![Personalization algorithms](_static/non-iid_mnist_personalization.png) 
 
 ## Code Acknowledgments
