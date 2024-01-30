@@ -62,7 +62,7 @@ def add_noise_to_params(parameters: Parameters, stdv: float) -> Parameters:
 
 def compute_stdv(
     noise_multiplier: float, clipping_norm: float, num_sampled_clients: int
-):
+) -> float:
     """Compute standard deviation for noise addition.
 
     paper: https://arxiv.org/pdf/1710.06963.pdf
