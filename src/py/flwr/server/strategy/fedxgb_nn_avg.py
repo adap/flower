@@ -25,7 +25,7 @@ from logging import WARNING
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from flwr.common import FitRes, Scalar, ndarrays_to_parameters, parameters_to_ndarrays
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_deprecated_feature
 from flwr.server.client_proxy import ClientProxy
 
 from .aggregate import aggregate
@@ -33,7 +33,13 @@ from .fedavg import FedAvg
 
 
 class FedXgbNnAvg(FedAvg):
-    """Configurable FedXgbNnAvg strategy implementation."""
+    """Configurable FedXgbNnAvg strategy implementation.
+
+    Warning
+    -------
+    This strategy is deprecated, but a copy of it is available in Flower Baselines:
+    https://github.com/adap/flower/tree/main/baselines/hfedxgboost.
+    """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Federated XGBoost [Ma et al., 2023] strategy.
@@ -41,6 +47,7 @@ class FedXgbNnAvg(FedAvg):
         Implementation based on https://arxiv.org/abs/2304.07537.
         """
         super().__init__(*args, **kwargs)
+        warn_deprecated_feature("`FedXgbNnAvg` strategy")
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
