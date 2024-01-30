@@ -88,6 +88,7 @@ class PFlowerClient(fl.client.NumPyClient):
         self.num_epochs = num_epochs
         self.state_path = state_path
         self.algorithm = algorithm
+        self.private_server_param: Dict[str, torch.Tensor] = {}
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         """Return the parameters of the current net."""
@@ -99,7 +100,6 @@ class PFlowerClient(fl.client.NumPyClient):
 
     def set_parameters(self, parameters: NDArrays, evaluate: bool) -> None:
         """Apply parameters to model state dict."""
-        self.private_server_param: Dict[str, torch.Tensor] = {}
         params_dict = zip(self.net.state_dict().keys(), parameters)
         server_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.private_server_param = {

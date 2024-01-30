@@ -88,6 +88,8 @@ As for the parameters ratio ($\gamma$) we use the following model sizes. As in t
 
 - The Jacobian correction was not incorporated into our implementation, primarily due to the lack of explicit instructions in the paper regarding the specific implementation of the dual update principle mentioned in the Jacobian correction section.
 
+- It was observed that data generation is crutial for model convergence 
+
 ## Environment Setup
 To construct the Python environment follow these steps:
 
@@ -173,3 +175,9 @@ Communication costs as measured as described in the paper:
 ### NON-IID MINST (FedAvg vs FedPer vs pFedPara)
 **Important Note: The only federated averaging (FedAvg) implementation replicates the results outlined in the paper. However, challenges with convergence were encountered when applying pFedPara and FedPer methods.**
 ![Personalization algorithms](_static/non-iid_mnist_personalization.png) 
+
+## Code Acknowledgments
+Our code is inspired from these repos:
+- [Fedpara low rank tensor CNN class structure](https://github.com/South-hw/FedPara_ICLR22)
+- [Non-IID mnist data preparation](https://github.com/nimeshagrawal/FedAvg-Pytorch)
+- [Cifar non IID data generation](https://github.com/guobbin/PFL-MoE)
