@@ -8,7 +8,9 @@
 
 - **Retiring MXNet examples** The development of the MXNet fremework has ended and the project is now [archived on GitHub](https://github.com/apache/mxnet). Existing MXNet examples won't receive updates [#2724](https://github.com/adap/flower/pull/2724)
 
-- **Deprecated `start_numpy_client`**. ([#2563](https://github.com/adap/flower/pull/2563)) Until now, clients of type `NumPyClient` needed to be started via `start_numpy_client`. In our efforts to consolidate the core freamework we have introduced changes and now all client types should start via `start_client`. To continue using `NumPyClient` clients, you simply need to first all the `.to_client()` method then pass the client object to `start_client`. The examples and the documentation have been updated accordigntly.
+- **Deprecated `start_numpy_client`**. ([#2563](https://github.com/adap/flower/pull/2563))
+
+  Until now, clients of type `NumPyClient` needed to be started via `start_numpy_client`. In our efforts to consolidate the core framework, we have introduced changes, and now all client types should start via `start_client`. To continue using `NumPyClient` clients, you simply need to first call the `.to_client()` method and then pass returned `Client` object to `start_client`. The examples and the documentation have been updated accordingly.
 
 - **Update Flower Baselines**
 

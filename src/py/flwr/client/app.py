@@ -402,8 +402,8 @@ def start_numpy_client(
     Warning
     -------
     This function is deprecated since 1.7.0. Use :code:`flwr.client.start_client`
-    instead and first convert your client to type :code:`flwr.client.Client` by
-    exectuing its :code:`to_client()` method.
+    instead and first convert your :code:`NumPyClient` to type
+    :code:`flwr.client.Client` by executing its :code:`to_client()` method.
 
     Parameters
     ----------
