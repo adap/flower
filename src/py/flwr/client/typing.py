@@ -14,31 +14,13 @@
 # ==============================================================================
 """Custom types for Flower clients."""
 
-from dataclasses import dataclass
 from typing import Callable
 
-from flwr.client.workload_state import WorkloadState
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.common.context import Context
+from flwr.common.message import Message
 
 from .client import Client as Client
 
-
-@dataclass
-class Fwd:
-    """."""
-
-    task_ins: TaskIns
-    state: WorkloadState
-
-
-@dataclass
-class Bwd:
-    """."""
-
-    task_res: TaskRes
-    state: WorkloadState
-
-
-FlowerCallable = Callable[[Fwd], Bwd]
+FlowerCallable = Callable[[Message, Context], Message]
 ClientFn = Callable[[str], Client]
-Layer = Callable[[Fwd, FlowerCallable], Bwd]
+Layer = Callable[[Message, Context, FlowerCallable], Message]
