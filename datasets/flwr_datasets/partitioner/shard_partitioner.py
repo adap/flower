@@ -221,7 +221,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         indices_on_which_to_split_shards = np.cumsum(
             num_shards_per_node_array, dtype=int
         )
-        shard_indices_array = np.random.permutation(self._total_num_shards)
+        shard_indices_array = self._rng.permutation(self._total_num_shards)
         # Randomly assign shards to node_id
         nid_to_shard_indices = np.split(
             shard_indices_array, indices_on_which_to_split_shards
