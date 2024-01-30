@@ -28,27 +28,27 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
 
     The algorithm works as follows: the dataset is sorted by label e.g. [samples with
     label 1, samples with labels 2 ...], then the shards are created, with each
-    shard of size - shard_size if provided or automatically calculated:
-    shards_size = len(dataset) / num_partitions * num_shards_per_node.
+    shard of size = `shard_size` if provided or automatically calculated:
+    shards_size = len(dataset) / `num_partitions` * `num_shards_per_node`.
     Each partition is created from `num_shards_per_node` that are chosen randomly.
 
     There are a few ways of partitioning data that result in certain properties
     (depending on the parameters specification):
     1) same number of shards per nodes + the same shard size (specify:
-    a) num_shards_per_nodes, shard_size or b) num_shards_per_node)
-    In case of b the shard_size is calculated as floor(len(dataset) /
-    (num_shards_per_nodes * num_partitions))
+    a) `num_shards_per_nodes`, `shard_size`; or b) `num_shards_per_node`)
+    In case of b the `shard_size` is calculated as floor(len(dataset) /
+    (`num_shards_per_nodes` * `num_partitions`))
     2) possibly different number of shards per node (use nearly all data) + the same
-    shard size (specify: shard_size + keep_incomplete_shard=False)
+    shard size (specify: `shard_size` + `keep_incomplete_shard=False`)
     3) possibly different number of shards per node (use all data) + possibly different
-    shard size (specify: shard_size + keep_incomplete_shard=True)
+    shard size (specify: `shard_size` + `keep_incomplete_shard=True`)
 
 
-    Algorithm based on the description in  Communication-Efficient Learning of Deep
+    Algorithm based on the description in Communication-Efficient Learning of Deep
     Networks from Decentralized Data https://arxiv.org/abs/1602.05629. This
     implementation expands on the initial idea by enabling more hyperparameters
-    specification therefore providing more control of the partitions. It enables the
-    division obtained in original paper.
+    specification therefore providing more control on how partitions are created. 
+    It enables the division obtained in original paper.
 
     Parameters
     ----------
@@ -58,7 +58,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         Column name of the labels (targets) based on which Dirichlet sampling works.
     num_shards_per_node : Optional[int]
         Number of shards to assign to a single partitioner. It's an alternative to
-        num_partitions.
+        `num_partitions`.
     shard_size : Optional[int]
         Size of a single shards (a partition has one or more shards). If the size is not
         given it will be automatically computed such that.
@@ -66,8 +66,8 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         Weather to drop the last shard which might be incomplete (smaller than the
         others). If it is dropped each shard is equal size. (It does not mean that each
         client gets equal number of shards, which only happens if
-        num_partitions % num_shards = 0). This parameter has no effect if
-        num_shards_per_nodes and shard_size are specified.
+        `num_partitions` % `num_shards` = 0). This parameter has no effect if
+        `num_shards_per_nodes` and `shard_size` are specified.
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to nodes.
@@ -93,7 +93,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     [2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000]
 
     2) If you want to use nearly all the data and do not need to have the number of
-    shard per each node
+    shard per each node to be the same
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import ShardPartitioner
     >>>
@@ -104,7 +104,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     >>> print(partition_sizes)
     [7000, 7000, 7000, 7000, 7000, 7000, 6000, 6000, 6000]
 
-    3) If you want ot use all the data
+    3) If you want to use all the data
         >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import ShardPartitioner
     >>>
@@ -168,7 +168,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     def _determine_node_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
         """Assign sample indices to each node id.
 
-        This method works on sorted datasets. "Shard" is a part of the dataset of the
+        This method works on sorted datasets. A "shard" is a part of the dataset of
         consecutive samples (if self._keep_incomplete_shard is False, each shard is same
         size).
         """
