@@ -18,6 +18,8 @@
 
   - HeteroFL [#2439](https://github.com/adap/flower/pull/2439)
 
+  - FedPara [#2722](https://github.com/adap/flower/pull/2722)
+
 ## v1.6.0 (2023-11-28)
 
 ### Thanks to our contributors

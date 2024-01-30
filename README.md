@@ -104,6 +104,7 @@ Flower Baselines is a collection of community-contributed projects that reproduc
 - [MOON](https://github.com/adap/flower/tree/main/baselines/moon)
 - [niid-Bench](https://github.com/adap/flower/tree/main/baselines/niid_bench)
 - [TAMUNA](https://github.com/adap/flower/tree/main/baselines/tamuna)
+- [FedPara](https://github.com/adap/flower/tree/main/baselines/fedpara)
 - [FedAvg](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist)
 - [FedOpt](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
 

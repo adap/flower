@@ -1,5 +1,4 @@
 """Server strategies pipelines for FedPer."""
-
 from flwr.server.strategy.fedavg import FedAvg
 
 from fedper.strategy import (
