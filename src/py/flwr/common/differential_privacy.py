@@ -29,7 +29,7 @@ def add_gaussian_noise(input_array: NDArrays, std_dev: float) -> NDArrays:
     """Add noise to each element of the provided input from Gaussian (Normal)
     distribution with respect to the passed standard deviation."""
     noised_input = [
-        layer + np.random.normal(0, std_dev**2, layer.shape) for layer in input_array
+        layer + np.random.normal(0, std_dev, layer.shape) for layer in input_array
     ]
     return noised_input
 
