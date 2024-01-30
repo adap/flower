@@ -16,23 +16,63 @@
 
 
 import unittest
+from typing import Union, cast
 from unittest.mock import MagicMock
 
 import numpy as np
 
 import flwr
-from flwr.common.typing import Config, GetParametersIns
+from flwr.common import recordset_compat as compat
+from flwr.common import serde
+from flwr.common.constant import (
+    TASK_TYPE_EVALUATE,
+    TASK_TYPE_FIT,
+    TASK_TYPE_GET_PARAMETERS,
+    TASK_TYPE_GET_PROPERTIES,
+)
+from flwr.common.typing import (
+    Code,
+    Config,
+    EvaluateIns,
+    EvaluateRes,
+    FitRes,
+    GetParametersIns,
+    GetParametersRes,
+    GetPropertiesRes,
+    Parameters,
+    Properties,
+    Status,
+)
 from flwr.driver.driver_client_proxy import DriverClientProxy
 from flwr.proto import driver_pb2, node_pb2, task_pb2  # pylint: disable=E0611
-from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
-    ClientMessage,
-    Parameters,
-    Scalar,
-)
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
 
-CLIENT_PROPERTIES = {"tensor_type": Scalar(string="numpy.ndarray")}
+CLIENT_PROPERTIES = cast(Properties, {"tensor_type": "numpy.ndarray"})
+CLIENT_STATUS = Status(code=Code.OK, message="OK")
+
+
+def _make_task(
+    res: Union[GetParametersRes, GetPropertiesRes, FitRes, EvaluateRes]
+) -> task_pb2.Task:  # pylint: disable=E1101
+    if isinstance(res, GetParametersRes):
+        task_type = TASK_TYPE_GET_PARAMETERS
+        recordset = compat.getparametersres_to_recordset(res, True)
+    elif isinstance(res, GetPropertiesRes):
+        task_type = TASK_TYPE_GET_PROPERTIES
+        recordset = compat.getpropertiesres_to_recordset(res)
+    elif isinstance(res, FitRes):
+        task_type = TASK_TYPE_FIT
+        recordset = compat.fitres_to_recordset(res, True)
+    elif isinstance(res, EvaluateRes):
+        task_type = TASK_TYPE_EVALUATE
+        recordset = compat.evaluateres_to_recordset(res)
+    else:
+        raise ValueError(f"Unsupported type: {type(res)}")
+    return task_pb2.Task(  # pylint: disable=E1101
+        task_type=task_type,
+        recordset=serde.recordset_to_proto(recordset),
+    )
 
 
 class DriverClientProxyTestCase(unittest.TestCase):
@@ -64,11 +104,9 @@ class DriverClientProxyTestCase(unittest.TestCase):
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                         group_id="",
                         run_id=0,
-                        task=task_pb2.Task(  # pylint: disable=E1101
-                            legacy_client_message=ClientMessage(
-                                get_properties_res=ClientMessage.GetPropertiesRes(
-                                    properties=CLIENT_PROPERTIES
-                                )
+                        task=_make_task(
+                            GetPropertiesRes(
+                                status=CLIENT_STATUS, properties=CLIENT_PROPERTIES
                             )
                         ),
                     )
@@ -104,11 +142,10 @@ class DriverClientProxyTestCase(unittest.TestCase):
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                         group_id="",
                         run_id=0,
-                        task=task_pb2.Task(  # pylint: disable=E1101
-                            legacy_client_message=ClientMessage(
-                                get_parameters_res=ClientMessage.GetParametersRes(
-                                    parameters=MESSAGE_PARAMETERS,
-                                )
+                        task=_make_task(
+                            GetParametersRes(
+                                status=CLIENT_STATUS,
+                                parameters=MESSAGE_PARAMETERS,
                             )
                         ),
                     )
@@ -143,12 +180,12 @@ class DriverClientProxyTestCase(unittest.TestCase):
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                         group_id="",
                         run_id=0,
-                        task=task_pb2.Task(  # pylint: disable=E1101
-                            legacy_client_message=ClientMessage(
-                                fit_res=ClientMessage.FitRes(
-                                    parameters=MESSAGE_PARAMETERS,
-                                    num_examples=10,
-                                )
+                        task=_make_task(
+                            FitRes(
+                                status=CLIENT_STATUS,
+                                parameters=MESSAGE_PARAMETERS,
+                                num_examples=10,
+                                metrics={},
                             )
                         ),
                     )
@@ -184,11 +221,12 @@ class DriverClientProxyTestCase(unittest.TestCase):
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                         group_id="",
                         run_id=0,
-                        task=task_pb2.Task(  # pylint: disable=E1101
-                            legacy_client_message=ClientMessage(
-                                evaluate_res=ClientMessage.EvaluateRes(
-                                    loss=0.0, num_examples=0
-                                )
+                        task=_make_task(
+                            EvaluateRes(
+                                status=CLIENT_STATUS,
+                                loss=0.0,
+                                num_examples=0,
+                                metrics={},
                             )
                         ),
                     )
@@ -198,8 +236,8 @@ class DriverClientProxyTestCase(unittest.TestCase):
         client = DriverClientProxy(
             node_id=1, driver=self.driver, anonymous=True, run_id=0
         )
-        parameters = flwr.common.Parameters(tensors=[], tensor_type="np")
-        evaluate_ins: flwr.common.EvaluateIns = flwr.common.EvaluateIns(parameters, {})
+        parameters = Parameters(tensors=[], tensor_type="np")
+        evaluate_ins = EvaluateIns(parameters, {})
 
         # Execute
         evaluate_res = client.evaluate(evaluate_ins, timeout=None)
