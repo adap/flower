@@ -119,8 +119,9 @@ class SecAggPlusState:
                 continue
             new_v: Any = v
             if k.endswith(":K"):
+                k = k[:-2]
                 keys = cast(List[int], v)
-                values = cast(List[bytes], kwargs[k[:-2] + ":V"])
+                values = cast(List[bytes], kwargs[f"{k}:V"])
                 if len(values) > len(keys):
                     updated_values = [
                         tuple(values[i : i + 2]) for i in range(0, len(values), 2)
@@ -133,7 +134,7 @@ class SecAggPlusState:
     def to_dict(self) -> Dict[str, ConfigsRecordValues]:
         """Convert the state to a dictionary."""
         ret = vars(self)
-        for k in ret.keys():
+        for k in list(ret.keys()):
             if isinstance(ret[k], dict):
                 # Replace dict with two lists
                 v = cast(Dict[str, Any], ret.pop(k))
@@ -202,7 +203,7 @@ def secaggplus_middleware(
         raise ValueError(f"Unknown secagg stage: {state.current_stage}")
 
     # Save state
-    ctxt.state.set_configs(RECORD_KEY_STATE, ConfigsRecord(vars(state)))
+    ctxt.state.set_configs(RECORD_KEY_STATE, ConfigsRecord(state.to_dict()))
 
     # Return message
     return Message(
