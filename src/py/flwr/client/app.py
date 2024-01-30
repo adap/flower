@@ -34,7 +34,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
 )
-from flwr.common.logger import log, warn_experimental_feature
+from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
 from flwr.common.message import Message
 
 from .flower import load_flower_callable
@@ -399,6 +399,12 @@ def start_numpy_client(
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
 
+    Warning
+    -------
+    This function is deprecated since 1.7.0. Use :code:`flwr.client.start_client`
+    instead and first convert your :code:`NumPyClient` to type
+    :code:`flwr.client.Client` by executing its :code:`to_client()` method.
+
     Parameters
     ----------
     server_address : str
@@ -454,21 +460,22 @@ def start_numpy_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-    # warnings.warn(
-    #     "flwr.client.start_numpy_client() is deprecated and will "
-    #     "be removed in a future version of Flower. Instead, pass "
-    #     "your client to `flwr.client.start_client()` by calling "
-    #     "first the `.to_client()` method as shown below: \n"
-    #     "\tflwr.client.start_client(\n"
-    #     "\t\tserver_address='<IP>:<PORT>',\n"
-    #     "\t\tclient=FlowerClient().to_client()\n"
-    #     "\t)",
-    #     DeprecationWarning,
-    #     stacklevel=2,
-    # )
+    mssg = (
+        "flwr.client.start_numpy_client() is deprecated. \n\tInstead, use "
+        "`flwr.client.start_client()` by ensuring you first call "
+        "the `.to_client()` method as shown below: \n"
+        "\tflwr.client.start_client(\n"
+        "\t\tserver_address='<IP>:<PORT>',\n"
+        "\t\tclient=FlowerClient().to_client(),"
+        " # <-- where FlowerClient is of type flwr.client.NumPyClient object\n"
+        "\t)\n"
+        "\tUsing `start_numpy_client()` is deprecated."
+    )
+
+    warn_deprecated_feature(name=mssg)
 
     # Calling this function is deprecated. A warning is thrown.
-    # We first need to convert either the supplied client to `Client.`
+    # We first need to convert the supplied client to `Client.`
 
     wrp_client = client.to_client()
 
