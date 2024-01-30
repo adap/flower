@@ -72,11 +72,10 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         An implementation of the abstract base class
         `flwr.server.strategy.Strategy`. If no strategy is provided, then
         `start_server` will use `flwr.server.strategy.FedAvg`.
-    client_manager : Optional[flwr.driver.DriverClientManager] (default: None)
-        An implementation of the class
-        `flwr.driver.driver_client_manager.DriverClientManager`. If no
+    client_manager : Optional[flwr.server.DriverClientManager] (default: None)
+        An implementation of the class `flwr.server.ClientManager`. If no
         implementation is provided, then `start_driver` will use
-        `flwr.driver.driver_client_manager.DriverClientManager`.
+        `flwr.server.SimpleClientManager`.
     root_certificates : Optional[Union[bytes, str]] (default: None)
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be

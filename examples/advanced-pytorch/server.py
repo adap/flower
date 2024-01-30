@@ -80,17 +80,28 @@ def main():
         help="Set to true to use only 10 datasamples for validation. \
             Useful for testing purposes. Default: False",
     )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="efficientnet",
+        choices=["efficientnet", "alexnet"],
+        help="Use either Efficientnet or Alexnet models. \
+             If you want to achieve differential privacy, please use the Alexnet model",
+    )
 
     args = parser.parse_args()
 
-    model = utils.load_efficientnet(classes=10)
+    if args.model == "alexnet":
+        model = utils.load_alexnet(classes=10)
+    else:
+        model = utils.load_efficientnet(classes=10)
 
     model_parameters = [val.cpu().numpy() for _, val in model.state_dict().items()]
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
-        fraction_fit=0.2,
-        fraction_evaluate=0.2,
+        fraction_fit=1.0,
+        fraction_evaluate=1.0,
         min_fit_clients=2,
         min_evaluate_clients=2,
         min_available_clients=10,

@@ -40,20 +40,22 @@ from .typing import (
 
 
 def parametersrecord_to_parameters(
-    record: ParametersRecord, keep_input: bool = False
+    record: ParametersRecord, keep_input: bool
 ) -> Parameters:
     """Convert ParameterRecord to legacy Parameters.
 
-    Warning: Because `Arrays` in `ParametersRecord` encode more information of the
+    Warnings
+    --------
+    Because `Arrays` in `ParametersRecord` encode more information of the
     array-like or tensor-like data (e.g their datatype, shape) than `Parameters` it
     might not be possible to reconstruct such data structures from `Parameters` objects
-    alone. Additional information or metadta must be provided from elsewhere.
+    alone. Additional information or metadata must be provided from elsewhere.
 
     Parameters
     ----------
     record : ParametersRecord
         The record to be conveted into Parameters.
-    keep_input : bool (default: False)
+    keep_input : bool
         A boolean indicating whether entries in the record should be deleted from the
         input dictionary immediately after adding them to the record.
     """
@@ -74,7 +76,7 @@ def parametersrecord_to_parameters(
 
 
 def parameters_to_parametersrecord(
-    parameters: Parameters, keep_input: bool = False
+    parameters: Parameters, keep_input: bool
 ) -> ParametersRecord:
     """Convert legacy Parameters into a single ParametersRecord.
 
@@ -86,7 +88,7 @@ def parameters_to_parametersrecord(
     ----------
     parameters : Parameters
         Parameters object to be represented as a ParametersRecord.
-    keep_input : bool (default: False)
+    keep_input : bool
         A boolean indicating whether parameters should be deleted from the input
         Parameters object (i.e. a list of serialized NumPy arrays) immediately after
         adding them to the record.
@@ -96,17 +98,17 @@ def parameters_to_parametersrecord(
     p_record = ParametersRecord()
 
     num_arrays = len(parameters.tensors)
+    ordered_dict = OrderedDict()
     for idx in range(num_arrays):
         if keep_input:
             tensor = parameters.tensors[idx]
         else:
             tensor = parameters.tensors.pop(0)
-        p_record.set_parameters(
-            OrderedDict(
-                {str(idx): Array(data=tensor, dtype="", stype=tensor_type, shape=[])}
-            )
+        ordered_dict[str(idx)] = Array(
+            data=tensor, dtype="", stype=tensor_type, shape=[]
         )
 
+    p_record.set_parameters(ordered_dict, keep_input=keep_input)
     return p_record
 
 
@@ -330,11 +332,15 @@ def getparametersins_to_recordset(getparameters_ins: GetParametersIns) -> Record
     return recordset
 
 
-def getparametersres_to_recordset(getparametersres: GetParametersRes) -> RecordSet:
+def getparametersres_to_recordset(
+    getparametersres: GetParametersRes, keep_input: bool
+) -> RecordSet:
     """Construct a RecordSet from a GetParametersRes object."""
     recordset = RecordSet()
     res_str = "getparametersres"
-    parameters_record = parameters_to_parametersrecord(getparametersres.parameters)
+    parameters_record = parameters_to_parametersrecord(
+        getparametersres.parameters, keep_input=keep_input
+    )
     recordset.set_parameters(f"{res_str}.parameters", parameters_record)
 
     # status
@@ -345,11 +351,13 @@ def getparametersres_to_recordset(getparametersres: GetParametersRes) -> RecordS
     return recordset
 
 
-def recordset_to_getparametersres(recordset: RecordSet) -> GetParametersRes:
+def recordset_to_getparametersres(
+    recordset: RecordSet, keep_input: bool
+) -> GetParametersRes:
     """Derive GetParametersRes from a RecordSet object."""
     res_str = "getparametersres"
     parameters = parametersrecord_to_parameters(
-        recordset.get_parameters(f"{res_str}.parameters")
+        recordset.get_parameters(f"{res_str}.parameters"), keep_input=keep_input
     )
 
     status = _extract_status_from_recordset(res_str, recordset)
