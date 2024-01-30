@@ -34,7 +34,7 @@ hyperparams:
   learning_decay: 0
 
 strategy:
-  _target_: fedpara.strategy.FedAvg
+  _target_: flwr.server.strategy.FedAvg
   fraction_fit: 0.00001
   fraction_evaluate: 0.00001
   min_evaluate_clients: ${clients_per_round}

@@ -118,7 +118,7 @@ python -m fedpara.main
 python -m fedpara.main num_rounds=2024 num_epochs=1
 
 # Choose parameterization scheme: lowrank or original (normal weights)
-python -m fedpara.main model.conv_type=standard # or lowrank (default)
+python -m fedpara.main model.param_type=standard # or lowrank (default)
 
 # Choosing between non IID and IID scheme
 python -m fedpara.main dataset_config.partition=iid # or non-iid (default)
@@ -132,17 +132,17 @@ python -m fedpara.main --config-name cifar100 # change settings as shown above i
 
 ## Expected Results
 
-To reproduce the curves shown below (which correspond to those in Figure 3 in the paper), run the following commands. Experiments running with `model.conv_type=lowrank` correspond to those with `-FedPara` in the legend of the figures below. Those with `model.conv_type=standard` are labelled with the `-orig` (as original) tag.
+To reproduce the curves shown below (which correspond to those in Figure 3 in the paper), run the following commands. Experiments running with `model.param_type=lowrank` correspond to those with `-FedPara` in the legend of the figures below. Those with `model.param_type=standard` are labelled with the `-orig` (as original) tag.
 
 ```bash
 # To run fedpara for non-iid CIFAR-10 on vgg16 for lowrank and original schemes
-python -m fedpara.main --multirun model.conv_type=standard,lowrank 
+python -m fedpara.main --multirun model.param_type=standard,lowrank 
 # To run fedpara for non-iid CIFAR-100 on vgg16 for lowrank and original schemes
-python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank 
+python -m fedpara.main --config-name cifar100 --multirun model.param_type=standard,lowrank 
 # To run fedpara for iid CIFAR-10 on vgg16 for lowrank and original schemes
-python -m fedpara.main --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid 
+python -m fedpara.main --multirun model.param_type=standard,lowrank num_epochs=10 dataset_config.partition=iid 
 # To run fedpara for iid CIFAR-100 on vgg16 for lowrank and original schemes
-python -m fedpara.main --config-name cifar100 --multirun model.conv_type=standard,lowrank num_epochs=10 dataset_config.partition=iid
+python -m fedpara.main --config-name cifar100 --multirun model.param_type=standard,lowrank num_epochs=10 dataset_config.partition=iid
 # To run fedavg for non-iid MINST on FC 
 python -m fedpara.main --config-name mnist_fedavg 
 # To run fedper for non-iid MINST on FC 

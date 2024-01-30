@@ -6,7 +6,7 @@ import random
 import time
 from pathlib import Path
 from secrets import token_hex
-from typing import Optional
+from typing import List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -141,17 +141,21 @@ def set_client_state_save_path(path: str) -> str:
     return client_state_save_path
 
 
-def get_keys_state_dict(model, algorithm, mode: str = "local") -> list[str]:
+def get_keys_state_dict(model, algorithm, mode: str = "local") -> List[str]:
+    """."""
+    keys: List[str] = []
     match algorithm:
         case "fedper":
             if mode == "local":
-                return list(filter(lambda x: "fc1" not in x, model.state_dict().keys()))
+                keys = list(filter(lambda x: "fc1" not in x, model.state_dict().keys()))
             elif mode == "global":
-                return list(filter(lambda x: "fc1" in x, model.state_dict().keys()))
+                keys = list(filter(lambda x: "fc1" in x, model.state_dict().keys()))
         case "pfedpara":
             if mode == "local":
-                return list(filter(lambda x: "w2" in x, model.state_dict().keys()))
+                keys = list(filter(lambda x: "w2" in x, model.state_dict().keys()))
             elif mode == "global":
-                return list(filter(lambda x: "w1" in x, model.state_dict().keys()))
+                keys = list(filter(lambda x: "w1" in x, model.state_dict().keys()))
         case _:
             raise NotImplementedError(f"algorithm {algorithm} not implemented")
+
+    return keys

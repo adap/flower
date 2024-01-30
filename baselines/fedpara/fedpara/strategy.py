@@ -1,7 +1,5 @@
-# FedPara uses FedAvg as the default strategy
-from flwr.server.strategy import FedAvg
+"""Optionally define a custom strategy.
 
-
-class FedAvg(FedAvg):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+Needed only when the strategy is not yet implemented in Flower or because you want to
+extend or modify the functionality of an existing strategy.
+"""

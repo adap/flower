@@ -37,7 +37,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8.15, <3.12.0"  # don't change this
+python = ">=3.10, <3.12.0"  # don't change this
 flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
 matplotlib = "^3.7.2"
@@ -83,7 +83,7 @@ plugins = "numpy.typing.mypy_plugin"
 
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
-good-names = "i,j,k,_,x,y,X,Y,n,T,W1,W2,r1,r2,r,a,b,c,r3,W,W,n,v,lr"
+good-names = "i,j,k,_,x,y,X,Y,m,w1,w2,W1,W2,n,r1,r2,r3,W,w,v,lr,f,r,T,a,b,c"
 signature-mutators="hydra.main.main"
 
 [tool.pylint.typecheck]

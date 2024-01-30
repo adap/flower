@@ -102,18 +102,19 @@ def noniid(dataset, no_participants, alpha=0.5):
 
 
 def data_to_tensor(data):
-    """Loads dataset to memory, applies transform."""
+    """Load dataset to memory, applies transform."""
     loader = torch.utils.data.DataLoader(data, batch_size=len(data))
     img, label = next(iter(loader))
     return img, label
 
 
 def noniid_partition_loader(data, m_per_shard=300, n_shards_per_client=2):
-    """semi-pathological client sample partition
+    """Partition in semi-pathological fashion.
+
     1. sort examples by label, form shards of size 300 by grouping points
     successively
     2. each client is 2 random shards
-    most clients will have 2 digits, at most 4
+    most clients will have 2 digits, at most 4.
     """
     # load data into memory
     img, label = data_to_tensor(data)

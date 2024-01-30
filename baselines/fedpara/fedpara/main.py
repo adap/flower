@@ -1,7 +1,10 @@
 """Main script for running FedPara."""
 
+from typing import Dict
+
 import flwr as fl
 import hydra
+from flwr.common import Scalar
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
@@ -56,7 +59,9 @@ def main(cfg: DictConfig) -> None:
 
     def get_on_fit_config():
         def fit_config_fn(server_round: int):
-            fit_config = OmegaConf.to_container(cfg.hyperparams, resolve=True)
+            fit_config: Dict[str, Scalar] = OmegaConf.to_container(
+                cfg.hyperparams, resolve=True
+            )  # type: ignore
             fit_config["curr_round"] = server_round
             return fit_config
 
@@ -98,11 +103,6 @@ def main(cfg: DictConfig) -> None:
         config=fl.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
         client_resources=cfg.client_resources,
-        ray_init_args={
-            "num_cpus": 40,
-            "num_gpus": 1,
-            "_memory": 30 * 1024 * 1024 * 1024,
-        },
     )
     save_path = HydraConfig.get().runtime.output_dir
 

@@ -38,6 +38,7 @@ class FlowerClient(fl.client.NumPyClient):
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def set_parameters(self, parameters: NDArrays) -> None:
+        """Apply parameters to model state dict."""
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
@@ -64,10 +65,11 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
+# pylint: disable=too-many-instance-attributes
 class PFlowerClient(fl.client.NumPyClient):
     """Personalized Flower Client."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         cid: int,
         net: torch.nn.Module,
@@ -95,7 +97,8 @@ class PFlowerClient(fl.client.NumPyClient):
             model_dict[k] = self.private_server_param[k]
         return [val.cpu().numpy() for _, val in model_dict.items()]
 
-    def set_parameters(self, parameters: NDArrays, evaluate: False) -> None:
+    def set_parameters(self, parameters: NDArrays, evaluate: bool) -> None:
+        """Apply parameters to model state dict."""
         self.private_server_param: Dict[str, torch.Tensor] = {}
         params_dict = zip(self.net.state_dict().keys(), parameters)
         server_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
@@ -135,7 +138,7 @@ class PFlowerClient(fl.client.NumPyClient):
             self.device,
             epochs=self.num_epochs,
             hyperparams=config,
-            epoch=config["curr_round"],
+            epoch=int(config["curr_round"]),
         )
         if self.state_path is not None:
             with open(self.state_path, "wb") as f:
@@ -158,6 +161,7 @@ class PFlowerClient(fl.client.NumPyClient):
         return loss, len(self.test_loader), {"accuracy": accuracy}
 
 
+# pylint: disable=too-many-arguments
 def gen_client_fn(
     train_loaders: List[DataLoader],
     model: DictConfig,
@@ -170,27 +174,26 @@ def gen_client_fn(
 
     def client_fn(cid: str) -> fl.client.NumPyClient:
         """Create a new FlowerClient for a given cid."""
-        cid = int(cid)
+        cid_ = int(cid)
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         if args["algorithm"].lower() == "pfedpara" or args["algorithm"] == "fedper":
-            cl_path = f"{state_path}/client_{cid}.pth"
+            cl_path = f"{state_path}/client_{cid_}.pth"
             return PFlowerClient(
-                cid=cid,
+                cid=cid_,
                 net=instantiate(model).to(device),
-                train_loader=train_loaders[cid],
+                train_loader=train_loaders[cid_],
                 test_loader=copy.deepcopy(test_loader),
                 num_epochs=num_epochs,
                 state_path=cl_path,
                 algorithm=args["algorithm"].lower(),
                 device=device,
             )
-        else:
-            return FlowerClient(
-                cid=cid,
-                net=instantiate(model).to(device),
-                train_loader=train_loaders[cid],
-                num_epochs=num_epochs,
-                device=device,
-            )
+        return FlowerClient(
+            cid=cid_,
+            net=instantiate(model).to(device),
+            train_loader=train_loaders[cid_],
+            num_epochs=num_epochs,
+            device=device,
+        )
 
     return client_fn

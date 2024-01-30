@@ -15,11 +15,11 @@ from torch.utils.data import DataLoader
 class LowRankNN(nn.Module):
     """Fedpara Low-rank weight systhesis for fully connected layer."""
 
-    def __init__(self, input, output, rank) -> None:
-        super(LowRankNN, self).__init__()
+    def __init__(self, input_, output, rank) -> None:
+        super().__init__()
 
         self.X = nn.Parameter(
-            torch.empty(size=(input, rank)),
+            torch.empty(size=(input_, rank)),
             requires_grad=True,
         )
         self.Y = nn.Parameter(torch.empty(size=(output, rank)), requires_grad=True)
@@ -28,6 +28,7 @@ class LowRankNN(nn.Module):
         init.kaiming_normal_(self.Y, mode="fan_out", nonlinearity="relu")
 
     def forward(self):
+        """Forward pass."""
         out = torch.einsum("yr,xr->yx", self.Y, self.X)
         return out
 
@@ -35,30 +36,30 @@ class LowRankNN(nn.Module):
 class Linear(nn.Module):
     """Low-rank fully connected layer module for personalized scheme."""
 
-    def __init__(self, input, output, ratio, bias=True) -> None:
-        super(Linear, self).__init__()
-        rank = self._calc_from_ratio(ratio, input, output)
-        self.w1 = LowRankNN(input, output, rank)
-        self.w2 = LowRankNN(input, output, rank)
+    def __init__(self, input_, output, ratio, bias=True) -> None:
+        super().__init__()
+        rank = self._calc_from_ratio(ratio, input_, output)
+        self.w1 = LowRankNN(input_, output, rank)
+        self.w2 = LowRankNN(input_, output, rank)
         # make the bias for each layer
         if bias:
             self.bias = nn.Parameter(torch.zeros(output))
 
-    def _calc_from_ratio(self, ratio, input, output):
+    @staticmethod
+    def _calc_from_ratio(ratio, input_, output):
         # Return the low-rank of sub-matrices given the compression ratio
         # minimum possible parameter
         r1 = int(np.ceil(np.sqrt(output)))
-        r2 = int(np.ceil(np.sqrt(input)))
+        r2 = int(np.ceil(np.sqrt(input_)))
         r = np.min((r1, r2))
-        # maximum possible rank,
-        """
-        To solve it we need to know the roots of quadratic equation: 2*r*(m+n)=m*n
-        """
-        r3 = math.floor((output * input) / (2 * (output + input)))
+        # maximum possible rank
+        # To solve it we need to know the roots of quadratic equation: 2*r*(m+n)=m*n
+        r3 = math.floor((output * input_) / (2 * (output + input_)))
         rank = math.ceil((1 - ratio) * r + ratio * r3)
         return rank
 
     def forward(self, x):
+        """Forward pass."""
         # personalized
         w = self.w1() * self.w2() + self.w1()
         out = F.linear(x, w, self.bias)
@@ -66,9 +67,9 @@ class Linear(nn.Module):
 
 
 class FC(nn.Module):
-    """2NN Fully connected layer as in the paper: https://arxiv.org/abs/1602.05629"""
+    """2NN Fully connected layer as in the paper: https://arxiv.org/abs/1602.05629."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         input_size=28**2,
         hidden_size=200,
@@ -76,7 +77,7 @@ class FC(nn.Module):
         ratio=0.5,
         param_type="standard",
     ):
-        super(FC, self).__init__()
+        super().__init__()
         self.input_size = input_size
         if param_type == "standard":
             self.fc1 = nn.Linear(input_size, hidden_size)
@@ -93,7 +94,8 @@ class FC(nn.Module):
 
     @property
     def model_size(self):
-        """Return the total number of trainable parameters (in million paramaters) and
+        """Return the total number of trainable parameters (in million paramaters) and.
+
         the size of the model in MB.
         """
         total_trainable_params = (
@@ -109,6 +111,7 @@ class FC(nn.Module):
         return total_trainable_params, size_all_mb
 
     def forward(self, x):
+        """Forward pass."""
         x = x.view(-1, self.input_size)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
@@ -193,7 +196,9 @@ class Conv2d(nn.Module):
         # r3 is floored because we cannot take the ceil as it results a bigger number
         # of parameters than the original problem
 
-        num_target_params = self.out_channels * self.in_channels * (self.kernel_size**2)
+        num_target_params = (
+            self.out_channels * self.in_channels * (self.kernel_size**2)
+        )
         a, b, c = (
             self.kernel_size**2,
             self.out_channels + self.in_channels,
