@@ -17,75 +17,80 @@
 
 
 import unittest
-from typing import Dict, Union, Any
-from unittest import mock
+from typing import Dict, Union
 from unittest.mock import Mock, patch
 
 import pytest
+from mock_utils import load_mocked_dataset, mock_cifar100, mock_dict_dataset
 from parameterized import parameterized, parameterized_class
 
 import datasets
 from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.federated_dataset import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
-from mock_utils import mock_dict_dataset, mock_cifar100, load_mocked_dataset
 
 mocked_datasets = ["cifar100", "svhn", "sentiment140"]
 
 
 @parameterized_class(
-    ("dataset_name", "test_split", "subset"), [
+    ("dataset_name", "test_split", "subset"),
+    [
         # Downloaded
         # #Image datasets
-        ("mnist", "test", None),
-        ("cifar10", "test", None),
-        ("fashion_mnist", "test", None),
-        ("sasha/dog-food", "test", None),
-        ("zh-plus/tiny-imagenet", "valid", None),
-
+        ("mnist", "test", ""),
+        ("cifar10", "test", ""),
+        ("fashion_mnist", "test", ""),
+        ("sasha/dog-food", "test", ""),
+        ("zh-plus/tiny-imagenet", "valid", ""),
         # Text
-        ("scikit-learn/adult-census-income", None, None),
-
+        ("scikit-learn/adult-census-income", None, ""),
         # Mocked
         # #Image
-        ("cifar100", "test", None),
+        ("cifar100", "test", ""),
         # Note: there's also the extra split and full_numbers subset
         ("svhn", "test", "cropped_digits"),
-
         # Text
-        ("sentiment140", "test", None),  # aka twitter
-
-    ])
+        ("sentiment140", "test", ""),  # aka twitter
+    ],
+)
 class BaseFederatedDatasetsTest(unittest.TestCase):
-    """Test Real Dataset (MNIST, CIFAR10) in FederatedDatasets."""
+    """Test Real/Mocked Datasets used in FederatedDatasets.
+
+    The setUp method mocks the dataset download via datasets.load_dataset  if it is in
+    the `mocked_datasets` list.
+    """
 
     dataset_name = ""
     test_split = ""
     subset = ""
 
     def setUp(self):
+        """Mock the dataset download prior to each method if needed.
+
+        If the `dataset_name` is in the `mocked_datasets` list, then the dataset
+        download is mocked.
+        """
         if self.dataset_name in mocked_datasets:
             self.patcher = patch("datasets.load_dataset")
             self.mock_load_dataset = self.patcher.start()
-            self.mock_load_dataset.return_value = load_mocked_dataset(self.dataset_name, [200, 100],
-                                                                    ["train",
-                                                                     self.test_split],
-                                                                    self.subset)
+            self.mock_load_dataset.return_value = load_mocked_dataset(
+                self.dataset_name, [200, 100], ["train", self.test_split], self.subset
+            )
 
     def tearDown(self):
-        # Stop the patch after each test
+        """Clean up after the dataset mocking."""
         if self.dataset_name in mocked_datasets:
             patch.stopall()
 
     @parameterized.expand(  # type: ignore
         [
             (
-                    "10",
-                    10,
+                "10",
+                10,
             ),
             (
-                    "100",
-                    100,
+                "100",
+                100,
             ),
         ]
     )
@@ -94,11 +99,20 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
         dataset_fds = FederatedDataset(
             dataset=self.dataset_name, partitioners={"train": train_num_partitions}
         )
-        dataset_partition0 = dataset_fds.load_partition(0, "train")
+        # Compute the actual partition sizes
+        partition_sizes = []
+        for node_id in range(train_num_partitions):
+            partition_sizes.append(len(dataset_fds.load_partition(node_id, "train")))
+
+        #  Create the expected sizes of partitions
         dataset = datasets.load_dataset(self.dataset_name)
-        self.assertEqual(
-            len(dataset_partition0), len(dataset["train"]) // train_num_partitions
-        )
+        full_train_length = len(dataset["train"])
+        expected_sizes = []
+        default_partition_size = full_train_length // train_num_partitions
+        mod = full_train_length % train_num_partitions
+        for i in range(train_num_partitions):
+            expected_sizes.append(default_partition_size + (1 if i < mod else 0))
+        self.assertEqual(partition_sizes, expected_sizes)
 
     def test_load_full(self) -> None:
         """Test if the load_full works with the correct split name."""
@@ -203,11 +217,10 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
 class ShufflingResplittingOnArtificialDatasetTest(unittest.TestCase):
     """Test shuffling and resplitting using small artificial dataset.
 
-     The purpose of this class is to ensure the order of samples remains as
-     expected.
+    The purpose of this class is to ensure the order of samples remains as expected.
 
-     The load_dataset method is mocked and the artificial dataset is returned.
-     """
+    The load_dataset method is mocked and the artificial dataset is returned.
+    """
 
     # pylint: disable=no-self-use
     def _dummy_setup(self, train_rows: int = 10, test_rows: int = 5) -> DatasetDict:
@@ -417,9 +430,9 @@ def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
 
 def mock_dataset(mock_load_dataset, dataset_name):
     if dataset_name in mocked_datasets:
-        mock_load_dataset.return_value = mock_dict_dataset([200, 100],
-                                                           ["train", "test"],
-                                                           mock_cifar100)
+        mock_load_dataset.return_value = mock_dict_dataset(
+            [200, 100], ["train", "test"], mock_cifar100
+        )
     return mock_load_dataset
 
 
