@@ -14,7 +14,12 @@
 
 import numpy as np
 
-from flwr.common.typing import NDArrays
+from flwr.common import (
+    NDArrays,
+    Parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
 
 
 def get_norm(input_array: NDArrays) -> float:
@@ -43,3 +48,23 @@ def clip_inputs(input_array: NDArrays, clipping_norm: float) -> NDArrays:
     scaling_factor = min(1, clipping_norm / input_norm)
     clipped_inputs: NDArrays = [layer * scaling_factor for layer in input_array]
     return clipped_inputs
+
+
+def add_noise_to_params(parameters: Parameters, stdv: float) -> Parameters:
+    """Add Gaussian noise to model params."""
+    return ndarrays_to_parameters(
+        add_gaussian_noise(
+            parameters_to_ndarrays(parameters),
+            stdv,
+        )
+    )
+
+
+def compute_stdv(
+    noise_multiplier: float, clipping_norm: float, num_sampled_clients: int
+):
+    """Compute standard deviation for noise addition.
+
+    paper: https://arxiv.org/pdf/1710.06963.pdf
+    """
+    return float((noise_multiplier * clipping_norm) / num_sampled_clients)
