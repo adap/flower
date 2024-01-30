@@ -35,8 +35,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
 )
 from flwr.common.logger import log, warn_experimental_feature
-from flwr.common.serde import message_from_taskins, message_to_taskres
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.common.message import Message
 
 from .flower import load_flower_callable
 from .grpc_client.connection import grpc_connection
@@ -341,25 +340,22 @@ def _start_client_internal(
 
             while True:
                 # Receive
-                task_ins = receive()
-                if task_ins is None:
+                message = receive()
+                if message is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
                 # Handle control message
-                task_res, sleep_duration = handle_control_message(task_ins=task_ins)
-                if task_res:
-                    send(task_res)
+                out_message, sleep_duration = handle_control_message(message)
+                if out_message:
+                    send(out_message)
                     break
 
                 # Register context for this run
-                node_state.register_context(run_id=task_ins.run_id)
+                node_state.register_context(run_id=message.metadata.run_id)
 
                 # Retrieve context for this run
-                context = node_state.retrieve_context(run_id=task_ins.run_id)
-
-                # Get Message from TaskIns
-                message = message_from_taskins(task_ins)
+                context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
                 # Load app
                 app: Flower = load_flower_callable_fn()
@@ -373,11 +369,8 @@ def _start_client_internal(
                     context=context,
                 )
 
-                # Construct TaskRes from out_message
-                task_res = message_to_taskres(out_message)
-
                 # Send
-                send(task_res)
+                send(out_message)
 
             # Unregister node
             if delete_node is not None:
@@ -496,8 +489,8 @@ def _init_connection(
         [str, bool, int, Union[bytes, str, None]],
         ContextManager[
             Tuple[
-                Callable[[], Optional[TaskIns]],
-                Callable[[TaskRes], None],
+                Callable[[], Optional[Message]],
+                Callable[[Message], None],
                 Optional[Callable[[], None]],
                 Optional[Callable[[], None]],
             ]
