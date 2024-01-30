@@ -31,7 +31,11 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from flwr.common.differential_privacy import add_gaussian_noise, clip_inputs
+from flwr.common.differential_privacy import (
+    add_noise_to_params,
+    clip_inputs,
+    compute_stdv,
+)
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
@@ -150,7 +154,12 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params = self._add_noise_to_updates(aggregated_params)
+            aggregated_params = add_noise_to_params(
+                aggregated_params,
+                compute_stdv(
+                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+                ),
+            )
 
         return aggregated_params, metrics
 
@@ -168,18 +177,6 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
-
-    def _add_noise_to_updates(self, parameters: Parameters) -> Parameters:
-        """Add Gaussian noise to model params."""
-        return ndarrays_to_parameters(
-            add_gaussian_noise(
-                parameters_to_ndarrays(parameters),
-                float(
-                    (self.noise_multiplier * self.clipping_norm)
-                    / self.num_sampled_clients
-                ),
-            )
-        )
 
     def _compute_model_updates(
         self, all_clients_params: List[NDArrays]

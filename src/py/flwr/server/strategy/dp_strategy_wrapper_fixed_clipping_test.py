@@ -16,29 +16,8 @@
 
 import numpy as np
 
-from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
-
 from .dp_strategy_wrapper_fixed_clipping import DPStrategyWrapperServerSideFixedClipping
 from .fedavg import FedAvg
-
-
-def test_add_noise_to_updates() -> None:
-    """Test _add_noise_to_updates method."""
-    # Prepare
-    strategy = FedAvg()
-    dp_wrapper = DPStrategyWrapperServerSideFixedClipping(strategy, 1.5, 1.5, 5)
-    parameters = [np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])]
-
-    # Execute
-    result = parameters_to_ndarrays(
-        # pylint: disable-next=protected-access
-        dp_wrapper._add_noise_to_updates(ndarrays_to_parameters(parameters))
-    )
-
-    # Assert
-    for layer in result:
-        assert layer.shape == parameters[0].shape  # Check shape consistency
-        assert not np.array_equal(layer, parameters[0])  # Check if noise was added
 
 
 def test_compute_model_updates() -> None:
