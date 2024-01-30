@@ -43,8 +43,13 @@ from flwr.common.typing import (
     Properties,
     Status,
 )
-from flwr.driver.driver_client_proxy import DriverClientProxy
-from flwr.proto import driver_pb2, node_pb2, task_pb2  # pylint: disable=E0611
+from flwr.driver.driver_client_proxy import DriverClientProxy, validate_task_res
+from flwr.proto import (  # pylint: disable=E0611
+    driver_pb2,
+    node_pb2,
+    recordset_pb2,
+    task_pb2,
+)
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
 
@@ -245,3 +250,78 @@ class DriverClientProxyTestCase(unittest.TestCase):
         # Assert
         assert 0.0 == evaluate_res.loss
         assert 0 == evaluate_res.num_examples
+
+    def test_validate_task_res_valid(self) -> None:
+        """Test valid TaskRes."""
+        metrics_record = recordset_pb2.MetricsRecord(  # pylint: disable=E1101
+            data={
+                "loss": recordset_pb2.MetricsRecordValue(  # pylint: disable=E1101
+                    double=1.0
+                )
+            }
+        )
+        task_res = task_pb2.TaskRes(  # pylint: disable=E1101
+            task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
+            group_id="",
+            run_id=0,
+            task=task_pb2.Task(  # pylint: disable=E1101
+                recordset=recordset_pb2.RecordSet(  # pylint: disable=E1101
+                    parameters={},
+                    metrics={"loss": metrics_record},
+                    configs={},
+                )
+            ),
+        )
+
+        # Execute & assert
+        try:
+            validate_task_res(task_res=task_res)
+        except ValueError:
+            self.fail()
+
+    def test_validate_task_res_missing_task(self) -> None:
+        """Test invalid TaskRes (missing task)."""
+        # Prepare
+        task_res = task_pb2.TaskRes(  # pylint: disable=E1101
+            task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
+            group_id="",
+            run_id=0,
+        )
+
+        # Execute & assert
+        with self.assertRaises(ValueError):
+            validate_task_res(task_res=task_res)
+
+    def test_validate_task_res_missing_recordset(self) -> None:
+        """Test invalid TaskRes (missing recordset)."""
+        # Prepare
+        task_res = task_pb2.TaskRes(  # pylint: disable=E1101
+            task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
+            group_id="",
+            run_id=0,
+            task=task_pb2.Task(),  # pylint: disable=E1101
+        )
+
+        # Execute & assert
+        with self.assertRaises(ValueError):
+            validate_task_res(task_res=task_res)
+
+    def test_validate_task_res_missing_content(self) -> None:
+        """Test invalid TaskRes (missing content)."""
+        # Prepare
+        task_res = task_pb2.TaskRes(  # pylint: disable=E1101
+            task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
+            group_id="",
+            run_id=0,
+            task=task_pb2.Task(  # pylint: disable=E1101
+                recordset=recordset_pb2.RecordSet(  # pylint: disable=E1101
+                    parameters={},
+                    metrics={},
+                    configs={},
+                )
+            ),
+        )
+
+        # Execute & assert
+        with self.assertRaises(ValueError):
+            validate_task_res(task_res=task_res)
