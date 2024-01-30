@@ -38,4 +38,4 @@ strategy:
   min_fit_clients: ${clients_per_round}
   min_available_clients: ${clients_per_round}
 
-exp_id: ${algorithm}_${dataset_config.name}_${seed}_${model.param_type}_${model.ratio}
+exp_id: ${algorithm}_${dataset_config.name}_${model.param_type}_${model.ratio}

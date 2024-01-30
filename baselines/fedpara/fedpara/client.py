@@ -130,7 +130,6 @@ class PFlowerClient(fl.client.NumPyClient):
     ) -> Tuple[NDArrays, int, Dict]:
         """Train the network on the training set."""
         self.set_parameters(parameters, evaluate=False)
-        print(f"Client {self.cid} Training...")
 
         train(
             self.net,
@@ -155,7 +154,6 @@ class PFlowerClient(fl.client.NumPyClient):
     ) -> Tuple[float, int, Dict]:
         """Evaluate the network on the test set."""
         self.set_parameters(parameters, evaluate=True)
-        print(f"Client {self.cid} Evaluating...")
         self.net.to(self.device)
         loss, accuracy = test(self.net, self.test_loader, device=self.device)
         return loss, len(self.test_loader), {"accuracy": accuracy}

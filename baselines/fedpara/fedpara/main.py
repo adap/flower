@@ -20,7 +20,7 @@ from fedpara.utils import (
 )
 
 
-@hydra.main(config_path="conf", config_name="cifar100", version_base=None)
+@hydra.main(config_path="conf", config_name="cifar10", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
 

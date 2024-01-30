@@ -40,3 +40,6 @@ strategy:
   min_evaluate_clients: ${clients_per_round}
   min_fit_clients: ${clients_per_round}
   min_available_clients: ${clients_per_round}
+
+
+exp_id: ${algorithm}_${dataset_config.name}

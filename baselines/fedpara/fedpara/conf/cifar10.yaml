@@ -40,4 +40,4 @@ strategy:
   min_available_clients: ${clients_per_round}
   accept_failures: false
 
-exp_id: ${algorithm}_${dataset_config.name}_${seed}_${dataset_config.partition}_${dataset_config.alpha}_${model.param_type}_${model.ratio}
+exp_id: ${model.param_type}_${dataset_config.name}_${dataset_config.partition}_alpha${dataset_config.alpha}
