@@ -20,38 +20,38 @@ from flwr.common import NDArrays
 def get_norm(input_arrays: NDArrays) -> float:
     """Compute the L2 norm of the flattened input."""
     array_norms = [np.linalg.norm(array.flat) for array in input_arrays]
-    return float(np.sqrt(sum([norm**2 for norm in array_norms])))
+    return float(
+        np.sqrt(sum([norm**2 for norm in array_norms]))
+    )  # pylint: disable=consider-using-generator
 
 
-def add_gaussian_noise_inplace(input_array: NDArrays, std_dev: float) -> None:
+def add_gaussian_noise_inplace(input_arrays: NDArrays, std_dev: float) -> None:
     """Add noise to each element of the provided input from Gaussian (Normal)
     distribution with respect to the passed standard deviation."""
-    for i in range(len(input_array)):
-        input_array[i] += np.random.normal(0, std_dev, input_array[i].shape).astype(
-            input_array[i].dtype
-        )
+    for array in input_arrays:
+        array += np.random.normal(0, std_dev, array.shape).astype(array.dtype)
 
 
-def clip_inputs(input_array: NDArrays, clipping_norm: float) -> NDArrays:
+def clip_inputs(input_arrays: NDArrays, clipping_norm: float) -> NDArrays:
     """Clip model update based on the clipping norm.
 
     FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
     """
-    input_norm = get_norm(input_array)
+    input_norm = get_norm(input_arrays)
     scaling_factor = min(1, clipping_norm / input_norm)
-    clipped_inputs: NDArrays = [layer * scaling_factor for layer in input_array]
+    clipped_inputs: NDArrays = [layer * scaling_factor for layer in input_arrays]
     return clipped_inputs
 
 
-def clip_inputs_inplace(input_array: NDArrays, clipping_norm: float) -> None:
+def clip_inputs_inplace(input_arrays: NDArrays, clipping_norm: float) -> None:
     """Clip model update based on the clipping norm in-place.
 
     FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
     """
-    input_norm = get_norm(input_array)
+    input_norm = get_norm(input_arrays)
     scaling_factor = min(1, clipping_norm / input_norm)
-    for i in range(len(input_array)):
-        input_array[i] *= scaling_factor
+    for array in input_arrays:
+        array *= scaling_factor
 
 
 def compute_stdv(

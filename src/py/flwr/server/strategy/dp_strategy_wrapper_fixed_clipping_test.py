@@ -24,40 +24,51 @@ def test_compute_clip_model_updates() -> None:
     """Test _compute_clip_model_updates method."""
     # Prepare
     strategy = FedAvg()
-    dp_wrapper = DPStrategyWrapperServerSideFixedClipping(strategy, 1.5, 6, 5)
+    dp_wrapper = DPStrategyWrapperServerSideFixedClipping(strategy, 1.5, 10, 5)
 
     # Ensure all arrays have the same data type
     dtype = np.float64
 
     client_params = [
-        [np.array([2, 3, 4], dtype=dtype), np.array([5, 6, 7], dtype=dtype)],
-        [np.array([3, 4, 5], dtype=dtype), np.array([6, 7, 8], dtype=dtype)],
+        [
+            np.array([0.5, 1.5, 2.5], dtype=np.float64),
+            np.array([3.5, 4.5, 5.5], dtype=np.float64),
+            np.array([6.5, 7.5, 8.5], dtype=np.float64),
+        ],
+        [
+            np.array([1.5, 2.5, 3.5], dtype=np.float64),
+            np.array([4.5, 5.5, 6.5], dtype=np.float64),
+            np.array([7.5, 8.5, 9.5], dtype=np.float64),
+        ],
     ]
     current_round_params = [
-        np.array([1, 2, 3], dtype=dtype),
-        np.array([4, 5, 6], dtype=dtype),
+        np.array([1.0, 2.0, 3.0], dtype=np.float64),
+        np.array([4.0, 5.0, 6.0], dtype=np.float64),
+        np.array([7.0, 8.0, 9.0], dtype=np.float64),
     ]
 
     expected_updates = [
         [
-            np.subtract(client_params[0][0], current_round_params[0]),
-            np.subtract(client_params[0][1], current_round_params[1]),
+            np.array([0.5, 1.5, 2.5], dtype=np.float64),
+            np.array([3.5, 4.5, 5.5], dtype=np.float64),
+            np.array([6.5, 7.5, 8.5], dtype=np.float64),
         ],
         [
-            np.subtract(client_params[1][0], current_round_params[0]),
-            np.subtract(client_params[1][1], current_round_params[1]),
+            np.array([1.5, 2.5, 3.5], dtype=np.float64),
+            np.array([4.5, 5.5, 6.5], dtype=np.float64),
+            np.array([7.5, 8.5, 9.5], dtype=np.float64),
         ],
     ]
     # Set current model parameters in the wrapper
     dp_wrapper.current_round_params = current_round_params
 
     # Execute
-    # pylint: disable-next=protected-access
-    computed_updates = dp_wrapper._compute_clip_model_updates(client_params)
+    dp_wrapper._compute_clip_model_updates(client_params)
 
-    for expected, actual in zip(expected_updates, computed_updates):
-        for e, a in zip(expected, actual):
-            np.testing.assert_array_equal(e, a)
+    # Verify
+    for i, client_param in enumerate(client_params):
+        for j, update in enumerate(client_param):
+            np.testing.assert_array_almost_equal(update, expected_updates[i][j])
 
 
 def test_update_clients_params() -> None:

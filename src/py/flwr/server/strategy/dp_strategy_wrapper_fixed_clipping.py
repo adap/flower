@@ -133,11 +133,11 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         ]
 
         # Compute and clip the updates
-        all_clients_updates = self._compute_clip_model_updates(clients_params)
+        self._compute_clip_model_updates(clients_params)
 
-        # Compute the new parameters with the clipped updates
-        for client_param, client_update in zip(clients_params, all_clients_updates):
-            self._update_clients_params(client_param, client_update)
+        # # Compute the new parameters with the clipped updates
+        # for client_param, client_update in zip(clients_params, all_clients_updates):
+        #     self._update_clients_params(client_param, client_update)
 
         # Update the results with the new params
         for res, params in zip(results, clients_params):
@@ -176,24 +176,15 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
-    def _compute_clip_model_updates(
-        self, all_clients_params: List[NDArrays]
-    ) -> List[NDArrays]:
-        """Compute model updates for each client based on the current round parameters
-        and then clip it."""
-        all_client_updates = []
+    def _compute_clip_model_updates(self, all_clients_params: List[NDArrays]) -> None:
+        """Compute model updates for each client model based on the current round
+        parameters and then clip it."""
         for client_param in all_clients_params:
             client_update = [
                 np.subtract(x, y)
                 for (x, y) in zip(client_param, self.current_round_params)
             ]
             clip_inputs_inplace(client_update, self.clipping_norm)
-            all_client_updates.append(client_update)
-        return all_client_updates
 
-    def _update_clients_params(
-        self, client_param: NDArrays, client_update: NDArrays
-    ) -> None:
-        """Update the client parameters based on the model updates."""
-        for i, _ in enumerate(self.current_round_params):
-            client_param[i] = self.current_round_params[i] + client_update[i]
+            for i, _ in enumerate(self.current_round_params):
+                client_param[i] = self.current_round_params[i] + client_update[i]
