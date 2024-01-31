@@ -88,7 +88,7 @@ def run_client() -> None:
     _start_client_internal(
         server_address=args.server,
         load_flower_callable_fn=_load,
-        transport="grpc-rere",  # Only
+        transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
         insecure=args.insecure,
     )
@@ -110,6 +110,11 @@ def _parse_args_client() -> argparse.ArgumentParser:
         action="store_true",
         help="Run the client without HTTPS. By default, the client runs with "
         "HTTPS enabled. Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--rest",
+        action="store_true",
+        help="Use REST as a transport layer for the client.",
     )
     parser.add_argument(
         "--root-certificates",
