@@ -135,7 +135,10 @@ jobs:
         run: ./../test_driver.sh "${{ matrix.directory }}"
       - name: Run driver test with REST
         if: ${{ matrix.directory == 'bare' }}
-        run: ./../test_driver.sh "${{ matrix.directory }}" rest
+        run: ./../test_driver.sh bare rest
+      - name: Run driver test with SQLite database
+        if: ${{ matrix.directory == 'bare' }}
+        run: ./../test_driver.sh bare sqlite
 
   strategies:
     runs-on: ubuntu-22.04
