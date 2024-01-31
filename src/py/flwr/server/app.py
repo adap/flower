@@ -532,7 +532,7 @@ def _run_fleet_api_grpc_rere(
     """Run Fleet API (gRPC, request-response)."""
     # Create Fleet API gRPC server
     fleet_servicer = FleetServicer(
-        state=state_factory.state(),
+        state_factory=state_factory,
     )
     fleet_add_servicer_to_server_fn = add_FleetServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
