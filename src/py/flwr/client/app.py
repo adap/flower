@@ -72,11 +72,6 @@ def run_client() -> None:
         else:
             root_certificates = Path(cert_path).read_bytes()
 
-    print(args.root_certificates)
-    print(args.server)
-    print(args.dir)
-    print(args.callable)
-
     callable_dir = args.dir
     if callable_dir is not None:
         sys.path.insert(0, callable_dir)
