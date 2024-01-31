@@ -13,13 +13,24 @@ case "$1" in
     ;;
 esac
 
-timeout 2m flower-server $server_arg &
+case "$2" in
+  rest)
+    rest_arg="--rest"
+    server_address="http://127.0.0.1:9092"
+    ;;
+  *)
+    rest_arg=""
+    server_address="127.0.0.1:9092"
+    ;;
+esac
+
+timeout 2m flower-server $server_arg $rest_arg &
 sleep 3
 
-timeout 2m flower-client client:flower $client_arg --server 127.0.0.1:9092 &
+timeout 2m flower-client client:flower $client_arg --server $server_address &
 sleep 3
 
-timeout 2m flower-client client:flower $client_arg --server 127.0.0.1:9092 &
+timeout 2m flower-client client:flower $client_arg $rest_arg --server $server_address &
 sleep 3
 
 timeout 2m python driver.py &

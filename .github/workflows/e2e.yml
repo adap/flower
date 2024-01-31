@@ -133,6 +133,9 @@ jobs:
         run: python simulation.py
       - name: Run driver test
         run: ./../test_driver.sh "${{ matrix.directory }}"
+      - name: Run driver test with REST
+        if: ${{ matrix.directory == 'bare' }}
+        run: ./../test_driver.sh "${{ matrix.directory }}" rest
 
   strategies:
     runs-on: ubuntu-22.04
