@@ -696,6 +696,14 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "Flower will just create a state in memory.",
         default=DATABASE,
     )
+    parser.add_argument(
+        "--require-client-authentication",
+        nargs=3,
+        metavar=("CLIENT_KEYS", "SERVER_PUBLIC_KEY", "SERVER_PRIVATE_KEY"),
+        type=str,
+        help="Paths to .csv file containing list of known client public keys for "
+        "authentication, server public key, and server private key, in that order."
+    )
 
 
 def _add_args_driver_api(parser: argparse.ArgumentParser) -> None:
