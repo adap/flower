@@ -9,6 +9,7 @@ strategy:
 batch_size: 32
 lr: 0.01
 momentum: 0.9
+save_every_round: 10
 
 # Set ray config
 client_resources:

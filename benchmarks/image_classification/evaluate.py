@@ -9,8 +9,8 @@ from flwr.common.logger import log
 from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
-from ..baseline.model import Net
-from ..baseline.utils import apply_transforms
+from evaluation.eval_utils import test, apply_transforms_test, weighted_average
+from baseline.model import Net
 
 
 # Arguments parser
@@ -25,38 +25,11 @@ parser.add_argument(
     )
 
 
-# Borrowed from Pytorch quickstart example
-def test(net, testloader, device: str):
-    """Validate the network on the entire test set."""
-    criterion = torch.nn.CrossEntropyLoss()
-    correct, loss = 0, 0.0
-    net.eval()
-    with torch.no_grad():
-        for data in testloader:
-            images, labels = data["image"].to(device), data["label"].to(device)
-            outputs = net(images)
-            loss += criterion(outputs, labels).item()
-            _, predicted = torch.max(outputs.data, 1)
-            correct += (predicted == labels).sum().item()
-    accuracy = correct / len(testloader.dataset)
-    return loss, accuracy
-
-
-def weighted_average(metrics):
-    """Aggregation function for (federated) evaluation metrics."""
-    # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * acc for num_examples, acc in metrics]
-    examples = [num_examples for num_examples, _ in metrics]
-    weighted_acc = sum(accuracies) / sum(examples)
-
-    return weighted_acc
-
-
 def main():
     args = parser.parse_args()
 
     # Load static configs
-    with open("../static/static_config.yaml", "r") as f:
+    with open("static/static_config.yaml", "r") as f:
         static_config = yaml.load(f, Loader=yaml.FullLoader)
 
     # Construct Federated Dataset
@@ -78,7 +51,7 @@ def main():
         centralised_testset = cifar10_fds.load_full("test")
 
         # Apply transform to dataset
-        testset = centralised_testset.with_transform(apply_transforms)
+        testset = centralised_testset.with_transform(apply_transforms_test)
 
         # Construct dataloader
         testloader = DataLoader(testset, batch_size=50)
@@ -98,7 +71,7 @@ def main():
             testset = client_dataset_splits["test"]
 
             # Now we apply the transform to each batch
-            testset = testset.with_transform(apply_transforms)
+            testset = testset.with_transform(apply_transforms_test)
 
             # Construct dataloader
             testloader = DataLoader(testset, batch_size=64)
