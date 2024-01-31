@@ -89,7 +89,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
-        rep = "DP Strategy Wrapper with Fixed Clipping"
+        rep = "DP Strategy Wrapper with Server Side Fixed Clipping"
         return rep
 
     def initialize_parameters(
@@ -134,10 +134,6 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
         # Compute and clip the updates
         self._compute_clip_model_updates(clients_params)
-
-        # # Compute the new parameters with the clipped updates
-        # for client_param, client_update in zip(clients_params, all_clients_updates):
-        #     self._update_clients_params(client_param, client_update)
 
         # Update the results with the new params
         for res, params in zip(results, clients_params):

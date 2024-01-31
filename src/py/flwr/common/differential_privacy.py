@@ -29,7 +29,7 @@ def add_gaussian_noise_inplace(input_arrays: NDArrays, std_dev: float) -> None:
     """Add noise to each element of the provided input from Gaussian (Normal)
     distribution with respect to the passed standard deviation."""
     for array in input_arrays:
-        array += np.random.normal(0, std_dev, array.shape).astype(array.dtype)
+        array += np.random.normal(0, std_dev, array.shape)
 
 
 def clip_inputs(input_arrays: NDArrays, clipping_norm: float) -> NDArrays:
