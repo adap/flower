@@ -16,7 +16,7 @@ esac
 case "$2" in
   rest)
     rest_arg="--rest"
-    server_address="http://127.0.0.1:9093"
+    server_address="http://localhost:9093"
     db_arg="--database :flwr-in-memory-state:"
     ;;
   sqlite)
