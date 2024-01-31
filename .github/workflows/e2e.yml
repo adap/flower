@@ -134,7 +134,7 @@ jobs:
       - name: Run driver test
         run: ./../test_driver.sh "${{ matrix.directory }}"
       - name: Test server with database
-        if: ${{ matrix.dataset == 'bare' }}
+        if: ${{ matrix.directory == 'bare' }}
         run: ./../test_driver.sh bare db
 
   strategies:
