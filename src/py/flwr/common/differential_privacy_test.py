@@ -16,38 +16,41 @@
 
 import numpy as np
 
-from flwr.common import Parameters, ndarrays_to_parameters, parameters_to_ndarrays
-
 from .differential_privacy import (
-    add_gaussian_noise,
-    add_noise_to_params,
-    clip_inputs,
+    add_gaussian_noise_inplace,
+    clip_inputs_inplace,
     compute_stdv,
     get_norm,
 )
 
 
-def test_add_gaussian_noise() -> None:
-    """Test add_gaussian_noise function."""
+def test_add_gaussian_noise_inplace() -> None:
+    """Test add_gaussian_noise_inplace function."""
     # Prepare
-    update = [np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])]
+    update = [np.array([[1.0, 2.0], [3.0, 4.0]]), np.array([[5.0, 6.0], [7.0, 8.0]])]
     std_dev = 0.1
 
     # Execute
-    update_noised = add_gaussian_noise(update, std_dev)
+    add_gaussian_noise_inplace(update, std_dev)
 
     # Assert
     # Check that the shape of the result is the same as the input
-    for layer, layer_noised in zip(update, update_noised):
-        assert layer.shape == layer_noised.shape
+    for layer in update:
+        assert layer.shape == (2, 2)
 
     # Check that the values have been changed and are not equal to the original update
-    for layer, layer_noised in zip(update, update_noised):
-        assert not np.array_equal(layer, layer_noised)
+    for layer in update:
+        assert not np.array_equal(
+            layer, [[1.0, 2.0], [3.0, 4.0]]
+        ) and not np.array_equal(layer, [[5.0, 6.0], [7.0, 8.0]])
 
     # Check that the noise has been added
-    for layer, layer_noised in zip(update, update_noised):
-        noise_added = layer_noised - layer
+    for layer in update:
+        noise_added = (
+            layer - np.array([[1.0, 2.0], [3.0, 4.0]])
+            if np.array_equal(layer, [[1.0, 2.0], [3.0, 4.0]])
+            else layer - np.array([[5.0, 6.0], [7.0, 8.0]])
+        )
         assert np.any(np.abs(noise_added) > 0)
 
 
@@ -67,8 +70,8 @@ def test_get_norm() -> None:
     assert expected == result
 
 
-def test_clip_inputs() -> None:
-    """Test clip_inputs function."""
+def test_clip_inputs_inplace() -> None:
+    """Test clip_inputs_inplace function."""
     # Prepare
     updates = [
         np.array([[1.5, -0.5], [2.0, -1.0]]),
@@ -78,44 +81,15 @@ def test_clip_inputs() -> None:
     ]
     clipping_norm = 1.5
 
+    original_updates = [np.copy(update) for update in updates]
+
     # Execute
-    clipped_updates = clip_inputs(updates, clipping_norm)
+    clip_inputs_inplace(updates, clipping_norm)
 
     # Assert
-    assert len(clipped_updates) == len(updates)
-
-    for clipped_update, original_update in zip(clipped_updates, updates):
+    for updated, original_update in zip(updates, original_updates):
         clip_norm = np.linalg.norm(original_update)
-        assert np.all(clipped_update <= clip_norm) and np.all(
-            clipped_update >= -clip_norm
-        )
-
-
-def test_add_noise_to_params() -> None:
-    """Test add_noise_to_params function."""
-    # Prepare
-    parameters = ndarrays_to_parameters(
-        [np.array([[1, 2], [3, 4]]), np.array([[5, 6], [7, 8]])]
-    )
-    std_dev = 0.1
-
-    # Execute
-    noised_parameters = add_noise_to_params(parameters, std_dev)
-
-    original_params_list = parameters_to_ndarrays(parameters)
-    noised_params_list = parameters_to_ndarrays(noised_parameters)
-
-    # Assert
-    assert isinstance(noised_parameters, Parameters)
-
-    # Check the values have been changed and are not equal to the original parameters
-    for original_param, noised_param in zip(original_params_list, noised_params_list):
-        assert not np.array_equal(original_param, noised_param)
-
-    # Check that the noise has been added
-    for original_param, noised_param in zip(original_params_list, noised_params_list):
-        noise_added = noised_param - original_param
-        assert np.any(np.abs(noise_added) > 0)
+        assert np.all(updated <= clip_norm) and np.all(updated >= -clip_norm)
 
 
 def test_compute_stdv() -> None:

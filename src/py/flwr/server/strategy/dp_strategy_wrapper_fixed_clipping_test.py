@@ -20,17 +20,23 @@ from .dp_strategy_wrapper_fixed_clipping import DPStrategyWrapperServerSideFixed
 from .fedavg import FedAvg
 
 
-def test_compute_model_updates() -> None:
-    """Test _compute_model_updates method."""
+def test_compute_clip_model_updates() -> None:
+    """Test _compute_clip_model_updates method."""
     # Prepare
     strategy = FedAvg()
-    dp_wrapper = DPStrategyWrapperServerSideFixedClipping(strategy, 1.5, 1.5, 5)
+    dp_wrapper = DPStrategyWrapperServerSideFixedClipping(strategy, 1.5, 6, 5)
+
+    # Ensure all arrays have the same data type
+    dtype = np.float64
 
     client_params = [
-        [np.array([2, 3, 4]), np.array([5, 6, 7])],
-        [np.array([3, 4, 5]), np.array([6, 7, 8])],
+        [np.array([2, 3, 4], dtype=dtype), np.array([5, 6, 7], dtype=dtype)],
+        [np.array([3, 4, 5], dtype=dtype), np.array([6, 7, 8], dtype=dtype)],
     ]
-    current_round_params = [np.array([1, 2, 3]), np.array([4, 5, 6])]
+    current_round_params = [
+        np.array([1, 2, 3], dtype=dtype),
+        np.array([4, 5, 6], dtype=dtype),
+    ]
 
     expected_updates = [
         [
@@ -47,7 +53,7 @@ def test_compute_model_updates() -> None:
 
     # Execute
     # pylint: disable-next=protected-access
-    computed_updates = dp_wrapper._compute_model_updates(client_params)
+    computed_updates = dp_wrapper._compute_clip_model_updates(client_params)
 
     for expected, actual in zip(expected_updates, computed_updates):
         for e, a in zip(expected, actual):
