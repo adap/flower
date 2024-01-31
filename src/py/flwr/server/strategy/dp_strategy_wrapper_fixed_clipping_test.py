@@ -26,37 +26,34 @@ def test_compute_clip_model_updates() -> None:
     strategy = FedAvg()
     dp_wrapper = DPStrategyWrapperServerSideFixedClipping(strategy, 1.5, 10, 5)
 
-    # Ensure all arrays have the same data type
-    dtype = np.float64
-
     client_params = [
         [
-            np.array([0.5, 1.5, 2.5], dtype=np.float64),
-            np.array([3.5, 4.5, 5.5], dtype=np.float64),
-            np.array([6.5, 7.5, 8.5], dtype=np.float64),
+            np.array([0.5, 1.5, 2.5]),
+            np.array([3.5, 4.5, 5.5]),
+            np.array([6.5, 7.5, 8.5]),
         ],
         [
-            np.array([1.5, 2.5, 3.5], dtype=np.float64),
-            np.array([4.5, 5.5, 6.5], dtype=np.float64),
-            np.array([7.5, 8.5, 9.5], dtype=np.float64),
+            np.array([1.5, 2.5, 3.5]),
+            np.array([4.5, 5.5, 6.5]),
+            np.array([7.5, 8.5, 9.5]),
         ],
     ]
     current_round_params = [
-        np.array([1.0, 2.0, 3.0], dtype=np.float64),
-        np.array([4.0, 5.0, 6.0], dtype=np.float64),
-        np.array([7.0, 8.0, 9.0], dtype=np.float64),
+        np.array([1.0, 2.0, 3.0]),
+        np.array([4.0, 5.0, 6.0]),
+        np.array([7.0, 8.0, 9.0]),
     ]
 
     expected_updates = [
         [
-            np.array([0.5, 1.5, 2.5], dtype=np.float64),
-            np.array([3.5, 4.5, 5.5], dtype=np.float64),
-            np.array([6.5, 7.5, 8.5], dtype=np.float64),
+            np.array([0.5, 1.5, 2.5]),
+            np.array([3.5, 4.5, 5.5]),
+            np.array([6.5, 7.5, 8.5]),
         ],
         [
-            np.array([1.5, 2.5, 3.5], dtype=np.float64),
-            np.array([4.5, 5.5, 6.5], dtype=np.float64),
-            np.array([7.5, 8.5, 9.5], dtype=np.float64),
+            np.array([1.5, 2.5, 3.5]),
+            np.array([4.5, 5.5, 6.5]),
+            np.array([7.5, 8.5, 9.5]),
         ],
     ]
     # Set current model parameters in the wrapper
