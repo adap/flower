@@ -32,14 +32,14 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.server.fleet.message_handler import message_handler
-from flwr.server.state import State
+from flwr.server.state import StateFactory
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):
     """Fleet API servicer."""
 
-    def __init__(self, state: State) -> None:
-        self.state = state
+    def __init__(self, state_factory: StateFactory) -> None:
+        self.state_factory = state_factory
 
     def CreateNode(
         self, request: CreateNodeRequest, context: grpc.ServicerContext
@@ -48,7 +48,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         log(INFO, "FleetServicer.CreateNode")
         return message_handler.create_node(
             request=request,
-            state=self.state,
+            state=self.state_factory.state(),
         )
 
     def DeleteNode(
@@ -58,7 +58,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         log(INFO, "FleetServicer.DeleteNode")
         return message_handler.delete_node(
             request=request,
-            state=self.state,
+            state=self.state_factory.state(),
         )
 
     def PullTaskIns(
@@ -68,7 +68,7 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         log(INFO, "FleetServicer.PullTaskIns")
         return message_handler.pull_task_ins(
             request=request,
-            state=self.state,
+            state=self.state_factory.state(),
         )
 
     def PushTaskRes(
@@ -78,5 +78,5 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         log(INFO, "FleetServicer.PushTaskRes")
         return message_handler.push_task_res(
             request=request,
-            state=self.state,
+            state=self.state_factory.state(),
         )
