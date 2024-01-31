@@ -13,7 +13,16 @@ case "$1" in
     ;;
 esac
 
-timeout 2m flower-server $server_arg &
+case "$2" in
+  sqlite)
+    db_args="--database $(date +%s).db"
+    ;;
+  *)
+    db_args="--database :flwr-in-memory-state:"
+    ;;
+esac
+
+timeout 2m flower-server $server_arg $db_args &
 sleep 3
 
 timeout 2m flower-client client:flower $client_arg --server 127.0.0.1:9092 &
