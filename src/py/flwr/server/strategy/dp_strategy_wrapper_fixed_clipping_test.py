@@ -60,6 +60,7 @@ def test_compute_clip_model_updates() -> None:
     dp_wrapper.current_round_params = current_round_params
 
     # Execute
+    # pylint: disable-next=protected-access
     dp_wrapper._compute_clip_model_updates(client_params)
 
     # Verify

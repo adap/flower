@@ -20,9 +20,8 @@ from flwr.common import NDArrays
 def get_norm(input_arrays: NDArrays) -> float:
     """Compute the L2 norm of the flattened input."""
     array_norms = [np.linalg.norm(array.flat) for array in input_arrays]
-    return float(
-        np.sqrt(sum([norm**2 for norm in array_norms]))
-    )  # pylint: disable=consider-using-generator
+    # pylint: disable=consider-using-generator
+    return float(np.sqrt(sum([norm**2 for norm in array_norms])))
 
 
 def add_gaussian_noise_inplace(input_arrays: NDArrays, std_dev: float) -> None:
