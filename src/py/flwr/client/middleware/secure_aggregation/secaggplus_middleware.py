@@ -150,7 +150,7 @@ class SecAggPlusState:
 
 
 def _get_fit_fn(
-    msg: Message, call_next: FlowerCallable, ctxt: Context
+    msg: Message, ctxt: Context, call_next: FlowerCallable
 ) -> Callable[[], FitRes]:
     """Get the fit function."""
 
@@ -195,7 +195,7 @@ def secaggplus_middleware(
     elif state.current_stage == STAGE_SHARE_KEYS:
         res = _share_keys(state, configs)
     elif state.current_stage == STAGE_COLLECT_MASKED_INPUT:
-        fit = _get_fit_fn(msg, call_next, ctxt)
+        fit = _get_fit_fn(msg, ctxt, call_next)
         res = _collect_masked_input(state, configs, fit)
     elif state.current_stage == STAGE_UNMASK:
         res = _unmask(state, configs)
