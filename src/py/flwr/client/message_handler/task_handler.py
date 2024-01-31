@@ -20,21 +20,15 @@ from typing import Optional
 from flwr.proto.fleet_pb2 import PullTaskInsResponse  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
-    ClientMessage,
-    ServerMessage,
-)
 
 
-def validate_task_ins(task_ins: TaskIns, discard_reconnect_ins: bool) -> bool:
+def validate_task_ins(task_ins: TaskIns) -> bool:
     """Validate a TaskIns before it entering the message handling process.
 
     Parameters
     ----------
     task_ins: TaskIns
         The task instruction coming from the server.
-    discard_reconnect_ins: bool
-        If True, ReconnectIns will not be considered as valid content.
 
     Returns
     -------
@@ -42,23 +36,8 @@ def validate_task_ins(task_ins: TaskIns, discard_reconnect_ins: bool) -> bool:
         True if the TaskIns is deemed valid and therefore suitable for
         undergoing the message handling process, False otherwise.
     """
-    # Check if the task_ins contains legacy_server_message or sa.
-    # If legacy_server_message is set, check if ServerMessage is one of
-    # {GetPropertiesIns, GetParametersIns, FitIns, EvaluateIns, ReconnectIns*}
-    # Discard ReconnectIns if discard_reconnect_ins is true.
-    if (
-        not task_ins.HasField("task")
-        or (
-            not task_ins.task.HasField("legacy_server_message")
-            and not task_ins.task.HasField("sa")
-        )
-        or (
-            discard_reconnect_ins
-            and task_ins.task.legacy_server_message.WhichOneof("msg") == "reconnect_ins"
-        )
-    ):
+    if not (task_ins.HasField("task") and task_ins.task.HasField("recordset")):
         return False
-
     return True
 
 
@@ -108,32 +87,6 @@ def get_task_ins(
     task_ins: TaskIns = pull_task_ins_response.task_ins_list[0]
 
     return task_ins
-
-
-def get_server_message_from_task_ins(
-    task_ins: TaskIns, exclude_reconnect_ins: bool
-) -> Optional[ServerMessage]:
-    """Get ServerMessage from TaskIns, if available."""
-    # Return the message if it is in
-    # {GetPropertiesIns, GetParametersIns, FitIns, EvaluateIns}
-    # Return the message if it is ReconnectIns and exclude_reconnect_ins is False.
-    if not validate_task_ins(
-        task_ins, discard_reconnect_ins=exclude_reconnect_ins
-    ) or not task_ins.task.HasField("legacy_server_message"):
-        return None
-
-    return task_ins.task.legacy_server_message
-
-
-def wrap_client_message_in_task_res(client_message: ClientMessage) -> TaskRes:
-    """Wrap ClientMessage in TaskRes."""
-    # Instantiate a TaskRes, only filling client_message field.
-    return TaskRes(
-        task_id="",
-        group_id="",
-        run_id=0,
-        task=Task(ancestry=[], legacy_client_message=client_message),
-    )
 
 
 def configure_task_res(

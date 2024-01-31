@@ -30,7 +30,7 @@ from flwr.proto.recordset_pb2 import MetricsRecordValue as ProtoMetricsRecordVal
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 from flwr.proto.recordset_pb2 import Sint64List, StringList
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes, Value
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import (
     ClientMessage,
     Code,
@@ -48,142 +48,6 @@ from .message import Message, Metadata
 from .metricsrecord import MetricsRecord
 from .parametersrecord import Array, ParametersRecord
 from .recordset import RecordSet
-
-#  === ServerMessage message ===
-
-
-def server_message_to_proto(server_message: typing.ServerMessage) -> ServerMessage:
-    """Serialize `ServerMessage` to ProtoBuf."""
-    if server_message.get_properties_ins is not None:
-        return ServerMessage(
-            get_properties_ins=get_properties_ins_to_proto(
-                server_message.get_properties_ins,
-            )
-        )
-    if server_message.get_parameters_ins is not None:
-        return ServerMessage(
-            get_parameters_ins=get_parameters_ins_to_proto(
-                server_message.get_parameters_ins,
-            )
-        )
-    if server_message.fit_ins is not None:
-        return ServerMessage(
-            fit_ins=fit_ins_to_proto(
-                server_message.fit_ins,
-            )
-        )
-    if server_message.evaluate_ins is not None:
-        return ServerMessage(
-            evaluate_ins=evaluate_ins_to_proto(
-                server_message.evaluate_ins,
-            )
-        )
-    raise ValueError(
-        "No instruction set in ServerMessage, cannot serialize to ProtoBuf"
-    )
-
-
-def server_message_from_proto(
-    server_message_proto: ServerMessage,
-) -> typing.ServerMessage:
-    """Deserialize `ServerMessage` from ProtoBuf."""
-    field = server_message_proto.WhichOneof("msg")
-    if field == "get_properties_ins":
-        return typing.ServerMessage(
-            get_properties_ins=get_properties_ins_from_proto(
-                server_message_proto.get_properties_ins,
-            )
-        )
-    if field == "get_parameters_ins":
-        return typing.ServerMessage(
-            get_parameters_ins=get_parameters_ins_from_proto(
-                server_message_proto.get_parameters_ins,
-            )
-        )
-    if field == "fit_ins":
-        return typing.ServerMessage(
-            fit_ins=fit_ins_from_proto(
-                server_message_proto.fit_ins,
-            )
-        )
-    if field == "evaluate_ins":
-        return typing.ServerMessage(
-            evaluate_ins=evaluate_ins_from_proto(
-                server_message_proto.evaluate_ins,
-            )
-        )
-    raise ValueError(
-        "Unsupported instruction in ServerMessage, cannot deserialize from ProtoBuf"
-    )
-
-
-#  === ClientMessage message ===
-
-
-def client_message_to_proto(client_message: typing.ClientMessage) -> ClientMessage:
-    """Serialize `ClientMessage` to ProtoBuf."""
-    if client_message.get_properties_res is not None:
-        return ClientMessage(
-            get_properties_res=get_properties_res_to_proto(
-                client_message.get_properties_res,
-            )
-        )
-    if client_message.get_parameters_res is not None:
-        return ClientMessage(
-            get_parameters_res=get_parameters_res_to_proto(
-                client_message.get_parameters_res,
-            )
-        )
-    if client_message.fit_res is not None:
-        return ClientMessage(
-            fit_res=fit_res_to_proto(
-                client_message.fit_res,
-            )
-        )
-    if client_message.evaluate_res is not None:
-        return ClientMessage(
-            evaluate_res=evaluate_res_to_proto(
-                client_message.evaluate_res,
-            )
-        )
-    raise ValueError(
-        "No instruction set in ClientMessage, cannot serialize to ProtoBuf"
-    )
-
-
-def client_message_from_proto(
-    client_message_proto: ClientMessage,
-) -> typing.ClientMessage:
-    """Deserialize `ClientMessage` from ProtoBuf."""
-    field = client_message_proto.WhichOneof("msg")
-    if field == "get_properties_res":
-        return typing.ClientMessage(
-            get_properties_res=get_properties_res_from_proto(
-                client_message_proto.get_properties_res,
-            )
-        )
-    if field == "get_parameters_res":
-        return typing.ClientMessage(
-            get_parameters_res=get_parameters_res_from_proto(
-                client_message_proto.get_parameters_res,
-            )
-        )
-    if field == "fit_res":
-        return typing.ClientMessage(
-            fit_res=fit_res_from_proto(
-                client_message_proto.fit_res,
-            )
-        )
-    if field == "evaluate_res":
-        return typing.ClientMessage(
-            evaluate_res=evaluate_res_from_proto(
-                client_message_proto.evaluate_res,
-            )
-        )
-    raise ValueError(
-        "Unsupported instruction in ClientMessage, cannot deserialize from ProtoBuf"
-    )
-
 
 #  === Parameters message ===
 
@@ -209,24 +73,7 @@ def reconnect_ins_to_proto(ins: typing.ReconnectIns) -> ServerMessage.ReconnectI
     return ServerMessage.ReconnectIns()
 
 
-def reconnect_ins_from_proto(msg: ServerMessage.ReconnectIns) -> typing.ReconnectIns:
-    """Deserialize `ReconnectIns` from ProtoBuf."""
-    return typing.ReconnectIns(seconds=msg.seconds)
-
-
 # === DisconnectRes message ===
-
-
-def disconnect_res_to_proto(res: typing.DisconnectRes) -> ClientMessage.DisconnectRes:
-    """Serialize `DisconnectRes` to ProtoBuf."""
-    reason_proto = Reason.UNKNOWN
-    if res.reason == "RECONNECT":
-        reason_proto = Reason.RECONNECT
-    elif res.reason == "POWER_DISCONNECTED":
-        reason_proto = Reason.POWER_DISCONNECTED
-    elif res.reason == "WIFI_UNAVAILABLE":
-        reason_proto = Reason.WIFI_UNAVAILABLE
-    return ClientMessage.DisconnectRes(reason=reason_proto)
 
 
 def disconnect_res_from_proto(msg: ClientMessage.DisconnectRes) -> typing.DisconnectRes:
@@ -509,7 +356,7 @@ def scalar_from_proto(scalar_msg: Scalar) -> typing.Scalar:
     return cast(typing.Scalar, scalar)
 
 
-# === Value messages ===
+# === Record messages ===
 
 
 _type_to_field = {
@@ -519,8 +366,6 @@ _type_to_field = {
     str: "string",
     bytes: "bytes",
 }
-
-
 _list_type_to_class_and_field = {
     float: (DoubleList, "double_list"),
     int: (Sint64List, "sint64_list"),
@@ -528,85 +373,21 @@ _list_type_to_class_and_field = {
     str: (StringList, "string_list"),
     bytes: (BytesList, "bytes_list"),
 }
-
-
-def _check_value(value: typing.Value) -> None:
-    if isinstance(value, tuple(_type_to_field.keys())):
-        return
-    if isinstance(value, list):
-        if len(value) > 0 and isinstance(value[0], tuple(_type_to_field.keys())):
-            data_type = type(value[0])
-            for element in value:
-                if isinstance(element, data_type):
-                    continue
-                raise TypeError(
-                    f"Inconsistent type: the types of elements in the list must "
-                    f"be the same (expected {data_type}, but got {type(element)})."
-                )
-    else:
-        raise TypeError(
-            f"Accepted types: {bool, bytes, float, int, str} or "
-            f"list of these types."
-        )
-
-
-def value_to_proto(value: typing.Value) -> Value:
-    """Serialize `Value` to ProtoBuf."""
-    _check_value(value)
-
-    arg = {}
-    if isinstance(value, list):
-        msg_class, field_name = _list_type_to_class_and_field[
-            type(value[0]) if len(value) > 0 else int
-        ]
-        arg[field_name] = msg_class(vals=value)
-    else:
-        arg[_type_to_field[type(value)]] = value
-    return Value(**arg)
-
-
-def value_from_proto(value_msg: Value) -> typing.Value:
-    """Deserialize `Value` from ProtoBuf."""
-    value_field = cast(str, value_msg.WhichOneof("value"))
-    if value_field.endswith("list"):
-        value = list(getattr(value_msg, value_field).vals)
-    else:
-        value = getattr(value_msg, value_field)
-    return cast(typing.Value, value)
-
-
-# === Named Values ===
-
-
-def named_values_to_proto(
-    named_values: Dict[str, typing.Value],
-) -> Dict[str, Value]:
-    """Serialize named values to ProtoBuf."""
-    return {name: value_to_proto(value) for name, value in named_values.items()}
-
-
-def named_values_from_proto(
-    named_values_proto: MutableMapping[str, Value]
-) -> Dict[str, typing.Value]:
-    """Deserialize named values from ProtoBuf."""
-    return {name: value_from_proto(value) for name, value in named_values_proto.items()}
-
-
-# === Record messages ===
-
-
 T = TypeVar("T")
 
 
 def _record_value_to_proto(
     value: Any, allowed_types: List[type], proto_class: Type[T]
 ) -> T:
-    """Serialize `*RecordValue` to ProtoBuf."""
+    """Serialize `*RecordValue` to ProtoBuf.
+
+    Note: `bool` MUST be put in the front of allowd_types if it exists.
+    """
     arg = {}
     for t in allowed_types:
         # Single element
         # Note: `isinstance(False, int) == True`.
-        if type(value) == t:  # pylint: disable=C0123
+        if isinstance(value, t):
             arg[_type_to_field[t]] = value
             return proto_class(**arg)
         # List
@@ -634,7 +415,14 @@ def _record_value_from_proto(value_proto: GrpcMessage) -> Any:
 def _record_value_dict_to_proto(
     value_dict: Dict[str, Any], allowed_types: List[type], value_proto_class: Type[T]
 ) -> Dict[str, T]:
-    """Serialize the record value dict to ProtoBuf."""
+    """Serialize the record value dict to ProtoBuf.
+
+    Note: `bool` MUST be put in the front of allowd_types if it exists.
+    """
+    # Move bool to the front
+    if bool in allowed_types and allowed_types[0] != bool:
+        allowed_types.remove(bool)
+        allowed_types.insert(0, bool)
 
     def proto(_v: Any) -> T:
         return _record_value_to_proto(_v, allowed_types, value_proto_class)
@@ -708,7 +496,7 @@ def configs_record_to_proto(record: ConfigsRecord) -> ProtoConfigsRecord:
     """Serialize ConfigsRecord to ProtoBuf."""
     return ProtoConfigsRecord(
         data=_record_value_dict_to_proto(
-            record.data, [int, float, bool, str, bytes], ProtoConfigsRecordValue
+            record.data, [bool, int, float, str, bytes], ProtoConfigsRecordValue
         )
     )
 
