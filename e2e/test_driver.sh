@@ -14,7 +14,7 @@ case "$1" in
 esac
 
 case "$2" in
-  db)
+  sqlite)
     db_args="--database $(date +%s).db"
     ;;
   *)
