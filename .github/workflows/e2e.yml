@@ -133,6 +133,9 @@ jobs:
         run: python simulation.py
       - name: Run driver test
         run: ./../test_driver.sh "${{ matrix.directory }}"
+      - name: Test server with sqlite state
+        if: ${{ matrix.directory == 'bare' }}
+        run: ./../test_driver.sh bare sqlite
 
   strategies:
     runs-on: ubuntu-22.04
