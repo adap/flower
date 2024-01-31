@@ -34,7 +34,7 @@ esac
 timeout 2m flower-server $server_arg $db_arg $rest_arg &
 sleep 3
 
-timeout 2m flower-client client:flower $client_arg --server $server_address &
+timeout 2m flower-client client:flower $client_arg $rest_arg --server $server_address &
 sleep 3
 
 timeout 2m flower-client client:flower $client_arg $rest_arg --server $server_address &
