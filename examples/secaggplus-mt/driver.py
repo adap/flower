@@ -24,7 +24,6 @@ def task_dict_to_task_ins_list(
             task_id="",  # Do not set, will be created and set by the DriverAPI
             group_id="",
             run_id=run_id,
-            run_id=run_id,
             task=merge(
                 task,
                 task_pb2.Task(
@@ -193,9 +192,7 @@ for server_round in range(num_rounds):
                 break
 
         # Collect correct results
-        node_messages = task_res_list_to_task_dict(
-            [res for res in all_task_res if res.task.HasField("sa")]
-        )
+        node_messages = task_res_list_to_task_dict(all_task_res)
     workflow.close()
 
     # Slow down the start of the next round
