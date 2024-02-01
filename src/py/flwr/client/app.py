@@ -64,7 +64,8 @@ def run_client() -> None:
             )
         log(
             WARN,
-            "Option `--insecure` was set. Starting insecure HTTP client connected to %s.",
+            "Option `--insecure` was set. "
+            "Starting insecure HTTP client connected to %s.",
             args.server,
         )
         root_certificates = None
@@ -77,7 +78,8 @@ def run_client() -> None:
             root_certificates = Path(cert_path).read_bytes()
         log(
             DEBUG,
-            "Starting secure HTTPS client connected to %s with the following certificates: %s.",
+            "Starting secure HTTPS client connected to %s "
+            "with the following certificates: %s.",
             args.server,
             cert_path,
         )
