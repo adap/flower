@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Secure Aggregation handlers."""
-
-
-from .handler import SecureAggregationHandler
-from .secaggplus_handler import SecAggPlusHandler
+from .secaggplus_middleware import secaggplus_middleware
 
 __all__ = [
-    "SecAggPlusHandler",
-    "SecureAggregationHandler",
+    "secaggplus_middleware",
 ]

@@ -15,7 +15,7 @@ python -m isort --check-only --skip src/py/flwr/proto src/py/flwr
 echo "- isort: done"
 
 echo "- black: start"
-python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr
+python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr examples
 echo "- black: done"
 
 echo "- init_py_check: start"
