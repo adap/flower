@@ -57,7 +57,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     Algorithm based on the description in Communication-Efficient Learning of Deep
     Networks from Decentralized Data https://arxiv.org/abs/1602.05629. This
     implementation expands on the initial idea by enabling more hyperparameters
-    specification therefore providing more control on how partitions are created. 
+    specification therefore providing more control on how partitions are created.
     It enables the division obtained in original paper.
 
     Parameters
@@ -71,9 +71,9 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         `num_partitions`.
     shard_size : Optional[int]
         Size of a single shards (a partition has one or more shards). If the size is not
-        given it will be automatically computed such that.
+        given it will be automatically computed.
     keep_incomplete_shard : bool
-        Weather to drop the last shard which might be incomplete (smaller than the
+        Whether to drop the last shard which might be incomplete (smaller than the
         others). If it is dropped each shard is equal size. (It does not mean that each
         client gets equal number of shards, which only happens if
         `num_partitions` % `num_shards` = 0). This parameter has no effect if
@@ -142,7 +142,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         self._check_num_partitions_greater_than_zero()
         self._partition_by = partition_by
         self._num_shards_per_node = num_shards_per_node
-        self._total_num_shards: Optional[int] = None
+        self._num_shards_used: Optional[int] = None
         self._shard_size = shard_size
         self._keep_incomplete_shard = keep_incomplete_shard
         self._shuffle = shuffle
@@ -182,16 +182,33 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         consecutive samples (if self._keep_incomplete_shard is False, each shard is same
         size).
         """
+        # No need to do anything if that node_id_to_indices are already determined
         if self._node_id_to_indices_determined:
             return
+
+        # One of the specification allows to skip the `num_shards_per_node` param
         if self._num_shards_per_node is not None:
-            self._total_num_shards = int(
+            self._num_shards_used = int(
                 self._num_partitions * self._num_shards_per_node
             )
             num_shards_per_node_array = (
                 np.ones(self._num_partitions) * self._num_shards_per_node
             )
-            self._compute_shard_size_if_missing()
+            if self._shard_size is None:
+                self._compute_shard_size_if_missing()
+                assert self._shard_size is not None
+                if self._keep_incomplete_shard:
+                    num_usable_shards_in_dataset = int(
+                        math.ceil(len(self.dataset) / self._shard_size)
+                    )
+                else:
+                    num_usable_shards_in_dataset = int(
+                        math.floor(len(self.dataset) / self._shard_size)
+                    )
+            else:
+                num_usable_shards_in_dataset = int(
+                    math.floor(len(self.dataset) / self._shard_size)
+                )
         elif self._num_shards_per_node is None:
             if self._shard_size is None:
                 raise ValueError(
@@ -199,25 +216,27 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
                     "num_shards_per_node is None"
                 )
             if self._keep_incomplete_shard is False:
-                self._total_num_shards = int(
+                self._num_shards_used = int(
                     math.floor(len(self.dataset) / self._shard_size)
                 )
+                num_usable_shards_in_dataset = self._num_shards_used
             elif self._keep_incomplete_shard is True:
-                self._total_num_shards = int(
+                self._num_shards_used = int(
                     math.ceil(len(self.dataset) / self._shard_size)
                 )
+                num_usable_shards_in_dataset = self._num_shards_used
             else:
                 raise ValueError(
                     "The keep_incomplete_shards need to be specified "
                     "when _num_shards_per_node is None."
                 )
-            num_shards_per_node = int(self._total_num_shards / self._num_partitions)
+            num_shards_per_node = int(self._num_shards_used / self._num_partitions)
             # Assign the shards per nodes (so far, the same as in ideal case)
             num_shards_per_node_array = (
                 np.ones(self._num_partitions) * num_shards_per_node
             )
             num_shards_assigned = self._num_partitions * num_shards_per_node
-            num_shards_to_assign = self._total_num_shards - num_shards_assigned
+            num_shards_to_assign = self._num_shards_used - num_shards_assigned
             # Assign the "missing" shards
             for i in range(num_shards_to_assign):
                 num_shards_per_node_array[i] += 1
@@ -231,7 +250,10 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         indices_on_which_to_split_shards = np.cumsum(
             num_shards_per_node_array, dtype=int
         )
-        shard_indices_array = self._rng.permutation(self._total_num_shards)
+
+        shard_indices_array = self._rng.permutation(num_usable_shards_in_dataset)[
+            : self._num_shards_used
+        ]
         # Randomly assign shards to node_id
         nid_to_shard_indices = np.split(
             shard_indices_array, indices_on_which_to_split_shards
@@ -284,7 +306,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         if self._shard_size is None:
             # If shard size is not specified it needs to be computed
             num_rows = self.dataset.num_rows
-            self._shard_size = int(num_rows / self._total_num_shards)
+            self._shard_size = int(num_rows / self._num_shards_used)
 
     def _check_possibility_of_partitions_creation(self) -> None:
         if self._shard_size is not None and self._num_shards_per_node is not None:
