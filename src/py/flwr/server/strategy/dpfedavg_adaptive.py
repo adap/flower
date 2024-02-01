@@ -36,7 +36,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
 
     Warning
     -------
-    This class is deprecated.
+    This class is deprecated and will be removed in a future release.
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes

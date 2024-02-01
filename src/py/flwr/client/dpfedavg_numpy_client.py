@@ -31,7 +31,7 @@ class DPFedAvgNumPyClient(NumPyClient):
 
     Warning
     -------
-    This class is deprecated.
+    This class is deprecated and will be removed in a future release.
     """
 
     def __init__(self, client: NumPyClient) -> None:
