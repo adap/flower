@@ -86,7 +86,7 @@ def run_client() -> None:
 
     log(
         DEBUG,
-        "The Flower Client uses the %s function as a callable.",
+        "The Flower client uses `%s` to execute tasks",
         args.callable,
     )
 
