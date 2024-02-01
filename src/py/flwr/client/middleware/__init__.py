@@ -15,8 +15,10 @@
 """Middleware layers."""
 
 
+from .secure_aggregation.secaggplus_middleware import secaggplus_middleware
 from .utils import make_ffn
 
 __all__ = [
     "make_ffn",
+    "secaggplus_middleware",
 ]

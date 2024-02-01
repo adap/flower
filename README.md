@@ -104,6 +104,7 @@ Flower Baselines is a collection of community-contributed projects that reproduc
 - [MOON](https://github.com/adap/flower/tree/main/baselines/moon)
 - [niid-Bench](https://github.com/adap/flower/tree/main/baselines/niid_bench)
 - [TAMUNA](https://github.com/adap/flower/tree/main/baselines/tamuna)
+- [FedPara](https://github.com/adap/flower/tree/main/baselines/fedpara)
 - [FedAvg](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist)
 - [FedOpt](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
 
@@ -125,6 +126,7 @@ Quickstart examples:
 - [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)
 - [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart-jax)
 - [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
+- [Quickstart (XGBoost)](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
 - [Quickstart (Android [TFLite])](https://github.com/adap/flower/tree/main/examples/android)
 - [Quickstart (iOS [CoreML])](https://github.com/adap/flower/tree/main/examples/ios)
 
@@ -135,6 +137,7 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 - [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced-tensorflow)
 - [Advanced Flower with PyTorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)
 - Single-Machine Simulation of Federated Learning Systems ([PyTorch](https://github.com/adap/flower/tree/main/examples/simulation_pytorch)) ([Tensorflow](https://github.com/adap/flower/tree/main/examples/simulation_tensorflow))
+- [Comprehensive Flower+XGBoost](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive)
 - [Flower through Docker Compose and with Grafana dashboard](https://github.com/adap/flower/tree/main/examples/flower-via-docker-compose)
 
 ## Community
