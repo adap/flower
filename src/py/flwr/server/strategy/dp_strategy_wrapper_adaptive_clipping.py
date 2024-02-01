@@ -127,6 +127,7 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
+
         return self.strategy.configure_fit(server_round, parameters, client_manager)
 
     def configure_evaluate(

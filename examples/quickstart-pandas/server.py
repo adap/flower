@@ -1,5 +1,4 @@
-import pickle
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -9,9 +8,6 @@ from flwr.common import (
     EvaluateRes,
     FitIns,
     FitRes,
-    Metrics,
-    MetricsAggregationFn,
-    NDArrays,
     Parameters,
     Scalar,
     ndarrays_to_parameters,
@@ -23,11 +19,6 @@ from flwr.server.strategy import Strategy
 
 
 class FedAnalytics(Strategy):
-    def __init__(
-        self, compute_fns: List[Callable] = None, col_names: List[str] = None
-    ) -> None:
-        super().__init__()
-
     def initialize_parameters(
         self, client_manager: Optional[ClientManager] = None
     ) -> Optional[Parameters]:

@@ -14,19 +14,27 @@
 # ==============================================================================
 """RecordSet tests."""
 
-
-from typing import Callable, List, OrderedDict, Type, Union
+from copy import deepcopy
+from typing import Callable, Dict, List, OrderedDict, Type, Union
 
 import numpy as np
 import pytest
 
+from .configsrecord import ConfigsRecord
+from .metricsrecord import MetricsRecord
 from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from .parametersrecord import Array, ParametersRecord
-from .recordset_utils import (
+from .recordset_compat import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
 )
-from .typing import NDArray, NDArrays, Parameters
+from .typing import (
+    ConfigsRecordValues,
+    MetricsRecordValues,
+    NDArray,
+    NDArrays,
+    Parameters,
+)
 
 
 def get_ndarrays() -> NDArrays:
@@ -80,20 +88,37 @@ def test_parameters_to_array_and_back() -> None:
     assert np.array_equal(ndarray, ndarray_)
 
 
-def test_parameters_to_parametersrecord_and_back() -> None:
+@pytest.mark.parametrize(
+    "keep_input, validate_freed_fn",
+    [
+        (False, lambda x, x_copy, y: len(x.tensors) == 0),  # check tensors were freed
+        (True, lambda x, x_copy, y: x.tensors == y.tensors),  # check they are equal
+    ],
+)
+def test_parameters_to_parametersrecord_and_back(
+    keep_input: bool,
+    validate_freed_fn: Callable[[Parameters, Parameters, Parameters], bool],
+) -> None:
     """Test conversion between legacy Parameters and ParametersRecords."""
     ndarrays = get_ndarrays()
 
     parameters = ndarrays_to_parameters(ndarrays)
+    parameters_copy = deepcopy(parameters)
 
-    params_record = parameters_to_parametersrecord(parameters=parameters)
+    params_record = parameters_to_parametersrecord(
+        parameters=parameters, keep_input=keep_input
+    )
 
-    parameters_ = parametersrecord_to_parameters(params_record)
+    parameters_ = parametersrecord_to_parameters(params_record, keep_input=keep_input)
 
     ndarrays_ = parameters_to_ndarrays(parameters=parameters_)
 
+    # Validate returned NDArrays match those at the beginning
     for arr, arr_ in zip(ndarrays, ndarrays_):
-        assert np.array_equal(arr, arr_)
+        assert np.array_equal(arr, arr_), "no"
+
+    # Validate initial Parameters object has been handled according to `keep_input`
+    assert validate_freed_fn(parameters, parameters_copy, parameters_)
 
 
 def test_set_parameters_while_keeping_intputs() -> None:
@@ -103,7 +128,7 @@ def test_set_parameters_while_keeping_intputs() -> None:
     array_dict = OrderedDict(
         {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
     )
-    p_record.set_parameters(array_dict)
+    p_record.set_parameters(array_dict, keep_input=True)
 
     # Creating a second parametersrecord passing the same `array_dict` (not erased)
     p_record_2 = ParametersRecord(array_dict)
@@ -145,3 +170,196 @@ def test_set_parameters_with_incorrect_types(
 
     with pytest.raises(TypeError):
         p_record.set_parameters(array_dict)  # type: ignore
+
+
+@pytest.mark.parametrize(
+    "key_type, value_fn",
+    [
+        (str, lambda x: int(x.flatten()[0])),  # str: int
+        (str, lambda x: float(x.flatten()[0])),  # str: float
+        (str, lambda x: x.flatten().astype("int").tolist()),  # str: List[int]
+        (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
+        (str, lambda x: []),  # str: empty list
+    ],
+)
+def test_set_metrics_to_metricsrecord_with_correct_types(
+    key_type: Type[str],
+    value_fn: Callable[[NDArray], MetricsRecordValues],
+) -> None:
+    """Test adding metrics of various types to a MetricsRecord."""
+    m_record = MetricsRecord()
+
+    labels = [1, 2.0]
+    arrays = get_ndarrays()
+
+    my_metrics = OrderedDict(
+        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
+    )
+
+    # Add metric
+    m_record.set_metrics(my_metrics)
+
+    # Check metrics are actually added
+    assert my_metrics == m_record.data
+
+
+@pytest.mark.parametrize(
+    "key_type, value_fn",
+    [
+        (str, lambda x: str(x.flatten()[0])),  # str: str  (supported: unsupported)
+        (str, lambda x: bool(x.flatten()[0])),  # str: bool  (supported: unsupported)
+        (
+            str,
+            lambda x: x.flatten().astype("str").tolist(),
+        ),  # str: List[str] (supported: unsupported)
+        (str, lambda x: x),  # str: NDArray (supported: unsupported)
+        (
+            str,
+            lambda x: {str(v): v for v in x.flatten()},
+        ),  # str: dict[str: float] (supported: unsupported)
+        (
+            str,
+            lambda x: [{str(v): v for v in x.flatten()}],
+        ),  # str: List[dict[str: float]] (supported: unsupported)
+        (
+            str,
+            lambda x: [1, 2.0, 3.0, 4],
+        ),  # str: List[mixing valid types] (supported: unsupported)
+        (
+            int,
+            lambda x: x.flatten().tolist(),
+        ),  # int: List[str] (unsupported: supported)
+        (
+            float,
+            lambda x: x.flatten().tolist(),
+        ),  # float: List[int] (unsupported: supported)
+    ],
+)
+def test_set_metrics_to_metricsrecord_with_incorrect_types(
+    key_type: Type[Union[str, int, float, bool]],
+    value_fn: Callable[[NDArray], Union[NDArray, Dict[str, NDArray], List[float]]],
+) -> None:
+    """Test adding metrics of various unsupported types to a MetricsRecord."""
+    m_record = MetricsRecord()
+
+    labels = [1, 2.0]
+    arrays = get_ndarrays()
+
+    my_metrics = OrderedDict(
+        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
+    )
+
+    with pytest.raises(TypeError):
+        m_record.set_metrics(my_metrics)  # type: ignore
+
+
+@pytest.mark.parametrize(
+    "keep_input",
+    [
+        (True),
+        (False),
+    ],
+)
+def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
+    keep_input: bool,
+) -> None:
+    """Test keep_input functionality for MetricsRecord."""
+    m_record = MetricsRecord(keep_input=keep_input)
+
+    # constructing a valid input
+    labels = [1, 2.0]
+    arrays = get_ndarrays()
+    my_metrics = OrderedDict(
+        {str(label): arr.flatten().tolist() for label, arr in zip(labels, arrays)}
+    )
+
+    my_metrics_copy = my_metrics.copy()
+
+    # Add metric
+    m_record.set_metrics(my_metrics, keep_input=keep_input)
+
+    # Check metrics are actually added
+    # Check that input dict has been emptied when enabled such behaviour
+    if keep_input:
+        assert my_metrics == m_record.data
+    else:
+        assert my_metrics_copy == m_record.data
+        assert len(my_metrics) == 0
+
+
+@pytest.mark.parametrize(
+    "key_type, value_fn",
+    [
+        (str, lambda x: str(x.flatten()[0])),  # str: str
+        (str, lambda x: int(x.flatten()[0])),  # str: int
+        (str, lambda x: float(x.flatten()[0])),  # str: float
+        (str, lambda x: bool(x.flatten()[0])),  # str: bool
+        (str, lambda x: x.flatten().tobytes()),  # str: bytes
+        (str, lambda x: x.flatten().astype("str").tolist()),  # str: List[str]
+        (str, lambda x: x.flatten().astype("int").tolist()),  # str: List[int]
+        (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
+        (str, lambda x: x.flatten().astype("bool").tolist()),  # str: List[bool]
+        (str, lambda x: [x.flatten().tobytes()]),  # str: List[bytes]
+        (str, lambda x: []),  # str: empyt list
+    ],
+)
+def test_set_configs_to_configsrecord_with_correct_types(
+    key_type: Type[str],
+    value_fn: Callable[[NDArray], ConfigsRecordValues],
+) -> None:
+    """Test adding configs of various types to a ConfigsRecord."""
+    labels = [1, 2.0]
+    arrays = get_ndarrays()
+
+    my_configs = OrderedDict(
+        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
+    )
+
+    c_record = ConfigsRecord(my_configs)
+
+    # check values are actually there
+    assert c_record.data == my_configs
+
+
+@pytest.mark.parametrize(
+    "key_type, value_fn",
+    [
+        (str, lambda x: x),  # str: NDArray (supported: unsupported)
+        (
+            str,
+            lambda x: {str(v): v for v in x.flatten()},
+        ),  # str: dict[str: float] (supported: unsupported)
+        (
+            str,
+            lambda x: [{str(v): v for v in x.flatten()}],
+        ),  # str: List[dict[str: float]] (supported: unsupported)
+        (
+            str,
+            lambda x: [1, 2.0, 3.0, 4],
+        ),  # str: List[mixing valid types] (supported: unsupported)
+        (
+            int,
+            lambda x: x.flatten().tolist(),
+        ),  # int: List[str] (unsupported: supported)
+        (
+            float,
+            lambda x: x.flatten().tolist(),
+        ),  # float: List[int] (unsupported: supported)
+    ],
+)
+def test_set_configs_to_configsrecord_with_incorrect_types(
+    key_type: Type[Union[str, int, float]],
+    value_fn: Callable[[NDArray], Union[NDArray, Dict[str, NDArray], List[float]]],
+) -> None:
+    """Test adding configs of various unsupported types to a ConfigsRecord."""
+    m_record = ConfigsRecord()
+
+    labels = [1, 2.0]
+    arrays = get_ndarrays()
+
+    my_metrics = OrderedDict(
+        {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
+    )
+
+    with pytest.raises(TypeError):
+        m_record.set_configs(my_metrics)  # type: ignore
