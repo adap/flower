@@ -125,6 +125,7 @@ Quickstart examples:
 - [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)
 - [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart-jax)
 - [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
+- [Quickstart (XGBoost)](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
 - [Quickstart (Android [TFLite])](https://github.com/adap/flower/tree/main/examples/android)
 - [Quickstart (iOS [CoreML])](https://github.com/adap/flower/tree/main/examples/ios)
 
@@ -135,6 +136,7 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 - [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced-tensorflow)
 - [Advanced Flower with PyTorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)
 - Single-Machine Simulation of Federated Learning Systems ([PyTorch](https://github.com/adap/flower/tree/main/examples/simulation_pytorch)) ([Tensorflow](https://github.com/adap/flower/tree/main/examples/simulation_tensorflow))
+- [Comprehensive Flower+XGBoost](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive)
 - [Flower through Docker Compose and with Grafana dashboard](https://github.com/adap/flower/tree/main/examples/flower-via-docker-compose)
 
 ## Community
