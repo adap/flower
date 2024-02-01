@@ -29,7 +29,13 @@ def adaptive_clipping_middleware(
     """Clip the client model updates before sending them to the server."""
     if msg.metadata.task_type == TASK_TYPE_FIT:
         fit_ins = compat.recordset_to_fitins(msg.message, keep_input=True)
+
+        if "clipping_norm" not in fit_ins.config:
+            raise Exception("Clipping norm is not supplied by the server.")
+        if not isinstance(fit_ins.config["clipping_norm"], float):
+            raise Exception("Clipping norm should be a float value.")
         clipping_norm = fit_ins.config["clipping_norm"]
+
         server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
 
         # Call inner app
@@ -46,5 +52,7 @@ def adaptive_clipping_middleware(
         )
 
         fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
+
+        fit_res.metrics["norm_bit"] = norm_bit
         out_msg.message = compat.fitres_to_recordset(fit_res, keep_input=True)
         return out_msg
