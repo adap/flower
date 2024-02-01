@@ -335,7 +335,9 @@ class EnhancedServer(Server):
         else:
             results = ordered_results
             others = {}
-
+    
+        good_clients_idx = []
+        malicious_clients_idx = []
         if isinstance(self.strategy, Flanders):
             # Aggregate training results
             log(INFO, "fit_round - Aggregating training results")

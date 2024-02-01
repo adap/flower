@@ -87,7 +87,7 @@ def main(cfg: DictConfig) -> None:
         fed_dir = do_fl_partitioning(
             train_path,
             pool_size=cfg.server.pool_size,
-            alpha=0.5,
+            alpha=cfg.server.noniidness,
             num_classes=10,
             val_ratio=0.5,
             seed=1234,
@@ -97,7 +97,7 @@ def main(cfg: DictConfig) -> None:
         fed_dir = do_fl_partitioning(
             train_path,
             pool_size=cfg.server.pool_size,
-            alpha=0.5,
+            alpha=cfg.server.noniidness,
             num_classes=10,
             val_ratio=0.5,
             seed=1234,
@@ -141,15 +141,9 @@ def main(cfg: DictConfig) -> None:
     strategy = None
     if cfg.strategy.name == "flanders":
         function_path = cfg.aggregate_fn.aggregate_fn.function
-        print(f"Using aggregation function: {function_path}")
         module_name, function_name = function_path.rsplit('.', 1)
         module = importlib.import_module(module_name, package=__package__)
         aggregation_fn = getattr(module, function_name)
-        print(f"module_name {module_name}")
-        print(f"function_name {function_name}")
-        print(f"module {module}")
-        print(f"Aggr function {aggregation_fn}")
-        print(f"Aggr parameters {cfg.aggregate_fn.aggregate_fn.parameters}")
 
         strategy = instantiate(
             cfg.strategy.strategy,
@@ -197,6 +191,43 @@ def main(cfg: DictConfig) -> None:
             num_malicious_clients=num_malicious,
         )
     elif cfg.strategy.name == "fedavg":
+        strategy = instantiate(
+            cfg.strategy.strategy,
+            evaluate_fn=clients[dataset_name][1],
+            on_fit_config_fn=fit_config,
+            fraction_fit=1,
+            fraction_evaluate=0,
+            min_fit_clients=cfg.server.pool_size,
+            min_evaluate_clients=0,
+            min_available_clients=cfg.server.pool_size,
+        )
+    elif cfg.strategy.name == "bulyan":
+        # Get aggregation rule function
+        strategy = instantiate(
+            cfg.strategy.strategy,
+            evaluate_fn=clients[dataset_name][1],
+            on_fit_config_fn=fit_config,
+            fraction_fit=1,
+            fraction_evaluate=0,
+            min_fit_clients=cfg.server.pool_size,
+            min_evaluate_clients=0,
+            min_available_clients=cfg.server.pool_size,
+            num_malicious_clients=num_malicious,
+            to_keep=cfg.strategy.strategy.to_keep,
+        )
+    elif cfg.strategy.name == "trimmedmean":
+        strategy = instantiate(
+            cfg.strategy.strategy,
+            evaluate_fn=clients[dataset_name][1],
+            on_fit_config_fn=fit_config,
+            fraction_fit=1,
+            fraction_evaluate=0,
+            min_fit_clients=cfg.server.pool_size,
+            min_evaluate_clients=0,
+            min_available_clients=cfg.server.pool_size,
+            beta=cfg.strategy.strategy.beta,
+        )
+    elif cfg.strategy.name == "fedmedian":
         strategy = instantiate(
             cfg.strategy.strategy,
             evaluate_fn=clients[dataset_name][1],

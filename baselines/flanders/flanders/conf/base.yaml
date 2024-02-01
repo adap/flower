@@ -26,6 +26,7 @@ server:
   attack_fn: gaussian
   num_malicious: 0
   omniscent: True
+  noniidness: 0.5
  
 server_device: cpu
 seed: 33

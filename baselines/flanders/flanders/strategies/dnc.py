@@ -9,6 +9,7 @@ from flwr.common import (
     NDArrays,
     Parameters,
     Scalar,
+    parameters_to_ndarrays
 )
 from flwr.common.logger import log
 from flwr.server.client_proxy import ClientProxy
@@ -122,7 +123,11 @@ class DnC(FedAvg):
             5. Compute outlier score
             6. Filter "bad" models
         """
-        parameters_aggregated = aggregate_dnc(results, self.c, self.niters, len(results), self.num_malicious_clients)
+        weights_results = [
+            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+            for _, fit_res in results
+        ]
+        parameters_aggregated = aggregate_dnc(weights_results, self.c, self.niters, len(results))
         parameters_aggregated, metrics_aggregated = super().aggregate_fit(server_round, results, failures)
 
         # Aggregate custom metrics if aggregation fn was provided
