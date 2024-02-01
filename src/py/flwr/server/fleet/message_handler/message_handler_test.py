@@ -17,14 +17,14 @@
 
 from unittest.mock import MagicMock
 
-from flwr.proto.fleet_pb2 import (
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
     PullTaskInsRequest,
     PushTaskResRequest,
 )
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskRes
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
 from .message_handler import create_node, delete_node, pull_task_ins, push_task_res
 

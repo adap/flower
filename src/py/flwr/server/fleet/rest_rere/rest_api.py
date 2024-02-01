@@ -18,7 +18,7 @@
 import sys
 
 from flwr.common.constant import MISSING_EXTRA_REST
-from flwr.proto.fleet_pb2 import (
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
     PullTaskInsRequest,

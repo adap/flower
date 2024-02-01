@@ -357,23 +357,31 @@ Changelog entry
 
 When opening a new PR, inside its description, there should be a ``Changelog entry`` header.
 
-As per the comment above this section::
+Above this header you should see the following comment that explains how to write your changelog entry:
 
     Inside the following 'Changelog entry' section, 
     you should put the description of your changes that will be added to the changelog alongside your PR title.
 
     If the section is completely empty (without any token), 
     the changelog will just contain the title of the PR for the changelog entry, without any description. 
+
     If the 'Changelog entry' section is removed entirely, 
     it will categorize the PR as "General improvement" and add it to the changelog accordingly. 
+
     If the section contains some text other than tokens, it will use it to add a description to the change. 
+
     If the section contains one of the following tokens it will ignore any other text and put the PR under the corresponding section of the changelog:
 
     <general> is for classifying a PR as a general improvement.
+
     <skip> is to not add the PR to the changelog
+
     <baselines> is to add a general baselines change to the PR
+
     <examples> is to add a general examples change to the PR
+
     <sdk> is to add a general sdk change to the PR
+
     <simulations> is to add a general simulations change to the PR
 
     Note that only one token should be used.
