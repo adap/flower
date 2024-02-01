@@ -22,13 +22,20 @@ import numpy as np
 
 from flwr.client.numpy_client import NumPyClient
 from flwr.common.dp import add_gaussian_noise, clip_by_l2
+from flwr.common.logger import warn_deprecated_feature
 from flwr.common.typing import Config, NDArrays, Scalar
 
 
 class DPFedAvgNumPyClient(NumPyClient):
-    """Wrapper for configuring a Flower client for DP."""
+    """Wrapper for configuring a Flower client for DP.
+
+    Warning
+    -------
+    This class is deprecated and will be removed in a future release.
+    """
 
     def __init__(self, client: NumPyClient) -> None:
+        warn_deprecated_feature("`DPFedAvgNumPyClient` wrapper")
         super().__init__()
         self.client = client
 
