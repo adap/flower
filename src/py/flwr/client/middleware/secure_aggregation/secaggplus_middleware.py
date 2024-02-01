@@ -171,13 +171,13 @@ def secaggplus_middleware(
     if msg.metadata.task_type != TASK_TYPE_FIT:
         return call_next(msg, ctxt)
 
-    # Retrieve state
+    # Retrieve local state
     if RECORD_KEY_STATE not in ctxt.state.configs:
         ctxt.state.set_configs(RECORD_KEY_STATE, ConfigsRecord({}))
     state_dict = ctxt.state.get_configs(RECORD_KEY_STATE).data
     state = SecAggPlusState(**state_dict)
 
-    # Retrieve configs
+    # Retrieve incoming configs
     configs = msg.message.get_configs(RECORD_KEY_CONFIGS).data
 
     # Check the validity of the next stage
