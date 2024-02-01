@@ -12,14 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-from flwr.common.message import Message
-from flwr.client.typing import FlowerCallable
-from flwr.common.context import Context
-from flwr.common.constant import TASK_TYPE_FIT
-from flwr.common import recordset_compat as compat
-def clipping_middlewaremsg (msg: Message, ctxt: Context, call_next: FlowerCallable) -> Message:
-    """Clip the client model updates before sending them to the server."""
+"""Clipping middleware for central DP with client side clipping."""
 
+from flwr.client.typing import FlowerCallable
+from flwr.common import recordset_compat as compat
+from flwr.common.constant import TASK_TYPE_FIT
+from flwr.common.context import Context
+from flwr.common.differential_privacy import compute_clip_model_update
+from flwr.common.message import Message
+
+
+def clipping_middlewaremsg(
+    msg: Message, ctxt: Context, call_next: FlowerCallable
+) -> Message:
+    """Clip the client model updates before sending them to the server."""
     if msg.metadata.task_type == TASK_TYPE_FIT:
         fit_ins = compat.recordset_to_fitins(msg.message, keep_input=True)
         clipping_norm = fit_ins.config["clipping_norm"]
@@ -30,9 +36,10 @@ def clipping_middlewaremsg (msg: Message, ctxt: Context, call_next: FlowerCallab
 
         fit_res = compat.recordset_to_fitres(out_msg.message, keep_input=True)
 
-        # Modify the FitRes message
-        fit_res.parameters  # This should be of Parameters type. You may want to deserialize it to numpy arrays.
-        # Save back to the out message
+        # Clip the client update
+        compute_clip_model_update(
+            fit_res.parameters, server_to_client_params, clipping_norm
+        )
+
         out_msg.message = compat.fitres_to_recordset(fit_res, keep_input=True)
         return out_msg
-

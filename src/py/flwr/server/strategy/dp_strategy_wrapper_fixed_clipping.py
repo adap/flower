@@ -18,8 +18,6 @@ Papers: https://arxiv.org/pdf/1712.07557.pdf, https://arxiv.org/pdf/1710.06963.p
 """
 from typing import Dict, List, Optional, Tuple, Union
 
-import numpy as np
-
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -33,7 +31,7 @@ from flwr.common import (
 )
 from flwr.common.differential_privacy import (
     add_gaussian_noise_inplace,
-    clip_inputs_inplace,
+    compute_clip_model_update,
     compute_stdv,
 )
 from flwr.server.client_manager import ClientManager
@@ -133,7 +131,10 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         ]
 
         # Compute and clip the updates
-        self._compute_clip_model_updates(clients_params)
+        for client_param in clients_params:
+            compute_clip_model_update(
+                client_param, self.current_round_params, self.clipping_norm
+            )
 
         # Update the results with the new params
         for res, params in zip(results, clients_params):
@@ -172,44 +173,32 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
-    def _compute_clip_model_updates(self, all_clients_params: List[NDArrays]) -> None:
-        """Compute model updates for each client model based on the current round
-        parameters and then clip it."""
-        for client_param in all_clients_params:
-            client_update = [
-                np.subtract(x, y)
-                for (x, y) in zip(client_param, self.current_round_params)
-            ]
-            clip_inputs_inplace(client_update, self.clipping_norm)
-
-            for i, _ in enumerate(self.current_round_params):
-                client_param[i] = self.current_round_params[i] + client_update[i]
 
 class DPStrategyWrapperClientSideFixedClipping(Strategy):
     """Wrapper for Configuring a Strategy for Central DP.
 
-        The clipping is at the client side.
+    The clipping is at the client side.
 
-        Parameters
-        ----------
-        strategy: Strategy
-            The strategy to which DP functionalities will be added by this wrapper.
-        noise_multiplier: float
-            The noise multiplier for the Gaussian mechanism for model updates.
-            A value of 1.0 or higher is recommended for strong privacy.
-        clipping_norm: float
-            The value of the clipping norm.
-        num_sampled_clients: int
-            The number of clients that are sampled on each round.
-        """
+    Parameters
+    ----------
+    strategy: Strategy
+        The strategy to which DP functionalities will be added by this wrapper.
+    noise_multiplier: float
+        The noise multiplier for the Gaussian mechanism for model updates.
+        A value of 1.0 or higher is recommended for strong privacy.
+    clipping_norm: float
+        The value of the clipping norm.
+    num_sampled_clients: int
+        The number of clients that are sampled on each round.
+    """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
-            self,
-            strategy: Strategy,
-            noise_multiplier: float,
-            clipping_norm: float,
-            num_sampled_clients: int,
+        self,
+        strategy: Strategy,
+        noise_multiplier: float,
+        clipping_norm: float,
+        num_sampled_clients: int,
     ) -> None:
         super().__init__()
 
@@ -245,7 +234,6 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-
         additional_config = {"clipping_norm": self.clipping_norm}
         inner_strategy_config_result = self.strategy.configure_fit(
             server_round, parameters, client_manager
@@ -276,11 +264,6 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
         """
         if failures:
             return None, {}
-
-        # Extract all clients' model params
-        clients_params = [
-            parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results
-        ]
 
         # Pass the new parameters for aggregation
         aggregated_params, metrics = self.strategy.aggregate_fit(
