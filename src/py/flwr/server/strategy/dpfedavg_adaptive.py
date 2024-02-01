@@ -52,7 +52,6 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         clip_count_stddev: Optional[float] = None,
     ) -> None:
         warn_deprecated_feature("`DPFedAvgAdaptive` wrapper")
-
         super().__init__(
             strategy=strategy,
             num_sampled_clients=num_sampled_clients,
