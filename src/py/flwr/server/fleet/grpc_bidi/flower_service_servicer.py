@@ -92,11 +92,11 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         - The `Join` method is (pretty much) unaware of the protocol
         """
         # When running Flower behind a proxy, the peer can be the same for
-        # different clients, so instead of `peer: str = context.peer()` we
+        # different clients, so instead of `cid: str = context.peer()` we
         # use a `UUID4` that is unique.
-        peer = uuid.uuid4().hex
+        cid: str = uuid.uuid4().hex
         bridge = self.grpc_bridge_factory()
-        client_proxy = self.client_proxy_factory(peer, bridge)
+        client_proxy = self.client_proxy_factory(cid, bridge)
         is_success = register_client_proxy(self.client_manager, client_proxy, context)
 
         if is_success:
