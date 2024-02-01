@@ -43,7 +43,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 # -------------------------------------------------------------------------- Driver SDK
-driver = GrpcDriver(driver_service_address="0.0.0.0:9091", certificates=None)
+driver = GrpcDriver(driver_service_address="0.0.0.0:9091", root_certificates=None)
 # -------------------------------------------------------------------------- Driver SDK
 
 anonymous_client_nodes = False

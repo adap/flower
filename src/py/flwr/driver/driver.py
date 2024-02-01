@@ -15,14 +15,21 @@
 """Flower driver service client."""
 
 
-from typing import Iterable, List, Optional, Tuple
+from threading import Lock
+from typing import Iterable, List, Optional, Tuple, cast
 
+from grpc import RpcError, StatusCode
+
+from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER, GrpcDriver
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     GetNodesRequest,
+    GetNodesResponse,
     PullTaskResRequest,
+    PullTaskResResponse,
     PushTaskInsRequest,
+    PushTaskInsResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
@@ -36,37 +43,53 @@ class Driver:
     driver_service_address : Optional[str]
         The IPv4 or IPv6 address of the Driver API server.
         Defaults to `"[::]:9091"`.
-    certificates : bytes (default: None)
-        Tuple containing root certificate, server certificate, and private key
-        to start a secure SSL-enabled server. The tuple is expected to have
-        three bytes elements in the following order:
-
-            * CA certificate.
-            * server certificate.
-            * server private key.
+    root_certificates : Optional[bytes] (default: None)
+        The PEM-encoded root certificates as a byte string. If provided,
+        a secure connection using the certificates will be established to
+        an SSL-enabled Flower server.
+    invoker : Optional[RetryInvoker] (default: None)
+        A `RetryInvoker` object to control the retry behavior on Driver API failures.
+        If set to None, a default instance is created with an exponential backoff
+        strategy, up to 10 attempts, a 300-second time limit, and retries are aborted
+        only if the RpcError's status code is not `StatusCode.UNAVAILABLE`.
     """
 
     def __init__(
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        certificates: Optional[bytes] = None,
+        root_certificates: Optional[bytes] = None,
+        invoker: Optional[RetryInvoker] = None,
     ) -> None:
         self.addr = driver_service_address
-        self.certificates = certificates
+        self.root_certificates = root_certificates
         self.grpc_driver: Optional[GrpcDriver] = None
         self.run_id: Optional[int] = None
         self.node = Node(node_id=0, anonymous=True)
+        self.lock = Lock()
+        # Initialize invoker
+        if invoker is None:
+            err_codes = (StatusCode.UNAVAILABLE,)
+            invoker = RetryInvoker(
+                exponential,
+                RpcError,
+                max_tries=10,
+                max_time=300,
+                should_giveup=lambda e: e.code() not in err_codes,  # type: ignore
+            )
+        self.invoker = invoker
 
     def _get_grpc_driver_and_run_id(self) -> Tuple[GrpcDriver, int]:
         # Check if the GrpcDriver is initialized
-        if self.grpc_driver is None or self.run_id is None:
-            # Connect and create run
-            self.grpc_driver = GrpcDriver(
-                driver_service_address=self.addr, certificates=self.certificates
-            )
-            self.grpc_driver.connect()
-            res = self.grpc_driver.create_run(CreateRunRequest())
-            self.run_id = res.run_id
+        with self.lock:
+            if self.grpc_driver is None or self.run_id is None:
+                # Connect and create run
+                self.grpc_driver = GrpcDriver(
+                    driver_service_address=self.addr,
+                    root_certificates=self.root_certificates,
+                )
+                self.grpc_driver.connect()
+                res = self.grpc_driver.create_run(CreateRunRequest())
+                self.run_id = res.run_id
 
         return self.grpc_driver, self.run_id
 
@@ -75,7 +98,11 @@ class Driver:
         grpc_driver, run_id = self._get_grpc_driver_and_run_id()
 
         # Call GrpcDriver method
-        res = grpc_driver.get_nodes(GetNodesRequest(run_id=run_id))
+        req = GetNodesRequest(run_id=run_id)
+        with self.lock:
+            res = cast(
+                GetNodesResponse, self.invoker.invoke(grpc_driver.get_nodes, req)
+            )
         return list(res.nodes)
 
     def push_task_ins(self, task_ins_list: List[TaskIns]) -> List[str]:
@@ -87,7 +114,11 @@ class Driver:
             task_ins.run_id = run_id
 
         # Call GrpcDriver method
-        res = grpc_driver.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
+        req = PushTaskInsRequest(task_ins_list=task_ins_list)
+        with self.lock:
+            res = cast(
+                PushTaskInsResponse, self.invoker.invoke(grpc_driver.push_task_ins, req)
+            )
         return list(res.task_ids)
 
     def pull_task_res(self, task_ids: Iterable[str]) -> List[TaskRes]:
@@ -95,9 +126,11 @@ class Driver:
         grpc_driver, _ = self._get_grpc_driver_and_run_id()
 
         # Call GrpcDriver method
-        res = grpc_driver.pull_task_res(
-            PullTaskResRequest(node=self.node, task_ids=task_ids)
-        )
+        req = PullTaskResRequest(node=self.node, task_ids=task_ids)
+        with self.lock:
+            res = cast(
+                PullTaskResResponse, self.invoker.invoke(grpc_driver.pull_task_res, req)
+            )
         return list(res.task_res_list)
 
     def __del__(self) -> None:
@@ -107,4 +140,5 @@ class Driver:
             return
 
         # Disconnect
-        self.grpc_driver.disconnect()
+        with self.lock:
+            self.grpc_driver.disconnect()
