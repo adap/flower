@@ -20,8 +20,14 @@ from typing import Tuple, cast
 
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,  
+    load_ssh_public_key,
+    SSHPrivateKeyTypes, 
+    SSHPublicKeyTypes,
+)
 
 
 def generate_key_pairs() -> (
@@ -98,3 +104,17 @@ def decrypt(key: bytes, ciphertext: bytes) -> bytes:
     # The input key must be url safe
     fernet = Fernet(key)
     return fernet.decrypt(ciphertext)
+
+def deserialize_private_key(private_key_path) -> SSHPrivateKeyTypes:
+    with open(private_key_path, "rb") as key_file:
+        return load_ssh_private_key(
+            key_file.read(),
+            password=None,
+        )
+    
+def deserialize_public_key(public_key_path) -> SSHPublicKeyTypes:
+    with open(public_key_path, "rb") as key_file:
+        return load_ssh_public_key(
+            key_file.read(),
+            password=None,
+        )
