@@ -108,6 +108,7 @@ Flower Baselines is a collection of community-contributed projects that reproduc
 - [TAMUNA](https://github.com/adap/flower/tree/main/baselines/tamuna)
 - [FedVSSL](https://github.com/adap/flower/tree/main/baselines/fedvssl)
 - [FedXGBoost](https://github.com/adap/flower/tree/main/baselines/hfedxgboost)
+- [FedPara](https://github.com/adap/flower/tree/main/baselines/fedpara)
 - [FedAvg](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist)
 - [FedOpt](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
 
