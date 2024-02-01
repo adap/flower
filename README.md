@@ -33,8 +33,7 @@ design of Flower is based on a few guiding principles:
 
 - **Framework-agnostic**: Different machine learning frameworks have different
   strengths. Flower can be used with any machine learning framework, for
-  example, [PyTorch](https://pytorch.org),
-  [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), [fastai](https://www.fast.ai/), [Pandas](https://pandas.pydata.org/) for federated analytics, or even raw [NumPy](https://numpy.org/)
+  example, [PyTorch](https://pytorch.org), [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), [fastai](https://www.fast.ai/), [MLX](https://ml-explore.github.io/mlx/build/html/index.html), [XGBoost](https://xgboost.readthedocs.io/en/stable/), [Pandas](https://pandas.pydata.org/) for federated analytics, or even raw [NumPy](https://numpy.org/)
   for users who enjoy computing gradients by hand.
 
 - **Understandable**: Flower is written with maintainability in mind. The
@@ -80,7 +79,7 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 - [Quickstart (TensorFlow)](https://flower.dev/docs/framework/tutorial-quickstart-tensorflow.html)
 - [Quickstart (PyTorch)](https://flower.dev/docs/framework/tutorial-quickstart-pytorch.html)
 - [Quickstart (Hugging Face)](https://flower.dev/docs/framework/tutorial-quickstart-huggingface.html)
-- [Quickstart (PyTorch Lightning [code example])](https://flower.dev/docs/framework/tutorial-quickstart-pytorch-lightning.html)
+- [Quickstart (PyTorch Lightning)](https://flower.dev/docs/framework/tutorial-quickstart-pytorch-lightning.html)
 - [Quickstart (Pandas)](https://flower.dev/docs/framework/tutorial-quickstart-pandas.html)
 - [Quickstart (fastai)](https://flower.dev/docs/framework/tutorial-quickstart-fastai.html)
 - [Quickstart (JAX)](https://flower.dev/docs/framework/tutorial-quickstart-jax.html)
@@ -99,11 +98,16 @@ Flower Baselines is a collection of community-contributed projects that reproduc
 - [FedMLB](https://github.com/adap/flower/tree/main/baselines/fedmlb)
 - [FedPer](https://github.com/adap/flower/tree/main/baselines/fedper)
 - [FedProx](https://github.com/adap/flower/tree/main/baselines/fedprox)
+- [FedNova](https://github.com/adap/flower/tree/main/baselines/fednova)
+- [HeteroFL](https://github.com/adap/flower/tree/main/baselines/heterofl)
+- [FedAvgM](https://github.com/adap/flower/tree/main/baselines/fedavgm)
 - [FedWav2vec2](https://github.com/adap/flower/tree/main/baselines/fedwav2vec2)
 - [FjORD](https://github.com/adap/flower/tree/main/baselines/fjord)
 - [MOON](https://github.com/adap/flower/tree/main/baselines/moon)
 - [niid-Bench](https://github.com/adap/flower/tree/main/baselines/niid_bench)
 - [TAMUNA](https://github.com/adap/flower/tree/main/baselines/tamuna)
+- [FedVSSL](https://github.com/adap/flower/tree/main/baselines/fedvssl)
+- [FedXGBoost](https://github.com/adap/flower/tree/main/baselines/hfedxgboost)
 - [FedPara](https://github.com/adap/flower/tree/main/baselines/fedpara)
 - [FedAvg](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist)
 - [FedOpt](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
@@ -129,14 +133,19 @@ Quickstart examples:
 - [Quickstart (XGBoost)](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
 - [Quickstart (Android [TFLite])](https://github.com/adap/flower/tree/main/examples/android)
 - [Quickstart (iOS [CoreML])](https://github.com/adap/flower/tree/main/examples/ios)
+- [Quickstart (MLX)](https://github.com/adap/flower/tree/main/examples/quickstart-mlx)
+- [Quickstart (XGBoost)](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
 
 Other [examples](https://github.com/adap/flower/tree/main/examples):
 
 - [Raspberry Pi & Nvidia Jetson Tutorial](https://github.com/adap/flower/tree/main/examples/embedded-devices)
 - [PyTorch: From Centralized to Federated](https://github.com/adap/flower/tree/main/examples/pytorch-from-centralized-to-federated)
+- [Vertical FL](https://github.com/adap/flower/tree/main/examples/vertical-fl)
+- [Federated Finetuning of OpenAI's Whisper](https://github.com/adap/flower/tree/main/examples/whisper-federated-finetuning)
+- [Comprehensive XGBoost](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive)
 - [Advanced Flower with TensorFlow/Keras](https://github.com/adap/flower/tree/main/examples/advanced-tensorflow)
 - [Advanced Flower with PyTorch](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)
-- Single-Machine Simulation of Federated Learning Systems ([PyTorch](https://github.com/adap/flower/tree/main/examples/simulation_pytorch)) ([Tensorflow](https://github.com/adap/flower/tree/main/examples/simulation_tensorflow))
+- Single-Machine Simulation of Federated Learning Systems ([PyTorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch)) ([Tensorflow](https://github.com/adap/flower/tree/main/examples/simulation-tensorflow))
 - [Comprehensive Flower+XGBoost](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive)
 - [Flower through Docker Compose and with Grafana dashboard](https://github.com/adap/flower/tree/main/examples/flower-via-docker-compose)
 
