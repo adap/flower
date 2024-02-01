@@ -16,6 +16,7 @@
 
 
 from dataclasses import dataclass
+from typing import Optional
 
 from .recordset import RecordSet
 
@@ -46,7 +47,7 @@ class Metadata:
     task_id: str = ""
     group_id: str = ""
     ttl: str = ""
-    target_node_id: int = 0
+    target_node_id: Optional[int] = None
     task_type: str = ""
 
 
@@ -65,3 +66,21 @@ class Message:
 
     metadata: Metadata
     message: RecordSet
+
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        message: RecordSet,
+        task_type: Optional[str] = None,
+        target_node_id: Optional[int] = None,
+        ttl: Optional[str] = None,
+        metadata: Optional[Metadata] = None,
+    ):
+        self.message = message
+        if metadata is not None:
+            self.metadata = metadata
+        else:
+            self.metadata = Metadata(
+                task_type=task_type if task_type is not None else "",
+                target_node_id=target_node_id,
+                ttl=ttl if ttl is not None else "",
+            )

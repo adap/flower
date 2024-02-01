@@ -21,7 +21,7 @@ from typing import List
 from flwr.client.typing import FlowerCallable, Layer
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.context import Context
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message
 from flwr.common.metricsrecord import MetricsRecord
 from flwr.common.recordset import RecordSet
 
@@ -73,8 +73,8 @@ def make_mock_app(name: str, footprint: List[str]) -> FlowerCallable:
 
 def _get_dummy_flower_message() -> Message:
     return Message(
+        task_type="mock",
         message=RecordSet(),
-        metadata=Metadata(run_id=0, task_id="", group_id="", ttl="", task_type="mock"),
     )
 
 

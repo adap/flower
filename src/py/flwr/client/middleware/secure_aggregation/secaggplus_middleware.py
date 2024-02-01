@@ -27,7 +27,7 @@ from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import TASK_TYPE_FIT
 from flwr.common.context import Context
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message
 from flwr.common.recordset import RecordSet
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -207,7 +207,6 @@ def secaggplus_middleware(
 
     # Return message
     return Message(
-        metadata=Metadata(0, "", "", "", TASK_TYPE_FIT),
         message=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)}),
     )
 

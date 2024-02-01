@@ -169,10 +169,7 @@ def grpc_connection(  # pylint: disable=R0915
         # Construct Message
         return Message(
             metadata=Metadata(
-                run_id=0,
                 task_id=str(uuid.uuid4()),
-                group_id="",
-                ttl="",
                 task_type=task_type,
             ),
             message=recordset,
