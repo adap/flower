@@ -19,4 +19,5 @@ from .utils import make_ffn
 
 __all__ = [
     "make_ffn",
+    "fixed_clipping_middleware",
 ]

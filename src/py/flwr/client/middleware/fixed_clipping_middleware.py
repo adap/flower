@@ -15,6 +15,7 @@
 """Clipping middleware for central DP with client side clipping."""
 
 from flwr.client.typing import FlowerCallable
+from flwr.common import parameters_to_ndarrays, ndarrays_to_parameters
 from flwr.common import recordset_compat as compat
 from flwr.common.constant import TASK_TYPE_FIT
 from flwr.common.context import Context
@@ -22,24 +23,28 @@ from flwr.common.differential_privacy import compute_clip_model_update
 from flwr.common.message import Message
 
 
-def clipping_middlewaremsg(
+def fixed_clipping_middleware(
     msg: Message, ctxt: Context, call_next: FlowerCallable
 ) -> Message:
     """Clip the client model updates before sending them to the server."""
     if msg.metadata.task_type == TASK_TYPE_FIT:
         fit_ins = compat.recordset_to_fitins(msg.message, keep_input=True)
         clipping_norm = fit_ins.config["clipping_norm"]
-        server_to_client_params = fit_ins.parameters
+        server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
 
         # Call inner app
         out_msg = call_next(msg, ctxt)
-
         fit_res = compat.recordset_to_fitres(out_msg.message, keep_input=True)
+
+        client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
 
         # Clip the client update
         compute_clip_model_update(
-            fit_res.parameters, server_to_client_params, clipping_norm
+            client_to_server_params,
+            server_to_client_params,
+            clipping_norm,
         )
 
+        fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
         out_msg.message = compat.fitres_to_recordset(fit_res, keep_input=True)
         return out_msg
