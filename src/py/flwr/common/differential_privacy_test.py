@@ -19,6 +19,7 @@ import numpy as np
 from .differential_privacy import (
     add_gaussian_noise_inplace,
     clip_inputs_inplace,
+    compute_clip_model_update,
     compute_stdv,
     get_norm,
 )
@@ -105,3 +106,32 @@ def test_compute_stdv() -> None:
     # Assert
     expected_stdv = float((noise_multiplier * clipping_norm) / num_sampled_clients)
     assert stdv == expected_stdv
+
+
+def test_compute_clip_model_update() -> None:
+    """Test compute_clip_model_update function."""
+    # Prepare
+    param1 = [
+        np.array([0.5, 1.5, 2.5]),
+        np.array([3.5, 4.5, 5.5]),
+        np.array([6.5, 7.5, 8.5]),
+    ]
+    param2 = [
+        np.array([1.0, 2.0, 3.0]),
+        np.array([4.0, 5.0, 6.0]),
+        np.array([7.0, 8.0, 9.0]),
+    ]
+    clipping_norm = 4
+
+    expected_result = [
+        np.array([0.5, 1.5, 2.5]),
+        np.array([3.5, 4.5, 5.5]),
+        np.array([6.5, 7.5, 8.5]),
+    ]
+
+    # Execute
+    compute_clip_model_update(param1, param2, clipping_norm)
+
+    # Verify
+    for i, param in enumerate(param1):
+        np.testing.assert_array_almost_equal(param, expected_result[i])

@@ -18,8 +18,6 @@ Papers: https://arxiv.org/pdf/1712.07557.pdf, https://arxiv.org/pdf/1710.06963.p
 """
 from typing import Dict, List, Optional, Tuple, Union
 
-import numpy as np
-
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -33,7 +31,7 @@ from flwr.common import (
 )
 from flwr.common.differential_privacy import (
     add_gaussian_noise_inplace,
-    clip_inputs_inplace,
+    compute_clip_model_update,
     compute_stdv,
 )
 from flwr.server.client_manager import ClientManager
@@ -133,7 +131,10 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         ]
 
         # Compute and clip the updates
-        self._compute_clip_model_updates(clients_params)
+        for client_param in clients_params:
+            compute_clip_model_update(
+                client_param, self.current_round_params, self.clipping_norm
+            )
 
         # Update the results with the new params
         for res, params in zip(results, clients_params):
@@ -171,16 +172,3 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
-
-    def _compute_clip_model_updates(self, all_clients_params: List[NDArrays]) -> None:
-        """Compute model updates for each client model based on the current round
-        parameters and then clip it."""
-        for client_param in all_clients_params:
-            client_update = [
-                np.subtract(x, y)
-                for (x, y) in zip(client_param, self.current_round_params)
-            ]
-            clip_inputs_inplace(client_update, self.clipping_norm)
-
-            for i, _ in enumerate(self.current_round_params):
-                client_param[i] = self.current_round_params[i] + client_update[i]

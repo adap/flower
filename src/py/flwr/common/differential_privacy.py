@@ -12,6 +12,8 @@
 # ==============================================================================
 """Utility functions for differential privacy."""
 
+from typing import List
+
 import numpy as np
 
 from flwr.common import NDArrays
@@ -61,3 +63,15 @@ def compute_stdv(
     paper: https://arxiv.org/pdf/1710.06963.pdf
     """
     return float((noise_multiplier * clipping_norm) / num_sampled_clients)
+
+
+def compute_clip_model_update(
+    param1: List[NDArrays], param2: List[NDArrays], clipping_norm: float
+) -> None:
+    """Compute model update (param1 - param2) and clip it.
+    Then add the clipped value to param1."""
+    model_update = [np.subtract(x, y) for (x, y) in zip(param1, param2)]
+    clip_inputs_inplace(model_update, clipping_norm)
+
+    for i, _ in enumerate(param2):
+        param1[i] = param2[i] + model_update[i]
