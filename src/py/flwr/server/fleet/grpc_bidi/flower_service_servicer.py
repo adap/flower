@@ -91,10 +91,9 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
           wrapping the actual message
         - The `Join` method is (pretty much) unaware of the protocol
         """
-        # NOTE(aloga): this is a hack. when running flower behind a proxy, the peer can
-        # be the same for different clients (i.e. ip:port) so we use a uuid that is
-        # unique.
-        # peer: str = context.peer()
+        # When running Flower behind a proxy, the peer can be the same for
+        # different clients, so instead of `peer: str = context.peer()` we
+        # use a `UUID4` that is unique.
         peer = uuid.uuid4().hex
         bridge = self.grpc_bridge_factory()
         client_proxy = self.client_proxy_factory(peer, bridge)
