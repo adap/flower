@@ -30,11 +30,12 @@ parser.add_argument(
     "--mnist",
     action="store_true",
     help="If you use Raspberry Pi Zero clients (which just have 512MB or RAM) use "
-         "MNIST",
+    "MNIST",
 )
 
 warnings.filterwarnings("ignore", category=UserWarning)
 NUM_CLIENTS = 50
+
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')."""
@@ -96,6 +97,7 @@ def prepare_dataset(use_mnist: bool):
         img_key = "img"
         norm = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     pytorch_transforms = Compose([ToTensor(), norm])
+
     def apply_transforms(batch):
         """Apply transforms to the partition from FederatedDataset."""
         batch[img_key] = [pytorch_transforms(img) for img in batch[img_key]]
@@ -112,7 +114,7 @@ def prepare_dataset(use_mnist: bool):
         validsets.append(partition["test"])
     testset = fds.load_full("test")
     testset = testset.with_transform(apply_transforms)
-    return trainsets,  validsets, testset
+    return trainsets, validsets, testset
 
 
 # Flower client, adapted from Pytorch quickstart/simulation example
