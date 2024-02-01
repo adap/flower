@@ -19,7 +19,7 @@ import base64
 from typing import Tuple, cast
 
 from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives import hashes, serialization, hmac
 from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.serialization import (
@@ -118,3 +118,17 @@ def deserialize_public_key(public_key_path) -> SSHPublicKeyTypes:
             key_file.read(),
             password=None,
         )
+    
+def compute_hmac(key: bytes, message: bytes) -> bytes:
+    computed_hmac = hmac.HMAC(key, hashes.SHA256())
+    computed_hmac.update(message)
+    return computed_hmac.finalize()
+
+def verify_hmac(key: bytes, message: bytes, hmac_value: bytes) -> bool:
+    computed_hmac = hmac.HMAC(key, hashes.SHA256())
+    computed_hmac.update(message)
+    try:
+        computed_hmac.verify(hmac_value)
+        return True
+    except:
+        return False
