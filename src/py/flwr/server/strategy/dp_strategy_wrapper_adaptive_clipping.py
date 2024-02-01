@@ -128,7 +128,14 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
 
-        return self.strategy.configure_fit(server_round, parameters, client_manager)
+        additional_config = {"clipping_norm": self.clipping_norm}
+        inner_strategy_config_result = self.strategy.configure_fit(
+            server_round, parameters, client_manager
+        )
+        for _, fit_ins in inner_strategy_config_result:
+            fit_ins.config.update(additional_config)
+
+        return inner_strategy_config_result
 
     def configure_evaluate(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
@@ -154,17 +161,21 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         self._update_clip_norm(results)
         if aggregated_params:
             aggregated_params = self._add_noise_to_updates(aggregated_params)
+
+
+        # Add noise to params
+
         return aggregated_params
 
     def _update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
         # calculate the number of clients which set the norm indicator bit
         norm_bit_set_count = 0
         for client_proxy, fit_res in results:
-            if "dpfedavg_norm_bit" not in fit_res.metrics:
+            if "norm_bit" not in fit_res.metrics:
                 raise Exception(
-                    f"Indicator bit not returned by client with id {client_proxy.cid}."
+                    f"Norm bit not returned by client with id {client_proxy.cid}."
                 )
-            if fit_res.metrics["dpfedavg_norm_bit"]:
+            if fit_res.metrics["norm_bit"]:
                 norm_bit_set_count += 1
         # Noising the count
         noised_norm_bit_set_count = float(
@@ -176,18 +187,6 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         self.clipping_norm *= math.exp(
             -self.clip_norm_lr
             * (noised_norm_bit_set_fraction - self.target_clipped_quantile)
-        )
-
-    def _add_noise_to_updates(self, parameters: Parameters) -> Parameters:
-        """Add Gaussian noise to model params."""
-        return ndarrays_to_parameters(
-            self.add_gaussian_noise(
-                parameters_to_ndarrays(parameters),
-                float(
-                    (self.noise_multiplier * self.clipping_norm)
-                    / self.num_sampled_clients ** (0.5)
-                ),
-            )
         )
 
     @staticmethod
