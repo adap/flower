@@ -12,7 +12,6 @@
 # ==============================================================================
 """Utility functions for differential privacy."""
 
-from typing import List
 
 import numpy as np
 
@@ -66,7 +65,7 @@ def compute_stdv(
 
 
 def compute_clip_model_update(
-    param1: List[NDArrays], param2: List[NDArrays], clipping_norm: float
+    param1: NDArrays, param2: NDArrays, clipping_norm: float
 ) -> None:
     """Compute model update (param1 - param2) and clip it.
     Then add the clipped value to param1."""
