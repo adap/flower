@@ -15,7 +15,7 @@
 """Clipping middleware for central DP with client side clipping."""
 
 from flwr.client.typing import FlowerCallable
-from flwr.common import parameters_to_ndarrays, ndarrays_to_parameters
+from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common import recordset_compat as compat
 from flwr.common.constant import TASK_TYPE_FIT
 from flwr.common.context import Context

@@ -32,6 +32,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.common.differential_privacy import add_gaussian_noise_inplace, compute_stdv
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
@@ -127,7 +128,6 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-
         additional_config = {"clipping_norm": self.clipping_norm}
         inner_strategy_config_result = self.strategy.configure_fit(
             server_round, parameters, client_manager
@@ -159,11 +159,17 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
             server_round, results, failures
         )
         self._update_clip_norm(results)
+
+        # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params = self._add_noise_to_updates(aggregated_params)
-
-
-        # Add noise to params
+            aggregated_params_ndarrays = parameters_to_ndarrays(aggregated_params)
+            add_gaussian_noise_inplace(
+                aggregated_params_ndarrays,
+                compute_stdv(
+                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+                ),
+            )
+            aggregated_params = ndarrays_to_parameters(aggregated_params_ndarrays)
 
         return aggregated_params
 

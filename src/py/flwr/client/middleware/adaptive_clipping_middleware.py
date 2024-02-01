@@ -15,11 +15,11 @@
 """Clipping middleware for central DP with client side adaptive clipping."""
 
 from flwr.client.typing import FlowerCallable
-from flwr.common import parameters_to_ndarrays, ndarrays_to_parameters
+from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common import recordset_compat as compat
 from flwr.common.constant import TASK_TYPE_FIT
 from flwr.common.context import Context
-from flwr.common.differential_privacy import compute_clip_model_update
+from flwr.common.differential_privacy import compute_adaptive_clip_model_update
 from flwr.common.message import Message
 
 
@@ -45,7 +45,7 @@ def adaptive_clipping_middleware(
         client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
 
         # Clip the client update
-        compute_clip_model_update(
+        norm_bit = compute_adaptive_clip_model_update(
             client_to_server_params,
             server_to_client_params,
             clipping_norm,

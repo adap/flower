@@ -74,3 +74,33 @@ def compute_clip_model_update(
 
     for i, _ in enumerate(param2):
         param1[i] = param2[i] + model_update[i]
+
+
+def adaptive_clip_inputs_inplace(input_arrays: NDArrays, clipping_norm: float) -> bool:
+    """Clip model update based on the clipping norm in-place.
+
+    It returns true if scaling_factor < 1 which is used for norm_bit
+    FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
+    """
+    input_norm = get_norm(input_arrays)
+    scaling_factor = min(1, clipping_norm / input_norm)
+    for array in input_arrays:
+        array *= scaling_factor
+    return scaling_factor < 1
+
+
+def compute_adaptive_clip_model_update(
+    param1: NDArrays, param2: NDArrays, clipping_norm: float
+) -> bool:
+    """Compute model update, clip it, then add the clipped value to param1.
+
+    model update = param1 - param2
+    Return the norm_bit
+    """
+    model_update = [np.subtract(x, y) for (x, y) in zip(param1, param2)]
+    norm_bit = adaptive_clip_inputs_inplace(model_update, clipping_norm)
+
+    for i, _ in enumerate(param2):
+        param1[i] = param2[i] + model_update[i]
+
+    return norm_bit
