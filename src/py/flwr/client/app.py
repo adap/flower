@@ -18,7 +18,7 @@
 import argparse
 import sys
 import time
-from logging import INFO, WARN
+from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
@@ -62,7 +62,12 @@ def run_client() -> None:
                 "the '--root-certificates' option when running in insecure mode, "
                 "or omit '--insecure' to use HTTPS."
             )
-        log(WARN, "Option `--insecure` was set. Starting insecure HTTP client.")
+        log(
+            WARN,
+            "Option `--insecure` was set. "
+            "Starting insecure HTTP client connected to %s.",
+            args.server,
+        )
         root_certificates = None
     else:
         # Load the certificates if provided, or load the system certificates
@@ -71,11 +76,19 @@ def run_client() -> None:
             root_certificates = None
         else:
             root_certificates = Path(cert_path).read_bytes()
+        log(
+            DEBUG,
+            "Starting secure HTTPS client connected to %s "
+            "with the following certificates: %s.",
+            args.server,
+            cert_path,
+        )
 
-    print(args.root_certificates)
-    print(args.server)
-    print(args.dir)
-    print(args.callable)
+    log(
+        DEBUG,
+        "The Flower client uses `%s` to execute tasks",
+        args.callable,
+    )
 
     callable_dir = args.dir
     if callable_dir is not None:
