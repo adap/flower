@@ -32,8 +32,8 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.differential_privacy import (
-    add_noise_to_params,
-    clip_inputs,
+    add_gaussian_noise_inplace,
+    clip_inputs_inplace,
     compute_stdv,
 )
 from flwr.server.client_manager import ClientManager
@@ -74,7 +74,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
             raise ValueError("The noise multiplier should be a non-negative value.")
 
         if clipping_norm <= 0:
-            raise ValueError("The clipping threshold should be a positive value.")
+            raise ValueError("The clipping norm should be a positive value.")
 
         if num_sampled_clients <= 0:
             raise ValueError(
@@ -89,7 +89,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
-        rep = "DP Strategy Wrapper with Fixed Clipping"
+        rep = "DP Strategy Wrapper with Server Side Fixed Clipping"
         return rep
 
     def initialize_parameters(
@@ -132,16 +132,8 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
             parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results
         ]
 
-        # Compute the updates
-        all_clients_updates = self._compute_model_updates(clients_params)
-
-        # Clip updates
-        for client_update in all_clients_updates:
-            client_update = clip_inputs(client_update, self.clipping_norm)
-
-        # Compute the new parameters with the clipped updates
-        for client_param, client_update in zip(clients_params, all_clients_updates):
-            self._update_clients_params(client_param, client_update)
+        # Compute and clip the updates
+        self._compute_clip_model_updates(clients_params)
 
         # Update the results with the new params
         for res, params in zip(results, clients_params):
@@ -154,12 +146,14 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params = add_noise_to_params(
-                aggregated_params,
+            aggregated_params_ndarrays = parameters_to_ndarrays(aggregated_params)
+            add_gaussian_noise_inplace(
+                aggregated_params_ndarrays,
                 compute_stdv(
                     self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
                 ),
             )
+            aggregated_params = ndarrays_to_parameters(aggregated_params_ndarrays)
 
         return aggregated_params, metrics
 
@@ -178,26 +172,18 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
 
-    def _compute_model_updates(
-        self, all_clients_params: List[NDArrays]
-    ) -> List[NDArrays]:
-        """Compute model updates for each client based on the current round
-        parameters."""
-        all_client_updates = []
+    def _compute_clip_model_updates(self, all_clients_params: List[NDArrays]) -> None:
+        """Compute model updates for each client model based on the current round
+        parameters and then clip it."""
         for client_param in all_clients_params:
             client_update = [
                 np.subtract(x, y)
                 for (x, y) in zip(client_param, self.current_round_params)
             ]
-            all_client_updates.append(client_update)
-        return all_client_updates
+            clip_inputs_inplace(client_update, self.clipping_norm)
 
-    def _update_clients_params(
-        self, client_param: NDArrays, client_update: NDArrays
-    ) -> None:
-        """Update the client parameters based on the model updates."""
-        for i, _ in enumerate(self.current_round_params):
-            client_param[i] = self.current_round_params[i] + client_update[i]
+            for i, _ in enumerate(self.current_round_params):
+                client_param[i] = self.current_round_params[i] + client_update[i]
 
 class DPStrategyWrapperClientSideFixedClipping(Strategy):
     """Wrapper for Configuring a Strategy for Central DP.
@@ -303,12 +289,14 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params = add_noise_to_params(
-                aggregated_params,
+            aggregated_params_ndarrays = parameters_to_ndarrays(aggregated_params)
+            add_gaussian_noise_inplace(
+                aggregated_params_ndarrays,
                 compute_stdv(
                     self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
                 ),
             )
+            aggregated_params = ndarrays_to_parameters(aggregated_params_ndarrays)
 
         return aggregated_params, metrics
 
@@ -326,24 +314,3 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         """Evaluate model parameters using an evaluation function from the strategy."""
         return self.strategy.evaluate(server_round, parameters)
-
-    def _compute_model_updates(
-        self, all_clients_params: List[NDArrays]
-    ) -> List[NDArrays]:
-        """Compute model updates for each client based on the current round
-        parameters."""
-        all_client_updates = []
-        for client_param in all_clients_params:
-            client_update = [
-                np.subtract(x, y)
-                for (x, y) in zip(client_param, self.current_round_params)
-            ]
-            all_client_updates.append(client_update)
-        return all_client_updates
-
-    def _update_clients_params(
-        self, client_param: NDArrays, client_update: NDArrays
-    ) -> None:
-        """Update the client parameters based on the model updates."""
-        for i, _ in enumerate(self.current_round_params):
-            client_param[i] = self.current_round_params[i] + client_update[i]
