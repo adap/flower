@@ -61,4 +61,5 @@ __all__ = [
     "Strategy",
     "DPStrategyWrapperClientSideAdaptiveClipping",
     "DPStrategyWrapperServerSideFixedClipping",
+    "DPStrategyWrapperClientSideFixedClipping",
 ]
