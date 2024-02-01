@@ -16,6 +16,7 @@
 
 
 import unittest
+import uuid
 from unittest.mock import MagicMock, call
 
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
@@ -30,7 +31,8 @@ from flwr.server.fleet.grpc_bidi.grpc_bridge import InsWrapper, ResWrapper
 
 CLIENT_MESSAGE = ClientMessage()
 SERVER_MESSAGE = ServerMessage()
-CLIENT_CID = "some_client_cid"
+
+CID: str = uuid.uuid4().hex
 
 
 class FlowerServiceServicerTestCase(unittest.TestCase):
@@ -42,7 +44,6 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         """Create mocks for tests."""
         # Mock for the gRPC context argument
         self.context_mock = MagicMock()
-        self.context_mock.peer.return_value = CLIENT_CID
 
         # Define client_messages to be processed by FlowerServiceServicer instance
         self.client_messages = [CLIENT_MESSAGE for _ in range(5)]
@@ -70,7 +71,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
         # Create a GrpcClientProxy mock which we will use to test if correct
         # methods where called and client_messages are getting passed to it
         self.grpc_client_proxy_mock = MagicMock()
-        self.grpc_client_proxy_mock.cid = CLIENT_CID
+        self.grpc_client_proxy_mock.cid = CID
 
         self.client_proxy_factory_mock = MagicMock()
         self.client_proxy_factory_mock.return_value = self.grpc_client_proxy_mock
@@ -127,11 +128,7 @@ class FlowerServiceServicerTestCase(unittest.TestCase):
             num_server_messages += 1
 
         assert len(self.client_messages) == num_server_messages
-        assert self.grpc_client_proxy_mock.cid == CLIENT_CID
-
-        self.client_proxy_factory_mock.assert_called_once_with(
-            CLIENT_CID, self.grpc_bridge_mock
-        )
+        assert self.grpc_client_proxy_mock.cid == CID
 
         # Check if the client was registered with the client_manager
         self.client_manager_mock.register.assert_called_once_with(
