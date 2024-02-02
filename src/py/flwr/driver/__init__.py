@@ -17,9 +17,11 @@
 
 from .app import DriverConfig, start_driver
 from .driver import Driver
+from .grpc_driver import GrpcDriver
 
 __all__ = [
-    "DriverConfig",
-    "start_driver",
     "Driver",
+    "DriverConfig",
+    "GrpcDriver",
+    "start_driver",
 ]

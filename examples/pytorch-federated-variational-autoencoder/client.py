@@ -93,7 +93,9 @@ def main():
             loss = test(net, testloader)
             return float(loss), len(testloader), {}
 
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=CifarClient())
+    fl.client.start_client(
+        server_address="127.0.0.1:8080", client=CifarClient().to_client()
+    )
 
 
 if __name__ == "__main__":
