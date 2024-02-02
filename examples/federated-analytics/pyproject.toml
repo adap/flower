@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "federated-analytics"
 version = "0.1.0"
-description = "Federated Analytics Quickstart with Flower"
+description = "Federated Analytics with Flower"
 authors = ["Ragy Haddad <ragy202@gmail.com>"]
 maintainers = ["The Flower Authors <hello@flower.dev>"]
 
