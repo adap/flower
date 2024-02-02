@@ -50,7 +50,6 @@ A learning-oriented series of federated learning tutorials, the best place to st
    tutorial-quickstart-tensorflow
    tutorial-quickstart-huggingface
    tutorial-quickstart-jax
-   tutorial-quickstart-pandas
    tutorial-quickstart-fastai
    tutorial-quickstart-pytorch-lightning
    tutorial-quickstart-mxnet
@@ -93,6 +92,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    how-to-upgrade-to-flower-1.0
    how-to-use-built-in-middleware-layers
    how-to-run-flower-using-docker
+   how-to-federated-analytics
 
 .. toctree::
    :maxdepth: 1
