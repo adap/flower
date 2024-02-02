@@ -8,18 +8,9 @@
 
   Subclasses of `Client` and `NumPyClient` can now store local state that remains on the client. Let's start with the highlight first: this new feature is compatible with both simulated clients (via `start_simulation`) and networked clients (via `start_client`). It's also the first preview of new abstractions like `Context` and `RecordSet`. Clients can access state of type `RecordSet` via `state: RecordSet = self.context.state`. Changes to this `RecordSet` are preserved across different rounds of execution to enable stateful computations in a unified way across simulation and deployment.
 
-  <!-- - **Rename WorkloadState to RunState** ([#2770](https://github.com/adap/flower/pull/2770))
-  - **Add `NodeState` to `RayClientProxy`** ([#2686](https://github.com/adap/flower/pull/2686))
-  - **Add E2E test for `WorkloadState` and `NodeState`** ([#2696](https://github.com/adap/flower/pull/2696))
-  - **Add `WorkloadState` to virtual clients** ([#2643](https://github.com/adap/flower/pull/2643))
-  - **Rename `workload_id` to `run_id`** ([#2769](https://github.com/adap/flower/pull/2769)) -->
-
 - **Improve performance** ([#2293](https://github.com/adap/flower/pull/2293))
 
   Flower is faster than ever. All `FedAvg`-derived strategies now use in-place aggregation to reduce memory consumption. The Flower client serialization/deserialization has been rewritten from the ground up, which often results in speedups of more than 10%.
-
-  <!-- - **Add in-place FedAvg** ()
-  - **Make `receive` / `send` based on `Message`** ([#2868](https://github.com/adap/flower/pull/2868)) -->
 
 - **Introduce new XGBoost cyclic strategy** ([#2666](https://github.com/adap/flower/pull/2666), [#2668](https://github.com/adap/flower/pull/2668))
 
@@ -63,13 +54,6 @@
   - FedPara ([#2722](https://github.com/adap/flower/pull/2722))
 
 - **Improve documentation** ([#2674](https://github.com/adap/flower/pull/2674), [#2480](https://github.com/adap/flower/pull/2480), [#2826](https://github.com/adap/flower/pull/2826), [#2727](https://github.com/adap/flower/pull/2727), [#2761](https://github.com/adap/flower/pull/2761))
-  
-  <!-- - **Improve DP doc page** ([#2674](https://github.com/adap/flower/pull/2674))
-  - **Migrate tutorial-series-get-started-with-flower-pytorch to FDS** ([#2480](https://github.com/adap/flower/pull/2480))
-  - **Modified checkpoint loading instructions** ([#2826](https://github.com/adap/flower/pull/2826))
-  - **Update content in top-level README** ([#2727](https://github.com/adap/flower/pull/2727))
-  - **Update fedmedian.py docstring** ([#2761](https://github.com/adap/flower/pull/2761)) -->
-
 
 - **Improved testing and development infrastructure** ([#2797](https://github.com/adap/flower/pull/2797), [#2676](https://github.com/adap/flower/pull/2676), [#2644](https://github.com/adap/flower/pull/2644), [#2656](https://github.com/adap/flower/pull/2656), [#2848](https://github.com/adap/flower/pull/2848), [#2675](https://github.com/adap/flower/pull/2675), [#2735](https://github.com/adap/flower/pull/2735), [#2767](https://github.com/adap/flower/pull/2767), [#2732](https://github.com/adap/flower/pull/2732), [#2744](https://github.com/adap/flower/pull/2744), [#2681](https://github.com/adap/flower/pull/2681), [#2699](https://github.com/adap/flower/pull/2699), [#2745](https://github.com/adap/flower/pull/2745), [#2734](https://github.com/adap/flower/pull/2734), [#2731](https://github.com/adap/flower/pull/2731), [#2652](https://github.com/adap/flower/pull/2652), [#2720](https://github.com/adap/flower/pull/2720), [#2721](https://github.com/adap/flower/pull/2721), [#2717](https://github.com/adap/flower/pull/2717), [#2864](https://github.com/adap/flower/pull/2864), [#2694](https://github.com/adap/flower/pull/2694), [#2709](https://github.com/adap/flower/pull/2709), [#2658](https://github.com/adap/flower/pull/2658), [#2796](https://github.com/adap/flower/pull/2796), [#2692](https://github.com/adap/flower/pull/2692), [#2657](https://github.com/adap/flower/pull/2657), [#2813](https://github.com/adap/flower/pull/2813), [#2661](https://github.com/adap/flower/pull/2661), [#2398](https://github.com/adap/flower/pull/2398))
 
