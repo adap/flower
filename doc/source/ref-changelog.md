@@ -2,29 +2,123 @@
 
 ## Unreleased
 
-- **Add scikit-learn tabular data example** ([#2719](https://github.com/adap/flower/pull/2719))
+Features:
 
-- **General updates to Flower Examples** ([#2381](https://github.com/adap/flower/pull/2381))
+- **Middleware** ([#2580](https://github.com/adap/flower/pull/2580))
+- **Add SecAggPlus middleware** ([#2871](https://github.com/adap/flower/pull/2871))
 
-- **Retiring MXNet examples** The development of the MXNet fremework has ended and the project is now [archived on GitHub](https://github.com/apache/mxnet). Existing MXNet examples won't receive updates [#2724](https://github.com/adap/flower/pull/2724)
+- **Add conversion functions for `Message`** ([#2843](https://github.com/adap/flower/pull/2843))
+- **Update supported types in `ConfigsRecord` and `MetricsRecord`** ([#2832](https://github.com/adap/flower/pull/2832))
+- **Add `RecordSet` to `Task` proto** ([#2841](https://github.com/adap/flower/pull/2841))
+- **Add `NodeState` to `start_client`.** ([#2645](https://github.com/adap/flower/pull/2645))
+- **Add `FlowerContext` and `Metadata`** ([#2820](https://github.com/adap/flower/pull/2820))
+- **Add `ParametersRecord`** ([#2799](https://github.com/adap/flower/pull/2799))
+- **Add `MetricsRecord`** ([#2802](https://github.com/adap/flower/pull/2802))
+- **`RecordSet` basic enhancements** ([#2830](https://github.com/adap/flower/pull/2830))
+- **Remove default input arguments** ([#2854](https://github.com/adap/flower/pull/2854))
+- **Improve records type checking** ([#2838](https://github.com/adap/flower/pull/2838))
+- **Replace `Fwd/Bwd` with `Message/Context`** ([#2842](https://github.com/adap/flower/pull/2842))
+- **Add `*Record` ProtoBuf messages and corresponding serde functions.** ([#2831](https://github.com/adap/flower/pull/2831))
+- **Fix a bug in `serde._record_value_to_proto`** ([#2859](https://github.com/adap/flower/pull/2859))
 
-- **Deprecated `start_numpy_client`**. ([#2563](https://github.com/adap/flower/pull/2563))
+### What's new?
 
-  Until now, clients of type `NumPyClient` needed to be started via `start_numpy_client`. In our efforts to consolidate the core framework, we have introduced changes, and now all client types should start via `start_client`. To continue using `NumPyClient` clients, you simply need to first call the `.to_client()` method and then pass returned `Client` object to `start_client`. The examples and the documentation have been updated accordingly.
+- **Introduce stateful clients (experimental)** ([#2770](https://github.com/adap/flower/pull/2770), [#2686](https://github.com/adap/flower/pull/2686), [#2696](https://github.com/adap/flower/pull/2696), [#2643](https://github.com/adap/flower/pull/2643), [#2769](https://github.com/adap/flower/pull/2769))
+
+  Subclasses of `Client` and `NumPyClient` can now store local state that remains on the client. Let's start with the highlight first: this new feature is compatible with both simulated clients (via `start_simulation`) and networked clients (via `start_client`). It's also the first preview of new abstractions like `Context` and `RecordSet`. Clients can access state of type `RecordSet` via `state: RecordSet = self.context.state`. Changes to this `RecordSet` are preserved across different rounds of execution to enable stateful computations in a unified way across simulation and deployment.
+
+  <!-- - **Rename WorkloadState to RunState** ([#2770](https://github.com/adap/flower/pull/2770))
+  - **Add `NodeState` to `RayClientProxy`** ([#2686](https://github.com/adap/flower/pull/2686))
+  - **Add E2E test for `WorkloadState` and `NodeState`** ([#2696](https://github.com/adap/flower/pull/2696))
+  - **Add `WorkloadState` to virtual clients** ([#2643](https://github.com/adap/flower/pull/2643))
+  - **Rename `workload_id` to `run_id`** ([#2769](https://github.com/adap/flower/pull/2769)) -->
+
+- **Improve performance** ([#2293](https://github.com/adap/flower/pull/2293))
+
+  Flower is faster than ever. All `FedAvg`-derived strategies now use in-place aggregation to reduce memory consumption. The Flower client serialization/deserialization has been rewritten from the ground up, which often results in speedups of more than 10%.
+
+  <!-- - **Add in-place FedAvg** ()
+  - **Make `receive` / `send` based on `Message`** ([#2868](https://github.com/adap/flower/pull/2868)) -->
+
+- **Introduce new XGBoost cyclic strategy** ([#2666](https://github.com/adap/flower/pull/2666), [#2668](https://github.com/adap/flower/pull/2668))
+
+  A new strategy called `FedXgbCyclic` supports a client-by-client style of training (often called cyclic). The `xgboost-comprehensive` code examples shows how to use it in a full project and new also supports simulation mode. With this, Flower offers best-in-class XGBoost support.
+
+- **Support Python 3.11** ([#2394](https://github.com/adap/flower/pull/2394))
+
+  Framework tests now run on Python 3.8, 3.9, 3.10, and 3.11. This will ensure better support for users using more recent Python versions.
+
+- **Update gRPC and ProtoBuf dependencies** ([#2814](https://github.com/adap/flower/pull/2814))
+
+  The `grpcio` and `protobuf` dependencies were updated to their latest versions for improved security and performance.
+
+- **Introduce Docker image for Flower server** ([#2700](https://github.com/adap/flower/pull/2700), [#2688](https://github.com/adap/flower/pull/2688), [#2705](https://github.com/adap/flower/pull/2705), [#2695](https://github.com/adap/flower/pull/2695), [#2747](https://github.com/adap/flower/pull/2747), [#2746](https://github.com/adap/flower/pull/2746), [#2680](https://github.com/adap/flower/pull/2680), [#2682](https://github.com/adap/flower/pull/2682), [#2701](https://github.com/adap/flower/pull/2701))
+
+  The Flower server can now be run using an official Docker image. A new how-to guide explains [how to run Flower using Docker](https://flower.dev/docs/framework/how-to-run-flower-using-docker.html). An official Flower client Docker image will follow.
+
+- **Introduce** `flower-via-docker-compose` **example** ([#2626](https://github.com/adap/flower/pull/2626))
+
+- **Introduce** `quickstart-mlx` **example** ([#2693](https://github.com/adap/flower/pull/2693))
+
+- **Introduce** `quickstart-sklearn-tabular` **example** ([#2719](https://github.com/adap/flower/pull/2719))
+
+- **Introduce** `custom-metrics` **example** ([#1958](https://github.com/adap/flower/pull/1958))
+
+- **Update code examples to use Flower Datasets** ([#2450](https://github.com/adap/flower/pull/2450), [#2456](https://github.com/adap/flower/pull/2456), [#2318](https://github.com/adap/flower/pull/2318), [#2712](https://github.com/adap/flower/pull/2712))
+
+  Several code examples were updated to use [Flower Datasets](https://flower.dev/docs/datasets/).
+
+- **General updates to Flower Examples** ([#2381](https://github.com/adap/flower/pull/2381), [2805](https://github.com/adap/flower/pull/2805), [2782](https://github.com/adap/flower/pull/2782), [2806](https://github.com/adap/flower/pull/2806), [2829](https://github.com/adap/flower/pull/2829), [2825](https://github.com/adap/flower/pull/2825), [2816](https://github.com/adap/flower/pull/2816), [#2726](https://github.com/adap/flower/pull/2726), [#2659](https://github.com/adap/flower/pull/2659), [#2655](https://github.com/adap/flower/pull/2655))
+
+  Many Flower code examples received substantial updates.
 
 - **Update Flower Baselines**
 
-  - HFedXGBoost [#2226](https://github.com/adap/flower/pull/2226)
+  - HFedXGBoost ([#2226](https://github.com/adap/flower/pull/2226), [#2771](https://github.com/adap/flower/pull/2771))
+  - FedVSSL ([#2412](https://github.com/adap/flower/pull/2412))
+  - FedNova ([#2179](https://github.com/adap/flower/pull/2179))
+  - HeteroFL ([#2439](https://github.com/adap/flower/pull/2439))
+  - FedAvgM ([#2246](https://github.com/adap/flower/pull/2246))
+  - FedPara ([#2722](https://github.com/adap/flower/pull/2722))
 
-  - FedVSSL [#2412](https://github.com/adap/flower/pull/2412)
+- **Improve documentation** ([#2674](https://github.com/adap/flower/pull/2674), [#2480](https://github.com/adap/flower/pull/2480), [#2826](https://github.com/adap/flower/pull/2826), [#2727](https://github.com/adap/flower/pull/2727), [#2761](https://github.com/adap/flower/pull/2761))
+  
+  <!-- - **Improve DP doc page** ([#2674](https://github.com/adap/flower/pull/2674))
+  - **Migrate tutorial-series-get-started-with-flower-pytorch to FDS** ([#2480](https://github.com/adap/flower/pull/2480))
+  - **Modified checkpoint loading instructions** ([#2826](https://github.com/adap/flower/pull/2826))
+  - **Update content in top-level README** ([#2727](https://github.com/adap/flower/pull/2727))
+  - **Update fedmedian.py docstring** ([#2761](https://github.com/adap/flower/pull/2761)) -->
 
-  - FedNova [#2179](https://github.com/adap/flower/pull/2179)
 
-  - HeteroFL [#2439](https://github.com/adap/flower/pull/2439)
+- **Improved testing and development infrastructure** ([#2797](https://github.com/adap/flower/pull/2797), [#2676](https://github.com/adap/flower/pull/2676), [#2644](https://github.com/adap/flower/pull/2644), [#2656](https://github.com/adap/flower/pull/2656), [#2848](https://github.com/adap/flower/pull/2848), [#2675](https://github.com/adap/flower/pull/2675), [#2735](https://github.com/adap/flower/pull/2735), [#2767](https://github.com/adap/flower/pull/2767), [#2732](https://github.com/adap/flower/pull/2732), [#2744](https://github.com/adap/flower/pull/2744), [#2681](https://github.com/adap/flower/pull/2681), [#2699](https://github.com/adap/flower/pull/2699), [#2745](https://github.com/adap/flower/pull/2745), [#2734](https://github.com/adap/flower/pull/2734), [#2731](https://github.com/adap/flower/pull/2731), [#2652](https://github.com/adap/flower/pull/2652), [#2720](https://github.com/adap/flower/pull/2720), [#2721](https://github.com/adap/flower/pull/2721), [#2717](https://github.com/adap/flower/pull/2717), [#2864](https://github.com/adap/flower/pull/2864), [#2694](https://github.com/adap/flower/pull/2694), [#2709](https://github.com/adap/flower/pull/2709), [#2658](https://github.com/adap/flower/pull/2658), [#2796](https://github.com/adap/flower/pull/2796), [#2692](https://github.com/adap/flower/pull/2692), [#2657](https://github.com/adap/flower/pull/2657), [#2813](https://github.com/adap/flower/pull/2813), [#2661](https://github.com/adap/flower/pull/2661), [#2398](https://github.com/adap/flower/pull/2398))
 
-  - FedAvgM [#2246](https://github.com/adap/flower/pull/2246)
+  The Flower testing and development infrastructure has received substantial updates.
 
-  - FedPara [#2722](https://github.com/adap/flower/pull/2722)
+- **Update dependencies** ([#2753](https://github.com/adap/flower/pull/2753), [#2651](https://github.com/adap/flower/pull/2651), [#2739](https://github.com/adap/flower/pull/2739), [#2837](https://github.com/adap/flower/pull/2837), [#2788](https://github.com/adap/flower/pull/2788), [#2811](https://github.com/adap/flower/pull/2811), [#2774](https://github.com/adap/flower/pull/2774), [#2790](https://github.com/adap/flower/pull/2790), [#2751](https://github.com/adap/flower/pull/2751), [#2850](https://github.com/adap/flower/pull/2850), [#2812](https://github.com/adap/flower/pull/2812), [#2872](https://github.com/adap/flower/pull/2872), [#2736](https://github.com/adap/flower/pull/2736), [#2756](https://github.com/adap/flower/pull/2756), [#2857](https://github.com/adap/flower/pull/2857), [#2757](https://github.com/adap/flower/pull/2757), [#2810](https://github.com/adap/flower/pull/2810), [#2740](https://github.com/adap/flower/pull/2740), [#2789](https://github.com/adap/flower/pull/2789))
+
+- **General improvements** ([#2803](https://github.com/adap/flower/pull/2803), [2847](https://github.com/adap/flower/pull/2847), [2877](https://github.com/adap/flower/pull/2877), [2690](https://github.com/adap/flower/pull/2690), [2889](https://github.com/adap/flower/pull/2889), [2874](https://github.com/adap/flower/pull/2874), [2819](https://github.com/adap/flower/pull/2819), [2689](https://github.com/adap/flower/pull/2689), [2457](https://github.com/adap/flower/pull/2457), [2870](https://github.com/adap/flower/pull/2870), [2669](https://github.com/adap/flower/pull/2669), [2876](https://github.com/adap/flower/pull/2876), [2885](https://github.com/adap/flower/pull/2885), [2858](https://github.com/adap/flower/pull/2858), [2867](https://github.com/adap/flower/pull/2867), [2351](https://github.com/adap/flower/pull/2351), [2886](https://github.com/adap/flower/pull/2886), [2860](https://github.com/adap/flower/pull/2860), [2828](https://github.com/adap/flower/pull/2828), [2869](https://github.com/adap/flower/pull/2869), [2875](https://github.com/adap/flower/pull/2875), [2733](https://github.com/adap/flower/pull/2733), [2488](https://github.com/adap/flower/pull/2488), [2646](https://github.com/adap/flower/pull/2646), [2879](https://github.com/adap/flower/pull/2879), [2821](https://github.com/adap/flower/pull/2821), [2855](https://github.com/adap/flower/pull/2855), [2800](https://github.com/adap/flower/pull/2800), [2807](https://github.com/adap/flower/pull/2807), [2801](https://github.com/adap/flower/pull/2801), [2804](https://github.com/adap/flower/pull/2804), [2851](https://github.com/adap/flower/pull/2851), [2787](https://github.com/adap/flower/pull/2787), [2852](https://github.com/adap/flower/pull/2852), [#2672](https://github.com/adap/flower/pull/2672), [#2759](https://github.com/adap/flower/pull/2759))
+
+### Incompatible changes
+
+- **Deprecate** `start_numpy_client` ([#2563](https://github.com/adap/flower/pull/2563), [#2718](https://github.com/adap/flower/pull/2718))
+
+  Until now, clients of type `NumPyClient` needed to be started via `start_numpy_client`. In our efforts to consolidate the core framework, we have introduced changes, and now all client types should start via `start_client`. To continue using `NumPyClient` clients, you simply need to first call the `.to_client()` method and then pass returned `Client` object to `start_client`. The examples and the documentation have been updated accordingly.
+
+- **Deprecate legacy DP wrappers** ([#2749](https://github.com/adap/flower/pull/2749))
+  
+  Legacy DP wrapper classes are deprecated, but still functional. This is in preparation for a all-new pluggable version of differential privacy support in Flower.
+
+- **Make optional arg** `--callable` **in** `flower-client` **a required positional arg** ([#2673](https://github.com/adap/flower/pull/2673))
+
+- **Rename** `certificates` **to** `root_certificates` **in** `Driver` ([#2890](https://github.com/adap/flower/pull/2890))
+
+- **Drop experimental** `Task` **fields** ([#2866](https://github.com/adap/flower/pull/2866), [#2865](https://github.com/adap/flower/pull/2865))
+
+  Experimental fields `sa`, `legacy_server_message` and `legacy_client_message` were removed from `Task` message. The removed fields are superseded by the new `RecordSet` abstraction.
+
+- **Retire MXNet examples** ([#2724](https://github.com/adap/flower/pull/2724))
+
+  The development of the MXNet fremework has ended and the project is now [archived on GitHub](https://github.com/apache/mxnet). Existing MXNet examples won't receive updates.
 
 ## v1.6.0 (2023-11-28)
 
@@ -104,7 +198,7 @@ We would like to give our special thanks to all the contributors who made the ne
 
   - FedBN ([#2608](https://github.com/adap/flower/pull/2608), [#2615](https://github.com/adap/flower/pull/2615))
 
-- **General updates to Flower Examples** ([#2384](https://github.com/adap/flower/pull/2384),[#2425](https://github.com/adap/flower/pull/2425), [#2526](https://github.com/adap/flower/pull/2526), [#2302](https://github.com/adap/flower/pull/2302), [#2545](https://github.com/adap/flower/pull/2545))
+- **General updates to Flower Examples** ([#2384](https://github.com/adap/flower/pull/2384), [#2425](https://github.com/adap/flower/pull/2425), [#2526](https://github.com/adap/flower/pull/2526), [#2302](https://github.com/adap/flower/pull/2302), [#2545](https://github.com/adap/flower/pull/2545))
 
 - **General updates to Flower Baselines** ([#2301](https://github.com/adap/flower/pull/2301), [#2305](https://github.com/adap/flower/pull/2305), [#2307](https://github.com/adap/flower/pull/2307), [#2327](https://github.com/adap/flower/pull/2327), [#2435](https://github.com/adap/flower/pull/2435), [#2462](https://github.com/adap/flower/pull/2462), [#2463](https://github.com/adap/flower/pull/2463), [#2461](https://github.com/adap/flower/pull/2461), [#2469](https://github.com/adap/flower/pull/2469), [#2466](https://github.com/adap/flower/pull/2466), [#2471](https://github.com/adap/flower/pull/2471), [#2472](https://github.com/adap/flower/pull/2472), [#2470](https://github.com/adap/flower/pull/2470))
 
