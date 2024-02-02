@@ -15,7 +15,12 @@
 
 import numpy as np
 
-from flwr.common import NDArrays
+from flwr.common import (
+    NDArrays,
+    Parameters,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
 
 
 def get_norm(input_arrays: NDArrays) -> float:
@@ -74,3 +79,18 @@ def compute_clip_model_update(
 
     for i, _ in enumerate(param2):
         param1[i] = param2[i] + model_update[i]
+
+
+def add_gaussian_to_params(
+    model_params: Parameters,
+    noise_multiplier: float,
+    clipping_norm: float,
+    num_sampled_clients: int,
+) -> Parameters:
+    """Add gaussian noise to model parameters."""
+    model_params_ndarrays = parameters_to_ndarrays(model_params)
+    add_gaussian_noise_inplace(
+        model_params_ndarrays,
+        compute_stdv(noise_multiplier, clipping_norm, num_sampled_clients),
+    )
+    return ndarrays_to_parameters(model_params_ndarrays)
