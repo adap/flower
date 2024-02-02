@@ -2,25 +2,6 @@
 
 ## Unreleased
 
-Features:
-
-- **Middleware** ([#2580](https://github.com/adap/flower/pull/2580))
-- **Add SecAggPlus middleware** ([#2871](https://github.com/adap/flower/pull/2871))
-
-- **Add conversion functions for `Message`** ([#2843](https://github.com/adap/flower/pull/2843))
-- **Update supported types in `ConfigsRecord` and `MetricsRecord`** ([#2832](https://github.com/adap/flower/pull/2832))
-- **Add `RecordSet` to `Task` proto** ([#2841](https://github.com/adap/flower/pull/2841))
-- **Add `NodeState` to `start_client`.** ([#2645](https://github.com/adap/flower/pull/2645))
-- **Add `FlowerContext` and `Metadata`** ([#2820](https://github.com/adap/flower/pull/2820))
-- **Add `ParametersRecord`** ([#2799](https://github.com/adap/flower/pull/2799))
-- **Add `MetricsRecord`** ([#2802](https://github.com/adap/flower/pull/2802))
-- **`RecordSet` basic enhancements** ([#2830](https://github.com/adap/flower/pull/2830))
-- **Remove default input arguments** ([#2854](https://github.com/adap/flower/pull/2854))
-- **Improve records type checking** ([#2838](https://github.com/adap/flower/pull/2838))
-- **Replace `Fwd/Bwd` with `Message/Context`** ([#2842](https://github.com/adap/flower/pull/2842))
-- **Add `*Record` ProtoBuf messages and corresponding serde functions.** ([#2831](https://github.com/adap/flower/pull/2831))
-- **Fix a bug in `serde._record_value_to_proto`** ([#2859](https://github.com/adap/flower/pull/2859))
-
 ### What's new?
 
 - **Introduce stateful clients (experimental)** ([#2770](https://github.com/adap/flower/pull/2770), [#2686](https://github.com/adap/flower/pull/2686), [#2696](https://github.com/adap/flower/pull/2696), [#2643](https://github.com/adap/flower/pull/2643), [#2769](https://github.com/adap/flower/pull/2769))
