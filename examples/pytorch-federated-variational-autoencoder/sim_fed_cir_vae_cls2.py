@@ -35,7 +35,7 @@ parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 parser.add_argument(
     "--num_cpus",
     type=int,
-    default=6,
+    default=5,
     help="Number of CPUs to assign to a virtual client",
 )
 parser.add_argument(
@@ -318,8 +318,15 @@ if __name__ == "__main__":
         "method": "random",
         "metric": {"name": "global_val_loss", "goal": "minimize"},
         "parameters": {
-            "sample_per_class": {"values": [50, 100, 200, 300, 400, 500]},
-            "lambda_reg": {"min": 0.0, "max": 1.0},
+            "sample_per_class": {
+                "values": [
+                    50,
+                    100,
+                    200,
+                ]
+            },
+            # "lambda_reg": {"min": 0.0, "max": 1.0},
+            "lambda_reg": {"values": [0]},
             "lambda_align": {"values": [1, 10, 50, 100]},
             "lr_g": {"values": [1e-3, 1e-2, 1e-4]},
             "steps_g": {"values": [5, 10, 15, 20]},
@@ -329,4 +336,4 @@ if __name__ == "__main__":
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=20)
+    wandb.agent(sweep_id, function=main, count=5)

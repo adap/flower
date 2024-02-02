@@ -37,6 +37,26 @@ import torch.nn as nn
 from collections import OrderedDict
 
 
+def vae_loss(recon_img, img, mu, logvar):
+    # Reconstruction loss using binary cross-entropy
+    condition = (recon_img >= 0.0) & (recon_img <= 1.0)
+    # assert torch.all(condition), "Values should be between 0 and 1"
+    if not torch.all(condition):
+        ValueError("Values should be between 0 and 1")
+        recon_img = torch.clamp(recon_img, 0.0, 1.0)
+    recon_loss = F.binary_cross_entropy(
+        recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="sum"
+    )
+
+    # KL divergence loss
+    kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+
+    # Total VAE loss
+    total_loss = recon_loss + kld_loss
+
+    return total_loss
+
+
 class FedCiR(FedAvg):
     """Configurable FedCiRs strategy implementation."""
 
@@ -132,6 +152,22 @@ class FedCiR(FedAvg):
         self.device = device
         self.gen_model = VAE(encoder_only=True).to(self.device)
         self.alignment_loader = alignment_dataloader
+        self.ref_mu, self.ref_logvar = self.compute_ref_stats()
+
+    def compute_ref_stats(self):
+        ref_model = VAE().to(self.device)
+        opt_ref = torch.optim.Adam(ref_model.parameters(), lr=1e-3)
+        for _ in range(50):
+            for images, _ in self.alignment_loader:
+                images = images.to(self.device)
+                opt_ref.zero_grad()
+                recon_images, mu, logvar = ref_model(images)
+                vae_loss1 = vae_loss(recon_images, images, mu, logvar)
+                vae_loss1.backward()
+                opt_ref.step()
+        ref_model.eval()
+        _, ref_mu, ref_logvar = ref_model(images)
+        return ref_mu, ref_logvar
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
@@ -218,7 +254,8 @@ class FedCiR(FedAvg):
         if not self.accept_failures and failures:
             return None, {}
 
-        def vae_loss(recon_img, img, mu, logvar):
+        def vae_loss_connect(recon_img, img, mu, logvar, mu_ref, logvar_ref):
+            lambda_align = 1.0
             # Reconstruction loss using binary cross-entropy
             condition = (recon_img >= 0.0) & (recon_img <= 1.0)
             # assert torch.all(condition), "Values should be between 0 and 1"
@@ -230,10 +267,12 @@ class FedCiR(FedAvg):
             )
 
             # KL divergence loss
-            kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-
+            loss_align = 0.5 * (logvar_ref - logvar - 1) + (
+                logvar.exp() + (mu - mu_ref).pow(2)
+            ) / (2 * logvar_ref.exp())
+            loss_align_reduced = loss_align.sum(dim=1).sum()
             # Total VAE loss
-            total_loss = recon_loss + kld_loss
+            total_loss = lambda_align * loss_align_reduced + recon_loss
 
             return total_loss
 
@@ -251,6 +290,8 @@ class FedCiR(FedAvg):
         for ep_g in range(self.steps_gen):
             for step, (align_img, _) in enumerate(self.alignment_loader):
                 preds = []
+                # mu_s = []
+                # logvar_s = []
                 optimizer.zero_grad()
                 align_img = align_img.to(self.device)
 
@@ -264,6 +305,9 @@ class FedCiR(FedAvg):
                     temp_local_models[idx].load_state_dict(state_dict, strict=True)
                     z_g, mu_g, logvar_g = self.gen_model(align_img)
                     preds.append(temp_local_models[idx].decoder(z_g))
+                    # _, mu, logvar = temp_local_models[idx](align_img)
+                    # mu_s.append(mu)
+                    # logvar_s.append(logvar)
 
                 loss = vae_loss(
                     torch.stack(preds).mean(dim=0),
@@ -271,13 +315,23 @@ class FedCiR(FedAvg):
                     mu_g,
                     logvar_g,
                 )
+                # loss = vae_loss_connect(
+                #     torch.stack(preds).mean(dim=0),
+                #     align_img,
+                #     mu_g,
+                #     logvar_g,
+                #     self.ref_mu,
+                #     self.ref_logvar,
+                #     # torch.stack(mu_s).mean(dim=0),
+                #     # torch.stack(logvar_s).mean(dim=0),
+                # )
                 threshold = 1e-6  # Define a threshold for the negligible loss
                 log(DEBUG, f"generator loss at ep {ep_g} step {step}: {loss}")
 
                 if (
                     loss.item() > threshold
                 ):  # Check if the loss is greater than the threshold
-                    loss.backward()
+                    loss.backward(retain_graph=True)
                     optimizer.step()
                 else:
                     log(
