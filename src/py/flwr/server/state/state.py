@@ -152,3 +152,27 @@ class State(abc.ABC):
     @abc.abstractmethod
     def create_run(self) -> int:
         """Create one run."""
+
+    @abc.abstractmethod
+    def store_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Store `node_id` and `public_key` as key-value pair in state."""
+
+    @abc.abstractmethod
+    def get_public_key(self, node_id: int) -> bytes:
+        """Get client's public key in urlsafe bytes for `node_id`."""
+
+    @abc.abstractmethod
+    def store_my_private_key(self, private_key: bytes) -> None:
+        """Store my `private_key` in state."""
+
+    @abc.abstractmethod
+    def get_my_private_key(self) -> bytes:
+        """Get my private key in urlsafe bytes for `node_id`."""
+
+    @abc.abstractmethod
+    def store_my_public_key(self, public_key: bytes) -> None:
+        """Store my `public_key` in state."""
+
+    @abc.abstractmethod
+    def get_my_public_key(self) -> bytes:
+        """Get my public key in urlsafe bytes."""

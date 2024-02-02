@@ -15,6 +15,8 @@
 """Flower server interceptor."""
 
 import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
+from typing import Callable, Sequence, Tuple, Union
 from common.secure_aggregation.crypto.symmetric_encryption import generate_shared_key
 from flwr.proto.fleet_pb2 import (
     CreateNodeRequest,
@@ -22,6 +24,9 @@ from flwr.proto.fleet_pb2 import (
 )
 from flwr.server.fleet.message_handler import message_handler
 from flwr.server.state import StateFactory, State
+
+_PUBLIC_KEY_HEADER = "public-key"
+_AUTH_TOKEN_HEADER = "auth-token"
 
 def _unary_unary_rpc_terminator():
 
@@ -35,7 +40,7 @@ def _create_node_with_public_key(state: State, server_public_key: bytes):
     def send_public_key(request: CreateNodeRequest, context: grpc.ServicerContext) -> CreateNodeResponse:
         context.set_trailing_metadata(
             (
-                ("public-key", server_public_key),
+                (_PUBLIC_KEY_HEADER, server_public_key),
             )
         )
         return message_handler.create_node(request, state)
@@ -43,19 +48,34 @@ def _create_node_with_public_key(state: State, server_public_key: bytes):
     return grpc.unary_unary_rpc_method_handler(send_public_key)
 
 def _handle_authentication(public_key, private_key):
-    generate_shared_key(public_key, private_key)
+    return generate_shared_key(public_key, private_key)
 
+def _is_public_key_known(state: State, public_key: ec.EllipticCurvePublicKey) -> bool:
+    print("")
+
+def _get_value_from_tuples(key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]) -> Union[str, bytes]:
+    return next((value[::-1] for key, value in tuples if key == key_string), "")
 
 class AuthenticateClientInterceptor(grpc.ServerInterceptor):
 
-    def __init__(self, state_factory: StateFactory):
-        self._public_key_header = "public-key"
-        self._auth_token_header = "auth-token"
+    def __init__(self, state_factory: StateFactory, private_key: ec.EllipticCurvePrivateKey, public_key: ec.EllipticCurvePublicKey):
+        self._private_key = private_key
+        self._public_key = public_key
         self._state_factory = state_factory
         self._terminator = _unary_unary_rpc_terminator()
         self._create_node_handler = _create_node_with_public_key()
 
-    def intercept_service(self, continuation, handler_call_details: grpc.HandlerCallDetails):
+    def intercept_service(self, continuation: Callable, handler_call_details: grpc.HandlerCallDetails):
+        method_name = handler_call_details.method.split("/")[-1]
+        client_public_key = _get_value_from_tuples(_PUBLIC_KEY_HEADER, handler_call_details.invocation_metadata)
+        if method_name == 'CreateNode':
+            expected_metadata = (_PUBLIC_KEY_HEADER, generate_shared_key())
+        elif method_name in {'DeleteNode', 'PullTaskIns', 'PushTaskRes'}:
+            
+            
+            expected_metadata = (_PUBLIC_KEY_HEADER, generate_shared_key())
+
+
         if (self._header, self._value) in handler_call_details.invocation_metadata:
             grpc.unary_unary_rpc_method_handler
             return continuation(handler_call_details)
