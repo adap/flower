@@ -30,9 +30,8 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.differential_privacy import (
-    add_gaussian_noise_inplace,
+    add_gaussian_to_params,
     compute_clip_model_update,
-    compute_stdv,
 )
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
@@ -147,14 +146,12 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params_ndarrays = parameters_to_ndarrays(aggregated_params)
-            add_gaussian_noise_inplace(
-                aggregated_params_ndarrays,
-                compute_stdv(
-                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
-                ),
+            aggregated_params = add_gaussian_to_params(
+                aggregated_params,
+                self.noise_multiplier,
+                self.clipping_norm,
+                self.num_sampled_clients,
             )
-            aggregated_params = ndarrays_to_parameters(aggregated_params_ndarrays)
 
         return aggregated_params, metrics
 
