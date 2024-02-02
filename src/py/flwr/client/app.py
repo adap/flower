@@ -386,7 +386,7 @@ def _start_client_internal(
                 except Exception as ex:  # pylint: disable=broad-exception-caught
                     log(ERROR, "FlowerCallable raised an exception", exc_info=ex)
 
-                    # Don't update/change RunState
+                    # Don't update/change NodeState
                     # Return empty Message
 
                     error_out_message = Message(
