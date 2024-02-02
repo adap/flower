@@ -269,15 +269,12 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params_ndarrays = parameters_to_ndarrays(aggregated_params)
-            add_gaussian_noise_inplace(
-                aggregated_params_ndarrays,
-                compute_stdv(
-                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
-                ),
+            aggregated_params = add_gaussian_to_params(
+                aggregated_params,
+                self.noise_multiplier,
+                self.clipping_norm,
+                self.num_sampled_clients,
             )
-            aggregated_params = ndarrays_to_parameters(aggregated_params_ndarrays)
-
         return aggregated_params, metrics
 
     def aggregate_evaluate(
