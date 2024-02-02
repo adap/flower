@@ -17,6 +17,8 @@
 
 from typing import Iterable, List, Optional, Tuple
 
+from flwr.common.message import Message
+from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER, GrpcDriver
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -25,7 +27,7 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsRequest,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 
 class Driver:
@@ -71,35 +73,50 @@ class Driver:
 
         return self.grpc_driver, self.run_id
 
-    def get_nodes(self) -> List[Node]:
+    def get_node_ids(self) -> List[int]:
         """Get node IDs."""
         grpc_driver, run_id = self._get_grpc_driver_and_run_id()
 
         # Call GrpcDriver method
         res = grpc_driver.get_nodes(GetNodesRequest(run_id=run_id))
-        return list(res.nodes)
+        return [node.node_id for node in res.nodes]
 
-    def push_task_ins(self, task_ins_list: List[TaskIns]) -> List[str]:
-        """Schedule tasks."""
+    def push_messages(self, messages: Iterable[Message]) -> List[str]:
+        """Push messages."""
         grpc_driver, run_id = self._get_grpc_driver_and_run_id()
 
-        # Set run_id
-        for task_ins in task_ins_list:
-            task_ins.run_id = run_id
+        # Construct TaskIns
+        task_ins_list: List[TaskIns] = []
+        for msg in messages:
+            # Check target_node_id
+            if msg.metadata.target_node_id is None:
+                raise ValueError("Message has no target_node_id.")
+            # Convert Message to TaskIns
+            taskins = message_to_taskins(msg)
+            # Set producer
+            taskins.task.producer.node_id = self.node.node_id
+            taskins.task.producer.anonymous = self.node.anonymous
+            # Set run_id
+            taskins.run_id = run_id
+            # Add to list
+            task_ins_list.append(taskins)
 
         # Call GrpcDriver method
         res = grpc_driver.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
         return list(res.task_ids)
 
-    def pull_task_res(self, task_ids: Iterable[str]) -> List[TaskRes]:
-        """Get task results."""
+    def pull_messages(self, task_ids: Iterable[str]) -> Iterable[Message]:
+        """Pull messages."""
         grpc_driver, _ = self._get_grpc_driver_and_run_id()
-
-        # Call GrpcDriver method
+        # Pull TaskRes
         res = grpc_driver.pull_task_res(
             PullTaskResRequest(node=self.node, task_ids=task_ids)
         )
-        return list(res.task_res_list)
+
+        # Convert TaskRes to Message
+        msgs = [message_from_taskres(taskres) for taskres in res.task_res_list]
+
+        return msgs
 
     def __del__(self) -> None:
         """Disconnect GrpcDriver if connected."""
