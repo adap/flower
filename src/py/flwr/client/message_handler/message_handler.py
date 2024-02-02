@@ -24,7 +24,6 @@ from flwr.client.client import (
     maybe_call_get_properties,
 )
 from flwr.client.typing import ClientFn
-from flwr.common import serde
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import (
     TASK_TYPE_EVALUATE,
@@ -45,7 +44,6 @@ from flwr.common.recordset_compat import (
     recordset_to_getparametersins,
     recordset_to_getpropertiesins,
 )
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     Reason,
@@ -61,25 +59,25 @@ class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle_control_message(task_ins: TaskIns) -> Tuple[Optional[TaskRes], int]:
+def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
     """Handle control part of the incoming message.
 
     Parameters
     ----------
-    task_ins : TaskIns
-        The task instruction coming from the server, to be processed by the client.
+    message : Message
+        The Message coming from the server, to be processed by the client.
 
     Returns
     -------
-    task_res : Optional[TaskRes]
-        TaskRes to be sent back to the server. If None, the client should
+    message : Optional[Message]
+        Message to be sent back to the server. If None, the client should
         continue to process messages from the server.
     sleep_duration : int
         Number of seconds that the client should disconnect from the server.
     """
-    if task_ins.task.task_type == "reconnect":
+    if message.metadata.task_type == "reconnect":
         # Retrieve ReconnectIns from recordset
-        recordset = serde.recordset_from_proto(task_ins.task.recordset)
+        recordset = message.message
         seconds = cast(int, recordset.get_configs("config")["seconds"])
         # Construct ReconnectIns and call _reconnect
         disconnect_msg, sleep_duration = _reconnect(
@@ -89,14 +87,18 @@ def handle_control_message(task_ins: TaskIns) -> Tuple[Optional[TaskRes], int]:
         reason = cast(int, disconnect_msg.disconnect_res.reason)
         recordset = RecordSet()
         recordset.set_configs("config", ConfigsRecord({"reason": reason}))
-        task_res = TaskRes(
-            task=Task(
+        out_message = Message(
+            metadata=Metadata(
+                run_id=0,
+                task_id="",
+                group_id="",
+                ttl="",
                 task_type="reconnect",
-                recordset=serde.recordset_to_proto(recordset),
-            )
+            ),
+            message=recordset,
         )
         # Return TaskRes and sleep duration
-        return task_res, sleep_duration
+        return out_message, sleep_duration
 
     # Any other message
     return None, 0

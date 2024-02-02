@@ -18,7 +18,7 @@
 import argparse
 import sys
 import time
-from logging import ERROR, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
@@ -34,11 +34,10 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
 )
-from flwr.common.logger import log, warn_experimental_feature
+from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
 from flwr.common.message import Message
 from flwr.common.recordset import RecordSet
-from flwr.common.serde import message_from_taskins, message_to_taskres
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.common.serde import message_to_taskres
 
 from .flower import load_flower_callable
 from .grpc_client.connection import grpc_connection
@@ -65,7 +64,12 @@ def run_client() -> None:
                 "the '--root-certificates' option when running in insecure mode, "
                 "or omit '--insecure' to use HTTPS."
             )
-        log(WARN, "Option `--insecure` was set. Starting insecure HTTP client.")
+        log(
+            WARN,
+            "Option `--insecure` was set. "
+            "Starting insecure HTTP client connected to %s.",
+            args.server,
+        )
         root_certificates = None
     else:
         # Load the certificates if provided, or load the system certificates
@@ -74,11 +78,19 @@ def run_client() -> None:
             root_certificates = None
         else:
             root_certificates = Path(cert_path).read_bytes()
+        log(
+            DEBUG,
+            "Starting secure HTTPS client connected to %s "
+            "with the following certificates: %s.",
+            args.server,
+            cert_path,
+        )
 
-    print(args.root_certificates)
-    print(args.server)
-    print(args.dir)
-    print(args.callable)
+    log(
+        DEBUG,
+        "The Flower client uses `%s` to execute tasks",
+        args.callable,
+    )
 
     callable_dir = args.dir
     if callable_dir is not None:
@@ -91,7 +103,7 @@ def run_client() -> None:
     _start_client_internal(
         server_address=args.server,
         load_flower_callable_fn=_load,
-        transport="grpc-rere",  # Only
+        transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
         insecure=args.insecure,
     )
@@ -113,6 +125,11 @@ def _parse_args_client() -> argparse.ArgumentParser:
         action="store_true",
         help="Run the client without HTTPS. By default, the client runs with "
         "HTTPS enabled. Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--rest",
+        action="store_true",
+        help="Use REST as a transport layer for the client.",
     )
     parser.add_argument(
         "--root-certificates",
@@ -343,25 +360,22 @@ def _start_client_internal(
 
             while True:
                 # Receive
-                task_ins = receive()
-                if task_ins is None:
+                message = receive()
+                if message is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
                 # Handle control message
-                task_res, sleep_duration = handle_control_message(task_ins=task_ins)
-                if task_res:
-                    send(task_res)
+                out_message, sleep_duration = handle_control_message(message)
+                if out_message:
+                    send(out_message)
                     break
 
                 # Register context for this run
-                node_state.register_context(run_id=task_ins.run_id)
+                node_state.register_context(run_id=message.metadata.run_id)
 
                 # Retrieve context for this run
-                context = node_state.retrieve_context(run_id=task_ins.run_id)
-
-                # Get Message from TaskIns
-                message = message_from_taskins(task_ins)
+                context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
                 # Load app
                 app: Flower = load_flower_callable_fn()
@@ -391,11 +405,8 @@ def _start_client_internal(
                     context=context,
                 )
 
-                # Construct TaskRes from out_message
-                task_res = message_to_taskres(out_message)
-
                 # Send
-                send(task_res)
+                send(out_message)
 
             # Unregister node
             if delete_node is not None:
@@ -423,6 +434,12 @@ def start_numpy_client(
     transport: Optional[str] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
+
+    Warning
+    -------
+    This function is deprecated since 1.7.0. Use :code:`flwr.client.start_client`
+    instead and first convert your :code:`NumPyClient` to type
+    :code:`flwr.client.Client` by executing its :code:`to_client()` method.
 
     Parameters
     ----------
@@ -479,21 +496,22 @@ def start_numpy_client(
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-    # warnings.warn(
-    #     "flwr.client.start_numpy_client() is deprecated and will "
-    #     "be removed in a future version of Flower. Instead, pass "
-    #     "your client to `flwr.client.start_client()` by calling "
-    #     "first the `.to_client()` method as shown below: \n"
-    #     "\tflwr.client.start_client(\n"
-    #     "\t\tserver_address='<IP>:<PORT>',\n"
-    #     "\t\tclient=FlowerClient().to_client()\n"
-    #     "\t)",
-    #     DeprecationWarning,
-    #     stacklevel=2,
-    # )
+    mssg = (
+        "flwr.client.start_numpy_client() is deprecated. \n\tInstead, use "
+        "`flwr.client.start_client()` by ensuring you first call "
+        "the `.to_client()` method as shown below: \n"
+        "\tflwr.client.start_client(\n"
+        "\t\tserver_address='<IP>:<PORT>',\n"
+        "\t\tclient=FlowerClient().to_client(),"
+        " # <-- where FlowerClient is of type flwr.client.NumPyClient object\n"
+        "\t)\n"
+        "\tUsing `start_numpy_client()` is deprecated."
+    )
+
+    warn_deprecated_feature(name=mssg)
 
     # Calling this function is deprecated. A warning is thrown.
-    # We first need to convert either the supplied client to `Client.`
+    # We first need to convert the supplied client to `Client.`
 
     wrp_client = client.to_client()
 
@@ -514,8 +532,8 @@ def _init_connection(
         [str, bool, int, Union[bytes, str, None]],
         ContextManager[
             Tuple[
-                Callable[[], Optional[TaskIns]],
-                Callable[[TaskRes], None],
+                Callable[[], Optional[Message]],
+                Callable[[Message], None],
                 Optional[Callable[[], None]],
                 Optional[Callable[[], None]],
             ]

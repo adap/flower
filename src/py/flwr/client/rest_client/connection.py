@@ -29,6 +29,8 @@ from flwr.client.message_handler.task_handler import (
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
+from flwr.common.message import Message
+from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -39,7 +41,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 try:
     import requests
@@ -68,8 +70,8 @@ def http_request_response(
     ] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
-        Callable[[], Optional[TaskIns]],
-        Callable[[TaskRes], None],
+        Callable[[], Optional[Message]],
+        Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
     ]
@@ -206,7 +208,7 @@ def http_request_response(
                 PATH_PULL_TASK_INS,
             )
 
-    def receive() -> Optional[TaskIns]:
+    def receive() -> Optional[Message]:
         """Receive next task from server."""
         # Get Node
         if node_store[KEY_NODE] is None:
@@ -262,12 +264,14 @@ def http_request_response(
         # Remember `task_ins` until `task_res` is available
         state[KEY_TASK_INS] = task_ins
 
-        # Return the TaskIns if available
+        # Return the Message if available
+        message = None
         if task_ins is not None:
+            message = message_from_taskins(task_ins)
             log(INFO, "[Node] POST /%s: success", PATH_PULL_TASK_INS)
-        return task_ins
+        return message
 
-    def send(task_res: TaskRes) -> None:
+    def send(message: Message) -> None:
         """Send task result back to server."""
         # Get Node
         if node_store[KEY_NODE] is None:
@@ -280,6 +284,9 @@ def http_request_response(
             return
 
         task_ins: TaskIns = cast(TaskIns, state[KEY_TASK_INS])
+
+        # Construct TaskRes
+        task_res = message_to_taskres(message)
 
         # Check if fields to be set are not initialized
         if not validate_task_res(task_res):
