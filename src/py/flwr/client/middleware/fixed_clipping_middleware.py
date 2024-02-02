@@ -29,7 +29,7 @@ def fixed_clipping_middleware(
     """Clip the client model updates before sending them to the server."""
     if msg.metadata.task_type == TASK_TYPE_FIT:
         fit_ins = compat.recordset_to_fitins(msg.message, keep_input=True)
-        clipping_norm = float(fit_ins.config["clipping_norm"])
+        clipping_norm = fit_ins.config["clipping_norm"]
         server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
 
         # Call inner app
