@@ -32,9 +32,13 @@ class InMemoryState(State):
 
     def __init__(self) -> None:
         self.node_ids: Set[int] = set()
+        self.node_id_public_key_dict: Dict[int, bytes] = {}
         self.run_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
+        self.client_public_keys: Set[bytes] = set()
+        self.server_public_key: bytes = bytes()
+        self.server_private_key: bytes = bytes()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
@@ -221,3 +225,45 @@ class InMemoryState(State):
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def store_node_id_public_key_pair(self, node_id: int, public_key: bytes) -> None:
+        """Store `node_id` and `public_key` as key-value pair in state."""
+        if node_id not in self.node_ids:
+            raise ValueError(f"Node {node_id} not found")
+        if node_id in self.node_id_public_key_dict:
+            raise ValueError(f"Node {node_id} has already assigned a public key")
+        self.node_id_public_key_dict[node_id] = public_key
+
+    def get_public_key_from_node_id(self, node_id: int) -> bytes:
+        """Get client's public key in urlsafe bytes for `node_id`."""
+        if node_id in self.node_id_public_key_dict:
+            return self.node_id_public_key_dict[node_id]
+        return bytes()
+
+    def store_server_private_key(self, private_key: bytes) -> None:
+        """Store my `private_key` in state."""
+        self.server_private_key = private_key
+
+    def get_server_private_key(self) -> bytes:
+        """Get my private key in urlsafe bytes for `node_id`."""
+        return self.server_private_key
+
+    def store_server_public_key(self, public_key: bytes) -> None:
+        """Store my `public_key` in state."""
+        self.server_public_key = public_key
+
+    def get_server_public_key(self) -> bytes:
+        """Get my public key in urlsafe bytes."""
+        return self.server_public_key
+
+    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
+         """Store a set of client public keys in state."""
+         self.client_public_keys = public_keys
+
+    def store_client_public_key(self, public_key: bytes) -> None:
+         """Retrieve a client public key in state."""
+         self.client_public_keys.add(public_key)
+
+    def get_client_public_keys(self) -> Set[bytes]:
+         """Retrieve all currently stored client public keys as a set."""
+         return self.client_public_keys

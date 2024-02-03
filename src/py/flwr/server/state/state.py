@@ -154,25 +154,30 @@ class State(abc.ABC):
         """Create one run."""
 
     @abc.abstractmethod
-    def store_public_key(self, node_id: int, public_key: bytes) -> None:
+    def store_node_id_public_key(self, node_id: int, public_key: bytes) -> None:
         """Store `node_id` and `public_key` as key-value pair in state."""
 
     @abc.abstractmethod
-    def get_public_key(self, node_id: int) -> bytes:
+    def get_public_key_from_node_id(self, node_id: int) -> bytes:
         """Get client's public key in urlsafe bytes for `node_id`."""
 
     @abc.abstractmethod
-    def store_my_private_key(self, private_key: bytes) -> None:
+    def store_server_private_key(self, private_key: bytes) -> None:
         """Store my `private_key` in state."""
 
     @abc.abstractmethod
-    def get_my_private_key(self) -> bytes:
+    def get_server_private_key(self) -> bytes:
         """Get my private key in urlsafe bytes for `node_id`."""
 
     @abc.abstractmethod
-    def store_my_public_key(self, public_key: bytes) -> None:
+    def store_server_public_key(self, public_key: bytes) -> None:
         """Store my `public_key` in state."""
 
     @abc.abstractmethod
-    def get_my_public_key(self) -> bytes:
+    def get_server_public_key(self) -> bytes:
         """Get my public key in urlsafe bytes."""
+
+    @abc.abstractmethod
+    def get_public_keys(self) -> Set[bytes]:
+         """Retrieve all currently stored client public keys as a set."""
+         
