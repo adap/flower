@@ -110,7 +110,9 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     # Create the Driver
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
-    driver = GrpcDriver(driver_service_address=address, certificates=root_certificates)
+    driver = GrpcDriver(
+        driver_service_address=address, root_certificates=root_certificates
+    )
     driver.connect()
     lock = threading.Lock()
 
