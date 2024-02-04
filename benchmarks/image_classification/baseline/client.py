@@ -3,8 +3,8 @@ from torch.utils.data import DataLoader
 import flwr as fl
 from flwr_datasets import FederatedDataset
 
-from utils import train, set_params, apply_transforms_train
-from model import Net
+from .utils import train, set_params, apply_transforms_train
+from .model import Net
 from evaluation.eval_utils import test
 
 

@@ -8,14 +8,14 @@ from flwr.common import Metrics, NDArrays
 from flwr.common.typing import Scalar
 from datasets.utils.logging import disable_progress_bar
 
-from model import Net
+from .model import Net
 from evaluation.eval_utils import apply_transforms_test, test
 
 
 # transformation to convert images to tensors and apply normalization
 def apply_transforms_train(batch):
     transforms = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
-    batch["image"] = [transforms(img) for img in batch["image"]]
+    batch["img"] = [transforms(img) for img in batch["img"]]
     return batch
 
 
@@ -34,7 +34,7 @@ def train(net, trainloader, optim, epochs, device: str):
     net.train()
     for _ in range(epochs):
         for batch in trainloader:
-            images, labels = batch["image"].to(device), batch["label"].to(device)
+            images, labels = batch["img"].to(device), batch["label"].to(device)
             optim.zero_grad()
             outputs = net(images)
             loss = criterion(outputs, labels)

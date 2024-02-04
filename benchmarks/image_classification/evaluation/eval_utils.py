@@ -5,7 +5,7 @@ from torchvision.transforms import ToTensor, Normalize, Compose
 # transformation to convert images to tensors and apply normalization
 def apply_transforms_test(batch):
     transforms = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
-    batch["image"] = [transforms(img) for img in batch["image"]]
+    batch["img"] = [transforms(img) for img in batch["img"]]
     return batch
 
 
@@ -17,7 +17,7 @@ def test(net, testloader, device: str):
     net.eval()
     with torch.no_grad():
         for data in testloader:
-            images, labels = data["image"].to(device), data["label"].to(device)
+            images, labels = data["img"].to(device), data["label"].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)
