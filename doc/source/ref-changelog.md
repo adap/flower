@@ -70,7 +70,7 @@
   Until now, clients of type `NumPyClient` needed to be started via `start_numpy_client`. In our efforts to consolidate the core framework, we have introduced changes, and now all client types should start via `start_client`. To continue using `NumPyClient` clients, you simply need to first call the `.to_client()` method and then pass returned `Client` object to `start_client`. The examples and the documentation have been updated accordingly.
 
 - **Deprecate legacy DP wrappers** ([#2749](https://github.com/adap/flower/pull/2749))
-  
+
   Legacy DP wrapper classes are deprecated, but still functional. This is in preparation for a all-new pluggable version of differential privacy support in Flower.
 
 - **Make optional arg** `--callable` **in** `flower-client` **a required positional arg** ([#2673](https://github.com/adap/flower/pull/2673))
