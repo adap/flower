@@ -4,7 +4,7 @@ import flwr as fl
 from flwr_datasets import FederatedDataset
 
 from .utils import train, set_params, apply_transforms_train
-from .model import NetResnet18
+from .model import NetResnet18, Net
 from evaluation.eval_utils import test
 
 
@@ -15,7 +15,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.testset = testset
 
         # Instantiate model
-        self.model = NetResnet18()
+        self.model = Net()
 
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

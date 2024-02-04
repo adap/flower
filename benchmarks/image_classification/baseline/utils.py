@@ -8,7 +8,7 @@ from flwr.common import Metrics, NDArrays
 from flwr.common.typing import Scalar
 from datasets.utils.logging import disable_progress_bar
 
-from .model import NetResnet18
+from .model import NetResnet18, Net
 from evaluation.eval_utils import apply_transforms_test, test
 
 
@@ -55,7 +55,7 @@ def get_evaluate_fn(centralized_testset, save_every_round, save_path):
         server_round: int, parameters: NDArrays, config: Dict[str, Scalar]
     ):
         # Init model
-        model = NetResnet18()
+        model = Net()
         set_params(model, parameters)
 
         # Determine device

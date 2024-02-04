@@ -10,7 +10,7 @@ from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
 from evaluation.eval_utils import test, apply_transforms_test, weighted_average
-from baseline.model import NetResnet18
+from baseline.model import NetResnet18, Net
 
 
 # Arguments parser
@@ -40,7 +40,7 @@ def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # Init model
-    model = NetResnet18()
+    model = Net()
     params_init = torch.load(args.model_path)
     model.load_state_dict(params_init, strict=True)
     model.to(device)
