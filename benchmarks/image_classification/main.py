@@ -49,7 +49,7 @@ def main(cfg: DictConfig) -> None:
     }
 
     # Start simulation
-    fl.simulation.start_simulation(
+    hist = fl.simulation.start_simulation(
         client_fn=get_client_fn(cifar10_fds, static_config["test_size"], static_config["seed"]),
         num_clients=static_config["num_clients"],
         client_resources=client_resources,
