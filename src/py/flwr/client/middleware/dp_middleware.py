@@ -31,7 +31,7 @@ def fixed_clipping_middleware(
     if msg.metadata.task_type == TASK_TYPE_FIT:
         fit_ins = compat.recordset_to_fitins(msg.message, keep_input=True)
         if KEY_CLIPPING_NORM not in fit_ins.config:
-            raise Exception(f"{KEY_CLIPPING_NORM} is not supplied by the server.")
+            raise KeyError(f"{KEY_CLIPPING_NORM} is not supplied by the server.")
         clipping_norm = float(fit_ins.config[KEY_CLIPPING_NORM])
         server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
 
