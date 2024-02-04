@@ -33,6 +33,7 @@ from flwr.common.differential_privacy import (
     add_gaussian_to_params,
     compute_clip_model_update,
 )
+from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
@@ -231,7 +232,7 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        additional_config = {"clipping_norm": self.clipping_norm}
+        additional_config = {KEY_CLIPPING_NORM: self.clipping_norm}
         inner_strategy_config_result = self.strategy.configure_fit(
             server_round, parameters, client_manager
         )

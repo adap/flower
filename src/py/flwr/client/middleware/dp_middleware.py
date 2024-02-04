@@ -20,6 +20,7 @@ from flwr.common import recordset_compat as compat
 from flwr.common.constant import TASK_TYPE_FIT
 from flwr.common.context import Context
 from flwr.common.differential_privacy import compute_clip_model_update
+from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM
 from flwr.common.message import Message
 
 
@@ -29,7 +30,9 @@ def fixed_clipping_middleware(
     """Clip the client model updates before sending them to the server."""
     if msg.metadata.task_type == TASK_TYPE_FIT:
         fit_ins = compat.recordset_to_fitins(msg.message, keep_input=True)
-        clipping_norm = float(fit_ins.config["clipping_norm"])
+        if KEY_CLIPPING_NORM not in fit_ins.config:
+            raise Exception(f"{KEY_CLIPPING_NORM} is not supplied by the server.")
+        clipping_norm = float(fit_ins.config[KEY_CLIPPING_NORM])
         server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
 
         # Call inner app
