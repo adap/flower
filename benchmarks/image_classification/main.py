@@ -32,6 +32,7 @@ def main(cfg: DictConfig) -> None:
     strategy = instantiate(
         cfg.strategy,
         fraction_fit=static_config["fraction_fit"],  # Sample 10% of available clients for training
+        min_available_clients=int(static_config["num_clients"]),  # Wait until all clients are available
         fraction_evaluate=0.05,  # Sample 5% of available clients for evaluation
         min_evaluate_clients=5,  # Never sample less than 5 clients for evaluation
         min_fit_clients=static_config["min_fit_clients"],  # Never sample less than 10 clients for training
