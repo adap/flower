@@ -203,7 +203,7 @@ def test_compute_adaptive_noise_params() -> None:
     result = compute_adaptive_noise_params(
         noise_multiplier, num_sampled_clients, clipped_count_stddev
     )
-    tempValue = (noise_multiplier ** (-2) - (2 * clipped_count_stddev) ** (-2)) ** -0.5
+    temp_value = (noise_multiplier ** (-2) - (2 * clipped_count_stddev) ** (-2)) ** -0.5
 
     # Assert
-    assert np.isclose(result[1], tempValue, rtol=1e-6)
+    assert np.isclose(result[1], temp_value, rtol=1e-6)
