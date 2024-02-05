@@ -23,13 +23,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
-from flwr.common import (
-    EvaluateIns,
-    FitIns,
-    FitRes,
-    Parameters,
-    Scalar,
-)
+from flwr.common import EvaluateIns, FitIns, FitRes, Parameters, Scalar
 from flwr.common.differential_privacy import add_gaussian_to_params
 from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM, KEY_NORM_BIT
 from flwr.server.client_manager import ClientManager
