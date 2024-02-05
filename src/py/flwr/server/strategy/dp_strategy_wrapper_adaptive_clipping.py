@@ -82,7 +82,9 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
             raise ValueError("The noise multiplier should be a non-negative value.")
 
         if num_sampled_clients <= 0:
-            raise ValueError("The number of sampled clients should be a positive value.")
+            raise ValueError(
+                "The number of sampled clients should be a positive value."
+            )
 
         if initial_clipping_norm <= 0:
             raise ValueError("The initial clipping norm should be a positive value.")
