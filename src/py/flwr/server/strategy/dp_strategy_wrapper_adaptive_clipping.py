@@ -193,7 +193,7 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         noise_multiplier: float,
         num_sampled_clients: float,
         clipped_count_stddev: Optional[float],
-    ):
+    ) -> Tuple[float, float]:
         """Compute noising parameters for the adaptive clipping.
 
         paper: https://arxiv.org/abs/1905.03871

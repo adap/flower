@@ -90,3 +90,4 @@ def adaptive_clipping_middleware(
         fit_res.metrics[KEY_NORM_BIT] = norm_bit
         out_msg.message = compat.fitres_to_recordset(fit_res, keep_input=True)
         return out_msg
+    return call_next(msg, ctxt)
