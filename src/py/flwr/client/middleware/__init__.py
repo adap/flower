@@ -15,9 +15,13 @@
 """Middleware layers."""
 
 
+from .dp_middleware import adaptive_clipping_middleware, fixed_clipping_middleware
+from .secure_aggregation.secaggplus_middleware import secaggplus_middleware
 from .utils import make_ffn
 
 __all__ = [
     "make_ffn",
+    "secaggplus_middleware",
     "fixed_clipping_middleware",
+    "adaptive_clipping_middleware",
 ]

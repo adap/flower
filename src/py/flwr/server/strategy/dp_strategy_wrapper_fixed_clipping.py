@@ -30,10 +30,10 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.differential_privacy import (
-    add_gaussian_noise_inplace,
+    add_gaussian_to_params,
     compute_clip_model_update,
-    compute_stdv,
 )
+from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
@@ -147,14 +147,12 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params_ndarrays = parameters_to_ndarrays(aggregated_params)
-            add_gaussian_noise_inplace(
-                aggregated_params_ndarrays,
-                compute_stdv(
-                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
-                ),
+            aggregated_params = add_gaussian_to_params(
+                aggregated_params,
+                self.noise_multiplier,
+                self.clipping_norm,
+                self.num_sampled_clients,
             )
-            aggregated_params = ndarrays_to_parameters(aggregated_params_ndarrays)
 
         return aggregated_params, metrics
 
@@ -234,7 +232,7 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        additional_config = {"clipping_norm": self.clipping_norm}
+        additional_config = {KEY_CLIPPING_NORM: self.clipping_norm}
         inner_strategy_config_result = self.strategy.configure_fit(
             server_round, parameters, client_manager
         )
@@ -272,15 +270,12 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params_ndarrays = parameters_to_ndarrays(aggregated_params)
-            add_gaussian_noise_inplace(
-                aggregated_params_ndarrays,
-                compute_stdv(
-                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
-                ),
+            aggregated_params = add_gaussian_to_params(
+                aggregated_params,
+                self.noise_multiplier,
+                self.clipping_norm,
+                self.num_sampled_clients,
             )
-            aggregated_params = ndarrays_to_parameters(aggregated_params_ndarrays)
-
         return aggregated_params, metrics
 
     def aggregate_evaluate(

@@ -29,6 +29,8 @@ from flwr.client.message_handler.task_handler import (
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log, warn_experimental_feature
+from flwr.common.message import Message
+from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
@@ -37,7 +39,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 KEY_NODE = "node"
 KEY_TASK_INS = "current_task_ins"
@@ -56,8 +58,8 @@ def grpc_request_response(
     root_certificates: Optional[Union[bytes, str]] = None,
 ) -> Iterator[
     Tuple[
-        Callable[[], Optional[TaskIns]],
-        Callable[[TaskRes], None],
+        Callable[[], Optional[Message]],
+        Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
     ]
@@ -132,7 +134,7 @@ def grpc_request_response(
 
         del node_store[KEY_NODE]
 
-    def receive() -> Optional[TaskIns]:
+    def receive() -> Optional[Message]:
         """Receive next task from server."""
         # Get Node
         if node_store[KEY_NODE] is None:
@@ -154,10 +156,10 @@ def grpc_request_response(
         # Remember `task_ins` until `task_res` is available
         state[KEY_TASK_INS] = task_ins
 
-        # Return the TaskIns if available
-        return task_ins
+        # Return the message if available
+        return message_from_taskins(task_ins) if task_ins is not None else None
 
-    def send(task_res: TaskRes) -> None:
+    def send(message: Message) -> None:
         """Send task result back to server."""
         # Get Node
         if node_store[KEY_NODE] is None:
@@ -170,6 +172,9 @@ def grpc_request_response(
             log(ERROR, "No current TaskIns")
             return
         task_ins: TaskIns = cast(TaskIns, state[KEY_TASK_INS])
+
+        # Construct TaskRes
+        task_res = message_to_taskres(message)
 
         # Check if fields to be set are not initialized
         if not validate_task_res(task_res):

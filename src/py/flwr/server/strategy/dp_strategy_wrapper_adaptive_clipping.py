@@ -29,10 +29,9 @@ from flwr.common import (
     FitRes,
     Parameters,
     Scalar,
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
 )
-from flwr.common.differential_privacy import add_gaussian_noise_inplace, compute_stdv
+from flwr.common.differential_privacy import add_gaussian_to_params
+from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM, KEY_NORM_BIT
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
@@ -128,7 +127,7 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        additional_config = {"clipping_norm": self.clipping_norm}
+        additional_config = {KEY_CLIPPING_NORM: self.clipping_norm}
         inner_strategy_config_result = self.strategy.configure_fit(
             server_round, parameters, client_manager
         )
@@ -162,26 +161,24 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params_ndarrays = parameters_to_ndarrays(aggregated_params)
-            add_gaussian_noise_inplace(
-                aggregated_params_ndarrays,
-                compute_stdv(
-                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
-                ),
+            aggregated_params = add_gaussian_to_params(
+                aggregated_params,
+                self.noise_multiplier,
+                self.clipping_norm,
+                self.num_sampled_clients,
             )
-            aggregated_params = ndarrays_to_parameters(aggregated_params_ndarrays)
 
-        return aggregated_params
+        return aggregated_params, metrics
 
     def _update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
         # calculate the number of clients which set the norm indicator bit
         norm_bit_set_count = 0
         for client_proxy, fit_res in results:
-            if "norm_bit" not in fit_res.metrics:
-                raise Exception(
-                    f"Norm bit not returned by client with id {client_proxy.cid}."
+            if KEY_NORM_BIT not in fit_res.metrics:
+                raise KeyError(
+                    f"{KEY_NORM_BIT} not returned by client with id {client_proxy.cid}."
                 )
-            if fit_res.metrics["norm_bit"]:
+            if fit_res.metrics[KEY_NORM_BIT]:
                 norm_bit_set_count += 1
         # Noising the count
         noised_norm_bit_set_count = float(

@@ -19,7 +19,10 @@ from .bulyan import Bulyan as Bulyan
 from .dp_strategy_wrapper_adaptive_clipping import (
     DPStrategyWrapperClientSideAdaptiveClipping,
 )
-from .dp_strategy_wrapper_fixed_clipping import DPStrategyWrapperServerSideFixedClipping
+from .dp_strategy_wrapper_fixed_clipping import (
+    DPStrategyWrapperClientSideFixedClipping,
+    DPStrategyWrapperServerSideFixedClipping,
+)
 from .dpfedavg_adaptive import DPFedAvgAdaptive as DPFedAvgAdaptive
 from .dpfedavg_fixed import DPFedAvgFixed as DPFedAvgFixed
 from .fault_tolerant_fedavg import FaultTolerantFedAvg as FaultTolerantFedAvg
