@@ -23,7 +23,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
-from flwr.common import EvaluateIns, FitIns, FitRes, Parameters, Scalar
+from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Scalar
 from flwr.common.differential_privacy import add_gaussian_to_params
 from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM, KEY_NORM_BIT
 from flwr.server.client_manager import ClientManager
@@ -103,7 +103,9 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         self.target_clipped_quantile = target_clipped_quantile
         self.clip_norm_lr = clip_norm_lr
         self.clipped_count_stddev, self.noise_multiplier = self._compute_noise_params(
-            clipped_count_stddev
+            noise_multiplier,
+            self.num_sampled_clients,
+            clipped_count_stddev,
         )
 
     def __repr__(self) -> str:
@@ -223,3 +225,18 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
             noise_multiplier_value = 0.0
 
         return clipped_count_stddev, noise_multiplier_value
+
+    def aggregate_evaluate(
+        self,
+        server_round: int,
+        results: List[Tuple[ClientProxy, EvaluateRes]],
+        failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]],
+    ) -> Tuple[Optional[float], Dict[str, Scalar]]:
+        """Aggregate evaluation losses using the given strategy."""
+        return self.strategy.aggregate_evaluate(server_round, results, failures)
+
+    def evaluate(
+        self, server_round: int, parameters: Parameters
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate model parameters using an evaluation function from the strategy."""
+        return self.strategy.evaluate(server_round, parameters)

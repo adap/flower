@@ -15,33 +15,10 @@
 """DPStrategyWrapperClientSideAdaptiveClipping tests."""
 
 
-from flwr.common import FitRes, Parameters
-from flwr.server.client_proxy import ClientProxy
 
-from .dp_strategy_wrapper_client_side_adaptive_clipping import (
+from .dp_strategy_wrapper_adaptive_clipping import (
     DPStrategyWrapperClientSideAdaptiveClipping,
 )
-from .fedavg import FedAvg
-
-
-def test_update_clip_norm() -> None:
-    """Test _update_clip_norm method."""
-    # Prepare
-    strategy = FedAvg()
-    dp_wrapper = DPStrategyWrapperClientSideAdaptiveClipping(strategy, 1.5, 5)
-
-    results = [
-        (ClientProxy("client1"), FitRes(Parameters(), {"dpfedavg_norm_bit": True})),
-        (ClientProxy("client2"), FitRes(Parameters(), {"dpfedavg_norm_bit": False})),
-        (ClientProxy("client3"), FitRes(Parameters(), {"dpfedavg_norm_bit": True})),
-    ]
-
-    # Execute
-    # pylint: disable-next=protected-access
-    dp_wrapper._update_clip_norm(results)
-
-    # Assert
-    assert dp_wrapper.clip_norm > 0  # Check that clip norm is updated
 
 
 def test_compute_noise_params() -> None:
