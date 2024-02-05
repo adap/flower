@@ -68,7 +68,7 @@ def adaptive_clipping_middleware(
             raise KeyError(f"{KEY_CLIPPING_NORM} is not supplied by the server.")
         if not isinstance(fit_ins.config["clipping_norm"], float):
             raise ValueError(f"{KEY_CLIPPING_NORM} should be a float value.")
-        clipping_norm = fit_ins.config[KEY_CLIPPING_NORM]
+        clipping_norm = float(fit_ins.config[KEY_CLIPPING_NORM])
 
         server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
 
