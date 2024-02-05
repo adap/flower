@@ -226,6 +226,24 @@ def get_cifar_10(path_to_data="flanders/datasets_files/cifar_10/data"):
     # returns path where training data is and testset
     return training_data, test_set
 
+def get_cifar_100(path_to_data="flanders/datasets_files/cifar_100/data"):
+    """Download CIFAR100 dataset."""
+    # download dataset and load train set
+    train_set = datasets.CIFAR100(root=path_to_data, train=True, download=True)
+
+    # fuse all data splits into a single "training.pt"
+    data_loc = Path(path_to_data) / "cifar-100-python"
+    training_data = data_loc / "training.pt"
+    print("Generating unified CIFAR100 dataset")
+    torch.save([train_set.data, np.array(train_set.targets)], training_data)
+
+    test_set = datasets.CIFAR100(
+        root=path_to_data, train=False, transform=cifar10_transformation
+    )
+
+    # returns path where training data is and testset
+    return training_data, test_set
+
 def get_mnist(path_to_data="flanders/datasets_files/mnist/data"):
     """Download MNIST dataset."""
     # download dataset and load train set

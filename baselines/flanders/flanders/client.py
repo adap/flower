@@ -12,7 +12,7 @@ from sklearn.linear_model import ElasticNet, LogisticRegression
 from sklearn.metrics import accuracy_score, log_loss
 
 from .dataset import get_dataloader, get_mnist, cifar10_transformation, mnist_transformation
-from .models import CifarNet, MnistNet, test_cifar, test_mnist, train_cifar, train_mnist
+from .models import CifarNet, MnistNet, test_cifar, test_mnist, train_cifar, train_mnist, MobileNet, train_mobilenet, test_mobilenet
 
 XY = Tuple[np.ndarray, np.ndarray]
 LogRegParams = Union[XY, Tuple[np.ndarray]]
@@ -99,8 +99,15 @@ class CifarClient(fl.client.NumPyClient):
         self.net = CifarNet()
 
         # Determine device
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        #self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        if torch.cuda.is_available():
+            self.device = torch.device("cuda:0")
+        elif torch.backends.mps.is_available():
+            self.device = torch.device("mps")
+        else:
+            self.device = torch.device("cpu")
         # self.device = torch.device("mps")
+        print("Device: ", self.device)
 
     def get_parameters(self, config):
         """Get model parameters as a list of NumPy ndarrays."""
@@ -144,6 +151,70 @@ class CifarClient(fl.client.NumPyClient):
         loss, accuracy = test_cifar(self.net, valloader, device=self.device)
 
         return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
+    
+class Cifar100Client(fl.client.NumPyClient):
+    """Implementation of CIFAR-100 image classification using PyTorch."""
+
+    def __init__(self, cid, fed_dir_data):
+        """Instantiate a client for the CIFAR-100 dataset."""
+        self.cid = cid
+        self.fed_dir = Path(fed_dir_data)
+        self.properties = {"tensor_type": "numpy.ndarray"}
+
+        # Instantiate model
+        self.net = MobileNet()
+
+        # Determine device
+        if torch.cuda.is_available():
+            self.device = torch.device("cuda:0")
+        elif torch.backends.mps.is_available():
+            self.device = torch.device("mps")
+        else:
+            self.device = torch.device("cpu")
+        print("Device: ", self.device)
+
+    def get_parameters(self, config):
+        """Get model parameters as a list of NumPy ndarrays."""
+        return get_params(self.net)
+
+    def fit(self, parameters, config):
+        """Set model parameters from a list of NumPy ndarrays."""
+        set_params(self.net, parameters)
+
+        # Load data for this client and get trainloader
+        num_workers = 1
+        trainloader = get_dataloader(
+            self.fed_dir,
+            self.cid,
+            is_train=True,
+            batch_size=config["batch_size"],
+            workers=num_workers,
+            transform=cifar10_transformation,
+        )
+
+        self.net.to(self.device)
+        train_mobilenet(self.net, trainloader, epochs=config["epochs"], device=self.device)
+
+        return (
+            get_params(self.net),
+            len(trainloader.dataset),
+            {"cid": self.cid},
+        )
+
+    def evaluate(self, parameters, config):
+        """Evaluate using local test dataset."""
+        set_params(self.net, parameters)
+
+        # Load data for this client and get trainloader
+        num_workers = len(ray.worker.get_resource_ids()["CPU"])
+        valloader = get_dataloader(
+            self.fed_dir, self.cid, is_train=False, batch_size=50, workers=num_workers
+        )
+        self.net.to(self.device)
+        loss, accuracy = test_mobilenet(self.net, valloader, device=self.device)
+
+        return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
+
 
 class MnistClient(fl.client.NumPyClient):
     """Implementation of MNIST image classification using PyTorch."""
@@ -158,8 +229,14 @@ class MnistClient(fl.client.NumPyClient):
         self.net = MnistNet()
 
         # Determine device
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        # self.device = torch.device("mps")
+        #self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        if torch.cuda.is_available():
+            self.device = torch.device("cuda:0")
+        elif torch.backends.mps.is_available():
+            self.device = torch.device("mps")
+        else:
+            self.device = torch.device("cpu")
+        print("Device: ", self.device)
 
     def get_parameters(self, config):
         """Get model parameters as a list of NumPy ndarrays."""

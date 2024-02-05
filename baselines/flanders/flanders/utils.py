@@ -23,8 +23,8 @@ from torchvision import transforms
 from torchvision.datasets import MNIST
 
 from .client import set_params, set_sklearn_model_params
-from .dataset import get_cifar_10, get_partitioned_house, get_partitioned_income
-from .models import CifarNet, MnistNet, test_cifar, test_mnist
+from .dataset import get_cifar_10, get_partitioned_house, get_partitioned_income, get_cifar_100
+from .models import CifarNet, MnistNet, test_cifar, test_mnist, MobileNet, test_mobilenet
 
 lock = Lock()
 
@@ -174,6 +174,21 @@ def cifar_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Sc
     _, testset = get_cifar_10()
     testloader = torch.utils.data.DataLoader(testset, batch_size=32)
     loss, accuracy, auc = test_cifar(model, testloader, device=device)
+
+    # return statistics
+    return loss, {"accuracy": accuracy, "auc": auc}
+
+def mobilenet_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]):
+    """Evaluate MobileNet model on the test set."""
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    model = MobileNet()
+    set_params(model, parameters)
+    model.to(device)
+
+    _, testset = get_cifar_100()
+    testloader = torch.utils.data.DataLoader(testset, batch_size=32)
+    loss, accuracy, auc = test_mobilenet(model, testloader, device=device)
 
     # return statistics
     return loss, {"accuracy": accuracy, "auc": auc}

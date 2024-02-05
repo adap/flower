@@ -19,10 +19,11 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
 from .attacks import fang_attack, gaussian_attack, lie_attack, minmax_attack
-from .client import CifarClient, HouseClient, IncomeClient, MnistClient
+from .client import CifarClient, HouseClient, IncomeClient, MnistClient, Cifar100Client
 from .dataset import (
     do_fl_partitioning,
     get_cifar_10,
+    get_cifar_100,
     get_mnist,
     get_partitioned_house,
     get_partitioned_income,
@@ -35,6 +36,7 @@ from .utils import (
     l2_norm,
     cosine_distance,
     mnist_evaluate,
+    mobilenet_evaluate,
 )
 
 
@@ -71,6 +73,7 @@ def main(cfg: DictConfig) -> None:
         "cifar": (CifarClient, cifar_evaluate),
         "house": (HouseClient, house_evaluate),
         "income": (IncomeClient, income_evaluate),
+        "cifar100": (Cifar100Client, mobilenet_evaluate),
     }
 
     # Delete old client_params
@@ -90,7 +93,7 @@ def main(cfg: DictConfig) -> None:
             alpha=cfg.server.noniidness,
             num_classes=10,
             val_ratio=0.5,
-            seed=1234,
+            seed=seed,
         )
     elif dataset_name == "mnist":
         train_path, _ = get_mnist()
@@ -100,7 +103,17 @@ def main(cfg: DictConfig) -> None:
             alpha=cfg.server.noniidness,
             num_classes=10,
             val_ratio=0.5,
-            seed=1234,
+            seed=seed,
+        )
+    elif dataset_name == "cifar100":
+        train_path, _ = get_cifar_100()
+        fed_dir = do_fl_partitioning(
+            train_path,
+            pool_size=cfg.server.pool_size,
+            alpha=cfg.server.noniidness,
+            num_classes=100,
+            val_ratio=0.5,
+            seed=seed,
         )
     elif dataset_name == "income":
         x_train, x_test, y_train, y_test = get_partitioned_income(
@@ -116,7 +129,7 @@ def main(cfg: DictConfig) -> None:
     def client_fn(cid: str, pool_size: int = 10, dataset_name: str = dataset_name):
         client = clients[dataset_name][0]
         cid_idx = int(cid)
-        if dataset_name == "cifar" or dataset_name == "mnist":
+        if dataset_name in ["cifar", "mnist", "cifar100"]:
             return client(cid, fed_dir)
         elif dataset_name == "income":
             return client(
@@ -245,6 +258,7 @@ def main(cfg: DictConfig) -> None:
     history = fl.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=cfg.server.pool_size,
+        client_resources=cfg.client_resources,
         server=EnhancedServer(
             warmup_rounds=cfg.server.warmup_rounds,
             num_malicious=num_malicious,

@@ -223,7 +223,12 @@ class EnhancedServer(Server):
             [proxy.cid for proxy, _ in client_instructions], size=size, replace=False
         )
         # TODO: remove this
-        #self.malicious_lst = ["0","1"]
+        #if (server_round > 9 and server_round < 20) or (server_round > 29 and server_round < 40) or #(server_round > 49 and server_round < 60):
+        #    print("--- MALICIOUS ROUNDS ---")
+        #    self.malicious_lst = ["0","1"]
+        #else:
+        #    print("--- LEGIT ROUNDS ---")
+        #    self.malicious_lst = []
         ####################
 
         # Create dict clients_state to keep track of malicious clients

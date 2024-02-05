@@ -247,8 +247,10 @@ class Flanders(FedAvg):
             )  # noqa
 
             # TODO: remove this
-            #good_clients_idx = [2,3,4]
-            #malicious_clients_idx = [0,1]
+            # alternate between 2 malicious and 0 malicious clients every 10 rounds
+            #if (server_round > 9 and server_round < 20) or (server_round > 29 and server_round < #40) or (server_round > 49 and server_round < 60):
+            #    good_clients_idx = [2,3,4]
+            #    malicious_clients_idx = [0,1]
             ##########################################
             # Compute the average anomaly score for the good clients
             avg_anomaly_score_gc = np.mean(anomaly_scores[good_clients_idx])
