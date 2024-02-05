@@ -76,28 +76,28 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         super().__init__()
 
         if strategy is None:
-            raise Exception("The passed strategy is None.")
+            raise ValueError("The passed strategy is None.")
 
         if noise_multiplier < 0:
-            raise Exception("The noise multiplier should be a non-negative value.")
+            raise ValueError("The noise multiplier should be a non-negative value.")
 
         if num_sampled_clients <= 0:
-            raise Exception("The number of sampled clients should be a positive value.")
+            raise ValueError("The number of sampled clients should be a positive value.")
 
         if initial_clipping_norm <= 0:
-            raise Exception("The initial clipping norm should be a positive value.")
+            raise ValueError("The initial clipping norm should be a positive value.")
 
         if not 0 <= target_clipped_quantile <= 1:
-            raise Exception(
+            raise ValueError(
                 "The target clipped quantile must be between 0 and 1 (inclusive)."
             )
 
         if clip_norm_lr <= 0:
-            raise Exception("The learning rate must be positive.")
+            raise ValueError("The learning rate must be positive.")
 
         if clipped_count_stddev is not None:
             if clipped_count_stddev < 0:
-                raise Exception("The `clipped_count_stddev` must be non-negative.")
+                raise ValueError("The `clipped_count_stddev` must be non-negative.")
 
         self.strategy = strategy
         self.num_sampled_clients = num_sampled_clients
