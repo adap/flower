@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### What's new?
+
+### Incompatible changes
+
 ## v1.7.0 (2024-02-05)
 
 ### Thanks to our contributors
