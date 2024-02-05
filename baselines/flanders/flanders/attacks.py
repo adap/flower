@@ -215,9 +215,9 @@ def fang_attack(
     while lamda > threshold and malicious_selected is False:
         lamda = lamda * 0.5
         malicious_selected, corrupted_params = _fang_corrupt_and_select(all_params, w_re, states, num_corrupted, lamda)
-        #print(f"-- lambda: {lamda}")
-        #print(f"-- malicious_selected: {malicious_selected}")
-        #print(f"-- lamda > threshold: {lamda > threshold}")
+        print(f"-- lambda: {lamda}")
+        print(f"-- malicious_selected: {malicious_selected}")
+        print(f"-- lamda > threshold: {lamda > threshold}")
     # Set corrupted clients' updates to w_1
     results = [
         (
@@ -240,7 +240,7 @@ def fang_attack(
 def minmax_attack(
     ordered_results,
     states,
-    omniscent,
+    omniscent=True,
     **kwargs,
 ):
     """Apply Min-Max agnostic attack.
@@ -321,7 +321,7 @@ def minmax_attack(
 
         # Set corrupted clients' updates to corrupted_params
         params_c = [
-            corrupted_params if states[i] else params[i] for i in range(len(params))
+            corrupted_params if states[str(i)] else params[i] for i in range(len(params))
         ]
         distance_matrix = _compute_distances(params_c)
 
@@ -481,8 +481,8 @@ def _fang_corrupt_and_select(all_models, global_model, states, num_corrupted, la
     # Check that krum selects a malicious client
     corrupted_params = _fang_corrupt_params(global_model, lamda)
     all_models_m = [
-        (corrupted_params, num_examples) if states[str(i)] else all_models[i]
-        for i, (_, num_examples) in enumerate(all_models)
+        (corrupted_params, num_examples) if states[str(i)] else (model, num_examples)
+        for i, (model, num_examples) in enumerate(all_models)
     ]
     _, idx_best_model, _, _ = _krum(all_models_m, num_corrupted, 1)
     # Check if the best model is malicious
