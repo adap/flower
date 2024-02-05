@@ -15,7 +15,6 @@
 """DPStrategyWrapperClientSideAdaptiveClipping tests."""
 
 
-
 from .dp_strategy_wrapper_adaptive_clipping import (
     DPStrategyWrapperClientSideAdaptiveClipping,
 )
