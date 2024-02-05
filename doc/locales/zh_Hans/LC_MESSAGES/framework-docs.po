@@ -2153,13 +2153,12 @@ msgid ""
 msgstr ""
 "本示例的完整源代码可在 <https://github.com/adap/flower/blob/main/examples/"
 "pytorch-from-centralized-to-federated>`_ 找到。当然，我们的示例有些过于简单，"
-"因为两个客户端都加载了完全相同的数据集，这并不现实。现在，您已经准备好进一步"
-"探讨这一主题了。在每个客户端使用不同的 CIFAR-10 子集如何？增加更多客户端如"
-"何？"
+"因为两个客户端都加载了完全相同的数据集，这并不真实。让我们准备好进一步探讨这"
+"一主题。如在每个客户端使用不同的 CIFAR-10 子集，或者增加客户端的数量。"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:2
 msgid "Example: JAX - Run JAX Federated"
-msgstr "示例： JAX - 联合运行 JAX"
+msgstr "示例： JAX - 运行联邦式 JAX"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:4
 #: ../../source/tutorial-quickstart-jax.rst:10
@@ -2174,13 +2173,13 @@ msgid ""
 "linear_regression/jax.html>`_ tutorial`. Then, we build upon the centralized "
 "training code to run the training in a federated fashion."
 msgstr ""
-"本教程将向您展示如何使用 Flower 构建现有 JAX 工作负载的联合版本。我们将使用 "
-"JAX 在 scikit-learn 数据集上训练线性回归模型。我们将采用与 \"PyTorch - 从集中"
-"到联合 <https://github.com/adap/flower/blob/main/examples/pytorch-from-"
-"centralized-to-federated>`_ 演练 \"类似的示例结构。首先，我们根据 \"使用 JAX "
-"的线性回归 <https://coax.readthedocs.io/en/latest/examples/linear_regression/"
-"jax.html>`_ 教程 \"构建集中式训练方法。然后，我们在集中式训练代码的基础上以联"
-"合方式运行训练。"
+"本教程将向您展示如何使用 Flower 构建现有 JAX 的联邦学习版本。我们将使用 JAX "
+"在 scikit-learn 数据集上训练线性回归模型。我们将采用与 `PyTorch - 从集中式到"
+"联邦式 <https://github.com/adap/flower/blob/main/examples/pytorch-from-"
+"centralized-to-federated>`_ 教程中类似的示例结构。首先，我们根据 `JAX 的线性"
+"回归 <https://coax.readthedocs.io/en/latest/examples/linear_regression/jax."
+"html>`_ 教程构建集中式训练方法。然后，我们在集中式训练代码的基础上以联邦方式"
+"运行训练。"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:10
 #: ../../source/tutorial-quickstart-jax.rst:16
@@ -2223,8 +2222,8 @@ msgstr ""
 "性回归训练所需的所有组件。首先，需要导入 JAX 包 :code:`jax` 和 :code:"
 "`jaxlib`。此外，我们还需要导入 :code:`sklearn`，因为我们使用 :code:"
 "`make_regression` 创建数据集，并使用 :code:`train_test_split` 将数据集拆分成"
-"训练集和测试集。你可以看到，我们还没有导入用于联合学习的 :code:`flwr` 软件"
-"包。这将在稍后完成。"
+"训练集和测试集。您可以看到，我们还没有导入用于联邦学习的 :code:`flwr` 软件"
+"包，这将在稍后完成。"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:37
 #: ../../source/tutorial-quickstart-jax.rst:43
@@ -2238,8 +2237,8 @@ msgid ""
 "The model architecture (a very simple :code:`Linear Regression` model) is "
 "defined in :code:`load_model()`."
 msgstr ""
-"模型结构（一个非常简单的 :code:` 线性回归模型）在 :code:`load_model()` 中定"
-"义。"
+"模型结构（一个非常简单的 :code:`Linear Regression` 线性回归模型）在 :code:"
+"`load_model()` 中定义。"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:59
 #: ../../source/tutorial-quickstart-jax.rst:65
@@ -2250,9 +2249,9 @@ msgid ""
 "takes derivatives with a :code:`grad()` function (defined in the :code:"
 "`main()` function and called in :code:`train()`)."
 msgstr ""
-"现在，我们需要定义训练（函数 :code:`train()`），它循环遍历训练集，并测量每批"
-"训练示例的损失（函数 :code:`loss_fn()`）。由于 JAX 使用 :code:`grad()` 函数"
-"（在 :code:`main()` 函数中定义，并在 :code:`train()` 中调用）提取导数，因此损"
+"现在，我们需要定义训练函数（ :code:`train()`）。它循环遍历训练集，并计算每批"
+"训练数据的损失值（函数 :code:`loss_fn()`）。由于 JAX 使用 :code:`grad()` 函数"
+"提取导数（在 :code:`main()` 函数中定义，并在 :code:`train()` 中调用），因此损"
 "失函数是独立的。"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:77
@@ -2262,8 +2261,8 @@ msgid ""
 "The function takes all test examples and measures the loss of the linear "
 "regression model."
 msgstr ""
-"模型的评估在函数 :code:`evaluation()` 中定义。该函数获取所有测试示例，并测量"
-"线性回归模型的损失。"
+"模型的评估在函数 :code:`evaluation()` 中定义。该函数获取所有测试数据，并计算"
+"线性回归模型的损失值。"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:88
 #: ../../source/tutorial-quickstart-jax.rst:94
@@ -2273,14 +2272,14 @@ msgid ""
 "already mentioned, the :code:`jax.grad()` function is defined in :code:"
 "`main()` and passed to :code:`train()`."
 msgstr ""
-"在定义了数据加载、模型架构、训练和评估之后，我们就可以把所有东西放在一起，使"
-"用 JAX 训练我们的模型了。如前所述，:code:`jax.grad()` 函数在 :code:`main()` "
-"中定义，并传递给 :code:`train()`。"
+"在定义了数据加载、模型架构、训练和评估之后，我们就可以把这些放在一起，使用 "
+"JAX 训练我们的模型了。如前所述，:code:`jax.grad()` 函数在 :code:`main()` 中定"
+"义，并传递给 :code:`train()`。"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:105
 #: ../../source/tutorial-quickstart-jax.rst:111
 msgid "You can now run your (centralized) JAX linear regression workload:"
-msgstr "现在您可以运行（集中式）JAX 线性回归工作负载："
+msgstr "现在您可以运行（集中式）JAX 线性回归工作了："
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:111
 #: ../../source/tutorial-quickstart-jax.rst:117
@@ -2289,13 +2288,13 @@ msgid ""
 "take the next step and use what we've built to create a simple federated "
 "learning system consisting of one server and two clients."
 msgstr ""
-"到目前为止，如果你以前使用过 JAX，就会对这一切感到相当熟悉。下一步，让我们利"
-"用已构建的内容创建一个由一个服务器和两个客户端组成的简单联合学习系统。"
+"到目前为止，如果你以前使用过 JAX，就会对这一切感到很熟悉。下一步，让我们利用"
+"已构建的代码创建一个简单的联邦学习系统（一个服务器和两个客户端）。"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:115
 #: ../../source/tutorial-quickstart-jax.rst:121
 msgid "JAX meets Flower"
-msgstr "JAX 遇见Flower"
+msgstr "JAX 结合 Flower"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:117
 #: ../../source/tutorial-quickstart-jax.rst:123
@@ -2309,11 +2308,11 @@ msgid ""
 "one round of the federated learning process, and we repeat this for multiple "
 "rounds."
 msgstr ""
-"联合现有工作负载的概念始终是相同的，也很容易理解。我们必须启动一个*服务器*，"
-"然后对连接到*服务器*的*客户端*使用 :code:`jax_training.py`中的代码。服务器*向"
-"客户端发送模型参数。客户端*运行训练并更新参数。更新后的参数被发回*服务器，*服"
-"务器对所有收到的参数更新进行平均。以上描述的是一轮联合学习过程，我们将重复进"
-"行多轮学习。"
+"把现有工作联邦化的概念始终是相同的，也很容易理解。我们要启动一个*服务器*，然"
+"后对连接到*服务器*的*客户端*运行 :code:`jax_training.py`中的代码。*服务器*向"
+"客户端发送模型参数，*客户端*运行训练并更新参数。更新后的参数被发回*服务器*，"
+"然后服务器对所有收到的参数进行平均聚合。以上的描述构成了一轮联邦学习，我们将"
+"重复进行多轮学习。"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:123
 #: ../../source/example-mxnet-walk-through.rst:204
@@ -2325,9 +2324,9 @@ msgid ""
 "`flwr`. Next, we use the :code:`start_server` function to start a server and "
 "tell it to perform three rounds of federated learning."
 msgstr ""
-"我们的示例包括一个*服务器*和两个*客户端*。让我们先设置 :code:`server.py`。服"
+"我们的示例包括一个*服务器*和两个*客户端*。让我们先设置 :code:`server.py`。*服"
 "务器*需要导入 Flower 软件包 :code:`flwr`。接下来，我们使用 :code:"
-"`start_server` 函数启动服务器，并告诉它执行三轮联合学习。"
+"`start_server` 函数启动服务器，并让它执行三轮联邦学习。"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:133
 #: ../../source/example-mxnet-walk-through.rst:214
@@ -2361,18 +2360,18 @@ msgid ""
 "methods, two methods for getting/setting model parameters, one method for "
 "training the model, and one method for testing the model:"
 msgstr ""
-"实现 Flower *client*基本上意味着实现 :code:`flwr.client.Client` 或 :code:"
-"`flwr.client.NumPyClient` 的子类。我们的实现将基于 :code:`flwr.client."
-"NumPyClient`，并将其命名为 :code:`FlowerClient`。如果使用具有良好 NumPy 互操"
-"作性的框架（如 JAX），:code:`NumPyClient` 比 :code:`Client`更容易实现，因为它"
-"避免了一些必要的模板。:code:`FlowerClient` 需要实现四个方法，两个用于获取/设"
-"置模型参数，一个用于训练模型，一个用于测试模型："
+"实现一个 Flower *client*基本上意味着去实现一个 :code:`flwr.client.Client` "
+"或 :code:`flwr.client.NumPyClient` 的子类。我们的代码实现将基于 :code:`flwr."
+"client.NumPyClient`，并将其命名为 :code:`FlowerClient`。如果使用具有良好 "
+"NumPy 互操作性的框架（如 JAX），:code:`NumPyClient` 比 :code:`Client`更容易实"
+"现，因为它避免了一些不必要的操作。:code:`FlowerClient` 需要实现四个方法，两个"
+"用于获取/设置模型参数，一个用于训练模型，一个用于测试模型："
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:161
 #: ../../source/example-mxnet-walk-through.rst:242
 #: ../../source/tutorial-quickstart-jax.rst:167
 msgid ":code:`set_parameters (optional)`"
-msgstr "代码：\"set_parameters（可选）\""
+msgstr ":code:`set_parameters (可选)`"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:160
 #: ../../source/example-mxnet-walk-through.rst:241
@@ -2385,7 +2384,7 @@ msgstr "在本地模型上设置从服务器接收的模型参数"
 #: ../../source/example-jax-from-centralized-to-federated.rst:161
 #: ../../source/tutorial-quickstart-jax.rst:167
 msgid "transform parameters to NumPy :code:`ndarray`'s"
-msgstr "将参数转换为 NumPy :code:`ndarray`'s"
+msgstr "将参数转换为 NumPy :code:`ndarray`格式"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:162
 #: ../../source/example-mxnet-walk-through.rst:243
@@ -2395,7 +2394,7 @@ msgid ""
 "loop over the list of model parameters received as NumPy :code:`ndarray`'s "
 "(think list of neural network layers)"
 msgstr ""
-"循环遍历以 NumPy :code:`ndarray`'s 形式接收的模型参数列表（可视为神经网络层列"
+"循环遍历以 NumPy :code:`ndarray` 形式接收的模型参数列表（可以看作神经网络的列"
 "表）"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:163
@@ -2406,7 +2405,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:155
 #: ../../source/tutorial-quickstart-scikitlearn.rst:108
 msgid ":code:`get_parameters`"
-msgstr "代码：`get_parameters`（获取参数"
+msgstr ":code:`get_parameters`"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:164
 #: ../../source/example-mxnet-walk-through.rst:245
@@ -2417,7 +2416,7 @@ msgid ""
 "`ndarray`'s (which is what :code:`flwr.client.NumPyClient` expects)"
 msgstr ""
 "获取模型参数，并以 NumPy :code:`ndarray`的列表形式返回（这正是 :code:`flwr."
-"client.NumPyClient`所期望的）"
+"client.NumPyClient`所匹配的格式）"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:167
 #: ../../source/example-mxnet-walk-through.rst:248
@@ -2427,7 +2426,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-pytorch.rst:161
 #: ../../source/tutorial-quickstart-scikitlearn.rst:115
 msgid ":code:`fit`"
-msgstr "代码：\"fit"
+msgstr ":code:`fit`"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:166
 #: ../../source/example-jax-from-centralized-to-federated.rst:170
@@ -2462,7 +2461,7 @@ msgstr "获取更新后的本地模型参数并返回服务器"
 #: ../../source/tutorial-quickstart-pytorch.rst:164
 #: ../../source/tutorial-quickstart-scikitlearn.rst:118
 msgid ":code:`evaluate`"
-msgstr "代码：`评估"
+msgstr ":code:`evaluate`"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:171
 #: ../../source/example-mxnet-walk-through.rst:252
@@ -2474,7 +2473,7 @@ msgstr "在本地测试集上评估更新后的模型"
 #: ../../source/example-jax-from-centralized-to-federated.rst:172
 #: ../../source/tutorial-quickstart-jax.rst:178
 msgid "return the local loss to the server"
-msgstr "向服务器返回本地损失"
+msgstr "向服务器返回本地损失值"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:174
 #: ../../source/tutorial-quickstart-jax.rst:180
@@ -2496,23 +2495,23 @@ msgid ""
 "functions to call for training and evaluation. We included type annotations "
 "to give you a better understanding of the data types that get passed around."
 msgstr ""
-"两个 :code:`NumPyClient` 方法 :code:`fit` 和 :code:`evaluate` 使用了之前在 :"
-"code:`jax_training.py` 中定义的函数 :code:`train()` 和 :code:`evaluate()`。因"
-"此，我们在这里要做的就是通过 :code:`NumPyClient` 子类告诉 Flower 在训练和评估"
-"时要调用哪些已定义的函数。我们加入了类型注解，以便让你更好地理解传递的数据类"
-"型。"
+"这两个 :code:`NumPyClient` 方法 :code:`fit` 和 :code:`evaluate` 使用了之前"
+"在 :code:`jax_training.py` 中定义的函数 :code:`train()` 和 :code:"
+"`evaluate()`。因此，我们在这里要做的就是通过 :code:`NumPyClient` 子类告知 "
+"Flower 在训练和评估时要调用哪些已定义的函数。我们加入了类型注解，以便让您更好"
+"地理解传递的数据类型。"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:245
 #: ../../source/tutorial-quickstart-jax.rst:251
 msgid "Having defined the federation process, we can run it."
-msgstr "定义了联合进程后，我们就可以运行它了。"
+msgstr "定义了联邦进程后，我们就可以运行它了。"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:268
 #: ../../source/example-mxnet-walk-through.rst:347
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:301
 #: ../../source/tutorial-quickstart-jax.rst:274
 msgid "And that's it. You can now open two additional terminal windows and run"
-msgstr "就是这样。现在你可以打开另外两个终端窗口，运行"
+msgstr "就是这样，现在你可以打开另外两个终端窗口，然后运行"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:274
 #: ../../source/tutorial-quickstart-jax.rst:280
@@ -2521,8 +2520,8 @@ msgid ""
 "and see your JAX project run federated learning across two clients. "
 "Congratulations!"
 msgstr ""
-"确保服务器仍在运行），然后就能看到你的 JAX 项目在两个客户端上运行联合学习了。"
-"恭喜您!"
+"确保服务器仍在运行，然后在每个客户端窗口就能看到你的 JAX 项目在两个客户端上运"
+"行联邦学习了。祝贺!"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:279
 #: ../../source/tutorial-quickstart-jax.rst:285
@@ -2543,12 +2542,12 @@ msgid ""
 "sophisticated model or using a different dataset? How about adding more "
 "clients?"
 msgstr ""
-"现在，您已准备好进一步探讨这一主题。使用更复杂的模型或使用不同的数据集如何？"
-"增加更多客户如何？"
+"现在，您已准备好进行更深一步探索了。例如使用更复杂的模型或使用不同的数据集会"
+"如何？增加更多客户端会如何？"
 
 #: ../../source/example-mxnet-walk-through.rst:2
 msgid "Example: MXNet - Run MXNet Federated"
-msgstr "示例： MXNet - 联合运行 MXNet"
+msgstr "示例： MXNet - 运行联邦式 MXNet"
 
 #: ../../source/example-mxnet-walk-through.rst:4
 msgid ""
@@ -2565,16 +2564,16 @@ msgid ""
 "tutorials/packages/gluon/image/mnist.html>`_ tutorial. Then, we build upon "
 "the centralized training code to run the training in a federated fashion."
 msgstr ""
-"本教程将向您展示如何使用 Flower 构建现有 MXNet 工作负载的联合版本。我们将使"
-"用 MXNet 在 MNIST 数据集上训练一个序列模型。我们将采用与我们的 \"PyTorch - 从"
-"集中到联合 <https://github.com/adap/flower/blob/main/examples/pytorch-from-"
-"centralized-to-federated>`_ 演练 \"类似的示例结构。MXNet 和 PyTorch 非常相"
-"似，\"此处 <https://mxnet.apache.org/versions/1.7.0/api/python/docs/"
-"tutorials/getting-started/to-mxnet/pytorch.html>`_\"对 MXNet 和 PyTorch 进行"
-"了很好的比较。首先，我们根据 \"手写数字识别 <https://mxnet.apache.org/"
-"versions/1.7.0/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_ "
-"教程 \"建立了一种集中式训练方法。然后，我们在集中式训练代码的基础上，以联合方"
-"式运行训练。"
+"本教程将向您展示如何使用 Flower 构建现有 MXNet 的联学习版本。我们将使用 "
+"MXNet 在 MNIST 数据集上训练一个序列模型。另外，我们将采用与我们的 `PyTorch - "
+"从集中式到联邦式 <https://github.com/adap/flower/blob/main/examples/pytorch-"
+"from-centralized-to-federated>`_ 教程类似的示例结构。MXNet 和 PyTorch 非常相"
+"似，参考 `此处 <https://mxnet.apache.org/versions/1.7.0/api/python/docs/"
+"tutorials/getting-started/to-mxnet/pytorch.html>`_对 MXNet 和 PyTorch 进行了"
+"详细的比较。首先，我们根据 `手写数字识别 <https://mxnet.apache.org/"
+"versions/1.7.0/api/python/docs/tutorials/packages/gluon/image/mnist.html>` 教"
+"程 建立了集中式训练方法。然后，我们在集中式训练代码的基础上，以联邦方式运行训"
+"练。"
 
 #: ../../source/example-mxnet-walk-through.rst:10
 msgid ""
