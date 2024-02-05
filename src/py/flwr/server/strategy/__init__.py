@@ -18,6 +18,7 @@
 from .bulyan import Bulyan as Bulyan
 from .dp_strategy_wrapper_adaptive_clipping import (
     DPStrategyWrapperClientSideAdaptiveClipping,
+    DPStrategyWrapperServerSideAdaptiveClipping,
 )
 from .dp_strategy_wrapper_fixed_clipping import (
     DPStrategyWrapperClientSideFixedClipping,
@@ -64,6 +65,7 @@ __all__ = [
     "DPFedAvgAdaptive",
     "DPFedAvgFixed",
     "Strategy",
+    "DPStrategyWrapperServerSideAdaptiveClipping",
     "DPStrategyWrapperClientSideAdaptiveClipping",
     "DPStrategyWrapperServerSideFixedClipping",
     "DPStrategyWrapperClientSideFixedClipping",
