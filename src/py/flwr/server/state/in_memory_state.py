@@ -240,20 +240,17 @@ class InMemoryState(State):
             return self.node_id_public_key_dict[node_id]
         return bytes()
 
-    def store_server_private_key(self, private_key: bytes) -> None:
-        """Store my `private_key` in state."""
+    def store_server_public_private_key(self, public_key: bytes, private_key: bytes) -> None:
+        """Store server's `public_key` and `private_key` in state."""
         self.server_private_key = private_key
-
-    def get_server_private_key(self) -> bytes:
-        """Get my private key in urlsafe bytes for `node_id`."""
-        return self.server_private_key
-
-    def store_server_public_key(self, public_key: bytes) -> None:
-        """Store my `public_key` in state."""
         self.server_public_key = public_key
 
+    def get_server_private_key(self) -> bytes:
+        """Get server private key in urlsafe bytes."""
+        return self.server_private_key
+
     def get_server_public_key(self) -> bytes:
-        """Get my public key in urlsafe bytes."""
+        """Get server public key in urlsafe bytes."""
         return self.server_public_key
 
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
