@@ -13,6 +13,9 @@
 """Utility functions for differential privacy."""
 
 
+import warnings
+from typing import Optional, Tuple
+
 import numpy as np
 
 from flwr.common import (
@@ -124,3 +127,45 @@ def add_gaussian_to_params(
         compute_stdv(noise_multiplier, clipping_norm, num_sampled_clients),
     )
     return ndarrays_to_parameters(model_params_ndarrays)
+
+
+def compute_adaptive_noise_params(
+    noise_multiplier: float,
+    num_sampled_clients: float,
+    clipped_count_stddev: Optional[float],
+) -> Tuple[float, float]:
+    """Compute noising parameters for the adaptive clipping.
+
+    paper: https://arxiv.org/abs/1905.03871
+    """
+    if noise_multiplier > 0:
+        if clipped_count_stddev is None:
+            clipped_count_stddev = num_sampled_clients / 20
+        if noise_multiplier >= 2 * clipped_count_stddev:
+            raise ValueError(
+                f"If not specified, `clipped_count_stddev` is set to "
+                f"`num_sampled_clients`/20 by default. This value "
+                f"({num_sampled_clients / 20}) is too low to achieve the "
+                f"desired effective `noise_multiplier` ({noise_multiplier}). "
+                f"Consider increasing `clipped_count_stddev` or decreasing "
+                f"`noise_multiplier`."
+            )
+        noise_multiplier_value = (
+            noise_multiplier ** (-2) - (2 * clipped_count_stddev) ** (-2)
+        ) ** -0.5
+
+        adding_noise = noise_multiplier_value / noise_multiplier
+        if adding_noise >= 2:
+            warnings.warn(
+                f"A significant amount of noise ({adding_noise}) has to be "
+                f"added. Consider increasing `clipped_count_stddev` or "
+                f"`num_sampled_clients`.",
+                stacklevel=2,
+            )
+
+    else:
+        if clipped_count_stddev is None:
+            clipped_count_stddev = 0.0
+        noise_multiplier_value = 0.0
+
+    return clipped_count_stddev, noise_multiplier_value

@@ -18,13 +18,15 @@ Paper (Andrew et al.): https://arxiv.org/pdf/1905.03871.pdf
 """
 
 import math
-import warnings
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Scalar
-from flwr.common.differential_privacy import add_gaussian_to_params
+from flwr.common.differential_privacy import (
+    add_gaussian_to_params,
+    compute_adaptive_noise_params,
+)
 from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM, KEY_NORM_BIT
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
@@ -102,9 +104,12 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         self.clipping_norm = initial_clipping_norm
         self.target_clipped_quantile = target_clipped_quantile
         self.clip_norm_lr = clip_norm_lr
-        self.clipped_count_stddev, self.noise_multiplier = self._compute_noise_params(
+        (
+            self.clipped_count_stddev,
+            self.noise_multiplier,
+        ) = compute_adaptive_noise_params(
             noise_multiplier,
-            self.num_sampled_clients,
+            num_sampled_clients,
             clipped_count_stddev,
         )
 
@@ -187,44 +192,6 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
             -self.clip_norm_lr
             * (noised_norm_bit_set_fraction - self.target_clipped_quantile)
         )
-
-    @staticmethod
-    def _compute_noise_params(
-        noise_multiplier: float,
-        num_sampled_clients: float,
-        clipped_count_stddev: Optional[float],
-    ) -> Tuple[float, float]:
-        """Compute noising parameters for the adaptive clipping.
-
-        paper: https://arxiv.org/abs/1905.03871
-        """
-        if noise_multiplier > 0:
-            if clipped_count_stddev is None:
-                clipped_count_stddev = num_sampled_clients / 20
-            if noise_multiplier >= 2 * clipped_count_stddev:
-                raise ValueError(
-                    f"If not specified, `clipped_count_stddev` is set to `num_sampled_clients`/20 by default. "
-                    f"This value ({num_sampled_clients / 20}) is too low to achieve the desired effective `noise_multiplier` ({noise_multiplier})."
-                    f"Consider increasing `clipped_count_stddev` or decreasing `noise_multiplier`."
-                )
-            noise_multiplier_value = (
-                noise_multiplier ** (-2) - (2 * clipped_count_stddev) ** (-2)
-            ) ** -0.5
-
-            adding_noise = noise_multiplier_value / noise_multiplier
-            if adding_noise >= 2:
-                warnings.warn(
-                    f"A significant amount of noise ({adding_noise}) has to be added. Consider increasing"
-                    f" `clipped_count_stddev` or `num_sampled_clients`.",
-                    stacklevel=2,
-                )
-
-        else:
-            if clipped_count_stddev is None:
-                clipped_count_stddev = 0.0
-            noise_multiplier_value = 0.0
-
-        return clipped_count_stddev, noise_multiplier_value
 
     def aggregate_evaluate(
         self,
