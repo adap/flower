@@ -54,7 +54,9 @@ class RayActorClientProxy(ClientProxy):
         super().__init__(cid)
 
         def _load_app() -> Flower:
-            return Flower(client_fn=client_fn)
+            def wrap(cid: str):
+                return client_fn(self.cid)
+            return Flower(client_fn=wrap)
 
         self.app_fn = _load_app
         self.actor_pool = actor_pool
