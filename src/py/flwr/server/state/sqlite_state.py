@@ -37,6 +37,26 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
+SQL_CREATE_TABLE_NODE_KEY = """
+CREATE TABLE IF NOT EXISTS node_key(
+    node_id INTEGER PRIMARY KEY,
+    public_key BLOB
+);
+"""
+
+SQL_CREATE_TABLE_CREDENTIAL = """
+CREATE TABLE IF NOT EXISTS credential(
+    public_key BLOB PRIMARY KEY,
+    private_key BLOB
+);
+"""
+
+SQL_CREATE_TABLE_PUBLIC_KEY = """
+CREATE TABLE IF NOT EXISTS public_key(
+    public_key BLOB UNIQUE
+);
+"""
+
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
     run_id INTEGER UNIQUE
@@ -102,10 +122,6 @@ class SqliteState(State):
         """
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
-        self.tables = [SQL_CREATE_TABLE_RUN, 
-                       SQL_CREATE_TABLE_TASK_INS, 
-                       SQL_CREATE_TABLE_TASK_RES, 
-                       SQL_CREATE_TABLE_NODE]
 
     def initialize(self, log_queries: bool = False) -> List[Tuple[str]]:
         """Create tables if they don't exist yet.
@@ -123,8 +139,13 @@ class SqliteState(State):
         cur = self.conn.cursor()
 
         # Create each table if not exists queries
-        for table in self.tables:
-            cur.execute(table)
+        cur.execute(SQL_CREATE_TABLE_RUN)
+        cur.execute(SQL_CREATE_TABLE_TASK_INS)
+        cur.execute(SQL_CREATE_TABLE_TASK_RES)
+        cur.execute(SQL_CREATE_TABLE_NODE)
+        cur.execute(SQL_CREATE_TABLE_CREDENTIAL)
+        cur.execute(SQL_CREATE_TABLE_NODE_KEY)
+        cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
         return res.fetchall()
@@ -520,7 +541,6 @@ class SqliteState(State):
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
-
 
 def dict_factory(
     cursor: sqlite3.Cursor,

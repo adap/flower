@@ -16,34 +16,11 @@
 
 from sqlite_state import SqliteState
 from authentication_state import AuthenticationState
-
-SQL_CREATE_TABLE_NODE_KEY = """
-CREATE TABLE IF NOT EXISTS node_key(
-    node_id INTEGER PRIMARY KEY,
-    public_key BLOB
-);
-"""
-
-SQL_CREATE_TABLE_CREDENTIAL = """
-CREATE TABLE IF NOT EXISTS credential(
-    public_key BLOB PRIMARY KEY,
-    private_key BLOB
-);
-"""
-
-SQL_CREATE_TABLE_PUBLIC_KEY = """
-CREATE TABLE IF NOT EXISTS public_key(
-    public_key BLOB UNIQUE
-);
-"""
+from typing import Set
 
 class SqliteAuthState(AuthenticationState, SqliteState):
     def __init__(self) -> None:
         super().__init__()
-        tables = [SQL_CREATE_TABLE_CREDENTIAL, 
-                  SQL_CREATE_TABLE_NODE_KEY, 
-                  SQL_CREATE_TABLE_PUBLIC_KEY]
-        self.tables += tables
 
     def store_node_id_public_key_pair(self, node_id: int, public_key: bytes) -> None:
         """Store `node_id` and `public_key` as key-value pair in state."""
