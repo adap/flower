@@ -92,6 +92,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
                 run_id=0,
                 task_id="",
                 group_id="",
+                node_id="",
                 ttl="",
                 task_type="reconnect",
             ),
@@ -108,7 +109,7 @@ def handle_legacy_message_from_tasktype(
     client_fn: ClientFn, message: Message, context: Context
 ) -> Message:
     """Handle legacy message in the inner most middleware layer."""
-    client = client_fn("-1")
+    client = client_fn(message.metadata.node_id)
 
     client.set_context(context)
 
@@ -153,6 +154,7 @@ def handle_legacy_message_from_tasktype(
             run_id=0,  # Non-user defined
             task_id="",  # Non-user defined
             group_id="",  # Non-user defined
+            node_id="",
             ttl="",
             task_type=task_type,
         ),

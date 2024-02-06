@@ -207,7 +207,7 @@ def secaggplus_middleware(
 
     # Return message
     return Message(
-        metadata=Metadata(0, "", "", "", TASK_TYPE_FIT),
+        metadata=Metadata(0, "", "", "", "", TASK_TYPE_FIT),
         message=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)}),
     )
 

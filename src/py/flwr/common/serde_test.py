@@ -219,6 +219,7 @@ class RecordMaker:
             run_id=self.rng.randint(0, 1 << 30),
             task_id=self.get_str(64),
             group_id=self.get_str(30),
+            node_id=self.get_str(30),
             ttl=self.get_str(10),
             task_type=self.get_str(10),
         )
@@ -309,6 +310,7 @@ def test_message_to_and_from_taskins() -> None:
             run_id=0,
             task_id="",
             group_id="",
+            node_id="",
             ttl=metadata.ttl,
             task_type=metadata.task_type,
         ),
@@ -337,6 +339,7 @@ def test_message_to_and_from_taskres() -> None:
             run_id=0,
             task_id="",
             group_id="",
+            node_id="",
             ttl=metadata.ttl,
             task_type=metadata.task_type,
         ),
