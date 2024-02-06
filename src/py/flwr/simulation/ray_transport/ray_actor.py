@@ -25,22 +25,21 @@ import ray
 from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
-from flwr.client import ClientFn
-from flwr.client.message_handler.message_handler import (
-    UnexpectedServerMessage,
-    UnknownServerMessage,
-    _evaluate,
-    _fit,
-    _get_parameters,
-    _get_properties,
-    get_server_message_from_task_ins,
-    wrap_client_message_in_task_res,
-)
-from flwr.client.run_state import RunState
+from flwr import common
+from flwr.client import Client
+from flwr.client.flower import Flower
+from flwr.common.context import Context
 from flwr.common.logger import log
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.common.message import Message
 
-from .utils import check_clientfn_returns_client
+# All possible returns by a client
+ClientRes = Union[
+    common.GetPropertiesRes, common.GetParametersRes, common.FitRes, common.EvaluateRes
+]
+# A function to be executed by a client to obtain some results
+JobFn = Callable[[Client], ClientRes]
+
+FlowerFn = Callable[[], Flower]
 
 
 class ClientException(Exception):
@@ -62,48 +61,25 @@ class VirtualClientEngineActor(ABC):
 
     def run(
         self,
-        client_fn: ClientFn,
-        task_ins: TaskIns,
+        app_fn: FlowerFn,
+        message: Message,
         cid: str,
-        state: RunState,
-    ) -> Tuple[str, TaskRes, RunState]:
-        """Instantiate client and run TaskIns."""
+        context: Context,
+    ) -> Tuple[str, Message, Context]:
+        """Run a client run."""
+        # Execute tasks and return result
+        # return also cid which is needed to ensure results
+        # from the pool are correctly assigned to each ClientProxy
         try:
-            # Ideally we would be simply call `handle()` but we can't
-            # this is because we need to pass `cid` to `client_fn`
-            # Still, most of the code below is borrowed from handle() and the functions it calls internally
-            server_msg = server_msg = get_server_message_from_task_ins(
-                task_ins, exclude_reconnect_ins=False
-            )
-            field = server_msg.WhichOneof("msg")
+            # Load app
+            app: Flower = app_fn()
 
-            # Must be handled elsewhere
-            if field == "reconnect_ins":
-                raise UnexpectedServerMessage()
-
-            # Instantiate the client
-            client = check_clientfn_returns_client(
-                client_fn(cid)
-            )  # client_fn must return Client type
-            client.set_state(state)
-            # Execute task
-            message = None
-            if field == "get_properties_ins":
-                message = _get_properties(client, server_msg.get_properties_ins)
-            elif field == "get_parameters_ins":
-                message = _get_parameters(client, server_msg.get_parameters_ins)
-            elif field == "fit_ins":
-                message = _fit(client, server_msg.fit_ins)
-            elif field == "evaluate_ins":
-                message = _evaluate(client, server_msg.evaluate_ins)
-            else:
-                raise UnknownServerMessage()
-
-            task_res = wrap_client_message_in_task_res(message)
+            # Handle task message
+            out_message = app(message=message, context=context)
 
         except Exception as ex:
             client_trace = traceback.format_exc()
-            message = (
+            mssg = (
                 "\n\tSomething went wrong when running your client run."
                 "\n\tClient "
                 + cid
@@ -112,9 +88,9 @@ class VirtualClientEngineActor(ABC):
                 + " was running its run."
                 "\n\tException triggered on the client side: " + client_trace,
             )
-            raise ClientException(str(message)) from ex
+            raise ClientException(str(mssg)) from ex
 
-        return cid, task_res, client.get_state()
+        return cid, out_message, context
 
 
 @ray.remote
@@ -262,16 +238,16 @@ class VirtualClientEngineActorPool(ActorPool):
             self._idle_actors.extend(new_actors)
             self.num_actors += num_actors
 
-    def submit(self, fn: Any, value: Tuple[ClientFn, TaskIns, str, RunState]) -> None:
+    def submit(self, fn: Any, value: Tuple[FlowerFn, Message, str, Context]) -> None:
         """Take idle actor and assign it a client run.
 
         Submit a job to an actor by first removing it from the list of idle actors, then
         check if this actor was flagged to be removed from the pool
         """
-        client_fn, task_ins, cid, state = value
+        app_fn, mssg, cid, context = value
         actor = self._idle_actors.pop()
         if self._check_and_remove_actor_from_pool(actor):
-            future = fn(actor, client_fn, task_ins, cid, state)
+            future = fn(actor, app_fn, mssg, cid, context)
             future_key = tuple(future) if isinstance(future, List) else future
             self._future_to_actor[future_key] = (self._next_task_index, actor, cid)
             self._next_task_index += 1
@@ -279,8 +255,8 @@ class VirtualClientEngineActorPool(ActorPool):
             # Update with future
             self._cid_to_future[cid]["future"] = future_key
 
-    def submit_task_ins(
-        self, actor_fn: Any, job: Tuple[ClientFn, TaskIns, str, RunState]
+    def submit_client_job(
+        self, actor_fn: Any, job: Tuple[FlowerFn, Message, str, Context]
     ) -> None:
         """Submit a job while tracking client ids."""
         _, _, cid, _ = job
@@ -320,17 +296,17 @@ class VirtualClientEngineActorPool(ActorPool):
 
         return self._cid_to_future[cid]["ready"]  # type: ignore
 
-    def _fetch_future_result(self, cid: str) -> Tuple[TaskRes, RunState]:
-        """Fetch result and updated state for a VirtualClient from Object Store.
+    def _fetch_future_result(self, cid: str) -> Tuple[Message, Context]:
+        """Fetch result and updated context for a VirtualClient from Object Store.
 
         The job submitted by the ClientProxy interfacing with client with cid=cid is
         ready. Here we fetch it from the object store and return.
         """
         try:
             future: ObjectRef[Any] = self._cid_to_future[cid]["future"]  # type: ignore
-            res_cid, res, updated_state = ray.get(
+            res_cid, res, updated_context = ray.get(
                 future
-            )  # type: (str, TaskRes, RunState)
+            )  # type: (str, Message, Context)
         except ray.exceptions.RayActorError as ex:
             log(ERROR, ex)
             if hasattr(ex, "actor_id"):
@@ -347,7 +323,7 @@ class VirtualClientEngineActorPool(ActorPool):
         # Reset mapping
         self._reset_cid_to_future_dict(cid)
 
-        return res, updated_state
+        return res, updated_context
 
     def _flag_actor_for_removal(self, actor_id_hex: str) -> None:
         """Flag actor that should be removed from pool."""
@@ -434,7 +410,7 @@ class VirtualClientEngineActorPool(ActorPool):
 
     def get_client_result(
         self, cid: str, timeout: Optional[float]
-    ) -> Tuple[TaskRes, RunState]:
+    ) -> Tuple[Message, Context]:
         """Get result from VirtualClient with specific cid."""
         # Loop until all jobs submitted to the pool are completed. Break early
         # if the result for the ClientProxy calling this method is ready
@@ -446,5 +422,5 @@ class VirtualClientEngineActorPool(ActorPool):
                 break
 
         # Fetch result belonging to the VirtualClient calling this method
-        # Return both result from tasks and (potentially) updated run state
+        # Return both result from tasks and (potentially) updated run context
         return self._fetch_future_result(cid)

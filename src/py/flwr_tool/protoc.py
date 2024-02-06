@@ -51,7 +51,7 @@ def compile_all() -> None:
     exit_code = protoc.main(command)
 
     if exit_code != 0:
-        raise Exception(f"Error: {command} failed")
+        raise Exception(f"Error: {command} failed")  # pylint: disable=W0719
 
 
 if __name__ == "__main__":
