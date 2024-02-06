@@ -31,12 +31,12 @@ If you're looking to try out Flower, you can use the following command:
 
 .. code-block:: bash
 
-  $ docker run --rm -p 9091:9091 -p 9092:9092 flwr/server:1.6.0-py3.11-ubuntu22.04 \
+  $ docker run --rm -p 9091:9091 -p 9092:9092 flwr/server:1.7.0-py3.11-ubuntu22.04 \
     --insecure
 
-The command will pull the Docker image with the tag ``1.6.0-py3.11-ubuntu22.04`` from Docker Hub.
+The command will pull the Docker image with the tag ``1.7.0-py3.11-ubuntu22.04`` from Docker Hub.
 The tag contains the information which Flower, Python and Ubuntu is used. In this case, it
-uses Flower 1.6.0, Python 3.11 and Ubuntu 22.04. The ``--rm`` flag tells Docker to remove
+uses Flower 1.7.0, Python 3.11 and Ubuntu 22.04. The ``--rm`` flag tells Docker to remove
 the container after it exits.
 
 .. note::
@@ -61,7 +61,7 @@ You can use ``--help`` to view all available flags that the server supports:
 
 .. code-block:: bash
 
-  $ docker run --rm flwr/server:1.6.0-py3.11-ubuntu22.04 --help
+  $ docker run --rm flwr/server:1.7.0-py3.11-ubuntu22.04 --help
 
 Mounting a volume to store the state on the host system
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,7 +75,7 @@ flag ``--database`` to specify the name of the database file.
 .. code-block:: bash
 
   $ docker run --rm \
-    -p 9091:9091 -p 9092:9092 -v ~/:/app/ flwr/server:1.6.0-py3.11-ubuntu22.04 \
+    -p 9091:9091 -p 9092:9092 -v ~/:/app/ flwr/server:1.7.0-py3.11-ubuntu22.04 \
     --insecure \
     --database state.db
 
@@ -101,7 +101,7 @@ the server with the ``--certificates`` flag.
 .. code-block:: bash
 
   $ docker run --rm \
-    -p 9091:9091 -p 9092:9092 -v ./certificates/:/app/ flwr/server:1.6.0-py3.11-ubuntu22.04 \
+    -p 9091:9091 -p 9092:9092 -v ./certificates/:/app/ flwr/server:1.7.0-py3.11-ubuntu22.04 \
     --certificates ca.crt server.pem server.key
 
 Using a different Flower or Python version
@@ -118,19 +118,19 @@ updates of system dependencies that should not change the functionality of Flowe
 want to ensure that you always use the same image, you can specify the hash of the image instead of
 the tag.
 
-The following command returns the current image hash referenced by the ``server:1.6.0-py3.11-ubuntu22.04`` tag:
+The following command returns the current image hash referenced by the ``server:1.7.0-py3.11-ubuntu22.04`` tag:
 
 .. code-block:: bash
 
-  $ docker inspect --format='{{index .RepoDigests 0}}' flwr/server:1.6.0-py3.11-ubuntu22.04
-  flwr/server@sha256:43fc389bcb016feab2b751b2ccafc9e9a906bb0885bd92b972329801086bc017
+  $ docker inspect --format='{{index .RepoDigests 0}}' flwr/server:1.7.0-py3.11-ubuntu22.04
+  flwr/server@sha256:c4be5012f9d73e3022e98735a889a463bb2f4f434448ebc19c61379920b1b327
 
 Next, we can pin the hash when running a new server container:
 
 .. code-block:: bash
 
   $ docker run \
-    --rm flwr/server@sha256:43fc389bcb016feab2b751b2ccafc9e9a906bb0885bd92b972329801086bc017 \
+    --rm flwr/server@sha256:c4be5012f9d73e3022e98735a889a463bb2f4f434448ebc19c61379920b1b327 \
     --insecure
 
 Setting environment variables
@@ -141,4 +141,4 @@ To set a variable inside a Docker container, you can use the ``-e <name>=<value>
 .. code-block:: bash
 
   $ docker run -e FLWR_TELEMETRY_ENABLED=0 \
-    --rm flwr/server:1.6.0-py3.11-ubuntu22.04 --insecure
+    --rm flwr/server:1.7.0-py3.11-ubuntu22.04 --insecure
