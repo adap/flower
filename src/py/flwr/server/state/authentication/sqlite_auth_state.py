@@ -27,7 +27,6 @@ class SqliteAuthState(AuthenticationState, SqliteState):
         query = "INSERT OR REPLACE INTO node_key (node_id, public_key) VALUES (:node_id, :public_key)"
         self.query(query, {"node_id": node_id, "public_key": public_key})
 
-
     def get_public_key_from_node_id(self, node_id: int) -> bytes:
         """Get client's public key in urlsafe bytes for `node_id`."""
         query = "SELECT public_key FROM node_key WHERE node_id = :node_id"
