@@ -16,11 +16,7 @@
 
 
 from flwr.client.flower import Flower as Flower
-from flwr.client.typing import Bwd as Bwd
-from flwr.client.typing import Fwd as Fwd
 
 __all__ = [
     "Flower",
-    "Fwd",
-    "Bwd",
 ]

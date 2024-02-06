@@ -23,7 +23,7 @@ import grpc
 from flwr.common import EventType, event
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.proto.driver_pb2 import (
+from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
     GetNodesRequest,
@@ -33,7 +33,7 @@ from flwr.proto.driver_pb2 import (
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
-from flwr.proto.driver_pb2_grpc import DriverStub
+from flwr.proto.driver_pb2_grpc import DriverStub  # pylint: disable=E0611
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -51,10 +51,10 @@ class GrpcDriver:
     def __init__(
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        certificates: Optional[bytes] = None,
+        root_certificates: Optional[bytes] = None,
     ) -> None:
         self.driver_service_address = driver_service_address
-        self.certificates = certificates
+        self.root_certificates = root_certificates
         self.channel: Optional[grpc.Channel] = None
         self.stub: Optional[DriverStub] = None
 
@@ -66,8 +66,8 @@ class GrpcDriver:
             return
         self.channel = create_channel(
             server_address=self.driver_service_address,
-            insecure=(self.certificates is None),
-            root_certificates=self.certificates,
+            insecure=(self.root_certificates is None),
+            root_certificates=self.root_certificates,
         )
         self.stub = DriverStub(self.channel)
         log(INFO, "[Driver] Connected to %s", self.driver_service_address)
@@ -89,7 +89,7 @@ class GrpcDriver:
         # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`GrpcDriver` instance not connected")
+            raise ConnectionError("`GrpcDriver` instance not connected")
 
         # Call Driver API
         res: CreateRunResponse = self.stub.CreateRun(request=req)
@@ -100,7 +100,7 @@ class GrpcDriver:
         # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`GrpcDriver` instance not connected")
+            raise ConnectionError("`GrpcDriver` instance not connected")
 
         # Call gRPC Driver API
         res: GetNodesResponse = self.stub.GetNodes(request=req)
@@ -111,7 +111,7 @@ class GrpcDriver:
         # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`GrpcDriver` instance not connected")
+            raise ConnectionError("`GrpcDriver` instance not connected")
 
         # Call gRPC Driver API
         res: PushTaskInsResponse = self.stub.PushTaskIns(request=req)
@@ -122,7 +122,7 @@ class GrpcDriver:
         # Check if channel is open
         if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise Exception("`GrpcDriver` instance not connected")
+            raise ConnectionError("`GrpcDriver` instance not connected")
 
         # Call Driver API
         res: PullTaskResResponse = self.stub.PullTaskRes(request=req)

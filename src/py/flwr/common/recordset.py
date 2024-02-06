@@ -14,32 +14,22 @@
 # ==============================================================================
 """RecordSet."""
 
-from dataclasses import dataclass
+
+from dataclasses import dataclass, field
 from typing import Dict
 
-
-@dataclass
-class ParametersRecord:
-    """Parameters record."""
-
-
-@dataclass
-class MetricsRecord:
-    """Metrics record."""
-
-
-@dataclass
-class ConfigsRecord:
-    """Configs record."""
+from .configsrecord import ConfigsRecord
+from .metricsrecord import MetricsRecord
+from .parametersrecord import ParametersRecord
 
 
 @dataclass
 class RecordSet:
     """Definition of RecordSet."""
 
-    parameters: Dict[str, ParametersRecord] = {}
-    metrics: Dict[str, MetricsRecord] = {}
-    configs: Dict[str, ConfigsRecord] = {}
+    parameters: Dict[str, ParametersRecord] = field(default_factory=dict)
+    metrics: Dict[str, MetricsRecord] = field(default_factory=dict)
+    configs: Dict[str, ConfigsRecord] = field(default_factory=dict)
 
     def set_parameters(self, name: str, record: ParametersRecord) -> None:
         """Add a ParametersRecord."""

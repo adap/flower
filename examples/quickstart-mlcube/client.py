@@ -43,8 +43,9 @@ def main():
         os.path.dirname(os.path.abspath(__file__)), "workspaces", workspace_name
     )
 
-    fl.client.start_numpy_client(
-        server_address="0.0.0.0:8080", client=MLCubeClient(workspace=workspace)
+    fl.client.start_client(
+        server_address="0.0.0.0:8080",
+        client=MLCubeClient(workspace=workspace).to_client(),
     )
 
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Test for utility functions."""
-# pylint: disable=no-self-use, invalid-name, disable=R0904
+# pylint: disable=invalid-name, disable=R0904
 
 import unittest
 
@@ -40,8 +40,8 @@ class SqliteStateTest(unittest.TestCase):
             "delivered_at",
             "ttl",
             "ancestry",
-            "legacy_server_message",
-            "legacy_client_message",
+            "task_type",
+            "recordset",
         ]
 
         # Execute

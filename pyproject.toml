@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr"
-version = "1.7.0"
+version = "1.8.0"
 description = "Flower: A Friendly Federated Learning Framework"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.dev>"]
@@ -61,8 +61,8 @@ flower-client = "flwr.client:run_client"
 python = "^3.8"
 # Mandatory dependencies
 numpy = "^1.21.0"
-grpcio = "^1.48.2,!=1.52.0"
-protobuf = "^3.19.0"
+grpcio = "^1.60.0"
+protobuf = "^4.25.2"
 cryptography = "^41.0.2"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
@@ -81,21 +81,21 @@ rest = ["requests", "starlette", "uvicorn"]
 [tool.poetry.group.dev.dependencies]
 types-dataclasses = "==0.6.6"
 types-protobuf = "==3.19.18"
-types-requests = "==2.31.0.10"
-types-setuptools = "==69.0.0.20240115"
-clang-format = "==17.0.4"
-isort = "==5.12.0"
+types-requests = "==2.31.0.20240125"
+types-setuptools = "==69.0.0.20240125"
+clang-format = "==17.0.6"
+isort = "==5.13.2"
 black = { version = "==23.10.1", extras = ["jupyter"] }
 docformatter = "==1.7.5"
-mypy = "==1.6.1"
-pylint = "==2.13.9"
+mypy = "==1.8.0"
+pylint = "==3.0.3"
 flake8 = "==5.0.4"
-pytest = "==7.4.3"
+pytest = "==7.4.4"
 pytest-cov = "==4.1.0"
 pytest-watch = "==4.2.0"
-grpcio-tools = "==1.48.2"
+grpcio-tools = "==1.60.0"
 mypy-protobuf = "==3.2.0"
-jupyterlab = "==4.0.9"
+jupyterlab = "==4.0.12"
 rope = "==1.11.0"
 semver = "==3.0.2"
 sphinx = "==6.2.1"
@@ -121,7 +121,7 @@ pyroma = "==4.2"
 check-wheel-contents = "==0.4.0"
 GitPython = "==3.1.32"
 PyGithub = "==2.1.1"
-licensecheck = "==2023.5.1"
+licensecheck = "==2024"
 
 [tool.isort]
 line_length = 88
@@ -137,7 +137,7 @@ line-length = 88
 target-version = ["py38", "py39", "py310", "py311"]
 
 [tool.pylint."MESSAGES CONTROL"]
-disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
+disable = "duplicate-code,too-few-public-methods,useless-import-alias"
 
 [tool.pytest.ini_options]
 minversion = "6.2"
@@ -184,7 +184,7 @@ target-version = "py38"
 line-length = 88
 select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
 fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
-ignore = ["B024", "B027"]
+ignore = ["B024", "B027", "D205", "D209"]
 exclude = [
     ".bzr",
     ".direnv",

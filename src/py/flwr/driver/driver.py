@@ -18,14 +18,14 @@
 from typing import Iterable, List, Optional, Tuple
 
 from flwr.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER, GrpcDriver
-from flwr.proto.driver_pb2 import (
+from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     GetNodesRequest,
     PullTaskResRequest,
     PushTaskInsRequest,
 )
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
 class Driver:
@@ -49,10 +49,10 @@ class Driver:
     def __init__(
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        certificates: Optional[bytes] = None,
+        root_certificates: Optional[bytes] = None,
     ) -> None:
         self.addr = driver_service_address
-        self.certificates = certificates
+        self.root_certificates = root_certificates
         self.grpc_driver: Optional[GrpcDriver] = None
         self.run_id: Optional[int] = None
         self.node = Node(node_id=0, anonymous=True)
@@ -62,7 +62,8 @@ class Driver:
         if self.grpc_driver is None or self.run_id is None:
             # Connect and create run
             self.grpc_driver = GrpcDriver(
-                driver_service_address=self.addr, certificates=self.certificates
+                driver_service_address=self.addr,
+                root_certificates=self.root_certificates,
             )
             self.grpc_driver.connect()
             res = self.grpc_driver.create_run(CreateRunRequest())
