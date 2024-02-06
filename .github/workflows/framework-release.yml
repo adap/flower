@@ -34,7 +34,9 @@ jobs:
         wheel_url="https://artifact.flower.dev/py/release/v${TAG_NAME}/${wheel_name}"
         tar_url="https://artifact.flower.dev/py/release/v${TAG_NAME}/${tar_name}"
 
-        curl $wheel_url --output $wheel_name
-        curl $tar_url --output $tar_name
+        mkdir -p dist
+
+        curl $wheel_url --output dist/$wheel_name
+        curl $tar_url --output dist/$tar_name
 
         python -m poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}
