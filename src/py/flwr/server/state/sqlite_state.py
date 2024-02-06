@@ -37,26 +37,6 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
-SQL_CREATE_TABLE_NODE_KEY = """
-CREATE TABLE IF NOT EXISTS node_key(
-    node_id INTEGER PRIMARY KEY,
-    public_key BLOB
-);
-"""
-
-SQL_CREATE_TABLE_CREDENTIAL = """
-CREATE TABLE IF NOT EXISTS credential(
-    public_key BLOB PRIMARY KEY,
-    private_key BLOB
-);
-"""
-
-SQL_CREATE_TABLE_PUBLIC_KEY = """
-CREATE TABLE IF NOT EXISTS public_key(
-    public_key BLOB UNIQUE
-);
-"""
-
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
     run_id INTEGER UNIQUE
@@ -122,6 +102,10 @@ class SqliteState(State):
         """
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
+        self.tables = [SQL_CREATE_TABLE_RUN, 
+                       SQL_CREATE_TABLE_TASK_INS, 
+                       SQL_CREATE_TABLE_TASK_RES, 
+                       SQL_CREATE_TABLE_NODE]
 
     def initialize(self, log_queries: bool = False) -> List[Tuple[str]]:
         """Create tables if they don't exist yet.
@@ -139,13 +123,8 @@ class SqliteState(State):
         cur = self.conn.cursor()
 
         # Create each table if not exists queries
-        cur.execute(SQL_CREATE_TABLE_RUN)
-        cur.execute(SQL_CREATE_TABLE_TASK_INS)
-        cur.execute(SQL_CREATE_TABLE_TASK_RES)
-        cur.execute(SQL_CREATE_TABLE_NODE)
-        cur.execute(SQL_CREATE_TABLE_CREDENTIAL)
-        cur.execute(SQL_CREATE_TABLE_NODE_KEY)
-        cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
+        for table in self.tables:
+            cur.execute(table)
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
         return res.fetchall()
@@ -541,30 +520,6 @@ class SqliteState(State):
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
-    
-    def store_node_id_public_key_pair(self, node_id: int, public_key: bytes) -> None:
-        """Store `node_id` and `public_key` as key-value pair in state."""
-
-    def get_public_key_from_node_id(self, node_id: int) -> bytes:
-        """Get client's public key in urlsafe bytes for `node_id`."""
-
-    def store_server_public_private_key(self, public_key: bytes, private_key: bytes) -> None:
-        """Store server's `public_key` and `private_key` in state."""
-
-    def get_server_private_key(self) -> bytes:
-        """Get server private key in urlsafe bytes."""
-
-    def get_server_public_key(self) -> bytes:
-        """Get server public key in urlsafe bytes."""
-
-    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-         """Store a set of client public keys in state."""
-
-    def store_client_public_key(self, public_key: bytes) -> None:
-         """Retrieve a client public key in state."""
-
-    def get_client_public_keys(self) -> Set[bytes]:
-         """Retrieve all currently stored client public keys as a set."""
 
 
 def dict_factory(
