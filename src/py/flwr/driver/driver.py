@@ -49,10 +49,10 @@ class Driver:
     def __init__(
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        certificates: Optional[bytes] = None,
+        root_certificates: Optional[bytes] = None,
     ) -> None:
         self.addr = driver_service_address
-        self.certificates = certificates
+        self.root_certificates = root_certificates
         self.grpc_driver: Optional[GrpcDriver] = None
         self.run_id: Optional[int] = None
         self.node = Node(node_id=0, anonymous=True)
@@ -62,7 +62,8 @@ class Driver:
         if self.grpc_driver is None or self.run_id is None:
             # Connect and create run
             self.grpc_driver = GrpcDriver(
-                driver_service_address=self.addr, certificates=self.certificates
+                driver_service_address=self.addr,
+                root_certificates=self.root_certificates,
             )
             self.grpc_driver.connect()
             res = self.grpc_driver.create_run(CreateRunRequest())
