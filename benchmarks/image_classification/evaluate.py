@@ -10,7 +10,7 @@ from flwr_datasets import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner
 
 from evaluation.eval_utils import test, apply_transforms_test, weighted_average
-from baseline.model import NetResnet18, Net
+from baseline.model import Net
 
 
 # Arguments parser

@@ -8,7 +8,7 @@ from flwr.common import Metrics, NDArrays
 from flwr.common.typing import Scalar
 from datasets.utils.logging import disable_progress_bar
 
-from .model import NetResnet18, Net
+from .model import Net
 from evaluation.eval_utils import apply_transforms_test, test
 
 
