@@ -25,19 +25,10 @@ import ray
 from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
-from flwr import common
-from flwr.client import Client
 from flwr.client.flower import Flower
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
-
-# All possible returns by a client
-ClientRes = Union[
-    common.GetPropertiesRes, common.GetParametersRes, common.FitRes, common.EvaluateRes
-]
-# A function to be executed by a client to obtain some results
-JobFn = Callable[[Client], ClientRes]
 
 FlowerFn = Callable[[], Flower]
 
@@ -67,7 +58,7 @@ class VirtualClientEngineActor(ABC):
         context: Context,
     ) -> Tuple[str, Message, Context]:
         """Run a client run."""
-        # Execute tasks and return result
+        # Pass message through app and return a message
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
         try:
@@ -239,10 +230,10 @@ class VirtualClientEngineActorPool(ActorPool):
             self.num_actors += num_actors
 
     def submit(self, fn: Any, value: Tuple[FlowerFn, Message, str, Context]) -> None:
-        """Take idle actor and assign it a client run.
+        """Take an idle actor and assign it to run a client app and Message.
 
         Submit a job to an actor by first removing it from the list of idle actors, then
-        check if this actor was flagged to be removed from the pool
+        check if this actor was flagged to be removed from the pool.
         """
         app_fn, mssg, cid, context = value
         actor = self._idle_actors.pop()
@@ -304,7 +295,7 @@ class VirtualClientEngineActorPool(ActorPool):
         """
         try:
             future: ObjectRef[Any] = self._cid_to_future[cid]["future"]  # type: ignore
-            res_cid, res, updated_context = ray.get(
+            res_cid, out_mssg, updated_context = ray.get(
                 future
             )  # type: (str, Message, Context)
         except ray.exceptions.RayActorError as ex:
@@ -323,7 +314,7 @@ class VirtualClientEngineActorPool(ActorPool):
         # Reset mapping
         self._reset_cid_to_future_dict(cid)
 
-        return res, updated_context
+        return out_mssg, updated_context
 
     def _flag_actor_for_removal(self, actor_id_hex: str) -> None:
         """Flag actor that should be removed from pool."""

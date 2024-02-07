@@ -62,7 +62,7 @@ class RayActorClientProxy(ClientProxy):
         self.proxy_state = NodeState()
 
     def _submit_job(self, message: Message, timeout: Optional[float]) -> Message:
-        # The VCE is not exposed to TaskIns, it won't handle multilple runs
+        """Sumbit a message to the AcotrPool."""
         # For the time being, fixing run_id is a small compromise
         # This will be one of the first points to address integrating VCE + DriverAPI
         run_id = message.metadata.run_id
@@ -99,6 +99,7 @@ class RayActorClientProxy(ClientProxy):
     def _wrap_recordset_in_message(
         self, recordset: RecordSet, task_type: str
     ) -> Message:
+        """Wrap a RecordSet inside a Message."""
         return Message(
             message=recordset,
             metadata=Metadata(
