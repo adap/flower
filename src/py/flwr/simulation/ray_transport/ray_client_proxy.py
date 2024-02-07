@@ -31,6 +31,7 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
+from flwr.common.recordset import RecordSet
 from flwr.common.recordset_compat import (
     evaluateins_to_recordset,
     fitins_to_recordset,
@@ -54,9 +55,7 @@ class RayActorClientProxy(ClientProxy):
         super().__init__(cid)
 
         def _load_app() -> Flower:
-            def wrap(cid: str):
-                return client_fn(self.cid)
-            return Flower(client_fn=wrap)
+            return Flower(client_fn=client_fn)
 
         self.app_fn = _load_app
         self.actor_pool = actor_pool
@@ -97,20 +96,28 @@ class RayActorClientProxy(ClientProxy):
 
         return out_mssg
 
-    def get_properties(
-        self, ins: common.GetPropertiesIns, timeout: Optional[float]
-    ) -> common.GetPropertiesRes:
-        """Return client's properties."""
-        recordset = getpropertiesins_to_recordset(ins)
-        message = Message(
+    def _wrap_recordset_in_message(
+        self, recordset: RecordSet, task_type: str
+    ) -> Message:
+        return Message(
             message=recordset,
             metadata=Metadata(
                 run_id=0,
                 task_id="",
                 group_id="",
+                node_id=int(self.cid),
                 ttl="",
-                task_type=TASK_TYPE_GET_PROPERTIES,
+                task_type=task_type,
             ),
+        )
+
+    def get_properties(
+        self, ins: common.GetPropertiesIns, timeout: Optional[float]
+    ) -> common.GetPropertiesRes:
+        """Return client's properties."""
+        recordset = getpropertiesins_to_recordset(ins)
+        message = self._wrap_recordset_in_message(
+            recordset, task_type=TASK_TYPE_GET_PROPERTIES
         )
 
         message_out = self._submit_job(message, timeout)
@@ -122,15 +129,8 @@ class RayActorClientProxy(ClientProxy):
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
         recordset = getparametersins_to_recordset(ins)
-        message = Message(
-            message=recordset,
-            metadata=Metadata(
-                run_id=0,
-                task_id="",
-                group_id="",
-                ttl="",
-                task_type=TASK_TYPE_GET_PARAMETERS,
-            ),
+        message = self._wrap_recordset_in_message(
+            recordset, task_type=TASK_TYPE_GET_PARAMETERS
         )
 
         message_out = self._submit_job(message, timeout)
@@ -142,16 +142,7 @@ class RayActorClientProxy(ClientProxy):
         recordset = fitins_to_recordset(
             ins, keep_input=True
         )  # This must stay TRUE since ins are in-memory
-        message = Message(
-            message=recordset,
-            metadata=Metadata(
-                run_id=0,
-                task_id="",
-                group_id="",
-                ttl="",
-                task_type=TASK_TYPE_FIT,
-            ),
-        )
+        message = self._wrap_recordset_in_message(recordset, task_type=TASK_TYPE_FIT)
 
         message_out = self._submit_job(message, timeout)
 
@@ -164,15 +155,8 @@ class RayActorClientProxy(ClientProxy):
         recordset = evaluateins_to_recordset(
             ins, keep_input=True
         )  # This must stay TRUE since ins are in-memory
-        message = Message(
-            message=recordset,
-            metadata=Metadata(
-                run_id=0,
-                task_id="",
-                group_id="",
-                ttl="",
-                task_type=TASK_TYPE_EVALUATE,
-            ),
+        message = self._wrap_recordset_in_message(
+            recordset, task_type=TASK_TYPE_EVALUATE
         )
 
         message_out = self._submit_job(message, timeout)
