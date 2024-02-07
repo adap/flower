@@ -5,7 +5,7 @@ import numpy as np
 import flwr as fl
 from flwr.common import Status, FitIns, FitRes, Code
 from flwr.common.parameter import ndarrays_to_parameters
-from flwr.client.middleware import secaggplus_middleware
+from flwr.client.mod import secaggplus_mod
 
 
 # Define Flower client with the SecAgg+ protocol
@@ -35,7 +35,7 @@ def client_fn(cid: str):
 # To run this: `flower-client --callable client:flower`
 flower = fl.flower.Flower(
     client_fn=client_fn,
-    layers=[secaggplus_middleware],
+    mods=[secaggplus_mod],
 )
 
 
