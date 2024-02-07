@@ -15,7 +15,7 @@ from evaluation.eval_utils import apply_transforms_test, test
 # transformation to convert images to tensors and apply normalization
 def apply_transforms_train(batch):
     transforms = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
-    batch["img"] = [transforms(img) for img in batch["img"]]
+    batch["image"] = [transforms(img) for img in batch["image"]]
     return batch
 
 

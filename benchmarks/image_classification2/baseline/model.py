@@ -13,7 +13,7 @@ class Net(nn.Module):
         # max pooling layer
         self.pool = nn.MaxPool2d(2, 2)
         # fully connected layers
-        self.fc1 = nn.Linear(64 * 4 * 4, 512)
+        self.fc1 = nn.Linear(64 * 8 * 8, 512)
         self.fc2 = nn.Linear(512, 64)
         self.fc3 = nn.Linear(64, 10)
         # dropout
@@ -25,7 +25,7 @@ class Net(nn.Module):
         x = self.pool(F.relu(self.conv2(x)))
         x = self.pool(F.relu(self.conv3(x)))
         # flattening
-        x = x.view(-1, 64 * 4 * 4)
+        x = x.view(-1, 64 * 8 * 8)
         # fully connected layers
         x = self.dropout(F.relu(self.fc1(x)))
         x = self.dropout(F.relu(self.fc2(x)))
