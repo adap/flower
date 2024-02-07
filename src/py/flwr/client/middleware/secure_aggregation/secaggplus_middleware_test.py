@@ -22,7 +22,7 @@ from flwr.client.middleware import make_ffn
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import TASK_TYPE_FIT
 from flwr.common.context import Context
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message
 from flwr.common.recordset import RecordSet
 from flwr.common.secure_aggregation.secaggplus_constants import (
     KEY_ACTIVE_SECURE_ID_LIST,
@@ -57,7 +57,7 @@ def get_test_handler(
 
     def empty_ffn(_: Message, _2: Context) -> Message:
         return Message(
-            metadata=Metadata(0, "", "", "", TASK_TYPE_FIT),
+            task_type=TASK_TYPE_FIT,
             message=RecordSet(),
         )
 
@@ -65,7 +65,7 @@ def get_test_handler(
 
     def func(configs: Dict[str, ConfigsRecordValues]) -> Dict[str, ConfigsRecordValues]:
         in_msg = Message(
-            metadata=Metadata(0, "", "", "", TASK_TYPE_FIT),
+            task_type=TASK_TYPE_FIT,
             message=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
         )
         out_msg = app(in_msg, ctxt)

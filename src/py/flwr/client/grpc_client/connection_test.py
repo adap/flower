@@ -26,7 +26,7 @@ import grpc
 from flwr.common import recordset_compat as compat
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import TASK_TYPE_GET_PROPERTIES
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message
 from flwr.common.recordset import RecordSet
 from flwr.common.typing import Code, GetPropertiesRes, Status
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
@@ -44,25 +44,13 @@ SERVER_MESSAGE = ServerMessage(get_properties_ins=ServerMessage.GetPropertiesIns
 SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect_ins=ServerMessage.ReconnectIns())
 
 MESSAGE_GET_PROPERTIES = Message(
-    metadata=Metadata(
-        run_id=0,
-        task_id="",
-        group_id="",
-        ttl="",
-        task_type=TASK_TYPE_GET_PROPERTIES,
-    ),
+    task_type=TASK_TYPE_GET_PROPERTIES,
     message=compat.getpropertiesres_to_recordset(
         GetPropertiesRes(Status(Code.OK, ""), {})
     ),
 )
 MESSAGE_DISCONNECT = Message(
-    metadata=Metadata(
-        run_id=0,
-        task_id="",
-        group_id="",
-        ttl="",
-        task_type="reconnect",
-    ),
+    task_type="reconnect",
     message=RecordSet(configs={"config": ConfigsRecord({"reason": 0})}),
 )
 

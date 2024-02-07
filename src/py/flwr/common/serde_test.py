@@ -220,6 +220,7 @@ class RecordMaker:
             task_id=self.get_str(64),
             group_id=self.get_str(30),
             ttl=self.get_str(10),
+            target_node_id=self.get_value(int),
             task_type=self.get_str(10),
         )
 
@@ -305,13 +306,9 @@ def test_message_to_and_from_taskins() -> None:
     maker = RecordMaker(state=1)
     metadata = maker.metadata()
     original = Message(
-        metadata=Metadata(
-            run_id=0,
-            task_id="",
-            group_id="",
-            ttl=metadata.ttl,
-            task_type=metadata.task_type,
-        ),
+        task_type=metadata.task_type,
+        target_node_id=metadata.target_node_id,
+        ttl=metadata.ttl,
         message=maker.recordset(1, 1, 1),
     )
 
@@ -333,13 +330,9 @@ def test_message_to_and_from_taskres() -> None:
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
     original = Message(
-        metadata=Metadata(
-            run_id=0,
-            task_id="",
-            group_id="",
-            ttl=metadata.ttl,
-            task_type=metadata.task_type,
-        ),
+        task_type=metadata.task_type,
+        target_node_id=metadata.target_node_id,
+        ttl=metadata.ttl,
         message=maker.recordset(1, 1, 1),
     )
 

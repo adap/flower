@@ -20,6 +20,7 @@ from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, 
 from google.protobuf.message import Message as GrpcMessage
 
 # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import Array as ProtoArray
 from flwr.proto.recordset_pb2 import BoolList, BytesList
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
@@ -545,10 +546,15 @@ def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordSet:
 # === Message ===
 
 
-def message_to_taskins(message: Message) -> TaskIns:
+def message_to_taskins(message: Message, anonymous: bool = False) -> TaskIns:
     """Create a TaskIns from the Message."""
+    dst_node_id = message.metadata.target_node_id
+    node = None
+    if dst_node_id is not None:
+        node = Node(node_id=dst_node_id, anonymous=anonymous)
     return TaskIns(
         task=Task(
+            consumer=node,
             ttl=message.metadata.ttl,
             task_type=message.metadata.task_type,
             recordset=recordset_to_proto(message.message),
@@ -564,6 +570,7 @@ def message_from_taskins(taskins: TaskIns) -> Message:
         task_id=taskins.task_id,
         group_id=taskins.group_id,
         ttl=taskins.task.ttl,
+        target_node_id=taskins.task.consumer.node_id,
         task_type=taskins.task.task_type,
     )
 
@@ -574,10 +581,15 @@ def message_from_taskins(taskins: TaskIns) -> Message:
     )
 
 
-def message_to_taskres(message: Message) -> TaskRes:
+def message_to_taskres(message: Message, anonymous: bool = False) -> TaskRes:
     """Create a TaskRes from the Message."""
+    dst_node_id = message.metadata.target_node_id
+    node = None
+    if dst_node_id is not None:
+        node = Node(node_id=dst_node_id, anonymous=anonymous)
     return TaskRes(
         task=Task(
+            consumer=node,
             ttl=message.metadata.ttl,
             task_type=message.metadata.task_type,
             recordset=recordset_to_proto(message.message),
@@ -593,6 +605,7 @@ def message_from_taskres(taskres: TaskRes) -> Message:
         task_id=taskres.task_id,
         group_id=taskres.group_id,
         ttl=taskres.task.ttl,
+        target_node_id=taskres.task.consumer.node_id,
         task_type=taskres.task.task_type,
     )
 

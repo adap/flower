@@ -16,6 +16,7 @@
 
 
 from dataclasses import dataclass
+from typing import Optional
 
 from .recordset import RecordSet
 
@@ -35,16 +36,19 @@ class Metadata:
         this is used as the FL round.
     ttl : str
         Time-to-live for this task.
+    target_node_id : int
+        The ID of the node that will receive the message.
     task_type : str
         A string that encodes the action to be executed on
         the receiving end.
     """
 
-    run_id: int
-    task_id: str
-    group_id: str
-    ttl: str
-    task_type: str
+    run_id: int = 0
+    task_id: str = ""
+    group_id: str = ""
+    ttl: str = ""
+    target_node_id: Optional[int] = None
+    task_type: str = ""
 
 
 @dataclass
@@ -62,3 +66,21 @@ class Message:
 
     metadata: Metadata
     message: RecordSet
+
+    def __init__(  # pylint: disable=too-many-arguments
+        self,
+        message: RecordSet,
+        task_type: Optional[str] = None,
+        target_node_id: Optional[int] = None,
+        ttl: Optional[str] = None,
+        metadata: Optional[Metadata] = None,
+    ):
+        self.message = message
+        if metadata is not None:
+            self.metadata = metadata
+        else:
+            self.metadata = Metadata(
+                task_type=task_type if task_type is not None else "",
+                target_node_id=target_node_id,
+                ttl=ttl if ttl is not None else "",
+            )
