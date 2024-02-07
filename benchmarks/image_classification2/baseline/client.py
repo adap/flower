@@ -4,7 +4,7 @@ import flwr as fl
 from flwr_datasets import FederatedDataset
 
 from .utils import train, set_params, apply_transforms_train
-from .model import NetResnet18, Net
+from .model import Net
 from evaluation.eval_utils import test
 
 
