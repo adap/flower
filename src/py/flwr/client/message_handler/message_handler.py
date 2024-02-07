@@ -109,7 +109,7 @@ def handle_legacy_message_from_tasktype(
     client_fn: ClientFn, message: Message, context: Context
 ) -> Message:
     """Handle legacy message in the inner most middleware layer."""
-    client = client_fn(str(message.metadata.node_id))
+    client = client_fn("-1")
 
     client.set_context(context)
 
