@@ -172,7 +172,7 @@ def grpc_connection(  # pylint: disable=R0915
                 run_id=0,
                 task_id=str(uuid.uuid4()),
                 group_id="",
-                node_id="",
+                node_id=0,
                 ttl="",
                 task_type=task_type,
             ),

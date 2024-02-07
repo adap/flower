@@ -219,7 +219,7 @@ class RecordMaker:
             run_id=self.rng.randint(0, 1 << 30),
             task_id=self.get_str(64),
             group_id=self.get_str(30),
-            node_id=self.get_str(30),
+            node_id=self.rng.randint(0, 1 << 30),
             ttl=self.get_str(10),
             task_type=self.get_str(10),
         )
@@ -310,7 +310,7 @@ def test_message_to_and_from_taskins() -> None:
             run_id=0,
             task_id="",
             group_id="",
-            node_id="",
+            node_id=metadata.node_id,
             ttl=metadata.ttl,
             task_type=metadata.task_type,
         ),
@@ -323,6 +323,9 @@ def test_message_to_and_from_taskins() -> None:
     taskins.task_id = metadata.task_id
     taskins.group_id = metadata.group_id
     deserialized = message_from_taskins(taskins)
+
+    # update node_id
+    deserialized.metadata.node_id = metadata.node_id
 
     # Assert
     assert original.message == deserialized.message
@@ -339,7 +342,7 @@ def test_message_to_and_from_taskres() -> None:
             run_id=0,
             task_id="",
             group_id="",
-            node_id="",
+            node_id=metadata.node_id,
             ttl=metadata.ttl,
             task_type=metadata.task_type,
         ),
@@ -352,6 +355,9 @@ def test_message_to_and_from_taskres() -> None:
     taskres.task_id = metadata.task_id
     taskres.group_id = metadata.group_id
     deserialized = message_from_taskres(taskres)
+
+    # update node_id
+    deserialized.metadata.node_id = metadata.node_id
 
     # Assert
     assert original.message == deserialized.message
