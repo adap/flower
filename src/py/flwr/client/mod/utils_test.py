@@ -87,9 +87,7 @@ class TestMakeApp(unittest.TestCase):
         footprint: List[str] = []
         mock_app = make_mock_app("app", footprint)
         mock_mod_names = [f"mod{i}" for i in range(1, 15)]
-        mock_mods = [
-            make_mock_mod(name, footprint) for name in mock_mod_names
-        ]
+        mock_mods = [make_mock_mod(name, footprint) for name in mock_mod_names]
 
         state = RecordSet()
         state.set_metrics(METRIC, record=MetricsRecord({COUNTER: 0.0}))
@@ -108,9 +106,7 @@ class TestMakeApp(unittest.TestCase):
         self.assertEqual(
             "".join(out_message.message.configs.keys()), "".join(reversed(trace))
         )
-        self.assertEqual(
-            state.get_metrics(METRIC)[COUNTER], 2 * len(mock_mods)
-        )
+        self.assertEqual(state.get_metrics(METRIC)[COUNTER], 2 * len(mock_mods))
 
     def test_filter(self) -> None:
         """Test if a mod can filter incoming TaskIns."""
