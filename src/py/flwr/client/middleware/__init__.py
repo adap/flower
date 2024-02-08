@@ -15,7 +15,7 @@
 """Middleware layers."""
 
 
-from .dp_middleware import fixed_clipping_modifier
+from .dp_modifier import fixed_clipping_modifier
 from .secure_aggregation.secaggplus_middleware import secaggplus_middleware
 from .utils import make_ffn
 
