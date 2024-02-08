@@ -23,6 +23,7 @@ from flwr.proto.fleet_pb2 import (
     PullTaskInsRequest,
     PushTaskResRequest,
 )
+from cryptography.hazmat.primitives.asymmetric import ec
 
 Request = Union[CreateNodeRequest, DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest]
 
@@ -36,7 +37,7 @@ class _ClientCallDetails(
 class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):
     def __init__(self, private_key: ec.EllipticCurvePrivateKey, public_key: ec.EllipticCurvePublicKey):
         self.private_key = private_key
-        
+
     def intercept_unary_unary(self, continuation: Callable, client_call_details: grpc.ClientCallDetails, request: Request):
         """Flower client interceptor."""
         metadata = []
