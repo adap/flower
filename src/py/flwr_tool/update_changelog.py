@@ -62,7 +62,7 @@ def _extract_changelog_entry(pr_info):
         f"{CHANGELOG_SECTION_HEADER}(.+?)(?=##|$)", pr_info.body, re.DOTALL
     )
     if not entry_match:
-        return None, "general"
+        return None, None
 
     entry_text = entry_match.group(1).strip()
 

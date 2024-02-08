@@ -34,9 +34,8 @@ from flwr.common.constant import (
 )
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     Reason,
@@ -64,8 +63,8 @@ def grpc_connection(  # pylint: disable=R0915
     root_certificates: Optional[Union[bytes, str]] = None,
 ) -> Iterator[
     Tuple[
-        Callable[[], Optional[TaskIns]],
-        Callable[[TaskRes], None],
+        Callable[[], Optional[Message]],
+        Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
     ]
@@ -128,7 +127,7 @@ def grpc_connection(  # pylint: disable=R0915
 
     server_message_iterator: Iterator[ServerMessage] = stub.Join(iter(queue.get, None))
 
-    def receive() -> TaskIns:
+    def receive() -> Message:
         # Receive ServerMessage proto
         proto = next(server_message_iterator)
 
@@ -167,27 +166,22 @@ def grpc_connection(  # pylint: disable=R0915
                 "cannot deserialize from ProtoBuf"
             )
 
-        # RecordSet --> RecordSet proto
-        recordset_proto = serde.recordset_to_proto(recordset)
-
-        # Construct TaskIns
-        return TaskIns(
-            task_id=str(uuid.uuid4()),
-            group_id="",
-            run_id=0,
-            task=Task(
-                producer=Node(node_id=0, anonymous=True),
-                consumer=Node(node_id=0, anonymous=True),
-                ancestry=[],
+        # Construct Message
+        return Message(
+            metadata=Metadata(
+                run_id=0,
+                task_id=str(uuid.uuid4()),
+                group_id="",
+                ttl="",
                 task_type=task_type,
-                recordset=recordset_proto,
             ),
+            message=recordset,
         )
 
-    def send(task_res: TaskRes) -> None:
+    def send(message: Message) -> None:
         # Retrieve RecordSet and task_type
-        recordset = serde.recordset_from_proto(task_res.task.recordset)
-        task_type = task_res.task.task_type
+        recordset = message.message
+        task_type = message.metadata.task_type
 
         # RecordSet --> *Res --> *Res proto -> ClientMessage proto
         if task_type == TASK_TYPE_GET_PROPERTIES:

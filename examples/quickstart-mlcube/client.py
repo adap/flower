@@ -44,7 +44,8 @@ def main():
     )
 
     fl.client.start_client(
-        server_address="0.0.0.0:8080", client=MLCubeClient(workspace=workspace).to_client()
+        server_address="0.0.0.0:8080",
+        client=MLCubeClient(workspace=workspace).to_client(),
     )
 
 
