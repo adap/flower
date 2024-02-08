@@ -25,10 +25,11 @@ from os.path import isfile
 from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import grpc
 
+from flwr.client.flower import Flower
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
@@ -51,7 +52,6 @@ from flwr.server.fleet.grpc_bidi.grpc_server import (
     start_grpc_server,
 )
 from flwr.server.fleet.grpc_rere.fleet_servicer import FleetServicer
-from flwr.server.fleet.vce.vce_api import run_vce
 from flwr.server.history import History
 from flwr.server.server import Server
 from flwr.server.state import StateFactory
@@ -415,8 +415,11 @@ def run_server() -> None:
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
-        num_clients = 3  # TODO: take arg from CLI
-        _run_fleet_api_vce(num_clients=num_clients, state_factory=state_factory)
+        _run_fleet_api_vce(
+            num_supernodes=args.num_supernodes,
+            client_app_callable=args.callable,
+            state_factory=state_factory,
+        )
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
@@ -553,10 +556,14 @@ def _run_fleet_api_grpc_rere(
     return fleet_grpc_server
 
 
-def _run_fleet_api_vce(num_clients: int, state_factory: StateFactory):
+def _run_fleet_api_vce(
+    num_supernodes: int, client_app_callable: Callable[[], Flower], state_factory: StateFactory
+):
+    from flwr.server.fleet.vce.vce_api import run_vce
+
     log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
 
-    run_vce(num_clients, state_factory)
+    run_vce(num_supernodes, client_app_callable, state_factory)
 
 
 # pylint: disable=import-outside-toplevel,too-many-arguments
@@ -777,4 +784,16 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="Set the number of concurrent workers for the Fleet API REST server.",
         type=int,
         default=1,
+    )
+
+    # Fleet API VCE options
+    vce_group = parser.add_argument_group("Fleet API (VCE) server options", "")
+    vce_group.add_argument(
+        "--callable",
+        help="For example: `client:flower`",
+    )
+    vce_group.add_argument(
+        "--num-supernodes",
+        type=int,
+        help="Number of SuperNodes connected to the SuperLink",
     )

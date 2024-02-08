@@ -18,13 +18,19 @@ from logging import INFO
 from time import sleep
 
 # construct nodes
-from typing import Dict
+from typing import Callable, Dict
 
 import ray
 
-from flwr.client.message_handler.task_handler import configure_task_res
+from flwr.client.flower import Flower, load_flower_callable
 from flwr.client.node_state import NodeState
+from flwr.common import recordset_compat as compat
 from flwr.common.logger import log
+from flwr.common.message import Message, Metadata
+from flwr.common.recordset import RecordSet
+from flwr.common.serde import message_to_taskres, recordset_from_proto
+from flwr.proto.task_pb2 import TaskIns
+from flwr.client.message_handler.task_handler import configure_task_res
 from flwr.server.fleet.message_handler.message_handler import (
     PushTaskResRequest,
     create_node,
@@ -33,16 +39,15 @@ from flwr.server.fleet.message_handler.message_handler import (
     push_task_res,
 )
 from flwr.server.state import StateFactory
+from flwr.simulation.ray_transport.ray_actor import (
+    DefaultActor,
+    VirtualClientEngineActorPool,
+)
 
 
 def _construct_actor_pool():
     """Prepare ActorPool."""
-    # TODO: imports are here due to hard-to-fix circular import
-    from flwr.simulation.ray_transport.ray_actor import (
-        DefaultActor,
-        VirtualClientEngineActorPool,
-    )
-
+    # TODO: these should be passed by the user (controls degree of parallelism)
     client_resources = {"num_cpus": 2, "num_gpus": 0.0}
 
     def create_actor_fn():
@@ -57,7 +62,32 @@ def _construct_actor_pool():
     return pool
 
 
-def run_vce(num_clients: int, state_factory: StateFactory):
+def _wrap_recordset_in_message(recordset: RecordSet, task_type: str) -> Message:
+    """Wrap a RecordSet inside a Message."""
+    return Message(
+        message=recordset,
+        metadata=Metadata(
+            run_id=0,
+            task_id="",
+            group_id="",
+            ttl="",
+            task_type=task_type,
+        ),
+    )
+
+
+def taskins_to_message(taskins: TaskIns) -> Message:
+
+    recordset = recordset_from_proto(taskins.task.recordset)
+
+    return _wrap_recordset_in_message(
+        recordset=recordset, task_type=taskins.task.task_type
+    )
+
+
+def run_vce(
+    num_supernodes: int, client_app_callable: Callable[[], Flower], state_factory: StateFactory
+):
     """Run VirtualClientEnginge."""
     # Create actor pool
     pool = _construct_actor_pool()
@@ -67,12 +97,18 @@ def run_vce(num_clients: int, state_factory: StateFactory):
     # Each node has its own state
     node_states: Dict[int, NodeState] = {}
     create_node_responses = []
-    for _ in range(num_clients):
+    for _ in range(num_supernodes):
         res = create_node(request=None, state=state_factory.state())
         create_node_responses.append(res)
         node_states[res.node.node_id] = NodeState()
 
     log(INFO, f"Registered {len(create_node_responses)} nodes")
+
+    print(f"{client_app_callable = }")
+    def _load() -> Flower:
+        flower: Flower = load_flower_callable(client_app_callable)
+        return flower
+    app = _load
 
     # Pull messages forever
     while True:
@@ -86,30 +122,36 @@ def run_vce(num_clients: int, state_factory: StateFactory):
 
                 for task_ins in task_ins_pulled.task_ins_list:
                     # register and retrive runstate
-                    node_states[node_id].register_runstate(run_id=task_ins.run_id)
-                    run_state = node_states[node_id].retrieve_runstate(
+                    node_states[node_id].register_context(run_id=task_ins.run_id)
+                    run_state = node_states[node_id].retrieve_context(
                         run_id=task_ins.run_id
                     )
 
+                    # convert TaskIns to Message
+                    message = taskins_to_message(task_ins)
+
                     # Submite a task to the pool
-                    pool.submit_task_ins(
-                        lambda a, c_fn, t_ins, cid, state: a.run.remote(
-                            c_fn, t_ins, cid, state
+                    pool.submit_client_job(
+                        lambda a, a_fn, mssg, cid, state: a.run.remote(
+                            a_fn, mssg, cid, state
                         ),
-                        (client_fn, task_ins, node_id, run_state),
+                        (app, message, node_id, run_state),
                     )
+                    print("message submitted")
 
                     # Wait until result is ready
-                    task_res, updated_runstate = pool.get_client_result(
+                    out_mssg, updated_runstate = pool.get_client_result(
                         node_id, timeout=None
                     )
+                    print('fetched result')
 
                     # Update runstate
-                    node_states[node_id].update_runstate(
+                    node_states[node_id].update_context(
                         task_ins.run_id, updated_runstate
                     )
 
                     # TODO: can we do the below in the VCE? this currently works because we run things sequentially
+                    task_res = message_to_taskres(out_mssg)
                     task_res = configure_task_res(task_res, task_ins, res.node)
                     to_push = PushTaskResRequest(task_res_list=[task_res])
                     push_task_res(request=to_push, state=state_factory.state())
@@ -123,58 +165,3 @@ def run_vce(num_clients: int, state_factory: StateFactory):
 
     print("DONE")
     ray.shutdown()
-
-
-### Dummy code providing a Client and client_fn
-from random import random
-
-import tensorflow as tf
-
-from flwr.client import NumPyClient
-
-(x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
-NUM_TRAIN = 512
-NUM_TEST = 256
-
-
-# Define a dummy client
-class DummyFlowerClient(NumPyClient):
-    def __init__(self):
-        self.model = tf.keras.applications.MobileNetV2(
-            (32, 32, 3), classes=10, weights=None
-        )
-        opt = tf.keras.optimizers.Adam(learning_rate=0.01)
-        self.model.compile(
-            optimizer=opt,
-            loss="sparse_categorical_crossentropy",
-            metrics=["accuracy"],
-        )
-
-    def get_parameters(self, config):
-        return self.model.get_weights()
-
-    def fit(self, parameters, config):
-        self.model.set_weights(parameters)
-        history = self.model.fit(
-            x_train[:NUM_TRAIN],
-            y_train[:NUM_TRAIN],
-            batch_size=32,
-            epochs=1,
-            validation_split=0.1,
-        )
-        results = {
-            "train_loss": history.history["loss"][0],
-            "train_accuracy": history.history["accuracy"][0],
-            "val_loss": history.history["val_loss"][0],
-            "val_accuracy": history.history["val_accuracy"][0],
-        }
-        return self.model.get_weights(), len(x_train[:NUM_TRAIN]), results
-
-    def evaluate(self, parameters, config):
-        self.model.set_weights(parameters)
-        loss, accuracy = self.model.evaluate(x_test[:NUM_TEST], y_test[:NUM_TEST])
-        return random(), len(x_test[:NUM_TEST]), {"accuracy": accuracy}
-
-
-def client_fn(cid: str = None):
-    return DummyFlowerClient().to_client()
