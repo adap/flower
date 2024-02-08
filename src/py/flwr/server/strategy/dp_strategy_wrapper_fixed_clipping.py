@@ -125,20 +125,14 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         if failures:
             return None, {}
 
-        # Extract all clients' model params
-        clients_params = [
-            parameters_to_ndarrays(fit_res.parameters) for _, fit_res in results
-        ]
-
-        # Compute and clip the updates
-        for client_param in clients_params:
+        for _, res in results:
+            param = parameters_to_ndarrays(res.parameters)
+            # Compute and clip update
             compute_clip_model_update(
-                client_param, self.current_round_params, self.clipping_norm
+                param, self.current_round_params, self.clipping_norm
             )
-
-        # Update the results with the new params
-        for res, params in zip(results, clients_params):
-            res[1].parameters = ndarrays_to_parameters(params)
+            # Convert back to parameters
+            res.parameters = ndarrays_to_parameters(param)
 
         # Pass the new parameters for aggregation
         aggregated_params, metrics = self.strategy.aggregate_fit(
