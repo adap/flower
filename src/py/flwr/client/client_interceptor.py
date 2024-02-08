@@ -16,7 +16,7 @@
 
 import grpc
 import collections
-from typing import Callable, Union
+from typing import Callable, Union, Sequence, Tuple
 from flwr.proto.fleet_pb2 import (
     CreateNodeRequest,
     DeleteNodeRequest,
@@ -24,8 +24,20 @@ from flwr.proto.fleet_pb2 import (
     PushTaskResRequest,
 )
 from cryptography.hazmat.primitives.asymmetric import ec
+from common.secure_aggregation.crypto.symmetric_encryption import (
+    compute_hmac, 
+    bytes_to_public_key, 
+    generate_shared_key,
+    public_key_to_bytes,
+)
+
+_PUBLIC_KEY_HEADER = "public-key"
+_AUTH_TOKEN_HEADER = "auth-token"
 
 Request = Union[CreateNodeRequest, DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest]
+
+def _get_value_from_tuples(key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]) -> Union[str, bytes]:
+    return next((value[::-1] for key, value in tuples if key == key_string), "")
 
 class _ClientCallDetails(
         collections.namedtuple(
@@ -37,25 +49,32 @@ class _ClientCallDetails(
 class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):
     def __init__(self, private_key: ec.EllipticCurvePrivateKey, public_key: ec.EllipticCurvePublicKey):
         self.private_key = private_key
+        self.public_key = public_key
 
     def intercept_unary_unary(self, continuation: Callable, client_call_details: grpc.ClientCallDetails, request: Request):
         """Flower client interceptor."""
         metadata = []
+        postprocess = False
         if client_call_details.metadata is not None:
             metadata = list(client_call_details.metadata)
 
         if isinstance(request, CreateNodeRequest):
-            pass
+            metadata.append((_PUBLIC_KEY_HEADER, public_key_to_bytes(self.public_key)))
+            postprocess = True
+
         elif isinstance(request, (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest)):
-            pass
+            metadata.append(("auth-token", compute_hmac(self.shared_secret, request)))
         else:
             pass
 
-        metadata.append(())
         client_call_details = _ClientCallDetails(
             client_call_details.method, client_call_details.timeout, metadata,
             client_call_details.credentials)
         
         response = continuation(client_call_details, request)
+        if postprocess:
+            server_public_key_bytes = _get_value_from_tuples(_PUBLIC_KEY_HEADER, response.trailing_metadata)
+            self.server_public_key = bytes_to_public_key(server_public_key_bytes)
+            self.shared_secret = generate_shared_key(self.private_key, self.server_public_key)
         return response
             
