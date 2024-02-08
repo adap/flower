@@ -138,7 +138,7 @@ class AudioServer:  # pylint: disable=too-many-instance-attributes
         self.final_accuracy = 0.0
         self.round_time = time.time()
         self.strategy = flwr.server.strategy.FedAvg(
-            fraction_fit=fraction_fit,
+            fraction_fit=float(fraction_fit),
             min_available_clients=flwr_num_clients,
             on_fit_config_fn=get_on_fit_config_fn(
                 self.rounds, model_epochs, model_batch_size

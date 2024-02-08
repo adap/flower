@@ -23,7 +23,7 @@ server:
 client:
   server_address: "localhost:8080"
   num_clients: ${num_clients}
-  gpu_memory: 2048
+  gpu_memory: 1024
   dataset_name: ${dataset_name}
   seed: 2021
   batch_size: 64
