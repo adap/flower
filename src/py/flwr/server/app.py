@@ -417,7 +417,7 @@ def run_server() -> None:
     elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
         _run_fleet_api_vce(
             num_supernodes=args.num_supernodes,
-            client_app_callable=args.callable,
+            client_app_callable_str=args.callable,
             state_factory=state_factory,
         )
     else:
@@ -558,14 +558,14 @@ def _run_fleet_api_grpc_rere(
 
 def _run_fleet_api_vce(
     num_supernodes: int,
-    client_app_callable: Callable[[], Flower],
+    client_app_callable_str: str,
     state_factory: StateFactory,
 ):
     from flwr.server.fleet.vce.vce_api import run_vce
 
     log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
 
-    run_vce(num_supernodes, client_app_callable, state_factory)
+    run_vce(num_supernodes, client_app_callable_str, state_factory)
 
 
 # pylint: disable=import-outside-toplevel,too-many-arguments

@@ -78,7 +78,7 @@ def taskins_to_message(taskins: TaskIns) -> Message:
 
 def run_vce(
     num_supernodes: int,
-    client_app_callable: Callable[[], Flower],
+    client_app_callable_str: str,
     state_factory: StateFactory,
 ):
     """Run VirtualClientEnginge."""
@@ -98,10 +98,10 @@ def run_vce(
     log(INFO, f"Registered {len(create_node_responses)} nodes")
 
     # TODO: handle different workdir
-    print(f"{client_app_callable = }")
+    print(f"{client_app_callable_str = }")
 
     def _load() -> Flower:
-        flower: Flower = load_flower_callable(client_app_callable)
+        flower: Flower = load_flower_callable(client_app_callable_str)
         return flower
 
     app = _load
