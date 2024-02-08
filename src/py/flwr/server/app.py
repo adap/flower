@@ -557,7 +557,9 @@ def _run_fleet_api_grpc_rere(
 
 
 def _run_fleet_api_vce(
-    num_supernodes: int, client_app_callable: Callable[[], Flower], state_factory: StateFactory
+    num_supernodes: int,
+    client_app_callable: Callable[[], Flower],
+    state_factory: StateFactory,
 ):
     from flwr.server.fleet.vce.vce_api import run_vce
 

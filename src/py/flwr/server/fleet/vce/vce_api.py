@@ -23,14 +23,12 @@ from typing import Callable, Dict
 import ray
 
 from flwr.client.flower import Flower, load_flower_callable
+from flwr.client.message_handler.task_handler import configure_task_res
 from flwr.client.node_state import NodeState
-from flwr.common import recordset_compat as compat
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
-from flwr.common.recordset import RecordSet
 from flwr.common.serde import message_to_taskres, recordset_from_proto
 from flwr.proto.task_pb2 import TaskIns
-from flwr.client.message_handler.task_handler import configure_task_res
 from flwr.server.fleet.message_handler.message_handler import (
     PushTaskResRequest,
     create_node,
@@ -62,8 +60,10 @@ def _construct_actor_pool():
     return pool
 
 
-def _wrap_recordset_in_message(recordset: RecordSet, task_type: str) -> Message:
-    """Wrap a RecordSet inside a Message."""
+def taskins_to_message(taskins: TaskIns) -> Message:
+    """Convert TaskIns to Messsage."""
+    recordset = recordset_from_proto(taskins.task.recordset)
+
     return Message(
         message=recordset,
         metadata=Metadata(
@@ -71,22 +71,15 @@ def _wrap_recordset_in_message(recordset: RecordSet, task_type: str) -> Message:
             task_id="",
             group_id="",
             ttl="",
-            task_type=task_type,
+            task_type=taskins.task.task_type,
         ),
     )
 
 
-def taskins_to_message(taskins: TaskIns) -> Message:
-
-    recordset = recordset_from_proto(taskins.task.recordset)
-
-    return _wrap_recordset_in_message(
-        recordset=recordset, task_type=taskins.task.task_type
-    )
-
-
 def run_vce(
-    num_supernodes: int, client_app_callable: Callable[[], Flower], state_factory: StateFactory
+    num_supernodes: int,
+    client_app_callable: Callable[[], Flower],
+    state_factory: StateFactory,
 ):
     """Run VirtualClientEnginge."""
     # Create actor pool
@@ -104,10 +97,13 @@ def run_vce(
 
     log(INFO, f"Registered {len(create_node_responses)} nodes")
 
+    # TODO: handle different workdir
     print(f"{client_app_callable = }")
+
     def _load() -> Flower:
         flower: Flower = load_flower_callable(client_app_callable)
         return flower
+
     app = _load
 
     # Pull messages forever
@@ -137,13 +133,11 @@ def run_vce(
                         ),
                         (app, message, node_id, run_state),
                     )
-                    print("message submitted")
 
                     # Wait until result is ready
                     out_mssg, updated_runstate = pool.get_client_result(
                         node_id, timeout=None
                     )
-                    print('fetched result')
 
                     # Update runstate
                     node_states[node_id].update_context(
