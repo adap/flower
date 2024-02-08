@@ -17,7 +17,8 @@
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 from typing import Callable, Sequence, Tuple, Union
-from common.secure_aggregation.crypto.symmetric_encryption import generate_shared_key
+from server.state.authentication.authentication_state import AuthenticationState
+from common.secure_aggregation.crypto.symmetric_encryption import generate_shared_key, bytes_to_public_key
 from flwr.proto.fleet_pb2 import (
     CreateNodeRequest,
     CreateNodeResponse,
@@ -56,7 +57,7 @@ def _is_public_key_known(state: State, public_key: ec.EllipticCurvePublicKey) ->
 def _get_value_from_tuples(key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]) -> Union[str, bytes]:
     return next((value[::-1] for key, value in tuples if key == key_string), "")
 
-class AuthenticateClientInterceptor(grpc.ServerInterceptor):
+class AuthenticateServerInterceptor(grpc.ServerInterceptor):
 
     def __init__(self, state_factory: StateFactory, private_key: ec.EllipticCurvePrivateKey, public_key: ec.EllipticCurvePublicKey):
         self._private_key = private_key
@@ -67,13 +68,16 @@ class AuthenticateClientInterceptor(grpc.ServerInterceptor):
 
     def intercept_service(self, continuation: Callable, handler_call_details: grpc.HandlerCallDetails):
         method_name = handler_call_details.method.split("/")[-1]
-        client_public_key = _get_value_from_tuples(_PUBLIC_KEY_HEADER, handler_call_details.invocation_metadata)
-        if method_name == 'CreateNode':
-            expected_metadata = (_PUBLIC_KEY_HEADER, generate_shared_key())
-        elif method_name in {'DeleteNode', 'PullTaskIns', 'PushTaskRes'}:
-            
-            
-            expected_metadata = (_PUBLIC_KEY_HEADER, generate_shared_key())
+        client_public_key_bytes = _get_value_from_tuples(_PUBLIC_KEY_HEADER, handler_call_details.invocation_metadata)
+        client_public_key = bytes_to_public_key(client_public_key_bytes)
+
+        if _is_public_key_known(self._state_factory, client_public_key):
+            if method_name == 'CreateNode':
+                return _create_node_with_public_key(self._state_factory.state, self._public_key)
+            elif method_name in {'DeleteNode', 'PullTaskIns', 'PushTaskRes'}:
+                state: AuthenticationState = self._state_factory.state
+                state.get_client_public_keys()
+                expected_metadata = (_AUTH_TOKEN_HEADER, generate_shared_key())
 
 
         if (self._header, self._value) in handler_call_details.invocation_metadata:
