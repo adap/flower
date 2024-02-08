@@ -63,7 +63,7 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):
             postprocess = True
 
         elif isinstance(request, (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest)):
-            metadata.append(("auth-token", compute_hmac(self.shared_secret, request)))
+            metadata.append((_AUTH_TOKEN_HEADER, compute_hmac(self.shared_secret, request)))
         else:
             pass
 
