@@ -519,13 +519,13 @@ msgid ""
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:62
-msgid "Upload the whl (e.g., ``flwr-1.6.0-py3-none-any.whl``)"
+msgid "Upload the whl (e.g., ``flwr-1.7.0-py3-none-any.whl``)"
 msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:63
 msgid ""
 "Change ``!pip install -q 'flwr[simulation]' torch torchvision "
-"matplotlib`` to ``!pip install -q 'flwr-1.6.0-py3-none-"
+"matplotlib`` to ``!pip install -q 'flwr-1.7.0-py3-none-"
 "any.whl[simulation]' torch torchvision matplotlib``"
 msgstr ""
 
