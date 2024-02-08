@@ -40,17 +40,6 @@ def add_gaussian_noise_inplace(input_arrays: NDArrays, std_dev: float) -> None:
         array += np.random.normal(0, std_dev, array.shape)
 
 
-def clip_inputs(input_arrays: NDArrays, clipping_norm: float) -> NDArrays:
-    """Clip model update based on the clipping norm.
-
-    FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
-    """
-    input_norm = get_norm(input_arrays)
-    scaling_factor = min(1, clipping_norm / input_norm)
-    clipped_inputs: NDArrays = [layer * scaling_factor for layer in input_arrays]
-    return clipped_inputs
-
-
 def clip_inputs_inplace(input_arrays: NDArrays, clipping_norm: float) -> None:
     """Clip model update based on the clipping norm in-place.
 
