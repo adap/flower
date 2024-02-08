@@ -322,11 +322,8 @@ def test_message_to_and_from_taskins() -> None:
     taskins.run_id = metadata.run_id
     taskins.task_id = metadata.task_id
     taskins.group_id = metadata.group_id
-    taskins.task.consumer = metadata.node_id
+    taskins.task.consumer.node_id = metadata.node_id
     deserialized = message_from_taskins(taskins)
-
-    # update node_id
-    # deserialized.metadata.node_id = metadata.node_id
 
     # Assert
     assert original.message == deserialized.message
@@ -355,11 +352,8 @@ def test_message_to_and_from_taskres() -> None:
     taskres.run_id = metadata.run_id
     taskres.task_id = metadata.task_id
     taskres.group_id = metadata.group_id
-    # taskres.task.consumer = metadata.node_id  # <------------ can't be done (it's read only)
+    taskres.task.consumer.node_id = metadata.node_id
     deserialized = message_from_taskres(taskres)
-
-    # update node_id
-    # deserialized.metadata.node_id = metadata.node_id
 
     # Assert
     assert original.message == deserialized.message
