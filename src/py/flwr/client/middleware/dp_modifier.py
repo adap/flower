@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Clipping middleware for central DP with client side clipping."""
+"""Clipping modifier for central DP with client side clipping."""
 
 from flwr.client.typing import FlowerCallable
 from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
@@ -24,7 +24,7 @@ from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM
 from flwr.common.message import Message
 
 
-def fixed_clipping_middleware(
+def fixed_clipping_modifier(
     msg: Message, ctxt: Context, call_next: FlowerCallable
 ) -> Message:
     """Clip the client model updates before sending them to the server."""
