@@ -16,6 +16,7 @@
 
 Papers: https://arxiv.org/pdf/1712.07557.pdf, https://arxiv.org/pdf/1710.06963.pdf
 """
+import warnings
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
@@ -30,7 +31,7 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common.differential_privacy import (
-    add_gaussian_to_params,
+    add_gaussian_noise_to_params,
     compute_clip_model_update,
 )
 from flwr.server.client_manager import ClientManager
@@ -124,6 +125,14 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         if failures:
             return None, {}
 
+        if len(results) != self.num_sampled_clients:
+            warnings.warn(
+                f"The number of clients returning parameters ({len(results)}) differs from "
+                f"the number of sampled clients ({self.num_sampled_clients}). This could impact "
+                f"the differential privacy guarantees of the system, potentially leading to privacy leakage "
+                f"or inadequate noise calibration.",
+                stacklevel=2,
+            )
         for _, res in results:
             param = parameters_to_ndarrays(res.parameters)
             # Compute and clip update
@@ -140,7 +149,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params = add_gaussian_to_params(
+            aggregated_params = add_gaussian_noise_to_params(
                 aggregated_params,
                 self.noise_multiplier,
                 self.clipping_norm,
