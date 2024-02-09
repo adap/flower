@@ -25,11 +25,8 @@ from uuid import UUID, uuid4
 
 from flwr.common import log, now
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
-    ClientMessage,
-    ServerMessage,
-)
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .state import State
@@ -50,7 +47,7 @@ SQL_CREATE_TABLE_TASK_INS = """
 CREATE TABLE IF NOT EXISTS task_ins(
     task_id                 TEXT UNIQUE,
     group_id                TEXT,
-    run_id             INTEGER,
+    run_id                  INTEGER,
     producer_anonymous      BOOLEAN,
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
@@ -59,8 +56,8 @@ CREATE TABLE IF NOT EXISTS task_ins(
     delivered_at            TEXT,
     ttl                     TEXT,
     ancestry                TEXT,
-    legacy_server_message   BLOB,
-    legacy_client_message   BLOB,
+    task_type               TEXT,
+    recordset               BLOB,
     FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
@@ -70,7 +67,7 @@ SQL_CREATE_TABLE_TASK_RES = """
 CREATE TABLE IF NOT EXISTS task_res(
     task_id                 TEXT UNIQUE,
     group_id                TEXT,
-    run_id             INTEGER,
+    run_id                  INTEGER,
     producer_anonymous      BOOLEAN,
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
@@ -79,8 +76,8 @@ CREATE TABLE IF NOT EXISTS task_res(
     delivered_at            TEXT,
     ttl                     TEXT,
     ancestry                TEXT,
-    legacy_server_message   BLOB,
-    legacy_client_message   BLOB,
+    task_type               TEXT,
+    recordset               BLOB,
     FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
@@ -549,10 +546,8 @@ def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
         "delivered_at": task_msg.task.delivered_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
-        "legacy_server_message": (
-            task_msg.task.legacy_server_message.SerializeToString()
-        ),
-        "legacy_client_message": None,
+        "task_type": task_msg.task.task_type,
+        "recordset": task_msg.task.recordset.SerializeToString(),
     }
     return result
 
@@ -571,18 +566,16 @@ def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
         "delivered_at": task_msg.task.delivered_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
-        "legacy_server_message": None,
-        "legacy_client_message": (
-            task_msg.task.legacy_client_message.SerializeToString()
-        ),
+        "task_type": task_msg.task.task_type,
+        "recordset": task_msg.task.recordset.SerializeToString(),
     }
     return result
 
 
 def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
     """Turn task_dict into protobuf message."""
-    server_message = ServerMessage()
-    server_message.ParseFromString(task_dict["legacy_server_message"])
+    recordset = RecordSet()
+    recordset.ParseFromString(task_dict["recordset"])
 
     result = TaskIns(
         task_id=task_dict["task_id"],
@@ -601,7 +594,8 @@ def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
             delivered_at=task_dict["delivered_at"],
             ttl=task_dict["ttl"],
             ancestry=task_dict["ancestry"].split(","),
-            legacy_server_message=server_message,
+            task_type=task_dict["task_type"],
+            recordset=recordset,
         ),
     )
     return result
@@ -609,8 +603,8 @@ def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
 
 def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
     """Turn task_dict into protobuf message."""
-    client_message = ClientMessage()
-    client_message.ParseFromString(task_dict["legacy_client_message"])
+    recordset = RecordSet()
+    recordset.ParseFromString(task_dict["recordset"])
 
     result = TaskRes(
         task_id=task_dict["task_id"],
@@ -629,7 +623,8 @@ def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
             delivered_at=task_dict["delivered_at"],
             ttl=task_dict["ttl"],
             ancestry=task_dict["ancestry"].split(","),
-            legacy_client_message=client_message,
+            task_type=task_dict["task_type"],
+            recordset=recordset,
         ),
     )
     return result
