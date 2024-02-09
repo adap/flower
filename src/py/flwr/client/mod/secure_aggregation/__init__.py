@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Secure Aggregation handlers."""
-from .secaggplus_middleware import secaggplus_middleware
+"""Secure Aggregation mods."""
+
+
+from .secaggplus_mod import secaggplus_mod
 
 __all__ = [
-    "secaggplus_middleware",
+    "secaggplus_mod",
 ]

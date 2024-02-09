@@ -18,7 +18,7 @@
 import unittest
 from typing import List
 
-from flwr.client.typing import FlowerCallable, Layer
+from flwr.client.typing import FlowerCallable, Mod
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.context import Context
 from flwr.common.message import Message, Metadata
@@ -39,22 +39,22 @@ def _increment_context_counter(context: Context) -> None:
     context.state.set_metrics(METRIC, record=MetricsRecord({COUNTER: current_counter}))
 
 
-def make_mock_middleware(name: str, footprint: List[str]) -> Layer:
-    """Make a mock middleware layer."""
+def make_mock_mod(name: str, footprint: List[str]) -> Mod:
+    """Make a mock mod."""
 
-    def middleware(message: Message, context: Context, app: FlowerCallable) -> Message:
+    def mod(message: Message, context: Context, app: FlowerCallable) -> Message:
         footprint.append(name)
-        # add empty ConfigRecord to in_message for this middleware layer
+        # add empty ConfigRecord to in_message for this mod
         message.message.set_configs(name=name, record=ConfigsRecord())
         _increment_context_counter(context)
         out_message: Message = app(message, context)
         footprint.append(name)
         _increment_context_counter(context)
-        # add empty ConfigRegcord to out_message for this middleware layer
+        # add empty ConfigRegcord to out_message for this mod
         out_message.message.set_configs(name=name, record=ConfigsRecord())
         return out_message
 
-    return middleware
+    return mod
 
 
 def make_mock_app(name: str, footprint: List[str]) -> FlowerCallable:
@@ -81,15 +81,13 @@ def _get_dummy_flower_message() -> Message:
 class TestMakeApp(unittest.TestCase):
     """Tests for the `make_app` function."""
 
-    def test_multiple_middlewares(self) -> None:
-        """Test if multiple middlewares are called in the correct order."""
+    def test_multiple_mods(self) -> None:
+        """Test if multiple mods are called in the correct order."""
         # Prepare
         footprint: List[str] = []
         mock_app = make_mock_app("app", footprint)
-        mock_middleware_names = [f"middleware{i}" for i in range(1, 15)]
-        mock_middleware_layers = [
-            make_mock_middleware(name, footprint) for name in mock_middleware_names
-        ]
+        mock_mod_names = [f"mod{i}" for i in range(1, 15)]
+        mock_mods = [make_mock_mod(name, footprint) for name in mock_mod_names]
 
         state = RecordSet()
         state.set_metrics(METRIC, record=MetricsRecord({COUNTER: 0.0}))
@@ -97,30 +95,28 @@ class TestMakeApp(unittest.TestCase):
         message = _get_dummy_flower_message()
 
         # Execute
-        wrapped_app = make_ffn(mock_app, mock_middleware_layers)
+        wrapped_app = make_ffn(mock_app, mock_mods)
         out_message = wrapped_app(message, context)
 
         # Assert
-        trace = mock_middleware_names + ["app"]
-        self.assertEqual(footprint, trace + list(reversed(mock_middleware_names)))
+        trace = mock_mod_names + ["app"]
+        self.assertEqual(footprint, trace + list(reversed(mock_mod_names)))
         # pylint: disable-next=no-member
         self.assertEqual("".join(message.message.configs.keys()), "".join(trace))
         self.assertEqual(
             "".join(out_message.message.configs.keys()), "".join(reversed(trace))
         )
-        self.assertEqual(
-            state.get_metrics(METRIC)[COUNTER], 2 * len(mock_middleware_layers)
-        )
+        self.assertEqual(state.get_metrics(METRIC)[COUNTER], 2 * len(mock_mods))
 
     def test_filter(self) -> None:
-        """Test if a middleware can filter incoming TaskIns."""
+        """Test if a mod can filter incoming TaskIns."""
         # Prepare
         footprint: List[str] = []
         mock_app = make_mock_app("app", footprint)
         context = Context(state=RecordSet())
         message = _get_dummy_flower_message()
 
-        def filter_layer(
+        def filter_mod(
             message: Message,
             _1: Context,
             _2: FlowerCallable,
@@ -133,7 +129,7 @@ class TestMakeApp(unittest.TestCase):
             return out_message
 
         # Execute
-        wrapped_app = make_ffn(mock_app, [filter_layer])
+        wrapped_app = make_ffn(mock_app, [filter_mod])
         out_message = wrapped_app(message, context)
 
         # Assert

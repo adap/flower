@@ -21,6 +21,8 @@ from flwr.common.message import Message
 
 from .client import Client as Client
 
-FlowerCallable = Callable[[Message, Context], Message]
+# Compatibility
 ClientFn = Callable[[str], Client]
-Layer = Callable[[Message, Context, FlowerCallable], Message]
+
+FlowerCallable = Callable[[Message, Context], Message]
+Mod = Callable[[Message, Context, FlowerCallable], Message]
