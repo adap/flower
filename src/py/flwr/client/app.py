@@ -87,7 +87,7 @@ def run_client() -> None:
     log(
         DEBUG,
         "Flower will load ClientApp `%s` to execute tasks",
-        args["client-app"],
+        getattr(args, "client-app"),
     )
 
     client_app_dir = args.dir
@@ -95,7 +95,7 @@ def run_client() -> None:
         sys.path.insert(0, client_app_dir)
 
     def _load() -> ClientApp:
-        client_app: ClientApp = load_client_app(args["client-app"])
+        client_app: ClientApp = load_client_app(getattr(args, "client-app"))
         return client_app
 
     _start_client_internal(
