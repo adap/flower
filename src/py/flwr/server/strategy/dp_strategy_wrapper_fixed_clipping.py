@@ -127,10 +127,10 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
         if len(results) != self.num_sampled_clients:
             warnings.warn(
-                f"The number of clients returning parameters ({len(results)}) differs from "
-                f"the number of sampled clients ({self.num_sampled_clients}). This could impact "
-                f"the differential privacy guarantees of the system, potentially leading to privacy leakage "
-                f"or inadequate noise calibration.",
+                f"The number of clients returning parameters ({len(results)})"
+                f" differs from the number of sampled clients ({self.num_sampled_clients})."
+                f" This could impact the differential privacy guarantees of the system,"
+                f" potentially leading to privacy leakage or inadequate noise calibration.",
                 stacklevel=2,
             )
         for _, res in results:
