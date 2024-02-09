@@ -1,0 +1,26 @@
+program: sim_fed_cir_vae_wand.py
+method: random
+
+metric:
+  name: global_val_loss
+  goal: minimize
+
+parameters:
+  - name: sample_per_class
+    distribution: choice
+    values: [50, 100, 150]
+  - name: lambda_align
+    distribution: choice
+    values: [1, 10, 100]
+  - name: lambda_reg
+    distribution: uniform
+    min: 0
+    max: 1
+  # - name: epochs
+  #   distribution: choice
+  #   values: [2, 5]
+command:
+  - ${env}
+  - python
+  - ${program}
+  - "--identifier=1"

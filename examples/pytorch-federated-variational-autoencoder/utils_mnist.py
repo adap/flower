@@ -75,23 +75,28 @@ class Net(nn.Module):
 
 
 class VAE(nn.Module):
-    def __init__(self, x_dim=784, h_dim1=512, h_dim2=256, z_dim=2, encoder_only=False):
+    def __init__(
+        self, x_dim=784, h_dim1=512, h_dim2=256, h_dim3=32, z_dim=16, encoder_only=False
+    ):
         super(VAE, self).__init__()
         self.encoder_only = encoder_only
         # encoder part
         self.fc1 = nn.Linear(x_dim, h_dim1)
         self.fc2 = nn.Linear(h_dim1, h_dim2)
-        self.fc31 = nn.Linear(h_dim2, z_dim)
-        self.fc32 = nn.Linear(h_dim2, z_dim)
+        self.fc3 = nn.Linear(h_dim2, h_dim3)
+        self.fc42 = nn.Linear(h_dim3, z_dim)
+        self.fc41 = nn.Linear(h_dim3, z_dim)
         # decoder part
-        self.fc4 = nn.Linear(z_dim, h_dim2)
-        self.fc5 = nn.Linear(h_dim2, h_dim1)
-        self.fc6 = nn.Linear(h_dim1, x_dim)
+        self.fc5 = nn.Linear(z_dim, h_dim3)
+        self.fc6 = nn.Linear(h_dim3, h_dim2)
+        self.fc7 = nn.Linear(h_dim2, h_dim1)
+        self.fc8 = nn.Linear(h_dim1, x_dim)
 
     def encoder(self, x):
         h = F.relu(self.fc1(x))
         h = F.relu(self.fc2(h))
-        return self.fc31(h), self.fc32(h)  # mu, log_var
+        h = F.relu(self.fc3(h))
+        return self.fc41(h), self.fc42(h)  # mu, log_var
 
     def sampling(self, mu, log_var):
         std = torch.exp(0.5 * log_var)
@@ -99,9 +104,10 @@ class VAE(nn.Module):
         return eps.mul(std).add_(mu)  # return z sample
 
     def decoder(self, z):
-        h = F.relu(self.fc4(z))
-        h = F.relu(self.fc5(h))
-        return torch.sigmoid(self.fc6(h))
+        h = F.relu(self.fc5(z))
+        h = F.relu(self.fc6(h))
+        h = F.relu(self.fc7(h))
+        return torch.sigmoid(self.fc8(h))
 
     def forward(self, x):
         mu, log_var = self.encoder(x.view(-1, 784))
@@ -602,47 +608,28 @@ def visualize_gmm_latent_representation(
 
         # Convert to numpy array
         reduced_latents = reduced_latents.numpy()
-    gm = GaussianMixture(n_components=num_class, random_state=42).fit(reduced_latents)
+    fig, ax = plt.subplots(figsize=(8, 8))
 
-    # Create 1x2 subplots
-    fig, axs = plt.subplots(1, 2, figsize=(15, 6))
-
-    # Visualize latent representation based on GMM predictions
-    scatter1 = axs[0].scatter(
-        all_means[:, 0],
-        all_means[:, 1],
-        c=gm.predict(all_latents),
-        cmap="viridis",
-        label="Latent Points",
-        zorder=2,
-    )
-    axs[0].set_title("Latent Representation with GMM Predictions")
-    axs[0].set_xlabel("Principal Component 1")
-    axs[0].set_ylabel("Principal Component 2")
-    axs[0].legend()
-    axs[0].grid()
-
-    scatter2 = axs[1].scatter(
-        all_means[:, 0],
-        all_means[:, 1],
+    scatter2 = ax.scatter(
+        reduced_latents[:, 0],
+        reduced_latents[:, 1],
         c=all_labels,
-        cmap="viridis",
+        cmap="Set1",
         label="Labels",
         zorder=2,
     )
-    axs[1].set_title("Latent Representation with True Labels")
-    axs[1].set_xlabel("Principal Component 1")
-    axs[1].set_ylabel("Principal Component 2")
-    axs[1].legend()
-    axs[1].grid()
+    ax.set_title("Latent Representation with True Labels")
+    ax.set_xlabel("Principal Component 1")
+    ax.set_ylabel("Principal Component 2")
+    ax.legend()
+    ax.grid()
     # Create a colorbar for the scatter plots
     # cbar1 = plt.colorbar(scatter1, ax=axs[0], label="GMM Predictions")
-    cbar2 = plt.colorbar(scatter2, ax=axs[1], label="True Labels")
+    cbar2 = plt.colorbar(scatter2, ax=ax, label="True Labels")
 
     # Set colorbar ticks and labels based on unique label values
     unique_labels = np.unique(all_labels)
-    # cbar1.set_ticks(unique_labels)
-    # cbar1.set_ticklabels(unique_labels)
+
     cbar2.set_ticks(unique_labels)
     cbar2.set_ticklabels(unique_labels)
 
@@ -652,7 +639,6 @@ def visualize_gmm_latent_representation(
     fig.savefig(f"{folder}/latent_rep_at_{rnd}.png")
     plt.close()
     return f"{folder}/latent_rep_at_{rnd}.png"
-    # return fig
 
 
 def sample(net, device):
