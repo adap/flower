@@ -32,10 +32,13 @@ from flwr.common import (
     Parameters,
     Status,
 )
+from flwr.common.context import Context
 
 
 class Client(ABC):
     """Abstract base class for Flower clients."""
+
+    context: Context
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Return set of client's properties.
@@ -137,6 +140,14 @@ class Client(ABC):
             num_examples=0,
             metrics={},
         )
+
+    def get_context(self) -> Context:
+        """Get the run context from this client."""
+        return self.context
+
+    def set_context(self, context: Context) -> None:
+        """Apply a run context to this client."""
+        self.context = context
 
     def to_client(self) -> Client:
         """Return client (itself)."""
