@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower callable package."""
+"""Mods."""
 
 
-from flwr.client.flower import Flower as Flower
-from flwr.client.typing import Bwd as Bwd
-from flwr.client.typing import Fwd as Fwd
+from .secure_aggregation.secaggplus_mod import secaggplus_mod
+from .utils import make_ffn
 
 __all__ = [
-    "Flower",
-    "Fwd",
-    "Bwd",
+    "make_ffn",
+    "secaggplus_mod",
 ]

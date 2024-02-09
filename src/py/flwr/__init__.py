@@ -17,13 +17,12 @@
 
 from flwr.common.version import package_version as _package_version
 
-from . import client, common, driver, flower, server, simulation
+from . import client, common, driver, server, simulation
 
 __all__ = [
     "client",
     "common",
     "driver",
-    "flower",
     "server",
     "simulation",
 ]
