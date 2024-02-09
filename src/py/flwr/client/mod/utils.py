@@ -17,15 +17,15 @@
 
 from typing import List
 
-from flwr.client.typing import FlowerCallable, Mod
+from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common.context import Context
 from flwr.common.message import Message
 
 
-def make_ffn(ffn: FlowerCallable, mods: List[Mod]) -> FlowerCallable:
+def make_ffn(ffn: ClientAppCallable, mods: List[Mod]) -> ClientAppCallable:
     """."""
 
-    def wrap_ffn(_ffn: FlowerCallable, _mod: Mod) -> FlowerCallable:
+    def wrap_ffn(_ffn: ClientAppCallable, _mod: Mod) -> ClientAppCallable:
         def new_ffn(message: Message, context: Context) -> Message:
             return _mod(message, context, _ffn)
 
