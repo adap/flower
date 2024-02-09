@@ -161,7 +161,7 @@ def _get_fit_fn(
     return fit
 
 
-def secaggplus_middleware(
+def secaggplus_mod(
     msg: Message,
     ctxt: Context,
     call_next: FlowerCallable,
