@@ -6,7 +6,7 @@ inputs:
     default: 3.8
   pip-version:
     description: "Version of pip to be installed using pip"
-    default: 23.3.1
+    default: 24.0.0
   setuptools-version:
     description: "Version of setuptools to be installed using pip"
     default: 69.0.3
