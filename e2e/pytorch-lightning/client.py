@@ -55,7 +55,7 @@ def client_fn(cid):
     # Flower client
     return FlowerClient(model, train_loader, val_loader, test_loader).to_client()
 
-flower = fl.flower.Flower(
+app = fl.client.ClientApp(
     client_fn=client_fn,
 )
 
