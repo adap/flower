@@ -12,26 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Utility functions for middleware layers."""
+"""Mods."""
 
 
-from typing import List
+from .secure_aggregation.secaggplus_mod import secaggplus_mod
+from .utils import make_ffn
 
-from flwr.client.typing import FlowerCallable, Layer
-from flwr.common.context import Context
-from flwr.common.message import Message
-
-
-def make_ffn(ffn: FlowerCallable, layers: List[Layer]) -> FlowerCallable:
-    """."""
-
-    def wrap_ffn(_ffn: FlowerCallable, _layer: Layer) -> FlowerCallable:
-        def new_ffn(message: Message, context: Context) -> Message:
-            return _layer(message, context, _ffn)
-
-        return new_ffn
-
-    for layer in reversed(layers):
-        ffn = wrap_ffn(ffn, layer)
-
-    return ffn
+__all__ = [
+    "make_ffn",
+    "secaggplus_mod",
+]

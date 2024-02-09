@@ -21,8 +21,8 @@ from typing import List, Optional, cast
 from flwr.client.message_handler.message_handler import (
     handle_legacy_message_from_tasktype,
 )
-from flwr.client.middleware.utils import make_ffn
-from flwr.client.typing import ClientFn, Layer
+from flwr.client.mod.utils import make_ffn
+from flwr.client.typing import ClientFn, Mod
 from flwr.common.context import Context
 from flwr.common.message import Message
 
@@ -56,7 +56,7 @@ class Flower:
     def __init__(
         self,
         client_fn: ClientFn,  # Only for backward compatibility
-        layers: Optional[List[Layer]] = None,
+        mods: Optional[List[Mod]] = None,
     ) -> None:
         # Create wrapper function for `handle`
         def ffn(
@@ -68,8 +68,8 @@ class Flower:
             )
             return out_message
 
-        # Wrap middleware layers around the wrapped handle function
-        self._call = make_ffn(ffn, layers if layers is not None else [])
+        # Wrap mods around the wrapped handle function
+        self._call = make_ffn(ffn, mods if mods is not None else [])
 
     def __call__(self, message: Message, context: Context) -> Message:
         """."""
