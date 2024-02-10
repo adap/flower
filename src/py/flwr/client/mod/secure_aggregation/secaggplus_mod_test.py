@@ -18,7 +18,7 @@ import unittest
 from itertools import product
 from typing import Callable, Dict, List
 
-from flwr.client.middleware import make_ffn
+from flwr.client.mod import make_ffn
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import TASK_TYPE_FIT
 from flwr.common.context import Context
@@ -47,7 +47,7 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
 )
 from flwr.common.typing import ConfigsRecordValues
 
-from .secaggplus_middleware import SecAggPlusState, check_configs, secaggplus_middleware
+from .secaggplus_mod import SecAggPlusState, check_configs, secaggplus_mod
 
 
 def get_test_handler(
@@ -61,7 +61,7 @@ def get_test_handler(
             message=RecordSet(),
         )
 
-    app = make_ffn(empty_ffn, [secaggplus_middleware])
+    app = make_ffn(empty_ffn, [secaggplus_mod])
 
     def func(configs: Dict[str, ConfigsRecordValues]) -> Dict[str, ConfigsRecordValues]:
         in_msg = Message(
