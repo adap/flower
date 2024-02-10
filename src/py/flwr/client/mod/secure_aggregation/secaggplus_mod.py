@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from logging import INFO, WARNING
 from typing import Any, Callable, Dict, List, Tuple, cast
 
-from flwr.client.typing import FlowerCallable
+from flwr.client.typing import ClientAppCallable
 from flwr.common import ndarray_to_bytes, parameters_to_ndarrays
 from flwr.common import recordset_compat as compat
 from flwr.common.configsrecord import ConfigsRecord
@@ -150,7 +150,7 @@ class SecAggPlusState:
 
 
 def _get_fit_fn(
-    msg: Message, ctxt: Context, call_next: FlowerCallable
+    msg: Message, ctxt: Context, call_next: ClientAppCallable
 ) -> Callable[[], FitRes]:
     """Get the fit function."""
 
@@ -164,7 +164,7 @@ def _get_fit_fn(
 def secaggplus_mod(
     msg: Message,
     ctxt: Context,
-    call_next: FlowerCallable,
+    call_next: ClientAppCallable,
 ) -> Message:
     """Handle incoming message and return results, following the SecAgg+ protocol."""
     # Ignore non-fit messages

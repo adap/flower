@@ -18,7 +18,7 @@
 import unittest
 from typing import List
 
-from flwr.client.typing import FlowerCallable, Mod
+from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.context import Context
 from flwr.common.message import Message, Metadata
@@ -42,7 +42,7 @@ def _increment_context_counter(context: Context) -> None:
 def make_mock_mod(name: str, footprint: List[str]) -> Mod:
     """Make a mock mod."""
 
-    def mod(message: Message, context: Context, app: FlowerCallable) -> Message:
+    def mod(message: Message, context: Context, app: ClientAppCallable) -> Message:
         footprint.append(name)
         # add empty ConfigRecord to in_message for this mod
         message.message.set_configs(name=name, record=ConfigsRecord())
@@ -57,7 +57,7 @@ def make_mock_mod(name: str, footprint: List[str]) -> Mod:
     return mod
 
 
-def make_mock_app(name: str, footprint: List[str]) -> FlowerCallable:
+def make_mock_app(name: str, footprint: List[str]) -> ClientAppCallable:
     """Make a mock app."""
 
     def app(message: Message, context: Context) -> Message:
@@ -119,7 +119,7 @@ class TestMakeApp(unittest.TestCase):
         def filter_mod(
             message: Message,
             _1: Context,
-            _2: FlowerCallable,
+            _2: ClientAppCallable,
         ) -> Message:
             footprint.append("filter")
             message.message.set_configs(name="filter", record=ConfigsRecord())

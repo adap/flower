@@ -3,25 +3,25 @@ Use Built-in Mods
 
 **Note: This tutorial covers experimental features. The functionality and interfaces may change in future versions.**
 
-In this tutorial, we will learn how to utilize built-in mods to augment the behavior of a ``FlowerCallable``. Mods (sometimes also called Modifiers) allow us to perform operations before and after a task is processed in the ``FlowerCallable``.
+In this tutorial, we will learn how to utilize built-in mods to augment the behavior of a ``ClientApp``. Mods (sometimes also called Modifiers) allow us to perform operations before and after a task is processed in the ``ClientApp``.
 
 What are Mods?
 --------------
 
-A Mod is a callable that wraps around a ``FlowerCallable``. It can manipulate or inspect the incoming ``Message`` and the resulting outgoing ``Message``. The signature for a ``Mod`` is as follows:
+A Mod is a callable that wraps around a ``ClientApp``. It can manipulate or inspect the incoming ``Message`` and the resulting outgoing ``Message``. The signature for a ``Mod`` is as follows:
 
 .. code-block:: python
 
-    FlowerCallable = Callable[[Fwd], Bwd]
-    Mod = Callable[[Fwd, FlowerCallable], Bwd]
+    ClientApp = Callable[[Message, Context], Message]
+    Mod = Callable[[Message, Context, ClientApp], Message]
 
 A typical mod function might look something like this:
 
 .. code-block:: python
 
-    def example_mod(msg: Message, ctx: Context, nxt: FlowerCallable) -> Message:
+    def example_mod(msg: Message, ctx: Context, nxt: ClientApp) -> Message:
         # Do something with incoming Message (or Context)
-        # before passing to the inner ``FlowerCallable``
+        # before passing to the inner ``ClientApp``
         msg = nxt(msg, ctx)
         # Do something with outgoing Message (or Context)
         # before returning
@@ -30,7 +30,7 @@ A typical mod function might look something like this:
 Using Mods
 ----------
 
-To use mods in your ``FlowerCallable``, you can follow these steps:
+To use mods in your ``ClientApp``, you can follow these steps:
 
 1. Import the required mods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,14 +53,14 @@ Define your client function (``client_fn``) that will be wrapped by the mod(s):
         # Your client code goes here.
         return # your client
 
-3. Create the ``FlowerCallable`` with mods
+3. Create the ``ClientApp`` with mods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Create your ``FlowerCallable`` and pass the mods as a list to the ``mods`` argument. The order in which you provide the mods matters:
+Create your ``ClientApp`` and pass the mods as a list to the ``mods`` argument. The order in which you provide the mods matters:
 
 .. code-block:: python
 
-    flower = fl.app.Flower(
+    app = fl.client.ClientApp(
         client_fn=client_fn,
         mods=[
             example_mod_1,  # Mod 1
@@ -71,7 +71,7 @@ Create your ``FlowerCallable`` and pass the mods as a list to the ``mods`` argum
 Order of execution
 ------------------
 
-When the ``FlowerCallable`` runs, the mods are executed in the order they are provided in the list:
+When the ``ClientApp`` runs, the mods are executed in the order they are provided in the list:
 
 1. ``example_mod_1`` (outermost mod)
 2. ``example_mod_2`` (next mod)
@@ -84,6 +84,6 @@ Each mod has a chance to inspect and modify the incoming ``Message`` before pass
 Conclusion
 ----------
 
-By following this guide, you have learned how to effectively use mods to enhance your ``FlowerCallable``'s functionality. Remember that the order of mods is crucial and affects how the input and output are processed.
+By following this guide, you have learned how to effectively use mods to enhance your ``ClientApp``'s functionality. Remember that the order of mods is crucial and affects how the input and output are processed.
 
-Enjoy building more robust and flexible ``FlowerCallable``s with mods!
+Enjoy building more robust and flexible ``ClientApp``s with mods!

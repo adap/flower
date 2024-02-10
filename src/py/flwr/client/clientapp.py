@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower callable."""
+"""Flower ClientApp."""
 
 
 import importlib
@@ -27,13 +27,13 @@ from flwr.common.context import Context
 from flwr.common.message import Message
 
 
-class Flower:
-    """Flower callable.
+class ClientApp:
+    """Flower ClientApp.
 
     Examples
     --------
-    Assuming a typical client implementation in `FlowerClient`, you can wrap it in a
-    Flower callable as follows:
+    Assuming a typical `Client` implementation named `FlowerClient`, you can wrap it in
+    a `ClientApp` as follows:
 
     >>> class FlowerClient(NumPyClient):
     >>>     # ...
@@ -41,16 +41,16 @@ class Flower:
     >>> def client_fn(cid):
     >>>    return FlowerClient().to_client()
     >>>
-    >>> flower = Flower(client_fn)
+    >>> app = ClientApp(client_fn)
 
     If the above code is in a Python module called `client`, it can be started as
     follows:
 
-    >>> flower-client --callable client:flower
+    >>> flower-client client:app --insecure
 
-    In this `client:flower` example, `client` refers to the Python module in which the
-    previous code lives in. `flower` refers to the global attribute `flower` that points
-    to an object of type `Flower` (a Flower callable).
+    In this `client:app` example, `client` refers to the Python module `client.py` in
+    which the previous code lives in and `app` refers to the global attribute `app` that
+    points to an object of type `ClientApp`.
     """
 
     def __init__(
@@ -76,25 +76,25 @@ class Flower:
         return self._call(message, context)
 
 
-class LoadCallableError(Exception):
+class LoadClientAppError(Exception):
     """."""
 
 
-def load_flower_callable(module_attribute_str: str) -> Flower:
-    """Load the `Flower` object specified in a module attribute string.
+def load_client_app(module_attribute_str: str) -> ClientApp:
+    """Load the `ClientApp` object specified in a module attribute string.
 
     The module/attribute string should have the form <module>:<attribute>. Valid
-    examples include `client:flower` and `project.package.module:wrapper.flower`. It
+    examples include `client:app` and `project.package.module:wrapper.app`. It
     must refer to a module on the PYTHONPATH, the module needs to have the specified
-    attribute, and the attribute must be of type `Flower`.
+    attribute, and the attribute must be of type `ClientApp`.
     """
     module_str, _, attributes_str = module_attribute_str.partition(":")
     if not module_str:
-        raise LoadCallableError(
+        raise LoadClientAppError(
             f"Missing module in {module_attribute_str}",
         ) from None
     if not attributes_str:
-        raise LoadCallableError(
+        raise LoadClientAppError(
             f"Missing attribute in {module_attribute_str}",
         ) from None
 
@@ -102,7 +102,7 @@ def load_flower_callable(module_attribute_str: str) -> Flower:
     try:
         module = importlib.import_module(module_str)
     except ModuleNotFoundError:
-        raise LoadCallableError(
+        raise LoadClientAppError(
             f"Unable to load module {module_str}",
         ) from None
 
@@ -112,14 +112,14 @@ def load_flower_callable(module_attribute_str: str) -> Flower:
         for attribute_str in attributes_str.split("."):
             attribute = getattr(attribute, attribute_str)
     except AttributeError:
-        raise LoadCallableError(
+        raise LoadClientAppError(
             f"Unable to load attribute {attributes_str} from module {module_str}",
         ) from None
 
     # Check type
-    if not isinstance(attribute, Flower):
-        raise LoadCallableError(
-            f"Attribute {attributes_str} is not of type {Flower}",
+    if not isinstance(attribute, ClientApp):
+        raise LoadClientAppError(
+            f"Attribute {attributes_str} is not of type {ClientApp}",
         ) from None
 
-    return cast(Flower, attribute)
+    return cast(ClientApp, attribute)
