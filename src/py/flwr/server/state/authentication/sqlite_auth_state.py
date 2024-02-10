@@ -14,9 +14,11 @@
 # ==============================================================================
 """SQLite based implementation of server authentication state."""
 
-from sqlite_state import SqliteState
-from authentication_state import AuthenticationState
 from typing import Set
+
+from authentication_state import AuthenticationState
+from sqlite_state import SqliteState
+
 
 class SqliteAuthState(AuthenticationState, SqliteState):
     def __init__(self) -> None:

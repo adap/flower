@@ -17,6 +17,7 @@
 import abc
 from typing import Set
 
+
 class AuthenticationState(abc.ABC):
     """Abstract State."""
     @abc.abstractmethod

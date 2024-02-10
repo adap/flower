@@ -14,9 +14,11 @@
 # ==============================================================================
 """In-memory Authentication State implementation."""
 
-from in_memory_state import InMemoryState
-from authentication_state import AuthenticationState
 from typing import Dict, Set
+
+from authentication_state import AuthenticationState
+from in_memory_state import InMemoryState
+
 
 class InMemoryAuthState(AuthenticationState, InMemoryState):
     def __init__(self) -> None:

@@ -15,6 +15,7 @@
 """Test for authentication state."""
 
 import os
+
 from common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
     generate_key_pairs,
