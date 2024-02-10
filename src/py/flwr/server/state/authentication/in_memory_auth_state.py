@@ -21,6 +21,7 @@ from in_memory_state import InMemoryState
 
 
 class InMemoryAuthState(AuthenticationState, InMemoryState):
+    """In-memory-based authentication state implementation."""
     def __init__(self) -> None:
         """Init InMemoryAuthState."""
         super().__init__()
