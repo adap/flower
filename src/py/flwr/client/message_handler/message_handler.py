@@ -107,7 +107,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
 def handle_legacy_message_from_tasktype(
     client_fn: ClientFn, message: Message, context: Context
 ) -> Message:
-    """Handle legacy message in the inner most middleware layer."""
+    """Handle legacy message in the inner most mod."""
     client = client_fn("-1")
 
     client.set_context(context)
