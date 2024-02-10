@@ -101,16 +101,18 @@ def decrypt(key: bytes, ciphertext: bytes) -> bytes:
 
 
 def compute_hmac(key: bytes, message: bytes) -> bytes:
+    """Compute hmac of a message using key as hash."""
     computed_hmac = hmac.HMAC(key, hashes.SHA256())
     computed_hmac.update(message)
     return computed_hmac.finalize()
 
 
 def verify_hmac(key: bytes, message: bytes, hmac_value: bytes) -> bool:
+    """Verify hmac of a message using key as hash."""
     computed_hmac = hmac.HMAC(key, hashes.SHA256())
     computed_hmac.update(message)
     try:
         computed_hmac.verify(hmac_value)
         return True
-    except:
+    except Exception:
         return False

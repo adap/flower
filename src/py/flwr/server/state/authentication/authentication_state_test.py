@@ -27,6 +27,7 @@ from in_memory_auth_state import InMemoryAuthState
 
 
 def test_client_public_keys() -> None:
+    """Test client public keys store and get from state."""
     key_pairs = [generate_key_pairs() for _ in range(3)]
     public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
 
@@ -37,6 +38,7 @@ def test_client_public_keys() -> None:
 
 
 def test_node_id_public_key_pair() -> None:
+    """Test store and get node_id public_key pair."""
     node_id = int.from_bytes(os.urandom(8), "little", signed=True)
     public_key = public_key_to_bytes(generate_key_pairs()[1])
 
@@ -47,6 +49,7 @@ def test_node_id_public_key_pair() -> None:
 
 
 def test_generate_shared_key() -> None:
+    """Test util function generate_shared_key."""
     client_keys = generate_key_pairs()
     server_keys = generate_key_pairs()
 
@@ -57,6 +60,7 @@ def test_generate_shared_key() -> None:
 
 
 def test_hmac() -> None:
+    """Test util function compute and verify hmac."""
     client_keys = generate_key_pairs()
     server_keys = generate_key_pairs()
     client_shared_secret = generate_shared_key(client_keys[0], server_keys[1])

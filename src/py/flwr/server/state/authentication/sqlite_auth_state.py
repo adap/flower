@@ -22,11 +22,13 @@ from sqlite_state import SqliteState
 
 class SqliteAuthState(AuthenticationState, SqliteState):
     def __init__(self) -> None:
+        """Init SqliteAuthState."""
         super().__init__()
 
     def store_node_id_public_key_pair(self, node_id: int, public_key: bytes) -> None:
         """Store `node_id` and `public_key` as key-value pair in state."""
-        query = "INSERT OR REPLACE INTO node_key (node_id, public_key) VALUES (:node_id, :public_key)"
+        query = "INSERT OR REPLACE INTO node_key (node_id, public_key) "\
+                "VALUES (:node_id, :public_key)"
         self.query(query, {"node_id": node_id, "public_key": public_key})
 
     def get_public_key_from_node_id(self, node_id: int) -> bytes:
@@ -39,7 +41,8 @@ class SqliteAuthState(AuthenticationState, SqliteState):
         self, public_key: bytes, private_key: bytes
     ) -> None:
         """Store server's `public_key` and `private_key` in state."""
-        query = "INSERT OR REPLACE INTO credential (public_key, private_key) VALUES (:public_key, :private_key)"
+        query = "INSERT OR REPLACE INTO credential (public_key, private_key) "\
+                "VALUES (:public_key, :private_key)"
         self.query(query, {"public_key": public_key, "private_key": private_key})
 
     def get_server_private_key(self) -> bytes:

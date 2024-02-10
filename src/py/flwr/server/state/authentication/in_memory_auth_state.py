@@ -22,11 +22,12 @@ from in_memory_state import InMemoryState
 
 class InMemoryAuthState(AuthenticationState, InMemoryState):
     def __init__(self) -> None:
+        """Init InMemoryAuthState."""
         super().__init__()
         self.node_id_public_key_dict: Dict[int, bytes] = {}
         self.client_public_keys: Set[bytes] = set()
-        self.server_public_key: bytes = bytes()
-        self.server_private_key: bytes = bytes()
+        self.server_public_key: bytes = b""
+        self.server_private_key: bytes = b""
 
     def store_node_id_public_key_pair(self, node_id: int, public_key: bytes) -> None:
         """Store `node_id` and `public_key` as key-value pair in state."""
@@ -40,7 +41,7 @@ class InMemoryAuthState(AuthenticationState, InMemoryState):
         """Get client's public key in urlsafe bytes for `node_id`."""
         if node_id in self.node_id_public_key_dict:
             return self.node_id_public_key_dict[node_id]
-        return bytes()
+        return b""
 
     def store_server_public_private_key(
         self, public_key: bytes, private_key: bytes
