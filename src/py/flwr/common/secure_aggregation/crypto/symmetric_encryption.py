@@ -98,3 +98,17 @@ def decrypt(key: bytes, ciphertext: bytes) -> bytes:
     # The input key must be url safe
     fernet = Fernet(key)
     return fernet.decrypt(ciphertext)
+
+def compute_hmac(key: bytes, message: bytes) -> bytes:
+    computed_hmac = hmac.HMAC(key, hashes.SHA256())
+    computed_hmac.update(message)
+    return computed_hmac.finalize()
+
+def verify_hmac(key: bytes, message: bytes, hmac_value: bytes) -> bool:
+    computed_hmac = hmac.HMAC(key, hashes.SHA256())
+    computed_hmac.update(message)
+    try:
+        computed_hmac.verify(hmac_value)
+        return True
+    except:
+        return False
