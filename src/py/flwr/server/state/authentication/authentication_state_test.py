@@ -35,6 +35,7 @@ def test_client_public_keys() -> None:
 
     assert in_memory_auth_state.get_client_public_keys == public_keys
 
+
 def test_node_id_public_key_pair() -> None:
     node_id = int.from_bytes(os.urandom(8), "little", signed=True)
     public_key = public_key_to_bytes(generate_key_pairs()[1])
@@ -44,6 +45,7 @@ def test_node_id_public_key_pair() -> None:
 
     assert in_memory_auth_state.get_public_key_from_node_id(node_id) == public_key
 
+
 def test_generate_shared_key() -> None:
     client_keys = generate_key_pairs()
     server_keys = generate_key_pairs()
@@ -52,6 +54,7 @@ def test_generate_shared_key() -> None:
     server_shared_secret = generate_shared_key(server_keys[0], client_keys[1])
 
     assert client_shared_secret == server_shared_secret
+
 
 def test_hmac() -> None:
     client_keys = generate_key_pairs()
@@ -63,4 +66,3 @@ def test_hmac() -> None:
     client_compute_hmac = compute_hmac(client_shared_secret, message)
 
     assert verify_hmac(server_shared_secret, message, client_compute_hmac)
-    

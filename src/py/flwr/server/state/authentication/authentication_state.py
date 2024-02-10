@@ -20,6 +20,7 @@ from typing import Set
 
 class AuthenticationState(abc.ABC):
     """Abstract State."""
+
     @abc.abstractmethod
     def store_node_id_public_key_pair(self, node_id: int, public_key: bytes) -> None:
         """Store `node_id` and `public_key` as key-value pair in state."""
@@ -29,7 +30,9 @@ class AuthenticationState(abc.ABC):
         """Get client's public key in urlsafe bytes for `node_id`."""
 
     @abc.abstractmethod
-    def store_server_public_private_key(self, public_key: bytes, private_key: bytes) -> None:
+    def store_server_public_private_key(
+        self, public_key: bytes, private_key: bytes
+    ) -> None:
         """Store server's `public_key` and `private_key` in state."""
 
     @abc.abstractmethod
@@ -42,12 +45,12 @@ class AuthenticationState(abc.ABC):
 
     @abc.abstractmethod
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-         """Store a set of client public keys in state."""
+        """Store a set of client public keys in state."""
 
     @abc.abstractmethod
     def store_client_public_key(self, public_key: bytes) -> None:
-         """Retrieve a client public key in state."""
+        """Retrieve a client public key in state."""
 
     @abc.abstractmethod
     def get_client_public_keys(self) -> Set[bytes]:
-         """Retrieve all currently stored client public keys as a set."""
+        """Retrieve all currently stored client public keys as a set."""

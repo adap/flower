@@ -542,6 +542,7 @@ class SqliteState(State):
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
+
 def dict_factory(
     cursor: sqlite3.Cursor,
     row: sqlite3.Row,

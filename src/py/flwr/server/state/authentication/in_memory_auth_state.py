@@ -27,7 +27,7 @@ class InMemoryAuthState(AuthenticationState, InMemoryState):
         self.client_public_keys: Set[bytes] = set()
         self.server_public_key: bytes = bytes()
         self.server_private_key: bytes = bytes()
-    
+
     def store_node_id_public_key_pair(self, node_id: int, public_key: bytes) -> None:
         """Store `node_id` and `public_key` as key-value pair in state."""
         if node_id not in self.node_ids:
@@ -42,7 +42,9 @@ class InMemoryAuthState(AuthenticationState, InMemoryState):
             return self.node_id_public_key_dict[node_id]
         return bytes()
 
-    def store_server_public_private_key(self, public_key: bytes, private_key: bytes) -> None:
+    def store_server_public_private_key(
+        self, public_key: bytes, private_key: bytes
+    ) -> None:
         """Store server's `public_key` and `private_key` in state."""
         self.server_private_key = private_key
         self.server_public_key = public_key
@@ -56,13 +58,13 @@ class InMemoryAuthState(AuthenticationState, InMemoryState):
         return self.server_public_key
 
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-         """Store a set of client public keys in state."""
-         self.client_public_keys = public_keys
+        """Store a set of client public keys in state."""
+        self.client_public_keys = public_keys
 
     def store_client_public_key(self, public_key: bytes) -> None:
-         """Retrieve a client public key in state."""
-         self.client_public_keys.add(public_key)
+        """Retrieve a client public key in state."""
+        self.client_public_keys.add(public_key)
 
     def get_client_public_keys(self) -> Set[bytes]:
-         """Retrieve all currently stored client public keys as a set."""
-         return self.client_public_keys
+        """Retrieve all currently stored client public keys as a set."""
+        return self.client_public_keys

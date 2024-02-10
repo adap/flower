@@ -35,7 +35,9 @@ class SqliteAuthState(AuthenticationState, SqliteState):
         rows = self.query(query, {"node_id": node_id})
         return rows[0]["public_key"]
 
-    def store_server_public_private_key(self, public_key: bytes, private_key: bytes) -> None:
+    def store_server_public_private_key(
+        self, public_key: bytes, private_key: bytes
+    ) -> None:
         """Store server's `public_key` and `private_key` in state."""
         query = "INSERT OR REPLACE INTO credential (public_key, private_key) VALUES (:public_key, :private_key)"
         self.query(query, {"public_key": public_key, "private_key": private_key})

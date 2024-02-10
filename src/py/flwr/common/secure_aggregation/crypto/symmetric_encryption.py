@@ -99,10 +99,12 @@ def decrypt(key: bytes, ciphertext: bytes) -> bytes:
     fernet = Fernet(key)
     return fernet.decrypt(ciphertext)
 
+
 def compute_hmac(key: bytes, message: bytes) -> bytes:
     computed_hmac = hmac.HMAC(key, hashes.SHA256())
     computed_hmac.update(message)
     return computed_hmac.finalize()
+
 
 def verify_hmac(key: bytes, message: bytes, hmac_value: bytes) -> bool:
     computed_hmac = hmac.HMAC(key, hashes.SHA256())
