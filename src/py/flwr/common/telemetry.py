@@ -137,8 +137,8 @@ class EventType(str, Enum):
     RUN_FLEET_API_LEAVE = auto()
 
     # Driver API and Fleet API
-    RUN_SERVER_ENTER = auto()
-    RUN_SERVER_LEAVE = auto()
+    RUN_SUPERLINK_ENTER = auto()
+    RUN_SUPERLINK_LEAVE = auto()
 
     # Simulation
     START_SIMULATION_ENTER = auto()

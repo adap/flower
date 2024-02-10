@@ -344,10 +344,10 @@ def run_fleet_api() -> None:
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
-def run_server() -> None:
+def run_superlink() -> None:
     """Run Flower server (Driver API and Fleet API)."""
     log(INFO, "Starting Flower server")
-    event(EventType.RUN_SERVER_ENTER)
+    event(EventType.RUN_SUPERLINK_ENTER)
     args = _parse_args_server().parse_args()
 
     # Parse IP address
@@ -419,7 +419,7 @@ def run_server() -> None:
     _register_exit_handlers(
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_SERVER_LEAVE,
+        event_type=EventType.RUN_SUPERLINK_LEAVE,
     )
 
     # Block
