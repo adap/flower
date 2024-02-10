@@ -6645,13 +6645,8 @@ msgid "Flower CLI reference"
 msgstr "Flower CLI 参考"
 
 #: ../../source/ref-api-cli.rst:7
-<<<<<<< HEAD
 msgid "flower-superlink"
-msgstr ""
-=======
-msgid "flower-server"
-msgstr "Flower 服务器"
->>>>>>> main
+msgstr "flower-superlink"
 
 #: ../../source/ref-api-cli.rst:17
 #, fuzzy
