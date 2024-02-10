@@ -15,15 +15,15 @@
 """Test for authentication state."""
 
 import os
-from in_memory_auth_state import InMemoryAuthState
-from sqlite_auth_state import SqliteAuthState
 from common.secure_aggregation.crypto.symmetric_encryption import (
-    generate_key_pairs, 
-    public_key_to_bytes,
+    compute_hmac,
+    generate_key_pairs,
     generate_shared_key,
+    public_key_to_bytes,
     verify_hmac,
-    compute_hmac
 )
+from in_memory_auth_state import InMemoryAuthState
+
 
 def test_client_public_keys() -> None:
     key_pairs = [generate_key_pairs() for _ in range(3)]
