@@ -189,9 +189,9 @@ def get_middleware(name):
     return wandb_middleware
 
 
-# To run this: `flower-client --callable client:flower`
-flower = fl.flower.Flower(
-    client_fn=client_fn, middleware=[get_middleware("MT PyTorch Callable")]
+# To run this: `flower-client client:app`
+app = fl.client.ClientApp(
+    client_fn=client_fn, modifiers=[get_middleware("MT PyTorch Callable")]
 )
 
 

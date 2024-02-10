@@ -13,13 +13,31 @@ case "$1" in
     ;;
 esac
 
-timeout 2m flower-server $server_arg &
+case "$2" in
+  rest)
+    rest_arg="--rest"
+    server_address="http://localhost:9093"
+    db_arg="--database :flwr-in-memory-state:"
+    ;;
+  sqlite)
+    rest_arg=""
+    server_address="127.0.0.1:9092"
+    db_arg="--database $(date +%s).db"
+    ;;
+  *)
+    rest_arg=""
+    server_address="127.0.0.1:9092"
+    db_arg="--database :flwr-in-memory-state:"
+    ;;
+esac
+
+timeout 2m flower-server $server_arg $db_arg $rest_arg &
 sleep 3
 
-timeout 2m flower-client $client_arg --callable client:flower --server 127.0.0.1:9092 &
+timeout 2m flower-client client:app $client_arg $rest_arg --server $server_address &
 sleep 3
 
-timeout 2m flower-client $client_arg --callable client:flower --server 127.0.0.1:9092 &
+timeout 2m flower-client client:app $client_arg $rest_arg --server $server_address &
 sleep 3
 
 timeout 2m python driver.py &
