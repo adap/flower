@@ -31,7 +31,7 @@ case "$2" in
     ;;
 esac
 
-timeout 2m flower-server $server_arg $db_arg $rest_arg &
+timeout 2m flower-superlink $server_arg $db_arg $rest_arg &
 sleep 3
 
 timeout 2m flower-client client:app $client_arg $rest_arg --server $server_address &
@@ -47,7 +47,7 @@ wait $pid
 res=$?
 
 if [[ "$res" = "0" ]];
-  then echo "Training worked correctly" && pkill flower-client && pkill flower-server;
+  then echo "Training worked correctly" && pkill flower-client && pkill flower-superlink;
   else echo "Training had an issue" && exit 1;
 fi
 

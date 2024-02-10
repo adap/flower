@@ -5612,7 +5612,7 @@ msgid "Flower CLI reference"
 msgstr ""
 
 #: ../../source/ref-api-cli.rst:7
-msgid "flower-server"
+msgid "flower-superlink"
 msgstr ""
 
 #: ../../source/ref-api-cli.rst:17
@@ -7912,7 +7912,7 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:241
 msgid ""
-"`flower-server --driver-api-address \"0.0.0.0:8081\" --fleet-api-address "
+"`flower-superlink --driver-api-address \"0.0.0.0:8081\" --fleet-api-address "
 "\"0.0.0.0:8086\"`"
 msgstr ""
 
