@@ -21,7 +21,7 @@ from state import State
 
 
 class AuthenticationState(State, abc.ABC):
-    """Abstract State."""
+    """Abstract Authentication State."""
 
     @abc.abstractmethod
     def store_node_id_public_key_pair(self, node_id: int, public_key: bytes) -> None:
