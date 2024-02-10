@@ -39,7 +39,8 @@ class SqliteAuthState(AuthenticationState, SqliteState):
         """Get client's public key in urlsafe bytes for `node_id`."""
         query = "SELECT public_key FROM node_key WHERE node_id = :node_id"
         rows = self.query(query, {"node_id": node_id})
-        return rows[0]["public_key"]
+        public_key: bytes = rows[0]["public_key"]
+        return public_key
 
     def store_server_public_private_key(
         self, public_key: bytes, private_key: bytes
@@ -55,13 +56,15 @@ class SqliteAuthState(AuthenticationState, SqliteState):
         """Get server private key in urlsafe bytes."""
         query = "SELECT private_key FROM credential"
         rows = self.query(query)
-        return rows[0]["private_key"]
+        private_key: bytes = rows[0]["private_key"]
+        return private_key
 
     def get_server_public_key(self) -> bytes:
         """Get server public key in urlsafe bytes."""
         query = "SELECT public_key FROM credential"
         rows = self.query(query)
-        return rows[0]["public_key"]
+        public_key: bytes = rows[0]["public_key"]
+        return public_key
 
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
         """Store a set of client public keys in state."""
