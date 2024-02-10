@@ -16,7 +16,7 @@
 
 from typing import Dict, Set
 
-from .authentication_state import AuthenticationState
+from flwr.server.state.authentication.authentication_state import AuthenticationState
 from flwr.server.state.in_memory_state import InMemoryState
 
 
