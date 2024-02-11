@@ -15,7 +15,7 @@
 """Flower server."""
 
 
-from . import strategy
+from . import driver, strategy
 from .app import ServerConfig as ServerConfig
 from .app import run_driver_api as run_driver_api
 from .app import run_fleet_api as run_fleet_api
@@ -29,6 +29,7 @@ from .server import Server as Server
 
 __all__ = [
     "ClientManager",
+    "driver",
     "History",
     "run_driver_api",
     "run_fleet_api",
