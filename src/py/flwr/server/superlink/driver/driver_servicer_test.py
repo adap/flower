@@ -15,7 +15,7 @@
 """DriverServicer tests."""
 
 
-from flwr.server.driver.driver_servicer import _raise_if
+from flwr.server.superlink.driver.driver_servicer import _raise_if
 
 # pylint: disable=broad-except
 
