@@ -43,8 +43,10 @@ flower-client-app
 
 .. _flower-server-app-apiref:
 
+flower-server-app
+~~~~~~~~~~~~~~~~~
 
-    .. argparse::
-..    :filename: flwr.client
-..    :func: run_client
-..    :prog: flower-client
+.. argparse::
+   :filename: flwr.server
+   :func: run_server_app
+   :prog: flower-server-app

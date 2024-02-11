@@ -19,6 +19,7 @@ from . import strategy
 from .app import ServerConfig as ServerConfig
 from .app import run_driver_api as run_driver_api
 from .app import run_fleet_api as run_fleet_api
+from .app import run_server_app as run_server_app
 from .app import run_superlink as run_superlink
 from .app import start_server as start_server
 from .client_manager import ClientManager as ClientManager
@@ -31,6 +32,7 @@ __all__ = [
     "History",
     "run_driver_api",
     "run_fleet_api",
+    "run_server_app",
     "run_superlink",
     "Server",
     "ServerConfig",
