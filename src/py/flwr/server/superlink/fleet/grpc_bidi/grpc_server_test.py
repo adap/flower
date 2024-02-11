@@ -23,12 +23,12 @@ from pathlib import Path
 from typing import Tuple, cast
 
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.fleet.grpc_bidi.grpc_server import (
+from flwr.server.superlink.fleet.grpc_bidi.grpc_server import (
     start_grpc_server,
     valid_certificates,
 )
 
-root_dir = dirname(abspath(join(__file__, "../../../../../..")))
+root_dir = dirname(abspath(join(__file__, "../../../../../../..")))
 
 
 def load_certificates() -> Tuple[str, str, str]:

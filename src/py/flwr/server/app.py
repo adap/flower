@@ -44,16 +44,16 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.server.client_manager import ClientManager, SimpleClientManager
-from flwr.server.driver.driver_servicer import DriverServicer
-from flwr.server.fleet.grpc_bidi.grpc_server import (
+from flwr.server.history import History
+from flwr.server.server import Server
+from flwr.server.strategy import FedAvg, Strategy
+from flwr.server.superlink.driver.driver_servicer import DriverServicer
+from flwr.server.superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
 )
-from flwr.server.fleet.grpc_rere.fleet_servicer import FleetServicer
-from flwr.server.history import History
-from flwr.server.server import Server
-from flwr.server.state import StateFactory
-from flwr.server.strategy import FedAvg, Strategy
+from flwr.server.superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from flwr.server.superlink.state import StateFactory
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
