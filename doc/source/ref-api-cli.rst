@@ -31,10 +31,18 @@ flower-fleet-api
    :func:  _parse_args_fleet
    :prog: flower-fleet-api
 
-.. .. _flower-client-apiref:
+.. _flower-client-app-apiref:
 
-.. flower-client
-.. ~~~~~~~~~~~~~
+flower-client-app
+~~~~~~~~~~~~~~~~~
+
+.. argparse::
+   :filename: flwr.client
+   :func: run_client_app
+   :prog: flower-client-app
+
+.. _flower-server-app-apiref:
+
 
     .. argparse::
 ..    :filename: flwr.client
