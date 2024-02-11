@@ -1,18 +1,18 @@
-
 msgid ""
 msgstr ""
 "Project-Id-Version: Flower Docs\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2023-08-30 18:55+0200\n"
-"PO-Revision-Date: 2023-09-05 17:54+0000\n"
+"PO-Revision-Date: 2024-02-11 12:30+0000\n"
 "Last-Translator: Charles Beauville <charles@adap.com>\n"
+"Language-Team: French <https://hosted.weblate.org/projects/flower-docs/"
+"framework/fr/>\n"
 "Language: fr\n"
-"Language-Team: French <https://hosted.weblate.org/projects/flower-"
-"docs/framework/fr/>\n"
-"Plural-Forms: nplurals=2; plural=n > 1;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 5.4-dev\n"
 "Generated-By: Babel 2.12.1\n"
 
 #: ../../source/contributor-explanation-architecture.rst:2
@@ -777,14 +777,13 @@ msgstr "Version Python"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:11
 #: ../../source/how-to-install-flower.rst:8
-#, fuzzy
 msgid ""
 "Flower requires at least `Python 3.8 <https://docs.python.org/3.8/>`_, "
 "but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is "
 "recommended."
 msgstr ""
-"Flower nécessite `Python 3.7 <https://docs.python.org/3.7/>`_ ou plus, "
-"nous recommandons `Python 3.8 <https://docs.python.org/3.8/>`_."
+"Flower nécessite `Python 3.8 <https://docs.python.org/3.8/>`_ ou plus, nous "
+"recommandons `Python 3.10 <https://docs.python.org/3.10/>`_."
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:14
 msgid "Virutualenv with Pyenv/Virtualenv"
@@ -804,13 +803,12 @@ msgstr ""
 "détails."
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:18
-#, fuzzy
 msgid ""
 "Once Pyenv is set up, you can use it to install `Python Version 3.10 "
 "<https://docs.python.org/3.10/>`_ or above:"
 msgstr ""
-"Une fois Pyenv mis en place, tu peux l'utiliser pour installer `Python "
-"Version 3.7 <https://docs.python.org/3.7/>`_ ou supérieure :"
+"Une fois Pyenv installé, vous pouvez l'utiliser pour installer `Python "
+"Version 3.10 <https://docs.python.org/3.10/>`_ ou supérieure :"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:24
 msgid "Create the virtualenv with:"
@@ -2063,9 +2061,8 @@ msgstr ""
 "Docker requises en arrière plan."
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:97
-#, fuzzy
 msgid "Build Release"
-msgstr "Inédit"
+msgstr "Générer une nouvelle version"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:99
 msgid ""
@@ -2084,9 +2081,8 @@ msgstr ""
 "dans le sous-répertoire:code:`/dist`."
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:109
-#, fuzzy
 msgid "Build Documentation"
-msgstr "Amélioration de la documentation"
+msgstr "Générer la documentation"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:111
 msgid ""
@@ -2094,10 +2090,13 @@ msgid ""
 "There's no convenience script to re-build the documentation yet, but it's"
 " pretty easy::"
 msgstr ""
+"La documentation de Flower utilise `Sphinx <https://www.sphinx-doc.org/>`_ . "
+"Il n'y a pas encore de script pour re-générer automatiquement la "
+"documentation, mais c'est assez facile::"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:117
 msgid "This will generate HTML documentation in ``doc/build/html``."
-msgstr ""
+msgstr "Ceci générera la documentation HTML dans ``doc/build/html``."
 
 #: ../../source/example-fedbn-pytorch-from-centralized-to-federated.rst:2
 msgid "Example: FedBN in PyTorch - From Centralized To Federated"
@@ -2240,7 +2239,6 @@ msgid "Next Steps"
 msgstr "Prochaines étapes"
 
 #: ../../source/example-fedbn-pytorch-from-centralized-to-federated.rst:96
-#, fuzzy
 msgid ""
 "The full source code for this example can be found `here "
 "<https://github.com/adap/flower/blob/main/examples/pytorch-from-"
@@ -2250,14 +2248,13 @@ msgid ""
 "using different subsets of CIFAR-10 on each client? How about adding more"
 " clients?"
 msgstr ""
-"Le code source complet de cet exemple se trouve ici "
-"<https://github.com/adap/flower/blob/main/examples/pytorch-from-"
-"centralized-to-federated>`_. Notre exemple est bien sûr un peu trop "
-"simplifié parce que les deux clients chargent exactement le même ensemble"
-" de données, ce qui n'est pas réaliste. Tu es maintenant prêt à "
-"approfondir ce sujet. Pourquoi ne pas utiliser différents sous-ensembles "
-"de CIFAR-10 sur chaque client ? Pourquoi ne pas ajouter d'autres clients "
-"?"
+"Le code source complet de cet exemple se trouve `ici <https://github.com/"
+"adap/flower/blob/main/examples/pytorch-from-centralized-to-federated>`_. "
+"Notre exemple est bien sûr simplifié parce que les deux clients chargent "
+"exactement le même jeu de données, ce qui n'est pas réaliste. Vous êtes "
+"maintenant prêt à approfondir ce sujet. Pourquoi ne pas utiliser différents "
+"sous-ensembles de CIFAR-10 pour chaque client ? Pourquoi ne pas ajouter "
+"d'autres clients ?"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:2
 msgid "Example: JAX - Run JAX Federated"
@@ -2265,7 +2262,6 @@ msgstr "Exemple : JAX - Exécuter JAX Federated"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:4
 #: ../../source/tutorial-quickstart-jax.rst:7
-#, fuzzy
 msgid ""
 "This tutorial will show you how to use Flower to build a federated "
 "version of an existing JAX workload. We are using JAX to train a linear "
@@ -2278,18 +2274,17 @@ msgid ""
 " tutorial`. Then, we build upon the centralized training code to run the "
 "training in a federated fashion."
 msgstr ""
-"Ce tutoriel te montrera comment utiliser Flower pour construire une "
-"version fédérée d'une charge de travail JAX existante. Nous utilisons JAX"
-" pour entraîner un modèle de régression linéaire sur un ensemble de "
-"données scikit-learn. Nous structurerons l'exemple de la même manière que"
-" notre présentation `PyTorch - De la centralisation à la fédération "
-"<https://github.com/adap/flower/blob/main/examples/pytorch-from-"
-"centralized-to-federated>`_. Tout d'abord, nous construisons une approche"
-" d'entraînement centralisée basée sur le tutoriel `Régression linéaire "
-"avec JAX "
-"<https://coax.readthedocs.io/en/latest/examples/linear_regression/jax.html>`_."
-" Ensuite, nous nous appuyons sur le code d'entraînement centralisé pour "
-"exécuter l'entraînement de manière fédérée."
+"Ce tutoriel vous montrera comment utiliser Flower pour construire une "
+"version fédérée d'un workflow JAX existant. Nous utilisons JAX pour "
+"entraîner un modèle de régression linéaire sur un ensemble de données scikit-"
+"learn. Nous structurerons l'exemple de la même manière que notre "
+"présentation `PyTorch - De la centralisation à la fédération <https://github."
+"com/adap/flower/blob/main/examples/pytorch-from-centralized-to-federated>`_. "
+"Tout d'abord, nous construisons une approche d'entraînement centralisée "
+"basée sur le tutoriel `Régression linéaire avec JAX <https://coax.readthedocs"
+".io/en/latest/examples/linear_regression/jax.html>`_. Ensuite, nous nous "
+"appuyons sur le code d'entraînement centralisé pour exécuter l'entraînement "
+"de manière fédérée."
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:10
 #: ../../source/tutorial-quickstart-jax.rst:13
@@ -2681,18 +2676,16 @@ msgstr ""
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:279
 #: ../../source/tutorial-quickstart-jax.rst:282
-#, fuzzy
 msgid ""
 "The source code of this example was improved over time and can be found "
 "here: `Quickstart JAX <https://github.com/adap/flower/blob/main/examples"
 "/quickstart-jax>`_. Our example is somewhat over-simplified because both "
 "clients load the same dataset."
 msgstr ""
-"Le code source de cet exemple a été amélioré au fil du temps et peut être"
-" trouvé ici : `Quickstart JAX "
-"<https://github.com/adap/flower/blob/main/examples/quickstart-jax>`_. "
-"Notre exemple est quelque peu simplifié à l'extrême car les deux clients "
-"chargent le même jeu de données."
+"Le code source de cet exemple a été amélioré au fil du temps et peut être "
+"trouvé ici : `Quickstart JAX <https://github.com/adap/flower/blob/main/"
+"examples/quickstart-jax>`_. Notre exemple est quelque peu simplifié à "
+"l'extrême car les deux clients chargent le même jeu de données."
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:282
 #: ../../source/tutorial-quickstart-jax.rst:285
@@ -2710,7 +2703,6 @@ msgid "Example: MXNet - Run MXNet Federated"
 msgstr "Exemple : MXNet - Exécuter MXNet Federated"
 
 #: ../../source/example-mxnet-walk-through.rst:4
-#, fuzzy
 msgid ""
 "This tutorial will show you how to use Flower to build a federated "
 "version of an existing MXNet workload. We are using MXNet to train a "
@@ -2726,21 +2718,20 @@ msgid ""
 " tutorial. Then, we build upon the centralized training code to run the "
 "training in a federated fashion."
 msgstr ""
-"Ce tutoriel te montrera comment utiliser Flower pour construire une "
-"version fédérée d'une charge de travail MXNet existante. Nous utilisons "
-"MXNet pour former un modèle séquentiel sur l'ensemble de données MNIST. "
-"Nous structurerons l'exemple de la même manière que notre présentation "
-"`PyTorch - De la centralisation à la fédération "
-"<https://github.com/adap/flower/blob/main/examples/pytorch-from-"
-"centralized-to-federated>`_. MXNet et PyTorch sont très similaires et une"
-" très bonne comparaison entre MXNet et PyTorch est donnée ici "
-"<https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials"
-"/getting-started/to-mxnet/pytorch.html>`_. Tout d'abord, nous "
-"construisons une approche de formation centralisée basée sur le tutoriel "
-"`Handandwritten Digit Recognition "
-"<https://mxnet.apache.org/versions/1.7.0/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_."
-" Ensuite, nous nous basons sur le code de formation centralisé pour "
-"exécuter la formation de manière fédérée."
+"Ce tutoriel vous montrera comment utiliser Flower pour construire une "
+"version fédérée d'un workflow MXNet existant. Nous utilisons MXNet pour "
+"former un modèle séquentiel sur l'ensemble de données MNIST. Nous "
+"structurerons l'exemple de la même manière que notre présentation `PyTorch - "
+"De la centralisation à la fédération <https://github.com/adap/flower/blob/"
+"main/examples/pytorch-from-centralized-to-federated>`_. MXNet et PyTorch "
+"sont très similaires et une très bonne comparaison entre MXNet et PyTorch "
+"est donnée ici <https://mxnet.apache.org/versions/1.7.0/api/python/docs/"
+"tutorials/getting-started/to-mxnet/pytorch.html>`_. Tout d'abord, nous "
+"construisons une approche d'entrainement centralisée basée sur le tutoriel `"
+"Handwritten Digit Recognition <https://mxnet.apache.org/versions/1.7.0/api/"
+"python/docs/tutorials/packages/gluon/image/mnist.html>`_. Ensuite, nous nous "
+"basons sur le code d'entrainement centralisé pour exécuter l'entrainement de "
+"manière fédérée."
 
 #: ../../source/example-mxnet-walk-through.rst:10
 msgid ""
@@ -2991,7 +2982,6 @@ msgstr ""
 "l'apprentissage fédéré sur deux clients. Félicitations !"
 
 #: ../../source/example-mxnet-walk-through.rst:358
-#, fuzzy
 msgid ""
 "The full source code for this example: `MXNet: From Centralized To "
 "Federated (Code) <https://github.com/adap/flower/blob/main/examples"
@@ -3001,14 +2991,13 @@ msgid ""
 " further. How about using a CNN or using a different dataset? How about "
 "adding more clients?"
 msgstr ""
-"Le code source complet de cet exemple : `MXNet : From Centralized To "
-"Federated (Code) <https://github.com/adap/flower/blob/main/examples"
-"/mxnet-from-centralized-to-federated>`_. Notre exemple est bien sûr un "
-"peu trop simplifié parce que les deux clients chargent exactement le même"
-" ensemble de données, ce qui n'est pas réaliste. Tu es maintenant prêt à "
-"explorer ce sujet plus en profondeur. Pourquoi ne pas utiliser un CNN ou "
-"un ensemble de données différent ? Pourquoi ne pas ajouter d'autres "
-"clients ?"
+"Le code source complet de cet exemple : `MXNet : From Centralized To "
+"Federated (Code) <https://github.com/adap/flower/blob/main/examples/mxnet-"
+"from-centralized-to-federated>`_. Notre exemple est bien sûr simplifié parce "
+"que les deux clients chargent exactement le même ensemble de données, ce qui "
+"n'est pas réaliste. Vous êtes maintenant prêt à explorer ce sujet plus en "
+"profondeur. Pourquoi ne pas utiliser un CNN ou un ensemble de données "
+"différent ou pourquoi ne pas ajouter d'autres clients ?"
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:2
 msgid "Example: PyTorch - From Centralized To Federated"
@@ -3260,7 +3249,6 @@ msgstr ""
 "l'apprentissage fédéré sur deux clients. Félicitations !"
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:312
-#, fuzzy
 msgid ""
 "The full source code for this example: `PyTorch: From Centralized To "
 "Federated (Code) <https://github.com/adap/flower/blob/main/examples"
@@ -3270,14 +3258,13 @@ msgid ""
 " further. How about using different subsets of CIFAR-10 on each client? "
 "How about adding more clients?"
 msgstr ""
-"Le code source complet de cet exemple : `PyTorch : From Centralized To "
-"Federated (Code) <https://github.com/adap/flower/blob/main/examples"
-"/pytorch-from-centralized-to-federated>`_. Notre exemple est, bien sûr, "
-"un peu trop simplifié parce que les deux clients chargent exactement le "
-"même ensemble de données, ce qui n'est pas réaliste. Tu es maintenant "
-"prêt à explorer davantage ce sujet. Pourquoi ne pas utiliser différents "
-"sous-ensembles de CIFAR-10 sur chaque client ? Pourquoi ne pas ajouter "
-"d'autres clients ?"
+"Le code source complet de cet exemple : `PyTorch : From Centralized To "
+"Federated (Code) <https://github.com/adap/flower/blob/main/examples/pytorch-"
+"from-centralized-to-federated>`_. Notre exemple est, bien sûr, simplifié "
+"parce que les deux clients chargent exactement le même jeu de données, ce "
+"qui n'est pas réaliste. Vous êtes maintenant prêt à explorer davantage ce "
+"sujet. Pourquoi ne pas utiliser différents sous-ensembles de CIFAR-10 sur "
+"chaque client ou pourquoi ne pas ajouter d'autres clients ?"
 
 #: ../../source/example-walkthrough-pytorch-mnist.rst:2
 msgid "Example: Walk-Through PyTorch & MNIST"
@@ -3460,7 +3447,6 @@ msgstr ""
 "*formation* et *test*."
 
 #: ../../source/example-walkthrough-pytorch-mnist.rst:104
-#, fuzzy
 msgid ""
 "Again, we can go deeper and look inside :code:`flwr_example/quickstart-"
 "pytorch/client.py`. After going through the argument parsing code at the "
@@ -3472,16 +3458,15 @@ msgid ""
 "DataLoaders, the number of epochs in each round, and which device we want"
 " to use for training (CPU or GPU)."
 msgstr ""
-"Encore une fois, nous pouvons aller plus loin et regarder dans "
-":code:`flwr_example/quickstart-pytorch/client.py`. Après avoir parcouru "
-"le code d'analyse des arguments au début de notre fonction :code:`main`, "
-"tu trouveras un appel à :code:`mnist.load_data`. Cette fonction est "
-"responsable du partitionnement des ensembles de données MNIST originaux "
-"(*training* et *test*) et renvoie un :code:`torch.utils.data.DataLoader` "
-"s pour chacun d'entre eux. Nous instancions ensuite un objet "
-":code:`PytorchMNISTClient` avec notre ID client, nos DataLoaders, le "
-"nombre d'époques dans chaque tour et le périphérique que nous voulons "
-"utiliser pour l'entraînement (CPU ou GPU)."
+"Encore une fois, nous pouvons aller plus loin et regarder dans :code:`"
+"flwr_example/quickstart-pytorch/client.py`. Après avoir parcouru le code "
+"d'analyse des arguments au début de notre fonction :code:`main`, vous "
+"trouverez un appel à :code:`mnist.load_data`. Cette fonction est responsable "
+"du partitionnement des datasets MNIST originaux (*training* et *test*) et "
+"renvoie un :code:`torch.utils.data.DataLoader` pour chacun d'entre eux. Nous "
+"instancions ensuite un objet :code:`PytorchMNISTClient` avec notre ID "
+"client, nos DataLoaders, le nombre d'époques dans chaque round et le "
+"périphérique que nous voulons utiliser pour l'entraînement (CPU ou GPU)."
 
 #: ../../source/example-walkthrough-pytorch-mnist.rst:119
 msgid ""
@@ -3498,14 +3483,12 @@ msgid "A Closer Look"
 msgstr "Regarder de plus près"
 
 #: ../../source/example-walkthrough-pytorch-mnist.rst:125
-#, fuzzy
 msgid ""
 "Now, let's look closely into the :code:`PytorchMNISTClient` inside "
 ":code:`flwr_example.quickstart-pytorch.mnist` and see what it is doing:"
 msgstr ""
-"Maintenant, examinons de près le :code:`PytorchMNISTClient` à l'intérieur"
-" du :code:`flwr_example.quickstart-pytorch.mnist` et voyons ce qu'il fait"
-" :"
+"Maintenant, examinons de près le :code:`PytorchMNISTClient` à l'intérieur de "
+":code:`flwr_example.quickstart-pytorch.mnist` et voyons ce qu'il fait :"
 
 #: ../../source/example-walkthrough-pytorch-mnist.rst:226
 msgid ""
@@ -3516,16 +3499,15 @@ msgstr ""
 "instancie un modèle CNN dans son constructeur"
 
 #: ../../source/example-walkthrough-pytorch-mnist.rst:244
-#, fuzzy
 msgid ""
 "The code for the CNN is available under :code:`quickstart-pytorch.mnist` "
 "and it is reproduced below. It is the same network found in `Basic MNIST "
 "Example <https://github.com/pytorch/examples/tree/master/mnist>`_."
 msgstr ""
-"Le code du CNN est disponible sous :code:`quickstart-pytorch.mnist` et il"
-" est reproduit ci-dessous. Il s'agit du même réseau que celui que l'on "
-"trouve dans `Exemple basique de MNIST "
-"<https://github.com/pytorch/examples/tree/master/mnist>`_."
+"Le code du CNN est disponible dans :code:`quickstart-pytorch.mnist` et il "
+"est reproduit ci-dessous. Il s'agit du même réseau neuronal que celui que "
+"l'on trouve dans `Exemple basique de MNIST <https://github.com/pytorch/"
+"examples/tree/master/mnist>`_."
 
 #: ../../source/example-walkthrough-pytorch-mnist.rst:290
 msgid ""
@@ -3550,13 +3532,12 @@ msgstr ""
 ":code:`test` :."
 
 #: ../../source/example-walkthrough-pytorch-mnist.rst:317
-#, fuzzy
 msgid ""
 "These functions can both be found inside the same :code:`quickstart-"
 "pytorch.mnist` module:"
 msgstr ""
-"Ces fonctions se trouvent toutes deux dans le même module :code"
-":`quickstart-pytorch.mnist` :"
+"Ces fonctions se trouvent toutes deux dans le même module :code:`quickstart-"
+"pytorch.mnist` :"
 
 #: ../../source/example-walkthrough-pytorch-mnist.rst:437
 msgid ""
@@ -3629,9 +3610,8 @@ msgid "You are ready now. Enjoy learning in a federated way!"
 msgstr "Tu es prêt maintenant. Profite de l'apprentissage de manière fédérée !"
 
 #: ../../source/explanation-differential-privacy.rst:2
-#, fuzzy
 msgid "Differential privacy"
-msgstr "Confidentialité différentielle"
+msgstr "Differential privacy"
 
 #: ../../source/explanation-differential-privacy.rst:4
 msgid ""
@@ -4252,7 +4232,6 @@ msgid "Full Code Example"
 msgstr "Exemple de code complet"
 
 #: ../../source/explanation-federated-evaluation.rst:179
-#, fuzzy
 msgid ""
 "For a full code example that uses both centralized and federated "
 "evaluation, see the *Advanced TensorFlow Example* (the same approach can "
@@ -4260,10 +4239,10 @@ msgid ""
 "https://github.com/adap/flower/tree/main/examples/advanced-tensorflow"
 msgstr ""
 "Pour un exemple de code complet qui utilise à la fois l'évaluation "
-"centralisée et fédérée, voir l'*Exemple TensorFlow avancé* (la même "
-"approche peut être appliquée aux charges de travail mises en œuvre dans "
-"n'importe quel autre framework) : "
-"https://github.com/adap/flower/tree/main/examples/advanced-tensorflow"
+"centralisée et fédérée, voir *Advanced TensorFlow Example* (la même approche "
+"peut être appliquée aux workflows implémentés dans n'importe quel autre "
+"framework) : https://github.com/adap/flower/tree/main/examples/advanced-"
+"tensorflow"
 
 #: ../../source/fed/0000-20200102-fed-template.md:10
 msgid "FED Template"
@@ -4325,14 +4304,12 @@ msgid "Summary"
 msgstr "Résumé"
 
 #: ../../source/fed/0000-20200102-fed-template.md:26
-#, fuzzy
 msgid "\\[TODO - sentence 1: summary of the problem\\]"
-msgstr "[TODO - phrase 1 : résumé du problème]"
+msgstr "\\[TODO - phrase 1 : résumé du problème\\]"
 
 #: ../../source/fed/0000-20200102-fed-template.md:28
-#, fuzzy
 msgid "\\[TODO - sentence 2: summary of the solution\\]"
-msgstr "[TODO - phrase 2 : résumé de la solution]"
+msgstr "\\[TODO - phrase 2 : résumé de la solution\\]"
 
 #: ../../source/fed/0000-20200102-fed-template.md:30
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:47
@@ -4347,9 +4324,8 @@ msgstr "Motivation"
 #: ../../source/fed/0000-20200102-fed-template.md:48
 #: ../../source/fed/0000-20200102-fed-template.md:54
 #: ../../source/fed/0000-20200102-fed-template.md:58
-#, fuzzy
 msgid "\\[TODO\\]"
-msgstr "[TODO]"
+msgstr "\\[TODO\\]"
 
 #: ../../source/fed/0000-20200102-fed-template.md:34
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:53
@@ -4382,14 +4358,12 @@ msgid "Alternatives Considered"
 msgstr "Alternatives envisagées"
 
 #: ../../source/fed/0000-20200102-fed-template.md:52
-#, fuzzy
 msgid "\\[Alternative 1\\]"
-msgstr "[Alternative 1]"
+msgstr "\\[Alternative 1\\]"
 
 #: ../../source/fed/0000-20200102-fed-template.md:56
-#, fuzzy
 msgid "\\[Alternative 2\\]"
-msgstr "[Alternative 2]"
+msgstr "\\[Alternative 2\\]"
 
 #: ../../source/fed/0000-20200102-fed-template.md:60
 msgid "Appendix"
@@ -4849,15 +4823,17 @@ msgid "FED - Flower Enhancement Doc"
 msgstr "FED - Doc pour l'amélioration des fleurs"
 
 #: ../../source/how-to-aggregate-evaluation-results.rst:2
-#, fuzzy
 msgid "Aggregate evaluation results"
-msgstr "Résultats globaux de l'évaluation."
+msgstr "Résultats agrégés de l'évaluation"
 
 #: ../../source/how-to-aggregate-evaluation-results.rst:4
 msgid ""
 "The Flower server does not prescribe a way to aggregate evaluation "
 "results, but it enables the user to fully customize result aggregation."
 msgstr ""
+"Le serveur Flower ne prescrit pas de méthode pour agréger les résultats "
+"d'évaluation, il permet à l'utilisateur de personnaliser entièrement cette "
+"agrégation."
 
 #: ../../source/how-to-aggregate-evaluation-results.rst:8
 msgid "Aggregate Custom Evaluation Results"
@@ -4883,7 +4859,6 @@ msgstr ""
 "les mesures fournies dans ces dictionnaires :"
 
 #: ../../source/how-to-configure-clients.rst:2
-#, fuzzy
 msgid "Configure clients"
 msgstr "Configurer les clients"
 
@@ -5066,9 +5041,8 @@ msgstr ""
 "configuration \"spéciale\") :"
 
 #: ../../source/how-to-configure-logging.rst:2
-#, fuzzy
 msgid "Configure logging"
-msgstr "Configurer les clients"
+msgstr "Configurer le logging"
 
 #: ../../source/how-to-configure-logging.rst:4
 msgid ""
@@ -5076,6 +5050,9 @@ msgid ""
 "federated learning workloads. It presents information by default "
 "following a standard message format:"
 msgstr ""
+"Le logger de Flower suit tous les événements de base qui se déroulent dans "
+"des tâches d'apprentissage fédérées. Par défaut, il présente les "
+"informations en suivant un format de message standard :"
 
 #: ../../source/how-to-configure-logging.rst:13
 msgid ""
@@ -5084,10 +5061,14 @@ msgid ""
 "took place from, as well as the log message itself. In this way, the "
 "logger would typically display information on your terminal as follows:"
 msgstr ""
+"contenant des informations pertinentes, y compris : importance du message ("
+"par exemple :code:`INFO`, :code:`DEBUG`), un timestamp, la ligne qui a "
+"déclenché le message, ainsi que le message lui-même. De cette façon, le "
+"logger affiche généralement les informations sur votre terminal comme suit :"
 
 #: ../../source/how-to-configure-logging.rst:34
 msgid "Saving log to file"
-msgstr ""
+msgstr "Enregistrer le log dans un fichier"
 
 #: ../../source/how-to-configure-logging.rst:36
 msgid ""
@@ -5101,6 +5082,14 @@ msgid ""
 "<https://github.com/adap/flower/blob/main/src/py/flwr/common/logger.py>`_"
 " function. For example:"
 msgstr ""
+"Par défaut, le log Flower est affiché dans le terminal où vous lancez votre "
+"apprentissage fédéré. Ceci s'applique aussi bien pour la fédération basée "
+"sur gRPC (c.-à-d. lorsque vous le faites :code:`fl.server.start_server`) que "
+"pour l'utilisation du :code:`VirtualClientEngine` (c.-à-d. quand vous le "
+"faites :code:`fl.simulation.start_simulation`). Dans certaines situations, "
+"vous pourriez vouloir enregistrer ce journal sur disque. Vous pouvez le "
+"faire en appelant la fonction `fl.common.logger.configure() <https://github."
+"com/adap/flower/blob/main/src/py/flwr/common/logger.py>`_. Par exemple :"
 
 #: ../../source/how-to-configure-logging.rst:53
 msgid ""
@@ -5125,16 +5114,21 @@ msgid ""
 "by adding more messages relevant to your application. You can achieve "
 "this easily as follows."
 msgstr ""
+"Vous pouvez modifier l'information affichée par défaut avec le logger Flower "
+"en ajoutant plus de messages pertinents à votre application. Vous pouvez le "
+"réaliser facilement comme suit."
 
 #: ../../source/how-to-configure-logging.rst:102
 msgid ""
 "In this way your logger will show, in addition to the default messages, "
 "the ones introduced by the clients as specified above."
 msgstr ""
+"De cette façon, votre logger affichera, en plus des messages par défaut, "
+"ceux introduits par les clients comme spécifié ci-dessus."
 
 #: ../../source/how-to-configure-logging.rst:128
 msgid "Log to a remote service"
-msgstr ""
+msgstr "Envoyer les logs à un service externe"
 
 #: ../../source/how-to-configure-logging.rst:130
 msgid ""
@@ -5148,11 +5142,19 @@ msgid ""
 ":code:`HTTPHandler` should you whish to backup or analyze the logs "
 "somewhere else."
 msgstr ""
+"La fonction :code:`fl.common.logger.configure` permet également de spécifier "
+"un hôte auquel les journaux peuvent être envoyés (via :code:`POST`) à "
+"travers un :code:`logging.handler.HTTPHandler`. Il s'agit d'une "
+"caractéristique particulièrement utile dans les workflows d'apprentissage "
+"fédérés utilisant :code:`gRPC` où récolter les logs de toutes les entités "
+"(c.-à-d. le serveur et les clients) pourrait être lourd. Notez qu'avec "
+"Flower Simulation, le serveur affiche automatiquement tous les journaux. "
+"Vous pouvez toujours spécifier un :code:`HTTPHandler` si vous voulez essayer "
+"de sauvegarder ou d'analyser les journaux ailleurs."
 
 #: ../../source/how-to-enable-ssl-connections.rst:2
-#, fuzzy
 msgid "Enable SSL connections"
-msgstr "Collecte centralisée des données"
+msgstr "Activer les connections SSL"
 
 #: ../../source/how-to-enable-ssl-connections.rst:4
 msgid ""
@@ -5163,14 +5165,13 @@ msgstr ""
 "comment un client Flower peut établir une connexion sécurisée avec lui."
 
 #: ../../source/how-to-enable-ssl-connections.rst:7
-#, fuzzy
 msgid ""
 "A complete code example demonstrating a secure connection can be found "
 "`here <https://github.com/adap/flower/tree/main/examples/advanced-"
 "tensorflow>`_."
 msgstr ""
 "Un exemple de code complet démontrant une connexion sécurisée peut être "
-"trouvé ici <https://github.com/adap/flower/tree/main/examples/advanced-"
+"trouvé `ici <https://github.com/adap/flower/tree/main/examples/advanced-"
 "tensorflow>`_."
 
 #: ../../source/how-to-enable-ssl-connections.rst:10
@@ -5190,7 +5191,6 @@ msgid "Certificates"
 msgstr "Certificats"
 
 #: ../../source/how-to-enable-ssl-connections.rst:18
-#, fuzzy
 msgid ""
 "Using SSL-enabled connections requires certificates to be passed to the "
 "server and client. For the purpose of this guide we are going to generate"
@@ -5198,25 +5198,23 @@ msgid ""
 "to ask you to run the script in :code:`examples/advanced-"
 "tensorflow/certificates/generate.sh`"
 msgstr ""
-"L'utilisation de connexions compatibles avec le protocole SSL nécessite "
-"que des certificats soient transmis au serveur et au client. Pour les "
-"besoins de ce guide, nous allons générer des certificats auto-signés. "
-"Comme cela peut devenir assez complexe, nous allons te demander "
-"d'exécuter le script dans :code:`examples/advanced-"
-"tensorflow/certificates/generate.sh`"
+"L'utilisation de connexions compatibles avec le protocole SSL nécessite que "
+"des certificats soient transmis au serveur et au client. Pour les besoins de "
+"ce guide, nous allons générer des certificats auto-signés. Comme cela peut "
+"devenir assez complexe, nous mettons à disposition un script que vous devrez "
+"exécuter :code:`examples/advanced-tensorflow/certificates/generate.sh`"
 
 #: ../../source/how-to-enable-ssl-connections.rst:23
 msgid "with the following command sequence:"
 msgstr "avec la séquence de commandes suivante :"
 
 #: ../../source/how-to-enable-ssl-connections.rst:30
-#, fuzzy
 msgid ""
 "This will generate the certificates in :code:`examples/advanced-"
 "tensorflow/.cache/certificates`."
 msgstr ""
-"Cela générera les certificats dans :code:`examples/advanced-"
-"tensorflow/.cache/certificates`."
+"Cela générera les certificats dans :code:`examples/advanced-tensorflow/."
+"cache/certificates`."
 
 #: ../../source/how-to-enable-ssl-connections.rst:32
 msgid ""
@@ -5303,7 +5301,6 @@ msgstr ""
 "demander à un client d'établir une connexion sécurisée avec lui."
 
 #: ../../source/how-to-enable-ssl-connections.rst:96
-#, fuzzy
 msgid "Additional resources"
 msgstr "Ressources supplémentaires"
 
@@ -5324,9 +5321,8 @@ msgid "`certbot <https://certbot.eff.org/>`_"
 msgstr "`certbot <https://certbot.eff.org/>`_"
 
 #: ../../source/how-to-implement-strategies.rst:2
-#, fuzzy
 msgid "Implement strategies"
-msgstr "Mettre en place des stratégies"
+msgstr "Implémenter des stratégies"
 
 #: ../../source/how-to-implement-strategies.rst:4
 msgid ""
@@ -5700,12 +5696,10 @@ msgstr ""
 " données de l'évaluation côté serveur)."
 
 #: ../../source/how-to-install-flower.rst:2
-#, fuzzy
 msgid "Install Flower"
 msgstr "Installer Flower"
 
 #: ../../source/how-to-install-flower.rst:6
-#, fuzzy
 msgid "Python version"
 msgstr "Version Python"
 
@@ -5791,9 +5785,8 @@ msgstr ""
 "nightly`` doit être installé avec l'option ``simulation``: :"
 
 #: ../../source/how-to-monitor-simulation.rst:2
-#, fuzzy
 msgid "Monitor simulation"
-msgstr "Simulation de moniteur"
+msgstr "Monitorer une simulation"
 
 #: ../../source/how-to-monitor-simulation.rst:4
 msgid ""
@@ -6113,9 +6106,8 @@ msgstr ""
 "metrics.html>`_"
 
 #: ../../source/how-to-run-simulations.rst:2
-#, fuzzy
 msgid "Run simulations"
-msgstr "Simulation de moniteur"
+msgstr "Lancer des simulations"
 
 #: ../../source/how-to-run-simulations.rst:8
 msgid ""
@@ -6132,6 +6124,16 @@ msgid ""
 "<contributor-explanation-architecture.html#virtual-client-engine>`_ or "
 "VCE."
 msgstr ""
+"Simuler des workflow d'apprentissage fédéré est utile pour une multitude de "
+"cas d'utilisation : vous pourriez vouloir gérer votre workflow sur une "
+"grande cohorte de clients mais sans avoir à sourcer, configurer et gérer un "
+"grand nombre d'appareils physiques ; vous pourriez vouloir exécuter vos "
+"workflows aussi rapidement que possible sur les machines auxquels vous avez "
+"accès sans avoir à passer par un processus de configuration complexe ; vous "
+"pourriez vouloir valider votre algorithme sur différents scénarios de "
+"distribution de données ou de disponibilité des clients. Flower peut "
+"réaliser ces scénarios au moyen de son `VirtualClientEngine <contributor-"
+"explanation-architecture.html#virtual-client-engine>`_ ou VCE."
 
 #: ../../source/how-to-run-simulations.rst:10
 msgid ""
@@ -18908,4 +18910,3 @@ msgstr ""
 
 #~ msgid "|025f0a6f7a6145cba4bf8fa0e2495851|"
 #~ msgstr ""
-
