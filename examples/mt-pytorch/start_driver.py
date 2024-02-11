@@ -35,7 +35,7 @@ strategy = fl.server.strategy.FedAvg(
 
 if __name__ == "__main__":
     # Start Flower server
-    fl.driver.start_driver(
+    fl.server.driver.start_driver(
         server_address="0.0.0.0:9091",
         config=fl.server.ServerConfig(num_rounds=3),
         strategy=strategy,
