@@ -55,7 +55,7 @@ exclude = [
 flower-driver-api = "flwr.server:run_driver_api"
 flower-fleet-api = "flwr.server:run_fleet_api"
 flower-superlink = "flwr.server:run_superlink"
-flower-client = "flwr.client:run_client"
+flower-client-app = "flwr.client:run_client_app"
 
 [tool.poetry.dependencies]
 python = "^3.8"
