@@ -2,7 +2,7 @@ from typing import List, Tuple
 import random
 import time
 
-from flwr.driver import GrpcDriver
+from flwr.server.driver import GrpcDriver
 from flwr.common import (
     ServerMessage,
     FitIns,

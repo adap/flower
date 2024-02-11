@@ -43,8 +43,8 @@ from flwr.common.typing import (
     Properties,
     Status,
 )
-from flwr.driver.driver_client_proxy import DriverClientProxy
 from flwr.proto import driver_pb2, node_pb2, task_pb2  # pylint: disable=E0611
+from flwr.server.driver.driver_client_proxy import DriverClientProxy
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
 
