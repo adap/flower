@@ -35,11 +35,11 @@ timeout 2m flower-superlink $server_arg $db_arg $rest_arg &
 sl_pid=$!
 sleep 3
 
-timeout 2m flower-client client:app $client_arg $rest_arg --server $server_address &
+timeout 2m flower-client-app client:app $client_arg $rest_arg --server $server_address &
 cl1_pid=$!
 sleep 3
 
-timeout 2m flower-client client:app $client_arg $rest_arg --server $server_address &
+timeout 2m flower-client-app client:app $client_arg $rest_arg --server $server_address &
 cl2_pid=$!
 sleep 3
 

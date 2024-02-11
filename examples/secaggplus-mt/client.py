@@ -32,7 +32,7 @@ def client_fn(cid: str):
     return FlowerClient().to_client()
 
 
-# To run this: `flower-client client:app`
+# To run this: `flower-client-app client:app`
 app = fl.client.ClientApp(
     client_fn=client_fn,
     mods=[secaggplus_mod],

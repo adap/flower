@@ -1,6 +1,6 @@
 #!/bin/bash
 # Kill any currently running client.py processes
-pkill -f 'flower-client'
+pkill -f 'flower-client-app'
 
 # Kill any currently running flower-superlink processes
 pkill -f 'flower-superlink'
@@ -18,7 +18,7 @@ echo "Starting $N clients in background..."
 # Start N client processes
 for i in $(seq 1 $N)
 do
-  flower-client --insecure client:app > /dev/null 2>&1 &
+  flower-client-app --insecure client:app > /dev/null 2>&1 &
   sleep 0.1
 done
 
@@ -28,7 +28,7 @@ python driver.py
 echo "Clearing background processes..."
 
 # Kill any currently running client.py processes
-pkill -f 'flower-client'
+pkill -f 'flower-client-app'
 
 # Kill any currently running flower-superlink processes
 pkill -f 'flower-superlink'
