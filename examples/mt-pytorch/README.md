@@ -1,73 +1,52 @@
-# Multi-Tenant Federated Learning with Flower and PyTorch
+# Flower App (PyTorch) 🧪
 
-This example contains experimental code. Please consult the regular PyTorch code examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
+🧪 = This example covers experimental features that might change in future versions of Flower
 
-## Setup
+Please consult the regular PyTorch code examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
 
-```bash
-./dev/venv-reset.sh
-```
+This how-to guide describes the deployment of a long-running Flower server.
 
-## Run with Driver API
+## Preconditions
 
-Terminal 1: start Flower server
+Let's assume the following project structure:
 
 ```bash
-flower-server
+$ tree .
+.
+├── client.py
+├── server.py
+├── task.py
+└── requirements.txt
 ```
 
-Terminal 2+3: start two Flower client nodes
+## Install dependencies
 
 ```bash
-python client.py
+pip install -r requirements.txt
 ```
 
-Terminal 4: start Driver script
-
-Using:
+## Start the SuperLink
 
 ```bash
-python start_driver.py
+flower-superlink --insecure
 ```
 
-Or, alternatively:
+## Start the long-running Flower client
+
+In a new terminal window, start the first long-running Flower client:
+
+```bash
+flower-client client:app --insecure
+```
+
+In yet another new terminal window, start the second long-running Flower client:
+
+```bash
+flower-client client:app --insecure
+```
+
+## Start the driver
 
 ```bash
 python driver.py
-```
-
-## Run in legacy mode
-
-Terminal 1: start Flower server
-
-```bash
-python server.py
-```
-
-Terminal 2+3: start two clients
-
-```bash
-python client.py
-```
-
-## Run with Driver API (REST transport layer)
-
-Terminal 1: start Flower server and enable REST transport layer
-
-```bash
-flower-server --rest
-```
-
-Terminal 2: start Driver script
-
-```bash
-python driver.py
-```
-
-Open file `client.py` adjust `server_address` and `transport`.
-
-Terminal 3+4: start two Flower client nodes
-
-```bash
-python client.py
 ```
