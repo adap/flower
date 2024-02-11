@@ -24,9 +24,10 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 )
 
 from .in_memory_auth_state import InMemoryAuthState
+from .sqlite_auth_state import SqliteAuthState
 
 
-def test_client_public_keys() -> None:
+def test_in_memory_client_public_keys() -> None:
     """Test client public keys store and get from state."""
     key_pairs = [generate_key_pairs() for _ in range(3)]
     public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
@@ -37,7 +38,19 @@ def test_client_public_keys() -> None:
     assert in_memory_auth_state.get_client_public_keys() == public_keys
 
 
-def test_node_id_public_key_pair() -> None:
+def test_sqlite_client_public_keys() -> None:
+    """Test client public keys store and get from state."""
+    key_pairs = [generate_key_pairs() for _ in range(3)]
+    public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
+
+    sqlite_auth_state = SqliteAuthState(":memory:")
+    sqlite_auth_state.initialize()
+    sqlite_auth_state.store_client_public_keys(public_keys)
+
+    assert sqlite_auth_state.get_client_public_keys() == public_keys
+
+
+def test_in_memory_node_id_public_key_pair() -> None:
     """Test store and get node_id public_key pair."""
     in_memory_auth_state = InMemoryAuthState()
     node_id = in_memory_auth_state.create_node()
@@ -46,6 +59,18 @@ def test_node_id_public_key_pair() -> None:
     in_memory_auth_state.store_node_id_public_key_pair(node_id, public_key)
 
     assert in_memory_auth_state.get_public_key_from_node_id(node_id) == public_key
+
+
+def test_sqlite_node_id_public_key_pair() -> None:
+    """Test store and get node_id public_key pair."""
+    sqlite_auth_state = SqliteAuthState(":memory:")
+    sqlite_auth_state.initialize()
+    node_id = sqlite_auth_state.create_node()
+    public_key = public_key_to_bytes(generate_key_pairs()[1])
+
+    sqlite_auth_state.store_node_id_public_key_pair(node_id, public_key)
+
+    assert sqlite_auth_state.get_public_key_from_node_id(node_id) == public_key
 
 
 def test_generate_shared_key() -> None:
