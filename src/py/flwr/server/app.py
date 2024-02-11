@@ -293,7 +293,7 @@ def run_driver_api() -> None:
     """Run Flower server (Driver API)."""
     log(INFO, "Starting Flower server (Driver API)")
     event(EventType.RUN_DRIVER_API_ENTER)
-    args = _parse_args_driver().parse_args()
+    args = _parse_args_run_driver_api().parse_args()
 
     # Parse IP address
     parsed_address = parse_address(args.driver_api_address)
@@ -330,7 +330,7 @@ def run_fleet_api() -> None:
     """Run Flower server (Fleet API)."""
     log(INFO, "Starting Flower server (Fleet API)")
     event(EventType.RUN_FLEET_API_ENTER)
-    args = _parse_args_fleet().parse_args()
+    args = _parse_args_run_fleet_api().parse_args()
 
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
@@ -402,7 +402,7 @@ def run_superlink() -> None:
     """Run Flower server (Driver API and Fleet API)."""
     log(INFO, "Starting Flower server")
     event(EventType.RUN_SUPERLINK_ENTER)
-    args = _parse_args_server().parse_args()
+    args = _parse_args_run_superlink().parse_args()
 
     # Parse IP address
     parsed_address = parse_address(args.driver_api_address)
@@ -675,7 +675,7 @@ def _validate_ssl_files(
     return validation_exceptions
 
 
-def _parse_args_driver() -> argparse.ArgumentParser:
+def _parse_args_run_driver_api() -> argparse.ArgumentParser:
     """Parse command line arguments for Driver API."""
     parser = argparse.ArgumentParser(
         description="Start a Flower Driver API server. "
@@ -692,7 +692,7 @@ def _parse_args_driver() -> argparse.ArgumentParser:
     return parser
 
 
-def _parse_args_fleet() -> argparse.ArgumentParser:
+def _parse_args_run_fleet_api() -> argparse.ArgumentParser:
     """Parse command line arguments for Fleet API."""
     parser = argparse.ArgumentParser(
         description="Start a Flower Fleet API server."
@@ -709,7 +709,7 @@ def _parse_args_fleet() -> argparse.ArgumentParser:
     return parser
 
 
-def _parse_args_server() -> argparse.ArgumentParser:
+def _parse_args_run_superlink() -> argparse.ArgumentParser:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
         description="This will start a Flower server "
