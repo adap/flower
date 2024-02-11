@@ -46,12 +46,12 @@ from .numpy_client import NumPyClient
 
 
 def run_client_app() -> None:
-    """Run Flower client."""
+    """Run Flower client app."""
     event(EventType.RUN_CLIENT_APP_ENTER)
 
     log(INFO, "Long-running Flower client starting")
 
-    args = _parse_args_client().parse_args()
+    args = _parse_args_run_client_app().parse_args()
 
     # Obtain certificates
     if args.insecure:
@@ -108,8 +108,8 @@ def run_client_app() -> None:
     event(EventType.RUN_CLIENT_APP_LEAVE)
 
 
-def _parse_args_client() -> argparse.ArgumentParser:
-    """Parse command line arguments."""
+def _parse_args_run_client_app() -> argparse.ArgumentParser:
+    """Parse flower-client-app command line arguments."""
     parser = argparse.ArgumentParser(
         description="Start a long-running Flower client",
     )
