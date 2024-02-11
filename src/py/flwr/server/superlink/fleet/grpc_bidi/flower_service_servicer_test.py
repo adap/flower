@@ -23,11 +23,11 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     ServerMessage,
 )
-from flwr.server.fleet.grpc_bidi.flower_service_servicer import (
+from flwr.server.superlink.fleet.grpc_bidi.flower_service_servicer import (
     FlowerServiceServicer,
     register_client_proxy,
 )
-from flwr.server.fleet.grpc_bidi.grpc_bridge import InsWrapper, ResWrapper
+from flwr.server.superlink.fleet.grpc_bidi.grpc_bridge import InsWrapper, ResWrapper
 
 CLIENT_MESSAGE = ClientMessage()
 SERVER_MESSAGE = ServerMessage()

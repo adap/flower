@@ -31,8 +31,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
 )
-from flwr.server.fleet.message_handler import message_handler
-from flwr.server.state import StateFactory
+from flwr.server.superlink.fleet.message_handler import message_handler
+from flwr.server.superlink.state import StateFactory
 
 
 class FleetServicer(fleet_pb2_grpc.FleetServicer):

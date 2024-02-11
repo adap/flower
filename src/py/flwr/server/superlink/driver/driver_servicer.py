@@ -35,7 +35,7 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
-from flwr.server.state import State, StateFactory
+from flwr.server.superlink.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 

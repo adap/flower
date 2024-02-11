@@ -24,7 +24,11 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ServerMessage,
 )
 from flwr.server.client_proxy import ClientProxy
-from flwr.server.fleet.grpc_bidi.grpc_bridge import GrpcBridge, InsWrapper, ResWrapper
+from flwr.server.superlink.fleet.grpc_bidi.grpc_bridge import (
+    GrpcBridge,
+    InsWrapper,
+    ResWrapper,
+)
 
 
 class GrpcClientProxy(ClientProxy):

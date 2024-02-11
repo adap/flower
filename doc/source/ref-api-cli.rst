@@ -1,17 +1,17 @@
 Flower CLI reference
 ====================
 
-.. _flower-server-apiref:
+.. _flower-superlink-apiref:
 
-flower-server
-~~~~~~~~~~~~~
+flower-superlink
+~~~~~~~~~~~~~~~~
 
 .. argparse::
    :module: flwr.server.app
    :func:  _parse_args_server
-   :prog: flower-server
+   :prog: flower-superlink
 
-.. _flower-driver-apiref:
+.. _flower-driver-api-apiref:
 
 flower-driver-api
 ~~~~~~~~~~~~~~~~~
@@ -21,7 +21,7 @@ flower-driver-api
    :func: _parse_args_driver
    :prog: flower-driver-api
 
-.. _flower-fleet-apiref:
+.. _flower-fleet-api-apiref:
 
 flower-fleet-api
 ~~~~~~~~~~~~~~~~
@@ -31,12 +31,22 @@ flower-fleet-api
    :func:  _parse_args_fleet
    :prog: flower-fleet-api
 
-.. .. _flower-client-apiref:
+.. _flower-client-app-apiref:
 
-.. flower-client
-.. ~~~~~~~~~~~~~
+flower-client-app
+~~~~~~~~~~~~~~~~~
 
-    .. argparse::
-..    :filename: flwr.client
-..    :func: run_client
-..    :prog: flower-client
+.. argparse::
+   :filename: flwr.client
+   :func: run_client_app
+   :prog: flower-client-app
+
+.. _flower-server-app-apiref:
+
+flower-server-app
+~~~~~~~~~~~~~~~~~
+
+.. argparse::
+   :filename: flwr.server
+   :func: run_server_app
+   :prog: flower-server-app

@@ -44,16 +44,16 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 from flwr.server.client_manager import ClientManager, SimpleClientManager
-from flwr.server.driver.driver_servicer import DriverServicer
-from flwr.server.fleet.grpc_bidi.grpc_server import (
+from flwr.server.history import History
+from flwr.server.server import Server
+from flwr.server.strategy import FedAvg, Strategy
+from flwr.server.superlink.driver.driver_servicer import DriverServicer
+from flwr.server.superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
 )
-from flwr.server.fleet.grpc_rere.fleet_servicer import FleetServicer
-from flwr.server.history import History
-from flwr.server.server import Server
-from flwr.server.state import StateFactory
-from flwr.server.strategy import FedAvg, Strategy
+from flwr.server.superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from flwr.server.superlink.state import StateFactory
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
@@ -73,6 +73,13 @@ class ServerConfig:
 
     num_rounds: int = 1
     round_timeout: Optional[float] = None
+
+
+def run_server_app() -> None:
+    """Run Flower server app."""
+    event(EventType.RUN_SERVER_APP_ENTER)
+    log(WARN, "Not implemented: run_server_app")
+    event(EventType.RUN_SERVER_APP_LEAVE)
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -344,10 +351,10 @@ def run_fleet_api() -> None:
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
-def run_server() -> None:
+def run_superlink() -> None:
     """Run Flower server (Driver API and Fleet API)."""
     log(INFO, "Starting Flower server")
-    event(EventType.RUN_SERVER_ENTER)
+    event(EventType.RUN_SUPERLINK_ENTER)
     args = _parse_args_server().parse_args()
 
     # Parse IP address
@@ -419,7 +426,7 @@ def run_server() -> None:
     _register_exit_handlers(
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_SERVER_LEAVE,
+        event_type=EventType.RUN_SUPERLINK_LEAVE,
     )
 
     # Block
@@ -561,7 +568,7 @@ def _run_fleet_api_rest(
     try:
         import uvicorn
 
-        from flwr.server.fleet.rest_rere.rest_api import app as fast_api_app
+        from flwr.server.superlink.fleet.rest_rere.rest_api import app as fast_api_app
     except ModuleNotFoundError:
         sys.exit(MISSING_EXTRA_REST)
     if workers != 1:
@@ -584,7 +591,7 @@ def _run_fleet_api_rest(
         raise ValueError(validation_exceptions)
 
     uvicorn.run(
-        app="flwr.server.fleet.rest_rere.rest_api:app",
+        app="flwr.server.superlink.fleet.rest_rere.rest_api:app",
         port=port,
         host=host,
         reload=False,

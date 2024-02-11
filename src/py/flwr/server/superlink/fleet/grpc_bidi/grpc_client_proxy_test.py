@@ -27,8 +27,8 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     Parameters,
     Scalar,
 )
-from flwr.server.fleet.grpc_bidi.grpc_bridge import ResWrapper
-from flwr.server.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
+from flwr.server.superlink.fleet.grpc_bidi.grpc_bridge import ResWrapper
+from flwr.server.superlink.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
 
 MESSAGE_PARAMETERS = Parameters(tensors=[], tensor_type="np")
 MESSAGE_FIT_RES = ClientMessage(
