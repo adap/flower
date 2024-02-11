@@ -11,7 +11,7 @@ flower-superlink
    :func:  _parse_args_server
    :prog: flower-superlink
 
-.. _flower-driver-apiref:
+.. _flower-driver-api-apiref:
 
 flower-driver-api
 ~~~~~~~~~~~~~~~~~
@@ -21,7 +21,7 @@ flower-driver-api
    :func: _parse_args_driver
    :prog: flower-driver-api
 
-.. _flower-fleet-apiref:
+.. _flower-fleet-api-apiref:
 
 flower-fleet-api
 ~~~~~~~~~~~~~~~~
@@ -43,8 +43,10 @@ flower-client-app
 
 .. _flower-server-app-apiref:
 
+flower-server-app
+~~~~~~~~~~~~~~~~~
 
-    .. argparse::
-..    :filename: flwr.client
-..    :func: run_client
-..    :prog: flower-client
+.. argparse::
+   :filename: flwr.server
+   :func: run_server_app
+   :prog: flower-server-app

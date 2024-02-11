@@ -156,6 +156,10 @@ class EventType(str, Enum):
     RUN_CLIENT_APP_ENTER = auto()
     RUN_CLIENT_APP_LEAVE = auto()
 
+    # flower-server-app
+    RUN_SERVER_APP_ENTER = auto()
+    RUN_SERVER_APP_LEAVE = auto()
+
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.

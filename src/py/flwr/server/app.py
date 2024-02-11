@@ -75,6 +75,13 @@ class ServerConfig:
     round_timeout: Optional[float] = None
 
 
+def run_server_app() -> None:
+    """Run Flower server app."""
+    event(EventType.RUN_SERVER_APP_ENTER)
+    log(WARN, "Not implemented: run_server_app")
+    event(EventType.RUN_SERVER_APP_LEAVE)
+
+
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     *,
     server_address: str = ADDRESS_FLEET_API_GRPC_BIDI,
