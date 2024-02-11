@@ -17,7 +17,7 @@
 import abc
 from typing import Set
 
-from state import State
+from flwr.server.state import State
 
 
 class AuthenticationState(State, abc.ABC):

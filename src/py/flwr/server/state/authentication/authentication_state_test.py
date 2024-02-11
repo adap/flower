@@ -16,14 +16,15 @@
 
 import os
 
-from common.secure_aggregation.crypto.symmetric_encryption import (
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
     generate_key_pairs,
     generate_shared_key,
     public_key_to_bytes,
     verify_hmac,
 )
-from in_memory_auth_state import InMemoryAuthState
+
+from .in_memory_auth_state import InMemoryAuthState
 
 
 def test_client_public_keys() -> None:
@@ -34,7 +35,7 @@ def test_client_public_keys() -> None:
     in_memory_auth_state = InMemoryAuthState()
     in_memory_auth_state.store_client_public_keys(public_keys)
 
-    assert in_memory_auth_state.get_client_public_keys == public_keys
+    assert in_memory_auth_state.get_client_public_keys() == public_keys
 
 
 def test_node_id_public_key_pair() -> None:
