@@ -45,9 +45,9 @@ from .node_state import NodeState
 from .numpy_client import NumPyClient
 
 
-def run_client() -> None:
+def run_client_app() -> None:
     """Run Flower client."""
-    event(EventType.RUN_CLIENT_ENTER)
+    event(EventType.RUN_CLIENT_APP_ENTER)
 
     log(INFO, "Long-running Flower client starting")
 
@@ -105,7 +105,7 @@ def run_client() -> None:
         root_certificates=root_certificates,
         insecure=args.insecure,
     )
-    event(EventType.RUN_CLIENT_LEAVE)
+    event(EventType.RUN_CLIENT_APP_LEAVE)
 
 
 def _parse_args_client() -> argparse.ArgumentParser:

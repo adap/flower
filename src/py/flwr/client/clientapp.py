@@ -46,7 +46,7 @@ class ClientApp:
     If the above code is in a Python module called `client`, it can be started as
     follows:
 
-    >>> flower-client client:app --insecure
+    >>> flower-client-app client:app --insecure
 
     In this `client:app` example, `client` refers to the Python module `client.py` in
     which the previous code lives in and `app` refers to the global attribute `app` that
