@@ -18,13 +18,13 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from flwr.driver.driver import Driver
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     PullTaskResRequest,
     PushTaskInsRequest,
 )
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.server.driver.driver import Driver
 
 
 class TestDriver(unittest.TestCase):
@@ -37,7 +37,7 @@ class TestDriver(unittest.TestCase):
         self.mock_grpc_driver = Mock()
         self.mock_grpc_driver.create_run.return_value = mock_response
         self.patcher = patch(
-            "flwr.driver.driver.GrpcDriver", return_value=self.mock_grpc_driver
+            "flwr.server.driver.driver.GrpcDriver", return_value=self.mock_grpc_driver
         )
         self.patcher.start()
         self.driver = Driver()
