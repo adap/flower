@@ -14,7 +14,6 @@
 # ==============================================================================
 """Test for authentication state."""
 
-import os
 
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
@@ -40,10 +39,10 @@ def test_client_public_keys() -> None:
 
 def test_node_id_public_key_pair() -> None:
     """Test store and get node_id public_key pair."""
-    node_id = int.from_bytes(os.urandom(8), "little", signed=True)
+    in_memory_auth_state = InMemoryAuthState()
+    node_id = in_memory_auth_state.create_node()
     public_key = public_key_to_bytes(generate_key_pairs()[1])
 
-    in_memory_auth_state = InMemoryAuthState()
     in_memory_auth_state.store_node_id_public_key_pair(node_id, public_key)
 
     assert in_memory_auth_state.get_public_key_from_node_id(node_id) == public_key

@@ -23,10 +23,6 @@ from flwr.server.state.sqlite_state import SqliteState
 class SqliteAuthState(AuthenticationState, SqliteState):
     """SQLite-based authentication state implementation."""
 
-    def __init__(self) -> None:
-        """Init SqliteAuthState."""
-        super().__init__()
-
     def store_node_id_public_key_pair(self, node_id: int, public_key: bytes) -> None:
         """Store `node_id` and `public_key` as key-value pair in state."""
         query = (
