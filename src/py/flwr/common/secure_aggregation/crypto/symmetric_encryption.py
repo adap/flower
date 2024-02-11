@@ -18,6 +18,7 @@
 import base64
 from typing import Tuple, cast
 
+from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes, hmac, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -114,5 +115,5 @@ def verify_hmac(key: bytes, message: bytes, hmac_value: bytes) -> bool:
     try:
         computed_hmac.verify(hmac_value)
         return True
-    except Exception:
+    except InvalidSignature:
         return False
