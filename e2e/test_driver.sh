@@ -31,13 +31,16 @@ case "$2" in
     ;;
 esac
 
-timeout 2m flower-server $server_arg $db_arg $rest_arg &
+timeout 2m flower-superlink $server_arg $db_arg $rest_arg &
+sl_pid=$!
 sleep 3
 
 timeout 2m flower-client client:app $client_arg $rest_arg --server $server_address &
+cl1_pid=$!
 sleep 3
 
 timeout 2m flower-client client:app $client_arg $rest_arg --server $server_address &
+cl2_pid=$!
 sleep 3
 
 timeout 2m python driver.py &
@@ -47,7 +50,7 @@ wait $pid
 res=$?
 
 if [[ "$res" = "0" ]];
-  then echo "Training worked correctly" && pkill flower-client && pkill flower-server;
+  then echo "Training worked correctly"; kill $cl1_pid; kill $cl2_pid; kill $sl_pid;
   else echo "Training had an issue" && exit 1;
 fi
 

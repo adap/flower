@@ -1,15 +1,15 @@
 Flower CLI reference
 ====================
 
-.. _flower-server-apiref:
+.. _flower-superlink-apiref:
 
-flower-server
-~~~~~~~~~~~~~
+flower-superlink
+~~~~~~~~~~~~~~~~
 
 .. argparse::
    :module: flwr.server.app
    :func:  _parse_args_server
-   :prog: flower-server
+   :prog: flower-superlink
 
 .. _flower-driver-apiref:
 
