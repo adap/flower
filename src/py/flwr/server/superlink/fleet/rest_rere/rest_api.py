@@ -24,8 +24,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PullTaskInsRequest,
     PushTaskResRequest,
 )
-from flwr.server.fleet.message_handler import message_handler
-from flwr.server.state import State
+from flwr.server.superlink.fleet.message_handler import message_handler
+from flwr.server.superlink.state import State
 
 try:
     from starlette.applications import Starlette

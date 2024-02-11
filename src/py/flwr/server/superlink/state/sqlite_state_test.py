@@ -17,8 +17,8 @@
 
 import unittest
 
-from flwr.server.state.sqlite_state import task_ins_to_dict
-from flwr.server.state.state_test import create_task_ins
+from flwr.server.superlink.state.sqlite_state import task_ins_to_dict
+from flwr.server.superlink.state.state_test import create_task_ins
 
 
 class SqliteStateTest(unittest.TestCase):

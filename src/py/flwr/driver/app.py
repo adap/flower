@@ -72,7 +72,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         An implementation of the abstract base class
         `flwr.server.strategy.Strategy`. If no strategy is provided, then
         `start_server` will use `flwr.server.strategy.FedAvg`.
-    client_manager : Optional[flwr.server.DriverClientManager] (default: None)
+    client_manager : Optional[flwr.server.ClientManager] (default: None)
         An implementation of the class `flwr.server.ClientManager`. If no
         implementation is provided, then `start_driver` will use
         `flwr.server.SimpleClientManager`.

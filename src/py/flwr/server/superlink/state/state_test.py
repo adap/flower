@@ -25,7 +25,7 @@ from uuid import uuid4
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.server.state import InMemoryState, SqliteState, State
+from flwr.server.superlink.state import InMemoryState, SqliteState, State
 
 
 class StateTest(unittest.TestCase):
