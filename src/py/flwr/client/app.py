@@ -86,7 +86,7 @@ def run_client_app() -> None:
 
     log(
         DEBUG,
-        "Flower will load ClientApp `%s` to execute tasks",
+        "Flower will load ClientApp `%s`",
         getattr(args, "client-app"),
     )
 
@@ -111,7 +111,7 @@ def run_client_app() -> None:
 def _parse_args_run_client_app() -> argparse.ArgumentParser:
     """Parse flower-client-app command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Start a long-running Flower client",
+        description="Start a Flower client app",
     )
 
     parser.add_argument(
@@ -145,7 +145,7 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         "--dir",
         default="",
         help="Add specified directory to the PYTHONPATH and load Flower "
-        "callable from there."
+        "app from there."
         " Default: current working directory.",
     )
 
