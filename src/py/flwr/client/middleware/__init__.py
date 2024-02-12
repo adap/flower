@@ -15,12 +15,12 @@
 """Middleware layers."""
 
 
-from .dp_modifier import fixed_clipping_modifier
+from .dp_modifier import fixed_clipping_mod
 from .secure_aggregation.secaggplus_middleware import secaggplus_middleware
 from .utils import make_ffn
 
 __all__ = [
     "make_ffn",
     "secaggplus_middleware",
-    "fixed_clipping_modifier",
+    "fixed_clipping_mod",
 ]

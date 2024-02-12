@@ -266,6 +266,15 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
         if failures:
             return None, {}
 
+        if len(results) != self.num_sampled_clients:
+            warnings.warn(
+                f"The number of clients returning parameters ({len(results)})"
+                f" differs from the number of sampled clients ({self.num_sampled_clients})."
+                f" This could impact the differential privacy guarantees,"
+                f" potentially leading to privacy leakage or inadequate noise calibration.",
+                stacklevel=2,
+            )
+
         # Pass the new parameters for aggregation
         aggregated_params, metrics = self.strategy.aggregate_fit(
             server_round, results, failures
@@ -273,7 +282,7 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params = add_gaussian_to_params(
+            aggregated_params = add_gaussian_noise_to_params(
                 aggregated_params,
                 self.noise_multiplier,
                 self.clipping_norm,
