@@ -16,6 +16,7 @@
 
 
 import argparse
+import csv
 import importlib.util
 import sys
 import threading
@@ -25,7 +26,7 @@ from os.path import isfile
 from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Set
 
 import grpc
 
@@ -406,6 +407,11 @@ def run_server() -> None:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
+        setup_client_auth = _try_setup_client_authentication(args)
+        if setup_client_auth:
+            client_public_keys, server_private_key, server_public_key = setup_client_auth
+
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
             state_factory=state_factory,
@@ -430,6 +436,29 @@ def run_server() -> None:
                     sys.exit(1)
         driver_server.wait_for_termination(timeout=1)
 
+def _try_setup_client_authentication(args: argparse.Namespace) -> Optional[Tuple[Set[bytes], bytes, bytes]]: 
+    if args.require_client_authentication:
+        client_keys_file_path = Path(args.require_client_authentication[0])
+        if client_keys_file_path.exists():
+            client_public_keys: Set[bytes] = set()
+            with open(client_keys_file_path, 'r', newline='') as csvfile:
+                reader = csv.reader(csvfile)
+                for row in reader:
+                    for element in row:
+                        client_public_keys.add(element.encode())
+            return (
+                client_public_keys, 
+                Path(args.require_client_authentication[1]).read_bytes(), 
+                Path(args.require_client_authentication[2]).read_bytes(),
+            )
+        else:
+            sys.exit(
+                "Client public keys csv file are required for client authentication. "
+                "Please provide the csv file path containing known client public keys "
+                "to '--require-client-authentication'."
+            )
+    else:
+        return None
 
 def _try_obtain_certificates(
     args: argparse.Namespace,
@@ -695,6 +724,14 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "instead of on disk. If nothing is provided, "
         "Flower will just create a state in memory.",
         default=DATABASE,
+    )
+    parser.add_argument(
+        "--require-client-authentication",
+        nargs=3,
+        metavar=("CLIENT_KEYS", "SERVER_PUBLIC_KEY", "SERVER_PRIVATE_KEY"),
+        type=str,
+        help="Paths to .csv file containing list of known client public keys for "
+        "authentication, server public key, and server private key, in that order."
     )
 
 
