@@ -12,10 +12,12 @@ Finally, many other estimators beyond KaplanMeierFitter can be used with the pro
 AalenJohansenFitter, GeneralizedGammaFitter, LogLogisticFitter,
 SplineFitter, and WeibullFitter.
 
-We also use the NatualPartitioner from Flower Datasets to divide the data according to
+We also use the [NatualPartitioner](https://flower.dev/docs/datasets/ref-api/flwr_datasets.partitioner.NaturalIdPartitioner.html#flwr_datasets.partitioner.NaturalIdPartitioner) from [Flower Datasets](https://flower.dev/docs/datasets/) to divide the data according to
 the group it comes from therefore to simulate the division that might occur.
 
-![Survival Function](./survival_function_federated.jpg)
+<p style="text-align:center;"><img 
+<img src="_static/survival_function_federated.png" alt="Survival Function" width="600"/>
+</p>
 
 ## Project Setup
 

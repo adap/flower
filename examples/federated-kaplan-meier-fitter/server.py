@@ -142,6 +142,6 @@ if __name__ == "__main__":
     print(strategy.fitter.survival_function_)
     strategy.fitter.plot_survival_function()
     plt.title("Survival function of fruit flies (Walton's data)", fontsize=16)
-    plt.savefig("./survival_function_federated.jpg", dpi=200)
+    plt.savefig("./survival_function_federated.png", dpi=200)
     print("Mean survival time:")
     print(strategy.fitter.median_survival_time_)
