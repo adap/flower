@@ -551,7 +551,7 @@ def message_to_taskins(message: Message) -> TaskIns:
         task=Task(
             ttl=message.metadata.ttl,
             task_type=message.metadata.task_type,
-            recordset=recordset_to_proto(message.message),
+            recordset=recordset_to_proto(message.content),
         ),
     )
 
@@ -570,7 +570,7 @@ def message_from_taskins(taskins: TaskIns) -> Message:
     # Return the Message
     return Message(
         metadata=metadata,
-        message=recordset_from_proto(taskins.task.recordset),
+        content=recordset_from_proto(taskins.task.recordset),
     )
 
 
@@ -580,7 +580,7 @@ def message_to_taskres(message: Message) -> TaskRes:
         task=Task(
             ttl=message.metadata.ttl,
             task_type=message.metadata.task_type,
-            recordset=recordset_to_proto(message.message),
+            recordset=recordset_to_proto(message.content),
         ),
     )
 
@@ -599,5 +599,5 @@ def message_from_taskres(taskres: TaskRes) -> Message:
     # Return the Message
     return Message(
         metadata=metadata,
-        message=recordset_from_proto(taskres.task.recordset),
+        content=recordset_from_proto(taskres.task.recordset),
     )
