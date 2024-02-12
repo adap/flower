@@ -1,5 +1,7 @@
 # MXNet: From Centralized To Federated
 
+> Note the MXNet project has ended, and is now in [Attic](https://attic.apache.org/projects/mxnet.html). The MXNet GitHub has also [been archived](https://github.com/apache/mxnet). As a result, this example won't be receiving more updates. Using MXNet is no longer recommnended.
+
 This example demonstrates how an already existing centralized MXNet-based machine learning project can be federated with Flower.
 
 This introductory example for Flower uses MXNet, but you're not required to be a MXNet expert to run the example. The example will help you to understand how Flower can be used to build federated learning use cases based on an existing MXNet project.
