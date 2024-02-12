@@ -95,8 +95,8 @@ def run_vce(
     print(f"{client_app_callable_str = }")
 
     def _load() -> ClientApp:
-        flower: ClientApp = load_client_app(client_app_callable_str)
-        return flower
+        app: ClientApp = load_client_app(client_app_callable_str)
+        return app
 
     app = _load
 
@@ -125,12 +125,12 @@ def run_vce(
                         lambda a, a_fn, mssg, cid, state: a.run.remote(
                             a_fn, mssg, cid, state
                         ),
-                        (app, message, node_id, run_state),
+                        (app, message, str(node_id), run_state),
                     )
 
                     # Wait until result is ready
                     out_mssg, updated_runstate = pool.get_client_result(
-                        node_id, timeout=None
+                        str(node_id), timeout=None
                     )
 
                     # Update runstate
