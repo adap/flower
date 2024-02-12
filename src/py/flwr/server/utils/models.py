@@ -178,7 +178,7 @@ class ResNet18(nn.Module):
 
 class VAE(nn.Module):
     def __init__(
-        self, x_dim=784, h_dim1=512, h_dim2=256, h_dim3=32, z_dim=16, encoder_only=False
+        self, x_dim=784, h_dim1=512, h_dim2=256, h_dim3=32, z_dim=2, encoder_only=False
     ):
         super(VAE, self).__init__()
         self.encoder_only = encoder_only

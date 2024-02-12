@@ -224,7 +224,7 @@ def main():
             # Determine device
             device = DEVICE
 
-            model = VAE()
+            model = VAE(z_dim=2)
             model.to(device)
             set_params(model, parameters)
             if server_round == 0 or server_round == args.num_rounds:
@@ -267,7 +267,7 @@ def main():
 
     # Download dataset and partition it
     trainsets, valsets = non_iid_train_iid_test_6789()
-    net = VAE().to(DEVICE)
+    net = VAE(z_dim=2).to(DEVICE)
     gen_net = VAE(encoder_only=True).to(DEVICE)
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)
@@ -290,6 +290,7 @@ def main():
         ),
         lr_g=wandb.config["lr_g"],
         steps_g=wandb.config["steps_g"],
+        lambda_align_g=wandb.config["lambda_align_g"],
         device=DEVICE,
         num_classes=NUM_CLASSES,
     )
@@ -322,11 +323,11 @@ if __name__ == "__main__":
         "parameters": {
             "sample_per_class": {
                 "values": [
-                    100,
                     200,
                 ]
             },
             # "lambda_reg": {"min": 0.0, "max": 1.0},
+            "lambda_align_g": {"min": 1.0, "max": 10.0},
             "lambda_reg": {"values": [0]},
             "lambda_align": {"values": [100, 200, 300]},
             "lr_g": {
