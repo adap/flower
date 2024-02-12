@@ -219,7 +219,7 @@ class RecordMaker:
             run_id=self.rng.randint(0, 1 << 30),
             task_id=self.get_str(64),
             group_id=self.get_str(30),
-            node_id=self.rng.randint(0, 1 << 30),
+            node_id=self.rng.randint(0, 1 << 63),
             ttl=self.get_str(10),
             task_type=self.get_str(10),
         )
@@ -307,14 +307,11 @@ def test_message_to_and_from_taskins() -> None:
     metadata = maker.metadata()
     original = Message(
         metadata=Metadata(
-            run_id=0,
-            task_id="",
-            group_id="",
             node_id=metadata.node_id,
             ttl=metadata.ttl,
             task_type=metadata.task_type,
         ),
-        message=maker.recordset(1, 1, 1),
+        content=maker.recordset(1, 1, 1),
     )
 
     # Execute
@@ -322,11 +319,11 @@ def test_message_to_and_from_taskins() -> None:
     taskins.run_id = metadata.run_id
     taskins.task_id = metadata.task_id
     taskins.group_id = metadata.group_id
-    taskins.task.consumer.node_id = metadata.node_id
+    taskins.task.consumer.node_id = cast(int, metadata.node_id)
     deserialized = message_from_taskins(taskins)
 
     # Assert
-    assert original.message == deserialized.message
+    assert original.content == deserialized.content
     assert metadata == deserialized.metadata
 
 
@@ -337,14 +334,11 @@ def test_message_to_and_from_taskres() -> None:
     metadata = maker.metadata()
     original = Message(
         metadata=Metadata(
-            run_id=0,
-            task_id="",
-            group_id="",
             node_id=metadata.node_id,
             ttl=metadata.ttl,
             task_type=metadata.task_type,
         ),
-        message=maker.recordset(1, 1, 1),
+        content=maker.recordset(1, 1, 1),
     )
 
     # Execute
@@ -352,9 +346,9 @@ def test_message_to_and_from_taskres() -> None:
     taskres.run_id = metadata.run_id
     taskres.task_id = metadata.task_id
     taskres.group_id = metadata.group_id
-    taskres.task.consumer.node_id = metadata.node_id
+    taskres.task.consumer.node_id = cast(int, metadata.node_id)
     deserialized = message_from_taskres(taskres)
 
     # Assert
-    assert original.message == deserialized.message
+    assert original.content == deserialized.content
     assert metadata == deserialized.metadata

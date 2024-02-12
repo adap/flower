@@ -121,14 +121,10 @@ def test_client_without_get_properties() -> None:
     recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
     message = Message(
         metadata=Metadata(
-            run_id=0,
             task_id=str(uuid.uuid4()),
-            group_id="",
-            node_id=0,
-            ttl="",
             task_type=TASK_TYPE_GET_PROPERTIES,
         ),
-        message=recordset,
+        content=recordset,
     )
 
     # Execute
@@ -149,7 +145,7 @@ def test_client_without_get_properties() -> None:
     expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
     expected_msg = Message(message.metadata, expected_rs)
 
-    assert actual_msg.message == expected_msg.message
+    assert actual_msg.content == expected_msg.content
     assert actual_msg.metadata.task_type == expected_msg.metadata.task_type
 
 
@@ -160,14 +156,10 @@ def test_client_with_get_properties() -> None:
     recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
     message = Message(
         metadata=Metadata(
-            run_id=0,
             task_id=str(uuid.uuid4()),
-            group_id="",
-            node_id=0,
-            ttl="",
             task_type=TASK_TYPE_GET_PROPERTIES,
         ),
-        message=recordset,
+        content=recordset,
     )
 
     # Execute
@@ -188,5 +180,5 @@ def test_client_with_get_properties() -> None:
     expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
     expected_msg = Message(message.metadata, expected_rs)
 
-    assert actual_msg.message == expected_msg.message
+    assert actual_msg.content == expected_msg.content
     assert actual_msg.metadata.task_type == expected_msg.metadata.task_type

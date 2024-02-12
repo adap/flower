@@ -45,27 +45,17 @@ SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect_ins=ServerMessage.ReconnectIn
 
 MESSAGE_GET_PROPERTIES = Message(
     metadata=Metadata(
-        run_id=0,
-        task_id="",
-        group_id="",
-        node_id=0,
-        ttl="",
         task_type=TASK_TYPE_GET_PROPERTIES,
     ),
-    message=compat.getpropertiesres_to_recordset(
+    content=compat.getpropertiesres_to_recordset(
         GetPropertiesRes(Status(Code.OK, ""), {})
     ),
 )
 MESSAGE_DISCONNECT = Message(
     metadata=Metadata(
-        run_id=0,
-        task_id="",
-        group_id="",
-        node_id=0,
-        ttl="",
         task_type="reconnect",
     ),
-    message=RecordSet(configs={"config": ConfigsRecord({"reason": 0})}),
+    content=RecordSet(configs={"config": ConfigsRecord({"reason": 0})}),
 )
 
 
