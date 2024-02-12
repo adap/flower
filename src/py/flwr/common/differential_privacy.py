@@ -72,6 +72,7 @@ def compute_clip_model_update(
     for i, _ in enumerate(param2):
         param1[i] = param2[i] + model_update[i]
 
+
 def adaptive_clip_inputs_inplace(input_arrays: NDArrays, clipping_norm: float) -> bool:
     """Clip model update based on the clipping norm in-place.
 
@@ -100,6 +101,7 @@ def compute_adaptive_clip_model_update(
         param1[i] = param2[i] + model_update[i]
 
     return norm_bit
+
 
 def add_gaussian_noise_to_params(
     model_params: Parameters,
