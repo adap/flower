@@ -10,8 +10,7 @@ from lifelines.datasets import load_waltons
 
 
 class FlowerClient(fl.client.NumPyClient):
-    """
-    Flower client that holds and sends the events and times data.
+    """Flower client that holds and sends the events and times data.
 
     Parameters
     ----------
