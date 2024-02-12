@@ -5,6 +5,7 @@ import flwr as fl
 import wandb
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common.message import Message
+from flwr.common.constant import TASK_TYPE_FIT, TASK_TYPE_EVALUATE
 from flwr.common.context import Context
 from flwr.common import NDArrays, Parameters, Scalar
 
@@ -85,21 +86,22 @@ def get_wandb_mod(name: str) -> Mod:
 
         bwd = app(fwd, context)
 
-        time_diff = time.time() - start_time
+        if bwd.metadata.task_type == (TASK_TYPE_FIT or TASK_TYPE_EVALUATE):
+            time_diff = time.time() - start_time
 
-        results_to_log = {}
+            results_to_log = {}
 
-        metrics = bwd.message.metrics
-        task_type = bwd.metadata.task_type
+            metrics = bwd.message.metrics
+            task_type = bwd.metadata.task_type
 
-        if "loss" in metrics:
-            results_to_log[f"{task_type}_loss"] = metrics["loss"]
-        if "accuracy" in metrics:
-            results_to_log[f"{task_type}_accuracy"] = metrics["accuracy"]
-        if time_diff is not None:
-            results_to_log[f"{task_type}_time"] = time_diff
+            if "loss" in metrics:
+                results_to_log[f"{task_type}_loss"] = metrics["loss"]
+            if "accuracy" in metrics:
+                results_to_log[f"{task_type}_accuracy"] = metrics["accuracy"]
+            if time_diff is not None:
+                results_to_log[f"{task_type}_time"] = time_diff
 
-        wandb.log(results_to_log, step=round)
+            wandb.log(results_to_log, step=round)
 
         return bwd
 
