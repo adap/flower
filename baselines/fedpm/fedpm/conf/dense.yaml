@@ -5,7 +5,7 @@
 
 num_clients: 10
 num_rounds: 200
-verbose: 0
+verbose: 1
 
 dataset:
   name: 'mnist' # [cifar10, mnist]
@@ -32,7 +32,7 @@ strategy:
   min_evaluate_clients: 0
   min_available_clients: 0
   compressor_cfg: ${compressor}
-  device: cpu
+  device: cuda
   loss_fn:
     _target_: torch.nn.CrossEntropyLoss
   
@@ -63,4 +63,4 @@ compressor:
 
 ray_init_args:
   ignore_reinit_error: True
-  local_mode: True
+  local_mode: False

@@ -236,6 +236,7 @@ class DenseStrategy(flwr.server.strategy.Strategy):
         self.global_dataset = global_data_loader
         self.loss_fn = instantiate(loss_fn)
         self.device = device
+
         self.global_model = load_model(self.model_cfg).to(self.device)
         self.sim_folder = sim_folder
         if compressor_cfg.compress:
@@ -336,13 +337,14 @@ class DenseStrategy(flwr.server.strategy.Strategy):
     def evaluate(
         self, server_round: int, parameters: Parameters
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        correct = 0
+        correct = torch.tensor(0, device=self.device)
         total = 0
         set_parameters(self.global_model, parameters_to_ndarrays(parameters))
         # self.set_parameters(parameters)
         with torch.no_grad():
             inputs, labels = next(iter(self.global_dataset))
             self.global_model.zero_grad()
+            labels = labels.to(self.device)
             outputs = self.global_model(inputs.to(self.device))
             loss = self.loss_fn(outputs, labels.to(self.device))
             _, predicted = torch.max(outputs.data, 1)

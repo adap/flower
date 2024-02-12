@@ -51,6 +51,7 @@ def main(cfg: DictConfig) -> None:
             client_id=cid,
             train_data_loader=trainloader,
             test_data_loader=valloader,
+            device=cfg.strategy.device
         )
 
     # 4. Define your strategy
@@ -59,12 +60,12 @@ def main(cfg: DictConfig) -> None:
     )
 
     # 5. Start Simulation
+    # client_resources = {'num_cpus': 1, 'num_gpus': 1}
     flwr.simulation.start_simulation(
         client_fn=client_fn,
         num_clients=cfg.num_clients,
         config=flwr.server.ServerConfig(num_rounds=cfg.num_rounds),
         strategy=strategy,
-        # ray_init_args=cfg.ray_init_args,
     )
 
     # 6. Save your results
