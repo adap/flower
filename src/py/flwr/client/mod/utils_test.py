@@ -45,13 +45,13 @@ def make_mock_mod(name: str, footprint: List[str]) -> Mod:
     def mod(message: Message, context: Context, app: ClientAppCallable) -> Message:
         footprint.append(name)
         # add empty ConfigRecord to in_message for this mod
-        message.message.set_configs(name=name, record=ConfigsRecord())
+        message.content.set_configs(name=name, record=ConfigsRecord())
         _increment_context_counter(context)
         out_message: Message = app(message, context)
         footprint.append(name)
         _increment_context_counter(context)
         # add empty ConfigRegcord to out_message for this mod
-        out_message.message.set_configs(name=name, record=ConfigsRecord())
+        out_message.content.set_configs(name=name, record=ConfigsRecord())
         return out_message
 
     return mod
@@ -62,9 +62,9 @@ def make_mock_app(name: str, footprint: List[str]) -> ClientAppCallable:
 
     def app(message: Message, context: Context) -> Message:
         footprint.append(name)
-        message.message.set_configs(name=name, record=ConfigsRecord())
-        out_message = Message(metadata=message.metadata, message=RecordSet())
-        out_message.message.set_configs(name=name, record=ConfigsRecord())
+        message.content.set_configs(name=name, record=ConfigsRecord())
+        out_message = Message(metadata=message.metadata, content=RecordSet())
+        out_message.content.set_configs(name=name, record=ConfigsRecord())
         print(context)
         return out_message
 
@@ -73,7 +73,7 @@ def make_mock_app(name: str, footprint: List[str]) -> ClientAppCallable:
 
 def _get_dummy_flower_message() -> Message:
     return Message(
-        message=RecordSet(),
+        content=RecordSet(),
         metadata=Metadata(run_id=0, task_id="", group_id="", ttl="", task_type="mock"),
     )
 
@@ -102,9 +102,9 @@ class TestMakeApp(unittest.TestCase):
         trace = mock_mod_names + ["app"]
         self.assertEqual(footprint, trace + list(reversed(mock_mod_names)))
         # pylint: disable-next=no-member
-        self.assertEqual("".join(message.message.configs.keys()), "".join(trace))
+        self.assertEqual("".join(message.content.configs.keys()), "".join(trace))
         self.assertEqual(
-            "".join(out_message.message.configs.keys()), "".join(reversed(trace))
+            "".join(out_message.content.configs.keys()), "".join(reversed(trace))
         )
         self.assertEqual(state.get_metrics(METRIC)[COUNTER], 2 * len(mock_mods))
 
@@ -122,9 +122,9 @@ class TestMakeApp(unittest.TestCase):
             _2: ClientAppCallable,
         ) -> Message:
             footprint.append("filter")
-            message.message.set_configs(name="filter", record=ConfigsRecord())
-            out_message = Message(metadata=message.metadata, message=RecordSet())
-            out_message.message.set_configs(name="filter", record=ConfigsRecord())
+            message.content.set_configs(name="filter", record=ConfigsRecord())
+            out_message = Message(metadata=message.metadata, content=RecordSet())
+            out_message.content.set_configs(name="filter", record=ConfigsRecord())
             # Skip calling app
             return out_message
 
@@ -135,5 +135,5 @@ class TestMakeApp(unittest.TestCase):
         # Assert
         self.assertEqual(footprint, ["filter"])
         # pylint: disable-next=no-member
-        self.assertEqual(list(message.message.configs.keys())[0], "filter")
-        self.assertEqual(list(out_message.message.configs.keys())[0], "filter")
+        self.assertEqual(list(message.content.configs.keys())[0], "filter")
+        self.assertEqual(list(out_message.content.configs.keys())[0], "filter")
