@@ -77,7 +77,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
     """
     if message.metadata.task_type == "reconnect":
         # Retrieve ReconnectIns from recordset
-        recordset = message.message
+        recordset = message.content
         seconds = cast(int, recordset.get_configs("config")["seconds"])
         # Construct ReconnectIns and call _reconnect
         disconnect_msg, sleep_duration = _reconnect(
@@ -95,7 +95,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
                 ttl="",
                 task_type="reconnect",
             ),
-            message=recordset,
+            content=recordset,
         )
         # Return TaskRes and sleep duration
         return out_message, sleep_duration
@@ -118,14 +118,14 @@ def handle_legacy_message_from_tasktype(
     if task_type == TASK_TYPE_GET_PROPERTIES:
         get_properties_res = maybe_call_get_properties(
             client=client,
-            get_properties_ins=recordset_to_getpropertiesins(message.message),
+            get_properties_ins=recordset_to_getpropertiesins(message.content),
         )
         out_recordset = getpropertiesres_to_recordset(get_properties_res)
     # Handle GetParametersIns
     elif task_type == TASK_TYPE_GET_PARAMETERS:
         get_parameters_res = maybe_call_get_parameters(
             client=client,
-            get_parameters_ins=recordset_to_getparametersins(message.message),
+            get_parameters_ins=recordset_to_getparametersins(message.content),
         )
         out_recordset = getparametersres_to_recordset(
             get_parameters_res, keep_input=False
@@ -134,14 +134,14 @@ def handle_legacy_message_from_tasktype(
     elif task_type == TASK_TYPE_FIT:
         fit_res = maybe_call_fit(
             client=client,
-            fit_ins=recordset_to_fitins(message.message, keep_input=True),
+            fit_ins=recordset_to_fitins(message.content, keep_input=True),
         )
         out_recordset = fitres_to_recordset(fit_res, keep_input=False)
     # Handle EvaluateIns
     elif task_type == TASK_TYPE_EVALUATE:
         evaluate_res = maybe_call_evaluate(
             client=client,
-            evaluate_ins=recordset_to_evaluateins(message.message, keep_input=True),
+            evaluate_ins=recordset_to_evaluateins(message.content, keep_input=True),
         )
         out_recordset = evaluateres_to_recordset(evaluate_res)
     else:
@@ -156,7 +156,7 @@ def handle_legacy_message_from_tasktype(
             ttl="",
             task_type=task_type,
         ),
-        message=out_recordset,
+        content=out_recordset,
     )
     return out_message
 
