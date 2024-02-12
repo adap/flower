@@ -14,7 +14,7 @@
 # ==============================================================================
 """Mods."""
 
-from .dp_modifier import fixed_clipping_mod
+from .dp_modifiers import fixedclipping_mod
 from .secure_aggregation.secaggplus_mod import secaggplus_mod
 from .utils import make_ffn
 

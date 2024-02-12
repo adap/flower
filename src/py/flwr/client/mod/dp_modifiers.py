@@ -14,7 +14,7 @@
 # ==============================================================================
 """Clipping modifier for central DP with client side clipping."""
 
-from flwr.client.typing import FlowerCallable
+from flwr.client.typing import ClientAppCallable
 from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common import recordset_compat as compat
 from flwr.common.constant import TASK_TYPE_FIT
@@ -24,8 +24,8 @@ from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM
 from flwr.common.message import Message
 
 
-def fixed_clipping_mod(
-    msg: Message, ctxt: Context, call_next: FlowerCallable
+def fixedclipping_mod(
+    msg: Message, ctxt: Context, call_next: ClientAppCallable
 ) -> Message:
     """Clip the client model updates before sending them to the server."""
     if msg.metadata.task_type == TASK_TYPE_FIT:
