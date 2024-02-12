@@ -21,5 +21,5 @@ from .utils import make_ffn
 __all__ = [
     "make_ffn",
     "secaggplus_mod",
-    "fixed_clipping_mod",
+    "fixedclipping_mod",
 ]
