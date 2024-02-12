@@ -79,10 +79,8 @@ class EventTimeFitterStrategy(Strategy):
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Merge data and perform the fitting of the fitter from lifelines library.
 
-        Assume just a single federated learning round.
-
-        Assume the data comes as a list with two elements of 1-dim numpy arrays
-        of events and times.
+        Assume just a single federated learning round. Assume the data comes as a list
+        with two elements of 1-dim numpy arrays of events and times.
         """
         remote_data = [
             (parameters_to_ndarrays(fit_res.parameters)) for _, fit_res in results

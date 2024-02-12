@@ -1,21 +1,22 @@
 # Flower Example using KaplanMeierFitter
 
-This is an introductory example on **federated survival analysis** using [Flower](https://flower.dev/) 
+This is an introductory example on **federated survival analysis** using [Flower](https://flower.dev/)
 and [lifelines](https://lifelines.readthedocs.io/en/stable/index.html) library.
 
-The aim of this example is to estimate the survival function using the 
-[Kaplan-Meier Estimate](https://en.wikipedia.org/wiki/Kaplan%E2%80%93Meier_estimator) implemented in 
-lifelines library (see [KaplanMeierFitter](https://lifelines.readthedocs.io/en/stable/fitters/univariate/KaplanMeierFitter.html#lifelines.fitters.kaplan_meier_fitter.KaplanMeierFitter)). The distributed/federated aspect of this example 
+The aim of this example is to estimate the survival function using the
+[Kaplan-Meier Estimate](https://en.wikipedia.org/wiki/Kaplan%E2%80%93Meier_estimator) implemented in
+lifelines library (see [KaplanMeierFitter](https://lifelines.readthedocs.io/en/stable/fitters/univariate/KaplanMeierFitter.html#lifelines.fitters.kaplan_meier_fitter.KaplanMeierFitter)). The distributed/federated aspect of this example
 is the data sending to the server. You can think of it as a federated analytics examples.
 
 Finally, many other estimators beyond KaplanMeierFitter can be used with the provided strategy:
-AalenJohansenFitter, GeneralizedGammaFitter, LogLogisticFitter, 
+AalenJohansenFitter, GeneralizedGammaFitter, LogLogisticFitter,
 SplineFitter, and WeibullFitter.
 
-We also use the NatualPartitioner from Flower Datasets to divide the data according to 
+We also use the NatualPartitioner from Flower Datasets to divide the data according to
 the group it comes from therefore to simulate the division that might occur.
 
 ![Survival Function](./survival_function_federated.jpg)
+
 ## Project Setup
 
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
