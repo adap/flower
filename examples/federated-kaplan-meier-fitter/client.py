@@ -25,6 +25,7 @@ class FlowerClient(fl.client.NumPyClient):
     ValueError
         If the `times` and `events` are not the same shape.
     """
+
     def __init__(self, times: NDArray, events: NDArray):
         if len(times) != len(events):
             raise ValueError("The times and events arrays have to be same shape.")
@@ -32,7 +33,7 @@ class FlowerClient(fl.client.NumPyClient):
         self._events = events
 
     def fit(
-            self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[NDArrays, int, Dict]:
         return (
             [self._times, self._events],
