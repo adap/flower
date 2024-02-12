@@ -47,7 +47,7 @@ MESSAGE_GET_PROPERTIES = Message(
     metadata=Metadata(
         task_type=TASK_TYPE_GET_PROPERTIES,
     ),
-    message=compat.getpropertiesres_to_recordset(
+    content=compat.getpropertiesres_to_recordset(
         GetPropertiesRes(Status(Code.OK, ""), {})
     ),
 )
@@ -55,7 +55,7 @@ MESSAGE_DISCONNECT = Message(
     metadata=Metadata(
         task_type="reconnect",
     ),
-    message=RecordSet(configs={"config": ConfigsRecord({"reason": 0})}),
+    content=RecordSet(configs={"config": ConfigsRecord({"reason": 0})}),
 )
 
 

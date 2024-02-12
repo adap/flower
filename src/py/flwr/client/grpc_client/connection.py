@@ -173,12 +173,12 @@ def grpc_connection(  # pylint: disable=R0915
                 node_id=0,
                 task_type=task_type,
             ),
-            message=recordset,
+            content=recordset,
         )
 
     def send(message: Message) -> None:
         # Retrieve RecordSet and task_type
-        recordset = message.message
+        recordset = message.content
         task_type = message.metadata.task_type
 
         # RecordSet --> *Res --> *Res proto -> ClientMessage proto
