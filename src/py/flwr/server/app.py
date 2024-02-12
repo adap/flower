@@ -19,7 +19,6 @@ import argparse
 import importlib.util
 import sys
 import threading
-from dataclasses import dataclass
 from logging import DEBUG, ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
@@ -43,17 +42,20 @@ from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
-from flwr.server.client_manager import ClientManager, SimpleClientManager
-from flwr.server.history import History
-from flwr.server.server import Server
-from flwr.server.strategy import FedAvg, Strategy
-from flwr.server.superlink.driver.driver_servicer import DriverServicer
-from flwr.server.superlink.fleet.grpc_bidi.grpc_server import (
+
+from .client_manager import ClientManager, SimpleClientManager
+from .history import History
+from .server import Server
+from .server_config import ServerConfig
+from .serverapp import ServerApp, load_server_app
+from .strategy import FedAvg, Strategy
+from .superlink.driver.driver_servicer import DriverServicer
+from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
 )
-from flwr.server.superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
-from flwr.server.superlink.state import StateFactory
+from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from .superlink.state import StateFactory
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
@@ -61,18 +63,6 @@ ADDRESS_FLEET_API_GRPC_BIDI = "[::]:8080"  # IPv6 to keep start_server compatibl
 ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
 DATABASE = ":flwr-in-memory-state:"
-
-
-@dataclass
-class ServerConfig:
-    """Flower server config.
-
-    All attributes have default values which allows users to configure just the ones
-    they care about.
-    """
-
-    num_rounds: int = 1
-    round_timeout: Optional[float] = None
 
 
 def run_server_app() -> None:
@@ -125,6 +115,18 @@ def run_server_app() -> None:
     )
 
     log(WARN, "Not implemented: run_server_app")
+
+    server_app_dir = args.dir
+    if server_app_dir is not None:
+        sys.path.insert(0, server_app_dir)
+
+    def _load() -> ServerApp:
+        server_app: ServerApp = load_server_app(getattr(args, "server-app"))
+        return server_app
+
+    server_app = _load()
+
+    log(DEBUG, "server_app: `%s`", server_app)
 
     event(EventType.RUN_SERVER_APP_LEAVE)
 
