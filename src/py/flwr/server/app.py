@@ -26,7 +26,7 @@ from os.path import isfile
 from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
-from typing import List, Optional, Tuple, Set
+from typing import List, Optional, Tuple, Set, Sequence
 
 import grpc
 
@@ -409,6 +409,8 @@ def run_server() -> None:
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
         setup_client_auth = _try_setup_client_authentication(args)
+        interceptors: Sequence[grpc.ServerInterceptor] = []
+
         if setup_client_auth:
             client_public_keys, server_private_key, server_public_key = setup_client_auth
 
@@ -416,6 +418,7 @@ def run_server() -> None:
             address=address,
             state_factory=state_factory,
             certificates=certificates,
+            interceptors=interceptors
         )
         grpc_servers.append(fleet_server)
     else:
@@ -557,6 +560,7 @@ def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
+    interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
     # Create Fleet API gRPC server
@@ -569,6 +573,7 @@ def _run_fleet_api_grpc_rere(
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=certificates,
+        interceptors=interceptors,
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
