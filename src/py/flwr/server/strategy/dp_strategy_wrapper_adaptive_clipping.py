@@ -18,6 +18,7 @@ Paper (Andrew et al.): https://arxiv.org/pdf/1905.03871.pdf
 """
 
 import math
+import warnings
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -156,6 +157,15 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         """Aggregate training results and update clip norms."""
         if failures:
             return None, {}
+
+        if len(results) != self.num_sampled_clients:
+            warnings.warn(
+                f"The number of clients returning parameters ({len(results)})"
+                f" differs from the number of sampled clients ({self.num_sampled_clients})."
+                f" This could impact the differential privacy guarantees,"
+                f" potentially leading to privacy leakage or inadequate noise calibration.",
+                stacklevel=2,
+            )
 
         aggregated_params, metrics = self.strategy.aggregate_fit(
             server_round, results, failures
