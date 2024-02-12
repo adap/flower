@@ -4,8 +4,7 @@ Contribute on GitHub
 This guide is for people who want to get involved with Flower, but who are not used to contributing to GitHub projects.
 
 If you're familiar with how contributing on GitHub works, you can directly checkout our 
-`getting started guide for contributors <https://flower.dev/docs/getting-started-for-contributors.html>`_ 
-and examples of `good first contributions <https://flower.dev/docs/good-first-contributions.html>`_.
+`getting started guide for contributors <https://flower.dev/docs/contributor-tutorial-get-started-as-a-contributor.html>`_.
 
 
 Setting up the repository
@@ -362,13 +361,10 @@ Above this header you should see the following comment that explains how to writ
     Inside the following 'Changelog entry' section, 
     you should put the description of your changes that will be added to the changelog alongside your PR title.
 
-    If the section is completely empty (without any token), 
-    the changelog will just contain the title of the PR for the changelog entry, without any description. 
+    If the section is completely empty (without any token) or non-existant, 
+    the changelog will just contain the title of the PR for the changelog entry, without any description.
 
-    If the 'Changelog entry' section is removed entirely, 
-    it will categorize the PR as "General improvement" and add it to the changelog accordingly. 
-
-    If the section contains some text other than tokens, it will use it to add a description to the change. 
+    If the section contains some text other than tokens, it will use it to add a description to the change.
 
     If the section contains one of the following tokens it will ignore any other text and put the PR under the corresponding section of the changelog:
 
@@ -388,11 +384,7 @@ Above this header you should see the following comment that explains how to writ
 
 Its content must have a specific format. We will break down what each possibility does:
 
-- If the ``### Changelog entry`` section is removed, the following text will be added to the changelog::
-
-    - **General improvements** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-- If the ``### Changelog entry`` section contains nothing but exists, the following text will be added to the changelog::
+- If the ``### Changelog entry`` section contains nothing or doesn't exist, the following text will be added to the changelog::
 
     - **PR TITLE** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
 

@@ -21,7 +21,7 @@ from typing import Optional
 
 from flwr import common
 from flwr.client import ClientFn
-from flwr.client.flower import Flower
+from flwr.client.clientapp import ClientApp
 from flwr.client.node_state import NodeState
 from flwr.common.constant import (
     TASK_TYPE_EVALUATE,
@@ -31,6 +31,7 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
+from flwr.common.recordset import RecordSet
 from flwr.common.recordset_compat import (
     evaluateins_to_recordset,
     fitins_to_recordset,
@@ -53,15 +54,15 @@ class RayActorClientProxy(ClientProxy):
     ):
         super().__init__(cid)
 
-        def _load_app() -> Flower:
-            return Flower(client_fn=client_fn)
+        def _load_app() -> ClientApp:
+            return ClientApp(client_fn=client_fn)
 
         self.app_fn = _load_app
         self.actor_pool = actor_pool
         self.proxy_state = NodeState()
 
     def _submit_job(self, message: Message, timeout: Optional[float]) -> Message:
-        # The VCE is not exposed to TaskIns, it won't handle multilple runs
+        """Sumbit a message to the AcotrPool."""
         # For the time being, fixing run_id is a small compromise
         # This will be one of the first points to address integrating VCE + DriverAPI
         run_id = message.metadata.run_id
@@ -95,65 +96,54 @@ class RayActorClientProxy(ClientProxy):
 
         return out_mssg
 
+    def _wrap_recordset_in_message(
+        self, recordset: RecordSet, task_type: str
+    ) -> Message:
+        """Wrap a RecordSet inside a Message."""
+        return Message(
+            content=recordset,
+            metadata=Metadata(
+                node_id=int(self.cid),
+                task_type=task_type,
+            ),
+        )
+
     def get_properties(
         self, ins: common.GetPropertiesIns, timeout: Optional[float]
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
         recordset = getpropertiesins_to_recordset(ins)
-        message = Message(
-            message=recordset,
-            metadata=Metadata(
-                run_id=0,
-                task_id="",
-                group_id="",
-                ttl="",
-                task_type=TASK_TYPE_GET_PROPERTIES,
-            ),
+        message = self._wrap_recordset_in_message(
+            recordset, task_type=TASK_TYPE_GET_PROPERTIES
         )
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_getpropertiesres(message_out.message)
+        return recordset_to_getpropertiesres(message_out.content)
 
     def get_parameters(
         self, ins: common.GetParametersIns, timeout: Optional[float]
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
         recordset = getparametersins_to_recordset(ins)
-        message = Message(
-            message=recordset,
-            metadata=Metadata(
-                run_id=0,
-                task_id="",
-                group_id="",
-                ttl="",
-                task_type=TASK_TYPE_GET_PARAMETERS,
-            ),
+        message = self._wrap_recordset_in_message(
+            recordset, task_type=TASK_TYPE_GET_PARAMETERS
         )
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_getparametersres(message_out.message, keep_input=False)
+        return recordset_to_getparametersres(message_out.content, keep_input=False)
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         recordset = fitins_to_recordset(
             ins, keep_input=True
         )  # This must stay TRUE since ins are in-memory
-        message = Message(
-            message=recordset,
-            metadata=Metadata(
-                run_id=0,
-                task_id="",
-                group_id="",
-                ttl="",
-                task_type=TASK_TYPE_FIT,
-            ),
-        )
+        message = self._wrap_recordset_in_message(recordset, task_type=TASK_TYPE_FIT)
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_fitres(message_out.message, keep_input=False)
+        return recordset_to_fitres(message_out.content, keep_input=False)
 
     def evaluate(
         self, ins: common.EvaluateIns, timeout: Optional[float]
@@ -162,20 +152,13 @@ class RayActorClientProxy(ClientProxy):
         recordset = evaluateins_to_recordset(
             ins, keep_input=True
         )  # This must stay TRUE since ins are in-memory
-        message = Message(
-            message=recordset,
-            metadata=Metadata(
-                run_id=0,
-                task_id="",
-                group_id="",
-                ttl="",
-                task_type=TASK_TYPE_EVALUATE,
-            ),
+        message = self._wrap_recordset_in_message(
+            recordset, task_type=TASK_TYPE_EVALUATE
         )
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_evaluateres(message_out.message)
+        return recordset_to_evaluateres(message_out.content)
 
     def reconnect(
         self, ins: common.ReconnectIns, timeout: Optional[float]
