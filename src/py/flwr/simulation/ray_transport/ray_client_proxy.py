@@ -21,7 +21,7 @@ from typing import Optional
 
 from flwr import common
 from flwr.client import ClientFn
-from flwr.client.flower import Flower
+from flwr.client.clientapp import ClientApp
 from flwr.client.node_state import NodeState
 from flwr.common.constant import (
     TASK_TYPE_EVALUATE,
@@ -54,8 +54,8 @@ class RayActorClientProxy(ClientProxy):
     ):
         super().__init__(cid)
 
-        def _load_app() -> Flower:
-            return Flower(client_fn=client_fn)
+        def _load_app() -> ClientApp:
+            return ClientApp(client_fn=client_fn)
 
         self.app_fn = _load_app
         self.actor_pool = actor_pool
@@ -101,13 +101,9 @@ class RayActorClientProxy(ClientProxy):
     ) -> Message:
         """Wrap a RecordSet inside a Message."""
         return Message(
-            message=recordset,
+            content=recordset,
             metadata=Metadata(
-                run_id=0,
-                task_id="",
-                group_id="",
                 node_id=int(self.cid),
-                ttl="",
                 task_type=task_type,
             ),
         )
@@ -123,7 +119,7 @@ class RayActorClientProxy(ClientProxy):
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_getpropertiesres(message_out.message)
+        return recordset_to_getpropertiesres(message_out.content)
 
     def get_parameters(
         self, ins: common.GetParametersIns, timeout: Optional[float]
@@ -136,7 +132,7 @@ class RayActorClientProxy(ClientProxy):
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_getparametersres(message_out.message, keep_input=False)
+        return recordset_to_getparametersres(message_out.content, keep_input=False)
 
     def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
@@ -147,7 +143,7 @@ class RayActorClientProxy(ClientProxy):
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_fitres(message_out.message, keep_input=False)
+        return recordset_to_fitres(message_out.content, keep_input=False)
 
     def evaluate(
         self, ins: common.EvaluateIns, timeout: Optional[float]
@@ -162,7 +158,7 @@ class RayActorClientProxy(ClientProxy):
 
         message_out = self._submit_job(message, timeout)
 
-        return recordset_to_evaluateres(message_out.message)
+        return recordset_to_evaluateres(message_out.content)
 
     def reconnect(
         self, ins: common.ReconnectIns, timeout: Optional[float]

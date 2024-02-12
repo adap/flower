@@ -22,7 +22,7 @@ from typing import Dict, List, Tuple, Type
 import ray
 
 from flwr.client import Client, NumPyClient
-from flwr.client.flower import Flower
+from flwr.client.clientapp import ClientApp
 from flwr.common import Config, Scalar
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import TASK_TYPE_GET_PROPERTIES
@@ -113,7 +113,7 @@ def test_cid_consistency_one_at_a_time() -> None:
             message=message, timeout=None
         )
 
-        res = recordset_to_getpropertiesres(message_out.message)
+        res = recordset_to_getpropertiesres(message_out.content)
 
         assert int(prox.cid) * pi == res.properties["result"]
 
@@ -155,7 +155,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
             prox.cid, timeout=None
         )
         prox.proxy_state.update_context(run_id, context=updated_context)
-        res = recordset_to_getpropertiesres(message_out.message)
+        res = recordset_to_getpropertiesres(message_out.content)
 
         assert int(prox.cid) * pi == res.properties["result"]
         assert (
@@ -177,20 +177,16 @@ def test_cid_consistency_without_proxies() -> None:
     getproperties_ins = _get_valid_getpropertiesins()
     recordset = getpropertiesins_to_recordset(getproperties_ins)
 
-    def _load_app() -> Flower:
-        return Flower(client_fn=get_dummy_client)
+    def _load_app() -> ClientApp:
+        return ClientApp(client_fn=get_dummy_client)
 
     # submit all jobs (collect later)
     shuffle(cids)
     for cid in cids:
         message = Message(
-            message=recordset,
+            content=recordset,
             metadata=Metadata(
-                run_id=0,
-                task_id="",
-                group_id="",
                 node_id=int(cid),
-                ttl="",
                 task_type=TASK_TYPE_GET_PROPERTIES,
             ),
         )
@@ -203,7 +199,7 @@ def test_cid_consistency_without_proxies() -> None:
     shuffle(cids)
     for cid in cids:
         message_out, _ = pool.get_client_result(cid, timeout=None)
-        res = recordset_to_getpropertiesres(message_out.message)
+        res = recordset_to_getpropertiesres(message_out.content)
         assert int(cid) * pi == res.properties["result"]
 
     ray.shutdown()

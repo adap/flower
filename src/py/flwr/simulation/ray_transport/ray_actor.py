@@ -25,12 +25,12 @@ import ray
 from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
-from flwr.client.flower import Flower
+from flwr.client.clientapp import ClientApp
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
 
-FlowerFn = Callable[[], Flower]
+FlowerFn = Callable[[], ClientApp]
 
 
 class ClientException(Exception):
@@ -63,7 +63,7 @@ class VirtualClientEngineActor(ABC):
         # from the pool are correctly assigned to each ClientProxy
         try:
             # Load app
-            app: Flower = app_fn()
+            app: ClientApp = app_fn()
 
             # Handle task message
             out_message = app(message=message, context=context)
