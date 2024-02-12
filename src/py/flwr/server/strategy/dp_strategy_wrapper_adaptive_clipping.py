@@ -24,7 +24,7 @@ import numpy as np
 
 from flwr.common import EvaluateIns, EvaluateRes, FitIns, FitRes, Parameters, Scalar
 from flwr.common.differential_privacy import (
-    add_gaussian_to_params,
+    add_gaussian_noise_to_params,
     compute_adaptive_noise_params,
 )
 from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM, KEY_NORM_BIT
@@ -164,7 +164,7 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params = add_gaussian_to_params(
+            aggregated_params = add_gaussian_noise_to_params(
                 aggregated_params,
                 self.noise_multiplier,
                 self.clipping_norm,
