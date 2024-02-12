@@ -15,7 +15,8 @@
 """Message."""
 
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Optional
 
 from .recordset import RecordSet
 
@@ -26,28 +27,28 @@ class Metadata:
 
     Parameters
     ----------
-    run_id : int
+    run_id : int (default: 0)
         An identifier for the current run.
-    task_id : str
+    task_id : str (default: "")
         An identifier for the current task.
-    group_id : str
+    group_id : str (default: "")
         An identifier for grouping tasks. In some settings
         this is used as the FL round.
-    node_id : int
+    node_id : Optional[int] (default: None)
         An identifier for the node running a task.
-    ttl : str
+    ttl : str (default: "")
         Time-to-live for this task.
-    task_type : str
+    task_type : str (default: "")
         A string that encodes the action to be executed on
         the receiving end.
     """
 
-    run_id: int
-    task_id: str
-    group_id: str
-    node_id: int
-    ttl: str
-    task_type: str
+    run_id: int = 0
+    task_id: str = ""
+    group_id: str = ""
+    node_id: Optional[int] = None
+    ttl: str = ""
+    task_type: str = ""
 
 
 @dataclass
@@ -63,5 +64,5 @@ class Message:
         logic to a client, or vice-versa) or that will be sent to it.
     """
 
-    metadata: Metadata
-    message: RecordSet
+    metadata: Metadata = field(default_factory=Metadata)
+    message: RecordSet = field(default_factory=RecordSet)

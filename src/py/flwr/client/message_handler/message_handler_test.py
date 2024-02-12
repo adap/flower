@@ -121,11 +121,7 @@ def test_client_without_get_properties() -> None:
     recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
     message = Message(
         metadata=Metadata(
-            run_id=0,
             task_id=str(uuid.uuid4()),
-            group_id="",
-            node_id=0,
-            ttl="",
             task_type=TASK_TYPE_GET_PROPERTIES,
         ),
         message=recordset,
@@ -160,11 +156,7 @@ def test_client_with_get_properties() -> None:
     recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
     message = Message(
         metadata=Metadata(
-            run_id=0,
             task_id=str(uuid.uuid4()),
-            group_id="",
-            node_id=0,
-            ttl="",
             task_type=TASK_TYPE_GET_PROPERTIES,
         ),
         message=recordset,
