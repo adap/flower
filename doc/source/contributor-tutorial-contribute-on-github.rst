@@ -4,8 +4,7 @@ Contribute on GitHub
 This guide is for people who want to get involved with Flower, but who are not used to contributing to GitHub projects.
 
 If you're familiar with how contributing on GitHub works, you can directly checkout our 
-`getting started guide for contributors <https://flower.dev/docs/getting-started-for-contributors.html>`_ 
-and examples of `good first contributions <https://flower.dev/docs/good-first-contributions.html>`_.
+`getting started guide for contributors <https://flower.dev/docs/contributor-tutorial-get-started-as-a-contributor.html>`_.
 
 
 Setting up the repository
