@@ -19,9 +19,12 @@ import importlib
 from typing import Optional, cast
 
 from flwr.common.context import Context
-from flwr.server import ClientManager, Server, ServerConfig
-from flwr.server.driver import Driver
+from flwr.server.driver.driver import Driver
 from flwr.server.strategy import Strategy
+
+from .app import ServerConfig
+from .client_manager import ClientManager
+from .server import Server
 
 
 class ServerApp:
