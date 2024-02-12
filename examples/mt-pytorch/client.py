@@ -34,9 +34,20 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
-# Start Flower client
-fl.client.start_client(
-    server_address="0.0.0.0:9092",  # "0.0.0.0:9093" for REST
-    client=FlowerClient().to_client(),
-    transport="grpc-rere",  # "rest" for REST
+def client_fn(cid: str):
+    return FlowerClient().to_client()
+
+
+# To run this: `flower-client client:app`
+app = fl.client.ClientApp(
+    client_fn=client_fn,
 )
+
+
+if __name__ == "__main__":
+    # Start Flower client
+    fl.client.start_client(
+        server_address="0.0.0.0:9092",  # "0.0.0.0:9093" for REST
+        client_fn=client_fn,
+        transport="grpc-rere",  # "rest" for REST
+    )
