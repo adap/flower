@@ -103,7 +103,7 @@ def compute_adaptive_clip_model_update(
     return norm_bit
 
 
-def add_gaussian_to_params(
+def add_gaussian_noise_to_params(
     model_params: Parameters,
     noise_multiplier: float,
     clipping_norm: float,

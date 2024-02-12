@@ -18,6 +18,7 @@ Paper (Andrew et al.): https://arxiv.org/pdf/1905.03871.pdf
 """
 
 import math
+import warnings
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -35,7 +36,7 @@ from flwr.common import (
 )
 from flwr.common.differential_privacy import (
     adaptive_clip_inputs_inplace,
-    add_gaussian_to_params,
+    add_gaussian_noise_to_params,
     compute_adaptive_noise_params,
 )
 from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM, KEY_NORM_BIT
@@ -164,6 +165,15 @@ class DPStrategyWrapperServerSideAdaptiveClipping(Strategy):
         if failures:
             return None, {}
 
+        if len(results) != self.num_sampled_clients:
+            warnings.warn(
+                f"The number of clients returning parameters ({len(results)})"
+                f" differs from the number of sampled clients ({self.num_sampled_clients})."
+                f" This could impact the differential privacy guarantees,"
+                f" potentially leading to privacy leakage or inadequate noise calibration.",
+                stacklevel=2,
+            )
+
         norm_bit_set_count = 0
         for _, res in results:
             param = parameters_to_ndarrays(res.parameters)
@@ -197,7 +207,7 @@ class DPStrategyWrapperServerSideAdaptiveClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params = add_gaussian_to_params(
+            aggregated_params = add_gaussian_noise_to_params(
                 aggregated_params,
                 self.noise_multiplier,
                 self.clipping_norm,
@@ -346,6 +356,15 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
         if failures:
             return None, {}
 
+        if len(results) != self.num_sampled_clients:
+            warnings.warn(
+                f"The number of clients returning parameters ({len(results)})"
+                f" differs from the number of sampled clients ({self.num_sampled_clients})."
+                f" This could impact the differential privacy guarantees,"
+                f" potentially leading to privacy leakage or inadequate noise calibration.",
+                stacklevel=2,
+            )
+
         aggregated_params, metrics = self.strategy.aggregate_fit(
             server_round, results, failures
         )
@@ -353,7 +372,7 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
 
         # Add Gaussian noise to the aggregated parameters
         if aggregated_params:
-            aggregated_params = add_gaussian_to_params(
+            aggregated_params = add_gaussian_noise_to_params(
                 aggregated_params,
                 self.noise_multiplier,
                 self.clipping_norm,
