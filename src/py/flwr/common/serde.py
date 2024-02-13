@@ -563,6 +563,7 @@ def message_from_taskins(taskins: TaskIns) -> Message:
         run_id=taskins.run_id,
         task_id=taskins.task_id,
         group_id=taskins.group_id,
+        node_id=taskins.task.consumer.node_id,
         ttl=taskins.task.ttl,
         task_type=taskins.task.task_type,
     )
@@ -592,6 +593,7 @@ def message_from_taskres(taskres: TaskRes) -> Message:
         run_id=taskres.run_id,
         task_id=taskres.task_id,
         group_id=taskres.group_id,
+        node_id=taskres.task.consumer.node_id,
         ttl=taskres.task.ttl,
         task_type=taskres.task.task_type,
     )
