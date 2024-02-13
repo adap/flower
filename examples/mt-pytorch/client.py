@@ -69,9 +69,9 @@ def get_tensorboard_mod(logdir) -> Mod:
     ) -> Message:
         group_id = fwd.metadata.group_id
 
-        client_id = str(fwd.message)
+        client_id = str(fwd.metadata.node_id)
 
-        config = fwd.message.configs
+        config = fwd.content.configs
         if "round" in config:
             round = str(config["round"])
         else:
@@ -86,7 +86,7 @@ def get_tensorboard_mod(logdir) -> Mod:
         if bwd.metadata.task_type == (TASK_TYPE_FIT or TASK_TYPE_EVALUATE):
             writer = tf.summary.create_file_writer(os.path.join(logdir_run, client_id))
 
-            metrics = bwd.message.metrics
+            metrics = bwd.content.metrics
             task_type = bwd.metadata.task_type
 
             # Write aggregated loss
