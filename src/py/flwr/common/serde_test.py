@@ -307,6 +307,9 @@ def test_message_to_and_from_taskins() -> None:
     metadata = maker.metadata()
     original = Message(
         metadata=Metadata(
+            run_id=0,
+            task_id="",
+            group_id="",
             node_id=metadata.node_id,
             ttl=metadata.ttl,
             task_type=metadata.task_type,
@@ -319,7 +322,7 @@ def test_message_to_and_from_taskins() -> None:
     taskins.run_id = metadata.run_id
     taskins.task_id = metadata.task_id
     taskins.group_id = metadata.group_id
-    taskins.task.consumer.node_id = cast(int, metadata.node_id)
+    taskins.task.consumer.node_id = metadata.node_id
     deserialized = message_from_taskins(taskins)
 
     # Assert
@@ -334,6 +337,9 @@ def test_message_to_and_from_taskres() -> None:
     metadata = maker.metadata()
     original = Message(
         metadata=Metadata(
+            run_id=0,
+            task_id="",
+            group_id="",
             node_id=metadata.node_id,
             ttl=metadata.ttl,
             task_type=metadata.task_type,
@@ -346,7 +352,7 @@ def test_message_to_and_from_taskres() -> None:
     taskres.run_id = metadata.run_id
     taskres.task_id = metadata.task_id
     taskres.group_id = metadata.group_id
-    taskres.task.consumer.node_id = cast(int, metadata.node_id)
+    taskres.task.consumer.node_id = metadata.node_id
     deserialized = message_from_taskres(taskres)
 
     # Assert
