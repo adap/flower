@@ -55,10 +55,10 @@ class Message:
     ----------
     metadata : Metadata
         A dataclass including information about the task to be executed.
-    message : RecordSet
+    content : RecordSet
         Holds records either sent by another entity (e.g. sent by the server-side
         logic to a client, or vice-versa) or that will be sent to it.
     """
 
     metadata: Metadata
-    message: RecordSet
+    content: RecordSet

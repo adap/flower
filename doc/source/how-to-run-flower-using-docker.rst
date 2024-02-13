@@ -1,5 +1,5 @@
 Run Flower using Docker
-====================
+=======================
 
 The simplest way to get started with Flower is by using the pre-made Docker images, which you can
 find on `Docker Hub <https://hub.docker.com/r/flwr/server/tags>`_.
