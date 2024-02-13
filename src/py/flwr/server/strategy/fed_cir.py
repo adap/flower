@@ -18,7 +18,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from flwr.server.utils import Generator, ResNet18, VAE
+from flwr.server.utils import Generator, ResNet18, VAE, CVAE
 from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg
 import wandb
@@ -157,14 +157,15 @@ class FedCiR(FedAvg):
         self.lambda_align_g = lambda_align_g
 
     def compute_ref_stats(self):
-        ref_model = VAE(z_dim=2).to(self.device)
+        ref_model = CVAE(z_dim=2).to(self.device)
         opt_ref = torch.optim.Adam(ref_model.parameters(), lr=1e-4)
         for ep in range(5000):
-            for images, _ in self.alignment_loader:
+            for images, labels in self.alignment_loader:
                 images = images.to(self.device)
+                labels = labels.to(self.device)
                 opt_ref.zero_grad()
-                recon_images, mu, logvar = ref_model(images)
-                vae_loss1 = vae_loss(recon_images, images, mu, logvar, 10)
+                recon_images, mu, logvar = ref_model(images, labels)
+                vae_loss1 = vae_loss(recon_images, images, mu, logvar, 0.01)
                 vae_loss1.backward()
                 opt_ref.step()
             if ep % 100 == 0:
@@ -173,9 +174,10 @@ class FedCiR(FedAvg):
                 log(DEBUG, f"--------------------------------------------------")
         ref_model.eval()
         with torch.no_grad():
-            for images, _ in self.alignment_loader:
+            for images, labels in self.alignment_loader:
                 images = images.to(self.device)
-                _, ref_mu, ref_logvar = ref_model(images)
+                labels = labels.to(self.device)
+                _, ref_mu, ref_logvar = ref_model(images, labels)
         return ref_mu, ref_logvar
 
     def __repr__(self) -> str:

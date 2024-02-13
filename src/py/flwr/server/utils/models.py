@@ -222,6 +222,60 @@ class VAE(nn.Module):
         return output, mu, log_var
 
 
+class CVAE(nn.Module):
+    def __init__(
+        self, x_dim=784, h_dim1=512, h_dim2=256, h_dim3=128, z_dim=2, num_classes=10
+    ):
+        super(CVAE, self).__init__()
+        self.num_classes = num_classes
+
+        # Encoder part
+        self.fc1 = nn.Linear(x_dim + self.num_classes, h_dim1)
+        self.fc2 = nn.Linear(h_dim1, h_dim2)
+        self.fc3 = nn.Linear(h_dim2, h_dim3)
+        self.fc41 = nn.Linear(h_dim3, z_dim)  # mu
+        self.fc42 = nn.Linear(h_dim3, z_dim)  # log_var
+
+        # Decoder part
+        self.label_projection = nn.Linear(num_classes, z_dim)
+        self.fc5 = nn.Linear(z_dim, h_dim3)
+        self.fc6 = nn.Linear(h_dim3, h_dim2)
+        self.fc7 = nn.Linear(h_dim2, h_dim1)
+        self.fc8 = nn.Linear(h_dim1, x_dim)
+
+    def encoder(self, x, y):
+        input_cat = torch.cat((x, y), dim=1)
+        h = F.relu(self.fc1(input_cat))
+        h = F.relu(self.fc2(h))
+        h = F.relu(self.fc3(h))
+        return self.fc41(h), self.fc42(h)  # mu, log_var
+
+    def sampling(self, mu, log_var):
+        std = torch.exp(0.5 * log_var)
+        eps = torch.randn_like(std)
+        return eps.mul(std).add_(mu)  # return z sample
+
+    def decoder(self, z):
+        h = F.relu(self.fc5(z))
+        h = F.relu(self.fc6(h))
+        h = F.relu(self.fc7(h))
+        return torch.sigmoid(self.fc8(h))
+
+    def forward(self, x, y):
+        y_onehot = F.one_hot(y, self.num_classes).float()
+        mu, log_var = self.encoder(x.view(-1, 784), y_onehot)
+        z = self.sampling(mu, log_var)
+
+        # Project one-hot encoded conditional information to latent space
+        y_proj = self.label_projection(y_onehot)
+
+        # Combine latent vector z with projected conditional information y
+        z_combined = z + y_proj
+
+        output = self.decoder(z_combined)
+        return output, mu, log_var
+
+
 if __name__ == "__main__":
     net = ResNet18().to(DEVICE)
     summary(net, (3, 128, 128))
