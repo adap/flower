@@ -156,7 +156,7 @@ def _get_fit_fn(
 
     def fit() -> FitRes:
         out_msg = call_next(msg, ctxt)
-        return compat.recordset_to_fitres(out_msg.message, keep_input=False)
+        return compat.recordset_to_fitres(out_msg.content, keep_input=False)
 
     return fit
 
@@ -178,7 +178,7 @@ def secaggplus_mod(
     state = SecAggPlusState(**state_dict)
 
     # Retrieve incoming configs
-    configs = msg.message.get_configs(RECORD_KEY_CONFIGS).data
+    configs = msg.content.get_configs(RECORD_KEY_CONFIGS).data
 
     # Check the validity of the next stage
     check_stage(state.current_stage, configs)
@@ -207,8 +207,15 @@ def secaggplus_mod(
 
     # Return message
     return Message(
-        metadata=Metadata(0, "", "", "", TASK_TYPE_FIT),
-        message=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)}),
+        metadata=Metadata(
+            run_id=0,
+            task_id="",
+            group_id="",
+            node_id=0,
+            ttl="",
+            task_type=TASK_TYPE_FIT,
+        ),
+        content=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)}),
     )
 
 
