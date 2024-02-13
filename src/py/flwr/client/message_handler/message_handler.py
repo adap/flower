@@ -89,6 +89,11 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
         recordset.set_configs("config", ConfigsRecord({"reason": reason}))
         out_message = Message(
             metadata=Metadata(
+                run_id=0,
+                task_id="",
+                group_id="",
+                node_id=0,
+                ttl="",
                 task_type="reconnect",
             ),
             content=recordset,
@@ -146,6 +151,11 @@ def handle_legacy_message_from_tasktype(
     # Return Message
     out_message = Message(
         metadata=Metadata(
+            run_id=0,
+            task_id="",
+            group_id="",
+            node_id=0,
+            ttl="",
             task_type=task_type,
         ),
         content=out_recordset,

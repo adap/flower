@@ -186,6 +186,10 @@ def test_cid_consistency_without_proxies() -> None:
         message = Message(
             content=recordset,
             metadata=Metadata(
+                run_id=0,
+                task_id="",
+                group_id="",
+                ttl="",
                 node_id=int(cid),
                 task_type=TASK_TYPE_GET_PROPERTIES,
             ),

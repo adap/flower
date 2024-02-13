@@ -103,7 +103,11 @@ class RayActorClientProxy(ClientProxy):
         return Message(
             content=recordset,
             metadata=Metadata(
+                run_id=0,
+                task_id="",
+                group_id="",
                 node_id=int(self.cid),
+                ttl="",
                 task_type=task_type,
             ),
         )
