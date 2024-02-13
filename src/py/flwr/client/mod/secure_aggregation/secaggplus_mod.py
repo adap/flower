@@ -211,7 +211,7 @@ def secaggplus_mod(
             run_id=0,
             task_id="",
             group_id="",
-            node_id=None,
+            node_id=0,
             ttl="",
             task_type=TASK_TYPE_FIT,
         ),

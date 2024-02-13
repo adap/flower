@@ -16,7 +16,6 @@
 
 
 from dataclasses import dataclass
-from typing import Optional
 
 from .recordset import RecordSet
 
@@ -34,7 +33,7 @@ class Metadata:
     group_id : str
         An identifier for grouping tasks. In some settings
         this is used as the FL round.
-    node_id : Optional[int]
+    node_id : int
         An identifier for the node running a task.
     ttl : str
         Time-to-live for this task.
@@ -46,7 +45,7 @@ class Metadata:
     run_id: int
     task_id: str
     group_id: str
-    node_id: Optional[int]
+    node_id: int
     ttl: str
     task_type: str
 
