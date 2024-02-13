@@ -264,7 +264,6 @@ class FedCiR(FedAvg):
             return None, {}
 
         def vae_loss_connect(recon_img, img, mu, logvar, mu_ref, logvar_ref):
-            lambda_align = 1.0
             # Reconstruction loss using binary cross-entropy
             condition = (recon_img >= 0.0) & (recon_img <= 1.0)
             # assert torch.all(condition), "Values should be between 0 and 1"

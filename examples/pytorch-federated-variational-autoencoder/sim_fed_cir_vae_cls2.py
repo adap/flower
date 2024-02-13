@@ -326,10 +326,11 @@ if __name__ == "__main__":
                     200,
                 ]
             },
-            # "lambda_reg": {"min": 0.0, "max": 1.0},
+            "lambda_reg": {"min": 0.0, "max": 1.0},
             "lambda_align_g": {"min": 1.0, "max": 10.0},
-            "lambda_reg": {"values": [0]},
-            "lambda_align": {"values": [100, 200, 300]},
+            # "lambda_reg": {"values": [0]},
+            # "lambda_align": {"values": [100, 200, 300]},
+            "lambda_align": {"min": 1.0, "max": 10.0},
             "lr_g": {
                 "values": [
                     1e-3,
