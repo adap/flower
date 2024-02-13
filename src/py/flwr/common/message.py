@@ -27,28 +27,28 @@ class Metadata:
 
     Parameters
     ----------
-    run_id : int (default: 0)
+    run_id : int
         An identifier for the current run.
-    task_id : str (default: "")
+    task_id : str
         An identifier for the current task.
-    group_id : str (default: "")
+    group_id : str
         An identifier for grouping tasks. In some settings
         this is used as the FL round.
-    node_id : Optional[int] (default: None)
+    node_id : Optional[int]
         An identifier for the node running a task.
-    ttl : str (default: "")
+    ttl : str
         Time-to-live for this task.
-    task_type : str (default: "")
+    task_type : str
         A string that encodes the action to be executed on
         the receiving end.
     """
 
-    run_id: int = 0
-    task_id: str = ""
-    group_id: str = ""
-    node_id: Optional[int] = None
-    ttl: str = ""
-    task_type: str = ""
+    run_id: int
+    task_id: str
+    group_id: str
+    node_id: Optional[int]
+    ttl: str
+    task_type: str
 
 
 @dataclass

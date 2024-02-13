@@ -307,6 +307,9 @@ def test_message_to_and_from_taskins() -> None:
     metadata = maker.metadata()
     original = Message(
         metadata=Metadata(
+            run_id=0,
+            task_id="",
+            group_id="",
             node_id=metadata.node_id,
             ttl=metadata.ttl,
             task_type=metadata.task_type,
@@ -334,6 +337,9 @@ def test_message_to_and_from_taskres() -> None:
     metadata = maker.metadata()
     original = Message(
         metadata=Metadata(
+            run_id=0,
+            task_id="",
+            group_id="",
             node_id=metadata.node_id,
             ttl=metadata.ttl,
             task_type=metadata.task_type,

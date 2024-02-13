@@ -207,7 +207,14 @@ def secaggplus_mod(
 
     # Return message
     return Message(
-        metadata=Metadata(task_type=TASK_TYPE_FIT),
+        metadata=Metadata(
+            run_id=0,
+            task_id="",
+            group_id="",
+            node_id=None,
+            ttl="",
+            task_type=TASK_TYPE_FIT,
+        ),
         content=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)}),
     )
 
