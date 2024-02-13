@@ -32,7 +32,7 @@ from flwr.common.version import package_name, package_version
 FLWR_TELEMETRY_ENABLED = os.getenv("FLWR_TELEMETRY_ENABLED", "1")
 FLWR_TELEMETRY_LOGGING = os.getenv("FLWR_TELEMETRY_LOGGING", "0")
 
-TELEMETRY_EVENTS_URL = "https://telemetry.flower.dev/api/v1/event"
+TELEMETRY_EVENTS_URL = "https://telemetry.flower.ai/api/v1/event"
 
 LOGGER_NAME = "flwr-telemetry"
 LOGGER_LEVEL = logging.DEBUG
