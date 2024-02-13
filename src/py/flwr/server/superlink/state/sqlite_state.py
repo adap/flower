@@ -37,6 +37,26 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
+SQL_CREATE_TABLE_NODE_KEY = """
+CREATE TABLE IF NOT EXISTS node_key(
+    node_id INTEGER PRIMARY KEY,
+    public_key BLOB
+);
+"""
+
+SQL_CREATE_TABLE_CREDENTIAL = """
+CREATE TABLE IF NOT EXISTS credential(
+    public_key BLOB PRIMARY KEY,
+    private_key BLOB
+);
+"""
+
+SQL_CREATE_TABLE_PUBLIC_KEY = """
+CREATE TABLE IF NOT EXISTS public_key(
+    public_key BLOB UNIQUE
+);
+"""
+
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
     run_id INTEGER UNIQUE
@@ -123,6 +143,9 @@ class SqliteState(State):
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
+        cur.execute(SQL_CREATE_TABLE_CREDENTIAL)
+        cur.execute(SQL_CREATE_TABLE_NODE_KEY)
+        cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
         return res.fetchall()
