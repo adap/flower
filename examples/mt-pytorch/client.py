@@ -58,14 +58,14 @@ def get_wandb_mod(name: str) -> Mod:
         group_id = fwd.metadata.group_id
         group_name = f"Workload ID: {run_id}"
 
-        client_id = str(fwd.message)
+        client_id = str(fwd.metadata.node_id)
         run_name = f"Client ID: {client_id}"
 
         time_diff = None
 
-        config = fwd.message.configs
+        config = fwd.content.configs
         if "round" in config:
-            round = str(config["round"])
+            round = config["round"]
         else:
             round = group_id
         if "project" in config:
@@ -91,7 +91,7 @@ def get_wandb_mod(name: str) -> Mod:
 
             results_to_log = {}
 
-            metrics = bwd.message.metrics
+            metrics = bwd.content.metrics
             task_type = bwd.metadata.task_type
 
             if "loss" in metrics:
@@ -101,7 +101,7 @@ def get_wandb_mod(name: str) -> Mod:
             if time_diff is not None:
                 results_to_log[f"{task_type}_time"] = time_diff
 
-            wandb.log(results_to_log, step=round)
+            wandb.log(results_to_log, step=int(round))
 
         return bwd
 
