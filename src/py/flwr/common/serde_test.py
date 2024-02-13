@@ -312,7 +312,7 @@ def test_message_to_and_from_taskins() -> None:
             ttl=metadata.ttl,
             task_type=metadata.task_type,
         ),
-        message=maker.recordset(1, 1, 1),
+        content=maker.recordset(1, 1, 1),
     )
 
     # Execute
@@ -323,7 +323,7 @@ def test_message_to_and_from_taskins() -> None:
     deserialized = message_from_taskins(taskins)
 
     # Assert
-    assert original.message == deserialized.message
+    assert original.content == deserialized.content
     assert metadata == deserialized.metadata
 
 
@@ -340,7 +340,7 @@ def test_message_to_and_from_taskres() -> None:
             ttl=metadata.ttl,
             task_type=metadata.task_type,
         ),
-        message=maker.recordset(1, 1, 1),
+        content=maker.recordset(1, 1, 1),
     )
 
     # Execute
@@ -351,5 +351,5 @@ def test_message_to_and_from_taskres() -> None:
     deserialized = message_from_taskres(taskres)
 
     # Assert
-    assert original.message == deserialized.message
+    assert original.content == deserialized.content
     assert metadata == deserialized.metadata
