@@ -18,7 +18,7 @@
 import concurrent.futures
 import sys
 from logging import ERROR
-from typing import Any, Callable, Optional, Tuple, Union, Sequence
+from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import grpc
 
