@@ -94,3 +94,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
         )
         port = self._server.add_insecure_port("[::]:0")
         self._server.start()
+        
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
