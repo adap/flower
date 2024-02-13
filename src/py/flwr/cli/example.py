@@ -14,12 +14,11 @@
 # ==============================================================================
 """Flower CLI package."""
 
+import json
 import subprocess
+import urllib.request
 
 import typer
-
-import urllib.request
-import json
 
 
 def example():
@@ -50,7 +49,9 @@ def example():
 
     example_name = example_names[int(index)]
 
-    subprocess.check_output([ "git", "clone", "--depth=1", "https://github.com/adap/flower.git"])
+    subprocess.check_output(
+        ["git", "clone", "--depth=1", "https://github.com/adap/flower.git"]
+    )
     subprocess.check_output(["mv", f"flower/examples/{example_name}", "."])
     subprocess.check_output(["rm", "-rf", "flower"])
 

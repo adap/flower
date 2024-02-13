@@ -16,8 +16,8 @@
 
 import typer
 
-from .new.new import new
 from .example import example
+from .new.new import new
 
 app = typer.Typer(
     help="Flower CLI.",

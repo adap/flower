@@ -16,7 +16,7 @@
 
 import os
 
-from .new import new, MLFramework, load_template, render_template, create_file
+from .new import MLFramework, create_file, load_template, new, render_template
 
 
 def test_load_template():
@@ -64,9 +64,7 @@ def test_new(tmp_path):
     expected_files_top_level = set(
         ["requirements.txt", "fedgpt", "README.md", "flower.toml"]
     )
-    expected_files_module = set(
-        ["main.py", "__init__.py"]
-    )
+    expected_files_module = set(["main.py", "__init__.py"])
 
     ## Change into the temprorary directory
     os.chdir(tmp_path)
@@ -78,5 +76,7 @@ def test_new(tmp_path):
     file_list = os.listdir(os.path.join(tmp_path, project_name.lower()))
     assert set(file_list) == expected_files_top_level
 
-    file_list = os.listdir(os.path.join(tmp_path, project_name.lower(), project_name.lower()))
+    file_list = os.listdir(
+        os.path.join(tmp_path, project_name.lower(), project_name.lower())
+    )
     assert set(file_list) == expected_files_module

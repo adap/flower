@@ -14,10 +14,10 @@
 # ==============================================================================
 """Flower CLI package."""
 
-from typing import Dict
-from string import Template
-from enum import Enum
 import os
+from enum import Enum
+from string import Template
+from typing import Dict
 
 import typer
 from typing_extensions import Annotated
@@ -75,9 +75,7 @@ def new(
         ),
     ],
 ):
-    """
-    This command will guide you through creating your Flower project.
-    """
+    """This command will guide you through creating your Flower project."""
     print(f"Creating Flower project {project_name}...")
 
     # Set project directory path
