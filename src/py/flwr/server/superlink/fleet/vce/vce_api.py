@@ -72,7 +72,7 @@ def taskins_to_message(taskins: TaskIns) -> Message:
             run_id=taskins.run_id,
             task_id=taskins.task_id,
             group_id=taskins.group_id,
-            node_id=-1,
+            node_id=0, # TODO: resolve
             ttl="",
             task_type=taskins.task.task_type,
         ),
@@ -180,11 +180,11 @@ async def run(
     node_states: Dict[int, NodeState],
 ) -> None:
     """Run the VCE async."""
-    queue: PullTaskInsRequestQueue = asyncio.Queue(128)
+    queue: PullTaskInsRequestQueue = asyncio.Queue(64)
 
     worker_tasks = [
         asyncio.create_task(worker(app, queue, node_states, state_factory, pool))
-        for _ in range(6)
+        for _ in range(pool.num_actors)
     ]
     asyncio.create_task(generate_pull_requests(queue, nodes))
     await queue.join()
