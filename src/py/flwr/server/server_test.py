@@ -15,6 +15,10 @@
 """Flower server tests."""
 
 
+import argparse
+import csv
+import tempfile
+from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
@@ -35,8 +39,14 @@ from flwr.common import (
     Status,
     ndarray_to_bytes,
 )
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    generate_key_pairs,
+    private_key_to_bytes,
+    public_key_to_bytes,
+)
 from flwr.server.client_manager import SimpleClientManager
 
+from .app import _try_setup_client_authentication
 from .client_proxy import ClientProxy
 from .server import Server, evaluate_clients, fit_clients
 
@@ -169,3 +179,52 @@ def test_set_max_workers() -> None:
 
     # Assert
     assert server.max_workers == 42
+
+
+def test_setup_client_auth() -> None:
+    """Test setup client authentication."""
+    # Generate keys
+    _, first_public_key = generate_key_pairs()
+    _, second_public_key = generate_key_pairs()
+    server_private_key, server_public_key = generate_key_pairs()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Initialize temporary files
+        client_keys_file_path = Path(temp_dir) / "client_keys.csv"
+        server_public_key_path = Path(temp_dir) / "server_public_key"
+        server_private_key_path = Path(temp_dir) / "server_private_key"
+
+        # Fill the files with relevant keys
+        with open(client_keys_file_path, "w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(
+                [
+                    public_key_to_bytes(first_public_key).decode(),
+                    public_key_to_bytes(second_public_key).decode(),
+                ]
+            )
+        server_public_key_path.write_bytes(public_key_to_bytes(server_public_key))
+        server_private_key_path.write_bytes(private_key_to_bytes(server_private_key))
+
+        # Mock argparse with `require-client-authentication`` flag
+        mock_args = argparse.Namespace(
+            require_client_authentication=[
+                str(client_keys_file_path),
+                str(server_public_key_path),
+                str(server_private_key_path),
+            ]
+        )
+
+        # Run _try_setup_client_authentication
+        result = _try_setup_client_authentication(mock_args)
+
+        # Assert result with expected values
+        assert result is not None
+        assert result == (
+            {
+                public_key_to_bytes(first_public_key),
+                public_key_to_bytes(second_public_key),
+            },
+            public_key_to_bytes(server_public_key),
+            private_key_to_bytes(server_private_key),
+        )
