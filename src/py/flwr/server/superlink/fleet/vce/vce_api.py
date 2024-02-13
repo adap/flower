@@ -16,7 +16,7 @@
 
 import asyncio
 from logging import INFO
-from typing import Dict, List
+from typing import Callable, Dict, List, Union
 
 import ray
 
@@ -42,14 +42,16 @@ from flwr.simulation.ray_transport.ray_actor import (
     VirtualClientEngineActorPool,
 )
 
+PullTaskInsRequestQueue = asyncio.Queue[PullTaskInsRequest]
 
-def _construct_actor_pool() -> VirtualClientEngineActorPool:
+
+def _construct_actor_pool(
+    client_resources: Dict[str, Union[float, int]]
+) -> VirtualClientEngineActorPool:
     """Prepare ActorPool."""
-    # TODO: these should be passed by the user (controls degree of parallelism)
-    client_resources = {"num_cpus": 2, "num_gpus": 0.0}
 
-    def _create_actor_fn():
-        return DefaultActor.options(**client_resources).remote()
+    def _create_actor_fn():  # type: ignore
+        return DefaultActor.options(**client_resources).remote()  # type: ignore
 
     # Create actor pool
     ray.init(include_dashboard=True)
@@ -88,12 +90,16 @@ def _register_nodes(num_nodes: int, state_factory: StateFactory) -> List[Node]:
 
 
 async def worker(
-    app: ClientApp,
-    queue: asyncio.Queue,
+    app: Callable[[], ClientApp],
+    queue: PullTaskInsRequestQueue,
     node_states: Dict[int, NodeState],
     state_factory: StateFactory,
     pool: VirtualClientEngineActorPool,
-):
+) -> None:
+    """Get PullTaskInRequests from queue and execute associated job if actor is free.
+
+    If actor is not free, the request is added back to the queue.
+    """
     while True:
         pulltaskinrequest = await queue.get()
 
@@ -137,6 +143,11 @@ async def worker(
                 # Fetch result
                 out_mssg, updated_context = pool.fetch_result_and_return_actor(future)
 
+                # Update Context
+                node_states[node_id].update_context(
+                    task_ins.run_id, context=updated_context
+                )
+
                 # Convert to TaskRes
                 task_res = message_to_taskres(out_mssg)
                 # Configuring task
@@ -148,9 +159,13 @@ async def worker(
                 push_task_res(request=to_push, state=state_factory.state())
 
 
-async def generate_pull_requests(queue: asyncio.Queue, nodes: List[Node]):
+async def generate_pull_requests(
+    queue: PullTaskInsRequestQueue, nodes: List[Node]
+) -> None:
+    """Generate PullTaskInsRequests and adds it to the queue."""
     while True:
         for node in nodes:
+            # TODO: ideally only create requests if node has a taskins
             request = PullTaskInsRequest(node=node)
             await queue.put(request)
 
@@ -158,13 +173,14 @@ async def generate_pull_requests(queue: asyncio.Queue, nodes: List[Node]):
 
 
 async def run(
-    app: ClientApp,
+    app: Callable[[], ClientApp],
     nodes: List[Node],
     state_factory: StateFactory,
     pool: VirtualClientEngineActorPool,
     node_states: Dict[int, NodeState],
-):
-    queue = asyncio.Queue(128)
+) -> None:
+    """Run the VCE async."""
+    queue: PullTaskInsRequestQueue = asyncio.Queue(128)
 
     worker_tasks = [
         asyncio.create_task(worker(app, queue, node_states, state_factory, pool))
@@ -177,12 +193,14 @@ async def run(
 
 def run_vce(
     num_supernodes: int,
+    client_resources: Dict[str, Union[float, int]],
     client_app_callable_str: str,
     state_factory: StateFactory,
 ) -> None:
     """Run VirtualClientEnginge."""
     # Create actor pool
-    pool = _construct_actor_pool()
+    log(INFO, f"{client_resources = }")
+    pool = _construct_actor_pool(client_resources)
     log(INFO, f"Constructed ActorPool with: {pool.num_actors} actors")
 
     # Register nodes (as many as number of possible clients)

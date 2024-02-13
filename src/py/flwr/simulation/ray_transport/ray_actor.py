@@ -416,14 +416,14 @@ class VirtualClientEngineActorPool(ActorPool):
         # Return both result from tasks and (potentially) updated run context
         return self._fetch_future_result(cid)
 
-    def is_actor_available(self):
-        """."""
+    def is_actor_available(self) -> bool:
+        """Return true if there is an idle actor."""
         return len(self._idle_actors) > 0
 
     def submit_if_actor_is_free(
         self, actor_fn: Any, job: Tuple[FlowerFn, Message, str, Context]
-    ) -> ObjectRef | None:
-        """."""
+    ) -> Any | None:
+        """On idle actor, execute job."""
         if self._idle_actors:
             app_fn, mssg, cid, context = job
             actor = self._idle_actors.pop()
@@ -434,10 +434,10 @@ class VirtualClientEngineActorPool(ActorPool):
         else:
             return None
 
-    def fetch_result_and_return_actor(self, future) -> Tuple[Message, Context]:
-        """."""
+    def fetch_result_and_return_actor(self, future: Any) -> Tuple[Message, Context]:
+        """Pull result given a future and add actor back to pool."""
         actor = self._future_to_actor.pop(future)
-        self._return_actor(actor)
+        self._return_actor(actor)  # type: ignore
         _, out_mssg, updated_context = ray.get(future)
 
         return out_mssg, updated_context

@@ -14,9 +14,9 @@
 # ==============================================================================
 """Flower server app."""
 
-
 import argparse
 import importlib.util
+import json
 import sys
 import threading
 from dataclasses import dataclass
@@ -25,7 +25,7 @@ from os.path import isfile
 from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import grpc
 
@@ -470,6 +470,7 @@ def run_superlink() -> None:
     elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
         _run_fleet_api_vce(
             num_supernodes=args.num_supernodes,
+            client_resources=args.client_resources,
             client_app_callable_str=args.callable,
             state_factory=state_factory,
         )
@@ -611,6 +612,7 @@ def _run_fleet_api_grpc_rere(
 
 def _run_fleet_api_vce(
     num_supernodes: int,
+    client_resources: Dict[str, Union[float, int]],
     client_app_callable_str: str,
     state_factory: StateFactory,
 ) -> None:
@@ -618,7 +620,7 @@ def _run_fleet_api_vce(
 
     log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
 
-    run_vce(num_supernodes, client_app_callable_str, state_factory)
+    run_vce(num_supernodes, client_resources, client_app_callable_str, state_factory)
 
 
 # pylint: disable=import-outside-toplevel,too-many-arguments
@@ -851,6 +853,13 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "--num-supernodes",
         type=int,
         help="Number of SuperNodes connected to the SuperLink",
+    )
+    vce_group.add_argument(
+        "--client-resources",
+        type=json.loads,
+        default='{"num_cpus":2, "num_gpus":0.0}',
+        help='A dict in the form \'{"num_cpus":<int>, "num_gpus":<float>}\'. Pay close '
+        " attention to how the quotes and double quotes are set.",
     )
 
 
