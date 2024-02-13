@@ -462,15 +462,8 @@ def run_superlink() -> None:
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-        setup_client_auth = _try_setup_client_authentication(args)
+        _try_setup_client_authentication(args)
         interceptors: Sequence[grpc.ServerInterceptor] = []
-
-        if setup_client_auth:
-            (
-                client_public_keys,
-                server_private_key,
-                server_public_key,
-            ) = setup_client_auth
 
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
@@ -505,16 +498,16 @@ def _try_setup_client_authentication(
         client_keys_file_path = Path(args.require_client_authentication[0])
         if client_keys_file_path.exists():
             client_public_keys: Set[bytes] = set()
-            with open(client_keys_file_path, newline="") as csvfile:
+            with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
                 reader = csv.reader(csvfile)
                 for row in reader:
                     for element in row:
                         client_public_keys.add(element.encode())
-            return (
-                client_public_keys,
-                Path(args.require_client_authentication[1]).read_bytes(),
-                Path(args.require_client_authentication[2]).read_bytes(),
-            )
+                return (
+                    client_public_keys,
+                    Path(args.require_client_authentication[1]).read_bytes(),
+                    Path(args.require_client_authentication[2]).read_bytes(),
+                )
         else:
             sys.exit(
                 "Client public keys csv file are required for client authentication. "
