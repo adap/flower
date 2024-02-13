@@ -613,7 +613,7 @@ def _run_fleet_api_vce(
     num_supernodes: int,
     client_app_callable_str: str,
     state_factory: StateFactory,
-):
+) -> None:
     from flwr.server.superlink.fleet.vce.vce_api import run_vce
 
     log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")

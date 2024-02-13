@@ -16,7 +16,7 @@
 
 from logging import INFO
 from time import sleep
-from typing import Dict
+from typing import Dict, List
 
 import ray
 
@@ -26,8 +26,11 @@ from flwr.client.node_state import NodeState
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.serde import message_to_taskres, recordset_from_proto
+from flwr.proto.fleet_pb2 import CreateNodeRequest
+from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import TaskIns
 from flwr.server.superlink.fleet.message_handler.message_handler import (
+    PullTaskInsRequest,
     PushTaskResRequest,
     create_node,
     delete_node,
@@ -70,6 +73,16 @@ def taskins_to_message(taskins: TaskIns) -> Message:
     )
 
 
+def _register_nodes(num_nodes: int, state_factory: StateFactory) -> List[Node]:
+    nodes = []
+    for _ in range(num_nodes):
+        node = create_node(
+            request=CreateNodeRequest(), state=state_factory.state()
+        ).node
+        nodes.append(node)
+    return nodes
+
+
 def run_vce(
     num_supernodes: int,
     client_app_callable_str: str,
@@ -83,13 +96,11 @@ def run_vce(
     # Register nodes (as many as number of possible clients)
     # Each node has its own state
     node_states: Dict[int, NodeState] = {}
-    create_node_responses = []
-    for _ in range(num_supernodes):
-        res = create_node(request=None, state=state_factory.state())
-        create_node_responses.append(res)
-        node_states[res.node.node_id] = NodeState()
+    nodes = _register_nodes(num_nodes=num_supernodes, state_factory=state_factory)
+    for node in nodes:
+        node_states[node.node_id] = NodeState()
 
-    log(INFO, f"Registered {len(create_node_responses)} nodes")
+    log(INFO, f"Registered {len(nodes)} nodes")
 
     # TODO: handle different workdir
     print(f"{client_app_callable_str = }")
@@ -104,11 +115,13 @@ def run_vce(
     while True:
         sleep(3)
         # Pull task for each node
-        for res in create_node_responses:
-            task_ins_pulled = pull_task_ins(request=res, state=state_factory.state())
+        for node in nodes:
+            task_ins_pulled = pull_task_ins(
+                request=PullTaskInsRequest(node=node), state=state_factory.state()
+            )
             if task_ins_pulled.task_ins_list:
-                print(f"Tasks PULLED for NODE {res.node}")
-                node_id = res.node.node_id
+                print(f"Tasks PULLED for NODE {node}")
+                node_id = node.node_id
 
                 for task_ins in task_ins_pulled.task_ins_list:
                     # register and retrive runstate
@@ -141,15 +154,15 @@ def run_vce(
                     # TODO: can we do the below in the VCE? this
                     # TODO: currently works because we run things sequentially
                     task_res = message_to_taskres(out_mssg)
-                    task_res = configure_task_res(task_res, task_ins, res.node)
+                    task_res = configure_task_res(task_res, task_ins, node)
                     to_push = PushTaskResRequest(task_res_list=[task_res])
                     push_task_res(request=to_push, state=state_factory.state())
 
     # Delete nodes from state
 
     print("Deleting nodes...")
-    for res in create_node_responses:
-        response = delete_node(res, state=state_factory.state())
+    for node in nodes:
+        response = delete_node(node, state=state_factory.state())
         print(response)
 
     print("DONE")
