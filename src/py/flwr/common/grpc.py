@@ -57,7 +57,7 @@ def create_channel(
             server_address, ssl_channel_credentials, options=channel_options
         )
         log(INFO, "Opened secure gRPC connection using certificates")
-    
+
     if interceptors is not None:
         channel = grpc.intercept_channel(channel, interceptors)
 

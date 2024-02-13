@@ -18,7 +18,8 @@
 from contextlib import contextmanager
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast, Sequence
+from typing import Callable, Dict, Iterator, Optional, Sequence, Tuple, Union, cast
+
 import grpc
 
 from flwr.client.message_handler.task_handler import (
