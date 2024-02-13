@@ -415,3 +415,29 @@ class VirtualClientEngineActorPool(ActorPool):
         # Fetch result belonging to the VirtualClient calling this method
         # Return both result from tasks and (potentially) updated run context
         return self._fetch_future_result(cid)
+
+    def is_actor_available(self):
+        """."""
+        return len(self._idle_actors) > 0
+
+    def submit_if_actor_is_free(
+        self, actor_fn: Any, job: Tuple[FlowerFn, Message, str, Context]
+    ) -> ObjectRef | None:
+        """."""
+        if self._idle_actors:
+            app_fn, mssg, cid, context = job
+            actor = self._idle_actors.pop()
+            future = actor_fn(actor, app_fn, mssg, cid, context)
+            future_key = tuple(future) if isinstance(future, list) else future
+            self._future_to_actor[future_key] = actor
+            return future
+        else:
+            return None
+
+    def fetch_result_and_return_actor(self, future) -> Tuple[Message, Context]:
+        """."""
+        actor = self._future_to_actor.pop(future)
+        self._return_actor(actor)
+        _, out_mssg, updated_context = ray.get(future)
+
+        return out_mssg, updated_context

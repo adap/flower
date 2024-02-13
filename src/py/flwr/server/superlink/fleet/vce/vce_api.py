@@ -14,8 +14,8 @@
 # ==============================================================================
 """Fleet VirtualClientEngine API."""
 
+import asyncio
 from logging import INFO
-from time import sleep
 from typing import Dict, List
 
 import ray
@@ -33,7 +33,6 @@ from flwr.server.superlink.fleet.message_handler.message_handler import (
     PullTaskInsRequest,
     PushTaskResRequest,
     create_node,
-    delete_node,
     pull_task_ins,
     push_task_res,
 )
@@ -68,6 +67,11 @@ def taskins_to_message(taskins: TaskIns) -> Message:
     return Message(
         content=recordset,
         metadata=Metadata(
+            run_id=taskins.run_id,
+            task_id=taskins.task_id,
+            group_id=taskins.group_id,
+            node_id=-1,
+            ttl="",
             task_type=taskins.task.task_type,
         ),
     )
@@ -81,6 +85,94 @@ def _register_nodes(num_nodes: int, state_factory: StateFactory) -> List[Node]:
         ).node
         nodes.append(node)
     return nodes
+
+
+async def worker(
+    app: ClientApp,
+    queue: asyncio.Queue,
+    node_states: Dict[int, NodeState],
+    state_factory: StateFactory,
+    pool: VirtualClientEngineActorPool,
+):
+    while True:
+        pulltaskinrequest = await queue.get()
+
+        # TODO: check if another request for the same node is being running atm
+        # TODO: Else potential problesm with run_state ?
+
+        if pool.is_actor_available():
+            # Pull tasks
+            task_ins_pulled = pull_task_ins(
+                request=pulltaskinrequest, state=state_factory.state()
+            )
+            if task_ins_pulled.task_ins_list:
+                # Take the first element in the list
+                task_ins = task_ins_pulled.task_ins_list.pop(0)
+                node_id = task_ins.task.consumer.node_id
+
+                # Register and retrive runstate
+                node_states[node_id].register_context(run_id=task_ins.run_id)
+                run_state = node_states[node_id].retrieve_context(
+                    run_id=task_ins.run_id
+                )
+
+                # Convert TaskIns to Message
+                message = taskins_to_message(task_ins)
+
+                # Submite a task to the pool
+                future = pool.submit_if_actor_is_free(
+                    lambda a, a_fn, mssg, cid, state: a.run.remote(
+                        a_fn, mssg, cid, state
+                    ),
+                    (app, message, str(node_id), run_state),
+                )
+
+                assert (
+                    future is not None
+                ), "this shouldn't happen given the check above, right?"
+                print(f"wait for {future = }")
+                await asyncio.wait([future])
+                print(f"got: {future = }")
+
+                # Fetch result
+                out_mssg, updated_context = pool.fetch_result_and_return_actor(future)
+
+                # Convert to TaskRes
+                task_res = message_to_taskres(out_mssg)
+                # Configuring task
+                task_res = configure_task_res(
+                    task_res, task_ins, pulltaskinrequest.node
+                )
+                to_push = PushTaskResRequest(task_res_list=[task_res])
+                # Push
+                push_task_res(request=to_push, state=state_factory.state())
+
+
+async def generate_pull_requests(queue: asyncio.Queue, nodes: List[Node]):
+    while True:
+        for node in nodes:
+            request = PullTaskInsRequest(node=node)
+            await queue.put(request)
+
+        await asyncio.sleep(0.5)
+
+
+async def run(
+    app: ClientApp,
+    nodes: List[Node],
+    state_factory: StateFactory,
+    pool: VirtualClientEngineActorPool,
+    node_states: Dict[int, NodeState],
+):
+    queue = asyncio.Queue(128)
+
+    worker_tasks = [
+        asyncio.create_task(worker(app, queue, node_states, state_factory, pool))
+        for _ in range(6)
+    ]
+    asyncio.create_task(generate_pull_requests(queue, nodes))
+    await queue.join()
+    await asyncio.gather(*worker_tasks)
 
 
 def run_vce(
@@ -111,59 +203,4 @@ def run_vce(
 
     app = _load
 
-    # Pull messages forever
-    while True:
-        sleep(3)
-        # Pull task for each node
-        for node in nodes:
-            task_ins_pulled = pull_task_ins(
-                request=PullTaskInsRequest(node=node), state=state_factory.state()
-            )
-            if task_ins_pulled.task_ins_list:
-                print(f"Tasks PULLED for NODE {node}")
-                node_id = node.node_id
-
-                for task_ins in task_ins_pulled.task_ins_list:
-                    # register and retrive runstate
-                    node_states[node_id].register_context(run_id=task_ins.run_id)
-                    run_state = node_states[node_id].retrieve_context(
-                        run_id=task_ins.run_id
-                    )
-
-                    # convert TaskIns to Message
-                    message = taskins_to_message(task_ins)
-
-                    # Submite a task to the pool
-                    pool.submit_client_job(
-                        lambda a, a_fn, mssg, cid, state: a.run.remote(
-                            a_fn, mssg, cid, state
-                        ),
-                        (app, message, str(node_id), run_state),
-                    )
-
-                    # Wait until result is ready
-                    out_mssg, updated_runstate = pool.get_client_result(
-                        str(node_id), timeout=None
-                    )
-
-                    # Update runstate
-                    node_states[node_id].update_context(
-                        task_ins.run_id, updated_runstate
-                    )
-
-                    # TODO: can we do the below in the VCE? this
-                    # TODO: currently works because we run things sequentially
-                    task_res = message_to_taskres(out_mssg)
-                    task_res = configure_task_res(task_res, task_ins, node)
-                    to_push = PushTaskResRequest(task_res_list=[task_res])
-                    push_task_res(request=to_push, state=state_factory.state())
-
-    # Delete nodes from state
-
-    print("Deleting nodes...")
-    for node in nodes:
-        response = delete_node(node, state=state_factory.state())
-        print(response)
-
-    print("DONE")
-    ray.shutdown()
+    asyncio.run(run(app, nodes, state_factory, pool, node_states))
