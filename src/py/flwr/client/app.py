@@ -45,13 +45,13 @@ from .node_state import NodeState
 from .numpy_client import NumPyClient
 
 
-def run_client() -> None:
-    """Run Flower client."""
-    event(EventType.RUN_CLIENT_ENTER)
+def run_client_app() -> None:
+    """Run Flower client app."""
+    event(EventType.RUN_CLIENT_APP_ENTER)
 
     log(INFO, "Long-running Flower client starting")
 
-    args = _parse_args_client().parse_args()
+    args = _parse_args_run_client_app().parse_args()
 
     # Obtain certificates
     if args.insecure:
@@ -86,7 +86,7 @@ def run_client() -> None:
 
     log(
         DEBUG,
-        "Flower will load ClientApp `%s` to execute tasks",
+        "Flower will load ClientApp `%s`",
         getattr(args, "client-app"),
     )
 
@@ -105,13 +105,13 @@ def run_client() -> None:
         root_certificates=root_certificates,
         insecure=args.insecure,
     )
-    event(EventType.RUN_CLIENT_LEAVE)
+    event(EventType.RUN_CLIENT_APP_LEAVE)
 
 
-def _parse_args_client() -> argparse.ArgumentParser:
-    """Parse command line arguments."""
+def _parse_args_run_client_app() -> argparse.ArgumentParser:
+    """Parse flower-client-app command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Start a long-running Flower client",
+        description="Start a Flower client app",
     )
 
     parser.add_argument(
@@ -145,7 +145,7 @@ def _parse_args_client() -> argparse.ArgumentParser:
         "--dir",
         default="",
         help="Add specified directory to the PYTHONPATH and load Flower "
-        "callable from there."
+        "app from there."
         " Default: current working directory.",
     )
 
