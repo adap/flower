@@ -173,6 +173,7 @@ def grpc_connection(  # pylint: disable=R0915
                 task_id=str(uuid.uuid4()),
                 group_id="",
                 ttl="",
+                node_id=0,
                 task_type=task_type,
             ),
             content=recordset,
