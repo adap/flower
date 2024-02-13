@@ -114,7 +114,7 @@ class Driver:
         res = grpc_driver.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
         return list(res.task_ids)
 
-    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
+    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Tuple[Message, int]]:
         """Pull messages based on message IDs.
 
         This method is used to collect responses or messages from the network
