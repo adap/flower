@@ -62,7 +62,7 @@ class RayActorClientProxy(ClientProxy):
         self.proxy_state = NodeState()
 
     def _submit_job(self, message: Message, timeout: Optional[float]) -> Message:
-        """Sumbit a message to the AcotrPool."""
+        """Sumbit a message to the ActorPool."""
         # For the time being, fixing run_id is a small compromise
         # This will be one of the first points to address integrating VCE + DriverAPI
         run_id = message.metadata.run_id

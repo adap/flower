@@ -52,13 +52,13 @@ class VirtualClientEngineActor(ABC):
 
     def run(
         self,
-        app_fn: FlowerFn,
+        client_app_fn: FlowerFn,
         message: Message,
         cid: str,
         context: Context,
     ) -> Tuple[str, Message, Context]:
         """Run a client run."""
-        # Pass message through app and return a message
+        # Pass message through ClientApp and return a message
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
         try:
