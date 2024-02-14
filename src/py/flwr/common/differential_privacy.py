@@ -53,7 +53,7 @@ def compute_stdv(
 ) -> float:
     """Compute standard deviation for noise addition.
 
-    paper: https://arxiv.org/pdf/1710.06963.pdf
+    Paper: https://arxiv.org/abs/1710.06963
     """
     return float((noise_multiplier * clipping_norm) / num_sampled_clients)
 
