@@ -7,8 +7,8 @@ name = "sklearn-mnist"
 version = "0.1.0"
 description = "Federated learning with scikit-learn and Flower"
 authors = [
-    "The Flower Authors <hello@flower.dev>",
-    "Kaushik Amar Das <kaushik.das@iiitg.ac.in>"
+    "The Flower Authors <hello@flower.ai>",
+    "Kaushik Amar Das <kaushik.das@iiitg.ac.in>",
 ]
 
 [tool.poetry.dependencies]
