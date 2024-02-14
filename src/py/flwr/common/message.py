@@ -26,7 +26,7 @@ class Metadata:
 
     Parameters
     ----------
-    run_id : int (default: 0)
+    run_id : int
         An identifier for the current run.
     message_id : str
         An identifier for the current message.
