@@ -421,7 +421,7 @@ class VirtualClientEngineActorPool(ActorPool):
         return len(self._idle_actors) > 0
 
     def submit_if_actor_is_free(
-        self, actor_fn: Any, job: Tuple[FlowerFn, Message, str, Context]
+        self, actor_fn: Any, job: Tuple[ClientAppFn, Message, str, Context]
     ) -> Any | None:
         """On idle actor, execute job."""
         if self._idle_actors:
@@ -431,8 +431,7 @@ class VirtualClientEngineActorPool(ActorPool):
             future_key = tuple(future) if isinstance(future, list) else future
             self._future_to_actor[future_key] = actor
             return future
-        else:
-            return None
+        return None
 
     def fetch_result_and_return_actor(self, future: Any) -> Tuple[Message, Context]:
         """Pull result given a future and add actor back to pool."""

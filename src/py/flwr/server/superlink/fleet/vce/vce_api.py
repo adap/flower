@@ -16,7 +16,7 @@
 
 import asyncio
 from logging import INFO
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, Union
 
 import ray
 
@@ -26,17 +26,16 @@ from flwr.client.node_state import NodeState
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.serde import message_to_taskres, recordset_from_proto
-from flwr.proto.fleet_pb2 import CreateNodeRequest
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import TaskIns
-from flwr.server.superlink.fleet.message_handler.message_handler import create_node
 from flwr.server.superlink.state import StateFactory
 from flwr.simulation.ray_transport.ray_actor import (
-    DefaultActor,
+    ClientAppActor,
     VirtualClientEngineActorPool,
 )
 
 TaskInsQueue = asyncio.Queue[TaskIns]
+NodeToPartitionMapping = Dict[int, int]
 
 
 def _construct_actor_pool(
@@ -45,7 +44,7 @@ def _construct_actor_pool(
     """Prepare ActorPool."""
 
     def _create_actor_fn():  # type: ignore
-        return DefaultActor.options(**client_resources).remote()  # type: ignore
+        return ClientAppActor.options(**client_resources).remote()  # type: ignore
 
     # Create actor pool
     ray.init(include_dashboard=True)
@@ -56,7 +55,7 @@ def _construct_actor_pool(
     return pool
 
 
-def taskins_to_message(taskins: TaskIns) -> Message:
+def taskins_to_message(taskins: TaskIns, datapartition_id: int) -> Message:
     """Convert TaskIns to Messsage."""
     recordset = recordset_from_proto(taskins.task.recordset)
 
@@ -66,21 +65,21 @@ def taskins_to_message(taskins: TaskIns) -> Message:
             run_id=taskins.run_id,
             message_id=taskins.task_id,
             group_id=taskins.group_id,
-            node_id=0,  # TODO: resolve
+            node_id=datapartition_id,
             ttl="",
             message_type=taskins.task.task_type,
         ),
     )
 
 
-def _register_nodes(num_nodes: int, state_factory: StateFactory) -> List[Node]:
-    nodes = []
-    for _ in range(num_nodes):
-        node = create_node(
-            request=CreateNodeRequest(), state=state_factory.state()
-        ).node
-        nodes.append(node)
-    return nodes
+def _register_nodes(
+    num_nodes: int, state_factory: StateFactory
+) -> NodeToPartitionMapping:
+    nodes_mapping: NodeToPartitionMapping = {}
+    for i in range(num_nodes):
+        node_id = state_factory.state().create_node()
+        nodes_mapping[node_id] = i
+    return nodes_mapping
 
 
 async def worker(
@@ -88,6 +87,7 @@ async def worker(
     queue: TaskInsQueue,
     node_states: Dict[int, NodeState],
     state_factory: StateFactory,
+    nodes_mapping: NodeToPartitionMapping,
     pool: VirtualClientEngineActorPool,
 ) -> None:
     """Get TaskIns from queue and execute associated job if actor is free.
@@ -112,7 +112,7 @@ async def worker(
         run_state = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
 
         # Convert TaskIns to Message
-        message = taskins_to_message(task_ins)
+        message = taskins_to_message(task_ins, datapartition_id=nodes_mapping[node_id])
 
         # Submite a task to the pool
         future = pool.submit_if_actor_is_free(
@@ -134,9 +134,7 @@ async def worker(
         # Convert to TaskRes
         task_res = message_to_taskres(out_mssg)
         # Configuring task
-        task_res = configure_task_res(
-            task_res, task_ins, Node(node_id=task_ins.task.consumer.node_id)
-        )
+        task_res = configure_task_res(task_res, task_ins, Node(node_id=node_id))
         # Store TaskRes in state
         state_factory.state().store_task_res(task_res)
 
@@ -144,12 +142,12 @@ async def worker(
 async def generate_pull_requests(
     queue: TaskInsQueue,
     state_factory: StateFactory,
-    nodes: List[Node],
+    nodes_mapping: NodeToPartitionMapping,
 ) -> None:
-    """Generate PullTaskInsRequests and adds it to the queue."""
+    """Generate TaskIns and add it to the queue."""
     while True:
-        for node in nodes:
-            task_ins = state_factory.state().get_task_ins(node_id=node.node_id, limit=1)
+        for node_id in nodes_mapping.keys():
+            task_ins = state_factory.state().get_task_ins(node_id=node_id, limit=1)
             if task_ins:
                 await queue.put(task_ins[0])
         await asyncio.sleep(0.5)
@@ -157,7 +155,7 @@ async def generate_pull_requests(
 
 async def run(
     app: Callable[[], ClientApp],
-    nodes: List[Node],
+    nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
     pool: VirtualClientEngineActorPool,
     node_states: Dict[int, NodeState],
@@ -166,10 +164,12 @@ async def run(
     queue: TaskInsQueue = asyncio.Queue(64)
 
     worker_tasks = [
-        asyncio.create_task(worker(app, queue, node_states, state_factory, pool))
+        asyncio.create_task(
+            worker(app, queue, node_states, state_factory, nodes_mapping, pool)
+        )
         for _ in range(pool.num_actors)
     ]
-    asyncio.create_task(generate_pull_requests(queue, state_factory, nodes))
+    asyncio.create_task(generate_pull_requests(queue, state_factory, nodes_mapping))
     await queue.join()
     await asyncio.gather(*worker_tasks)
 
@@ -189,11 +189,13 @@ def run_vce(
     # Register nodes (as many as number of possible clients)
     # Each node has its own state
     node_states: Dict[int, NodeState] = {}
-    nodes = _register_nodes(num_nodes=num_supernodes, state_factory=state_factory)
-    for node in nodes:
-        node_states[node.node_id] = NodeState()
+    nodes_mapping = _register_nodes(
+        num_nodes=num_supernodes, state_factory=state_factory
+    )
+    for node_id in nodes_mapping.keys():
+        node_states[node_id] = NodeState()
 
-    log(INFO, f"Registered {len(nodes)} nodes")
+    log(INFO, f"Registered {len(nodes_mapping)} nodes")
 
     # TODO: handle different workdir
     print(f"{client_app_callable_str = }")
@@ -204,4 +206,4 @@ def run_vce(
 
     app = _load
 
-    asyncio.run(run(app, nodes, state_factory, pool, node_states))
+    asyncio.run(run(app, nodes_mapping, state_factory, pool, node_states))
