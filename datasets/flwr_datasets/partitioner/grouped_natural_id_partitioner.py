@@ -3,7 +3,7 @@ import datasets
 from flwr_datasets.partitioner.natural_id_partitioner import NaturalIdPartitioner
 import numpy as np
 
-class NonIidPartitioner(NaturalIdPartitioner):
+class GroupedNaturalIdPartitioner(NaturalIdPartitioner):
     """Partitioner for a dataset in which the final partition results in different 
         non overlapping datasets for a given number of groups/nodes"""
 

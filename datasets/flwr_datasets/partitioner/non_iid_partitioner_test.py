@@ -9,17 +9,17 @@ import numpy as np
 from parameterized import parameterized
 
 from datasets import Dataset
-from flwr_datasets.partitioner.non_iid_partitioner import NonIidPartitioner
+from datasets.flwr_datasets.partitioner.grouped_natural_id_partitioner import GroupedNaturalIdPartitioner
 
 def _dummy_setup(
     num_rows: int, n_unique_natural_ids: int, num_nodes: int
-) -> Tuple[Dataset, NonIidPartitioner]:
+) -> Tuple[Dataset, GroupedNaturalIdPartitioner]:
     """Create a dummy dataset and partitioner based on given arguments.
 
     The partitioner has automatically the dataset assigned to it.
     """
     dataset = _create_dataset(num_rows, n_unique_natural_ids)
-    partitioner = NonIidPartitioner(partition_by="natural_id",num_nodes=num_nodes)
+    partitioner = GroupedNaturalIdPartitioner(partition_by="natural_id",num_nodes=num_nodes)
     partitioner.dataset = dataset
     return dataset, partitioner
 
@@ -76,7 +76,7 @@ class TestNaturalIdPartitioner(unittest.TestCase):
     def test_partitioner_with_non_existing_column_partition_by(self) -> None:
         """Test error when the partition_by columns does not exist."""
         dataset = _create_dataset(10, 2)
-        partitioner = NonIidPartitioner(partition_by="not-existing",num_nodes=2)
+        partitioner = GroupedNaturalIdPartitioner(partition_by="not-existing",num_nodes=2)
         partitioner.dataset = dataset
         with self.assertRaises(ValueError):
             partitioner.load_partition(0)
