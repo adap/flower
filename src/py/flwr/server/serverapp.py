@@ -22,9 +22,9 @@ from flwr.common.context import Context
 from flwr.server.driver.driver import Driver
 from flwr.server.strategy import Strategy
 
-from .app import ServerConfig
 from .client_manager import ClientManager
 from .server import Server
+from .server_config import ServerConfig
 
 
 class ServerApp:
