@@ -34,12 +34,12 @@ from flwr.common import (
 )
 from flwr.common import recordset_compat as compat
 from flwr.common import typing
-from flwr.common.constant import TASK_TYPE_GET_PROPERTIES
+from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.context import Context
 from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
 
-from .message_handler import handle_legacy_message_from_tasktype
+from .message_handler import handle_legacy_message_from_msgtype
 
 
 class ClientWithoutProps(Client):
@@ -122,17 +122,17 @@ def test_client_without_get_properties() -> None:
     message = Message(
         metadata=Metadata(
             run_id=0,
-            task_id=str(uuid.uuid4()),
+            message_id=str(uuid.uuid4()),
             group_id="",
             node_id=0,
             ttl="",
-            task_type=TASK_TYPE_GET_PROPERTIES,
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
         content=recordset,
     )
 
     # Execute
-    actual_msg = handle_legacy_message_from_tasktype(
+    actual_msg = handle_legacy_message_from_msgtype(
         client_fn=_get_client_fn(client),
         message=message,
         context=Context(state=RecordSet()),
@@ -150,7 +150,7 @@ def test_client_without_get_properties() -> None:
     expected_msg = Message(message.metadata, expected_rs)
 
     assert actual_msg.content == expected_msg.content
-    assert actual_msg.metadata.task_type == expected_msg.metadata.task_type
+    assert actual_msg.metadata.message_type == expected_msg.metadata.message_type
 
 
 def test_client_with_get_properties() -> None:
@@ -161,17 +161,17 @@ def test_client_with_get_properties() -> None:
     message = Message(
         metadata=Metadata(
             run_id=0,
-            task_id=str(uuid.uuid4()),
+            message_id=str(uuid.uuid4()),
             group_id="",
             node_id=0,
             ttl="",
-            task_type=TASK_TYPE_GET_PROPERTIES,
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
         content=recordset,
     )
 
     # Execute
-    actual_msg = handle_legacy_message_from_tasktype(
+    actual_msg = handle_legacy_message_from_msgtype(
         client_fn=_get_client_fn(client),
         message=message,
         context=Context(state=RecordSet()),
@@ -189,4 +189,4 @@ def test_client_with_get_properties() -> None:
     expected_msg = Message(message.metadata, expected_rs)
 
     assert actual_msg.content == expected_msg.content
-    assert actual_msg.metadata.task_type == expected_msg.metadata.task_type
+    assert actual_msg.metadata.message_type == expected_msg.metadata.message_type
