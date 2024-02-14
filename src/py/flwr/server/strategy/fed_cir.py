@@ -158,7 +158,7 @@ class FedCiR(FedAvg):
 
     def compute_ref_stats(self):
         ref_model = CVAE(z_dim=2).to(self.device)
-        opt_ref = torch.optim.Adam(ref_model.parameters(), lr=1e-4)
+        opt_ref = torch.optim.Adam(ref_model.parameters(), lr=1e-3)
         for ep in range(5000):
             for images, labels in self.alignment_loader:
                 images = images.to(self.device)

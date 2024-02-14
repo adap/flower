@@ -209,6 +209,7 @@ def main():
             "lambda_align": wandb.config["lambda_align"],
             "lr_g": wandb.config["lr_g"],
             "steps_g": wandb.config["steps_g"],
+            "beta": wandb.config["beta"],
         }
         return config
 
@@ -327,10 +328,10 @@ if __name__ == "__main__":
                 ]
             },
             # "lambda_reg": {"min": 0.0, "max": 1.0},
-            "lambda_align_g": {"min": 0.01, "max": 10.0},
+            "lambda_align_g": {"min": 1e-6, "max": 1e-3},
             "lambda_reg": {"values": [0]},
             # "lambda_align": {"values": [100, 200, 300]},
-            "lambda_align": {"min": 0.01, "max": 10.0},
+            "lambda_align": {"min": 1e-6, "max": 1e-3},
             "lr_g": {
                 "values": [
                     1e-3,
@@ -340,8 +341,9 @@ if __name__ == "__main__":
             "steps_g": {"values": [5, 10, 15, 20]},  # number of epochs for generator
             "epochs": {"values": [5, 10]},
             "batch_size": {"values": [32, 64, 128]},
+            "beta": {"values": [1, 0.01]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=10)
+    wandb.agent(sweep_id, function=main, count=2)

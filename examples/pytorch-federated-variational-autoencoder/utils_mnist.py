@@ -403,7 +403,7 @@ def _train_one_epoch(
     return net, vae_term, prox_term
 
 
-def vae_loss(recon_img, img, mu, logvar):
+def vae_loss(recon_img, img, mu, logvar, beta=1.0):
     # Reconstruction loss using binary cross-entropy
     condition = (recon_img >= 0) & (recon_img <= 1)
     assert torch.all(condition), "Values should be between 0 and 1"
@@ -415,7 +415,7 @@ def vae_loss(recon_img, img, mu, logvar):
     kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
 
     # Total VAE loss
-    total_loss = recon_loss + kld_loss
+    total_loss = recon_loss + kld_loss * beta
 
     return total_loss
 
@@ -447,6 +447,7 @@ def train_align(
 
     # lambda_align = config.get("lambda_align", 100)
     lambda_align = config["lambda_align"]
+    beta = config["beta"]
     align_loader = subset_alignment_dataloader(
         samples_per_class=sample_per_class, batch_size=sample_per_class * num_classes
     )
@@ -455,9 +456,9 @@ def train_align(
             images = images.to(device)
             optimizer.zero_grad()
             recon_images, mu, logvar = net(images)
-            vae_loss1 = vae_loss(recon_images, images, mu, logvar)
+            vae_loss1 = vae_loss(recon_images, images, mu, logvar, beta)
             z_g, mu_g, logvar_g = temp_gen_model(images)
-            vae_loss2 = vae_loss(net.decoder(z_g), images, mu_g, logvar_g)
+            vae_loss2 = vae_loss(net.decoder(z_g), images, mu_g, logvar_g, beta)
             loss = vae_loss1 + lambda_reg * vae_loss2
             for align_img, _ in align_loader:
                 align_img = align_img.to(device)
