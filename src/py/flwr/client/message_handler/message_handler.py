@@ -75,7 +75,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
     sleep_duration : int
         Number of seconds that the client should disconnect from the server.
     """
-    if message.metadata.task_type == "reconnect":
+    if message.metadata.message_type == "reconnect":
         # Retrieve ReconnectIns from recordset
         recordset = message.content
         seconds = cast(int, recordset.get_configs("config")["seconds"])
@@ -90,11 +90,11 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
         out_message = Message(
             metadata=Metadata(
                 run_id=0,
-                task_id="",
+                message_id="",
                 group_id="",
                 node_id=0,
                 ttl="",
-                task_type="reconnect",
+                message_type="reconnect",
             ),
             content=recordset,
         )
@@ -113,7 +113,7 @@ def handle_legacy_message_from_tasktype(
 
     client.set_context(context)
 
-    task_type = message.metadata.task_type
+    task_type = message.metadata.message_type
 
     # Handle GetPropertiesIns
     if task_type == TASK_TYPE_GET_PROPERTIES:
@@ -152,11 +152,11 @@ def handle_legacy_message_from_tasktype(
     out_message = Message(
         metadata=Metadata(
             run_id=0,
-            task_id="",
+            message_id="",
             group_id="",
             node_id=0,
             ttl="",
-            task_type=task_type,
+            message_type=task_type,
         ),
         content=out_recordset,
     )

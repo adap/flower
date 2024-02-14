@@ -59,11 +59,11 @@ def get_test_handler(
         return Message(
             metadata=Metadata(
                 run_id=0,
-                task_id="",
+                message_id="",
                 group_id="",
                 node_id=0,
                 ttl="",
-                task_type=TASK_TYPE_FIT,
+                message_type=TASK_TYPE_FIT,
             ),
             content=RecordSet(),
         )
@@ -74,11 +74,11 @@ def get_test_handler(
         in_msg = Message(
             metadata=Metadata(
                 run_id=0,
-                task_id="",
+                message_id="",
                 group_id="",
                 node_id=0,
                 ttl="",
-                task_type=TASK_TYPE_FIT,
+                message_type=TASK_TYPE_FIT,
             ),
             content=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
         )

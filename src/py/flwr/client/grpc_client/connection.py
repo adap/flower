@@ -170,11 +170,11 @@ def grpc_connection(  # pylint: disable=R0915
         return Message(
             metadata=Metadata(
                 run_id=0,
-                task_id=str(uuid.uuid4()),
+                message_id=str(uuid.uuid4()),
                 group_id="",
                 ttl="",
                 node_id=0,
-                task_type=task_type,
+                message_type=task_type,
             ),
             content=recordset,
         )
@@ -182,7 +182,7 @@ def grpc_connection(  # pylint: disable=R0915
     def send(message: Message) -> None:
         # Retrieve RecordSet and task_type
         recordset = message.content
-        task_type = message.metadata.task_type
+        task_type = message.metadata.message_type
 
         # RecordSet --> *Res --> *Res proto -> ClientMessage proto
         if task_type == TASK_TYPE_GET_PROPERTIES:

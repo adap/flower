@@ -122,11 +122,11 @@ def test_client_without_get_properties() -> None:
     message = Message(
         metadata=Metadata(
             run_id=0,
-            task_id=str(uuid.uuid4()),
+            message_id=str(uuid.uuid4()),
             group_id="",
             node_id=0,
             ttl="",
-            task_type=TASK_TYPE_GET_PROPERTIES,
+            message_type=TASK_TYPE_GET_PROPERTIES,
         ),
         content=recordset,
     )
@@ -150,7 +150,7 @@ def test_client_without_get_properties() -> None:
     expected_msg = Message(message.metadata, expected_rs)
 
     assert actual_msg.content == expected_msg.content
-    assert actual_msg.metadata.task_type == expected_msg.metadata.task_type
+    assert actual_msg.metadata.message_type == expected_msg.metadata.message_type
 
 
 def test_client_with_get_properties() -> None:
@@ -161,11 +161,11 @@ def test_client_with_get_properties() -> None:
     message = Message(
         metadata=Metadata(
             run_id=0,
-            task_id=str(uuid.uuid4()),
+            message_id=str(uuid.uuid4()),
             group_id="",
             node_id=0,
             ttl="",
-            task_type=TASK_TYPE_GET_PROPERTIES,
+            message_type=TASK_TYPE_GET_PROPERTIES,
         ),
         content=recordset,
     )
@@ -189,4 +189,4 @@ def test_client_with_get_properties() -> None:
     expected_msg = Message(message.metadata, expected_rs)
 
     assert actual_msg.content == expected_msg.content
-    assert actual_msg.metadata.task_type == expected_msg.metadata.task_type
+    assert actual_msg.metadata.message_type == expected_msg.metadata.message_type

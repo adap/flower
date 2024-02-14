@@ -46,11 +46,11 @@ SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect_ins=ServerMessage.ReconnectIn
 MESSAGE_GET_PROPERTIES = Message(
     metadata=Metadata(
         run_id=0,
-        task_id="",
+        message_id="",
         group_id="",
         node_id=0,
         ttl="",
-        task_type=TASK_TYPE_GET_PROPERTIES,
+        message_type=TASK_TYPE_GET_PROPERTIES,
     ),
     content=compat.getpropertiesres_to_recordset(
         GetPropertiesRes(Status(Code.OK, ""), {})
@@ -59,11 +59,11 @@ MESSAGE_GET_PROPERTIES = Message(
 MESSAGE_DISCONNECT = Message(
     metadata=Metadata(
         run_id=0,
-        task_id="",
+        message_id="",
         group_id="",
         node_id=0,
         ttl="",
-        task_type="reconnect",
+        message_type="reconnect",
     ),
     content=RecordSet(configs={"config": ConfigsRecord({"reason": 0})}),
 )
@@ -134,7 +134,7 @@ def test_integration_connection() -> None:
                 message = receive()
 
                 messages_received += 1
-                if message.metadata.task_type == "reconnect":  # type: ignore
+                if message.metadata.message_type == "reconnect":  # type: ignore
                     send(MESSAGE_DISCONNECT)
                     break
 
