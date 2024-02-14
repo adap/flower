@@ -98,8 +98,6 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
                     compute_hmac(self.shared_secret, request.SerializeToString(True)),
                 )
             )
-        else:
-            pass
 
         client_call_details = _ClientCallDetails(
             client_call_details.method,
