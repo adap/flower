@@ -16,8 +16,8 @@
 
 from typing import Set
 
-from flwr.server.state.authentication.authentication_state import AuthenticationState
-from flwr.server.state.sqlite_state import SqliteState
+from flwr.server.superlink.state import SqliteState
+from flwr.server.superlink.state.authentication import AuthenticationState
 
 
 class SqliteAuthState(AuthenticationState, SqliteState):

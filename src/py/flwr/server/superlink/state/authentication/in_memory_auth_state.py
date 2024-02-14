@@ -16,8 +16,8 @@
 
 from typing import Dict, Set
 
-from flwr.server.state.authentication.authentication_state import AuthenticationState
-from flwr.server.state.in_memory_state import InMemoryState
+from flwr.server.superlink.state import InMemoryState
+from flwr.server.superlink.state.authentication import AuthenticationState
 
 
 class InMemoryAuthState(AuthenticationState, InMemoryState):

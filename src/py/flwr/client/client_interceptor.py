@@ -19,6 +19,7 @@ from typing import Callable, Sequence, Tuple, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
+from grpc import ClientCallDetails, UnaryUnaryClientInterceptor
 
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_public_key,
@@ -51,12 +52,12 @@ class _ClientCallDetails(
     collections.namedtuple(
         "_ClientCallDetails", ("method", "timeout", "metadata", "credentials")
     ),
-    grpc.ClientCallDetails,
+    ClientCallDetails,  # type: ignore
 ):
     pass
 
 
-class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):
+class AuthenticateClientInterceptor(UnaryUnaryClientInterceptor):  # type: ignore
     """Client interceptor for client authentication."""
 
     def __init__(

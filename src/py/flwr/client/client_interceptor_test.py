@@ -30,16 +30,18 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 from flwr.proto import fleet_pb2 as flwr_dot_proto_dot_fleet__pb2
 from flwr.proto.fleet_pb2 import CreateNodeRequest
 
+from .client_interceptor import AuthenticateClientInterceptor, Request
+
 _PUBLIC_KEY_HEADER = "public-key"
 
 
 class _MockServicer:
-    def __init__(self):
+    def __init__(self) -> None:
         self._lock = threading.Lock()
         self._received_client_metadata = None
         _, self._server_public_key = generate_key_pairs()
 
-    def unary_unary(self, request, context):
+    def unary_unary(self, request: Request, context: grpc.ServicerContext) -> object:
         with self._lock:
             self._received_client_metadata = context.invocation_metadata()
             if isinstance(request, CreateNodeRequest):
@@ -54,7 +56,7 @@ class _MockServicer:
             return self._received_client_metadata
 
 
-def _generic_handler(servicer: _MockServicer):
+def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
     rpc_method_handlers = {
         "CreateNode": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
@@ -77,21 +79,29 @@ def _generic_handler(servicer: _MockServicer):
             response_serializer=flwr_dot_proto_dot_fleet__pb2.PushTaskResResponse.SerializeToString,
         ),
     }
-    return grpc.method_handlers_generic_handler("flwr.proto.Fleet", rpc_method_handlers)
+    generic_handler = grpc.method_handlers_generic_handler(
+        "flwr.proto.Fleet", rpc_method_handlers
+    )
+    server.add_generic_rpc_handlers((generic_handler,))
 
 
 class TestAuthenticateClientInterceptor(unittest.TestCase):
     """Test for client interceptor client authentication."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Initialize mock server and client."""
         self._server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=10),
             options=(("grpc.so_reuseport", int(False)),),
         )
-        self._server.add_generic_rpc_handlers((_generic_handler(self._servicer),))
+        self._servicer = _MockServicer()
+        _add_generic_handler(self._servicer, self._server)
         port = self._server.add_insecure_port("[::]:0")
         self._server.start()
+        self._client_private_key, self._client_public_key = generate_key_pairs()
+        self._client_interceptor = AuthenticateClientInterceptor(
+            self._client_private_key, self._client_public_key
+        )
 
         self._connection: Callable[
             [str, bool, int, Union[bytes, str, None]],
@@ -103,7 +113,13 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
                     Optional[Callable[[], None]],
                 ]
             ],
-        ] = grpc_request_response(f"localhost:{port}")
+        ] = grpc_request_response(
+            f"localhost:{port}",
+            False,
+            GRPC_MAX_MESSAGE_LENGTH,
+            None,
+            [self._client_interceptor],
+        )
         self._address = f"localhost:{port}"
 
     def test_client_auth_create_node(self) -> None:
@@ -114,8 +130,9 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             GRPC_MAX_MESSAGE_LENGTH,
             None,
         ) as conn:
-            receive, send, create_node, delete_node = conn
+            _, _, create_node, _ = conn
             create_node()
+            assert self._servicer.received_client_metadata is not None
 
 
 if __name__ == "__main__":
