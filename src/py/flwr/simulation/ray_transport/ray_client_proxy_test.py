@@ -35,7 +35,7 @@ from flwr.common.recordset_compat import (
 )
 from flwr.common.recordset_compat_test import _get_valid_getpropertiesins
 from flwr.simulation.ray_transport.ray_actor import (
-    DefaultActor,
+    ClientAppActor,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
 )
@@ -65,7 +65,7 @@ def get_dummy_client(cid: str) -> Client:
 
 
 def prep(
-    actor_type: Type[VirtualClientEngineActor] = DefaultActor,
+    actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
 ) -> Tuple[List[RayActorClientProxy], VirtualClientEngineActorPool]:  # pragma: no cover
     """Prepare ClientProxies and pool for tests."""
     client_resources = {"num_cpus": 1, "num_gpus": 0.0}
@@ -107,7 +107,9 @@ def test_cid_consistency_one_at_a_time() -> None:
     # submit jobs one at a time
     for prox in proxies:
         message = prox._wrap_recordset_in_message(  # pylint: disable=protected-access
-            recordset, MESSAGE_TYPE_GET_PROPERTIES
+            recordset,
+            MESSAGE_TYPE_GET_PROPERTIES,
+            timeout=None,
         )
         message_out = prox._submit_job(  # pylint: disable=protected-access
             message=message, timeout=None
@@ -141,7 +143,9 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         state = prox.proxy_state.retrieve_context(run_id=run_id)
 
         message = prox._wrap_recordset_in_message(  # pylint: disable=protected-access
-            recordset, MESSAGE_TYPE_GET_PROPERTIES
+            recordset,
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            timeout=None,
         )
         prox.actor_pool.submit_client_job(
             lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
