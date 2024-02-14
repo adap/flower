@@ -63,8 +63,6 @@ class RayActorClientProxy(ClientProxy):
 
     def _submit_job(self, message: Message, timeout: Optional[float]) -> Message:
         """Sumbit a message to the ActorPool."""
-        # For the time being, fixing run_id is a small compromise
-        # This will be one of the first points to address integrating VCE + DriverAPI
         run_id = message.metadata.run_id
 
         # Register state
@@ -97,7 +95,10 @@ class RayActorClientProxy(ClientProxy):
         return out_mssg
 
     def _wrap_recordset_in_message(
-        self, recordset: RecordSet, task_type: str
+        self,
+        recordset: RecordSet,
+        message_type: str,
+        timeout: Optional[float],
     ) -> Message:
         """Wrap a RecordSet inside a Message."""
         return Message(
@@ -107,8 +108,8 @@ class RayActorClientProxy(ClientProxy):
                 message_id="",
                 group_id="",
                 node_id=int(self.cid),
-                ttl="",
-                message_type=task_type,
+                ttl=str(timeout) if timeout else "",
+                message_type=message_type,
             ),
         )
 
@@ -118,7 +119,9 @@ class RayActorClientProxy(ClientProxy):
         """Return client's properties."""
         recordset = getpropertiesins_to_recordset(ins)
         message = self._wrap_recordset_in_message(
-            recordset, task_type=MESSAGE_TYPE_GET_PROPERTIES
+            recordset,
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            timeout=timeout,
         )
 
         message_out = self._submit_job(message, timeout)
@@ -131,7 +134,9 @@ class RayActorClientProxy(ClientProxy):
         """Return the current local model parameters."""
         recordset = getparametersins_to_recordset(ins)
         message = self._wrap_recordset_in_message(
-            recordset, task_type=MESSAGE_TYPE_GET_PARAMETERS
+            recordset,
+            message_type=MESSAGE_TYPE_GET_PARAMETERS,
+            timeout=timeout,
         )
 
         message_out = self._submit_job(message, timeout)
@@ -143,7 +148,9 @@ class RayActorClientProxy(ClientProxy):
         recordset = fitins_to_recordset(
             ins, keep_input=True
         )  # This must stay TRUE since ins are in-memory
-        message = self._wrap_recordset_in_message(recordset, task_type=MESSAGE_TYPE_FIT)
+        message = self._wrap_recordset_in_message(
+            recordset, message_type=MESSAGE_TYPE_FIT, timeout=timeout
+        )
 
         message_out = self._submit_job(message, timeout)
 
@@ -157,7 +164,7 @@ class RayActorClientProxy(ClientProxy):
             ins, keep_input=True
         )  # This must stay TRUE since ins are in-memory
         message = self._wrap_recordset_in_message(
-            recordset, task_type=MESSAGE_TYPE_EVALUATE
+            recordset, message_type=MESSAGE_TYPE_EVALUATE, timeout=timeout
         )
 
         message_out = self._submit_job(message, timeout)

@@ -30,7 +30,7 @@ from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
 
-FlowerFn = Callable[[], ClientApp]
+ClientAppFn = Callable[[], ClientApp]
 
 
 class ClientException(Exception):
@@ -52,7 +52,7 @@ class VirtualClientEngineActor(ABC):
 
     def run(
         self,
-        client_app_fn: FlowerFn,
+        client_app_fn: ClientAppFn,
         message: Message,
         cid: str,
         context: Context,
@@ -63,7 +63,7 @@ class VirtualClientEngineActor(ABC):
         # from the pool are correctly assigned to each ClientProxy
         try:
             # Load app
-            app: ClientApp = app_fn()
+            app: ClientApp = client_app_fn()
 
             # Handle task message
             out_message = app(message=message, context=context)
@@ -229,7 +229,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self._idle_actors.extend(new_actors)
             self.num_actors += num_actors
 
-    def submit(self, fn: Any, value: Tuple[FlowerFn, Message, str, Context]) -> None:
+    def submit(self, fn: Any, value: Tuple[ClientAppFn, Message, str, Context]) -> None:
         """Take an idle actor and assign it to run a client app and Message.
 
         Submit a job to an actor by first removing it from the list of idle actors, then
@@ -247,7 +247,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self._cid_to_future[cid]["future"] = future_key
 
     def submit_client_job(
-        self, actor_fn: Any, job: Tuple[FlowerFn, Message, str, Context]
+        self, actor_fn: Any, job: Tuple[ClientAppFn, Message, str, Context]
     ) -> None:
         """Submit a job while tracking client ids."""
         _, _, cid, _ = job
