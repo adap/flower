@@ -18,7 +18,6 @@ import traceback
 import warnings
 from logging import ERROR
 
-from flwr.client import Client
 from flwr.common.logger import log
 
 try:
