@@ -104,12 +104,14 @@ def new(
     # List of files to render
     files = {
         "README.md": {
-            "template": "README.md",
+            "template": "README.md.tpl",
         },
-        "requirements.txt": {"template": f"requirements.{framework_str.lower()}.txt"},
-        "flower.toml": {"template": "flower.toml"},
-        f"{pnl}/__init__.py": {"template": "__init__.py"},
-        f"{pnl}/main.py": {"template": f"main.{framework_str.lower()}.py"},
+        "requirements.txt": {
+            "template": f"requirements.{framework_str.lower()}.txt.tpl"
+        },
+        "flower.toml": {"template": "flower.toml.tpl"},
+        f"{pnl}/__init__.py": {"template": "__init__.py.tpl"},
+        f"{pnl}/main.py": {"template": f"main.{framework_str.lower()}.py.tpl"},
     }
     context = {"project_name": project_name}
 
