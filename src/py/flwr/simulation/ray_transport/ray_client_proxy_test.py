@@ -35,7 +35,7 @@ from flwr.common.recordset_compat import (
 )
 from flwr.common.recordset_compat_test import _get_valid_getpropertiesins
 from flwr.simulation.ray_transport.ray_actor import (
-    DefaultActor,
+    ClientAppActor,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
 )
@@ -65,7 +65,7 @@ def get_dummy_client(cid: str) -> Client:
 
 
 def prep(
-    actor_type: Type[VirtualClientEngineActor] = DefaultActor,
+    actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
 ) -> Tuple[List[RayActorClientProxy], VirtualClientEngineActorPool]:  # pragma: no cover
     """Prepare ClientProxies and pool for tests."""
     client_resources = {"num_cpus": 1, "num_gpus": 0.0}

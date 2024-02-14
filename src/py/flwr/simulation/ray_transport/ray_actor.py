@@ -85,7 +85,7 @@ class VirtualClientEngineActor(ABC):
 
 
 @ray.remote
-class DefaultActor(VirtualClientEngineActor):
+class ClientAppActor(VirtualClientEngineActor):
     """A Ray Actor class that runs client runs.
 
     Parameters
