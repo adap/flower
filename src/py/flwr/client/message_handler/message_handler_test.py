@@ -34,7 +34,7 @@ from flwr.common import (
 )
 from flwr.common import recordset_compat as compat
 from flwr.common import typing
-from flwr.common.constant import TASK_TYPE_GET_PROPERTIES
+from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.context import Context
 from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
@@ -126,7 +126,7 @@ def test_client_without_get_properties() -> None:
             group_id="",
             node_id=0,
             ttl="",
-            message_type=TASK_TYPE_GET_PROPERTIES,
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
         content=recordset,
     )
@@ -165,7 +165,7 @@ def test_client_with_get_properties() -> None:
             group_id="",
             node_id=0,
             ttl="",
-            message_type=TASK_TYPE_GET_PROPERTIES,
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
         content=recordset,
     )

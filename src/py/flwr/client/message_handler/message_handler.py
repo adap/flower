@@ -26,10 +26,10 @@ from flwr.client.client import (
 from flwr.client.typing import ClientFn
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import (
-    TASK_TYPE_EVALUATE,
-    TASK_TYPE_FIT,
-    TASK_TYPE_GET_PARAMETERS,
-    TASK_TYPE_GET_PROPERTIES,
+    MESSAGE_TYPE_EVALUATE,
+    MESSAGE_TYPE_FIT,
+    MESSAGE_TYPE_GET_PARAMETERS,
+    MESSAGE_TYPE_GET_PROPERTIES,
 )
 from flwr.common.context import Context
 from flwr.common.message import Message, Metadata
@@ -116,14 +116,14 @@ def handle_legacy_message_from_tasktype(
     task_type = message.metadata.message_type
 
     # Handle GetPropertiesIns
-    if task_type == TASK_TYPE_GET_PROPERTIES:
+    if task_type == MESSAGE_TYPE_GET_PROPERTIES:
         get_properties_res = maybe_call_get_properties(
             client=client,
             get_properties_ins=recordset_to_getpropertiesins(message.content),
         )
         out_recordset = getpropertiesres_to_recordset(get_properties_res)
     # Handle GetParametersIns
-    elif task_type == TASK_TYPE_GET_PARAMETERS:
+    elif task_type == MESSAGE_TYPE_GET_PARAMETERS:
         get_parameters_res = maybe_call_get_parameters(
             client=client,
             get_parameters_ins=recordset_to_getparametersins(message.content),
@@ -132,14 +132,14 @@ def handle_legacy_message_from_tasktype(
             get_parameters_res, keep_input=False
         )
     # Handle FitIns
-    elif task_type == TASK_TYPE_FIT:
+    elif task_type == MESSAGE_TYPE_FIT:
         fit_res = maybe_call_fit(
             client=client,
             fit_ins=recordset_to_fitins(message.content, keep_input=True),
         )
         out_recordset = fitres_to_recordset(fit_res, keep_input=False)
     # Handle EvaluateIns
-    elif task_type == TASK_TYPE_EVALUATE:
+    elif task_type == MESSAGE_TYPE_EVALUATE:
         evaluate_res = maybe_call_evaluate(
             client=client,
             evaluate_ins=recordset_to_evaluateins(message.content, keep_input=True),

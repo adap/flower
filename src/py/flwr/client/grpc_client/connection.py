@@ -27,10 +27,10 @@ from flwr.common import recordset_compat as compat
 from flwr.common import serde
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import (
-    TASK_TYPE_EVALUATE,
-    TASK_TYPE_FIT,
-    TASK_TYPE_GET_PARAMETERS,
-    TASK_TYPE_GET_PROPERTIES,
+    MESSAGE_TYPE_EVALUATE,
+    MESSAGE_TYPE_FIT,
+    MESSAGE_TYPE_GET_PARAMETERS,
+    MESSAGE_TYPE_GET_PROPERTIES,
 )
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
@@ -138,22 +138,22 @@ def grpc_connection(  # pylint: disable=R0915
             recordset = compat.getpropertiesins_to_recordset(
                 serde.get_properties_ins_from_proto(proto.get_properties_ins)
             )
-            task_type = TASK_TYPE_GET_PROPERTIES
+            task_type = MESSAGE_TYPE_GET_PROPERTIES
         elif field == "get_parameters_ins":
             recordset = compat.getparametersins_to_recordset(
                 serde.get_parameters_ins_from_proto(proto.get_parameters_ins)
             )
-            task_type = TASK_TYPE_GET_PARAMETERS
+            task_type = MESSAGE_TYPE_GET_PARAMETERS
         elif field == "fit_ins":
             recordset = compat.fitins_to_recordset(
                 serde.fit_ins_from_proto(proto.fit_ins), False
             )
-            task_type = TASK_TYPE_FIT
+            task_type = MESSAGE_TYPE_FIT
         elif field == "evaluate_ins":
             recordset = compat.evaluateins_to_recordset(
                 serde.evaluate_ins_from_proto(proto.evaluate_ins), False
             )
-            task_type = TASK_TYPE_EVALUATE
+            task_type = MESSAGE_TYPE_EVALUATE
         elif field == "reconnect_ins":
             recordset = RecordSet()
             recordset.set_configs(
@@ -185,20 +185,20 @@ def grpc_connection(  # pylint: disable=R0915
         task_type = message.metadata.message_type
 
         # RecordSet --> *Res --> *Res proto -> ClientMessage proto
-        if task_type == TASK_TYPE_GET_PROPERTIES:
+        if task_type == MESSAGE_TYPE_GET_PROPERTIES:
             getpropres = compat.recordset_to_getpropertiesres(recordset)
             msg_proto = ClientMessage(
                 get_properties_res=serde.get_properties_res_to_proto(getpropres)
             )
-        elif task_type == TASK_TYPE_GET_PARAMETERS:
+        elif task_type == MESSAGE_TYPE_GET_PARAMETERS:
             getparamres = compat.recordset_to_getparametersres(recordset, False)
             msg_proto = ClientMessage(
                 get_parameters_res=serde.get_parameters_res_to_proto(getparamres)
             )
-        elif task_type == TASK_TYPE_FIT:
+        elif task_type == MESSAGE_TYPE_FIT:
             fitres = compat.recordset_to_fitres(recordset, False)
             msg_proto = ClientMessage(fit_res=serde.fit_res_to_proto(fitres))
-        elif task_type == TASK_TYPE_EVALUATE:
+        elif task_type == MESSAGE_TYPE_EVALUATE:
             evalres = compat.recordset_to_evaluateres(recordset)
             msg_proto = ClientMessage(evaluate_res=serde.evaluate_res_to_proto(evalres))
         elif task_type == "reconnect":
