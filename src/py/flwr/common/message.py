@@ -33,6 +33,8 @@ class Metadata:
     group_id : str
         An identifier for grouping tasks. In some settings
         this is used as the FL round.
+    node_id : int
+        An identifier for the node running a task.
     ttl : str
         Time-to-live for this task.
     task_type : str
@@ -43,6 +45,7 @@ class Metadata:
     run_id: int
     task_id: str
     group_id: str
+    node_id: int
     ttl: str
     task_type: str
 
