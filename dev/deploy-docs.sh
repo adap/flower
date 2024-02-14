@@ -16,27 +16,34 @@
 # ==============================================================================
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/../
 
-ROOT=`pwd`
+ROOT=$(pwd)
 
 # Build and deploy Flower Framework docs
 cd doc
 ./build-versioned-docs.sh
 cd build/html
-aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./ s3://flower.dev/docs/framework
+aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./ s3://flower.ai/docs/framework
 
 # Build and deploy Flower Baselines docs
-cd $ROOT
+cd "$ROOT"
 cd baselines/doc
 make docs
 cd build/html
-aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./ s3://flower.dev/docs/baselines
+aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./ s3://flower.ai/docs/baselines
 
 # Build and deploy Flower Examples docs
-cd $ROOT
+cd "$ROOT"
 ./dev/update-examples.sh
 cd examples/doc
 make docs
 cd build/html
-aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./ s3://flower.dev/docs/examples
+aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./ s3://flower.ai/docs/examples
+
+# Build and deploy Flower Datasets docs
+cd "$ROOT"
+cd datasets/doc
+make docs
+cd build/html
+aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./ s3://flower.ai/docs/datasets
