@@ -4,12 +4,12 @@
 import itertools
 import unittest
 from typing import Tuple
-import numpy as np
+import numpy as n
 
 from parameterized import parameterized
 
 from datasets import Dataset
-from datasets.flwr_datasets.partitioner.grouped_natural_id_partitioner import GroupedNaturalIdPartitioner
+from flwr_datasets.partitioner.grouped_natural_id_partitioner import GroupedNaturalIdPartitioner
 
 def _dummy_setup(
     num_rows: int, n_unique_natural_ids: int, num_nodes: int
