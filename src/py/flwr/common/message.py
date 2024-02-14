@@ -22,32 +22,32 @@ from .recordset import RecordSet
 
 @dataclass
 class Metadata:
-    """A dataclass holding metadata associated with the current task.
+    """A dataclass holding metadata associated with the current message.
 
     Parameters
     ----------
     run_id : int
         An identifier for the current run.
-    task_id : str
-        An identifier for the current task.
+    message_id : str
+        An identifier for the current message.
     group_id : str
-        An identifier for grouping tasks. In some settings
+        An identifier for grouping messages. In some settings
         this is used as the FL round.
     node_id : int
-        An identifier for the node running a task.
+        An identifier for the node running a message.
     ttl : str
-        Time-to-live for this task.
-    task_type : str
+        Time-to-live for this message.
+    message_type : str
         A string that encodes the action to be executed on
         the receiving end.
     """
 
     run_id: int
-    task_id: str
+    message_id: str
     group_id: str
     node_id: int
     ttl: str
-    task_type: str
+    message_type: str
 
 
 @dataclass
@@ -57,7 +57,7 @@ class Message:
     Parameters
     ----------
     metadata : Metadata
-        A dataclass including information about the task to be executed.
+        A dataclass including information about the message to be executed.
     content : RecordSet
         Holds records either sent by another entity (e.g. sent by the server-side
         logic to a client, or vice-versa) or that will be sent to it.

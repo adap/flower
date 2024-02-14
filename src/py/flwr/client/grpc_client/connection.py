@@ -27,10 +27,10 @@ from flwr.common import recordset_compat as compat
 from flwr.common import serde
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import (
-    TASK_TYPE_EVALUATE,
-    TASK_TYPE_FIT,
-    TASK_TYPE_GET_PARAMETERS,
-    TASK_TYPE_GET_PROPERTIES,
+    MESSAGE_TYPE_EVALUATE,
+    MESSAGE_TYPE_FIT,
+    MESSAGE_TYPE_GET_PARAMETERS,
+    MESSAGE_TYPE_GET_PROPERTIES,
 )
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
@@ -133,33 +133,33 @@ def grpc_connection(  # pylint: disable=R0915
 
         # ServerMessage proto --> *Ins --> RecordSet
         field = proto.WhichOneof("msg")
-        task_type = ""
+        message_type = ""
         if field == "get_properties_ins":
             recordset = compat.getpropertiesins_to_recordset(
                 serde.get_properties_ins_from_proto(proto.get_properties_ins)
             )
-            task_type = TASK_TYPE_GET_PROPERTIES
+            message_type = MESSAGE_TYPE_GET_PROPERTIES
         elif field == "get_parameters_ins":
             recordset = compat.getparametersins_to_recordset(
                 serde.get_parameters_ins_from_proto(proto.get_parameters_ins)
             )
-            task_type = TASK_TYPE_GET_PARAMETERS
+            message_type = MESSAGE_TYPE_GET_PARAMETERS
         elif field == "fit_ins":
             recordset = compat.fitins_to_recordset(
                 serde.fit_ins_from_proto(proto.fit_ins), False
             )
-            task_type = TASK_TYPE_FIT
+            message_type = MESSAGE_TYPE_FIT
         elif field == "evaluate_ins":
             recordset = compat.evaluateins_to_recordset(
                 serde.evaluate_ins_from_proto(proto.evaluate_ins), False
             )
-            task_type = TASK_TYPE_EVALUATE
+            message_type = MESSAGE_TYPE_EVALUATE
         elif field == "reconnect_ins":
             recordset = RecordSet()
             recordset.set_configs(
                 "config", ConfigsRecord({"seconds": proto.reconnect_ins.seconds})
             )
-            task_type = "reconnect"
+            message_type = "reconnect"
         else:
             raise ValueError(
                 "Unsupported instruction in ServerMessage, "
@@ -170,44 +170,44 @@ def grpc_connection(  # pylint: disable=R0915
         return Message(
             metadata=Metadata(
                 run_id=0,
-                task_id=str(uuid.uuid4()),
+                message_id=str(uuid.uuid4()),
                 group_id="",
                 ttl="",
                 node_id=0,
-                task_type=task_type,
+                message_type=message_type,
             ),
             content=recordset,
         )
 
     def send(message: Message) -> None:
-        # Retrieve RecordSet and task_type
+        # Retrieve RecordSet and message_type
         recordset = message.content
-        task_type = message.metadata.task_type
+        message_type = message.metadata.message_type
 
         # RecordSet --> *Res --> *Res proto -> ClientMessage proto
-        if task_type == TASK_TYPE_GET_PROPERTIES:
+        if message_type == MESSAGE_TYPE_GET_PROPERTIES:
             getpropres = compat.recordset_to_getpropertiesres(recordset)
             msg_proto = ClientMessage(
                 get_properties_res=serde.get_properties_res_to_proto(getpropres)
             )
-        elif task_type == TASK_TYPE_GET_PARAMETERS:
+        elif message_type == MESSAGE_TYPE_GET_PARAMETERS:
             getparamres = compat.recordset_to_getparametersres(recordset, False)
             msg_proto = ClientMessage(
                 get_parameters_res=serde.get_parameters_res_to_proto(getparamres)
             )
-        elif task_type == TASK_TYPE_FIT:
+        elif message_type == MESSAGE_TYPE_FIT:
             fitres = compat.recordset_to_fitres(recordset, False)
             msg_proto = ClientMessage(fit_res=serde.fit_res_to_proto(fitres))
-        elif task_type == TASK_TYPE_EVALUATE:
+        elif message_type == MESSAGE_TYPE_EVALUATE:
             evalres = compat.recordset_to_evaluateres(recordset)
             msg_proto = ClientMessage(evaluate_res=serde.evaluate_res_to_proto(evalres))
-        elif task_type == "reconnect":
+        elif message_type == "reconnect":
             reason = cast(Reason.ValueType, recordset.get_configs("config")["reason"])
             msg_proto = ClientMessage(
                 disconnect_res=ClientMessage.DisconnectRes(reason=reason)
             )
         else:
-            raise ValueError(f"Invalid task type: {task_type}")
+            raise ValueError(f"Invalid task type: {message_type}")
 
         # Send ClientMessage proto
         return queue.put(msg_proto, block=False)

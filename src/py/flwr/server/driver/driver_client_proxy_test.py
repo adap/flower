@@ -25,10 +25,10 @@ import flwr
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
 from flwr.common.constant import (
-    TASK_TYPE_EVALUATE,
-    TASK_TYPE_FIT,
-    TASK_TYPE_GET_PARAMETERS,
-    TASK_TYPE_GET_PROPERTIES,
+    MESSAGE_TYPE_EVALUATE,
+    MESSAGE_TYPE_FIT,
+    MESSAGE_TYPE_GET_PARAMETERS,
+    MESSAGE_TYPE_GET_PROPERTIES,
 )
 from flwr.common.typing import (
     Code,
@@ -56,21 +56,21 @@ def _make_task(
     res: Union[GetParametersRes, GetPropertiesRes, FitRes, EvaluateRes]
 ) -> task_pb2.Task:  # pylint: disable=E1101
     if isinstance(res, GetParametersRes):
-        task_type = TASK_TYPE_GET_PARAMETERS
+        message_type = MESSAGE_TYPE_GET_PARAMETERS
         recordset = compat.getparametersres_to_recordset(res, True)
     elif isinstance(res, GetPropertiesRes):
-        task_type = TASK_TYPE_GET_PROPERTIES
+        message_type = MESSAGE_TYPE_GET_PROPERTIES
         recordset = compat.getpropertiesres_to_recordset(res)
     elif isinstance(res, FitRes):
-        task_type = TASK_TYPE_FIT
+        message_type = MESSAGE_TYPE_FIT
         recordset = compat.fitres_to_recordset(res, True)
     elif isinstance(res, EvaluateRes):
-        task_type = TASK_TYPE_EVALUATE
+        message_type = MESSAGE_TYPE_EVALUATE
         recordset = compat.evaluateres_to_recordset(res)
     else:
         raise ValueError(f"Unsupported type: {type(res)}")
     return task_pb2.Task(  # pylint: disable=E1101
-        task_type=task_type,
+        task_type=message_type,
         recordset=serde.recordset_to_proto(recordset),
     )
 
