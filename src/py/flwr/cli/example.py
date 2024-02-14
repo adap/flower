@@ -28,16 +28,16 @@ def example() -> None:
     """
     # Load list of examples directly from GitHub
     url = "https://api.github.com/repos/adap/flower/git/trees/main"
-    with json.load(urllib.request.urlopen(url)) as res:
+    with urllib.request.urlopen(url) as res:
+        data = json.load(res)
         examples_directory_url = [
-            item["url"] for item in res["tree"] if item["path"] == "examples"
+            item["url"] for item in data["tree"] if item["path"] == "examples"
         ][0]
 
-    with json.load(urllib.request.urlopen(examples_directory_url)) as result:
+    with urllib.request.urlopen(examples_directory_url) as res:
+        data = json.load(res)
         example_names = [
-            item["path"]
-            for item in result["tree"]
-            if item["path"] not in [".gitignore"]
+            item["path"] for item in data["tree"] if item["path"] not in [".gitignore"]
         ]
 
     example_name = prompt_options(
