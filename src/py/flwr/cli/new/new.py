@@ -17,7 +17,7 @@
 import os
 from enum import Enum
 from string import Template
-from typing import Dict
+from typing import Dict, Optional
 
 import typer
 from typing_extensions import Annotated
@@ -28,8 +28,12 @@ from ..utils import prompt_options
 class MLFramework(str, Enum):
     """Available frameworks."""
 
-    pytorch = "PyTorch"
-    tensorflow = "TensorFlow"
+    PYTORCH = "PyTorch"
+    TENSORFLOW = "TensorFlow"
+
+
+class TemplateNotFound(Exception):
+    """Raised when template does not exist."""
 
 
 def load_template(name: str) -> str:
@@ -38,7 +42,7 @@ def load_template(name: str) -> str:
     tpl_files = os.listdir(tpl_dir)
 
     if name not in tpl_files:
-        raise Exception(f"Template '{name}' not found")
+        raise TemplateNotFound(f"Template '{name}' not found")
 
     with open(os.path.join(tpl_dir, name), encoding="utf-8") as tpl_file:
         return tpl_file.read()
@@ -71,23 +75,26 @@ def new(
         typer.Argument(metavar="project_name", help="The name of the project"),
     ],
     framework: Annotated[
-        MLFramework,
+        Optional[MLFramework],
         typer.Option(case_sensitive=False, help="The ML framework to use"),
     ] = None,
 ) -> None:
     """Create new Flower project."""
     print(f"Creating Flower project {project_name}...")
 
-    if framework is None:
+    if framework is not None:
+        framework_str = str(framework.value)
+    else:
         framework_value = prompt_options(
             "Please select ML framework by typing in the number",
             [mlf.value for mlf in MLFramework],
         )
-        framework = next(
+        selected_value = [
             name
             for name, value in vars(MLFramework).items()
             if value == framework_value
-        )
+        ]
+        framework_str = selected_value[0]
 
     # Set project directory path
     cwd = os.getcwd()
@@ -99,10 +106,10 @@ def new(
         "README.md": {
             "template": "README.md",
         },
-        "requirements.txt": {"template": f"requirements.{framework.lower()}.txt"},
+        "requirements.txt": {"template": f"requirements.{framework_str.lower()}.txt"},
         "flower.toml": {"template": "flower.toml"},
         f"{pnl}/__init__.py": {"template": "__init__.py"},
-        f"{pnl}/main.py": {"template": f"main.{framework.lower()}.py"},
+        f"{pnl}/main.py": {"template": f"main.{framework_str.lower()}.py"},
     }
     context = {"project_name": project_name}
 

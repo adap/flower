@@ -1,1 +1,2 @@
-"""A Flower app."""
+"""A Flower / TensorFlow app."""
+

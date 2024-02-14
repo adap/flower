@@ -30,12 +30,25 @@ def prompt_options(text: str, options: List[str]) -> str:
         for index, name in enumerate(options)
     ]
 
-    index = typer.prompt(
-        "\n"
-        + typer.style(f"💬 {text}", fg=typer.colors.MAGENTA, bold=True)
-        + "\n\n"
-        + "\n".join(options_formatted)
-        + "\n\n\n"
-    )
+    while True:
+        index = typer.prompt(
+            "\n"
+            + typer.style(f"💬 {text}", fg=typer.colors.MAGENTA, bold=True)
+            + "\n\n"
+            + "\n".join(options_formatted)
+            + "\n\n\n"
+        )
+        try:
+            options[int(index)]  # pylint: disable=expression-not-assigned
+            break
+        except IndexError:
+            print(typer.style("❌ Index out of range", fg=typer.colors.RED, bold=True))
+            continue
+        except ValueError:
+            print(
+                typer.style("❌ Please choose a number", fg=typer.colors.RED, bold=True)
+            )
+            continue
 
-    return options[int(index)]
+    result = options[int(index)]
+    return result

@@ -19,7 +19,7 @@ import os
 from .new import MLFramework, create_file, load_template, new, render_template
 
 
-def test_load_template():
+def test_load_template() -> None:
     """Test if load_template returns a string."""
     # Prepare
     filename = "README.md"
@@ -31,7 +31,7 @@ def test_load_template():
     assert isinstance(text, str)
 
 
-def test_render_template():
+def test_render_template() -> None:
     """Test if a string is correctly substituted."""
     # Prepare
     filename = "README.md"
@@ -44,7 +44,7 @@ def test_render_template():
     assert "# FedGPT" in result
 
 
-def test_create_file(tmp_path):
+def test_create_file(tmp_path: str) -> None:
     """Test if file with content is created."""
     # Prepare
     file_path = os.path.join(tmp_path, "test.txt")
@@ -60,11 +60,11 @@ def test_create_file(tmp_path):
     assert text == "Foobar"
 
 
-def test_new(tmp_path):
+def test_new(tmp_path: str) -> None:
     """Test if project is created for framework."""
     # Prepare
     project_name = "FedGPT"
-    framework = MLFramework.pytorch
+    framework = MLFramework.PYTORCH
     expected_files_top_level = {
         "requirements.txt",
         "fedgpt",
@@ -76,7 +76,7 @@ def test_new(tmp_path):
         "__init__.py",
     }
 
-    ## Change into the temprorary directory
+    # Change into the temprorary directory
     os.chdir(tmp_path)
 
     # Execute

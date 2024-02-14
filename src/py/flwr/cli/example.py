@@ -18,8 +18,6 @@ import json
 import subprocess
 import urllib.request
 
-from rich import print
-
 from .utils import prompt_options
 
 
@@ -30,14 +28,17 @@ def example() -> None:
     """
     # Load list of examples directly from GitHub
     url = "https://api.github.com/repos/adap/flower/git/trees/main"
-    res = json.load(urllib.request.urlopen(url))
-    examples_directory_url = [
-        item["url"] for item in res["tree"] if item["path"] == "examples"
-    ][0]
-    result = json.load(urllib.request.urlopen(examples_directory_url))
-    example_names = [
-        item["path"] for item in result["tree"] if item["path"] not in [".gitignore"]
-    ]
+    with json.load(urllib.request.urlopen(url)) as res:
+        examples_directory_url = [
+            item["url"] for item in res["tree"] if item["path"] == "examples"
+        ][0]
+
+    with json.load(urllib.request.urlopen(examples_directory_url)) as result:
+        example_names = [
+            item["path"]
+            for item in result["tree"]
+            if item["path"] not in [".gitignore"]
+        ]
 
     example_name = prompt_options(
         "Please select example by typing in the number",
