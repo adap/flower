@@ -15,11 +15,10 @@
 """Flower client interceptor."""
 
 import collections
-from typing import Callable, Sequence, Tuple, Union
+from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
-from grpc import ClientCallDetails, UnaryUnaryClientInterceptor
 
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_public_key,
@@ -27,7 +26,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_shared_key,
     public_key_to_bytes,
 )
-from flwr.proto.fleet_pb2 import (
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
     PullTaskInsRequest,
@@ -44,20 +43,24 @@ Request = Union[
 
 def _get_value_from_tuples(
     key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
-) -> Union[str, bytes]:
-    return next((value[::-1] for key, value in tuples if key == key_string), "")
+) -> bytes:
+    value = next((value[::-1] for key, value in tuples if key == key_string), "")
+    if isinstance(value, str):
+        return value.encode()
+
+    return value
 
 
 class _ClientCallDetails(
     collections.namedtuple(
         "_ClientCallDetails", ("method", "timeout", "metadata", "credentials")
     ),
-    ClientCallDetails,  # type: ignore
+    grpc.ClientCallDetails,  # type: ignore
 ):
     pass
 
 
-class AuthenticateClientInterceptor(UnaryUnaryClientInterceptor):  # type: ignore
+class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
     """Client interceptor for client authentication."""
 
     def __init__(
@@ -67,13 +70,15 @@ class AuthenticateClientInterceptor(UnaryUnaryClientInterceptor):  # type: ignor
     ):
         self.private_key = private_key
         self.public_key = public_key
+        self.shared_secret = b""
+        self.server_public_key: Optional[ec.EllipticCurvePublicKey] = None
 
     def intercept_unary_unary(
         self,
-        continuation: Callable,
+        continuation: Callable[[Any, Any], Any],
         client_call_details: grpc.ClientCallDetails,
         request: Request,
-    ):
+    ) -> grpc.Call:
         """Flower client interceptor."""
         metadata = []
         postprocess = False
@@ -88,7 +93,10 @@ class AuthenticateClientInterceptor(UnaryUnaryClientInterceptor):  # type: ignor
             request, (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest)
         ):
             metadata.append(
-                (_AUTH_TOKEN_HEADER, compute_hmac(self.shared_secret, request))
+                (
+                    _AUTH_TOKEN_HEADER,
+                    compute_hmac(self.shared_secret, request.SerializeToString(True)),
+                )
             )
         else:
             pass

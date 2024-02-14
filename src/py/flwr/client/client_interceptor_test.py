@@ -17,18 +17,25 @@
 import threading
 import unittest
 from concurrent import futures
-from typing import Callable, ContextManager, Optional, Tuple, Union
+from typing import Optional, Sequence, Tuple, Union
 
 import grpc
 
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.message import Message
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
 )
-from flwr.proto import fleet_pb2 as flwr_dot_proto_dot_fleet__pb2
-from flwr.proto.fleet_pb2 import CreateNodeRequest
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
+    CreateNodeRequest,
+    CreateNodeResponse,
+    DeleteNodeRequest,
+    DeleteNodeResponse,
+    PullTaskInsRequest,
+    PullTaskInsResponse,
+    PushTaskResRequest,
+    PushTaskResResponse,
+)
 
 from .client_interceptor import AuthenticateClientInterceptor, Request
 
@@ -36,12 +43,18 @@ _PUBLIC_KEY_HEADER = "public-key"
 
 
 class _MockServicer:
+    """Mock Servicer for Flower clients."""
+
     def __init__(self) -> None:
+        """Initialize mock servicer."""
         self._lock = threading.Lock()
-        self._received_client_metadata = None
+        self._received_client_metadata: Optional[
+            Sequence[Tuple[str, Union[str, bytes]]]
+        ] = None
         _, self._server_public_key = generate_key_pairs()
 
     def unary_unary(self, request: Request, context: grpc.ServicerContext) -> object:
+        """Handle unary call."""
         with self._lock:
             self._received_client_metadata = context.invocation_metadata()
             if isinstance(request, CreateNodeRequest):
@@ -51,7 +64,10 @@ class _MockServicer:
 
             return object()
 
-    def received_client_metadata(self):
+    def received_client_metadata(
+        self,
+    ) -> Optional[Sequence[Tuple[str, Union[str, bytes]]]]:
+        """Return received client metadata."""
         with self._lock:
             return self._received_client_metadata
 
@@ -60,23 +76,23 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
     rpc_method_handlers = {
         "CreateNode": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
-            request_deserializer=flwr_dot_proto_dot_fleet__pb2.CreateNodeRequest.FromString,
-            response_serializer=flwr_dot_proto_dot_fleet__pb2.CreateNodeResponse.SerializeToString,
+            request_deserializer=CreateNodeRequest.FromString,
+            response_serializer=CreateNodeResponse.SerializeToString,
         ),
         "DeleteNode": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
-            request_deserializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeRequest.FromString,
-            response_serializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeResponse.SerializeToString,
+            request_deserializer=DeleteNodeRequest.FromString,
+            response_serializer=DeleteNodeResponse.SerializeToString,
         ),
         "PullTaskIns": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
-            request_deserializer=flwr_dot_proto_dot_fleet__pb2.PullTaskInsRequest.FromString,
-            response_serializer=flwr_dot_proto_dot_fleet__pb2.PullTaskInsResponse.SerializeToString,
+            request_deserializer=PullTaskInsRequest.FromString,
+            response_serializer=PullTaskInsResponse.SerializeToString,
         ),
         "PushTaskRes": grpc.unary_unary_rpc_method_handler(
             servicer.unary_unary,
-            request_deserializer=flwr_dot_proto_dot_fleet__pb2.PushTaskResRequest.FromString,
-            response_serializer=flwr_dot_proto_dot_fleet__pb2.PushTaskResResponse.SerializeToString,
+            request_deserializer=PushTaskResRequest.FromString,
+            response_serializer=PushTaskResResponse.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -103,23 +119,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             self._client_private_key, self._client_public_key
         )
 
-        self._connection: Callable[
-            [str, bool, int, Union[bytes, str, None]],
-            ContextManager[
-                Tuple[
-                    Callable[[], Optional[Message]],
-                    Callable[[Message], None],
-                    Optional[Callable[[], None]],
-                    Optional[Callable[[], None]],
-                ]
-            ],
-        ] = grpc_request_response(
-            f"localhost:{port}",
-            False,
-            GRPC_MAX_MESSAGE_LENGTH,
-            None,
-            [self._client_interceptor],
-        )
+        self._connection = grpc_request_response
         self._address = f"localhost:{port}"
 
     def test_client_auth_create_node(self) -> None:
@@ -129,8 +129,10 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             True,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
+            (self._client_interceptor),
         ) as conn:
             _, _, create_node, _ = conn
+            assert create_node is not None
             create_node()
             assert self._servicer.received_client_metadata is not None
 
