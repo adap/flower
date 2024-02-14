@@ -57,7 +57,14 @@ def get_test_handler(
 
     def empty_ffn(_: Message, _2: Context) -> Message:
         return Message(
-            metadata=Metadata(0, "", "", "", TASK_TYPE_FIT),
+            metadata=Metadata(
+                run_id=0,
+                task_id="",
+                group_id="",
+                node_id=0,
+                ttl="",
+                task_type=TASK_TYPE_FIT,
+            ),
             content=RecordSet(),
         )
 
@@ -65,7 +72,14 @@ def get_test_handler(
 
     def func(configs: Dict[str, ConfigsRecordValues]) -> Dict[str, ConfigsRecordValues]:
         in_msg = Message(
-            metadata=Metadata(0, "", "", "", TASK_TYPE_FIT),
+            metadata=Metadata(
+                run_id=0,
+                task_id="",
+                group_id="",
+                node_id=0,
+                ttl="",
+                task_type=TASK_TYPE_FIT,
+            ),
             content=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
         )
         out_msg = app(in_msg, ctxt)
