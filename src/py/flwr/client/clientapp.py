@@ -46,7 +46,7 @@ class ClientApp:
     If the above code is in a Python module called `client`, it can be started as
     follows:
 
-    >>> flower-client client:app --insecure
+    >>> flower-client-app client:app --insecure
 
     In this `client:app` example, `client` refers to the Python module `client.py` in
     which the previous code lives in and `app` refers to the global attribute `app` that
@@ -72,12 +72,12 @@ class ClientApp:
         self._call = make_ffn(ffn, mods if mods is not None else [])
 
     def __call__(self, message: Message, context: Context) -> Message:
-        """."""
+        """Execute `ClientApp`."""
         return self._call(message, context)
 
 
 class LoadClientAppError(Exception):
-    """."""
+    """Error when trying to load `ClientApp`."""
 
 
 def load_client_app(module_attribute_str: str) -> ClientApp:

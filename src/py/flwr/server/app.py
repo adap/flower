@@ -19,8 +19,7 @@ import argparse
 import importlib.util
 import sys
 import threading
-from dataclasses import dataclass
-from logging import ERROR, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
@@ -43,17 +42,20 @@ from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
-from flwr.server.client_manager import ClientManager, SimpleClientManager
-from flwr.server.driver.driver_servicer import DriverServicer
-from flwr.server.fleet.grpc_bidi.grpc_server import (
+
+from .client_manager import ClientManager, SimpleClientManager
+from .history import History
+from .server import Server
+from .server_config import ServerConfig
+from .serverapp import ServerApp, load_server_app
+from .strategy import FedAvg, Strategy
+from .superlink.driver.driver_servicer import DriverServicer
+from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
 )
-from flwr.server.fleet.grpc_rere.fleet_servicer import FleetServicer
-from flwr.server.history import History
-from flwr.server.server import Server
-from flwr.server.state import StateFactory
-from flwr.server.strategy import FedAvg, Strategy
+from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from .superlink.state import StateFactory
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
@@ -63,16 +65,70 @@ ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 DATABASE = ":flwr-in-memory-state:"
 
 
-@dataclass
-class ServerConfig:
-    """Flower server config.
+def run_server_app() -> None:
+    """Run Flower server app."""
+    event(EventType.RUN_SERVER_APP_ENTER)
 
-    All attributes have default values which allows users to configure just the ones
-    they care about.
-    """
+    args = _parse_args_run_server_app().parse_args()
 
-    num_rounds: int = 1
-    round_timeout: Optional[float] = None
+    # Obtain certificates
+    if args.insecure:
+        if args.root_certificates is not None:
+            sys.exit(
+                "Conflicting options: The '--insecure' flag disables HTTPS, "
+                "but '--root-certificates' was also specified. Please remove "
+                "the '--root-certificates' option when running in insecure mode, "
+                "or omit '--insecure' to use HTTPS."
+            )
+        log(
+            WARN,
+            "Option `--insecure` was set. "
+            "Starting insecure HTTP client connected to %s.",
+            args.server,
+        )
+        root_certificates = None
+    else:
+        # Load the certificates if provided, or load the system certificates
+        cert_path = args.root_certificates
+        if cert_path is None:
+            root_certificates = None
+        else:
+            root_certificates = Path(cert_path).read_bytes()
+        log(
+            DEBUG,
+            "Starting secure HTTPS client connected to %s "
+            "with the following certificates: %s.",
+            args.server,
+            cert_path,
+        )
+
+    log(
+        DEBUG,
+        "Flower will load ServerApp `%s`",
+        getattr(args, "server-app"),
+    )
+
+    log(
+        DEBUG,
+        "root_certificates: `%s`",
+        root_certificates,
+    )
+
+    log(WARN, "Not implemented: run_server_app")
+
+    server_app_dir = args.dir
+    if server_app_dir is not None:
+        sys.path.insert(0, server_app_dir)
+
+    def _load() -> ServerApp:
+        server_app: ServerApp = load_server_app(getattr(args, "server-app"))
+        return server_app
+
+    server_app = _load()
+
+    log(DEBUG, "server_app: `%s`", server_app)
+
+    event(EventType.RUN_SERVER_APP_LEAVE)
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -239,7 +295,7 @@ def run_driver_api() -> None:
     """Run Flower server (Driver API)."""
     log(INFO, "Starting Flower server (Driver API)")
     event(EventType.RUN_DRIVER_API_ENTER)
-    args = _parse_args_driver().parse_args()
+    args = _parse_args_run_driver_api().parse_args()
 
     # Parse IP address
     parsed_address = parse_address(args.driver_api_address)
@@ -276,7 +332,7 @@ def run_fleet_api() -> None:
     """Run Flower server (Fleet API)."""
     log(INFO, "Starting Flower server (Fleet API)")
     event(EventType.RUN_FLEET_API_ENTER)
-    args = _parse_args_fleet().parse_args()
+    args = _parse_args_run_fleet_api().parse_args()
 
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
@@ -344,11 +400,11 @@ def run_fleet_api() -> None:
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
-def run_server() -> None:
+def run_superlink() -> None:
     """Run Flower server (Driver API and Fleet API)."""
     log(INFO, "Starting Flower server")
-    event(EventType.RUN_SERVER_ENTER)
-    args = _parse_args_server().parse_args()
+    event(EventType.RUN_SUPERLINK_ENTER)
+    args = _parse_args_run_superlink().parse_args()
 
     # Parse IP address
     parsed_address = parse_address(args.driver_api_address)
@@ -419,7 +475,7 @@ def run_server() -> None:
     _register_exit_handlers(
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_SERVER_LEAVE,
+        event_type=EventType.RUN_SUPERLINK_LEAVE,
     )
 
     # Block
@@ -561,7 +617,7 @@ def _run_fleet_api_rest(
     try:
         import uvicorn
 
-        from flwr.server.fleet.rest_rere.rest_api import app as fast_api_app
+        from flwr.server.superlink.fleet.rest_rere.rest_api import app as fast_api_app
     except ModuleNotFoundError:
         sys.exit(MISSING_EXTRA_REST)
     if workers != 1:
@@ -584,7 +640,7 @@ def _run_fleet_api_rest(
         raise ValueError(validation_exceptions)
 
     uvicorn.run(
-        app="flwr.server.fleet.rest_rere.rest_api:app",
+        app="flwr.server.superlink.fleet.rest_rere.rest_api:app",
         port=port,
         host=host,
         reload=False,
@@ -621,7 +677,7 @@ def _validate_ssl_files(
     return validation_exceptions
 
 
-def _parse_args_driver() -> argparse.ArgumentParser:
+def _parse_args_run_driver_api() -> argparse.ArgumentParser:
     """Parse command line arguments for Driver API."""
     parser = argparse.ArgumentParser(
         description="Start a Flower Driver API server. "
@@ -638,7 +694,7 @@ def _parse_args_driver() -> argparse.ArgumentParser:
     return parser
 
 
-def _parse_args_fleet() -> argparse.ArgumentParser:
+def _parse_args_run_fleet_api() -> argparse.ArgumentParser:
     """Parse command line arguments for Fleet API."""
     parser = argparse.ArgumentParser(
         description="Start a Flower Fleet API server."
@@ -655,7 +711,7 @@ def _parse_args_fleet() -> argparse.ArgumentParser:
     return parser
 
 
-def _parse_args_server() -> argparse.ArgumentParser:
+def _parse_args_run_superlink() -> argparse.ArgumentParser:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
         description="This will start a Flower server "
@@ -760,3 +816,42 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         type=int,
         default=1,
     )
+
+
+def _parse_args_run_server_app() -> argparse.ArgumentParser:
+    """Parse flower-server-app command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Start a Flower server app",
+    )
+
+    parser.add_argument(
+        "server-app",
+        help="For example: `server:app` or `project.package.module:wrapper.app`",
+    )
+    parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Run the server app without HTTPS. By default, the app runs with "
+        "HTTPS enabled. Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--root-certificates",
+        metavar="ROOT_CERT",
+        type=str,
+        help="Specifies the path to the PEM-encoded root certificate file for "
+        "establishing secure HTTPS connections.",
+    )
+    parser.add_argument(
+        "--server",
+        default="0.0.0.0:9092",
+        help="Server address",
+    )
+    parser.add_argument(
+        "--dir",
+        default="",
+        help="Add specified directory to the PYTHONPATH and load Flower "
+        "app from there."
+        " Default: current working directory.",
+    )
+
+    return parser

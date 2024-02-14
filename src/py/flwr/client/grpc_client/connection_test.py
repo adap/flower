@@ -34,7 +34,7 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ServerMessage,
 )
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.fleet.grpc_bidi.grpc_server import start_grpc_server
+from flwr.server.superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
 
 from .connection import grpc_connection
 
@@ -48,10 +48,11 @@ MESSAGE_GET_PROPERTIES = Message(
         run_id=0,
         task_id="",
         group_id="",
+        node_id=0,
         ttl="",
         task_type=TASK_TYPE_GET_PROPERTIES,
     ),
-    message=compat.getpropertiesres_to_recordset(
+    content=compat.getpropertiesres_to_recordset(
         GetPropertiesRes(Status(Code.OK, ""), {})
     ),
 )
@@ -60,10 +61,11 @@ MESSAGE_DISCONNECT = Message(
         run_id=0,
         task_id="",
         group_id="",
+        node_id=0,
         ttl="",
         task_type="reconnect",
     ),
-    message=RecordSet(configs={"config": ConfigsRecord({"reason": 0})}),
+    content=RecordSet(configs={"config": ConfigsRecord({"reason": 0})}),
 )
 
 
@@ -100,7 +102,9 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
 
 
 @patch(
-    "flwr.server.fleet.grpc_bidi.flower_service_servicer.FlowerServiceServicer.Join",
+    # pylint: disable=line-too-long
+    "flwr.server.superlink.fleet.grpc_bidi.flower_service_servicer.FlowerServiceServicer.Join",  # noqa: E501
+    # pylint: enable=line-too-long
     mock_join,
 )
 def test_integration_connection() -> None:
