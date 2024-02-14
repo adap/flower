@@ -40,7 +40,7 @@ def add_gaussian_noise_inplace(input_arrays: NDArrays, std_dev: float) -> None:
 def clip_inputs_inplace(input_arrays: NDArrays, clipping_norm: float) -> None:
     """Clip model update based on the clipping norm in-place.
 
-    FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
+    FlatClip method of the paper: https://arxiv.org/abs/1710.06963
     """
     input_norm = get_norm(input_arrays)
     scaling_factor = min(1, clipping_norm / input_norm)
