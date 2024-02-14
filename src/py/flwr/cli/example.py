@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,21 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower CLI package."""
+"""Flower command line interface `example` command."""
 
 import json
 import subprocess
 import urllib.request
 
-import typer
+from rich import print
+
+from .utils import prompt_options
 
 
-def example():
+def example() -> None:
+    """Clone a Flower example.
+
+    All examples available in the Flower repository are available through this command.
     """
-    This command allows you to copy any Flower example which is currently available at:
-    https://github.com/adap/flower/tree/main/examples
-    """
-
     # Load list of examples directly from GitHub
     url = "https://api.github.com/repos/adap/flower/git/trees/main"
     res = json.load(urllib.request.urlopen(url))
@@ -38,16 +39,10 @@ def example():
         item["path"] for item in result["tree"] if item["path"] not in [".gitignore"]
     ]
 
-    # Turn examples into a list with index as in "quickstart-pytorch [0]"
-    content = [f" {name} [{index}]" for index, name in enumerate(example_names)]
-    print()
-    index = typer.prompt(
-        "💬 Please select the example you'd like to copy by typing in the number.\n\n"
-        + "\n".join(content)
+    example_name = prompt_options(
+        "Please select example by typing in the number",
+        example_names,
     )
-    print()
-
-    example_name = example_names[int(index)]
 
     subprocess.check_output(
         ["git", "clone", "--depth=1", "https://github.com/adap/flower.git"]

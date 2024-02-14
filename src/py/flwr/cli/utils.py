@@ -1,0 +1,41 @@
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Flower command line interface utils."""
+
+from typing import List
+
+import typer
+
+
+def prompt_options(text: str, options: List[str]) -> str:
+    """Ask user to select one of the given options and return the selected item."""
+    # Turn examples into a list with index as in " [ 0] quickstart-pytorch"
+    options_formatted = [
+        " [ "
+        + typer.style(index, fg=typer.colors.GREEN, bold=True)
+        + "]"
+        + f" {typer.style(name, fg=typer.colors.WHITE, bold=True)}"
+        for index, name in enumerate(options)
+    ]
+
+    index = typer.prompt(
+        "\n"
+        + typer.style(f"💬 {text}", fg=typer.colors.MAGENTA, bold=True)
+        + "\n\n"
+        + "\n".join(options_formatted)
+        + "\n\n\n"
+    )
+
+    return options[int(index)]

@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower CLI package."""
+"""Flower command line interface `new` command."""
 
 import os
 from enum import Enum
@@ -22,13 +22,17 @@ from typing import Dict
 import typer
 from typing_extensions import Annotated
 
+from ..utils import prompt_options
+
 
 class MLFramework(str, Enum):
+    """Available frameworks."""
+
     pytorch = "PyTorch"
-    # tensorflow = "TensorFlow"
+    tensorflow = "TensorFlow"
 
 
-def load_template(name: str):
+def load_template(name: str) -> str:
     """Load template from template directory and return as text."""
     tpl_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "templates"))
     tpl_files = os.listdir(tpl_dir)
@@ -40,66 +44,73 @@ def load_template(name: str):
         return tpl_file.read()
 
 
-def render_template(template_name: str, data: Dict[str, str]):
+def render_template(template: str, data: Dict[str, str]) -> str:
     """Render template."""
-    tpl_file = load_template(template_name)
+    tpl_file = load_template(template)
     tpl = Template(tpl_file)
     result = tpl.substitute(data)
     return result
 
 
-def create_file(file_path: str, content: str):
+def create_file(file_path: str, content: str) -> None:
     """Create file including all nessecary directories and write content into file."""
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
 
 
-def render_and_create(file_path: str, template_name: str, data: Dict[str, str]):
+def render_and_create(file_path: str, template: str, context: Dict[str, str]) -> None:
     """Render template and write to file."""
-    content = render_template(template_name, data)
+    content = render_template(template, context)
     create_file(file_path, content)
 
 
 def new(
     project_name: Annotated[
         str,
-        typer.Argument(metavar="🌼 Project name 🌼", help="The name of the project"),
+        typer.Argument(metavar="project_name", help="The name of the project"),
     ],
     framework: Annotated[
         MLFramework,
-        typer.Option(
-            case_sensitive=False,
-            help="The ML framework to use",
-            prompt=("💬 Please select your machine learning framework."),
-        ),
-    ],
-):
-    """This command will guide you through creating your Flower project."""
+        typer.Option(case_sensitive=False, help="The ML framework to use"),
+    ] = None,
+) -> None:
+    """Create new Flower project."""
     print(f"Creating Flower project {project_name}...")
+
+    if framework is None:
+        framework_value = prompt_options(
+            "Please select ML framework by typing in the number",
+            [mlf.value for mlf in MLFramework],
+        )
+        framework = next(
+            name
+            for name, value in vars(MLFramework).items()
+            if value == framework_value
+        )
 
     # Set project directory path
     cwd = os.getcwd()
-    project_dir = os.path.join(cwd, project_name.lower())
+    pnl = project_name.lower()
+    project_dir = os.path.join(cwd, pnl)
 
-    # Render README.md
-    file_path = os.path.join(project_dir, "README.md")
-    render_and_create(file_path, "README.md", {"project_name": project_name})
+    # List of files to render
+    files = {
+        "README.md": {
+            "template": "README.md",
+        },
+        "requirements.txt": {"template": f"requirements.{framework.lower()}.txt"},
+        "flower.toml": {"template": "flower.toml"},
+        f"{pnl}/__init__.py": {"template": "__init__.py"},
+        f"{pnl}/main.py": {"template": f"main.{framework.lower()}.py"},
+    }
+    context = {"project_name": project_name}
 
-    # Render requirements.txt
-    file_path = os.path.join(project_dir, "requirements.txt")
-    render_and_create(file_path, f"requirements.{framework.lower()}.txt", {})
+    for file_path, value in files.items():
+        render_and_create(
+            file_path=os.path.join(project_dir, file_path),
+            template=value["template"],
+            context=context,
+        )
 
-    # Render flower.toml
-    file_path = os.path.join(project_dir, "flower.toml")
-    render_and_create(file_path, f"flower.toml", {"project_name": project_name})
-
-    # Render __init__.py in module directory
-    file_path = os.path.join(project_dir, f"{project_name.lower()}/__init__.py")
-    render_and_create(file_path, f"__init__.py", {})
-
-    # Render main.py in module directory
-    file_path = os.path.join(project_dir, f"{project_name.lower()}/main.py")
-    render_and_create(file_path, f"main.py", {})
-
-    print(f"Project creation successful.")
+    print("Project creation successful.")
