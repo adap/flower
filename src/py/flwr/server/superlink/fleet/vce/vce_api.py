@@ -29,20 +29,14 @@ from flwr.common.serde import message_to_taskres, recordset_from_proto
 from flwr.proto.fleet_pb2 import CreateNodeRequest
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import TaskIns
-from flwr.server.superlink.fleet.message_handler.message_handler import (
-    PullTaskInsRequest,
-    PushTaskResRequest,
-    create_node,
-    pull_task_ins,
-    push_task_res,
-)
+from flwr.server.superlink.fleet.message_handler.message_handler import create_node
 from flwr.server.superlink.state import StateFactory
 from flwr.simulation.ray_transport.ray_actor import (
     DefaultActor,
     VirtualClientEngineActorPool,
 )
 
-PullTaskInsRequestQueue = asyncio.Queue[PullTaskInsRequest]
+TaskInsQueue = asyncio.Queue[TaskIns]
 
 
 def _construct_actor_pool(
@@ -70,11 +64,11 @@ def taskins_to_message(taskins: TaskIns) -> Message:
         content=recordset,
         metadata=Metadata(
             run_id=taskins.run_id,
-            task_id=taskins.task_id,
+            message_id=taskins.task_id,
             group_id=taskins.group_id,
-            node_id=0, # TODO: resolve
+            node_id=0,  # TODO: resolve
             ttl="",
-            task_type=taskins.task.task_type,
+            message_type=taskins.task.task_type,
         ),
     )
 
@@ -91,84 +85,73 @@ def _register_nodes(num_nodes: int, state_factory: StateFactory) -> List[Node]:
 
 async def worker(
     app: Callable[[], ClientApp],
-    queue: PullTaskInsRequestQueue,
+    queue: TaskInsQueue,
     node_states: Dict[int, NodeState],
     state_factory: StateFactory,
     pool: VirtualClientEngineActorPool,
 ) -> None:
-    """Get PullTaskInRequests from queue and execute associated job if actor is free.
+    """Get TaskIns from queue and execute associated job if actor is free.
 
     If actor is not free, the request is added back to the queue.
     """
     while True:
-        pulltaskinrequest = await queue.get()
+        task_ins = await queue.get()
 
         # TODO: check if another request for the same node is being running atm
         # TODO: Else potential problesm with run_state ?
 
-        if pool.is_actor_available():
-            # Pull tasks
-            task_ins_pulled = pull_task_ins(
-                request=pulltaskinrequest, state=state_factory.state()
-            )
-            if task_ins_pulled.task_ins_list:
-                # Take the first element in the list
-                task_ins = task_ins_pulled.task_ins_list.pop(0)
-                node_id = task_ins.task.consumer.node_id
+        if not pool.is_actor_available():
+            # TODO: revisit
+            # insert actor in pool, then what?
+            raise RuntimeError("Did an actor die?")
 
-                # Register and retrive runstate
-                node_states[node_id].register_context(run_id=task_ins.run_id)
-                run_state = node_states[node_id].retrieve_context(
-                    run_id=task_ins.run_id
-                )
+        node_id = task_ins.task.consumer.node_id
 
-                # Convert TaskIns to Message
-                message = taskins_to_message(task_ins)
+        # Register and retrive runstate
+        node_states[node_id].register_context(run_id=task_ins.run_id)
+        run_state = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
 
-                # Submite a task to the pool
-                future = pool.submit_if_actor_is_free(
-                    lambda a, a_fn, mssg, cid, state: a.run.remote(
-                        a_fn, mssg, cid, state
-                    ),
-                    (app, message, str(node_id), run_state),
-                )
+        # Convert TaskIns to Message
+        message = taskins_to_message(task_ins)
 
-                assert (
-                    future is not None
-                ), "this shouldn't happen given the check above, right?"
-                print(f"wait for {future = }")
-                await asyncio.wait([future])
-                print(f"got: {future = }")
+        # Submite a task to the pool
+        future = pool.submit_if_actor_is_free(
+            lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
+            (app, message, str(node_id), run_state),
+        )
 
-                # Fetch result
-                out_mssg, updated_context = pool.fetch_result_and_return_actor(future)
+        assert future is not None, "this shouldn't happen given the check above, right?"
+        # print(f"wait for {future = }")
+        await asyncio.wait([future])
+        # print(f"got: {future = }")
 
-                # Update Context
-                node_states[node_id].update_context(
-                    task_ins.run_id, context=updated_context
-                )
+        # Fetch result
+        out_mssg, updated_context = pool.fetch_result_and_return_actor(future)
 
-                # Convert to TaskRes
-                task_res = message_to_taskres(out_mssg)
-                # Configuring task
-                task_res = configure_task_res(
-                    task_res, task_ins, pulltaskinrequest.node
-                )
-                to_push = PushTaskResRequest(task_res_list=[task_res])
-                # Push
-                push_task_res(request=to_push, state=state_factory.state())
+        # Update Context
+        node_states[node_id].update_context(task_ins.run_id, context=updated_context)
+
+        # Convert to TaskRes
+        task_res = message_to_taskres(out_mssg)
+        # Configuring task
+        task_res = configure_task_res(
+            task_res, task_ins, Node(node_id=task_ins.task.consumer.node_id)
+        )
+        # Store TaskRes in state
+        state_factory.state().store_task_res(task_res)
 
 
 async def generate_pull_requests(
-    queue: PullTaskInsRequestQueue, nodes: List[Node]
+    queue: TaskInsQueue,
+    state_factory: StateFactory,
+    nodes: List[Node],
 ) -> None:
     """Generate PullTaskInsRequests and adds it to the queue."""
     while True:
         for node in nodes:
-            # TODO: ideally only create requests if node has a taskins
-            request = PullTaskInsRequest(node=node)
-            await queue.put(request)
-
+            task_ins = state_factory.state().get_task_ins(node_id=node.node_id, limit=1)
+            if task_ins:
+                await queue.put(task_ins[0])
         await asyncio.sleep(0.5)
 
 
@@ -180,13 +163,13 @@ async def run(
     node_states: Dict[int, NodeState],
 ) -> None:
     """Run the VCE async."""
-    queue: PullTaskInsRequestQueue = asyncio.Queue(64)
+    queue: TaskInsQueue = asyncio.Queue(64)
 
     worker_tasks = [
         asyncio.create_task(worker(app, queue, node_states, state_factory, pool))
         for _ in range(pool.num_actors)
     ]
-    asyncio.create_task(generate_pull_requests(queue, nodes))
+    asyncio.create_task(generate_pull_requests(queue, state_factory, nodes))
     await queue.join()
     await asyncio.gather(*worker_tasks)
 
