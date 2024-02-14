@@ -34,7 +34,7 @@ TRANSPORT_TYPES = [
     TRANSPORT_TYPE_VCE,
 ]
 
-TASK_TYPE_GET_PROPERTIES = "get_properties"
-TASK_TYPE_GET_PARAMETERS = "get_parameters"
-TASK_TYPE_FIT = "fit"
-TASK_TYPE_EVALUATE = "evaluate"
+MESSAGE_TYPE_GET_PROPERTIES = "get_properties"
+MESSAGE_TYPE_GET_PARAMETERS = "get_parameters"
+MESSAGE_TYPE_FIT = "fit"
+MESSAGE_TYPE_EVALUATE = "evaluate"

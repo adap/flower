@@ -25,7 +25,7 @@ from flwr.client import Client, NumPyClient
 from flwr.client.clientapp import ClientApp
 from flwr.common import Config, Scalar
 from flwr.common.configsrecord import ConfigsRecord
-from flwr.common.constant import TASK_TYPE_GET_PROPERTIES
+from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.context import Context
 from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
@@ -107,7 +107,7 @@ def test_cid_consistency_one_at_a_time() -> None:
     # submit jobs one at a time
     for prox in proxies:
         message = prox._wrap_recordset_in_message(  # pylint: disable=protected-access
-            recordset, TASK_TYPE_GET_PROPERTIES
+            recordset, MESSAGE_TYPE_GET_PROPERTIES
         )
         message_out = prox._submit_job(  # pylint: disable=protected-access
             message=message, timeout=None
@@ -141,7 +141,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         state = prox.proxy_state.retrieve_context(run_id=run_id)
 
         message = prox._wrap_recordset_in_message(  # pylint: disable=protected-access
-            recordset, TASK_TYPE_GET_PROPERTIES
+            recordset, MESSAGE_TYPE_GET_PROPERTIES
         )
         prox.actor_pool.submit_client_job(
             lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
@@ -187,11 +187,11 @@ def test_cid_consistency_without_proxies() -> None:
             content=recordset,
             metadata=Metadata(
                 run_id=0,
-                task_id="",
+                message_id="",
                 group_id="",
                 ttl="",
                 node_id=int(cid),
-                task_type=TASK_TYPE_GET_PROPERTIES,
+                message_type=MESSAGE_TYPE_GET_PROPERTIES,
             ),
         )
         pool.submit_client_job(
