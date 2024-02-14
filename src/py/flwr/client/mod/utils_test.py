@@ -74,7 +74,9 @@ def make_mock_app(name: str, footprint: List[str]) -> ClientAppCallable:
 def _get_dummy_flower_message() -> Message:
     return Message(
         content=RecordSet(),
-        metadata=Metadata(run_id=0, task_id="", group_id="", ttl="", task_type="mock"),
+        metadata=Metadata(
+            run_id=0, task_id="", group_id="", node_id=0, ttl="", task_type="mock"
+        ),
     )
 
 

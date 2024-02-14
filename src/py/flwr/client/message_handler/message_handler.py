@@ -92,6 +92,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
                 run_id=0,
                 task_id="",
                 group_id="",
+                node_id=0,
                 ttl="",
                 task_type="reconnect",
             ),
@@ -150,9 +151,10 @@ def handle_legacy_message_from_tasktype(
     # Return Message
     out_message = Message(
         metadata=Metadata(
-            run_id=0,  # Non-user defined
-            task_id="",  # Non-user defined
-            group_id="",  # Non-user defined
+            run_id=0,
+            task_id="",
+            group_id="",
+            node_id=0,
             ttl="",
             task_type=task_type,
         ),
