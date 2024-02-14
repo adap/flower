@@ -24,7 +24,10 @@ import grpc
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    compute_hmac,
     generate_key_pairs,
+    generate_shared_key,
+    public_key_to_bytes,
 )
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -37,9 +40,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 
-from .client_interceptor import AuthenticateClientInterceptor, Request
-
-_PUBLIC_KEY_HEADER = "public-key"
+from .client_interceptor import (
+    _AUTH_TOKEN_HEADER,
+    _PUBLIC_KEY_HEADER,
+    AuthenticateClientInterceptor,
+    Request,
+)
 
 
 class _MockServicer:
@@ -51,15 +57,17 @@ class _MockServicer:
         self._received_client_metadata: Optional[
             Sequence[Tuple[str, Union[str, bytes]]]
         ] = None
-        _, self._server_public_key = generate_key_pairs()
+        self.server_private_key, self.server_public_key = generate_key_pairs()
+        self._received_message_bytes: bytes = b""
 
     def unary_unary(self, request: Request, context: grpc.ServicerContext) -> object:
         """Handle unary call."""
         with self._lock:
             self._received_client_metadata = context.invocation_metadata()
+            self._received_message_bytes = request.SerializeToString(True)
             if isinstance(request, CreateNodeRequest):
                 context.set_trailing_metadata(
-                    ((_PUBLIC_KEY_HEADER, self._server_public_key),)
+                    ((_PUBLIC_KEY_HEADER, self.server_public_key),)
                 )
 
             return object()
@@ -70,6 +78,11 @@ class _MockServicer:
         """Return received client metadata."""
         with self._lock:
             return self._received_client_metadata
+
+    def received_message_bytes(self) -> bytes:
+        """Return received message bytes."""
+        with self._lock:
+            return self._received_message_bytes
 
 
 def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
@@ -134,7 +147,39 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             _, _, create_node, _ = conn
             assert create_node is not None
             create_node()
-            assert self._servicer.received_client_metadata is not None
+            expected_client_metadata = (
+                _PUBLIC_KEY_HEADER,
+                public_key_to_bytes(self._client_public_key),
+            )
+            assert self._servicer.received_client_metadata() == expected_client_metadata
+            assert (
+                self._client_interceptor.server_public_key
+                == self._servicer.server_public_key
+            )
+
+    def test_client_auth_delete_node(self) -> None:
+        """Test client authentication during delete node."""
+        with self._connection(
+            self._address,
+            True,
+            GRPC_MAX_MESSAGE_LENGTH,
+            None,
+            (self._client_interceptor),
+        ) as conn:
+            _, _, _, delete_node = conn
+            assert delete_node is not None
+            delete_node()
+            shared_secret = generate_shared_key(
+                self._servicer.server_private_key, self._client_public_key
+            )
+            expected_hmac = compute_hmac(
+                shared_secret, self._servicer.received_message_bytes()
+            )
+            expected_client_metadata = (
+                _AUTH_TOKEN_HEADER,
+                expected_hmac,
+            )
+            assert self._servicer.received_client_metadata() == expected_client_metadata
 
 
 if __name__ == "__main__":
