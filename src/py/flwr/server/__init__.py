@@ -26,6 +26,7 @@ from .client_manager import ClientManager as ClientManager
 from .client_manager import SimpleClientManager as SimpleClientManager
 from .history import History as History
 from .server import Server as Server
+from .serverapp import ServerApp as ServerApp
 
 __all__ = [
     "ClientManager",
@@ -36,6 +37,7 @@ __all__ = [
     "run_server_app",
     "run_superlink",
     "Server",
+    "ServerApp",
     "ServerConfig",
     "SimpleClientManager",
     "start_server",

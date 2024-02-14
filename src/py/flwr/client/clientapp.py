@@ -72,12 +72,12 @@ class ClientApp:
         self._call = make_ffn(ffn, mods if mods is not None else [])
 
     def __call__(self, message: Message, context: Context) -> Message:
-        """."""
+        """Execute `ClientApp`."""
         return self._call(message, context)
 
 
 class LoadClientAppError(Exception):
-    """."""
+    """Error when trying to load `ClientApp`."""
 
 
 def load_client_app(module_attribute_str: str) -> ClientApp:
