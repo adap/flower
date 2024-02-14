@@ -550,7 +550,7 @@ def message_to_taskins(message: Message) -> TaskIns:
     return TaskIns(
         task=Task(
             ttl=message.metadata.ttl,
-            task_type=message.metadata.task_type,
+            task_type=message.metadata.message_type,
             recordset=recordset_to_proto(message.content),
         ),
     )
@@ -561,11 +561,11 @@ def message_from_taskins(taskins: TaskIns) -> Message:
     # Retrieve the Metadata
     metadata = Metadata(
         run_id=taskins.run_id,
-        task_id=taskins.task_id,
+        message_id=taskins.task_id,
         group_id=taskins.group_id,
         node_id=taskins.task.consumer.node_id,
         ttl=taskins.task.ttl,
-        task_type=taskins.task.task_type,
+        message_type=taskins.task.task_type,
     )
 
     # Return the Message
@@ -580,7 +580,7 @@ def message_to_taskres(message: Message) -> TaskRes:
     return TaskRes(
         task=Task(
             ttl=message.metadata.ttl,
-            task_type=message.metadata.task_type,
+            task_type=message.metadata.message_type,
             recordset=recordset_to_proto(message.content),
         ),
     )
@@ -591,11 +591,11 @@ def message_from_taskres(taskres: TaskRes) -> Message:
     # Retrieve the MetaData
     metadata = Metadata(
         run_id=taskres.run_id,
-        task_id=taskres.task_id,
+        message_id=taskres.task_id,
         group_id=taskres.group_id,
         node_id=taskres.task.consumer.node_id,
         ttl=taskres.task.ttl,
-        task_type=taskres.task.task_type,
+        message_type=taskres.task.task_type,
     )
 
     # Return the Message

@@ -26,10 +26,10 @@ from flwr.client.client import (
 from flwr.client.typing import ClientFn
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import (
-    TASK_TYPE_EVALUATE,
-    TASK_TYPE_FIT,
-    TASK_TYPE_GET_PARAMETERS,
-    TASK_TYPE_GET_PROPERTIES,
+    MESSAGE_TYPE_EVALUATE,
+    MESSAGE_TYPE_FIT,
+    MESSAGE_TYPE_GET_PARAMETERS,
+    MESSAGE_TYPE_GET_PROPERTIES,
 )
 from flwr.common.context import Context
 from flwr.common.message import Message, Metadata
@@ -75,7 +75,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
     sleep_duration : int
         Number of seconds that the client should disconnect from the server.
     """
-    if message.metadata.task_type == "reconnect":
+    if message.metadata.message_type == "reconnect":
         # Retrieve ReconnectIns from recordset
         recordset = message.content
         seconds = cast(int, recordset.get_configs("config")["seconds"])
@@ -90,11 +90,11 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
         out_message = Message(
             metadata=Metadata(
                 run_id=0,
-                task_id="",
+                message_id="",
                 group_id="",
                 node_id=0,
                 ttl="",
-                task_type="reconnect",
+                message_type="reconnect",
             ),
             content=recordset,
         )
@@ -105,7 +105,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
     return None, 0
 
 
-def handle_legacy_message_from_tasktype(
+def handle_legacy_message_from_msgtype(
     client_fn: ClientFn, message: Message, context: Context
 ) -> Message:
     """Handle legacy message in the inner most mod."""
@@ -113,17 +113,17 @@ def handle_legacy_message_from_tasktype(
 
     client.set_context(context)
 
-    task_type = message.metadata.task_type
+    message_type = message.metadata.message_type
 
     # Handle GetPropertiesIns
-    if task_type == TASK_TYPE_GET_PROPERTIES:
+    if message_type == MESSAGE_TYPE_GET_PROPERTIES:
         get_properties_res = maybe_call_get_properties(
             client=client,
             get_properties_ins=recordset_to_getpropertiesins(message.content),
         )
         out_recordset = getpropertiesres_to_recordset(get_properties_res)
     # Handle GetParametersIns
-    elif task_type == TASK_TYPE_GET_PARAMETERS:
+    elif message_type == MESSAGE_TYPE_GET_PARAMETERS:
         get_parameters_res = maybe_call_get_parameters(
             client=client,
             get_parameters_ins=recordset_to_getparametersins(message.content),
@@ -132,31 +132,31 @@ def handle_legacy_message_from_tasktype(
             get_parameters_res, keep_input=False
         )
     # Handle FitIns
-    elif task_type == TASK_TYPE_FIT:
+    elif message_type == MESSAGE_TYPE_FIT:
         fit_res = maybe_call_fit(
             client=client,
             fit_ins=recordset_to_fitins(message.content, keep_input=True),
         )
         out_recordset = fitres_to_recordset(fit_res, keep_input=False)
     # Handle EvaluateIns
-    elif task_type == TASK_TYPE_EVALUATE:
+    elif message_type == MESSAGE_TYPE_EVALUATE:
         evaluate_res = maybe_call_evaluate(
             client=client,
             evaluate_ins=recordset_to_evaluateins(message.content, keep_input=True),
         )
         out_recordset = evaluateres_to_recordset(evaluate_res)
     else:
-        raise ValueError(f"Invalid task type: {task_type}")
+        raise ValueError(f"Invalid task type: {message_type}")
 
     # Return Message
     out_message = Message(
         metadata=Metadata(
             run_id=0,
-            task_id="",
+            message_id="",
             group_id="",
             node_id=0,
             ttl="",
-            task_type=task_type,
+            message_type=message_type,
         ),
         content=out_recordset,
     )
