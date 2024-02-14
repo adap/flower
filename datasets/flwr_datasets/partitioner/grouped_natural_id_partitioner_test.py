@@ -19,7 +19,7 @@ def _dummy_setup(
     The partitioner has automatically the dataset assigned to it.
     """
     dataset = _create_dataset(num_rows, n_unique_natural_ids)
-    partitioner = GroupedNaturalIdPartitioner(partition_by="natural_id",num_nodes=num_nodes)
+    partitioner = GroupedNaturalIdPartitioner(partition_by="natural_id",num_groups=num_nodes)
     partitioner.dataset = dataset
     return dataset, partitioner
 
@@ -51,7 +51,7 @@ class TestNaturalIdPartitioner(unittest.TestCase):
         _, partitioner = _dummy_setup(num_rows, num_unique_natural_id, num_nodes)
         # Simulate usage to start lazy node_id_to_natural_id creation
         _ = partitioner.load_partition(0)
-        self.assertEqual(len(partitioner.node_id_to_natural_id.keys()), num_nodes, f'part: {partitioner._num_nodes}, real: {num_nodes}')
+        self.assertEqual(len(partitioner.node_id_to_natural_id.keys()), num_nodes, f'part: {partitioner._num_groups}, real: {num_nodes}')
 
     @parameterized.expand(  # type: ignore
         # num_rows, num_unique_natural_ids
@@ -76,7 +76,7 @@ class TestNaturalIdPartitioner(unittest.TestCase):
     def test_partitioner_with_non_existing_column_partition_by(self) -> None:
         """Test error when the partition_by columns does not exist."""
         dataset = _create_dataset(10, 2)
-        partitioner = GroupedNaturalIdPartitioner(partition_by="not-existing",num_nodes=2)
+        partitioner = GroupedNaturalIdPartitioner(partition_by="not-existing",num_groups=2)
         partitioner.dataset = dataset
         with self.assertRaises(ValueError):
             partitioner.load_partition(0)

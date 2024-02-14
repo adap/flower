@@ -5,11 +5,19 @@ import numpy as np
 
 class GroupedNaturalIdPartitioner(NaturalIdPartitioner):
     """Partitioner for a dataset in which the final partition results in different 
-        non overlapping datasets for a given number of groups/nodes"""
+        non overlapping datasets for a given number of groups/nodes
+        
+        Parameters
+        ----------
+        partition_by : str
+            The label in the dataset that divided the data.
+        num_groups : int
+            The number of groups in which the data will be divided.
+        """
 
-    def __init__(self, partition_by, num_nodes) -> None:
+    def __init__(self, partition_by, num_groups) -> None:
         super().__init__(partition_by)
-        self._num_nodes = num_nodes
+        self._num_groups = num_groups
 
     def _create_int_node_id_to_natural_id(self) -> None:
         """Create a mapping from int indices to unique client or group ids from dataset.
@@ -19,10 +27,10 @@ class GroupedNaturalIdPartitioner(NaturalIdPartitioner):
         unique_natural_ids = self.dataset.unique(self._partition_by)
 
         # Divides the labels between the number of nodes/ groups
-        split_natural_ids = np.array_split(unique_natural_ids, self._num_nodes)
+        split_natural_ids = np.array_split(unique_natural_ids, self._num_groups)
 
         self._node_id_to_natural_id = dict(
-            zip(range(self._num_nodes), split_natural_ids)
+            zip(range(self._num_groups), split_natural_ids)
         )
 
     def load_partition(self, node_id: int) -> datasets.Dataset:
