@@ -32,7 +32,7 @@ from flwr.common.constant import (
     MESSAGE_TYPE_GET_PROPERTIES,
 )
 from flwr.common.context import Context
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message
 from flwr.common.recordset import RecordSet
 from flwr.common.recordset_compat import (
     evaluateres_to_recordset,
@@ -87,17 +87,8 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
         reason = cast(int, disconnect_msg.disconnect_res.reason)
         recordset = RecordSet()
         recordset.set_configs("config", ConfigsRecord({"reason": reason}))
-        out_message = Message(
-            metadata=Metadata(
-                run_id=0,
-                message_id="",
-                group_id="",
-                node_id=0,
-                ttl="",
-                message_type="reconnect",
-            ),
-            content=recordset,
-        )
+        out_message = message.create_reply(recordset, ttl="")
+        out_message.metadata.message_type = "reconnect"
         # Return TaskRes and sleep duration
         return out_message, sleep_duration
 
@@ -149,18 +140,7 @@ def handle_legacy_message_from_msgtype(
         raise ValueError(f"Invalid task type: {message_type}")
 
     # Return Message
-    out_message = Message(
-        metadata=Metadata(
-            run_id=0,
-            message_id="",
-            group_id="",
-            node_id=0,
-            ttl="",
-            message_type=message_type,
-        ),
-        content=out_recordset,
-    )
-    return out_message
+    return message.create_reply(out_recordset, ttl="")
 
 
 def _reconnect(

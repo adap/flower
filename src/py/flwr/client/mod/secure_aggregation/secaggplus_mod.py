@@ -27,7 +27,7 @@ from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import MESSAGE_TYPE_FIT
 from flwr.common.context import Context
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common.message import Message
 from flwr.common.recordset import RecordSet
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -206,17 +206,8 @@ def secaggplus_mod(
     ctxt.state.set_configs(RECORD_KEY_STATE, ConfigsRecord(state.to_dict()))
 
     # Return message
-    return Message(
-        metadata=Metadata(
-            run_id=0,
-            message_id="",
-            group_id="",
-            node_id=0,
-            ttl="",
-            message_type=MESSAGE_TYPE_FIT,
-        ),
-        content=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)}),
-    )
+    content = RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)})
+    return msg.create_reply(content, ttl="")
 
 
 def check_stage(current_stage: str, configs: Dict[str, ConfigsRecordValues]) -> None:

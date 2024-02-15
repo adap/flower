@@ -171,9 +171,11 @@ def grpc_connection(  # pylint: disable=R0915
             metadata=Metadata(
                 run_id=0,
                 message_id=str(uuid.uuid4()),
+                src_node_id=0,
+                dst_node_id=0,
+                reply_to_message="",
                 group_id="",
                 ttl="",
-                node_id=0,
                 message_type=message_type,
             ),
             content=recordset,

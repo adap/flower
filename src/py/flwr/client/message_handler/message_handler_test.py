@@ -34,7 +34,7 @@ from flwr.common import (
 )
 from flwr.common import recordset_compat as compat
 from flwr.common import typing
-from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
+from flwr.common.constant import MessageType
 from flwr.common.context import Context
 from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
@@ -121,12 +121,14 @@ def test_client_without_get_properties() -> None:
     recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
     message = Message(
         metadata=Metadata(
-            run_id=0,
+            run_id=123,
             message_id=str(uuid.uuid4()),
-            group_id="",
-            node_id=0,
+            group_id="some group ID",
+            src_node_id=0,
+            dst_node_id=1123,
+            reply_to_message="",
             ttl="",
-            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            message_type=MessageType.GET_PROPERTIES,
         ),
         content=recordset,
     )
@@ -147,10 +149,22 @@ def test_client_without_get_properties() -> None:
         properties={},
     )
     expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
-    expected_msg = Message(message.metadata, expected_rs)
+    expected_msg = Message(
+        metadata=Metadata(
+            run_id=123,
+            message_id="",
+            group_id="some group ID",
+            src_node_id=1123,
+            dst_node_id=0,
+            reply_to_message=message.metadata.message_id,
+            ttl="",
+            message_type=MessageType.GET_PROPERTIES,
+        ),
+        content=expected_rs,
+    )
 
     assert actual_msg.content == expected_msg.content
-    assert actual_msg.metadata.message_type == expected_msg.metadata.message_type
+    assert actual_msg.metadata == expected_msg.metadata
 
 
 def test_client_with_get_properties() -> None:
@@ -160,12 +174,14 @@ def test_client_with_get_properties() -> None:
     recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
     message = Message(
         metadata=Metadata(
-            run_id=0,
+            run_id=123,
             message_id=str(uuid.uuid4()),
-            group_id="",
-            node_id=0,
+            group_id="some group ID",
+            src_node_id=0,
+            dst_node_id=1123,
+            reply_to_message="",
             ttl="",
-            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            message_type=MessageType.GET_PROPERTIES,
         ),
         content=recordset,
     )
@@ -186,7 +202,19 @@ def test_client_with_get_properties() -> None:
         properties={"str_prop": "val", "int_prop": 1},
     )
     expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
-    expected_msg = Message(message.metadata, expected_rs)
+    expected_msg = Message(
+        metadata=Metadata(
+            run_id=123,
+            message_id="",
+            group_id="some group ID",
+            src_node_id=1123,
+            dst_node_id=0,
+            reply_to_message=message.metadata.message_id,
+            ttl="",
+            message_type=MessageType.GET_PROPERTIES,
+        ),
+        content=expected_rs,
+    )
 
     assert actual_msg.content == expected_msg.content
-    assert actual_msg.metadata.message_type == expected_msg.metadata.message_type
+    assert actual_msg.metadata == expected_msg.metadata
