@@ -26,7 +26,8 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.driver.app import update_client_manager
+
+from .app import update_client_manager
 
 
 class TestClientManagerWithDriver(unittest.TestCase):
