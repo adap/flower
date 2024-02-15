@@ -15,19 +15,28 @@
 """Flower server interceptor tests."""
 
 import unittest
-import grpc
 
-from app import _run_fleet_api_grpc_rere, ADDRESS_FLEET_API_GRPC_RERE
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from common.constant import TRANSPORT_TYPE_GRPC_RERE
+import grpc
+from app import ADDRESS_FLEET_API_GRPC_RERE, _run_fleet_api_grpc_rere
 from client.app import _init_connection
+from common.constant import TRANSPORT_TYPE_GRPC_RERE
 from state.state_factory import StateFactory
 
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+
+
 class TestServerInterceptor(unittest.TestCase):
+    """Server interceptor tests."""
+
     def setUp(self):
+        """Initialize mock stub and server interceptor."""
         self._state_factory = StateFactory(":flwr-in-memory-state:")
-        self._server: grpc.Server = _run_fleet_api_grpc_rere(ADDRESS_FLEET_API_GRPC_RERE, self._state_factory)
-        self._connection, self._address = _init_connection(TRANSPORT_TYPE_GRPC_RERE, ADDRESS_FLEET_API_GRPC_RERE)
+        self._server: grpc.Server = _run_fleet_api_grpc_rere(
+            ADDRESS_FLEET_API_GRPC_RERE, self._state_factory
+        )
+        self._connection, self._address = _init_connection(
+            TRANSPORT_TYPE_GRPC_RERE, ADDRESS_FLEET_API_GRPC_RERE
+        )
         with self._connection(
             self._address,
             True,
@@ -36,8 +45,9 @@ class TestServerInterceptor(unittest.TestCase):
             self._receive, self._send, self._create_node, self._delete_node = conn
 
     def tearDown(self):
+        """Clean up grpc server."""
         self._server.stop(None)
 
     def test_successful_create_node_with_metadata(self) -> None:
+        """Test server interceptor for create node."""
         self._create_node()
-        

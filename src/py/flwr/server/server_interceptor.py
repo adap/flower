@@ -14,118 +14,127 @@
 # ==============================================================================
 """Flower server interceptor."""
 
+import threading
+from typing import Callable, Sequence, Tuple, Union
+
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
-from typing import Callable, Sequence, Tuple, Union
-from flwr.server.state.authentication import AuthenticationState
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import generate_shared_key, bytes_to_public_key, public_key_to_bytes, verify_hmac
+
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    bytes_to_public_key,
+    generate_shared_key,
+    public_key_to_bytes,
+    verify_hmac,
+)
 from flwr.proto.fleet_pb2 import (
     CreateNodeRequest,
     CreateNodeResponse,
+    DeleteNodeRequest,
+    DeleteNodeResponse,
+    PullTaskInsRequest,
+    PullTaskInsResponse,
+    PushTaskResRequest,
+    PushTaskResResponse,
 )
-from flwr.server.fleet.message_handler import message_handler
-from flwr.server.state import StateFactory, State
+from flwr.server.superlink.state import StateFactory
 
 _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
 
-def _unary_unary_rpc_terminator():
 
-    def terminate(_, context):
-        context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
+def _get_value_from_tuples(
+    key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
+) -> bytes:
+    value = next((value[::-1] for key, value in tuples if key == key_string), "")
+    if isinstance(value, str):
+        return value.encode()
 
-    return grpc.unary_unary_rpc_method_handler(terminate)
+    return value
 
-def _create_node_with_public_key(state: State, server_public_key: bytes):
-
-    def send_public_key(request: CreateNodeRequest, context: grpc.ServicerContext) -> CreateNodeResponse:
-        context.set_trailing_metadata(
-            (
-                (_PUBLIC_KEY_HEADER, server_public_key),
-            )
-        )
-        return message_handler.create_node(request, state)
-
-    return grpc.unary_unary_rpc_method_handler(send_public_key)
-
-def _create_node_with_public_key(state: State, server_public_key: bytes):
-
-    def send_public_key(request: CreateNodeRequest, context: grpc.ServicerContext) -> CreateNodeResponse:
-        context.set_trailing_metadata(
-            (
-                (_PUBLIC_KEY_HEADER, server_public_key),
-            )
-        )
-        return message_handler.create_node(request, state)
-
-    return grpc.unary_unary_rpc_method_handler(send_public_key)
-
-def _handle_authentication(public_key, private_key):
-    return generate_shared_key(public_key, private_key)
-
-def _is_public_key_known(state: AuthenticationState, public_key: bytes) -> bool:
-    return public_key in state.get_client_public_keys()
-
-def _get_value_from_tuples(key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]) -> Union[str, bytes]:
-    return next((value[::-1] for key, value in tuples if key == key_string), "")
 
 class AuthenticateServerInterceptor(grpc.ServerInterceptor):
+    """Server interceptor for client authentication."""
 
-    def __init__(self, state_factory: StateFactory, private_key: ec.EllipticCurvePrivateKey, public_key: ec.EllipticCurvePublicKey):
-        self._private_key = private_key
-        self._public_key = public_key
-        self._state_factory = state_factory
-        self._terminator = _unary_unary_rpc_terminator()
-        self._create_node_handler = _create_node_with_public_key()
+    def __init__(
+        self,
+        state_factory: StateFactory,
+        private_key: ec.EllipticCurvePrivateKey,
+        public_key: ec.EllipticCurvePublicKey,
+    ):
+        self._lock = threading.Lock
+        self.server_private_key = private_key
+        self.server_public_key = public_key
+        self.state_factory = state_factory
 
-    def intercept_service(self, continuation: Callable, handler_call_details: grpc.HandlerCallDetails):
-        method_name = handler_call_details.method.split("/")[-1]
-        client_public_key_bytes = _get_value_from_tuples(_PUBLIC_KEY_HEADER, handler_call_details.invocation_metadata)
-        client_public_key = bytes_to_public_key(client_public_key_bytes)
+    def intercept_service(
+        self, continuation: Callable, handler_call_details: grpc.HandlerCallDetails
+    ) -> grpc.RpcMethodHandler:
+        """Flower server interceptor authentication logic."""
+        message_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
+        return self._generic_auth_unary_method_handler(message_handler)
 
-        if _is_public_key_known(self._state_factory.state, client_public_key_bytes):
-            if method_name == 'CreateNode':
-                return _create_node_with_public_key(self._state_factory.state, self._public_key)
-            elif method_name in {'DeleteNode', 'PullTaskIns', 'PushTaskRes'}:
-                state: AuthenticationState = self._state_factory.state
-                shared_secret = generate_shared_key(self._private_key, client_public_key)
-                hmac = _get_value_from_tuples(_AUTH_TOKEN_HEADER, handler_call_details.invocation_metadata)
-                if verify_hmac(shared_secret, )
-                state.get_client_public_keys()
-                expected_metadata = (_AUTH_TOKEN_HEADER, generate_shared_key())
+    def _generic_auth_unary_method_handler(
+        self, existing_handler: grpc.RpcMethodHandler
+    ) -> grpc.RpcMethodHandler:
+        def _generic_method_handler(
+            request: Union[
+                CreateNodeRequest,
+                DeleteNodeRequest,
+                PullTaskInsRequest,
+                PushTaskResRequest,
+            ],
+            context: grpc.ServicerContext,
+        ) -> Union[
+            CreateNodeResponse,
+            DeleteNodeResponse,
+            PullTaskInsResponse,
+            PushTaskResResponse,
+        ]:
+            with self._lock:
+                if isinstance(request, CreateNodeRequest):
+                    client_public_key_bytes = _get_value_from_tuples(
+                        _PUBLIC_KEY_HEADER, context.invocation_metadata()
+                    )
+                    is_public_key_known = (
+                        client_public_key_bytes in self.state.get_client_public_keys()
+                    )
+                    if is_public_key_known:
+                        context.set_trailing_metadata(
+                            (
+                                (
+                                    _PUBLIC_KEY_HEADER,
+                                    public_key_to_bytes(self.server_public_key),
+                                ),
+                            )
+                        )
+                    else:
+                        context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
+                elif isinstance(
+                    request, (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest)
+                ):
+                    hmac_value = _get_value_from_tuples(
+                        _AUTH_TOKEN_HEADER, context.invocation_metadata()
+                    )
+                    node_id: int = (
+                        -1 if request.node.anonymous else request.node.node_id
+                    )
+                    client_public_key_bytes = state.get_public_key_from_node_id(node_id)
+                    shared_secret = generate_shared_key(
+                        self.server_private_key,
+                        bytes_to_public_key(client_public_key_bytes),
+                    )
+                    verify = verify_hmac(
+                        shared_secret, request.SerializeToString(True), hmac_value
+                    )
+                    if not verify:
+                        context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
+                else:
+                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
 
+                return existing_handler.unary_unary
 
-        if (self._header, self._value) in handler_call_details.invocation_metadata:
-            grpc.unary_unary_rpc_method_handler
-            return continuation(handler_call_details)
-        else:
-            return self._terminator
-        
-    def intercept_service(self, continuation: Callable, handler_call_details: grpc.HandlerCallDetails):
-        client_public_key_bytes = _get_value_from_tuples(_PUBLIC_KEY_HEADER, handler_call_details.invocation_metadata)
-        if _is_public_key_known(self._state_factory.state, client_public_key_bytes):
-            message_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
-            message_handler.
-            return grpc.unary_unary_rpc_method_handler(message_handler.unary_unary, request_deserializer=message_handler.request_deserializer, response_serializer=message_handler.response_serializer)
-            if message_handler is None:
-                return
-        else:
-            return self._terminator
-
-        handler_factory, next_handler_method = _get_factory_and_method(next_handler)
-        
-
-        def invoke_intercept_method(request_or_iterator, context):
-            method_name = handler_call_details.method
-            return self.intercept(
-                next_handler_method,
-                request_or_iterator,
-                context,
-                method_name,
-            )
-
-        return handler_factory(
-            invoke_intercept_method,
-            request_deserializer=next_handler.request_deserializer,
-            response_serializer=next_handler.response_serializer,
+        return grpc.unary_unary_rpc_method_handler(
+            _generic_method_handler,
+            request_deserializer=existing_handler.request_deserializer,
+            response_serializer=existing_handler.response_serializer,
         )
