@@ -19,7 +19,7 @@ import importlib
 from typing import List, Optional, cast
 
 from flwr.client.message_handler.message_handler import (
-    handle_legacy_message_from_tasktype,
+    handle_legacy_message_from_msgtype,
 )
 from flwr.client.mod.utils import make_ffn
 from flwr.client.typing import ClientFn, Mod
@@ -63,7 +63,7 @@ class ClientApp:
             message: Message,
             context: Context,
         ) -> Message:  # pylint: disable=invalid-name
-            out_message = handle_legacy_message_from_tasktype(
+            out_message = handle_legacy_message_from_msgtype(
                 client_fn=client_fn, message=message, context=context
             )
             return out_message
