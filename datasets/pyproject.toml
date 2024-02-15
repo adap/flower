@@ -62,7 +62,7 @@ librosa = { version = ">=0.10.0.post2", optional = true }
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
 black = { version = "==23.3.0", extras = ["jupyter"] }
-docformatter = "==1.7.1"
+docformatter = "==1.5.1"
 mypy = "==1.4.0"
 pylint = "==2.13.9"
 flake8 = "==3.9.2"
