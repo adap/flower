@@ -1,7 +1,7 @@
 # Leveraging Flower and Docker for Device Heterogeneity Management in Federated Learning
 
 <p align="center">
-  <img src="https://flower.dev/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
+  <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
   <img src="https://github.com/ChoosyDevs/Choosy/assets/59146613/73d15990-453b-4da6-b8d6-df0f956a127c" width="140px" alt="Docker Logo" />
 </p>
 
@@ -141,7 +141,7 @@ By following these steps, you will have a fully functional federated learning en
 
 ### Data Pipeline with FLWR-Datasets
 
-We have integrated [`flwr-datasets`](https://flower.dev/docs/datasets/) into our data pipeline, which is managed within the `load_data.py` file in the `helpers/` directory. This script facilitates standardized access to datasets across the federated network and incorporates a `data_sampling_percentage` argument. This argument allows users to specify the percentage of the dataset to be used for training and evaluation, accommodating devices with lower memory capabilities to prevent Out-of-Memory (OOM) errors.
+We have integrated [`flwr-datasets`](https://flower.ai/docs/datasets/) into our data pipeline, which is managed within the `load_data.py` file in the `helpers/` directory. This script facilitates standardized access to datasets across the federated network and incorporates a `data_sampling_percentage` argument. This argument allows users to specify the percentage of the dataset to be used for training and evaluation, accommodating devices with lower memory capabilities to prevent Out-of-Memory (OOM) errors.
 
 ### Model Selection and Dataset
 

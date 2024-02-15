@@ -25,7 +25,7 @@ import grpc
 
 from flwr.common import recordset_compat as compat
 from flwr.common.configsrecord import ConfigsRecord
-from flwr.common.constant import TASK_TYPE_GET_PROPERTIES
+from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.typing import Code, GetPropertiesRes, Status
@@ -46,11 +46,11 @@ SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect_ins=ServerMessage.ReconnectIn
 MESSAGE_GET_PROPERTIES = Message(
     metadata=Metadata(
         run_id=0,
-        task_id="",
+        message_id="",
         group_id="",
         node_id=0,
         ttl="",
-        task_type=TASK_TYPE_GET_PROPERTIES,
+        message_type=MESSAGE_TYPE_GET_PROPERTIES,
     ),
     content=compat.getpropertiesres_to_recordset(
         GetPropertiesRes(Status(Code.OK, ""), {})
@@ -59,11 +59,11 @@ MESSAGE_GET_PROPERTIES = Message(
 MESSAGE_DISCONNECT = Message(
     metadata=Metadata(
         run_id=0,
-        task_id="",
+        message_id="",
         group_id="",
         node_id=0,
         ttl="",
-        task_type="reconnect",
+        message_type="reconnect",
     ),
     content=RecordSet(configs={"config": ConfigsRecord({"reason": 0})}),
 )
@@ -134,7 +134,7 @@ def test_integration_connection() -> None:
                 message = receive()
 
                 messages_received += 1
-                if message.metadata.task_type == "reconnect":  # type: ignore
+                if message.metadata.message_type == "reconnect":  # type: ignore
                     send(MESSAGE_DISCONNECT)
                     break
 
