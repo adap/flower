@@ -29,7 +29,7 @@ from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.federated_dataset import FederatedDataset
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
 
-mocked_datasets = ["cifar100", "svhn", "sentiment140"]
+mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
 
 
 @parameterized_class(
@@ -51,6 +51,8 @@ mocked_datasets = ["cifar100", "svhn", "sentiment140"]
         ("svhn", "test", "cropped_digits"),
         # Text
         ("sentiment140", "test", ""),  # aka twitter
+        # Audio
+        ("speech_commands", "test", "v0.01")
     ],
 )
 class BaseFederatedDatasetsTest(unittest.TestCase):
@@ -426,14 +428,6 @@ def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
             return False
 
     return True
-
-
-def mock_dataset(mock_load_dataset, dataset_name):
-    if dataset_name in mocked_datasets:
-        mock_load_dataset.return_value = mock_dict_dataset(
-            [200, 100], ["train", "test"], mock_cifar100
-        )
-    return mock_load_dataset
 
 
 if __name__ == "__main__":
