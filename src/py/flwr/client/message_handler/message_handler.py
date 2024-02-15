@@ -32,7 +32,7 @@ from flwr.common.constant import (
     MESSAGE_TYPE_GET_PROPERTIES,
 )
 from flwr.common.context import Context
-from flwr.common.message import Message
+from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.recordset_compat import (
     evaluateres_to_recordset,
@@ -155,3 +155,20 @@ def _reconnect(
     # Build DisconnectRes message
     disconnect_res = ClientMessage.DisconnectRes(reason=reason)
     return ClientMessage(disconnect_res=disconnect_res), sleep_duration
+
+
+def validate_out_message(out_message: Message, in_message_metadata: Metadata) -> bool:
+    """Validate the out message."""
+    out_meta = out_message.metadata
+    in_meta = in_message_metadata
+    if (  # pylint: disable-next=too-many-boolean-expressions
+        out_meta.run_id == in_meta.run_id
+        and out_meta.message_id == ""
+        and out_meta.src_node_id == in_meta.dst_node_id
+        and out_meta.dst_node_id == in_meta.src_node_id
+        and out_meta.reply_to_message == in_meta.message_id
+        and out_meta.group_id == in_meta.group_id
+        and out_meta.message_type == in_meta.message_type
+    ):
+        return True
+    return False

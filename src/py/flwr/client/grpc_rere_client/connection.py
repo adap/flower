@@ -20,12 +20,7 @@ from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
-from flwr.client.message_handler.task_handler import (
-    configure_task_res,
-    get_task_ins,
-    validate_task_ins,
-    validate_task_res,
-)
+from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log, warn_experimental_feature
@@ -165,24 +160,13 @@ def grpc_request_response(
         if node_store[KEY_NODE] is None:
             log(ERROR, "Node instance missing")
             return
-        node: Node = cast(Node, node_store[KEY_NODE])
 
         # Get incoming TaskIns
         if state[KEY_TASK_INS] is None:
             log(ERROR, "No current TaskIns")
             return
-        task_ins: TaskIns = cast(TaskIns, state[KEY_TASK_INS])
-
         # Construct TaskRes
         task_res = message_to_taskres(message)
-
-        # Check if fields to be set are not initialized
-        if not validate_task_res(task_res):
-            state[KEY_TASK_INS] = None
-            log(ERROR, "TaskRes has been initialized accidentally")
-
-        # Configure TaskRes
-        task_res = configure_task_res(task_res, task_ins, node)
 
         # Serialize ProtoBuf to bytes
         request = PushTaskResRequest(task_res_list=[task_res])
