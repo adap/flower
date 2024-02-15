@@ -30,7 +30,7 @@ def fixedclipping_mod(
 ) -> Message:
     """Clip the client model updates before sending them to the server."""
     if msg.metadata.message_type == MESSAGE_TYPE_FIT:
-        fit_ins = compat.recordset_to_fitins(msg.message, keep_input=True)
+        fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
         if KEY_CLIPPING_NORM not in fit_ins.config:
             raise KeyError(f"{KEY_CLIPPING_NORM} is not supplied by the server.")
         clipping_norm = float(fit_ins.config[KEY_CLIPPING_NORM])
