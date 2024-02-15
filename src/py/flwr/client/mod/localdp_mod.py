@@ -14,21 +14,23 @@
 # ==============================================================================
 """Local DP modifier."""
 
-
 from flwr.client.typing import ClientAppCallable
+from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
+from flwr.common import recordset_compat as compat
+from flwr.common.constant import MESSAGE_TYPE_FIT
 from flwr.common.context import Context
+from flwr.common.differential_privacy import (
+    add_localdp_gaussian_noise_to_params,
+    compute_clip_model_update,
+)
 from flwr.common.message import Message
 
 
 class localdp_mod:
-    """Modifier for local differential privacy
+    """Modifier for local differential privacy.
 
     Parameters
     ----------
-    clipping_norm : float
-        The value of the clipping norm.
-    senitivity : float
-
     clipping_norm : float
         The value of the clipping norm.
     sensitivity : float
@@ -37,16 +39,37 @@ class localdp_mod:
         The privacy budget.
     delta : float
         The failure probability.
-        The probability that the privacy mechanism fails to provide the desired level of privacy.
+        The probability that the privacy mechanism
+        fails to provide the desired level of privacy.
     """
-    def __init__(self, clipping_norm: float, sensitivity: float, epsilon: float, delta: float) -> None:
+
+    def __init__(
+        self, clipping_norm: float, sensitivity: float, epsilon: float, delta: float
+    ) -> None:
         self.clipping_norm = clipping_norm
         self.sensitivity = sensitivity
         self.epsilon = epsilon
         self.delta = delta
 
+    def __call__(
+        self, msg: Message, ctxt: Context, call_next: ClientAppCallable
+    ) -> Message:
+        """Perform local DP on the client model parameters.
 
-    def __call__(self, msg: Message, ctxt: Context, call_next: ClientAppCallable) -> Message:
+        Parameters
+        ----------
+        msg : Message
+            The message received from the server.
+        ctxt : Context
+            The context of the client.
+        call_next : ClientAppCallable
+            The callable to call the next middleware in the chain.
+
+        Returns
+        -------
+        Message
+            The modified message to be sent back to the server.
+        """
         if msg.metadata.message_type == MESSAGE_TYPE_FIT:
             fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
             server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
@@ -67,6 +90,9 @@ class localdp_mod:
             fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
 
             # Add noise to model params
+            add_localdp_gaussian_noise_to_params(
+                fit_res.parameters, self.sensitivity, self.epsilon, self.delta
+            )
 
             out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)
             return out_msg
