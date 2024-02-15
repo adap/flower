@@ -17,10 +17,10 @@
 import unittest
 
 import grpc
-from app import ADDRESS_FLEET_API_GRPC_RERE, _run_fleet_api_grpc_rere
-from client.app import _init_connection
-from common.constant import TRANSPORT_TYPE_GRPC_RERE
-from state.state_factory import StateFactory
+from .app import ADDRESS_FLEET_API_GRPC_RERE, _run_fleet_api_grpc_rere
+from flwr.client.app import _init_connection
+from flwr.common.constant import TRANSPORT_TYPE_GRPC_RERE
+from .superlink.state.state_factory import StateFactory
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 

@@ -41,6 +41,17 @@ from flwr.server.superlink.state import StateFactory
 _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
 
+Request = Union[
+    CreateNodeRequest, DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest
+]
+
+Response = Union[
+    CreateNodeResponse,
+    DeleteNodeResponse,
+    PullTaskInsResponse,
+    PushTaskResResponse,
+]
+
 
 def _get_value_from_tuples(
     key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
@@ -64,7 +75,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):
         self._lock = threading.Lock
         self.server_private_key = private_key
         self.server_public_key = public_key
-        self.state_factory = state_factory
+        self.state = state_factory.state
 
     def intercept_service(
         self, continuation: Callable, handler_call_details: grpc.HandlerCallDetails
@@ -77,19 +88,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):
         self, existing_handler: grpc.RpcMethodHandler
     ) -> grpc.RpcMethodHandler:
         def _generic_method_handler(
-            request: Union[
-                CreateNodeRequest,
-                DeleteNodeRequest,
-                PullTaskInsRequest,
-                PushTaskResRequest,
-            ],
+            request: Request,
             context: grpc.ServicerContext,
-        ) -> Union[
-            CreateNodeResponse,
-            DeleteNodeResponse,
-            PullTaskInsResponse,
-            PushTaskResResponse,
-        ]:
+        ) -> Response:
             with self._lock:
                 if isinstance(request, CreateNodeRequest):
                     client_public_key_bytes = _get_value_from_tuples(
@@ -118,7 +119,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):
                     node_id: int = (
                         -1 if request.node.anonymous else request.node.node_id
                     )
-                    client_public_key_bytes = state.get_public_key_from_node_id(node_id)
+                    client_public_key_bytes = self.state.get_public_key_from_node_id(
+                        node_id
+                    )
                     shared_secret = generate_shared_key(
                         self.server_private_key,
                         bytes_to_public_key(client_public_key_bytes),

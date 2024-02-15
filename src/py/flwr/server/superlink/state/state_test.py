@@ -22,19 +22,14 @@ from datetime import datetime, timezone
 from typing import List
 from uuid import uuid4
 
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    generate_key_pairs,
+    public_key_to_bytes,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import InMemoryState, SqliteState, State
-
-
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    compute_hmac,
-    generate_key_pairs,
-    generate_shared_key,
-    public_key_to_bytes,
-    verify_hmac,
-)
 
 
 class StateTest(unittest.TestCase):
@@ -426,6 +421,7 @@ class StateTest(unittest.TestCase):
         state.store_node_id_public_key_pair(node_id, public_key)
 
         assert state.get_public_key_from_node_id(node_id) == public_key
+
 
 def create_task_ins(
     consumer_node_id: int,

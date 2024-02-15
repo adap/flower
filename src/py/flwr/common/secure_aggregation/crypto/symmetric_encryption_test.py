@@ -14,7 +14,13 @@
 # ==============================================================================
 """Symmetric encryption tests."""
 
-from .symmetric_encryption import generate_shared_key, generate_key_pairs, compute_hmac, verify_hmac
+from .symmetric_encryption import (
+    compute_hmac,
+    generate_key_pairs,
+    generate_shared_key,
+    verify_hmac,
+)
+
 
 def test_generate_shared_key() -> None:
     """Test util function generate_shared_key."""
