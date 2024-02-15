@@ -13,9 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """FederatedDataset."""
-
-
-from typing import Dict, Optional, Tuple, Union, List
+import warnings
+from typing import Dict, List, Optional, Tuple, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
@@ -29,6 +28,8 @@ from flwr_datasets.utils import (
 )
 
 
+# flake8: noqa: E501
+# pylint: disable=line-too-long
 class FederatedDataset:
     """Representation of a dataset for federated learning/evaluation/analytics.
 
@@ -52,8 +53,9 @@ class FederatedDataset:
         (representing the number of IID partitions that this split should be partitioned
         into). One or multiple `Partitioner` objects can be specified in that manner,
         but at most, one per split.
-    partition_division : Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]]
-        Divide each partition into a splits (e.g. into a train and evaluation) and
+    partition_division : Optional[Union[List[float], Tuple[float, ...], Dict[str,
+    float]]]
+        Divide each partition into splits (e.g. into train and evaluation) and
         control the size of the splits - fractions of the data. You can also name the
         splits for verification.
     shuffle : bool
@@ -87,7 +89,9 @@ class FederatedDataset:
         subset: Optional[str] = None,
         resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]] = None,
         partitioners: Dict[str, Union[Partitioner, int]],
-        partition_division: Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]] = None,
+        partition_division: Optional[
+            Union[List[float], Tuple[float, ...], Dict[str, float]]
+        ] = None,
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
@@ -109,7 +113,12 @@ class FederatedDataset:
         # Indicate if the dataset is prepared for `load_partition` or `load_full`
         self._dataset_prepared: bool = False
 
-    def load_partition(self, node_id: int, split: Optional[str] = None, inner_split: Optional[Union[int, str]]=None) -> Union[Dataset, List[Dataset], DatasetDict]:
+    def load_partition(
+        self,
+        node_id: int,
+        split: Optional[str] = None,
+        inner_split: Optional[Union[int, str]] = None,
+    ) -> Union[Dataset, List[Dataset], DatasetDict]:
         """Load the partition specified by the idx in the selected split.
 
         If the partition is divided as specified in `partition_split` then you can
@@ -160,13 +169,28 @@ class FederatedDataset:
         self._assign_dataset_to_partitioner(split)
         partition = partitioner.load_partition(node_id)
         if self._partition_division is None:
+            if inner_split is not None:
+                warnings.warn(
+                    "`inner_split` was specified but it does not have any "
+                    "effect when the `partition_division` is None."
+                )
             return partition
-        else:
-            divided_partition = divide_dataset(partition, self._partition_division)
-            if inner_split is None:
-                return divided_partition
-            else:
+        divided_partition: Union[List[Dataset], DatasetDict] = divide_dataset(
+            partition, self._partition_division
+        )
+        if inner_split is None:
+            return divided_partition
+        if isinstance(divided_partition, list):
+            if isinstance(inner_split, int):
                 return divided_partition[inner_split]
+            raise ValueError(
+                "The type of `inner_split` = {type(inner_split)}, does not "
+                "work with the specified type `divide_partition` that "
+                "results in list."
+            )
+        if isinstance(divided_partition, DatasetDict):
+            return divided_partition[inner_split]
+        raise ValueError("The types of divided_partition should be list or dict only.")
 
     def load_full(self, split: str) -> Dataset:
         """Load the full split of the dataset.
