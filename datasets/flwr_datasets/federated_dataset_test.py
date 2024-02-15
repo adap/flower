@@ -21,7 +21,7 @@ from typing import Dict, Union
 from unittest.mock import Mock, patch
 
 import pytest
-from mock_utils import load_mocked_dataset, mock_cifar100, mock_dict_dataset
+from mock_utils import _load_mocked_dataset
 from parameterized import parameterized, parameterized_class
 
 import datasets
@@ -52,7 +52,7 @@ mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
         # Text
         ("sentiment140", "test", ""),  # aka twitter
         # Audio
-        ("speech_commands", "test", "v0.01")
+        ("speech_commands", "test", "v0.01"),
     ],
 )
 class BaseFederatedDatasetsTest(unittest.TestCase):
@@ -75,7 +75,7 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
         if self.dataset_name in mocked_datasets:
             self.patcher = patch("datasets.load_dataset")
             self.mock_load_dataset = self.patcher.start()
-            self.mock_load_dataset.return_value = load_mocked_dataset(
+            self.mock_load_dataset.return_value = _load_mocked_dataset(
                 self.dataset_name, [200, 100], ["train", self.test_split], self.subset
             )
 
