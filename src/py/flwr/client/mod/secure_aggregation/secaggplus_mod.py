@@ -24,7 +24,7 @@ from flwr.client.typing import ClientAppCallable
 from flwr.common import ndarray_to_bytes, parameters_to_ndarrays
 from flwr.common import recordset_compat as compat
 from flwr.common.configsrecord import ConfigsRecord
-from flwr.common.constant import TASK_TYPE_FIT
+from flwr.common.constant import MESSAGE_TYPE_FIT
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
@@ -156,7 +156,7 @@ def _get_fit_fn(
 
     def fit() -> FitRes:
         out_msg = call_next(msg, ctxt)
-        return compat.recordset_to_fitres(out_msg.message, keep_input=False)
+        return compat.recordset_to_fitres(out_msg.content, keep_input=False)
 
     return fit
 
@@ -168,7 +168,7 @@ def secaggplus_mod(
 ) -> Message:
     """Handle incoming message and return results, following the SecAgg+ protocol."""
     # Ignore non-fit messages
-    if msg.metadata.task_type != TASK_TYPE_FIT:
+    if msg.metadata.message_type != MESSAGE_TYPE_FIT:
         return call_next(msg, ctxt)
 
     # Retrieve local state
@@ -178,7 +178,7 @@ def secaggplus_mod(
     state = SecAggPlusState(**state_dict)
 
     # Retrieve incoming configs
-    configs = msg.message.get_configs(RECORD_KEY_CONFIGS).data
+    configs = msg.content.get_configs(RECORD_KEY_CONFIGS).data
 
     # Check the validity of the next stage
     check_stage(state.current_stage, configs)
@@ -207,8 +207,15 @@ def secaggplus_mod(
 
     # Return message
     return Message(
-        metadata=Metadata(0, "", "", "", TASK_TYPE_FIT),
-        message=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)}),
+        metadata=Metadata(
+            run_id=0,
+            message_id="",
+            group_id="",
+            node_id=0,
+            ttl="",
+            message_type=MESSAGE_TYPE_FIT,
+        ),
+        content=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)}),
     )
 
 

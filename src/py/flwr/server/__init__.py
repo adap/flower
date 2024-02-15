@@ -16,7 +16,6 @@
 
 
 from . import driver, strategy
-from .app import ServerConfig as ServerConfig
 from .app import run_driver_api as run_driver_api
 from .app import run_fleet_api as run_fleet_api
 from .app import run_server_app as run_server_app
@@ -26,6 +25,8 @@ from .client_manager import ClientManager as ClientManager
 from .client_manager import SimpleClientManager as SimpleClientManager
 from .history import History as History
 from .server import Server as Server
+from .server_config import ServerConfig as ServerConfig
+from .serverapp import ServerApp as ServerApp
 
 __all__ = [
     "ClientManager",
@@ -36,6 +37,7 @@ __all__ = [
     "run_server_app",
     "run_superlink",
     "Server",
+    "ServerApp",
     "ServerConfig",
     "SimpleClientManager",
     "start_server",

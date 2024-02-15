@@ -20,7 +20,7 @@ from typing import Callable, Dict, List
 
 from flwr.client.mod import make_ffn
 from flwr.common.configsrecord import ConfigsRecord
-from flwr.common.constant import TASK_TYPE_FIT
+from flwr.common.constant import MESSAGE_TYPE_FIT
 from flwr.common.context import Context
 from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
@@ -57,19 +57,33 @@ def get_test_handler(
 
     def empty_ffn(_: Message, _2: Context) -> Message:
         return Message(
-            metadata=Metadata(0, "", "", "", TASK_TYPE_FIT),
-            message=RecordSet(),
+            metadata=Metadata(
+                run_id=0,
+                message_id="",
+                group_id="",
+                node_id=0,
+                ttl="",
+                message_type=MESSAGE_TYPE_FIT,
+            ),
+            content=RecordSet(),
         )
 
     app = make_ffn(empty_ffn, [secaggplus_mod])
 
     def func(configs: Dict[str, ConfigsRecordValues]) -> Dict[str, ConfigsRecordValues]:
         in_msg = Message(
-            metadata=Metadata(0, "", "", "", TASK_TYPE_FIT),
-            message=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
+            metadata=Metadata(
+                run_id=0,
+                message_id="",
+                group_id="",
+                node_id=0,
+                ttl="",
+                message_type=MESSAGE_TYPE_FIT,
+            ),
+            content=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
         )
         out_msg = app(in_msg, ctxt)
-        return out_msg.message.get_configs(RECORD_KEY_CONFIGS).data
+        return out_msg.content.get_configs(RECORD_KEY_CONFIGS).data
 
     return func
 
