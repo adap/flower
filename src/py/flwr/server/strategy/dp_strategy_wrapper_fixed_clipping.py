@@ -51,7 +51,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         A value of 1.0 or higher is recommended for strong privacy.
     clipping_norm : float
         The value of the clipping norm.
-    num_sampled_clients: int
+    num_sampled_clients : int
         The number of clients that are sampled on each round.
     """
 
