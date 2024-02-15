@@ -106,7 +106,9 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     event(EventType.START_DRIVER_ENTER)
 
     if driver:
+        # pylint: disable=protected-access
         grpc_driver, _ = driver._get_grpc_driver_and_run_id()
+        # pylint: enable=protected-access
     else:
         # Not passing a `Driver` object is deprecated
         warn_deprecated_feature("start_driver")
