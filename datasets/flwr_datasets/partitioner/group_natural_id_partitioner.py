@@ -3,7 +3,7 @@ import datasets
 from flwr_datasets.partitioner.natural_id_partitioner import NaturalIdPartitioner
 import numpy as np
 
-class GroupedNaturalIdPartitioner(NaturalIdPartitioner):
+class GroupNaturalIdPartitioner(NaturalIdPartitioner):
     """Partitioner for a dataset in which the final partition results in different 
         non overlapping datasets for a given number of groups/nodes
         
@@ -19,13 +19,19 @@ class GroupedNaturalIdPartitioner(NaturalIdPartitioner):
         super().__init__(partition_by)
         self._num_groups = num_groups
 
+
     def _create_int_node_id_to_natural_id(self) -> None:
         """Create a mapping from int indices to unique client or group ids from dataset.
 
         Natural ids come from the column specified in `partition_by`.
         """
+
+        num_labels = len(self.dataset.unique(self._partition_by))
+        if self._num_groups > num_labels:
+            raise ValueError("The number of groups cannot be greater than the number of labels in the dataset.")
         unique_natural_ids = self.dataset.unique(self._partition_by)
 
+        
         # Divides the labels between the number of nodes/ groups
         split_natural_ids = np.array_split(unique_natural_ids, self._num_groups)
 
@@ -58,19 +64,3 @@ class GroupedNaturalIdPartitioner(NaturalIdPartitioner):
         )
     
     
-
-    @property
-    def node_id_to_natural_id(self) -> Dict[int, str]:
-        """Node id to corresponding natural id present.
-
-        Natural ids are the unique values in `partition_by` column in dataset.
-        """
-        return self._node_id_to_natural_id
-
-    # pylint: disable=R0201
-    @node_id_to_natural_id.setter
-    def node_id_to_natural_id(self, value: Dict[int, str]) -> None:
-        raise AttributeError(
-            "Setting the node_id_to_natural_id dictionary is not allowed."
-        )
-

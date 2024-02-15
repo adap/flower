@@ -9,17 +9,17 @@ import numpy as np
 from parameterized import parameterized
 
 from datasets import Dataset
-from flwr_datasets.partitioner.grouped_natural_id_partitioner import GroupedNaturalIdPartitioner
+from flwr_datasets.partitioner.group_natural_id_partitioner import GroupNaturalIdPartitioner
 
 def _dummy_setup(
     num_rows: int, n_unique_natural_ids: int, num_nodes: int
-) -> Tuple[Dataset, GroupedNaturalIdPartitioner]:
+) -> Tuple[Dataset, GroupNaturalIdPartitioner]:
     """Create a dummy dataset and partitioner based on given arguments.
 
     The partitioner has automatically the dataset assigned to it.
     """
     dataset = _create_dataset(num_rows, n_unique_natural_ids)
-    partitioner = GroupedNaturalIdPartitioner(partition_by="natural_id",num_groups=num_nodes)
+    partitioner = GroupNaturalIdPartitioner(partition_by="natural_id",num_groups=num_nodes)
     partitioner.dataset = dataset
     return dataset, partitioner
 
@@ -35,7 +35,7 @@ def _create_dataset(num_rows: int, n_unique_natural_ids: int) -> Dataset:
     return dataset
 
 
-class TestGroupedNaturalIdPartitioner(unittest.TestCase):
+class TestGroupNaturalIdPartitioner(unittest.TestCase):
     """Test IidPartitioner."""
 
     @parameterized.expand(  # type: ignore
@@ -51,7 +51,7 @@ class TestGroupedNaturalIdPartitioner(unittest.TestCase):
         _, partitioner = _dummy_setup(num_rows, num_unique_natural_id, num_groups)
         # Simulate usage to start lazy node_id_to_natural_id creation
         _ = partitioner.load_partition(0)
-        self.assertEqual(len(partitioner.node_id_to_natural_id.keys()), num_groups, f'part: {partitioner._num_groups}, real: {num_groups}')
+        self.assertEqual(len(partitioner.node_id_to_natural_id.keys()), num_groups, f'part: {partitioner._group_size}, real: {num_groups}')
 
     @parameterized.expand(  # type: ignore
         # num_rows, num_unique_natural_ids
