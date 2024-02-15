@@ -24,7 +24,13 @@ jobs:
             while read -d $'\0' BASELINES_PATH; do
                 DIR=$(basename $BASELINES_PATH)
                 FILTER+=$(echo "$DIR: ${BASELINES_PATH}/**\n")
-            done < <(find baselines -maxdepth 1 -name ".*" -prune -o -type d -print0)
+            done < <(find baselines -maxdepth 1 \
+                -name ".*" -prune -o \
+                -path "baselines/doc" -prune -o \
+                -path "baselines/dev" -prune -o \
+                -path "baselines/baseline_template" -prune -o \
+                -path "baselines/flwr_baselines" -prune -o \
+                -type d -print0)
             FILTER=$(echo -e "$FILTER")
             # remove first line
             FILTER=${FILTER#*$'\n'}
