@@ -21,9 +21,33 @@ from flwr.common.message import Message
 
 
 class localdp_mod:
-    def __init__(self, clipping_norm: float, ):
+    def __init__(self, clipping_norm: float, ) -> None:
+        self.clipping_norm = clipping_norm
+
 
 
     def __call__(self, msg: Message, ctxt: Context, call_next: ClientAppCallable) -> Message:
-        if msg.metadata.task_type == TASK_TYPE_FIT:
-            fit_ins = compat.recordset_to_fitins(msg.message, keep_input=True)
+        if msg.metadata.message_type == MESSAGE_TYPE_FIT:
+            fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
+            if KEY_CLIPPING_NORM not in fit_ins.config:
+                raise KeyError(f"{KEY_CLIPPING_NORM} is not supplied by the server.")
+            # clipping_norm = float(fit_ins.config[KEY_CLIPPING_NORM])
+            server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
+
+            # Call inner app
+            out_msg = call_next(msg, ctxt)
+            fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
+
+            client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
+
+            # Clip the client update
+            compute_clip_model_update(
+                client_to_server_params,
+                server_to_client_params,
+                self.clipping_norm,
+            )
+
+            fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
+            out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)
+            return out_msg
+        return call_next(msg, ctxt)
