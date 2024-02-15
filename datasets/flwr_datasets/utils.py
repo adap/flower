@@ -16,10 +16,9 @@
 
 
 import warnings
-from typing import Dict, Optional, Tuple, Union, cast, List
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 from datasets import Dataset, DatasetDict
-
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
 from flwr_datasets.resplitter import Resplitter
 from flwr_datasets.resplitter.merge_resplitter import MergeResplitter
@@ -89,83 +88,133 @@ def _check_if_dataset_tested(dataset: str) -> None:
         )
 
 
-def divide_dataset(dataset: Dataset, division: Union[List[float], Tuple[float, ...], Dict[str, float]]) -> Union[Dataset, List[Dataset], DatasetDict]:
+def divide_dataset(
+    dataset: Dataset, division: Union[List[float], Tuple[float, ...], Dict[str, float]]
+) -> Union[List[Dataset], DatasetDict]:
+    """Divide the dataset according to the `division`.
 
+    The division support varying number of splits, which you can name. The splits are
+    created from the beginning of the dataset.
+
+    Parameters
+    ----------
+    dataset: Dataset
+        Dataset to be divided.
+    division: Union[List[float], Tuple[float, ...], Dict[str, float]]
+        Configuration specifying how the dataset is divided. Each fraction has to be
+        >0 and <1. They have to sum up to at most 1 (smaller sum is possible).
+
+    Returns
+    -------
+    `List[Dataset]` is returned in case of `List` or `Tuple` of the division
+    `DatasetDict` in case of `Dict` specification
+    """
     dataset_length = len(dataset)
     ranges = _create_division_indices_ranges(dataset_length, division)
     if isinstance(division, (list, tuple)):
-        split_partition = []
-        for r in ranges:
-            split_partition.append(dataset.select(r))
-            return split_partition
-    elif isinstance(division, dict):
-        split_partition = {}
+        split_partition: List[Dataset] = []
+        for single_range in ranges:
+            split_partition.append(dataset.select(single_range))
+        return split_partition
+    if isinstance(division, dict):
+        split_partition_dict: Dict[str, Dataset] = {}
         ranges = _create_division_indices_ranges(dataset_length, division)
-        for split_name, r in zip(division.keys(), ranges):
-            split_partition[split_name] = dataset.select(r)
-            return DatasetDict(split_partition)
-    else:
-        TypeError(
-            f"The type of the `division` should be dict, tuple or list but is {type(division)} instead.")
+        for split_name, single_range in zip(division.keys(), ranges):
+            split_partition_dict[split_name] = dataset.select(single_range)
+        return DatasetDict(split_partition_dict)
+    raise TypeError(
+        f"The type of the `division` should be dict, "
+        f"tuple or list but is {type(division)} instead."
+    )
 
 
-def _create_division_indices_ranges(dataset_length: int, division: Union[List[float], Tuple[float, ...], Dict[str, float]]) -> List[range]:
+def _create_division_indices_ranges(
+    dataset_length: int,
+    division: Union[List[float], Tuple[float, ...], Dict[str, float]],
+) -> List[range]:
     ranges = []
     if isinstance(division, (list, tuple)):
         start_idx = 0
         end_idx = 0
         for fraction in division:
-            end_idx = int(dataset_length * fraction)
+            end_idx += int(dataset_length * fraction)
             ranges.append(range(start_idx, end_idx))
-            start_idx = end_idx
+            start_idx += end_idx
     elif isinstance(division, dict):
         ranges = []
         start_idx = 0
         end_idx = 0
         for fraction in division.values():
-            end_idx = int(dataset_length * fraction)
+            end_idx += int(dataset_length * fraction)
             ranges.append(range(start_idx, end_idx))
-            start_idx = end_idx
+            start_idx += end_idx
     else:
-        TypeError("The type of the `partition_split` should be dict, tuple or list but is {type(self.partition_split)} instead. ")
+        TypeError(
+            f"The type of the `division` should be dict, "
+            f"tuple or list but is {type(division)} instead. "
+        )
     return ranges
 
 
-def _check_division_config_types_correctness(division: Union[List[float], Tuple[float, ...], Dict[str, float]]) -> None:
+def _check_division_config_types_correctness(
+    division: Union[List[float], Tuple[float, ...], Dict[str, float]]
+) -> None:
     if isinstance(division, (list, tuple)):
         if not all(isinstance(x, float) for x in division):
             raise TypeError(
-                "List or tuple values of `partition_split` must contain only floats, other types are not allowed.")
+                "List or tuple values of `division` must contain only floats, "
+                "other types are not allowed."
+            )
     elif isinstance(division, dict):
         if not all(isinstance(x, float) for x in division.values()):
             raise TypeError(
-                "Dict values of `partition_split` must be only floats, other types are not allowed.")
+                "Dict values of `division` must be only floats, "
+                "other types are not allowed."
+            )
     else:
-        raise TypeError("`partition_split` must be a list, tuple, or dict.")
+        raise TypeError("`division` must be a list, tuple, or dict.")
 
-def _check_division_config_values_correctness(division: Union[List[float], Tuple[float, ...], Dict[str, float]]) -> None:
+
+def _check_division_config_values_correctness(
+    division: Union[List[float], Tuple[float, ...], Dict[str, float]]
+) -> None:
     if isinstance(division, (list, tuple)):
         if not all(0 < x <= 1 for x in division):
             raise ValueError(
-                "All fractions for the division must be greater than 0 and smaller or equal to 1.")
+                "All fractions for the division must be greater than 0 and smaller or "
+                "equal to 1."
+            )
         fraction_sum_from_list_tuple = sum(division)
         if fraction_sum_from_list_tuple > 1:
             raise ValueError("Sum of fractions for division must not exceed 1.")
         if fraction_sum_from_list_tuple < 1:
-            warnings.warn(f"Sum of fractions for division is {sum(division)}, which is below 1. Make sure that's the desired behavior. Some data will not be used in the current specification.")
+            warnings.warn(
+                f"Sum of fractions for division is {sum(division)}, which is below 1. "
+                f"Make sure that's the desired behavior. Some data will not be used "
+                f"in the current specification.",
+                stacklevel=1,
+            )
     elif isinstance(division, dict):
         values = list(division.values())
         if not all(0 < x <= 1 for x in values):
             raise ValueError(
-                "All fractions must be greater than 0 and smaller or equal to 1.")
+                "All fractions must be greater than 0 and smaller or equal to 1."
+            )
         if sum(values) > 1:
             raise ValueError("Sum of fractions must not exceed 1.")
-        if sum(division) < 1:
+        if sum(values) < 1:
             warnings.warn(
-                f"Sum of fractions in `partition_split` is {values}, which is below 1. Make sure that's the desired behavior. Some data will not be used in the current specification.")
+                f"Sum of fractions in `division` is {values}, which is below 1. "
+                f"Make sure that's the desired behavior. Some data will not be used "
+                f"in the current specification.",
+                stacklevel=1,
+            )
     else:
-        raise TypeError("`partition_split` must be a list, tuple, or dict.")
+        raise TypeError("`division` must be a list, tuple, or dict.")
 
-def _check_division_config_correctness(division: Union[List[float], Tuple[float, ...], Dict[str, float]]) -> None:
+
+def _check_division_config_correctness(
+    division: Union[List[float], Tuple[float, ...], Dict[str, float]]
+) -> None:
     _check_division_config_types_correctness(division)
     _check_division_config_values_correctness(division)
