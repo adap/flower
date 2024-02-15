@@ -26,10 +26,11 @@ from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log
 from flwr.proto import driver_pb2  # pylint: disable=E0611
-from flwr.server.app import ServerConfig, init_defaults, run_fl
+from flwr.server.app import init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server
+from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 
 from .driver_client_proxy import DriverClientProxy
