@@ -166,6 +166,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
             del driver
         else:
             grpc_driver.disconnect()
+
     thread.join()
 
     event(EventType.START_SERVER_LEAVE)
