@@ -15,7 +15,9 @@
 """Flower command line interface `example` command."""
 
 import json
+import os
 import subprocess
+import tempfile
 import urllib.request
 
 from .utils import prompt_options
@@ -45,11 +47,18 @@ def example() -> None:
         example_names,
     )
 
-    subprocess.check_output(
-        ["git", "clone", "--depth=1", "https://github.com/adap/flower.git"]
-    )
-    subprocess.check_output(["mv", f"flower/examples/{example_name}", "."])
-    subprocess.check_output(["rm", "-rf", "flower"])
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        subprocess.check_output(
+            [
+                "git",
+                "clone",
+                "--depth=1",
+                "https://github.com/adap/flower.git",
+                tmpdirname,
+            ]
+        )
+        examples_dir = os.path.join(tmpdirname, "examples", example_name)
+        subprocess.check_output(["mv", examples_dir, "."])
 
-    print()
-    print(f"Example ready to use: {example_name}")
+        print()
+        print(f"Example ready to use in {os.path.join(os.getcwd(), example_name)}")
