@@ -21,17 +21,34 @@ from flwr.common.message import Message
 
 
 class localdp_mod:
-    def __init__(self, clipping_norm: float, ) -> None:
-        self.clipping_norm = clipping_norm
+    """Modifier for local differential privacy
 
+    Parameters
+    ----------
+    clipping_norm : float
+        The value of the clipping norm.
+    senitivity : float
+
+    clipping_norm : float
+        The value of the clipping norm.
+    sensitivity : float
+        The sensitivity of the client model.
+    epsilon : float
+        The privacy budget.
+    delta : float
+        The failure probability.
+        The probability that the privacy mechanism fails to provide the desired level of privacy.
+    """
+    def __init__(self, clipping_norm: float, sensitivity: float, epsilon: float, delta: float) -> None:
+        self.clipping_norm = clipping_norm
+        self.sensitivity = sensitivity
+        self.epsilon = epsilon
+        self.delta = delta
 
 
     def __call__(self, msg: Message, ctxt: Context, call_next: ClientAppCallable) -> Message:
         if msg.metadata.message_type == MESSAGE_TYPE_FIT:
             fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
-            if KEY_CLIPPING_NORM not in fit_ins.config:
-                raise KeyError(f"{KEY_CLIPPING_NORM} is not supplied by the server.")
-            # clipping_norm = float(fit_ins.config[KEY_CLIPPING_NORM])
             server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
 
             # Call inner app
@@ -48,6 +65,9 @@ class localdp_mod:
             )
 
             fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
+
+            # Add noise to model params
+
             out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)
             return out_msg
         return call_next(msg, ctxt)
