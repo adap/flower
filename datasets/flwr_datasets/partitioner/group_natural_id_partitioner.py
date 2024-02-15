@@ -28,7 +28,8 @@ class GroupNaturalIdPartitioner(NaturalIdPartitioner):
         num_labels = len(self.dataset.unique(self._partition_by))
         if self._num_groups > num_labels:
             raise ValueError(
-                "The number of groups cannot be greater than the number of labels in the dataset."
+                "The number of groups cannot be greater than the number \
+                    of labels in the dataset."
             )
         unique_natural_ids = self.dataset.unique(self._partition_by)
 

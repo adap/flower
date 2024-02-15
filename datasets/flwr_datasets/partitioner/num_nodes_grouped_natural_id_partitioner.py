@@ -41,7 +41,8 @@ class NumNodesGroupedNaturalIdPartitioner(GroupNaturalIdPartitioner):
         """
         if self._num_nodes <= node_id:
             raise KeyError(
-                f"There are only {self._num_nodes} nodes [0-{self._num_nodes - 1}], {node_id} is out of this range. "
+                f"There are only {self._num_nodes} nodes [0-{self._num_nodes - 1}], \
+                    {node_id} is out of this range. "
             )
 
         nodes_per_group = self._num_nodes // self._num_groups
