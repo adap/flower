@@ -1,0 +1,68 @@
+name: Baselines
+on:
+  workflow_call:
+
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
+jobs:
+  changes:
+    runs-on: ubuntu-22.04
+    permissions:
+      pull-requests: read
+    outputs:
+      packages: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - shell: bash
+        run: |
+          # create a list of all directories in baselines
+          {
+            echo 'FILTER_PATHS<<EOF'
+            FILTER=""
+            while read -d $'\0' BASELINES_PATH; do
+                DIR=$(basename $BASELINES_PATH)
+                FILTER+=$(echo "$DIR: ${BASELINES_PATH}/**\n")
+            done < <(find baselines -maxdepth 1 -name ".*" -prune -o -type d -print0)
+            FILTER=$(echo -e "$FILTER")
+            # remove first line
+            FILTER=${FILTER#*$'\n'}
+            echo "$FILTER"
+            echo EOF
+          } >> "$GITHUB_ENV"
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: ${{ env.FILTER_PATHS }}
+
+  test:
+    runs-on: ubuntu-22.04
+    needs: changes
+    strategy:
+      matrix:
+        baseline: ${{ fromJSON(needs.changes.outputs.packages) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        working-directory: baselines/${{ matrix.baseline }}
+        run: python -m poetry install
+
+      - name: Test
+        working-directory: baselines
+        run: |
+          echo "Testing ${{ matrix.baseline }}"
+          ./dev/test-baseline.sh ${{ matrix.baseline }}
+
+      - name: Test Structure
+        working-directory: baselines
+        run: |
+          echo "Testing ${{ matrix.baseline }}"
+          ./dev/test-baseline-structure.sh ${{ matrix.baseline }}
