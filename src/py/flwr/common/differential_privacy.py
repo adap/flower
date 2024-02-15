@@ -1,3 +1,5 @@
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -34,8 +36,7 @@ def get_norm(input_arrays: NDArrays) -> float:
 
 
 def add_gaussian_noise_inplace(input_arrays: NDArrays, std_dev: float) -> None:
-    """Add noise to each element of the provided input from Gaussian (Normal)
-    distribution with respect to the passed standard deviation."""
+    """Add Gaussian noise to each element of the input arrays."""
     for array in input_arrays:
         array += np.random.normal(0, std_dev, array.shape)
 
@@ -43,7 +44,7 @@ def add_gaussian_noise_inplace(input_arrays: NDArrays, std_dev: float) -> None:
 def clip_inputs_inplace(input_arrays: NDArrays, clipping_norm: float) -> None:
     """Clip model update based on the clipping norm in-place.
 
-    FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
+    FlatClip method of the paper: https://arxiv.org/abs/1710.06963
     """
     input_norm = get_norm(input_arrays)
     scaling_factor = min(1, clipping_norm / input_norm)
@@ -56,7 +57,7 @@ def compute_stdv(
 ) -> float:
     """Compute standard deviation for noise addition.
 
-    paper: https://arxiv.org/pdf/1710.06963.pdf
+    Paper: https://arxiv.org/abs/1710.06963
     """
     return float((noise_multiplier * clipping_norm) / num_sampled_clients)
 
@@ -65,6 +66,7 @@ def compute_clip_model_update(
     param1: NDArrays, param2: NDArrays, clipping_norm: float
 ) -> None:
     """Compute model update (param1 - param2) and clip it.
+
     Then add the clipped value to param1."""
     model_update = [np.subtract(x, y) for (x, y) in zip(param1, param2)]
     clip_inputs_inplace(model_update, clipping_norm)
