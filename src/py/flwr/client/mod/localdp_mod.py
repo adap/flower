@@ -26,7 +26,7 @@ from flwr.common.differential_privacy import (
 from flwr.common.message import Message
 
 
-class localdp_mod:
+class LocalDpMod:
     """Modifier for local differential privacy.
 
     Parameters
