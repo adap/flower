@@ -14,7 +14,7 @@
 # ==============================================================================
 """Central differential privacy with fixed clipping.
 
-Papers: https://arxiv.org/pdf/1712.07557.pdf, https://arxiv.org/pdf/1710.06963.pdf
+Papers: https://arxiv.org/abs/1712.07557, https://arxiv.org/abs/1710.06963
 """
 import warnings
 from typing import Dict, List, Optional, Tuple, Union
@@ -41,17 +41,16 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DPStrategyWrapperServerSideFixedClipping(Strategy):
-    """Wrapper for Configuring a Strategy for Central DP with Server Side Fixed
-    Clipping.
+    """Wrapper for Central DP with Server Side Fixed Clipping.
 
     Parameters
     ----------
-    strategy: Strategy
+    strategy : Strategy
         The strategy to which DP functionalities will be added by this wrapper.
-    noise_multiplier: float
+    noise_multiplier : float
         The noise multiplier for the Gaussian mechanism for model updates.
         A value of 1.0 or higher is recommended for strong privacy.
-    clipping_norm: float
+    clipping_norm : float
         The value of the clipping norm.
     num_sampled_clients: int
         The number of clients that are sampled on each round.
@@ -88,7 +87,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
-        rep = "DP Strategy Wrapper with Server Side Fixed Clipping"
+        rep = "Differential Privacy Strategy Wrapper (Server-Side Fixed Clipping)"
         return rep
 
     def initialize_parameters(
@@ -118,8 +117,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Compute the updates, clip them, and pass them to the child strategy for
-        aggregation.
+        """Compute the updates, clip, and pass them for aggregation.
 
         Afterward, add noise to the aggregated parameters.
         """
