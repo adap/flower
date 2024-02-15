@@ -37,13 +37,6 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
-SQL_CREATE_TABLE_NODE_KEY = """
-CREATE TABLE IF NOT EXISTS node_key(
-    node_id INTEGER PRIMARY KEY,
-    public_key BLOB
-);
-"""
-
 SQL_CREATE_TABLE_CREDENTIAL = """
 CREATE TABLE IF NOT EXISTS credential(
     public_key BLOB PRIMARY KEY,
@@ -144,7 +137,6 @@ class SqliteState(State):
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
         cur.execute(SQL_CREATE_TABLE_CREDENTIAL)
-        cur.execute(SQL_CREATE_TABLE_NODE_KEY)
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
@@ -541,21 +533,6 @@ class SqliteState(State):
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
-
-    def store_node_id_public_key_pair(self, node_id: int, public_key: bytes) -> None:
-        """Store `node_id` and `public_key` as key-value pair in state."""
-        query = (
-            "INSERT OR REPLACE INTO node_key (node_id, public_key) "
-            "VALUES (:node_id, :public_key)"
-        )
-        self.query(query, {"node_id": node_id, "public_key": public_key})
-
-    def get_public_key_from_node_id(self, node_id: int) -> bytes:
-        """Get client's public key in urlsafe bytes for `node_id`."""
-        query = "SELECT public_key FROM node_key WHERE node_id = :node_id"
-        rows = self.query(query, {"node_id": node_id})
-        public_key: bytes = rows[0]["public_key"]
-        return public_key
 
     def store_server_public_private_key(
         self, public_key: bytes, private_key: bytes

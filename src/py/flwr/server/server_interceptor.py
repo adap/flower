@@ -14,19 +14,22 @@
 # ==============================================================================
 """Flower server interceptor."""
 
+import base64
 import threading
-from typing import Callable, Sequence, Tuple, Union
+from logging import INFO
+from typing import Any, Callable, Sequence, Tuple, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_public_key,
     generate_shared_key,
     public_key_to_bytes,
     verify_hmac,
 )
-from flwr.proto.fleet_pb2 import (
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
@@ -63,7 +66,7 @@ def _get_value_from_tuples(
     return value
 
 
-class AuthenticateServerInterceptor(grpc.ServerInterceptor):
+class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Server interceptor for client authentication."""
 
     def __init__(
@@ -72,72 +75,75 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):
         private_key: ec.EllipticCurvePrivateKey,
         public_key: ec.EllipticCurvePublicKey,
     ):
-        self._lock = threading.Lock
+        self._lock = threading.Lock()
         self.server_private_key = private_key
         self.server_public_key = public_key
-        self.state = state_factory.state
+        self.state = state_factory.state()
 
     def intercept_service(
-        self, continuation: Callable, handler_call_details: grpc.HandlerCallDetails
+        self,
+        continuation: Callable[[Any], Any],
+        handler_call_details: grpc.HandlerCallDetails,
     ) -> grpc.RpcMethodHandler:
         """Flower server interceptor authentication logic."""
         message_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
         return self._generic_auth_unary_method_handler(message_handler)
 
     def _generic_auth_unary_method_handler(
-        self, existing_handler: grpc.RpcMethodHandler
+        self, message_handler: grpc.RpcMethodHandler
     ) -> grpc.RpcMethodHandler:
         def _generic_method_handler(
             request: Request,
             context: grpc.ServicerContext,
-        ) -> Response:
+        ) -> Any:
             with self._lock:
-                if isinstance(request, CreateNodeRequest):
-                    client_public_key_bytes = _get_value_from_tuples(
-                        _PUBLIC_KEY_HEADER, context.invocation_metadata()
-                    )
-                    is_public_key_known = (
-                        client_public_key_bytes in self.state.get_client_public_keys()
-                    )
-                    if is_public_key_known:
-                        context.set_trailing_metadata(
+                encoded_bytes = _get_value_from_tuples(
+                    _PUBLIC_KEY_HEADER, context.invocation_metadata()
+                )[::-1]
+                log(INFO, "Client public key bytes: %s", encoded_bytes)
+                client_public_key_bytes = base64.urlsafe_b64decode(encoded_bytes)
+                is_public_key_known = (
+                    client_public_key_bytes in self.state.get_client_public_keys()
+                )
+                if is_public_key_known:
+                    if isinstance(request, CreateNodeRequest):
+                        context.send_initial_metadata(
                             (
                                 (
                                     _PUBLIC_KEY_HEADER,
-                                    public_key_to_bytes(self.server_public_key),
+                                    base64.urlsafe_b64encode(
+                                        public_key_to_bytes(self.server_public_key)
+                                    ),
                                 ),
                             )
                         )
+                    elif isinstance(request, (DeleteNodeRequest, PullTaskInsRequest)):
+                        encoded_bytes = _get_value_from_tuples(
+                            _AUTH_TOKEN_HEADER, context.invocation_metadata()
+                        )[::-1]
+                        hmac_value = base64.urlsafe_b64decode(encoded_bytes)
+                        log(INFO, "Client public key bytes: %s", encoded_bytes)
+                        client_public_key = bytes_to_public_key(client_public_key_bytes)
+                        shared_secret = generate_shared_key(
+                            self.server_private_key,
+                            client_public_key,
+                        )
+                        verify = verify_hmac(
+                            shared_secret, request.SerializeToString(True), hmac_value
+                        )
+                        if not verify:
+                            context.abort(
+                                grpc.StatusCode.UNAUTHENTICATED, "Access denied!"
+                            )
                     else:
-                        context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
-                elif isinstance(
-                    request, (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest)
-                ):
-                    hmac_value = _get_value_from_tuples(
-                        _AUTH_TOKEN_HEADER, context.invocation_metadata()
-                    )
-                    node_id: int = (
-                        -1 if request.node.anonymous else request.node.node_id
-                    )
-                    client_public_key_bytes = self.state.get_public_key_from_node_id(
-                        node_id
-                    )
-                    shared_secret = generate_shared_key(
-                        self.server_private_key,
-                        bytes_to_public_key(client_public_key_bytes),
-                    )
-                    verify = verify_hmac(
-                        shared_secret, request.SerializeToString(True), hmac_value
-                    )
-                    if not verify:
                         context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
                 else:
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
 
-                return existing_handler.unary_unary
+                return message_handler.unary_unary(request, context)
 
         return grpc.unary_unary_rpc_method_handler(
             _generic_method_handler,
-            request_deserializer=existing_handler.request_deserializer,
-            response_serializer=existing_handler.response_serializer,
+            request_deserializer=message_handler.request_deserializer,
+            response_serializer=message_handler.response_serializer,
         )

@@ -412,16 +412,6 @@ class StateTest(unittest.TestCase):
 
         assert state.get_client_public_keys() == public_keys
 
-    def test_in_memory_node_id_public_key_pair(self) -> None:
-        """Test store and get node_id public_key pair."""
-        state: State = self.state_factory()
-        node_id = state.create_node()
-        public_key = public_key_to_bytes(generate_key_pairs()[1])
-
-        state.store_node_id_public_key_pair(node_id, public_key)
-
-        assert state.get_public_key_from_node_id(node_id) == public_key
-
 
 def create_task_ins(
     consumer_node_id: int,
@@ -501,7 +491,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 13
+        assert len(result) == 12
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -526,7 +516,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 13
+        assert len(result) == 12
 
 
 if __name__ == "__main__":

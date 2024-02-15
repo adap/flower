@@ -35,7 +35,6 @@ class InMemoryState(State):
         self.run_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
-        self.node_id_public_key_dict: Dict[int, bytes] = {}
         self.client_public_keys: Set[bytes] = set()
         self.server_public_key: bytes = b""
         self.server_private_key: bytes = b""
@@ -225,20 +224,6 @@ class InMemoryState(State):
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
-
-    def store_node_id_public_key_pair(self, node_id: int, public_key: bytes) -> None:
-        """Store `node_id` and `public_key` as key-value pair in state."""
-        if node_id not in self.node_ids:
-            raise ValueError(f"Node {node_id} not found")
-        if node_id in self.node_id_public_key_dict:
-            raise ValueError(f"Node {node_id} has already assigned a public key")
-        self.node_id_public_key_dict[node_id] = public_key
-
-    def get_public_key_from_node_id(self, node_id: int) -> bytes:
-        """Get client's public key in urlsafe bytes for `node_id`."""
-        if node_id in self.node_id_public_key_dict:
-            return self.node_id_public_key_dict[node_id]
-        return b""
 
     def store_server_public_private_key(
         self, public_key: bytes, private_key: bytes
