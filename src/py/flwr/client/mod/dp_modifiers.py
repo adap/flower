@@ -62,8 +62,8 @@ def adaptiveclipping_mod(
     msg: Message, ctxt: Context, call_next: ClientAppCallable
 ) -> Message:
     """Clip the client model updates before sending them to the server."""
-    if msg.metadata.task_type == TASK_TYPE_FIT:
-        fit_ins = compat.recordset_to_fitins(msg.message, keep_input=True)
+    if msg.metadata.message_type == TASK_TYPE_FIT:
+        fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
 
         if KEY_CLIPPING_NORM not in fit_ins.config:
             raise KeyError(f"{KEY_CLIPPING_NORM} is not supplied by the server.")
@@ -75,7 +75,7 @@ def adaptiveclipping_mod(
 
         # Call inner app
         out_msg = call_next(msg, ctxt)
-        fit_res = compat.recordset_to_fitres(out_msg.message, keep_input=True)
+        fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
 
         client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
 
@@ -89,6 +89,6 @@ def adaptiveclipping_mod(
         fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
 
         fit_res.metrics[KEY_NORM_BIT] = norm_bit
-        out_msg.message = compat.fitres_to_recordset(fit_res, keep_input=True)
+        out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)
         return out_msg
     return call_next(msg, ctxt)
