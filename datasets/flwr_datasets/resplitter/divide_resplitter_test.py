@@ -23,7 +23,6 @@ from datasets import Dataset, DatasetDict
 from flwr_datasets.resplitter import DivideResplitter
 
 
-# todo a separate case when the name is inferred
 @parameterized_class(
     ("divide_config", "divide_split", "drop_remaining_splits", "split_name_to_size"),
     [
@@ -109,7 +108,6 @@ class TestDivideResplitter(unittest.TestCase):
         self.assertEqual(self.split_name_to_size, split_to_size)
 
 
-# todo: test mixed dict types
 class TestDivideResplitterIncorrectUseCases(unittest.TestCase):
     """Resplitter tests."""
 
@@ -125,7 +123,7 @@ class TestDivideResplitterIncorrectUseCases(unittest.TestCase):
 
     def test_doubling_names_in_config(self) -> None:
         """Test if resplitting raises when the same name in config is detected."""
-        divide_config = {"train": {"new_train": 0.5}, "valid": {"new_train": 0.5}}
+        divide_config = {"train": {"new_train": 0.5}, "valid": {"new_train": 0.3}}
         divide_split = None
         drop_remaining_splits = False
 
