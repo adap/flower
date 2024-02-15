@@ -31,7 +31,7 @@ from flwr.common.recordset import RecordSet
 from flwr.proto import driver_pb2, node_pb2, task_pb2  # pylint: disable=E0611
 from flwr.server.client_proxy import ClientProxy
 
-from .grpc_driver import GrpcDriver
+from ..driver.grpc_driver import GrpcDriver
 
 SLEEP_TIME = 1
 
