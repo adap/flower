@@ -17,7 +17,7 @@
 
 
 import unittest
-from typing import Dict, Union
+from typing import Dict, List, Optional, Tuple, Union
 from unittest.mock import Mock, patch
 
 import pytest
@@ -66,6 +66,44 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
         self.assertEqual(
             len(dataset_partition0), len(dataset["train"]) // train_num_partitions
         )
+
+    @parameterized.expand(  # type: ignore
+        [
+            ((0.2, 0.8), None, 2),
+            ((0.2, 0.8), 0, None),
+            ([0.2, 0.8], None, 2),
+            ({"train": 0.2, "test": 0.8}, None, 2),
+            # Not full dataset
+            ([0.2, 0.1], None, 2),
+            ((0.2, 0.1), 1, None),
+            ({"train": 0.2, "test": 0.1}, None, 2),
+            ({"train": 0.2, "test": 0.1}, "test", None),
+            (None, None, None),
+            (None, "train", None),
+        ],
+    )
+    def test_divide_partition_integration_size(
+        self,
+        partition_division: Optional[
+            Union[List[float], Tuple[float, ...], Dict[str, float]]
+        ],
+        inner_split: Optional[str],
+        expected_length: Optional[int],
+    ):
+        """Test is the `partition_division` and `inner_split` create correct data."""
+        dataset_fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners={"train": 100},
+            partition_division=partition_division,
+        )
+        partition = dataset_fds.load_partition(0, "train", inner_split=inner_split)
+        if partition_division is None:
+            self.assertEqual(expected_length, None)
+        else:
+            if inner_split is None:
+                self.assertEqual(len(partition), expected_length)
+            else:
+                self.assertIsInstance(partition, Dataset)
 
     def test_load_full(self) -> None:
         """Test if the load_full works with the correct split name."""
