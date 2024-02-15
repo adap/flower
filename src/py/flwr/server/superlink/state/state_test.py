@@ -417,7 +417,7 @@ class StateTest(unittest.TestCase):
 
         assert state.get_client_public_keys() == public_keys
 
-    def test_in_memory_node_id_public_key_pair() -> None:
+    def test_in_memory_node_id_public_key_pair(self) -> None:
         """Test store and get node_id public_key pair."""
         state: State = self.state_factory()
         node_id = state.create_node()
