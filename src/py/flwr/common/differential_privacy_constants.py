@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,4 +14,11 @@
 # ==============================================================================
 """Constants for differential privacy."""
 
+
 KEY_CLIPPING_NORM = "clipping_norm"
+CLIENTS_DISCREPANCY_WARNING = (
+    "The number of clients returning parameters (%s)"
+    " differs from the number of sampled clients (%s)."
+    " This could impact the differential privacy guarantees,"
+    " potentially leading to privacy leakage or inadequate noise calibration."
+)
