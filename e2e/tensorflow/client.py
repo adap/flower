@@ -34,7 +34,7 @@ class FlowerClient(fl.client.NumPyClient):
 def client_fn(cid):
     return FlowerClient().to_client()
 
-flower = fl.flower.Flower(
+app = fl.client.ClientApp(
     client_fn=client_fn,
 )
 
