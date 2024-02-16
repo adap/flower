@@ -15,8 +15,6 @@
 """Flower constants."""
 
 
-from typing import Any, Iterable
-
 MISSING_EXTRA_REST = """
 Extra dependencies required for using the REST-based Fleet API are missing.
 
@@ -40,13 +38,7 @@ MESSAGE_TYPE_FIT = "fit"
 MESSAGE_TYPE_EVALUATE = "evaluate"
 
 
-class _IterableType(type):
-    def __iter__(cls) -> Iterable[Any]:
-        # iterate over class attributes
-        return (getattr(cls, key) for key in cls.__dict__ if not key.startswith("_"))
-
-
-class MessageType(metaclass=_IterableType):
+class MessageType:
     """Message type."""
 
     GET_PROPERTIES = MESSAGE_TYPE_GET_PROPERTIES
