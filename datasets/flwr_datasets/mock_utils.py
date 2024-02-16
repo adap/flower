@@ -458,6 +458,7 @@ dataset_name_to_mock_function = {
     "cifar100": _mock_cifar100,
     "sentiment140": _mock_sentiment140,
     "svhn_cropped_digits": _mock_svhn_cropped_digits,
+    "speech_commands_v0.01": _mock_speach_commands,
 }
 
 
