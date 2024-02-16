@@ -99,21 +99,6 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         """An identifier for the message this message replies to."""
         return self._reply_to_message
 
-    # def __eq__(self, __value: object) -> bool:
-    #     """."""
-    #     if not isinstance(__value, self.__class__):
-    #         return NotImplemented
-    #     return (
-    #         self._run_id == __value.run_id
-    #         and self._message_id == __value.message_id
-    #         and self._src_node_id == __value.src_node_id
-    #         and self.dst_node_id == __value.dst_node_id
-    #         and self._reply_to_message == __value.reply_to_message
-    #         and self.group_id == __value.group_id
-    #         and self.ttl == __value.ttl
-    #         and self.message_type == __value.message_type
-    #     )
-
 
 @dataclass
 class Message:
@@ -128,8 +113,17 @@ class Message:
         logic to a client, or vice-versa) or that will be sent to it.
     """
 
-    metadata: Metadata
+    _metadata: Metadata
     content: RecordSet
+
+    def __init__(self, metadata: Metadata, content: RecordSet) -> None:
+        self._metadata = metadata
+        self.content = content
+
+    @property
+    def metadata(self) -> Metadata:
+        """A dataclass including information about the message to be executed."""
+        return self._metadata
 
     def create_reply(self, content: RecordSet, ttl: str) -> "Message":
         """Create a reply to the message."""
