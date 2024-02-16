@@ -21,12 +21,12 @@ from typing import Dict, Union
 from unittest.mock import Mock, patch
 
 import pytest
-from mock_utils import _load_mocked_dataset
 from parameterized import parameterized, parameterized_class
 
 import datasets
 from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.federated_dataset import FederatedDataset
+from flwr_datasets.mock_utils import _load_mocked_dataset
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
 
 mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
@@ -66,7 +66,7 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
     test_split = ""
     subset = ""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Mock the dataset download prior to each method if needed.
 
         If the `dataset_name` is in the `mocked_datasets` list, then the dataset
@@ -79,7 +79,7 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
                 self.dataset_name, [200, 100], ["train", self.test_split], self.subset
             )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up after the dataset mocking."""
         if self.dataset_name in mocked_datasets:
             patch.stopall()

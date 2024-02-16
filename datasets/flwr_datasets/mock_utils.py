@@ -17,20 +17,20 @@ import io
 import random
 import string
 from datetime import datetime, timedelta
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Set, Tuple, Union
 
 import numpy as np
 from PIL import Image
 
 import datasets
-from datasets import ClassLabel, DatasetDict, Features, Value
+from datasets import ClassLabel, Dataset, DatasetDict, Features, Value
 
 
 def _generate_artificial_strings(
     num_rows: int, num_unique: int, string_length: int
 ) -> List[str]:
     """Create list of strings."""
-    unique_strings = set()
+    unique_strings: Set[str] = set()
     while len(unique_strings) < num_unique:
         random_str = "".join(
             random.choices(string.ascii_letters + string.digits, k=string_length)
@@ -74,7 +74,7 @@ def _generate_random_sentence(
 ) -> str:
     # Generate a random sentence with words of random lengths
     sentence_length = random.randint(min_sentence_length, max_sentence_length)
-    sentence = []
+    sentence: List[str] = []
     while len(" ".join(sentence)) < sentence_length:
         word_length = random.randint(min_word_length, max_word_length)
         word = _generate_random_word(word_length)
@@ -99,7 +99,7 @@ def _generate_random_sentences(
     return text_col
 
 
-def _make_num_rows_none(column, num_none):
+def _make_num_rows_none(column: List[Any], num_none: int) -> List[Any]:
     none_positions = random.sample(range(len(column)), num_none)
     for pos in none_positions:
         column[pos] = None
@@ -117,11 +117,9 @@ def _generate_random_date(
     random_seconds = random.randint(0, int(time_between_dates.total_seconds()))
     random_date = start_date + timedelta(seconds=random_seconds)
 
-    # Return the date in the specified format
     if as_string:
         return random_date.strftime(date_format)
-    else:
-        return random_date
+    return random_date
 
 
 def _generate_random_date_column(
@@ -138,11 +136,11 @@ def _generate_random_date_column(
     ]
 
 
-def _generate_random_int_column(num_rows: int, min_int: int, max_int: int):
+def _generate_random_int_column(num_rows: int, min_int: int, max_int: int) -> List[int]:
     return [random.randint(min_int, max_int) for _ in range(num_rows)]
 
 
-def _generate_random_bool_column(num_rows: int):
+def _generate_random_bool_column(num_rows: int) -> List[bool]:
     return [random.choice([True, False]) for _ in range(num_rows)]
 
 
@@ -150,7 +148,7 @@ def _generate_random_image_column(
     num_rows: int,
     image_size: Union[Tuple[int, int], Tuple[int, int, int]],
     simulate_type: str,
-):
+) -> List[Any]:
     """Simulate the images with the format that is found in HF Hub.
 
     Directly using `Image.fromarray` does not work because it creates `PIL.Image.Image`.
@@ -181,7 +179,7 @@ def generate_random_audio_column(
     num_rows: int,
     sampling_rate: int,
     length_in_samples: int,
-):
+) -> List[Dict[str, Any]]:
     """Simulate the audio column.
 
     Audio column in the datset is comprised from an array or floats, sample_rate and a
@@ -197,7 +195,7 @@ def generate_random_audio_column(
     return audios
 
 
-def _mock_sentiment140(num_rows: int):
+def _mock_sentiment140(num_rows: int) -> Dataset:
     users = _generate_artificial_strings(
         num_rows=num_rows, num_unique=30, string_length=5
     )
@@ -249,7 +247,7 @@ def _mock_sentiment140(num_rows: int):
     return dataset
 
 
-def _mock_cifar100(num_rows: int):
+def _mock_cifar100(num_rows: int) -> Dataset:
     imgs = _generate_random_image_column(num_rows, (32, 32, 3), "PNG")
     unique_fine_labels = [
         "apple",
@@ -392,7 +390,7 @@ def _mock_cifar100(num_rows: int):
     return dataset
 
 
-def _mock_svhn_cropped_digits(num_rows: int):
+def _mock_svhn_cropped_digits(num_rows: int) -> Dataset:
     imgs = _generate_random_image_column(num_rows, (32, 32, 3), "PNG")
     unique_labels = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
     label = _generate_artificial_categories(num_rows, unique_labels)
@@ -408,7 +406,7 @@ def _mock_svhn_cropped_digits(num_rows: int):
     return dataset
 
 
-def _mock_speach_commands(num_rows: int):
+def _mock_speach_commands(num_rows: int) -> Dataset:
     sampling_rate = 16_000
     length_in_samples = 16_000
     imgs = generate_random_audio_column(
@@ -447,7 +445,9 @@ def _mock_speach_commands(num_rows: int):
     return dataset
 
 
-def _mock_dict_dataset(num_rows: List[int], split_names: List[str], function: Callable):
+def _mock_dict_dataset(
+    num_rows: List[int], split_names: List[str], function: Callable[[int], Dataset]
+) -> DatasetDict:
     dataset_dict = {}
     for params in zip(num_rows, split_names):
         dataset_dict[params[1]] = function(params[0])
@@ -465,7 +465,7 @@ def _load_mocked_dataset(
     dataset_name: str,
     num_rows: List[int],
     split_names: List[str],
-    subset: Optional[str] = "",
+    subset: str = "",
 ) -> DatasetDict:
     dataset_dict = {}
     name = dataset_name if subset == "" else dataset_name + "_" + subset
