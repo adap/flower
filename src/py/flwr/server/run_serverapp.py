@@ -110,7 +110,7 @@ def run_server_app() -> None:
     )
 
     # Run the Server App with the Driver
-    run(server_app_attr, server_app_dir, driver)
+    run(server_app_attr, driver, server_app_dir)
 
     # Clean up
     del driver
