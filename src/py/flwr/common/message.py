@@ -16,9 +16,7 @@
 
 
 from dataclasses import dataclass
-from typing import Union
 
-from .constant import MessageType
 from .recordset import RecordSet
 
 
@@ -66,7 +64,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         reply_to_message: str,
         group_id: str,
         ttl: str,
-        message_type: Union[str, MessageType],
+        message_type: str,
     ) -> None:
         self._run_id = run_id
         self._message_id = message_id
@@ -75,8 +73,6 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         self._reply_to_message = reply_to_message
         self.group_id = group_id
         self.ttl = ttl
-        if isinstance(message_type, MessageType):
-            message_type = message_type.value
         self.message_type = message_type
 
     @property

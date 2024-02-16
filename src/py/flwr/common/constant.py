@@ -14,7 +14,8 @@
 # ==============================================================================
 """Flower constants."""
 
-from enum import Enum
+
+from typing import Any, Iterable
 
 MISSING_EXTRA_REST = """
 Extra dependencies required for using the REST-based Fleet API are missing.
@@ -39,20 +40,16 @@ MESSAGE_TYPE_FIT = "fit"
 MESSAGE_TYPE_EVALUATE = "evaluate"
 
 
-class MessageType(Enum):
+class _IterableType(type):
+    def __iter__(cls) -> Iterable[Any]:
+        # iterate over class attributes
+        return (getattr(cls, key) for key in cls.__dict__ if not key.startswith("_"))
+
+
+class MessageType(metaclass=_IterableType):
     """Message type."""
 
     GET_PROPERTIES = MESSAGE_TYPE_GET_PROPERTIES
     GET_PARAMETERS = MESSAGE_TYPE_GET_PARAMETERS
     TRAIN = MESSAGE_TYPE_FIT
     EVALUATE = MESSAGE_TYPE_EVALUATE
-
-    def __eq__(self, other: object) -> bool:
-        """."""
-        if isinstance(other, MessageType):
-            return self.value == other.value
-        return self.value == other
-
-    def __hash__(self) -> int:
-        """."""
-        return hash(self.value)
