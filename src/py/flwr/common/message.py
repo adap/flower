@@ -15,6 +15,8 @@
 """Message."""
 
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 from .recordset import RecordSet
@@ -161,7 +163,7 @@ class Message:
         """A dataclass including information about the message to be executed."""
         return self._metadata
 
-    def create_reply(self, content: RecordSet, ttl: str) -> "Message":
+    def create_reply(self, content: RecordSet, ttl: str) -> Message:
         """Create a reply to this message with specified content and TTL.
 
         The method generates a new `Message` as a reply to this message.
