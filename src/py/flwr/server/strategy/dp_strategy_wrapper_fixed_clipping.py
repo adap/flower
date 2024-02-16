@@ -52,8 +52,23 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         A value of 1.0 or higher is recommended for strong privacy.
     clipping_norm : float
         The value of the clipping norm.
-    num_sampled_clients: int
+    num_sampled_clients : int
         The number of clients that are sampled on each round.
+
+    Examples
+    --------
+    Create an strategy:
+
+    >>> strategy = fl.server.strategy.FedAvg( ... )
+
+    Wrap the strategy with a DP wrapper
+
+    >>> dpStrategy = DPStrategyWrapperServerSideFixedClipping(
+                        strategy,
+                        cfg.noise_multiplier,
+                        cfg.clipping_norm,
+                        cfg.num_sampled_clients
+                        )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
