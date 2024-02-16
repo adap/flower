@@ -9,13 +9,13 @@ Quickstart MXNet
 .. meta::
    :description: Check out this Federated Learning quickstart tutorial for using Flower with MXNet to train a Sequential model on MNIST.
 
-In this tutorial, we will learn how to train a :code:`Sequential` model on MNIST using Flower and MXNet. 
+In this tutorial, we will learn how to train a :code:`Sequential` model on MNIST using Flower and MXNet.
 
-It is recommended to create a virtual environment and run everything within this `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_. 
+It is recommended to create a virtual environment and run everything within this `virtualenv <https://flower.ai/docs/recommended-env-setup.html>`_.
 
-Our example consists of one *server* and two *clients* all having the same model. 
+Our example consists of one *server* and two *clients* all having the same model.
 
-*Clients* are responsible for generating individual model parameter updates for the model based on their local datasets. 
+*Clients* are responsible for generating individual model parameter updates for the model based on their local datasets.
 These updates are then sent to the *server* which will aggregate them to produce an updated global model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of parameters updates is called a *round*.
 
@@ -35,12 +35,12 @@ Since we want to use MXNet, let's go ahead and install it:
 Flower Client
 -------------
 
-Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on MXNet´s `Hand-written Digit Recognition tutorial <https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_. 
+Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on MXNet´s `Hand-written Digit Recognition tutorial <https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html>`_.
 
 In a file called :code:`client.py`, import Flower and MXNet related packages:
 
 .. code-block:: python
-      
+
     import flwr as fl
 
     import numpy as np
@@ -58,7 +58,7 @@ In addition, define the device allocation in MXNet with:
 
     DEVICE = [mx.gpu() if mx.test_utils.list_gpus() else mx.cpu()]
 
-We use MXNet to load MNIST, a popular image classification dataset of handwritten digits for machine learning. The MXNet utility :code:`mx.test_utils.get_mnist()` downloads the training and test data. 
+We use MXNet to load MNIST, a popular image classification dataset of handwritten digits for machine learning. The MXNet utility :code:`mx.test_utils.get_mnist()` downloads the training and test data.
 
 .. code-block:: python
 
@@ -72,7 +72,7 @@ We use MXNet to load MNIST, a popular image classification dataset of handwritte
         val_data = mx.io.NDArrayIter(mnist["test_data"], mnist["test_label"], batch_size)
         return train_data, val_data
 
-Define the training and loss with MXNet. We train the model by looping over the dataset, measure the corresponding loss, and optimize it. 
+Define the training and loss with MXNet. We train the model by looping over the dataset, measure the corresponding loss, and optimize it.
 
 .. code-block:: python
 
@@ -110,7 +110,7 @@ Define the training and loss with MXNet. We train the model by looping over the 
         return trainings_metric, num_examples
 
 
-Next, we define the validation of our machine learning model. We loop over the test set and measure both loss and accuracy on the test set. 
+Next, we define the validation of our machine learning model. We loop over the test set and measure both loss and accuracy on the test set.
 
 .. code-block:: python
 
@@ -155,7 +155,7 @@ Our Flower clients will use a simple :code:`Sequential` model:
         init = nd.random.uniform(shape=(2, 784))
         model(init)
 
-After loading the dataset with :code:`load_data()` we perform one forward propagation to initialize the model and model parameters with :code:`model(init)`. Next, we implement a Flower client. 
+After loading the dataset with :code:`load_data()` we perform one forward propagation to initialize the model and model parameters with :code:`model(init)`. Next, we implement a Flower client.
 
 The Flower server interacts with clients through an interface called
 :code:`Client`. When the server selects a particular client for training, it
@@ -207,7 +207,7 @@ They can be implemented in the following way:
             [accuracy, loss], num_examples = test(model, val_data)
             print("Evaluation accuracy & loss", accuracy, loss)
             return float(loss[1]), val_data.batch_size, {"accuracy": float(accuracy[1])}
-    
+
 
 We can now create an instance of our class :code:`MNISTClient` and add one line
 to actually run this client:

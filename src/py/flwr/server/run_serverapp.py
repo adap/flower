@@ -21,8 +21,11 @@ from logging import DEBUG, WARN
 from pathlib import Path
 
 from flwr.common import EventType, event
+from flwr.common.context import Context
 from flwr.common.logger import log
+from flwr.common.recordset import RecordSet
 
+from .driver.driver import Driver
 from .serverapp import ServerApp, load_server_app
 
 
@@ -89,6 +92,21 @@ def run_server_app() -> None:
 
     log(DEBUG, "server_app: `%s`", server_app)
 
+    # Initialize Context
+    context = Context(state=RecordSet())
+
+    # Initialize Driver
+    driver = Driver(
+        driver_service_address=args.server,
+        root_certificates=root_certificates,
+    )
+
+    # Call ServerApp
+    server_app(driver=driver, context=context)
+
+    # Clean up
+    del driver
+
     event(EventType.RUN_SERVER_APP_LEAVE)
 
 
@@ -117,7 +135,7 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--server",
-        default="0.0.0.0:9092",
+        default="0.0.0.0:9091",
         help="Server address",
     )
     parser.add_argument(

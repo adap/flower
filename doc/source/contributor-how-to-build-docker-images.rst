@@ -17,7 +17,7 @@ Before we can start, we need to meet a few prerequisites in our local developmen
 #. Verify the Docker daemon is running.
 
     Please follow the first section on
-    `Run Flower using Docker <https://flower.dev/docs/framework/how-to-run-flower-using-docker>`_
+    `Run Flower using Docker <https://flower.ai/docs/framework/how-to-run-flower-using-docker>`_
     which covers this step in more detail.
 
 Currently, Flower provides two images, a base image and a server image. There will also be a client
