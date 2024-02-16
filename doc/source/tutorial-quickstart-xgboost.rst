@@ -36,7 +36,7 @@ and then we dive into a more complex example (`full code xgboost-comprehensive <
 Environment Setup
 --------------------
 
-First of all, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_.
+First of all, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.ai/docs/recommended-env-setup.html>`_.
 
 We first need to install Flower and Flower Datasets. You can do this by running :
 
@@ -596,7 +596,7 @@ Comprehensive Federated XGBoost
 Now that you have known how federated XGBoost work with Flower, it's time to run some more comprehensive experiments by customising the experimental settings.
 In the xgboost-comprehensive example (`full code <https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive>`_),
 we provide more options to define various experimental setups, including aggregation strategies, data partitioning and centralised/distributed evaluation.
-We also support `Flower simulation <https://flower.dev/docs/framework/how-to-run-simulations.html>`_ making it easy to simulate large client cohorts in a resource-aware manner.
+We also support `Flower simulation <https://flower.ai/docs/framework/how-to-run-simulations.html>`_ making it easy to simulate large client cohorts in a resource-aware manner.
 Let's take a look!
 
 Cyclic training
