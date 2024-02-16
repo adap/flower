@@ -195,14 +195,14 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
 
     Parameters
     ----------
-    strategy: Strategy
+    strategy : Strategy
         The strategy to which DP functionalities will be added by this wrapper.
-    noise_multiplier: float
+    noise_multiplier : float
         The noise multiplier for the Gaussian mechanism for model updates.
         A value of 1.0 or higher is recommended for strong privacy.
-    clipping_norm: float
+    clipping_norm : float
         The value of the clipping norm.
-    num_sampled_clients: int
+    num_sampled_clients : int
         The number of clients that are sampled on each round.
     """
 
