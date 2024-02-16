@@ -6,7 +6,7 @@ and [lifelines](https://lifelines.readthedocs.io/en/stable/index.html) library.
 The aim of this example is to estimate the survival function using the
 [Kaplan-Meier Estimate](https://en.wikipedia.org/wiki/Kaplan%E2%80%93Meier_estimator) implemented in
 lifelines library (see [KaplanMeierFitter](https://lifelines.readthedocs.io/en/stable/fitters/univariate/KaplanMeierFitter.html#lifelines.fitters.kaplan_meier_fitter.KaplanMeierFitter)). The distributed/federated aspect of this example
-is the data sending to the server. You can think of it as a federated analytics examples.
+is the data sending to the server. You can think of it as a federated analytics example. However, it's worth noting that this procedure violates privacy since the raw data is exchanged.
 
 Finally, many other estimators beyond KaplanMeierFitter can be used with the provided strategy:
 AalenJohansenFitter, GeneralizedGammaFitter, LogLogisticFitter,
@@ -15,7 +15,7 @@ SplineFitter, and WeibullFitter.
 We also use the [NatualPartitioner](https://flower.dev/docs/datasets/ref-api/flwr_datasets.partitioner.NaturalIdPartitioner.html#flwr_datasets.partitioner.NaturalIdPartitioner) from [Flower Datasets](https://flower.dev/docs/datasets/) to divide the data according to
 the group it comes from therefore to simulate the division that might occur.
 
-<p style="text-align:center;"><img 
+<p style="text-align:center;">
 <img src="_static/survival_function_federated.png" alt="Survival Function" width="600"/>
 </p>
 
