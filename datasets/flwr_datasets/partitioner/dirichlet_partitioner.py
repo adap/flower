@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Dirichlet partitioner class that works with Hugging Face Datasets."""
+
+
 import warnings
 from typing import Dict, List, Optional, Union
 
@@ -272,10 +274,10 @@ class DirichletPartitioner(Partitioner):
             ]
             mssg_list_alphas = (
                 (
-                    " Generating partitions by sampling from a list of very"
-                    "dispair alpha values can be hard to achieve. "
-                    f"Try reducing the range between maximum ({max(self._alpha)}) and "
-                    f"minimum alpha ({min(self._alpha)}) values."
+                    "Generating partitions by sampling from a list of very wide range "
+                    "of alpha values can be hard to achieve. Try reducing the range "
+                    f"between maximum ({max(self._alpha)}) and minimum alpha "
+                    f"({min(self._alpha)}) values or increasing all the values."
                 )
                 if len(self._alpha.flatten().tolist()) > 0
                 else ""
@@ -290,6 +292,11 @@ class DirichletPartitioner(Partitioner):
                 f"min_partition_size instead. {mssg_list_alphas}",
                 stacklevel=1,
             )
+            if sampling_try == 10:
+                raise ValueError(
+                    "The max number of attempts (10) was reached. "
+                    "Please update the values of alpha and try again."
+                )
             sampling_try += 1
 
         # Shuffle the indices not to have the datasets with targets in sequences like
