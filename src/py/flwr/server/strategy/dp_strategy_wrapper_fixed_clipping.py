@@ -36,7 +36,7 @@ from flwr.common.differential_privacy import (
     add_gaussian_noise_to_params,
     compute_clip_model_update,
 )
-from flwr.common.differential_privacy_constants import CLIENTS_DISCREPENCY_WARNING
+from flwr.common.differential_privacy_constants import CLIENTS_DISCREPANCY_WARNING
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
@@ -145,7 +145,9 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         if len(results) != self.num_sampled_clients:
             log(
                 WARNING,
-                CLIENTS_DISCREPENCY_WARNING % (len(results), self.num_sampled_clients),
+                CLIENTS_DISCREPANCY_WARNING,
+                len(results),
+                self.num_sampled_clients,
             )
         for _, res in results:
             param = parameters_to_ndarrays(res.parameters)
