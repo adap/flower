@@ -123,7 +123,7 @@ html_theme = "furo"
 html_title = f"Flower Datasets {release}"
 html_logo = "_static/flower-datasets-logo.png"
 html_favicon = "_static/favicon.ico"
-html_baseurl = "https://flower.dev/docs/datasets/"
+html_baseurl = "https://flower.ai/docs/datasets/"
 
 html_theme_options = {
     #
