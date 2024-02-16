@@ -16,11 +16,9 @@
 
 import base64
 import unittest
-from logging import INFO
 
 import grpc
 
-from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
     generate_key_pairs,
@@ -85,7 +83,6 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._client_public_key)
         )
-        log(INFO, "Client public key bytes: %s", public_key_bytes)
         response, call = self._create_node.with_call(
             request=CreateNodeRequest(),
             metadata=((_PUBLIC_KEY_HEADER, public_key_bytes),),
@@ -114,7 +111,6 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._client_public_key)
         )
-        log(INFO, "Client public key bytes: %s", public_key_bytes)
         response, call = self._delete_node.with_call(
             request=request,
             metadata=(

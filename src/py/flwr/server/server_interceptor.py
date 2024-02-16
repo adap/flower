@@ -16,13 +16,11 @@
 
 import base64
 import threading
-from logging import INFO
 from typing import Any, Callable, Sequence, Tuple, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_public_key,
     generate_shared_key,
@@ -59,7 +57,7 @@ Response = Union[
 def _get_value_from_tuples(
     key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
 ) -> bytes:
-    value = next((value[::-1] for key, value in tuples if key == key_string), "")
+    value = next((value for key, value in tuples if key == key_string), "")
     if isinstance(value, str):
         return value.encode()
 
@@ -97,11 +95,11 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             context: grpc.ServicerContext,
         ) -> Any:
             with self._lock:
-                encoded_bytes = _get_value_from_tuples(
-                    _PUBLIC_KEY_HEADER, context.invocation_metadata()
-                )[::-1]
-                log(INFO, "Client public key bytes: %s", encoded_bytes)
-                client_public_key_bytes = base64.urlsafe_b64decode(encoded_bytes)
+                client_public_key_bytes = base64.urlsafe_b64decode(
+                    _get_value_from_tuples(
+                        _PUBLIC_KEY_HEADER, context.invocation_metadata()
+                    )
+                )
                 is_public_key_known = (
                     client_public_key_bytes in self.state.get_client_public_keys()
                 )
@@ -118,11 +116,11 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                             )
                         )
                     elif isinstance(request, (DeleteNodeRequest, PullTaskInsRequest)):
-                        encoded_bytes = _get_value_from_tuples(
-                            _AUTH_TOKEN_HEADER, context.invocation_metadata()
-                        )[::-1]
-                        hmac_value = base64.urlsafe_b64decode(encoded_bytes)
-                        log(INFO, "Client public key bytes: %s", encoded_bytes)
+                        hmac_value = base64.urlsafe_b64decode(
+                            _get_value_from_tuples(
+                                _AUTH_TOKEN_HEADER, context.invocation_metadata()
+                            )
+                        )
                         client_public_key = bytes_to_public_key(client_public_key_bytes)
                         shared_secret = generate_shared_key(
                             self.server_private_key,
