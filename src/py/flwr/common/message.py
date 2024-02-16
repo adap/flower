@@ -126,7 +126,24 @@ class Message:
         return self._metadata
 
     def create_reply(self, content: RecordSet, ttl: str) -> "Message":
-        """Create a reply to the message."""
+        """Create a reply to this message with specified content and TTL.
+
+        The method generates a new `Message` as a reply to this message.
+        It inherits 'run_id', 'src_node_id', 'dst_node_id', and 'message_type' from
+        this message and sets 'reply_to_message' to the ID of this message.
+
+        Parameters
+        ----------
+        content : RecordSet
+            The content for the reply message.
+        ttl : str
+            Time-to-live for this message.
+
+        Returns
+        -------
+        Message
+            A new `Message` instance representing the reply.
+        """
         return Message(
             metadata=Metadata(
                 run_id=self.metadata.run_id,
