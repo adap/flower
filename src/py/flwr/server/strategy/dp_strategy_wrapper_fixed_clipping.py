@@ -16,7 +16,9 @@
 
 Papers: https://arxiv.org/abs/1712.07557, https://arxiv.org/abs/1710.06963
 """
-import warnings
+
+
+from logging import WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
@@ -34,6 +36,8 @@ from flwr.common.differential_privacy import (
     add_gaussian_noise_to_params,
     compute_clip_model_update,
 )
+from flwr.common.differential_privacy_constants import CLIENTS_DISCREPENCY_WARNING
+from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
@@ -139,12 +143,11 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
             return None, {}
 
         if len(results) != self.num_sampled_clients:
-            warnings.warn(
-                f"The number of clients returning parameters ({len(results)})"
-                f" differs from the number of sampled clients ({self.num_sampled_clients})."
-                f" This could impact the differential privacy guarantees,"
-                f" potentially leading to privacy leakage or inadequate noise calibration.",
-                stacklevel=2,
+            log(
+                WARNING,
+                CLIENTS_DISCREPENCY_WARNING.format(
+                    len(results), self.num_sampled_clients
+                ),
             )
         for _, res in results:
             param = parameters_to_ndarrays(res.parameters)
