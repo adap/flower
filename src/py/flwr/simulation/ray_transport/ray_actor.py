@@ -33,6 +33,12 @@ from flwr.common.message import Message
 ClientAppFn = Callable[[], ClientApp]
 
 
+def init_ray(*args: Any, **kwargs: Any) -> None:
+    """Intialises Ray if not already initialised."""
+    if not ray.is_initialized():
+        ray.init(*args, **kwargs)
+
+
 class ClientException(Exception):
     """Raised when client side logic crashes with an exception."""
 

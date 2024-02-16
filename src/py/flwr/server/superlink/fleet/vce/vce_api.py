@@ -19,8 +19,6 @@ import traceback
 from logging import ERROR, INFO
 from typing import Callable, Dict, Union
 
-import ray
-
 from flwr.client.clientapp import ClientApp, load_client_app
 from flwr.client.message_handler.task_handler import configure_task_res
 from flwr.client.node_state import NodeState
@@ -33,13 +31,14 @@ from flwr.server.superlink.state import StateFactory
 from flwr.simulation.ray_transport.ray_actor import (
     ClientAppActor,
     VirtualClientEngineActorPool,
+    init_ray,
 )
 
 TaskInsQueue = asyncio.Queue[TaskIns]
 NodeToPartitionMapping = Dict[int, int]
 
 
-def _construct_actor_pool(
+def _construct_ray_actor_pool(
     client_resources: Dict[str, Union[float, int]],
     wdir: str,
 ) -> VirtualClientEngineActorPool:
@@ -51,7 +50,7 @@ def _construct_actor_pool(
     # Init ray and append working dir if needed
     # Ref: https://docs.ray.io/en/latest/ray-core/handling-dependencies.html#api-reference
     runtime_env = {"working_dir": wdir} if wdir else None
-    ray.init(
+    init_ray(
         include_dashboard=True, runtime_env=runtime_env
     )  # TODO: recursiviely search dir, we don't want that. use `excludes` arg
     # Create actor pool
@@ -197,7 +196,7 @@ def run_vce(
     """Run VirtualClientEnginge."""
     # Create actor pool
     log(INFO, f"{client_resources = }")
-    pool = _construct_actor_pool(client_resources, wdir=working_dir)
+    pool = _construct_ray_actor_pool(client_resources, wdir=working_dir)
     log(INFO, f"Constructed ActorPool with: {pool.num_actors} actors")
 
     # Register nodes (as many as number of possible clients)
