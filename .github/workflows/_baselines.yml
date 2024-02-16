@@ -11,7 +11,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      packages: ${{ steps.filter.outputs.changes }}
+      baselines: ${{ steps.filter.outputs.changes }}
     steps:
       - uses: actions/checkout@v4
 
@@ -46,9 +46,10 @@ jobs:
   test:
     runs-on: ubuntu-22.04
     needs: changes
+    if: ${{ needs.changes.outputs.baselines != '' && toJson(fromJson(needs.changes.outputs.baselines)) != '[]' }}
     strategy:
       matrix:
-        baseline: ${{ fromJSON(needs.changes.outputs.packages) }}
+        baseline: ${{ fromJSON(needs.changes.outputs.baselines) }}
     steps:
       - uses: actions/checkout@v4
 
