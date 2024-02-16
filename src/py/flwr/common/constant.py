@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,3 +31,8 @@ TRANSPORT_TYPES = [
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 ]
+
+MESSAGE_TYPE_GET_PROPERTIES = "get_properties"
+MESSAGE_TYPE_GET_PARAMETERS = "get_parameters"
+MESSAGE_TYPE_FIT = "fit"
+MESSAGE_TYPE_EVALUATE = "evaluate"

@@ -12,7 +12,7 @@ This tutorial allows for a variety of settings (some shown in the diagrams above
 
 - For Flower server: A machine running Linux/macOS/Windows (e.g. your laptop). You can run the server on an embedded device too!
 - For Flower clients (one or more): Raspberry Pi 4 (or Zero 2), or an NVIDIA Jetson Xavier-NX (or Nano), or anything similar to these.
-- A uSD card with 32GB or more.
+- A uSD card with 32GB or more. While 32GB is enough for the RPi, a larger 64GB uSD card works best for the NVIDIA Jetson.
 - Software to flash the images to a uSD card:
   - For Raspberry Pi we recommend the [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
   - For other devices [balenaEtcher](https://www.balena.io/etcher/) it's a great option.
@@ -192,7 +192,8 @@ On the machine of your choice, launch the server:
 # Launch your server.
 # Will wait for at least 2 clients to be connected, then will train for 3 FL rounds
 # The command below will sample all clients connected (since sample_fraction=1.0)
-python server.py --rounds 3 --min_num_clients 2 --sample_fraction 1.0 # append `--mnist` if you want to use that dataset/model setting
+# The the server is dataset agnostic (use the same command for MNIST and CIFAR10)
+python server.py --rounds 3 --min_num_clients 2 --sample_fraction 1.0
 ```
 
 > If you are on macOS with Apple Silicon (i.e. M1, M2 chips), you might encounter a `grpcio`-related issue when launching your server. If you are in a conda environment you can solve this easily by doing: `pip uninstall grpcio` and then `conda install grpcio`.

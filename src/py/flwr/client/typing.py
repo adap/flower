@@ -14,10 +14,16 @@
 # ==============================================================================
 """Custom types for Flower clients."""
 
-from typing import Callable, Union
+
+from typing import Callable
+
+from flwr.common.context import Context
+from flwr.common.message import Message
 
 from .client import Client as Client
-from .numpy_client import NumPyClient as NumPyClient
 
-ClientLike = Union[Client, NumPyClient]
-ClientFn = Callable[[str], ClientLike]
+# Compatibility
+ClientFn = Callable[[str], Client]
+
+ClientAppCallable = Callable[[Message, Context], Message]
+Mod = Callable[[Message, Context, ClientAppCallable], Message]

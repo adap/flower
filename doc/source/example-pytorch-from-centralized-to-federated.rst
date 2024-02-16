@@ -278,7 +278,7 @@ We included type annotations to give you a better understanding of the data type
             return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
 
 All that's left to do it to define a function that loads both model and data, creates a :code:`CifarClient`, and starts this client.
-You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient` with the function :code:`fl.client.start_numpy_client()` by pointing it at the same IP adress we used in :code:`server.py`: 
+You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient` with the function :code:`fl.client.start_client()` by pointing it at the same IP adress we used in :code:`server.py`: 
 
 .. code-block:: python
 
@@ -292,7 +292,7 @@ You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient
 
         # Start client
         client = CifarClient(model, trainloader, testloader, num_examples)
-        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client)
+        fl.client.start_client(server_address="0.0.0.0:8080", client.to_client())
 
 
     if __name__ == "__main__":

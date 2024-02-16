@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 """Check provided directory and sub-directories for missing __init__.py files.
 
 Example:
@@ -36,7 +36,7 @@ def check_missing_init_files(absolute_path: str) -> None:
 
 if __name__ == "__main__":
     if len(sys.argv) == 0:
-        raise Exception(
+        raise Exception(  # pylint: disable=W0719
             "Please provide at least one directory path relative to your current working directory."
         )
     for i, _ in enumerate(sys.argv):

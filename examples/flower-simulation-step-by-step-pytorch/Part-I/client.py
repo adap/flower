@@ -98,7 +98,7 @@ def generate_client_fn(trainloaders, valloaders, num_classes):
             trainloader=trainloaders[int(cid)],
             vallodaer=valloaders[int(cid)],
             num_classes=num_classes,
-        )
+        ).to_client()
 
     # return the function to spawn client
     return client_fn

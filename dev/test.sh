@@ -15,7 +15,7 @@ python -m isort --check-only --skip src/py/flwr/proto src/py/flwr
 echo "- isort: done"
 
 echo "- black: start"
-python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr
+python -m black --exclude "src\/py\/flwr\/proto" --check src/py/flwr examples
 echo "- black: done"
 
 echo "- init_py_check: start"
@@ -55,3 +55,11 @@ python -m mdformat --check --number doc/source examples
 echo "- mdformat: done"
 
 echo "- All Markdown checks passed"
+
+echo "- Start license checks"
+
+echo "- licensecheck: start"
+python -m licensecheck -u poetry --fail-licenses gpl --zero
+echo "- licensecheck: done"
+
+echo "- All license checks passed"

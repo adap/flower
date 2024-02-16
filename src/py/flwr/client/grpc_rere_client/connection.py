@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 
 from contextlib import contextmanager
-from logging import DEBUG, ERROR, WARN
+from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
@@ -28,16 +28,18 @@ from flwr.client.message_handler.task_handler import (
 )
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
-from flwr.common.logger import log
-from flwr.proto.fleet_pb2 import (
+from flwr.common.logger import log, warn_experimental_feature
+from flwr.common.message import Message
+from flwr.common.serde import message_from_taskins, message_to_taskres
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
     PullTaskInsRequest,
     PushTaskResRequest,
 )
-from flwr.proto.fleet_pb2_grpc import FleetStub
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 KEY_NODE = "node"
 KEY_TASK_INS = "current_task_ins"
@@ -51,14 +53,13 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 @contextmanager
 def grpc_request_response(
     server_address: str,
+    insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[
-        Union[bytes, str]
-    ] = None,  # pylint: disable=unused-argument
+    root_certificates: Optional[Union[bytes, str]] = None,
 ) -> Iterator[
     Tuple[
-        Callable[[], Optional[TaskIns]],
-        Callable[[TaskRes], None],
+        Callable[[], Optional[Message]],
+        Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
     ]
@@ -88,24 +89,19 @@ def grpc_request_response(
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
     """
+    warn_experimental_feature("`grpc-rere`")
+
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
 
     channel = create_channel(
         server_address=server_address,
+        insecure=insecure,
         root_certificates=root_certificates,
         max_message_length=max_message_length,
     )
     channel.subscribe(on_channel_state_change)
     stub = FleetStub(channel)
-
-    log(
-        WARN,
-        """
-        EXPERIMENTAL: `grpc-rere` is an experimental transport layer, it might change
-        considerably in future versions of Flower
-        """,
-    )
 
     # Necessary state to link TaskRes to TaskIns
     state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
@@ -136,7 +132,9 @@ def grpc_request_response(
         delete_node_request = DeleteNodeRequest(node=node)
         stub.DeleteNode(request=delete_node_request)
 
-    def receive() -> Optional[TaskIns]:
+        del node_store[KEY_NODE]
+
+    def receive() -> Optional[Message]:
         """Receive next task from server."""
         # Get Node
         if node_store[KEY_NODE] is None:
@@ -152,18 +150,16 @@ def grpc_request_response(
         task_ins: Optional[TaskIns] = get_task_ins(response)
 
         # Discard the current TaskIns if not valid
-        if task_ins is not None and not validate_task_ins(
-            task_ins, discard_reconnect_ins=True
-        ):
+        if task_ins is not None and not validate_task_ins(task_ins):
             task_ins = None
 
         # Remember `task_ins` until `task_res` is available
         state[KEY_TASK_INS] = task_ins
 
-        # Return the TaskIns if available
-        return task_ins
+        # Return the message if available
+        return message_from_taskins(task_ins) if task_ins is not None else None
 
-    def send(task_res: TaskRes) -> None:
+    def send(message: Message) -> None:
         """Send task result back to server."""
         # Get Node
         if node_store[KEY_NODE] is None:
@@ -176,6 +172,9 @@ def grpc_request_response(
             log(ERROR, "No current TaskIns")
             return
         task_ins: TaskIns = cast(TaskIns, state[KEY_TASK_INS])
+
+        # Construct TaskRes
+        task_res = message_to_taskres(message)
 
         # Check if fields to be set are not initialized
         if not validate_task_res(task_res):

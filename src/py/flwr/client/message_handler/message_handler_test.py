@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import uuid
 from flwr.client import Client
 from flwr.client.typing import ClientFn
 from flwr.common import (
+    Code,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -29,14 +30,16 @@ from flwr.common import (
     GetPropertiesIns,
     GetPropertiesRes,
     Parameters,
-    serde,
-    typing,
+    Status,
 )
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, Code, ServerMessage, Status
+from flwr.common import recordset_compat as compat
+from flwr.common import typing
+from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
+from flwr.common.context import Context
+from flwr.common.message import Message, Metadata
+from flwr.common.recordset import RecordSet
 
-from .message_handler import handle
+from .message_handler import handle_legacy_message_from_msgtype
 
 
 class ClientWithoutProps(Client):
@@ -115,127 +118,75 @@ def test_client_without_get_properties() -> None:
     """Test client implementing get_properties."""
     # Prepare
     client = ClientWithoutProps()
-    ins = ServerMessage.GetPropertiesIns()
-
-    task_ins: TaskIns = TaskIns(
-        task_id=str(uuid.uuid4()),
-        group_id="",
-        workload_id="",
-        task=Task(
-            producer=Node(node_id=0, anonymous=True),
-            consumer=Node(node_id=0, anonymous=True),
-            ancestry=[],
-            legacy_server_message=ServerMessage(get_properties_ins=ins),
+    recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
+    message = Message(
+        metadata=Metadata(
+            run_id=0,
+            message_id=str(uuid.uuid4()),
+            group_id="",
+            node_id=0,
+            ttl="",
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
+        content=recordset,
     )
 
     # Execute
-    task_res, actual_sleep_duration, actual_keep_going = handle(
-        client_fn=_get_client_fn(client), task_ins=task_ins
+    actual_msg = handle_legacy_message_from_msgtype(
+        client_fn=_get_client_fn(client),
+        message=message,
+        context=Context(state=RecordSet()),
     )
-
-    if not task_res.HasField("task"):
-        raise ValueError("Task value not found")
-
-    # pylint: disable=no-member
-    if not task_res.task.HasField("legacy_client_message"):
-        raise ValueError("Unexpected None value")
-    # pylint: enable=no-member
-
-    task_res.MergeFrom(
-        TaskRes(
-            task_id=str(uuid.uuid4()),
-            group_id="",
-            workload_id="",
-        )
-    )
-    # pylint: disable=no-member
-    task_res.task.MergeFrom(
-        Task(
-            producer=Node(node_id=0, anonymous=True),
-            consumer=Node(node_id=0, anonymous=True),
-            ancestry=[task_ins.task_id],
-        )
-    )
-
-    actual_msg = task_res.task.legacy_client_message
-    # pylint: enable=no-member
 
     # Assert
-    expected_get_properties_res = ClientMessage.GetPropertiesRes(
+    expected_get_properties_res = GetPropertiesRes(
         status=Status(
             code=Code.GET_PROPERTIES_NOT_IMPLEMENTED,
             message="Client does not implement `get_properties`",
-        )
+        ),
+        properties={},
     )
-    expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
+    expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
+    expected_msg = Message(message.metadata, expected_rs)
 
-    assert actual_msg == expected_msg
-    assert actual_sleep_duration == 0
-    assert actual_keep_going is True
+    assert actual_msg.content == expected_msg.content
+    assert actual_msg.metadata.message_type == expected_msg.metadata.message_type
 
 
 def test_client_with_get_properties() -> None:
     """Test client not implementing get_properties."""
     # Prepare
     client = ClientWithProps()
-    ins = ServerMessage.GetPropertiesIns()
-    task_ins = TaskIns(
-        task_id=str(uuid.uuid4()),
-        group_id="",
-        workload_id="",
-        task=Task(
-            producer=Node(node_id=0, anonymous=True),
-            consumer=Node(node_id=0, anonymous=True),
-            ancestry=[],
-            legacy_server_message=ServerMessage(get_properties_ins=ins),
+    recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
+    message = Message(
+        metadata=Metadata(
+            run_id=0,
+            message_id=str(uuid.uuid4()),
+            group_id="",
+            node_id=0,
+            ttl="",
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
+        content=recordset,
     )
 
     # Execute
-    task_res, actual_sleep_duration, actual_keep_going = handle(
-        client_fn=_get_client_fn(client), task_ins=task_ins
+    actual_msg = handle_legacy_message_from_msgtype(
+        client_fn=_get_client_fn(client),
+        message=message,
+        context=Context(state=RecordSet()),
     )
-
-    if not task_res.HasField("task"):
-        raise ValueError("Task value not found")
-
-    # pylint: disable=no-member
-    if not task_res.task.HasField("legacy_client_message"):
-        raise ValueError("Unexpected None value")
-    # pylint: enable=no-member
-
-    task_res.MergeFrom(
-        TaskRes(
-            task_id=str(uuid.uuid4()),
-            group_id="",
-            workload_id="",
-        )
-    )
-    # pylint: disable=no-member
-    task_res.task.MergeFrom(
-        Task(
-            producer=Node(node_id=0, anonymous=True),
-            consumer=Node(node_id=0, anonymous=True),
-            ancestry=[task_ins.task_id],
-        )
-    )
-
-    actual_msg = task_res.task.legacy_client_message
-    # pylint: enable=no-member
 
     # Assert
-    expected_get_properties_res = ClientMessage.GetPropertiesRes(
+    expected_get_properties_res = GetPropertiesRes(
         status=Status(
             code=Code.OK,
             message="Success",
         ),
-        properties=serde.properties_to_proto(
-            properties={"str_prop": "val", "int_prop": 1}
-        ),
+        properties={"str_prop": "val", "int_prop": 1},
     )
-    expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
+    expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
+    expected_msg = Message(message.metadata, expected_rs)
 
-    assert actual_msg == expected_msg
-    assert actual_sleep_duration == 0
-    assert actual_keep_going is True
+    assert actual_msg.content == expected_msg.content
+    assert actual_msg.metadata.message_type == expected_msg.metadata.message_type

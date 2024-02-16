@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,9 @@ from flwr.client.message_handler.task_handler import (
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
-from flwr.proto.fleet_pb2 import (
+from flwr.common.message import Message
+from flwr.common.serde import message_from_taskins, message_to_taskres
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
@@ -38,8 +40,8 @@ from flwr.proto.fleet_pb2 import (
     PushTaskResRequest,
     PushTaskResResponse,
 )
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 try:
     import requests
@@ -61,14 +63,15 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 # pylint: disable-next=too-many-statements
 def http_request_response(
     server_address: str,
+    insecure: bool,  # pylint: disable=unused-argument
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
-        Callable[[], Optional[TaskIns]],
-        Callable[[TaskRes], None],
+        Callable[[], Optional[Message]],
+        Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
     ]
@@ -142,6 +145,7 @@ def http_request_response(
             },
             data=create_node_req_bytes,
             verify=verify,
+            timeout=None,
         )
 
         # Check status code and headers
@@ -184,6 +188,7 @@ def http_request_response(
             },
             data=delete_node_req_req_bytes,
             verify=verify,
+            timeout=None,
         )
 
         # Check status code and headers
@@ -203,7 +208,7 @@ def http_request_response(
                 PATH_PULL_TASK_INS,
             )
 
-    def receive() -> Optional[TaskIns]:
+    def receive() -> Optional[Message]:
         """Receive next task from server."""
         # Get Node
         if node_store[KEY_NODE] is None:
@@ -224,6 +229,7 @@ def http_request_response(
             },
             data=pull_task_ins_req_bytes,
             verify=verify,
+            timeout=None,
         )
 
         # Check status code and headers
@@ -252,20 +258,20 @@ def http_request_response(
         task_ins: Optional[TaskIns] = get_task_ins(pull_task_ins_response_proto)
 
         # Discard the current TaskIns if not valid
-        if task_ins is not None and not validate_task_ins(
-            task_ins, discard_reconnect_ins=True
-        ):
+        if task_ins is not None and not validate_task_ins(task_ins):
             task_ins = None
 
         # Remember `task_ins` until `task_res` is available
         state[KEY_TASK_INS] = task_ins
 
-        # Return the TaskIns if available
+        # Return the Message if available
+        message = None
         if task_ins is not None:
+            message = message_from_taskins(task_ins)
             log(INFO, "[Node] POST /%s: success", PATH_PULL_TASK_INS)
-        return task_ins
+        return message
 
-    def send(task_res: TaskRes) -> None:
+    def send(message: Message) -> None:
         """Send task result back to server."""
         # Get Node
         if node_store[KEY_NODE] is None:
@@ -278,6 +284,9 @@ def http_request_response(
             return
 
         task_ins: TaskIns = cast(TaskIns, state[KEY_TASK_INS])
+
+        # Construct TaskRes
+        task_res = message_to_taskres(message)
 
         # Check if fields to be set are not initialized
         if not validate_task_res(task_res):
@@ -302,6 +311,7 @@ def http_request_response(
             },
             data=push_task_res_request_bytes,
             verify=verify,
+            timeout=None,
         )
 
         state[KEY_TASK_INS] = None
