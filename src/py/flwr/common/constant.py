@@ -14,7 +14,6 @@
 # ==============================================================================
 """Flower constants."""
 
-from enum import Enum
 
 MISSING_EXTRA_REST = """
 Extra dependencies required for using the REST-based Fleet API are missing.
@@ -39,20 +38,10 @@ MESSAGE_TYPE_FIT = "fit"
 MESSAGE_TYPE_EVALUATE = "evaluate"
 
 
-class MessageType(Enum):
+class MessageType:
     """Message type."""
 
     GET_PROPERTIES = MESSAGE_TYPE_GET_PROPERTIES
     GET_PARAMETERS = MESSAGE_TYPE_GET_PARAMETERS
     TRAIN = MESSAGE_TYPE_FIT
     EVALUATE = MESSAGE_TYPE_EVALUATE
-
-    def __eq__(self, other: object) -> bool:
-        """."""
-        if isinstance(other, MessageType):
-            return self.value == other.value
-        return self.value == other
-
-    def __hash__(self) -> int:
-        """."""
-        return hash(self.value)

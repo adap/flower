@@ -15,10 +15,10 @@
 """Message."""
 
 
-from dataclasses import dataclass
-from typing import Union
+from __future__ import annotations
 
-from .constant import MessageType
+from dataclasses import dataclass
+
 from .recordset import RecordSet
 
 
@@ -51,11 +51,11 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     _run_id: int
     _message_id: str
     _src_node_id: int
-    dst_node_id: int
+    _dst_node_id: int
     _reply_to_message: str
-    group_id: str
-    ttl: str
-    message_type: str
+    _group_id: str
+    _ttl: str
+    _message_type: str
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -66,18 +66,16 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         reply_to_message: str,
         group_id: str,
         ttl: str,
-        message_type: Union[str, MessageType],
+        message_type: str,
     ) -> None:
         self._run_id = run_id
         self._message_id = message_id
         self._src_node_id = src_node_id
-        self.dst_node_id = dst_node_id
+        self._dst_node_id = dst_node_id
         self._reply_to_message = reply_to_message
-        self.group_id = group_id
-        self.ttl = ttl
-        if isinstance(message_type, MessageType):
-            message_type = message_type.value
-        self.message_type = message_type
+        self._group_id = group_id
+        self._ttl = ttl
+        self._message_type = message_type
 
     @property
     def run_id(self) -> int:
@@ -98,6 +96,46 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     def reply_to_message(self) -> str:
         """An identifier for the message this message replies to."""
         return self._reply_to_message
+
+    @property
+    def dst_node_id(self) -> int:
+        """An identifier for the node receiving this message."""
+        return self._dst_node_id
+
+    @dst_node_id.setter
+    def dst_node_id(self, value: int) -> None:
+        """Set dst_node_id."""
+        self._dst_node_id = value
+
+    @property
+    def group_id(self) -> str:
+        """An identifier for grouping messages."""
+        return self._group_id
+
+    @group_id.setter
+    def group_id(self, value: str) -> None:
+        """Set group_id."""
+        self._group_id = value
+
+    @property
+    def ttl(self) -> str:
+        """Time-to-live for this message."""
+        return self._ttl
+
+    @ttl.setter
+    def ttl(self, value: str) -> None:
+        """Set ttl."""
+        self._ttl = value
+
+    @property
+    def message_type(self) -> str:
+        """A string that encodes the action to be executed on the receiving end."""
+        return self._message_type
+
+    @message_type.setter
+    def message_type(self, value: str) -> None:
+        """Set message_type."""
+        self._message_type = value
 
 
 @dataclass
@@ -125,7 +163,7 @@ class Message:
         """A dataclass including information about the message to be executed."""
         return self._metadata
 
-    def create_reply(self, content: RecordSet, ttl: str) -> "Message":
+    def create_reply(self, content: RecordSet, ttl: str) -> Message:
         """Create a reply to this message with specified content and TTL.
 
         The method generates a new `Message` as a reply to this message.

@@ -26,12 +26,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
 from flwr.common.configsrecord import ConfigsRecord
-from flwr.common.constant import (
-    MESSAGE_TYPE_EVALUATE,
-    MESSAGE_TYPE_FIT,
-    MESSAGE_TYPE_GET_PARAMETERS,
-    MESSAGE_TYPE_GET_PROPERTIES,
-)
+from flwr.common.constant import MessageType
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
@@ -138,22 +133,22 @@ def grpc_connection(  # pylint: disable=R0915
             recordset = compat.getpropertiesins_to_recordset(
                 serde.get_properties_ins_from_proto(proto.get_properties_ins)
             )
-            message_type = MESSAGE_TYPE_GET_PROPERTIES
+            message_type = MessageType.GET_PROPERTIES
         elif field == "get_parameters_ins":
             recordset = compat.getparametersins_to_recordset(
                 serde.get_parameters_ins_from_proto(proto.get_parameters_ins)
             )
-            message_type = MESSAGE_TYPE_GET_PARAMETERS
+            message_type = MessageType.GET_PARAMETERS
         elif field == "fit_ins":
             recordset = compat.fitins_to_recordset(
                 serde.fit_ins_from_proto(proto.fit_ins), False
             )
-            message_type = MESSAGE_TYPE_FIT
+            message_type = MessageType.TRAIN
         elif field == "evaluate_ins":
             recordset = compat.evaluateins_to_recordset(
                 serde.evaluate_ins_from_proto(proto.evaluate_ins), False
             )
-            message_type = MESSAGE_TYPE_EVALUATE
+            message_type = MessageType.EVALUATE
         elif field == "reconnect_ins":
             recordset = RecordSet()
             recordset.set_configs(
@@ -187,20 +182,20 @@ def grpc_connection(  # pylint: disable=R0915
         message_type = message.metadata.message_type
 
         # RecordSet --> *Res --> *Res proto -> ClientMessage proto
-        if message_type == MESSAGE_TYPE_GET_PROPERTIES:
+        if message_type == MessageType.GET_PROPERTIES:
             getpropres = compat.recordset_to_getpropertiesres(recordset)
             msg_proto = ClientMessage(
                 get_properties_res=serde.get_properties_res_to_proto(getpropres)
             )
-        elif message_type == MESSAGE_TYPE_GET_PARAMETERS:
+        elif message_type == MessageType.GET_PARAMETERS:
             getparamres = compat.recordset_to_getparametersres(recordset, False)
             msg_proto = ClientMessage(
                 get_parameters_res=serde.get_parameters_res_to_proto(getparamres)
             )
-        elif message_type == MESSAGE_TYPE_FIT:
+        elif message_type == MessageType.TRAIN:
             fitres = compat.recordset_to_fitres(recordset, False)
             msg_proto = ClientMessage(fit_res=serde.fit_res_to_proto(fitres))
-        elif message_type == MESSAGE_TYPE_EVALUATE:
+        elif message_type == MessageType.EVALUATE:
             evalres = compat.recordset_to_evaluateres(recordset)
             msg_proto = ClientMessage(evaluate_res=serde.evaluate_res_to_proto(evalres))
         elif message_type == "reconnect":
@@ -209,7 +204,7 @@ def grpc_connection(  # pylint: disable=R0915
                 disconnect_res=ClientMessage.DisconnectRes(reason=reason)
             )
         else:
-            raise ValueError(f"Invalid task type: {message_type}")
+            raise ValueError(f"Invalid message type: {message_type}")
 
         # Send ClientMessage proto
         return queue.put(msg_proto, block=False)
