@@ -16,7 +16,8 @@
 import time
 from typing import Iterable, List, Optional, Tuple
 
-from flwr.common.message import Message
+from flwr.common.message import Message, Metadata
+from flwr.common.recordset import RecordSet
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -70,6 +71,65 @@ class Driver:
             self.run_id = res.run_id
         return self.grpc_driver, self.run_id
 
+    def _check_message(self, message: Message) -> None:
+        # Check if the message is valid
+        if not (
+            message.metadata.run_id == self.run_id
+            and message.metadata.src_node_id == self.node.node_id
+            and message.metadata.message_id == ""
+            and message.metadata.reply_to_message == ""
+        ):
+            raise ValueError(f"Invalid message: {message}")
+
+    def create_message(  # pylint: disable=too-many-arguments
+        self,
+        content: RecordSet,
+        message_type: str,
+        dst_node_id: int,
+        group_id: str,
+        ttl: str,
+    ) -> Message:
+        """Create a new message with specified parameters.
+
+        This method constructs a new `Message` with given content and metadata.
+        The `run_id` and `src_node_id` will be set automatically.
+
+        Parameters
+        ----------
+        content : RecordSet
+            The content for the new message. This holds records that are to be sent
+            to the destination node.
+        message_type : str
+            The type of the message, defining the action to be executed on
+            the receiving end.
+        dst_node_id : int
+            The ID of the destination node to which the message is being sent.
+        group_id : str
+            The ID of the group to which this message is associated. In some settings,
+            this is used as the FL round.
+        ttl : str
+            Time-to-live for the round trip of this message, i.e., the time from sending
+            this message to receiving a reply. It specifies the duration for which the
+            message and its potential reply are considered valid.
+
+        Returns
+        -------
+        Message
+            A new `Message` instance with the specified content and metadata.
+        """
+        _, run_id = self._get_grpc_driver_and_run_id()
+        metadata = Metadata(
+            run_id=run_id,
+            message_id="",
+            src_node_id=self.node.node_id,
+            dst_node_id=dst_node_id,
+            reply_to_message="",
+            group_id=group_id,
+            ttl=ttl,
+            message_type=message_type,
+        )
+        return Message(metadata=metadata, content=content)
+
     def get_node_ids(self) -> List[int]:
         """Get node IDs."""
         grpc_driver, run_id = self._get_grpc_driver_and_run_id()
@@ -77,7 +137,7 @@ class Driver:
         res = grpc_driver.get_nodes(GetNodesRequest(run_id=run_id))
         return [node.node_id for node in res.nodes]
 
-    def push_messages(self, messages: Iterable[Message]) -> List[str]:
+    def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
         """Push messages to specified node IDs.
 
         This method takes an iterable of messages and sends each message
@@ -90,31 +150,25 @@ class Driver:
 
         Returns
         -------
-        message_ids : List[str]
-            A list of IDs for the messages that were sent, which can be used
+        message_ids : Iterable[str]
+            An iterable of IDs for the messages that were sent, which can be used
             to pull responses.
         """
-        grpc_driver, run_id = self._get_grpc_driver_and_run_id()
+        grpc_driver, _ = self._get_grpc_driver_and_run_id()
         # Construct TaskIns
         task_ins_list: List[TaskIns] = []
         for msg in messages:
-            # Check node_id
-            if msg.metadata.node_id == 0:
-                raise ValueError("Message has no node_id.")
+            # Check message
+            self._check_message(msg)
             # Convert Message to TaskIns
             taskins = message_to_taskins(msg)
-            # Set producer
-            taskins.task.producer.node_id = self.node.node_id
-            taskins.task.producer.anonymous = self.node.anonymous
-            # Set run_id
-            taskins.run_id = run_id
             # Add to list
             task_ins_list.append(taskins)
         # Call GrpcDriver method
         res = grpc_driver.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
         return list(res.task_ids)
 
-    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Tuple[Message, int]]:
+    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
 
         This method is used to collect responses or messages from the network
@@ -127,9 +181,8 @@ class Driver:
 
         Returns
         -------
-        Iterable[Tuple[Message, int]]
-            An iterable of tuples, each containing a `Message` object and the ID of
-            the node from which the message was received.
+        Iterable[Message]
+            An iterable of messages received.
         """
         grpc_driver, _ = self._get_grpc_driver_and_run_id()
         # Pull TaskRes
@@ -137,18 +190,15 @@ class Driver:
             PullTaskResRequest(node=self.node, task_ids=message_ids)
         )
         # Convert TaskRes to Message
-        msgs = [
-            (message_from_taskres(taskres), taskres.task.producer.node_id)
-            for taskres in res.task_res_list
-        ]
+        msgs = [message_from_taskres(taskres) for taskres in res.task_res_list]
         return msgs
 
     def send_and_receive(
         self,
-        messages: Iterable[Tuple[Message, Iterable[int]]],
+        messages: Iterable[Message],
         *,
         time_out: Optional[float] = None,
-    ) -> Iterable[Tuple[Message, int]]:
+    ) -> Iterable[Message]:
         """Push messages to specified node IDs and pull the responses.
 
         This method sends a list of messages to their target node IDs and then
@@ -158,8 +208,7 @@ class Driver:
         Parameters
         ----------
         messages : Iterable[Tuple[Message, Iterable[int]]]
-            An iterable of tuples, each containing a `Message` object and an iterable
-            of target node IDs to which the message should be sent.
+            An iterable of messages to be sent.
         time_out : Optional[float], default=None
             The time out duration in seconds. If specified, the method will wait for
             responses for this duration. If None, there is no time limit and the method
@@ -167,26 +216,29 @@ class Driver:
 
         Returns
         -------
-        Iterable[Tuple[Message, int]]
-            An iterable of tuples, each containing a `Message` object and the ID of
-            the node from which the message was received.
+        Iterable[Message]
+            An iterable of messages received.
 
         Notes
         -----
         This method uses `push_messages` to send the messages and `pull_messages`
         to collect the responses. If `time_out` is set, the method may not return
-        responses for all sent messages.
+        responses for all sent messages. A message remains valid until its TTL,
+        which is not affected by `time_out`.
         """
         # Push messages
-        msg_ids = self.push_messages(messages)
+        msg_ids = set(self.push_messages(messages))
 
         # Pull messages
-        end_time = time.time() + time_out
-        ret: List[Tuple[Message, int]] = []
-        while time.time() < end_time:
+        end_time = time.time() + (time_out if time_out is not None else 0.0)
+        ret: List[Message] = []
+        while time_out is None or time.time() < end_time:
             res_msgs = self.pull_messages(msg_ids)
-            ret += res_msgs
-            if len(ret) == len(msg_ids):
+            ret.extend(res_msgs)
+            msg_ids.difference_update(
+                {msg.metadata.reply_to_message for msg in res_msgs}
+            )
+            if len(msg_ids) == 0:
                 break
             # Sleep
             time.sleep(3)
