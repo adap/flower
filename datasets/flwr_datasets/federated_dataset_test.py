@@ -20,6 +20,7 @@ import unittest
 from typing import Dict, Union
 from unittest.mock import Mock, patch
 
+import numpy as np
 import pytest
 from parameterized import parameterized, parameterized_class
 
@@ -150,7 +151,7 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
 
     def test_no_need_for_split_keyword_if_one_partitioner(self) -> None:
         """Test if partitions got with and without split args are the same."""
-        fds = FederatedDataset(dataset="mnist", partitioners={"train": 10})
+        fds = FederatedDataset(dataset=self.dataset_name, partitioners={"train": 10})
         partition_loaded_with_no_split_arg = fds.load_partition(0)
         partition_loaded_with_verbose_split_arg = fds.load_partition(0, "train")
         self.assertTrue(
@@ -424,8 +425,25 @@ def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
 
     # Iterate over each row and check for equality
     for row1, row2 in zip(ds1, ds2):
-        if row1 != row2:
+        # Ensure all keys are the same in both rows
+        if set(row1.keys()) != set(row2.keys()):
             return False
+
+        # Compare values for each key
+        for key in row1:
+            if key == "audio":
+                # Special handling for 'audio' key
+                if not all(
+                    [
+                        np.array_equal(row1[key]["array"], row2[key]["array"]),
+                        row1[key]["path"] == row2[key]["path"],
+                        row1[key]["sampling_rate"] == row2[key]["sampling_rate"],
+                    ]
+                ):
+                    return False
+            elif row1[key] != row2[key]:
+                # Direct comparison for other keys
+                return False
 
     return True
 
