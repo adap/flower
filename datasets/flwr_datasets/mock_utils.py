@@ -473,33 +473,3 @@ def _load_mocked_dataset(
     for params in zip(num_rows, split_names):
         dataset_dict[params[1]] = dataset_creation_fnc(params[0])
     return datasets.DatasetDict(dataset_dict)
-
-
-if __name__ == "__main__":
-    print("_mock_cifar100")
-    print(_mock_dict_dataset([200, 100], ["train", "test"], _mock_cifar100))
-    print("_mock_sentiment140")
-    print(
-        _mock_dict_dataset(
-            [
-                200,
-            ],
-            [
-                "train",
-            ],
-            _mock_sentiment140,
-        )
-    )
-    print("_mock_svhn_cropped_digits")
-    print(
-        _mock_dict_dataset(
-            [200, 100, 50], ["train", "test", "extra"], _mock_svhn_cropped_digits
-        )
-    )
-    print("_mock_speach_commands")
-    print(
-        _mock_dict_dataset([200, 100], ["train", "test"], _mock_speach_commands)[
-            "train"
-        ][0]
-    )
-    print()
