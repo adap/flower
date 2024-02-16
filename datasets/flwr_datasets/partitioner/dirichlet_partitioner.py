@@ -264,14 +264,30 @@ class DirichletPartitioner(Partitioner):
             )
             if min_sample_size_on_client >= self._min_partition_size:
                 break
+            sample_sizes = [len(indices) for indices in node_id_to_indices.values()]
+            alpha_not_met = [
+                self._alpha[i]
+                for i, ss in enumerate(sample_sizes)
+                if ss == min(sample_sizes)
+            ]
+            mssg_list_alphas = (
+                (
+                    " Generating partitions by sampling from a list of very"
+                    "dispair alpha values can be hard to achieve. "
+                    f"Try reducing the range between maximum ({max(self._alpha)}) and "
+                    f"minimum alpha ({min(self._alpha)}) values."
+                )
+                if len(self._alpha.flatten().tolist()) > 0
+                else ""
+            )
             warnings.warn(
-                f"The specified min_partition_size of the create the "
-                f"partitions was not satisfied as the direct result of the "
-                f"{sampling_try} st/nd/rd/th sampling from the Dirichlet "
+                f"The specified min_partition_size ({self._min_partition_size}) was "
+                f"not satisfied for alpha ({alpha_not_met}) after "
+                f"{sampling_try} attempts at sampling from the Dirichlet "
                 f"distribution. The probability sampling from the Dirichlet "
-                f"distribution will be repeated. Note: It is not a desired "
+                f"distribution will be repeated. Note: This is not a desired "
                 f"behavior. It is recommended to adjust the alpha or "
-                f"min_partition_size instead.",
+                f"min_partition_size instead. {mssg_list_alphas}",
                 stacklevel=1,
             )
             sampling_try += 1
