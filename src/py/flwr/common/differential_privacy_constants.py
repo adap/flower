@@ -15,8 +15,8 @@
 """Constants for differential privacy."""
 
 CLIENTS_DISCREPENCY_WARNING = (
-    "The number of clients returning parameters ({})"
-    " differs from the number of sampled clients ({})."
+    "The number of clients returning parameters (%s)"
+    " differs from the number of sampled clients (%s)."
     " This could impact the differential privacy guarantees,"
     " potentially leading to privacy leakage or inadequate noise calibration."
 )

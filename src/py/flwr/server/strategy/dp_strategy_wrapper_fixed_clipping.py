@@ -145,9 +145,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         if len(results) != self.num_sampled_clients:
             log(
                 WARNING,
-                CLIENTS_DISCREPENCY_WARNING.format(
-                    len(results), self.num_sampled_clients
-                ),
+                CLIENTS_DISCREPENCY_WARNING % (len(results), self.num_sampled_clients),
             )
         for _, res in results:
             param = parameters_to_ndarrays(res.parameters)
