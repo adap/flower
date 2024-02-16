@@ -209,7 +209,7 @@ def grpc_connection(  # pylint: disable=R0915
                 disconnect_res=ClientMessage.DisconnectRes(reason=reason)
             )
         else:
-            raise ValueError(f"Invalid task type: {message_type}")
+            raise ValueError(f"Invalid message type: {message_type}")
 
         # Send ClientMessage proto
         return queue.put(msg_proto, block=False)

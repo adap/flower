@@ -137,7 +137,7 @@ def handle_legacy_message_from_msgtype(
         )
         out_recordset = evaluateres_to_recordset(evaluate_res)
     else:
-        raise ValueError(f"Invalid task type: {message_type}")
+        raise ValueError(f"Invalid message type: {message_type}")
 
     # Return Message
     return message.create_reply(out_recordset, ttl="")
