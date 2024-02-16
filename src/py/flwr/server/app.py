@@ -470,10 +470,15 @@ def run_superlink() -> None:
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
+        client_app_dir = args.dir
+        if client_app_dir is not None:
+            sys.path.insert(0, client_app_dir)
+
         _run_fleet_api_vce(
             num_supernodes=args.num_supernodes,
             client_resources=args.client_resources,
-            client_app_callable_str=args.callable,
+            client_app_str=args.client_app,
+            working_dir=client_app_dir,
             state_factory=state_factory,
         )
     else:
@@ -615,14 +620,17 @@ def _run_fleet_api_grpc_rere(
 def _run_fleet_api_vce(
     num_supernodes: int,
     client_resources: Dict[str, Union[float, int]],
-    client_app_callable_str: str,
+    client_app_str: str,
+    working_dir: str,
     state_factory: StateFactory,
 ) -> None:
     from flwr.server.superlink.fleet.vce.vce_api import run_vce
 
     log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
 
-    run_vce(num_supernodes, client_resources, client_app_callable_str, state_factory)
+    run_vce(
+        num_supernodes, client_resources, client_app_str, working_dir, state_factory
+    )
 
 
 # pylint: disable=import-outside-toplevel,too-many-arguments
@@ -848,8 +856,8 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     # Fleet API VCE options
     vce_group = parser.add_argument_group("Fleet API (VCE) server options", "")
     vce_group.add_argument(
-        "--callable",
-        help="For example: `client:flower`",
+        "--client-app",
+        help="For example: `client:app` or `project.package.module:wrapper.app`",
     )
     vce_group.add_argument(
         "--num-supernodes",
@@ -862,6 +870,12 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         default='{"num_cpus":2, "num_gpus":0.0}',
         help='A dict in the form \'{"num_cpus":<int>, "num_gpus":<float>}\'. Pay close '
         " attention to how the quotes and double quotes are set.",
+    )
+    parser.add_argument(
+        "--dir",
+        default="",
+        help="Add specified directory to the PYTHONPATH."
+        " Default: current working directory.",
     )
 
 

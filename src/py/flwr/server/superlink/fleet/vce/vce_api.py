@@ -15,7 +15,8 @@
 """Fleet VirtualClientEngine API."""
 
 import asyncio
-from logging import INFO
+import traceback
+from logging import ERROR, INFO
 from typing import Callable, Dict, Union
 
 import ray
@@ -39,15 +40,21 @@ NodeToPartitionMapping = Dict[int, int]
 
 
 def _construct_actor_pool(
-    client_resources: Dict[str, Union[float, int]]
+    client_resources: Dict[str, Union[float, int]],
+    wdir: str,
 ) -> VirtualClientEngineActorPool:
     """Prepare ActorPool."""
 
     def _create_actor_fn():  # type: ignore
         return ClientAppActor.options(**client_resources).remote()  # type: ignore
 
+    # Init ray and append working dir if needed
+    # Ref: https://docs.ray.io/en/latest/ray-core/handling-dependencies.html#api-reference
+    runtime_env = {"working_dir": wdir} if wdir else None
+    ray.init(
+        include_dashboard=True, runtime_env=runtime_env
+    )  # TODO: recursiviely search dir, we don't want that. use `excludes` arg
     # Create actor pool
-    ray.init(include_dashboard=True)
     pool = VirtualClientEngineActorPool(
         create_actor_fn=_create_actor_fn,
         client_resources=client_resources,
@@ -90,53 +97,59 @@ async def worker(
     nodes_mapping: NodeToPartitionMapping,
     pool: VirtualClientEngineActorPool,
 ) -> None:
-    """Get TaskIns from queue and execute associated job if actor is free.
-
-    If actor is not free, the request is added back to the queue.
-    """
+    """Get TaskIns from queue and pass it to an actor in the pool to execute it."""
     while True:
-        task_ins = await queue.get()
+        try:
+            task_ins = await queue.get()
 
-        # TODO: check if another request for the same node is being running atm
-        # TODO: Else potential problesm with run_state ?
+            # TODO: check if another request for the same node is being running atm
+            # TODO: Else potential problesm with run_state ?
 
-        if not pool.is_actor_available():
-            # TODO: revisit
-            # insert actor in pool, then what?
-            raise RuntimeError("Did an actor die?")
+            assert pool.is_actor_available(), "This should never happen."
 
-        node_id = task_ins.task.consumer.node_id
+            node_id = task_ins.task.consumer.node_id
 
-        # Register and retrive runstate
-        node_states[node_id].register_context(run_id=task_ins.run_id)
-        run_state = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
+            # Register and retrive runstate
+            node_states[node_id].register_context(run_id=task_ins.run_id)
+            run_state = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
 
-        # Convert TaskIns to Message
-        message = taskins_to_message(task_ins, datapartition_id=nodes_mapping[node_id])
+            # Convert TaskIns to Message
+            message = taskins_to_message(
+                task_ins, datapartition_id=nodes_mapping[node_id]
+            )
 
-        # Submite a task to the pool
-        future = pool.submit_if_actor_is_free(
-            lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-            (app, message, str(node_id), run_state),
-        )
+            # Submite a task to the pool
+            future = pool.submit_if_actor_is_free(
+                lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
+                (app, message, str(node_id), run_state),
+            )
 
-        assert future is not None, "this shouldn't happen given the check above, right?"
-        # print(f"wait for {future = }")
-        await asyncio.wait([future])
-        # print(f"got: {future = }")
+            assert (
+                future is not None
+            ), "this shouldn't happen given the check above, right?"
+            # print(f"wait for {future = }")
+            await asyncio.wait([future])
+            # print(f"got: {future = }")
 
-        # Fetch result
-        out_mssg, updated_context = pool.fetch_result_and_return_actor(future)
+            # Fetch result
+            out_mssg, updated_context = pool.fetch_result_and_return_actor(future)
 
-        # Update Context
-        node_states[node_id].update_context(task_ins.run_id, context=updated_context)
+            # Update Context
+            node_states[node_id].update_context(
+                task_ins.run_id, context=updated_context
+            )
 
-        # Convert to TaskRes
-        task_res = message_to_taskres(out_mssg)
-        # Configuring task
-        task_res = configure_task_res(task_res, task_ins, Node(node_id=node_id))
-        # Store TaskRes in state
-        state_factory.state().store_task_res(task_res)
+            # Convert to TaskRes
+            task_res = message_to_taskres(out_mssg)
+            # Configuring task
+            task_res = configure_task_res(task_res, task_ins, Node(node_id=node_id))
+            # Store TaskRes in state
+            state_factory.state().store_task_res(task_res)
+        except Exception as ex:
+            # TODO: gen TaskRes with relevant error, add it to state_factory.state()
+            log(ERROR, ex)
+            log(ERROR, traceback.format_exc())
+            break
 
 
 async def generate_pull_requests(
@@ -150,7 +163,7 @@ async def generate_pull_requests(
             task_ins = state_factory.state().get_task_ins(node_id=node_id, limit=1)
             if task_ins:
                 await queue.put(task_ins[0])
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(1.0)
 
 
 async def run(
@@ -177,13 +190,14 @@ async def run(
 def run_vce(
     num_supernodes: int,
     client_resources: Dict[str, Union[float, int]],
-    client_app_callable_str: str,
+    client_app_str: str,
+    working_dir: str,
     state_factory: StateFactory,
 ) -> None:
     """Run VirtualClientEnginge."""
     # Create actor pool
     log(INFO, f"{client_resources = }")
-    pool = _construct_actor_pool(client_resources)
+    pool = _construct_actor_pool(client_resources, wdir=working_dir)
     log(INFO, f"Constructed ActorPool with: {pool.num_actors} actors")
 
     # Register nodes (as many as number of possible clients)
@@ -198,10 +212,10 @@ def run_vce(
     log(INFO, f"Registered {len(nodes_mapping)} nodes")
 
     # TODO: handle different workdir
-    print(f"{client_app_callable_str = }")
+    log(INFO, f"{client_app_str = }")
 
     def _load() -> ClientApp:
-        app: ClientApp = load_client_app(client_app_callable_str)
+        app: ClientApp = load_client_app(client_app_str)
         return app
 
     app = _load
