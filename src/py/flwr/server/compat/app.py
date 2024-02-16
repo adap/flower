@@ -24,7 +24,7 @@ from typing import Dict, Optional, Union
 
 from flwr.common import EventType, event
 from flwr.common.address import parse_address
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_deprecated_feature
 from flwr.proto import driver_pb2  # pylint: disable=E0611
 from flwr.server.app import init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
@@ -33,6 +33,7 @@ from flwr.server.server import Server
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 
+from ..driver import Driver
 from ..driver.grpc_driver import GrpcDriver
 from .driver_client_proxy import DriverClientProxy
 
@@ -54,6 +55,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     strategy: Optional[Strategy] = None,
     client_manager: Optional[ClientManager] = None,
     root_certificates: Optional[Union[bytes, str]] = None,
+    driver: Optional[Driver] = None,
 ) -> History:
     """Start a Flower Driver API server.
 
@@ -81,6 +83,8 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    driver : Optional[Driver] (default: None)
+        The Driver object to use.
 
     Returns
     -------
@@ -101,21 +105,29 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     """
     event(EventType.START_DRIVER_ENTER)
 
-    # Parse IP address
-    parsed_address = parse_address(server_address)
-    if not parsed_address:
-        sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+    if driver:
+        # pylint: disable=protected-access
+        grpc_driver, _ = driver._get_grpc_driver_and_run_id()
+        # pylint: enable=protected-access
+    else:
+        # Not passing a `Driver` object is deprecated
+        warn_deprecated_feature("start_driver")
 
-    # Create the Driver
-    if isinstance(root_certificates, str):
-        root_certificates = Path(root_certificates).read_bytes()
-    grpc_driver = GrpcDriver(
-        driver_service_address=address, root_certificates=root_certificates
-    )
+        # Parse IP address
+        parsed_address = parse_address(server_address)
+        if not parsed_address:
+            sys.exit(f"Server IP address ({server_address}) cannot be parsed.")
+        host, port, is_v6 = parsed_address
+        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-    grpc_driver.connect()
+        # Create the Driver
+        if isinstance(root_certificates, str):
+            root_certificates = Path(root_certificates).read_bytes()
+        grpc_driver = GrpcDriver(
+            driver_service_address=address, root_certificates=root_certificates
+        )
+        grpc_driver.connect()
+
     lock = threading.Lock()
 
     # Initialize the Driver API server and config
@@ -150,7 +162,11 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
     # Stop the Driver API server and the thread
     with lock:
-        grpc_driver.disconnect()
+        if driver:
+            del driver
+        else:
+            grpc_driver.disconnect()
+
     thread.join()
 
     event(EventType.START_SERVER_LEAVE)

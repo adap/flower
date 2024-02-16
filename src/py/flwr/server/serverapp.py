@@ -23,6 +23,7 @@ from flwr.server.driver.driver import Driver
 from flwr.server.strategy import Strategy
 
 from .client_manager import ClientManager
+from .compat import start_driver
 from .server import Server
 from .server_config import ServerConfig
 
@@ -44,6 +45,14 @@ class ServerApp:
 
     def __call__(self, driver: Driver, context: Context) -> None:
         """Execute `ServerApp`."""
+        # Compatibility mode
+        start_driver(
+            server=self.server,
+            config=self.config,
+            strategy=self.strategy,
+            client_manager=self.client_manager,
+            driver=driver,
+        )
 
 
 class LoadServerAppError(Exception):
