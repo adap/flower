@@ -91,6 +91,7 @@ class DivideResplitter:
             self._check_duplicate_splits_in_config_and_original_dataset(dataset_splits)
         return self.resplit(dataset)
 
+    # pylint: disable=too-many-branches
     def resplit(self, dataset: DatasetDict) -> DatasetDict:
         """Resplit the dataset according to the configuration."""
         resplit_dataset = {}
@@ -105,8 +106,7 @@ class DivideResplitter:
                         "dataset with more than one split you need to specify the "
                         "`divide_split` but given None instead."
                     )
-                else:
-                    self._divide_split = dataset_splits[0]
+                self._divide_split = dataset_splits[0]
             self._multiple_splits_config = cast(
                 Union[Dict[str, Dict[str, float]], Dict[str, Dict[str, int]]],
                 {self._divide_split: self._single_split_config},
