@@ -29,10 +29,9 @@ from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import TaskIns
 from flwr.server.superlink.state import StateFactory
 from flwr.simulation.ray_transport.ray_actor import (
-    ClientAppActor,
-    VirtualClientEngineActorPool,
-    init_ray,
+    VirtualClientEngineActorPool,  # TODO: rewrite, simpler, autoscale
 )
+from flwr.simulation.ray_transport.ray_actor import ClientAppActor, init_ray
 
 TaskInsQueue = asyncio.Queue[TaskIns]
 NodeToPartitionMapping = Dict[int, int]
@@ -72,7 +71,7 @@ def taskins_to_message(taskins: TaskIns, datapartition_id: int) -> Message:
             message_id=taskins.task_id,
             group_id=taskins.group_id,
             node_id=datapartition_id,
-            ttl="",
+            ttl=taskins.task.ttl,
             message_type=taskins.task.task_type,
         ),
     )
@@ -162,7 +161,8 @@ async def generate_pull_requests(
             task_ins = state_factory.state().get_task_ins(node_id=node_id, limit=1)
             if task_ins:
                 await queue.put(task_ins[0])
-        await asyncio.sleep(1.0)
+        log(INFO, f"TaskIns in queue: {queue.qsize()}")
+        await asyncio.sleep(1.0)  # TODO: what's the right value here ?
 
 
 async def run(
@@ -173,7 +173,7 @@ async def run(
     node_states: Dict[int, NodeState],
 ) -> None:
     """Run the VCE async."""
-    queue: TaskInsQueue = asyncio.Queue(64)
+    queue: TaskInsQueue = asyncio.Queue(64)  # TODO: how to set?
 
     worker_tasks = [
         asyncio.create_task(

@@ -793,7 +793,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="For example: `client:app` or `project.package.module:wrapper.app`",
     )
     vce_group.add_argument(
-        "--num-supernodes",
+        "--num-supernodes",  # TODO: or should we use simply "clients" ?
         type=int,
         help="Number of SuperNodes connected to the SuperLink",
     )
