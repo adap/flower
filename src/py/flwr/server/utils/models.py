@@ -276,6 +276,73 @@ class CVAE(nn.Module):
         return output, mu, log_var
 
 
+class infoVAE(nn.Module):
+    def __init__(
+        self,
+        input_size=784,
+        hidden_size1=256,
+        hidden_size2=128,
+        latent_size=2,
+        num_classes=10,
+        dis_hidden_size=4,
+    ):
+        super(infoVAE, self).__init__()
+        self.num_classes = num_classes
+        self.encoder = nn.Sequential(
+            nn.Linear(input_size, hidden_size1),
+            nn.ReLU(),
+            nn.Linear(hidden_size1, hidden_size2),
+            nn.ReLU(),
+        )
+
+        self.fc_mu = nn.Linear(hidden_size2, latent_size)
+        self.fc_logvar = nn.Linear(hidden_size2, latent_size)
+
+        # Decoder
+        self.decoder = nn.Sequential(
+            nn.Linear(latent_size + num_classes, hidden_size2),
+            nn.ReLU(),
+            nn.Linear(hidden_size2, hidden_size1),
+            nn.ReLU(),
+            nn.Linear(hidden_size1, input_size),
+            nn.Sigmoid(),
+        )
+
+        # Discriminator for InfoGAN
+        self.discriminator = nn.Sequential(
+            nn.Linear(latent_size, dis_hidden_size),
+            nn.ReLU(),
+            nn.Linear(dis_hidden_size, num_classes),
+        )
+
+    def reparameterize(self, mu, logvar):
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return mu + eps * std
+
+    def encode(self, x):
+        hidden = self.encoder(x)
+        mu = self.fc_mu(hidden)
+        logvar = self.fc_logvar(hidden)
+        z = self.reparameterize(mu, logvar)
+        return z, mu, logvar
+
+    def decode(self, z, y):
+        y = F.one_hot(y, self.num_classes)
+        zy = torch.cat((z, y), dim=1)
+        return self.decoder(zy)
+
+    def discriminate(self, z):
+        return self.discriminator(z)
+
+    def forward(self, x, y):
+        z, mu, logvar = self.encode(x.view(-1, 784))
+        recon_x = self.decode(z, y)
+        pred_y = self.discriminate(z)
+
+        return recon_x, mu, logvar, pred_y
+
+
 if __name__ == "__main__":
     net = ResNet18().to(DEVICE)
     summary(net, (3, 128, 128))

@@ -18,7 +18,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from flwr.server.utils import Generator, ResNet18, VAE, CVAE
+from flwr.server.utils import Generator, ResNet18, VAE, CVAE, infoVAE
 from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg
 import wandb
@@ -55,6 +55,24 @@ def vae_loss(recon_img, img, mu, logvar, beta=1.0):
     total_loss = recon_loss + kld_loss * beta
 
     return total_loss
+
+
+def info_vae_loss(recon_x, x, mu, logvar, y, y_pred, lambda_kl=0.01, lambda_info=1.0):
+    # Reconstruction loss
+    recon_loss = F.binary_cross_entropy(
+        recon_x, x.view(-1, 784), reduction="sum"
+    )  # Adjust for your data type
+
+    # KL divergence loss
+    kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+
+    # Information loss (cross-entropy between predicted and true auxiliary variable)
+    info_loss = F.cross_entropy(y_pred, y, reduction="sum")
+
+    # Total loss
+    total_loss = recon_loss + lambda_kl * kl_loss + lambda_info * info_loss
+
+    return total_loss, recon_loss.item(), kl_loss.item(), info_loss.item()
 
 
 class FedCiR(FedAvg):
@@ -157,19 +175,31 @@ class FedCiR(FedAvg):
         self.lambda_align_g = lambda_align_g
 
     def compute_ref_stats(self):
-        ref_model = CVAE(z_dim=2).to(self.device)
+        ref_model = infoVAE(latent_size=2, dis_hidden_size=4).to(self.device)
         opt_ref = torch.optim.Adam(ref_model.parameters(), lr=1e-3)
         for ep in range(5000):
             for images, labels in self.alignment_loader:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 opt_ref.zero_grad()
-                recon_images, mu, logvar = ref_model(images, labels)
-                vae_loss1 = vae_loss(recon_images, images, mu, logvar, 0.01)
-                vae_loss1.backward()
+                recon_images, mu, logvar, y_pred = ref_model(images, labels)
+                total_loss, recon_loss, kl_loss, info_loss = info_vae_loss(
+                    recon_images,
+                    images,
+                    mu,
+                    logvar,
+                    labels,
+                    y_pred,
+                    0.01,
+                    10,
+                )
+                total_loss.backward()
                 opt_ref.step()
             if ep % 100 == 0:
-                log(DEBUG, f"Epoch {ep}, Loss {vae_loss1.item()}")
+                log(
+                    DEBUG,
+                    f"Epoch {ep}, Loss {total_loss.item()}, Recon Loss {recon_loss}, KL Loss {kl_loss}, Info Loss {info_loss}",
+                )
 
                 log(DEBUG, f"--------------------------------------------------")
         ref_model.eval()
@@ -177,7 +207,7 @@ class FedCiR(FedAvg):
             for images, labels in self.alignment_loader:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
-                _, ref_mu, ref_logvar = ref_model(images, labels)
+                _, ref_mu, ref_logvar, _ = ref_model(images, labels)
         return ref_mu, ref_logvar
 
     def __repr__(self) -> str:

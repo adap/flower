@@ -92,7 +92,7 @@ class FlowerClient(fl.client.NumPyClient):
             num_classes=NUM_CLASSES,
         )
 
-        true_img, gen_img = true_img, gen_img = visualize_gen_image(
+        true_img, gen_img = visualize_gen_image(
             self.model,
             DataLoader(self.valset, batch_size=64, shuffle=True),
             self.device,
@@ -328,22 +328,23 @@ if __name__ == "__main__":
                 ]
             },
             # "lambda_reg": {"min": 0.0, "max": 1.0},
-            "lambda_align_g": {"min": 1e-6, "max": 1e-3},
-            "lambda_reg": {"values": [0]},
-            # "lambda_align": {"values": [100, 200, 300]},
-            "lambda_align": {"min": 1e-6, "max": 1e-3},
+            # "lambda_align_g": {"min": 1e-6, "max": 1e-3},
+            "lambda_align_g": {"values": [1, 10]}, # kl term for generator
+            "lambda_reg": {"values": [0.5, 1]},
+            "lambda_align": {"values": [1, 10]},
+            # "lambda_align": {"min": 1e-6, "max": 1e-3},
             "lr_g": {
                 "values": [
                     1e-3,
-                    1e-2,
+                    1e-4,
                 ]
             },
             "steps_g": {"values": [5, 10, 15, 20]},  # number of epochs for generator
             "epochs": {"values": [5, 10]},
             "batch_size": {"values": [32, 64, 128]},
-            "beta": {"values": [1, 0.01]},
+            "beta": {"values": [1, 0.01]},  # for local kl loss
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=2)
+    wandb.agent(sweep_id, function=main, count=6)
