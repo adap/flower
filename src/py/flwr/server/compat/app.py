@@ -33,8 +33,8 @@ from flwr.server.server import Server
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 
+from ..driver.grpc_driver import GrpcDriver
 from .driver_client_proxy import DriverClientProxy
-from .grpc_driver import GrpcDriver
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 
@@ -111,10 +111,11 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     # Create the Driver
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
-    driver = GrpcDriver(
+    grpc_driver = GrpcDriver(
         driver_service_address=address, root_certificates=root_certificates
     )
-    driver.connect()
+
+    grpc_driver.connect()
     lock = threading.Lock()
 
     # Initialize the Driver API server and config
@@ -134,7 +135,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     thread = threading.Thread(
         target=update_client_manager,
         args=(
-            driver,
+            grpc_driver,
             initialized_server.client_manager(),
             lock,
         ),
@@ -149,7 +150,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
     # Stop the Driver API server and the thread
     with lock:
-        driver.disconnect()
+        grpc_driver.disconnect()
     thread.join()
 
     event(EventType.START_SERVER_LEAVE)

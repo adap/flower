@@ -1,16 +1,16 @@
 # Flower: A Friendly Federated Learning Framework
 
 <p align="center">
-  <a href="https://flower.dev/">
-    <img src="https://flower.dev/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
+  <a href="https://flower.ai/">
+    <img src="https://flower.ai/_next/image/?url=%2F_next%2Fstatic%2Fmedia%2Fflower_white_border.c2012e70.png&w=640&q=75" width="140px" alt="Flower Website" />
   </a>
 </p>
 <p align="center">
-    <a href="https://flower.dev/">Website</a> |
-    <a href="https://flower.dev/blog">Blog</a> |
-    <a href="https://flower.dev/docs/">Docs</a> |
-    <a href="https://flower.dev/conf/flower-summit-2022">Conference</a> |
-    <a href="https://flower.dev/join-slack">Slack</a>
+    <a href="https://flower.ai/">Website</a> |
+    <a href="https://flower.ai/blog">Blog</a> |
+    <a href="https://flower.ai/docs/">Docs</a> |
+    <a href="https://flower.ai/conf/flower-summit-2022">Conference</a> |
+    <a href="https://flower.ai/join-slack">Slack</a>
     <br /><br />
 </p>
 
@@ -18,7 +18,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/main/CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/actions/workflows/framework.yml/badge.svg)
 [![Downloads](https://static.pepy.tech/badge/flwr)](https://pepy.tech/project/flwr)
-[![Slack](https://img.shields.io/badge/Chat-Slack-red)](https://flower.dev/join-slack)
+[![Slack](https://img.shields.io/badge/Chat-Slack-red)](https://flower.ai/join-slack)
 
 Flower (`flwr`) is a framework for building federated learning systems. The
 design of Flower is based on a few guiding principles:
@@ -39,7 +39,7 @@ design of Flower is based on a few guiding principles:
 - **Understandable**: Flower is written with maintainability in mind. The
   community is encouraged to both read and contribute to the codebase.
 
-Meet the Flower community on [flower.dev](https://flower.dev)!
+Meet the Flower community on [flower.ai](https://flower.ai)!
 
 ## Federated Learning Tutorial
 
@@ -73,19 +73,19 @@ Stay tuned, more tutorials are coming soon. Topics include **Privacy and Securit
 
 ## Documentation
 
-[Flower Docs](https://flower.dev/docs):
+[Flower Docs](https://flower.ai/docs):
 
-- [Installation](https://flower.dev/docs/framework/how-to-install-flower.html)
-- [Quickstart (TensorFlow)](https://flower.dev/docs/framework/tutorial-quickstart-tensorflow.html)
-- [Quickstart (PyTorch)](https://flower.dev/docs/framework/tutorial-quickstart-pytorch.html)
-- [Quickstart (Hugging Face)](https://flower.dev/docs/framework/tutorial-quickstart-huggingface.html)
-- [Quickstart (PyTorch Lightning)](https://flower.dev/docs/framework/tutorial-quickstart-pytorch-lightning.html)
-- [Quickstart (Pandas)](https://flower.dev/docs/framework/tutorial-quickstart-pandas.html)
-- [Quickstart (fastai)](https://flower.dev/docs/framework/tutorial-quickstart-fastai.html)
-- [Quickstart (JAX)](https://flower.dev/docs/framework/tutorial-quickstart-jax.html)
-- [Quickstart (scikit-learn)](https://flower.dev/docs/framework/tutorial-quickstart-scikitlearn.html)
-- [Quickstart (Android [TFLite])](https://flower.dev/docs/framework/tutorial-quickstart-android.html)
-- [Quickstart (iOS [CoreML])](https://flower.dev/docs/framework/tutorial-quickstart-ios.html)
+- [Installation](https://flower.ai/docs/framework/how-to-install-flower.html)
+- [Quickstart (TensorFlow)](https://flower.ai/docs/framework/tutorial-quickstart-tensorflow.html)
+- [Quickstart (PyTorch)](https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html)
+- [Quickstart (Hugging Face)](https://flower.ai/docs/framework/tutorial-quickstart-huggingface.html)
+- [Quickstart (PyTorch Lightning)](https://flower.ai/docs/framework/tutorial-quickstart-pytorch-lightning.html)
+- [Quickstart (Pandas)](https://flower.ai/docs/framework/tutorial-quickstart-pandas.html)
+- [Quickstart (fastai)](https://flower.ai/docs/framework/tutorial-quickstart-fastai.html)
+- [Quickstart (JAX)](https://flower.ai/docs/framework/tutorial-quickstart-jax.html)
+- [Quickstart (scikit-learn)](https://flower.ai/docs/framework/tutorial-quickstart-scikitlearn.html)
+- [Quickstart (Android [TFLite])](https://flower.ai/docs/framework/tutorial-quickstart-android.html)
+- [Quickstart (iOS [CoreML])](https://flower.ai/docs/framework/tutorial-quickstart-ios.html)
 
 ## Flower Baselines
 
@@ -112,9 +112,9 @@ Flower Baselines is a collection of community-contributed projects that reproduc
 - [FedAvg](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/fedavg_mnist)
 - [FedOpt](https://github.com/adap/flower/tree/main/baselines/flwr_baselines/flwr_baselines/publications/adaptive_federated_optimization)
 
-Please refer to the [Flower Baselines Documentation](https://flower.dev/docs/baselines/) for a detailed categorization of baselines and for additional info including:
-* [How to use Flower Baselines](https://flower.dev/docs/baselines/how-to-use-baselines.html)
-* [How to contribute a new Flower Baseline](https://flower.dev/docs/baselines/how-to-contribute-baselines.html)
+Please refer to the [Flower Baselines Documentation](https://flower.ai/docs/baselines/) for a detailed categorization of baselines and for additional info including:
+* [How to use Flower Baselines](https://flower.ai/docs/baselines/how-to-use-baselines.html)
+* [How to contribute a new Flower Baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html)
 
 ## Flower Usage Examples
 
@@ -151,7 +151,7 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 
 ## Community
 
-Flower is built by a wonderful community of researchers and engineers. [Join Slack](https://flower.dev/join-slack) to meet them, [contributions](#contributing-to-flower) are welcome.
+Flower is built by a wonderful community of researchers and engineers. [Join Slack](https://flower.ai/join-slack) to meet them, [contributions](#contributing-to-flower) are welcome.
 
 <a href="https://github.com/adap/flower/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=adap/flower" />
