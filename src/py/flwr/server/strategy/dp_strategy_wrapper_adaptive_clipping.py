@@ -17,8 +17,9 @@
 Paper (Andrew et al.): https://arxiv.org/pdf/1905.03871.pdf
 """
 
+
 import math
-import warnings
+from logging import WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -28,7 +29,12 @@ from flwr.common.differential_privacy import (
     add_gaussian_noise_to_params,
     compute_adaptive_noise_params,
 )
-from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM, KEY_NORM_BIT
+from flwr.common.differential_privacy_constants import (
+    CLIENTS_DISCREPANCY_WARNING,
+    KEY_CLIPPING_NORM,
+    KEY_NORM_BIT,
+)
+from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
@@ -41,24 +47,24 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
 
     Parameters
     ----------
-    strategy: Strategy
+    strategy : Strategy
         The strategy to which DP functionalities will be added by this wrapper.
-    noise_multiplier: float
+    noise_multiplier : float
         The noise multiplier for the Gaussian mechanism for model updates.
-    num_sampled_clients: int
+    num_sampled_clients : int
         The number of clients that are sampled on each round.
-    initial_clipping_norm: float
+    initial_clipping_norm : float
         The initial value of clipping norm. Deafults to 0.1.
         Andrew et al. recommends to set to 0.1.
-    target_clipped_quantile: float
+    target_clipped_quantile : float
         The desired quantile of updates which should be clipped. Defaults to 0.5.
-    clip_norm_lr: float
+    clip_norm_lr : float
         The learning rate for the clipping norm adaptation. Defaults to 0.2.
         Andrew et al. recommends to set to 0.2.
-    clipped_count_stddev: float
+    clipped_count_stddev : float
         The stddev of the noise added to the count of updates currently below the estimate.
         Andrew et al. recommends to set to `expected_num_records/20`
-    use_geometric_update: bool
+    use_geometric_update : bool
         Use geometric updating of clip. Defaults to True.
         It is recommended by Andrew et al. to use it.
     """
@@ -159,12 +165,11 @@ class DPStrategyWrapperClientSideAdaptiveClipping(Strategy):
             return None, {}
 
         if len(results) != self.num_sampled_clients:
-            warnings.warn(
-                f"The number of clients returning parameters ({len(results)})"
-                f" differs from the number of sampled clients ({self.num_sampled_clients})."
-                f" This could impact the differential privacy guarantees,"
-                f" potentially leading to privacy leakage or inadequate noise calibration.",
-                stacklevel=2,
+            log(
+                WARNING,
+                CLIENTS_DISCREPANCY_WARNING,
+                len(results),
+                self.num_sampled_clients,
             )
 
         aggregated_params, metrics = self.strategy.aggregate_fit(

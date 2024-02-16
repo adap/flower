@@ -16,7 +16,9 @@
 
 Papers: https://arxiv.org/abs/1712.07557, https://arxiv.org/abs/1710.06963
 """
-import warnings
+
+
+from logging import WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
@@ -34,7 +36,11 @@ from flwr.common.differential_privacy import (
     add_gaussian_noise_to_params,
     compute_clip_model_update,
 )
-from flwr.common.differential_privacy_constants import KEY_CLIPPING_NORM
+from flwr.common.differential_privacy_constants import (
+    CLIENTS_DISCREPANCY_WARNING,
+    KEY_CLIPPING_NORM,
+)
+from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
@@ -52,8 +58,23 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         A value of 1.0 or higher is recommended for strong privacy.
     clipping_norm : float
         The value of the clipping norm.
-    num_sampled_clients: int
+    num_sampled_clients : int
         The number of clients that are sampled on each round.
+
+    Examples
+    --------
+    Create an strategy:
+
+    >>> strategy = fl.server.strategy.FedAvg( ... )
+
+    Wrap the strategy with a DP wrapper
+
+    >>> dpStrategy = DPStrategyWrapperServerSideFixedClipping(
+                        strategy,
+                        cfg.noise_multiplier,
+                        cfg.clipping_norm,
+                        cfg.num_sampled_clients
+                        )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -125,12 +146,11 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
             return None, {}
 
         if len(results) != self.num_sampled_clients:
-            warnings.warn(
-                f"The number of clients returning parameters ({len(results)})"
-                f" differs from the number of sampled clients ({self.num_sampled_clients})."
-                f" This could impact the differential privacy guarantees,"
-                f" potentially leading to privacy leakage or inadequate noise calibration.",
-                stacklevel=2,
+            log(
+                WARNING,
+                CLIENTS_DISCREPANCY_WARNING,
+                len(results),
+                self.num_sampled_clients,
             )
         for _, res in results:
             param = parameters_to_ndarrays(res.parameters)
@@ -180,14 +200,14 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
 
     Parameters
     ----------
-    strategy: Strategy
+    strategy : Strategy
         The strategy to which DP functionalities will be added by this wrapper.
-    noise_multiplier: float
+    noise_multiplier : float
         The noise multiplier for the Gaussian mechanism for model updates.
         A value of 1.0 or higher is recommended for strong privacy.
-    clipping_norm: float
+    clipping_norm : float
         The value of the clipping norm.
-    num_sampled_clients: int
+    num_sampled_clients : int
         The number of clients that are sampled on each round.
     """
 
@@ -265,12 +285,11 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
             return None, {}
 
         if len(results) != self.num_sampled_clients:
-            warnings.warn(
-                f"The number of clients returning parameters ({len(results)})"
-                f" differs from the number of sampled clients ({self.num_sampled_clients})."
-                f" This could impact the differential privacy guarantees,"
-                f" potentially leading to privacy leakage or inadequate noise calibration.",
-                stacklevel=2,
+            log(
+                WARNING,
+                CLIENTS_DISCREPANCY_WARNING,
+                len(results),
+                self.num_sampled_clients,
             )
 
         # Pass the new parameters for aggregation
