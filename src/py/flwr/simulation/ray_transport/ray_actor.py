@@ -434,11 +434,13 @@ class BasicActorPool:
         self.client_resources = client_resources
 
         # Queue of idle actors
-        self.pool = asyncio.Queue()
+        self.pool: asyncio.Queue[Type[VirtualClientEngineActor]] = asyncio.Queue()
         self.num_actors = 0
 
         # A function that creates an actor
-        self.create_actor_fn = lambda: actor_type.options(**client_resources).remote()
+        self.create_actor_fn = lambda: actor_type.options(  # type: ignore
+            **client_resources
+        ).remote()
 
         # Figure out how many actors can be created given the cluster resources
         # and the resources the user indicates each VirtualClient will need
@@ -456,7 +458,7 @@ class BasicActorPool:
         (e.g. you add a new node).
         """
         for _ in range(num_actors):
-            await self.pool.put(self.create_actor_fn())
+            await self.pool.put(self.create_actor_fn())  # type: ignore
         self.num_actors += num_actors
 
     async def submit_if_actor_is_free(

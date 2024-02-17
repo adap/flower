@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import asyncio
 import traceback
 from logging import ERROR, INFO
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, Type, Union
 
 from flwr.client.clientapp import ClientApp, load_client_app
 from flwr.client.message_handler.task_handler import configure_task_res
@@ -28,33 +28,14 @@ from flwr.common.serde import message_to_taskres, recordset_from_proto
 from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import TaskIns
 from flwr.server.superlink.state import StateFactory
-from flwr.simulation.ray_transport.ray_actor import (
-    BasicActorPool,
-    ClientAppActor,
-    init_ray,
-)
+
+from .backend import Backend, RayBackend
 
 TaskInsQueue = asyncio.Queue[TaskIns]
 NodeToPartitionMapping = Dict[int, int]
 
 
-def _construct_ray_actor_pool(
-    client_resources: Dict[str, Union[float, int]],
-    wdir: str,
-) -> BasicActorPool:
-    """Prepare ActorPool."""
-    # Init ray and append working dir if needed
-    # Ref: https://docs.ray.io/en/latest/ray-core/handling-dependencies.html#api-reference
-    runtime_env = {"working_dir": wdir} if wdir else None
-    init_ray(
-        include_dashboard=True, runtime_env=runtime_env
-    )  # TODO: recursiviely search dir, we don't want that. use `excludes` arg
-    # Create actor pool
-    pool = BasicActorPool(
-        actor_type=ClientAppActor,
-        client_resources=client_resources,
-    )
-    return pool
+supported_backends = {"ray": RayBackend}
 
 
 def taskins_to_message(taskins: TaskIns, datapartition_id: int) -> Message:
@@ -90,7 +71,7 @@ async def worker(
     node_states: Dict[int, NodeState],
     state_factory: StateFactory,
     nodes_mapping: NodeToPartitionMapping,
-    pool: BasicActorPool,
+    backend: Backend,
 ) -> None:
     """Get TaskIns from queue and pass it to an actor in the pool to execute it."""
     while True:
@@ -100,41 +81,29 @@ async def worker(
             # TODO: check if another request for the same node is being running atm
             # TODO: Else potential problesm with run_state ?
 
-            assert pool.is_actor_available(), "This should never happen."
-
             node_id = task_ins.task.consumer.node_id
 
             # Register and retrive runstate
             node_states[node_id].register_context(run_id=task_ins.run_id)
-            run_state = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
+            context = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
 
             # Convert TaskIns to Message
             message = taskins_to_message(
                 task_ins, datapartition_id=nodes_mapping[node_id]
             )
 
-            # Submite a task to the pool
-            future = await pool.submit_if_actor_is_free(
-                lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-                (app, message, str(node_id), run_state),
+            # Let backend process message
+            out_mssg, updated_context = await backend.process_message(
+                app, message, context, node_id
             )
-
-            assert (
-                future is not None
-            ), "this shouldn't happen given the check above, right?"
-            # print(f"wait for {future = }")
-            await asyncio.wait([future])
-            # print(f"got: {future = }")
-
-            # Fetch result
-            out_mssg, updated_context = await pool.fetch_result_and_return_actor(future)
 
             # Update Context
             node_states[node_id].update_context(
                 task_ins.run_id, context=updated_context
             )
 
-            # TODO: can we avoid going to proto ? maybe with a new StateFactory + In-Memory Driver-SuperLink conn.
+            # TODO: can we avoid going to proto ?
+            # TODO: maybe with a new StateFactory + In-Memory Driver-SuperLink conn.
             # Convert to TaskRes
             task_res = message_to_taskres(out_mssg)
             # Configuring task
@@ -166,8 +135,7 @@ async def generate_pull_requests(
 
 async def run(
     app: Callable[[], ClientApp],
-    working_dir: str,
-    client_resources: Dict[str, Union[float, int]],
+    backend: Backend,
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
     node_states: Dict[int, NodeState],
@@ -175,18 +143,13 @@ async def run(
     """Run the VCE async."""
     queue: TaskInsQueue = asyncio.Queue(64)  # TODO: how to set?
 
-    # Create actor pool
-    log(INFO, f"{client_resources = }")
-    pool = _construct_ray_actor_pool(client_resources, wdir=working_dir)
-    # Adding actors to pool
-    await pool.add_actors_to_pool(pool.actors_capacity)
-    log(INFO, f"Constructed ActorPool with: {pool.num_actors} actors")
-
+    # Build backend
+    await backend.build()
     worker_tasks = [
         asyncio.create_task(
-            worker(app, queue, node_states, state_factory, nodes_mapping, pool)
+            worker(app, queue, node_states, state_factory, nodes_mapping, backend)
         )
-        for _ in range(pool.num_actors)
+        for _ in range(backend.num_workers)
     ]
     asyncio.create_task(generate_pull_requests(queue, state_factory, nodes_mapping))
     await queue.join()
@@ -199,6 +162,7 @@ def run_vce(
     client_app_str: str,
     working_dir: str,
     state_factory: StateFactory,
+    backend_str: str = "ray",
 ) -> None:
     """Run VirtualClientEnginge."""
     # Register nodes (as many as number of possible clients)
@@ -209,6 +173,17 @@ def run_vce(
     )
     for node_id in nodes_mapping.keys():
         node_states[node_id] = NodeState()
+
+    try:
+        backend_type: Type[RayBackend] = supported_backends[backend_str]
+        backend = backend_type(client_resources, wdir=working_dir)
+    except KeyError as ex:
+        log(
+            ERROR,
+            f"Backennd type `{backend_str}`, is not supported."
+            f" Use any of {list(supported_backends.keys())}",
+        )
+        raise (ex)
 
     log(INFO, f"Registered {len(nodes_mapping)} nodes")
 
@@ -223,8 +198,7 @@ def run_vce(
     asyncio.run(
         run(
             app,
-            working_dir,
-            client_resources,
+            backend,
             nodes_mapping,
             state_factory,
             node_states,
