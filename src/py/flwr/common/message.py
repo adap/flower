@@ -152,16 +152,26 @@ class Message:
     """
 
     _metadata: Metadata
-    content: RecordSet
+    _content: RecordSet
 
     def __init__(self, metadata: Metadata, content: RecordSet) -> None:
         self._metadata = metadata
-        self.content = content
+        self._content = content
 
     @property
     def metadata(self) -> Metadata:
         """A dataclass including information about the message to be executed."""
         return self._metadata
+
+    @property
+    def content(self) -> RecordSet:
+        """The content of this message."""
+        return self._content
+
+    @content.setter
+    def content(self, value: RecordSet) -> None:
+        """Set content."""
+        self._content = value
 
     def create_reply(self, content: RecordSet, ttl: str) -> Message:
         """Create a reply to this message with specified content and TTL.
