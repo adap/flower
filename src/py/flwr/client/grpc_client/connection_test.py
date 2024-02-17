@@ -25,7 +25,7 @@ import grpc
 
 from flwr.common import recordset_compat as compat
 from flwr.common.configsrecord import ConfigsRecord
-from flwr.common.constant import MessageType
+from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.typing import Code, GetPropertiesRes, Status
@@ -52,7 +52,7 @@ MESSAGE_GET_PROPERTIES = Message(
         reply_to_message="",
         group_id="",
         ttl="",
-        message_type=MessageType.GET_PROPERTIES,
+        message_type=MESSAGE_TYPE_GET_PROPERTIES,
     ),
     content=compat.getpropertiesres_to_recordset(
         GetPropertiesRes(Status(Code.OK, ""), {})
