@@ -29,9 +29,10 @@ from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import TaskIns
 from flwr.server.superlink.state import StateFactory
 from flwr.simulation.ray_transport.ray_actor import (
-    BasicActorPool,  # TODO: rewrite, simpler, autoscale
+    BasicActorPool,
+    ClientAppActor,
+    init_ray,
 )
-from flwr.simulation.ray_transport.ray_actor import ClientAppActor, init_ray
 
 TaskInsQueue = asyncio.Queue[TaskIns]
 NodeToPartitionMapping = Dict[int, int]
@@ -42,10 +43,6 @@ def _construct_ray_actor_pool(
     wdir: str,
 ) -> BasicActorPool:
     """Prepare ActorPool."""
-
-    def _create_actor_fn():  # type: ignore
-        return ClientAppActor.options(**client_resources).remote()  # type: ignore
-
     # Init ray and append working dir if needed
     # Ref: https://docs.ray.io/en/latest/ray-core/handling-dependencies.html#api-reference
     runtime_env = {"working_dir": wdir} if wdir else None
@@ -54,7 +51,7 @@ def _construct_ray_actor_pool(
     )  # TODO: recursiviely search dir, we don't want that. use `excludes` arg
     # Create actor pool
     pool = BasicActorPool(
-        create_actor_fn=_create_actor_fn,
+        actor_type=ClientAppActor,
         client_resources=client_resources,
     )
     return pool
@@ -117,7 +114,7 @@ async def worker(
             )
 
             # Submite a task to the pool
-            future = pool.submit_if_actor_is_free(
+            future = await pool.submit_if_actor_is_free(
                 lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
                 (app, message, str(node_id), run_state),
             )
@@ -169,13 +166,21 @@ async def generate_pull_requests(
 
 async def run(
     app: Callable[[], ClientApp],
+    working_dir: str,
+    client_resources: Dict[str, Union[float, int]],
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
-    pool: BasicActorPool,
     node_states: Dict[int, NodeState],
 ) -> None:
     """Run the VCE async."""
     queue: TaskInsQueue = asyncio.Queue(64)  # TODO: how to set?
+
+    # Create actor pool
+    log(INFO, f"{client_resources = }")
+    pool = _construct_ray_actor_pool(client_resources, wdir=working_dir)
+    # Adding actors to pool
+    await pool.add_actors_to_pool(pool.actors_capacity)
+    log(INFO, f"Constructed ActorPool with: {pool.num_actors} actors")
 
     worker_tasks = [
         asyncio.create_task(
@@ -196,11 +201,6 @@ def run_vce(
     state_factory: StateFactory,
 ) -> None:
     """Run VirtualClientEnginge."""
-    # Create actor pool
-    log(INFO, f"{client_resources = }")
-    pool = _construct_ray_actor_pool(client_resources, wdir=working_dir)
-    log(INFO, f"Constructed ActorPool with: {pool.num_actors} actors")
-
     # Register nodes (as many as number of possible clients)
     # Each node has its own state
     node_states: Dict[int, NodeState] = {}
@@ -212,7 +212,6 @@ def run_vce(
 
     log(INFO, f"Registered {len(nodes_mapping)} nodes")
 
-    # TODO: handle different workdir
     log(INFO, f"{client_app_str = }")
 
     def _load() -> ClientApp:
@@ -221,4 +220,13 @@ def run_vce(
 
     app = _load
 
-    asyncio.run(run(app, nodes_mapping, state_factory, pool, node_states))
+    asyncio.run(
+        run(
+            app,
+            working_dir,
+            client_resources,
+            nodes_mapping,
+            state_factory,
+            node_states,
+        )
+    )
