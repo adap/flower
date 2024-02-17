@@ -1,10 +1,9 @@
 # Flower App (PyTorch) 🧪
 
-🧪 = This example covers experimental features that might change in future versions of Flower
+> 🧪 = This example covers experimental features that might change in future versions of Flower
+> Please consult the regular PyTorch code examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
 
-Please consult the regular PyTorch code examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
-
-This how-to guide describes the deployment of a long-running Flower server.
+The following steps describe how to start a long-running Flower server (SuperLink) and then run a Flower App (consisting of a `ClientApp` and a `ServerApp`).
 
 ## Preconditions
 
@@ -13,10 +12,10 @@ Let's assume the following project structure:
 ```bash
 $ tree .
 .
-├── client.py
-├── server.py
-├── task.py
-└── requirements.txt
+├── client.py         # <-- contains `ClientApp`
+├── server.py         # <-- contains `ServerApp`
+├── task.py           # <-- task-specific code (model, data)
+└── requirements.txt  # <-- dependencies
 ```
 
 ## Install dependencies
@@ -25,13 +24,13 @@ $ tree .
 pip install -r requirements.txt
 ```
 
-## Start the SuperLink
+## Start the long-running Flower server (SuperLink)
 
 ```bash
 flower-superlink --insecure
 ```
 
-## Start the long-running Flower client
+## Start the long-running Flower client (SuperNode)
 
 In a new terminal window, start the first long-running Flower client:
 
@@ -45,8 +44,10 @@ In yet another new terminal window, start the second long-running Flower client:
 flower-client-app client:app --insecure
 ```
 
-## Start the driver
+## Run the Flower App
+
+With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
 
 ```bash
-python start_driver.py
+flower-server-app server:app --insecure
 ```
