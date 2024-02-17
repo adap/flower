@@ -29,7 +29,7 @@ from flwr.proto.node_pb2 import Node
 from flwr.proto.task_pb2 import TaskIns
 from flwr.server.superlink.state import StateFactory
 from flwr.simulation.ray_transport.ray_actor import (
-    VirtualClientEngineActorPool,  # TODO: rewrite, simpler, autoscale
+    BasicActorPool,  # TODO: rewrite, simpler, autoscale
 )
 from flwr.simulation.ray_transport.ray_actor import ClientAppActor, init_ray
 
@@ -40,7 +40,7 @@ NodeToPartitionMapping = Dict[int, int]
 def _construct_ray_actor_pool(
     client_resources: Dict[str, Union[float, int]],
     wdir: str,
-) -> VirtualClientEngineActorPool:
+) -> BasicActorPool:
     """Prepare ActorPool."""
 
     def _create_actor_fn():  # type: ignore
@@ -53,7 +53,7 @@ def _construct_ray_actor_pool(
         include_dashboard=True, runtime_env=runtime_env
     )  # TODO: recursiviely search dir, we don't want that. use `excludes` arg
     # Create actor pool
-    pool = VirtualClientEngineActorPool(
+    pool = BasicActorPool(
         create_actor_fn=_create_actor_fn,
         client_resources=client_resources,
     )
@@ -93,7 +93,7 @@ async def worker(
     node_states: Dict[int, NodeState],
     state_factory: StateFactory,
     nodes_mapping: NodeToPartitionMapping,
-    pool: VirtualClientEngineActorPool,
+    pool: BasicActorPool,
 ) -> None:
     """Get TaskIns from queue and pass it to an actor in the pool to execute it."""
     while True:
@@ -130,19 +130,21 @@ async def worker(
             # print(f"got: {future = }")
 
             # Fetch result
-            out_mssg, updated_context = pool.fetch_result_and_return_actor(future)
+            out_mssg, updated_context = await pool.fetch_result_and_return_actor(future)
 
             # Update Context
             node_states[node_id].update_context(
                 task_ins.run_id, context=updated_context
             )
 
+            # TODO: can we avoid going to proto ? maybe with a new StateFactory + In-Memory Driver-SuperLink conn.
             # Convert to TaskRes
             task_res = message_to_taskres(out_mssg)
             # Configuring task
             task_res = configure_task_res(task_res, task_ins, Node(node_id=node_id))
             # Store TaskRes in state
             state_factory.state().store_task_res(task_res)
+
         except Exception as ex:
             # TODO: gen TaskRes with relevant error, add it to state_factory.state()
             log(ERROR, ex)
@@ -169,7 +171,7 @@ async def run(
     app: Callable[[], ClientApp],
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
-    pool: VirtualClientEngineActorPool,
+    pool: BasicActorPool,
     node_states: Dict[int, NodeState],
 ) -> None:
     """Run the VCE async."""

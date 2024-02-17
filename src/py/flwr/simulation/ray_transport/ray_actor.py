@@ -14,7 +14,6 @@
 # ==============================================================================
 """Ray-based Flower Actor and ActorPool implementation."""
 
-
 import threading
 import traceback
 from abc import ABC
@@ -422,6 +421,26 @@ class VirtualClientEngineActorPool(ActorPool):
         # Return both result from tasks and (potentially) updated run context
         return self._fetch_future_result(cid)
 
+
+class BasicActorPool:
+    """A basic actor pool."""
+    def __init__(
+        self,
+        create_actor_fn: Callable[[], Type[VirtualClientEngineActor]],
+        client_resources: Dict[str, Union[int, float]],
+    ):
+        self.client_resources = client_resources
+        self.create_actor_fn = create_actor_fn
+
+        # Figure out how many actors can be created given the cluster resources
+        # and the resources the user indicates each VirtualClient will need
+        num_actors = pool_size_from_resources(client_resources)
+        actors = [create_actor_fn() for _ in range(num_actors)]
+        self.num_actors = len(actors)
+
+        self._idle_actors = actors
+        self._future_to_actor: Dict[Any, Type[VirtualClientEngineActor]] = {}
+
     def is_actor_available(self) -> bool:
         """Return true if there is an idle actor."""
         return len(self._idle_actors) > 0
@@ -439,10 +458,11 @@ class VirtualClientEngineActorPool(ActorPool):
             return future
         return None
 
-    def fetch_result_and_return_actor(self, future: Any) -> Tuple[Message, Context]:
+    async def fetch_result_and_return_actor(
+        self, future: Any
+    ) -> Tuple[Message, Context]:
         """Pull result given a future and add actor back to pool."""
         actor = self._future_to_actor.pop(future)
-        self._return_actor(actor)  # type: ignore
-        _, out_mssg, updated_context = ray.get(future)
-
+        self._idle_actors.append(actor)
+        _, out_mssg, updated_context = await future
         return out_mssg, updated_context
