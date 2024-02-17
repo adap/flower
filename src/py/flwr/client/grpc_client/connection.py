@@ -36,6 +36,7 @@ from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
+from flwr.common.retry_invoker import RetryInvoker
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     Reason,
@@ -61,6 +62,7 @@ def grpc_connection(  # pylint: disable=R0915
     insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
+    retry_invoker: Optional[RetryInvoker] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
@@ -77,6 +79,9 @@ def grpc_connection(  # pylint: disable=R0915
         The IPv4 or IPv6 address of the server. If the Flower server runs on the same
         machine on port 8080, then `server_address` would be `"0.0.0.0:8080"` or
         `"[::]:8080"`.
+    insecure : bool
+        Starts an insecure gRPC connection when True. Enables HTTPS connection
+        when False, using system certificates if `root_certificates` is None.
     max_message_length : int
         The maximum length of gRPC messages that can be exchanged with the Flower
         server. The default should be sufficient for most models. Users who train
@@ -89,6 +94,8 @@ def grpc_connection(  # pylint: disable=R0915
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    retry_invoker: Optional[RetryInvoker] (default: None)
+        Unused argument present for compatibilty.
 
     Returns
     -------

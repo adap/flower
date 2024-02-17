@@ -36,6 +36,9 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
 from flwr.common.message import Message
+from flwr.common.retry_invoker import RetryInvoker, exponential
+from grpc import RpcError
+from requests.exceptions import ConnectionError
 
 from .clientapp import load_client_app
 from .grpc_client.connection import grpc_connection
@@ -272,6 +275,8 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    retry_max_tries: Optional[int] = None,
+    retry_max_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -299,7 +304,7 @@ def _start_client_internal(
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
-    insecure : bool (default: True)
+    insecure : Optional[bool] (default: None)
         Starts an insecure gRPC connection when True. Enables HTTPS connection
         when False, using system certificates if `root_certificates` is None.
     transport : Optional[str] (default: None)
@@ -307,6 +312,14 @@ def _start_client_internal(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    retry_max_tries: Optional[int]
+        The maximum number of times the client will try to reconnect to the
+        server before giving up in case of gRPC error. If set to None, there
+        is no limit to the number of tries.
+    retry_max_time: Optional[float]
+        The maximum total amount of time before the client stops trying to
+        reconnect to the server before giving up in case of gRPC error. If set
+        to None, there is no limit to the total time.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -340,6 +353,13 @@ def _start_client_internal(
     # Initialize connection context manager
     connection, address = _init_connection(transport, server_address)
 
+    retry_invoker = RetryInvoker(
+        exponential,
+        ConnectionError if transport == "rest" else RpcError,
+        max_tries=retry_max_tries,
+        max_time=retry_max_time,
+    )
+
     node_state = NodeState()
 
     while True:
@@ -349,6 +369,7 @@ def _start_client_internal(
             insecure,
             grpc_max_message_length,
             root_certificates,
+            retry_invoker,
         ) as conn:
             receive, send, create_node, delete_node = conn
 

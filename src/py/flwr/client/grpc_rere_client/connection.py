@@ -20,6 +20,7 @@ from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
+import grpc
 from flwr.client.message_handler.task_handler import (
     configure_task_res,
     get_task_ins,
@@ -30,6 +31,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log, warn_experimental_feature
 from flwr.common.message import Message
+from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -56,6 +58,7 @@ def grpc_request_response(
     insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
+    retry_invoker: Optional[RetryInvoker] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
@@ -75,12 +78,18 @@ def grpc_request_response(
         The IPv6 address of the server with `http://` or `https://`.
         If the Flower server runs on the same machine
         on port 8080, then `server_address` would be `"http://[::]:8080"`.
+    insecure : bool
+        Starts an insecure gRPC connection when True. Enables HTTPS connection
+        when False, using system certificates if `root_certificates` is None.
     max_message_length : int
         Ignored, only present to preserve API-compatibility.
     root_certificates : Optional[Union[bytes, str]] (default: None)
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
+    retry_invoker: Optional[RetryInvoker] (default: None)
+        `RetryInvoker` object that will try to reconnect the client to the server
+        after gRPC errors.
 
     Returns
     -------
@@ -109,6 +118,17 @@ def grpc_request_response(
     # Enable create_node and delete_node to store node
     node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
 
+    retry_invoker = (
+        RetryInvoker(
+            exponential,
+            grpc.RpcError,
+            max_tries=1,
+            max_time=None,
+        )
+        if retry_invoker is None
+        else retry_invoker
+    )
+
     ###########################################################################
     # receive/send functions
     ###########################################################################
@@ -116,7 +136,8 @@ def grpc_request_response(
     def create_node() -> None:
         """Set create_node."""
         create_node_request = CreateNodeRequest()
-        create_node_response = stub.CreateNode(
+        create_node_response = retry_invoker.invoke(
+            stub.CreateNode,
             request=create_node_request,
         )
         node_store[KEY_NODE] = create_node_response.node
@@ -130,7 +151,7 @@ def grpc_request_response(
         node: Node = cast(Node, node_store[KEY_NODE])
 
         delete_node_request = DeleteNodeRequest(node=node)
-        stub.DeleteNode(request=delete_node_request)
+        retry_invoker.invoke(stub.DeleteNode, request=delete_node_request)
 
         del node_store[KEY_NODE]
 
@@ -144,7 +165,7 @@ def grpc_request_response(
 
         # Request instructions (task) from server
         request = PullTaskInsRequest(node=node)
-        response = stub.PullTaskIns(request=request)
+        response = retry_invoker.invoke(stub.PullTaskIns, request=request)
 
         # Get the current TaskIns
         task_ins: Optional[TaskIns] = get_task_ins(response)
@@ -186,7 +207,7 @@ def grpc_request_response(
 
         # Serialize ProtoBuf to bytes
         request = PushTaskResRequest(task_res_list=[task_res])
-        _ = stub.PushTaskRes(request)
+        _ = retry_invoker.invoke(stub.PushTaskRes, request)
 
         state[KEY_TASK_INS] = None
 
