@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
 import grpc
+
 from flwr.client.message_handler.task_handler import (
     configure_task_res,
     get_task_ins,

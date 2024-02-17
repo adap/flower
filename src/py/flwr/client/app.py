@@ -22,6 +22,9 @@ from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
+from grpc import RpcError
+from requests.exceptions import ConnectionError
+
 from flwr.client.client import Client
 from flwr.client.clientapp import ClientApp
 from flwr.client.typing import ClientFn
@@ -37,8 +40,6 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
 from flwr.common.message import Message
 from flwr.common.retry_invoker import RetryInvoker, exponential
-from grpc import RpcError
-from requests.exceptions import ConnectionError
 
 from .clientapp import load_client_app
 from .grpc_client.connection import grpc_connection
