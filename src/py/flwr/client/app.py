@@ -540,6 +540,7 @@ def _init_connection(
                 Callable[[Message], None],
                 Optional[Callable[[], None]],
                 Optional[Callable[[], None]],
+                Optional[RetryInvoker],
             ]
         ],
     ],
