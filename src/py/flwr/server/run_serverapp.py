@@ -78,8 +78,6 @@ def run_server_app() -> None:
         root_certificates,
     )
 
-    log(WARN, "Not implemented: run_server_app")
-
     server_app_dir = args.dir
     if server_app_dir is not None:
         sys.path.insert(0, server_app_dir)
@@ -89,8 +87,6 @@ def run_server_app() -> None:
         return server_app
 
     server_app = _load()
-
-    log(DEBUG, "server_app: `%s`", server_app)
 
     # Initialize Context
     context = Context(state=RecordSet())
