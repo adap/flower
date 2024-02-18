@@ -75,7 +75,7 @@ def new(
         typer.Argument(metavar="project_name", help="The name of the project"),
     ],
     framework: Annotated[
-        Optional[MLFramework],
+        Optional[MlFramework],
         typer.Option(case_sensitive=False, help="The ML framework to use"),
     ] = None,
 ) -> None:
@@ -87,11 +87,11 @@ def new(
     else:
         framework_value = prompt_options(
             "Please select ML framework by typing in the number",
-            [mlf.value for mlf in MLFramework],
+            [mlf.value for mlf in MlFramework],
         )
         selected_value = [
             name
-            for name, value in vars(MLFramework).items()
+            for name, value in vars(MlFramework).items()
             if value == framework_value
         ]
         framework_str = selected_value[0]

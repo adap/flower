@@ -16,7 +16,7 @@
 
 import os
 
-from .new import MLFramework, create_file, load_template, new, render_template
+from .new import MlFramework, create_file, load_template, new, render_template
 
 
 def test_load_template() -> None:
@@ -64,7 +64,7 @@ def test_new(tmp_path: str) -> None:
     """Test if project is created for framework."""
     # Prepare
     project_name = "FedGPT"
-    framework = MLFramework.PYTORCH
+    framework = MlFramework.PYTORCH
     expected_files_top_level = {
         "requirements.txt",
         "fedgpt",
