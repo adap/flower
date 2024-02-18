@@ -26,10 +26,9 @@ from flwr.client.message_handler.task_handler import (
     validate_task_ins,
     validate_task_res,
 )
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Message
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log, warn_experimental_feature
-from flwr.common.message import Message
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,

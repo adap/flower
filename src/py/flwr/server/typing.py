@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Utility functions for mods."""
+"""Custom types for Flower servers."""
 
 
-from typing import List
+from typing import Callable
 
-from flwr.client.typing import ClientAppCallable, Mod
-from flwr.common import Context, Message
+from flwr.common import Context
+from flwr.server.driver import Driver
 
-
-def make_ffn(ffn: ClientAppCallable, mods: List[Mod]) -> ClientAppCallable:
-    """."""
-
-    def wrap_ffn(_ffn: ClientAppCallable, _mod: Mod) -> ClientAppCallable:
-        def new_ffn(message: Message, context: Context) -> Message:
-            return _mod(message, context, _ffn)
-
-        return new_ffn
-
-    for mod in reversed(mods):
-        ffn = wrap_ffn(ffn, mod)
-
-    return ffn
+ServerAppCallable = Callable[[Driver, Context], None]

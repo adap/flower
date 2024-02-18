@@ -20,8 +20,7 @@ from flwr.client.message_handler.task_handler import (
     validate_task_ins,
     validate_task_res,
 )
-from flwr.common import serde
-from flwr.common.recordset import RecordSet
+from flwr.common import RecordSet, serde
 from flwr.proto.fleet_pb2 import PullTaskInsResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
