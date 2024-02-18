@@ -29,6 +29,24 @@ from .driver.driver import Driver
 from .server_app import ServerApp, load_server_app
 
 
+def run(server_app_attr: str, driver: Driver, server_app_dir: str) -> None:
+    """Run ServerApp with a given Driver."""
+    if server_app_dir is not None:
+        sys.path.insert(0, server_app_dir)
+
+    def _load() -> ServerApp:
+        server_app: ServerApp = load_server_app(server_app_attr)
+        return server_app
+
+    server_app = _load()
+
+    # Initialize Context
+    context = Context(state=RecordSet())
+
+    # Call ServerApp
+    server_app(driver=driver, context=context)
+
+
 def run_server_app() -> None:
     """Run Flower server app."""
     event(EventType.RUN_SERVER_APP_ENTER)
@@ -79,17 +97,7 @@ def run_server_app() -> None:
     )
 
     server_app_dir = args.dir
-    if server_app_dir is not None:
-        sys.path.insert(0, server_app_dir)
-
-    def _load() -> ServerApp:
-        server_app: ServerApp = load_server_app(getattr(args, "server-app"))
-        return server_app
-
-    server_app = _load()
-
-    # Initialize Context
-    context = Context(state=RecordSet())
+    server_app_attr = getattr(args, "server-app")
 
     # Initialize Driver
     driver = Driver(
@@ -97,8 +105,8 @@ def run_server_app() -> None:
         root_certificates=root_certificates,
     )
 
-    # Call ServerApp
-    server_app(driver=driver, context=context)
+    # Run the Server App with the Driver
+    run(server_app_attr, driver, server_app_dir)
 
     # Clean up
     del driver
