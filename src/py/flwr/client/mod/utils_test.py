@@ -19,9 +19,9 @@ import unittest
 from typing import List, cast
 
 from flwr.client.typing import ClientAppCallable, Mod
+from flwr.common import ConfigsRecord, MetricsRecord, RecordSet
 from flwr.common.context import Context
 from flwr.common.message import Message, Metadata
-from flwr.common.record import ConfigsRecord, MetricsRecord, RecordSet
 
 from .utils import make_ffn
 
