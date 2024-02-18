@@ -33,5 +33,5 @@ flower-client client:app --insecure
 ## Start the driver
 
 ```bash
-python driver.py
+flower-server-app server:app --insecure
 ```
