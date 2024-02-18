@@ -19,7 +19,7 @@ from itertools import product
 from typing import Callable, Dict, List
 
 from flwr.client.mod import make_ffn
-from flwr.common import Context, Message, Metadata, RecordSet, ConfigsRecord
+from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet
 from flwr.common.constant import MESSAGE_TYPE_FIT
 from flwr.common.secure_aggregation.secaggplus_constants import (
     KEY_ACTIVE_SECURE_ID_LIST,

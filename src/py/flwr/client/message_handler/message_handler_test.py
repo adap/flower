@@ -37,7 +37,6 @@ from flwr.common import (
     Metadata,
     Parameters,
     RecordSet,
-    RecordSet,
     Status,
 )
 from flwr.common import recordset_compat as compat

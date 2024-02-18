@@ -22,7 +22,13 @@ from pathlib import Path
 from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple, Union, cast
 
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Message, Metadata, RecordSet, ConfigsRecord
+from flwr.common import (
+    GRPC_MAX_MESSAGE_LENGTH,
+    ConfigsRecord,
+    Message,
+    Metadata,
+    RecordSet,
+)
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
 from flwr.common.constant import (

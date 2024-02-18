@@ -15,7 +15,6 @@
 """Common components shared between server and client."""
 
 
-from .configsrecord import ConfigsRecord as ConfigsRecord
 from .context import Context as Context
 from .date import now as now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
