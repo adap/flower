@@ -30,6 +30,7 @@ from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
 
+
 ClientAppFn = Callable[[], ClientApp]
 
 
