@@ -19,10 +19,9 @@ from itertools import product
 from typing import Callable, Dict, List
 
 from flwr.client.mod import make_ffn
-from flwr.common import Context, Message, Metadata
+from flwr.common import Context, Message, Metadata, RecordSet
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import MESSAGE_TYPE_FIT
-from flwr.common.recordset import RecordSet
 from flwr.common.secure_aggregation.secaggplus_constants import (
     KEY_ACTIVE_SECURE_ID_LIST,
     KEY_CIPHERTEXT_LIST,

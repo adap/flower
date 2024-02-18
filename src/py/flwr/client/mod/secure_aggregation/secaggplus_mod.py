@@ -25,6 +25,7 @@ from flwr.common import (
     Context,
     Message,
     Metadata,
+    RecordSet,
     ndarray_to_bytes,
     parameters_to_ndarrays,
 )
@@ -32,7 +33,6 @@ from flwr.common import recordset_compat as compat
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import MESSAGE_TYPE_FIT
 from flwr.common.logger import log
-from flwr.common.recordset import RecordSet
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_private_key,
