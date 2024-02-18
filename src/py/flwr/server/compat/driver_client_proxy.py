@@ -50,7 +50,7 @@ class DriverClientProxy(ClientProxy):
         self,
         ins: common.GetPropertiesIns,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
         # Ins to RecordSet
@@ -66,7 +66,7 @@ class DriverClientProxy(ClientProxy):
         self,
         ins: common.GetParametersIns,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
         # Ins to RecordSet
@@ -79,7 +79,7 @@ class DriverClientProxy(ClientProxy):
         return compat.recordset_to_getparametersres(in_recordset, False)
 
     def fit(
-        self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[str]
+        self, ins: common.FitIns, timeout: Optional[float], group_id: int
     ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         # Ins to RecordSet
@@ -92,7 +92,7 @@ class DriverClientProxy(ClientProxy):
         return compat.recordset_to_fitres(in_recordset, keep_input=False)
 
     def evaluate(
-        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[str]
+        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: int
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
         # Ins to RecordSet
@@ -108,7 +108,7 @@ class DriverClientProxy(ClientProxy):
         self,
         ins: common.ReconnectIns,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
@@ -118,11 +118,11 @@ class DriverClientProxy(ClientProxy):
         recordset: RecordSet,
         task_type: str,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> RecordSet:
         task_ins = task_pb2.TaskIns(  # pylint: disable=E1101
             task_id="",
-            group_id=group_id if group_id else "",
+            group_id=group_id,
             run_id=self.run_id,
             task=task_pb2.Task(  # pylint: disable=E1101
                 producer=node_pb2.Node(  # pylint: disable=E1101

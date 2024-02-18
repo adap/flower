@@ -42,7 +42,7 @@ class CustomClientProxy(ClientProxy):
         self,
         ins: GetPropertiesIns,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> GetPropertiesRes:
         """Return the client's properties."""
         return GetPropertiesRes(status=Status(code=Code.OK, message=""), properties={})
@@ -51,7 +51,7 @@ class CustomClientProxy(ClientProxy):
         self,
         ins: GetParametersIns,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> GetParametersRes:
         """Return the current local model parameters."""
         return GetParametersRes(
@@ -63,7 +63,7 @@ class CustomClientProxy(ClientProxy):
         self,
         ins: FitIns,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> FitRes:
         """Refine the provided weights using the locally held dataset."""
         return FitRes(
@@ -77,7 +77,7 @@ class CustomClientProxy(ClientProxy):
         self,
         ins: EvaluateIns,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> EvaluateRes:
         """Evaluate the provided weights using the locally held dataset."""
         return EvaluateRes(
@@ -88,7 +88,7 @@ class CustomClientProxy(ClientProxy):
         self,
         ins: ReconnectIns,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         return DisconnectRes(reason="")

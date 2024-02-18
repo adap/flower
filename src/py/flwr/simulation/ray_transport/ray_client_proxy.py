@@ -98,7 +98,7 @@ class RayActorClientProxy(ClientProxy):
         recordset: RecordSet,
         message_type: str,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> Message:
         """Wrap a RecordSet inside a Message."""
         return Message(
@@ -106,7 +106,7 @@ class RayActorClientProxy(ClientProxy):
             metadata=Metadata(
                 run_id=0,
                 message_id="",
-                group_id=group_id if group_id else "",
+                group_id=group_id,
                 node_id=int(self.cid),
                 ttl=str(timeout) if timeout else "",
                 message_type=message_type,
@@ -117,7 +117,7 @@ class RayActorClientProxy(ClientProxy):
         self,
         ins: common.GetPropertiesIns,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
         recordset = getpropertiesins_to_recordset(ins)
@@ -136,7 +136,7 @@ class RayActorClientProxy(ClientProxy):
         self,
         ins: common.GetParametersIns,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
         recordset = getparametersins_to_recordset(ins)
@@ -152,7 +152,7 @@ class RayActorClientProxy(ClientProxy):
         return recordset_to_getparametersres(message_out.content, keep_input=False)
 
     def fit(
-        self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[str]
+        self, ins: common.FitIns, timeout: Optional[float], group_id: int
     ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         recordset = fitins_to_recordset(
@@ -170,7 +170,7 @@ class RayActorClientProxy(ClientProxy):
         return recordset_to_fitres(message_out.content, keep_input=False)
 
     def evaluate(
-        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[str]
+        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: int
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
         recordset = evaluateins_to_recordset(
@@ -191,7 +191,7 @@ class RayActorClientProxy(ClientProxy):
         self,
         ins: common.ReconnectIns,
         timeout: Optional[float],
-        group_id: Optional[str],
+        group_id: int,
     ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)

@@ -183,7 +183,7 @@ class Server:
             client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
-            group_id=str(server_round),
+            group_id=server_round,
         )
         log(
             DEBUG,
@@ -233,7 +233,7 @@ class Server:
             client_instructions=client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
-            group_id=str(server_round),
+            group_id=server_round,
         )
         log(
             DEBUG,
@@ -262,7 +262,7 @@ class Server:
             client_instructions=client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
-            group_id=None,
+            group_id=-1,
         )
 
     def _get_initial_parameters(self, timeout: Optional[float]) -> Parameters:
@@ -280,7 +280,7 @@ class Server:
         random_client = self._client_manager.sample(1)[0]
         ins = GetParametersIns(config={})
         get_parameters_res = random_client.get_parameters(
-            ins=ins, timeout=timeout, group_id=None
+            ins=ins, timeout=timeout, group_id=0
         )
         log(INFO, "Received initial parameters from one random client")
         return get_parameters_res.parameters
@@ -290,7 +290,7 @@ def reconnect_clients(
     client_instructions: List[Tuple[ClientProxy, ReconnectIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
-    group_id: Optional[str],
+    group_id: int,
 ) -> ReconnectResultsAndFailures:
     """Instruct clients to disconnect and never reconnect."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -320,7 +320,7 @@ def reconnect_client(
     client: ClientProxy,
     reconnect: ReconnectIns,
     timeout: Optional[float],
-    group_id: Optional[str],
+    group_id: int,
 ) -> Tuple[ClientProxy, DisconnectRes]:
     """Instruct client to disconnect and (optionally) reconnect later."""
     disconnect = client.reconnect(
@@ -335,7 +335,7 @@ def fit_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
-    group_id: Optional[str],
+    group_id: int,
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -359,7 +359,7 @@ def fit_clients(
 
 
 def fit_client(
-    client: ClientProxy, ins: FitIns, timeout: Optional[float], group_id: Optional[str]
+    client: ClientProxy, ins: FitIns, timeout: Optional[float], group_id: int
 ) -> Tuple[ClientProxy, FitRes]:
     """Refine parameters on a single client."""
     fit_res = client.fit(ins, timeout=timeout, group_id=group_id)
@@ -395,7 +395,7 @@ def evaluate_clients(
     client_instructions: List[Tuple[ClientProxy, EvaluateIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
-    group_id: Optional[str],
+    group_id: int,
 ) -> EvaluateResultsAndFailures:
     """Evaluate parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -422,7 +422,7 @@ def evaluate_client(
     client: ClientProxy,
     ins: EvaluateIns,
     timeout: Optional[float],
-    group_id: Optional[str],
+    group_id: int,
 ) -> Tuple[ClientProxy, EvaluateRes]:
     """Evaluate parameters on a single client."""
     evaluate_res = client.evaluate(ins, timeout=timeout, group_id=group_id)

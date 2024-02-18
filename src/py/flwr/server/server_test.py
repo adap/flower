@@ -45,20 +45,18 @@ class SuccessClient(ClientProxy):
     """Test class."""
 
     def get_properties(
-        self, ins: GetPropertiesIns, timeout: Optional[float], group_id: Optional[str]
+        self, ins: GetPropertiesIns, timeout: Optional[float], group_id: int
     ) -> GetPropertiesRes:
         """Raise an error because this method is not expected to be called."""
         raise NotImplementedError()
 
     def get_parameters(
-        self, ins: GetParametersIns, timeout: Optional[float], group_id: Optional[str]
+        self, ins: GetParametersIns, timeout: Optional[float], group_id: int
     ) -> GetParametersRes:
         """Raise a error because this method is not expected to be called."""
         raise NotImplementedError()
 
-    def fit(
-        self, ins: FitIns, timeout: Optional[float], group_id: Optional[str]
-    ) -> FitRes:
+    def fit(self, ins: FitIns, timeout: Optional[float], group_id: int) -> FitRes:
         """Simulate fit by returning a success FitRes with simple set of weights."""
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
@@ -70,7 +68,7 @@ class SuccessClient(ClientProxy):
         )
 
     def evaluate(
-        self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[str]
+        self, ins: EvaluateIns, timeout: Optional[float], group_id: int
     ) -> EvaluateRes:
         """Simulate evaluate by returning a success EvaluateRes with loss 1.0."""
         return EvaluateRes(
@@ -81,7 +79,7 @@ class SuccessClient(ClientProxy):
         )
 
     def reconnect(
-        self, ins: ReconnectIns, timeout: Optional[float], group_id: Optional[str]
+        self, ins: ReconnectIns, timeout: Optional[float], group_id: int
     ) -> DisconnectRes:
         """Simulate reconnect by returning a DisconnectRes with UNKNOWN reason."""
         return DisconnectRes(reason="UNKNOWN")
@@ -91,31 +89,29 @@ class FailingClient(ClientProxy):
     """Test class."""
 
     def get_properties(
-        self, ins: GetPropertiesIns, timeout: Optional[float], group_id: Optional[str]
+        self, ins: GetPropertiesIns, timeout: Optional[float], group_id: int
     ) -> GetPropertiesRes:
         """Raise a NotImplementedError to simulate failure in the client."""
         raise NotImplementedError()
 
     def get_parameters(
-        self, ins: GetParametersIns, timeout: Optional[float], group_id: Optional[str]
+        self, ins: GetParametersIns, timeout: Optional[float], group_id: int
     ) -> GetParametersRes:
         """Raise a NotImplementedError to simulate failure in the client."""
         raise NotImplementedError()
 
-    def fit(
-        self, ins: FitIns, timeout: Optional[float], group_id: Optional[str]
-    ) -> FitRes:
+    def fit(self, ins: FitIns, timeout: Optional[float], group_id: int) -> FitRes:
         """Raise a NotImplementedError to simulate failure in the client."""
         raise NotImplementedError()
 
     def evaluate(
-        self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[str]
+        self, ins: EvaluateIns, timeout: Optional[float], group_id: int
     ) -> EvaluateRes:
         """Raise a NotImplementedError to simulate failure in the client."""
         raise NotImplementedError()
 
     def reconnect(
-        self, ins: ReconnectIns, timeout: Optional[float], group_id: Optional[str]
+        self, ins: ReconnectIns, timeout: Optional[float], group_id: int
     ) -> DisconnectRes:
         """Raise a NotImplementedError to simulate failure in the client."""
         raise NotImplementedError()
@@ -134,7 +130,7 @@ def test_fit_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = fit_clients(client_instructions, None, None, None)
+    results, failures = fit_clients(client_instructions, None, None, 0)
 
     # Assert
     assert len(results) == 1
@@ -162,7 +158,7 @@ def test_eval_clients() -> None:
         client_instructions=client_instructions,
         max_workers=None,
         timeout=None,
-        group_id=None,
+        group_id=0,
     )
 
     # Assert
