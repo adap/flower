@@ -35,7 +35,7 @@ from flwr.server.history import History
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_actor import (
-    DefaultActor,
+    ClientAppActor,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
     pool_size_from_resources,
@@ -83,7 +83,7 @@ def start_simulation(
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
     keep_initialised: Optional[bool] = False,
-    actor_type: Type[VirtualClientEngineActor] = DefaultActor,
+    actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
     actor_kwargs: Optional[Dict[str, Any]] = None,
     actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
 ) -> History:
@@ -139,10 +139,10 @@ def start_simulation(
     keep_initialised: Optional[bool] (default: False)
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
 
-    actor_type: VirtualClientEngineActor (default: DefaultActor)
+    actor_type: VirtualClientEngineActor (default: ClientAppActor)
         Optionally specify the type of actor to use. The actor object, which
         persists throughout the simulation, will be the process in charge of
-        running the clients' jobs (i.e. their `fit()` method).
+        executing a ClientApp wrapping input argument `client_fn`.
 
     actor_kwargs: Optional[Dict[str, Any]] (default: None)
         If you want to create your own Actor classes, you might need to pass

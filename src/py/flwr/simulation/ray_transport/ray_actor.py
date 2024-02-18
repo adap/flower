@@ -25,18 +25,12 @@ import ray
 from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
-from flwr import common
-from flwr.client import Client, ClientFn
+from flwr.client.clientapp import ClientApp
 from flwr.common.context import Context
 from flwr.common.logger import log
-from flwr.simulation.ray_transport.utils import check_clientfn_returns_client
+from flwr.common.message import Message
 
-# All possible returns by a client
-ClientRes = Union[
-    common.GetPropertiesRes, common.GetParametersRes, common.FitRes, common.EvaluateRes
-]
-# A function to be executed by a client to obtain some results
-JobFn = Callable[[Client], ClientRes]
+ClientAppFn = Callable[[], ClientApp]
 
 
 class ClientException(Exception):
@@ -58,27 +52,25 @@ class VirtualClientEngineActor(ABC):
 
     def run(
         self,
-        client_fn: ClientFn,
-        job_fn: JobFn,
+        client_app_fn: ClientAppFn,
+        message: Message,
         cid: str,
         context: Context,
-    ) -> Tuple[str, ClientRes, Context]:
+    ) -> Tuple[str, Message, Context]:
         """Run a client run."""
-        # Execute tasks and return result
+        # Pass message through ClientApp and return a message
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
         try:
-            # Instantiate client (check 'Client' type is returned)
-            client = check_clientfn_returns_client(client_fn(cid))
-            # Inject context
-            client.set_context(context)
-            # Run client job
-            job_results = job_fn(client)
-            # Retrieve context (potentially updated)
-            updated_context = client.get_context()
+            # Load app
+            app: ClientApp = client_app_fn()
+
+            # Handle task message
+            out_message = app(message=message, context=context)
+
         except Exception as ex:
             client_trace = traceback.format_exc()
-            message = (
+            mssg = (
                 "\n\tSomething went wrong when running your client run."
                 "\n\tClient "
                 + cid
@@ -87,13 +79,13 @@ class VirtualClientEngineActor(ABC):
                 + " was running its run."
                 "\n\tException triggered on the client side: " + client_trace,
             )
-            raise ClientException(str(message)) from ex
+            raise ClientException(str(mssg)) from ex
 
-        return cid, job_results, updated_context
+        return cid, out_message, context
 
 
 @ray.remote
-class DefaultActor(VirtualClientEngineActor):
+class ClientAppActor(VirtualClientEngineActor):
     """A Ray Actor class that runs client runs.
 
     Parameters
@@ -237,16 +229,16 @@ class VirtualClientEngineActorPool(ActorPool):
             self._idle_actors.extend(new_actors)
             self.num_actors += num_actors
 
-    def submit(self, fn: Any, value: Tuple[ClientFn, JobFn, str, Context]) -> None:
-        """Take idle actor and assign it a client run.
+    def submit(self, fn: Any, value: Tuple[ClientAppFn, Message, str, Context]) -> None:
+        """Take an idle actor and assign it to run a client app and Message.
 
         Submit a job to an actor by first removing it from the list of idle actors, then
-        check if this actor was flagged to be removed from the pool
+        check if this actor was flagged to be removed from the pool.
         """
-        client_fn, job_fn, cid, context = value
+        app_fn, mssg, cid, context = value
         actor = self._idle_actors.pop()
         if self._check_and_remove_actor_from_pool(actor):
-            future = fn(actor, client_fn, job_fn, cid, context)
+            future = fn(actor, app_fn, mssg, cid, context)
             future_key = tuple(future) if isinstance(future, List) else future
             self._future_to_actor[future_key] = (self._next_task_index, actor, cid)
             self._next_task_index += 1
@@ -255,7 +247,7 @@ class VirtualClientEngineActorPool(ActorPool):
             self._cid_to_future[cid]["future"] = future_key
 
     def submit_client_job(
-        self, actor_fn: Any, job: Tuple[ClientFn, JobFn, str, Context]
+        self, actor_fn: Any, job: Tuple[ClientAppFn, Message, str, Context]
     ) -> None:
         """Submit a job while tracking client ids."""
         _, _, cid, _ = job
@@ -295,7 +287,7 @@ class VirtualClientEngineActorPool(ActorPool):
 
         return self._cid_to_future[cid]["ready"]  # type: ignore
 
-    def _fetch_future_result(self, cid: str) -> Tuple[ClientRes, Context]:
+    def _fetch_future_result(self, cid: str) -> Tuple[Message, Context]:
         """Fetch result and updated context for a VirtualClient from Object Store.
 
         The job submitted by the ClientProxy interfacing with client with cid=cid is
@@ -303,9 +295,9 @@ class VirtualClientEngineActorPool(ActorPool):
         """
         try:
             future: ObjectRef[Any] = self._cid_to_future[cid]["future"]  # type: ignore
-            res_cid, res, updated_context = ray.get(
+            res_cid, out_mssg, updated_context = ray.get(
                 future
-            )  # type: (str, ClientRes, Context)
+            )  # type: (str, Message, Context)
         except ray.exceptions.RayActorError as ex:
             log(ERROR, ex)
             if hasattr(ex, "actor_id"):
@@ -322,7 +314,7 @@ class VirtualClientEngineActorPool(ActorPool):
         # Reset mapping
         self._reset_cid_to_future_dict(cid)
 
-        return res, updated_context
+        return out_mssg, updated_context
 
     def _flag_actor_for_removal(self, actor_id_hex: str) -> None:
         """Flag actor that should be removed from pool."""
@@ -409,7 +401,7 @@ class VirtualClientEngineActorPool(ActorPool):
 
     def get_client_result(
         self, cid: str, timeout: Optional[float]
-    ) -> Tuple[ClientRes, Context]:
+    ) -> Tuple[Message, Context]:
         """Get result from VirtualClient with specific cid."""
         # Loop until all jobs submitted to the pool are completed. Break early
         # if the result for the ClientProxy calling this method is ready
