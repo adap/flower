@@ -57,8 +57,8 @@ class DummyClient(NumPyClient):
         result = int(self.cid) * pi
 
         # store something in context
-        self.context.state.set_configs(
-            "result", record=ConfigsRecord({"result": str(result)})
+        self.context.state.configs_dict["result"] = ConfigsRecord(
+            {"result": str(result)}
         )
         return {"result": result}
 
@@ -164,14 +164,10 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         )
         prox.proxy_state.update_context(run_id, context=updated_context)
         res = recordset_to_getpropertiesres(message_out.content)
+        recordset = prox.proxy_state.retrieve_context(run_id).state
 
         assert int(prox.cid) * pi == res.properties["result"]
-        assert (
-            str(int(prox.cid) * pi)
-            == prox.proxy_state.retrieve_context(run_id).state.get_configs("result")[
-                "result"
-            ]
-        )
+        assert str(int(prox.cid) * pi) == recordset.configs_dict["result"]["result"]
 
     ray.shutdown()
 

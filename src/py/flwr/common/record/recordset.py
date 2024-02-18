@@ -16,7 +16,7 @@
 
 
 from dataclasses import dataclass
-from typing import Callable, Type, TypeVar
+from typing import Callable, Dict, Type, TypeVar
 
 from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
@@ -34,7 +34,12 @@ class RecordSet:
     _metrics: TypedDict[str, MetricsRecord]
     _configs: TypedDict[str, ConfigsRecord]
 
-    def __init__(self):
+    def __init__(
+        self,
+        parameters_dict: Dict[str, ParametersRecord] | None = None,
+        metrics_dict: Dict[str, MetricsRecord] | None = None,
+        configs_dict: Dict[str, ConfigsRecord] | None = None,
+    ) -> None:
         def _get_check_fn(__t: Type[T]) -> Callable[[T], None]:
             def _check_fn(__v: T) -> None:
                 if not isinstance(__v, __t):
@@ -51,6 +56,12 @@ class RecordSet:
         self._configs = TypedDict[str, ConfigsRecord](
             _get_check_fn(str), _get_check_fn(ConfigsRecord)
         )
+        if parameters_dict is not None:
+            self._parameters.update(parameters_dict)
+        if metrics_dict is not None:
+            self._metrics.update(metrics_dict)
+        if configs_dict is not None:
+            self._configs.update(configs_dict)
 
     @property
     def parameters_dict(self) -> TypedDict[str, ParametersRecord]:
