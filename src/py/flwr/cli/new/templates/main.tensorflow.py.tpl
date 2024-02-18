@@ -1,1 +1,1 @@
-"""A Flower / TensorFlow app."""
+"""$project_name: A Flower / TensorFlow app."""
