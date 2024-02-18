@@ -58,7 +58,7 @@ def parametersrecord_to_parameters(
     """
     parameters = Parameters(tensors=[], tensor_type="")
 
-    for key in list(record.data.keys()):
+    for key in list(record.keys()):
         parameters.tensors.append(record[key].data)
 
         if not parameters.tensor_type:
@@ -67,7 +67,7 @@ def parametersrecord_to_parameters(
             parameters.tensor_type = record[key].stype
 
         if not keep_input:
-            del record.data[key]
+            del record[key]
 
     return parameters
 
@@ -92,8 +92,6 @@ def parameters_to_parametersrecord(
     """
     tensor_type = parameters.tensor_type
 
-    p_record = ParametersRecord()
-
     num_arrays = len(parameters.tensors)
     ordered_dict = OrderedDict()
     for idx in range(num_arrays):
@@ -105,8 +103,7 @@ def parameters_to_parametersrecord(
             data=tensor, dtype="", stype=tensor_type, shape=[]
         )
 
-    p_record.set_parameters(ordered_dict, keep_input=keep_input)
-    return p_record
+    return ParametersRecord(ordered_dict, keep_input=keep_input)
 
 
 def _check_mapping_from_recordscalartype_to_scalar(

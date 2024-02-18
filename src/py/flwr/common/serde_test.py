@@ -248,7 +248,7 @@ def test_parameters_record_serialization_deserialization() -> None:
 
     # Assert
     assert isinstance(proto, ProtoParametersRecord)
-    assert original.data == deserialized.data
+    assert original == deserialized
 
 
 def test_metrics_record_serialization_deserialization() -> None:
@@ -263,7 +263,7 @@ def test_metrics_record_serialization_deserialization() -> None:
 
     # Assert
     assert isinstance(proto, ProtoMetricsRecord)
-    assert original.data == deserialized.data
+    assert original == deserialized
 
 
 def test_configs_record_serialization_deserialization() -> None:

@@ -123,15 +123,14 @@ def test_parameters_to_parametersrecord_and_back(
 def test_set_parameters_while_keeping_intputs() -> None:
     """Tests keep_input functionality in ParametersRecord."""
     # Adding parameters to a record that doesn't erase entries in the input `array_dict`
-    p_record = ParametersRecord(keep_input=True)
     array_dict = OrderedDict(
         {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
     )
-    p_record.set_parameters(array_dict, keep_input=True)
+    p_record = ParametersRecord(array_dict, keep_input=True)
 
     # Creating a second parametersrecord passing the same `array_dict` (not erased)
     p_record_2 = ParametersRecord(array_dict)
-    assert p_record.data == p_record_2.data
+    assert p_record == p_record_2
 
     # Now it should be empty (the second ParametersRecord wasn't flagged to keep it)
     assert len(array_dict) == 0
@@ -143,7 +142,7 @@ def test_set_parameters_with_correct_types() -> None:
     array_dict = OrderedDict(
         {str(i): ndarray_to_array(ndarray) for i, ndarray in enumerate(get_ndarrays())}
     )
-    p_record.set_parameters(array_dict)
+    p_record.update(array_dict)
 
 
 @pytest.mark.parametrize(
@@ -168,7 +167,7 @@ def test_set_parameters_with_incorrect_types(
     }
 
     with pytest.raises(TypeError):
-        p_record.set_parameters(array_dict)  # type: ignore
+        p_record.update(array_dict)
 
 
 @pytest.mark.parametrize(
@@ -196,10 +195,10 @@ def test_set_metrics_to_metricsrecord_with_correct_types(
     )
 
     # Add metric
-    m_record.set_metrics(my_metrics)
+    m_record.update(my_metrics)
 
     # Check metrics are actually added
-    assert my_metrics == m_record.data
+    assert my_metrics == m_record
 
 
 @pytest.mark.parametrize(
@@ -249,7 +248,7 @@ def test_set_metrics_to_metricsrecord_with_incorrect_types(
     )
 
     with pytest.raises(TypeError):
-        m_record.set_metrics(my_metrics)  # type: ignore
+        m_record.update(my_metrics)
 
 
 @pytest.mark.parametrize(
@@ -263,8 +262,6 @@ def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
     keep_input: bool,
 ) -> None:
     """Test keep_input functionality for MetricsRecord."""
-    m_record = MetricsRecord(keep_input=keep_input)
-
     # constructing a valid input
     labels = [1, 2.0]
     arrays = get_ndarrays()
@@ -275,14 +272,14 @@ def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
     my_metrics_copy = my_metrics.copy()
 
     # Add metric
-    m_record.set_metrics(my_metrics, keep_input=keep_input)
+    m_record = MetricsRecord(my_metrics, keep_input=keep_input)
 
     # Check metrics are actually added
     # Check that input dict has been emptied when enabled such behaviour
     if keep_input:
-        assert my_metrics == m_record.data
+        assert my_metrics == m_record
     else:
-        assert my_metrics_copy == m_record.data
+        assert my_metrics_copy == m_record
         assert len(my_metrics) == 0
 
 

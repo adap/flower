@@ -45,6 +45,7 @@ from flwr.proto.transport_pb2 import (
 from . import typing
 from .message import Message, Metadata
 from .record import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
+from .record.typeddict import TypedDict
 
 #  === Parameters message ===
 
@@ -410,7 +411,9 @@ def _record_value_from_proto(value_proto: GrpcMessage) -> Any:
 
 
 def _record_value_dict_to_proto(
-    value_dict: Dict[str, Any], allowed_types: List[type], value_proto_class: Type[T]
+    value_dict: TypedDict[str, Any],
+    allowed_types: List[type],
+    value_proto_class: Type[T],
 ) -> Dict[str, T]:
     """Serialize the record value dict to ProtoBuf.
 
@@ -452,8 +455,8 @@ def array_from_proto(array_proto: ProtoArray) -> Array:
 def parameters_record_to_proto(record: ParametersRecord) -> ProtoParametersRecord:
     """Serialize ParametersRecord to ProtoBuf."""
     return ProtoParametersRecord(
-        data_keys=record.data.keys(),
-        data_values=map(array_to_proto, record.data.values()),
+        data_keys=record.keys(),
+        data_values=map(array_to_proto, record.values()),
     )
 
 
@@ -472,9 +475,7 @@ def parameters_record_from_proto(
 def metrics_record_to_proto(record: MetricsRecord) -> ProtoMetricsRecord:
     """Serialize MetricsRecord to ProtoBuf."""
     return ProtoMetricsRecord(
-        data=_record_value_dict_to_proto(
-            record.data, [float, int], ProtoMetricsRecordValue
-        )
+        data=_record_value_dict_to_proto(record, [float, int], ProtoMetricsRecordValue)
     )
 
 
@@ -493,8 +494,7 @@ def configs_record_to_proto(record: ConfigsRecord) -> ProtoConfigsRecord:
     """Serialize ConfigsRecord to ProtoBuf."""
     return ProtoConfigsRecord(
         data=_record_value_dict_to_proto(
-            # pylint: disable-next=protected-access
-            record._data,
+            record,
             [bool, int, float, str, bytes],
             ProtoConfigsRecordValue,
         )
