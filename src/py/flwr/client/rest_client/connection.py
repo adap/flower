@@ -117,9 +117,6 @@ def http_request_response(
             "must be provided as a string path to the client.",
         )
 
-    # Necessary state to link TaskRes to TaskIns
-    state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
-
     # Enable create_node and delete_node to store node
     node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
 
@@ -259,9 +256,6 @@ def http_request_response(
         ):
             task_ins = None
 
-        # Remember `task_ins` until `task_res` is available
-        state[KEY_TASK_INS] = task_ins
-
         # Return the Message if available
         message = None
         if task_ins is not None:
@@ -274,10 +268,6 @@ def http_request_response(
         # Get Node
         if node_store[KEY_NODE] is None:
             log(ERROR, "Node instance missing")
-            return
-
-        if state[KEY_TASK_INS] is None:
-            log(ERROR, "No current TaskIns")
             return
 
         # Construct TaskRes
@@ -300,8 +290,6 @@ def http_request_response(
             verify=verify,
             timeout=None,
         )
-
-        state[KEY_TASK_INS] = None
 
         # Check status code and headers
         if res.status_code != 200:
