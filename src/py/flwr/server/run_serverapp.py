@@ -26,7 +26,7 @@ from flwr.common.logger import log
 from flwr.common.recordset import RecordSet
 
 from .driver.driver import Driver
-from .serverapp import ServerApp, load_server_app
+from .server_app import ServerApp, load_server_app
 
 
 def run(server_app_attr: str, driver: Driver, server_app_dir: str) -> None:
@@ -39,8 +39,6 @@ def run(server_app_attr: str, driver: Driver, server_app_dir: str) -> None:
         return server_app
 
     server_app = _load()
-
-    log(DEBUG, "server_app: `%s`", server_app)
 
     # Initialize Context
     context = Context(state=RecordSet())
@@ -97,8 +95,6 @@ def run_server_app() -> None:
         "root_certificates: `%s`",
         root_certificates,
     )
-
-    log(WARN, "Not implemented: run_server_app")
 
     server_app_dir = args.dir
     server_app_attr = getattr(args, "server-app")

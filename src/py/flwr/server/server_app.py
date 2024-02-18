@@ -16,9 +16,10 @@
 
 
 import importlib
-from typing import Optional, cast
+from typing import Callable, Optional, cast
 
 from flwr.common.context import Context
+from flwr.common.recordset import RecordSet
 from flwr.server.driver.driver import Driver
 from flwr.server.strategy import Strategy
 
@@ -26,10 +27,32 @@ from .client_manager import ClientManager
 from .compat import start_driver
 from .server import Server
 from .server_config import ServerConfig
+from .typing import ServerAppCallable
 
 
 class ServerApp:
-    """Flower ServerApp."""
+    """Flower ServerApp.
+
+    Examples
+    --------
+    Use the `ServerApp` with an existing `Strategy`:
+
+    >>> server_config = ServerConfig(num_rounds=3)
+    >>> strategy = FedAvg()
+    >>>
+    >>> app = ServerApp()
+    >>>     server_config=server_config,
+    >>>     strategy=strategy,
+    >>> )
+
+    Use the `ServerApp` with a custom main function:
+
+    >>> app = ServerApp()
+    >>>
+    >>> @app.main()
+    >>> def main(driver: Driver, context: Context) -> None:
+    >>>    print("ServerApp running")
+    """
 
     def __init__(
         self,
@@ -38,21 +61,74 @@ class ServerApp:
         strategy: Optional[Strategy] = None,
         client_manager: Optional[ClientManager] = None,
     ) -> None:
-        self.server = server
-        self.config = config
-        self.strategy = strategy
-        self.client_manager = client_manager
+        self._server = server
+        self._config = config
+        self._strategy = strategy
+        self._client_manager = client_manager
+        self._main: Optional[ServerAppCallable] = None
 
     def __call__(self, driver: Driver, context: Context) -> None:
         """Execute `ServerApp`."""
         # Compatibility mode
-        start_driver(
-            server=self.server,
-            config=self.config,
-            strategy=self.strategy,
-            client_manager=self.client_manager,
-            driver=driver,
-        )
+        if not self._main:
+            start_driver(
+                server=self._server,
+                config=self._config,
+                strategy=self._strategy,
+                client_manager=self._client_manager,
+                driver=driver,
+            )
+            return
+
+        # New execution mode
+        context = Context(state=RecordSet())
+        self._main(driver, context)
+
+    def main(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
+        """Return a decorator that registers the main fn with the server app.
+
+        Examples
+        --------
+        >>> app = ServerApp()
+        >>>
+        >>> @app.main()
+        >>> def main(driver: Driver, context: Context) -> None:
+        >>>    print("ServerApp running")
+        """
+
+        def main_decorator(main_fn: ServerAppCallable) -> ServerAppCallable:
+            """Register the main fn with the ServerApp object."""
+            if self._server or self._config or self._strategy or self._client_manager:
+                raise ValueError(
+                    """Use either a custom main function or a `Strategy`, but not both.
+
+                    Use the `ServerApp` with an existing `Strategy`:
+
+                    >>> server_config = ServerConfig(num_rounds=3)
+                    >>> strategy = FedAvg()
+                    >>>
+                    >>> app = ServerApp()
+                    >>>     server_config=server_config,
+                    >>>     strategy=strategy,
+                    >>> )
+
+                    Use the `ServerApp` with a custom main function:
+
+                    >>> app = ServerApp()
+                    >>>
+                    >>> @app.main()
+                    >>> def main(driver: Driver, context: Context) -> None:
+                    >>>    print("ServerApp running")
+                    """,
+                )
+
+            # Register provided function with the ServerApp object
+            self._main = main_fn
+
+            # Return provided function unmodified
+            return main_fn
+
+        return main_decorator
 
 
 class LoadServerAppError(Exception):
