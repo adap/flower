@@ -17,7 +17,7 @@
 
 from typing import Callable
 
-from flwr.common.context import Context
+from flwr.common import Context
 
 from .driver import Driver
 

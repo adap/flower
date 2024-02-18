@@ -19,6 +19,7 @@ import time
 from typing import List, Optional
 
 from flwr import common
+from flwr.common import RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
 from flwr.common.constant import (
@@ -27,7 +28,6 @@ from flwr.common.constant import (
     MESSAGE_TYPE_GET_PARAMETERS,
     MESSAGE_TYPE_GET_PROPERTIES,
 )
-from flwr.common.recordset import RecordSet
 from flwr.proto import driver_pb2, node_pb2, task_pb2  # pylint: disable=E0611
 from flwr.server.client_proxy import ClientProxy
 
