@@ -54,7 +54,7 @@ def get_wandb_mod(name: str) -> Mod:
 
         config = fwd.content.configs
         if "round" in config:
-            round = config["round"]
+            round = str(config["round"])
         else:
             round = group_id
         if "project" in config:
