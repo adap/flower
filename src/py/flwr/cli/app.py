@@ -17,7 +17,7 @@
 import typer
 
 from .example import example
-from .new.new import new
+from .new import new
 
 app = typer.Typer(
     help=typer.style(
