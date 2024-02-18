@@ -23,6 +23,7 @@ from flwr import common
 from flwr.client import ClientFn
 from flwr.client.clientapp import ClientApp
 from flwr.client.node_state import NodeState
+from flwr.common import Message, Metadata, RecordSet
 from flwr.common.constant import (
     MESSAGE_TYPE_EVALUATE,
     MESSAGE_TYPE_FIT,
@@ -30,8 +31,6 @@ from flwr.common.constant import (
     MESSAGE_TYPE_GET_PROPERTIES,
 )
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
-from flwr.common.recordset import RecordSet
 from flwr.common.recordset_compat import (
     evaluateins_to_recordset,
     fitins_to_recordset,
