@@ -21,14 +21,18 @@ from logging import INFO, WARNING
 from typing import Any, Callable, Dict, List, Tuple, cast
 
 from flwr.client.typing import ClientAppCallable
-from flwr.common import ndarray_to_bytes, parameters_to_ndarrays
+from flwr.common import (
+    Context,
+    Message,
+    Metadata,
+    RecordSet,
+    ndarray_to_bytes,
+    parameters_to_ndarrays,
+)
 from flwr.common import recordset_compat as compat
 from flwr.common.configsrecord import ConfigsRecord
-from flwr.common.constant import TASK_TYPE_FIT
-from flwr.common.context import Context
+from flwr.common.constant import MESSAGE_TYPE_FIT
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
-from flwr.common.recordset import RecordSet
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_private_key,
@@ -168,7 +172,7 @@ def secaggplus_mod(
 ) -> Message:
     """Handle incoming message and return results, following the SecAgg+ protocol."""
     # Ignore non-fit messages
-    if msg.metadata.task_type != TASK_TYPE_FIT:
+    if msg.metadata.message_type != MESSAGE_TYPE_FIT:
         return call_next(msg, ctxt)
 
     # Retrieve local state
@@ -209,11 +213,11 @@ def secaggplus_mod(
     return Message(
         metadata=Metadata(
             run_id=0,
-            task_id="",
+            message_id="",
             group_id="",
             node_id=0,
             ttl="",
-            task_type=TASK_TYPE_FIT,
+            message_type=MESSAGE_TYPE_FIT,
         ),
         content=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)}),
     )

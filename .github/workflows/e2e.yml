@@ -14,6 +14,7 @@ concurrency:
 
 env:
   FLWR_TELEMETRY_ENABLED: 0
+  ARTIFACT_BUCKET: artifact.flower.ai
 
 jobs:
   wheel:
@@ -43,7 +44,7 @@ jobs:
           echo "SHORT_SHA=$sha_short" >> "$GITHUB_OUTPUT"
           [ -z "${{ github.head_ref }}" ] && dir="${{ github.ref_name }}" || dir="pr/${{ github.head_ref }}"
           echo "DIR=$dir" >> "$GITHUB_OUTPUT"
-          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://artifact.flower.dev/py/$dir/$sha_short --recursive
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://${{ env.ARTIFACT_BUCKET }}/py/$dir/$sha_short --recursive
     outputs:
       whl_path: ${{ steps.upload.outputs.WHL_PATH }}
       short_sha: ${{ steps.upload.outputs.SHORT_SHA }}
@@ -123,7 +124,7 @@ jobs:
       - name: Install Flower wheel from artifact store
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
-          python -m pip install https://artifact.flower.dev/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
@@ -164,7 +165,7 @@ jobs:
       - name: Install Flower wheel from artifact store
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
-          python -m pip install https://artifact.flower.dev/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Cache Datasets
         uses: actions/cache@v3
         with:

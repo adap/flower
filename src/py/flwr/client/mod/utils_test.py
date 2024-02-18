@@ -19,11 +19,14 @@ import unittest
 from typing import List
 
 from flwr.client.typing import ClientAppCallable, Mod
-from flwr.common.configsrecord import ConfigsRecord
-from flwr.common.context import Context
-from flwr.common.message import Message, Metadata
-from flwr.common.metricsrecord import MetricsRecord
-from flwr.common.recordset import RecordSet
+from flwr.common import (
+    ConfigsRecord,
+    Context,
+    Message,
+    Metadata,
+    MetricsRecord,
+    RecordSet,
+)
 
 from .utils import make_ffn
 
@@ -75,7 +78,7 @@ def _get_dummy_flower_message() -> Message:
     return Message(
         content=RecordSet(),
         metadata=Metadata(
-            run_id=0, task_id="", group_id="", node_id=0, ttl="", task_type="mock"
+            run_id=0, message_id="", group_id="", node_id=0, ttl="", message_type="mock"
         ),
     )
 
