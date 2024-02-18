@@ -31,7 +31,7 @@ from flwr.common.constant import (
     MESSAGE_TYPE_GET_PARAMETERS,
     MESSAGE_TYPE_GET_PROPERTIES,
 )
-from flwr.common.context import Context
+from flwr.common import Context
 from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.recordset_compat import (

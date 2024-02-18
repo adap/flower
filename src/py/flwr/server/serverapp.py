@@ -18,7 +18,7 @@
 import importlib
 from typing import Optional, cast
 
-from flwr.common.context import Context
+from flwr.common import Context
 from flwr.server.driver.driver import Driver
 from flwr.server.strategy import Strategy
 

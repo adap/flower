@@ -35,7 +35,7 @@ from flwr.common import (
 from flwr.common import recordset_compat as compat
 from flwr.common import typing
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
-from flwr.common.context import Context
+from flwr.common import Context
 from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
 

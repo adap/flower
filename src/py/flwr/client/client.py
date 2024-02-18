@@ -32,7 +32,7 @@ from flwr.common import (
     Parameters,
     Status,
 )
-from flwr.common.context import Context
+from flwr.common import Context
 
 
 class Client(ABC):

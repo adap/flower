@@ -25,7 +25,7 @@ from flwr.common import ndarray_to_bytes, parameters_to_ndarrays
 from flwr.common import recordset_compat as compat
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import MESSAGE_TYPE_FIT
-from flwr.common.context import Context
+from flwr.common import Context
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet

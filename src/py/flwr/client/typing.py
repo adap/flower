@@ -17,7 +17,7 @@
 
 from typing import Callable
 
-from flwr.common.context import Context
+from flwr.common import Context
 from flwr.common.message import Message
 
 from .client import Client as Client

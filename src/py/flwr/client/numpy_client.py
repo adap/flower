@@ -26,7 +26,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from flwr.common.context import Context
+from flwr.common import Context
 from flwr.common.typing import (
     Code,
     EvaluateIns,

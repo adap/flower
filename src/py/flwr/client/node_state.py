@@ -17,7 +17,7 @@
 
 from typing import Any, Dict
 
-from flwr.common.context import Context
+from flwr.common import Context
 from flwr.common.recordset import RecordSet
 
 

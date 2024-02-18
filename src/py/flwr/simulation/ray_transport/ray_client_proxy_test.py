@@ -26,7 +26,7 @@ from flwr.client.clientapp import ClientApp
 from flwr.common import Config, Scalar
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
-from flwr.common.context import Context
+from flwr.common import Context
 from flwr.common.message import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.recordset_compat import (

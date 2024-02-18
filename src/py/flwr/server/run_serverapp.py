@@ -21,7 +21,7 @@ from logging import DEBUG, WARN
 from pathlib import Path
 
 from flwr.common import EventType, event
-from flwr.common.context import Context
+from flwr.common import Context
 from flwr.common.logger import log
 from flwr.common.recordset import RecordSet
 
