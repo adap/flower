@@ -26,9 +26,8 @@ from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
 from flwr.client.clientapp import ClientApp
-from flwr.common import Context
+from flwr.common import Context, Message
 from flwr.common.logger import log
-from flwr.common import Message
 
 ClientAppFn = Callable[[], ClientApp]
 

@@ -23,10 +23,10 @@ from unittest.mock import patch
 
 import grpc
 
+from flwr.common import Message, Metadata
 from flwr.common import recordset_compat as compat
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
-from flwr.common import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.typing import Code, GetPropertiesRes, Status
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611

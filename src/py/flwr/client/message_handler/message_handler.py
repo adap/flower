@@ -24,6 +24,7 @@ from flwr.client.client import (
     maybe_call_get_properties,
 )
 from flwr.client.typing import ClientFn
+from flwr.common import Context, Message, Metadata
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import (
     MESSAGE_TYPE_EVALUATE,
@@ -31,8 +32,6 @@ from flwr.common.constant import (
     MESSAGE_TYPE_GET_PARAMETERS,
     MESSAGE_TYPE_GET_PROPERTIES,
 )
-from flwr.common import Context
-from flwr.common import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.recordset_compat import (
     evaluateres_to_recordset,

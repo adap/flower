@@ -21,6 +21,7 @@ from flwr.client import Client
 from flwr.client.typing import ClientFn
 from flwr.common import (
     Code,
+    Context,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -29,14 +30,14 @@ from flwr.common import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
+    Message,
+    Metadata,
     Parameters,
     Status,
 )
 from flwr.common import recordset_compat as compat
 from flwr.common import typing
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
-from flwr.common import Context
-from flwr.common import Message, Metadata
 from flwr.common.recordset import RecordSet
 
 from .message_handler import handle_legacy_message_from_msgtype
