@@ -78,7 +78,14 @@ def _get_dummy_flower_message() -> Message:
     return Message(
         content=RecordSet(),
         metadata=Metadata(
-            run_id=0, message_id="", group_id="", node_id=0, ttl="", message_type="mock"
+            run_id=0,
+            message_id="",
+            group_id="",
+            src_node_id=0,
+            dst_node_id=0,
+            reply_to_message="",
+            ttl="",
+            message_type="mock",
         ),
     )
 

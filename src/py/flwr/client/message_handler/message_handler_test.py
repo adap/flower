@@ -15,7 +15,10 @@
 """Client-side message handler tests."""
 
 
+import unittest
 import uuid
+from copy import copy
+from typing import List
 
 from flwr.client import Client
 from flwr.client.typing import ClientFn
@@ -40,7 +43,7 @@ from flwr.common import recordset_compat as compat
 from flwr.common import typing
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 
-from .message_handler import handle_legacy_message_from_msgtype
+from .message_handler import handle_legacy_message_from_msgtype, validate_out_message
 
 
 class ClientWithoutProps(Client):
@@ -122,10 +125,12 @@ def test_client_without_get_properties() -> None:
     recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
     message = Message(
         metadata=Metadata(
-            run_id=0,
+            run_id=123,
             message_id=str(uuid.uuid4()),
-            group_id="",
-            node_id=0,
+            group_id="some group ID",
+            src_node_id=0,
+            dst_node_id=1123,
+            reply_to_message="",
             ttl="",
             message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
@@ -148,10 +153,22 @@ def test_client_without_get_properties() -> None:
         properties={},
     )
     expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
-    expected_msg = Message(message.metadata, expected_rs)
+    expected_msg = Message(
+        metadata=Metadata(
+            run_id=123,
+            message_id="",
+            group_id="some group ID",
+            src_node_id=1123,
+            dst_node_id=0,
+            reply_to_message=message.metadata.message_id,
+            ttl="",
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+        ),
+        content=expected_rs,
+    )
 
     assert actual_msg.content == expected_msg.content
-    assert actual_msg.metadata.message_type == expected_msg.metadata.message_type
+    assert actual_msg.metadata == expected_msg.metadata
 
 
 def test_client_with_get_properties() -> None:
@@ -161,10 +178,12 @@ def test_client_with_get_properties() -> None:
     recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
     message = Message(
         metadata=Metadata(
-            run_id=0,
+            run_id=123,
             message_id=str(uuid.uuid4()),
-            group_id="",
-            node_id=0,
+            group_id="some group ID",
+            src_node_id=0,
+            dst_node_id=1123,
+            reply_to_message="",
             ttl="",
             message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
@@ -187,7 +206,83 @@ def test_client_with_get_properties() -> None:
         properties={"str_prop": "val", "int_prop": 1},
     )
     expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
-    expected_msg = Message(message.metadata, expected_rs)
+    expected_msg = Message(
+        metadata=Metadata(
+            run_id=123,
+            message_id="",
+            group_id="some group ID",
+            src_node_id=1123,
+            dst_node_id=0,
+            reply_to_message=message.metadata.message_id,
+            ttl="",
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+        ),
+        content=expected_rs,
+    )
 
     assert actual_msg.content == expected_msg.content
-    assert actual_msg.metadata.message_type == expected_msg.metadata.message_type
+    assert actual_msg.metadata == expected_msg.metadata
+
+
+class TestMessageValidation(unittest.TestCase):
+    """Test message validation."""
+
+    def setUp(self) -> None:
+        """Set up the message validation."""
+        # Common setup for tests
+        self.in_metadata = Metadata(
+            run_id=123,
+            message_id="qwerty",
+            src_node_id=10,
+            dst_node_id=20,
+            reply_to_message="",
+            group_id="group1",
+            ttl="60",
+            message_type="mock",
+        )
+        self.valid_out_metadata = Metadata(
+            run_id=123,
+            message_id="",
+            src_node_id=20,
+            dst_node_id=10,
+            reply_to_message="qwerty",
+            group_id="group1",
+            ttl="60",
+            message_type="mock",
+        )
+        self.common_content = RecordSet()
+
+    def test_valid_message(self) -> None:
+        """Test a valid message."""
+        # Prepare
+        valid_message = Message(metadata=self.valid_out_metadata, content=RecordSet())
+
+        # Assert
+        self.assertTrue(validate_out_message(valid_message, self.in_metadata))
+
+    def test_invalid_message_run_id(self) -> None:
+        """Test invalid messages."""
+        # Prepare
+        msg = Message(metadata=self.valid_out_metadata, content=RecordSet())
+
+        # Execute
+        invalid_metadata_list: List[Metadata] = []
+        attrs = list(vars(self.valid_out_metadata).keys())
+        for attr in attrs:
+            if attr == "_ttl":  # Skip configurable ttl
+                continue
+            # Make an invalid metadata
+            invalid_metadata = copy(self.valid_out_metadata)
+            value = getattr(invalid_metadata, attr)
+            if isinstance(value, int):
+                value = 999
+            elif isinstance(value, str):
+                value = "999"
+            setattr(invalid_metadata, attr, value)
+            # Add to list
+            invalid_metadata_list.append(invalid_metadata)
+
+        # Assert
+        for invalid_metadata in invalid_metadata_list:
+            msg._metadata = invalid_metadata  # pylint: disable=protected-access
+            self.assertFalse(validate_out_message(msg, self.in_metadata))

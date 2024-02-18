@@ -17,18 +17,16 @@
 
 import sys
 from contextlib import contextmanager
+from copy import copy
 from logging import ERROR, INFO, WARN
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
-from flwr.client.message_handler.task_handler import (
-    configure_task_res,
-    get_task_ins,
-    validate_task_ins,
-    validate_task_res,
-)
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Message
+from flwr.client.message_handler.message_handler import validate_out_message
+from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
+from flwr.common.message import Message, Metadata
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -49,7 +47,7 @@ except ModuleNotFoundError:
 
 
 KEY_NODE = "node"
-KEY_TASK_INS = "current_task_ins"
+KEY_METADATA = "in_message_metadata"
 
 
 PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
@@ -121,8 +119,8 @@ def http_request_response(
             "must be provided as a string path to the client.",
         )
 
-    # Necessary state to link TaskRes to TaskIns
-    state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
+    # Necessary state to validate messages to be sent
+    state: Dict[str, Optional[Metadata]] = {KEY_METADATA: None}
 
     # Enable create_node and delete_node to store node
     node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
@@ -257,16 +255,18 @@ def http_request_response(
         task_ins: Optional[TaskIns] = get_task_ins(pull_task_ins_response_proto)
 
         # Discard the current TaskIns if not valid
-        if task_ins is not None and not validate_task_ins(task_ins):
+        if task_ins is not None and not (
+            task_ins.task.consumer.node_id == node.node_id
+            and validate_task_ins(task_ins)
+        ):
             task_ins = None
-
-        # Remember `task_ins` until `task_res` is available
-        state[KEY_TASK_INS] = task_ins
 
         # Return the Message if available
         message = None
+        state[KEY_METADATA] = None
         if task_ins is not None:
             message = message_from_taskins(task_ins)
+            state[KEY_METADATA] = copy(message.metadata)
             log(INFO, "[Node] POST /%s: success", PATH_PULL_TASK_INS)
         return message
 
@@ -276,24 +276,20 @@ def http_request_response(
         if node_store[KEY_NODE] is None:
             log(ERROR, "Node instance missing")
             return
-        node: Node = cast(Node, node_store[KEY_NODE])
 
-        if state[KEY_TASK_INS] is None:
-            log(ERROR, "No current TaskIns")
+        # Get incoming message
+        in_metadata = state[KEY_METADATA]
+        if in_metadata is None:
+            log(ERROR, "No current message")
             return
 
-        task_ins: TaskIns = cast(TaskIns, state[KEY_TASK_INS])
+        # Validate out message
+        if not validate_out_message(message, in_metadata):
+            log(ERROR, "Invalid out message")
+            return
 
         # Construct TaskRes
         task_res = message_to_taskres(message)
-
-        # Check if fields to be set are not initialized
-        if not validate_task_res(task_res):
-            state[KEY_TASK_INS] = None
-            log(ERROR, "TaskRes has been initialized accidentally")
-
-        # Configure TaskRes
-        task_res = configure_task_res(task_res, task_ins, node)
 
         # Serialize ProtoBuf to bytes
         push_task_res_request_proto = PushTaskResRequest(task_res_list=[task_res])
@@ -313,7 +309,7 @@ def http_request_response(
             timeout=None,
         )
 
-        state[KEY_TASK_INS] = None
+        state[KEY_METADATA] = None
 
         # Check status code and headers
         if res.status_code != 200:
