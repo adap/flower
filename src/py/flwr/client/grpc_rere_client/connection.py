@@ -98,6 +98,9 @@ def grpc_request_response(
     channel.subscribe(on_channel_state_change)
     stub = FleetStub(channel)
 
+    # Necessary state to link TaskRes to TaskIns
+    state: Dict[str, Optional[TaskIns]] = {KEY_TASK_INS: None}
+
     # Enable create_node and delete_node to store node
     node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
 
@@ -148,6 +151,9 @@ def grpc_request_response(
         ):
             task_ins = None
 
+        # Remember `task_ins` until `task_res` is available
+        state[KEY_TASK_INS] = task_ins
+
         # Return the message if available
         return message_from_taskins(task_ins) if task_ins is not None else None
 
@@ -158,12 +164,18 @@ def grpc_request_response(
             log(ERROR, "Node instance missing")
             return
 
+        # Get incoming TaskIns
+        if state[KEY_TASK_INS] is None:
+            log(ERROR, "No current TaskIns")
+            return
         # Construct TaskRes
         task_res = message_to_taskres(message)
 
         # Serialize ProtoBuf to bytes
         request = PushTaskResRequest(task_res_list=[task_res])
         _ = stub.PushTaskRes(request)
+
+        state[KEY_TASK_INS] = None
 
     try:
         # Yield methods
