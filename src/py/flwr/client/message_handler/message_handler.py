@@ -88,7 +88,6 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
         recordset = RecordSet()
         recordset.set_configs("config", ConfigsRecord({"reason": reason}))
         out_message = message.create_reply(recordset, ttl="")
-        out_message.metadata.message_type = "reconnect"
         # Return TaskRes and sleep duration
         return out_message, sleep_duration
 

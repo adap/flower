@@ -371,8 +371,7 @@ def _start_client_internal(
                 # Handle control message
                 out_message, sleep_duration = handle_control_message(message)
                 if out_message:
-                    if not validate_out_message(out_message, in_metadata):
-                        log(ERROR, "Invalid out message: %s", out_message)
+                    # Assume return value of handle_control_message() is valid
                     send(out_message)
                     break
 
@@ -397,6 +396,7 @@ def _start_client_internal(
                 # Send
                 if not validate_out_message(out_message, in_metadata):
                     log(ERROR, "Invalid out message: %s", out_message)
+                    continue
                 send(out_message)
 
             # Unregister node
