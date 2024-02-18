@@ -18,6 +18,7 @@
 from typing import Callable
 
 from flwr.common import Context
-from flwr.server.driver import Driver
+
+from .driver import Driver
 
 ServerAppCallable = Callable[[Driver, Context], None]
