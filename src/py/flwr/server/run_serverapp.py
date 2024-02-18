@@ -26,7 +26,7 @@ from flwr.common.logger import log
 from flwr.common.recordset import RecordSet
 
 from .driver.driver import Driver
-from .serverapp import ServerApp, load_server_app
+from .server_app import ServerApp, load_server_app
 
 
 def run_server_app() -> None:

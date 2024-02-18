@@ -27,7 +27,7 @@ from .history import History as History
 from .run_serverapp import run_server_app as run_server_app
 from .server import Server as Server
 from .server_config import ServerConfig as ServerConfig
-from .serverapp import ServerApp as ServerApp
+from .server_app import ServerApp as ServerApp
 
 __all__ = [
     "ClientManager",
