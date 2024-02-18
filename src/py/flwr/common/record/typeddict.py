@@ -14,7 +14,7 @@
 # ==============================================================================
 """Typed dict base class for *Records."""
 
-from typing import Any, Callable, Dict, Generic, Iterator, Tuple, TypeVar, cast
+from typing import Any, Callable, Dict, Generic, Iterable, Tuple, TypeVar, cast
 
 K = TypeVar("K")  # Key type
 V = TypeVar("V")  # Value type
@@ -47,7 +47,7 @@ class TypedDict(Generic[K, V]):
         """."""
         return self._data[item]
 
-    def __iter__(self) -> Iterator[K]:
+    def __iter__(self) -> Iterable[K]:
         """."""
         return iter(self._data)
 
@@ -71,17 +71,17 @@ class TypedDict(Generic[K, V]):
             return self._data == other
         return NotImplemented
 
-    def items(self) -> Iterator[Tuple[K, V]]:
+    def items(self) -> Iterable[Tuple[K, V]]:
         """R.items() -> a set-like object providing a view on R's items."""
-        return cast(Iterator[Tuple[K, V]], self._data.items())
+        return cast(Iterable[Tuple[K, V]], self._data.items())
 
-    def keys(self) -> Iterator[K]:
+    def keys(self) -> Iterable[K]:
         """R.keys() -> a set-like object providing a view on R's keys."""
-        return cast(Iterator[K], self._data.keys())
+        return cast(Iterable[K], self._data.keys())
 
-    def values(self) -> Iterator[V]:
+    def values(self) -> Iterable[V]:
         """R.values() -> an object providing a view on R's values."""
-        return cast(Iterator[V], self._data.values())
+        return cast(Iterable[V], self._data.values())
 
     def update(self, *args: Any, **kwargs: Any) -> None:
         """R.update([E, ]**F) -> None.

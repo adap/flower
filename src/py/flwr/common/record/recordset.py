@@ -16,7 +16,7 @@
 
 
 from dataclasses import dataclass, field
-from typing import Dict
+from typing import Dict, Iterable, Union
 
 from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
@@ -25,44 +25,67 @@ from .parametersrecord import ParametersRecord
 
 @dataclass
 class RecordSet:
-    """Definition of RecordSet."""
+    """Enhanced RecordSet with a unified and Pythonic interface."""
 
-    parameters: Dict[str, ParametersRecord] = field(default_factory=dict)
-    metrics: Dict[str, MetricsRecord] = field(default_factory=dict)
-    configs: Dict[str, ConfigsRecord] = field(default_factory=dict)
+    _parameters: Dict[str, ParametersRecord] = field(default_factory=dict)
+    _metrics: Dict[str, MetricsRecord] = field(default_factory=dict)
+    _configs: Dict[str, ConfigsRecord] = field(default_factory=dict)
 
-    def set_parameters(self, name: str, record: ParametersRecord) -> None:
-        """Add a ParametersRecord."""
-        self.parameters[name] = record
+    def __getitem__(
+        self, key: str
+    ) -> Union[ParametersRecord, MetricsRecord, ConfigsRecord]:
+        """."""
+        if key in self._parameters:
+            return self._parameters[key]
+        elif key in self._metrics:
+            return self._metrics[key]
+        elif key in self._configs:
+            return self._configs[key]
+        raise KeyError(f"Invalid key: {key}")
 
-    def get_parameters(self, name: str) -> ParametersRecord:
-        """Get a ParametesRecord."""
-        return self.parameters[name]
+    def __setitem__(
+        self, key: str, value: Union[ParametersRecord, MetricsRecord, ConfigsRecord]
+    ) -> None:
+        """."""
+        if isinstance(value, ParametersRecord):
+            self._parameters[key] = value
+        elif isinstance(value, MetricsRecord):
+            self._metrics[key] = value
+        elif isinstance(value, ConfigsRecord):
+            self._configs[key] = value
+        else:
+            raise ValueError(f"Invalid value type: {type(value)}")
 
-    def del_parameters(self, name: str) -> None:
-        """Delete a ParametersRecord."""
-        del self.parameters[name]
+    def __delitem__(self, key: str) -> None:
+        """."""
+        if key in self._parameters:
+            del self._parameters[key]
+        elif key in self._metrics:
+            del self._metrics[key]
+        elif key in self._configs:
+            del self._configs[key]
+        else:
+            raise KeyError(f"Invalid key: {key}")
 
-    def set_metrics(self, name: str, record: MetricsRecord) -> None:
-        """Add a MetricsRecord."""
-        self.metrics[name] = record
+    def __str__(self) -> str:
+        """."""
+        return (
+            f"RecordSet(parameters={self._parameters}, "
+            f"metrics={self._metrics}, configs={self._configs})"
+        )
 
-    def get_metrics(self, name: str) -> MetricsRecord:
-        """Get a MetricsRecord."""
-        return self.metrics[name]
+    def __repr__(self) -> str:
+        """."""
+        return self.__str__()
 
-    def del_metrics(self, name: str) -> None:
-        """Delete a MetricsRecord."""
-        del self.metrics[name]
+    def paramsrecord_keys(self) -> Iterable[str]:
+        """Retrieve the keys for each stored `ParametersRecord`."""
+        return self._parameters.keys()
 
-    def set_configs(self, name: str, record: ConfigsRecord) -> None:
-        """Add a ConfigsRecord."""
-        self.configs[name] = record
+    def metricsrecord_keys(self) -> Iterable[str]:
+        """Retrieve the keys for each stored `MetricsRecord`."""
+        return self._metrics.keys()
 
-    def get_configs(self, name: str) -> ConfigsRecord:
-        """Get a ConfigsRecord."""
-        return self.configs[name]
-
-    def del_configs(self, name: str) -> None:
-        """Delete a ConfigsRecord."""
-        del self.configs[name]
+    def configsrecord_keys(self) -> Iterable[str]:
+        """Retrieve the keys for each stored `ConfigsRecord`."""
+        return self._configs.keys()
