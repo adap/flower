@@ -18,8 +18,7 @@
 import argparse
 import sys
 import time
-from copy import copy
-from logging import DEBUG, ERROR, INFO, WARN
+from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
@@ -41,10 +40,7 @@ from flwr.common.message import Message
 from .clientapp import load_client_app
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
-from .message_handler.message_handler import (
-    handle_control_message,
-    validate_out_message,
-)
+from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
 
@@ -366,12 +362,10 @@ def _start_client_internal(
                 if message is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
-                in_metadata = copy(message.metadata)
 
                 # Handle control message
                 out_message, sleep_duration = handle_control_message(message)
                 if out_message:
-                    # Assume return value of handle_control_message() is valid
                     send(out_message)
                     break
 
@@ -394,9 +388,6 @@ def _start_client_internal(
                 )
 
                 # Send
-                if not validate_out_message(out_message, in_metadata):
-                    log(ERROR, "Invalid out message: %s", out_message)
-                    continue
                 send(out_message)
 
             # Unregister node
