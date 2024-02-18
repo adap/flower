@@ -24,6 +24,7 @@ from flwr.client import Client
 from flwr.client.typing import ClientFn
 from flwr.common import (
     Code,
+    Context,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -32,15 +33,15 @@ from flwr.common import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
+    Message,
+    Metadata,
     Parameters,
+    RecordSet,
     Status,
 )
 from flwr.common import recordset_compat as compat
 from flwr.common import typing
-from flwr.common.constant import MessageType
-from flwr.common.context import Context
-from flwr.common.message import Message, Metadata
-from flwr.common.recordset import RecordSet
+from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 
 from .message_handler import handle_legacy_message_from_msgtype, validate_out_message
 
@@ -161,7 +162,7 @@ def test_client_without_get_properties() -> None:
             dst_node_id=0,
             reply_to_message=message.metadata.message_id,
             ttl="",
-            message_type=MessageType.GET_PROPERTIES,
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
         content=expected_rs,
     )
@@ -214,7 +215,7 @@ def test_client_with_get_properties() -> None:
             dst_node_id=0,
             reply_to_message=message.metadata.message_id,
             ttl="",
-            message_type=MessageType.GET_PROPERTIES,
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
         content=expected_rs,
     )

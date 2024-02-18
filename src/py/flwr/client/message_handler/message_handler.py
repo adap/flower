@@ -24,11 +24,14 @@ from flwr.client.client import (
     maybe_call_get_properties,
 )
 from flwr.client.typing import ClientFn
+from flwr.common import Context, Message, Metadata, RecordSet
 from flwr.common.configsrecord import ConfigsRecord
-from flwr.common.constant import MessageType
-from flwr.common.context import Context
-from flwr.common.message import Message, Metadata
-from flwr.common.recordset import RecordSet
+from flwr.common.constant import (
+    MESSAGE_TYPE_EVALUATE,
+    MESSAGE_TYPE_FIT,
+    MESSAGE_TYPE_GET_PARAMETERS,
+    MESSAGE_TYPE_GET_PROPERTIES,
+)
 from flwr.common.recordset_compat import (
     evaluateres_to_recordset,
     fitres_to_recordset,
@@ -83,7 +86,6 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
         recordset = RecordSet()
         recordset.set_configs("config", ConfigsRecord({"reason": reason}))
         out_message = message.create_reply(recordset, ttl="")
-        out_message.metadata.message_type = "reconnect"
         # Return TaskRes and sleep duration
         return out_message, sleep_duration
 
@@ -95,7 +97,7 @@ def handle_legacy_message_from_msgtype(
     client_fn: ClientFn, message: Message, context: Context
 ) -> Message:
     """Handle legacy message in the inner most mod."""
-    client = client_fn("-1")
+    client = client_fn(str(message.metadata.dst_node_id))
 
     client.set_context(context)
 

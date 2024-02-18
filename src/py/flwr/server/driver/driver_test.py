@@ -26,7 +26,7 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsRequest,
 )
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
-from flwr.server.driver.driver import Driver
+from .driver import Driver
 
 
 class TestDriver(unittest.TestCase):
