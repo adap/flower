@@ -16,14 +16,12 @@
 
 
 import unittest
-from typing import List
+from typing import List, cast
 
 from flwr.client.typing import ClientAppCallable, Mod
-from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.context import Context
 from flwr.common.message import Message, Metadata
-from flwr.common.metricsrecord import MetricsRecord
-from flwr.common.recordset import RecordSet
+from flwr.common.record import ConfigsRecord, MetricsRecord, RecordSet
 
 from .utils import make_ffn
 
@@ -33,7 +31,7 @@ COUNTER = "counter"
 
 def _increment_context_counter(context: Context) -> None:
     # Read from context
-    current_counter: int = context.state.get_metrics(METRIC)[COUNTER]  # type: ignore
+    current_counter = cast(int, context.state.get_metrics(METRIC)[COUNTER])
     # update and override context
     current_counter += 1
     context.state.set_metrics(METRIC, record=MetricsRecord({COUNTER: current_counter}))

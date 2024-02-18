@@ -18,15 +18,19 @@
 from dataclasses import dataclass, field
 from typing import Dict, Optional, get_args
 
-from .typing import MetricsRecordValues, MetricsScalar
+from flwr.common.typing import MetricsRecordValues, MetricsScalar
+
+from .typeddict import TypedDict
 
 
-@dataclass
-class MetricsRecord:
+def _check_key(key: str) -> None:
+    """Check if key is of expected type."""
+    if not isinstance(key, str):
+        raise TypeError(f"Key must be of type str. You passed {type(key)}.")
+
+class MetricsRecord(TypedDict[str, MetricsRecordValues]):
     """Metrics record."""
-
-    data: Dict[str, MetricsRecordValues] = field(default_factory=dict)
-
+    
     def __init__(
         self,
         metrics_dict: Optional[Dict[str, MetricsRecordValues]] = None,
@@ -82,24 +86,7 @@ class MetricsRecord:
         # Split between those values that are list and those that aren't
         # then process in the same way
         for value in metrics_dict.values():
-            if isinstance(value, list):
-                # If your lists are large (e.g. 1M+ elements) this will be slow
-                # 1s to check 10M element list on a M2 Pro
-                # In such settings, you'd be better of treating such metric as
-                # an array and pass it to a ParametersRecord.
-                # Empty lists are valid
-                if len(value) > 0:
-                    is_valid(value[0])
-                    # all elements in the list must be of the same valid type
-                    # this is needed for protobuf
-                    value_type = type(value[0])
-                    if not all(isinstance(v, value_type) for v in value):
-                        raise TypeError(
-                            "All values in a list must be of the same valid type. "
-                            f"One of {MetricsScalar}."
-                        )
-            else:
-                is_valid(value)
+            
 
         # Add metrics to record
         if keep_input:

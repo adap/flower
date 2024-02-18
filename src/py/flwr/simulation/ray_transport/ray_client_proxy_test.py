@@ -22,10 +22,8 @@ from typing import List, Tuple, Type, cast
 import ray
 
 from flwr.client import Client, NumPyClient
-from flwr.common import Code, GetPropertiesRes, Status
-from flwr.common.configsrecord import ConfigsRecord
+from flwr.common import Code, ConfigsRecord, GetPropertiesRes, RecordSet, Status
 from flwr.common.context import Context
-from flwr.common.recordset import RecordSet
 from flwr.simulation.ray_transport.ray_actor import (
     ClientRes,
     DefaultActor,

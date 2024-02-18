@@ -20,21 +20,20 @@ from typing import Callable, Dict, List, OrderedDict, Type, Union
 import numpy as np
 import pytest
 
-from .configsrecord import ConfigsRecord
-from .metricsrecord import MetricsRecord
-from .parameter import ndarrays_to_parameters, parameters_to_ndarrays
-from .parametersrecord import Array, ParametersRecord
-from .recordset_compat import (
+from flwr.common.parameter import ndarrays_to_parameters, parameters_to_ndarrays
+from flwr.common.recordset_compat import (
     parameters_to_parametersrecord,
     parametersrecord_to_parameters,
 )
-from .typing import (
+from flwr.common.typing import (
     ConfigsRecordValues,
     MetricsRecordValues,
     NDArray,
     NDArrays,
     Parameters,
 )
+
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord
 
 
 def get_ndarrays() -> NDArrays:
@@ -318,7 +317,7 @@ def test_set_configs_to_configsrecord_with_correct_types(
     c_record = ConfigsRecord(my_configs)
 
     # check values are actually there
-    assert c_record.data == my_configs
+    assert c_record == my_configs
 
 
 @pytest.mark.parametrize(
@@ -362,4 +361,4 @@ def test_set_configs_to_configsrecord_with_incorrect_types(
     )
 
     with pytest.raises(TypeError):
-        m_record.set_configs(my_metrics)  # type: ignore
+        m_record.update(my_metrics)

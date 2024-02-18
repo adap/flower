@@ -23,6 +23,7 @@ from .parameter import bytes_to_ndarray as bytes_to_ndarray
 from .parameter import ndarray_to_bytes as ndarray_to_bytes
 from .parameter import ndarrays_to_parameters as ndarrays_to_parameters
 from .parameter import parameters_to_ndarrays as parameters_to_ndarrays
+from .record import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
 from .telemetry import EventType as EventType
 from .telemetry import event as event
 from .typing import ClientMessage as ClientMessage
@@ -81,4 +82,9 @@ __all__ = [
     "Scalar",
     "ServerMessage",
     "Status",
+    "ConfigsRecord",
+    "MetricsRecord",
+    "Array",
+    "ParametersRecord",
+    "RecordSet",
 ]

@@ -17,8 +17,8 @@
 
 from typing import Any, Dict
 
+from flwr.common import RecordSet
 from flwr.common.context import Context
-from flwr.common.recordset import RecordSet
 
 
 class NodeState:

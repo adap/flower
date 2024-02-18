@@ -20,10 +20,9 @@ import sys
 from logging import DEBUG, WARN
 from pathlib import Path
 
-from flwr.common import EventType, event
+from flwr.common import EventType, RecordSet, event
 from flwr.common.context import Context
 from flwr.common.logger import log
-from flwr.common.recordset import RecordSet
 
 from .driver.driver import Driver
 from .serverapp import ServerApp, load_server_app

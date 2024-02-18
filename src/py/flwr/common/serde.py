@@ -43,11 +43,8 @@ from flwr.proto.transport_pb2 import (
 
 # pylint: enable=E0611
 from . import typing
-from .configsrecord import ConfigsRecord
 from .message import Message, Metadata
-from .metricsrecord import MetricsRecord
-from .parametersrecord import Array, ParametersRecord
-from .recordset import RecordSet
+from .record import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
 
 #  === Parameters message ===
 
@@ -496,7 +493,10 @@ def configs_record_to_proto(record: ConfigsRecord) -> ProtoConfigsRecord:
     """Serialize ConfigsRecord to ProtoBuf."""
     return ProtoConfigsRecord(
         data=_record_value_dict_to_proto(
-            record.data, [bool, int, float, str, bytes], ProtoConfigsRecordValue
+            # pylint: disable-next=protected-access
+            record._data,
+            [bool, int, float, str, bytes],
+            ProtoConfigsRecordValue,
         )
     )
 
