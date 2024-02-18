@@ -3,7 +3,7 @@ name = "$project_name"
 version = "1.0.0"
 description = ""
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [components]
 serverapp = "$project_name.server:app"
