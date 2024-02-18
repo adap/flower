@@ -191,7 +191,7 @@ def test_cid_consistency_without_proxies() -> None:
             metadata=Metadata(
                 run_id=0,
                 message_id="",
-                group_id=0,
+                group_id=str(0),
                 ttl="",
                 node_id=int(cid),
                 message_type=MESSAGE_TYPE_GET_PROPERTIES,

@@ -122,7 +122,7 @@ class DriverClientProxy(ClientProxy):
     ) -> RecordSet:
         task_ins = task_pb2.TaskIns(  # pylint: disable=E1101
             task_id="",
-            group_id=group_id,
+            group_id=str(group_id),
             run_id=self.run_id,
             task=task_pb2.Task(  # pylint: disable=E1101
                 producer=node_pb2.Node(  # pylint: disable=E1101

@@ -106,7 +106,7 @@ class RayActorClientProxy(ClientProxy):
             metadata=Metadata(
                 run_id=0,
                 message_id="",
-                group_id=group_id,
+                group_id=str(group_id),
                 node_id=int(self.cid),
                 ttl=str(timeout) if timeout else "",
                 message_type=message_type,
