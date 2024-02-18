@@ -15,11 +15,37 @@
 """Tests for ServerApp."""
 
 
+from unittest.mock import MagicMock
+
 import pytest
 
 from flwr.common.context import Context
+from flwr.common.recordset import RecordSet
 from flwr.server import ServerApp, ServerConfig
 from flwr.server.driver import Driver
+
+
+def test_server_app_custom_mode() -> None:
+    """Test sampling w/o criterion."""
+    # Prepare
+    app = ServerApp()
+    driver = MagicMock()
+    context = Context(state=RecordSet())
+
+    called = {"called": False}
+
+    # pylint: disable=unused-argument
+    @app.main()
+    def custom_main(driver: Driver, context: Context) -> None:
+        called["called"] = True
+
+    # pylint: enable=unused-argument
+
+    # Execute
+    app(driver, context)
+
+    # Assert
+    assert called["called"]
 
 
 def test_server_app_exception_when_both_modes() -> None:
