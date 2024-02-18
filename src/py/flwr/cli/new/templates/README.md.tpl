@@ -1,4 +1,4 @@
-# $project_name 🧪
+# $project_name
 
 TODO: intro text
 
