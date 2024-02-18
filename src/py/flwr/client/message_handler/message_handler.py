@@ -104,14 +104,14 @@ def handle_legacy_message_from_msgtype(
     message_type = message.metadata.message_type
 
     # Handle GetPropertiesIns
-    if message_type == MessageType.GET_PROPERTIES:
+    if message_type == MESSAGE_TYPE_GET_PROPERTIES:
         get_properties_res = maybe_call_get_properties(
             client=client,
             get_properties_ins=recordset_to_getpropertiesins(message.content),
         )
         out_recordset = getpropertiesres_to_recordset(get_properties_res)
     # Handle GetParametersIns
-    elif message_type == MessageType.GET_PARAMETERS:
+    elif message_type == MESSAGE_TYPE_GET_PARAMETERS:
         get_parameters_res = maybe_call_get_parameters(
             client=client,
             get_parameters_ins=recordset_to_getparametersins(message.content),
@@ -120,14 +120,14 @@ def handle_legacy_message_from_msgtype(
             get_parameters_res, keep_input=False
         )
     # Handle FitIns
-    elif message_type == MessageType.TRAIN:
+    elif message_type == MESSAGE_TYPE_FIT:
         fit_res = maybe_call_fit(
             client=client,
             fit_ins=recordset_to_fitins(message.content, keep_input=True),
         )
         out_recordset = fitres_to_recordset(fit_res, keep_input=False)
     # Handle EvaluateIns
-    elif message_type == MessageType.EVALUATE:
+    elif message_type == MESSAGE_TYPE_EVALUATE:
         evaluate_res = maybe_call_evaluate(
             client=client,
             evaluate_ins=recordset_to_evaluateins(message.content, keep_input=True),

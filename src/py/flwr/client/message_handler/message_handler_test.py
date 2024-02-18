@@ -132,7 +132,7 @@ def test_client_without_get_properties() -> None:
             dst_node_id=1123,
             reply_to_message="",
             ttl="",
-            message_type=MessageType.GET_PROPERTIES,
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
         content=recordset,
     )
@@ -185,7 +185,7 @@ def test_client_with_get_properties() -> None:
             dst_node_id=1123,
             reply_to_message="",
             ttl="",
-            message_type=MessageType.GET_PROPERTIES,
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
         content=recordset,
     )

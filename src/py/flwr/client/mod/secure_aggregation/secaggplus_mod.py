@@ -171,7 +171,7 @@ def secaggplus_mod(
 ) -> Message:
     """Handle incoming message and return results, following the SecAgg+ protocol."""
     # Ignore non-fit messages
-    if msg.metadata.message_type != MessageType.TRAIN:
+    if msg.metadata.message_type != MESSAGE_TYPE_FIT:
         return call_next(msg, ctxt)
 
     # Retrieve local state

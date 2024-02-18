@@ -151,5 +151,57 @@ class Message:
         logic to a client, or vice-versa) or that will be sent to it.
     """
 
-    metadata: Metadata
-    content: RecordSet
+    _metadata: Metadata
+    _content: RecordSet
+
+    def __init__(self, metadata: Metadata, content: RecordSet) -> None:
+        self._metadata = metadata
+        self._content = content
+
+    @property
+    def metadata(self) -> Metadata:
+        """A dataclass including information about the message to be executed."""
+        return self._metadata
+
+    @property
+    def content(self) -> RecordSet:
+        """The content of this message."""
+        return self._content
+
+    @content.setter
+    def content(self, value: RecordSet) -> None:
+        """Set content."""
+        self._content = value
+
+    def create_reply(self, content: RecordSet, ttl: str) -> Message:
+        """Create a reply to this message with specified content and TTL.
+
+        The method generates a new `Message` as a reply to this message.
+        It inherits 'run_id', 'src_node_id', 'dst_node_id', and 'message_type' from
+        this message and sets 'reply_to_message' to the ID of this message.
+
+        Parameters
+        ----------
+        content : RecordSet
+            The content for the reply message.
+        ttl : str
+            Time-to-live for this message.
+
+        Returns
+        -------
+        Message
+            A new `Message` instance representing the reply.
+        """
+        return Message(
+            metadata=Metadata(
+                run_id=self.metadata.run_id,
+                message_id="",
+                src_node_id=self.metadata.dst_node_id,
+                dst_node_id=self.metadata.src_node_id,
+                reply_to_message=self.metadata.message_id,
+                group_id=self.metadata.group_id,
+                ttl=ttl,
+                message_type=self.metadata.message_type,
+            ),
+            content=content,
+        )

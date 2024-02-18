@@ -21,12 +21,8 @@ from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
-from flwr.client.message_handler.task_handler import (
-    configure_task_res,
-    get_task_ins,
-    validate_task_ins,
-    validate_task_res,
-)
+from flwr.client.message_handler.message_handler import validate_out_message
+from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log, warn_experimental_feature
@@ -183,7 +179,6 @@ def grpc_request_response(
         if not validate_out_message(message, in_metadata):
             log(ERROR, "Invalid out message")
             return
-        task_ins: TaskIns = cast(TaskIns, state[KEY_TASK_INS])
 
         # Construct TaskRes
         task_res = message_to_taskres(message)

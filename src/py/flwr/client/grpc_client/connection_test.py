@@ -51,7 +51,7 @@ MESSAGE_GET_PROPERTIES = Message(
         reply_to_message="",
         group_id="",
         ttl="",
-        message_type=MessageType.GET_PROPERTIES,
+        message_type=MESSAGE_TYPE_GET_PROPERTIES,
     ),
     content=compat.getpropertiesres_to_recordset(
         GetPropertiesRes(Status(Code.OK, ""), {})

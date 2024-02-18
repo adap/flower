@@ -68,7 +68,7 @@ def get_test_handler(
                 reply_to_message="",
                 group_id="",
                 ttl="",
-                message_type=MessageType.TRAIN,
+                message_type=MESSAGE_TYPE_FIT,
             ),
             content=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
         )
