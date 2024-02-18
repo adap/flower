@@ -25,7 +25,7 @@ from typing_extensions import Annotated
 from ..utils import prompt_options
 
 
-class MLFramework(str, Enum):
+class MlFramework(str, Enum):
     """Available frameworks."""
 
     PYTORCH = "PyTorch"
