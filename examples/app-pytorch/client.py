@@ -1,26 +1,15 @@
-import os
 import datetime
+import os
 import time
 from typing import Dict
 
+import tensorflow as tf
+from task import DEVICE, Net, get_parameters, load_data, set_parameters, test, train
+
 import flwr as fl
 from flwr.client.typing import ClientAppCallable, Mod
-from flwr.common.context import Context
-from flwr.common.message import Message
-import tensorflow as tf
-from flwr.common import NDArrays, Scalar
-from flwr.common.constant import TASK_TYPE_FIT, TASK_TYPE_EVALUATE
-
-from task import (
-    Net,
-    DEVICE,
-    load_data,
-    get_parameters,
-    set_parameters,
-    train,
-    test,
-)
-
+from flwr.common import Context, Message, NDArrays, Scalar
+from flwr.common.constant import MESSAGE_TYPE_EVALUATE, MESSAGE_TYPE_FIT
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
@@ -83,24 +72,24 @@ def get_tensorboard_mod(logdir) -> Mod:
 
         time_diff = time.time() - start_time
 
-        if bwd.metadata.task_type == (TASK_TYPE_FIT or TASK_TYPE_EVALUATE):
+        if bwd.metadata.message_type == (MESSAGE_TYPE_FIT or MESSAGE_TYPE_EVALUATE):
             writer = tf.summary.create_file_writer(os.path.join(logdir_run, client_id))
 
             metrics = bwd.content.metrics
-            task_type = bwd.metadata.task_type
+            msg_type = bwd.metadata.message_type
 
             # Write aggregated loss
             with writer.as_default(step=round):  # pylint: disable=not-context-manager
-                tf.summary.scalar(f"{task_type}_time", time_diff, step=round)
+                tf.summary.scalar(f"{msg_type}_time", time_diff, step=int(round))
                 if "accuracy" in metrics:
                     tf.summary.scalar(
-                        f"{task_type}_accuracy",
+                        f"{msg_type}_accuracy",
                         metrics["accuracy"],
                         step=round,
                     )
                 if "loss" in metrics:
                     tf.summary.scalar(
-                        f"{task_type}_loss",
+                        f"{msg_type}_loss",
                         metrics["loss"],
                         step=round,
                     )
@@ -111,7 +100,6 @@ def get_tensorboard_mod(logdir) -> Mod:
     return tensorboard_mod
 
 
-# To run this: `flower-client client:app`
 # Run via `flower-client-app client:app`
 app = fl.client.ClientApp(
     client_fn=client_fn, mods=[get_tensorboard_mod(".runs_history")]
