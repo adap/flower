@@ -98,7 +98,9 @@ def http_request_response(
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
     retry_invoker: Optional[RetryInvoker] (default: None)
-        Unused argument present for compatibilty.
+        `RetryInvoker` object that will try to reconnect the client to the server
+        after REST connection errors. If None, the client will only try to
+        reconnect once after a failure.
 
     Returns
     -------

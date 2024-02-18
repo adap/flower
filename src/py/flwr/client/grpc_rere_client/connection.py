@@ -90,7 +90,8 @@ def grpc_request_response(
         Flower server. Bytes won't work for the REST API.
     retry_invoker: Optional[RetryInvoker] (default: None)
         `RetryInvoker` object that will try to reconnect the client to the server
-        after gRPC errors.
+        after gRPC errors. If None, the client will only try to
+        reconnect once after a failure.
 
     Returns
     -------

@@ -315,12 +315,12 @@ def _start_client_internal(
         - 'rest': HTTP (experimental)
     retry_max_tries: Optional[int]
         The maximum number of times the client will try to reconnect to the
-        server before giving up in case of gRPC error. If set to None, there
-        is no limit to the number of tries.
+        server before giving up in case of a connection error. If set to None,
+        there is no limit to the number of tries.
     retry_max_time: Optional[float]
         The maximum total amount of time before the client stops trying to
-        reconnect to the server before giving up in case of gRPC error. If set
-        to None, there is no limit to the total time.
+        reconnect to the server before giving up in case of connection error.
+        If set to None, there is no limit to the total time.
     """
     if insecure is None:
         insecure = root_certificates is None
