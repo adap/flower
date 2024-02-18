@@ -21,7 +21,7 @@ import typer
 
 def prompt_options(text: str, options: List[str]) -> str:
     """Ask user to select one of the given options and return the selected item."""
-    # Turn examples into a list with index as in " [ 0] quickstart-pytorch"
+    # Turn options into a list with index as in " [ 0] quickstart-pytorch"
     options_formatted = [
         " [ "
         + typer.style(index, fg=typer.colors.GREEN, bold=True)
