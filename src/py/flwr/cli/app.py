@@ -21,7 +21,7 @@ from .new.new import new
 
 app = typer.Typer(
     help=typer.style(
-        "This is flwr, the Flower command line interface.",
+        "flwr is the Flower command line interface.",
         fg=typer.colors.BRIGHT_YELLOW,
         bold=True,
     ),
