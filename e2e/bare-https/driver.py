@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 # Start Flower server
-hist = fl.driver.start_driver(
+hist = fl.server.start_driver(
     server_address="127.0.0.1:9091",
     config=fl.server.ServerConfig(num_rounds=3),
     root_certificates=Path("certificates/ca.crt").read_bytes(),
