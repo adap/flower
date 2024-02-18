@@ -23,12 +23,16 @@ from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from grpc import RpcError
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from flwr.client.client import Client
 from flwr.client.clientapp import ClientApp
 from flwr.client.typing import ClientFn
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
+from flwr.common import (
+    GRPC_MAX_MESSAGE_LENGTH,
+    EventType,
+    event as RequestsConnectionError,
+)
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
@@ -356,7 +360,7 @@ def _start_client_internal(
 
     retry_invoker = RetryInvoker(
         exponential,
-        ConnectionError if transport == "rest" else RpcError,
+        RequestsConnectionError if transport == "rest" else RpcError,
         max_tries=retry_max_tries,
         max_time=retry_max_time,
     )
