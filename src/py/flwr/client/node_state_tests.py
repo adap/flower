@@ -16,8 +16,7 @@
 
 
 from flwr.client.node_state import NodeState
-from flwr.common import ConfigsRecord
-from flwr.common.context import Context
+from flwr.common import ConfigsRecord, Context
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 

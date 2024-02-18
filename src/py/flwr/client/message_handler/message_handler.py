@@ -24,15 +24,13 @@ from flwr.client.client import (
     maybe_call_get_properties,
 )
 from flwr.client.typing import ClientFn
-from flwr.common import ConfigsRecord, RecordSet
+from flwr.common import Context, Message, Metadata, RecordSet, ConfigsRecord
 from flwr.common.constant import (
     MESSAGE_TYPE_EVALUATE,
     MESSAGE_TYPE_FIT,
     MESSAGE_TYPE_GET_PARAMETERS,
     MESSAGE_TYPE_GET_PROPERTIES,
 )
-from flwr.common.context import Context
-from flwr.common.message import Message, Metadata
 from flwr.common.recordset_compat import (
     evaluateres_to_recordset,
     fitres_to_recordset,
@@ -108,7 +106,7 @@ def handle_legacy_message_from_msgtype(
     client_fn: ClientFn, message: Message, context: Context
 ) -> Message:
     """Handle legacy message in the inner most mod."""
-    client = client_fn("-1")
+    client = client_fn(str(message.metadata.node_id))
 
     client.set_context(context)
 
