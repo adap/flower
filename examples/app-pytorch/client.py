@@ -5,7 +5,7 @@ import flwr as fl
 import wandb
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common.message import Message
-from flwr.common.constant import TASK_TYPE_FIT, TASK_TYPE_EVALUATE
+from flwr.common.constant import MESSAGE_TYPE_FIT, MESSAGE_TYPE_EVALUATE
 from flwr.common.context import Context
 from flwr.common import NDArrays, Parameters, Scalar
 
@@ -86,20 +86,20 @@ def get_wandb_mod(name: str) -> Mod:
 
         bwd = app(fwd, context)
 
-        if bwd.metadata.task_type == (TASK_TYPE_FIT or TASK_TYPE_EVALUATE):
+        if bwd.metadata.message_type == (MESSAGE_TYPE_FIT or MESSAGE_TYPE_EVALUATE):
             time_diff = time.time() - start_time
 
             results_to_log = {}
 
             metrics = bwd.content.metrics
-            task_type = bwd.metadata.task_type
+            msg_type = bwd.metadata.message_type
 
             if "loss" in metrics:
-                results_to_log[f"{task_type}_loss"] = metrics["loss"]
+                results_to_log[f"{msg_type}_loss"] = metrics["loss"]
             if "accuracy" in metrics:
-                results_to_log[f"{task_type}_accuracy"] = metrics["accuracy"]
+                results_to_log[f"{msg_type}_accuracy"] = metrics["accuracy"]
             if time_diff is not None:
-                results_to_log[f"{task_type}_time"] = time_diff
+                results_to_log[f"{msg_type}_time"] = time_diff
 
             wandb.log(results_to_log, step=int(round))
 
@@ -108,7 +108,6 @@ def get_wandb_mod(name: str) -> Mod:
     return wandb_mod
 
 
-# To run this: `flower-client client:app`
 # Run via `flower-client-app client:app`
 app = fl.client.ClientApp(
     client_fn=client_fn, mods=[get_wandb_mod("MT PyTorch Callable")]
