@@ -1,24 +1,13 @@
-from typing import Dict, Tuple
 import time
+from typing import Dict, Tuple
+
+import wandb
+from task import DEVICE, Net, get_parameters, load_data, set_parameters, test, train
 
 import flwr as fl
-import wandb
 from flwr.client.typing import ClientAppCallable, Mod
-from flwr.common.message import Message
-from flwr.common.constant import MESSAGE_TYPE_FIT, MESSAGE_TYPE_EVALUATE
-from flwr.common.context import Context
-from flwr.common import NDArrays, Parameters, Scalar
-
-from task import (
-    Net,
-    DEVICE,
-    load_data,
-    get_parameters,
-    set_parameters,
-    train,
-    test,
-)
-
+from flwr.common import Context, Message, NDArrays, Parameters, Scalar
+from flwr.common.constant import MESSAGE_TYPE_EVALUATE, MESSAGE_TYPE_FIT
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
