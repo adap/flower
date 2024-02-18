@@ -23,12 +23,9 @@ import ray
 
 from flwr.client import Client, NumPyClient
 from flwr.client.clientapp import ClientApp
-from flwr.common import Config, Scalar
+from flwr.common import Config, Context, Message, Metadata, RecordSet, Scalar
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
-from flwr.common.context import Context
-from flwr.common.message import Message, Metadata
-from flwr.common.recordset import RecordSet
 from flwr.common.recordset_compat import (
     getpropertiesins_to_recordset,
     recordset_to_getpropertiesres,

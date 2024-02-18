@@ -22,7 +22,7 @@ from pathlib import Path
 from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple, Union, cast
 
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Message, Metadata, RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
 from flwr.common.configsrecord import ConfigsRecord
@@ -34,8 +34,6 @@ from flwr.common.constant import (
 )
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
-from flwr.common.recordset import RecordSet
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     Reason,
