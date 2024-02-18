@@ -21,7 +21,7 @@ flower-superlink --insecure
 In a new terminal window, start the first long-running Flower client:
 
 ```bash
-flower-client client:app --insecure
+flower-client-app client:app --insecure
 ```
 
 In yet another new terminal window, start the second long-running Flower client:
