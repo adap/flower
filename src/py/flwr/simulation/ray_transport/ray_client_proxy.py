@@ -30,7 +30,7 @@ from flwr.common.constant import (
     MESSAGE_TYPE_GET_PROPERTIES,
 )
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.recordset_compat import (
     evaluateins_to_recordset,

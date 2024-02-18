@@ -21,7 +21,7 @@ from typing import List
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common import Context
-from flwr.common.message import Message, Metadata
+from flwr.common import Message, Metadata
 from flwr.common.metricsrecord import MetricsRecord
 from flwr.common.recordset import RecordSet
 

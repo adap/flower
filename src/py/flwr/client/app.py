@@ -35,7 +35,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
 )
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
-from flwr.common.message import Message
+from flwr.common import Message
 
 from .clientapp import load_client_app
 from .grpc_client.connection import grpc_connection

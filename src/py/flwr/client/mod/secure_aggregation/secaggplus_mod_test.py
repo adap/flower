@@ -22,7 +22,7 @@ from flwr.client.mod import make_ffn
 from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import MESSAGE_TYPE_FIT
 from flwr.common import Context
-from flwr.common.message import Message, Metadata
+from flwr.common import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.secure_aggregation.secaggplus_constants import (
     KEY_ACTIVE_SECURE_ID_LIST,

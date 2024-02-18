@@ -22,6 +22,7 @@ from .grpc import GRPC_MAX_MESSAGE_LENGTH
 from .logger import configure as configure
 from .logger import log as log
 from .message import Message as Message
+from .message import Metadata as Metadata
 from .metricsrecord import MetricsRecord as MetricsRecord
 from .parameter import bytes_to_ndarray as bytes_to_ndarray
 from .parameter import ndarray_to_bytes as ndarray_to_bytes
@@ -76,6 +77,7 @@ __all__ = [
     "GRPC_MAX_MESSAGE_LENGTH",
     "log",
     "Message",
+    "Metadata",
     "Metrics",
     "MetricsAggregationFn",
     "MetricsRecord",

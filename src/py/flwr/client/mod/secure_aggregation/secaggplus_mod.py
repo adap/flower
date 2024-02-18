@@ -27,7 +27,7 @@ from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import MESSAGE_TYPE_FIT
 from flwr.common import Context
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (

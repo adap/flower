@@ -34,7 +34,7 @@ from flwr.common.constant import (
 )
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
+from flwr.common import Message, Metadata
 from flwr.common.recordset import RecordSet
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
