@@ -15,77 +15,54 @@
 """RecordSet."""
 
 
-from dataclasses import dataclass, field
-from typing import Dict, Iterable, Union
+from dataclasses import dataclass
+from typing import Callable, Type, TypeVar
 
 from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parametersrecord import ParametersRecord
+from .typeddict import TypedDict
+
+T = TypeVar("T")
 
 
 @dataclass
 class RecordSet:
     """Enhanced RecordSet with a unified and Pythonic interface."""
 
-    _parameters: Dict[str, ParametersRecord] = field(default_factory=dict)
-    _metrics: Dict[str, MetricsRecord] = field(default_factory=dict)
-    _configs: Dict[str, ConfigsRecord] = field(default_factory=dict)
+    _parameters: TypedDict[str, ParametersRecord]
+    _metrics: TypedDict[str, MetricsRecord]
+    _configs: TypedDict[str, ConfigsRecord]
 
-    def __getitem__(
-        self, key: str
-    ) -> Union[ParametersRecord, MetricsRecord, ConfigsRecord]:
-        """."""
-        if key in self._parameters:
-            return self._parameters[key]
-        elif key in self._metrics:
-            return self._metrics[key]
-        elif key in self._configs:
-            return self._configs[key]
-        raise KeyError(f"Invalid key: {key}")
+    def __init__(self):
+        def _get_check_fn(__t: Type[T]) -> Callable[[T], None]:
+            def _check_fn(__v: T) -> None:
+                if not isinstance(__v, __t):
+                    raise TypeError(f"Key must be of type str. You passed {type(__v)}.")
 
-    def __setitem__(
-        self, key: str, value: Union[ParametersRecord, MetricsRecord, ConfigsRecord]
-    ) -> None:
-        """."""
-        if isinstance(value, ParametersRecord):
-            self._parameters[key] = value
-        elif isinstance(value, MetricsRecord):
-            self._metrics[key] = value
-        elif isinstance(value, ConfigsRecord):
-            self._configs[key] = value
-        else:
-            raise ValueError(f"Invalid value type: {type(value)}")
+            return _check_fn
 
-    def __delitem__(self, key: str) -> None:
-        """."""
-        if key in self._parameters:
-            del self._parameters[key]
-        elif key in self._metrics:
-            del self._metrics[key]
-        elif key in self._configs:
-            del self._configs[key]
-        else:
-            raise KeyError(f"Invalid key: {key}")
-
-    def __str__(self) -> str:
-        """."""
-        return (
-            f"RecordSet(parameters={self._parameters}, "
-            f"metrics={self._metrics}, configs={self._configs})"
+        self._parameters = TypedDict[str, ParametersRecord](
+            _get_check_fn(str), _get_check_fn(ParametersRecord)
+        )
+        self._metrics = TypedDict[str, MetricsRecord](
+            _get_check_fn(str), _get_check_fn(MetricsRecord)
+        )
+        self._configs = TypedDict[str, ConfigsRecord](
+            _get_check_fn(str), _get_check_fn(ConfigsRecord)
         )
 
-    def __repr__(self) -> str:
-        """."""
-        return self.__str__()
+    @property
+    def parameters_dict(self) -> TypedDict[str, ParametersRecord]:
+        """Dictionary of ParametersRecord."""
+        return self._parameters
 
-    def paramsrecord_keys(self) -> Iterable[str]:
-        """Retrieve the keys for each stored `ParametersRecord`."""
-        return self._parameters.keys()
+    @property
+    def metrics_dict(self) -> TypedDict[str, MetricsRecord]:
+        """Dictionary of MetricsRecord."""
+        return self._metrics
 
-    def metricsrecord_keys(self) -> Iterable[str]:
-        """Retrieve the keys for each stored `MetricsRecord`."""
-        return self._metrics.keys()
-
-    def configsrecord_keys(self) -> Iterable[str]:
-        """Retrieve the keys for each stored `ConfigsRecord`."""
-        return self._configs.keys()
+    @property
+    def configs_dict(self) -> TypedDict[str, ConfigsRecord]:
+        """Dictionary of ConfigsRecord."""
+        return self._configs
