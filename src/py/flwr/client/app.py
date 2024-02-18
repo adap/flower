@@ -28,11 +28,7 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from flwr.client.client import Client
 from flwr.client.clientapp import ClientApp
 from flwr.client.typing import ClientFn
-from flwr.common import (
-    GRPC_MAX_MESSAGE_LENGTH,
-    EventType,
-    event as RequestsConnectionError,
-)
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
