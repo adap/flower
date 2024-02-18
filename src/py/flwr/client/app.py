@@ -533,14 +533,13 @@ def _init_connection(
     transport: Optional[str], server_address: str
 ) -> Tuple[
     Callable[
-        [str, bool, int, Union[bytes, str, None]],
+        [str, bool, int, Union[bytes, str, None], Optional[RetryInvoker]],
         ContextManager[
             Tuple[
                 Callable[[], Optional[Message]],
                 Callable[[Message], None],
                 Optional[Callable[[], None]],
                 Optional[Callable[[], None]],
-                Optional[RetryInvoker],
             ]
         ],
     ],
