@@ -41,6 +41,13 @@ Poetry will install all your dependencies in a newly created virtual environment
 poetry run python3 -c "import flwr"
 ```
 
+You then need to install specific dependencies for this example. First clone the `FLamby` repo and install it:
+
+```shell
+git clone https://github.com/owkin/FLamby.git
+poetry run pip install -e "./FLamby[heart]"
+```
+
 If you don't see any errors you're good to go!
 
 #### pip
@@ -49,6 +56,22 @@ Write the command below in your terminal to install the dependencies according t
 
 ```shell
 pip install -r requirements.txt
+```
+
+And then you need to clone the `FLamby` repo and install it:
+
+```shell
+git clone https://github.com/owkin/FLamby.git
+pip install -e "./FLamby[heart]"
+```
+
+### Install dataset
+
+In order to install the `FedHeartDisease` dataset, you need to run the following commands:
+
+```shell
+cd FLamby/flamby/datasets/fed_heart_disease/dataset_creation_scripts
+python download.py --output-folder ./heart_disease_dataset
 ```
 
 ## Run Federated Learning Example
