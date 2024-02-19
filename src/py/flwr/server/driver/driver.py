@@ -25,7 +25,8 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER, GrpcDriver
+
+from .grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER, GrpcDriver
 
 
 class Driver:

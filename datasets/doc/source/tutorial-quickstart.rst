@@ -40,7 +40,7 @@ To iid partition your dataset, choose the split you want to partition and the nu
   partition = fds.load_partition(0, "train")
   centralized_dataset = fds.load_full("test")
 
-Now you're ready to go. You have ten partitions created from the train split of the MNIST dataset and the test split
+Now you're ready to go. You have ten partitions created from the train split of the CIFAR10 dataset and the test split
 for the centralized evaluation. We will convert the type of the dataset from Hugging Face's `Dataset` type to the one
 supported by your framework.
 
