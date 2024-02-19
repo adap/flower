@@ -23,6 +23,11 @@ model:
   activation: 'relu'
   agg_steps: 5
 
+server_device: cuda # cpu or cuda
+client_resources:
+  num_cpus: 2
+  num_gpus: 0.5
+
 strategy:
   _target_: fedpm.strategy.DenseStrategy
   _recursive_: false
@@ -32,7 +37,7 @@ strategy:
   min_evaluate_clients: 0
   min_available_clients: 0
   compressor_cfg: ${compressor}
-  device: cuda
+  device: ${server_device}
   loss_fn:
     _target_: torch.nn.CrossEntropyLoss
   
@@ -41,7 +46,7 @@ client:
   _recursive_: false
   model_cfg: ${model}
   compressor_cfg: ${compressor}
-  
+
 
 compressor:
   compress: True

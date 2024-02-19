@@ -41,12 +41,12 @@ class FedPMClient(flwr.client.Client):
         client_id: int,
         train_data_loader: DataLoader,
         test_data_loader: DataLoader,
-        device='cpu'
     ) -> None:
         self.model_cfg = model_cfg
         self.client_id = client_id
         self.train_data_loader = train_data_loader
-        self.device = device
+        # Device is set based on the `client_resources` passed to start_simulation
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.test_data_loader = test_data_loader
         self.local_model = load_model(self.model_cfg).to(self.device)
         self.epsilon = 0.01
@@ -166,13 +166,13 @@ class DenseClient(flwr.client.Client):
         client_id: int,
         train_data_loader: DataLoader,
         test_data_loader: DataLoader,
-        device='cpu'
     ) -> None:
         self.client_id = client_id
         self.compressor_cfg = compressor_cfg
         self.train_data_loader = train_data_loader
         self.test_data_loader = test_data_loader
-        self.device = device
+        # Device is set based on the `client_resources` passed to start_simulation
+        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.local_model = load_model(model_cfg).to(self.device)
         self.compressor = None
         self.compression = compressor_cfg.compress
@@ -243,7 +243,6 @@ class DenseClient(flwr.client.Client):
         optimizer: torch.optim.Optimizer = None,
     ):
         """Train the network on the training set."""
-
         if self.compressor_cfg.compress:
             # TODO: make this better in 2nd round of Hydra fixes
             if self.compressor_cfg.type == "sign_sgd":

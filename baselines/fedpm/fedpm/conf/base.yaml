@@ -23,6 +23,11 @@ model:
   activation: 'relu'
   agg_steps: 5
 
+server_device: cuda # cpu or cuda
+client_resources:
+  num_cpus: 2
+  num_gpus: 0.2
+
 strategy:
   _target_: fedpm.strategy.FedPMStrategy
   fraction_fit: 0.02
@@ -32,14 +37,13 @@ strategy:
   min_available_clients: 0
   local_epochs: 3
   local_lr: 0.1
-  device: cpu
+  device: ${server_device}
   loss_fn:
     _target_: torch.nn.CrossEntropyLoss
   
 client:
   _target_: fedpm.client.FedPMClient
   model_cfg: ${model}
-  
 
 compressor:
   compress: True

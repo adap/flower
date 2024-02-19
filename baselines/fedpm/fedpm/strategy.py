@@ -186,11 +186,14 @@ class FedPMStrategy(flwr.server.strategy.Strategy):
         correct = 0
         total = 0
         set_parameters(self.global_model, parameters_to_ndarrays(parameters))
+        self.global_model.to(self.device)
         with torch.no_grad():
             inputs, labels = next(iter(self.global_dataset))
+            inputs = inputs.to(self.device)
+            labels = labels.to(self.device)
             self.global_model.zero_grad()
-            outputs = self.global_model(inputs.to(self.device))
-            loss = self.loss_fn(outputs, labels.to(self.device))
+            outputs = self.global_model(inputs)
+            loss = self.loss_fn(outputs, labels)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.shape[0]
             correct += (predicted == labels).sum().item()
