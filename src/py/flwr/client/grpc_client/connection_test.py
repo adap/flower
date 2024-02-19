@@ -46,8 +46,10 @@ MESSAGE_GET_PROPERTIES = Message(
     metadata=Metadata(
         run_id=0,
         message_id="",
+        src_node_id=0,
+        dst_node_id=0,
+        reply_to_message="",
         group_id="",
-        node_id=0,
         ttl="",
         message_type=MESSAGE_TYPE_GET_PROPERTIES,
     ),
@@ -59,8 +61,10 @@ MESSAGE_DISCONNECT = Message(
     metadata=Metadata(
         run_id=0,
         message_id="",
+        src_node_id=0,
+        dst_node_id=0,
+        reply_to_message="",
         group_id="",
-        node_id=0,
         ttl="",
         message_type="reconnect",
     ),

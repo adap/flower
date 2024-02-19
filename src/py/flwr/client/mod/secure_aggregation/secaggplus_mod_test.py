@@ -53,18 +53,8 @@ def get_test_handler(
 ) -> Callable[[Dict[str, ConfigsRecordValues]], Dict[str, ConfigsRecordValues]]:
     """."""
 
-    def empty_ffn(_: Message, _2: Context) -> Message:
-        return Message(
-            metadata=Metadata(
-                run_id=0,
-                message_id="",
-                group_id="",
-                node_id=0,
-                ttl="",
-                message_type=MESSAGE_TYPE_FIT,
-            ),
-            content=RecordSet(),
-        )
+    def empty_ffn(_msg: Message, _2: Context) -> Message:
+        return _msg.create_reply(RecordSet(), ttl="")
 
     app = make_ffn(empty_ffn, [secaggplus_mod])
 
@@ -73,8 +63,10 @@ def get_test_handler(
             metadata=Metadata(
                 run_id=0,
                 message_id="",
+                src_node_id=0,
+                dst_node_id=123,
+                reply_to_message="",
                 group_id="",
-                node_id=0,
                 ttl="",
                 message_type=MESSAGE_TYPE_FIT,
             ),

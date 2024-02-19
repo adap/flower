@@ -24,7 +24,6 @@ from flwr.client.typing import ClientAppCallable
 from flwr.common import (
     Context,
     Message,
-    Metadata,
     RecordSet,
     ndarray_to_bytes,
     parameters_to_ndarrays,
@@ -210,17 +209,8 @@ def secaggplus_mod(
     ctxt.state.set_configs(RECORD_KEY_STATE, ConfigsRecord(state.to_dict()))
 
     # Return message
-    return Message(
-        metadata=Metadata(
-            run_id=0,
-            message_id="",
-            group_id="",
-            node_id=0,
-            ttl="",
-            message_type=MESSAGE_TYPE_FIT,
-        ),
-        content=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)}),
-    )
+    content = RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)})
+    return msg.create_reply(content, ttl="")
 
 
 def check_stage(current_stage: str, configs: Dict[str, ConfigsRecordValues]) -> None:
