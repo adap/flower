@@ -15,15 +15,17 @@
 """Tests for driver SDK."""
 
 
+import time
 import unittest
 from unittest.mock import Mock, patch
 
+from flwr.common import RecordSet
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     PullTaskResRequest,
     PushTaskInsRequest,
 )
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
 from .driver import Driver
 
@@ -74,11 +76,11 @@ class TestDriver(unittest.TestCase):
         """Test retrieval of nodes."""
         # Prepare
         mock_response = Mock()
-        mock_response.nodes = [Mock(), Mock()]
+        mock_response.nodes = [Mock(node_id=404), Mock(node_id=200)]
         self.mock_grpc_driver.get_nodes.return_value = mock_response
 
         # Execute
-        nodes = self.driver.get_nodes()
+        node_ids = self.driver.get_node_ids()
         args, kwargs = self.mock_grpc_driver.get_nodes.call_args
 
         # Assert
@@ -87,18 +89,19 @@ class TestDriver(unittest.TestCase):
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], GetNodesRequest)
         self.assertEqual(args[0].run_id, 61016)
-        self.assertEqual(nodes, mock_response.nodes)
+        self.assertEqual(node_ids, [404, 200])
 
-    def test_push_task_ins(self) -> None:
-        """Test pushing task instructions."""
+    def test_push_messages_valid(self) -> None:
+        """Test pushing valid messages."""
         # Prepare
-        mock_response = Mock()
-        mock_response.task_ids = ["id1", "id2"]
+        mock_response = Mock(task_ids=["id1", "id2"])
         self.mock_grpc_driver.push_task_ins.return_value = mock_response
-        task_ins_list = [TaskIns(), TaskIns()]
+        msgs = [
+            self.driver.create_message(RecordSet(), "", 0, "", "") for _ in range(2)
+        ]
 
         # Execute
-        task_ids = self.driver.push_task_ins(task_ins_list)
+        msg_ids = self.driver.push_messages(msgs)
         args, kwargs = self.mock_grpc_driver.push_task_ins.call_args
 
         # Assert
@@ -106,12 +109,27 @@ class TestDriver(unittest.TestCase):
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PushTaskInsRequest)
-        self.assertEqual(task_ids, mock_response.task_ids)
+        self.assertEqual(msg_ids, mock_response.task_ids)
         for task_ins in args[0].task_ins_list:
             self.assertEqual(task_ins.run_id, 61016)
 
-    def test_pull_task_res_with_given_task_ids(self) -> None:
-        """Test pulling task results with specific task IDs."""
+    def test_push_messages_invalid(self) -> None:
+        """Test pushing invalid messages."""
+        # Prepare
+        mock_response = Mock(task_ids=["id1", "id2"])
+        self.mock_grpc_driver.push_task_ins.return_value = mock_response
+        msgs = [
+            self.driver.create_message(RecordSet(), "", 0, "", "") for _ in range(2)
+        ]
+        # Use invalid run_id
+        msgs[1].metadata._run_id += 1  # pylint: disable=protected-access
+
+        # Execute and assert
+        with self.assertRaises(ValueError):
+            self.driver.push_messages(msgs)
+
+    def test_pull_messages_with_given_message_ids(self) -> None:
+        """Test pulling messages with specific message IDs."""
         # Prepare
         mock_response = Mock()
         mock_response.task_res_list = [
@@ -119,10 +137,11 @@ class TestDriver(unittest.TestCase):
             TaskRes(task=Task(ancestry=["id3"])),
         ]
         self.mock_grpc_driver.pull_task_res.return_value = mock_response
-        task_ids = ["id1", "id2", "id3"]
+        msg_ids = ["id1", "id2", "id3"]
 
         # Execute
-        task_res_list = self.driver.pull_task_res(task_ids)
+        msgs = self.driver.pull_messages(msg_ids)
+        reply_tos = {msg.metadata.reply_to_message for msg in msgs}
         args, kwargs = self.mock_grpc_driver.pull_task_res.call_args
 
         # Assert
@@ -130,8 +149,43 @@ class TestDriver(unittest.TestCase):
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PullTaskResRequest)
-        self.assertEqual(args[0].task_ids, task_ids)
-        self.assertEqual(task_res_list, mock_response.task_res_list)
+        self.assertEqual(args[0].task_ids, msg_ids)
+        self.assertEqual(reply_tos, {"id2", "id3"})
+
+    def test_send_and_receive_messages_complete(self) -> None:
+        """Test send and receive all messages successfully."""
+        # Prepare
+        mock_response = Mock(task_ids=["id1"])
+        self.mock_grpc_driver.push_task_ins.return_value = mock_response
+        mock_response = Mock(task_res_list=[TaskRes(task=Task(ancestry=["id1"]))])
+        self.mock_grpc_driver.pull_task_res.return_value = mock_response
+        msgs = [self.driver.create_message(RecordSet(), "", 0, "", "")]
+
+        # Execute
+        ret_msgs = list(self.driver.send_and_receive(msgs))
+
+        # Assert
+        self.assertEqual(len(ret_msgs), 1)
+        self.assertEqual(ret_msgs[0].metadata.reply_to_message, "id1")
+
+    def test_send_and_receive_messages_timeout(self) -> None:
+        """Test send and receive messages but time out."""
+        # Prepare
+        sleep_fn = time.sleep
+        mock_response = Mock(task_ids=["id1"])
+        self.mock_grpc_driver.push_task_ins.return_value = mock_response
+        mock_response = Mock(task_res_list=[])
+        self.mock_grpc_driver.pull_task_res.return_value = mock_response
+        msgs = [self.driver.create_message(RecordSet(), "", 0, "", "")]
+
+        # Execute
+        with patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01)):
+            start_time = time.time()
+            ret_msgs = list(self.driver.send_and_receive(msgs, timeout=0.15))
+
+        # Assert
+        self.assertLess(time.time() - start_time, 0.2)
+        self.assertEqual(len(ret_msgs), 0)
 
     def test_del_with_initialized_driver(self) -> None:
         """Test cleanup behavior when Driver is initialized."""
