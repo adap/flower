@@ -169,9 +169,11 @@ def grpc_connection(  # pylint: disable=R0915
             metadata=Metadata(
                 run_id=0,
                 message_id=str(uuid.uuid4()),
+                src_node_id=0,
+                dst_node_id=0,
+                reply_to_message="",
                 group_id="",
                 ttl="",
-                node_id=0,
                 message_type=message_type,
             ),
             content=recordset,
@@ -205,7 +207,7 @@ def grpc_connection(  # pylint: disable=R0915
                 disconnect_res=ClientMessage.DisconnectRes(reason=reason)
             )
         else:
-            raise ValueError(f"Invalid task type: {message_type}")
+            raise ValueError(f"Invalid message type: {message_type}")
 
         # Send ClientMessage proto
         return queue.put(msg_proto, block=False)
