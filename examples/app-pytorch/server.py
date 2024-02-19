@@ -33,10 +33,9 @@ strategy = fl.server.strategy.FedAvg(
     fit_metrics_aggregation_fn=weighted_average,
 )
 
-if __name__ == "__main__":
-    # Start Flower server
-    fl.server.driver.start_driver(
-        server_address="0.0.0.0:9091",
-        config=fl.server.ServerConfig(num_rounds=3),
-        strategy=strategy,
-    )
+
+# Run via `flower-server-app server:app`
+app = fl.server.ServerApp(
+    config=fl.server.ServerConfig(num_rounds=3),
+    strategy=strategy,
+)
