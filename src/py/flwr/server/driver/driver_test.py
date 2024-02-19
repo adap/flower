@@ -166,7 +166,7 @@ class TestDriver(unittest.TestCase):
         # Execute
         with patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01)):
             start_time = time.time()
-            ret_msgs = list(self.driver.send_and_receive(msgs, time_out=0.15))
+            ret_msgs = list(self.driver.send_and_receive(msgs, timeout=0.15))
 
         # Assert
         self.assertLess(time.time() - start_time, 0.2)

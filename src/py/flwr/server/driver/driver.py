@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Flower driver service client."""
+
+
 import time
 from typing import Iterable, List, Optional, Tuple
 
@@ -115,13 +117,13 @@ class Driver:
 
         Returns
         -------
-        Message
+        message : Message
             A new `Message` instance with the specified content and metadata.
         """
         _, run_id = self._get_grpc_driver_and_run_id()
         metadata = Metadata(
             run_id=run_id,
-            message_id="",
+            message_id="",  # Will be set by the server
             src_node_id=self.node.node_id,
             dst_node_id=dst_node_id,
             reply_to_message="",
@@ -142,7 +144,7 @@ class Driver:
         """Push messages to specified node IDs.
 
         This method takes an iterable of messages and sends each message
-        to the node it specifies in `node_id`.
+        to the node specified in `dst_node_id`.
 
         Parameters
         ----------
@@ -153,7 +155,7 @@ class Driver:
         -------
         message_ids : Iterable[str]
             An iterable of IDs for the messages that were sent, which can be used
-            to pull responses.
+            to pull replies.
         """
         grpc_driver, _ = self._get_grpc_driver_and_run_id()
         # Construct TaskIns
@@ -172,17 +174,17 @@ class Driver:
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
 
-        This method is used to collect responses or messages from the network
-        that correspond to a set of given task identifiers.
+        This method is used to collect messages from the SuperLink
+        that correspond to a set of given message IDs.
 
         Parameters
         ----------
         message_ids : Iterable[str]
-            An iterable of task identifiers for which messages are to be retrieved.
+            An iterable of message IDs for which reply messages are to be retrieved.
 
         Returns
         -------
-        Iterable[Message]
+        messages : Iterable[Message]
             An iterable of messages received.
         """
         grpc_driver, _ = self._get_grpc_driver_and_run_id()
@@ -198,42 +200,42 @@ class Driver:
         self,
         messages: Iterable[Message],
         *,
-        time_out: Optional[float] = None,
+        timeout: Optional[float] = None,
     ) -> Iterable[Message]:
-        """Push messages to specified node IDs and pull the responses.
+        """Push messages to specified node IDs and pull the reply messages.
 
-        This method sends a list of messages to their target node IDs and then
-        waits for the responses. It continues to pull responses until either all
-        responses are received or the specified time out duration is exceeded.
+        This method sends a list of messages to their destination node IDs and then
+        waits for the replies. It continues to pull replies until either all
+        replies are received or the specified timeout duration is exceeded.
 
         Parameters
         ----------
-        messages : Iterable[Tuple[Message, Iterable[int]]]
+        messages : Iterable[Message]
             An iterable of messages to be sent.
-        time_out : Optional[float], default=None
-            The time out duration in seconds. If specified, the method will wait for
-            responses for this duration. If None, there is no time limit and the method
-            will wait until responses for all messages are received.
+        timeout : Optional[float] (default: None)
+            The timeout duration in seconds. If specified, the method will wait for
+            replies for this duration. If `None`, there is no time limit and the method
+            will wait until replies for all messages are received.
 
         Returns
         -------
-        Iterable[Message]
-            An iterable of messages received.
+        replies : Iterable[Message]
+            An iterable of reply messages received from the SuperLink.
 
         Notes
         -----
         This method uses `push_messages` to send the messages and `pull_messages`
-        to collect the responses. If `time_out` is set, the method may not return
-        responses for all sent messages. A message remains valid until its TTL,
-        which is not affected by `time_out`.
+        to collect the replies. If `timeout` is set, the method may not return
+        replies for all sent messages. A message remains valid until its TTL,
+        which is not affected by `timeout`.
         """
         # Push messages
         msg_ids = set(self.push_messages(messages))
 
         # Pull messages
-        end_time = time.time() + (time_out if time_out is not None else 0.0)
+        end_time = time.time() + (timeout if timeout is not None else 0.0)
         ret: List[Message] = []
-        while time_out is None or time.time() < end_time:
+        while timeout is None or time.time() < end_time:
             res_msgs = self.pull_messages(msg_ids)
             ret.extend(res_msgs)
             msg_ids.difference_update(
