@@ -19,7 +19,7 @@ import time
 import unittest
 from unittest.mock import Mock, patch
 
-from flwr.common.recordset import RecordSet
+from flwr.common import RecordSet
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     PullTaskResRequest,
@@ -91,8 +91,8 @@ class TestDriver(unittest.TestCase):
         self.assertEqual(args[0].run_id, 61016)
         self.assertEqual(node_ids, [404, 200])
 
-    def test_push_messages(self) -> None:
-        """Test pushing task instructions."""
+    def test_push_messages_valid(self) -> None:
+        """Test pushing valid messages."""
         # Prepare
         mock_response = Mock(task_ids=["id1", "id2"])
         self.mock_grpc_driver.push_task_ins.return_value = mock_response
@@ -112,6 +112,21 @@ class TestDriver(unittest.TestCase):
         self.assertEqual(msg_ids, mock_response.task_ids)
         for task_ins in args[0].task_ins_list:
             self.assertEqual(task_ins.run_id, 61016)
+
+    def test_push_messages_invalid(self) -> None:
+        """Test pushing invalid messages."""
+        # Prepare
+        mock_response = Mock(task_ids=["id1", "id2"])
+        self.mock_grpc_driver.push_task_ins.return_value = mock_response
+        msgs = [
+            self.driver.create_message(RecordSet(), "", 0, "", "") for _ in range(2)
+        ]
+        # Use invalid run_id
+        msgs[1].metadata._run_id += 1  # pylint: disable=protected-access
+
+        # Execute and assert
+        with self.assertRaises(ValueError):
+            self.driver.push_messages(msgs)
 
     def test_pull_messages_with_given_message_ids(self) -> None:
         """Test pulling messages with specific message IDs."""
