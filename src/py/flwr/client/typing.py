@@ -14,13 +14,15 @@
 # ==============================================================================
 """Custom types for Flower clients."""
 
+
 from typing import Callable
 
-from flwr.common.context import Context
-from flwr.common.message import Message
+from flwr.common import Context, Message
 
 from .client import Client as Client
 
-FlowerCallable = Callable[[Message, Context], Message]
+# Compatibility
 ClientFn = Callable[[str], Client]
-Layer = Callable[[Message, Context, FlowerCallable], Message]
+
+ClientAppCallable = Callable[[Message, Context], Message]
+Mod = Callable[[Message, Context, ClientAppCallable], Message]
