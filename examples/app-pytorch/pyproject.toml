@@ -3,7 +3,7 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "mt-pytorch"
+name = "app-pytorch"
 version = "0.1.0"
 description = "Multi-Tenant Federated Learning with Flower and PyTorch"
 authors = ["The Flower Authors <hello@flower.dev>"]
