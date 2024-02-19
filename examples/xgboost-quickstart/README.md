@@ -85,4 +85,4 @@ poetry run ./run.sh
 ```
 
 Look at the [code](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
-and [tutorial](https://flower.dev/docs/framework/tutorial-quickstart-xgboost.html) for a detailed explanation.
+and [tutorial](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html) for a detailed explanation.
