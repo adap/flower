@@ -22,6 +22,7 @@ from utils_mnist import (
     subset_alignment_dataloader,
     train_align,
     eval_reconstrution,
+    visualize_plotly_latent_representation,
 )
 from utils_mnist import VAE
 import os
@@ -44,7 +45,7 @@ parser.add_argument(
     default=1 / 2,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=20, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
 parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
 args = parser.parse_args()
 
@@ -63,7 +64,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.cid = cid
 
         # Instantiate model
-        self.model = VAE()
+        self.model = VAE(z_dim=16)
 
         # Determine device
         self.device = DEVICE
@@ -99,12 +100,19 @@ class FlowerClient(fl.client.NumPyClient):
             f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
             folder=IDENTIFIER,
         )
-        latent_reps = visualize_gmm_latent_representation(
+        # latent_reps = visualize_gmm_latent_representation(
+        #     self.model,
+        #     DataLoader(self.valset, batch_size=64),
+        #     self.device,
+        #     f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
+        #     folder=IDENTIFIER,
+        #     num_class=NUM_CLASSES,
+        #     use_PCA=True,
+        # )
+        latent_reps = visualize_plotly_latent_representation(
             self.model,
             DataLoader(self.valset, batch_size=64),
             self.device,
-            f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
-            folder=IDENTIFIER,
             num_class=NUM_CLASSES,
             use_PCA=True,
         )
@@ -122,6 +130,7 @@ class FlowerClient(fl.client.NumPyClient):
                 "gen_image": gen_img,
                 "latent_rep": latent_reps,
                 "client_round": config["server_round"],
+                "train_total_loss": vae_loss_term + reg_term + align_term,
             },
         )
 
@@ -139,7 +148,7 @@ class FlowerClient(fl.client.NumPyClient):
             float(loss),
             len(valloader.dataset),
             {
-                "accuracy": float(accuracy),
+                "accuracy": float(accuracy),  # only reconstraction loss
                 "cid": self.cid,
                 "local_val_loss": float(loss),
             },
@@ -186,7 +195,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 def main():
     run = wandb.init(
         entity="mak",
-        group="cir20",
+        group="cir50",
         reinit=True,
     )
 
@@ -225,7 +234,7 @@ def main():
             # Determine device
             device = DEVICE
 
-            model = VAE(z_dim=2)
+            model = VAE(z_dim=16)
             model.to(device)
             set_params(model, parameters)
             if server_round == 0 or server_round == args.num_rounds:
@@ -243,12 +252,19 @@ def main():
                 f"server_eval_{server_round}",
                 folder=IDENTIFIER,
             )
-            latent_reps = visualize_gmm_latent_representation(
+            # latent_reps = visualize_gmm_latent_representation(
+            #     model,
+            #     testloader,
+            #     device,
+            #     f"server_eval_{server_round}",
+            #     folder=IDENTIFIER,
+            #     num_class=NUM_CLASSES,
+            #     use_PCA=True,
+            # )
+            latent_reps = visualize_plotly_latent_representation(
                 model,
                 testloader,
                 device,
-                f"server_eval_{server_round}",
-                folder=IDENTIFIER,
                 num_class=NUM_CLASSES,
                 use_PCA=True,
             )
@@ -257,7 +273,7 @@ def main():
                 {
                     f"global_true_image": wandb.Image(true_img),
                     f"global_gen_image": wandb.Image(gen_img),
-                    f"global_latent_rep": wandb.Image(latent_reps),
+                    f"global_latent_rep": latent_reps,
                     f"global_val_loss": global_val_loss,
                     "server_round": server_round,
                 }
@@ -268,8 +284,8 @@ def main():
 
     # Download dataset and partition it
     trainsets, valsets = non_iid_train_iid_test_6789()
-    net = VAE(z_dim=2).to(DEVICE)
-    gen_net = VAE(encoder_only=True).to(DEVICE)
+    net = VAE(z_dim=16).to(DEVICE)
+    gen_net = VAE(z_dim=16,encoder_only=True).to(DEVICE)
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)
     n2 = [val.cpu().numpy() for _, val in gen_net.state_dict().items()]
@@ -322,29 +338,25 @@ if __name__ == "__main__":
         "method": "random",
         "metric": {"name": "global_val_loss", "goal": "minimize"},
         "parameters": {
-            "sample_per_class": {
-                "values": [
-                    200,
-                ]
-            },
+            "sample_per_class": {"values": [200, 300]},
             # "lambda_reg": {"min": 0.0, "max": 1.0},
             # "lambda_align_g": {"min": 1e-6, "max": 1e-3},
-            "lambda_align_g": {"values": [1, 10]}, # kl term for generator
-            "lambda_reg": {"values": [0.5, 1]},
-            "lambda_align": {"values": [1, 10]},
+            "lambda_align_g": {"values": [0.1, 0.01]},  # kl term for generator
+            "lambda_reg": {"values": [0.1, 1]},
+            "lambda_align": {"values": [1, 2]},
             # "lambda_align": {"min": 1e-6, "max": 1e-3},
             "lr_g": {
                 "values": [
                     1e-3,
-                    1e-4,
+                    # 1e-4,
                 ]
             },
-            "steps_g": {"values": [5, 10, 15, 20]},  # number of epochs for generator
-            "epochs": {"values": [5, 10]},
-            "batch_size": {"values": [32, 64, 128]},
-            "beta": {"values": [1, 0.01]},  # for local kl loss
+            "steps_g": {"values": [200, 100]},  # number of epochs for generator
+            "epochs": {"values": [5]},
+            "batch_size": {"values": [128]},
+            "beta": {"values": [0]},  # for local kl loss
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=6)
+    wandb.agent(sweep_id, function=main, count=5)

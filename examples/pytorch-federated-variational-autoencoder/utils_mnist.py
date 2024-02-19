@@ -16,6 +16,7 @@ from torch.nn.parameter import Parameter
 from typing import List, Tuple
 from sklearn.mixture import GaussianMixture
 import matplotlib
+import plotly.graph_objects as go
 
 matplotlib.use("Agg")
 
@@ -472,12 +473,7 @@ def train_align(
             loss += lambda_align * loss_align_reduced
             loss.backward()
             optimizer.step()
-    # assert all(
-    #     torch.equal(val1, val2)
-    #     for (_, val1), (_, val2) in zip(
-    #         temp_gen_model.state_dict().items(), copied_model.state_dict().items()
-    #     )
-    # ), "Not all parameters are equal."
+
     return (
         vae_loss1.item(),
         lambda_reg * vae_loss2.item(),
@@ -640,6 +636,59 @@ def visualize_gmm_latent_representation(
     fig.savefig(f"{folder}/latent_rep_at_{rnd}.png")
     plt.close()
     return f"{folder}/latent_rep_at_{rnd}.png"
+
+
+def visualize_plotly_latent_representation(
+    model, test_loader, device, use_PCA=False, num_class=10
+):
+    model.eval()
+    all_latents = []
+    all_labels = []
+    all_means = []
+
+    with torch.no_grad():
+        for data, labels in test_loader:
+            data = data.to(device)
+            z, mu, _ = model(data)
+            all_latents.append(z.cpu().numpy())
+            all_means.append(mu.cpu().numpy())
+            all_labels.append(labels.numpy())
+
+    all_latents = np.concatenate(all_latents, axis=0)
+    all_labels = np.concatenate(all_labels, axis=0)
+    all_means = np.concatenate(all_means, axis=0)
+    reduced_latents = all_latents
+    if use_PCA:
+        # Apply PCA using PyTorch
+        cov_matrix = torch.tensor(np.cov(all_latents.T), dtype=torch.float32)
+        _, _, V = torch.svd_lowrank(cov_matrix, q=2)
+
+        # Project data onto the first two principal components
+        reduced_latents = torch.mm(torch.tensor(all_latents, dtype=torch.float32), V)
+
+        # Convert to numpy array
+        reduced_latents = reduced_latents.numpy()
+    fig = go.Figure()
+
+    fig.add_trace(
+        go.Scatter(
+            x=reduced_latents[:, 0],
+            y=reduced_latents[:, 1],
+            mode="markers",
+            marker=dict(color=all_labels, colorscale="Set1", opacity=0.8, size=8),
+            name="Labels",
+        )
+    )
+
+    fig.update_layout(
+        title="Latent Representation with True Labels",
+        xaxis=dict(title="Principal Component 1"),
+        yaxis=dict(title="Principal Component 2"),
+        legend=dict(title="True Labels"),
+        hovermode="closest",
+    )
+
+    return fig
 
 
 def sample(net, device):

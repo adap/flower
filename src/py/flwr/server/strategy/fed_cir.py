@@ -23,6 +23,8 @@ from .aggregate import aggregate, weighted_loss_avg
 from .fedavg import FedAvg
 import wandb
 import matplotlib
+import numpy as np
+import plotly.graph_objects as go
 
 matplotlib.use("Agg")
 
@@ -57,7 +59,7 @@ def vae_loss(recon_img, img, mu, logvar, beta=1.0):
     return total_loss
 
 
-def info_vae_loss(recon_x, x, mu, logvar, y, y_pred, lambda_kl=0.01, lambda_info=1.0):
+def info_vae_loss(recon_x, x, mu, logvar, y, y_pred, lambda_kl=0.01, lambda_info=10.0):
     # Reconstruction loss
     recon_loss = F.binary_cross_entropy(
         recon_x, x.view(-1, 784), reduction="sum"
@@ -169,15 +171,15 @@ class FedCiR(FedAvg):
         self.steps_gen = steps_g
         self.gen_stats = gen_stats
         self.device = device
-        self.gen_model = VAE(encoder_only=True).to(self.device)
+        self.gen_model = VAE(z_dim=16, encoder_only=True).to(self.device)
         self.alignment_loader = alignment_dataloader
         self.ref_mu, self.ref_logvar = self.compute_ref_stats()
         self.lambda_align_g = lambda_align_g
 
-    def compute_ref_stats(self):
-        ref_model = infoVAE(latent_size=2, dis_hidden_size=4).to(self.device)
+    def compute_ref_stats(self, use_PCA=True):
+        ref_model = infoVAE(latent_size=16, dis_hidden_size=4).to(self.device)
         opt_ref = torch.optim.Adam(ref_model.parameters(), lr=1e-3)
-        for ep in range(5000):
+        for ep in range(4000):
             for images, labels in self.alignment_loader:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
@@ -190,7 +192,7 @@ class FedCiR(FedAvg):
                     logvar,
                     labels,
                     y_pred,
-                    0.01,
+                    1,
                     10,
                 )
                 total_loss.backward()
@@ -203,11 +205,53 @@ class FedCiR(FedAvg):
 
                 log(DEBUG, f"--------------------------------------------------")
         ref_model.eval()
+        test_latents = []
+        test_labels = []
         with torch.no_grad():
             for images, labels in self.alignment_loader:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 _, ref_mu, ref_logvar, _ = ref_model(images, labels)
+                test_latents.append(ref_mu.cpu().numpy())
+                test_labels.append(labels.cpu().numpy())
+            test_latents = np.concatenate(test_latents, axis=0)
+            test_labels = np.concatenate(test_labels, axis=0)
+            if use_PCA:
+                # Apply PCA using PyTorch
+                cov_matrix = torch.tensor(np.cov(test_latents.T), dtype=torch.float32)
+                _, _, V = torch.svd_lowrank(cov_matrix, q=2)
+
+                # Project data onto the first two principal components
+                reduced_latents = torch.mm(
+                    torch.tensor(test_latents, dtype=torch.float32), V
+                )
+
+                # Convert to numpy array
+                test_latents = reduced_latents.numpy()
+            # Create traces for each class
+            traces = []
+            for label in np.unique(test_labels):
+                indices = np.where(test_labels == label)
+                trace = go.Scatter(
+                    x=test_latents[indices, 0].flatten(),
+                    y=test_latents[indices, 1].flatten(),
+                    mode="markers",
+                    name=str(label),
+                    marker=dict(size=8),
+                )
+                traces.append(trace)
+
+            # Create layout
+            layout = go.Layout(
+                title="Latent Space Visualization of Test Set with Class Highlight",
+                xaxis=dict(title="Latent Dimension 1"),
+                yaxis=dict(title="Latent Dimension 2"),
+                legend=dict(title="Class"),
+            )
+
+            # Create figure
+            fig = go.Figure(data=traces, layout=layout)
+            wandb.log({"latent_space": fig})
         return ref_mu, ref_logvar
 
     def __repr__(self) -> str:
@@ -321,7 +365,9 @@ class FedCiR(FedAvg):
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        temp_local_models = [VAE().to(self.device) for _ in range(len(weights_results))]
+        temp_local_models = [
+            VAE(z_dim=16).to(self.device) for _ in range(len(weights_results))
+        ]
         optimizer = torch.optim.Adam(self.gen_model.parameters(), lr=self.lr_gen)
 
         for temp_local_model in temp_local_models:
@@ -403,15 +449,16 @@ class FedCiR(FedAvg):
                 ],
                 f"train_reg_term_{fit_metric[1]['cid']}": fit_metric[1]["reg_term"],
                 f"train_align_term_{fit_metric[1]['cid']}": fit_metric[1]["align_term"],
+                f"train_total_loss_{fit_metric[1]['cid']}": fit_metric[1][
+                    "train_total_loss"
+                ],
                 f"train_true_image_{fit_metric[1]['cid']}": wandb.Image(
                     fit_metric[1]["true_image"]
                 ),
                 f"train_gen_image_{fit_metric[1]['cid']}": wandb.Image(
                     fit_metric[1]["gen_image"]
                 ),
-                f"train_latent_rep_{fit_metric[1]['cid']}": wandb.Image(
-                    fit_metric[1]["latent_rep"]
-                ),
+                f"train_latent_rep_{fit_metric[1]['cid']}": fit_metric[1]["latent_rep"],
                 "client_round": fit_metric[1]["client_round"],
             }
 

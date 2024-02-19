@@ -210,7 +210,7 @@ def train():
         ref_model.eval()
         with torch.no_grad():
             test_latents = []
-            test_labels = []  # Store corresponding labels
+            test_labels = []  
             for (
                 x,
                 labels,
