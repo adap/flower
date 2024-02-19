@@ -23,6 +23,7 @@ from flwr import common
 from flwr.client import ClientFn
 from flwr.client.clientapp import ClientApp
 from flwr.client.node_state import NodeState
+from flwr.common import Message, Metadata, RecordSet
 from flwr.common.constant import (
     MESSAGE_TYPE_EVALUATE,
     MESSAGE_TYPE_FIT,
@@ -30,8 +31,6 @@ from flwr.common.constant import (
     MESSAGE_TYPE_GET_PROPERTIES,
 )
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
-from flwr.common.recordset import RecordSet
 from flwr.common.recordset_compat import (
     evaluateins_to_recordset,
     fitins_to_recordset,
@@ -107,7 +106,9 @@ class RayActorClientProxy(ClientProxy):
                 run_id=0,
                 message_id="",
                 group_id="",
-                node_id=int(self.cid),
+                src_node_id=0,
+                dst_node_id=int(self.cid),
+                reply_to_message="",
                 ttl=str(timeout) if timeout else "",
                 message_type=message_type,
             ),

@@ -18,13 +18,12 @@
 import importlib
 from typing import Callable, Optional, cast
 
-from flwr.common.context import Context
-from flwr.common.recordset import RecordSet
-from flwr.server.driver.driver import Driver
+from flwr.common import Context, RecordSet
 from flwr.server.strategy import Strategy
 
 from .client_manager import ClientManager
 from .compat import start_driver
+from .driver import Driver
 from .server import Server
 from .server_config import ServerConfig
 from .typing import ServerAppCallable
