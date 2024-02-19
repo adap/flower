@@ -37,6 +37,19 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
+SQL_CREATE_TABLE_CREDENTIAL = """
+CREATE TABLE IF NOT EXISTS credential(
+    public_key BLOB PRIMARY KEY,
+    private_key BLOB
+);
+"""
+
+SQL_CREATE_TABLE_PUBLIC_KEY = """
+CREATE TABLE IF NOT EXISTS public_key(
+    public_key BLOB UNIQUE
+);
+"""
+
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
     run_id INTEGER UNIQUE
@@ -123,6 +136,8 @@ class SqliteState(State):
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
+        cur.execute(SQL_CREATE_TABLE_CREDENTIAL)
+        cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
         return res.fetchall()
@@ -518,6 +533,48 @@ class SqliteState(State):
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def store_server_public_private_key(
+        self, public_key: bytes, private_key: bytes
+    ) -> None:
+        """Store server's `public_key` and `private_key` in state."""
+        query = (
+            "INSERT OR REPLACE INTO credential (public_key, private_key) "
+            "VALUES (:public_key, :private_key)"
+        )
+        self.query(query, {"public_key": public_key, "private_key": private_key})
+
+    def get_server_private_key(self) -> bytes:
+        """Get server private key in urlsafe bytes."""
+        query = "SELECT private_key FROM credential"
+        rows = self.query(query)
+        private_key: bytes = rows[0]["private_key"]
+        return private_key
+
+    def get_server_public_key(self) -> bytes:
+        """Get server public key in urlsafe bytes."""
+        query = "SELECT public_key FROM credential"
+        rows = self.query(query)
+        public_key: bytes = rows[0]["public_key"]
+        return public_key
+
+    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of client public keys in state."""
+        query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
+        for public_key in public_keys:
+            self.query(query, {"public_key": public_key})
+
+    def store_client_public_key(self, public_key: bytes) -> None:
+        """Retrieve a client public key in state."""
+        query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
+        self.query(query, {"public_key": public_key})
+
+    def get_client_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored client public keys as a set."""
+        query = "SELECT public_key FROM public_key"
+        rows = self.query(query)
+        result: Set[bytes] = {row["public_key"] for row in rows}
+        return result
 
 
 def dict_factory(

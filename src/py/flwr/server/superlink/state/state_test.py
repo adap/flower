@@ -22,6 +22,10 @@ from datetime import datetime, timezone
 from typing import List
 from uuid import uuid4
 
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    generate_key_pairs,
+    public_key_to_bytes,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -398,6 +402,16 @@ class StateTest(unittest.TestCase):
         # Assert
         assert num == 2
 
+    def test_client_public_keys(self) -> None:
+        """Test client public keys store and get from state."""
+        state: State = self.state_factory()
+        key_pairs = [generate_key_pairs() for _ in range(3)]
+        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
+
+        state.store_client_public_keys(public_keys)
+
+        assert state.get_client_public_keys() == public_keys
+
 
 def create_task_ins(
     consumer_node_id: int,
@@ -477,7 +491,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 8
+        assert len(result) == 12
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -502,7 +516,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 8
+        assert len(result) == 12
 
 
 if __name__ == "__main__":
