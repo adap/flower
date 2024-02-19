@@ -20,12 +20,9 @@ from logging import ERROR, INFO
 from typing import Callable, Dict, Type, Union
 
 from flwr.client.clientapp import ClientApp, load_client_app
-from flwr.client.message_handler.task_handler import configure_task_res
 from flwr.client.node_state import NodeState
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
-from flwr.common.serde import message_to_taskres, recordset_from_proto
-from flwr.proto.node_pb2 import Node
+from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.task_pb2 import TaskIns
 from flwr.server.superlink.state import StateFactory
 
@@ -36,23 +33,6 @@ NodeToPartitionMapping = Dict[int, int]
 
 
 supported_backends = {"ray": RayBackend}
-
-
-def taskins_to_message(taskins: TaskIns, datapartition_id: int) -> Message:
-    """Convert TaskIns to Messsage."""
-    recordset = recordset_from_proto(taskins.task.recordset)
-
-    return Message(
-        content=recordset,
-        metadata=Metadata(
-            run_id=taskins.run_id,
-            message_id=taskins.task_id,
-            group_id=taskins.group_id,
-            node_id=datapartition_id,
-            ttl=taskins.task.ttl,
-            message_type=taskins.task.task_type,
-        ),
-    )
 
 
 def _register_nodes(
@@ -88,9 +68,9 @@ async def worker(
             context = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
 
             # Convert TaskIns to Message
-            message = taskins_to_message(
-                task_ins, datapartition_id=nodes_mapping[node_id]
-            )
+            message = message_from_taskins(task_ins)
+            #!TODO:  replace node_id with data partition id
+            # message.metadata.dst_node_id = nodes_mapping[node_id]
 
             # Let backend process message
             out_mssg, updated_context = await backend.process_message(
@@ -104,10 +84,10 @@ async def worker(
 
             # TODO: can we avoid going to proto ?
             # TODO: maybe with a new StateFactory + In-Memory Driver-SuperLink conn.
+            #!TODO: undo change node_id for partition choice
+            # out_mssg.metadata.src_node_id = task_ins.task.consumer.node_id
             # Convert to TaskRes
             task_res = message_to_taskres(out_mssg)
-            # Configuring task
-            task_res = configure_task_res(task_res, task_ins, Node(node_id=node_id))
             # Store TaskRes in state
             state_factory.state().store_task_res(task_res)
 

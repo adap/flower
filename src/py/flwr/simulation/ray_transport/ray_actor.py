@@ -29,7 +29,6 @@ from flwr.client.clientapp import ClientApp
 from flwr.common import Context, Message
 from flwr.common.logger import log
 
-
 ClientAppFn = Callable[[], ClientApp]
 
 

@@ -45,26 +45,6 @@ def run(server_app_attr: str, driver: Driver, server_app_dir: str) -> None:
     server_app(driver=driver, context=context)
 
 
-def run(server_app_attr: str, driver: Driver, server_app_dir: str) -> None:
-    """Run ServerApp with a given Driver."""
-    if server_app_dir is not None:
-        sys.path.insert(0, server_app_dir)
-
-    def _load() -> ServerApp:
-        server_app: ServerApp = load_server_app(server_app_attr)
-        return server_app
-
-    server_app = _load()
-
-    log(DEBUG, "server_app: `%s`", server_app)
-
-    # Initialize Context
-    context = Context(state=RecordSet())
-
-    # Call ServerApp
-    server_app(driver=driver, context=context)
-
-
 def run_server_app() -> None:
     """Run Flower server app."""
     event(EventType.RUN_SERVER_APP_ENTER)
