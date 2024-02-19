@@ -8,15 +8,16 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-02-13 11:23+0100\n"
-"PO-Revision-Date: 2024-02-10 11:56+0000\n"
+"PO-Revision-Date: 2024-02-19 11:37+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
+"Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
+"flower-docs/framework/zh_Hans/>\n"
 "Language: zh_Hans\n"
-"Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects"
-"/flower-docs/framework/zh_Hans/>\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 5.4\n"
 "Generated-By: Babel 2.13.1\n"
 
 #: ../../source/contributor-explanation-architecture.rst:2
@@ -55,7 +56,7 @@ msgstr "具有虚拟客户端引擎和边缘客户端引擎的`Flower <https://f
 
 #: ../../source/contributor-how-to-build-docker-images.rst:2
 msgid "How to build Docker Flower images locally"
-msgstr ""
+msgstr "如何在本地搭建Docker Flower images"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:4
 msgid ""
@@ -1183,7 +1184,7 @@ msgstr "从 ``index.rst`` 链接到新的 rst"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:2
 msgid "Good first contributions"
-msgstr "良好的首批捐款"
+msgstr "首次代码贡献"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:4
 msgid ""
@@ -1192,8 +1193,8 @@ msgid ""
 "where to start to increase your chances of getting your PR accepted into "
 "the Flower codebase."
 msgstr ""
-"我们欢迎为《鲜花》投稿！然而，要知道从哪里开始并非易事。因此，我们提出了一些建议，告诉您从哪里开始，以增加您的 PR 被 Flower "
-"代码库接受的机会。"
+"我们欢迎为Flower做出代码贡献！然而，要知道从哪里开始并非易事。因此，我们提出"
+"了一些建议，告诉您从哪里开始，以增加您的 PR 被 Flower 代码库接受的机会。"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:11
 msgid "Where to start"
@@ -1208,19 +1209,19 @@ msgstr "在 Flower 核心库成熟之前，如果 PR 只涉及代码库中的非
 
 #: ../../source/contributor-ref-good-first-contributions.rst:17
 msgid "Documentation: What's missing? What could be expressed more clearly?"
-msgstr "文件： 缺少什么？哪些内容可以表达得更清楚？"
+msgstr "文档： 缺少什么？哪些内容可以表达得更清楚？"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:18
 msgid "Baselines: See below."
-msgstr "基线： 见下文。"
+msgstr "Baselines： 见下文。"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:19
 msgid "Examples: See below."
-msgstr "举例说明： 见下文。"
+msgstr "示例： 见下文。"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:23
 msgid "Request for Flower Baselines"
-msgstr "Flower 基线申请"
+msgstr "Flower Baselines的申请"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:25
 msgid ""
@@ -1228,8 +1229,8 @@ msgid ""
 "out our `contributing guide for baselines <https://flower.ai/docs"
 "/contributing-baselines.html>`_."
 msgstr ""
-"如果您对 Flower Baselines 还不熟悉，也许应该看看我们的 \"基线贡献指南 <https://flower.ai/docs"
-"/contributing-baselines.html>`_\"。"
+"如果您对 Flower Baselines 还不熟悉，也许可以看看我们的 `Baselines贡献指南 "
+"<https://flower.ai/docs/contributing-baselines.html>`_。"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:27
 msgid ""
@@ -1239,30 +1240,33 @@ msgid ""
 " and that has no assignes, feel free to assign it to yourself and start "
 "working on it!"
 msgstr ""
-"然后，您应该查看开放的 `issues "
-"<https://github.com/adap/flower/issues?q=is%3Aopen+is%3Aissue+label%3A%22new+baseline%22>`_"
-" 基线请求。如果您发现了自己想做的基线，而它还没有被分配，请随时把它分配给自己，然后开始工作！"
+"然后查看开放的 `issues <https://github.com/adap/flower/"
+"issues?q=is%3Aopen+is%3Aissue+label%3A%22new+baseline%22>`_ baseline请求。如"
+"果您发现了自己想做的baseline，而它还没有被分配，请随时把它分配给自己，然后开"
+"始工作！"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:31
 msgid ""
 "Otherwise, if you don't find a baseline you'd like to work on, be sure to"
 " open a new issue with the baseline request template!"
-msgstr "否则，如果您没有找到想要处理的基线，请务必使用基线请求模板打开一个新问题！"
+msgstr "如果您没有找到想要做的baseline，请务必使用baseline请求模板打开一个新问题（"
+"GitHub issue）！"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:34
 msgid "Request for examples"
-msgstr "要求提供范例"
+msgstr "示例请求"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:36
 msgid ""
 "We wish we had more time to write usage examples because we believe they "
 "help users to get started with building what they want to build. Here are"
 " a few ideas where we'd be happy to accept a PR:"
-msgstr "我们希望有更多的时间来撰写使用示例，因为我们相信这些示例可以帮助用户开始构建他们想要构建的东西。以下是我们乐意接受 PR 的几个想法："
+msgstr "我们希望有更多的时间来撰写使用示例，因为我们相信这些示例可以帮助用户开始构建"
+"他们想要的东西。以下是我们乐意接受 PR 的几个想法："
 
 #: ../../source/contributor-ref-good-first-contributions.rst:40
 msgid "Llama 2 fine-tuning, with Hugging Face Transformers and PyTorch"
-msgstr "微调 \"拉玛 2\"，使用 \"抱脸变形金刚 \"和 PyTorch"
+msgstr "微调 Llama 2，使用 Hugging Face Transformers 和 PyTorch"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:41
 msgid "XGBoost"
@@ -1270,7 +1274,7 @@ msgstr "XGBoost"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:42
 msgid "Android ONNX on-device training"
-msgstr "安卓 ONNX 设备上培训"
+msgstr "安卓 ONNX 设备上训练"
 
 #: ../../source/contributor-ref-secure-aggregation-protocols.rst:2
 msgid "Secure Aggregation Protocols"
@@ -1326,16 +1330,16 @@ msgid ""
 msgstr "本指南适用于想参与 Flower，但不习惯为 GitHub 项目贡献的人。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:6
-#, fuzzy
 msgid ""
 "If you're familiar with how contributing on GitHub works, you can "
 "directly checkout our `getting started guide for contributors "
 "<https://flower.ai/docs/contributor-tutorial-get-started-"
 "as-a-contributor.html>`_."
 msgstr ""
-"如果您熟悉如何在 GitHub 上贡献，可以直接查看我们的 \"贡献者入门指南\" <https://flower.ai/docs"
-"/getting-started-for-contributors.html>`_ 和 \"优秀的首次贡献示例\" "
-"<https://flower.ai/docs/good-first-contributions.html>`_。"
+"如果您熟悉如何在 GitHub 上贡献，可以直接查看我们的 \"贡献者入门指南\" "
+"<https://flower.ai/docs/getting-started-for-contributors.html>`_ 和 "
+"\"优秀的首次贡献示例\" <https://flower.ai/docs/good-first-contributions."
+"html>`_。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:11
 msgid "Setting up the repository"
@@ -1997,7 +2001,7 @@ msgid ""
 "ref-good-first-contributions.html>`_, where you should particularly look "
 "into the :code:`baselines` contributions."
 msgstr ""
-"好的第一批贡献 <https://flower.ai/docs/framework/contributor-ref-good-first-"
+"`优秀的首次贡献 <https://flower.ai/docs/framework/contributor-ref-good-first-"
 "contributions.html>`_，在这里你应该特别看看 :code:`baselines` 的贡献。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:350
@@ -20489,4 +20493,3 @@ msgstr ""
 #~ "<ref-api-flwr.html#flwr.client.NumPyClient>`_\" "
 #~ "的类来配置，因此行为方式也完全相同。除此之外，由 :code:`VirtualClientEngine` "
 #~ "管理的客户端还包括："
-
