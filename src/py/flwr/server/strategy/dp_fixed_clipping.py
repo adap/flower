@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
 
 
-class DPStrategyWrapperServerSideFixedClipping(Strategy):
+class DifferentialPrivacyServerSideFixedClipping(Strategy):
     """Wrapper for Central DP with Server Side Fixed Clipping.
 
     Parameters
@@ -193,7 +193,7 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
         return self.strategy.evaluate(server_round, parameters)
 
 
-class DPStrategyWrapperClientSideFixedClipping(Strategy):
+class DifferentialPrivacyClientSideFixedClipping(Strategy):
     """Wrapper for Configuring a Strategy for Central DP.
 
     The clipping is at the client side.
@@ -209,6 +209,18 @@ class DPStrategyWrapperClientSideFixedClipping(Strategy):
         The value of the clipping norm.
     num_sampled_clients : int
         The number of clients that are sampled on each round.
+
+    Examples
+    --------
+    Create a strategy:
+
+    >>> strategy = fl.server.strategy.FedAvg( ... )
+
+    Wrap the strategy with the DifferentialPrivacyClientSideFixedClipping wrapper
+
+    >>> dp_strategy = DifferentialPrivacyServerSideFixedClipping(
+    >>>         strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+    >>>     )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
