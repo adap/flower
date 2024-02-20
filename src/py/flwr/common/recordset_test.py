@@ -353,9 +353,9 @@ def test_set_configs_to_configsrecord_with_incorrect_types(
     labels = [1, 2.0]
     arrays = get_ndarrays()
 
-    my_metrics = OrderedDict(
+    my_configs = OrderedDict(
         {key_type(label): value_fn(arr) for label, arr in zip(labels, arrays)}
     )
 
     with pytest.raises(TypeError):
-        c_record.update(my_metrics)
+        c_record.update(my_configs)
