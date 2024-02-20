@@ -63,18 +63,15 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
 
     Examples
     --------
-    Create an strategy:
+    Create a strategy:
 
     >>> strategy = fl.server.strategy.FedAvg( ... )
 
-    Wrap the strategy with a DP wrapper
+    Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
 
-    >>> dpStrategy = DPStrategyWrapperServerSideFixedClipping(
-                        strategy,
-                        cfg.noise_multiplier,
-                        cfg.clipping_norm,
-                        cfg.num_sampled_clients
-                        )
+    >>> dp_strategy = DifferentialPrivacyServerSideFixedClipping(
+    >>>         strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+    >>>     )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -218,7 +215,7 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
 
     Wrap the strategy with the DifferentialPrivacyClientSideFixedClipping wrapper
 
-    >>> dp_strategy = DifferentialPrivacyServerSideFixedClipping(
+    >>> dp_strategy = DifferentialPrivacyClientSideFixedClipping(
     >>>         strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
     >>>     )
     """
