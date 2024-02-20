@@ -219,7 +219,9 @@ class RecordMaker:
             run_id=self.rng.randint(0, 1 << 30),
             message_id=self.get_str(64),
             group_id=self.get_str(30),
-            node_id=self.rng.randint(0, 1 << 63),
+            src_node_id=self.rng.randint(0, 1 << 63),
+            dst_node_id=self.rng.randint(0, 1 << 63),
+            reply_to_message=self.get_str(64),
             ttl=self.get_str(10),
             message_type=self.get_str(10),
         )
@@ -305,24 +307,16 @@ def test_message_to_and_from_taskins() -> None:
     # Prepare
     maker = RecordMaker(state=1)
     metadata = maker.metadata()
+    # pylint: disable-next=protected-access
+    metadata._src_node_id = 0  # Assume driver node
     original = Message(
-        metadata=Metadata(
-            run_id=0,
-            message_id="",
-            group_id="",
-            node_id=metadata.node_id,
-            ttl=metadata.ttl,
-            message_type=metadata.message_type,
-        ),
+        metadata=metadata,
         content=maker.recordset(1, 1, 1),
     )
 
     # Execute
     taskins = message_to_taskins(original)
-    taskins.run_id = metadata.run_id
     taskins.task_id = metadata.message_id
-    taskins.group_id = metadata.group_id
-    taskins.task.consumer.node_id = metadata.node_id
     deserialized = message_from_taskins(taskins)
 
     # Assert
@@ -335,24 +329,15 @@ def test_message_to_and_from_taskres() -> None:
     # Prepare
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
+    metadata.dst_node_id = 0  # Assume driver node
     original = Message(
-        metadata=Metadata(
-            run_id=0,
-            message_id="",
-            group_id="",
-            node_id=metadata.node_id,
-            ttl=metadata.ttl,
-            message_type=metadata.message_type,
-        ),
+        metadata=metadata,
         content=maker.recordset(1, 1, 1),
     )
 
     # Execute
     taskres = message_to_taskres(original)
-    taskres.run_id = metadata.run_id
     taskres.task_id = metadata.message_id
-    taskres.group_id = metadata.group_id
-    taskres.task.consumer.node_id = metadata.node_id
     deserialized = message_from_taskres(taskres)
 
     # Assert

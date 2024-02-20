@@ -20,10 +20,29 @@ import sys
 from logging import DEBUG, WARN
 from pathlib import Path
 
-from flwr.common import EventType, event
+from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.logger import log
 
-from .serverapp import ServerApp, load_server_app
+from .driver.driver import Driver
+from .server_app import ServerApp, load_server_app
+
+
+def run(server_app_attr: str, driver: Driver, server_app_dir: str) -> None:
+    """Run ServerApp with a given Driver."""
+    if server_app_dir is not None:
+        sys.path.insert(0, server_app_dir)
+
+    def _load() -> ServerApp:
+        server_app: ServerApp = load_server_app(server_app_attr)
+        return server_app
+
+    server_app = _load()
+
+    # Initialize Context
+    context = Context(state=RecordSet())
+
+    # Call ServerApp
+    server_app(driver=driver, context=context)
 
 
 def run_server_app() -> None:
@@ -75,19 +94,20 @@ def run_server_app() -> None:
         root_certificates,
     )
 
-    log(WARN, "Not implemented: run_server_app")
-
     server_app_dir = args.dir
-    if server_app_dir is not None:
-        sys.path.insert(0, server_app_dir)
+    server_app_attr = getattr(args, "server-app")
 
-    def _load() -> ServerApp:
-        server_app: ServerApp = load_server_app(getattr(args, "server-app"))
-        return server_app
+    # Initialize Driver
+    driver = Driver(
+        driver_service_address=args.server,
+        root_certificates=root_certificates,
+    )
 
-    server_app = _load()
+    # Run the Server App with the Driver
+    run(server_app_attr, driver, server_app_dir)
 
-    log(DEBUG, "server_app: `%s`", server_app)
+    # Clean up
+    del driver
 
     event(EventType.RUN_SERVER_APP_LEAVE)
 
@@ -117,7 +137,7 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--server",
-        default="0.0.0.0:9092",
+        default="0.0.0.0:9091",
         help="Server address",
     )
     parser.add_argument(
