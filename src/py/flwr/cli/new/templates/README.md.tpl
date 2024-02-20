@@ -1,9 +1,5 @@
 # $project_name
 
-TODO: intro text
-
-If you are new to Flower and you are looking for more advanced examples please consult the regular PyTorch code examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
-
 ## Install dependencies
 
 ```bash
