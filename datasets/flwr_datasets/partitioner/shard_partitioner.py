@@ -138,11 +138,13 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     ) -> None:
         super().__init__()
         # Attributes based on the constructor
+        _check_if_natual_number(num_partitions, "num_partitions")
         self._num_partitions = num_partitions
-        self._check_num_partitions_greater_than_zero()
         self._partition_by = partition_by
+        _check_if_natual_number(num_shards_per_node, "num_shards_per_node", True)
         self._num_shards_per_node = num_shards_per_node
         self._num_shards_used: Optional[int] = None
+        _check_if_natual_number(shard_size, "shard_size", True)
         self._shard_size = shard_size
         self._keep_incomplete_shard = keep_incomplete_shard
         self._shuffle = shuffle
@@ -283,11 +285,6 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
                     "samples in the dataset."
                 )
 
-    def _check_num_partitions_greater_than_zero(self) -> None:
-        """Test num_partition left sides correctness."""
-        if not self._num_partitions > 0:
-            raise ValueError("The number of partitions needs to be greater than zero.")
-
     def _sort_dataset_if_needed(self) -> None:
         """Sort dataset prior to determining the partitions.
 
@@ -320,3 +317,21 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
                     f"size is {implied_min_dataset_size} but the dataset"
                     f"size is {len(self.dataset)}"
                 )
+
+
+def _check_if_natual_number(
+    number: int, parameter_name: str, none_acceptable: bool = False
+) -> None:
+    if none_acceptable and number is None:
+        return
+    if not isinstance(number, int):
+        raise TypeError(
+            f"The expected type of {parameter_name} is int but given: {number} of type "
+            f"{type(number)}. Please specify the correct type."
+        )
+    if not number >= 1:
+        raise ValueError(
+            f"The expected value of {parameter_name} is >= 1 (greater or equal to 1) "
+            f"but given: {number} which does not meet this condition. Please "
+            f"provide a correct number."
+        )
