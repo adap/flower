@@ -33,12 +33,12 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     shard of size = `shard_size` if provided or automatically calculated:
     shards_size = len(dataset) / `num_partitions` * `num_shards_per_node`.
 
-    A shard is just a block (chunk) of a `dataset` that contains `shard_size` consecutive
-    samples. There might be shards that contain samples associated with more than a
-    single unique label. The first case is (remember the preprocessing step sorts the
-    dataset by label) when a shard is constructed from samples at the boundaries of the
-    sorted dataset and therefore belonging to different classes e.g. the "leftover" of
-    samples of class 1 and the majority of class 2. The another scenario when a shard
+    A shard is just a block (chunk) of a `dataset` that contains `shard_size`
+    consecutive samples. There might be shards that contain samples associated with more
+    than a single unique label. The first case is (remember the preprocessing step sorts
+    the dataset by label) when a shard is constructed from samples at the boundaries of
+    the sorted dataset and therefore belonging to different classes e.g. the "leftover"
+    of samples of class 1 and the majority of class 2. The another scenario when a shard
     has samples with more than one unique label is when the shard size is bigger than
     the  number of samples of a certain class.
 
