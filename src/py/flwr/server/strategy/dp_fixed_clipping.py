@@ -67,8 +67,8 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
     Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
 
     >>> dp_strategy = DifferentialPrivacyServerSideFixedClipping(
-    >>>         strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
-    >>>     )
+    >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+    >>> )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
