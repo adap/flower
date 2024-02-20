@@ -60,4 +60,4 @@ INFO flwr 2024-02-20 21:20:07,210 | app.py:230 | app_fit: metrics_centralized {'
 After finishing the training, the first line shows the **AUC** and **accuracy** values for distributed (on-client) evaluation,
 while the second line is for centralised evaluation.
 
-Don't worry about the values of the results. We just uses sample dataset, so the model is easy to over-fit. 
+Don't worry about the values of the results. We just use sample dataset, so the model is easy to over-fit. 
