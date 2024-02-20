@@ -39,12 +39,12 @@ class TemplateNotFound(Exception):
 def load_template(name: str) -> str:
     """Load template from template directory and return as text."""
     tpl_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "templates"))
-    tpl_files = os.listdir(tpl_dir)
+    tpl_file_path = os.path.join(tpl_dir, name)
 
-    if name not in tpl_files:
+    if not os.path.isfile(tpl_file_path):
         raise TemplateNotFound(f"Template '{name}' not found")
 
-    with open(os.path.join(tpl_dir, name), encoding="utf-8") as tpl_file:
+    with open(tpl_file_path, encoding="utf-8") as tpl_file:
         return tpl_file.read()
 
 
@@ -104,14 +104,19 @@ def new(
     # List of files to render
     files = {
         "README.md": {
-            "template": "README.md.tpl",
+            "template": "app/README.md.tpl",
         },
         "requirements.txt": {
-            "template": f"requirements.{framework_str.lower()}.txt.tpl"
+            "template": f"app/requirements.{framework_str.lower()}.txt.tpl"
         },
-        "flower.toml": {"template": "flower.toml.tpl"},
-        f"{pnl}/__init__.py": {"template": "__init__.py.tpl"},
-        f"{pnl}/main.py": {"template": f"main.{framework_str.lower()}.py.tpl"},
+        "flower.toml": {"template": "app/flower.toml.tpl"},
+        f"{pnl}/__init__.py": {"template": "app/code/__init__.py.tpl"},
+        f"{pnl}/server.py": {
+            "template": f"app/code/server.{framework_str.lower()}.py.tpl"
+        },
+        f"{pnl}/client.py": {
+            "template": f"app/code/client.{framework_str.lower()}.py.tpl"
+        },
     }
     context = {"project_name": project_name}
 

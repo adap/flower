@@ -22,7 +22,7 @@ from .new import MlFramework, create_file, load_template, new, render_template
 def test_load_template() -> None:
     """Test if load_template returns a string."""
     # Prepare
-    filename = "README.md.tpl"
+    filename = "app/README.md.tpl"
 
     # Execute
     text = load_template(filename)
@@ -34,7 +34,7 @@ def test_load_template() -> None:
 def test_render_template() -> None:
     """Test if a string is correctly substituted."""
     # Prepare
-    filename = "README.md.tpl"
+    filename = "app/README.md.tpl"
     data = {"project_name": "FedGPT"}
 
     # Execute
@@ -72,8 +72,9 @@ def test_new(tmp_path: str) -> None:
         "flower.toml",
     }
     expected_files_module = {
-        "main.py",
         "__init__.py",
+        "server.py",
+        "client.py",
     }
 
     # Change into the temprorary directory
