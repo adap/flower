@@ -14,6 +14,7 @@
 # ==============================================================================
 """Typed dict base class for *Records."""
 
+
 from typing import Any, Callable, Dict, Generic, Iterator, Tuple, TypeVar, cast
 
 K = TypeVar("K")  # Key type
@@ -31,7 +32,7 @@ class TypedDict(Generic[K, V]):
         self._check_value_fn = check_value_fn
 
     def __setitem__(self, key: K, value: V) -> None:
-        """."""
+        """Set the given key to the given value after type checking."""
         # Check the types of key and value
         self._check_key_fn(key)
         self._check_value_fn(value)
@@ -40,31 +41,31 @@ class TypedDict(Generic[K, V]):
         self._data.items()
 
     def __delitem__(self, key: K) -> None:
-        """."""
+        """Remove the item with the specified key."""
         del self._data[key]
 
     def __getitem__(self, item: K) -> V:
-        """."""
+        """Return the value for the specified key."""
         return self._data[item]
 
     def __iter__(self) -> Iterator[K]:
-        """."""
+        """Yield an iterator over the keys of the dictionary."""
         return iter(self._data)
 
     def __repr__(self) -> str:
-        """."""
+        """Return a string representation of the dictionary."""
         return self._data.__repr__()
 
     def __len__(self) -> int:
-        """."""
+        """Return the number of items in the dictionary."""
         return len(self._data)
 
     def __contains__(self, key: K) -> bool:
-        """."""
+        """Check if the dictionary contains the specified key."""
         return key in self._data
 
     def __eq__(self, other: object) -> bool:
-        """."""
+        """Compare this instance to another dictionary or TypedDict."""
         if isinstance(other, TypedDict):
             return self._data == other._data
         if isinstance(other, dict):
