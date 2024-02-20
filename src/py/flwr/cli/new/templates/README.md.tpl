@@ -26,7 +26,7 @@ In yet another new terminal window, start the second long-running Flower client:
 flower-client-app client:app --insecure
 ```
 
-## Start the driver
+## Start the ServerApp
 
 ```bash
 flower-server-app server:app --insecure
