@@ -61,7 +61,7 @@ def _check_key(key: str) -> None:
 def _check_value(value: Array) -> None:
     if not isinstance(value, Array):
         raise TypeError(
-            f"Key must be of type `{Array}` but `{type(value)}` was passed."
+            f"Value must be of type `{Array}` but `{type(value)}` was passed."
         )
 
 
