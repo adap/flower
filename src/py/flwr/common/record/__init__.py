@@ -19,4 +19,10 @@ from .metricsrecord import MetricsRecord
 from .parametersrecord import Array, ParametersRecord
 from .recordset import RecordSet
 
-__all__ = ["ConfigsRecord", "MetricsRecord", "Array", "ParametersRecord", "RecordSet"]
+__all__ = [
+    "Array",
+    "ConfigsRecord",
+    "MetricsRecord",
+    "ParametersRecord",
+    "RecordSet",
+]
