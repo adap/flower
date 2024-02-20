@@ -16,7 +16,7 @@
 
 
 import unittest
-from typing import List, cast
+from typing import List
 
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common import (
@@ -36,7 +36,7 @@ COUNTER = "counter"
 
 def _increment_context_counter(context: Context) -> None:
     # Read from context
-    current_counter = cast(int, context.state.get_metrics(METRIC)[COUNTER])
+    current_counter: int = context.state.get_metrics(METRIC)[COUNTER]  # type: ignore
     # update and override context
     current_counter += 1
     context.state.set_metrics(METRIC, record=MetricsRecord({COUNTER: current_counter}))
