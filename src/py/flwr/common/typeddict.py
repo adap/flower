@@ -38,7 +38,6 @@ class TypedDict(Generic[K, V]):
         self._check_value_fn(value)
         # Set key-value pair
         self._data[key] = value
-        self._data.items()
 
     def __delitem__(self, key: K) -> None:
         """Remove the item with the specified key."""

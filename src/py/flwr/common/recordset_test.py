@@ -348,7 +348,7 @@ def test_set_configs_to_configsrecord_with_incorrect_types(
     value_fn: Callable[[NDArray], Union[NDArray, Dict[str, NDArray], List[float]]],
 ) -> None:
     """Test adding configs of various unsupported types to a ConfigsRecord."""
-    m_record = ConfigsRecord()
+    c_record = ConfigsRecord()
 
     labels = [1, 2.0]
     arrays = get_ndarrays()
@@ -358,4 +358,4 @@ def test_set_configs_to_configsrecord_with_incorrect_types(
     )
 
     with pytest.raises(TypeError):
-        m_record.update(my_metrics)
+        c_record.update(my_metrics)
