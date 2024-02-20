@@ -51,27 +51,27 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
 
     Parameters
     ----------
-        strategy : Strategy
-            The strategy to which DP functionalities will be added by this wrapper.
-        noise_multiplier : float
-            The noise multiplier for the Gaussian mechanism for model updates.
-            A value of 1.0 or higher is recommended for strong privacy.
-        clipping_norm : float
-            The value of the clipping norm.
-        num_sampled_clients : int
-            The number of clients that are sampled on each round.
+    strategy : Strategy
+        The strategy to which DP functionalities will be added by this wrapper.
+    noise_multiplier : float
+        The noise multiplier for the Gaussian mechanism for model updates.
+        A value of 1.0 or higher is recommended for strong privacy.
+    clipping_norm : float
+        The value of the clipping norm.
+    num_sampled_clients : int
+        The number of clients that are sampled on each round.
 
     Examples
     --------
-        Create a strategy:
+    Create a strategy:
 
-        >>> strategy = fl.server.strategy.FedAvg( ... )
+    >>> strategy = fl.server.strategy.FedAvg( ... )
 
-        Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
+    Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
 
-        >>> dp_strategy = DifferentialPrivacyServerSideFixedClipping(
-        >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
-        >>> )
+    >>> dp_strategy = DifferentialPrivacyServerSideFixedClipping(
+    >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+    >>> )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
