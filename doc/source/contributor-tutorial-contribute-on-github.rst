@@ -276,7 +276,7 @@ This is a tiny change, but it'll allow us to test your end-to-end setup. After c
 
 - Find the source file in ``doc/source``
 - Make the change in the ``.rst`` file (beware, the dashes under the title should be the same length as the title itself)
-- Build the docs and check the result: `<https://flower.ai/docs/writing-documentation.html#edit-an-existing-page>`_
+- Build the docs and `check the result <contributor-how-to-write-documentation.html#edit-an-existing-page>`_
 
 Rename file
 :::::::::::
