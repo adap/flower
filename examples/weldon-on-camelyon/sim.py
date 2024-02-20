@@ -1,4 +1,5 @@
 import argparse
+import os.path
 from collections import OrderedDict
 from typing import Dict, Tuple, List
 from copy import deepcopy
@@ -20,7 +21,7 @@ from model import Weldon
 from utils import train, test
 
 
-parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
+parser = argparse.ArgumentParser(description="Flower Simulation for weldon on camelyon")
 
 parser.add_argument(
     "--num-cpus",
@@ -169,7 +170,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 def get_evaluate_fn(
-    centralized_testset, index_generator,
+    centralized_testdata, index_generator,
 ):
     """Return an evaluation function for centralized evaluation."""
 
@@ -190,12 +191,13 @@ def get_evaluate_fn(
         set_params(model, parameters)
         model.to(device)
 
+        test_dataset = CamelyonDataset(datasamples=centralized_testdata)
         batch_sampler = deepcopy(index_generator)
-        batch_sampler.n_samples = len(centralized_testset)
+        batch_sampler.n_samples = len(test_dataset)
 
         # Construct dataloader
         test_loader = DataLoader(
-            centralized_testset,
+            test_dataset,
             batch_sampler=batch_sampler,
         )
 
@@ -214,6 +216,9 @@ def main():
     index_generator = NpIndexGenerator(
         batch_size=args.batch_size, num_updates=args.n_local_steps, drop_last=True, shuffle=False
     )
+    if not os.path.exists(args.data_path):
+        os.mkdir(args.data_path)
+
     exp_data_path = args.data_path / "tmp"
     fetch_camelyon(args.data_path)
     reset_data_folder(exp_data_path)
