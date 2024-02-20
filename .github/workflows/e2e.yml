@@ -167,7 +167,7 @@ jobs:
         run: |
           python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Cache Datasets
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: "~/.keras"
           key: keras-datasets
