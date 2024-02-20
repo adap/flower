@@ -99,6 +99,7 @@ parser = argparse.ArgumentParser(description="Flower")
 parser.add_argument(
     "--node-id",
     choices=[0, 1, 2],
+    required=True,
     type=int,
     help="Partition of the dataset divided into 3 iid partitions created artificially.",
 )
@@ -131,7 +132,7 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 # Start Flower client
-fl.client.start_numpy_client(
+fl.client.start_client(
     server_address="127.0.0.1:8080",
-    client=FlowerClient(),
+    client=FlowerClient().to_client(),
 )

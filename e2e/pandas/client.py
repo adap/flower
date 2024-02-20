@@ -1,4 +1,3 @@
-import warnings
 from typing import Dict, List, Tuple
 
 import numpy as np
@@ -36,13 +35,13 @@ class FlowerClient(fl.client.NumPyClient):
 def client_fn(cid):
     return FlowerClient().to_client()
 
-flower = fl.flower.Flower(
+app = fl.client.ClientApp(
     client_fn=client_fn,
 )
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_numpy_client(
+    fl.client.start_client(
         server_address="127.0.0.1:8080",
-        client=FlowerClient(),
+        client=FlowerClient().to_client(),
     )

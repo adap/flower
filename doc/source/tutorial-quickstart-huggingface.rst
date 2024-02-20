@@ -212,9 +212,9 @@ We can now start client instances using:
 
 .. code-block:: python
 
-    fl.client.start_numpy_client(
+    fl.client.start_client(
         server_address="127.0.0.1:8080", 
-        client=IMDBClient()
+        client=IMDBClient().to_client()
     )
 
 

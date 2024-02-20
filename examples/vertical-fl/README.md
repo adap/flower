@@ -295,7 +295,7 @@ class ServerModel(nn.Module):
 
 It comprises a single linear layer that accepts the concatenated outputs from
 all client models as its input. The number of inputs to this layer equals the
-total number of outputs from the client models ( $3 \times 4 = 12$ ). After processing
+total number of outputs from the client models (3 x 4 = 12). After processing
 these inputs, the linear layer's output is passed through a sigmoid activation
 function (`nn.Sigmoid()`), which maps the result to a `(0, 1)` range, providing
 a probability score indicative of the likelihood of survival.

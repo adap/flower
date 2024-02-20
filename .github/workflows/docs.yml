@@ -23,6 +23,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Check copyright line
+        run: ./dev/test-copyright.sh
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
@@ -41,8 +43,9 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+          DOCS_BUCKET: flower.ai
         run: |
-          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./doc/build/html/ s3://flower.dev/docs/framework
-          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./baselines/doc/build/html/ s3://flower.dev/docs/baselines
-          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./examples/doc/build/html/ s3://flower.dev/docs/examples
-          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./datasets/doc/build/html/ s3://flower.dev/docs/datasets
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./doc/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/framework
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./baselines/doc/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/baselines
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./examples/doc/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/examples
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./datasets/doc/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/datasets

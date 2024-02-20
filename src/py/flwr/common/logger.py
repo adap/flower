@@ -111,3 +111,17 @@ def warn_experimental_feature(name: str) -> None:
         """,
         name,
     )
+
+
+def warn_deprecated_feature(name: str) -> None:
+    """Warn the user when they use a deprecated feature."""
+    log(
+        WARN,
+        """
+        DEPRECATED FEATURE: %s
+
+        This is a deprecated feature. It will be removed
+        entirely in future versions of Flower.
+        """,
+        name,
+    )
