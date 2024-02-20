@@ -1,8 +1,11 @@
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import random
 import time
 
-from flwr.server.driver import GrpcDriver
+import flwr as fl
+from flwr.server import Driver
+from flwr.common import Context
+
 from flwr.common import (
     ServerMessage,
     FitIns,
@@ -19,7 +22,8 @@ from flwr.common import Metrics
 from flwr.server import History
 from flwr.common import serde
 from task import Net, get_parameters, set_parameters
-
+from flwr.common.recordset_compat import fitins_to_recordset, recordset_to_fitres
+from flwr.common import Message
 
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
@@ -42,185 +46,108 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     }
 
 
-# -------------------------------------------------------------------------- Driver SDK
-driver = GrpcDriver(driver_service_address="0.0.0.0:9091", root_certificates=None)
-# -------------------------------------------------------------------------- Driver SDK
+# Run via `flower-server-app server:app`
+app = fl.server.ServerApp()
 
-anonymous_client_nodes = False
-num_client_nodes_per_round = 2
-sleep_time = 1
-num_rounds = 3
-parameters = ndarrays_to_parameters(get_parameters(net=Net()))
 
-# -------------------------------------------------------------------------- Driver SDK
-driver.connect()
-create_run_res: driver_pb2.CreateRunResponse = driver.create_run(
-    req=driver_pb2.CreateRunRequest()
-)
-# -------------------------------------------------------------------------- Driver SDK
+@app.main()
+def main(driver: Driver, context: Context) -> None:
+    """."""
+    print("RUNNING!!!!!")
 
-run_id = create_run_res.run_id
-print(f"Created run id {run_id}")
+    anonymous_client_nodes = False
+    num_client_nodes_per_round = 2
+    sleep_time = 1
+    num_rounds = 3
+    parameters = ndarrays_to_parameters(get_parameters(net=Net()))
 
-history = History()
-for server_round in range(num_rounds):
-    print(f"Commencing server round {server_round + 1}")
+    history = History()
+    for server_round in range(num_rounds):
+        print(f"Commencing server round {server_round + 1}")
 
-    # List of sampled node IDs in this round
-    sampled_nodes: List[node_pb2.Node] = []
+        # List of sampled node IDs in this round
+        sampled_nodes: List[int] = []
 
-    # Sample node ids
-    if anonymous_client_nodes:
-        # If we're working with anonymous clients, we don't know their identities, and
-        # we don't know how many of them we have. We, therefore, have to assume that
-        # enough anonymous client nodes are available or become available over time.
-        #
-        # To schedule a TaskIns for an anonymous client node, we set the node_id to 0
-        # (and `anonymous` to True)
-        # Here, we create an array with only zeros in it:
-        sampled_node_ids: List[int] = [0] * num_client_nodes_per_round
-        sampled_nodes = [
-            node_pb2.Node(node_id=node_id, anonymous=False)
-            for node_id in sampled_node_ids
-        ]
-    else:
-        # If our client nodes have identiy (i.e., they are not anonymous), we can get
-        # those IDs from the Driver API using `get_nodes`. If enough clients are
-        # available via the Driver API, we can select a subset by taking a random
-        # sample.
-        #
         # The Driver API might not immediately return enough client node IDs, so we
         # loop and wait until enough client nodes are available.
         while True:
-            # Get a list of node ID's from the server
-            get_nodes_req = driver_pb2.GetNodesRequest(run_id=run_id)
+            all_node_ids = driver.get_node_ids()
 
-            # ---------------------------------------------------------------------- Driver SDK
-            get_nodes_res: driver_pb2.GetNodesResponse = driver.get_nodes(
-                req=get_nodes_req
-            )
-            # ---------------------------------------------------------------------- Driver SDK
-
-            all_nodes: List[node_pb2.Node] = get_nodes_res.nodes
-            print(f"Got {len(all_nodes)} client nodes")
-
-            if len(all_nodes) >= num_client_nodes_per_round:
+            print(f"Got {len(all_node_ids)} client nodes: {all_node_ids}")
+            if len(all_node_ids) >= num_client_nodes_per_round:
                 # Sample client nodes
-                sampled_nodes = random.sample(all_nodes, num_client_nodes_per_round)
+                sampled_nodes = random.sample(all_node_ids, num_client_nodes_per_round)
                 break
-
             time.sleep(3)
 
-    # Log sampled node IDs
-    print(f"Sampled {len(sampled_nodes)} node IDs: {sampled_nodes}")
-    time.sleep(sleep_time)
+        # Log sampled node IDs
+        print(f"Sampled {len(sampled_nodes)} node IDs: {sampled_nodes}")
 
-    # Schedule a task for all sampled nodes
-    fit_ins: FitIns = FitIns(parameters=parameters, config={})
-    server_message_proto: transport_pb2.ServerMessage = serde.server_message_to_proto(
-        server_message=ServerMessage(fit_ins=fit_ins)
-    )
-    task_ins_list: List[task_pb2.TaskIns] = []
-    for sampled_node in sampled_nodes:
-        new_task_ins = task_pb2.TaskIns(
-            task_id="",  # Do not set, will be created and set by the DriverAPI
-            group_id="",
-            run_id=run_id,
-            task=task_pb2.Task(
-                producer=node_pb2.Node(
-                    node_id=0,
-                    anonymous=True,
-                ),
-                consumer=sampled_node,
-                legacy_server_message=server_message_proto,
-            ),
-        )
-        task_ins_list.append(new_task_ins)
+        # Schedule a task for all sampled nodes
+        fit_ins: FitIns = FitIns(parameters=parameters, config={})
+        recordset = fitins_to_recordset(fitins=fit_ins, keep_input=True)
 
-    push_task_ins_req = driver_pb2.PushTaskInsRequest(task_ins_list=task_ins_list)
+        messages = []
+        for node_id in sampled_nodes:
+            message = driver.create_message(
+                content=recordset,
+                message_type="fit",
+                dst_node_id=node_id,
+                group_id=str(server_round),
+                ttl="",
+            )
+            messages.append(message)
 
-    # ---------------------------------------------------------------------- Driver SDK
-    push_task_ins_res: driver_pb2.PushTaskInsResponse = driver.push_task_ins(
-        req=push_task_ins_req
-    )
-    # ---------------------------------------------------------------------- Driver SDK
+        message_ids = driver.push_messages(messages)
+        print(f"Pushed {len(message_ids)} messages: {message_ids}")
 
-    print(
-        f"Scheduled {len(push_task_ins_res.task_ids)} tasks: {push_task_ins_res.task_ids}"
-    )
+        # Wait for results, ignore empty message_ids
+        message_ids = [message_id for message_id in message_ids if message_id != ""]
+        
+        all_replies: List[Message] = []
+        while True:
+            replies = driver.pull_messages(message_ids=message_ids)
+            print(f"Got {len(replies)} results")
+            all_replies += replies
+            if len(all_replies) == len(message_ids):
+                break
+            time.sleep(3)
 
-    time.sleep(sleep_time)
+        # Collect correct results
+        all_fitres = [recordset_to_fitres(msg.content, keep_input=True) for msg in all_replies]
+        print(f"Received {len(all_fitres)} results")
 
-    # Wait for results, ignore empty task_ids
-    task_ids: List[str] = [
-        task_id for task_id in push_task_ins_res.task_ids if task_id != ""
-    ]
-    all_task_res: List[task_pb2.TaskRes] = []
-    while True:
-        pull_task_res_req = driver_pb2.PullTaskResRequest(
-            node=node_pb2.Node(node_id=0, anonymous=True),
-            task_ids=task_ids,
-        )
+        weights_results: List[Tuple[NDArrays, int]] = []
+        metrics_results: List[Tuple[int, Dict]] = []
+        for fitres in all_fitres:
+            print(f"num_examples: {fitres.num_examples}, status: {fitres.status.code}")
 
-        # ------------------------------------------------------------------ Driver SDK
-        pull_task_res_res: driver_pb2.PullTaskResResponse = driver.pull_task_res(
-            req=pull_task_res_req
-        )
-        # ------------------------------------------------------------------ Driver SDK
+            # Aggregate only if the status is OK
+            if fitres.status.code != Code.OK.value:
+                continue
+            weights_results.append(
+                (parameters_to_ndarrays(fitres.parameters), fitres.num_examples)
+            )
+            metrics_results.append(
+                (fitres.num_examples, serde.metrics_from_proto(fitres.metrics))
+            )
 
-        task_res_list: List[task_pb2.TaskRes] = pull_task_res_res.task_res_list
-        print(f"Got {len(task_res_list)} results")
+        # # Aggregate parameters (FedAvg)
+        # parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+        # parameters = parameters_aggregated
 
-        time.sleep(sleep_time)
+        # # Aggregate metrics
+        # metrics_aggregated = weighted_average(metrics_results)
+        # history.add_metrics_distributed_fit(
+        #     server_round=server_round, metrics=metrics_aggregated
+        # )
+        # print("Round ", server_round, " metrics: ", metrics_aggregated)
 
-        all_task_res += task_res_list
-        if len(all_task_res) == len(task_ids):
-            break
+        # # Slow down the start of the next round
+        # time.sleep(sleep_time)
 
-    # Collect correct results
-    node_messages: List[ClientMessage] = []
-    for task_res in all_task_res:
-        if task_res.task.HasField("legacy_client_message"):
-            node_messages.append(task_res.task.legacy_client_message)
-    print(f"Received {len(node_messages)} results")
-
-    weights_results: List[Tuple[NDArrays, int]] = []
-    metrics_results: List = []
-    for node_message in node_messages:
-        if not node_message.fit_res:
-            continue
-        fit_res = node_message.fit_res
-        # Aggregate only if the status is OK
-        if fit_res.status.code != Code.OK.value:
-            continue
-        weights_results.append(
-            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-        )
-        metrics_results.append(
-            (fit_res.num_examples, serde.metrics_from_proto(fit_res.metrics))
-        )
-
-    # Aggregate parameters (FedAvg)
-    parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
-    parameters = parameters_aggregated
-
-    # Aggregate metrics
-    metrics_aggregated = weighted_average(metrics_results)
-    history.add_metrics_distributed_fit(
-        server_round=server_round, metrics=metrics_aggregated
-    )
-    print("Round ", server_round, " metrics: ", metrics_aggregated)
-
-    # Slow down the start of the next round
-    time.sleep(sleep_time)
-
-print("app_fit: losses_distributed %s", str(history.losses_distributed))
-print("app_fit: metrics_distributed_fit %s", str(history.metrics_distributed_fit))
-print("app_fit: metrics_distributed %s", str(history.metrics_distributed))
-print("app_fit: losses_centralized %s", str(history.losses_centralized))
-print("app_fit: metrics_centralized %s", str(history.metrics_centralized))
-
-# -------------------------------------------------------------------------- Driver SDK
-driver.disconnect()
-# -------------------------------------------------------------------------- Driver SDK
-print("Driver disconnected")
+    print("app_fit: losses_distributed %s", str(history.losses_distributed))
+    print("app_fit: metrics_distributed_fit %s", str(history.metrics_distributed_fit))
+    print("app_fit: metrics_distributed %s", str(history.metrics_distributed))
+    print("app_fit: losses_centralized %s", str(history.losses_centralized))
+    print("app_fit: metrics_centralized %s", str(history.metrics_centralized))
