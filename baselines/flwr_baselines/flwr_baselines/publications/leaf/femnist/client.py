@@ -25,8 +25,8 @@ def set_parameters(net: torch.nn.Module, parameters: NDArrays) -> None:
 
 
 class FlowerClient(fl.client.NumPyClient):
-    """Flower client for training with train and validation loss and accuracy
-    that enables having training time in epochs or in batches."""
+    """Flower client for training with train and validation loss and accuracy that
+    enables having training time in epochs or in batches."""
 
     # pylint: disable=R0902, R0913
     def __init__(

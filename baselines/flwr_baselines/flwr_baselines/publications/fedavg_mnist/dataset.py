@@ -81,8 +81,8 @@ def _partition_data(
     balance: Optional[bool] = True,
     seed: Optional[int] = 42,
 ) -> Tuple[List[Dataset], Dataset]:
-    """Split training set into iid or non iid partitions to simulate the
-    federated setting.
+    """Split training set into iid or non iid partitions to simulate the federated
+    setting.
 
     Parameters
     ----------

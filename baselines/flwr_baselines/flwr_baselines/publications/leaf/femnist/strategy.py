@@ -17,8 +17,8 @@ from flwr.server.strategy import FedAvg
 
 
 class FedAvgSameClients(FedAvg):
-    """FedAvg that samples clients for each round only once (the same clients
-    are used for training and testing round n)
+    """FedAvg that samples clients for each round only once (the same clients are used
+    for training and testing round n)
 
     It does not mean that the same client are used in each round. It used just the same clients
     (with different parts of their data) in round i.

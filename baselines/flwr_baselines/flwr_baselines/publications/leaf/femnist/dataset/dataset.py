@@ -69,8 +69,8 @@ def create_dataset(df_info: pd.DataFrame, labels: np.ndarray) -> NISTLikeDataset
 
 
 def create_partition_list(df_info: pd.DataFrame) -> List[List[int]]:
-    """
-    Create list of list with int masks identifying writers.
+    """Create list of list with int masks identifying writers.
+
     Parameters
     ----------
     df_info: pd.DataFrame
@@ -121,8 +121,8 @@ def train_valid_test_partition(
     test_split: float = 0.1,
     random_seed: int = None,
 ) -> Tuple[List[Dataset], List[Dataset], List[Dataset]]:
-    """Partition list of datasets to train, validation and test splits (each
-    dataset from the list individually).
+    """Partition list of datasets to train, validation and test splits (each dataset
+    from the list individually).
 
     Parameters
     ----------
@@ -174,8 +174,8 @@ def train_valid_test_partition(
 def transform_datasets_into_dataloaders(
     datasets: List[Dataset], **dataloader_kwargs
 ) -> List[DataLoader]:
-    """
-    Transform datasets into dataloaders.
+    """Transform datasets into dataloaders.
+
     Parameters
     ----------
     datasets: List[Dataset]
@@ -204,8 +204,8 @@ def create_federated_dataloaders(
     test_fraction: float,
     random_seed: int,
 ) -> Tuple[List[DataLoader], List[DataLoader], List[DataLoader]]:
-    """Create the federated dataloaders by following all the preprocessing
-    steps and division.
+    """Create the federated dataloaders by following all the preprocessing steps and
+    division.
 
     Parameters
     ----------

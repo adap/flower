@@ -18,13 +18,12 @@ from flwr_baselines.publications.leaf.femnist.dataset.utils import (
 
 # pylint: disable=too-many-instance-attributes
 class NISTPreprocessor:
-    """Preprocess NIST images from two directories divided by class and by
-    writer.
+    """Preprocess NIST images from two directories divided by class and by writer.
 
     The preprocessing procedure include different step for FEMNIST and FeMNIST.
 
-    Using two datasets (by_class and by_write, actually one dataset but divided differently) is
-    required to merge information about the writer_id and label.
+    Using two datasets (by_class and by_write, actually one dataset but divided
+    differently) is required to merge information about the writer_id and label.
     """
 
     def __init__(
@@ -48,9 +47,9 @@ class NISTPreprocessor:
         self._preprocessed_df: pd.DataFrame = pd.DataFrame()
 
     def preprocess(self, overwrite: bool = False) -> None:
-        """Extracts necessary information to create data that has both writer
-        and class information and preprocesses the dataset as by the authors of
-        the FEMNIST paper (which is not the same as by the EMNIST paper).
+        """Extracts necessary information to create data that has both writer and class
+        information and preprocesses the dataset as by the authors of the FEMNIST paper
+        (which is not the same as by the EMNIST paper).
 
         1. Extract writer_id from the directory structure.
         2. Extracts class_id from the directory structure.
@@ -118,8 +117,7 @@ class NISTPreprocessor:
         log(DEBUG, "Directory structure creation done")
 
     def _extract_writer_information(self) -> pd.DataFrame:
-        """Extract writer id based on the path (directories) it was placed
-        in."""
+        """Extract writer id based on the path (directories) it was placed in."""
         log(DEBUG, "Writer information preprocessing started")
         images_paths = list(self._by_writer_nist.glob("*/*/*/*"))
         writer_df = pd.DataFrame(images_paths, columns=["path_by_writer"])
@@ -131,11 +129,9 @@ class NISTPreprocessor:
         return writer_df
 
     def _extract_class_information(self) -> pd.DataFrame:
-        """Extract class (label) based on the path (directories) it was placed
-        in.
+        """Extract class (label) based on the path (directories) it was placed in.
 
-        It also transforms hexadecimal ascii information into readable
-        character.
+        It also transforms hexadecimal ascii information into readable character.
         """
         log(DEBUG, "Class information preprocessing started")
         hsf_and_train_dir = self._by_class_nist.glob("*/*")
