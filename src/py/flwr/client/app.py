@@ -107,6 +107,8 @@ def run_client_app() -> None:
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
         insecure=args.insecure,
+        retry_max_tries=args.retry_max_tries,
+        retry_max_time=args.retry_max_time,
     )
     event(EventType.RUN_CLIENT_APP_LEAVE)
 
@@ -143,6 +145,21 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         "--server",
         default="0.0.0.0:9092",
         help="Server address",
+    )
+    parser.add_argument(
+        "--retry_max_tries",
+        type=int,
+        default=1,
+        help="The maximum number of times the client will try to reconnect to the"
+        "server before giving up in case of a connection error. If set to None,"
+        "there is no limit to the number of tries.",
+    )
+    parser.add_argument(
+        "--retry_max_time",
+        type=float,
+        help="The maximum total amount of time before the client stops trying to"
+        "reconnect to the server before giving up in case of connection error."
+        "If set to None, there is no limit to the total time.",
     )
     parser.add_argument(
         "--dir",
@@ -183,6 +200,8 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    retry_max_tries: Optional[int] = 1,
+    retry_max_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -216,6 +235,14 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    retry_max_tries: Optional[int]
+        The maximum number of times the client will try to reconnect to the
+        server before giving up in case of a connection error. If set to None,
+        there is no limit to the number of tries.
+    retry_max_time: Optional[float]
+        The maximum total amount of time before the client stops trying to
+        reconnect to the server before giving up in case of connection error.
+        If set to None, there is no limit to the total time.
 
     Examples
     --------
@@ -257,6 +284,8 @@ def start_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
+        retry_max_tries=retry_max_tries,
+        retry_max_time=retry_max_time,
     )
     event(EventType.START_CLIENT_LEAVE)
 
@@ -275,7 +304,7 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
-    retry_max_tries: Optional[int] = None,
+    retry_max_tries: Optional[int] = 1,
     retry_max_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
