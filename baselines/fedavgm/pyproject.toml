@@ -3,7 +3,7 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "fedavgm" 
+name = "fedavgm"
 version = "1.0.0"
 description = "FedAvgM: Measuring the effects of non-identical data distribution for federated visual classification"
 license = "Apache-2.0"
