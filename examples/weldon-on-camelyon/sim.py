@@ -50,9 +50,9 @@ parser.add_argument(
 parser.add_argument(
         "--pool-size", type=int, default=2, help="Number of clients in total"
     )
-parser.add_argument("--num-rounds", type=int, default=11, help="Number of FL rounds.")
+parser.add_argument("--num-rounds", type=int, default=10, help="Number of FL rounds.")
 parser.add_argument(
-    "--n-local-steps", type=int, default=50, help="Number of batch to learn from at each step of the strategy"
+    "--n-local-steps", type=int, default=5, help="Number of batch to learn from at each step of the strategy"
 )
 parser.add_argument(
     "--batch-size", type=int, default=8, help="Number of sample to use learn from for each local step"
