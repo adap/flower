@@ -25,16 +25,16 @@ from .typeddict import TypedDict
 def _check_key(key: str) -> None:
     """Check if key is of expected type."""
     if not isinstance(key, str):
-        raise TypeError(f"Key must be of type str. You passed {type(key)}.")
+        raise TypeError(f"Key must be of type `str` but `{type(key)}` was passed.")
 
 
-def _check_values(value: MetricsRecordValues) -> None:
+def _check_value(value: MetricsRecordValues) -> None:
     def is_valid(__v: MetricsScalar) -> None:
         """Check if value is of expected type."""
         if not isinstance(__v, get_args(MetricsScalar)) or isinstance(__v, bool):
             raise TypeError(
                 "Not all values are of valid type."
-                f" Expected {MetricsRecordValues} but you passed {type(__v)}."
+                f" Expected `{MetricsRecordValues}` but `{type(__v)}` was passed."
             )
 
     if isinstance(value, list):
@@ -78,7 +78,7 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
             to True, the data is duplicated in memory. If memory is a concern, set
             it to False.
         """
-        super().__init__(_check_key, _check_values)
+        super().__init__(_check_key, _check_value)
         if metrics_dict:
             for k in list(metrics_dict.keys()):
                 self[k] = metrics_dict[k]

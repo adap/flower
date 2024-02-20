@@ -55,12 +55,14 @@ class Array:
 def _check_key(key: str) -> None:
     """Check if key is of expected type."""
     if not isinstance(key, str):
-        raise TypeError(f"Key must be of type str. You passed {type(key)}.")
+        raise TypeError(f"Key must be of type `str` but `{type(key)}` was passed.")
 
 
-def _check_values(value: Array) -> None:
+def _check_value(value: Array) -> None:
     if not isinstance(value, Array):
-        raise TypeError(f"Key must be of type str. You passed {type(value)}.")
+        raise TypeError(
+            f"Key must be of type `{Array}` but `{type(value)}` was passed."
+        )
 
 
 @dataclass
@@ -92,7 +94,7 @@ class ParametersRecord(TypedDict[str, Array]):
             parameters after adding it to the record, set this flag to True. When set
             to True, the data is duplicated in memory.
         """
-        super().__init__(_check_key, _check_values)
+        super().__init__(_check_key, _check_value)
         if array_dict:
             for k in list(array_dict.keys()):
                 self[k] = array_dict[k]
