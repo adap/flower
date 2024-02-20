@@ -7,13 +7,13 @@ Quickstart scikit-learn
 .. meta::
    :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a linear regression model.
 
-In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit-learn. 
+In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit-learn.
 
-It is recommended to create a virtual environment and run everything within this `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_. 
+It is recommended to create a virtual environment and run everything within this `virtualenv <https://flower.ai/docs/recommended-env-setup.html>`_.
 
-Our example consists of one *server* and two *clients* all having the same model. 
+Our example consists of one *server* and two *clients* all having the same model.
 
-*Clients* are responsible for generating individual model parameter updates for the model based on their local datasets. 
+*Clients* are responsible for generating individual model parameter updates for the model based on their local datasets.
 These updates are then sent to the *server* which will aggregate them to produce an updated global model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of parameters updates is called a *round*.
 
@@ -59,7 +59,7 @@ Please check out :code:`utils.py` `here <https://github.com/adap/flower/blob/mai
 The pre-defined functions are used in the :code:`client.py` and imported. The :code:`client.py` also requires to import several packages such as Flower and scikit-learn:
 
 .. code-block:: python
-      
+
   import warnings
   import flwr as fl
   import numpy as np
@@ -70,7 +70,7 @@ The pre-defined functions are used in the :code:`client.py` and imported. The :c
   import utils
 
 
-We load the MNIST dataset from `OpenML <https://www.openml.org/d/554>`_, a popular image classification dataset of handwritten digits for machine learning. The utility :code:`utils.load_mnist()` downloads the training and test data. The training set is split afterwards into 10 partitions with :code:`utils.partition()`. 
+We load the MNIST dataset from `OpenML <https://www.openml.org/d/554>`_, a popular image classification dataset of handwritten digits for machine learning. The utility :code:`utils.load_mnist()` downloads the training and test data. The training set is split afterwards into 10 partitions with :code:`utils.partition()`.
 
 .. code-block:: python
 

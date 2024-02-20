@@ -23,8 +23,7 @@ from flwr.client.message_handler.message_handler import (
 )
 from flwr.client.mod.utils import make_ffn
 from flwr.client.typing import ClientFn, Mod
-from flwr.common.context import Context
-from flwr.common.message import Message
+from flwr.common import Context, Message
 
 
 class ClientApp:

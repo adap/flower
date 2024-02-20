@@ -3,7 +3,7 @@ from datetime import datetime
 import flwr as fl
 import numpy as np
 
-from flwr.common.configsrecord import ConfigsRecord
+from flwr.common import ConfigsRecord
 
 SUBSET_SIZE = 1000
 STATE_VAR = 'timestamp'
