@@ -25,6 +25,7 @@ from flwr.common.logger import log
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.task_pb2 import TaskIns
 from flwr.server.superlink.state import StateFactory
+from flwr.common import Metadata, Message
 
 from .backend import Backend, RayBackend
 
@@ -69,8 +70,8 @@ async def worker(
 
             # Convert TaskIns to Message
             message = message_from_taskins(task_ins)
-            #!TODO:  replace node_id with data partition id
-            # message.metadata.dst_node_id = nodes_mapping[node_id]
+            # Replace node-id with data partition id
+            message.metadata.dst_node_id = nodes_mapping[node_id]
 
             # Let backend process message
             out_mssg, updated_context = await backend.process_message(
@@ -84,8 +85,8 @@ async def worker(
 
             # TODO: can we avoid going to proto ?
             # TODO: maybe with a new StateFactory + In-Memory Driver-SuperLink conn.
-            #!TODO: undo change node_id for partition choice
-            # out_mssg.metadata.src_node_id = task_ins.task.consumer.node_id
+            # Undo change node_id for partition choice
+            out_mssg.metadata._src_node_id = task_ins.task.consumer.node_id
             # Convert to TaskRes
             task_res = message_to_taskres(out_mssg)
             # Store TaskRes in state

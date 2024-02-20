@@ -45,7 +45,7 @@ class RayBackend(Backend):
         # Ref: https://docs.ray.io/en/latest/ray-core/handling-dependencies.html#api-reference
         runtime_env = {"working_dir": wdir} if wdir else None
         init_ray(
-            include_dashboard=True, runtime_env=runtime_env
+            runtime_env=runtime_env
         )  # TODO: recursiviely search dir, we don't want that. use `excludes` arg
         # Create actor pool
         self._pool = BasicActorPool(
