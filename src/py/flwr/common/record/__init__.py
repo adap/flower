@@ -12,27 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Context."""
+"""Record APIs."""
 
+from .configsrecord import ConfigsRecord
+from .metricsrecord import MetricsRecord
+from .parametersrecord import Array, ParametersRecord
+from .recordset import RecordSet
 
-from dataclasses import dataclass
-
-from .record import RecordSet
-
-
-@dataclass
-class Context:
-    """State of your run.
-
-    Parameters
-    ----------
-    state : RecordSet
-        Holds records added by the entity in a given run and that will stay local.
-        This means that the data it holds will never leave the system it's running from.
-        This can be used as an intermediate storage or scratchpad when
-        executing mods. It can also be used as a memory to access
-        at different points during the lifecycle of this entity (e.g. across
-        multiple rounds)
-    """
-
-    state: RecordSet
+__all__ = [
+    "Array",
+    "ConfigsRecord",
+    "MetricsRecord",
+    "ParametersRecord",
+    "RecordSet",
+]
