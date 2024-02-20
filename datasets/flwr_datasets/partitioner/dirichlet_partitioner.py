@@ -158,7 +158,7 @@ class DirichletPartitioner(Partitioner):
         elif isinstance(alpha, List):
             if len(alpha) != self._num_partitions:
                 raise ValueError(
-                    "The alpha parameter needs to be of length of equal to the "
+                    "If passing alpha as a List, it needs to be of length of equal to "
                     "num_partitions."
                 )
             alpha = np.asarray(alpha)
@@ -166,15 +166,15 @@ class DirichletPartitioner(Partitioner):
             # pylint: disable=R1720
             if alpha.ndim == 1 and alpha.shape[0] != self._num_partitions:
                 raise ValueError(
-                    "The alpha parameter needs to be of length of equal to"
-                    "the num_partitions."
+                    "If passing alpha as an NDArray, its length needs to be of length "
+                    "equal to num_partitions."
                 )
             elif alpha.ndim == 2:
                 alpha = alpha.flatten()
                 if alpha.shape[0] != self._num_partitions:
                     raise ValueError(
-                        "The alpha parameter needs to be of length of equal to "
-                        "the num_partitions."
+                        "If passing alpha as an NDArray, its size needs to be of length"
+                        " equal to num_partitions."
                     )
         else:
             raise ValueError("The given alpha format is not supported.")
