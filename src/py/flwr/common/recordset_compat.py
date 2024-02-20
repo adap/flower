@@ -17,7 +17,7 @@
 
 from typing import Dict, Mapping, OrderedDict, Tuple, Union, cast, get_args
 
-from .record import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
 from .typing import (
     Code,
     ConfigsRecordValues,

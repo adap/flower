@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .record import RecordSet
+from .recordset import RecordSet
 
 
 @dataclass

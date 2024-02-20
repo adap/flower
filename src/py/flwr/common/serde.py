@@ -43,10 +43,9 @@ from flwr.proto.transport_pb2 import (
 )
 
 # pylint: enable=E0611
-from . import typing
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, typing
 from .message import Message, Metadata
-from .record import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
-from .record.typeddict import TypedDict
+from .typeddict import TypedDict
 
 #  === Parameters message ===
 
