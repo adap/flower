@@ -55,7 +55,7 @@ parser.add_argument(
     "--n-local-steps", type=int, default=50, help="Number of batch to learn from at each step of the strategy"
 )
 parser.add_argument(
-    "--batch-size", type=int, default=16, help="Number of sample to use learn from for each local step"
+    "--batch-size", type=int, default=8, help="Number of sample to use learn from for each local step"
 )
 parser.add_argument(
         "--data-path",

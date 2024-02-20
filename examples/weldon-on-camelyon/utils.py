@@ -1,7 +1,6 @@
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
+from tqdm import tqdm
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import roc_auc_score
 
@@ -10,7 +9,7 @@ def train(net, trainloader, optim):
     """Train the network on the training set."""
     criterion = torch.nn.BCELoss()
     net.train()
-    for X, y in trainloader:
+    for X, y in tqdm(trainloader):
         optim.zero_grad()
         y_pred = net(X)
         loss = criterion(y_pred, y)
