@@ -7,9 +7,6 @@ import torch
 import torch.nn.functional as F  # noqa: N812
 from torch.utils.data import Dataset
 
-# WARNING: the code is not tested on gpu
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 
 # Duplicated in substrafl/benchmark/camelyon/pure_substrafl/assets/opener.py
 class Data:
@@ -33,12 +30,17 @@ class Data:
 
 
 class CamelyonDataset(Dataset):
-    """Torch Dataset for the Camelyon data. Padding is done on the fly."""
+    """Torch Dataset for the Camelyon data.
+
+    Padding is done on the fly.
+    """
 
     def __init__(self, datasamples, is_inference=False) -> None:
         data_indexes = datasamples.indexes
         self.data_indexes = (
-            data_indexes if len(data_indexes.shape) > 1 else np.array(data_indexes).reshape(1, data_indexes.shape[0])
+            data_indexes
+            if len(data_indexes.shape) > 1
+            else np.array(data_indexes).reshape(1, data_indexes.shape[0])
         )
         self.is_inference = is_inference
 
@@ -48,12 +50,14 @@ class CamelyonDataset(Dataset):
     def __getitem__(self, index):
         """Get the needed item from index and preprocess them on the fly."""
         sample_file_path, target = self.data_indexes[index]
-        x = torch.from_numpy(np.load(sample_file_path).astype(np.float32)).to(device)
+        x = torch.from_numpy(np.load(sample_file_path).astype(np.float32))
 
-        y = torch.tensor(int(target == "Tumor")).type(torch.float32).to(device)
+        y = torch.tensor(int(target == "Tumor")).type(torch.float32)
 
         missing_tiles = 25000 - x.shape[0]
-        assert missing_tiles > 0, f"The padding value is too low, got {x.shape[0]} in this sample."
+        assert (
+            missing_tiles > 0
+        ), f"The padding value is too low, got {x.shape[0]} in this sample."
 
         up = math.ceil(missing_tiles / 2)
         down = missing_tiles // 2

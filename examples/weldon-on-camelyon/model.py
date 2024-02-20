@@ -4,9 +4,7 @@ import torch
 
 
 class Weldon(torch.nn.Module):
-    """
-    Weldon module
-    """
+    """Weldon module."""
 
     def __init__(
         self,
@@ -24,7 +22,9 @@ class Weldon(torch.nn.Module):
         self.n_top = n_top
         self.n_bottom = n_bottom
         self.dim = 1
-        self.score_model = torch.nn.Linear(in_features, bias=True, out_features=out_features)
+        self.score_model = torch.nn.Linear(
+            in_features, bias=True, out_features=out_features
+        )
         torch.nn.init.xavier_uniform_(self.score_model.weight)
         self.score_model.bias.data.fill_(0.0)
 

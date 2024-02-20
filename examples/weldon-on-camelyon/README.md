@@ -45,9 +45,11 @@ pip install -r requirements.txt
 ```bash
 # After activating your environment
 # and then run the example
-python sim.py --data-path=./data --pool-size=2 --num-rounds=10
+python sim.py --data-path=./data --pool-size=2 --num-rounds=10 --num-gpus=0.5 --num_cpus=2
 ```
-This will run an FL simulation with 2 clients for 10 rounds.
+This command will run an FL simulation with 2 clients for 10 rounds. 
+Note that this will assign 2xCPUs and 50% of the GPU's VRAM to each client
+This means that you can have 2 concurrent clients on each GPU.
 
 ### Expected Results
 

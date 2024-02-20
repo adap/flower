@@ -32,7 +32,7 @@ parser.add_argument(
 parser.add_argument(
     "--num-gpus",
     type=float,
-    default=1.0,
+    default=0.0,
     help="Ratio of GPU memory to assign to a virtual client",
 )
 parser.add_argument(
@@ -40,7 +40,7 @@ parser.add_argument(
     type=int,
     default=5,
     help="Number of data sample of 400 Mb to use for each train task on each client",
-    )
+)
 parser.add_argument(
     "--nb-test-data-samples",
     type=int,
@@ -48,21 +48,27 @@ parser.add_argument(
     help="Number of data sample of 400 Mb to use for each test task",
 )
 parser.add_argument(
-        "--pool-size", type=int, default=2, help="Number of clients in total"
-    )
+    "--pool-size", type=int, default=2, help="Number of clients in total"
+)
 parser.add_argument("--num-rounds", type=int, default=10, help="Number of FL rounds.")
 parser.add_argument(
-    "--n-local-steps", type=int, default=5, help="Number of batch to learn from at each step of the strategy"
+    "--n-local-steps",
+    type=int,
+    default=5,
+    help="Number of batch to learn from at each step of the strategy",
 )
 parser.add_argument(
-    "--batch-size", type=int, default=8, help="Number of sample to use learn from for each local step"
+    "--batch-size",
+    type=int,
+    default=8,
+    help="Number of sample to use learn from for each local step",
 )
 parser.add_argument(
-        "--data-path",
-        type=Path,
-        default=Path(__file__).resolve().parents[1] / "data",
-        help="Path to the data",
-    )
+    "--data-path",
+    type=Path,
+    default=Path(__file__).resolve().parents[1] / "data",
+    help="Path to the data",
+)
 
 
 # Flower client, adapted from Pytorch quickstart example
@@ -103,7 +109,7 @@ class FlowerClient(fl.client.NumPyClient):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=0.01)
 
         # Train
-        train(self.model, train_dataloader, optimizer)
+        train(self.model, train_dataloader, optimizer, self.device)
 
         # Reset the iterator
         batch_sampler.reset_counter()
@@ -123,10 +129,14 @@ class FlowerClient(fl.client.NumPyClient):
             batch_sampler=batch_sampler,
         )
         # Evaluate
-        loss, auc, accuracy = test(self.model, valloader)
+        loss, auc, accuracy = test(self.model, valloader, self.device)
 
         # Return statistics
-        return float(loss), len(valloader.dataset), {"auc": float(auc), "accuracy": float(accuracy)}
+        return (
+            float(loss),
+            len(valloader.dataset),
+            {"auc": float(auc), "accuracy": float(accuracy)},
+        )
 
 
 def get_client_fn(train_data, test_data, index_generator):
@@ -166,11 +176,15 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     examples = [num_examples for num_examples, _ in metrics]
 
     # Aggregate and return custom metric (weighted average)
-    return {"auc": sum(aucs) / sum(examples), "accuracy": sum(accuracies) / sum(examples)}
+    return {
+        "auc": sum(aucs) / sum(examples),
+        "accuracy": sum(accuracies) / sum(examples),
+    }
 
 
 def get_evaluate_fn(
-    centralized_testdata, index_generator,
+    centralized_testdata,
+    index_generator,
 ):
     """Return an evaluation function for centralized evaluation."""
 
@@ -202,7 +216,7 @@ def get_evaluate_fn(
         )
 
         # Evaluate
-        loss, auc, accuracy = test(model, test_loader)
+        loss, auc, accuracy = test(model, test_loader, device)
         return loss, {"auc": auc, "accuracy": accuracy}
 
     return evaluate
@@ -214,7 +228,10 @@ def main():
 
     # Data pre-processing
     index_generator = NpIndexGenerator(
-        batch_size=args.batch_size, num_updates=args.n_local_steps, drop_last=True, shuffle=False
+        batch_size=args.batch_size,
+        num_updates=args.n_local_steps,
+        drop_last=True,
+        shuffle=False,
     )
     if not os.path.exists(args.data_path):
         os.mkdir(args.data_path)
@@ -242,7 +259,9 @@ def main():
         min_evaluate_clients=2,  # Never sample less than 2 clients for evaluation
         min_available_clients=args.pool_size,  # Wait until all clients are available
         evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
-        evaluate_fn=get_evaluate_fn(test_camelyon, index_generator),  # Global evaluation function
+        evaluate_fn=get_evaluate_fn(
+            test_camelyon, index_generator
+        ),  # Global evaluation function
     )
 
     # Resources to be assigned to each virtual client

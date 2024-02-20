@@ -14,7 +14,11 @@ def fetch_camelyon(data_path: Path):
     if not (data_path / files_archive).exists():
         print("Downloading the dataset (~400Mb), this may take a few minutes.")
         subprocess.run(
-            ["wget", f"{URL}"], check=True, cwd=data_path, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT
+            ["wget", f"{URL}"],
+            check=True,
+            cwd=data_path,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT,
         )
 
         with zipfile.ZipFile(data_path / files_archive, "r") as zip_ref:
@@ -22,7 +26,8 @@ def fetch_camelyon(data_path: Path):
 
 
 def reset_data_folder(data_path: Path):
-    """Reset data folder to it's original state i.e. all the data in the img_dir_path folder."""
+    """Reset data folder to it's original state i.e. all the data in the img_dir_path
+    folder."""
     # Deleting old experiment folders
     if data_path.is_dir():
         shutil.rmtree(data_path)
