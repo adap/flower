@@ -12,27 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Context."""
+"""Flower command line interface."""
 
+import typer
 
-from dataclasses import dataclass
+from .example import example
+from .new import new
 
-from .record import RecordSet
+app = typer.Typer(
+    help=typer.style(
+        "flwr is the Flower command line interface.",
+        fg=typer.colors.BRIGHT_YELLOW,
+        bold=True,
+    ),
+    no_args_is_help=True,
+)
 
+app.command()(new)
+app.command()(example)
 
-@dataclass
-class Context:
-    """State of your run.
-
-    Parameters
-    ----------
-    state : RecordSet
-        Holds records added by the entity in a given run and that will stay local.
-        This means that the data it holds will never leave the system it's running from.
-        This can be used as an intermediate storage or scratchpad when
-        executing mods. It can also be used as a memory to access
-        at different points during the lifecycle of this entity (e.g. across
-        multiple rounds)
-    """
-
-    state: RecordSet
+if __name__ == "__main__":
+    app()

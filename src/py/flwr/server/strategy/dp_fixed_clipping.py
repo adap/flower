@@ -51,27 +51,27 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
 
     Parameters
     ----------
-    strategy : Strategy
-        The strategy to which DP functionalities will be added by this wrapper.
-    noise_multiplier : float
-        The noise multiplier for the Gaussian mechanism for model updates.
-        A value of 1.0 or higher is recommended for strong privacy.
-    clipping_norm : float
-        The value of the clipping norm.
-    num_sampled_clients : int
-        The number of clients that are sampled on each round.
+        strategy : Strategy
+            The strategy to which DP functionalities will be added by this wrapper.
+        noise_multiplier : float
+            The noise multiplier for the Gaussian mechanism for model updates.
+            A value of 1.0 or higher is recommended for strong privacy.
+        clipping_norm : float
+            The value of the clipping norm.
+        num_sampled_clients : int
+            The number of clients that are sampled on each round.
 
     Examples
     --------
-    Create a strategy:
+        Create a strategy:
 
-    >>> strategy = fl.server.strategy.FedAvg( ... )
+        >>> strategy = fl.server.strategy.FedAvg( ... )
 
-    Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
+        Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
 
-    >>> dp_strategy = DifferentialPrivacyServerSideFixedClipping(
-    >>>         strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
-    >>>     )
+        >>> dp_strategy = DifferentialPrivacyServerSideFixedClipping(
+        >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+        >>> )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -216,8 +216,8 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
     Wrap the strategy with the DifferentialPrivacyClientSideFixedClipping wrapper
 
     >>> dp_strategy = DifferentialPrivacyClientSideFixedClipping(
-    >>>         strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
-    >>>     )
+    >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+    >>> )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -249,7 +249,7 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
-        rep = "DP Strategy Wrapper with Fixed Client Side Clipping"
+        rep = "Differential Privacy Strategy Wrapper (Client-Side Fixed Clipping)"
         return rep
 
     def initialize_parameters(
@@ -285,11 +285,7 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
-        """Compute the updates, clip them, and pass them to the child strategy for
-        aggregation.
-
-        Afterward, add noise to the aggregated parameters.
-        """
+        """Add noise to the aggregated parameters."""
         if failures:
             return None, {}
 
