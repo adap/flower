@@ -27,7 +27,7 @@ flower-client-app client:app --insecure
 In yet another new terminal window, start the second long-running Flower client:
 
 ```bash
-flower-client-all client:app --insecure
+flower-client-app client:app --insecure
 ```
 
 ## Start the driver
