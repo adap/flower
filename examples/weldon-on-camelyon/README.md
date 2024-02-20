@@ -1,4 +1,4 @@
-# Flower Simulation example using PyTorch
+# Flower Simulation of Training Weldon on Camelyon
 
 This introductory example uses the simulation capabilities of Flower to 
 simulate federated Weldon model training on Camelyon dataset using a single machine.
