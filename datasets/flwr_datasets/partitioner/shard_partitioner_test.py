@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Test DirichletPartitioner."""
+"""Test ShardPartitioner."""
+
+
 # pylint: disable=W0212, R0913
 import unittest
 from typing import Optional, Tuple
