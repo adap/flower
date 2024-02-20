@@ -29,7 +29,7 @@ def test(net, testloader):
         for X, y in testloader:
             outputs = net(X)
             y_pred.append(outputs)
-            y_true = np.append(y_true, y.numpy())
+            y_true = np.append(y_true, y.cpu().numpy())
             loss += criterion(outputs, y).item()
 
         # Fusion, sigmoid and to numpy
