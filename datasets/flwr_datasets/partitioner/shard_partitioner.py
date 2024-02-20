@@ -322,7 +322,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
 
 
 def _check_if_natual_number(
-    number: int, parameter_name: str, none_acceptable: bool = False
+    number: Optional[int], parameter_name: str, none_acceptable: bool = False
 ) -> None:
     if none_acceptable and number is None:
         return
