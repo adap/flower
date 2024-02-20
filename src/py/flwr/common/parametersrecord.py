@@ -15,8 +15,10 @@
 """ParametersRecord and Array."""
 
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Optional, OrderedDict
+
+from .typeddict import TypedDict
 
 
 @dataclass
@@ -50,16 +52,27 @@ class Array:
     data: bytes
 
 
+def _check_key(key: str) -> None:
+    """Check if key is of expected type."""
+    if not isinstance(key, str):
+        raise TypeError(f"Key must be of type `str` but `{type(key)}` was passed.")
+
+
+def _check_value(value: Array) -> None:
+    if not isinstance(value, Array):
+        raise TypeError(
+            f"Value must be of type `{Array}` but `{type(value)}` was passed."
+        )
+
+
 @dataclass
-class ParametersRecord:
+class ParametersRecord(TypedDict[str, Array]):
     """Parameters record.
 
     A dataclass storing named Arrays in order. This means that it holds entries as an
     OrderedDict[str, Array]. ParametersRecord objects can be viewed as an equivalent to
     PyTorch's state_dict, but holding serialised tensors instead.
     """
-
-    data: OrderedDict[str, Array] = field(default_factory=OrderedDict[str, Array])
 
     def __init__(
         self,
@@ -81,37 +94,9 @@ class ParametersRecord:
             parameters after adding it to the record, set this flag to True. When set
             to True, the data is duplicated in memory.
         """
-        self.data = OrderedDict()
+        super().__init__(_check_key, _check_value)
         if array_dict:
-            self.set_parameters(array_dict, keep_input=keep_input)
-
-    def set_parameters(
-        self, array_dict: OrderedDict[str, Array], keep_input: bool = False
-    ) -> None:
-        """Add parameters to record.
-
-        Parameters
-        ----------
-        array_dict : OrderedDict[str, Array]
-            A dictionary that stores serialized array-like or tensor-like objects.
-        keep_input : bool (default: False)
-            A boolean indicating whether parameters should be deleted from the input
-            dictionary immediately after adding them to the record.
-        """
-        if any(not isinstance(k, str) for k in array_dict.keys()):
-            raise TypeError(f"Not all keys are of valid type. Expected {str}")
-        if any(not isinstance(v, Array) for v in array_dict.values()):
-            raise TypeError(f"Not all values are of valid type. Expected {Array}")
-
-        if keep_input:
-            # Copy
-            self.data = OrderedDict(array_dict)
-        else:
-            # Add entries to dataclass without duplicating memory
-            for key in list(array_dict.keys()):
-                self.data[key] = array_dict[key]
-                del array_dict[key]
-
-    def __getitem__(self, key: str) -> Array:
-        """Retrieve an element stored in record."""
-        return self.data[key]
+            for k in list(array_dict.keys()):
+                self[k] = array_dict[k]
+                if not keep_input:
+                    del array_dict[k]
