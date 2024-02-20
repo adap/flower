@@ -11,7 +11,7 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
 import flwr as fl
-from flwr.common.configsrecord import ConfigsRecord
+from flwr.common import ConfigsRecord
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -126,7 +126,7 @@ def set_parameters(model, parameters):
 def client_fn(cid):
     return FlowerClient().to_client()
 
-flower = fl.flower.Flower(
+app = fl.client.ClientApp(
     client_fn=client_fn,
 )
 

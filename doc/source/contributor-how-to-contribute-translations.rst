@@ -2,7 +2,7 @@ Contribute translations
 =======================
 
 Since `Flower 1.5
-<https://flower.dev/docs/framework/ref-changelog.html#v1-5-0-2023-08-31>`_ we
+<https://flower.ai/docs/framework/ref-changelog.html#v1-5-0-2023-08-31>`_ we
 have introduced translations to our doc pages, but, as you might have noticed,
 the translations are often imperfect. If you speak languages other than
 English, you might be able to help us in our effort to make Federated Learning
@@ -67,5 +67,5 @@ Add new languages
 -----------------
 
 If you want to add a new language, you will first have to contact us, either on
-`Slack <https://flower.dev/join-slack>`_, or by opening an issue on our `GitHub
+`Slack <https://flower.ai/join-slack>`_, or by opening an issue on our `GitHub
 repo <https://github.com/adap/flower>`_.

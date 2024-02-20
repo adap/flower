@@ -3,7 +3,7 @@ from datetime import datetime
 import flwr as fl
 import numpy as np
 
-from flwr.common.configsrecord import ConfigsRecord
+from flwr.common import ConfigsRecord
 
 SUBSET_SIZE = 1000
 STATE_VAR = 'timestamp'
@@ -46,7 +46,7 @@ class FlowerClient(fl.client.NumPyClient):
 def client_fn(cid):
     return FlowerClient().to_client()
 
-flower = fl.flower.Flower(
+app = fl.client.ClientApp(
     client_fn=client_fn,
 )
 
