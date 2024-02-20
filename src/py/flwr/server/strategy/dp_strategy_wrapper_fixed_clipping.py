@@ -43,7 +43,7 @@ from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.strategy import Strategy
 
 
-class DPStrategyWrapperServerSideFixedClipping(Strategy):
+class DifferentialPrivacyServerSideFixedClipping(Strategy):
     """Wrapper for Central DP with Server Side Fixed Clipping.
 
     Parameters
@@ -60,18 +60,15 @@ class DPStrategyWrapperServerSideFixedClipping(Strategy):
 
     Examples
     --------
-    Create an strategy:
+    Create a strategy:
 
     >>> strategy = fl.server.strategy.FedAvg( ... )
 
-    Wrap the strategy with a DP wrapper
+    Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
 
-    >>> dpStrategy = DPStrategyWrapperServerSideFixedClipping(
-                        strategy,
-                        cfg.noise_multiplier,
-                        cfg.clipping_norm,
-                        cfg.num_sampled_clients
-                        )
+    >>> dp_strategy = DifferentialPrivacyServerSideFixedClipping(
+    >>>         strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+    >>>     )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
