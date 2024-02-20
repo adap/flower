@@ -33,7 +33,7 @@ def test(net, testloader):
             loss += criterion(outputs, y).item()
 
         # Fusion, sigmoid and to numpy
-        y_pred = torch.cat(y_pred).numpy()
+        y_pred = torch.cat(y_pred).cpu().numpy()
         auc = roc_auc_score(y_true, y_pred) if len(set(y_true)) > 1 else 0
         acc = accuracy_score(y_true, np.round(y_pred)) if len(set(y_true)) > 1 else 0
 
