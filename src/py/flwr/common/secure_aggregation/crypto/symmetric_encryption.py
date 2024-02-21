@@ -21,7 +21,7 @@ from typing import Tuple, cast
 from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes, hmac, serialization
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 
