@@ -22,6 +22,10 @@ from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.common import (
     Code,
@@ -41,7 +45,6 @@ from flwr.common import (
 )
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
-    private_key_to_bytes,
     public_key_to_bytes,
 )
 from flwr.server.client_manager import SimpleClientManager
@@ -185,8 +188,19 @@ def test_setup_client_auth() -> None:
     """Test setup client authentication."""
     # Generate keys
     _, first_public_key = generate_key_pairs()
+    server_public_key = (
+        b"ssh-ed25519 "
+        b"AAAAC3NzaC1lZDI1NTE5AAAAIH2WQPMp+JHI9UxvrFuOphfZXN5CC12N3AKB6CjmRnpN"
+    )
+    server_private_key = b"""-----BEGIN OPENSSH PRIVATE KEY-----
+    b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+    QyNTUxOQAAACB9lkDzKfiRyPVMb6xbjqYX2VzeQgtdjdwCgego5kZ6TQAAALBZcmCzWXJg
+    swAAAAtzc2gtZWQyNTUxOQAAACB9lkDzKfiRyPVMb6xbjqYX2VzeQgtdjdwCgego5kZ6TQ
+    AAAEDWjCVhWlskdnWQPyoRo6E/kwZBra82kIrH4P3UoZI9z32WQPMp+JHI9UxvrFuOphfZ
+    XN5CC12N3AKB6CjmRnpNAAAAJ2RhbmllbG51Z3JhaGFARGFuaWVscy1NYWNCb29rLVByby
+    5sb2NhbAECAwQFBg==
+    -----END OPENSSH PRIVATE KEY-----"""
     _, second_public_key = generate_key_pairs()
-    server_private_key, server_public_key = generate_key_pairs()
 
     with tempfile.TemporaryDirectory() as temp_dir:
         # Initialize temporary files
@@ -203,8 +217,8 @@ def test_setup_client_auth() -> None:
                     public_key_to_bytes(second_public_key).decode(),
                 ]
             )
-        server_public_key_path.write_bytes(public_key_to_bytes(server_public_key))
-        server_private_key_path.write_bytes(private_key_to_bytes(server_private_key))
+        server_public_key_path.write_bytes(server_public_key)
+        server_private_key_path.write_bytes(server_private_key)
 
         # Mock argparse with `require-client-authentication`` flag
         mock_args = argparse.Namespace(
@@ -214,6 +228,9 @@ def test_setup_client_auth() -> None:
                 str(server_private_key_path),
             ]
         )
+
+        expected_private_key = load_ssh_private_key(server_private_key, None)
+        expected_public_key = load_ssh_public_key(server_public_key)
 
         # Run _try_setup_client_authentication
         result = _try_setup_client_authentication(mock_args)
@@ -225,6 +242,6 @@ def test_setup_client_auth() -> None:
                 public_key_to_bytes(first_public_key),
                 public_key_to_bytes(second_public_key),
             },
-            public_key_to_bytes(server_public_key),
-            private_key_to_bytes(server_private_key),
+            expected_public_key,
+            expected_private_key,
         )

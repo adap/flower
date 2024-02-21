@@ -28,6 +28,11 @@ from types import FrameType
 from typing import List, Optional, Sequence, Set, Tuple
 
 import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
@@ -48,6 +53,7 @@ from .client_manager import ClientManager, SimpleClientManager
 from .history import History
 from .server import Server
 from .server_config import ServerConfig
+from .server_interceptor import AuthenticateServerInterceptor
 from .strategy import FedAvg, Strategy
 from .superlink.driver.driver_servicer import DriverServicer
 from .superlink.fleet.grpc_bidi.grpc_server import (
@@ -397,8 +403,21 @@ def run_superlink() -> None:
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-        _try_setup_client_authentication(args)
-        interceptors: Sequence[grpc.ServerInterceptor] = []
+        data = _try_setup_client_authentication(args)
+        if data is None:
+            sys.exit("--require-client-authentication cannot be parsed.")
+        (
+            client_public_keys,
+            server_public_key,
+            server_private_key,
+        ) = data
+        state_factory.state().store_client_public_keys(client_public_keys)
+
+        interceptors: Sequence[grpc.ServerInterceptor] = [
+            AuthenticateServerInterceptor(
+                state_factory, server_private_key, server_public_key
+            )
+        ]
 
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
@@ -428,11 +447,35 @@ def run_superlink() -> None:
 
 def _try_setup_client_authentication(
     args: argparse.Namespace,
-) -> Optional[Tuple[Set[bytes], bytes, bytes]]:
+) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePublicKey, ec.EllipticCurvePrivateKey]]:
     if args.require_client_authentication:
         client_keys_file_path = Path(args.require_client_authentication[0])
         if client_keys_file_path.exists():
             client_public_keys: Set[bytes] = set()
+            public_key = load_ssh_public_key(
+                Path(args.require_client_authentication[1]).read_bytes()
+            )
+            private_key = load_ssh_private_key(
+                Path(args.require_client_authentication[2]).read_bytes(),
+                None,
+            )
+            log(INFO, type(public_key))
+            log(INFO, type(private_key))
+            if not isinstance(public_key, ec.EllipticCurvePublicKey):
+                sys.exit(
+                    "An eliptic curve public and private key pair is required for "
+                    "client authentication. Please provide the file path containing "
+                    "valid public and private key to '--require-client-authentication'."
+                )
+            server_public_key = public_key
+            if not isinstance(private_key, ec.EllipticCurvePrivateKey):
+                sys.exit(
+                    "An eliptic curve public and private key pair is required for "
+                    "client authentication. Please provide the file path containing "
+                    "valid public and private key to '--require-client-authentication'."
+                )
+            server_private_key = private_key
+
             with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
                 reader = csv.reader(csvfile)
                 for row in reader:
@@ -440,8 +483,8 @@ def _try_setup_client_authentication(
                         client_public_keys.add(element.encode())
                 return (
                     client_public_keys,
-                    Path(args.require_client_authentication[1]).read_bytes(),
-                    Path(args.require_client_authentication[2]).read_bytes(),
+                    server_public_key,
+                    server_private_key,
                 )
         else:
             sys.exit(
