@@ -191,9 +191,7 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
 
 
 class DifferentialPrivacyClientSideFixedClipping(Strategy):
-    """Wrapper for Configuring a Strategy for Central DP.
-
-    The clipping is at the client side.
+    """Wrapper for Central DP with Client Side Fixed Clipping.
 
     Parameters
     ----------
