@@ -43,7 +43,7 @@ MESSAGE_TYPE_EVALUATE = "evaluate"
 class SType:
     """Serialisation type."""
 
-    NUMPY = "builtin:numpy"
+    NUMPY = "numpy.ndarray"
 
     def __new__(cls) -> SType:
         """Prevent instantiation."""
