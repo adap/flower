@@ -24,6 +24,8 @@ from typing import List, Optional
 import numpy as np
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    PublicFormat,
     load_ssh_private_key,
     load_ssh_public_key,
 )
@@ -220,8 +222,12 @@ def test_setup_client_auth() -> None:
             writer = csv.writer(csvfile)
             writer.writerow(
                 [
-                    public_key_to_bytes(first_public_key).decode(),
-                    public_key_to_bytes(second_public_key).decode(),
+                    first_public_key.public_bytes(
+                        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+                    ).decode(),
+                    second_public_key.public_bytes(
+                        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+                    ).decode(),
                 ]
             )
         server_public_key_path.write_bytes(server_public_key)
