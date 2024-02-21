@@ -14,7 +14,7 @@
 # ==============================================================================
 """Central DP with client side adaptive clipping.
 
-Paper (Andrew et al.): https://arxiv.org/pdf/1905.03871.pdf
+Paper (Andrew et al.): https://arxiv.org/abs/1905.03871
 """
 
 
@@ -189,7 +189,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
         return aggregated_params, metrics
 
     def _update_clip_norm(self, results: List[Tuple[ClientProxy, FitRes]]) -> None:
-        # calculate the number of clients which set the norm indicator bit
+        # Calculate the number of clients which set the norm indicator bit
         norm_bit_set_count = 0
         for client_proxy, fit_res in results:
             if KEY_NORM_BIT not in fit_res.metrics:
@@ -198,7 +198,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
                 )
             if fit_res.metrics[KEY_NORM_BIT]:
                 norm_bit_set_count += 1
-        # Noising the count
+        # Add noise to the count
         noised_norm_bit_set_count = float(
             np.random.normal(norm_bit_set_count, self.clipped_count_stddev)
         )
