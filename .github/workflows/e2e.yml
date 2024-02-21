@@ -140,6 +140,9 @@ jobs:
       - name: Run driver test with SQLite database
         if: ${{ matrix.directory == 'bare' }}
         run: ./../test_driver.sh bare sqlite
+      - name: Run driver test with client authentication
+        if: ${{ matrix.directory == 'pytorch' }}
+        run: ./../test_driver.sh pytorch client-auth
 
   strategies:
     runs-on: ubuntu-22.04
@@ -167,7 +170,7 @@ jobs:
         run: |
           python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Cache Datasets
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: "~/.keras"
           key: keras-datasets
@@ -177,3 +180,5 @@ jobs:
       - name: Test strategies
         run: |
           python test.py "${{ matrix.strat }}"
+
+  
