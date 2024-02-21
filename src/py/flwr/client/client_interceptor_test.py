@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower client interceptor tests."""
 
+import base64
 import threading
 import unittest
 from concurrent import futures
@@ -60,17 +61,27 @@ class _MockServicer:
         self.server_private_key, self.server_public_key = generate_key_pairs()
         self._received_message_bytes: bytes = b""
 
-    def unary_unary(self, request: Request, context: grpc.ServicerContext) -> object:
+    def unary_unary(
+        self, request: Request, context: grpc.ServicerContext
+    ) -> Union[
+        CreateNodeResponse, DeleteNodeResponse, PushTaskResResponse, PullTaskInsResponse
+    ]:
         """Handle unary call."""
         with self._lock:
             self._received_client_metadata = context.invocation_metadata()
             self._received_message_bytes = request.SerializeToString(True)
+
             if isinstance(request, CreateNodeRequest):
-                context.set_trailing_metadata(
+                context.send_initial_metadata(
                     ((_PUBLIC_KEY_HEADER, self.server_public_key),)
                 )
+                return CreateNodeResponse()
+            if isinstance(request, DeleteNodeRequest):
+                return DeleteNodeResponse()
+            if isinstance(request, PushTaskResRequest):
+                return PushTaskResResponse()
 
-            return object()
+            return PullTaskInsResponse()
 
     def received_client_metadata(
         self,
@@ -149,7 +160,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             create_node()
             expected_client_metadata = (
                 _PUBLIC_KEY_HEADER,
-                public_key_to_bytes(self._client_public_key),
+                base64.urlsafe_b64encode(public_key_to_bytes(self._client_public_key)),
             )
             assert self._servicer.received_client_metadata() == expected_client_metadata
             assert (
@@ -176,8 +187,16 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
                 shared_secret, self._servicer.received_message_bytes()
             )
             expected_client_metadata = (
-                _AUTH_TOKEN_HEADER,
-                expected_hmac,
+                (
+                    _PUBLIC_KEY_HEADER,
+                    base64.urlsafe_b64encode(
+                        public_key_to_bytes(self._client_public_key)
+                    ),
+                ),
+                (
+                    _AUTH_TOKEN_HEADER,
+                    base64.urlsafe_b64encode(expected_hmac),
+                ),
             )
             assert self._servicer.received_client_metadata() == expected_client_metadata
 

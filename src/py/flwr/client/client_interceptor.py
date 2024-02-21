@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower client interceptor."""
 
+import base64
 import collections
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
@@ -44,7 +45,7 @@ Request = Union[
 def _get_value_from_tuples(
     key_string: str, tuples: Sequence[Tuple[str, Union[str, bytes]]]
 ) -> bytes:
-    value = next((value[::-1] for key, value in tuples if key == key_string), "")
+    value = next((value for key, value in tuples if key == key_string), "")
     if isinstance(value, str):
         return value.encode()
 
@@ -86,7 +87,12 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
             metadata = list(client_call_details.metadata)
 
         if isinstance(request, CreateNodeRequest):
-            metadata.append((_PUBLIC_KEY_HEADER, public_key_to_bytes(self.public_key)))
+            metadata.append(
+                (
+                    _PUBLIC_KEY_HEADER,
+                    base64.urlsafe_b64encode(public_key_to_bytes(self.public_key)),
+                )
+            )
             postprocess = True
 
         elif isinstance(
@@ -94,8 +100,18 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
         ):
             metadata.append(
                 (
+                    _PUBLIC_KEY_HEADER,
+                    base64.urlsafe_b64encode(public_key_to_bytes(self.public_key)),
+                )
+            )
+            metadata.append(
+                (
                     _AUTH_TOKEN_HEADER,
-                    compute_hmac(self.shared_secret, request.SerializeToString(True)),
+                    base64.urlsafe_b64encode(
+                        compute_hmac(
+                            self.shared_secret, request.SerializeToString(True)
+                        )
+                    ),
                 )
             )
 
@@ -108,8 +124,8 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
 
         response = continuation(client_call_details, request)
         if postprocess:
-            server_public_key_bytes = _get_value_from_tuples(
-                _PUBLIC_KEY_HEADER, response.trailing_metadata
+            server_public_key_bytes = base64.urlsafe_b64decode(
+                _get_value_from_tuples(_PUBLIC_KEY_HEADER, response.initial_metadata())
             )
             self.server_public_key = bytes_to_public_key(server_public_key_bytes)
             self.shared_secret = generate_shared_key(
