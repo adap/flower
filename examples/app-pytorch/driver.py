@@ -25,6 +25,7 @@ from task import Net, get_parameters, set_parameters
 from flwr.common.recordset_compat import fitins_to_recordset, recordset_to_fitres
 from flwr.common import Message
 
+
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     examples = [num_examples for num_examples, _ in metrics]
@@ -103,7 +104,7 @@ def main(driver: Driver, context: Context) -> None:
 
         # Wait for results, ignore empty message_ids
         message_ids = [message_id for message_id in message_ids if message_id != ""]
-        
+
         all_replies: List[Message] = []
         while True:
             replies = driver.pull_messages(message_ids=message_ids)
@@ -114,7 +115,9 @@ def main(driver: Driver, context: Context) -> None:
             time.sleep(3)
 
         # Collect correct results
-        all_fitres = [recordset_to_fitres(msg.content, keep_input=True) for msg in all_replies]
+        all_fitres = [
+            recordset_to_fitres(msg.content, keep_input=True) for msg in all_replies
+        ]
         print(f"Received {len(all_fitres)} results")
 
         weights_results: List[Tuple[NDArrays, int]] = []
