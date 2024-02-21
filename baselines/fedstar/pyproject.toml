@@ -7,11 +7,11 @@ name = "fedstar" # <----- Ensure it matches the name of your baseline directory 
 version = "1.0.0"
 description = "Federated Self-training for Semi-supervised Audio Recognition"
 license = "Apache-2.0"
-authors = ["Raj Parekh <rajparekhwc@gmail.com>", "The Flower Authors <hello@flower.dev>>"]
+authors = ["Raj Parekh <rajparekhwc@gmail.com>", "The Flower Authors <hello@flower.ai>"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev"
+documentation = "https://flower.ai"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

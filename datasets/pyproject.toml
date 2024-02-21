@@ -7,11 +7,11 @@ name = "flwr-datasets"
 version = "0.0.2"
 description = "Flower Datasets"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev/docs/datasets"
+documentation = "https://flower.ai/docs/datasets"
 keywords = [
     "flower",
     "fl",
@@ -56,7 +56,7 @@ python = "^3.8"
 numpy = "^1.21.0"
 datasets = "^2.14.3"
 pillow = { version = ">=6.2.1", optional = true }
-soundfile = {version = ">=0.12.1", optional = true}
+soundfile = { version = ">=0.12.1", optional = true }
 librosa = { version = ">=0.10.0.post2", optional = true }
 
 [tool.poetry.dev-dependencies]

@@ -9,9 +9,9 @@ description = "DASHA: Distributed nonconvex optimization with communication comp
 license = "Apache-2.0"
 authors = ["Alexander Tyurin <alexandertiurin@gmail.com>"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev"
+documentation = "https://flower.ai"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -89,8 +89,8 @@ plugins = "numpy.typing.mypy_plugin"
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias,no-self-use,too-many-locals,too-many-instance-attributes"
 good-names = "i,j,k,_,x,y,X,Y"
-signature-mutators="hydra.main.main"
-generated-members="numpy.*, torch.*"
+signature-mutators = "hydra.main.main"
+generated-members = "numpy.*, torch.*"
 
 [[tool.mypy.overrides]]
 module = [
