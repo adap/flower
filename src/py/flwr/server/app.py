@@ -418,6 +418,11 @@ def run_superlink() -> None:
                 state_factory, server_private_key, server_public_key
             )
         ]
+        log(
+            INFO,
+            f"Client authentication enabled with "
+            f"{len(client_public_keys)} known public keys",
+        )
 
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,

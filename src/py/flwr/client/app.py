@@ -147,6 +147,13 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         "app from there."
         " Default: current working directory.",
     )
+    parser.add_argument(
+        "--authentication-keys",
+        nargs=2,
+        metavar=("CLIENT_PUBLIC_KEY", "CLIENT_PRIVATE_KEY"),
+        type=str,
+        help="Paths to client public and private key, in that order.",
+    )
 
     return parser
 
