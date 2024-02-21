@@ -12,27 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Context."""
+"""Constants for differential privacy."""
 
-
-from dataclasses import dataclass
-
-from .record import RecordSet
-
-
-@dataclass
-class Context:
-    """State of your run.
-
-    Parameters
-    ----------
-    state : RecordSet
-        Holds records added by the entity in a given run and that will stay local.
-        This means that the data it holds will never leave the system it's running from.
-        This can be used as an intermediate storage or scratchpad when
-        executing mods. It can also be used as a memory to access
-        at different points during the lifecycle of this entity (e.g. across
-        multiple rounds)
-    """
-
-    state: RecordSet
+CLIENTS_DISCREPANCY_WARNING = (
+    "The number of clients returning parameters (%s)"
+    " differs from the number of sampled clients (%s)."
+    " This could impact the differential privacy guarantees,"
+    " potentially leading to privacy leakage or inadequate noise calibration."
+)
