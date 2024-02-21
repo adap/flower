@@ -3,7 +3,7 @@ FAQ
 
 This page collects answers to commonly asked questions about Federated Learning with Flower.
 
-.. dropdown:: :fa:`eye,mr-1` Can Flower run on Juptyter Notebooks / Google Colab?
+.. dropdown:: :fa:`eye,mr-1` Can Flower run on Jupyter Notebooks / Google Colab?
 
     Yes, it can! Flower even comes with a few under-the-hood optimizations to make it work even better on Colab. Here's a quickstart example:
 
