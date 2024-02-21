@@ -20,7 +20,7 @@ from contextlib import contextmanager
 from logging import DEBUG
 from pathlib import Path
 from queue import Queue
-from typing import Callable, Iterator, Optional, Tuple, Union, cast, Sequence
+from typing import Callable, Iterator, Optional, Sequence, Tuple, Union, cast
 
 import grpc
 
@@ -66,7 +66,9 @@ def grpc_connection(  # pylint: disable=R0915,R0913
     insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None  # pylint: disable=unused-argument
+    interceptors: Optional[  # pylint: disable=unused-argument
+        Sequence[grpc.UnaryUnaryClientInterceptor]
+    ] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],

@@ -126,7 +126,10 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                                 ),
                             )
                         )
-                    elif isinstance(request, (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest)):
+                    elif isinstance(
+                        request,
+                        (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest),
+                    ):
                         hmac_value = base64.urlsafe_b64decode(
                             _get_value_from_tuples(
                                 _AUTH_TOKEN_HEADER, context.invocation_metadata()

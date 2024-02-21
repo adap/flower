@@ -334,7 +334,7 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -581,7 +581,7 @@ def _init_connection(
             bool,
             int,
             Union[bytes, str, None],
-            Union[Sequence[grpc.UnaryUnaryClientInterceptor] | None]
+            Union[Sequence[grpc.UnaryUnaryClientInterceptor] | None],
         ],
         ContextManager[
             Tuple[
