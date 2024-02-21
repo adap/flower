@@ -100,6 +100,12 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
         ):
             metadata.append(
                 (
+                    _PUBLIC_KEY_HEADER,
+                    base64.urlsafe_b64encode(public_key_to_bytes(self.public_key)),
+                )
+            )
+            metadata.append(
+                (
                     _AUTH_TOKEN_HEADER,
                     base64.urlsafe_b64encode(
                         compute_hmac(
@@ -119,8 +125,10 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
         response = continuation(client_call_details, request)
         if postprocess:
             server_public_key_bytes = base64.urlsafe_b64decode(
-                _get_value_from_tuples(_PUBLIC_KEY_HEADER, response.trailing_metadata)
+                _get_value_from_tuples(_PUBLIC_KEY_HEADER, response.initial_metadata())
             )
+            print(response)
+            print(server_public_key_bytes)
             self.server_public_key = bytes_to_public_key(server_public_key_bytes)
             self.shared_secret = generate_shared_key(
                 self.private_key, self.server_public_key

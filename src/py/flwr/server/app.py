@@ -42,6 +42,9 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.logger import log
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    public_key_to_bytes,
+)
 from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
     add_DriverServicer_to_server,
 )
@@ -481,7 +484,9 @@ def _try_setup_client_authentication(
                 reader = csv.reader(csvfile)
                 for row in reader:
                     for element in row:
-                        client_public_keys.add(element.encode())
+                        public_key = load_ssh_public_key(element.encode())
+                        if isinstance(public_key, ec.EllipticCurvePublicKey):
+                            client_public_keys.add(public_key_to_bytes(public_key))
                 return (
                     client_public_keys,
                     server_public_key,

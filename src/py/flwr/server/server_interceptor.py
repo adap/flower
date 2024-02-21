@@ -109,9 +109,11 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                         _PUBLIC_KEY_HEADER, context.invocation_metadata()
                     )
                 )
+                print(client_public_key_bytes)
                 is_public_key_known = (
                     client_public_key_bytes in self.state.get_client_public_keys()
                 )
+                print(is_public_key_known)
                 if is_public_key_known:
                     if isinstance(request, CreateNodeRequest):
                         context.send_initial_metadata(
