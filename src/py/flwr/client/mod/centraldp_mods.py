@@ -28,10 +28,18 @@ from flwr.common.message import Message
 def fixedclipping_mod(
     msg: Message, ctxt: Context, call_next: ClientAppCallable
 ) -> Message:
-    """Clip the client model updates before sending them to the server.
+    """This mod needs to be used with DifferentialPrivacyClientSideFixedClipping server-
+    side strategy wrapper.
 
-    It needs to be used with DifferentialPrivacyClientSideFixedClipping server-side
-    wrapper.
+    The wrapper sends the clipping_norm value to the client.
+
+    This mod clips the client model updates before sending them to the server.
+
+    It operates on messages with type MESSAGE_TYPE_FIT.
+
+    Note: Consider the order of mods when using multiple.
+
+    Typically, fixedclipping_mod should be the last to operate on params.
     """
     if msg.metadata.message_type == MESSAGE_TYPE_FIT:
         fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)

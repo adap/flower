@@ -195,6 +195,8 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
 
     Use fixedclipping_mod modifier at the client side.
 
+    In comparison to DifferentialPrivacyServerSideFixedClipping, the clipping phase is at the client side.
+
     Parameters
     ----------
     strategy : Strategy
@@ -206,6 +208,24 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
         The value of the clipping norm.
     num_sampled_clients : int
         The number of clients that are sampled on each round.
+
+    Examples
+    --------
+    Create a strategy:
+
+    >>> strategy = fl.server.strategy.FedAvg(...)
+
+    Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
+
+    >>> DifferentialPrivacyClientSideFixedClipping(
+    >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+    >>> )
+
+    Place the fixedclipping_mod in the layers list and run via `flower-client-app client:app`
+
+    >>> app = fl.client.ClientApp(
+    >>>     client_fn=FlowerClient().to_client(), layers=[fixedclipping_mod]
+    >>> )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
