@@ -58,9 +58,9 @@ from flwr.common.typing import ConfigsRecordValues, FitIns, ServerMessage
 from flwr.proto.task_pb2 import Task
 from flwr.common import serde
 from flwr.common.constant import TASK_TYPE_FIT
-from flwr.common.recordset import RecordSet
+from flwr.common import RecordSet
 from flwr.common import recordset_compat as compat
-from flwr.common.configsrecord import ConfigsRecord
+from flwr.common import ConfigsRecord
 
 
 LOG_EXPLAIN = True

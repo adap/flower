@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 name = "whisper-flower"
 version = "0.1.0"
 description = "On-device Federated Downstreaming for Speech Classification"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"

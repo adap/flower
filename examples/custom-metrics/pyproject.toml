@@ -7,8 +7,8 @@ name = "custom-metrics"
 version = "0.1.0"
 description = "Federated Learning with Flower and Custom Metrics"
 authors = [
-	"The Flower Authors <hello@flower.dev>",
-	"Gustavo Bertoli <gubertoli -at- gmail.com>"
+	"The Flower Authors <hello@flower.ai>",
+	"Gustavo Bertoli <gubertoli -at- gmail.com>",
 ]
 
 [tool.poetry.dependencies]
