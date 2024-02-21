@@ -11,7 +11,7 @@ Setting up the repository
 
 1. **Create a GitHub account and setup Git**
     Git is a distributed version control tool. This allows for an entire codebase's history to be stored and every developer's machine.
-    It is a software that will need to be installed on your local machine, you can follow this `guide <https://docs.github.com/en/get-started/quickstart/set-up-git>`_ to set it up.
+    It is a software that will need to be installed on your local machine, you can follow this `guide <https://docs.github.com/en/get-started/getting-started-with-git/set-up-git>`_ to set it up.
 
     GitHub, itself, is a code hosting platform for version control and collaboration. It allows for everyone to collaborate and work from anywhere on remote repositories.
 
