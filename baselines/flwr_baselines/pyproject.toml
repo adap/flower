@@ -53,8 +53,8 @@ pandas = "^1.5.3"
 pyhamcrest = "^2.0.4"
 
 [tool.poetry.dev-dependencies]
-isort = "==5.11.5"
-black = "==23.1.0"
+isort = "==5.13.2"
+black = "==24.2.0"
 docformatter = "==1.5.1"
 mypy = "==0.961"
 pylint = "==2.8.2"

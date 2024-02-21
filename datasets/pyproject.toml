@@ -60,8 +60,8 @@ soundfile = { version = ">=0.12.1", optional = true }
 librosa = { version = ">=0.10.0.post2", optional = true }
 
 [tool.poetry.dev-dependencies]
-isort = "==5.11.5"
-black = { version = "==23.3.0", extras = ["jupyter"] }
+isort = "==5.13.2"
+black = { version = "==24.2.0", extras = ["jupyter"] }
 docformatter = "==1.7.1"
 mypy = "==1.4.0"
 pylint = "==2.13.9"

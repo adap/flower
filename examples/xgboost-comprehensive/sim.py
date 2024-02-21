@@ -124,21 +124,21 @@ def main():
     if args.train_method == "bagging":
         # Bagging training
         strategy = FedXgbBagging(
-            evaluate_function=get_evaluate_fn(test_dmatrix)
-            if args.centralised_eval
-            else None,
+            evaluate_function=(
+                get_evaluate_fn(test_dmatrix) if args.centralised_eval else None
+            ),
             fraction_fit=(float(args.num_clients_per_round) / args.pool_size),
             min_fit_clients=args.num_clients_per_round,
             min_available_clients=args.pool_size,
-            min_evaluate_clients=args.num_evaluate_clients
-            if not args.centralised_eval
-            else 0,
+            min_evaluate_clients=(
+                args.num_evaluate_clients if not args.centralised_eval else 0
+            ),
             fraction_evaluate=1.0 if not args.centralised_eval else 0.0,
             on_evaluate_config_fn=eval_config,
             on_fit_config_fn=fit_config,
-            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation
-            if not args.centralised_eval
-            else None,
+            evaluate_metrics_aggregation_fn=(
+                evaluate_metrics_aggregation if not args.centralised_eval else None
+            ),
         )
     else:
         # Cyclic training
