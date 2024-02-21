@@ -126,7 +126,7 @@ def main(driver: Driver, context: Context) -> None:
             print(f"num_examples: {fitres.num_examples}, status: {fitres.status.code}")
 
             # Aggregate only if the status is OK
-            if fitres.status.code != Code.OK.value:
+            if fitres.status.code != Code.OK:
                 continue
             weights_results.append(
                 (parameters_to_ndarrays(fitres.parameters), fitres.num_examples)
