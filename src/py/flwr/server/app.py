@@ -404,25 +404,21 @@ def run_superlink() -> None:
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
         data = _try_setup_client_authentication(args)
-        if data is None:
-            sys.exit("--require-client-authentication cannot be parsed.")
-        (
-            client_public_keys,
-            server_public_key,
-            server_private_key,
-        ) = data
-        state_factory.state().store_client_public_keys(client_public_keys)
-
-        interceptors: Sequence[grpc.ServerInterceptor] = [
-            AuthenticateServerInterceptor(
-                state_factory, server_private_key, server_public_key
-            )
-        ]
-        log(
-            INFO,
-            f"Client authentication enabled with "
-            f"{len(client_public_keys)} known public keys",
-        )
+        interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
+        if data is not None:
+            (
+                client_public_keys,
+                server_public_key,
+                server_private_key,
+            ) = data
+            interceptors = [
+                AuthenticateServerInterceptor(
+                    state_factory,
+                    client_public_keys,
+                    server_private_key,
+                    server_public_key,
+                )
+            ]
 
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,

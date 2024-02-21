@@ -19,7 +19,17 @@ from contextlib import contextmanager
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Callable, Dict, Iterator, Optional, Sequence, Tuple, Union, cast
+from typing import (
+    Callable,
+    ContextManager,
+    Dict,
+    Iterator,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+)
 
 import grpc
 
@@ -49,152 +59,173 @@ def on_channel_state_change(channel_connectivity: str) -> None:
     log(DEBUG, channel_connectivity)
 
 
-@contextmanager
-def grpc_request_response(
-    server_address: str,
-    insecure: bool,
-    max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[Union[bytes, str]] = None,
+def init_grpc_request_response(
     interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
-) -> Iterator[
-    Tuple[
-        Callable[[], Optional[Message]],
-        Callable[[Message], None],
-        Optional[Callable[[], None]],
-        Optional[Callable[[], None]],
-    ]
+) -> Callable[
+    [
+        str,
+        bool,
+        int,
+        Union[bytes, str, None],
+    ],
+    ContextManager[
+        Tuple[
+            Callable[[], Optional[Message]],
+            Callable[[Message], None],
+            Optional[Callable[[], None]],
+            Optional[Callable[[], None]],
+        ]
+    ],
 ]:
-    """Primitives for request/response-based interaction with a server.
+    """Initialize grpc-rere with interceptors."""
 
-    One notable difference to the grpc_connection context manager is that
-    `receive` can return `None`.
+    @contextmanager
+    def grpc_request_response(
+        server_address: str,
+        insecure: bool,
+        max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
+        root_certificates: Optional[Union[bytes, str]] = None,
+    ) -> Iterator[
+        Tuple[
+            Callable[[], Optional[Message]],
+            Callable[[Message], None],
+            Optional[Callable[[], None]],
+            Optional[Callable[[], None]],
+        ]
+    ]:
+        """Primitives for request/response-based interaction with a server.
 
-    Parameters
-    ----------
-    server_address : str
-        The IPv6 address of the server with `http://` or `https://`.
-        If the Flower server runs on the same machine
-        on port 8080, then `server_address` would be `"http://[::]:8080"`.
-    max_message_length : int
-        Ignored, only present to preserve API-compatibility.
-    root_certificates : Optional[Union[bytes, str]] (default: None)
-        Path of the root certificate. If provided, a secure
-        connection using the certificates will be established to an SSL-enabled
-        Flower server. Bytes won't work for the REST API.
+        One notable difference to the grpc_connection context manager is that
+        `receive` can return `None`.
 
-    Returns
-    -------
-    receive : Callable
-    send : Callable
-    create_node : Optional[Callable]
-    delete_node : Optional[Callable]
-    """
-    warn_experimental_feature("`grpc-rere`")
+        Parameters
+        ----------
+        server_address : str
+            The IPv6 address of the server with `http://` or `https://`.
+            If the Flower server runs on the same machine
+            on port 8080, then `server_address` would be `"http://[::]:8080"`.
+        max_message_length : int
+            Ignored, only present to preserve API-compatibility.
+        root_certificates : Optional[Union[bytes, str]] (default: None)
+            Path of the root certificate. If provided, a secure
+            connection using the certificates will be established to an SSL-enabled
+            Flower server. Bytes won't work for the REST API.
 
-    if isinstance(root_certificates, str):
-        root_certificates = Path(root_certificates).read_bytes()
+        Returns
+        -------
+        receive : Callable
+        send : Callable
+        create_node : Optional[Callable]
+        delete_node : Optional[Callable]
+        """
+        warn_experimental_feature("`grpc-rere`")
 
-    channel = create_channel(
-        server_address=server_address,
-        insecure=insecure,
-        root_certificates=root_certificates,
-        max_message_length=max_message_length,
-        interceptors=interceptors,
-    )
-    channel.subscribe(on_channel_state_change)
-    stub = FleetStub(channel)
+        if isinstance(root_certificates, str):
+            root_certificates = Path(root_certificates).read_bytes()
 
-    # Necessary state to validate messages to be sent
-    state: Dict[str, Optional[Metadata]] = {KEY_METADATA: None}
-
-    # Enable create_node and delete_node to store node
-    node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
-
-    ###########################################################################
-    # receive/send functions
-    ###########################################################################
-
-    def create_node() -> None:
-        """Set create_node."""
-        create_node_request = CreateNodeRequest()
-        create_node_response = stub.CreateNode(
-            request=create_node_request,
+        channel = create_channel(
+            server_address=server_address,
+            insecure=insecure,
+            root_certificates=root_certificates,
+            max_message_length=max_message_length,
+            interceptors=interceptors,
         )
-        node_store[KEY_NODE] = create_node_response.node
+        channel.subscribe(on_channel_state_change)
+        stub = FleetStub(channel)
 
-    def delete_node() -> None:
-        """Set delete_node."""
-        # Get Node
-        if node_store[KEY_NODE] is None:
-            log(ERROR, "Node instance missing")
-            return
-        node: Node = cast(Node, node_store[KEY_NODE])
+        # Necessary state to validate messages to be sent
+        state: Dict[str, Optional[Metadata]] = {KEY_METADATA: None}
 
-        delete_node_request = DeleteNodeRequest(node=node)
-        stub.DeleteNode(request=delete_node_request)
+        # Enable create_node and delete_node to store node
+        node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
 
-        del node_store[KEY_NODE]
+        ###########################################################################
+        # receive/send functions
+        ###########################################################################
 
-    def receive() -> Optional[Message]:
-        """Receive next task from server."""
-        # Get Node
-        if node_store[KEY_NODE] is None:
-            log(ERROR, "Node instance missing")
-            return None
-        node: Node = cast(Node, node_store[KEY_NODE])
+        def create_node() -> None:
+            """Set create_node."""
+            create_node_request = CreateNodeRequest()
+            create_node_response = stub.CreateNode(
+                request=create_node_request,
+            )
+            node_store[KEY_NODE] = create_node_response.node
 
-        # Request instructions (task) from server
-        request = PullTaskInsRequest(node=node)
-        response = stub.PullTaskIns(request=request)
+        def delete_node() -> None:
+            """Set delete_node."""
+            # Get Node
+            if node_store[KEY_NODE] is None:
+                log(ERROR, "Node instance missing")
+                return
+            node: Node = cast(Node, node_store[KEY_NODE])
 
-        # Get the current TaskIns
-        task_ins: Optional[TaskIns] = get_task_ins(response)
+            delete_node_request = DeleteNodeRequest(node=node)
+            stub.DeleteNode(request=delete_node_request)
 
-        # Discard the current TaskIns if not valid
-        if task_ins is not None and not (
-            task_ins.task.consumer.node_id == node.node_id
-            and validate_task_ins(task_ins)
-        ):
-            task_ins = None
+            del node_store[KEY_NODE]
 
-        # Construct the Message
-        in_message = message_from_taskins(task_ins) if task_ins else None
+        def receive() -> Optional[Message]:
+            """Receive next task from server."""
+            # Get Node
+            if node_store[KEY_NODE] is None:
+                log(ERROR, "Node instance missing")
+                return None
+            node: Node = cast(Node, node_store[KEY_NODE])
 
-        # Remember `metadata` of the in message
-        state[KEY_METADATA] = copy(in_message.metadata) if in_message else None
+            # Request instructions (task) from server
+            request = PullTaskInsRequest(node=node)
+            response = stub.PullTaskIns(request=request)
 
-        # Return the message if available
-        return in_message
+            # Get the current TaskIns
+            task_ins: Optional[TaskIns] = get_task_ins(response)
 
-    def send(message: Message) -> None:
-        """Send task result back to server."""
-        # Get Node
-        if node_store[KEY_NODE] is None:
-            log(ERROR, "Node instance missing")
-            return
+            # Discard the current TaskIns if not valid
+            if task_ins is not None and not (
+                task_ins.task.consumer.node_id == node.node_id
+                and validate_task_ins(task_ins)
+            ):
+                task_ins = None
 
-        # Get incoming message
-        in_metadata = state[KEY_METADATA]
-        if in_metadata is None:
-            log(ERROR, "No current message")
-            return
+            # Construct the Message
+            in_message = message_from_taskins(task_ins) if task_ins else None
 
-        # Validate out message
-        if not validate_out_message(message, in_metadata):
-            log(ERROR, "Invalid out message")
-            return
+            # Remember `metadata` of the in message
+            state[KEY_METADATA] = copy(in_message.metadata) if in_message else None
 
-        # Construct TaskRes
-        task_res = message_to_taskres(message)
+            # Return the message if available
+            return in_message
 
-        # Serialize ProtoBuf to bytes
-        request = PushTaskResRequest(task_res_list=[task_res])
-        _ = stub.PushTaskRes(request)
+        def send(message: Message) -> None:
+            """Send task result back to server."""
+            # Get Node
+            if node_store[KEY_NODE] is None:
+                log(ERROR, "Node instance missing")
+                return
 
-        state[KEY_METADATA] = None
+            # Get incoming message
+            in_metadata = state[KEY_METADATA]
+            if in_metadata is None:
+                log(ERROR, "No current message")
+                return
 
-    try:
-        # Yield methods
-        yield (receive, send, create_node, delete_node)
-    except Exception as exc:  # pylint: disable=broad-except
-        log(ERROR, exc)
+            # Validate out message
+            if not validate_out_message(message, in_metadata):
+                log(ERROR, "Invalid out message")
+                return
+
+            # Construct TaskRes
+            task_res = message_to_taskres(message)
+
+            # Serialize ProtoBuf to bytes
+            request = PushTaskResRequest(task_res_list=[task_res])
+            _ = stub.PushTaskRes(request)
+
+            state[KEY_METADATA] = None
+
+        try:
+            # Yield methods
+            yield (receive, send, create_node, delete_node)
+        except Exception as exc:  # pylint: disable=broad-except
+            log(ERROR, exc)
+
+    return grpc_request_response
