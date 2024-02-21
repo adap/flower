@@ -220,7 +220,7 @@ def start_simulation(
     log(
         INFO,
         "Optimize your simulation with Flower VCE: "
-        "https://flower.dev/docs/framework/how-to-run-simulations.html",
+        "https://flower.ai/docs/framework/how-to-run-simulations.html",
     )
 
     # Log the resources that a single client will be able to use
@@ -338,7 +338,7 @@ def start_simulation(
             "disconnected. The head node might still be alive but cannot accommodate "
             "any actor with resources: %s."
             "\nTake a look at the Flower simulation examples for guidance "
-            "<https://flower.dev/docs/framework/how-to-run-simulations.html>.",
+            "<https://flower.ai/docs/framework/how-to-run-simulations.html>.",
             client_resources,
             client_resources,
         )
