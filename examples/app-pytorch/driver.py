@@ -131,9 +131,7 @@ def main(driver: Driver, context: Context) -> None:
             weights_results.append(
                 (parameters_to_ndarrays(fitres.parameters), fitres.num_examples)
             )
-            metrics_results.append(
-                (fitres.num_examples, serde.metrics_from_proto(fitres.metrics))
-            )
+            metrics_results.append((fitres.num_examples, fitres.metrics))
 
         # # Aggregate parameters (FedAvg)
         # parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
