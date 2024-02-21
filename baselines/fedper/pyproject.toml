@@ -7,11 +7,11 @@ name = "fedper" # <----- Ensure it matches the name of your baseline directory c
 version = "1.0.0"
 description = "Federated Learning with Personalization Layers"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>", "William Lindskog <williamlindskog@protonmail.com>"]
+authors = ["The Flower Authors <hello@flower.ai>", "William Lindskog <williamlindskog@protonmail.com>"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev"
+documentation = "https://flower.ai"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -38,13 +38,13 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.10.0, <3.11.0"  # don't change this
-flwr = {extras = ["simulation"], version = "1.5.0" }
+flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
 pandas = "^2.0.3"
 matplotlib = "^3.7.2"
 tqdm = "^4.66.1"
-torch = { url = "https://download.pytorch.org/whl/cu117/torch-2.0.1%2Bcu117-cp310-cp310-linux_x86_64.whl"}
-torchvision = { url = "https://download.pytorch.org/whl/cu117/torchvision-0.15.2%2Bcu117-cp310-cp310-linux_x86_64.whl"}
+torch = { url = "https://download.pytorch.org/whl/cu117/torch-2.0.1%2Bcu117-cp310-cp310-linux_x86_64.whl" }
+torchvision = { url = "https://download.pytorch.org/whl/cu117/torchvision-0.15.2%2Bcu117-cp310-cp310-linux_x86_64.whl" }
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
@@ -86,10 +86,10 @@ plugins = "numpy.typing.mypy_plugin"
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
 good-names = "i,j,k,_,x,y,X,Y"
-signature-mutators="hydra.main.main"
+signature-mutators = "hydra.main.main"
 
 [tool.pylint."TYPECHECK"]
-generated-members="numpy.*, torch.*, tensorflow.*"
+generated-members = "numpy.*, torch.*, tensorflow.*"
 
 [[tool.mypy.overrides]]
 module = [

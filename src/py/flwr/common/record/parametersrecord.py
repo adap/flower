@@ -14,10 +14,14 @@
 # ==============================================================================
 """ParametersRecord and Array."""
 
-
 from dataclasses import dataclass
-from typing import List, Optional, OrderedDict
+from io import BytesIO
+from typing import List, Optional, OrderedDict, cast
 
+import numpy as np
+
+from ..constant import SType
+from ..typing import NDArray
 from .typeddict import TypedDict
 
 
@@ -50,6 +54,19 @@ class Array:
     shape: List[int]
     stype: str
     data: bytes
+
+    def numpy(self) -> NDArray:
+        """Return the array as a NumPy array."""
+        if self.stype != SType.NUMPY:
+            raise TypeError(
+                f"Unsupported serialization type for numpy conversion: '{self.stype}'"
+            )
+        bytes_io = BytesIO(self.data)
+        # WARNING: NEVER set allow_pickle to true.
+        # Reason: loading pickled data can execute arbitrary code
+        # Source: https://numpy.org/doc/stable/reference/generated/numpy.load.html
+        ndarray_deserialized = np.load(bytes_io, allow_pickle=False)
+        return cast(NDArray, ndarray_deserialized)
 
 
 def _check_key(key: str) -> None:

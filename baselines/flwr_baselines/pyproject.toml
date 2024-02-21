@@ -7,11 +7,11 @@ name = "flwr_baselines"
 version = "1.0.0"
 description = "Flower Baselines"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev"
+documentation = "https://flower.ai"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -103,8 +103,8 @@ follow_imports = "skip"
 follow_imports_for_stubs = true
 
 [tool.pylint.typecheck]
-generated-members="numpy.*, torch.*"
+generated-members = "numpy.*, torch.*"
 
 [tool.pylint.messages_control]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
-signature-mutators="hydra.main.main"
+signature-mutators = "hydra.main.main"

@@ -7,11 +7,11 @@ name = "moon" # <----- Ensure it matches the name of your baseline directory con
 version = "1.0.0"
 description = "Model-Contrastive Federated Learning"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>", "Qinbin Li <liqinbin1998@gmail.com>"]
+authors = ["The Flower Authors <hello@flower.ai>", "Qinbin Li <liqinbin1998@gmail.com>"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev"
+documentation = "https://flower.ai"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -42,8 +42,8 @@ flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
 scikit-learn = "1.3.0"
 matplotlib = "3.8.0"
-torch = { url = "https://download.pytorch.org/whl/cu116/torch-1.12.0%2Bcu116-cp310-cp310-linux_x86_64.whl"}
-torchvision = { url = "https://download.pytorch.org/whl/cu116/torchvision-0.13.0%2Bcu116-cp310-cp310-linux_x86_64.whl"}
+torch = { url = "https://download.pytorch.org/whl/cu116/torch-1.12.0%2Bcu116-cp310-cp310-linux_x86_64.whl" }
+torchvision = { url = "https://download.pytorch.org/whl/cu116/torchvision-0.13.0%2Bcu116-cp310-cp310-linux_x86_64.whl" }
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
@@ -90,10 +90,10 @@ max-attributes = 15
 max-locals = 36
 max-branches = 20
 max-statements = 55
-signature-mutators="hydra.main.main"
+signature-mutators = "hydra.main.main"
 
 [tool.pylint.typecheck]
-generated-members="numpy.*, torch.*, tensorflow.*"
+generated-members = "numpy.*, torch.*, tensorflow.*"
 
 [[tool.mypy.overrides]]
 module = [
