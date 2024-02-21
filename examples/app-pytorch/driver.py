@@ -133,19 +133,19 @@ def main(driver: Driver, context: Context) -> None:
             )
             metrics_results.append((fitres.num_examples, fitres.metrics))
 
-        # # Aggregate parameters (FedAvg)
-        # parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
-        # parameters = parameters_aggregated
+        # Aggregate parameters (FedAvg)
+        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+        parameters = parameters_aggregated
 
-        # # Aggregate metrics
-        # metrics_aggregated = weighted_average(metrics_results)
-        # history.add_metrics_distributed_fit(
-        #     server_round=server_round, metrics=metrics_aggregated
-        # )
-        # print("Round ", server_round, " metrics: ", metrics_aggregated)
+        # Aggregate metrics
+        metrics_aggregated = weighted_average(metrics_results)
+        history.add_metrics_distributed_fit(
+            server_round=server_round, metrics=metrics_aggregated
+        )
+        print("Round ", server_round, " metrics: ", metrics_aggregated)
 
-        # # Slow down the start of the next round
-        # time.sleep(sleep_time)
+        # Slow down the start of the next round
+        time.sleep(sleep_time)
 
     print("app_fit: losses_distributed %s", str(history.losses_distributed))
     print("app_fit: metrics_distributed_fit %s", str(history.metrics_distributed_fit))
