@@ -50,11 +50,12 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self._server_private_key, self._server_public_key = generate_key_pairs()
 
         state_factory = StateFactory(":flwr-in-memory-state:")
-        state_factory.state().store_client_public_key(
-            public_key_to_bytes(self._client_public_key)
-        )
+
         self._server_interceptor = AuthenticateServerInterceptor(
-            state_factory, self._server_private_key, self._server_public_key
+            state_factory,
+            {public_key_to_bytes(self._client_public_key)},
+            self._server_private_key,
+            self._server_public_key,
         )
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             ADDRESS_FLEET_API_GRPC_RERE, state_factory, None, [self._server_interceptor]

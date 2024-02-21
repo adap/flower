@@ -21,7 +21,7 @@ from typing import Optional, Sequence, Tuple, Union
 
 import grpc
 
-from flwr.client.grpc_rere_client.connection import grpc_request_response
+from flwr.client.grpc_rere_client.connection import init_grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
@@ -132,7 +132,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             self._client_private_key, self._client_public_key
         )
 
-        self._connection = grpc_request_response
+        self._connection = init_grpc_request_response(self._client_interceptor)
         self._address = f"localhost:{port}"
 
     def test_client_auth_create_node(self) -> None:
@@ -142,7 +142,6 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             True,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
-            (self._client_interceptor),
         ) as conn:
             _, _, create_node, _ = conn
             assert create_node is not None
@@ -164,7 +163,6 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             True,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
-            (self._client_interceptor),
         ) as conn:
             _, _, _, delete_node = conn
             assert delete_node is not None
