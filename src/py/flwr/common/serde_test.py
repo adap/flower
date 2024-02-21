@@ -28,12 +28,8 @@ from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 
 # pylint: enable=E0611
-from . import typing
-from .configsrecord import ConfigsRecord
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, typing
 from .message import Message, Metadata
-from .metricsrecord import MetricsRecord
-from .parametersrecord import Array, ParametersRecord
-from .recordset import RecordSet
 from .serde import (
     array_from_proto,
     array_to_proto,
@@ -254,7 +250,7 @@ def test_parameters_record_serialization_deserialization() -> None:
 
     # Assert
     assert isinstance(proto, ProtoParametersRecord)
-    assert original.data == deserialized.data
+    assert original == deserialized
 
 
 def test_metrics_record_serialization_deserialization() -> None:
@@ -269,7 +265,7 @@ def test_metrics_record_serialization_deserialization() -> None:
 
     # Assert
     assert isinstance(proto, ProtoMetricsRecord)
-    assert original.data == deserialized.data
+    assert original == deserialized
 
 
 def test_configs_record_serialization_deserialization() -> None:
@@ -284,7 +280,7 @@ def test_configs_record_serialization_deserialization() -> None:
 
     # Assert
     assert isinstance(proto, ProtoConfigsRecord)
-    assert original.data == deserialized.data
+    assert original == deserialized
 
 
 def test_recordset_serialization_deserialization() -> None:
