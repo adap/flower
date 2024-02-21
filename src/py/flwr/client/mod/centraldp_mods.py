@@ -65,7 +65,11 @@ def fixedclipping_mod(
 def adaptiveclipping_mod(
     msg: Message, ctxt: Context, call_next: ClientAppCallable
 ) -> Message:
-    """Clip the client model updates before sending them to the server."""
+    """Clip the client model updates before sending them to the server.
+
+    It needs to be used with DifferentialPrivacyClientSideAdaptiveClipping server-side
+    wrapper.
+    """
     if msg.metadata.message_type == MESSAGE_TYPE_FIT:
         fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
 

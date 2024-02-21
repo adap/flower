@@ -41,9 +41,7 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
-    """Wrapper for Configuring a Strategy for Central DP with Adaptive Clipping.
-
-    The clipping is at the client side.
+    """Wrapper for Central DP with Client Side Adaptive Clipping.
 
     Parameters
     ----------
@@ -124,7 +122,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
-        rep = "DP Strategy Wrapper with Client Side Adaptive Clipping"
+        rep = "Differential Privacy Strategy Wrapper (Client-Side Adaptive Clipping)"
         return rep
 
     def initialize_parameters(
