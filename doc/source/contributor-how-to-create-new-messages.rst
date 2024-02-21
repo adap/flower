@@ -29,8 +29,8 @@ Let's now see what we need to implement in order to get this simple function bet
 Message Types for Protocol Buffers
 ----------------------------------
 
-The first thing we need to do is to define a message type for the RPC system in :code:`transport.proto`. 
-Note that we have to do it for both the request and response messages. For more details on the syntax of proto3, please see the  `official documentation <https://developers.google.com/protocol-buffers/docs/proto3>`_.
+The first thing we need to do is to define a message type for the RPC system in :code:`transport.proto`.
+Note that we have to do it for both the request and response messages. For more details on the syntax of proto3, please see the  `official documentation <https://protobuf.dev/programming-guides/proto3/>`_.
 
 Within the :code:`ServerMessage` block:
 
