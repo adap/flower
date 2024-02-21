@@ -21,7 +21,7 @@ from typing import Optional, Sequence, Tuple, Union
 
 import grpc
 
-from flwr.client.grpc_rere_client.connection import init_grpc_request_response
+from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
@@ -40,12 +40,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 
-from .client_interceptor import (
-    _AUTH_TOKEN_HEADER,
-    _PUBLIC_KEY_HEADER,
-    AuthenticateClientInterceptor,
-    Request,
-)
+from .client_interceptor import _AUTH_TOKEN_HEADER, _PUBLIC_KEY_HEADER, Request
 
 
 class _MockServicer:
@@ -128,11 +123,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
         port = self._server.add_insecure_port("[::]:0")
         self._server.start()
         self._client_private_key, self._client_public_key = generate_key_pairs()
-        self._client_interceptor = AuthenticateClientInterceptor(
-            self._client_private_key, self._client_public_key
-        )
 
-        self._connection = init_grpc_request_response(self._client_interceptor)
+        self._connection = grpc_request_response
         self._address = f"localhost:{port}"
 
     def test_client_auth_create_node(self) -> None:
@@ -142,6 +134,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             True,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
+            self._client_public_key,
+            self._client_private_key,
         ) as conn:
             _, _, create_node, _ = conn
             assert create_node is not None
@@ -151,10 +145,6 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
                 public_key_to_bytes(self._client_public_key),
             )
             assert self._servicer.received_client_metadata() == expected_client_metadata
-            assert (
-                self._client_interceptor.server_public_key
-                == self._servicer.server_public_key
-            )
 
     def test_client_auth_delete_node(self) -> None:
         """Test client authentication during delete node."""
@@ -163,6 +153,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             True,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
+            self._client_public_key,
+            self._client_private_key,
         ) as conn:
             _, _, _, delete_node = conn
             assert delete_node is not None

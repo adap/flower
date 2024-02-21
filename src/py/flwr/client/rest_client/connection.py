@@ -19,7 +19,9 @@ import sys
 from contextlib import contextmanager
 from copy import copy
 from logging import ERROR, INFO, WARN
-from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
+from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast, Sequence
+
+import grpc
 
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
@@ -58,13 +60,12 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 
 @contextmanager
 # pylint: disable-next=too-many-statements
-def http_request_response(
+def http_request_response(  # pylint: disable=R0913
     server_address: str,
     insecure: bool,  # pylint: disable=unused-argument
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[
-        Union[bytes, str]
-    ] = None,  # pylint: disable=unused-argument
+    root_certificates: Optional[Union[bytes, str]] = None,
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],

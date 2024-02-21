@@ -20,7 +20,9 @@ from contextlib import contextmanager
 from logging import DEBUG
 from pathlib import Path
 from queue import Queue
-from typing import Callable, Iterator, Optional, Tuple, Union, cast
+from typing import Callable, Iterator, Optional, Tuple, Union, cast, Sequence
+
+import grpc
 
 from flwr.common import (
     GRPC_MAX_MESSAGE_LENGTH,
@@ -59,11 +61,12 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_connection(  # pylint: disable=R0915
+def grpc_connection(  # pylint: disable=R0915,R0913
     server_address: str,
     insecure: bool,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],

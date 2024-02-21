@@ -83,8 +83,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         self.state.store_client_public_keys(client_public_keys)
         log(
             INFO,
-            f"Client authentication enabled with "
-            f"{len(client_public_keys)} known public keys",
+            "Client authentication enabled with %d known public keys",
+            len(client_public_keys),
         )
 
     def intercept_service(
@@ -126,7 +126,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                                 ),
                             )
                         )
-                    elif isinstance(request, (DeleteNodeRequest, PullTaskInsRequest)):
+                    elif isinstance(request, (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest)):
                         hmac_value = base64.urlsafe_b64decode(
                             _get_value_from_tuples(
                                 _AUTH_TOKEN_HEADER, context.invocation_metadata()

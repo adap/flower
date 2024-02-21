@@ -46,7 +46,7 @@ from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_f
 from .client_interceptor import AuthenticateClientInterceptor
 from .clientapp import load_client_app
 from .grpc_client.connection import grpc_connection
-from .grpc_rere_client.connection import init_grpc_request_response
+from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
@@ -157,8 +157,8 @@ def _try_setup_client_authentication(
             server_public_key,
             server_private_key,
         )
-    else:
-        return None
+
+    return None
 
 
 def _parse_args_run_client_app() -> argparse.ArgumentParser:
@@ -334,7 +334,7 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -401,7 +401,7 @@ def _start_client_internal(
     # Both `client` and `client_fn` must not be used directly
 
     # Initialize connection context manager
-    connection, address = _init_connection(transport, server_address, interceptors)
+    connection, address = _init_connection(transport, server_address)
 
     node_state = NodeState()
 
@@ -412,6 +412,7 @@ def _start_client_internal(
             insecure,
             grpc_max_message_length,
             root_certificates,
+            interceptors,
         ) as conn:
             receive, send, create_node, delete_node = conn
 
@@ -573,7 +574,6 @@ def start_numpy_client(
 def _init_connection(
     transport: Optional[str],
     server_address: str,
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
 ) -> Tuple[
     Callable[
         [
@@ -581,6 +581,7 @@ def _init_connection(
             bool,
             int,
             Union[bytes, str, None],
+            Union[Sequence[grpc.UnaryUnaryClientInterceptor] | None]
         ],
         ContextManager[
             Tuple[
@@ -617,7 +618,7 @@ def _init_connection(
             )
         connection = http_request_response
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
-        connection = init_grpc_request_response(interceptors)
+        connection = grpc_request_response
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
         connection = grpc_connection
     else:
