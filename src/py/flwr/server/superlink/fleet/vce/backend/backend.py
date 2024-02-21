@@ -48,6 +48,5 @@ class Backend(ABC):
         app: Callable[[], ClientApp],
         message: Message,
         context: Context,
-        node_id: int,
     ) -> Tuple[Message, Context]:
         """Submit a job to the backend."""
