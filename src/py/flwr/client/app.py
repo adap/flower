@@ -581,7 +581,7 @@ def _init_connection(
             bool,
             int,
             Union[bytes, str, None],
-            Union[Sequence[grpc.UnaryUnaryClientInterceptor] | None],
+            Union[Sequence[grpc.UnaryUnaryClientInterceptor], None],
         ],
         ContextManager[
             Tuple[
