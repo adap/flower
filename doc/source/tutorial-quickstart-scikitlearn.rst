@@ -70,7 +70,7 @@ The pre-defined functions are used in the :code:`client.py` and imported. The :c
   import utils
 
 
-We load the MNIST dataset from `OpenML <https://www.openml.org/d/554>`_, a popular image classification dataset of handwritten digits for machine learning. The utility :code:`utils.load_mnist()` downloads the training and test data. The training set is split afterwards into 10 partitions with :code:`utils.partition()`.
+We load the MNIST dataset from `OpenML <https://www.openml.org/search?type=data&sort=runs&id=554>`_, a popular image classification dataset of handwritten digits for machine learning. The utility :code:`utils.load_mnist()` downloads the training and test data. The training set is split afterwards into 10 partitions with :code:`utils.partition()`.
 
 .. code-block:: python
 
