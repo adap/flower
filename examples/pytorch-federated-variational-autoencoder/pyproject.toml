@@ -2,7 +2,7 @@
 name = "pytorch_federated_variational_autoencoder"
 version = "0.1.0"
 description = "Federated Variational Autoencoder Example"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"

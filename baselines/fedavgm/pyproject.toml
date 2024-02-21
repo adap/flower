@@ -3,15 +3,15 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "fedavgm" 
+name = "fedavgm"
 version = "1.0.0"
 description = "FedAvgM: Measuring the effects of non-identical data distribution for federated visual classification"
 license = "Apache-2.0"
 authors = ["Gustavo Bertoli"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev"
+documentation = "https://flower.ai"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -56,6 +56,7 @@ pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
 ruff = "==0.0.272"
 types-requests = "==2.27.7"
+virtualenv = "==20.21.0"
 
 [tool.isort]
 line_length = 88
@@ -84,7 +85,7 @@ plugins = "numpy.typing.mypy_plugin"
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
 good-names = "i,j,k,_,x,y,X,Y"
-signature-mutators="hydra.main.main"
+signature-mutators = "hydra.main.main"
 
 [[tool.mypy.overrides]]
 module = [
