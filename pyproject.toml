@@ -7,11 +7,11 @@ name = "flwr"
 version = "1.8.0"
 description = "Flower: A Friendly Federated Learning Framework"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev"
+documentation = "https://flower.ai"
 keywords = [
     "flower",
     "fl",
