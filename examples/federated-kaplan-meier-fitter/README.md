@@ -1,6 +1,6 @@
 # Flower Example using KaplanMeierFitter
 
-This is an introductory example on **federated survival analysis** using [Flower](https://flower.dev/)
+This is an introductory example on **federated survival analysis** using [Flower](https://flower.ai/)
 and [lifelines](https://lifelines.readthedocs.io/en/stable/index.html) library.
 
 The aim of this example is to estimate the survival function using the
@@ -12,7 +12,7 @@ Finally, many other estimators beyond KaplanMeierFitter can be used with the pro
 AalenJohansenFitter, GeneralizedGammaFitter, LogLogisticFitter,
 SplineFitter, and WeibullFitter.
 
-We also use the [NatualPartitioner](https://flower.dev/docs/datasets/ref-api/flwr_datasets.partitioner.NaturalIdPartitioner.html#flwr_datasets.partitioner.NaturalIdPartitioner) from [Flower Datasets](https://flower.dev/docs/datasets/) to divide the data according to
+We also use the [NatualPartitioner](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.NaturalIdPartitioner.html#flwr_datasets.partitioner.NaturalIdPartitioner) from [Flower Datasets](https://flower.ai/docs/datasets/) to divide the data according to
 the group it comes from therefore to simulate the division that might occur.
 
 <p style="text-align:center;">
