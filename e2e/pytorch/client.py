@@ -101,7 +101,7 @@ class FlowerClient(fl.client.NumPyClient):
             value = self.context.state.configs_dict[STATE_VAR][STATE_VAR]  # type: ignore
             value += f",{t_stamp}"
 
-        self.context.state.configs_dict[STATE_VAR] = ConfigsRecord({STATE_VAR:value})
+        self.context.state.configs_dict[STATE_VAR] = ConfigsRecord({STATE_VAR: value})
     
     def _retrieve_timestamp_from_state(self):
         return self.context.state.configs_dict[STATE_VAR][STATE_VAR]
