@@ -15,6 +15,8 @@
 """Flower constants."""
 
 
+from __future__ import annotations
+
 MISSING_EXTRA_REST = """
 Extra dependencies required for using the REST-based Fleet API are missing.
 
@@ -36,3 +38,13 @@ MESSAGE_TYPE_GET_PROPERTIES = "get_properties"
 MESSAGE_TYPE_GET_PARAMETERS = "get_parameters"
 MESSAGE_TYPE_FIT = "fit"
 MESSAGE_TYPE_EVALUATE = "evaluate"
+
+
+class SType:
+    """Serialisation type."""
+
+    NUMPY = "numpy.ndarray"
+
+    def __new__(cls) -> SType:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")

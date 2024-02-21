@@ -9,9 +9,9 @@ description = "DepthFL: Depthwise Federated Learning for Heterogeneous Clients"
 license = "Apache-2.0"
 authors = ["Minjae Kim <mjkim@snu.ac.kr>"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev"
+documentation = "https://flower.ai"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -41,8 +41,8 @@ python = ">=3.10.0, <3.11.0"
 flwr = { extras = ["simulation"], version = "1.5.0" }
 hydra-core = "1.3.2" # don't change this
 matplotlib = "3.7.1"
-torch = { url = "https://download.pytorch.org/whl/cu116/torch-1.13.1%2Bcu116-cp310-cp310-linux_x86_64.whl"}
-torchvision = { url = "https://download.pytorch.org/whl/cu116/torchvision-0.14.1%2Bcu116-cp310-cp310-linux_x86_64.whl"}
+torch = { url = "https://download.pytorch.org/whl/cu116/torch-1.13.1%2Bcu116-cp310-cp310-linux_x86_64.whl" }
+torchvision = { url = "https://download.pytorch.org/whl/cu116/torchvision-0.14.1%2Bcu116-cp310-cp310-linux_x86_64.whl" }
 
 [tool.poetry.dev-dependencies]
 isort = "==5.11.5"
@@ -84,10 +84,10 @@ plugins = "numpy.typing.mypy_plugin"
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
 good-names = "i,j,k,_,x,y,X,Y"
-signature-mutators="hydra.main.main"
+signature-mutators = "hydra.main.main"
 
 [tool.pylint.typecheck]
-generated-members="numpy.*, torch.*, tensorflow.*"
+generated-members = "numpy.*, torch.*, tensorflow.*"
 
 [[tool.mypy.overrides]]
 module = [
