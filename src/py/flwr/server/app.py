@@ -14,9 +14,9 @@
 # ==============================================================================
 """Flower server app."""
 
-
 import argparse
 import importlib.util
+import json
 import sys
 import threading
 from logging import ERROR, INFO, WARN
@@ -24,7 +24,7 @@ from os.path import isfile
 from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import grpc
 
@@ -34,6 +34,7 @@ from flwr.common.constant import (
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
+    TRANSPORT_TYPE_VCE,
 )
 from flwr.common.logger import log
 from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
@@ -315,6 +316,15 @@ def run_fleet_api() -> None:
             certificates=certificates,
         )
         grpc_servers.append(fleet_server)
+    elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
+        _run_fleet_api_vce(
+            num_supernodes=args.num_supernodes,
+            client_app_str=args.client_app,
+            backend=args.backend,
+            backend_config=args.backend_config,
+            working_dir=args.dir,
+            state_factory=state_factory,
+        )
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
@@ -538,6 +548,29 @@ def _run_fleet_api_grpc_rere(
 
 
 # pylint: disable=import-outside-toplevel,too-many-arguments
+def _run_fleet_api_vce(
+    num_supernodes: int,
+    client_app_str: str,
+    backend: str,
+    backend_config: Dict[str, Union[str, int, float]],
+    working_dir: str,
+    state_factory: StateFactory,
+) -> None:
+    from flwr.server.superlink.fleet.vce.vce_api import start_vce
+
+    log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
+
+    start_vce(
+        num_supernodes=num_supernodes,
+        client_app_str=client_app_str,
+        backend_str=backend,
+        backend_config=backend_config,
+        state_factory=state_factory,
+        working_dir=working_dir,
+    )
+
+
+# pylint: disable=import-outside-toplevel,too-many-arguments
 def _run_fleet_api_rest(
     host: str,
     port: int,
@@ -714,6 +747,14 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="Start a Fleet API server (REST, experimental)",
     )
 
+    ex_group.add_argument(
+        "--vce",
+        action="store_const",
+        dest="fleet_api_type",
+        const=TRANSPORT_TYPE_VCE,
+        help="Start a Fleet API server (VirtualClientEngine)",
+    )
+
     # Fleet API gRPC-rere options
     grpc_rere_group = parser.add_argument_group(
         "Fleet API (gRPC-rere) server options", ""
@@ -748,4 +789,36 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="Set the number of concurrent workers for the Fleet API REST server.",
         type=int,
         default=1,
+    )
+
+    # Fleet API VCE options
+    vce_group = parser.add_argument_group("Fleet API (VCE) server options", "")
+    vce_group.add_argument(
+        "--client-app",
+        help="For example: `client:app` or `project.package.module:wrapper.app`.",
+    )
+    vce_group.add_argument(
+        "--num-supernodes",
+        type=int,
+        help="Number of SuperNodes connected to the SuperLink.",
+    )
+    vce_group.add_argument(
+        "--backend",
+        default="ray",
+        type=str,
+        help="Simulation Backend that process a ClientApp.",
+    )
+    vce_group.add_argument(
+        "--backend-config",
+        type=json.loads,
+        default='{"num_cpus":2, "num_gpus":0.0}',
+        help='A dict in the form \'{"<key>":<value>, "<another-key>":<value>}\' to '
+        "configure a backend. Pay close attention to how the quotes and double quotes "
+        "are set.",
+    )
+    parser.add_argument(
+        "--dir",
+        default="",
+        help="Add specified directory to the PYTHONPATH."
+        " Default: current working directory.",
     )
