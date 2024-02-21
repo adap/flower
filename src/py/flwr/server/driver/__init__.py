@@ -15,12 +15,10 @@
 """Flower driver SDK."""
 
 
-from .app import start_driver
 from .driver import Driver
 from .grpc_driver import GrpcDriver
 
 __all__ = [
     "Driver",
     "GrpcDriver",
-    "start_driver",
 ]

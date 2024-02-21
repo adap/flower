@@ -23,8 +23,8 @@ The TensorFlow/Keras quickstart example shows CIFAR-10 image classification
 with MobileNetV2:
 
 - `Quickstart TensorFlow (Code) <https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow>`_
-- `Quickstart TensorFlow (Tutorial) <https://flower.dev/docs/framework/tutorial-quickstart-tensorflow.html>`_
-- `Quickstart TensorFlow (Blog Post) <https://flower.dev/blog/2020-12-11-federated-learning-in-less-than-20-lines-of-code>`_
+- `Quickstart TensorFlow (Tutorial) <https://flower.ai/docs/framework/tutorial-quickstart-tensorflow.html>`_
+- `Quickstart TensorFlow (Blog Post) <https://flower.ai/blog/2020-12-11-federated-learning-in-less-than-20-lines-of-code>`_
 
 
 Quickstart PyTorch
@@ -34,7 +34,7 @@ The PyTorch quickstart example shows CIFAR-10 image classification
 with a simple Convolutional Neural Network:
 
 - `Quickstart PyTorch (Code) <https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_
-- `Quickstart PyTorch (Tutorial) <https://flower.dev/docs/framework/tutorial-quickstart-pytorch.html>`_
+- `Quickstart PyTorch (Tutorial) <https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html>`_
 
 
 PyTorch: From Centralized To Federated
@@ -43,7 +43,7 @@ PyTorch: From Centralized To Federated
 This example shows how a regular PyTorch project can be federated using Flower:
 
 - `PyTorch: From Centralized To Federated (Code) <https://github.com/adap/flower/tree/main/examples/pytorch-from-centralized-to-federated>`_
-- `PyTorch: From Centralized To Federated (Tutorial) <https://flower.dev/docs/framework/example-pytorch-from-centralized-to-federated.html>`_
+- `PyTorch: From Centralized To Federated (Tutorial) <https://flower.ai/docs/framework/example-pytorch-from-centralized-to-federated.html>`_
 
 
 Federated Learning on Raspberry Pi and Nvidia Jetson
@@ -52,7 +52,7 @@ Federated Learning on Raspberry Pi and Nvidia Jetson
 This example shows how Flower can be used to build a federated learning system that run across Raspberry Pi and Nvidia Jetson:
 
 - `Federated Learning on Raspberry Pi and Nvidia Jetson (Code) <https://github.com/adap/flower/tree/main/examples/embedded-devices>`_
-- `Federated Learning on Raspberry Pi and Nvidia Jetson (Blog Post) <https://flower.dev/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_
+- `Federated Learning on Raspberry Pi and Nvidia Jetson (Blog Post) <https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_
 
 
 
