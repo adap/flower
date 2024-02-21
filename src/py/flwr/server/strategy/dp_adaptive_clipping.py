@@ -250,6 +250,8 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
 class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
     """Wrapper for Central DP with Client Side Adaptive Clipping.
 
+    Use adaptiveclipping_mod modifier at the client side.
+
     Parameters
     ----------
     strategy : Strategy
