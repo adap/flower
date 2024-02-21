@@ -193,6 +193,8 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
 class DifferentialPrivacyClientSideFixedClipping(Strategy):
     """Wrapper for Central DP with Client Side Fixed Clipping.
 
+    Use fixedclipping_mod modifier at the client side.
+
     Parameters
     ----------
     strategy : Strategy
