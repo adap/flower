@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower server app."""
 
+
 import argparse
 import importlib.util
 import json
@@ -800,13 +801,13 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     vce_group.add_argument(
         "--num-supernodes",
         type=int,
-        help="Number of SuperNodes connected to the SuperLink.",
+        help="Number of SuperNodes to register with the SuperLink.",
     )
     vce_group.add_argument(
         "--backend",
         default="ray",
         type=str,
-        help="Simulation Backend that process a ClientApp.",
+        help="Simulation Backend that processes a ClientApp.",
     )
     vce_group.add_argument(
         "--backend-config",
@@ -819,6 +820,6 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--dir",
         default="",
-        help="Add specified directory to the PYTHONPATH."
+        help="Add a specified directory to the PYTHONPATH."
         " Default: current working directory.",
     )
