@@ -30,7 +30,7 @@ class Backend(ABC):
         """Build backend asynchronously.
 
         Different components need to be inplace before workers in a backend are ready to
-        accept jobs. When this method finish executed, the backend should be fully ready
+        accept jobs. When this method finish executing, the backend should be fully ready
         to run jobs.
         """
 
@@ -38,7 +38,7 @@ class Backend(ABC):
     def num_workers(self) -> int:
         """Return number of workers in the backend.
 
-        This is the number of TaskIns that can be run concurrently.
+        This is the number of TaskIns that can be processed concurrently.
         """
         return 0
 
