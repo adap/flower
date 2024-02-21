@@ -204,18 +204,6 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
         The value of the clipping norm.
     num_sampled_clients : int
         The number of clients that are sampled on each round.
-
-    Examples
-    --------
-    Create a strategy:
-
-    >>> strategy = fl.server.strategy.FedAvg( ... )
-
-    Wrap the strategy with the DifferentialPrivacyClientSideFixedClipping wrapper
-
-    >>> dp_strategy = DifferentialPrivacyClientSideFixedClipping(
-    >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
-    >>> )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
