@@ -21,7 +21,7 @@ class FlowerClient(fl.client.NumPyClient):
         """Record timestamp to client's state."""
         t_stamp = datetime.now().timestamp()
         value = str(t_stamp)
-        if STATE_VAR in self.context.state.configs.keys():
+        if STATE_VAR in self.context.state.configs_dict.keys():
             value = self.context.state.get_configs(STATE_VAR)[STATE_VAR]  # type: ignore
             value += f",{t_stamp}"
 

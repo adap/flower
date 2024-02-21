@@ -15,54 +15,65 @@
 """RecordSet."""
 
 
-from dataclasses import dataclass, field
-from typing import Dict
+from dataclasses import dataclass
+from typing import Callable, Dict, Optional, Type, TypeVar
 
 from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parametersrecord import ParametersRecord
+from .typeddict import TypedDict
+
+T = TypeVar("T")
 
 
 @dataclass
 class RecordSet:
-    """Definition of RecordSet."""
+    """Enhanced RecordSet with a unified and Pythonic interface."""
 
-    parameters: Dict[str, ParametersRecord] = field(default_factory=dict)
-    metrics: Dict[str, MetricsRecord] = field(default_factory=dict)
-    configs: Dict[str, ConfigsRecord] = field(default_factory=dict)
+    _params_dict: TypedDict[str, ParametersRecord]
+    _metrics_dict: TypedDict[str, MetricsRecord]
+    _configs_dict: TypedDict[str, ConfigsRecord]
 
-    def set_parameters(self, name: str, record: ParametersRecord) -> None:
-        """Add a ParametersRecord."""
-        self.parameters[name] = record
+    def __init__(
+        self,
+        params_dict: Optional[Dict[str, ParametersRecord]] = None,
+        metrics_dict: Optional[Dict[str, MetricsRecord]] = None,
+        configs_dict: Optional[Dict[str, ConfigsRecord]] = None,
+    ) -> None:
+        def _get_check_fn(__t: Type[T]) -> Callable[[T], None]:
+            def _check_fn(__v: T) -> None:
+                if not isinstance(__v, __t):
+                    raise TypeError(f"Key must be of type str. You passed {type(__v)}.")
 
-    def get_parameters(self, name: str) -> ParametersRecord:
-        """Get a ParametesRecord."""
-        return self.parameters[name]
+            return _check_fn
 
-    def del_parameters(self, name: str) -> None:
-        """Delete a ParametersRecord."""
-        del self.parameters[name]
+        self._params_dict = TypedDict[str, ParametersRecord](
+            _get_check_fn(str), _get_check_fn(ParametersRecord)
+        )
+        self._metrics_dict = TypedDict[str, MetricsRecord](
+            _get_check_fn(str), _get_check_fn(MetricsRecord)
+        )
+        self._configs_dict = TypedDict[str, ConfigsRecord](
+            _get_check_fn(str), _get_check_fn(ConfigsRecord)
+        )
+        if params_dict is not None:
+            self._params_dict.update(params_dict)
+        if metrics_dict is not None:
+            self._metrics_dict.update(metrics_dict)
+        if configs_dict is not None:
+            self._configs_dict.update(configs_dict)
 
-    def set_metrics(self, name: str, record: MetricsRecord) -> None:
-        """Add a MetricsRecord."""
-        self.metrics[name] = record
+    @property
+    def params_dict(self) -> TypedDict[str, ParametersRecord]:
+        """Dictionary of ParametersRecord."""
+        return self._params_dict
 
-    def get_metrics(self, name: str) -> MetricsRecord:
-        """Get a MetricsRecord."""
-        return self.metrics[name]
+    @property
+    def metrics_dict(self) -> TypedDict[str, MetricsRecord]:
+        """Dictionary of MetricsRecord."""
+        return self._metrics_dict
 
-    def del_metrics(self, name: str) -> None:
-        """Delete a MetricsRecord."""
-        del self.metrics[name]
-
-    def set_configs(self, name: str, record: ConfigsRecord) -> None:
-        """Add a ConfigsRecord."""
-        self.configs[name] = record
-
-    def get_configs(self, name: str) -> ConfigsRecord:
-        """Get a ConfigsRecord."""
-        return self.configs[name]
-
-    def del_configs(self, name: str) -> None:
-        """Delete a ConfigsRecord."""
-        del self.configs[name]
+    @property
+    def configs_dict(self) -> TypedDict[str, ConfigsRecord]:
+        """Dictionary of ConfigsRecord."""
+        return self._configs_dict
