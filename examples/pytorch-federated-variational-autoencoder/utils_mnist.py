@@ -432,7 +432,7 @@ def train_align(
 ):
     """Train the network on the training set."""
     net.train()
-    temp_gen_model = VAE(encoder_only=True).to(device)
+    temp_gen_model = VAE(z_dim=16, encoder_only=True).to(device)
     gen_weights = parameters_to_ndarrays(config["gen_params"])
     params_dict = zip(temp_gen_model.state_dict().keys(), gen_weights)
     state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
@@ -668,25 +668,26 @@ def visualize_plotly_latent_representation(
 
         # Convert to numpy array
         reduced_latents = reduced_latents.numpy()
-    fig = go.Figure()
-
-    fig.add_trace(
-        go.Scatter(
-            x=reduced_latents[:, 0],
-            y=reduced_latents[:, 1],
+    traces = []
+    for label in np.unique(all_labels):
+        indices = np.where(all_labels == label)
+        trace = go.Scatter(
+            x=reduced_latents[indices, 0].flatten(),
+            y=reduced_latents[indices, 1].flatten(),
             mode="markers",
-            marker=dict(color=all_labels, colorscale="Set1", opacity=0.8, size=8),
-            name="Labels",
+            name=f"Digit {label}",
+            marker=dict(size=8),
         )
-    )
+        traces.append(trace)
 
-    fig.update_layout(
+    layout = go.Layout(
         title="Latent Representation with True Labels",
         xaxis=dict(title="Principal Component 1"),
         yaxis=dict(title="Principal Component 2"),
         legend=dict(title="True Labels"),
         hovermode="closest",
     )
+    fig = go.Figure(data=traces, layout=layout)
 
     return fig
 

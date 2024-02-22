@@ -17,9 +17,8 @@ os.environ["WANDB_START_METHOD"] = "thread"
 from utils_mnist import (
     test,
     visualize_gen_image,
-    visualize_gmm_latent_representation,
-    non_iid_train_iid_test_6789,
-    subset_alignment_dataloader,
+    non_iid_train_iid_test,
+    alignment_dataloader,
     train_align,
     eval_reconstrution,
     visualize_plotly_latent_representation,
@@ -29,8 +28,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-NUM_CLIENTS = 2
-NUM_CLASSES = 4
+NUM_CLIENTS = 5
+NUM_CLASSES = 10
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
 parser.add_argument(
@@ -42,7 +41,7 @@ parser.add_argument(
 parser.add_argument(
     "--num_gpus",
     type=float,
-    default=1 / 2,
+    default=1 / 3,
     help="Ratio of GPU memory to assign to a virtual client",
 )
 parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
@@ -100,15 +99,7 @@ class FlowerClient(fl.client.NumPyClient):
             f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
             folder=IDENTIFIER,
         )
-        # latent_reps = visualize_gmm_latent_representation(
-        #     self.model,
-        #     DataLoader(self.valset, batch_size=64),
-        #     self.device,
-        #     f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
-        #     folder=IDENTIFIER,
-        #     num_class=NUM_CLASSES,
-        #     use_PCA=True,
-        # )
+
         latent_reps = visualize_plotly_latent_representation(
             self.model,
             DataLoader(self.valset, batch_size=64),
@@ -238,6 +229,7 @@ def main():
             model.to(device)
             set_params(model, parameters)
             if server_round == 0 or server_round == args.num_rounds:
+                # Save global model weights of first and last round
                 with open(
                     f"{IDENTIFIER}/weights_cir_round_{server_round}.npy", "wb"
                 ) as f:
@@ -252,15 +244,7 @@ def main():
                 f"server_eval_{server_round}",
                 folder=IDENTIFIER,
             )
-            # latent_reps = visualize_gmm_latent_representation(
-            #     model,
-            #     testloader,
-            #     device,
-            #     f"server_eval_{server_round}",
-            #     folder=IDENTIFIER,
-            #     num_class=NUM_CLASSES,
-            #     use_PCA=True,
-            # )
+
             latent_reps = visualize_plotly_latent_representation(
                 model,
                 testloader,
@@ -283,7 +267,7 @@ def main():
         return evaluate
 
     # Download dataset and partition it
-    trainsets, valsets = non_iid_train_iid_test_6789()
+    trainsets, valsets = non_iid_train_iid_test()
     net = VAE(z_dim=16).to(DEVICE)
     gen_net = VAE(z_dim=16, encoder_only=True).to(DEVICE)
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
@@ -301,7 +285,7 @@ def main():
         on_fit_config_fn=fit_config,
         evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
         evaluate_fn=get_evaluate_fn(valsets[-1]),  # Global evaluation function
-        alignment_dataloader=subset_alignment_dataloader(
+        alignment_dataloader=alignment_dataloader(
             samples_per_class=samples_per_class,
             batch_size=samples_per_class * NUM_CLASSES,
         ),

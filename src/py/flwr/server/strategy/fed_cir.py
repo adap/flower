@@ -109,6 +109,7 @@ class FedCiR(FedAvg):
         alignment_dataloader=None,
         device=None,
         lambda_align_g=1.0,
+        prior_steps=5000,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -172,6 +173,7 @@ class FedCiR(FedAvg):
         self.gen_stats = gen_stats
         self.device = device
         self.gen_model = VAE(z_dim=16, encoder_only=True).to(self.device)
+        self.prior_steps = prior_steps
         self.alignment_loader = alignment_dataloader
         self.ref_mu, self.ref_logvar = self.compute_ref_stats()
         self.lambda_align_g = lambda_align_g
@@ -179,7 +181,7 @@ class FedCiR(FedAvg):
     def compute_ref_stats(self, use_PCA=True):
         ref_model = infoVAE(latent_size=16, dis_hidden_size=4).to(self.device)
         opt_ref = torch.optim.Adam(ref_model.parameters(), lr=1e-3)
-        for ep in range(4000):
+        for ep in range(self.prior_steps):
             for images, labels in self.alignment_loader:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
