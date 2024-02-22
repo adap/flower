@@ -152,6 +152,7 @@ client_app = fl.client.ClientApp(
 )
 
 # ServerApp for Flower-Next
+# TODO: Unclear how to enable GPU growth for the ServerApp
 server_app = fl.server.ServerApp(
     config=fl.server.ServerConfig(num_rounds=NUM_ROUNDS),
     strategy=strategy,

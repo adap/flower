@@ -67,12 +67,12 @@ You can adjust the CPU/GPU resources you assign to each of your virtual clients.
 
 ```bash
 # Will assign 2xCPUs to each client
-python sim.py --num_cpus=2
+python sim.py --num_cpus=4
 
-# Will assign 2xCPUs and 20% of the GPU's VRAM to each client
-# This means that you can have 5 concurrent clients on each GPU
+# Will assign 4xCPUs and 25% of the GPU's VRAM to each client
+# This means that you can have 4 concurrent clients on each GPU
 # (assuming you have enough CPUs)
-python sim.py --num_cpus=2 --num_gpus=0.2
+python sim.py --num_cpus=4 --num_gpus=0.25
 ```
 
 ### Run with Flower-Next (`super-link` and `server-app`)
@@ -85,5 +85,17 @@ flower-superlink --insecure --vce --num-supernodes 100 --client-app sim:client_a
 # on a different terminal
 flower-server-app sim:server_app --insecure
 ```
+
+You can change the default resources assigned to each `ClientApp` by means the `--backend-config` argument:
+
+```bash
+# Tells the VCE to resever 4x CPUs and 25% of available VRAM for each ClientApp
+flower-superlink --insecure --vce --num-supernodes 100 \
+                 --client-app sim:client_app \
+                 --backend-config='{"client_resources": {"num_cpus":4, "num_gpus":0.25}}'
+
+# Then you can launch the `flower-server-app` command as shown earlier.
+```
+
 
 Take a look at the [Documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) for more details on how you can customise your simulation.
