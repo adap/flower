@@ -1,4 +1,3 @@
-import argparse
 from typing import Dict, List, Tuple
 
 import flwr as fl
@@ -32,7 +31,7 @@ class FlowerClient(fl.client.NumPyClient):
         self._events = events
 
     def fit(
-            self, parameters: List[np.ndarray], config: Dict[str, str]
+        self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[NDArrays, int, Dict]:
         return (
             [self._times, self._events],
@@ -40,19 +39,6 @@ class FlowerClient(fl.client.NumPyClient):
             {},
         )
 
-
-# if __name__ == "__main__":
-
-
-# parser = argparse.ArgumentParser(description="Flower")
-# parser.add_argument(
-#     "--node-id",
-#     type=int,
-#     required=True,
-#     help="Node id. Each node holds different part of the dataset.",
-# )
-# args = parser.parse_args()
-# node_id = args.node_id
 
 # Prepare data
 X = load_waltons()
@@ -78,4 +64,3 @@ app1 = fl.client.ClientApp(
 app2 = fl.client.ClientApp(
     client_fn=get_client_fn(1),
 )
-
