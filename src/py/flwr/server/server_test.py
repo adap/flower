@@ -22,6 +22,13 @@ from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    PublicFormat,
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.common import (
     Code,
@@ -185,8 +192,24 @@ def test_setup_client_auth() -> None:
     """Test setup client authentication."""
     # Generate keys
     _, first_public_key = generate_key_pairs()
+    server_public_key = (
+        b"ecdsa-sha2-nistp384 "
+        b"AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBIqtP/EvrgBYukcjRJT9zVLXE"
+        b"fykvVvT/QcHXuxCNu83SyCwedk3nNZxy5rZ1f8KoU+OSGmum5I9BxnWcLeBC+TGqpifTUSNwa/riV"
+        b"oJGcN/SxF3euqQg58YePORhos/Ug=="
+    )
+    server_private_key = b"""-----BEGIN OPENSSH PRIVATE KEY-----
+    b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAiAAAABNlY2RzYS
+    1zaGEyLW5pc3RwMzg0AAAACG5pc3RwMzg0AAAAYQSKrT/xL64AWLpHI0SU/c1S1xH8pL1b
+    0/0HB17sQjbvN0sgsHnZN5zWccua2dX/CqFPjkhprpuSPQcZ1nC3gQvkxqqYn01EjcGv64
+    laCRnDf0sRd3rqkIOfGHjzkYaLP1IAAADw/rbMO/62zDsAAAATZWNkc2Etc2hhMi1uaXN0
+    cDM4NAAAAAhuaXN0cDM4NAAAAGEEiq0/8S+uAFi6RyNElP3NUtcR/KS9W9P9Bwde7EI27z
+    dLILB52Tec1nHLmtnV/wqhT45Iaa6bkj0HGdZwt4EL5MaqmJ9NRI3Br+uJWgkZw39LEXd6
+    6pCDnxh485GGiz9SAAAAMQDQmvP7JeFNBDvo1VXciQF0Wv3/DCcj9x0kUABuX1gxb42Iw3
+    v7FOEco/enMaS4URwAAAAnZGFuaWVsbnVncmFoYUBEYW5pZWxzLU1hY0Jvb2stUHJvLmxv
+    Y2Fs
+    -----END OPENSSH PRIVATE KEY-----"""
     _, second_public_key = generate_key_pairs()
-    server_private_key, server_public_key = generate_key_pairs()
 
     with tempfile.TemporaryDirectory() as temp_dir:
         # Initialize temporary files
@@ -199,12 +222,16 @@ def test_setup_client_auth() -> None:
             writer = csv.writer(csvfile)
             writer.writerow(
                 [
-                    public_key_to_bytes(first_public_key).decode(),
-                    public_key_to_bytes(second_public_key).decode(),
+                    first_public_key.public_bytes(
+                        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+                    ).decode(),
+                    second_public_key.public_bytes(
+                        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+                    ).decode(),
                 ]
             )
-        server_public_key_path.write_bytes(public_key_to_bytes(server_public_key))
-        server_private_key_path.write_bytes(private_key_to_bytes(server_private_key))
+        server_public_key_path.write_bytes(server_public_key)
+        server_private_key_path.write_bytes(server_private_key)
 
         # Mock argparse with `require-client-authentication`` flag
         mock_args = argparse.Namespace(
@@ -218,13 +245,23 @@ def test_setup_client_auth() -> None:
         # Run _try_setup_client_authentication
         result = _try_setup_client_authentication(mock_args)
 
-        # Assert result with expected values
-        assert result is not None
-        assert result == (
-            {
+        expected_private_key = load_ssh_private_key(server_private_key, None)
+        expected_public_key = load_ssh_public_key(server_public_key)
+
+        if isinstance(expected_private_key, ec.EllipticCurvePrivateKey) and isinstance(
+            expected_public_key, ec.EllipticCurvePublicKey
+        ):
+            # Assert result with expected values
+            assert result is not None
+            assert result[0] == {
                 public_key_to_bytes(first_public_key),
                 public_key_to_bytes(second_public_key),
-            },
-            public_key_to_bytes(server_public_key),
-            private_key_to_bytes(server_private_key),
-        )
+            }
+            assert public_key_to_bytes(result[1]) == public_key_to_bytes(
+                expected_public_key
+            )
+            assert private_key_to_bytes(result[2]) == private_key_to_bytes(
+                expected_private_key
+            )
+        else:
+            raise AssertionError()

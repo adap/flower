@@ -20,8 +20,7 @@ import csv
 import importlib.util
 import sys
 import threading
-from dataclasses import dataclass
-from logging import DEBUG, ERROR, INFO, WARN
+from logging import ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
@@ -29,6 +28,11 @@ from types import FrameType
 from typing import List, Optional, Sequence, Set, Tuple
 
 import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
@@ -38,23 +42,29 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.logger import log
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    public_key_to_bytes,
+)
 from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
     add_DriverServicer_to_server,
 )
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
-from flwr.server.client_manager import ClientManager, SimpleClientManager
-from flwr.server.history import History
-from flwr.server.server import Server
-from flwr.server.strategy import FedAvg, Strategy
-from flwr.server.superlink.driver.driver_servicer import DriverServicer
-from flwr.server.superlink.fleet.grpc_bidi.grpc_server import (
+
+from .client_manager import ClientManager, SimpleClientManager
+from .history import History
+from .server import Server
+from .server_config import ServerConfig
+from .server_interceptor import AuthenticateServerInterceptor
+from .strategy import FedAvg, Strategy
+from .superlink.driver.driver_servicer import DriverServicer
+from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
 )
-from flwr.server.superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
-from flwr.server.superlink.state import StateFactory
+from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from .superlink.state import StateFactory
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
@@ -62,72 +72,6 @@ ADDRESS_FLEET_API_GRPC_BIDI = "[::]:8080"  # IPv6 to keep start_server compatibl
 ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
 DATABASE = ":flwr-in-memory-state:"
-
-
-@dataclass
-class ServerConfig:
-    """Flower server config.
-
-    All attributes have default values which allows users to configure just the ones
-    they care about.
-    """
-
-    num_rounds: int = 1
-    round_timeout: Optional[float] = None
-
-
-def run_server_app() -> None:
-    """Run Flower server app."""
-    event(EventType.RUN_SERVER_APP_ENTER)
-
-    args = _parse_args_run_server_app().parse_args()
-
-    # Obtain certificates
-    if args.insecure:
-        if args.root_certificates is not None:
-            sys.exit(
-                "Conflicting options: The '--insecure' flag disables HTTPS, "
-                "but '--root-certificates' was also specified. Please remove "
-                "the '--root-certificates' option when running in insecure mode, "
-                "or omit '--insecure' to use HTTPS."
-            )
-        log(
-            WARN,
-            "Option `--insecure` was set. "
-            "Starting insecure HTTP client connected to %s.",
-            args.server,
-        )
-        root_certificates = None
-    else:
-        # Load the certificates if provided, or load the system certificates
-        cert_path = args.root_certificates
-        if cert_path is None:
-            root_certificates = None
-        else:
-            root_certificates = Path(cert_path).read_bytes()
-        log(
-            DEBUG,
-            "Starting secure HTTPS client connected to %s "
-            "with the following certificates: %s.",
-            args.server,
-            cert_path,
-        )
-
-    log(
-        DEBUG,
-        "Flower will load ServerApp `%s`",
-        getattr(args, "server-app"),
-    )
-
-    log(
-        DEBUG,
-        "root_certificates: `%s`",
-        root_certificates,
-    )
-
-    log(WARN, "Not implemented: run_server_app")
-
-    event(EventType.RUN_SERVER_APP_LEAVE)
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -462,8 +406,22 @@ def run_superlink() -> None:
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-        _try_setup_client_authentication(args)
-        interceptors: Sequence[grpc.ServerInterceptor] = []
+        data = _try_setup_client_authentication(args)
+        interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
+        if data is not None:
+            (
+                client_public_keys,
+                server_public_key,
+                server_private_key,
+            ) = data
+            interceptors = [
+                AuthenticateServerInterceptor(
+                    state_factory,
+                    client_public_keys,
+                    server_private_key,
+                    server_public_key,
+                )
+            ]
 
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
@@ -493,20 +451,44 @@ def run_superlink() -> None:
 
 def _try_setup_client_authentication(
     args: argparse.Namespace,
-) -> Optional[Tuple[Set[bytes], bytes, bytes]]:
+) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePublicKey, ec.EllipticCurvePrivateKey]]:
     if args.require_client_authentication:
         client_keys_file_path = Path(args.require_client_authentication[0])
         if client_keys_file_path.exists():
             client_public_keys: Set[bytes] = set()
+            public_key = load_ssh_public_key(
+                Path(args.require_client_authentication[1]).read_bytes()
+            )
+            private_key = load_ssh_private_key(
+                Path(args.require_client_authentication[2]).read_bytes(),
+                None,
+            )
+            if not isinstance(public_key, ec.EllipticCurvePublicKey):
+                sys.exit(
+                    "An eliptic curve public and private key pair is required for "
+                    "client authentication. Please provide the file path containing "
+                    "valid public and private key to '--require-client-authentication'."
+                )
+            server_public_key = public_key
+            if not isinstance(private_key, ec.EllipticCurvePrivateKey):
+                sys.exit(
+                    "An eliptic curve public and private key pair is required for "
+                    "client authentication. Please provide the file path containing "
+                    "valid public and private key to '--require-client-authentication'."
+                )
+            server_private_key = private_key
+
             with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
                 reader = csv.reader(csvfile)
                 for row in reader:
                     for element in row:
-                        client_public_keys.add(element.encode())
+                        public_key = load_ssh_public_key(element.encode())
+                        if isinstance(public_key, ec.EllipticCurvePublicKey):
+                            client_public_keys.add(public_key_to_bytes(public_key))
                 return (
                     client_public_keys,
-                    Path(args.require_client_authentication[1]).read_bytes(),
-                    Path(args.require_client_authentication[2]).read_bytes(),
+                    server_public_key,
+                    server_private_key,
                 )
         else:
             sys.exit(
@@ -857,42 +839,3 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         type=int,
         default=1,
     )
-
-
-def _parse_args_run_server_app() -> argparse.ArgumentParser:
-    """Parse flower-server-app command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Start a Flower server app",
-    )
-
-    parser.add_argument(
-        "server-app",
-        help="For example: `server:app` or `project.package.module:wrapper.app`",
-    )
-    parser.add_argument(
-        "--insecure",
-        action="store_true",
-        help="Run the server app without HTTPS. By default, the app runs with "
-        "HTTPS enabled. Use this flag only if you understand the risks.",
-    )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
-        type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
-    )
-    parser.add_argument(
-        "--server",
-        default="0.0.0.0:9092",
-        help="Server address",
-    )
-    parser.add_argument(
-        "--dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load Flower "
-        "app from there."
-        " Default: current working directory.",
-    )
-
-    return parser
