@@ -23,7 +23,7 @@ from flwr.common.context import Context
 from flwr.common.message import Message
 from flwr.common.typing import ConfigsRecordValues
 
-BackendConfig = Dict[str, ConfigsRecordValues]
+BackendConfig = Dict[str, Dict[str, ConfigsRecordValues]]
 
 
 class Backend(ABC):
