@@ -54,7 +54,7 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
-### Run with `start_simulation`
+### Run with `start_simulation()`
 
 Ensure you have activated your environment then:
 
@@ -75,7 +75,7 @@ python sim.py --num_cpus=2
 python sim.py --num_cpus=2 --num_gpus=0.2
 ```
 
-### Run with `super-link` and `server-app`
+### Run with Flower-Next (`super-link` and `server-app`)
 
 Ensure you have activated your environment, then:
 

@@ -178,16 +178,15 @@ strategy = fl.server.strategy.FedAvg(
     min_available_clients=10,
     on_fit_config_fn=fit_config,
     evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
-    # evaluate_fn=get_evaluate_fn(centralized_testset),  # Global evaluation function
+    evaluate_fn=get_evaluate_fn(centralized_testset),  # Global evaluation function
 )
 
-
-# Run via `flower-client-app client:app`
+# ClientApp for Flower-Next
 client_app = fl.client.ClientApp(
     client_fn=get_client_fn(mnist_fds),
 )
 
-
+# ServerApp for Flower-Next
 server_app = fl.server.ServerApp(
     config=fl.server.ServerConfig(num_rounds=NUM_ROUNDS),
     strategy=strategy,

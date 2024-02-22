@@ -53,17 +53,13 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
-### Run Federated Learning Example
+### Run with `start_simulation()`
+
+Ensure you have activated your environment then:
 
 ```bash
-# You can run the example without activating your environemnt
-poetry run python sim.py
-
-# Or by first activating it
-poetry shell
 # and then run the example
 python sim.py
-# you can exit your environment by typing "exit"
 ```
 
 You can adjust the CPU/GPU resources you assign to each of your virtual clients. By default, your clients will only use 1xCPU core. For example:
@@ -76,6 +72,17 @@ python sim.py --num_cpus=2
 # This means that you can have 5 concurrent clients on each GPU
 # (assuming you have enough CPUs)
 python sim.py --num_cpus=2 --num_gpus=0.2
+```
+
+### Run with Flower-Next (`super-link` and `server-app`)
+
+Ensure you have activated your environment, then:
+
+```
+flower-superlink --insecure --vce --num-supernodes 100 --client-app sim:client_app
+
+# on a different terminal
+flower-server-app sim:server_app --insecure
 ```
 
 Take a look at the [Documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) for more details on how you can customise your simulation.
