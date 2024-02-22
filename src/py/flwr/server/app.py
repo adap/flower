@@ -24,7 +24,7 @@ from os.path import isfile
 from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import grpc
 
@@ -55,6 +55,7 @@ from .superlink.fleet.grpc_bidi.grpc_server import (
     start_grpc_server,
 )
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from .superlink.fleet.vce.backend import BackendConfig
 from .superlink.state import StateFactory
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
@@ -552,11 +553,11 @@ def _run_fleet_api_vce(
     num_supernodes: int,
     client_app_str: str,
     backend: str,
-    backend_config: Dict[str, Union[str, int, float]],
+    backend_config: BackendConfig,
     working_dir: str,
     state_factory: StateFactory,
 ) -> None:
-    from flwr.server.superlink.fleet.vce.vce_api import start_vce
+    from .superlink.fleet.vce.vce_api import start_vce
 
     log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
 

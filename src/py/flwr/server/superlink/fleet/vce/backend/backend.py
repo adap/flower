@@ -16,22 +16,25 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Callable, Tuple
+from typing import Callable, Dict, Tuple, Union
 
 from flwr.client.clientapp import ClientApp
 from flwr.common.context import Context
 from flwr.common.message import Message
 
+BackendConfig = Dict[str, Union[str, int, float]]
+
 
 class Backend(ABC):
     """Abstract base class for a Backend."""
 
-    async def build(self) -> None:
+    @abstractmethod
+    async def build(self, backend_config: BackendConfig) -> None:
         """Build backend asynchronously.
 
         Different components need to be inplace before workers in a backend are ready to
-        accept jobs. When this method finish executing, the backend should be fully ready
-        to run jobs.
+        accept jobs. When this method finish executing, the backend should be fully
+        ready to run jobs.
         """
 
     @property
@@ -41,6 +44,10 @@ class Backend(ABC):
         This is the number of TaskIns that can be processed concurrently.
         """
         return 0
+
+    @abstractmethod
+    def is_worker_idle(self) -> bool:
+        """Report whether a backend worker is idle and can therefore run a ClientApp."""
 
     @abstractmethod
     async def process_message(

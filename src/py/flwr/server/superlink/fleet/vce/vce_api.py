@@ -16,12 +16,14 @@
 
 
 from logging import INFO
-from typing import Dict, Union
+from typing import Dict
 
 from flwr.client.clientapp import ClientApp, load_client_app
 from flwr.client.node_state import NodeState
 from flwr.common.logger import log
 from flwr.server.superlink.state import StateFactory
+
+from .backend import BackendConfig
 
 NodeToPartitionMapping = Dict[int, int]
 
@@ -44,7 +46,7 @@ def start_vce(
     num_supernodes: int,
     client_app_str: str,
     backend_str: str,
-    backend_config: Dict[str, Union[str, int, float]],
+    backend_config: BackendConfig,
     state_factory: StateFactory,
     working_dir: str,
 ) -> None:

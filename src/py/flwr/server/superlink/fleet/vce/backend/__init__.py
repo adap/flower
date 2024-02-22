@@ -14,8 +14,9 @@
 # ==============================================================================
 """VirtualClientEngine Backends."""
 
-from .backend import Backend
+from .backend import Backend, BackendConfig
 
 __all__ = [
     "Backend",
+    "BackendConfig",
 ]
