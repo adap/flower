@@ -22,7 +22,8 @@ from utils_mnist import (
     alignment_dataloader,
     eval_reconstrution,
     non_iid_train_iid_test_6789,
-    subset_alignment_dataloader
+    subset_alignment_dataloader,
+    visualize_plotly_latent_representation,
 )
 from utils_mnist import VAE
 import os
@@ -30,8 +31,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import ray
 
-NUM_CLIENTS = 2
-NUM_CLASSES = 7
+NUM_CLIENTS = 5
+NUM_CLASSES = 10
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
 parser.add_argument(
@@ -67,7 +68,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.cid = cid
 
         # Instantiate model
-        self.model = VAE()
+        self.model = VAE(z_dim=16)
 
         # Determine device
         self.device = DEVICE
@@ -88,7 +89,7 @@ class FlowerClient(fl.client.NumPyClient):
         # optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         # Train
-        train(
+        loss = train(
             self.model,
             trainloader,
             optimizer,
@@ -100,17 +101,17 @@ class FlowerClient(fl.client.NumPyClient):
 
         true_img, gen_img = true_img, gen_img = visualize_gen_image(
             self.model,
-            DataLoader(self.valset, batch_size=64),
+            DataLoader(self.valset, batch_size=64, shuffle=True),
             self.device,
             f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
             folder=IDENTIFIER,
         )
-        latent_reps = visualize_gmm_latent_representation(
+        latent_reps = visualize_plotly_latent_representation(
             self.model,
             DataLoader(self.valset, batch_size=64),
             self.device,
-            f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
-            folder=IDENTIFIER,
+            num_class=NUM_CLASSES,
+            use_PCA=True,
         )
         # Return local model and statistics
         return (
@@ -122,6 +123,7 @@ class FlowerClient(fl.client.NumPyClient):
                 "gen_image": gen_img,
                 "latent_rep": latent_reps,
                 "client_round": config["server_round"],
+                "train_loss": float(loss),
             },
         )
 
@@ -186,7 +188,7 @@ def main():
     # Parse input arguments
     run = wandb.init(
         entity="mak",
-        group="avg",
+        group="avg50",
         reinit=True,
     )
 
@@ -201,10 +203,9 @@ def main():
         """Return a configuration with static batch size and (local) epochs."""
         config = {
             "epochs": wandb.config["epochs"],  # Number of local epochs done by clients
-            "batch_size": wandb.config[
-                "batch_size"
-            ],  # Batch size to use by clients during fit()
+            "batch_size": wandb.config["batch_size"],
             "server_round": server_round,
+            "beta": 0,
         }
         return config
 
@@ -219,7 +220,7 @@ def main():
             # Determine device
             device = DEVICE
 
-            model = VAE()
+            model = VAE(z_dim=16)
             model.to(device)
             set_params(model, parameters)
             if server_round == 0 or server_round == args.num_rounds:
@@ -229,7 +230,7 @@ def main():
                     np.save(f, np.array(parameters, dtype=object))
                 wandb.watch(model)
 
-            testloader = DataLoader(testset, batch_size=64)
+            testloader = DataLoader(testset, batch_size=64, shuffle=True)
             true_img, gen_img = visualize_gen_image(
                 model,
                 testloader,
@@ -237,19 +238,19 @@ def main():
                 f"server_eval_{server_round}",
                 folder=IDENTIFIER,
             )
-            latent_reps = visualize_gmm_latent_representation(
+            latent_reps = visualize_plotly_latent_representation(
                 model,
                 testloader,
                 device,
-                f"server_eval_{server_round}",
-                folder=IDENTIFIER,
+                num_class=NUM_CLASSES,
+                use_PCA=True,
             )
             global_val_loss = eval_reconstrution(model, testloader, device)
             wandb.log(
                 {
                     f"global_true_image": wandb.Image(true_img),
                     f"global_gen_image": wandb.Image(gen_img),
-                    f"global_latent_rep": wandb.Image(latent_reps),
+                    f"global_latent_rep": latent_reps,
                     f"global_val_loss": global_val_loss,
                     "server_round": server_round,
                 }
@@ -259,8 +260,8 @@ def main():
         return evaluate
 
     # Download dataset and partition it
-    trainsets, valsets = non_iid_train_iid_test_6789()
-    net = VAE().to(DEVICE)
+    trainsets, valsets = non_iid_train_iid_test()
+    net = VAE(z_dim=16).to(DEVICE)
 
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)
@@ -302,7 +303,7 @@ if __name__ == "__main__":
         "metric": {"name": "global_val_loss", "goal": "minimize"},
         "parameters": {
             "epochs": {"values": [2, 5, 10]},
-            "batch_size": {"values": [32, 64, 128]},
+            "batch_size": {"values": [128]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)

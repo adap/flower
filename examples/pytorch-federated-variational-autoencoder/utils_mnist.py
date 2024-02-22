@@ -343,9 +343,10 @@ def train(
             )
 
             kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-            loss = recon_loss + kld_loss * 1
+            loss = recon_loss + kld_loss * config["beta"]
             loss.backward()
             optimizer.step()
+    return loss.item()
     if if_return:
         return net
 

@@ -253,9 +253,7 @@ class FedAvg(Strategy):
                 f"train_gen_image_{fit_metric[1]['cid']}": wandb.Image(
                     fit_metric[1]["gen_image"]
                 ),
-                f"train_latent_rep_{fit_metric[1]['cid']}": wandb.Image(
-                    fit_metric[1]["latent_rep"]
-                ),
+                f"train_latent_rep_{fit_metric[1]['cid']}": fit_metric[1]["latent_rep"],
                 "client_round": fit_metric[1]["client_round"],
             }
 
