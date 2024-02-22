@@ -6,7 +6,6 @@ config. In this way, swapping your model for  another one can be done without ch
 the python code at all
 """
 
-
 import gc
 import os
 
