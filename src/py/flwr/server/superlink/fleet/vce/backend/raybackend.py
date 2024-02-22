@@ -73,7 +73,8 @@ class RayBackend(Backend):
             path = pathlib.Path(work_dir)
             for p in path.rglob("*"):
                 # exclude files need to be relative to the working_dir
-                excludes.append(str(p.relative_to(path)))
+                if p.is_file() and not str(p).endswith('.py'):
+                    excludes.append(str(p.relative_to(path)))
             runtime_env["excludes"] = excludes
 
         return runtime_env
