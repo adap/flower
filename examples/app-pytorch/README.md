@@ -51,3 +51,9 @@ With both the long-running server (SuperLink) and two clients (SuperNode) up and
 ```bash
 flower-server-app server:app --insecure
 ```
+
+Or, to try the custom server function example, run:
+
+```bash
+flower-server-app server_custom:app --insecure
+```
