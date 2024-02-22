@@ -813,7 +813,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     vce_group.add_argument(
         "--backend-config",
         type=json.loads,
-        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0}',
+        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0}}',
         help='A dict in the form \'{"<key>":<value>, "<another-key>":<value>}\' to '
         "configure a backend. Values supported in <value> are those included by "
         "`flwr.common.typing.ConfigsRecordValues`. "
