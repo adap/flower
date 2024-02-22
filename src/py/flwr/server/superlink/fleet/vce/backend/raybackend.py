@@ -55,10 +55,12 @@ class RayBackend(Backend):
         self.client_resources_key = "client_resources"
 
         # Create actor pool
+        actor_kwargs = backend_config.get("actor_kwargs", {})
         client_resources = self._validate_client_resources(config=backend_config)
         self.pool = BasicActorPool(
             actor_type=ClientAppActor,
             client_resources=client_resources,
+            actor_kwargs=actor_kwargs,
         )
 
     def _configure_runtime_env(self, work_dir: str) -> Dict[str, Union[str, List[str]]]:
@@ -73,7 +75,7 @@ class RayBackend(Backend):
             path = pathlib.Path(work_dir)
             for p in path.rglob("*"):
                 # exclude files need to be relative to the working_dir
-                if p.is_file() and not str(p).endswith('.py'):
+                if p.is_file() and not str(p).endswith(".py"):
                     excludes.append(str(p.relative_to(path)))
             runtime_env["excludes"] = excludes
 
