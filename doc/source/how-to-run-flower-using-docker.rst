@@ -54,7 +54,7 @@ to the Flower server. Here, we are passing the flag ``--insecure``.
 
   The ``--insecure`` flag enables insecure communication (using HTTP, not HTTPS) and should only be used
   for testing purposes. We strongly recommend enabling
-  `SSL <https://flower.dev/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`_
+  `SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`_
   when deploying to a production environment.
 
 You can use ``--help`` to view all available flags that the server supports:
@@ -90,7 +90,7 @@ To enable SSL, you will need a CA certificate, a server certificate and a server
 
 .. note::
   For testing purposes, you can generate your own self-signed certificates. The
-  `Enable SSL connections <https://flower.dev/docs/framework/how-to-enable-ssl-connections.html#certificates>`_
+  `Enable SSL connections <https://flower.ai/docs/framework/how-to-enable-ssl-connections.html#certificates>`_
   page contains a section that will guide you through the process.
 
 Assuming all files we need are in the local ``certificates`` directory, we can use the flag

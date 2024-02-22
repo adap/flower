@@ -56,7 +56,6 @@ from .client_manager import ClientManager, SimpleClientManager
 from .history import History
 from .server import Server
 from .server_config import ServerConfig
-from .server_interceptor import AuthenticateServerInterceptor
 from .strategy import FedAvg, Strategy
 from .superlink.driver.driver_servicer import DriverServicer
 from .superlink.fleet.grpc_bidi.grpc_server import (
@@ -414,14 +413,7 @@ def run_superlink() -> None:
                 server_public_key,
                 server_private_key,
             ) = data
-            interceptors = [
-                AuthenticateServerInterceptor(
-                    state_factory,
-                    client_public_keys,
-                    server_private_key,
-                    server_public_key,
-                )
-            ]
+            interceptors = []
 
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,

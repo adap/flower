@@ -28,12 +28,8 @@ from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 
 # pylint: enable=E0611
-from . import typing
-from .configsrecord import ConfigsRecord
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, typing
 from .message import Message, Metadata
-from .metricsrecord import MetricsRecord
-from .parametersrecord import Array, ParametersRecord
-from .recordset import RecordSet
 from .serde import (
     array_from_proto,
     array_to_proto,
@@ -217,10 +213,13 @@ class RecordMaker:
         """Create a Metadata."""
         return Metadata(
             run_id=self.rng.randint(0, 1 << 30),
-            task_id=self.get_str(64),
+            message_id=self.get_str(64),
             group_id=self.get_str(30),
+            src_node_id=self.rng.randint(0, 1 << 63),
+            dst_node_id=self.rng.randint(0, 1 << 63),
+            reply_to_message=self.get_str(64),
             ttl=self.get_str(10),
-            task_type=self.get_str(10),
+            message_type=self.get_str(10),
         )
 
 
@@ -251,7 +250,7 @@ def test_parameters_record_serialization_deserialization() -> None:
 
     # Assert
     assert isinstance(proto, ProtoParametersRecord)
-    assert original.data == deserialized.data
+    assert original == deserialized
 
 
 def test_metrics_record_serialization_deserialization() -> None:
@@ -266,7 +265,7 @@ def test_metrics_record_serialization_deserialization() -> None:
 
     # Assert
     assert isinstance(proto, ProtoMetricsRecord)
-    assert original.data == deserialized.data
+    assert original == deserialized
 
 
 def test_configs_record_serialization_deserialization() -> None:
@@ -281,7 +280,7 @@ def test_configs_record_serialization_deserialization() -> None:
 
     # Assert
     assert isinstance(proto, ProtoConfigsRecord)
-    assert original.data == deserialized.data
+    assert original == deserialized
 
 
 def test_recordset_serialization_deserialization() -> None:
@@ -304,22 +303,16 @@ def test_message_to_and_from_taskins() -> None:
     # Prepare
     maker = RecordMaker(state=1)
     metadata = maker.metadata()
+    # pylint: disable-next=protected-access
+    metadata._src_node_id = 0  # Assume driver node
     original = Message(
-        metadata=Metadata(
-            run_id=0,
-            task_id="",
-            group_id="",
-            ttl=metadata.ttl,
-            task_type=metadata.task_type,
-        ),
+        metadata=metadata,
         content=maker.recordset(1, 1, 1),
     )
 
     # Execute
     taskins = message_to_taskins(original)
-    taskins.run_id = metadata.run_id
-    taskins.task_id = metadata.task_id
-    taskins.group_id = metadata.group_id
+    taskins.task_id = metadata.message_id
     deserialized = message_from_taskins(taskins)
 
     # Assert
@@ -332,22 +325,15 @@ def test_message_to_and_from_taskres() -> None:
     # Prepare
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
+    metadata.dst_node_id = 0  # Assume driver node
     original = Message(
-        metadata=Metadata(
-            run_id=0,
-            task_id="",
-            group_id="",
-            ttl=metadata.ttl,
-            task_type=metadata.task_type,
-        ),
+        metadata=metadata,
         content=maker.recordset(1, 1, 1),
     )
 
     # Execute
     taskres = message_to_taskres(original)
-    taskres.run_id = metadata.run_id
-    taskres.task_id = metadata.task_id
-    taskres.group_id = metadata.group_id
+    taskres.task_id = metadata.message_id
     deserialized = message_from_taskres(taskres)
 
     # Assert
