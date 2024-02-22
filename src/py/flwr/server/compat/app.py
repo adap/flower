@@ -26,10 +26,9 @@ from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.proto import driver_pb2  # pylint: disable=E0611
-from flwr.server.app import init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
-from flwr.server.server import Server
+from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 
