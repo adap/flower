@@ -506,9 +506,7 @@ def start_numpy_client(
     )
 
 
-def _init_connection(
-    transport: Optional[str], server_address: str
-) -> Tuple[
+def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     Callable[
         [str, bool, int, Union[bytes, str, None]],
         ContextManager[

@@ -46,8 +46,8 @@ numpy = "1.25.2"
 matplotlib = "^3.7.2"
 
 [tool.poetry.dev-dependencies]
-isort = "==5.11.5"
-black = "==23.1.0"
+isort = "==5.13.2"
+black = "==24.2.0"
 docformatter = "==1.5.1"
 mypy = "==1.4.1"
 pylint = "==2.8.2"
