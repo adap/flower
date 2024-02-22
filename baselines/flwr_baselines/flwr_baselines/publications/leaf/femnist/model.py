@@ -54,8 +54,8 @@ def train(
     n_batches: Optional[int] = None,
     verbose: bool = False,
 ) -> Tuple[float, float, Optional[float], Optional[float]]:
-    """Train a given model with CrossEntropy and SGD. 
-    
+    """Train a given model with CrossEntropy and SGD.
+
     Alternatively, some version of it, like batch-SGD
 
     n_batches is an alternative way of specifying the training length
