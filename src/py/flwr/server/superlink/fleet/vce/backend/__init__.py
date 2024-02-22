@@ -14,9 +14,16 @@
 # ==============================================================================
 """VirtualClientEngine Backends."""
 
+from typing import Dict, Type
+
 from .backend import Backend, BackendConfig
+from .raybackend import RayBackend
 
 __all__ = [
     "Backend",
     "BackendConfig",
+    "RayBackend",
 ]
+
+# mappy of supported backends
+supported_backends: Dict[str, Type[Backend]] = {"ray": RayBackend}

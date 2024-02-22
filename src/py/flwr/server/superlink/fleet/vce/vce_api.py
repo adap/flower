@@ -15,13 +15,15 @@
 """Fleet VirtualClientEngine API."""
 
 import json
-from logging import INFO
+from logging import ERROR, INFO
 from typing import Dict
 
 from flwr.client.clientapp import ClientApp, load_client_app
 from flwr.client.node_state import NodeState
 from flwr.common.logger import log
 from flwr.server.superlink.state import StateFactory
+
+from .backend import supported_backends
 
 NodeToPartitionMapping = Dict[int, int]
 
@@ -60,7 +62,19 @@ def start_vce(
         node_states[node_id] = NodeState()
 
     # Load backend config
-    _ = json.loads(backend_config_json_str)
+    backend_config = json.loads(backend_config_json_str)
+
+    try:
+        backend_type = supported_backends[backend_str]
+        _ = backend_type(backend_config, work_dir=working_dir)
+    except KeyError as ex:
+        log(
+            ERROR,
+            "Backennd type `%s`, is not supported. Use any of %s",
+            backend_str,
+            list(supported_backends.keys()),
+        )
+        raise ex
 
     log(INFO, "client_app_str = %s", client_app_str)
 
