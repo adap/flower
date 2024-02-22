@@ -62,16 +62,16 @@ Ensure you have activated your environment then:
 python sim.py
 ```
 
-You can adjust the CPU/GPU resources you assign to each of your virtual clients. By default, your clients will only use 1xCPU core. For example:
+You can adjust the CPU/GPU resources you assign to each of your virtual clients. By default, your clients will only use 2xCPU core. For example:
 
 ```bash
 # Will assign 2xCPUs to each client
-python sim.py --num_cpus=4
+python sim.py --num_cpus=2
 
-# Will assign 4xCPUs and 25% of the GPU's VRAM to each client
+# Will assign 2xCPUs and 25% of the GPU's VRAM to each client
 # This means that you can have 4 concurrent clients on each GPU
 # (assuming you have enough CPUs)
-python sim.py --num_cpus=4 --num_gpus=0.25
+python sim.py --num_cpus=2 --num_gpus=0.25
 ```
 Because TensorFlow by default maps all the available VRAM, we need to [enable GPU memory growth](https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth), see how it is done in the example (`sim.py`) for both the "main" process (where the server/strategy runs) and for the clients (using the `actor_kwargs`)
 
@@ -86,13 +86,13 @@ flower-superlink --insecure --vce --num-supernodes 100 --client-app sim:client_a
 flower-server-app sim:server_app --insecure
 ```
 
-You can change the default resources assigned to each `ClientApp` by means the `--backend-config` argument. Note that we need to flag that the backend is going to use `TensorFlow`. In this way it will enable GPU memory growth.
+You can change the default resources assigned to each `ClientApp` using the `--backend-config` argument. Note that we need to flag that the backend is going to use `TensorFlow`. In this way, it will enable GPU memory growth.
 
 ```bash
-# Tells the VCE to resever 4x CPUs and 25% of available VRAM for each ClientApp
+# Tells the VCE to resever 2x CPUs and 25% of available VRAM for each ClientApp
 flower-superlink --insecure --vce --num-supernodes 100 \
                  --client-app sim:client_app \
-                 --backend-config='{"client_resources": {"num_cpus":4, "num_gpus":0.25}, "tensorflow": 1}'
+                 --backend-config='{"client_resources": {"num_cpus":2, "num_gpus":0.25}, "tensorflow": 1}'
 
 # Then you can launch the `flower-server-app` command as shown earlier.
 ```
