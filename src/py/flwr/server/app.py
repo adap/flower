@@ -44,11 +44,11 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 
-from .client_manager import ClientManager, SimpleClientManager
+from .client_manager import ClientManager
 from .history import History
-from .server import Server
+from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
-from .strategy import FedAvg, Strategy
+from .strategy import Strategy
 from .superlink.driver.driver_servicer import DriverServicer
 from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
@@ -181,47 +181,6 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     grpc_server.stop(grace=1)
 
     event(EventType.START_SERVER_LEAVE)
-
-    return hist
-
-
-def init_defaults(
-    server: Optional[Server],
-    config: Optional[ServerConfig],
-    strategy: Optional[Strategy],
-    client_manager: Optional[ClientManager],
-) -> Tuple[Server, ServerConfig]:
-    """Create server instance if none was given."""
-    if server is None:
-        if client_manager is None:
-            client_manager = SimpleClientManager()
-        if strategy is None:
-            strategy = FedAvg()
-        server = Server(client_manager=client_manager, strategy=strategy)
-    elif strategy is not None:
-        log(WARN, "Both server and strategy were provided, ignoring strategy")
-
-    # Set default config values
-    if config is None:
-        config = ServerConfig()
-
-    return server, config
-
-
-def run_fl(
-    server: Server,
-    config: ServerConfig,
-) -> History:
-    """Train a model on the given server and return the History object."""
-    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
-    log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
-    log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
-    log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
-    log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
-    log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
-
-    # Graceful shutdown
-    server.disconnect_all_clients(timeout=config.round_timeout)
 
     return hist
 
