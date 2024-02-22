@@ -429,6 +429,7 @@ class BasicActorPool:
         self,
         actor_type: Type[VirtualClientEngineActor],
         client_resources: Dict[str, Union[int, float]],
+        actor_kwargs: Dict[str, Any],
     ):
         self.client_resources = client_resources
 
@@ -436,10 +437,13 @@ class BasicActorPool:
         self.pool: asyncio.Queue[Type[VirtualClientEngineActor]] = asyncio.Queue()
         self.num_actors = 0
 
+        # Resolve arguments to pass during actor init
+        actor_args = {} if actor_kwargs is None else actor_kwargs
+
         # A function that creates an actor
         self.create_actor_fn = lambda: actor_type.options(  # type: ignore
             **client_resources
-        ).remote()
+        ).remote(**actor_args)
 
         # Figure out how many actors can be created given the cluster resources
         # and the resources the user indicates each VirtualClient will need
