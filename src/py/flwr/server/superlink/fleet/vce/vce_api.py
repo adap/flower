@@ -31,7 +31,7 @@ NodeToPartitionMapping = Dict[int, int]
 def _register_nodes(
     num_nodes: int, state_factory: StateFactory
 ) -> NodeToPartitionMapping:
-    """Registre nodes with the StateFactory and create node-id:partition-id mapping."""
+    """Register nodes with the StateFactory and create node-id:partition-id mapping."""
     nodes_mapping: NodeToPartitionMapping = {}
     state = state_factory.state()
     for i in range(num_nodes):
@@ -44,9 +44,9 @@ def _register_nodes(
 # pylint: disable=too-many-arguments,unused-argument
 def start_vce(
     num_supernodes: int,
-    client_app_str: str,
-    backend_str: str,
-    backend_config_json_str: str,
+    client_app_module_name: str,
+    backend_name: str,
+    backend_config_json_stream: str,
     state_factory: StateFactory,
     working_dir: str,
 ) -> None:
@@ -62,24 +62,24 @@ def start_vce(
         node_states[node_id] = NodeState()
 
     # Load backend config
-    backend_config = json.loads(backend_config_json_str)
+    backend_config = json.loads(backend_config_json_stream)
 
     try:
-        backend_type = supported_backends[backend_str]
+        backend_type = supported_backends[backend_name]
         _ = backend_type(backend_config, work_dir=working_dir)
     except KeyError as ex:
         log(
             ERROR,
             "Backennd type `%s`, is not supported. Use any of %s",
-            backend_str,
+            backend_name,
             list(supported_backends.keys()),
         )
         raise ex
 
-    log(INFO, "client_app_str = %s", client_app_str)
+    log(INFO, "client_app_str = %s", client_app_module_name)
 
     def _load() -> ClientApp:
-        app: ClientApp = load_client_app(client_app_str)
+        app: ClientApp = load_client_app(client_app_module_name)
         return app
 
     # start backend

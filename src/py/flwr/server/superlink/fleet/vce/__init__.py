@@ -13,3 +13,9 @@
 # limitations under the License.
 # ==============================================================================
 """Fleet VirtualClientEngine side."""
+
+from .vce_api import start_vce
+
+__all__ = [
+    "start_vce",
+]

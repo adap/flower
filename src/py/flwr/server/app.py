@@ -55,6 +55,7 @@ from .superlink.fleet.grpc_bidi.grpc_server import (
     start_grpc_server,
 )
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from .superlink.fleet.vce import start_vce
 from .superlink.state import StateFactory
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
@@ -405,9 +406,9 @@ def run_superlink() -> None:
     elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
         _run_fleet_api_vce(
             num_supernodes=args.num_supernodes,
-            client_app_str=args.client_app,
-            backend=args.backend,
-            backend_config_json_str=args.backend_config,
+            client_app_module_name=args.client_app,
+            backend_name=args.backend,
+            backend_config_json_stream=args.backend_config,
             working_dir=args.dir,
             state_factory=state_factory,
         )
@@ -547,24 +548,22 @@ def _run_fleet_api_grpc_rere(
     return fleet_grpc_server
 
 
-# pylint: disable=import-outside-toplevel,too-many-arguments
+# pylint: disable=too-many-arguments
 def _run_fleet_api_vce(
     num_supernodes: int,
-    client_app_str: str,
-    backend: str,
-    backend_config_json_str: str,
+    client_app_module_name: str,
+    backend_name: str,
+    backend_config_json_stream: str,
     working_dir: str,
     state_factory: StateFactory,
 ) -> None:
-    from .superlink.fleet.vce.vce_api import start_vce
-
     log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
 
     start_vce(
         num_supernodes=num_supernodes,
-        client_app_str=client_app_str,
-        backend_str=backend,
-        backend_config_json_str=backend_config_json_str,
+        client_app_module_name=client_app_module_name,
+        backend_name=backend_name,
+        backend_config_json_stream=backend_config_json_stream,
         state_factory=state_factory,
         working_dir=working_dir,
     )
@@ -800,26 +799,26 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     vce_group.add_argument(
         "--num-supernodes",
         type=int,
-        help="Number of SuperNodes to register with the SuperLink.",
+        help="Number of simulated SuperNodes.",
     )
     vce_group.add_argument(
         "--backend",
         default="ray",
         type=str,
-        help="Simulation Backend that processes a ClientApp.",
+        help="Simulation backend that executes the ClientApp.",
     )
     vce_group.add_argument(
         "--backend-config",
         type=str,
-        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0}}',
-        help='A JSON-like dict, e.g. \'{"<key>":<value>, "<another-key>":<value>}\' to '
+        default='{"client_resources": {"num_cpus":1, "num_gpus":0.0}, "tensorflow": 0}',
+        help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
         "configure a backend. Values supported in <value> are those included by "
-        "`flwr.common.typing.ConfigsRecordValues`. "
-        "Pay close attention to how the quotes and double quotes are set.",
+        "`flwr.common.typing.ConfigsRecordValues`. ",
     )
     parser.add_argument(
         "--dir",
         default="",
-        help="Add a specified directory to the PYTHONPATH."
+        help="Add specified directory to the PYTHONPATH and load"
+        "ClientApp from there."
         " Default: current working directory.",
     )
