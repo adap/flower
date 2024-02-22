@@ -55,6 +55,7 @@ from .superlink.fleet.grpc_bidi.grpc_server import (
     start_grpc_server,
 )
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from .superlink.fleet.vce.vce_api import start_vce
 from .superlink.state import StateFactory
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
@@ -547,7 +548,7 @@ def _run_fleet_api_grpc_rere(
     return fleet_grpc_server
 
 
-# pylint: disable=import-outside-toplevel,too-many-arguments
+# pylint: disable=too-many-arguments
 def _run_fleet_api_vce(
     num_supernodes: int,
     client_app_str: str,
@@ -556,8 +557,6 @@ def _run_fleet_api_vce(
     working_dir: str,
     state_factory: StateFactory,
 ) -> None:
-    from .superlink.fleet.vce.vce_api import start_vce
-
     log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
 
     start_vce(
