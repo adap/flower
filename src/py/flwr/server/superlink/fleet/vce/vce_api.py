@@ -29,7 +29,7 @@ NodeToPartitionMapping = Dict[int, int]
 def _register_nodes(
     num_nodes: int, state_factory: StateFactory
 ) -> NodeToPartitionMapping:
-    """Registre nodes with the StateFactory and create node-id:partition-id mapping."""
+    """Register nodes with the StateFactory and create node-id:partition-id mapping."""
     nodes_mapping: NodeToPartitionMapping = {}
     state = state_factory.state()
     for i in range(num_nodes):

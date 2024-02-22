@@ -799,13 +799,13 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     vce_group.add_argument(
         "--num-supernodes",
         type=int,
-        help="Number of SuperNodes to register with the SuperLink.",
+        help="Number of simulated SuperNodes.",
     )
     vce_group.add_argument(
         "--backend",
         default="ray",
         type=str,
-        help="Simulation Backend that processes a ClientApp.",
+        help="Simulation backend that executes the ClientApp.",
     )
     vce_group.add_argument(
         "--backend-config",
@@ -819,6 +819,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--dir",
         default="",
-        help="Add a specified directory to the PYTHONPATH."
+        help="Add specified directory to the PYTHONPATH and load"
+        "ClientApp from there."
         " Default: current working directory.",
     )
