@@ -26,8 +26,8 @@ class TestDataset(unittest.TestCase):
     """Test dataset."""
 
     def test_partitioning(self):
-        """Test if the full partitioning has the same number of writer as in the
-        preprocessed df."""
+        """Test if the full partitioning has the same number of writer as in
+        the preprocessed df."""
         temp_dir = recreate_nist()
         nist_preprocessor = NISTPreprocessor(temp_dir.name)
         nist_preprocessor.preprocess()
@@ -47,7 +47,8 @@ class TestDataset(unittest.TestCase):
 
     # pylint: disable=too-many-locals
     def test_train_valid_test_div(self):
-        """Test division of the already partitioned dataset into train test valid."""
+        """Test division of the already partitioned dataset into train test
+        valid."""
         temp_dir = recreate_nist()
         nist_preprocessor = NISTPreprocessor(temp_dir.name)
         nist_preprocessor.preprocess()
@@ -87,7 +88,8 @@ if __name__ == "__main__":
 def recreate_nist() -> tempfile.TemporaryDirectory:
     """Recreate a small dataset in a structure resembling the NIST dataset.
 
-    There are two different writers and 13 images saved in a temporary directory.
+    There are two different writers and 13 images saved in a temporary
+    directory.
     """
     # pylint: disable=consider-using-with
     temp_dir = tempfile.TemporaryDirectory()

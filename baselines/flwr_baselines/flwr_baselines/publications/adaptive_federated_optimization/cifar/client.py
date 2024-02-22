@@ -45,8 +45,9 @@ class RayClient(fl.client.NumPyClient):
         return self.properties
 
     def get_parameters(self, config) -> NDArrays:
-        """Returns weight from a given model. If no model is passed, then a local model
-        is created. This can be used to initialize a model in the server.
+        """Returns weight from a given model. If no model is passed, then a
+        local model is created. This can be used to initialize a model in the
+        server.
 
         Returns:
             NDArrays: weights from the model.

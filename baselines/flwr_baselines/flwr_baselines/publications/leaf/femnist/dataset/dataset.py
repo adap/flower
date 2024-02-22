@@ -121,8 +121,8 @@ def train_valid_test_partition(
     test_split: float = 0.1,
     random_seed: int = None,
 ) -> Tuple[List[Dataset], List[Dataset], List[Dataset]]:
-    """Partition list of datasets to train, validation and test splits (each dataset
-    from the list individually).
+    """Partition list of datasets to train, validation and test splits (each
+    dataset from the list individually).
 
     Parameters
     ----------
@@ -204,8 +204,8 @@ def create_federated_dataloaders(
     test_fraction: float,
     random_seed: int,
 ) -> Tuple[List[DataLoader], List[DataLoader], List[DataLoader]]:
-    """Create the federated dataloaders by following all the preprocessing steps and
-    division.
+    """Create the federated dataloaders by following all the preprocessing
+    steps and division.
 
     Parameters
     ----------

@@ -12,8 +12,8 @@ from torch.utils.data import DataLoader
 
 
 class Net(nn.Module):
-    """Implementation of the model used in the LEAF paper for training on FEMNIST
-    data."""
+    """Implementation of the model used in the LEAF paper for training on
+    FEMNIST data."""
 
     # pylint: disable=too-many-instance-attributes
     def __init__(self, num_classes: int) -> None:
@@ -54,11 +54,11 @@ def train(
     n_batches: Optional[int] = None,
     verbose: bool = False,
 ) -> Tuple[float, float, Optional[float], Optional[float]]:
-    """Train a given model with CrossEntropy and SGD (or some version of it like batch-
-    SGD).
+    """Train a given model with CrossEntropy and SGD (or some version of it
+    like batch- SGD).
 
-    n_batches is an alternative way of specifying the training length (instead of
-    epochs)
+    n_batches is an alternative way of specifying the training length
+    (instead of epochs)
     """
     criterion = torch.nn.CrossEntropyLoss(reduction="sum")
     optimizer = torch.optim.SGD(net.parameters(), lr=learning_rate)

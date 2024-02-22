@@ -216,7 +216,8 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
             split_array_at_indices(x, split_idx)
 
     def test_split_array_at_indices_not_increasing(self) -> None:
-        """Tests if exception is thrown for split not having increasing values."""
+        """Tests if exception is thrown for split not having increasing
+        values."""
         # Prepare
         x = np.ones((100, 3, 32, 32), dtype=np.float32)
         split_idx = np.arange(start=0, stop=90, step=10, dtype=np.int64)
@@ -404,7 +405,8 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         assert_identity(this_partition, (expected_x, expected_y))
 
     def test_create_lda_partitions_imbalanced_not_set(self) -> None:
-        """Test if Latent Dirichlet Allocation rejects imbalanced partitions."""
+        """Test if Latent Dirichlet Allocation rejects imbalanced
+        partitions."""
         # Prepare
         num_partitions = 3
         concentration = 1e-3
@@ -438,8 +440,8 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         assert total_samples == self.num_samples
 
     def test_create_lda_partitions_alpha_near_zero(self) -> None:
-        """Test if Latent Dirichlet Allocation partitions will give single class
-        distribution when concentration is near zero (~1e-3)."""
+        """Test if Latent Dirichlet Allocation partitions will give single
+        class distribution when concentration is near zero (~1e-3)."""
         # Prepare
         num_partitions = 5
         concentration = 1e-3
@@ -457,8 +459,8 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
             assert max_prob > 0.5
 
     def test_create_lda_partitions_large_alpha(self) -> None:
-        """Test if Latent Dirichlet Allocation partitions will give near uniform
-        distribution when concentration is large(~1e5)."""
+        """Test if Latent Dirichlet Allocation partitions will give near
+        uniform distribution when concentration is large(~1e5)."""
         # Prepare
         num_partitions = 5
         concentration = 1e5
@@ -520,8 +522,8 @@ class ImageClassificationPartitionedTestCase(unittest.TestCase):
         assert_identity(xy_0=self.ds, xy_1=(x_lda, y_lda))
 
     def test_create_lda_partitions_with_inf_alpha(self) -> None:
-        """Test if partitions created with concentration=Inf will produce uniform
-        partitions."""
+        """Test if partitions created with concentration=Inf will produce
+        uniform partitions."""
         # Prepare
         num_partitions = 5
         concentration = float("inf")

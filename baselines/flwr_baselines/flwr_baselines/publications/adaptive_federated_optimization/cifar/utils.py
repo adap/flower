@@ -98,8 +98,8 @@ def get_transforms(num_classes: int = 10) -> Dict[str, Compose]:
 
 
 def get_cifar_model(num_classes: int = 10) -> Module:
-    """Generates ResNet18 model using GroupNormalization rather than BatchNormalization.
-    Two groups are used.
+    """Generates ResNet18 model using GroupNormalization rather than
+    BatchNormalization. Two groups are used.
 
     Args:
         num_classes (int, optional): Number of classes {10,100}. Defaults to 10.
@@ -247,7 +247,8 @@ def shuffle_and_create_cifar100_lda_dists(
     lda_concentration_fine: float,
     num_partitions: int,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Shuffles the original dataset and creates the two-level LDA distributions.
+    """Shuffles the original dataset and creates the two-level LDA
+    distributions.
 
     Args:
         dataset (XY): original dataset in XY format
@@ -369,7 +370,8 @@ def gen_cifar100_partitions(
     lda_concentration_coarse: float,
     lda_concentration_fine: float,
 ) -> Path:
-    """Generates CIFAR100 partitions and return root directory where the partitions are.
+    """Generates CIFAR100 partitions and return root directory where the
+    partitions are.
 
     Args:
         path_original_dataset (Path): Path to original dataset

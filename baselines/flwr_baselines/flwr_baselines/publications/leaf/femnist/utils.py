@@ -11,8 +11,8 @@ from flwr.common import Metrics, Scalar
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, Scalar]:
     """Compute weighted average.
 
-    It is generic implementation that averages only over floats and ints and drops the
-    other data types of the Metrics.
+    It is generic implementation that averages only over floats and ints
+    and drops the other data types of the Metrics.
     """
     n_batches_list = [n_batches for n_batches, _ in metrics]
     n_batches_sum = sum(n_batches_list)
