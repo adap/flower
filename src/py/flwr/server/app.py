@@ -17,7 +17,6 @@
 
 import argparse
 import importlib.util
-import json
 import sys
 import threading
 from logging import ERROR, INFO, WARN
@@ -25,7 +24,7 @@ from os.path import isfile
 from pathlib import Path
 from signal import SIGINT, SIGTERM, signal
 from types import FrameType
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import grpc
 
@@ -408,7 +407,7 @@ def run_superlink() -> None:
             num_supernodes=args.num_supernodes,
             client_app_str=args.client_app,
             backend=args.backend,
-            backend_config=args.backend_config,
+            backend_config_json_str=args.backend_config,
             working_dir=args.dir,
             state_factory=state_factory,
         )
@@ -553,11 +552,11 @@ def _run_fleet_api_vce(
     num_supernodes: int,
     client_app_str: str,
     backend: str,
-    backend_config: Dict[str, Union[str, int, float]],
+    backend_config_json_str: str,
     working_dir: str,
     state_factory: StateFactory,
 ) -> None:
-    from flwr.server.superlink.fleet.vce.vce_api import start_vce
+    from .superlink.fleet.vce.vce_api import start_vce
 
     log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
 
@@ -565,7 +564,7 @@ def _run_fleet_api_vce(
         num_supernodes=num_supernodes,
         client_app_str=client_app_str,
         backend_str=backend,
-        backend_config=backend_config,
+        backend_config_json_str=backend_config_json_str,
         state_factory=state_factory,
         working_dir=working_dir,
     )
@@ -811,11 +810,12 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     )
     vce_group.add_argument(
         "--backend-config",
-        type=json.loads,
-        default='{"num_cpus":2, "num_gpus":0.0}',
-        help='A dict in the form \'{"<key>":<value>, "<another-key>":<value>}\' to '
-        "configure a backend. Pay close attention to how the quotes and double quotes "
-        "are set.",
+        type=str,
+        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0}}',
+        help='A JSON-like dict, e.g. \'{"<key>":<value>, "<another-key>":<value>}\' to '
+        "configure a backend. Values supported in <value> are those included by "
+        "`flwr.common.typing.ConfigsRecordValues`. "
+        "Pay close attention to how the quotes and double quotes are set.",
     )
     parser.add_argument(
         "--dir",

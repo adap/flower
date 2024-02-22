@@ -14,9 +14,9 @@
 # ==============================================================================
 """Fleet VirtualClientEngine API."""
 
-
+import json
 from logging import INFO
-from typing import Dict, Union
+from typing import Dict
 
 from flwr.client.clientapp import ClientApp, load_client_app
 from flwr.client.node_state import NodeState
@@ -44,7 +44,7 @@ def start_vce(
     num_supernodes: int,
     client_app_str: str,
     backend_str: str,
-    backend_config: Dict[str, Union[str, int, float]],
+    backend_config_json_str: str,
     state_factory: StateFactory,
     working_dir: str,
 ) -> None:
@@ -58,6 +58,9 @@ def start_vce(
     node_states: Dict[int, NodeState] = {}
     for node_id in nodes_mapping:
         node_states[node_id] = NodeState()
+
+    # Load backend config
+    _ = json.loads(backend_config_json_str)
 
     log(INFO, "client_app_str = %s", client_app_str)
 
