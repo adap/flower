@@ -221,7 +221,7 @@ def run_fl(
     log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
 
     # Graceful shutdown
-    server.disconnect_all_clients(round=last_round, timeout=config.round_timeout)
+    server.disconnect_all_clients(server_round=last_round, timeout=config.round_timeout)
 
     return hist
 
