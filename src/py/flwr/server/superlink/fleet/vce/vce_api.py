@@ -42,9 +42,9 @@ def _register_nodes(
 # pylint: disable=too-many-arguments,unused-argument
 def start_vce(
     num_supernodes: int,
-    client_app_str: str,
-    backend_str: str,
-    backend_config_json_str: str,
+    client_app_module_name: str,
+    backend_name: str,
+    backend_config_json_stream: str,
     state_factory: StateFactory,
     working_dir: str,
 ) -> None:
@@ -60,12 +60,12 @@ def start_vce(
         node_states[node_id] = NodeState()
 
     # Load backend config
-    _ = json.loads(backend_config_json_str)
+    _ = json.loads(backend_config_json_stream)
 
-    log(INFO, "client_app_str = %s", client_app_str)
+    log(INFO, "client_app_str = %s", client_app_module_name)
 
     def _load() -> ClientApp:
-        app: ClientApp = load_client_app(client_app_str)
+        app: ClientApp = load_client_app(client_app_module_name)
         return app
 
     # start backend
