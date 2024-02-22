@@ -30,7 +30,7 @@ class Backend(ABC):
     """Abstract base class for a Backend."""
 
     @abstractmethod
-    async def build(self, backend_config: BackendConfig) -> None:
+    async def build(self) -> None:
         """Build backend asynchronously.
 
         Different components need to be inplace before workers in a backend are ready to
