@@ -162,7 +162,6 @@ def main() -> None:
     # Parse input arguments
     args = parser.parse_args()
 
-
     # With a dictionary, you tell Flower's VirtualClientEngine that each
     # client needs exclusive access to these many resources in order to run
     client_resources = {
