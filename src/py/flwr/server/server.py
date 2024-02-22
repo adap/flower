@@ -81,13 +81,14 @@ class Server:
         return self._client_manager
 
     # pylint: disable=too-many-locals
-    def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
+    def fit(self, num_rounds: int, timeout: Optional[float]) -> Tuple[History, int]:
         """Run federated averaging for a number of rounds."""
         history = History()
+        server_round = 0
 
         # Initialize parameters
         log(INFO, "Initializing global parameters")
-        self.parameters = self._get_initial_parameters(timeout=timeout)
+        self.parameters = self._get_initial_parameters(server_round, timeout=timeout)
         log(INFO, "Evaluating initial parameters")
         res = self.strategy.evaluate(0, parameters=self.parameters)
         if res is not None:
@@ -105,6 +106,8 @@ class Server:
         start_time = timeit.default_timer()
 
         for current_round in range(1, num_rounds + 1):
+            server_round = current_round
+
             # Train model and replace previous global model
             res_fit = self.fit_round(
                 server_round=current_round,
@@ -151,7 +154,7 @@ class Server:
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
         log(INFO, "FL finished in %s", elapsed)
-        return history
+        return history, server_round
 
     def evaluate_round(
         self,
@@ -252,7 +255,9 @@ class Server:
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
 
-    def disconnect_all_clients(self, timeout: Optional[float]) -> None:
+    def disconnect_all_clients(
+        self, server_round: int, timeout: Optional[float]
+    ) -> None:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
         clients = [all_clients[k] for k in all_clients.keys()]
@@ -262,10 +267,12 @@ class Server:
             client_instructions=client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
-            group_id=-1,
+            group_id=server_round,
         )
 
-    def _get_initial_parameters(self, timeout: Optional[float]) -> Parameters:
+    def _get_initial_parameters(
+        self, server_round: int, timeout: Optional[float]
+    ) -> Parameters:
         """Get initial parameters from one of the available clients."""
         # Server-side parameter initialization
         parameters: Optional[Parameters] = self.strategy.initialize_parameters(
@@ -280,7 +287,7 @@ class Server:
         random_client = self._client_manager.sample(1)[0]
         ins = GetParametersIns(config={})
         get_parameters_res = random_client.get_parameters(
-            ins=ins, timeout=timeout, group_id=0
+            ins=ins, timeout=timeout, group_id=server_round
         )
         log(INFO, "Received initial parameters from one random client")
         return get_parameters_res.parameters
