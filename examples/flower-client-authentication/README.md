@@ -31,7 +31,7 @@ bash ./generate.sh
 ```
 
 `generate.sh` is a script that generates per default three private and public keys, for server and two clients.
-You can generate more keys by specifying number of client credentials that you wish. 
+You can generate more keys by specifying number of client credentials that you wish.
 Also, the script generates a csv file that includes each of the generated client credentials public keys.
 
 ```bash
@@ -45,7 +45,7 @@ flower-superlink --insecure --require-client-authentication ./keys/client_public
 ```
 
 To start a long-running Flower server and enable client authentication is very easy, all you need to do is to type
-`--require-client-authentication` followed by the path to the known `client_public_keys.csv`, server's public key 
+`--require-client-authentication` followed by the path to the known `client_public_keys.csv`, server's public key
 `server_credentials.pub`, and server's private key `server_credentials`.
 
 ## Start the long-running Flower client (SuperNode)
