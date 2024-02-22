@@ -32,7 +32,7 @@ class FlowerClient(fl.client.NumPyClient):
         self._events = events
 
     def fit(
-        self, parameters: List[np.ndarray], config: Dict[str, str]
+            self, parameters: List[np.ndarray], config: Dict[str, str]
     ) -> Tuple[NDArrays, int, Dict]:
         return (
             [self._times, self._events],
@@ -41,28 +41,41 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Flower")
-    parser.add_argument(
-        "--node-id",
-        type=int,
-        required=True,
-        help="Node id. Each node holds different part of the dataset.",
-    )
-    args = parser.parse_args()
-    partition_id = args.node_id
+# if __name__ == "__main__":
 
-    # Prepare data
-    X = load_waltons()
-    partitioner = NaturalIdPartitioner(partition_by="group")
-    partitioner.dataset = Dataset.from_pandas(X)
-    partition = partitioner.load_partition(partition_id).to_pandas()
-    events = partition["E"].values
-    times = partition["T"].values
 
-    # Start Flower client
-    client = FlowerClient(times=times, events=events).to_client()
-    fl.client.start_client(
-        server_address="127.0.0.1:8080",
-        client=client,
-    )
+# parser = argparse.ArgumentParser(description="Flower")
+# parser.add_argument(
+#     "--node-id",
+#     type=int,
+#     required=True,
+#     help="Node id. Each node holds different part of the dataset.",
+# )
+# args = parser.parse_args()
+# node_id = args.node_id
+
+# Prepare data
+X = load_waltons()
+partitioner = NaturalIdPartitioner(partition_by="group")
+partitioner.dataset = Dataset.from_pandas(X)
+
+
+def get_client_fn(partition_id: int):
+    def client_fn(cid: str):
+        print(cid)
+        partition = partitioner.load_partition(partition_id).to_pandas()
+        events = partition["E"].values
+        times = partition["T"].values
+        return FlowerClient(times=times, events=events).to_client()
+
+    return client_fn
+
+
+# Run via `flower-client-app client:app`
+app1 = fl.client.ClientApp(
+    client_fn=get_client_fn(0),
+)
+app2 = fl.client.ClientApp(
+    client_fn=get_client_fn(1),
+)
+
