@@ -16,11 +16,13 @@
 
 import base64
 import threading
-from typing import Any, Callable, Sequence, Tuple, Union
+from logging import INFO
+from typing import Any, Callable, Sequence, Set, Tuple, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_public_key,
     generate_shared_key,
@@ -70,6 +72,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     def __init__(
         self,
         state_factory: StateFactory,
+        client_public_keys: Set[bytes],
         private_key: ec.EllipticCurvePrivateKey,
         public_key: ec.EllipticCurvePublicKey,
     ):
@@ -77,6 +80,12 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         self.server_private_key = private_key
         self.server_public_key = public_key
         self.state = state_factory.state()
+        self.state.store_client_public_keys(client_public_keys)
+        log(
+            INFO,
+            "Client authentication enabled with %d known public keys",
+            len(client_public_keys),
+        )
 
     def intercept_service(
         self,
@@ -115,7 +124,10 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                                 ),
                             )
                         )
-                    elif isinstance(request, (DeleteNodeRequest, PullTaskInsRequest)):
+                    elif isinstance(
+                        request,
+                        (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest),
+                    ):
                         hmac_value = base64.urlsafe_b64decode(
                             _get_value_from_tuples(
                                 _AUTH_TOKEN_HEADER, context.invocation_metadata()
