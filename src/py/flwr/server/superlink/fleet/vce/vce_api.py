@@ -23,7 +23,7 @@ from flwr.client.node_state import NodeState
 from flwr.common.logger import log
 from flwr.server.superlink.state import StateFactory
 
-from .backend import supported_backends
+from .backend import error_messages_backends, supported_backends
 
 NodeToPartitionMapping = Dict[int, int]
 
@@ -62,6 +62,7 @@ def start_vce(
         node_states[node_id] = NodeState()
 
     # Load backend config
+    log(INFO, "Supported backends: %s", list(supported_backends.keys()))
     backend_config = json.loads(backend_config_json_stream)
 
     try:
@@ -70,10 +71,14 @@ def start_vce(
     except KeyError as ex:
         log(
             ERROR,
-            "Backennd type `%s`, is not supported. Use any of %s",
+            "Backend `%s`, is not supported. Use any of %s or add support "
+            "for a new backend.",
             backend_name,
             list(supported_backends.keys()),
         )
+        if backend_name in error_messages_backends:
+            log(ERROR, error_messages_backends[backend_name])
+
         raise ex
 
     log(INFO, "client_app_str = %s", client_app_module_name)

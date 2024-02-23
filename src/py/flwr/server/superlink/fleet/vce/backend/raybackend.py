@@ -43,6 +43,7 @@ class RayBackend(Backend):
         work_dir: str,
     ) -> None:
         """Prepare RayBackend by initialising Ray and creating the ActorPool."""
+        log(INFO, "Initialising: %s", self.__class__.__name__)
         log(INFO, "Backend config: %s", backend_config)
 
         # Init ray and append working dir if needed
