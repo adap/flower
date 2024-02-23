@@ -73,6 +73,7 @@ python sim.py --num_cpus=2
 # (assuming you have enough CPUs)
 python sim.py --num_cpus=2 --num_gpus=0.25
 ```
+
 Because TensorFlow by default maps all the available VRAM, we need to [enable GPU memory growth](https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth), see how it is done in the example (`sim.py`) for both the "main" process (where the server/strategy runs) and for the clients (using the `actor_kwargs`)
 
 ### Run with Flower-Next (`super-link` and `server-app`)
@@ -91,11 +92,10 @@ You can change the default resources assigned to each `ClientApp` using the `--b
 ```bash
 # Tells the VCE to resever 2x CPUs and 25% of available VRAM for each ClientApp
 flower-superlink --insecure --vce --num-supernodes 100 \
-                 --client-app sim:client_app \
-                 --backend-config='{"client_resources": {"num_cpus":2, "num_gpus":0.25}, "tensorflow": 1}'
+    --client-app sim:client_app \
+    --backend-config='{"client_resources": {"num_cpus":2, "num_gpus":0.25}, "tensorflow": 1}'
 
 # Then you can launch the `flower-server-app` command as shown earlier.
 ```
 
-
-Take a look at the [Documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) for more details on how you can customise your simulation. 
+Take a look at the [Documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) for more details on how you can customise your simulation.

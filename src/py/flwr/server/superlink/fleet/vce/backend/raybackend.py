@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Ray backend for the Fleet API using the VCE."""
+"""Ray backend for the Fleet API using the Simulation Engine."""
 
 import asyncio
 import pathlib
@@ -30,10 +30,9 @@ from flwr.simulation.ray_transport.ray_actor import (
 )
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
-
 from .backend import Backend, BackendConfig
 
-ClienteResourcesDict = Dict[str, Union[int, float]]
+ClientResourcesDict = Dict[str, Union[int, float]]
 
 
 class RayBackend(Backend):
@@ -45,6 +44,7 @@ class RayBackend(Backend):
         work_dir: str,
     ) -> None:
         """Prepare RayBackend by initialising Ray and creating the ActorPool."""
+        log(INFO, "Initialising: %s", self.__class__.__name__)
         log(INFO, "Backend config: %s", backend_config)
 
         # Init ray and append working dir if needed
@@ -58,7 +58,7 @@ class RayBackend(Backend):
 
         # Create actor pool
         use_tf = backend_config.get("tensorflow", False)
-        actor_kwargs = {"on_actor_init_fn": enable_tf_gpu_growth } if use_tf else {}
+        actor_kwargs = {"on_actor_init_fn": enable_tf_gpu_growth} if use_tf else {}
 
         client_resources = self._validate_client_resources(config=backend_config)
         self.pool = BasicActorPool(
@@ -68,37 +68,38 @@ class RayBackend(Backend):
         )
 
     def _configure_runtime_env(self, work_dir: str) -> Dict[str, Union[str, List[str]]]:
-        """Return list of files/subdirectories to exclude relateive to work_dir.
+        """Return list of files/subdirectories to exclude relative to work_dir.
 
         Without this, Ray will push everything to the Ray Cluster.
         """
         runtime_env: Dict[str, Union[str, List[str]]] = {"working_dir": work_dir}
 
-        if runtime_env:
-            excludes = []
-            path = pathlib.Path(work_dir)
-            for p in path.rglob("*"):
-                # exclude files need to be relative to the working_dir
-                if p.is_file() and not str(p).endswith(".py"):
-                    excludes.append(str(p.relative_to(path)))
-            runtime_env["excludes"] = excludes
+        excludes = []
+        path = pathlib.Path(work_dir)
+        for p in path.rglob("*"):
+            # Exclude files need to be relative to the working_dir
+            if p.is_file() and not str(p).endswith(".py"):
+                excludes.append(str(p.relative_to(path)))
+        runtime_env["excludes"] = excludes
 
         return runtime_env
 
-    def _validate_client_resources(self, config: BackendConfig) -> ClienteResourcesDict:
+    def _validate_client_resources(self, config: BackendConfig) -> ClientResourcesDict:
         client_resources_config = config.get(self.client_resources_key)
-        client_resources: ClienteResourcesDict = {}
+        client_resources: ClientResourcesDict = {}
         valid_types = (int, float)
         if client_resources_config:
             for k, v in client_resources_config.items():
-                assert isinstance(k, str), ValueError(
-                    f"client resources keys are expected to be `str` but you used "
-                    f"{type(k)} for `{k}`"
-                )
-                assert isinstance(v, valid_types), ValueError(
-                    f"client resources are expected to be of type {valid_types} but "
-                    f"found `{type(v)}` for key `{k}`",
-                )
+                if not isinstance(k, str):
+                    raise ValueError(
+                        f"client resources keys are expected to be `str` but you used "
+                        f"{type(k)} for `{k}`"
+                    )
+                if not isinstance(v, valid_types):
+                    raise ValueError(
+                        f"client resources are expected to be of type {valid_types} "
+                        f"but found `{type(v)}` for key `{k}`",
+                    )
                 client_resources[k] = v
 
         else:

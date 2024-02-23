@@ -1,4 +1,5 @@
 """Generate 1-second audio clip from background sounds in speechcommands."""
+
 import os
 import random
 
