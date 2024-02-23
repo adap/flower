@@ -75,7 +75,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
     if message.metadata.message_type == "reconnect":
         # Retrieve ReconnectIns from recordset
         recordset = message.content
-        seconds = cast(int, recordset.get_configs("config")["seconds"])
+        seconds = cast(int, recordset.configs_records["config"]["seconds"])
         # Construct ReconnectIns and call _reconnect
         disconnect_msg, sleep_duration = _reconnect(
             ServerMessage.ReconnectIns(seconds=seconds)
@@ -83,7 +83,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
         # Store DisconnectRes in recordset
         reason = cast(int, disconnect_msg.disconnect_res.reason)
         recordset = RecordSet()
-        recordset.set_configs("config", ConfigsRecord({"reason": reason}))
+        recordset.configs_records["config"] = ConfigsRecord({"reason": reason})
         out_message = message.create_reply(recordset, ttl="")
         # Return TaskRes and sleep duration
         return out_message, sleep_duration
