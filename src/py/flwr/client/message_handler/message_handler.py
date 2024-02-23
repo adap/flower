@@ -15,7 +15,6 @@
 """Client-side message handler."""
 
 
-from logging import WARN
 from typing import Optional, Tuple, cast
 
 from flwr.client.client import (
@@ -26,13 +25,14 @@ from flwr.client.client import (
 )
 from flwr.client.numpy_client import NumPyClient
 from flwr.client.typing import ClientFn
-from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet, log
+from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet
 from flwr.common.constant import (
     MESSAGE_TYPE_EVALUATE,
     MESSAGE_TYPE_FIT,
     MESSAGE_TYPE_GET_PARAMETERS,
     MESSAGE_TYPE_GET_PROPERTIES,
 )
+from flwr.common.logger import warn_deprecated_feature
 from flwr.common.recordset_compat import (
     evaluateres_to_recordset,
     fitres_to_recordset,
@@ -103,12 +103,16 @@ def handle_legacy_message_from_msgtype(
     # Check if NumPyClient is returend
     if isinstance(client, NumPyClient):
         client = client.to_client()
-        log(
-            WARN,
-            "Deprecation Warning: The `client_fn` function must return an instance "
-            "of `Client`, but an instance of `NumpyClient` was returned. "
-            "Please use `NumPyClient.to_client()` method to convert it to `Client`.",
+        warn_msg = (
+            "The `client_fn(cid: str) -> NumPyClient` signature is deprecated.\n"
+            "\t`client_fn` must now return an instance of `Client`. \n"
+            "\tCurrently, it returns an instance of `NumPyClient`. \n"
+            "\tTo resolve this, please update `client_fn` to return "
+            "a `Client` instance. \n"
+            "\tYou can use the `NumPyClient.to_client()` method to "
+            "convert a `NumPyClient` to `Client`.\n"
         )
+        warn_deprecated_feature(name=warn_msg)
 
     client.set_context(context)
 
