@@ -48,7 +48,6 @@ partitioner.dataset = Dataset.from_pandas(X)
 
 def get_client_fn(partition_id: int):
     def client_fn(cid: str):
-        print(cid)
         partition = partitioner.load_partition(partition_id).to_pandas()
         events = partition["E"].values
         times = partition["T"].values
