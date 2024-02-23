@@ -78,13 +78,13 @@ flower-superlink --insecure
 In a new terminal window, start the first long-running Flower client:
 
 ```bash
-flower-client-app client:app1 --insecure
+flower-client-app client:node_1_app --insecure
 ```
 
 In yet another new terminal window, start the second long-running Flower client:
 
 ```bash
-flower-client-app client:app2 --insecure
+flower-client-app client:node_2_app --insecure
 ```
 
 ### Run the Flower App

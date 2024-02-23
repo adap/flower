@@ -58,9 +58,9 @@ def get_client_fn(partition_id: int):
 
 
 # Run via `flower-client-app client:app`
-app1 = fl.client.ClientApp(
+node_1_app = fl.client.ClientApp(
     client_fn=get_client_fn(0),
 )
-app2 = fl.client.ClientApp(
+node_2_app = fl.client.ClientApp(
     client_fn=get_client_fn(1),
 )
