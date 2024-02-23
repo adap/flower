@@ -71,20 +71,19 @@ class RayBackend(Backend):
         """
         runtime_env: Dict[str, Union[str, List[str]]] = {"working_dir": work_dir}
 
-        if runtime_env:
-            excludes = []
-            path = pathlib.Path(work_dir)
-            for p in path.rglob("*"):
-                # Exclude files need to be relative to the working_dir
-                if p.is_file() and not str(p).endswith(".py"):
-                    excludes.append(str(p.relative_to(path)))
-            runtime_env["excludes"] = excludes
+        excludes = []
+        path = pathlib.Path(work_dir)
+        for p in path.rglob("*"):
+            # Exclude files need to be relative to the working_dir
+            if p.is_file() and not str(p).endswith(".py"):
+                excludes.append(str(p.relative_to(path)))
+        runtime_env["excludes"] = excludes
 
         return runtime_env
 
-    def _validate_client_resources(self, config: BackendConfig) -> ClienteResourcesDict:
+    def _validate_client_resources(self, config: BackendConfig) -> ClientResourcesDict:
         client_resources_config = config.get(self.client_resources_key)
-        client_resources: ClienteResourcesDict = {}
+        client_resources: ClientResourcesDict = {}
         valid_types = (int, float)
         if client_resources_config:
             for k, v in client_resources_config.items():
