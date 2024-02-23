@@ -33,8 +33,8 @@ class Backend(ABC):
     async def build(self) -> None:
         """Build backend asynchronously.
 
-        Different components need to be in place before workers in a backend are ready to
-        accept jobs. When this method finishes executing, the backend should be fully
+        Different components need to be in place before workers in a backend are ready
+        to accept jobs. When this method finishes executing, the backend should be fully
         ready to run jobs.
         """
 
