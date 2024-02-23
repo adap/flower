@@ -30,7 +30,7 @@ T = TypeVar("T")
 class RecordSet:
     """Enhanced RecordSet with a unified and Pythonic interface."""
 
-    _params_records: TypedDict[str, ParametersRecord]
+    _parameters_records: TypedDict[str, ParametersRecord]
     _metrics_records: TypedDict[str, MetricsRecord]
     _configs_records: TypedDict[str, ConfigsRecord]
 
@@ -47,7 +47,7 @@ class RecordSet:
 
             return _check_fn
 
-        self._params_records = TypedDict[str, ParametersRecord](
+        self._parameters_records = TypedDict[str, ParametersRecord](
             _get_check_fn(str), _get_check_fn(ParametersRecord)
         )
         self._metrics_records = TypedDict[str, MetricsRecord](
@@ -57,7 +57,7 @@ class RecordSet:
             _get_check_fn(str), _get_check_fn(ConfigsRecord)
         )
         if parameters_records is not None:
-            self._params_records.update(parameters_records)
+            self._parameters_records.update(parameters_records)
         if metrics_records is not None:
             self._metrics_records.update(metrics_records)
         if configs_records is not None:
@@ -66,7 +66,7 @@ class RecordSet:
     @property
     def parameters_records(self) -> TypedDict[str, ParametersRecord]:
         """Dictionary of ParametersRecord."""
-        return self._params_records
+        return self._parameters_records
 
     @property
     def metrics_records(self) -> TypedDict[str, MetricsRecord]:
