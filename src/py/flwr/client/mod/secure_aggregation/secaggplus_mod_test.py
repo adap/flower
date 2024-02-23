@@ -70,7 +70,7 @@ def get_test_handler(
                 message_type=MESSAGE_TYPE_FIT,
             ),
             content=RecordSet(
-                configs_dict={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}
+                configs_records={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}
             ),
         )
         out_msg = app(in_msg, ctxt)
@@ -81,7 +81,7 @@ def get_test_handler(
 
 def _make_ctxt() -> Context:
     cfg = ConfigsRecord(SecAggPlusState().to_dict())
-    return Context(RecordSet(configs_dict={RECORD_KEY_STATE: cfg}))
+    return Context(RecordSet(configs_records={RECORD_KEY_STATE: cfg}))
 
 
 def _make_set_state_fn(

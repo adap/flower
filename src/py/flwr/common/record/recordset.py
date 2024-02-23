@@ -30,15 +30,15 @@ T = TypeVar("T")
 class RecordSet:
     """Enhanced RecordSet with a unified and Pythonic interface."""
 
-    _params_dict: TypedDict[str, ParametersRecord]
-    _metrics_dict: TypedDict[str, MetricsRecord]
-    _configs_dict: TypedDict[str, ConfigsRecord]
+    _params_records: TypedDict[str, ParametersRecord]
+    _metrics_records: TypedDict[str, MetricsRecord]
+    _configs_records: TypedDict[str, ConfigsRecord]
 
     def __init__(
         self,
-        params_dict: Optional[Dict[str, ParametersRecord]] = None,
-        metrics_dict: Optional[Dict[str, MetricsRecord]] = None,
-        configs_dict: Optional[Dict[str, ConfigsRecord]] = None,
+        parameters_records: Optional[Dict[str, ParametersRecord]] = None,
+        metrics_records: Optional[Dict[str, MetricsRecord]] = None,
+        configs_records: Optional[Dict[str, ConfigsRecord]] = None,
     ) -> None:
         def _get_check_fn(__t: Type[T]) -> Callable[[T], None]:
             def _check_fn(__v: T) -> None:
@@ -47,33 +47,33 @@ class RecordSet:
 
             return _check_fn
 
-        self._params_dict = TypedDict[str, ParametersRecord](
+        self._params_records = TypedDict[str, ParametersRecord](
             _get_check_fn(str), _get_check_fn(ParametersRecord)
         )
-        self._metrics_dict = TypedDict[str, MetricsRecord](
+        self._metrics_records = TypedDict[str, MetricsRecord](
             _get_check_fn(str), _get_check_fn(MetricsRecord)
         )
-        self._configs_dict = TypedDict[str, ConfigsRecord](
+        self._configs_records = TypedDict[str, ConfigsRecord](
             _get_check_fn(str), _get_check_fn(ConfigsRecord)
         )
-        if params_dict is not None:
-            self._params_dict.update(params_dict)
-        if metrics_dict is not None:
-            self._metrics_dict.update(metrics_dict)
-        if configs_dict is not None:
-            self._configs_dict.update(configs_dict)
+        if parameters_records is not None:
+            self._params_records.update(parameters_records)
+        if metrics_records is not None:
+            self._metrics_records.update(metrics_records)
+        if configs_records is not None:
+            self._configs_records.update(configs_records)
 
     @property
     def parameters_records(self) -> TypedDict[str, ParametersRecord]:
         """Dictionary of ParametersRecord."""
-        return self._params_dict
+        return self._params_records
 
     @property
     def metrics_records(self) -> TypedDict[str, MetricsRecord]:
         """Dictionary of MetricsRecord."""
-        return self._metrics_dict
+        return self._metrics_records
 
     @property
     def configs_records(self) -> TypedDict[str, ConfigsRecord]:
         """Dictionary of ConfigsRecord."""
-        return self._configs_dict
+        return self._configs_records

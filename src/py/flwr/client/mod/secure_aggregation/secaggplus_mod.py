@@ -209,7 +209,7 @@ def secaggplus_mod(
     ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
 
     # Return message
-    content = RecordSet(configs_dict={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)})
+    content = RecordSet(configs_records={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)})
     return msg.create_reply(content, ttl="")
 
 

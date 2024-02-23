@@ -534,14 +534,14 @@ def recordset_to_proto(recordset: RecordSet) -> ProtoRecordSet:
 def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordSet:
     """Deserialize RecordSet from ProtoBuf."""
     return RecordSet(
-        params_dict={
+        parameters_records={
             k: parameters_record_from_proto(v)
             for k, v in recordset_proto.parameters.items()
         },
-        metrics_dict={
+        metrics_records={
             k: metrics_record_from_proto(v) for k, v in recordset_proto.metrics.items()
         },
-        configs_dict={
+        configs_records={
             k: configs_record_from_proto(v) for k, v in recordset_proto.configs.items()
         },
     )
