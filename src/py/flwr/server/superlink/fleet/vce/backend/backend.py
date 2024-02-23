@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Generic Backend class for Fleet API using the VCE."""
+"""Generic Backend class for Fleet API using the Simulation Engine."""
 
 
 from abc import ABC, abstractmethod
@@ -27,7 +27,7 @@ BackendConfig = Dict[str, Dict[str, ConfigsRecordValues]]
 
 
 class Backend(ABC):
-    """Abstract base class for a Backend."""
+    """Abstract base class for a Simulation Engine Backend."""
 
     def __init__(self, backend_config: BackendConfig, work_dir: str) -> None:
         """Construct a backend."""
@@ -36,8 +36,8 @@ class Backend(ABC):
     async def build(self) -> None:
         """Build backend asynchronously.
 
-        Different components need to be inplace before workers in a backend are ready to
-        accept jobs. When this method finish executing, the backend should be fully
+        Different components need to be in place before workers in a backend are ready
+        to accept jobs. When this method finishes executing, the backend should be fully
         ready to run jobs.
         """
 
