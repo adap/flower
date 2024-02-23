@@ -21,7 +21,7 @@ from .backend import Backend, BackendConfig
 
 is_ray_installed = importlib.util.find_spec("ray") is not None
 
-# mapping of supported backends
+# Mapping of supported backends
 supported_backends: Dict[str, Type[Backend]] = {}
 
 # To log backend-specific error message when chosen backend isn't available

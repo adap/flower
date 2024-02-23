@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Ray backend for the Fleet API using the VCE."""
+"""Ray backend for the Fleet API using the Simulation Engine."""
 
 import asyncio
 import pathlib
@@ -31,7 +31,7 @@ from flwr.simulation.ray_transport.ray_actor import (
 
 from .backend import Backend, BackendConfig
 
-ClienteResourcesDict = Dict[str, Union[int, float]]
+ClientResourcesDict = Dict[str, Union[int, float]]
 
 
 class RayBackend(Backend):
@@ -65,7 +65,7 @@ class RayBackend(Backend):
         )
 
     def _configure_runtime_env(self, work_dir: str) -> Dict[str, Union[str, List[str]]]:
-        """Return list of files/subdirectories to exclude relateive to work_dir.
+        """Return list of files/subdirectories to exclude relative to work_dir.
 
         Without this, Ray will push everything to the Ray Cluster.
         """
@@ -75,7 +75,7 @@ class RayBackend(Backend):
             excludes = []
             path = pathlib.Path(work_dir)
             for p in path.rglob("*"):
-                # exclude files need to be relative to the working_dir
+                # Exclude files need to be relative to the working_dir
                 if p.is_file() and not str(p).endswith(".py"):
                     excludes.append(str(p.relative_to(path)))
             runtime_env["excludes"] = excludes

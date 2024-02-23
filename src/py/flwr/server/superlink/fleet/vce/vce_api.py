@@ -81,7 +81,7 @@ def start_vce(
 
         raise ex
 
-    log(INFO, "client_app_str = %s", client_app_module_name)
+    log(INFO, "client_app_module_name = %s", client_app_module_name)
 
     def _load() -> ClientApp:
         app: ClientApp = load_client_app(client_app_module_name)
