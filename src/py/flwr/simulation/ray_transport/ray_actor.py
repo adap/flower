@@ -434,7 +434,7 @@ class BasicActorPool:
         self.client_resources = client_resources
 
         # Queue of idle actors
-        self.pool: asyncio.Queue[Type[VirtualClientEngineActor]] = asyncio.Queue()
+        self.pool: "asyncio.Queue[Type[VirtualClientEngineActor]]" = asyncio.Queue()
         self.num_actors = 0
 
         # Resolve arguments to pass during actor init

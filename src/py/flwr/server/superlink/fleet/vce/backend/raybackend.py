@@ -87,14 +87,16 @@ class RayBackend(Backend):
         valid_types = (int, float)
         if client_resources_config:
             for k, v in client_resources_config.items():
-                assert isinstance(k, str), ValueError(
-                    f"client resources keys are expected to be `str` but you used "
-                    f"{type(k)} for `{k}`"
-                )
-                assert isinstance(v, valid_types), ValueError(
-                    f"client resources are expected to be of type {valid_types} but "
-                    f"found `{type(v)}` for key `{k}`",
-                )
+                if not isinstance(k, str):
+                    raise ValueError(
+                        f"client resources keys are expected to be `str` but you used "
+                        f"{type(k)} for `{k}`"
+                    )
+                if not isinstance(v, valid_types):
+                    raise ValueError(
+                        f"client resources are expected to be of type {valid_types} "
+                        f"but found `{type(v)}` for key `{k}`",
+                    )
                 client_resources[k] = v
 
         else:
