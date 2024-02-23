@@ -42,6 +42,19 @@ MESSAGE_TYPE_FIT = "fit"
 MESSAGE_TYPE_EVALUATE = "evaluate"
 
 
+class MessageType:
+    """Message type."""
+
+    GET_PROPERTIES = "get_properties"
+    GET_PARAMETERS = "get_parameters"
+    FIT = "fit"
+    EVALUATE = "evaluate"
+
+    def __new__(cls) -> MessageType:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
 class SType:
     """Serialisation type."""
 
