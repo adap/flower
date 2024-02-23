@@ -79,7 +79,7 @@ def _wrap_in_task(
         recordset = compat.fitins_to_recordset(fit_ins, keep_input=True)
     else:
         recordset = RecordSet()
-    recordset.configs_dict[RECORD_KEY_CONFIGS] = ConfigsRecord(named_values)
+    recordset.configs_records[RECORD_KEY_CONFIGS] = ConfigsRecord(named_values)
     return Task(
         task_type=MESSAGE_TYPE_FIT,
         recordset=serde.recordset_to_proto(recordset),
@@ -88,7 +88,7 @@ def _wrap_in_task(
 
 def _get_from_task(task: Task) -> Dict[str, ConfigsRecordValues]:
     recordset = serde.recordset_from_proto(task.recordset)
-    return recordset.configs_dict[RECORD_KEY_CONFIGS]
+    return recordset.configs_records[RECORD_KEY_CONFIGS]
 
 
 _secure_aggregation_configuration = {

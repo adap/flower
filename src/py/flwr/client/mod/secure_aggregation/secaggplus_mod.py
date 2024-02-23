@@ -175,13 +175,13 @@ def secaggplus_mod(
         return call_next(msg, ctxt)
 
     # Retrieve local state
-    if RECORD_KEY_STATE not in ctxt.state.configs_dict:
-        ctxt.state.configs_dict[RECORD_KEY_STATE] = ConfigsRecord({})
-    state_dict = ctxt.state.configs_dict[RECORD_KEY_STATE]
+    if RECORD_KEY_STATE not in ctxt.state.configs_records:
+        ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord({})
+    state_dict = ctxt.state.configs_records[RECORD_KEY_STATE]
     state = SecAggPlusState(**state_dict)
 
     # Retrieve incoming configs
-    configs = msg.content.configs_dict[RECORD_KEY_CONFIGS]
+    configs = msg.content.configs_records[RECORD_KEY_CONFIGS]
 
     # Check the validity of the next stage
     check_stage(state.current_stage, configs)
@@ -206,7 +206,7 @@ def secaggplus_mod(
         raise ValueError(f"Unknown secagg stage: {state.current_stage}")
 
     # Save state
-    ctxt.state.configs_dict[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
+    ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
 
     # Return message
     content = RecordSet(configs_dict={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)})

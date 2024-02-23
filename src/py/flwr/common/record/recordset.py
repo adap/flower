@@ -64,16 +64,16 @@ class RecordSet:
             self._configs_dict.update(configs_dict)
 
     @property
-    def params_dict(self) -> TypedDict[str, ParametersRecord]:
+    def parameters_records(self) -> TypedDict[str, ParametersRecord]:
         """Dictionary of ParametersRecord."""
         return self._params_dict
 
     @property
-    def metrics_dict(self) -> TypedDict[str, MetricsRecord]:
+    def metrics_records(self) -> TypedDict[str, MetricsRecord]:
         """Dictionary of MetricsRecord."""
         return self._metrics_dict
 
     @property
-    def configs_dict(self) -> TypedDict[str, ConfigsRecord]:
+    def configs_records(self) -> TypedDict[str, ConfigsRecord]:
         """Dictionary of ConfigsRecord."""
         return self._configs_dict

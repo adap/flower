@@ -159,7 +159,7 @@ def grpc_connection(  # pylint: disable=R0915
             message_type = MESSAGE_TYPE_EVALUATE
         elif field == "reconnect_ins":
             recordset = RecordSet()
-            recordset.configs_dict["config"] = ConfigsRecord(
+            recordset.configs_records["config"] = ConfigsRecord(
                 {"seconds": proto.reconnect_ins.seconds}
             )
             message_type = "reconnect"
@@ -207,7 +207,9 @@ def grpc_connection(  # pylint: disable=R0915
             evalres = compat.recordset_to_evaluateres(recordset)
             msg_proto = ClientMessage(evaluate_res=serde.evaluate_res_to_proto(evalres))
         elif message_type == "reconnect":
-            reason = cast(Reason.ValueType, recordset.configs_dict["config"]["reason"])
+            reason = cast(
+                Reason.ValueType, recordset.configs_records["config"]["reason"]
+            )
             msg_proto = ClientMessage(
                 disconnect_res=ClientMessage.DisconnectRes(reason=reason)
             )

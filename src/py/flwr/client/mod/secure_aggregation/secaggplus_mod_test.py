@@ -74,7 +74,7 @@ def get_test_handler(
             ),
         )
         out_msg = app(in_msg, ctxt)
-        return out_msg.content.configs_dict[RECORD_KEY_CONFIGS]
+        return out_msg.content.configs_records[RECORD_KEY_CONFIGS]
 
     return func
 
@@ -88,10 +88,10 @@ def _make_set_state_fn(
     ctxt: Context,
 ) -> Callable[[str], None]:
     def set_stage(stage: str) -> None:
-        state_dict = ctxt.state.configs_dict[RECORD_KEY_STATE]
+        state_dict = ctxt.state.configs_records[RECORD_KEY_STATE]
         state = SecAggPlusState(**state_dict)
         state.current_stage = stage
-        ctxt.state.configs_dict[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
+        ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
 
     return set_stage
 
