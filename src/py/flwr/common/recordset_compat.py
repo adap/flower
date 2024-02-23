@@ -150,7 +150,7 @@ def _fit_or_evaluate_ins_to_recordset(
 
     ins_str = "fitins" if isinstance(ins, FitIns) else "evaluateins"
     parametersrecord = parameters_to_parametersrecord(ins.parameters, keep_input)
-    recordset.parameters_records[f"{ins_str}.parameters"] = parametersrecord        
+    recordset.parameters_records[f"{ins_str}.parameters"] = parametersrecord
 
     recordset.configs_records[f"{ins_str}.config"] = ConfigsRecord(
         ins.config  # type: ignore
