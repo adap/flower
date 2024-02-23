@@ -388,12 +388,9 @@ def _start_client_internal(
                     # Return empty Message
                     error_out_message = Message(
                         metadata=message.metadata,
-                        message=RecordSet(),
+                        content=RecordSet(),
                     )
-
-                    # Construct TaskRes from out_message
-                    error_task_res = message_to_taskres(error_out_message)
-                    send(error_task_res)
+                    send(error_out_message)
                     continue
 
                 # Update node state
