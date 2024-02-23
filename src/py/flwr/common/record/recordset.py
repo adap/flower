@@ -65,15 +65,15 @@ class RecordSet:
 
     @property
     def parameters_records(self) -> TypedDict[str, ParametersRecord]:
-        """Dictionary of ParametersRecord."""
+        """Dictionary holding ParametersRecord instances."""
         return self._parameters_records
 
     @property
     def metrics_records(self) -> TypedDict[str, MetricsRecord]:
-        """Dictionary of MetricsRecord."""
+        """Dictionary holding MetricsRecord instances."""
         return self._metrics_records
 
     @property
     def configs_records(self) -> TypedDict[str, ConfigsRecord]:
-        """Dictionary of ConfigsRecord."""
+        """Dictionary holding ConfigsRecord instances."""
         return self._configs_records
