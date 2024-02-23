@@ -163,14 +163,15 @@ Communication costs as measured as described in the paper:
 
 |                    IID                     |                      Non-IID                      |
 | :----------------------------------------: | :-----------------------------------------------: |
-| ![Cifar100 iid](_static/Cifar100_iid.jpeg) | ![Cifar100 non-iid](_static/Cifar100_noniid.jpeg) |
+| ![Cifar100 iid](_static/Cifar100_iid.png) | ![Cifar100 non-iid](_static/Cifar100_noniid.png) |
 
 
 ### CIFAR-10 (Accuracy vs Communication Cost)
 
 |                   IID                    |                     Non-IID                     |
 | :--------------------------------------: | :---------------------------------------------: |
-| ![CIFAR10 iid](_static/Cifar10_iid.jpeg) | ![CIFAR10 non-iid](_static/Cifar10_noniid.jpeg) |
+| ![CIFAR10 iid](_static/Cifar10_iid.png) | ![CIFAR10 non-iid](_static/Cifar10_noniid.png) |
+
 
 ### NON-IID MINST (FedAvg vs FedPer vs pFedPara)
 
