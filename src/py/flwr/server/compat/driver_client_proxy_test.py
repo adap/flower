@@ -51,8 +51,6 @@ from flwr.proto import (  # pylint: disable=E0611
 )
 from flwr.server.compat.driver_client_proxy import DriverClientProxy, validate_task_res
 
-from .driver_client_proxy import DriverClientProxy
-
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
 
 CLIENT_PROPERTIES = cast(Properties, {"tensor_type": "numpy.ndarray"})
