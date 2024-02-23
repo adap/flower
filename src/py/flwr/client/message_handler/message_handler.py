@@ -107,7 +107,7 @@ def handle_legacy_message_from_msgtype(
             WARN,
             "Deprecation Warning: The `client_fn` function must return an instance "
             "of `Client`, but an instance of `NumpyClient` was returned. "
-            "Please use `NumpyClient.to_client()` method to convert it to `Client`.",
+            "Please use `NumPyClient.to_client()` method to convert it to `Client`.",
         )
 
     client.set_context(context)
