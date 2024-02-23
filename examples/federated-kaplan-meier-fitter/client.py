@@ -1,4 +1,3 @@
-import argparse
 from typing import Dict, List, Tuple
 
 import flwr as fl
@@ -41,28 +40,26 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Flower")
-    parser.add_argument(
-        "--node-id",
-        type=int,
-        required=True,
-        help="Node id. Each node holds different part of the dataset.",
-    )
-    args = parser.parse_args()
-    partition_id = args.node_id
+# Prepare data
+X = load_waltons()
+partitioner = NaturalIdPartitioner(partition_by="group")
+partitioner.dataset = Dataset.from_pandas(X)
 
-    # Prepare data
-    X = load_waltons()
-    partitioner = NaturalIdPartitioner(partition_by="group")
-    partitioner.dataset = Dataset.from_pandas(X)
-    partition = partitioner.load_partition(partition_id).to_pandas()
-    events = partition["E"].values
-    times = partition["T"].values
 
-    # Start Flower client
-    client = FlowerClient(times=times, events=events).to_client()
-    fl.client.start_client(
-        server_address="127.0.0.1:8080",
-        client=client,
-    )
+def get_client_fn(partition_id: int):
+    def client_fn(cid: str):
+        partition = partitioner.load_partition(partition_id).to_pandas()
+        events = partition["E"].values
+        times = partition["T"].values
+        return FlowerClient(times=times, events=events).to_client()
+
+    return client_fn
+
+
+# Run via `flower-client-app client:app`
+node_1_app = fl.client.ClientApp(
+    client_fn=get_client_fn(0),
+)
+node_2_app = fl.client.ClientApp(
+    client_fn=get_client_fn(1),
+)
