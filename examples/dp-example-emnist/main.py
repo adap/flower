@@ -4,7 +4,7 @@ from dataset import prepare_dataset
 from client import generate_client_fn
 from server import get_on_fit_config, get_evaluate_fn
 import flwr as fl
-from flwr.server.strategy.dpfedavg_fixed import DPFedAvgFixed
+from flwr.server.strategy.dp_fixed_clipping import DifferentialPrivacyServerSideFixedClipping
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -29,7 +29,7 @@ def main(cfg: DictConfig):
         evaluate_fn=get_evaluate_fn(cfg.num_classes, testloader),
     )
 
-    dpStrategy = DPFedAvgFixed(strategy, 10, 4.0, 0.6)
+    dpStrategy = fl.server.strategy.DifferentialPrivacyServerSideFixedClipping(strategy, 1.2, 4.0, cfg.num_clients_per_round_fit)
 
     fl.simulation.start_simulation(
         client_fn=client_fn,

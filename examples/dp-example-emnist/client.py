@@ -55,6 +55,6 @@ def generate_client_fn(trainloaders, validationloaders, num_classes):
             trainloader=trainloaders[int(cid)],
             valloader=validationloaders[int(cid)],
             num_classes=num_classes,
-        )
+        ).to_client()
 
     return client_fn
