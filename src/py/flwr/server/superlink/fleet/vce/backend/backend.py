@@ -29,6 +29,9 @@ BackendConfig = Dict[str, Dict[str, ConfigsRecordValues]]
 class Backend(ABC):
     """Abstract base class for a Simulation Engine Backend."""
 
+    def __init__(self, backend_config: BackendConfig, work_dir: str) -> None:
+        """Construct a backend."""
+
     @abstractmethod
     async def build(self) -> None:
         """Build backend asynchronously.
