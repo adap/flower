@@ -23,9 +23,9 @@ from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.client.client import Client
-from flwr.client.flower import Flower
+from flwr.client.clientapp import ClientApp
 from flwr.client.typing import ClientFn
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
@@ -35,11 +35,14 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
 )
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
+
+
 from flwr.common.message import Message
 from flwr.common.recordset import RecordSet
 from flwr.common.serde import message_to_taskres
 
-from .flower import load_flower_callable
+
+from .clientapp import load_client_app
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
@@ -47,13 +50,13 @@ from .node_state import NodeState
 from .numpy_client import NumPyClient
 
 
-def run_client() -> None:
-    """Run Flower client."""
-    event(EventType.RUN_CLIENT_ENTER)
+def run_client_app() -> None:
+    """Run Flower client app."""
+    event(EventType.RUN_CLIENT_APP_ENTER)
 
     log(INFO, "Long-running Flower client starting")
 
-    args = _parse_args_client().parse_args()
+    args = _parse_args_run_client_app().parse_args()
 
     # Obtain certificates
     if args.insecure:
@@ -88,37 +91,37 @@ def run_client() -> None:
 
     log(
         DEBUG,
-        "The Flower client uses `%s` to execute tasks",
-        args.callable,
+        "Flower will load ClientApp `%s`",
+        getattr(args, "client-app"),
     )
 
-    callable_dir = args.dir
-    if callable_dir is not None:
-        sys.path.insert(0, callable_dir)
+    client_app_dir = args.dir
+    if client_app_dir is not None:
+        sys.path.insert(0, client_app_dir)
 
-    def _load() -> Flower:
-        flower: Flower = load_flower_callable(args.callable)
-        return flower
+    def _load() -> ClientApp:
+        client_app: ClientApp = load_client_app(getattr(args, "client-app"))
+        return client_app
 
     _start_client_internal(
         server_address=args.server,
-        load_flower_callable_fn=_load,
+        load_client_app_fn=_load,
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
         insecure=args.insecure,
     )
-    event(EventType.RUN_CLIENT_LEAVE)
+    event(EventType.RUN_CLIENT_APP_LEAVE)
 
 
-def _parse_args_client() -> argparse.ArgumentParser:
-    """Parse command line arguments."""
+def _parse_args_run_client_app() -> argparse.ArgumentParser:
+    """Parse flower-client-app command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Start a long-running Flower client",
+        description="Start a Flower client app",
     )
 
     parser.add_argument(
-        "callable",
-        help="For example: `client:flower` or `project.package.module:wrapper.flower`",
+        "client-app",
+        help="For example: `client:app` or `project.package.module:wrapper.app`",
     )
     parser.add_argument(
         "--insecure",
@@ -147,7 +150,7 @@ def _parse_args_client() -> argparse.ArgumentParser:
         "--dir",
         default="",
         help="Add specified directory to the PYTHONPATH and load Flower "
-        "callable from there."
+        "app from there."
         " Default: current working directory.",
     )
 
@@ -249,7 +252,7 @@ def start_client(
     event(EventType.START_CLIENT_ENTER)
     _start_client_internal(
         server_address=server_address,
-        load_flower_callable_fn=None,
+        load_client_app_fn=None,
         client_fn=client_fn,
         client=client,
         grpc_max_message_length=grpc_max_message_length,
@@ -267,7 +270,7 @@ def start_client(
 def _start_client_internal(
     *,
     server_address: str,
-    load_flower_callable_fn: Optional[Callable[[], Flower]] = None,
+    load_client_app_fn: Optional[Callable[[], ClientApp]] = None,
     client_fn: Optional[ClientFn] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -283,8 +286,8 @@ def _start_client_internal(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    load_flower_callable_fn : Optional[Callable[[], Flower]] (default: None)
-        A function that can be used to load a `Flower` callable instance.
+    load_client_app_fn : Optional[Callable[[], ClientApp]] (default: None)
+        A function that can be used to load a `ClientApp` instance.
     client_fn : Optional[ClientFn]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
@@ -313,7 +316,7 @@ def _start_client_internal(
     if insecure is None:
         insecure = root_certificates is None
 
-    if load_flower_callable_fn is None:
+    if load_client_app_fn is None:
         _check_actionable_client(client, client_fn)
 
         if client_fn is None:
@@ -329,14 +332,14 @@ def _start_client_internal(
 
             client_fn = single_client_factory
 
-        def _load_app() -> Flower:
-            return Flower(client_fn=client_fn)
+        def _load_client_app() -> ClientApp:
+            return ClientApp(client_fn=client_fn)
 
-        load_flower_callable_fn = _load_app
+        load_client_app_fn = _load_client_app
     else:
-        warn_experimental_feature("`load_flower_callable_fn`")
+        warn_experimental_feature("`load_client_app_fn`")
 
-    # At this point, only `load_flower_callable_fn` should be used
+    # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
 
     # Initialize connection context manager
@@ -377,18 +380,17 @@ def _start_client_internal(
                 # Retrieve context for this run
                 context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
-                # Load app
-                app: Flower = load_flower_callable_fn()
+                # Load ClientApp instance
+                client_app: ClientApp = load_client_app_fn()
 
                 # Handle task message
                 try:
-                    out_message = app(message=message, context=context)
+                    out_message = client_app(message=message, context=context)
                 except Exception as ex:  # pylint: disable=broad-exception-caught
-                    log(ERROR, "FlowerCallable raised an exception", exc_info=ex)
+                    log(ERROR, "ClientApp raised an exception", exc_info=ex)
 
                     # Don't update/change NodeState
                     # Return empty Message
-
                     error_out_message = Message(
                         metadata=message.metadata,
                         message=RecordSet(),
@@ -525,9 +527,7 @@ def start_numpy_client(
     )
 
 
-def _init_connection(
-    transport: Optional[str], server_address: str
-) -> Tuple[
+def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     Callable[
         [str, bool, int, Union[bytes, str, None]],
         ContextManager[

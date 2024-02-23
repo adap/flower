@@ -5,6 +5,9 @@ on:
     tags:
       - "v*.*.*"
 
+env:
+  ARTIFACT_BUCKET: artifact.flower.ai
+
 jobs:
   publish:
     if: ${{ github.repository == 'adap/flower' }}
@@ -26,16 +29,16 @@ jobs:
         run: |
           tag_name=$(echo "${GITHUB_REF_NAME}" | cut -c2-)
           echo "TAG_NAME=$tag_name" >> "$GITHUB_ENV"
-          
+
           wheel_name="flwr-${tag_name}-py3-none-any.whl"
           echo "WHEEL_NAME=$wheel_name" >> "$GITHUB_ENV"
-          
+
           tar_name="flwr-${tag_name}.tar.gz"
           echo "TAR_NAME=$tar_name" >> "$GITHUB_ENV"
 
-          wheel_url="https://artifact.flower.dev/py/main/${GITHUB_SHA::7}/${wheel_name}"
-          tar_url="https://artifact.flower.dev/py/main/${GITHUB_SHA::7}/${tar_name}"
-          
+          wheel_url="https://${{ env.ARTIFACT_BUCKET }}/py/main/${GITHUB_SHA::7}/${wheel_name}"
+          tar_url="https://${{ env.ARTIFACT_BUCKET }}/py/main/${GITHUB_SHA::7}/${tar_name}"
+
           curl $wheel_url --output $wheel_name
           curl $tar_url --output $tar_name
       - name: Upload wheel
@@ -44,14 +47,14 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
         run: |
-          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./${{ env.WHEEL_NAME }} s3://artifact.flower.dev/py/release/v${{ env.TAG_NAME }}/${{ env.WHEEL_NAME }}
-          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./${{ env.TAR_NAME }} s3://artifact.flower.dev/py/release/v${{ env.TAG_NAME }}/${{ env.TAR_NAME }}
-          
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./${{ env.WHEEL_NAME }} s3://${{ env.ARTIFACT_BUCKET }}/py/release/v${{ env.TAG_NAME }}/${{ env.WHEEL_NAME }}
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./${{ env.TAR_NAME }} s3://${{ env.ARTIFACT_BUCKET }}/py/release/v${{ env.TAG_NAME }}/${{ env.TAR_NAME }}
+
       - name: Generate body
         run: |
           ./dev/get-latest-changelog.sh > body.md
           cat body.md
-          
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:

@@ -36,7 +36,7 @@ if __name__ == "__main__":
         evaluate_fn=get_evaluate_fn(model),
         on_fit_config_fn=fit_round,
     )
-    hist = fl.driver.start_driver(
+    hist = fl.server.start_driver(
         server_address="0.0.0.0:9091",
         strategy=strategy,
         config=fl.server.ServerConfig(num_rounds=3),

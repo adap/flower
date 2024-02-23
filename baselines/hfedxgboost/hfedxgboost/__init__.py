@@ -1,1 +1,1 @@
-"""hfedxgboost baseline package."""
+"""Hfedxgboost baseline package."""

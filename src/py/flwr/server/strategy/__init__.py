@@ -16,6 +16,7 @@
 
 
 from .bulyan import Bulyan as Bulyan
+from .dp_fixed_clipping import DifferentialPrivacyServerSideFixedClipping
 from .dpfedavg_adaptive import DPFedAvgAdaptive as DPFedAvgAdaptive
 from .dpfedavg_fixed import DPFedAvgFixed as DPFedAvgFixed
 from .fault_tolerant_fedavg import FaultTolerantFedAvg as FaultTolerantFedAvg
@@ -57,4 +58,5 @@ __all__ = [
     "DPFedAvgAdaptive",
     "DPFedAvgFixed",
     "Strategy",
+    "DifferentialPrivacyServerSideFixedClipping",
 ]

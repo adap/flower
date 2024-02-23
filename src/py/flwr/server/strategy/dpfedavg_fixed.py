@@ -104,9 +104,9 @@ class DPFedAvgFixed(Strategy):
         """
         additional_config = {"dpfedavg_clip_norm": self.clip_norm}
         if not self.server_side_noising:
-            additional_config[
-                "dpfedavg_noise_stddev"
-            ] = self._calc_client_noise_stddev()
+            additional_config["dpfedavg_noise_stddev"] = (
+                self._calc_client_noise_stddev()
+            )
 
         client_instructions = self.strategy.configure_fit(
             server_round, parameters, client_manager
