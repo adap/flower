@@ -17,7 +17,7 @@
 
 import concurrent.futures
 import timeit
-from logging import DEBUG, INFO
+from logging import DEBUG, INFO, WARN
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
@@ -33,10 +33,12 @@ from flwr.common import (
 )
 from flwr.common.logger import log
 from flwr.common.typing import GetParametersIns
-from flwr.server.client_manager import ClientManager
+from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import FedAvg, Strategy
+
+from .server_config import ServerConfig
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -441,3 +443,44 @@ def _handle_finished_future_after_evaluate(
 
     # Not successful, client returned a result where the status code is not OK
     failures.append(result)
+
+
+def init_defaults(
+    server: Optional[Server],
+    config: Optional[ServerConfig],
+    strategy: Optional[Strategy],
+    client_manager: Optional[ClientManager],
+) -> Tuple[Server, ServerConfig]:
+    """Create server instance if none was given."""
+    if server is None:
+        if client_manager is None:
+            client_manager = SimpleClientManager()
+        if strategy is None:
+            strategy = FedAvg()
+        server = Server(client_manager=client_manager, strategy=strategy)
+    elif strategy is not None:
+        log(WARN, "Both server and strategy were provided, ignoring strategy")
+
+    # Set default config values
+    if config is None:
+        config = ServerConfig()
+
+    return server, config
+
+
+def run_fl(
+    server: Server,
+    config: ServerConfig,
+) -> History:
+    """Train a model on the given server and return the History object."""
+    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
+    log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
+    log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
+    log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
+    log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
+    log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
+
+    # Graceful shutdown
+    server.disconnect_all_clients(timeout=config.round_timeout)
+
+    return hist
