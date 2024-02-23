@@ -43,12 +43,9 @@ from flwr.proto.transport_pb2 import (
 )
 
 # pylint: enable=E0611
-from . import typing
-from .configsrecord import ConfigsRecord
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, typing
 from .message import Message, Metadata
-from .metricsrecord import MetricsRecord
-from .parametersrecord import Array, ParametersRecord
-from .recordset import RecordSet
+from .record.typeddict import TypedDict
 
 #  === Parameters message ===
 
@@ -414,7 +411,9 @@ def _record_value_from_proto(value_proto: GrpcMessage) -> Any:
 
 
 def _record_value_dict_to_proto(
-    value_dict: Dict[str, Any], allowed_types: List[type], value_proto_class: Type[T]
+    value_dict: TypedDict[str, Any],
+    allowed_types: List[type],
+    value_proto_class: Type[T],
 ) -> Dict[str, T]:
     """Serialize the record value dict to ProtoBuf.
 
@@ -456,8 +455,8 @@ def array_from_proto(array_proto: ProtoArray) -> Array:
 def parameters_record_to_proto(record: ParametersRecord) -> ProtoParametersRecord:
     """Serialize ParametersRecord to ProtoBuf."""
     return ProtoParametersRecord(
-        data_keys=record.data.keys(),
-        data_values=map(array_to_proto, record.data.values()),
+        data_keys=record.keys(),
+        data_values=map(array_to_proto, record.values()),
     )
 
 
@@ -476,9 +475,7 @@ def parameters_record_from_proto(
 def metrics_record_to_proto(record: MetricsRecord) -> ProtoMetricsRecord:
     """Serialize MetricsRecord to ProtoBuf."""
     return ProtoMetricsRecord(
-        data=_record_value_dict_to_proto(
-            record.data, [float, int], ProtoMetricsRecordValue
-        )
+        data=_record_value_dict_to_proto(record, [float, int], ProtoMetricsRecordValue)
     )
 
 
@@ -497,7 +494,9 @@ def configs_record_to_proto(record: ConfigsRecord) -> ProtoConfigsRecord:
     """Serialize ConfigsRecord to ProtoBuf."""
     return ProtoConfigsRecord(
         data=_record_value_dict_to_proto(
-            record.data, [bool, int, float, str, bytes], ProtoConfigsRecordValue
+            record,
+            [bool, int, float, str, bytes],
+            ProtoConfigsRecordValue,
         )
     )
 
@@ -520,24 +519,29 @@ def recordset_to_proto(recordset: RecordSet) -> ProtoRecordSet:
     """Serialize RecordSet to ProtoBuf."""
     return ProtoRecordSet(
         parameters={
-            k: parameters_record_to_proto(v) for k, v in recordset.parameters.items()
+            k: parameters_record_to_proto(v)
+            for k, v in recordset.parameters_records.items()
         },
-        metrics={k: metrics_record_to_proto(v) for k, v in recordset.metrics.items()},
-        configs={k: configs_record_to_proto(v) for k, v in recordset.configs.items()},
+        metrics={
+            k: metrics_record_to_proto(v) for k, v in recordset.metrics_records.items()
+        },
+        configs={
+            k: configs_record_to_proto(v) for k, v in recordset.configs_records.items()
+        },
     )
 
 
 def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordSet:
     """Deserialize RecordSet from ProtoBuf."""
     return RecordSet(
-        parameters={
+        parameters_records={
             k: parameters_record_from_proto(v)
             for k, v in recordset_proto.parameters.items()
         },
-        metrics={
+        metrics_records={
             k: metrics_record_from_proto(v) for k, v in recordset_proto.metrics.items()
         },
-        configs={
+        configs_records={
             k: configs_record_from_proto(v) for k, v in recordset_proto.configs.items()
         },
     )

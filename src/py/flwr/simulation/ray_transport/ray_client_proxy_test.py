@@ -23,8 +23,15 @@ import ray
 
 from flwr.client import Client, NumPyClient
 from flwr.client.clientapp import ClientApp
-from flwr.common import Config, Context, Message, Metadata, RecordSet, Scalar
-from flwr.common.configsrecord import ConfigsRecord
+from flwr.common import (
+    Config,
+    ConfigsRecord,
+    Context,
+    Message,
+    Metadata,
+    RecordSet,
+    Scalar,
+)
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.recordset_compat import (
     getpropertiesins_to_recordset,
@@ -50,8 +57,8 @@ class DummyClient(NumPyClient):
         result = int(self.cid) * pi
 
         # store something in context
-        self.context.state.set_configs(
-            "result", record=ConfigsRecord({"result": str(result)})
+        self.context.state.configs_records["result"] = ConfigsRecord(
+            {"result": str(result)}
         )
         return {"result": result}
 
@@ -161,9 +168,9 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         assert int(prox.cid) * pi == res.properties["result"]
         assert (
             str(int(prox.cid) * pi)
-            == prox.proxy_state.retrieve_context(run_id).state.get_configs("result")[
+            == prox.proxy_state.retrieve_context(run_id).state.configs_records[
                 "result"
-            ]
+            ]["result"]
         )
 
     ray.shutdown()
