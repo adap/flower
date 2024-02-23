@@ -15,6 +15,8 @@
 """Node state tests."""
 
 
+from typing import cast
+
 from flwr.client.node_state import NodeState
 from flwr.common import ConfigsRecord, Context
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
@@ -22,13 +24,11 @@ from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 def _run_dummy_task(context: Context) -> Context:
     counter_value: str = "1"
-    if "counter" in context.state.configs.keys():
-        counter_value = context.get_configs("counter")["count"]  # type: ignore
+    if "counter" in context.state.configs_records.keys():
+        counter_value = cast(str, context.state.configs_records["counter"]["count"])
         counter_value += "1"
 
-    context.state.set_configs(
-        name="counter", record=ConfigsRecord({"count": counter_value})
-    )
+    context.state.configs_records["counter"] = ConfigsRecord({"count": counter_value})
 
     return context
 
@@ -60,4 +60,6 @@ def test_multirun_in_node_state() -> None:
 
     # Verify values
     for run_id, context in node_state.run_contexts.items():
-        assert context.state.get_configs("counter")["count"] == expected_values[run_id]
+        assert (
+            context.state.configs_records["counter"]["count"] == expected_values[run_id]
+        )

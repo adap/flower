@@ -195,15 +195,15 @@ class RecordMaker:
     ) -> RecordSet:
         """Create a RecordSet."""
         return RecordSet(
-            parameters={
+            parameters_records={
                 self.get_str(): self.parameters_record()
                 for _ in range(num_params_records)
             },
-            metrics={
+            metrics_records={
                 self.get_str(): self.metrics_record()
                 for _ in range(num_metrics_records)
             },
-            configs={
+            configs_records={
                 self.get_str(): self.configs_record()
                 for _ in range(num_configs_records)
             },
