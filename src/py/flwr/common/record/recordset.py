@@ -28,7 +28,7 @@ T = TypeVar("T")
 
 @dataclass
 class RecordSet:
-    """Enhanced RecordSet with a unified and Pythonic interface."""
+    """RecordSet stores groups of parameters, metrics and configs."""
 
     _parameters_records: TypedDict[str, ParametersRecord]
     _metrics_records: TypedDict[str, MetricsRecord]
