@@ -54,10 +54,10 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
     RECORD_KEY_CONFIGS,
 )
 from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
-from flwr.common.typing import ConfigsRecordValues, FitIns, ServerMessage
+from flwr.common.typing import ConfigsRecordValues, FitIns
 from flwr.proto.task_pb2 import Task
 from flwr.common import serde
-from flwr.common.constant import TASK_TYPE_FIT
+from flwr.common.constant import MESSAGE_TYPE_FIT
 from flwr.common import RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.common import ConfigsRecord
@@ -79,16 +79,16 @@ def _wrap_in_task(
         recordset = compat.fitins_to_recordset(fit_ins, keep_input=True)
     else:
         recordset = RecordSet()
-    recordset.set_configs(RECORD_KEY_CONFIGS, ConfigsRecord(named_values))
+    recordset.configs_records[RECORD_KEY_CONFIGS] = ConfigsRecord(named_values)
     return Task(
-        task_type=TASK_TYPE_FIT,
+        task_type=MESSAGE_TYPE_FIT,
         recordset=serde.recordset_to_proto(recordset),
     )
 
 
 def _get_from_task(task: Task) -> Dict[str, ConfigsRecordValues]:
     recordset = serde.recordset_from_proto(task.recordset)
-    return recordset.get_configs(RECORD_KEY_CONFIGS).data
+    return recordset.configs_records[RECORD_KEY_CONFIGS]
 
 
 _secure_aggregation_configuration = {
