@@ -73,10 +73,10 @@ def ssh_connection(
     username, key_filename = ssh_credentials
 
     instance_ssh_port: int = cast(int, instance.ssh_port)
-    ignore_host_key_policy: Union[
-        Type[MissingHostKeyPolicy], MissingHostKeyPolicy
-    ] = cast(
-        Union[Type[MissingHostKeyPolicy], MissingHostKeyPolicy], IgnoreHostKeyPolicy
+    ignore_host_key_policy: Union[Type[MissingHostKeyPolicy], MissingHostKeyPolicy] = (
+        cast(
+            Union[Type[MissingHostKeyPolicy], MissingHostKeyPolicy], IgnoreHostKeyPolicy
+        )
     )
 
     client = SSHClient()
