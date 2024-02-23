@@ -43,7 +43,7 @@ class RecordSet:
         def _get_check_fn(__t: Type[T]) -> Callable[[T], None]:
             def _check_fn(__v: T) -> None:
                 if not isinstance(__v, __t):
-                    raise TypeError(f"Key must be of type str. You passed {type(__v)}.")
+                    raise TypeError(f"Expected `{__t}`, but `{type(__v)}` was passed.")
 
             return _check_fn
 
