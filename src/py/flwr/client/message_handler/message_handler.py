@@ -15,6 +15,7 @@
 """Client-side message handler."""
 
 
+from logging import WARN
 from typing import Optional, Tuple, cast
 
 from flwr.client.client import (
@@ -23,8 +24,9 @@ from flwr.client.client import (
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
+from flwr.client.numpy_client import NumPyClient
 from flwr.client.typing import ClientFn
-from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet
+from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet, log
 from flwr.common.constant import (
     MESSAGE_TYPE_EVALUATE,
     MESSAGE_TYPE_FIT,
@@ -97,6 +99,16 @@ def handle_legacy_message_from_msgtype(
 ) -> Message:
     """Handle legacy message in the inner most mod."""
     client = client_fn(str(message.metadata.dst_node_id))
+
+    # Check if NumPyClient is returend
+    if isinstance(client, NumPyClient):
+        client = client.to_client()
+        log(
+            WARN,
+            "Deprecation Warning: The `client_fn` function must return an instance "
+            "of `Client`, but an instance of `NumpyClient` was returned. "
+            "Please use `NumPyClient.to_client()` method to convert it to `Client`.",
+        )
 
     client.set_context(context)
 
