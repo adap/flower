@@ -27,7 +27,7 @@ BackendConfig = Dict[str, Dict[str, ConfigsRecordValues]]
 
 
 class Backend(ABC):
-    """Abstract base class for a Backend."""
+    """Abstract base class for a Simulation Engine Backend."""
 
     @abstractmethod
     async def build(self) -> None:
