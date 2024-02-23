@@ -40,9 +40,10 @@ Enable client authentication in Flower client app
 Similar to long-running Flower server, (SuperLink), you can easily enable client authentication in client app by typing the following code in a terminal:
 
 .. code-block:: bash
+    
     flower-client-app client:app --insecure --authentication-keys ./keys/client_credentials.pub ./keys/client_credentials
 
-The :code:`--authentication-keys` flag requires two arguments: a path to the client public and private key file. You can generate a public and private key pair using :code:`ssh-keygen -t ecdsa -b 384`.
+The :code:`--authentication-keys` flag expects two arguments: a path to the client public and private key file. You can generate a public and private key pair using :code:`ssh-keygen -t ecdsa -b 384`.
 
 
 Security notice
