@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Generic Backend class for Fleet API using the VCE."""
+"""Generic Backend class for Fleet API using the Simulation Engine."""
 
 
 from abc import ABC, abstractmethod
