@@ -17,14 +17,14 @@
 
 import timeit
 
-from logging import INFO
+from logging import INFO, DEBUG
 from flwr.common import log, GetParametersIns
 from typing import Optional
 from ..typing import Workflow
 from ..compat.legacy_context import LegacyContext
 from ..driver import Driver
 from flwr.common import Context, Parameters, RecordSet, ConfigsRecord, ParametersRecord, MetricsRecord
-from flwr.common.constant import MESSAGE_TYPE_GET_PARAMETERS
+from flwr.common.constant import MESSAGE_TYPE_GET_PARAMETERS, MESSAGE_TYPE_FIT, MESSAGE_TYPE_EVALUATE
 import flwr.common.recordset_compat as compat
 
 
@@ -148,66 +148,82 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
         context.history.add_metrics_centralized(server_round=0, metrics=res[1])
 
 
-def default_fit_workflow(state: WorkflowState) -> FlowerWorkflow:
+def default_fit_workflow(driver: Driver, context: Context) -> None:
     """Create the default workflow for a single fit round."""
+    if not isinstance(context, LegacyContext):
+        raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
+    
+    # Get current_round and parameters
+    current_round  = context.state.configs_records[CONFIGS_RECORD_KEY][KEY_CURRENT_ROUND]
+    parametersrecord = context.state.parameters_records[PARAMS_RECORD_KEY]
+    parameters = compat.parametersrecord_to_parameters(parametersrecord, keep_input=True)
+    
     # Get clients and their respective instructions from strategy
-    client_instructions = state.strategy.configure_fit(
-        server_round=state.current_round,
-        parameters=state.parameters,
-        client_manager=state.client_manager,
+    client_instructions = context.strategy.configure_fit(
+        server_round=current_round,
+        parameters=parameters,
+        client_manager=context.client_manager,
     )
 
     if not client_instructions:
-        log(INFO, "fit_round %s: no clients selected, cancel", state.current_round)
+        log(INFO, "fit_round %s: no clients selected, cancel", current_round)
         return
     log(
         DEBUG,
         "fit_round %s: strategy sampled %s clients (out of %s)",
-        state.current_round,
+        current_round,
         len(client_instructions),
-        state.client_manager.num_available(),
+        context.client_manager.num_available(),
     )
 
     # Build dictionary mapping node_id to ClientProxy
     node_id_to_proxy = {proxy.node_id: proxy for proxy, _ in client_instructions}
+    
+    # Build out messages
+    out_messages = [
+        driver.create_message(
+            content=compat.fitins_to_recordset(fitins, True),
+            message_type=MESSAGE_TYPE_FIT,
+            dst_node_id=proxy.node_id,
+            group_id="",
+            ttl="",
+        )
+        for proxy, fitins in client_instructions
+    ]
 
     # Send instructions to clients and
     # collect `fit` results from all clients participating in this round
-    node_responses = yield {
-        proxy.node_id: wrap_server_message_in_task(fit_ins)
-        for proxy, fit_ins in client_instructions
-    }
+    messages = driver.send_and_receive(out_messages)
+    del out_messages
 
     # No exception/failure handling currently
     log(
         DEBUG,
         "fit_round %s received %s results and %s failures",
-        state.current_round,
-        len(node_responses),
+        current_round,
+        len(messages),
         0,
     )
 
     # Aggregate training results
     results = [
         (
-            node_id_to_proxy[node_id],
-            serde.fit_res_from_proto(res.legacy_client_message.fit_res),
+            node_id_to_proxy[msg.metadata.src_node_id],
+            compat.recordset_to_fitres(msg.content, False),
         )
-        for node_id, res in node_responses.items()
+        for msg in messages
     ]
-    aggregated_result: Tuple[
-        Optional[Parameters],
-        Dict[str, Scalar],
-    ] = state.strategy.aggregate_fit(state.current_round, results, [])
+    aggregated_result = context.strategy.aggregate_fit(current_round, results, [])
     parameters_aggregated, metrics_aggregated = aggregated_result
 
     # Update the parameters and write history
     if parameters_aggregated:
-        state.parameters = parameters_aggregated
-    state.history.add_metrics_distributed_fit(
-        server_round=state.current_round, metrics=metrics_aggregated
+        paramsrecord = compat.parameters_to_parametersrecord(parameters_aggregated, True)
+        context.state.parameters_records[PARAMS_RECORD_KEY] = paramsrecord
+        
+    context.history.add_metrics_distributed_fit(
+        server_round=current_round, metrics=metrics_aggregated
     )
-    return
 
 
 def default_evaluate_workflow(state: WorkflowState) -> FlowerWorkflow:
