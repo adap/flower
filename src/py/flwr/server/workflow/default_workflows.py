@@ -18,12 +18,13 @@
 import timeit
 
 from logging import INFO
-from flwr.common import log
+from flwr.common import log, GetParametersIns
 from typing import Optional
 from ..typing import Workflow
 from ..compat.legacy_context import LegacyContext
 from ..driver import Driver
-from flwr.common import Context, Parameters
+from flwr.common import Context, Parameters, RecordSet, ConfigsRecord, ParametersRecord, MetricsRecord
+from flwr.common.constant import MESSAGE_TYPE_GET_PARAMETERS
 import flwr.common.recordset_compat as compat
 
 
@@ -39,7 +40,7 @@ class DefaultWorkflow:
         self,
         fit_workflow: Optional[Workflow] = None,
         evaluate_workflow: Optional[Workflow] = None,
-    ):
+    ) -> None:
         if fit_workflow is None:
             fit_workflow = default_fit_workflow
         if evaluate_workflow is None:
@@ -60,14 +61,14 @@ class DefaultWorkflow:
         start_time = timeit.default_timer()
 
         for current_round in range(1, context.config.num_rounds + 1):
-            context.state.configs[CONFIGS_RECORD_KEY][KEY_CURRENT_ROUND] = current_round
+            context.state.configs_records[CONFIGS_RECORD_KEY][KEY_CURRENT_ROUND] = current_round
 
             # Fit round
             self.fit_workflow(driver, context)
 
             # Centralized evaluation
             parameters = compat.parametersrecord_to_parameters(
-                record=context.state.parameters[PARAMS_RECORD_KEY],
+                record=context.state.parameters_records[PARAMS_RECORD_KEY],
                 keep_input=True,
             )
             res_cen = context.strategy.evaluate(
@@ -89,7 +90,7 @@ class DefaultWorkflow:
                 context.history.add_metrics_centralized(
                     server_round=current_round, metrics=metrics_cen
                 )
-
+            
             # Evaluate round
             self.evaluate_workflow(driver, context)
 
@@ -110,28 +111,32 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
     )
     if parameters is not None:
         log(INFO, "Using initial parameters provided by strategy")
-        state.parameters = parameters
+        paramsrecord = compat.parameters_to_parametersrecord(parameters)
     # Get initial parameters from one of the clients
     else:
         log(INFO, "Requesting initial parameters from one random client")
-        random_client = state.client_manager.sample(1)[0]
+        random_client = context.client_manager.sample(1)[0]
         # Send GetParametersIns and get the response
-        node_responses = yield {
-            random_client.node_id: wrap_server_message_in_task(
-                GetParametersIns(config={})
+        content = compat.getparametersins_to_recordset(GetParametersIns({}))
+        messages = driver.send_and_receive([
+            driver.create_message(
+                content=content, 
+                message_type=MESSAGE_TYPE_GET_PARAMETERS, 
+                dst_node_id=random_client.node_id,
+                group_id="",
+                ttl="",
             )
-        }
-        get_parameters_res = serde.get_parameters_res_from_proto(
-            node_responses[
-                random_client.node_id
-            ].legacy_client_message.get_parameters_res
-        )
+        ])
         log(INFO, "Received initial parameters from one random client")
-        state.parameters = get_parameters_res.parameters
+        msg = list(messages)[0]
+        paramsrecord = next(iter(msg.content.parameters_records.values()))
+    
+    context.state.parameters_records[PARAMS_RECORD_KEY] = paramsrecord
 
     # Evaluate initial parameters
     log(INFO, "Evaluating initial parameters")
-    res = state.strategy.evaluate(0, parameters=state.parameters)
+    parameters = compat.parametersrecord_to_parameters(paramsrecord, keep_input=True)
+    res = context.strategy.evaluate(0, parameters=parameters)
     if res is not None:
         log(
             INFO,
@@ -139,8 +144,8 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
             res[0],
             res[1],
         )
-        state.history.add_loss_centralized(server_round=0, loss=res[0])
-        state.history.add_metrics_centralized(server_round=0, metrics=res[1])
+        context.history.add_loss_centralized(server_round=0, loss=res[0])
+        context.history.add_metrics_centralized(server_round=0, metrics=res[1])
 
 
 def default_fit_workflow(state: WorkflowState) -> FlowerWorkflow:
