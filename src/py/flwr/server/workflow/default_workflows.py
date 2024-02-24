@@ -34,7 +34,7 @@ PARAMS_RECORD_KEY = "parameters"
 
 
 class DefaultWorkflow:
-    """Default FL workflow factory in Flower."""
+    """Default workflow in Flower."""
 
     def __init__(
         self,
@@ -49,7 +49,7 @@ class DefaultWorkflow:
         self.evaluate_workflow: Workflow = evaluate_workflow
 
     def __call__(self, driver: Driver, context: Context) -> None:
-        """Create the workflow."""
+        """Execute the workflow."""
         if not isinstance(context, LegacyContext):
             raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
         
@@ -101,7 +101,7 @@ class DefaultWorkflow:
 
 
 def default_init_params_workflow(driver: Driver, context: Context) -> None:
-    """Create the default workflow for parameters initialization."""
+    """Execute the default workflow for parameters initialization."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
     
@@ -149,7 +149,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
 
 
 def default_fit_workflow(driver: Driver, context: Context) -> None:
-    """Create the default workflow for a single fit round."""
+    """Execute the default workflow for a single fit round."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
     
@@ -227,7 +227,7 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
 
 
 def default_evaluate_workflow(state: WorkflowState) -> FlowerWorkflow:
-    """Create the default workflow for a single evaluate round."""
+    """Execute the default workflow for a single evaluate round."""
     # Get clients and their respective instructions from strategy
     client_instructions = state.strategy.configure_evaluate(
         server_round=state.current_round,
