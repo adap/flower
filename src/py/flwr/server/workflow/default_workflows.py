@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,17 +16,20 @@
 
 
 import timeit
+from logging import DEBUG, INFO
+from typing import Optional, cast
 
-from logging import INFO, DEBUG
-from flwr.common import log, GetParametersIns
-from typing import Optional
-from ..typing import Workflow
+import flwr.common.recordset_compat as compat
+from flwr.common import Context, GetParametersIns, log
+from flwr.common.constant import (
+    MESSAGE_TYPE_EVALUATE,
+    MESSAGE_TYPE_FIT,
+    MESSAGE_TYPE_GET_PARAMETERS,
+)
+
 from ..compat.legacy_context import LegacyContext
 from ..driver import Driver
-from flwr.common import Context, Parameters, RecordSet, ConfigsRecord, ParametersRecord, MetricsRecord
-from flwr.common.constant import MESSAGE_TYPE_GET_PARAMETERS, MESSAGE_TYPE_FIT, MESSAGE_TYPE_EVALUATE
-import flwr.common.recordset_compat as compat
-
+from ..typing import Workflow
 
 KEY_CURRENT_ROUND = "current_round"
 CONFIGS_RECORD_KEY = "config"
@@ -51,8 +54,10 @@ class DefaultWorkflow:
     def __call__(self, driver: Driver, context: Context) -> None:
         """Execute the workflow."""
         if not isinstance(context, LegacyContext):
-            raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
-        
+            raise TypeError(
+                f"Expect a LegacyContext, but get {type(context).__name__}."
+            )
+
         # Initialize parameters
         default_init_params_workflow(driver, context)
 
@@ -61,7 +66,9 @@ class DefaultWorkflow:
         start_time = timeit.default_timer()
 
         for current_round in range(1, context.config.num_rounds + 1):
-            context.state.configs_records[CONFIGS_RECORD_KEY][KEY_CURRENT_ROUND] = current_round
+            context.state.configs_records[CONFIGS_RECORD_KEY][
+                KEY_CURRENT_ROUND
+            ] = current_round
 
             # Fit round
             self.fit_workflow(driver, context)
@@ -71,9 +78,7 @@ class DefaultWorkflow:
                 record=context.state.parameters_records[PARAMS_RECORD_KEY],
                 keep_input=True,
             )
-            res_cen = context.strategy.evaluate(
-                current_round, parameters=parameters
-            )
+            res_cen = context.strategy.evaluate(current_round, parameters=parameters)
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
                 log(
@@ -90,7 +95,7 @@ class DefaultWorkflow:
                 context.history.add_metrics_centralized(
                     server_round=current_round, metrics=metrics_cen
                 )
-            
+
             # Evaluate round
             self.evaluate_workflow(driver, context)
 
@@ -104,33 +109,38 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
     """Execute the default workflow for parameters initialization."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
-    
+
     log(INFO, "Initializing global parameters")
     parameters = context.strategy.initialize_parameters(
         client_manager=context.client_manager
     )
     if parameters is not None:
         log(INFO, "Using initial parameters provided by strategy")
-        paramsrecord = compat.parameters_to_parametersrecord(parameters)
+        paramsrecord = compat.parameters_to_parametersrecord(
+            parameters, keep_input=True
+        )
+
     # Get initial parameters from one of the clients
     else:
         log(INFO, "Requesting initial parameters from one random client")
         random_client = context.client_manager.sample(1)[0]
         # Send GetParametersIns and get the response
         content = compat.getparametersins_to_recordset(GetParametersIns({}))
-        messages = driver.send_and_receive([
-            driver.create_message(
-                content=content, 
-                message_type=MESSAGE_TYPE_GET_PARAMETERS, 
-                dst_node_id=random_client.node_id,
-                group_id="",
-                ttl="",
-            )
-        ])
+        messages = driver.send_and_receive(
+            [
+                driver.create_message(
+                    content=content,
+                    message_type=MESSAGE_TYPE_GET_PARAMETERS,
+                    dst_node_id=random_client.node_id,
+                    group_id="",
+                    ttl="",
+                )
+            ]
+        )
         log(INFO, "Received initial parameters from one random client")
         msg = list(messages)[0]
         paramsrecord = next(iter(msg.content.parameters_records.values()))
-    
+
     context.state.parameters_records[PARAMS_RECORD_KEY] = paramsrecord
 
     # Evaluate initial parameters
@@ -152,12 +162,16 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
     """Execute the default workflow for a single fit round."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
-    
+
     # Get current_round and parameters
-    current_round  = context.state.configs_records[CONFIGS_RECORD_KEY][KEY_CURRENT_ROUND]
+    current_round = cast(
+        int, context.state.configs_records[CONFIGS_RECORD_KEY][KEY_CURRENT_ROUND]
+    )
     parametersrecord = context.state.parameters_records[PARAMS_RECORD_KEY]
-    parameters = compat.parametersrecord_to_parameters(parametersrecord, keep_input=True)
-    
+    parameters = compat.parametersrecord_to_parameters(
+        parametersrecord, keep_input=True
+    )
+
     # Get clients and their respective instructions from strategy
     client_instructions = context.strategy.configure_fit(
         server_round=current_round,
@@ -178,7 +192,7 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
 
     # Build dictionary mapping node_id to ClientProxy
     node_id_to_proxy = {proxy.node_id: proxy for proxy, _ in client_instructions}
-    
+
     # Build out messages
     out_messages = [
         driver.create_message(
@@ -193,7 +207,7 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
 
     # Send instructions to clients and
     # collect `fit` results from all clients participating in this round
-    messages = driver.send_and_receive(out_messages)
+    messages = list(driver.send_and_receive(out_messages))
     del out_messages
 
     # No exception/failure handling currently
@@ -218,9 +232,11 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
 
     # Update the parameters and write history
     if parameters_aggregated:
-        paramsrecord = compat.parameters_to_parametersrecord(parameters_aggregated, True)
+        paramsrecord = compat.parameters_to_parametersrecord(
+            parameters_aggregated, True
+        )
         context.state.parameters_records[PARAMS_RECORD_KEY] = paramsrecord
-        
+
     context.history.add_metrics_distributed_fit(
         server_round=current_round, metrics=metrics_aggregated
     )
@@ -230,12 +246,16 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     """Execute the default workflow for a single evaluate round."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
-    
+
     # Get current_round and parameters
-    current_round  = context.state.configs_records[CONFIGS_RECORD_KEY][KEY_CURRENT_ROUND]
+    current_round = cast(
+        int, context.state.configs_records[CONFIGS_RECORD_KEY][KEY_CURRENT_ROUND]
+    )
     parametersrecord = context.state.parameters_records[PARAMS_RECORD_KEY]
-    parameters = compat.parametersrecord_to_parameters(parametersrecord, keep_input=True)
-    
+    parameters = compat.parametersrecord_to_parameters(
+        parametersrecord, keep_input=True
+    )
+
     # Get clients and their respective instructions from strategy
     client_instructions = context.strategy.configure_evaluate(
         server_round=current_round,
@@ -252,10 +272,10 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
         len(client_instructions),
         context.client_manager.num_available(),
     )
-    
+
     # Build dictionary mapping node_id to ClientProxy
     node_id_to_proxy = {proxy.node_id: proxy for proxy, _ in client_instructions}
-    
+
     # Build out messages
     out_messages = [
         driver.create_message(
@@ -270,7 +290,7 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
 
     # Send instructions to clients and
     # collect `evaluate` results from all clients participating in this round
-    messages = driver.send_and_receive(out_messages)
+    messages = list(driver.send_and_receive(out_messages))
     del out_messages
 
     # No exception/failure handling currently
@@ -302,4 +322,3 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
         context.history.add_metrics_distributed(
             server_round=current_round, metrics=metrics_aggregated
         )
-    return
