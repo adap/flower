@@ -226,64 +226,80 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
     )
 
 
-def default_evaluate_workflow(state: WorkflowState) -> FlowerWorkflow:
+def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     """Execute the default workflow for a single evaluate round."""
+    if not isinstance(context, LegacyContext):
+        raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
+    
+    # Get current_round and parameters
+    current_round  = context.state.configs_records[CONFIGS_RECORD_KEY][KEY_CURRENT_ROUND]
+    parametersrecord = context.state.parameters_records[PARAMS_RECORD_KEY]
+    parameters = compat.parametersrecord_to_parameters(parametersrecord, keep_input=True)
+    
     # Get clients and their respective instructions from strategy
-    client_instructions = state.strategy.configure_evaluate(
-        server_round=state.current_round,
-        parameters=state.parameters,
-        client_manager=state.client_manager,
+    client_instructions = context.strategy.configure_evaluate(
+        server_round=current_round,
+        parameters=parameters,
+        client_manager=context.client_manager,
     )
     if not client_instructions:
-        log(INFO, "evaluate_round %s: no clients selected, cancel", state.current_round)
+        log(INFO, "evaluate_round %s: no clients selected, cancel", current_round)
         return
     log(
         DEBUG,
         "evaluate_round %s: strategy sampled %s clients (out of %s)",
-        state.current_round,
+        current_round,
         len(client_instructions),
-        state.client_manager.num_available(),
+        context.client_manager.num_available(),
     )
-
+    
     # Build dictionary mapping node_id to ClientProxy
     node_id_to_proxy = {proxy.node_id: proxy for proxy, _ in client_instructions}
+    
+    # Build out messages
+    out_messages = [
+        driver.create_message(
+            content=compat.evaluateins_to_recordset(evalins, True),
+            message_type=MESSAGE_TYPE_EVALUATE,
+            dst_node_id=proxy.node_id,
+            group_id="",
+            ttl="",
+        )
+        for proxy, evalins in client_instructions
+    ]
 
     # Send instructions to clients and
     # collect `evaluate` results from all clients participating in this round
-    node_responses = yield {
-        proxy.node_id: wrap_server_message_in_task(evaluate_ins)
-        for proxy, evaluate_ins in client_instructions
-    }
+    messages = driver.send_and_receive(out_messages)
+    del out_messages
+
     # No exception/failure handling currently
     log(
         DEBUG,
         "evaluate_round %s received %s results and %s failures",
-        state.current_round,
-        len(node_responses),
+        current_round,
+        len(messages),
         0,
     )
 
     # Aggregate the evaluation results
     results = [
         (
-            node_id_to_proxy[node_id],
-            serde.evaluate_res_from_proto(res.legacy_client_message.evaluate_res),
+            node_id_to_proxy[msg.metadata.src_node_id],
+            compat.recordset_to_evaluateres(msg.content),
         )
-        for node_id, res in node_responses.items()
+        for msg in messages
     ]
-    aggregated_result: Tuple[
-        Optional[float],
-        Dict[str, Scalar],
-    ] = state.strategy.aggregate_evaluate(state.current_round, results, [])
+    aggregated_result = context.strategy.aggregate_evaluate(current_round, results, [])
 
     loss_aggregated, metrics_aggregated = aggregated_result
 
     # Write history
     if loss_aggregated is not None:
-        state.history.add_loss_distributed(
-            server_round=state.current_round, loss=loss_aggregated
+        context.history.add_loss_distributed(
+            server_round=current_round, loss=loss_aggregated
         )
-        state.history.add_metrics_distributed(
-            server_round=state.current_round, metrics=metrics_aggregated
+        context.history.add_metrics_distributed(
+            server_round=current_round, metrics=metrics_aggregated
         )
     return
