@@ -18,7 +18,7 @@ import asyncio
 import threading
 import traceback
 from abc import ABC
-from logging import ERROR, WARNING
+from logging import DEBUG, ERROR, WARNING
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 import ray
@@ -46,7 +46,7 @@ class VirtualClientEngineActor(ABC):
 
     def terminate(self) -> None:
         """Manually terminate Actor object."""
-        log(WARNING, "Manually terminating %s}", self.__class__.__name__)
+        log(WARNING, "Manually terminating %s", self.__class__.__name__)
         ray.actor.exit_actor()
 
     def run(
@@ -434,7 +434,9 @@ class BasicActorPool:
         self.client_resources = client_resources
 
         # Queue of idle actors
-        self.pool: "asyncio.Queue[Type[VirtualClientEngineActor]]" = asyncio.Queue()
+        self.pool: "asyncio.Queue[Type[VirtualClientEngineActor]]" = asyncio.Queue(
+            maxsize=1024
+        )
         self.num_actors = 0
 
         # Resolve arguments to pass during actor init
@@ -463,6 +465,16 @@ class BasicActorPool:
         for _ in range(num_actors):
             await self.pool.put(self.create_actor_fn())  # type: ignore
         self.num_actors += num_actors
+
+    async def terminate_all_actors(self) -> None:
+        """Terminate actors in pool."""
+        num_terminated = 0
+        while self.pool.qsize():
+            actor = await self.pool.get()
+            actor.terminate.remote()  # type: ignore
+            num_terminated += 1
+
+        log(DEBUG, "Terminated %i actors", num_terminated)
 
     async def submit(
         self, actor_fn: Any, job: Tuple[ClientAppFn, Message, str, Context]
