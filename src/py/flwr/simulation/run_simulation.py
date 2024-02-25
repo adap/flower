@@ -15,6 +15,7 @@
 """Flower Simulation."""
 
 import argparse
+import asyncio
 import threading
 
 import grpc
@@ -44,6 +45,7 @@ def run_simulation() -> None:
     )
 
     # Superlink with Simulation Engine
+    f_stop = asyncio.Event()
     superlink_th = threading.Thread(
         target=start_vce,
         args=(
@@ -53,6 +55,7 @@ def run_simulation() -> None:
             args.backend_config,
             state_factory,
             args.dir,
+            f_stop,
         ),
         daemon=False,
     )
@@ -69,11 +72,17 @@ def run_simulation() -> None:
     # Launch server app
     run(args.server_app, driver, args.dir)
 
+    del driver
+
+    # Trigger stop event
+    f_stop.set()
+
     _register_exit_handlers(
         grpc_servers=[driver_server],
         bckg_threads=[superlink_th],
         event_type=EventType.RUN_SUPERLINK_LEAVE,
     )
+    superlink_th.join()
 
 
 def _parse_args_run_simulation() -> argparse.ArgumentParser:
@@ -106,7 +115,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--backend-config",
         type=str,
-        default='{"client_resources": {"num_cpus":1, "num_gpus":0.0}, "tensorflow": 0}',
+        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0}, "tensorflow": 0}',
         help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
         "configure a backend. Values supported in <value> are those included by "
         "`flwr.common.typing.ConfigsRecordValues`. ",

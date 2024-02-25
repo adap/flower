@@ -154,3 +154,7 @@ class RayBackend(Backend):
         ) = await self.pool.fetch_result_and_return_actor_to_pool(future)
 
         return out_mssg, updated_context
+
+    async def terminate(self) -> None:
+        """Terminate all actors in actor pool."""
+        await self.pool.terminate_all_actors()
