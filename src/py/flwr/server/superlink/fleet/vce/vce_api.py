@@ -19,7 +19,7 @@ import asyncio
 import json
 import traceback
 from logging import DEBUG, ERROR, INFO
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict
 
 from flwr.client.clientapp import ClientApp, load_client_app
 from flwr.client.node_state import NodeState
@@ -47,7 +47,7 @@ def _register_nodes(
     return nodes_mapping
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-locals
 async def worker(
     app: Callable[[], ClientApp],
     queue: TaskInsQueue,
@@ -92,7 +92,7 @@ async def worker(
             state.store_task_res(task_res)
 
         except asyncio.CancelledError as e:
-            log(DEBUG, f"Async worker: {e}")
+            log(DEBUG, "Async worker: %s", e)
             break
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
@@ -111,7 +111,7 @@ async def generate_pull_requests(
 ) -> None:
     """Generate TaskIns and add it to the queue."""
     state = state_factory.state()
-    while not (f_stop.is_set()):
+    while not f_stop.is_set():
         for node_id in nodes_mapping.keys():
             task_ins = state.get_task_ins(node_id=node_id, limit=1)
             if task_ins:
@@ -163,7 +163,7 @@ async def run(
     await backend.terminate()
 
 
-# pylint: disable=too-many-arguments,unused-argument
+# pylint: disable=too-many-arguments,unused-argument,too-many-locals
 def start_vce(
     num_supernodes: int,
     client_app_module_name: str,
@@ -171,7 +171,7 @@ def start_vce(
     backend_config_json_stream: str,
     state_factory: StateFactory,
     working_dir: str,
-    f_stop: Optional[asyncio.Event] = None,
+    f_stop: asyncio.Event,
 ) -> None:
     """Start Fleet API with the VirtualClientEngine (VCE)."""
     # Register SuperNodes
