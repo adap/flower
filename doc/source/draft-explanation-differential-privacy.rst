@@ -120,14 +120,32 @@ Please note that these two approaches are providing privacy at different levels.
 
 Differential Privacy in Flower
 -------
-In the following we present how the user can utilize differential privacy in Flower framework. 
+In the following we present how the user can utilize differential privacy in Flower framework.
 
 Central Differential Privacy
 ~~~~~~~~~~
-This approach consists of two seprate phases: clipping of the updates and adding noise to the aggregated model. 
+This approach consists of two seprate phases: clipping of the updates and adding noise to the aggregated model.
+For the clipping phase, Flower framework has made it possible to decide whether to perform clipping at the server side or the client side.
+To utilize the central DP with server side clipping, there are two wrapper classes :code:`DifferentialPrivacyServerSideFixedClipping` and :code:`DifferentialPrivacyServerSideAdaptiveClipping` to be used for fixed or adaptive clipping.
+
+.. image:: ./_static/DP/serversideCDP.png
+  :align: center
+  :width: 300
+  :alt: clipping
+
+.. code-block:: python
+
+  from flwr.server.strategy.dp_fixed_clipping import DifferentialPrivacyServerSideFixedClipping
+
+  strategy = fl.server.strategy.FedAvg( ... )
+  # Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
+  dp_strategy = DifferentialPrivacyServerSideFixedClipping(strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients)
+
+For clipping at the client side, the server sends the clipping value to the clients.
+In Flower, 
 
 
-Central Differential Privacy
+Local Differential Privacy
 ~~~~~~~~~~
 
 
