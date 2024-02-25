@@ -14,8 +14,8 @@
 # ==============================================================================
 """Flower server app."""
 
-
 import argparse
+import asyncio
 import importlib.util
 import sys
 import threading
@@ -363,6 +363,7 @@ def run_superlink() -> None:
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
+        f_stop = asyncio.Event()  # Does nothing
         _run_fleet_api_vce(
             num_supernodes=args.num_supernodes,
             client_app_module_name=args.client_app,
@@ -370,6 +371,7 @@ def run_superlink() -> None:
             backend_config_json_stream=args.backend_config,
             working_dir=args.dir,
             state_factory=state_factory,
+            f_stop=f_stop,
         )
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
@@ -515,6 +517,7 @@ def _run_fleet_api_vce(
     backend_config_json_stream: str,
     working_dir: str,
     state_factory: StateFactory,
+    f_stop: asyncio.Event,
 ) -> None:
     log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
 
@@ -525,6 +528,7 @@ def _run_fleet_api_vce(
         backend_config_json_stream=backend_config_json_stream,
         state_factory=state_factory,
         working_dir=working_dir,
+        f_stop=f_stop,
     )
 
 

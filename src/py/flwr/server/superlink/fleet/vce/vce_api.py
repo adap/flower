@@ -19,7 +19,7 @@ import asyncio
 import json
 import traceback
 from logging import DEBUG, ERROR, INFO
-from typing import Callable, Dict, Optional
+from typing import Callable, Dict
 
 from flwr.client.clientapp import ClientApp, load_client_app
 from flwr.client.node_state import NodeState
@@ -47,7 +47,7 @@ def _register_nodes(
     return nodes_mapping
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-locals
 async def worker(
     app: Callable[[], ClientApp],
     queue: TaskInsQueue,
@@ -91,6 +91,10 @@ async def worker(
             # Store TaskRes in state
             state.store_task_res(task_res)
 
+        except asyncio.CancelledError as e:
+            log(DEBUG, "Async worker: %s", e)
+            break
+
         except Exception as ex:  # pylint: disable=broad-exception-caught
             # pylint: disable=fixme
             # TODO: gen TaskRes with relevant error, add it to state_factory
@@ -103,10 +107,11 @@ async def generate_pull_requests(
     queue: TaskInsQueue,
     state_factory: StateFactory,
     nodes_mapping: NodeToPartitionMapping,
+    f_stop: asyncio.Event,
 ) -> None:
     """Generate TaskIns and add it to the queue."""
     state = state_factory.state()
-    while True:
+    while not f_stop.is_set():
         for node_id in nodes_mapping.keys():
             task_ins = state.get_task_ins(node_id=node_id, limit=1)
             if task_ins:
@@ -114,6 +119,7 @@ async def generate_pull_requests(
         log(DEBUG, "TaskIns in queue: %i", queue.qsize())
         # pylint: disable=fixme
         await asyncio.sleep(1.0)  # TODO: revisit
+    log(DEBUG, "Async producer: Stopped pulling from StateFactory.")
 
 
 async def run(
@@ -122,6 +128,7 @@ async def run(
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
     node_states: Dict[int, NodeState],
+    f_stop: asyncio.Event,
 ) -> None:
     """Run the VCE async."""
     # pylint: disable=fixme
@@ -135,12 +142,28 @@ async def run(
         )
         for _ in range(backend.num_workers)
     ]
-    asyncio.create_task(generate_pull_requests(queue, state_factory, nodes_mapping))
-    await queue.join()
+    producer = asyncio.create_task(
+        generate_pull_requests(queue, state_factory, nodes_mapping, f_stop)
+    )
+
+    await asyncio.gather(producer)
+
+    # Produced task terminated, now cancel worker tasks
+    for w_t in worker_tasks:
+        _ = w_t.cancel("Terminate on Simulation Engine shutdown.")
+
+    # print('requested cancel')
+    while not all(w_t.done() for w_t in worker_tasks):
+        log(DEBUG, "Terminating async workers...")
+        await asyncio.sleep(0.5)
+
     await asyncio.gather(*worker_tasks)
 
+    # Terminate backend
+    await backend.terminate()
 
-# pylint: disable=too-many-arguments,unused-argument
+
+# pylint: disable=too-many-arguments,unused-argument,too-many-locals
 def start_vce(
     num_supernodes: int,
     client_app_module_name: str,
@@ -148,7 +171,7 @@ def start_vce(
     backend_config_json_stream: str,
     state_factory: StateFactory,
     working_dir: str,
-    f_stop: Optional[asyncio.Event] = None,
+    f_stop: asyncio.Event,
 ) -> None:
     """Start Fleet API with the VirtualClientEngine (VCE)."""
     # Register SuperNodes
@@ -196,5 +219,6 @@ def start_vce(
             nodes_mapping,
             state_factory,
             node_states,
+            f_stop,
         )
     )
