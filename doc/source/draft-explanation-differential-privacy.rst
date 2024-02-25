@@ -120,8 +120,11 @@ Please note that these two approaches are providing privacy at different levels.
 
 Differential Privacy in Flower
 -------
+In the following we present how the user can utilize differential privacy in Flower framework. 
+
 Central Differential Privacy
 ~~~~~~~~~~
+This approach consists of two seprate phases: clipping of the updates and adding noise to the aggregated model. 
 
 
 Central Differential Privacy
