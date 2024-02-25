@@ -80,7 +80,7 @@ A common approach to achieve this is by restricting the `L2` norm of its model u
 
 .. image:: ./_static/DP/clipping.png
   :align: center
-  :width: 400
+  :width: 200
   :alt: clipping
 
 Afterwards, Gaussian mechanism is used to add noise in order to distort the sum of all clients' updates.
@@ -91,24 +91,46 @@ Clipping
 ^^^^^^^^^^^^^^^^
 There are two forms of clipping commonly used in Central DP: Fixed Clipping and Adaptive Clipping.
 
-- **Fixed Clipping** :
+- **Fixed Clipping** : A predefined fix threshold is set for the magnitude of clients' updates. Any update exceeding this threshold is clipped back to the threshold value.
 
-- **Adaptive Clipping** :
+- **Adaptive Clipping** : The clipping threshold dynamically adjusts based on the observed update distribution.
+It means that the clipping value is tuned during the rounds with respect to quantile of the update norm distribution.
+
+The choice between fixed and adaptive clipping depends on various factors such as privacy requirements, data distribution, model complexity, and etc.
 
 Local Differential Privacy
 ~~~~~~~~~~
 In this approach, each client is responsible for performing DP.
-Local DP avoids the need for a fully trusted aggregator, but it should be noted that local DP leads to a decrease in accuracy in comparison to central DP.
+Local DP avoids the need for a fully trusted aggregator, but it should be noted that local DP leads to a decrease in accuracy but better privacy in comparison to central DP.
 In this explainer, we focus on two forms of achieving Local DP:
 
--
+- Each client adds noise to the local updates before sending them to the server.
+To achieve (:math:`\epsilon`, :math:`\delta`)-DP, considering the sensitivity of the local model to be ∆, Gaussian noise is applied with a noise scale of σ where:
 
-Distributed Differential Privacy
-~~~~~~~~~~
+.. math::
+
+    \frac{∆ \times \sqrt{2 \times \log\left(\frac{1.25}{\delta}\right)}}{\epsilon}
+
+
+- Each client adds noise to the gradients of the model during the local training (DP-SGD).
+More specifically, in this approach, gradients are clipped and amount of calibrated noise is injected into the gradients.
+
+
+Please note that these two approaches are providing privacy at different levels.
 
 Differential Privacy in Flower
 -------
-Note: we are at the experimental phase of using differential privacy in Flower. Please
+Central Differential Privacy
+~~~~~~~~~~
+
+
+Central Differential Privacy
+~~~~~~~~~~
+
+
+.. warning::
+
+   Differential Privacy in Flower is at the experimental phase. If you plan to use these features in a production environment or with sensitive data, please contact us to discuss your needs and to receive guidance on how to best use these features.
 
 
 [1] Dwork et al. The Algorithmic Foundations of Differential Privacy.
@@ -117,3 +139,4 @@ Note: we are at the experimental phase of using differential privacy in Flower. 
 
 [3] Geyer et al. Differentially Private Federated Learning: A Client Level Perspective.
 
+[4] Galen et al. Differentially Private Learning with Adaptive Clipping.
