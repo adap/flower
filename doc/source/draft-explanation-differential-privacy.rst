@@ -80,7 +80,7 @@ A common approach to achieve this is by restricting the `L2` norm of its model u
 
 .. image:: ./_static/DP/clipping.png
   :align: center
-  :width: 200
+  :width: 300
   :alt: clipping
 
 Afterwards, Gaussian mechanism is used to add noise in order to distort the sum of all clients' updates.
