@@ -16,7 +16,7 @@ This preserves group patterns while obscuring individual details, ensuring indiv
   :alt: DP Intro
 
 
-One of the most commonly used mechanisms achieve DP is adding enough noise to the output to mask the contribution of each individual in the data while still preserving the overall accuracy of the analysis.
+One of the most commonly used mechanisms achieve DP is adding enough noise to the outputof the analysis to mask the contribution of each individual in the data while preserving the overall accuracy of the analysis.
 
 Formal Definition
 ~~~~~~~~~~
@@ -37,26 +37,26 @@ The amount of noise needed to achieve differential privacy is proportional to th
 
 Differential Privacy in Machine Learning
 -------
-Differentially private machine learning algorithms are designed in a way to protect the privacy of individuals data points in the training data.
-There are different ways to apply DP to machine learning algorithms.
-One common approach is to add noise du
-
+DP can be utilized in machine learning to preserve the privacy of the training data. 
+Differentially private machine learning algorithms are designed in a way to prevent the algorithm to learn any specific information about any individual data points and subsecuntly prevents the model from revealing sensitive information.
+Depending on the stage at which noise is introduced, various methods exist for applying DP to machine learning algorithms. 
+One approach involves adding noise to the training data (either to the features or labels), while another method entails injecting noise into the gradients of the loss function during model training. 
+Additionally, such noise can be incorporated into the model's output.
 
 Differential Privacy in Federated Learning
 -------
 Federated learning is a data minimization approach that allows multiple parties to collaboratively train a model without sharing their raw data.
 However, federated learning also introduces new privacy challenges. The model updates between parties and the central server can leak information about the local data.
-There are attacks that exploit such leaks, such as membership and property inference attacks or model inversion attacks.
-Differential privacy can play a role in federated learning to provide privacy for the clients' data.
+These leaks can be exploited by attacks such as membership inference and property inference attacks, or model inversion attacks.
 
-There are different forms that differential privacy can be integrated into federated learning.
-It is the matter of granularity that the definition of DP can be applied.
-We mainly categorize it into following categories.
+DP can play a curcial role in federated learning to provide privacy for the clients' data.
 
-- Central Differential Privacy
+Depending on the granularity of privacy provision or the location of noise addition, different forms of DP exist in federated learning.
+In this explainer, we focus on two approaches of DP utilization in federated learning based on where the noise is added: at the server (also known as the center) or at the client (also known as the local).
 
-- tes
+- Central Differential Privacy: In this category, DP is applied by the server. The goal is to prevent the aggregated model from leaking information about each client's data.
 
+- Local Differential Privacy: In this category, DP is applied on the client side before sending any information to the server. The goal is to prevent the updates that are sent to the server from leaking any information about the client's data.
 
 Central Differential Privacy
 ~~~~~~~~~~
@@ -64,7 +64,7 @@ Central Differential Privacy
 
 Local Differential Privacy
 ~~~~~~~~~~
-
+. Local DP avoids the need for a fully trusted aggregator, but it is now well established that local DP leads to a steep hit in accuracy.
 
 Distributed Differential Privacy
 ~~~~~~~~~~
