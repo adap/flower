@@ -130,7 +130,7 @@ To utilize the central DP with server side clipping, there are two wrapper class
 
 .. image:: ./_static/DP/serversideCDP.png
   :align: center
-  :width: 300
+  :width: 500
   :alt: clipping
 
 .. code-block:: python
@@ -142,7 +142,7 @@ To utilize the central DP with server side clipping, there are two wrapper class
   dp_strategy = DifferentialPrivacyServerSideFixedClipping(strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients)
 
 For clipping at the client side, the server sends the clipping value to the clients.
-In Flower, 
+In Flower,
 
 
 Local Differential Privacy
