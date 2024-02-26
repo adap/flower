@@ -193,10 +193,12 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
 class DifferentialPrivacyClientSideFixedClipping(Strategy):
     """Wrapper for Central DP with Client Side Fixed Clipping.
 
-    Use fixedclipping_mod modifier at the client side.
+    Use `fixedclipping_mod` modifier at the client side.
 
-    In comparison to DifferentialPrivacyServerSideFixedClipping,
-    the clipping phase is at the client side.
+    In comparison to `DifferentialPrivacyServerSideFixedClipping`,
+    which performs clipping on the server-side, `DifferentialPrivacyClientSideFixedClipping`
+    expects clipping to happen on the client-side, usually by using the built-in
+    `fixedclipping_mod `.
 
     Parameters
     ----------
@@ -216,16 +218,16 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
 
     >>> strategy = fl.server.strategy.FedAvg(...)
 
-    Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
+    Wrap the strategy with the `DifferentialPrivacyServerSideFixedClipping` wrapper:
 
     >>> DifferentialPrivacyClientSideFixedClipping(
     >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
     >>> )
 
-    Place the fixedclipping_mod in the layers list and run via `flower-client-app client:app`
+    On the client, add the `fixedclipping_mod` to the client-side mods:
 
     >>> app = fl.client.ClientApp(
-    >>>     client_fn=FlowerClient().to_client(), layers=[fixedclipping_mod]
+    >>>     client_fn=FlowerClient().to_client(), mods=[fixedclipping_mod]
     >>> )
     """
 
