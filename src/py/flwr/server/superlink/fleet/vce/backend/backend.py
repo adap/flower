@@ -54,6 +54,10 @@ class Backend(ABC):
         """Report whether a backend worker is idle and can therefore run a ClientApp."""
 
     @abstractmethod
+    async def terminate(self) -> None:
+        """Terminate backend."""
+
+    @abstractmethod
     async def process_message(
         self,
         app: Callable[[], ClientApp],
