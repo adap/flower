@@ -19,8 +19,6 @@ from math import pi
 from typing import Callable, Dict, Optional, Tuple, Union
 from unittest import IsolatedAsyncioTestCase
 
-import ray
-
 from flwr.client import Client, NumPyClient
 from flwr.client.clientapp import ClientApp
 from flwr.common import (
@@ -72,8 +70,6 @@ async def backend_build_process_and_termination(
         to_return = await backend.process_message(*process_args)
 
     await backend.terminate()
-
-    ray.shutdown()
 
     return to_return
 

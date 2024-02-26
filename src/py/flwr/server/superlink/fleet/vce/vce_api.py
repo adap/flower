@@ -19,7 +19,7 @@ import asyncio
 import json
 import traceback
 from logging import DEBUG, ERROR, INFO
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional
 
 from flwr.client.clientapp import ClientApp, load_client_app
 from flwr.client.node_state import NodeState
@@ -30,7 +30,6 @@ from flwr.server.superlink.state import StateFactory
 
 from .backend import Backend, error_messages_backends, supported_backends
 
-TaskInsQueue = asyncio.Queue[TaskIns]
 NodeToPartitionMapping = Dict[int, int]
 
 
@@ -50,7 +49,7 @@ def _register_nodes(
 # pylint: disable=too-many-arguments,too-many-locals
 async def worker(
     app: Callable[[], ClientApp],
-    queue: TaskInsQueue,
+    queue: "asyncio.Queue[TaskIns]",
     node_states: Dict[int, NodeState],
     state_factory: StateFactory,
     nodes_mapping: NodeToPartitionMapping,
@@ -60,7 +59,7 @@ async def worker(
     state = state_factory.state()
     while True:
         try:
-            task_ins = await queue.get()
+            task_ins: TaskIns = await queue.get()
             node_id = task_ins.task.consumer.node_id
 
             # Register and retrive runstate
@@ -104,7 +103,7 @@ async def worker(
 
 
 async def generate_pull_requests(
-    queue: TaskInsQueue,
+    queue: "asyncio.Queue[TaskIns]",
     state_factory: StateFactory,
     nodes_mapping: NodeToPartitionMapping,
     f_stop: asyncio.Event,
@@ -132,7 +131,7 @@ async def run(
 ) -> None:
     """Run the VCE async."""
     # pylint: disable=fixme
-    queue: TaskInsQueue = asyncio.Queue(128)
+    queue: "asyncio.Queue[TaskIns]" = asyncio.Queue(128)
 
     # Build backend
     await backend.build()
@@ -150,7 +149,7 @@ async def run(
 
     # Produced task terminated, now cancel worker tasks
     for w_t in worker_tasks:
-        _ = w_t.cancel("Terminate on Simulation Engine shutdown.")
+        _ = w_t.cancel()
 
     # print('requested cancel')
     while not all(w_t.done() for w_t in worker_tasks):
@@ -172,12 +171,18 @@ def start_vce(
     state_factory: StateFactory,
     working_dir: str,
     f_stop: asyncio.Event,
+    existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
     """Start Fleet API with the VirtualClientEngine (VCE)."""
-    # Register SuperNodes
-    nodes_mapping = _register_nodes(
-        num_nodes=num_supernodes, state_factory=state_factory
-    )
+    if existing_nodes_mapping:
+        # Use mapping constructed externally. This also means nodes
+        # have previously being registered.
+        nodes_mapping = existing_nodes_mapping
+    else:
+        # Register SuperNodes
+        nodes_mapping = _register_nodes(
+            num_nodes=num_supernodes, state_factory=state_factory
+        )
 
     # Construct mapping of NodeStates
     node_states: Dict[int, NodeState] = {}

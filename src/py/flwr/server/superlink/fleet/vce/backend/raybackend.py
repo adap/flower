@@ -18,6 +18,8 @@ import pathlib
 from logging import INFO
 from typing import Callable, Dict, List, Tuple, Union
 
+import ray
+
 from flwr.client.clientapp import ClientApp
 from flwr.common.context import Context
 from flwr.common.logger import log
@@ -157,3 +159,5 @@ class RayBackend(Backend):
     async def terminate(self) -> None:
         """Terminate all actors in actor pool."""
         await self.pool.terminate_all_actors()
+        ray.shutdown()
+        log(INFO, "Terminated %s", self.__class__.__name__)
