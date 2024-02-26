@@ -62,14 +62,14 @@ async def worker(
             task_ins: TaskIns = await queue.get()
             node_id = task_ins.task.consumer.node_id
 
-            # Register and retrive runstate
+            # Register and retrieve runstate
             node_states[node_id].register_context(run_id=task_ins.run_id)
             context = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
 
             # Convert TaskIns to Message
             message = message_from_taskins(task_ins)
-            # Replace node-id with data partition id
-            message.metadata.dst_node_id = nodes_mapping[node_id]
+            # Replace node ID with data partition ID
+            message.metadata.partition_id = nodes_mapping[node_id]
 
             # Let backend process message
             out_mssg, updated_context = await backend.process_message(
@@ -81,10 +81,6 @@ async def worker(
                 task_ins.run_id, context=updated_context
             )
 
-            # Undo change node_id for partition choice
-            out_mssg.metadata._src_node_id = (  # pylint: disable=protected-access
-                task_ins.task.consumer.node_id
-            )
             # Convert to TaskRes
             task_res = message_to_taskres(out_mssg)
             # Store TaskRes in state
@@ -95,8 +91,7 @@ async def worker(
             break
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
-            # pylint: disable=fixme
-            # TODO: gen TaskRes with relevant error, add it to state_factory
+
             log(ERROR, ex)
             log(ERROR, traceback.format_exc())
             break
@@ -108,7 +103,7 @@ async def generate_pull_requests(
     nodes_mapping: NodeToPartitionMapping,
     f_stop: asyncio.Event,
 ) -> None:
-    """Generate TaskIns and add it to the queue."""
+    """Retrieve TaskIns and add it to the queue."""
     state = state_factory.state()
     while not f_stop.is_set():
         for node_id in nodes_mapping.keys():
@@ -116,8 +111,8 @@ async def generate_pull_requests(
             if task_ins:
                 await queue.put(task_ins[0])
         log(DEBUG, "TaskIns in queue: %i", queue.qsize())
-        # pylint: disable=fixme
-        await asyncio.sleep(1.0)  # TODO: revisit
+
+        await asyncio.sleep(1.0)
     log(DEBUG, "Async producer: Stopped pulling from StateFactory.")
 
 
@@ -151,7 +146,6 @@ async def run(
     for w_t in worker_tasks:
         _ = w_t.cancel()
 
-    # print('requested cancel')
     while not all(w_t.done() for w_t in worker_tasks):
         log(DEBUG, "Terminating async workers...")
         await asyncio.sleep(0.5)
