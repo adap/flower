@@ -214,7 +214,7 @@ To use local DP to add noise to the client model parameters before sending them 
   app = fl.client.ClientApp(client_fn=FlowerClient().to_client(), mods=[local_dp_obj])
 
 
-
+References:
 
 [1] Dwork et al. The Algorithmic Foundations of Differential Privacy.
 
