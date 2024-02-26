@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""VirtualClientEngine Backends."""
+"""Simulation Engine Backends."""
 
 import importlib
 from typing import Dict, Type
