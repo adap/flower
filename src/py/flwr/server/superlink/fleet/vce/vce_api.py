@@ -68,7 +68,7 @@ async def worker(
 
             # Convert TaskIns to Message
             message = message_from_taskins(task_ins)
-            # Replace node-id with data partition id
+            # Replace node ID with data partition ID
             message.metadata.dst_node_id = nodes_mapping[node_id]
 
             # Let backend process message
@@ -108,7 +108,7 @@ async def generate_pull_requests(
     nodes_mapping: NodeToPartitionMapping,
     f_stop: asyncio.Event,
 ) -> None:
-    """Generate TaskIns and add it to the queue."""
+    """Retrieve TaskIns and add it to the queue."""
     state = state_factory.state()
     while not f_stop.is_set():
         for node_id in nodes_mapping.keys():
@@ -151,7 +151,6 @@ async def run(
     for w_t in worker_tasks:
         _ = w_t.cancel()
 
-    # print('requested cancel')
     while not all(w_t.done() for w_t in worker_tasks):
         log(DEBUG, "Terminating async workers...")
         await asyncio.sleep(0.5)
