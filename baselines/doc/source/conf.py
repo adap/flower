@@ -85,7 +85,7 @@ html_theme = "furo"
 html_title = f"Flower Baselines {release}"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
-html_baseurl = "https://flower.dev/docs/baselines/"
+html_baseurl = "https://flower.ai/docs/baselines/"
 
 html_theme_options = {
     #

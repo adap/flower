@@ -14,6 +14,8 @@
 # ==============================================================================
 """Constants for the SecAgg/SecAgg+ protocol."""
 
+RECORD_KEY_STATE = "secaggplus_state"
+RECORD_KEY_CONFIGS = "secaggplus_configs"
 
 # Names of stages
 STAGE_SETUP = "setup"

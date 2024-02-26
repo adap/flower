@@ -6,7 +6,7 @@ import numpy as np
 from workflows import get_workflow_factory
 
 from flwr.common import Metrics, ndarrays_to_parameters
-from flwr.driver import GrpcDriver
+from flwr.server.driver import GrpcDriver
 from flwr.proto import driver_pb2, node_pb2, task_pb2
 from flwr.server import History
 
@@ -23,7 +23,6 @@ def task_dict_to_task_ins_list(
         task_pb2.TaskIns(
             task_id="",  # Do not set, will be created and set by the DriverAPI
             group_id="",
-            run_id=run_id,
             run_id=run_id,
             task=merge(
                 task,
@@ -72,7 +71,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 # -------------------------------------------------------------------------- Driver SDK
-driver = GrpcDriver(driver_service_address="0.0.0.0:9091", certificates=None)
+driver = GrpcDriver(driver_service_address="0.0.0.0:9091", root_certificates=None)
 # -------------------------------------------------------------------------- Driver SDK
 
 anonymous_client_nodes = False
@@ -193,9 +192,7 @@ for server_round in range(num_rounds):
                 break
 
         # Collect correct results
-        node_messages = task_res_list_to_task_dict(
-            [res for res in all_task_res if res.task.HasField("sa")]
-        )
+        node_messages = task_res_list_to_task_dict(all_task_res)
     workflow.close()
 
     # Slow down the start of the next round

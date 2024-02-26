@@ -1,4 +1,5 @@
 """Logger functionality."""
+
 import logging
 
 import coloredlogs

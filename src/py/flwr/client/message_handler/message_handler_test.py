@@ -15,12 +15,16 @@
 """Client-side message handler tests."""
 
 
+import unittest
 import uuid
+from copy import copy
+from typing import List
 
 from flwr.client import Client
-from flwr.client.run_state import RunState
 from flwr.client.typing import ClientFn
 from flwr.common import (
+    Code,
+    Context,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -29,15 +33,17 @@ from flwr.common import (
     GetParametersRes,
     GetPropertiesIns,
     GetPropertiesRes,
+    Message,
+    Metadata,
     Parameters,
-    serde,
-    typing,
+    RecordSet,
+    Status,
 )
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, Code, ServerMessage, Status
+from flwr.common import recordset_compat as compat
+from flwr.common import typing
+from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 
-from .message_handler import handle, handle_control_message
+from .message_handler import handle_legacy_message_from_msgtype, validate_out_message
 
 
 class ClientWithoutProps(Client):
@@ -116,137 +122,167 @@ def test_client_without_get_properties() -> None:
     """Test client implementing get_properties."""
     # Prepare
     client = ClientWithoutProps()
-    ins = ServerMessage.GetPropertiesIns()
-
-    task_ins: TaskIns = TaskIns(
-        task_id=str(uuid.uuid4()),
-        group_id="",
-        run_id=0,
-        task=Task(
-            producer=Node(node_id=0, anonymous=True),
-            consumer=Node(node_id=0, anonymous=True),
-            ancestry=[],
-            legacy_server_message=ServerMessage(get_properties_ins=ins),
+    recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
+    message = Message(
+        metadata=Metadata(
+            run_id=123,
+            message_id=str(uuid.uuid4()),
+            group_id="some group ID",
+            src_node_id=0,
+            dst_node_id=1123,
+            reply_to_message="",
+            ttl="",
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
+        content=recordset,
     )
 
     # Execute
-    disconnect_task_res, actual_sleep_duration = handle_control_message(
-        task_ins=task_ins
-    )
-    task_res, _ = handle(
+    actual_msg = handle_legacy_message_from_msgtype(
         client_fn=_get_client_fn(client),
-        state=RunState(state={}),
-        task_ins=task_ins,
+        message=message,
+        context=Context(state=RecordSet()),
     )
-
-    if not task_res.HasField("task"):
-        raise ValueError("Task value not found")
-
-    # pylint: disable=no-member
-    if not task_res.task.HasField("legacy_client_message"):
-        raise ValueError("Unexpected None value")
-    # pylint: enable=no-member
-
-    task_res.MergeFrom(
-        TaskRes(
-            task_id=str(uuid.uuid4()),
-            group_id="",
-            run_id=0,
-        )
-    )
-    # pylint: disable=no-member
-    task_res.task.MergeFrom(
-        Task(
-            producer=Node(node_id=0, anonymous=True),
-            consumer=Node(node_id=0, anonymous=True),
-            ancestry=[task_ins.task_id],
-        )
-    )
-
-    actual_msg = task_res.task.legacy_client_message
-    # pylint: enable=no-member
 
     # Assert
-    expected_get_properties_res = ClientMessage.GetPropertiesRes(
+    expected_get_properties_res = GetPropertiesRes(
         status=Status(
             code=Code.GET_PROPERTIES_NOT_IMPLEMENTED,
             message="Client does not implement `get_properties`",
-        )
+        ),
+        properties={},
     )
-    expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
+    expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
+    expected_msg = Message(
+        metadata=Metadata(
+            run_id=123,
+            message_id="",
+            group_id="some group ID",
+            src_node_id=1123,
+            dst_node_id=0,
+            reply_to_message=message.metadata.message_id,
+            ttl="",
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+        ),
+        content=expected_rs,
+    )
 
-    assert actual_msg == expected_msg
-    assert not disconnect_task_res
-    assert actual_sleep_duration == 0
+    assert actual_msg.content == expected_msg.content
+    assert actual_msg.metadata == expected_msg.metadata
 
 
 def test_client_with_get_properties() -> None:
     """Test client not implementing get_properties."""
     # Prepare
     client = ClientWithProps()
-    ins = ServerMessage.GetPropertiesIns()
-    task_ins = TaskIns(
-        task_id=str(uuid.uuid4()),
-        group_id="",
-        run_id=0,
-        task=Task(
-            producer=Node(node_id=0, anonymous=True),
-            consumer=Node(node_id=0, anonymous=True),
-            ancestry=[],
-            legacy_server_message=ServerMessage(get_properties_ins=ins),
+    recordset = compat.getpropertiesins_to_recordset(GetPropertiesIns({}))
+    message = Message(
+        metadata=Metadata(
+            run_id=123,
+            message_id=str(uuid.uuid4()),
+            group_id="some group ID",
+            src_node_id=0,
+            dst_node_id=1123,
+            reply_to_message="",
+            ttl="",
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
         ),
+        content=recordset,
     )
 
     # Execute
-    disconnect_task_res, actual_sleep_duration = handle_control_message(
-        task_ins=task_ins
-    )
-    task_res, _ = handle(
+    actual_msg = handle_legacy_message_from_msgtype(
         client_fn=_get_client_fn(client),
-        state=RunState(state={}),
-        task_ins=task_ins,
+        message=message,
+        context=Context(state=RecordSet()),
     )
-
-    if not task_res.HasField("task"):
-        raise ValueError("Task value not found")
-
-    # pylint: disable=no-member
-    if not task_res.task.HasField("legacy_client_message"):
-        raise ValueError("Unexpected None value")
-    # pylint: enable=no-member
-
-    task_res.MergeFrom(
-        TaskRes(
-            task_id=str(uuid.uuid4()),
-            group_id="",
-            run_id=0,
-        )
-    )
-    # pylint: disable=no-member
-    task_res.task.MergeFrom(
-        Task(
-            producer=Node(node_id=0, anonymous=True),
-            consumer=Node(node_id=0, anonymous=True),
-            ancestry=[task_ins.task_id],
-        )
-    )
-
-    actual_msg = task_res.task.legacy_client_message
-    # pylint: enable=no-member
 
     # Assert
-    expected_get_properties_res = ClientMessage.GetPropertiesRes(
+    expected_get_properties_res = GetPropertiesRes(
         status=Status(
             code=Code.OK,
             message="Success",
         ),
-        properties=serde.properties_to_proto(
-            properties={"str_prop": "val", "int_prop": 1}
-        ),
+        properties={"str_prop": "val", "int_prop": 1},
     )
-    expected_msg = ClientMessage(get_properties_res=expected_get_properties_res)
+    expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
+    expected_msg = Message(
+        metadata=Metadata(
+            run_id=123,
+            message_id="",
+            group_id="some group ID",
+            src_node_id=1123,
+            dst_node_id=0,
+            reply_to_message=message.metadata.message_id,
+            ttl="",
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+        ),
+        content=expected_rs,
+    )
 
-    assert actual_msg == expected_msg
-    assert not disconnect_task_res
-    assert actual_sleep_duration == 0
+    assert actual_msg.content == expected_msg.content
+    assert actual_msg.metadata == expected_msg.metadata
+
+
+class TestMessageValidation(unittest.TestCase):
+    """Test message validation."""
+
+    def setUp(self) -> None:
+        """Set up the message validation."""
+        # Common setup for tests
+        self.in_metadata = Metadata(
+            run_id=123,
+            message_id="qwerty",
+            src_node_id=10,
+            dst_node_id=20,
+            reply_to_message="",
+            group_id="group1",
+            ttl="60",
+            message_type="mock",
+        )
+        self.valid_out_metadata = Metadata(
+            run_id=123,
+            message_id="",
+            src_node_id=20,
+            dst_node_id=10,
+            reply_to_message="qwerty",
+            group_id="group1",
+            ttl="60",
+            message_type="mock",
+        )
+        self.common_content = RecordSet()
+
+    def test_valid_message(self) -> None:
+        """Test a valid message."""
+        # Prepare
+        valid_message = Message(metadata=self.valid_out_metadata, content=RecordSet())
+
+        # Assert
+        self.assertTrue(validate_out_message(valid_message, self.in_metadata))
+
+    def test_invalid_message_run_id(self) -> None:
+        """Test invalid messages."""
+        # Prepare
+        msg = Message(metadata=self.valid_out_metadata, content=RecordSet())
+
+        # Execute
+        invalid_metadata_list: List[Metadata] = []
+        attrs = list(vars(self.valid_out_metadata).keys())
+        for attr in attrs:
+            if attr == "_ttl":  # Skip configurable ttl
+                continue
+            # Make an invalid metadata
+            invalid_metadata = copy(self.valid_out_metadata)
+            value = getattr(invalid_metadata, attr)
+            if isinstance(value, int):
+                value = 999
+            elif isinstance(value, str):
+                value = "999"
+            setattr(invalid_metadata, attr, value)
+            # Add to list
+            invalid_metadata_list.append(invalid_metadata)
+
+        # Assert
+        for invalid_metadata in invalid_metadata_list:
+            msg._metadata = invalid_metadata  # pylint: disable=protected-access
+            self.assertFalse(validate_out_message(msg, self.in_metadata))

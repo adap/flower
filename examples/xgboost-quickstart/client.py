@@ -173,4 +173,4 @@ class XgbClient(fl.client.Client):
 
 
 # Start Flower client
-fl.client.start_client(server_address="127.0.0.1:8080", client=XgbClient())
+fl.client.start_client(server_address="127.0.0.1:8080", client=XgbClient().to_client())
