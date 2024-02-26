@@ -31,7 +31,7 @@ def _dummy_setup(
     shard_size: Optional[int],
     keep_incomplete_shard: bool = False,
 ) -> Tuple[Dataset, ShardPartitioner]:
-    """Create a dummy dataset for testing.."""
+    """Create a dummy dataset for testing."""
     data = {
         partition_by: [i % 3 for i in range(num_rows)],
         "features": list(range(num_rows)),
@@ -367,6 +367,25 @@ class TestShardPartitionerIncorrectSpec(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             _ = partitioner.load_partition(0)
+
+    def test_too_big_shard_size(self) -> None:
+        """Test if it is impossible to create an empty partition."""
+        partition_by = "label"
+        num_rows = 20
+        num_partitions = 3
+        num_shards_per_node = None
+        shard_size = 10
+        keep_incomplete_shard = False
+        _, partitioner = _dummy_setup(
+            num_rows,
+            partition_by,
+            num_partitions,
+            num_shards_per_node,
+            shard_size,
+            keep_incomplete_shard,
+        )
+        with self.assertRaises(ValueError):
+            _ = partitioner.load_partition(2).num_rows
 
 
 if __name__ == "__main__":
