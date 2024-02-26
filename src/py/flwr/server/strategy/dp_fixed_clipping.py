@@ -195,7 +195,8 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
 
     Use fixedclipping_mod modifier at the client side.
 
-    In comparison to DifferentialPrivacyServerSideFixedClipping, the clipping phase is at the client side.
+    In comparison to DifferentialPrivacyServerSideFixedClipping,
+    the clipping phase is at the client side.
 
     Parameters
     ----------
