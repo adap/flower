@@ -1,4 +1,5 @@
 """Flower client example using PyTorch for CIFAR-10 image classification."""
+
 import argparse
 from collections import OrderedDict
 from typing import Dict, List, Tuple

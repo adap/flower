@@ -231,6 +231,6 @@ A: Either the simulation has already finished, or you still need to start Promet
 Resources
 ---------
 
-Ray Dashboard: `<https://docs.ray.io/en/latest/ray-core/ray-dashboard.html>`_
+Ray Dashboard: `<https://docs.ray.io/en/latest/ray-observability/getting-started.html>`_
 
-Ray Metrics: `<https://docs.ray.io/en/latest/ray-observability/ray-metrics.html>`_
+Ray Metrics: `<https://docs.ray.io/en/latest/cluster/metrics.html>`_

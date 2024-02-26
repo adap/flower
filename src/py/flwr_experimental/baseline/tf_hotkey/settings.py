@@ -144,9 +144,9 @@ def configure_clients(
             cid=str(i),
             partition=i,
             # Indices 0 to 49 fast, 50 to 99 slow
-            delay_factor=delay_factor_fast
-            if i < int(num_clients / 2)
-            else delay_factor_slow,
+            delay_factor=(
+                delay_factor_fast if i < int(num_clients / 2) else delay_factor_slow
+            ),
             # Shared
             iid_fraction=iid_fraction,
             num_clients=num_clients,
