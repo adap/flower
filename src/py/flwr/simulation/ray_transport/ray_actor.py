@@ -14,7 +14,7 @@
 # ==============================================================================
 """Ray-based Flower Actor and ActorPool implementation."""
 
-
+import asyncio
 import threading
 import traceback
 from abc import ABC
@@ -414,3 +414,78 @@ class VirtualClientEngineActorPool(ActorPool):
         # Fetch result belonging to the VirtualClient calling this method
         # Return both result from tasks and (potentially) updated run context
         return self._fetch_future_result(cid)
+
+
+def init_ray(*args: Any, **kwargs: Any) -> None:
+    """Intialises Ray if not already initialised."""
+    if not ray.is_initialized():
+        ray.init(*args, **kwargs)
+
+
+class BasicActorPool:
+    """A basic actor pool."""
+
+    def __init__(
+        self,
+        actor_type: Type[VirtualClientEngineActor],
+        client_resources: Dict[str, Union[int, float]],
+        actor_kwargs: Dict[str, Any],
+    ):
+        self.client_resources = client_resources
+
+        # Queue of idle actors
+        self.pool: "asyncio.Queue[Type[VirtualClientEngineActor]]" = asyncio.Queue()
+        self.num_actors = 0
+
+        # Resolve arguments to pass during actor init
+        actor_args = {} if actor_kwargs is None else actor_kwargs
+
+        # A function that creates an actor
+        self.create_actor_fn = lambda: actor_type.options(  # type: ignore
+            **client_resources
+        ).remote(**actor_args)
+
+        # Figure out how many actors can be created given the cluster resources
+        # and the resources the user indicates each VirtualClient will need
+        self.actors_capacity = pool_size_from_resources(client_resources)
+        self._future_to_actor: Dict[Any, Type[VirtualClientEngineActor]] = {}
+
+    def is_actor_available(self) -> bool:
+        """Return true if there is an idle actor."""
+        return self.pool.qsize() > 0
+
+    async def add_actors_to_pool(self, num_actors: int) -> None:
+        """Add actors to the pool.
+
+        This method may be executed also if new resources are added to your Ray cluster
+        (e.g. you add a new node).
+        """
+        for _ in range(num_actors):
+            await self.pool.put(self.create_actor_fn())  # type: ignore
+        self.num_actors += num_actors
+
+    async def submit(
+        self, actor_fn: Any, job: Tuple[ClientAppFn, Message, str, Context]
+    ) -> Any:
+        """On idle actor, submit job and return future."""
+        # Remove idle actor from pool
+        actor = await self.pool.get()
+        # Submit job to actor
+        app_fn, mssg, cid, context = job
+        future = actor_fn(actor, app_fn, mssg, cid, context)
+        # Keep track of future:actor (so we can fetch the actor upon job completion
+        # and add it back to the pool)
+        self._future_to_actor[future] = actor
+        return future
+
+    async def fetch_result_and_return_actor_to_pool(
+        self, future: Any
+    ) -> Tuple[Message, Context]:
+        """Pull result given a future and add actor back to pool."""
+        # Get actor that ran job
+        actor = self._future_to_actor.pop(future)
+        await self.pool.put(actor)
+        # Retrieve result for object store
+        # Instead of doing ray.get(future) we await it
+        _, out_mssg, updated_context = await future
+        return out_mssg, updated_context

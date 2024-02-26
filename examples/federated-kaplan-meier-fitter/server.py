@@ -97,6 +97,13 @@ class EventTimeFitterStrategy(Strategy):
         sorted_times = combined_times[args_sorted]
         sorted_events = combined_events[args_sorted]
         self.fitter.fit(sorted_times, sorted_events)
+        print("Survival function:")
+        print(self.fitter.survival_function_)
+        self.fitter.plot_survival_function()
+        plt.title("Survival function of fruit flies (Walton's data)", fontsize=16)
+        plt.savefig("./_static/survival_function_federated.png", dpi=200)
+        print("Mean survival time:")
+        print(self.fitter.median_survival_time_)
         return None, {}
 
     # The methods below return None or empty results.
@@ -129,19 +136,10 @@ class EventTimeFitterStrategy(Strategy):
         return []
 
 
-if __name__ == "__main__":
-    fitter = KaplanMeierFitter()  # You can choose other method that work on E, T data
-    strategy = EventTimeFitterStrategy(min_num_clients=2, fitter=fitter)
-    # Start Flower server
-    fl.server.start_server(
-        server_address="127.0.0.1:8080",
-        config=fl.server.ServerConfig(num_rounds=1),
-        strategy=strategy,
-    )
-    print("Survival function:")
-    print(strategy.fitter.survival_function_)
-    strategy.fitter.plot_survival_function()
-    plt.title("Survival function of fruit flies (Walton's data)", fontsize=16)
-    plt.savefig("./survival_function_federated.png", dpi=200)
-    print("Mean survival time:")
-    print(strategy.fitter.median_survival_time_)
+fitter = KaplanMeierFitter()  # You can choose other method that work on E, T data
+strategy = EventTimeFitterStrategy(min_num_clients=2, fitter=fitter)
+
+app = fl.server.ServerApp(
+    config=fl.server.ServerConfig(num_rounds=1),
+    strategy=strategy,
+)

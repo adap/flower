@@ -39,8 +39,8 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Dict[str, Scalar]:
 
 
 def setup_seed(seed: int):
-    """
-    Set up seed for numpy and torch.
+    """Set up seed for numpy and torch.
+
     Parameters
     ----------
     seed: int
