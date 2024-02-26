@@ -9,7 +9,7 @@ Quickstart iOS
 
 In this tutorial we will learn how to train a Neural Network on MNIST using Flower and CoreML on iOS devices.
 
-First of all, for running the Flower Python server, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.ai/docs/recommended-env-setup.html>`_.
+First of all, for running the Flower Python server, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 For the Flower client implementation in iOS, it is recommended to use Xcode as our IDE.
 
 Our example consists of one Python *server* and two iPhone *clients* that all have the same model.
@@ -97,9 +97,9 @@ For the MNIST dataset, we need to preprocess it into :code:`MLBatchProvider` obj
                                 testBatchProvider: testBatchProvider)
 
 Since CoreML does not allow the model parameters to be seen before training, and accessing the model parameters during or after the training can only be done by specifying the layer name,
-we need to know this informations beforehand, through looking at the model specification, which are written as proto files. The implementation can be seen in :code:`MLModelInspect`.
+we need to know this information beforehand, through looking at the model specification, which are written as proto files. The implementation can be seen in :code:`MLModelInspect`.
 
-After we have all of the necessary informations, let's create our Flower client.
+After we have all of the necessary information, let's create our Flower client.
 
 .. code-block:: swift
 

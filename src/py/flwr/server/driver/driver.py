@@ -44,6 +44,7 @@ class Driver:
         Tuple containing root certificate, server certificate, and private key
         to start a secure SSL-enabled server. The tuple is expected to have
         three bytes elements in the following order:
+
             * CA certificate.
             * server certificate.
             * server private key.
