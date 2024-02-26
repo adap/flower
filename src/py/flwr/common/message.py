@@ -14,9 +14,9 @@
 # ==============================================================================
 """Message."""
 
+from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Union
 
 from .record import RecordSet
 
@@ -59,7 +59,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     _group_id: str
     _ttl: str
     _message_type: str
-    _partition_id: Optional[int]
+    _partition_id: int | None
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -71,7 +71,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         group_id: str,
         ttl: str,
         message_type: str,
-        partition_id: Optional[int] = None,
+        partition_id: int | None = None,
     ) -> None:
         self._run_id = run_id
         self._message_id = message_id
@@ -144,7 +144,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         self._message_type = value
 
     @property
-    def partition_id(self) -> Union[int, None]:
+    def partition_id(self) -> int | None:
         """An identifier telling which data partition a ClientApp should use."""
         return self._partition_id
 
@@ -189,7 +189,7 @@ class Message:
         """Set content."""
         self._content = value
 
-    def create_reply(self, content: RecordSet, ttl: str) -> "Message":
+    def create_reply(self, content: RecordSet, ttl: str) -> Message:
         """Create a reply to this message with specified content and TTL.
 
         The method generates a new `Message` as a reply to this message.
