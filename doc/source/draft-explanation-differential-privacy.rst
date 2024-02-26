@@ -102,6 +102,13 @@ Local Differential Privacy
 ~~~~~~~~~~
 In this approach, each client is responsible for performing DP.
 Local DP avoids the need for a fully trusted aggregator, but it should be noted that local DP leads to a decrease in accuracy but better privacy in comparison to central DP.
+
+.. image:: ./_static/DP/LDP.png
+  :align: center
+  :width: 400
+  :alt: Local Differential Privacy
+
+
 In this explainer, we focus on two forms of achieving Local DP:
 
 - Each client adds noise to the local updates before sending them to the server.
@@ -166,7 +173,7 @@ Two mods are available for fixed and adaptive client-side clipping: :code:`fixed
 
 .. image:: ./_static/DP/clientsideCDP.png
   :align: center
-  :width: 700
+  :width: 800
   :alt: client side clipping
 
 
@@ -196,7 +203,7 @@ Please note that the order of mods, especially those that modify parameters, is 
 
 Local Differential Privacy
 ~~~~~~~~~~
-
+To use local DP in Flower, 
 
 
 
