@@ -30,8 +30,8 @@ def fixedclipping_mod(
 ) -> Message:
     """Client-side fixed clipping modifier.
 
-    This mod needs to be used with DifferentialPrivacyClientSideFixedClipping server-
-    side strategy wrapper.
+    This mod needs to be used with the DifferentialPrivacyClientSideFixedClipping
+    server-side strategy wrapper.
 
     The wrapper sends the clipping_norm value to the client.
 
