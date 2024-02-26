@@ -69,7 +69,7 @@ async def worker(
             # Convert TaskIns to Message
             message = message_from_taskins(task_ins)
             # Replace node ID with data partition ID
-            message.metadata.dst_node_id = nodes_mapping[node_id]
+            message.metadata.partition_id = nodes_mapping[node_id]
 
             # Let backend process message
             out_mssg, updated_context = await backend.process_message(
@@ -81,10 +81,6 @@ async def worker(
                 task_ins.run_id, context=updated_context
             )
 
-            # Undo change node_id for partition choice
-            out_mssg.metadata._src_node_id = (  # pylint: disable=protected-access
-                task_ins.task.consumer.node_id
-            )
             # Convert to TaskRes
             task_res = message_to_taskres(out_mssg)
             # Store TaskRes in state
@@ -95,8 +91,7 @@ async def worker(
             break
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
-            # pylint: disable=fixme
-            # TODO: gen TaskRes with relevant error, add it to state_factory
+
             log(ERROR, ex)
             log(ERROR, traceback.format_exc())
             break
@@ -116,8 +111,8 @@ async def generate_pull_requests(
             if task_ins:
                 await queue.put(task_ins[0])
         log(DEBUG, "TaskIns in queue: %i", queue.qsize())
-        # pylint: disable=fixme
-        await asyncio.sleep(1.0)  # TODO: revisit
+
+        await asyncio.sleep(1.0)
     log(DEBUG, "Async producer: Stopped pulling from StateFactory.")
 
 
