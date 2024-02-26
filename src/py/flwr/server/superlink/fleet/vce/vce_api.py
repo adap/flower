@@ -14,9 +14,10 @@
 # ==============================================================================
 """Fleet VirtualClientEngine API."""
 
+import asyncio
 import json
 from logging import ERROR, INFO
-from typing import Dict
+from typing import Dict, Optional
 
 from flwr.client.clientapp import ClientApp, load_client_app
 from flwr.client.node_state import NodeState
@@ -49,6 +50,7 @@ def start_vce(
     backend_config_json_stream: str,
     state_factory: StateFactory,
     working_dir: str,
+    f_stop: Optional[asyncio.Event] = None,
 ) -> None:
     """Start Fleet API with the VirtualClientEngine (VCE)."""
     # Register SuperNodes
