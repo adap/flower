@@ -47,7 +47,8 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DifferentialPrivacyServerSideFixedClipping(Strategy):
-    """Wrapper for Central DP with Server Side Fixed Clipping.
+    """Strategy wrapper for central differential privacy with server-side fixed
+    clipping.
 
     Parameters
     ----------
@@ -191,7 +192,8 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
 
 
 class DifferentialPrivacyClientSideFixedClipping(Strategy):
-    """Wrapper for Central DP with Client Side Fixed Clipping.
+    """Strategy wrapper for central differential privacy with client-side fixed
+    clipping.
 
     Use `fixedclipping_mod` modifier at the client side.
 
