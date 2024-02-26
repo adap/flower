@@ -14,10 +14,11 @@
 # ==============================================================================
 """Ray backend for the Fleet API using the Simulation Engine."""
 
-import asyncio
 import pathlib
 from logging import INFO
 from typing import Callable, Dict, List, Tuple, Union
+
+import ray
 
 from flwr.client.clientapp import ClientApp
 from flwr.common.context import Context
@@ -145,7 +146,7 @@ class RayBackend(Backend):
             (app, message, str(node_id), context),
         )
 
-        await asyncio.wait([future])
+        await future
 
         # Fetch result
         (
@@ -158,3 +159,5 @@ class RayBackend(Backend):
     async def terminate(self) -> None:
         """Terminate all actors in actor pool."""
         await self.pool.terminate_all_actors()
+        ray.shutdown()
+        log(INFO, "Terminated %s", self.__class__.__name__)

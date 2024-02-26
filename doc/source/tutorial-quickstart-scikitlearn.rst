@@ -9,7 +9,7 @@ Quickstart scikit-learn
 
 In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit-learn.
 
-It is recommended to create a virtual environment and run everything within this `virtualenv <https://flower.ai/docs/recommended-env-setup.html>`_.
+It is recommended to create a virtual environment and run everything within this :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
 Our example consists of one *server* and two *clients* all having the same model.
 
@@ -23,7 +23,7 @@ Now that we have a rough idea of what is going on, let's get started. We first n
 
   $ pip install flwr
 
-Since we want to use scikt-learn, let's go ahead and install it:
+Since we want to use scikit-learn, let's go ahead and install it:
 
 .. code-block:: shell
 
@@ -43,7 +43,7 @@ Now that we have all our dependencies installed, let's run a simple distributed 
 However, before setting up the client and server, we will define all functionalities that we need for our federated learning setup within :code:`utils.py`. The :code:`utils.py` contains different functions defining all the machine learning basics:
 
 * :code:`get_model_parameters()`
-    * Returns the paramters of a :code:`sklearn` LogisticRegression model
+    * Returns the parameters of a :code:`sklearn` LogisticRegression model
 * :code:`set_model_params()`
     * Sets the parameters of a :code:`sklean` LogisticRegression model
 * :code:`set_initial_params()`
@@ -70,7 +70,7 @@ The pre-defined functions are used in the :code:`client.py` and imported. The :c
   import utils
 
 
-We load the MNIST dataset from `OpenML <https://www.openml.org/d/554>`_, a popular image classification dataset of handwritten digits for machine learning. The utility :code:`utils.load_mnist()` downloads the training and test data. The training set is split afterwards into 10 partitions with :code:`utils.partition()`.
+We load the MNIST dataset from `OpenML <https://www.openml.org/search?type=data&sort=runs&id=554>`_, a popular image classification dataset of handwritten digits for machine learning. The utility :code:`utils.load_mnist()` downloads the training and test data. The training set is split afterwards into 10 partitions with :code:`utils.partition()`.
 
 .. code-block:: python
 
