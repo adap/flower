@@ -143,7 +143,7 @@ To utilize the central DP with server side clipping, there are two wrapper class
 
 .. image:: ./_static/DP/serversideCDP.png
   :align: center
-  :width: 600
+  :width: 700
   :alt: server side clipping
 
 
@@ -166,7 +166,7 @@ Two mods are available for fixed and adaptive client-side clipping: :code:`fixed
 
 .. image:: ./_static/DP/clientsideCDP.png
   :align: center
-  :width: 600
+  :width: 700
   :alt: client side clipping
 
 
@@ -174,7 +174,7 @@ Below is a sample code that enables a strategy using :code:`DifferentialPrivacyC
 
 .. code-block:: python
 
-  # Server Side:
+  # Server-side:
   from flwr.server.strategy.dp_fixed_clipping import DifferentialPrivacyClientSideFixedClipping
   # Configure the strategy
   strategy = fl.server.strategy.FedAvg( ... )
@@ -183,7 +183,8 @@ Below is a sample code that enables a strategy using :code:`DifferentialPrivacyC
 
 
 .. code-block:: python
-  
+
+  # Client-side:
   from flwr.client.mod.centraldp_mods import fixedclipping_mod
   # Add fixedclipping_mod to the client-side mods
   app = fl.client.ClientApp(client_fn=FlowerClient().to_client(), mods=[fixedclipping_mod])
