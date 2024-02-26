@@ -145,7 +145,7 @@ class RayBackend(Backend):
             (app, message, str(node_id), context),
         )
 
-        await asyncio.wait([future])
+        await future
 
         # Fetch result
         (
