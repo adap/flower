@@ -14,7 +14,6 @@
 # ==============================================================================
 """Ray backend for the Fleet API using the Simulation Engine."""
 
-import asyncio
 import pathlib
 from logging import INFO
 from typing import Callable, Dict, List, Tuple, Union
@@ -28,6 +27,7 @@ from flwr.simulation.ray_transport.ray_actor import (
     ClientAppActor,
     init_ray,
 )
+from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
 from .backend import Backend, BackendConfig
 
@@ -56,7 +56,9 @@ class RayBackend(Backend):
         self.client_resources_key = "client_resources"
 
         # Create actor pool
-        actor_kwargs = backend_config.get("actor_kwargs", {})
+        use_tf = backend_config.get("tensorflow", False)
+        actor_kwargs = {"on_actor_init_fn": enable_tf_gpu_growth} if use_tf else {}
+
         client_resources = self._validate_client_resources(config=backend_config)
         self.pool = BasicActorPool(
             actor_type=ClientAppActor,
@@ -142,7 +144,7 @@ class RayBackend(Backend):
             (app, message, str(node_id), context),
         )
 
-        await asyncio.wait([future])
+        await future
 
         # Fetch result
         (
@@ -151,3 +153,7 @@ class RayBackend(Backend):
         ) = await self.pool.fetch_result_and_return_actor_to_pool(future)
 
         return out_mssg, updated_context
+
+    async def terminate(self) -> None:
+        """Terminate all actors in actor pool."""
+        await self.pool.terminate_all_actors()
