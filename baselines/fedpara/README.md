@@ -93,7 +93,7 @@ As for the parameters ratio ($\gamma$) we use the following model sizes. As in t
 ## Environment Setup
 To construct the Python environment follow these steps:
 
-It is assumed that `pyenv` is installed, `poetry` is installed and python 3.10.6 is installed using `pyenv`. Refer to this [documentation](https://flower.ai/docs/baselines/how-to-usef-baselines.html#setting-up-your-machine) to ensure that your machine is ready.
+It is assumed that `pyenv` is installed, `poetry` is installed and python 3.10.6 is installed using `pyenv`. Refer to this [documentation](https://flower.ai/docs/baselines/how-to-use-baselines.html#setting-up-your-machine) to ensure that your machine is ready.
 
 ```bash
 # Set Python 3.10
