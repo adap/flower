@@ -14,7 +14,6 @@
 # ==============================================================================
 """Message."""
 
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -46,6 +45,10 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     message_type : str
         A string that encodes the action to be executed on
         the receiving end.
+    partition_id : Optional[int]
+        An identifier that can be used when loading a particular
+        data partition for a ClientApp. Making use of this identifier
+        is more relevant when conducting simulations.
     """
 
     _run_id: int
@@ -56,6 +59,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     _group_id: str
     _ttl: str
     _message_type: str
+    _partition_id: int | None
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -67,6 +71,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         group_id: str,
         ttl: str,
         message_type: str,
+        partition_id: int | None = None,
     ) -> None:
         self._run_id = run_id
         self._message_id = message_id
@@ -76,6 +81,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         self._group_id = group_id
         self._ttl = ttl
         self._message_type = message_type
+        self._partition_id = partition_id
 
     @property
     def run_id(self) -> int:
@@ -136,6 +142,16 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     def message_type(self, value: str) -> None:
         """Set message_type."""
         self._message_type = value
+
+    @property
+    def partition_id(self) -> int | None:
+        """An identifier telling which data partition a ClientApp should use."""
+        return self._partition_id
+
+    @partition_id.setter
+    def partition_id(self, value: int) -> None:
+        """Set patition_id."""
+        self._partition_id = value
 
 
 @dataclass
@@ -202,6 +218,7 @@ class Message:
                 group_id=self.metadata.group_id,
                 ttl=ttl,
                 message_type=self.metadata.message_type,
+                partition_id=self.metadata.partition_id,
             ),
             content=content,
         )
