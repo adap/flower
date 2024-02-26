@@ -93,7 +93,7 @@ There are two forms of clipping commonly used in Central DP: Fixed Clipping and 
 
 - **Fixed Clipping** : A predefined fix threshold is set for the magnitude of clients' updates. Any update exceeding this threshold is clipped back to the threshold value.
 
-- **Adaptive Clipping** : The clipping threshold dynamically adjusts based on the observed update distribution.
+- **Adaptive Clipping** : The clipping threshold dynamically adjusts based on the observed update distribution [4].
 It means that the clipping value is tuned during the rounds with respect to quantile of the update norm distribution.
 
 The choice between fixed and adaptive clipping depends on various factors such as privacy requirements, data distribution, model complexity, and etc.
@@ -120,38 +120,57 @@ Please note that these two approaches are providing privacy at different levels.
 
 Differential Privacy in Flower
 -------
-In the following we present how the user can utilize differential privacy in Flower framework.
+Below, we explain how users can utilize differential privacy in the Flower framework.
+
+.. warning::
+
+   Differential Privacy in Flower is at the experimental phase. If you plan to use these features in a production environment or with sensitive data, please contact us to discuss your needs and to receive guidance on how to best use these features.
+
 
 Central Differential Privacy
 ~~~~~~~~~~
 This approach consists of two seprate phases: clipping of the updates and adding noise to the aggregated model.
 For the clipping phase, Flower framework has made it possible to decide whether to perform clipping at the server side or the client side.
+
+- **Server-side Clipping**: This approach has the advantage of the server enforcing uniform clipping across all clients' updates and reducing the communication overhead for clipping values. However, it also has the disadvantage of increasing the computational load on the server due to the need to perform the clipping operation for all clients.
+- **Client-side Clipping**: This approach has the advantage of reducing the computational overhead on the server. However, it also has the disadvantage of lacking centralized control, as the server has less control over the clipping process.
+
+
+
+Server-side Clipping
+^^^^^^^^^^^^^^^^
 To utilize the central DP with server side clipping, there are two wrapper classes :code:`DifferentialPrivacyServerSideFixedClipping` and :code:`DifferentialPrivacyServerSideAdaptiveClipping` to be used for fixed or adaptive clipping.
 
 .. image:: ./_static/DP/serversideCDP.png
   :align: center
-  :width: 500
-  :alt: clipping
+  :width: 600
+  :alt: server side clipping
+
+
+Below is a sample code that enables a strategy using :code:`DifferentialPrivacyServerSideFixedClipping` wrapper class. The same approach can be used with :code:`DifferentialPrivacyServerSideAdaptiveClipping` by adjusting the corresponding input parameters.
 
 .. code-block:: python
 
   from flwr.server.strategy.dp_fixed_clipping import DifferentialPrivacyServerSideFixedClipping
-
+  # Configure the strategy
   strategy = fl.server.strategy.FedAvg( ... )
   # Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
   dp_strategy = DifferentialPrivacyServerSideFixedClipping(strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients)
 
-For clipping at the client side, the server sends the clipping value to the clients.
-In Flower,
 
+
+Client-side Clipping
+^^^^^^^^^^^^^^^^
+For client-side clipping, the server sends the clipping value to selected clients on each round. Clients can use existing Flower :code:`Mods` [5] to perform the clipping.
+Two mods are available for fixed and adaptive client-side clipping: :code:`fixedclipping_mod` and :code:`adaptiveclipping_mod` with corresponding server-side wrappers :code:`DifferentialPrivacyClientSideFixedClipping` and :code:`DifferentialPrivacyClientSideAdaptiveClipping`.
+
+.. image:: ./_static/DP/clientsideCDP.png
+  :align: center
+  :width: 600
+  :alt: client side clipping
 
 Local Differential Privacy
 ~~~~~~~~~~
-
-
-.. warning::
-
-   Differential Privacy in Flower is at the experimental phase. If you plan to use these features in a production environment or with sensitive data, please contact us to discuss your needs and to receive guidance on how to best use these features.
 
 
 [1] Dwork et al. The Algorithmic Foundations of Differential Privacy.
@@ -161,3 +180,5 @@ Local Differential Privacy
 [3] Geyer et al. Differentially Private Federated Learning: A Client Level Perspective.
 
 [4] Galen et al. Differentially Private Learning with Adaptive Clipping.
+
+[5] https://github.com/adap/flower/blob/dp-explainer/doc/source/how-to-use-built-in-mods.rst
