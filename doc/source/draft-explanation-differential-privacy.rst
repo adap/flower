@@ -173,6 +173,7 @@ Two mods are available for fixed and adaptive client-side clipping: :code:`fixed
 Below is a sample code that enables a strategy using :code:`DifferentialPrivacyClientSideFixedClipping` wrapper class. On the client, `fixedclipping_mod` can be added to the client-side mods:
 
 .. code-block:: python
+
   # Server Side:
   from flwr.server.strategy.dp_fixed_clipping import DifferentialPrivacyClientSideFixedClipping
   # Configure the strategy
@@ -182,6 +183,7 @@ Below is a sample code that enables a strategy using :code:`DifferentialPrivacyC
 
 
 .. code-block:: python
+  
   from flwr.client.mod.centraldp_mods import fixedclipping_mod
   # Add fixedclipping_mod to the client-side mods
   app = fl.client.ClientApp(client_fn=FlowerClient().to_client(), mods=[fixedclipping_mod])
