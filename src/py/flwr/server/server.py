@@ -491,7 +491,9 @@ def run_fl(
     config: ServerConfig,
 ) -> History:
     """Train a model on the given server and return the History object."""
-    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
+    hist, last_round = server.fit(
+        num_rounds=config.num_rounds, timeout=config.round_timeout
+    )
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
     log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
     log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
@@ -499,6 +501,6 @@ def run_fl(
     log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
 
     # Graceful shutdown
-    server.disconnect_all_clients(timeout=config.round_timeout)
+    server.disconnect_all_clients(server_round=last_round, timeout=config.round_timeout)
 
     return hist
