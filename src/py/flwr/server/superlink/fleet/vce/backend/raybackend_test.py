@@ -16,7 +16,7 @@
 
 import asyncio
 from math import pi
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple, Union
 
 import ray
 
@@ -62,7 +62,7 @@ def _load_app() -> ClientApp:
 async def backend_build_process_and_termination(
     backend: RayBackend,
     process_args: Optional[Tuple[Callable[[], ClientApp], Message, Context]] = None,
-) -> Tuple[Message, Context] | None:
+) -> Union[Tuple[Message, Context], None]:
     """Build, process job and terminate RayBackend."""
     await backend.build()
     to_return = None
@@ -136,5 +136,3 @@ def test_backend_creation_submit_and_termination() -> None:
         "result"
     ]
     assert obtained_result_in_context == pi * mult_factor
-
-
