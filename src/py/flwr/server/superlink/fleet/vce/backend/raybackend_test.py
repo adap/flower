@@ -136,5 +136,3 @@ def test_backend_creation_submit_and_termination() -> None:
         "result"
     ]
     assert obtained_result_in_context == pi * mult_factor
-
-
