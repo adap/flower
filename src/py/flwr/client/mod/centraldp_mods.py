@@ -39,7 +39,9 @@ def fixedclipping_mod(
 
     It operates on messages with type MESSAGE_TYPE_FIT.
 
-    Note: Consider the order of mods when using multiple.
+    Notes
+    -----
+    Consider the order of mods when using multiple.
 
     Typically, fixedclipping_mod should be the last to operate on params.
     """
