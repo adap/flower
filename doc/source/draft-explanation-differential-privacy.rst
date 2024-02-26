@@ -119,8 +119,7 @@ To achieve (:math:`\epsilon`, :math:`\delta`)-DP, considering the sensitivity of
     \frac{∆ \times \sqrt{2 \times \log\left(\frac{1.25}{\delta}\right)}}{\epsilon}
 
 
-- Each client adds noise to the gradients of the model during the local training (DP-SGD).
-More specifically, in this approach, gradients are clipped and amount of calibrated noise is injected into the gradients.
+- Each client adds noise to the gradients of the model during the local training (DP-SGD). More specifically, in this approach, gradients are clipped and amount of calibrated noise is injected into the gradients.
 
 
 Please note that these two approaches are providing privacy at different levels.
@@ -203,8 +202,16 @@ Please note that the order of mods, especially those that modify parameters, is 
 
 Local Differential Privacy
 ~~~~~~~~~~
-To use local DP in Flower, 
+To use local DP to add noise to the client model parameters before sending them to the server in Flower, users can use the :code:`LocalDpMod` as follows:
 
+.. code-block:: python
+
+  # Client-side
+  from flwr.client.mod.localdp_mod import LocalDpMod
+  # Create an instance of the mod with the required params
+  local_dp_obj = LocalDpMod(cfg.clipping_norm, cfg.sensitivity, cfg.epsilon, cfg.delta)
+  # Add local_dp_obj to the client-side mods
+  app = fl.client.ClientApp(client_fn=FlowerClient().to_client(), mods=[local_dp_obj])
 
 
 
