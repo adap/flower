@@ -28,7 +28,9 @@ from flwr.common.message import Message
 def fixedclipping_mod(
     msg: Message, ctxt: Context, call_next: ClientAppCallable
 ) -> Message:
-    """This mod needs to be used with DifferentialPrivacyClientSideFixedClipping server-
+    """Client-side fixed clipping modifier.
+
+    This mod needs to be used with DifferentialPrivacyClientSideFixedClipping server-
     side strategy wrapper.
 
     The wrapper sends the clipping_norm value to the client.
