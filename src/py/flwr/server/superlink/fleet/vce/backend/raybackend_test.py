@@ -17,6 +17,7 @@
 import asyncio
 from math import pi
 from typing import Callable, Dict, Optional, Tuple, Union
+from unittest import IsolatedAsyncioTestCase
 
 import ray
 
@@ -77,62 +78,64 @@ async def backend_build_process_and_termination(
     return to_return
 
 
-def test_backend_creation_and_termination() -> None:
-    """Test creation of RayBackend and its termination."""
-    backend = RayBackend(backend_config={}, work_dir="")
-    asyncio.run(
-        backend_build_process_and_termination(backend=backend, process_args=None)
-    )
+class AsyncTestRayBackend(IsolatedAsyncioTestCase):
+    """A basic class that allows runnig multliple asyncio tests."""
 
-
-def test_backend_creation_submit_and_termination() -> None:
-    """Test submit."""
-    backend = RayBackend(backend_config={}, work_dir="")
-
-    # Define ClientApp
-    client_app_callable = _load_app
-
-    # Construct a Message
-    mult_factor = 2024
-    getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
-    recordset = getpropertiesins_to_recordset(getproperties_ins)
-    message = Message(
-        content=recordset,
-        metadata=Metadata(
-            run_id=0,
-            message_id="",
-            group_id="",
-            src_node_id=0,
-            dst_node_id=0,
-            reply_to_message="",
-            ttl="",
-            message_type=MESSAGE_TYPE_GET_PROPERTIES,
-        ),
-    )
-
-    # Construct emtpy Context
-    context = Context(state=RecordSet())
-
-    res = asyncio.run(
-        backend_build_process_and_termination(
-            backend=backend, process_args=(client_app_callable, message, context)
+    def test_backend_creation_and_termination(self) -> None:
+        """Test creation of RayBackend and its termination."""
+        backend = RayBackend(backend_config={}, work_dir="")
+        asyncio.run(
+            backend_build_process_and_termination(backend=backend, process_args=None)
         )
-    )
 
-    if res is None:
-        raise AssertionError("This shouldn't happen")
+    def test_backend_creation_submit_and_termination(self) -> None:
+        """Test submit."""
+        backend = RayBackend(backend_config={}, work_dir="")
 
-    out_mssg, updated_context = res
+        # Define ClientApp
+        client_app_callable = _load_app
 
-    # Verify message content is as expected
-    content = out_mssg.content
-    assert (
-        content.configs_records["getpropertiesres.properties"]["result"]
-        == pi * mult_factor
-    )
+        # Construct a Message
+        mult_factor = 2024
+        getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
+        recordset = getpropertiesins_to_recordset(getproperties_ins)
+        message = Message(
+            content=recordset,
+            metadata=Metadata(
+                run_id=0,
+                message_id="",
+                group_id="",
+                src_node_id=0,
+                dst_node_id=0,
+                reply_to_message="",
+                ttl="",
+                message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            ),
+        )
 
-    # Verify context is correct
-    obtained_result_in_context = updated_context.state.configs_records["result"][
-        "result"
-    ]
-    assert obtained_result_in_context == pi * mult_factor
+        # Construct emtpy Context
+        context = Context(state=RecordSet())
+
+        res = asyncio.run(
+            backend_build_process_and_termination(
+                backend=backend, process_args=(client_app_callable, message, context)
+            )
+        )
+
+        if res is None:
+            raise AssertionError("This shouldn't happen")
+
+        out_mssg, updated_context = res
+
+        # Verify message content is as expected
+        content = out_mssg.content
+        assert (
+            content.configs_records["getpropertiesres.properties"]["result"]
+            == pi * mult_factor
+        )
+
+        # Verify context is correct
+        obtained_result_in_context = updated_context.state.configs_records["result"][
+            "result"
+        ]
+        assert obtained_result_in_context == pi * mult_factor
