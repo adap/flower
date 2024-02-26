@@ -62,7 +62,7 @@ async def worker(
             task_ins: TaskIns = await queue.get()
             node_id = task_ins.task.consumer.node_id
 
-            # Register and retrive runstate
+            # Register and retrieve runstate
             node_states[node_id].register_context(run_id=task_ins.run_id)
             context = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
 
