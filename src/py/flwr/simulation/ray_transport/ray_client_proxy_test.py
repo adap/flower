@@ -198,10 +198,11 @@ def test_cid_consistency_without_proxies() -> None:
                 message_id="",
                 group_id="",
                 src_node_id=0,
-                dst_node_id=int(cid),
+                dst_node_id=12345,
                 reply_to_message="",
                 ttl="",
                 message_type=MESSAGE_TYPE_GET_PROPERTIES,
+                partition_id=int(cid),
             ),
         )
         pool.submit_client_job(
