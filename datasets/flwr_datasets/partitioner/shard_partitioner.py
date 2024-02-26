@@ -229,6 +229,14 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
                     math.ceil(len(self.dataset) / self._shard_size)
                 )
                 num_usable_shards_in_dataset = self._num_shards_used
+                if num_usable_shards_in_dataset < self._num_partitions:
+                    raise ValueError(
+                        "Based on the given arguments the creation of the partitions "
+                        "is impossible. The implied number of partitions that can be "
+                        "used is lower than the number of requested partitions "
+                        "resulting in empty partitions. Please decrease the size of "
+                        "shards: `shard_size`."
+                    )
             else:
                 raise ValueError(
                     "The keep_incomplete_shards need to be specified "
@@ -249,6 +257,13 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
             raise ValueError(
                 "The specification of nm_shards_per_node and "
                 "keep_incomplete_shards is not correct."
+            )
+
+        if num_usable_shards_in_dataset < self._num_partitions:
+            raise ValueError(
+                "The specified configuration results in empty partitions because the "
+                "number of usable shards is smaller that the number partitions. "
+                "Try decreasing the shard size or the number of partitions. "
             )
 
         indices_on_which_to_split_shards = np.cumsum(
