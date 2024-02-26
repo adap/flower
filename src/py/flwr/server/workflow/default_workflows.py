@@ -15,9 +15,11 @@
 """Legacy default workflows."""
 
 
+import threading
+import time
 import timeit
 from logging import DEBUG, INFO
-from typing import Optional, cast
+from typing import Dict, Optional, cast
 
 import flwr.common.recordset_compat as compat
 from flwr.common import Context, GetParametersIns, log
@@ -27,11 +29,14 @@ from flwr.common.constant import (
     MESSAGE_TYPE_GET_PARAMETERS,
 )
 
+from ..client_manager import ClientManager
+from ..compat.driver_client_proxy import DriverClientProxy
 from ..compat.legacy_context import LegacyContext
 from ..driver import Driver
 from ..typing import Workflow
 
 KEY_CURRENT_ROUND = "current_round"
+KEY_START_TIME = "start_time"
 CONFIGS_RECORD_KEY = "config"
 PARAMS_RECORD_KEY = "parameters"
 
@@ -58,43 +63,35 @@ class DefaultWorkflow:
                 f"Expect a LegacyContext, but get {type(context).__name__}."
             )
 
+        # Start the thread updating nodes
+        f_stop = threading.Event()
+        client_manager_thread = threading.Thread(
+            target=_update_client_manager,
+            args=(
+                driver,
+                context.client_manager,
+                f_stop,
+            ),
+        )
+        client_manager_thread.start()
+
         # Initialize parameters
         default_init_params_workflow(driver, context)
 
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
+        cfg = context.state.configs_records[CONFIGS_RECORD_KEY]
+        cfg[KEY_START_TIME] = start_time
 
         for current_round in range(1, context.config.num_rounds + 1):
-            context.state.configs_records[CONFIGS_RECORD_KEY][
-                KEY_CURRENT_ROUND
-            ] = current_round
+            cfg[KEY_CURRENT_ROUND] = current_round
 
             # Fit round
             self.fit_workflow(driver, context)
 
             # Centralized evaluation
-            parameters = compat.parametersrecord_to_parameters(
-                record=context.state.parameters_records[PARAMS_RECORD_KEY],
-                keep_input=True,
-            )
-            res_cen = context.strategy.evaluate(current_round, parameters=parameters)
-            if res_cen is not None:
-                loss_cen, metrics_cen = res_cen
-                log(
-                    INFO,
-                    "fit progress: (%s, %s, %s, %s)",
-                    current_round,
-                    loss_cen,
-                    metrics_cen,
-                    timeit.default_timer() - start_time,
-                )
-                context.history.add_loss_centralized(
-                    server_round=current_round, loss=loss_cen
-                )
-                context.history.add_metrics_centralized(
-                    server_round=current_round, metrics=metrics_cen
-                )
+            default_centralized_evaluation_workflow(driver, context)
 
             # Evaluate round
             self.evaluate_workflow(driver, context)
@@ -103,12 +100,16 @@ class DefaultWorkflow:
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
         log(INFO, "FL finished in %s", elapsed)
-        
 
-def update_client_manager(
-    driver: GrpcDriver,
+        # Terminate the thread
+        f_stop.set()
+        del driver
+        client_manager_thread.join()
+
+
+def _update_client_manager(
+    driver: Driver,
     client_manager: ClientManager,
-    lock: threading.Lock,
     f_stop: threading.Event,
 ) -> None:
     """Update the nodes list in the client manager.
@@ -121,22 +122,10 @@ def update_client_manager(
     and dead nodes will be removed from the ClientManager via
     `client_manager.unregister()`.
     """
-    # Request for run_id
-    run_id = driver.create_run(
-        driver_pb2.CreateRunRequest()  # pylint: disable=E1101
-    ).run_id
-
     # Loop until the driver is disconnected
     registered_nodes: Dict[int, DriverClientProxy] = {}
     while not f_stop.is_set():
-        with lock:
-            # End the while loop if the driver is disconnected
-            if driver.stub is None:
-                break
-            get_nodes_res = driver.get_nodes(
-                req=driver_pb2.GetNodesRequest(run_id=run_id)  # pylint: disable=E1101
-            )
-        all_node_ids = {node.node_id for node in get_nodes_res.nodes}
+        all_node_ids = set(driver.get_node_ids())
         dead_nodes = set(registered_nodes).difference(all_node_ids)
         new_nodes = all_node_ids.difference(registered_nodes)
 
@@ -150,9 +139,9 @@ def update_client_manager(
         for node_id in new_nodes:
             client_proxy = DriverClientProxy(
                 node_id=node_id,
-                driver=driver,
+                driver=driver.grpc_driver,  # type: ignore
                 anonymous=False,
-                run_id=run_id,
+                run_id=driver.run_id,  # type: ignore
             )
             if client_manager.register(client_proxy):
                 registered_nodes[node_id] = client_proxy
@@ -161,7 +150,6 @@ def update_client_manager(
 
         # Sleep for 3 seconds
         time.sleep(3)
-
 
 
 def default_init_params_workflow(driver: Driver, context: Context) -> None:
@@ -217,15 +205,129 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
         context.history.add_metrics_centralized(server_round=0, metrics=res[1])
 
 
+def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None:
+    """Execute the default workflow for centralized evaluation."""
+    if not isinstance(context, LegacyContext):
+        raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
+
+    # Retrieve current_round and start_time from the context
+    cfg = context.state.configs_records[CONFIGS_RECORD_KEY]
+    current_round = cast(int, cfg[KEY_CURRENT_ROUND])
+    start_time = cast(float, cfg[KEY_START_TIME])
+
+    # Centralized evaluation
+    parameters = compat.parametersrecord_to_parameters(
+        record=context.state.parameters_records[PARAMS_RECORD_KEY],
+        keep_input=True,
+    )
+    res_cen = context.strategy.evaluate(current_round, parameters=parameters)
+    if res_cen is not None:
+        loss_cen, metrics_cen = res_cen
+        log(
+            INFO,
+            "fit progress: (%s, %s, %s, %s)",
+            current_round,
+            loss_cen,
+            metrics_cen,
+            timeit.default_timer() - start_time,
+        )
+        context.history.add_loss_centralized(server_round=current_round, loss=loss_cen)
+        context.history.add_metrics_centralized(
+            server_round=current_round, metrics=metrics_cen
+        )
+
+
+def default_fit_workflow(driver: Driver, context: Context) -> None:
+    """Execute the default workflow for a single fit round."""
+    if not isinstance(context, LegacyContext):
+        raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
+
+    # Get current_round and parameters
+    cfg = context.state.configs_records[CONFIGS_RECORD_KEY]
+    current_round = cast(int, cfg[KEY_CURRENT_ROUND])
+    parametersrecord = context.state.parameters_records[PARAMS_RECORD_KEY]
+    parameters = compat.parametersrecord_to_parameters(
+        parametersrecord, keep_input=True
+    )
+
+    # Get clients and their respective instructions from strategy
+    client_instructions = context.strategy.configure_fit(
+        server_round=current_round,
+        parameters=parameters,
+        client_manager=context.client_manager,
+    )
+
+    if not client_instructions:
+        log(INFO, "fit_round %s: no clients selected, cancel", current_round)
+        return
+    log(
+        DEBUG,
+        "fit_round %s: strategy sampled %s clients (out of %s)",
+        current_round,
+        len(client_instructions),
+        context.client_manager.num_available(),
+    )
+
+    # Build dictionary mapping node_id to ClientProxy
+    node_id_to_proxy = {proxy.node_id: proxy for proxy, _ in client_instructions}
+
+    # Build out messages
+    out_messages = [
+        driver.create_message(
+            content=compat.fitins_to_recordset(fitins, True),
+            message_type=MESSAGE_TYPE_FIT,
+            dst_node_id=proxy.node_id,
+            group_id="",
+            ttl="",
+        )
+        for proxy, fitins in client_instructions
+    ]
+
+    # Send instructions to clients and
+    # collect `fit` results from all clients participating in this round
+    messages = list(driver.send_and_receive(out_messages))
+    del out_messages
+
+    # No exception/failure handling currently
+    log(
+        DEBUG,
+        "fit_round %s received %s results and %s failures",
+        current_round,
+        len(messages),
+        0,
+    )
+
+    # Aggregate training results
+    results = [
+        (
+            node_id_to_proxy[msg.metadata.src_node_id],
+            compat.recordset_to_fitres(msg.content, False),
+        )
+        for msg in messages
+    ]
+    aggregated_result = context.strategy.aggregate_fit(current_round, results, [])
+    parameters_aggregated, metrics_aggregated = aggregated_result
+
+    # Update the parameters and write history
+    if parameters_aggregated:
+        paramsrecord = compat.parameters_to_parametersrecord(
+            parameters_aggregated, True
+        )
+        context.state.parameters_records[PARAMS_RECORD_KEY] = paramsrecord
+
+    context.history.add_metrics_distributed_fit(
+        server_round=current_round, metrics=metrics_aggregated
+    )
+
+
 def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     """Execute the default workflow for a single evaluate round."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
     # Get current_round and parameters
-    current_round = cast(
-        int, context.state.configs_records[CONFIGS_RECORD_KEY][KEY_CURRENT_ROUND]
-    )
+    cfg = context.state.configs_records[CONFIGS_RECORD_KEY]
+    current_round = cast(int, cfg[KEY_CURRENT_ROUND])
     parametersrecord = context.state.parameters_records[PARAMS_RECORD_KEY]
     parameters = compat.parametersrecord_to_parameters(
         parametersrecord, keep_input=True
