@@ -132,7 +132,7 @@ async def run(
 ) -> None:
     """Run the VCE async."""
     # pylint: disable=fixme
-    queue: TaskInsQueue = asyncio.Queue(64)  # TODO: revisit
+    queue: TaskInsQueue = asyncio.Queue(128)
 
     # Build backend
     await backend.build()
