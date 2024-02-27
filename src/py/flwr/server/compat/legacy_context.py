@@ -16,13 +16,14 @@
 
 
 from dataclasses import dataclass
+from typing import Optional
 
-from flwr.common import Context
+from flwr.common import Context, RecordSet
 
-from ..client_manager import ClientManager
+from ..client_manager import ClientManager, SimpleClientManager
 from ..history import History
 from ..server_config import ServerConfig
-from ..strategy import Strategy
+from ..strategy import FedAvg, Strategy
 
 
 @dataclass
@@ -33,3 +34,22 @@ class LegacyContext(Context):
     history: History
     config: ServerConfig
     strategy: Strategy
+
+    def __init__(
+        self,
+        state: RecordSet,
+        config: Optional[ServerConfig] = None,
+        strategy: Optional[Strategy] = None,
+        client_manager: Optional[ClientManager] = None,
+    ) -> None:
+        if config is None:
+            config = ServerConfig()
+        if client_manager is None:
+            client_manager = SimpleClientManager()
+        if strategy is None:
+            strategy = FedAvg()
+        self.config = config
+        self.strategy = strategy
+        self.client_manager = client_manager
+        self.history = History()
+        super().__init__(state)

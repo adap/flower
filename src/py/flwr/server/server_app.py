@@ -18,17 +18,15 @@
 import importlib
 from typing import Callable, Optional, cast
 
-from flwr.common import Context
+from flwr.common import Context, RecordSet
 from flwr.server.strategy import Strategy
 
-from .client_manager import ClientManager, SimpleClientManager
-from .compat.legacy_context import LegacyContext
+from .client_manager import ClientManager
+from .compat import start_driver
 from .driver import Driver
-from .history import History
+from .server import Server
 from .server_config import ServerConfig
-from .strategy import FedAvg
-from .typing import ServerAppCallable, Workflow
-from .workflow import DefaultWorkflow
+from .typing import ServerAppCallable
 
 
 class ServerApp:
@@ -57,39 +55,32 @@ class ServerApp:
 
     def __init__(
         self,
+        server: Optional[Server] = None,
         config: Optional[ServerConfig] = None,
         strategy: Optional[Strategy] = None,
         client_manager: Optional[ClientManager] = None,
-        workflow: Optional[Workflow] = None,
     ) -> None:
+        self._server = server
         self._config = config
         self._strategy = strategy
         self._client_manager = client_manager
         self._main: Optional[ServerAppCallable] = None
-        if workflow is None:
-            workflow = DefaultWorkflow()
-        self._workflow = workflow
 
     def __call__(self, driver: Driver, context: Context) -> None:
         """Execute `ServerApp`."""
         # Compatibility mode
         if not self._main:
-            client_manager = (
-                self._client_manager if self._client_manager else SimpleClientManager()
+            start_driver(
+                server=self._server,
+                config=self._config,
+                strategy=self._strategy,
+                client_manager=self._client_manager,
+                driver=driver,
             )
-            strategy = self._strategy if self._strategy else FedAvg()
-            config = self._config if self._config else ServerConfig()
-            legacy_context = LegacyContext(
-                state=context.state,
-                client_manager=client_manager,
-                history=History(),
-                config=config,
-                strategy=strategy,
-            )
-            self._workflow(driver, legacy_context)
             return
 
         # New execution mode
+        context = Context(state=RecordSet())
         self._main(driver, context)
 
     def main(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
@@ -106,7 +97,7 @@ class ServerApp:
 
         def main_decorator(main_fn: ServerAppCallable) -> ServerAppCallable:
             """Register the main fn with the ServerApp object."""
-            if self._config or self._strategy or self._client_manager:
+            if self._server or self._config or self._strategy or self._client_manager:
                 raise ValueError(
                     """Use either a custom main function or a `Strategy`, but not both.
 
