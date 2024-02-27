@@ -20,7 +20,7 @@ from typing import Callable, Dict, List, Tuple, Union
 
 import ray
 
-from flwr.client.clientapp import ClientApp, LoadClientAppError
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message

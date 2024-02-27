@@ -21,7 +21,7 @@ import traceback
 from logging import DEBUG, ERROR, INFO
 from typing import Callable, Dict, Optional
 
-from flwr.client.clientapp import ClientApp, LoadClientAppError, load_client_app
+from flwr.client.client_app import ClientApp, LoadClientAppError, load_client_app
 from flwr.client.node_state import NodeState
 from flwr.common.logger import log
 from flwr.common.serde import message_from_taskins, message_to_taskres
