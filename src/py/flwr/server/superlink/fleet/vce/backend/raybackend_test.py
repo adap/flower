@@ -21,7 +21,7 @@ from typing import Callable, Dict, Optional, Tuple, Union
 from unittest import IsolatedAsyncioTestCase
 
 from flwr.client import Client, NumPyClient
-from flwr.client.clientapp import ClientApp, LoadClientAppError, load_client_app
+from flwr.client.client_app import ClientApp, LoadClientAppError, load_client_app
 from flwr.common import (
     Config,
     ConfigsRecord,
