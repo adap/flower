@@ -65,7 +65,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
         The stddev of the noise added to the count of updates currently below the estimate.
         Andrew et al. recommends to set to `expected_num_records/20`
 
-     Examples
+    Examples
     --------
     Create a strategy:
 
