@@ -87,12 +87,15 @@ class InMemoryState(State):
             # If not annoymous clients, we can get TaskIns efficiently
             # by making use of node_id:task_id mapping
             if node_id:
+                # If node has at least one task assigned to it
                 if (
                     node_id not in self.task_ins_mapping
                     or len(self.task_ins_mapping[node_id]) == 0
                 ):
                     return task_ins_list
+                # Get task ids assigned to this node
                 task_ids = self.task_ins_mapping[node_id]
+                # Resolve how many TaskIns to extract
                 num = min(limit, len(task_ids)) if limit else len(task_ids)
                 while len(task_ins_list) < num:
                     # Remove
