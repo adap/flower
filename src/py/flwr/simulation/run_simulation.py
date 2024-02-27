@@ -24,7 +24,7 @@ from flwr.common import EventType, event
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.server.driver.driver import Driver
 from flwr.server.run_serverapp import run
-
+from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.state import StateFactory
 
 
@@ -32,7 +32,6 @@ def run_simulation() -> None:
     """."""
     # TODO: below create circular imports
     from flwr.server.app import _run_driver_api_grpc
-    from flwr.server.superlink.fleet.vce import start_vce
 
     args = _parse_args_run_simulation().parse_args()
 
@@ -50,7 +49,7 @@ def run_simulation() -> None:
     # Superlink with Simulation Engine
     f_stop = asyncio.Event()
     superlink_th = threading.Thread(
-        target=start_vce,
+        target=vce.start_vce,
         kwargs={
             "num_supernodes": args.num_supernodes,
             "client_app_module_name": args.client_app,
