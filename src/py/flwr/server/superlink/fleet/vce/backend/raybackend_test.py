@@ -22,7 +22,7 @@ from unittest import IsolatedAsyncioTestCase
 import ray
 
 from flwr.client import Client, NumPyClient
-from flwr.client.clientapp import ClientApp
+from flwr.client.client_app import ClientApp
 from flwr.common import (
     Config,
     ConfigsRecord,
