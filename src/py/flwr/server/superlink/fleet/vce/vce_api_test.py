@@ -72,22 +72,14 @@ def terminate_simulation(f_stop: asyncio.Event, sleep_duration: int) -> None:
 
 
 def start_and_shutdown(
-    existing_state_factory: Optional[StateFactory] = None,
+    backend: str = "ray",
+    num_supernodes: Optional[int] = None,
+    state_factory: Optional[StateFactory] = None,
     nodes_mapping: Optional[NodeToPartitionMapping] = None,
     duration: int = 10,
 ) -> None:
     """Start Simulation Engine and terminate after specified number of seconds."""
     f_stop = asyncio.Event()
-
-    # Initialize StateFactory
-    if nodes_mapping:
-        if existing_state_factory is None:
-            raise ValueError(
-                "If you specify a node mapping, you must pass a StateFactory."
-            )
-        state_factory = existing_state_factory
-    else:
-        state_factory = StateFactory(":flwr-in-memory-state:")
 
     # Setup thread that will set the f_stop event, triggering the termination of all
     # asyncio logic in the Simulation Engine. It will also terminate the Backend.
@@ -97,9 +89,9 @@ def start_and_shutdown(
     termination_th.start()
 
     start_vce(
-        num_supernodes=50,
+        num_supernodes=num_supernodes,
         client_app_module_name="vce_api_test:client_app",
-        backend_name="ray",
+        backend_name=backend,
         backend_config_json_stream="{}",  # an empty json stream (an empty config)
         state_factory=state_factory,
         working_dir="",
@@ -118,7 +110,32 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
 
     def test_start_and_shutdown(self) -> None:
         """Start Simulation Engine Fleet and terminate it."""
-        start_and_shutdown()
+        start_and_shutdown(num_supernodes=50)
+
+    def test_with_nonexistent_backend(self) -> None:
+        """Test specifying a backend that does not exist."""
+        with self.assertRaises(KeyError):
+            start_and_shutdown(num_supernodes=50, backend="this-backend-does-not-exist")
+
+    def test_erroneous_arguments_num_supernodes_and_existing_mapping(self) -> None:
+        """Test ValueError if a node mapping is passed but also num_supernodes.
+
+        Passing `num_supernodes` does nothing since we assume that if a node mapping
+        is supplied, nodes have been registered externally already. Therefore passing
+        `num_supernodes` might give the impression that that many nodes will be registered.
+        We don't do that since a mapping already exists.
+        """
+        with self.assertRaises(ValueError):
+            start_and_shutdown(num_supernodes=50, nodes_mapping={0: 1})
+
+    def test_erroneous_arguments_existing_mapping_but_no_state_factory(self) -> None:
+        """Test ValueError if a node mapping is passed but no state.
+
+        Passing a node mapping indicates that (externally) nodes have registered with a
+        state factory. Therefore, that state factory should be passed too.
+        """
+        with self.assertRaises(ValueError):
+            start_and_shutdown(nodes_mapping={0: 1})
 
     # pylint: disable=too-many-locals
     def test_start_and_shutdown_with_tasks_in_state(self) -> None:
@@ -179,7 +196,7 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
                 expected_results[task_id] = mult_factor * pi
 
         # Run
-        start_and_shutdown(state_factory, nodes_mapping)
+        start_and_shutdown(state_factory=state_factory, nodes_mapping=nodes_mapping)
 
         # Get all TaskRes
         task_res_list = state.get_task_res(task_ids=task_ids, limit=len(task_ids))
