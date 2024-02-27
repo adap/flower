@@ -20,6 +20,8 @@ from pathlib import Path
 from typing import Callable, Dict, Optional, Tuple, Union
 from unittest import IsolatedAsyncioTestCase
 
+import ray
+
 from flwr.client import Client, NumPyClient
 from flwr.client.client_app import ClientApp, LoadClientAppError, load_client_app
 from flwr.common import (
@@ -119,6 +121,11 @@ def _create_message_and_context() -> Tuple[Message, Context, float]:
 class AsyncTestRayBackend(IsolatedAsyncioTestCase):
     """A basic class that allows runnig multliple asyncio tests."""
 
+    async def on_cleanup(self) -> None:
+        """Ensure Ray has shutdown."""
+        if ray.is_initialized():
+            ray.shutdown()
+
     def test_backend_creation_and_termination(self) -> None:
         """Test creation of RayBackend and its termination."""
         backend = RayBackend(backend_config={}, work_dir="")
@@ -171,6 +178,7 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
             self.test_backend_creation_submit_and_termination(
                 client_app_loader=_load_from_module("a_non_existing_module:app")
             )
+        self.addAsyncCleanup(self.on_cleanup)
 
     def test_backend_creation_submit_and_termination_existing_client_app(
         self,
@@ -198,3 +206,4 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
                 client_app_loader=_load_from_module("raybackend_test:client_app"),
                 workdir="/?&%$^#%@$!",
             )
+        self.addAsyncCleanup(self.on_cleanup)

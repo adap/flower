@@ -26,7 +26,6 @@ from typing import Dict, Optional, Set
 from unittest import IsolatedAsyncioTestCase
 from uuid import UUID
 
-from flwr.client.client_app import LoadClientAppError
 from flwr.common import GetPropertiesIns, Message, Metadata
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
@@ -138,9 +137,6 @@ def start_and_shutdown(
         existing_nodes_mapping=nodes_mapping,
     )
 
-    # Trigger stop event
-    f_stop.set()
-
     termination_th.join()
 
 
@@ -172,11 +168,12 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
             run_id=run_id,
             num_messages=num_messages,
         )
-        with self.assertRaises(LoadClientAppError):
+        with self.assertRaises(RuntimeError):
             start_and_shutdown(
                 clientapp_module="totally_fictitious_app:client",
                 state_factory=state_factory,
                 nodes_mapping=nodes_mapping,
+                duration=10,
             )
 
     def test_erroneous_backend_config(self) -> None:
@@ -222,7 +219,7 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
         producer/consumer logic must function. This also severs to evaluate a valid
         ClientApp.
         """
-        num_messages = 113
+        num_messages = 229
         num_nodes = 59
 
         # Register a state and a run_id in it
