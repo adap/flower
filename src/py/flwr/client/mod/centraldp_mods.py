@@ -117,4 +117,3 @@ def adaptiveclipping_mod(
         out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)
         return out_msg
     return call_next(msg, ctxt)
-
