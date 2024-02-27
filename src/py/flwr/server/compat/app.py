@@ -26,10 +26,9 @@ from flwr.common import EventType, event
 from flwr.common.address import parse_address
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.proto import driver_pb2  # pylint: disable=E0611
-from flwr.server.app import init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
-from flwr.server.server import Server
+from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 
@@ -143,6 +142,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         initialized_config,
     )
 
+    f_stop = threading.Event()
     # Start the thread updating nodes
     thread = threading.Thread(
         target=update_client_manager,
@@ -150,6 +150,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
             grpc_driver,
             initialized_server.client_manager(),
             lock,
+            f_stop,
         ),
     )
     thread.start()
@@ -159,6 +160,8 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         server=initialized_server,
         config=initialized_config,
     )
+
+    f_stop.set()
 
     # Stop the Driver API server and the thread
     with lock:
@@ -178,6 +181,7 @@ def update_client_manager(
     driver: GrpcDriver,
     client_manager: ClientManager,
     lock: threading.Lock,
+    f_stop: threading.Event,
 ) -> None:
     """Update the nodes list in the client manager.
 
@@ -196,7 +200,7 @@ def update_client_manager(
 
     # Loop until the driver is disconnected
     registered_nodes: Dict[int, DriverClientProxy] = {}
-    while True:
+    while not f_stop.is_set():
         with lock:
             # End the while loop if the driver is disconnected
             if driver.stub is None:

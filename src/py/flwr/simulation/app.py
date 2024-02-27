@@ -28,14 +28,13 @@ from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 from flwr.client import ClientFn
 from flwr.common import EventType, event
 from flwr.common.logger import log
-from flwr.server import Server
-from flwr.server.app import init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
+from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_actor import (
-    DefaultActor,
+    ClientAppActor,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
     pool_size_from_resources,
@@ -83,7 +82,7 @@ def start_simulation(
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
     keep_initialised: Optional[bool] = False,
-    actor_type: Type[VirtualClientEngineActor] = DefaultActor,
+    actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
     actor_kwargs: Optional[Dict[str, Any]] = None,
     actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
 ) -> History:
@@ -139,10 +138,10 @@ def start_simulation(
     keep_initialised: Optional[bool] (default: False)
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
 
-    actor_type: VirtualClientEngineActor (default: DefaultActor)
+    actor_type: VirtualClientEngineActor (default: ClientAppActor)
         Optionally specify the type of actor to use. The actor object, which
         persists throughout the simulation, will be the process in charge of
-        running the clients' jobs (i.e. their `fit()` method).
+        executing a ClientApp wrapping input argument `client_fn`.
 
     actor_kwargs: Optional[Dict[str, Any]] (default: None)
         If you want to create your own Actor classes, you might need to pass
@@ -220,7 +219,7 @@ def start_simulation(
     log(
         INFO,
         "Optimize your simulation with Flower VCE: "
-        "https://flower.dev/docs/framework/how-to-run-simulations.html",
+        "https://flower.ai/docs/framework/how-to-run-simulations.html",
     )
 
     # Log the resources that a single client will be able to use
@@ -338,7 +337,7 @@ def start_simulation(
             "disconnected. The head node might still be alive but cannot accommodate "
             "any actor with resources: %s."
             "\nTake a look at the Flower simulation examples for guidance "
-            "<https://flower.dev/docs/framework/how-to-run-simulations.html>.",
+            "<https://flower.ai/docs/framework/how-to-run-simulations.html>.",
             client_resources,
             client_resources,
         )
