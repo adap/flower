@@ -7209,7 +7209,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:33:<autosummary>:1
-#: flwr.client.clientapp.ClientApp:1 of
+#: flwr.client.client_app.ClientApp:1 of
 #, fuzzy
 msgid "Flower ClientApp."
 msgstr "Flower 客户端。"
@@ -7511,7 +7511,7 @@ msgstr "当前客户端属性。"
 msgid "ClientApp"
 msgstr "客户端"
 
-#: flwr.client.clientapp.ClientApp:1 flwr.common.typing.ClientMessage:1
+#: flwr.client.client_app.ClientApp:1 flwr.common.typing.ClientMessage:1
 #: flwr.common.typing.DisconnectRes:1 flwr.common.typing.EvaluateIns:1
 #: flwr.common.typing.EvaluateRes:1 flwr.common.typing.FitIns:1
 #: flwr.common.typing.FitRes:1 flwr.common.typing.GetParametersIns:1
@@ -7526,24 +7526,24 @@ msgid "Bases: :py:class:`object`"
 msgstr ""
 
 #: flwr.client.app.start_client:33 flwr.client.app.start_numpy_client:36
-#: flwr.client.clientapp.ClientApp:4 flwr.server.app.start_server:41
+#: flwr.client.client_app.ClientApp:4 flwr.server.app.start_server:41
 #: flwr.server.driver.app.start_driver:30 of
 msgid "Examples"
 msgstr "实例"
 
-#: flwr.client.clientapp.ClientApp:5 of
+#: flwr.client.client_app.ClientApp:5 of
 msgid ""
 "Assuming a typical `Client` implementation named `FlowerClient`, you can "
 "wrap it in a `ClientApp` as follows:"
 msgstr ""
 
-#: flwr.client.clientapp.ClientApp:16 of
+#: flwr.client.client_app.ClientApp:16 of
 msgid ""
 "If the above code is in a Python module called `client`, it can be "
 "started as follows:"
 msgstr ""
 
-#: flwr.client.clientapp.ClientApp:21 of
+#: flwr.client.client_app.ClientApp:21 of
 msgid ""
 "In this `client:app` example, `client` refers to the Python module "
 "`client.py` in which the previous code lives in and `app` refers to the "
