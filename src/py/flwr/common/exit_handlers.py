@@ -31,6 +31,19 @@ def register_exit_handlers(
     grpc_servers: Optional[List[Server]] = None,
     bckg_threads: Optional[List[Thread]] = None,
 ) -> None:
+    """Registers exit handlers for `SIGINT` and `SIGTERM` signals.
+
+    Parameters
+    ----------
+    event_type : EventType
+        The telemetry event that should be logged before exit.
+    grpc_servers: Optional[List[Server]] (default: None)
+        An otpional list of gRPC servers that need to be gracefully
+        terminated before exiting.
+    bckg_threads: Optional[List[Thread]] (default: None)
+        An optional list of threads that need to be gracefully
+        terminated before exiting.
+    """
     default_handlers = {
         SIGINT: None,
         SIGTERM: None,
