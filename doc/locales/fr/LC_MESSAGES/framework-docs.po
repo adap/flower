@@ -1325,7 +1325,7 @@ msgid ""
 msgstr ""
 "Si tu n'es pas familier avec les Flower Baselines, tu devrais "
 "probablement consulter notre `guide de contribution pour les baselines "
-"<https://flower.ai/docs/contributing-baselines.html>`_."
+"<https://flower.ai/docs/baselines/how-to-contribute-baselines.html>`_."
 
 #: ../../source/contributor-ref-good-first-contributions.rst:27
 msgid ""
@@ -15862,7 +15862,7 @@ msgstr ""
 "l'utilisation de [Flower Baselines](https://flower.ai/docs/using-"
 "baselines.html). Avec cette première version préliminaire, nous invitons "
 "également la communauté à [contribuer à leurs propres lignes de "
-"base](https://flower.ai/docs/contributing-baselines.html)."
+"base](https://flower.ai/docs/baselines/how-to-contribute-baselines.html)."
 
 #: ../../source/ref-changelog.md:662
 msgid ""
@@ -25474,7 +25474,7 @@ msgstr ""
 #~ " papers. If you want to add a"
 #~ " new baseline or experiment, please "
 #~ "check the `Contributing Baselines "
-#~ "<https://flower.ai/docs/contributing-baselines.html>`_ "
+#~ "<https://flower.ai/docs/baselines/how-to-contribute-baselines.html>`_ "
 #~ "section."
 #~ msgstr ""
 

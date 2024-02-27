@@ -14,7 +14,6 @@
 # ==============================================================================
 """Ray backend for the Fleet API using the Simulation Engine."""
 
-import asyncio
 import pathlib
 from logging import INFO
 from typing import Callable, Dict, List, Tuple, Union
@@ -145,7 +144,7 @@ class RayBackend(Backend):
             (app, message, str(node_id), context),
         )
 
-        await asyncio.wait([future])
+        await future
 
         # Fetch result
         (
