@@ -19,6 +19,7 @@ import argparse
 import sys
 from logging import DEBUG, WARN
 from pathlib import Path
+from typing import Optional
 
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.logger import log
@@ -27,13 +28,22 @@ from .driver.driver import Driver
 from .server_app import ServerApp, load_server_app
 
 
-def run(server_app_attr: str, driver: Driver, server_app_dir: str) -> None:
+def run(
+    server_app_attr: str,
+    driver: Driver,
+    server_app_dir: str,
+    loaded_server_app: Optional[ServerApp] = None,
+) -> None:
     """Run ServerApp with a given Driver."""
     if server_app_dir is not None:
         sys.path.insert(0, server_app_dir)
 
     def _load() -> ServerApp:
-        server_app: ServerApp = load_server_app(server_app_attr)
+        server_app: ServerApp = (
+            load_server_app(server_app_attr)
+            if loaded_server_app is None
+            else loaded_server_app
+        )
         return server_app
 
     server_app = _load()

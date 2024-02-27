@@ -17,22 +17,46 @@
 import argparse
 import asyncio
 import threading
+from typing import Optional
 
 import grpc
 
+from flwr.client import ClientApp
 from flwr.common import EventType, event
 from flwr.server.driver.driver import Driver
 from flwr.server.run_serverapp import run
+from flwr.server.server_app import ServerApp
 from flwr.server.superlink.state import StateFactory
 
 
-def run_simulation() -> None:
+def run_from_cli() -> None:
+    """."""
+    args = _parse_args_run_simulation().parse_args()
+
+    run_simulation(
+        num_supernodes=args.num_supernodes,
+        client_app_module_name=args.client_app,
+        backend_name=args.backend,
+        backend_config_json_stream=args.backend_config,
+        working_dir=args.dir,
+        server_app_module_name=args.server_app,
+    )
+
+
+def run_simulation(
+    num_supernodes: int,
+    server_app: Optional[ServerApp] = None,
+    client_app: Optional[ClientApp] = None,
+    backend_name: str = "ray",
+    backend_config: str = "{}",
+    client_app_module_name: Optional[str] = None,
+    server_app_module_name: Optional[str] = None,
+    working_dir: str = "",
+) -> None:
     """."""
     # TODO: below create circular imports
     from flwr.server.app import _register_exit_handlers, _run_driver_api_grpc
     from flwr.server.superlink.fleet.vce import start_vce
-
-    args = _parse_args_run_simulation().parse_args()
 
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
@@ -50,11 +74,12 @@ def run_simulation() -> None:
     superlink_th = threading.Thread(
         target=start_vce,
         kwargs={
-            "num_supernodes": args.num_supernodes,
-            "client_app_module_name": args.client_app,
-            "backend_name": args.backend,
-            "backend_config_json_stream": args.backend_config,
-            "working_dir": args.dir,
+            "num_supernodes": num_supernodes,
+            "client_app_module_name": client_app_module_name,
+            "client_app": client_app,
+            "backend_name": backend_name,
+            "backend_config_json_stream": backend_config,
+            "working_dir": working_dir,
             "state_factory": state_factory,
             "f_stop": f_stop,
         },
@@ -71,7 +96,7 @@ def run_simulation() -> None:
     )
 
     # Launch server app
-    run(args.server_app, driver, args.dir)
+    run(server_app_module_name, driver, working_dir, loaded_server_app=server_app)
 
     del driver
 

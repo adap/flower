@@ -167,11 +167,18 @@ def start_vce(
     backend_config_json_stream: str,
     working_dir: str,
     f_stop: asyncio.Event,
+    client_app: Optional[ClientApp] = None,
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
     """Start Fleet API with the Simulation Engine."""
+    if client_app_module_name is not None and client_app is not None:
+        raise ValueError(
+            "Both `client_app_module_name` and `client_app` are provided, "
+            "but only one is allowed."
+        )
+
     if num_supernodes is not None and existing_nodes_mapping is not None:
         raise ValueError(
             "Both `num_supernodes` and `existing_nodes_mapping` are provided, "
@@ -234,7 +241,11 @@ def start_vce(
     log(INFO, "client_app_module_name = %s", client_app_module_name)
 
     def _load() -> ClientApp:
-        app: ClientApp = load_client_app(client_app_module_name)
+        app: ClientApp = (
+            load_client_app(client_app_module_name)
+            if client_app is None
+            else client_app
+        )
         return app
 
     app = _load
