@@ -19,9 +19,9 @@ from abc import ABC
 from typing import Callable, Dict, Tuple
 
 from flwr.client.client import Client
-from flwr.client.run_state import RunState
 from flwr.common import (
     Config,
+    Context,
     NDArrays,
     Scalar,
     ndarrays_to_parameters,
@@ -70,7 +70,7 @@ Example
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
-    state: RunState
+    context: Context
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return a client's set of properties.
@@ -174,13 +174,13 @@ class NumPyClient(ABC):
         _ = (self, parameters, config)
         return 0.0, 0, {}
 
-    def get_state(self) -> RunState:
-        """Get the run state from this client."""
-        return self.state
+    def get_context(self) -> Context:
+        """Get the run context from this client."""
+        return self.context
 
-    def set_state(self, state: RunState) -> None:
-        """Apply a run state to this client."""
-        self.state = state
+    def set_context(self, context: Context) -> None:
+        """Apply a run context to this client."""
+        self.context = context
 
     def to_client(self) -> Client:
         """Convert to object to Client type and return it."""
@@ -242,7 +242,7 @@ def _fit(self: Client, ins: FitIns) -> FitRes:
         and isinstance(results[1], int)
         and isinstance(results[2], dict)
     ):
-        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
+        raise TypeError(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
 
     # Return FitRes
     parameters_prime, num_examples, metrics = results
@@ -266,7 +266,7 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
         and isinstance(results[1], int)
         and isinstance(results[2], dict)
     ):
-        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE)
+        raise TypeError(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE)
 
     # Return EvaluateRes
     loss, num_examples, metrics = results
@@ -278,21 +278,21 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
     )
 
 
-def _get_state(self: Client) -> RunState:
-    """Return state of underlying NumPyClient."""
-    return self.numpy_client.get_state()  # type: ignore
+def _get_context(self: Client) -> Context:
+    """Return context of underlying NumPyClient."""
+    return self.numpy_client.get_context()  # type: ignore
 
 
-def _set_state(self: Client, state: RunState) -> None:
-    """Apply state to underlying NumPyClient."""
-    self.numpy_client.set_state(state)  # type: ignore
+def _set_context(self: Client, context: Context) -> None:
+    """Apply context to underlying NumPyClient."""
+    self.numpy_client.set_context(context)  # type: ignore
 
 
 def _wrap_numpy_client(client: NumPyClient) -> Client:
     member_dict: Dict[str, Callable] = {  # type: ignore
         "__init__": _constructor,
-        "get_state": _get_state,
-        "set_state": _set_state,
+        "get_context": _get_context,
+        "set_context": _set_context,
     }
 
     # Add wrapper type methods (if overridden)
