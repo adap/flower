@@ -92,7 +92,7 @@ def register_messages_into_state(
     return expected_results
 
 
-def _autoresolve_working_dir(rel_client_app_dir: str = "backend/test") -> str:
+def _autoresolve_working_dir(rel_client_app_dir: str = "backend") -> str:
     """Correctly resolve working directory."""
     file_path = Path(__file__)
     working_dir = Path.cwd()
@@ -105,7 +105,7 @@ def _autoresolve_working_dir(rel_client_app_dir: str = "backend/test") -> str:
 # pylint: disable=too-many-arguments
 def start_and_shutdown(
     backend: str = "ray",
-    clientapp_module: str = "client:client_app",
+    clientapp_module: str = "raybackend_test:client_app",
     working_dir: str = "",
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
@@ -126,7 +126,6 @@ def start_and_shutdown(
     # Resolve working directory if not passed
     if not working_dir:
         working_dir = _autoresolve_working_dir()
-        print(f"---> {working_dir = }")
 
     start_vce(
         num_supernodes=num_supernodes,
@@ -220,7 +219,8 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
 
         This test creates a few nodes and submits a few messages that need to be
         executed by the Backend. In order for that to happen the asyncio
-        producer/consumer logic must function.
+        producer/consumer logic must function. This also severs to evaluate
+        a valid ClientApp.
         """
         num_messages = 113
         num_nodes = 59
