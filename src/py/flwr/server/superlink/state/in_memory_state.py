@@ -93,7 +93,7 @@ class InMemoryState(State):
                 ):
                     return task_ins_list
                 task_ids = self.task_ins_mapping[node_id]
-                num = limit if limit else len(task_ids)
+                num = min(limit, len(task_ids)) if limit else len(task_ids)
                 while len(task_ins_list) < num:
                     # Remove
                     uuid = task_ids.pop(0)
