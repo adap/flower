@@ -23,6 +23,7 @@ import grpc
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event
+from flwr.common.exit_handlers import register_exit_handlers
 from flwr.server.driver.driver import Driver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
@@ -55,7 +56,7 @@ def run_simulation(
 ) -> None:
     """."""
     # TODO: below create circular imports
-    from flwr.server.app import _register_exit_handlers, _run_driver_api_grpc
+    from flwr.server.app import _run_driver_api_grpc
     from flwr.server.superlink.fleet.vce import start_vce
 
     # Initialize StateFactory
@@ -103,7 +104,7 @@ def run_simulation(
     # Trigger stop event
     f_stop.set()
 
-    _register_exit_handlers(
+    register_exit_handlers(
         grpc_servers=[driver_server],
         bckg_threads=[superlink_th],
         event_type=EventType.RUN_SUPERLINK_LEAVE,
