@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Central DP with client side adaptive clipping.
+"""Central differential privacy with adaptive clipping.
 
 Paper (Andrew et al.): https://arxiv.org/abs/1905.03871
 """
@@ -248,9 +248,15 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
 
 
 class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
-    """Wrapper for Central DP with Client Side Adaptive Clipping.
+    """Strategy wrapper for central differential privacy with client-side adaptive
+    clipping.
 
-    Use adaptiveclipping_mod modifier at the client side.
+    Use `adaptiveclipping_mod` modifier at the client side.
+
+    In comparison to `DifferentialPrivacyServerSideAdaptiveClipping`,
+    which performs clipping on the server-side, `DifferentialPrivacyClientSideAdaptiveClipping`
+    expects clipping to happen on the client-side, usually by using the built-in
+    `adaptiveclipping_mod`.
 
     Parameters
     ----------
@@ -271,9 +277,24 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
     clipped_count_stddev : float
         The stddev of the noise added to the count of updates currently below the estimate.
         Andrew et al. recommends to set to `expected_num_records/20`
-    use_geometric_update : bool
-        Use geometric updating of clip. Defaults to True.
-        It is recommended by Andrew et al. to use it.
+
+    Examples
+    --------
+    Create a strategy:
+
+    >>> strategy = fl.server.strategy.FedAvg(...)
+
+    Wrap the strategy with the `DifferentialPrivacyClientSideAdaptiveClipping` wrapper:
+
+    >>> DifferentialPrivacyClientSideAdaptiveClipping(
+    >>>     strategy, cfg.noise_multiplier, cfg.num_sampled_clients
+    >>> )
+
+    On the client, add the `adaptiveclipping_mod` to the client-side mods:
+
+    >>> app = fl.client.ClientApp(
+    >>>     client_fn=FlowerClient().to_client(), mods=[adaptiveclipping_mod]
+    >>> )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -311,9 +332,8 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
         if clip_norm_lr <= 0:
             raise ValueError("The learning rate must be positive.")
 
-        if clipped_count_stddev is not None:
-            if clipped_count_stddev < 0:
-                raise ValueError("The `clipped_count_stddev` must be non-negative.")
+        if clipped_count_stddev is not None and clipped_count_stddev < 0:
+            raise ValueError("The `clipped_count_stddev` must be non-negative.")
 
         self.strategy = strategy
         self.num_sampled_clients = num_sampled_clients

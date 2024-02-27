@@ -50,15 +50,11 @@ class TestClientManagerWithDriver(unittest.TestCase):
         driver.get_nodes.return_value = GetNodesResponse(nodes=expected_nodes)
         client_manager = SimpleClientManager()
         lock = threading.Lock()
-
+        f_stop = threading.Event()
         # Execute
         thread = threading.Thread(
             target=update_client_manager,
-            args=(
-                driver,
-                client_manager,
-                lock,
-            ),
+            args=(driver, client_manager, lock, f_stop),
             daemon=True,
         )
         thread.start()
@@ -83,5 +79,6 @@ class TestClientManagerWithDriver(unittest.TestCase):
         assert node_ids == {node.node_id for node in expected_nodes}
         assert updated_node_ids == {node.node_id for node in expected_updated_nodes}
 
+        f_stop.set()
         # Exit
         thread.join()

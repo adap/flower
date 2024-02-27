@@ -5,7 +5,6 @@ The code is generally adapted from:
 https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html
 """
 
-
 from typing import List, Tuple
 import mxnet as mx
 from mxnet import gluon
