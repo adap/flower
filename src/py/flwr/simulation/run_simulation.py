@@ -29,7 +29,7 @@ from flwr.server.server_app import ServerApp
 from flwr.server.superlink.state import StateFactory
 
 
-def run_from_cli() -> None:
+def run_simulation_from_cli() -> None:
     """."""
     args = _parse_args_run_simulation().parse_args()
 
@@ -37,7 +37,7 @@ def run_from_cli() -> None:
         num_supernodes=args.num_supernodes,
         client_app_module_name=args.client_app,
         backend_name=args.backend,
-        backend_config_json_stream=args.backend_config,
+        backend_config=args.backend_config,
         working_dir=args.dir,
         server_app_module_name=args.server_app,
     )
