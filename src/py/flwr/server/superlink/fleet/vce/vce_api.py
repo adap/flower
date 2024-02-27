@@ -21,7 +21,7 @@ import traceback
 from logging import DEBUG, ERROR, INFO
 from typing import Callable, Dict, Optional
 
-from flwr.client.clientapp import ClientApp, load_client_app
+from flwr.client.clientapp import ClientApp, LoadClientAppError, load_client_app
 from flwr.client.node_state import NodeState
 from flwr.common.logger import log
 from flwr.common.serde import message_from_taskins, message_to_taskres
@@ -90,8 +90,12 @@ async def worker(
             log(DEBUG, "Async worker: %s", e)
             break
 
-        except Exception as ex:  # pylint: disable=broad-exception-caught
+        except LoadClientAppError as app_ex:
+            log(ERROR, "Async worker: %s", app_ex)
+            log(ERROR, traceback.format_exc())
+            raise
 
+        except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, ex)
             log(ERROR, traceback.format_exc())
             break
@@ -158,21 +162,45 @@ async def run(
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals
 def start_vce(
-    num_supernodes: int,
     client_app_module_name: str,
     backend_name: str,
     backend_config_json_stream: str,
-    state_factory: StateFactory,
     working_dir: str,
     f_stop: asyncio.Event,
+    num_supernodes: Optional[int] = None,
+    state_factory: Optional[StateFactory] = None,
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
-    """Start Fleet API with the VirtualClientEngine (VCE)."""
+    """Start Fleet API with the Simulation Engine."""
+    if num_supernodes is not None and existing_nodes_mapping is not None:
+        raise ValueError(
+            "Both `num_supernodes` and `existing_nodes_mapping` are provided, "
+            "but only one is allowed."
+        )
+    if num_supernodes is None:
+        if state_factory is None or existing_nodes_mapping is None:
+            raise ValueError(
+                "If not passing an existing `state_factory` and associated "
+                "`existing_nodes_mapping` you must supply `num_supernodes` to indicate "
+                "how many nodes to insert into a new StateFactory that will be created."
+            )
     if existing_nodes_mapping:
+        if state_factory is None:
+            raise ValueError(
+                "You passed `existing_nodes_mapping` but no `state_factory` was passed."
+            )
+        log(INFO, "Using exiting NodeToPartitionMapping and StateFactory.")
         # Use mapping constructed externally. This also means nodes
         # have previously being registered.
         nodes_mapping = existing_nodes_mapping
-    else:
+
+    if not state_factory:
+        log(INFO, "A StateFactory was not supplied to the SimulationEngine.")
+        # Create an empty in-memory state factory
+        state_factory = StateFactory(":flwr-in-memory-state:")
+        log(INFO, "Created new %s.", state_factory.__class__.__name__)
+
+    if num_supernodes:
         # Register SuperNodes
         nodes_mapping = _register_nodes(
             num_nodes=num_supernodes, state_factory=state_factory
