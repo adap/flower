@@ -12,7 +12,7 @@ Quickstart PyTorch
 
 In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using Flower and PyTorch.
 
-First of all, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.ai/docs/recommended-env-setup.html>`_.
+First of all, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
 Our example consists of one *server* and two *clients* all having the same model.
 
