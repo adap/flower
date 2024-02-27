@@ -112,9 +112,8 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
         paramsrecord = compat.parameters_to_parametersrecord(
             parameters, keep_input=True
         )
-
-    # Get initial parameters from one of the clients
     else:
+        # Get initial parameters from one of the clients
         log(INFO, "Requesting initial parameters from one random client")
         random_client = context.client_manager.sample(1)[0]
         # Send GetParametersIns and get the response
