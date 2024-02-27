@@ -15,8 +15,8 @@
 """Common function to register exit handlers for server and client."""
 
 
+import sys
 from signal import SIGINT, SIGTERM, signal
-from sys import exit
 from threading import Thread
 from types import FrameType
 from typing import List, Optional
@@ -75,7 +75,7 @@ def register_exit_handlers(
         event_res.result()
 
         # Setup things for graceful exit
-        exit(0)
+        sys.exit(0)
 
     default_handlers[SIGINT] = signal(  # type: ignore
         SIGINT,
