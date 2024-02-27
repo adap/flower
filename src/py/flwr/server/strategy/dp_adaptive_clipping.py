@@ -64,9 +64,24 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
     clipped_count_stddev : float
         The stddev of the noise added to the count of updates currently below the estimate.
         Andrew et al. recommends to set to `expected_num_records/20`
-    use_geometric_update : bool
-        Use geometric updating of clip. Defaults to True.
-        It is recommended by Andrew et al. to use it.
+
+     Examples
+    --------
+    Create a strategy:
+
+    >>> strategy = fl.server.strategy.FedAvg(...)
+
+    Wrap the strategy with the `DifferentialPrivacyClientSideAdaptiveClipping` wrapper:
+
+    >>> DifferentialPrivacyClientSideAdaptiveClipping(
+    >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+    >>> )
+
+    On the client, add the `adaptiveclipping_mod` to the client-side mods:
+
+    >>> app = fl.client.ClientApp(
+    >>>     client_fn=FlowerClient().to_client(), mods=[adaptiveclipping_mod]
+    >>> )
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
@@ -104,9 +119,8 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
         if clip_norm_lr <= 0:
             raise ValueError("The learning rate must be positive.")
 
-        if clipped_count_stddev is not None:
-            if clipped_count_stddev < 0:
-                raise ValueError("The `clipped_count_stddev` must be non-negative.")
+        if clipped_count_stddev is not None and clipped_count_stddev < 0:
+            raise ValueError("The `clipped_count_stddev` must be non-negative.")
 
         self.strategy = strategy
         self.num_sampled_clients = num_sampled_clients

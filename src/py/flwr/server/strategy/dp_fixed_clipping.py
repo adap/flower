@@ -220,7 +220,7 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
 
     >>> strategy = fl.server.strategy.FedAvg(...)
 
-    Wrap the strategy with the `DifferentialPrivacyServerSideFixedClipping` wrapper:
+    Wrap the strategy with the `DifferentialPrivacyClientSideFixedClipping` wrapper:
 
     >>> DifferentialPrivacyClientSideFixedClipping(
     >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
