@@ -25,7 +25,7 @@ import ray
 from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
-from flwr.client.client_app import ClientApp
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import Context, Message
 from flwr.common.logger import log
 
@@ -66,6 +66,9 @@ class VirtualClientEngineActor(ABC):
 
             # Handle task message
             out_message = app(message=message, context=context)
+
+        except LoadClientAppError as load_ex:
+            raise load_ex
 
         except Exception as ex:
             client_trace = traceback.format_exc()

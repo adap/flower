@@ -15,10 +15,12 @@
 """Ray backend for the Fleet API using the Simulation Engine."""
 
 import pathlib
-from logging import INFO
+from logging import ERROR, INFO
 from typing import Callable, Dict, List, Tuple, Union
 
-from flwr.client.client_app import ClientApp
+import ray
+
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
@@ -45,6 +47,9 @@ class RayBackend(Backend):
         """Prepare RayBackend by initialising Ray and creating the ActorPool."""
         log(INFO, "Initialising: %s", self.__class__.__name__)
         log(INFO, "Backend config: %s", backend_config)
+
+        if not pathlib.Path(work_dir).exists():
+            raise ValueError(f"Specified work_dir {work_dir} does not exist.")
 
         # Init ray and append working dir if needed
         runtime_env = (
@@ -138,22 +143,34 @@ class RayBackend(Backend):
         """
         node_id = message.metadata.dst_node_id
 
-        # Submite a task to the pool
-        future = await self.pool.submit(
-            lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-            (app, message, str(node_id), context),
-        )
+        try:
+            # Submite a task to the pool
+            future = await self.pool.submit(
+                lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
+                (app, message, str(node_id), context),
+            )
 
-        await future
+            await future
 
-        # Fetch result
-        (
-            out_mssg,
-            updated_context,
-        ) = await self.pool.fetch_result_and_return_actor_to_pool(future)
+            # Fetch result
+            (
+                out_mssg,
+                updated_context,
+            ) = await self.pool.fetch_result_and_return_actor_to_pool(future)
 
-        return out_mssg, updated_context
+            return out_mssg, updated_context
+
+        except LoadClientAppError as load_ex:
+            log(
+                ERROR,
+                "An exception was raised when processing a message. Terminating %s",
+                self.__class__.__name__,
+            )
+            await self.terminate()
+            raise load_ex
 
     async def terminate(self) -> None:
         """Terminate all actors in actor pool."""
         await self.pool.terminate_all_actors()
+        ray.shutdown()
+        log(INFO, "Terminated %s", self.__class__.__name__)

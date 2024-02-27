@@ -16,13 +16,12 @@
 
 import asyncio
 from math import pi
+from pathlib import Path
 from typing import Callable, Dict, Optional, Tuple, Union
 from unittest import IsolatedAsyncioTestCase
 
-import ray
-
 from flwr.client import Client, NumPyClient
-from flwr.client.client_app import ClientApp
+from flwr.client.client_app import ClientApp, LoadClientAppError, load_client_app
 from flwr.common import (
     Config,
     ConfigsRecord,
@@ -35,8 +34,7 @@ from flwr.common import (
 )
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
-
-from .raybackend import RayBackend
+from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
 
 
 class DummyClient(NumPyClient):
@@ -60,6 +58,19 @@ def _load_app() -> ClientApp:
     return ClientApp(client_fn=get_dummy_client)
 
 
+client_app = ClientApp(
+    client_fn=get_dummy_client,
+)
+
+
+def _load_from_module(client_app_module_name: str) -> Callable[[], ClientApp]:
+    def _load_app() -> ClientApp:
+        app: ClientApp = load_client_app(client_app_module_name)
+        return app
+
+    return _load_app
+
+
 async def backend_build_process_and_termination(
     backend: RayBackend,
     process_args: Optional[Tuple[Callable[[], ClientApp], Message, Context]] = None,
@@ -73,9 +84,36 @@ async def backend_build_process_and_termination(
 
     await backend.terminate()
 
-    ray.shutdown()
-
     return to_return
+
+
+def _create_message_and_context() -> Tuple[Message, Context, float]:
+
+    # Construct a Message
+    mult_factor = 2024
+    getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
+    recordset = getpropertiesins_to_recordset(getproperties_ins)
+    message = Message(
+        content=recordset,
+        metadata=Metadata(
+            run_id=0,
+            message_id="",
+            group_id="",
+            src_node_id=0,
+            dst_node_id=0,
+            reply_to_message="",
+            ttl="",
+            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+        ),
+    )
+
+    # Construct emtpy Context
+    context = Context(state=RecordSet())
+
+    # Expected output
+    expected_output = pi * mult_factor
+
+    return message, context, expected_output
 
 
 class AsyncTestRayBackend(IsolatedAsyncioTestCase):
@@ -88,33 +126,18 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
             backend_build_process_and_termination(backend=backend, process_args=None)
         )
 
-    def test_backend_creation_submit_and_termination(self) -> None:
-        """Test submit."""
-        backend = RayBackend(backend_config={}, work_dir="")
+    def test_backend_creation_submit_and_termination(
+        self,
+        client_app_loader: Callable[[], ClientApp] = _load_app,
+        workdir: str = "",
+    ) -> None:
+        """Test submitting a message to a given ClientApp."""
+        backend = RayBackend(backend_config={}, work_dir=workdir)
 
         # Define ClientApp
-        client_app_callable = _load_app
+        client_app_callable = client_app_loader
 
-        # Construct a Message
-        mult_factor = 2024
-        getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
-        recordset = getpropertiesins_to_recordset(getproperties_ins)
-        message = Message(
-            content=recordset,
-            metadata=Metadata(
-                run_id=0,
-                message_id="",
-                group_id="",
-                src_node_id=0,
-                dst_node_id=0,
-                reply_to_message="",
-                ttl="",
-                message_type=MESSAGE_TYPE_GET_PROPERTIES,
-            ),
-        )
-
-        # Construct emtpy Context
-        context = Context(state=RecordSet())
+        message, context, expected_output = _create_message_and_context()
 
         res = asyncio.run(
             backend_build_process_and_termination(
@@ -131,11 +154,47 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
         content = out_mssg.content
         assert (
             content.configs_records["getpropertiesres.properties"]["result"]
-            == pi * mult_factor
+            == expected_output
         )
 
         # Verify context is correct
         obtained_result_in_context = updated_context.state.configs_records["result"][
             "result"
         ]
-        assert obtained_result_in_context == pi * mult_factor
+        assert obtained_result_in_context == expected_output
+
+    def test_backend_creation_submit_and_termination_non_existing_client_app(
+        self,
+    ) -> None:
+        """Testing with ClientApp module that does not exist."""
+        with self.assertRaises(LoadClientAppError):
+            self.test_backend_creation_submit_and_termination(
+                client_app_loader=_load_from_module("a_non_existing_module:app")
+            )
+
+    def test_backend_creation_submit_and_termination_existing_client_app(
+        self,
+    ) -> None:
+        """Testing with ClientApp module that exist."""
+        # Resolve what should be the workdir to pass upon Backend initialisation
+        file_path = Path(__file__)
+        working_dir = Path.cwd()
+        rel_workdir = file_path.relative_to(working_dir)
+
+        # Susbtract last element
+        rel_workdir_str = str(rel_workdir.parent)
+
+        self.test_backend_creation_submit_and_termination(
+            client_app_loader=_load_from_module("raybackend_test:client_app"),
+            workdir=rel_workdir_str,
+        )
+
+    def test_backend_creation_submit_and_termination_existing_client_app_unsetworkdir(
+        self,
+    ) -> None:
+        """Testing with ClientApp module that exist but the passed workdir does not."""
+        with self.assertRaises(ValueError):
+            self.test_backend_creation_submit_and_termination(
+                client_app_loader=_load_from_module("raybackend_test:client_app"),
+                workdir="/?&%$^#%@$!",
+            )
