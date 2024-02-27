@@ -42,7 +42,7 @@ def start_update_client_manager_thread(
     ----------
     driver : Driver
         The Driver object to use.
-    client_manager :ClientManager
+    client_manager : ClientManager
         The ClientManager object to be updated.
 
     Returns
