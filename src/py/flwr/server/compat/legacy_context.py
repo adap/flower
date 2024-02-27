@@ -15,6 +15,8 @@
 """Legacy Context."""
 
 
+from dataclasses import dataclass
+
 from flwr.common import Context
 
 from ..client_manager import ClientManager
@@ -23,6 +25,7 @@ from ..server_config import ServerConfig
 from ..strategy import Strategy
 
 
+@dataclass
 class LegacyContext(Context):
     """Legacy Context."""
 

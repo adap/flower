@@ -22,7 +22,7 @@ from logging import DEBUG, INFO
 from typing import Dict, Optional, cast
 
 import flwr.common.recordset_compat as compat
-from flwr.common import Context, GetParametersIns, log
+from flwr.common import Context, GetParametersIns, log, ConfigsRecord
 from flwr.common.constant import (
     MESSAGE_TYPE_EVALUATE,
     MESSAGE_TYPE_FIT,
@@ -81,8 +81,9 @@ class DefaultWorkflow:
         # Run federated learning for num_rounds
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
-        cfg = context.state.configs_records[CONFIGS_RECORD_KEY]
+        cfg = ConfigsRecord()
         cfg[KEY_START_TIME] = start_time
+        context.state.configs_records[CONFIGS_RECORD_KEY] = cfg
 
         for current_round in range(1, context.config.num_rounds + 1):
             cfg[KEY_CURRENT_ROUND] = current_round
