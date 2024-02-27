@@ -14,6 +14,8 @@
 # ==============================================================================
 """Constants for differential privacy."""
 
+
+KEY_CLIPPING_NORM = "clipping_norm"
 CLIENTS_DISCREPANCY_WARNING = (
     "The number of clients returning parameters (%s)"
     " differs from the number of sampled clients (%s)."
