@@ -23,11 +23,11 @@ from ..client_manager import SimpleClientManager
 from .app_utils import start_update_client_manager_thread
 
 
-class TestDefaultWorkflow(unittest.TestCase):
-    """Tests for default workflows."""
+class TestUtils(unittest.TestCase):
+    """Tests for utility functions."""
 
     def test_start_update_client_manager_thread(self) -> None:
-        """Test _update_client_manager function."""
+        """Test start_update_client_manager_thread function."""
         # Prepare
         sleep = time.sleep
         sleep_patch = patch("time.sleep", lambda x: sleep(x / 100))
