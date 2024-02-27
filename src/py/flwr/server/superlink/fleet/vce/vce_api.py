@@ -18,8 +18,8 @@
 import asyncio
 import json
 import traceback
-from logging import DEBUG, ERROR, INFO
-from typing import Callable, Dict, Optional
+from logging import DEBUG, ERROR, INFO, WARN
+from typing import Callable, Dict, List, Optional
 
 from flwr.client.client_app import ClientApp, LoadClientAppError, load_client_app
 from flwr.client.node_state import NodeState
@@ -101,21 +101,50 @@ async def worker(
             break
 
 
-async def generate_pull_requests(
+async def add_taskins_to_queue(
     queue: "asyncio.Queue[TaskIns]",
     state_factory: StateFactory,
     nodes_mapping: NodeToPartitionMapping,
+    backend: Backend,
+    consumers: List["asyncio.Task[None]"],
     f_stop: asyncio.Event,
 ) -> None:
     """Retrieve TaskIns and add it to the queue."""
     state = state_factory.state()
+    num_initial_consumers = len(consumers)
     while not f_stop.is_set():
         for node_id in nodes_mapping.keys():
             task_ins = state.get_task_ins(node_id=node_id, limit=1)
             if task_ins:
                 await queue.put(task_ins[0])
-        log(DEBUG, "TaskIns in queue: %i", queue.qsize())
 
+        # Count consumers that are running
+        num_active = sum(not (cc.done()) for cc in consumers)
+
+        # Alert if number of consumers decreased by half
+        if num_active < num_initial_consumers // 2:
+            log(
+                WARN,
+                "Number of active workers has more than halved: (%i/%i active)",
+                num_active,
+                num_initial_consumers,
+            )
+
+        # Break if consumers died
+        if num_active == 0:
+            raise RuntimeError("All workers have died. Ending Simulation.")
+
+        # Log some stats
+        log(
+            DEBUG,
+            "Simulation Engine stats: "
+            "(Active workers: (%i/%i) | %s (%i workers) | Tasks in queue: %i)",
+            num_active,
+            num_initial_consumers,
+            backend.__class__.__name__,
+            backend.num_workers,
+            queue.qsize(),
+        )
         await asyncio.sleep(1.0)
     log(DEBUG, "Async producer: Stopped pulling from StateFactory.")
 
@@ -132,32 +161,55 @@ async def run(
     # pylint: disable=fixme
     queue: "asyncio.Queue[TaskIns]" = asyncio.Queue(128)
 
-    # Build backend
-    await backend.build()
-    worker_tasks = [
-        asyncio.create_task(
-            worker(app, queue, node_states, state_factory, nodes_mapping, backend)
+    try:
+        # Build backend
+        await backend.build()
+
+        # Add workers (they submit Messages to Backend)
+        worker_tasks = [
+            asyncio.create_task(
+                worker(app, queue, node_states, state_factory, nodes_mapping, backend)
+            )
+            for _ in range(backend.num_workers)
+        ]
+        # Create producer (adds TaskIns into Queue)
+        producer = asyncio.create_task(
+            add_taskins_to_queue(
+                queue, state_factory, nodes_mapping, backend, worker_tasks, f_stop
+            )
         )
-        for _ in range(backend.num_workers)
-    ]
-    producer = asyncio.create_task(
-        generate_pull_requests(queue, state_factory, nodes_mapping, f_stop)
-    )
 
-    await asyncio.gather(producer)
+        # Wait for producer to finish
+        # The producer runs forever until f_stop is set or until
+        # all worker (consumer) coroutines are completed. Workers
+        # also run forever and only end if an exception is raised.
+        await asyncio.gather(producer)
 
-    # Produced task terminated, now cancel worker tasks
-    for w_t in worker_tasks:
-        _ = w_t.cancel()
+    except Exception as ex:
 
-    while not all(w_t.done() for w_t in worker_tasks):
-        log(DEBUG, "Terminating async workers...")
-        await asyncio.sleep(0.5)
+        log(ERROR, "An exception occured!! %s", ex)
+        log(ERROR, traceback.format_exc())
+        log(WARN, "Stopping Simulation Engine.")
 
-    await asyncio.gather(*worker_tasks)
+        # Manually trigger stopping event
+        f_stop.set()
 
-    # Terminate backend
-    await backend.terminate()
+        # Raise exception
+        raise RuntimeError("Simulation Engine crashed.") from ex
+
+    finally:
+        # Produced task terminated, now cancel worker tasks
+        for w_t in worker_tasks:
+            _ = w_t.cancel()
+
+        while not all(w_t.done() for w_t in worker_tasks):
+            log(DEBUG, "Terminating async workers...")
+            await asyncio.sleep(0.5)
+
+        await asyncio.gather(*[w_t for w_t in worker_tasks if not w_t.done()])
+
+        # Terminate backend
+        await backend.terminate()
 
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals
