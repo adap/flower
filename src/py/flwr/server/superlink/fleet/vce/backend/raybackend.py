@@ -48,6 +48,9 @@ class RayBackend(Backend):
         log(INFO, "Initialising: %s", self.__class__.__name__)
         log(INFO, "Backend config: %s", backend_config)
 
+        if not pathlib.Path(work_dir).exists():
+            raise ValueError(f"Specified work_dir {work_dir} does not exist.")
+
         # Init ray and append working dir if needed
         runtime_env = (
             self._configure_runtime_env(work_dir=work_dir) if work_dir else None
