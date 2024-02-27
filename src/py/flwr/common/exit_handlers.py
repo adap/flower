@@ -40,7 +40,7 @@ def register_exit_handlers(
         signalnum,
         frame: FrameType,  # pylint: disable=unused-argument
     ) -> None:
-        """Exit handler to be registered with signal.signal.
+        """Exit handler to be registered with `signal.signal`.
 
         When called will reset signal handler to original signal handler from
         default_handlers.
