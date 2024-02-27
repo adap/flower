@@ -74,7 +74,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
     Wrap the strategy with the `DifferentialPrivacyClientSideAdaptiveClipping` wrapper:
 
     >>> DifferentialPrivacyClientSideAdaptiveClipping(
-    >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+    >>>     strategy, cfg.noise_multiplier, cfg.num_sampled_clients
     >>> )
 
     On the client, add the `adaptiveclipping_mod` to the client-side mods:
