@@ -38,8 +38,9 @@ def run_simulation() -> None:
     state_factory = StateFactory(":flwr-in-memory-state:")
 
     # Start Driver API
+    driver_address = "0.0.0.0:9098"
     driver_server: grpc.Server = _run_driver_api_grpc(
-        address="0.0.0.0:9091",
+        address=driver_address,
         state_factory=state_factory,
         certificates=None,
     )
@@ -65,7 +66,7 @@ def run_simulation() -> None:
 
     # Initialize Driver
     driver = Driver(
-        driver_service_address="0.0.0.0:9091",
+        driver_service_address=driver_address,
         root_certificates=None,
     )
 
