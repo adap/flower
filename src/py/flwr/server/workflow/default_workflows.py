@@ -22,7 +22,7 @@ from logging import DEBUG, INFO
 from typing import Dict, Optional, cast
 
 import flwr.common.recordset_compat as compat
-from flwr.common import Context, GetParametersIns, log, ConfigsRecord
+from flwr.common import ConfigsRecord, Context, GetParametersIns, log
 from flwr.common.constant import (
     MESSAGE_TYPE_EVALUATE,
     MESSAGE_TYPE_FIT,
