@@ -20,6 +20,8 @@ import sys
 import time
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
+from signal import SIGINT, SIGTERM, signal
+from types import FrameType
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from flwr.client.client import Client
@@ -104,7 +106,7 @@ def run_client_app() -> None:
         root_certificates=root_certificates,
         insecure=args.insecure,
     )
-    event(EventType.RUN_CLIENT_APP_LEAVE)
+    _register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
 def _parse_args_run_client_app() -> argparse.ArgumentParser:
@@ -553,3 +555,41 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         )
 
     return connection, address
+
+
+def _register_exit_handlers(
+    event_type: EventType,
+) -> None:
+    default_handlers = {
+        SIGINT: None,
+        SIGTERM: None,
+    }
+
+    def graceful_exit_handler(  # type: ignore
+        signalnum,
+        frame: FrameType,  # pylint: disable=unused-argument
+    ) -> None:
+        """Exit handler to be registered with signal.signal.
+
+        When called will reset signal handler to original signal handler from
+        default_handlers.
+        """
+        # Reset to default handler
+        signal(signalnum, default_handlers[signalnum])
+
+        event_res = event(event_type=event_type)
+
+        # Ensure event has happend
+        event_res.result()
+
+        # Setup things for graceful exit
+        sys.exit(0)
+
+    default_handlers[SIGINT] = signal(  # type: ignore
+        SIGINT,
+        graceful_exit_handler,  # type: ignore
+    )
+    default_handlers[SIGTERM] = signal(  # type: ignore
+        SIGTERM,
+        graceful_exit_handler,  # type: ignore
+    )
