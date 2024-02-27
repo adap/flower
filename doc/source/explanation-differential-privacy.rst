@@ -207,10 +207,10 @@ To use local DP to add noise to the client model parameters before sending them 
 
 .. image:: ./_static/DP/localdp.png
   :align: center
-  :width: 800
+  :width: 700
   :alt: local DP mod
 
-  Below is a sample code about how to use :code:`LocalDpMod`:
+Below is a sample code about how to use :code:`LocalDpMod`:
 
 .. code-block:: python
 
