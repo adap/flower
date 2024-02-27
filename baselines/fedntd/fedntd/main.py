@@ -5,6 +5,7 @@ from typing import Dict
 import flwr as fl
 import hydra
 from datasets.utils.logging import disable_progress_bar
+from flwr.common import Scalar
 from flwr_datasets import FederatedDataset
 from omegaconf import DictConfig, OmegaConf
 
@@ -28,9 +29,9 @@ def main(cfg: DictConfig) -> None:
     mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
     centralized_testset = mnist_fds.load_full("test")
 
-    def fit_config(server_round: int) -> Dict[str, float]:
+    def fit_config(server_round: int) -> Dict[str, Scalar]:
         """Return a configuration with static batch size and (local) epochs."""
-        config = {
+        config: Dict[str, Scalar] = {
             "epochs": 1,
             "lr": 0.01,
         }
