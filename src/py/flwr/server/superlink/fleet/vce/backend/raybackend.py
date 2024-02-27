@@ -18,7 +18,7 @@ import pathlib
 from logging import INFO
 from typing import Callable, Dict, List, Tuple, Union
 
-from flwr.client.clientapp import ClientApp
+from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message

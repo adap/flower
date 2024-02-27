@@ -25,7 +25,7 @@ import ray
 from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
-from flwr.client.clientapp import ClientApp
+from flwr.client.client_app import ClientApp
 from flwr.common import Context, Message
 from flwr.common.logger import log
 
