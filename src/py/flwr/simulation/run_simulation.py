@@ -48,15 +48,15 @@ def run_simulation() -> None:
     f_stop = asyncio.Event()
     superlink_th = threading.Thread(
         target=start_vce,
-        args=(
-            args.num_supernodes,
-            args.client_app,
-            args.backend,
-            args.backend_config,
-            state_factory,
-            args.dir,
-            f_stop,
-        ),
+        kwargs={
+            "num_supernodes": args.num_supernodes,
+            "client_app_module_name": args.client_app,
+            "backend_name": args.backend,
+            "backend_config_json_stream": args.backend_config,
+            "working_dir": args.dir,
+            "state_factory": state_factory,
+            "f_stop": f_stop,
+        },
         daemon=False,
     )
 
