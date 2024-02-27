@@ -1,12 +1,15 @@
-"""Create and connect the building blocks for your experiments; start the simulation.
+"""Runs CNN federated learning for MNIST dataset."""
 
-It includes processioning the dataset, instantiate strategy, specify how the global
-model is going to be evaluated, etc. At the end, this script saves the results.
-"""
-# these are the basic packages you'll need here
-# feel free to remove some if aren't needed
+from typing import Dict
+
+import flwr as fl
 import hydra
+from datasets.utils.logging import disable_progress_bar
+from flwr_datasets import FederatedDataset
 from omegaconf import DictConfig, OmegaConf
+
+from fedntd.client import get_client_fn
+from fedntd.server import get_evaluate_fn
 
 
 @hydra.main(config_path="conf", config_name="base", version_base=None)
@@ -18,39 +21,35 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-    # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
 
-    # 2. Prepare your dataset
-    # here you should call a function in datasets.py that returns whatever is needed to:
-    # (1) ensure the server can access the dataset used to evaluate your model after
-    # aggregation
-    # (2) tell each client what dataset partitions they should use (e.g. a this could
-    # be a location in the file system, a list of dataloader, a list of ids to extract
-    # from a dataset, it's up to you)
+    NUM_CLIENTS = 2
 
-    # 3. Define your clients
-    # Define a function that returns another function that will be used during
-    # simulation to instantiate each individual client
-    # client_fn = client.<my_function_that_returns_a_function>()
+    mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
+    centralized_testset = mnist_fds.load_full("test")
 
-    # 4. Define your strategy
-    # pass all relevant argument (including the global dataset used after aggregation,
-    # if needed by your method.)
-    # strategy = instantiate(cfg.strategy, <additional arguments if desired>)
+    def fit_config(server_round: int) -> Dict[str, float]:
+        """Return a configuration with static batch size and (local) epochs."""
+        config = {
+            "epochs": 1,
+            "lr": 0.01,
+        }
+        return config
 
-    # 5. Start Simulation
-    # history = fl.simulation.start_simulation(<arguments for simulation>)
+    strategy = fl.server.strategy.FedAvg(
+        on_fit_config_fn=fit_config,
+        evaluate_fn=get_evaluate_fn(centralized_testset),
+    )
 
-    # 6. Save your results
-    # Here you can save the `history` returned by the simulation and include
-    # also other buffers, statistics, info needed to be saved in order to later
-    # on generate the plots you provide in the README.md. You can for instance
-    # access elements that belong to the strategy for example:
-    # data = strategy.get_my_custom_data() -- assuming you have such method defined.
-    # Hydra will generate for you a directory each time you run the code. You
-    # can retrieve the path to that directory with this:
-    # save_path = HydraConfig.get().runtime.output_dir
+    disable_progress_bar()
+
+    fl.simulation.start_simulation(
+        client_fn=get_client_fn(mnist_fds),
+        num_clients=NUM_CLIENTS,
+        config=fl.server.ServerConfig(num_rounds=3),
+        strategy=strategy,
+        actor_kwargs={"on_actor_init_fn": disable_progress_bar},
+    )
 
 
 if __name__ == "__main__":
