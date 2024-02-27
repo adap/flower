@@ -17,16 +17,50 @@
 import asyncio
 from math import pi
 from pathlib import Path
-from typing import Callable, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union
 from unittest import IsolatedAsyncioTestCase
 
+from flwr.client import Client, NumPyClient
 from flwr.client.clientapp import ClientApp, LoadClientAppError, load_client_app
-from flwr.common import Context, GetPropertiesIns, Message, Metadata, RecordSet
+from flwr.common import (
+    Config,
+    ConfigsRecord,
+    Context,
+    GetPropertiesIns,
+    Message,
+    Metadata,
+    RecordSet,
+    Scalar,
+)
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
+from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
 
-from .raybackend import RayBackend
-from .test.client import _load_app
+
+class DummyClient(NumPyClient):
+    """A dummy NumPyClient for tests."""
+
+    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+        """Return properties by doing a simple calculation."""
+        result = float(config["factor"]) * pi
+
+        # store something in context
+        self.context.state.configs_records["result"] = ConfigsRecord({"result": result})
+        return {"result": result}
+
+
+def get_dummy_client(cid: str) -> Client:  # pylint: disable=unused-argument
+    """Return a DummyClient converted to Client type."""
+    return DummyClient().to_client()
+
+
+def _load_app() -> ClientApp:
+    return ClientApp(client_fn=get_dummy_client)
+
+
+client_app = ClientApp(
+    client_fn=get_dummy_client,
+)
 
 
 def _load_from_module(client_app_module_name: str) -> Callable[[], ClientApp]:
@@ -147,11 +181,11 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
         working_dir = Path.cwd()
         rel_workdir = file_path.relative_to(working_dir)
 
-        # Susbtract lats element and append "test" (to make it point ot .test dir)
-        rel_workdir_str = str(rel_workdir.parent / "test")
+        # Susbtract last element
+        rel_workdir_str = str(rel_workdir.parent)
 
         self.test_backend_creation_submit_and_termination(
-            client_app_loader=_load_from_module("client:client_app"),
+            client_app_loader=_load_from_module("raybackend_test:client_app"),
             workdir=rel_workdir_str,
         )
 
@@ -161,6 +195,6 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
         """Testing with ClientApp module that exist but the passed workdir does not."""
         with self.assertRaises(ValueError):
             self.test_backend_creation_submit_and_termination(
-                client_app_loader=_load_from_module("test.client:client_app"),
+                client_app_loader=_load_from_module("raybackend_test:client_app"),
                 workdir="/?&%$^#%@$!",
             )
