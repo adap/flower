@@ -144,9 +144,7 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
         """Testing with ClientApp module that exist."""
         # Resolve what should be the workdir to pass upon Backend initialisation
         file_path = Path(__file__)
-        print(f"{file_path = }")
         working_dir = Path.cwd()
-        print(f"{working_dir = }")
         rel_workdir = file_path.relative_to(working_dir)
 
         # Susbtract lats element and append "test" (to make it point ot .test dir)
