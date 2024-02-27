@@ -18,7 +18,7 @@
 from abc import ABC, abstractmethod
 from typing import Callable, Dict, Tuple
 
-from flwr.client.clientapp import ClientApp
+from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.message import Message
 from flwr.common.typing import ConfigsRecordValues
