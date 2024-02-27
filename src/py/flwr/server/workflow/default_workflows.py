@@ -15,11 +15,9 @@
 """Legacy default workflows."""
 
 
-import threading
-import time
 import timeit
 from logging import DEBUG, INFO
-from typing import Dict, Optional, cast
+from typing import Optional, cast
 
 import flwr.common.recordset_compat as compat
 from flwr.common import ConfigsRecord, Context, GetParametersIns, log
@@ -29,8 +27,7 @@ from flwr.common.constant import (
     MESSAGE_TYPE_GET_PARAMETERS,
 )
 
-from ..client_manager import ClientManager
-from ..compat.driver_client_proxy import DriverClientProxy
+from ..compat.app_utils import start_update_client_manager_thread
 from ..compat.legacy_context import LegacyContext
 from ..driver import Driver
 from ..typing import Workflow
@@ -64,16 +61,9 @@ class DefaultWorkflow:
             )
 
         # Start the thread updating nodes
-        f_stop = threading.Event()
-        client_manager_thread = threading.Thread(
-            target=_update_client_manager,
-            args=(
-                driver,
-                context.client_manager,
-                f_stop,
-            ),
+        thread, f_stop = start_update_client_manager_thread(
+            driver, context.client_manager
         )
-        client_manager_thread.start()
 
         # Initialize parameters
         default_init_params_workflow(driver, context)
@@ -105,52 +95,7 @@ class DefaultWorkflow:
         # Terminate the thread
         f_stop.set()
         del driver
-        client_manager_thread.join()
-
-
-def _update_client_manager(
-    driver: Driver,
-    client_manager: ClientManager,
-    f_stop: threading.Event,
-) -> None:
-    """Update the nodes list in the client manager.
-
-    This function periodically communicates with the associated driver to get all
-    node_ids. Each node_id is then converted into a `DriverClientProxy` instance
-    and stored in the `registered_nodes` dictionary with node_id as key.
-
-    New nodes will be added to the ClientManager via `client_manager.register()`,
-    and dead nodes will be removed from the ClientManager via
-    `client_manager.unregister()`.
-    """
-    # Loop until the driver is disconnected
-    registered_nodes: Dict[int, DriverClientProxy] = {}
-    while not f_stop.is_set():
-        all_node_ids = set(driver.get_node_ids())
-        dead_nodes = set(registered_nodes).difference(all_node_ids)
-        new_nodes = all_node_ids.difference(registered_nodes)
-
-        # Unregister dead nodes
-        for node_id in dead_nodes:
-            client_proxy = registered_nodes[node_id]
-            client_manager.unregister(client_proxy)
-            del registered_nodes[node_id]
-
-        # Register new nodes
-        for node_id in new_nodes:
-            client_proxy = DriverClientProxy(
-                node_id=node_id,
-                driver=driver.grpc_driver,  # type: ignore
-                anonymous=False,
-                run_id=driver.run_id,  # type: ignore
-            )
-            if client_manager.register(client_proxy):
-                registered_nodes[node_id] = client_proxy
-            else:
-                raise RuntimeError("Could not register node.")
-
-        # Sleep for 3 seconds
-        time.sleep(3)
+        thread.join()
 
 
 def default_init_params_workflow(driver: Driver, context: Context) -> None:

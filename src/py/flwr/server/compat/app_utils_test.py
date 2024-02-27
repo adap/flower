@@ -12,22 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for legacy default workflows."""
+"""Tests for utility functions for the `start_driver`."""
 
 
-import threading
 import time
 import unittest
 from unittest.mock import Mock, patch
 
 from ..client_manager import SimpleClientManager
-from .default_workflows import _update_client_manager
+from .app_utils import start_update_client_manager_thread
 
 
 class TestDefaultWorkflow(unittest.TestCase):
     """Tests for default workflows."""
 
-    def test_update_client_manager(self) -> None:
+    def test_start_update_client_manager_thread(self) -> None:
         """Test _update_client_manager function."""
         # Prepare
         sleep = time.sleep
@@ -40,18 +39,9 @@ class TestDefaultWorkflow(unittest.TestCase):
         driver.run_id = 123
         driver.get_node_ids.return_value = expected_node_ids
         client_manager = SimpleClientManager()
-        f_stop = threading.Event()
 
         # Execute
-        client_manager_thread = threading.Thread(
-            target=_update_client_manager,
-            args=(
-                driver,
-                client_manager,
-                f_stop,
-            ),
-        )
-        client_manager_thread.start()
+        thread, f_stop = start_update_client_manager_thread(driver, client_manager)
         # Wait until all nodes are registered via `client_manager.sample()`
         client_manager.sample(len(expected_node_ids))
         # Retrieve all nodes in `client_manager`
@@ -69,4 +59,4 @@ class TestDefaultWorkflow(unittest.TestCase):
         assert updated_node_ids == set(updated_expected_node_ids)
 
         # Exit
-        client_manager_thread.join()
+        thread.join()
