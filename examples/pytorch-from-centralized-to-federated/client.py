@@ -1,4 +1,5 @@
 """Flower client example using PyTorch for CIFAR-10 image classification."""
+
 import argparse
 from collections import OrderedDict
 from typing import Dict, List, Tuple
@@ -93,8 +94,8 @@ def main() -> None:
     _ = model(next(iter(trainloader))["img"].to(DEVICE))
 
     # Start client
-    client = CifarClient(model, trainloader, testloader)
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
+    client = CifarClient(model, trainloader, testloader).to_client()
+    fl.client.start_client(server_address="127.0.0.1:8080", client=client)
 
 
 if __name__ == "__main__":

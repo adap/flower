@@ -17,7 +17,7 @@ Before we can start, we need to meet a few prerequisites in our local developmen
 #. Verify the Docker daemon is running.
 
     Please follow the first section on
-    `Run Flower using Docker <https://flower.dev/docs/framework/how-to-run-flower-using-docker>`_
+    :doc:`Run Flower using Docker <how-to-run-flower-using-docker>`
     which covers this step in more detail.
 
 Currently, Flower provides two images, a base image and a server image. There will also be a client
@@ -98,17 +98,17 @@ Building the server image
    * - ``FLWR_VERSION``
      - Version of Flower to be installed.
      - Yes
-     - ``1.6.0``
+     - ``1.7.0``
 
 The following example creates a server image with the official Flower base image py3.11-ubuntu22.04
-and Flower 1.6.0:
+and Flower 1.7.0:
 
 .. code-block:: bash
 
   $ cd src/docker/server/
   $ docker build \
     --build-arg BASE_IMAGE_TAG=py3.11-ubuntu22.04 \
-    --build-arg FLWR_VERSION=1.6.0 \
+    --build-arg FLWR_VERSION=1.7.0 \
     -t flwr_server:0.1.0 .
 
 The name of image is ``flwr_server`` and the tag ``0.1.0``. Remember that the build arguments as well
@@ -125,7 +125,7 @@ the tag of your image.
   $ docker build \
     --build-arg BASE_REPOSITORY=flwr_base \
     --build-arg BASE_IMAGE_TAG=0.1.0 \
-    --build-arg FLWR_VERSION=1.6.0 \
+    --build-arg FLWR_VERSION=1.7.0 \
     -t flwr_server:0.1.0 .
 
 After creating the image, we can test whether the image is working:
