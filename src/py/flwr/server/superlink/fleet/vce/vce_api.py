@@ -21,7 +21,7 @@ import traceback
 from logging import DEBUG, ERROR, INFO
 from typing import Callable, Dict, Optional
 
-from flwr.client.clientapp import ClientApp, LoadClientAppError, load_client_app
+from flwr.client.clientapp import ClientApp, load_client_app, LoadClientAppError
 from flwr.client.node_state import NodeState
 from flwr.common.logger import log
 from flwr.common.serde import message_from_taskins, message_to_taskres
@@ -89,12 +89,12 @@ async def worker(
         except asyncio.CancelledError as e:
             log(DEBUG, "Async worker: %s", e)
             break
-
+        
         except LoadClientAppError as app_ex:
             log(ERROR, "Async worker: %s", app_ex)
             log(ERROR, traceback.format_exc())
             raise
-
+        
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, ex)
             log(ERROR, traceback.format_exc())

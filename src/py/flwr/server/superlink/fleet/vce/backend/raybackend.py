@@ -138,7 +138,7 @@ class RayBackend(Backend):
 
         Return output message and updated context.
         """
-        node_id = message.metadata.dst_node_id
+        node_id = message.metadata.partition_id
 
         # Submite a task to the pool
         future = await self.pool.submit(
