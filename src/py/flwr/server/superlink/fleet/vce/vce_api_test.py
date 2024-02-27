@@ -26,7 +26,7 @@ from unittest import IsolatedAsyncioTestCase
 from uuid import UUID
 
 from flwr.client import Client, NumPyClient
-from flwr.client.clientapp import ClientApp
+from flwr.client.clientapp import ClientApp, LoadClientAppError
 from flwr.common import (
     Config,
     ConfigsRecord,
@@ -166,33 +166,32 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
         with self.assertRaises(ValueError):
             start_and_shutdown()
 
-    # def test_erroneous_clientapp_module_name(self) -> None:
-    #     """Tests attempt to load a ClientApp that can't be found."""
-    #     from flwr.client.clientapp import LoadClientAppError
-    #     num_messages = 7
-    #     num_nodes = 59
+    def test_erroneous_clientapp_module_name(self) -> None:
+        """Tests attempt to load a ClientApp that can't be found."""
+        num_messages = 7
+        num_nodes = 59
 
-    #     # Register a state and a run_id in it
-    #     run_id = 1234
-    #     state_factory = StateFactory(":flwr-in-memory-state:")
+        # Register a state and a run_id in it
+        run_id = 1234
+        state_factory = StateFactory(":flwr-in-memory-state:")
 
-    #     # Register a few nodes
-    #     nodes_mapping = _register_nodes(
-    #         num_nodes=num_nodes, state_factory=state_factory
-    #     )
+        # Register a few nodes
+        nodes_mapping = _register_nodes(
+            num_nodes=num_nodes, state_factory=state_factory
+        )
 
-    #     _ = register_messages_into_state(
-    #         state_factory=state_factory,
-    #         nodes_mapping=nodes_mapping,
-    #         run_id=run_id,
-    #         num_messages=num_messages,
-    #     )
-    #     with self.assertRaises(LoadClientAppError):
-    #         start_and_shutdown(
-    #             clientapp_module="totally_fictitious_app:client",
-    #             state_factory=state_factory,
-    #             nodes_mapping=nodes_mapping,
-    #         )
+        _ = register_messages_into_state(
+            state_factory=state_factory,
+            nodes_mapping=nodes_mapping,
+            run_id=run_id,
+            num_messages=num_messages,
+        )
+        with self.assertRaises(LoadClientAppError):
+            start_and_shutdown(
+                clientapp_module="totally_fictitious_app:client",
+                state_factory=state_factory,
+                nodes_mapping=nodes_mapping,
+            )
 
     def test_erroneous_backend_config(self) -> None:
         """Backend Config should be a JSON stream."""
