@@ -21,7 +21,7 @@ from typing import Optional
 
 from flwr import common
 from flwr.client import ClientFn
-from flwr.client.clientapp import ClientApp
+from flwr.client.client_app import ClientApp
 from flwr.client.node_state import NodeState
 from flwr.common import Message, Metadata, RecordSet
 from flwr.common.constant import (

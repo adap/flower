@@ -26,7 +26,7 @@ from typing import Dict, Optional, Set
 from unittest import IsolatedAsyncioTestCase
 from uuid import UUID
 
-from flwr.client.clientapp import LoadClientAppError
+from flwr.client.client_app import LoadClientAppError
 from flwr.common import GetPropertiesIns, Message, Metadata
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
@@ -219,8 +219,8 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
 
         This test creates a few nodes and submits a few messages that need to be
         executed by the Backend. In order for that to happen the asyncio
-        producer/consumer logic must function. This also severs to evaluate
-        a valid ClientApp.
+        producer/consumer logic must function. This also severs to evaluate a valid
+        ClientApp.
         """
         num_messages = 113
         num_nodes = 59
