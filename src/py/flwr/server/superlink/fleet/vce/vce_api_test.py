@@ -13,9 +13,12 @@
 # limitations under the License.
 # ==============================================================================
 """Test Fleet Simulation Engine API."""
+
+
 import asyncio
 import threading
 from itertools import cycle
+from json import JSONDecodeError
 from math import pi
 from time import sleep
 from typing import Dict, Optional, Set
@@ -71,12 +74,62 @@ def terminate_simulation(f_stop: asyncio.Event, sleep_duration: int) -> None:
     f_stop.set()
 
 
+# pylint: disable=too-many-locals
+def register_messages_into_state(
+    state_factory: StateFactory,
+    nodes_mapping: NodeToPartitionMapping,
+    run_id: int,
+    num_messages: int,
+) -> Dict[UUID, float]:
+    """Register `num_messages` into the state factory."""
+    state: InMemoryState = state_factory.state()  # type: ignore
+    state.run_ids.add(run_id)
+    # Artificially add TaskIns to state so they can be processed
+    # by the Simulation Engine logic
+    nodes_cycle = cycle(nodes_mapping.keys())  # we have more messages than supernodes
+    task_ids: Set[UUID] = set()  # so we can retrieve them later
+    expected_results = {}
+    for i in range(num_messages):
+        dst_node_id = next(nodes_cycle)
+        # Construct a Message
+        mult_factor = 2024 + i
+        getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
+        recordset = getpropertiesins_to_recordset(getproperties_ins)
+        message = Message(
+            content=recordset,
+            metadata=Metadata(
+                run_id=run_id,
+                message_id="",
+                group_id="",
+                src_node_id=0,
+                dst_node_id=dst_node_id,  # indicate destination node
+                reply_to_message="",
+                ttl="",
+                message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            ),
+        )
+        # Convert Message to TaskIns
+        taskins = message_to_taskins(message)
+        # Instert in state
+        task_id = state.store_task_ins(taskins)
+        if task_id:
+            # Add to UUID set
+            task_ids.add(task_id)
+            # Store expected output for check later on
+            expected_results[task_id] = mult_factor * pi
+
+    return expected_results
+
+
+# pylint: disable=too-many-arguments
 def start_and_shutdown(
     backend: str = "ray",
+    clientapp_module: str = "vce_api_test:client_app",
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
     nodes_mapping: Optional[NodeToPartitionMapping] = None,
     duration: int = 10,
+    backend_config: str = "{}",
 ) -> None:
     """Start Simulation Engine and terminate after specified number of seconds."""
     f_stop = asyncio.Event()
@@ -90,9 +143,9 @@ def start_and_shutdown(
 
     start_vce(
         num_supernodes=num_supernodes,
-        client_app_module_name="vce_api_test:client_app",
+        client_app_module_name=clientapp_module,
         backend_name=backend,
-        backend_config_json_stream="{}",  # an empty json stream (an empty config)
+        backend_config_json_stream=backend_config,
         state_factory=state_factory,
         working_dir="",
         f_stop=f_stop,
@@ -108,9 +161,43 @@ def start_and_shutdown(
 class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
     """A basic class that enables testing asyncio functionalities."""
 
-    def test_start_and_shutdown(self) -> None:
-        """Start Simulation Engine Fleet and terminate it."""
-        start_and_shutdown(num_supernodes=50)
+    def test_erroneous_no_supernodes_client_mapping(self) -> None:
+        """Test with unset arguments."""
+        with self.assertRaises(ValueError):
+            start_and_shutdown()
+
+    # def test_erroneous_clientapp_module_name(self) -> None:
+    #     """Tests attempt to load a ClientApp that can't be found."""
+    #     from flwr.client.clientapp import LoadClientAppError
+    #     num_messages = 7
+    #     num_nodes = 59
+
+    #     # Register a state and a run_id in it
+    #     run_id = 1234
+    #     state_factory = StateFactory(":flwr-in-memory-state:")
+
+    #     # Register a few nodes
+    #     nodes_mapping = _register_nodes(
+    #         num_nodes=num_nodes, state_factory=state_factory
+    #     )
+
+    #     _ = register_messages_into_state(
+    #         state_factory=state_factory,
+    #         nodes_mapping=nodes_mapping,
+    #         run_id=run_id,
+    #         num_messages=num_messages,
+    #     )
+    #     with self.assertRaises(LoadClientAppError):
+    #         start_and_shutdown(
+    #             clientapp_module="totally_fictitious_app:client",
+    #             state_factory=state_factory,
+    #             nodes_mapping=nodes_mapping,
+    #         )
+
+    def test_erroneous_backend_config(self) -> None:
+        """Backend Config should be a JSON stream."""
+        with self.assertRaises(JSONDecodeError):
+            start_and_shutdown(num_supernodes=50, backend_config="not a proper config")
 
     def test_with_nonexistent_backend(self) -> None:
         """Test specifying a backend that does not exist."""
@@ -122,8 +209,8 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
 
         Passing `num_supernodes` does nothing since we assume that if a node mapping
         is supplied, nodes have been registered externally already. Therefore passing
-        `num_supernodes` might give the impression that that many nodes will be registered.
-        We don't do that since a mapping already exists.
+        `num_supernodes` might give the impression that that many nodes will be
+        registered. We don't do that since a mapping already exists.
         """
         with self.assertRaises(ValueError):
             start_and_shutdown(num_supernodes=50, nodes_mapping={0: 1})
@@ -136,6 +223,10 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
         """
         with self.assertRaises(ValueError):
             start_and_shutdown(nodes_mapping={0: 1})
+
+    def test_start_and_shutdown(self) -> None:
+        """Start Simulation Engine Fleet and terminate it."""
+        start_and_shutdown(num_supernodes=50)
 
     # pylint: disable=too-many-locals
     def test_start_and_shutdown_with_tasks_in_state(self) -> None:
@@ -151,54 +242,25 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
         # Register a state and a run_id in it
         run_id = 1234
         state_factory = StateFactory(":flwr-in-memory-state:")
-        state: InMemoryState = state_factory.state()  # type: ignore
-        state.run_ids.add(run_id)
 
         # Register a few nodes
         nodes_mapping = _register_nodes(
             num_nodes=num_nodes, state_factory=state_factory
         )
 
-        # Artificially add TaskIns to state so they can be processed
-        # by the Simulation Engine logic
-        nodes_cycle = cycle(
-            nodes_mapping.keys()
-        )  # we have more messages than supernodes
-        task_ids: Set[UUID] = set()  # so we can retrieve them later
-        expected_results = {}
-        for i in range(num_messages):
-            dst_node_id = next(nodes_cycle)
-            # Construct a Message
-            mult_factor = 2024 + i
-            getproperties_ins = GetPropertiesIns(config={"factor": mult_factor})
-            recordset = getpropertiesins_to_recordset(getproperties_ins)
-            message = Message(
-                content=recordset,
-                metadata=Metadata(
-                    run_id=run_id,
-                    message_id="",
-                    group_id="",
-                    src_node_id=0,
-                    dst_node_id=dst_node_id,  # indicate destination node
-                    reply_to_message="",
-                    ttl="",
-                    message_type=MESSAGE_TYPE_GET_PROPERTIES,
-                ),
-            )
-            # Convert Message to TaskIns
-            taskins = message_to_taskins(message)
-            # Instert in state
-            task_id = state.store_task_ins(taskins)
-            if task_id:
-                # Add to UUID set
-                task_ids.add(task_id)
-                # Store expected output for check later on
-                expected_results[task_id] = mult_factor * pi
+        expected_results = register_messages_into_state(
+            state_factory=state_factory,
+            nodes_mapping=nodes_mapping,
+            run_id=run_id,
+            num_messages=num_messages,
+        )
 
         # Run
         start_and_shutdown(state_factory=state_factory, nodes_mapping=nodes_mapping)
 
         # Get all TaskRes
+        state = state_factory.state()
+        task_ids = set(expected_results.keys())
         task_res_list = state.get_task_res(task_ids=task_ids, limit=len(task_ids))
 
         # Check results by first converting to Message
