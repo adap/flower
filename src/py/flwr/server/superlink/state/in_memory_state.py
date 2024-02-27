@@ -35,6 +35,7 @@ class InMemoryState(State):
         self.node_ids: Set[int] = set()
         self.run_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
+        self.task_ins_mapping: Dict[int, List[UUID]] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
         self.lock = threading.Lock()
 
@@ -61,6 +62,14 @@ class InMemoryState(State):
         task_ins.task.ttl = ttl.isoformat()
         with self.lock:
             self.task_ins_store[task_id] = task_ins
+            node_id = task_ins.task.consumer.node_id
+            if node_id:
+                # If not an annonymous node, let's construct or
+                # update the node_id:task_id mapping
+                if node_id in self.task_ins_mapping:
+                    self.task_ins_mapping[node_id].append(task_id)
+                else:
+                    self.task_ins_mapping[node_id] = [task_id]
 
         # Return the new task_id
         return task_id
@@ -75,22 +84,37 @@ class InMemoryState(State):
         # Find TaskIns for node_id that were not delivered yet
         task_ins_list: List[TaskIns] = []
         with self.lock:
-            for _, task_ins in self.task_ins_store.items():
-                # pylint: disable=too-many-boolean-expressions
+            # If not annoymous clients, we can get TaskIns efficiently
+            # by making use of node_id:task_id mapping
+            if node_id:
                 if (
-                    node_id is not None  # Not anonymous
-                    and task_ins.task.consumer.anonymous is False
-                    and task_ins.task.consumer.node_id == node_id
-                    and task_ins.task.delivered_at == ""
-                ) or (
-                    node_id is None  # Anonymous
-                    and task_ins.task.consumer.anonymous is True
-                    and task_ins.task.consumer.node_id == 0
-                    and task_ins.task.delivered_at == ""
+                    node_id not in self.task_ins_mapping
+                    or len(self.task_ins_mapping[node_id]) == 0
                 ):
-                    task_ins_list.append(task_ins)
-                if limit and len(task_ins_list) == limit:
-                    break
+                    return task_ins_list
+                task_ids = self.task_ins_mapping[node_id]
+                num = limit if limit else len(task_ids)
+                while len(task_ins_list) < num:
+                    # Remove
+                    uuid = task_ids.pop(0)
+                    # Fetch
+                    taskins = self.task_ins_store[uuid]
+                    # Update
+                    self.task_ins_mapping[node_id] = task_ids
+
+                    task_ins_list.append(taskins)
+            else:
+                for _, task_ins in self.task_ins_store.items():
+                    # pylint: disable=too-many-boolean-expressions
+                    if (
+                        node_id is None  # Anonymous
+                        and task_ins.task.consumer.anonymous is True
+                        and task_ins.task.consumer.node_id == 0
+                        and task_ins.task.delivered_at == ""
+                    ):
+                        task_ins_list.append(task_ins)
+                    if limit and len(task_ins_list) == limit:
+                        break
 
         # Mark all of them as delivered
         delivered_at = now().isoformat()
