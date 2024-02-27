@@ -1230,7 +1230,7 @@ msgid ""
 "/contributing-baselines.html>`_."
 msgstr ""
 "如果您对 Flower Baselines 还不熟悉，也许可以看看我们的 `Baselines贡献指南 "
-"<https://flower.ai/docs/contributing-baselines.html>`_。"
+"<https://flower.ai/docs/baselines/how-to-contribute-baselines.html>`_。"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:27
 msgid ""
