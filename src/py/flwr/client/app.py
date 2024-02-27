@@ -34,6 +34,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
 )
+from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
 
 from .clientapp import load_client_app
@@ -104,7 +105,7 @@ def run_client_app() -> None:
         root_certificates=root_certificates,
         insecure=args.insecure,
     )
-    event(EventType.RUN_CLIENT_APP_LEAVE)
+    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
 def _parse_args_run_client_app() -> argparse.ArgumentParser:
