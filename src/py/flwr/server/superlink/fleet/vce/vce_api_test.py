@@ -20,21 +20,14 @@ import threading
 from itertools import cycle
 from json import JSONDecodeError
 from math import pi
+from pathlib import Path
 from time import sleep
 from typing import Dict, Optional, Set
 from unittest import IsolatedAsyncioTestCase
 from uuid import UUID
 
-from flwr.client import Client, NumPyClient
-from flwr.client.clientapp import ClientApp, LoadClientAppError
-from flwr.common import (
-    Config,
-    ConfigsRecord,
-    GetPropertiesIns,
-    Message,
-    Metadata,
-    Scalar,
-)
+from flwr.client.clientapp import LoadClientAppError
+from flwr.common import GetPropertiesIns, Message, Metadata
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.common.serde import message_from_taskres, message_to_taskins
@@ -44,28 +37,6 @@ from flwr.server.superlink.fleet.vce.vce_api import (
     start_vce,
 )
 from flwr.server.superlink.state import InMemoryState, StateFactory
-
-
-class DummyClient(NumPyClient):
-    """A dummy NumPyClient for tests."""
-
-    def get_properties(self, config: Config) -> Dict[str, Scalar]:
-        """Return properties by doing a simple calculation."""
-        result = float(config["factor"]) * pi
-
-        # store something in context
-        self.context.state.configs_records["result"] = ConfigsRecord({"result": result})
-        return {"result": result}
-
-
-def get_dummy_client(cid: str) -> Client:  # pylint: disable=unused-argument
-    """Return a DummyClient converted to Client type."""
-    return DummyClient().to_client()
-
-
-client_app = ClientApp(
-    client_fn=get_dummy_client,
-)
 
 
 def terminate_simulation(f_stop: asyncio.Event, sleep_duration: int) -> None:
@@ -121,10 +92,21 @@ def register_messages_into_state(
     return expected_results
 
 
+def _autoresolve_working_dir(rel_client_app_dir: str = "backend/test") -> str:
+    """Correctly resolve working directory."""
+    file_path = Path(__file__)
+    working_dir = Path.cwd()
+    rel_workdir = file_path.relative_to(working_dir)
+
+    # Susbtract lats element and append "backend/test" (wher the client module is.)
+    return str(rel_workdir.parent / rel_client_app_dir)
+
+
 # pylint: disable=too-many-arguments
 def start_and_shutdown(
     backend: str = "ray",
-    clientapp_module: str = "vce_api_test:client_app",
+    clientapp_module: str = "client:client_app",
+    working_dir: str = "",
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
     nodes_mapping: Optional[NodeToPartitionMapping] = None,
@@ -141,13 +123,18 @@ def start_and_shutdown(
     )
     termination_th.start()
 
+    # Resolve working directory if not passed
+    if not working_dir:
+        working_dir = _autoresolve_working_dir()
+        print(f"---> {working_dir = }")
+
     start_vce(
         num_supernodes=num_supernodes,
         client_app_module_name=clientapp_module,
         backend_name=backend,
         backend_config_json_stream=backend_config,
         state_factory=state_factory,
-        working_dir="",
+        working_dir=working_dir,
         f_stop=f_stop,
         existing_nodes_mapping=nodes_mapping,
     )
