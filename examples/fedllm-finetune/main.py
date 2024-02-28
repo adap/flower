@@ -30,8 +30,14 @@ def main(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
 
     # Partition dataset and get dataloaders
-    fds = FederatedDataset(dataset=cfg.dataset.name, partitioners={"train": cfg.num_clients})
-    tokenizer, data_collator, formatting_prompts_func = get_tokenizer_and_data_collator_and_propt_formatting(
+    fds = FederatedDataset(
+        dataset=cfg.dataset.name, partitioners={"train": cfg.num_clients}
+    )
+    (
+        tokenizer,
+        data_collator,
+        formatting_prompts_func,
+    ) = get_tokenizer_and_data_collator_and_propt_formatting(
         cfg.model.name,
     )
 
@@ -40,19 +46,26 @@ def main(cfg: DictConfig) -> None:
     save_path = HydraConfig.get().runtime.output_dir
 
     # Prepare function that will be used to spawn each client
-    client_fn = gen_client_fn(fds, tokenizer, formatting_prompts_func,
-                              data_collator, cfg.model, cfg.train, save_path)
+    client_fn = gen_client_fn(
+        fds,
+        tokenizer,
+        formatting_prompts_func,
+        data_collator,
+        cfg.model,
+        cfg.train,
+        save_path,
+    )
 
     # Get function that will be executed by the strategy's evaluate() method
     # Here we use it to save global model checkpoints
     def get_evaluate_fn(model_cfg, save_every_round, total_round, save_path):
         """Return an evaluation function for saving global model."""
 
-        def evaluate(
-                server_round: int, parameters, config
-        ):
+        def evaluate(server_round: int, parameters, config):
             # Save model
-            if server_round != 0 and (server_round == total_round or server_round % save_every_round == 0):
+            if server_round != 0 and (
+                server_round == total_round or server_round % save_every_round == 0
+            ):
                 # Init model
                 model = get_model(model_cfg)
                 set_parameters(model, parameters)
@@ -74,7 +87,7 @@ def main(cfg: DictConfig) -> None:
         return fit_config_fn
 
     def fit_weighted_average(metrics):
-        """Aggregation function for (federated) evaluation metrics"""
+        """Aggregation function for (federated) evaluation metrics."""
         # Multiply accuracy of each client by number of examples used
         losses = [num_examples * m["train_loss"] for num_examples, m in metrics]
         examples = [num_examples for num_examples, _ in metrics]
@@ -88,7 +101,9 @@ def main(cfg: DictConfig) -> None:
         cfg.strategy,
         on_fit_config_fn=get_on_fit_config(),
         fit_metrics_aggregation_fn=fit_weighted_average,
-        evaluate_fn=get_evaluate_fn(cfg.model, cfg.train.save_every_round, cfg.num_rounds, save_path),
+        evaluate_fn=get_evaluate_fn(
+            cfg.model, cfg.train.save_every_round, cfg.num_rounds, save_path
+        ),
     )
 
     # Start simulation

@@ -14,8 +14,10 @@ parser.add_argument("--template", type=str, default="vicuna_v1.1")
 args = parser.parse_args()
 
 # Load model and tokenizer
-model = AutoPeftModelForCausalLM.from_pretrained(args.peft_path, torch_dtype=torch.float16).to('cuda')
-base_model = model.peft_config['default'].base_model_name_or_path
+model = AutoPeftModelForCausalLM.from_pretrained(
+    args.peft_path, torch_dtype=torch.float16
+).to("cuda")
+base_model = model.peft_config["default"].base_model_name_or_path
 tokenizer = AutoTokenizer.from_pretrained(base_model)
 
 # Generate answers
@@ -35,14 +37,16 @@ output_ids = model.generate(
     max_new_tokens=1024,
 )
 
-output_ids = output_ids[0] if model.config.is_encoder_decoder else output_ids[0][len(input_ids[0]):]
+output_ids = (
+    output_ids[0]
+    if model.config.is_encoder_decoder
+    else output_ids[0][len(input_ids[0]) :]
+)
 
 # Be consistent with the template's stop_token_ids
 if conv.stop_token_ids:
     stop_token_ids_index = [
-        i
-        for i, id in enumerate(output_ids)
-        if id in conv.stop_token_ids
+        i for i, id in enumerate(output_ids) if id in conv.stop_token_ids
     ]
     if len(stop_token_ids_index) > 0:
         output_ids = output_ids[: stop_token_ids_index[0]]

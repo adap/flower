@@ -26,7 +26,7 @@ class FlowerClient(
         tokenizer,
         formatting_prompts_func,
         data_collator,
-        save_path
+        save_path,
     ):  # pylint: disable=too-many-arguments
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.train_cfg = train_cfg
@@ -53,11 +53,12 @@ class FlowerClient(
         """Implement distributed fit function for a given client."""
         set_parameters(self.model, parameters)
 
-        new_lr = cosine_annealing(int(config['current_round']),
-                                  self.train_cfg.num_rounds,
-                                  self.train_cfg.learning_rate_max,
-                                  self.train_cfg.learning_rate_min,
-                                  )
+        new_lr = cosine_annealing(
+            int(config["current_round"]),
+            self.train_cfg.num_rounds,
+            self.train_cfg.learning_rate_max,
+            self.train_cfg.learning_rate_min,
+        )
 
         self.training_argumnets.learning_rate = new_lr
         self.training_argumnets.output_dir = self.save_path
@@ -76,7 +77,11 @@ class FlowerClient(
         # Do local training
         results = trainer.train()
 
-        return self.get_parameters({}), len(self.trainset), {'train_loss': results.training_loss}
+        return (
+            self.get_parameters({}),
+            len(self.trainset),
+            {"train_loss": results.training_loss},
+        )
 
 
 def set_parameters(model, parameters: NDArrays) -> None:
@@ -96,8 +101,7 @@ def gen_client_fn(
     train_cfg: DictConfig,
     save_path: str,
 ) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
-    """Generate the client function that creates the Flower Clients.
-    """
+    """Generate the client function that creates the Flower Clients."""
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""

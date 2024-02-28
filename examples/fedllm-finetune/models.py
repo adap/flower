@@ -1,7 +1,7 @@
 import torch
 from omegaconf import DictConfig
 from transformers import AutoModelForCausalLM
-from transformers import  BitsAndBytesConfig
+from transformers import BitsAndBytesConfig
 from peft import get_peft_model, LoraConfig
 from peft.utils import prepare_model_for_kbit_training
 
@@ -21,16 +21,16 @@ def cosine_annealing(
 
 
 def get_model(model_cfg: DictConfig):
-    """Load model with appropiate quantization config and
-    other optimizations."""
+    """Load model with appropiate quantization config and other optimizations."""
 
     if model_cfg.quantization == 4:
         quantization_config = BitsAndBytesConfig(load_in_4bit=True)
     elif model_cfg.quantization == 8:
         quantization_config = BitsAndBytesConfig(load_in_8bit=True)
     else:
-        raise ValueError(f"Use 4-bit or 8-bit quantization. You passed: {model_cfg.quantization}/")
-
+        raise ValueError(
+            f"Use 4-bit or 8-bit quantization. You passed: {model_cfg.quantization}/"
+        )
 
     model = AutoModelForCausalLM.from_pretrained(
         model_cfg.name,
@@ -38,7 +38,9 @@ def get_model(model_cfg: DictConfig):
         torch_dtype=torch.bfloat16,
     )
 
-    model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=model_cfg.gradient_checkpointing)
+    model = prepare_model_for_kbit_training(
+        model, use_gradient_checkpointing=model_cfg.gradient_checkpointing
+    )
 
     peft_config = LoraConfig(
         r=model_cfg.lora.peft_lora_r,
