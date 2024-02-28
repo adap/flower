@@ -19,7 +19,7 @@ import json
 from logging import ERROR, INFO
 from typing import Dict, Optional
 
-from flwr.client.clientapp import ClientApp, load_client_app
+from flwr.client.client_app import ClientApp, load_client_app
 from flwr.client.node_state import NodeState
 from flwr.common.logger import log
 from flwr.server.superlink.state import StateFactory
