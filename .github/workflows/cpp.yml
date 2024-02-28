@@ -19,13 +19,13 @@ jobs:
       uses: ./.github/actions/bootstrap
 
     - name: Cache restore SDK build
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: build/
         key: ${{ runner.os }}-sdk-build
 
     - name: Cache restore example build
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: examples/quickstart-cpp/build/
         key: ${{ runner.os }}-example-build
@@ -82,14 +82,14 @@ jobs:
         fi
 
     - name: Cache save SDK build
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       if: github.ref_name == 'main'
       with:
         path: build/
         key: ${{ runner.os }}-sdk-build
 
     - name: Cache save example build
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       if: github.ref_name == 'main'
       with:
         path: examples/quickstart-cpp/build/

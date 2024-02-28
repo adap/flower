@@ -1,6 +1,5 @@
 """Utility functions for FedNova such as computing accuracy, plotting results, etc."""
 
-
 import glob
 import os
 from typing import List, Tuple
