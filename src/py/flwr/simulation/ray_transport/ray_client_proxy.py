@@ -98,6 +98,7 @@ class RayActorClientProxy(ClientProxy):
         recordset: RecordSet,
         message_type: str,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> Message:
         """Wrap a RecordSet inside a Message."""
         return Message(
@@ -105,7 +106,7 @@ class RayActorClientProxy(ClientProxy):
             metadata=Metadata(
                 run_id=0,
                 message_id="",
-                group_id="",
+                group_id=str(group_id) if group_id is not None else "",
                 src_node_id=0,
                 dst_node_id=int(self.cid),
                 reply_to_message="",
@@ -116,7 +117,10 @@ class RayActorClientProxy(ClientProxy):
         )
 
     def get_properties(
-        self, ins: common.GetPropertiesIns, timeout: Optional[float]
+        self,
+        ins: common.GetPropertiesIns,
+        timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
         recordset = getpropertiesins_to_recordset(ins)
@@ -124,6 +128,7 @@ class RayActorClientProxy(ClientProxy):
             recordset,
             message_type=MESSAGE_TYPE_GET_PROPERTIES,
             timeout=timeout,
+            group_id=group_id,
         )
 
         message_out = self._submit_job(message, timeout)
@@ -131,7 +136,10 @@ class RayActorClientProxy(ClientProxy):
         return recordset_to_getpropertiesres(message_out.content)
 
     def get_parameters(
-        self, ins: common.GetParametersIns, timeout: Optional[float]
+        self,
+        ins: common.GetParametersIns,
+        timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
         recordset = getparametersins_to_recordset(ins)
@@ -139,19 +147,25 @@ class RayActorClientProxy(ClientProxy):
             recordset,
             message_type=MESSAGE_TYPE_GET_PARAMETERS,
             timeout=timeout,
+            group_id=group_id,
         )
 
         message_out = self._submit_job(message, timeout)
 
         return recordset_to_getparametersres(message_out.content, keep_input=False)
 
-    def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
+    def fit(
+        self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         recordset = fitins_to_recordset(
             ins, keep_input=True
         )  # This must stay TRUE since ins are in-memory
         message = self._wrap_recordset_in_message(
-            recordset, message_type=MESSAGE_TYPE_FIT, timeout=timeout
+            recordset,
+            message_type=MESSAGE_TYPE_FIT,
+            timeout=timeout,
+            group_id=group_id,
         )
 
         message_out = self._submit_job(message, timeout)
@@ -159,14 +173,17 @@ class RayActorClientProxy(ClientProxy):
         return recordset_to_fitres(message_out.content, keep_input=False)
 
     def evaluate(
-        self, ins: common.EvaluateIns, timeout: Optional[float]
+        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
         recordset = evaluateins_to_recordset(
             ins, keep_input=True
         )  # This must stay TRUE since ins are in-memory
         message = self._wrap_recordset_in_message(
-            recordset, message_type=MESSAGE_TYPE_EVALUATE, timeout=timeout
+            recordset,
+            message_type=MESSAGE_TYPE_EVALUATE,
+            timeout=timeout,
+            group_id=group_id,
         )
 
         message_out = self._submit_job(message, timeout)
@@ -174,7 +191,10 @@ class RayActorClientProxy(ClientProxy):
         return recordset_to_evaluateres(message_out.content)
 
     def reconnect(
-        self, ins: common.ReconnectIns, timeout: Optional[float]
+        self,
+        ins: common.ReconnectIns,
+        timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)

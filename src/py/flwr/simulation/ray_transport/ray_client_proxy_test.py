@@ -114,6 +114,7 @@ def test_cid_consistency_one_at_a_time() -> None:
             recordset,
             MESSAGE_TYPE_GET_PROPERTIES,
             timeout=None,
+            group_id=0,
         )
         message_out = prox._submit_job(  # pylint: disable=protected-access
             message=message, timeout=None
@@ -150,6 +151,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
             recordset,
             message_type=MESSAGE_TYPE_GET_PROPERTIES,
             timeout=None,
+            group_id=0,
         )
         prox.actor_pool.submit_client_job(
             lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
@@ -196,7 +198,7 @@ def test_cid_consistency_without_proxies() -> None:
             metadata=Metadata(
                 run_id=0,
                 message_id="",
-                group_id="",
+                group_id=str(0),
                 src_node_id=0,
                 dst_node_id=12345,
                 reply_to_message="",
