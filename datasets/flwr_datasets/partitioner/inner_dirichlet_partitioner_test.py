@@ -90,6 +90,17 @@ class TestInnerDirichletPartitionerFailure(unittest.TestCase):
         with self.assertRaises(ValueError):
             _ = partitioner.load_partition(0)
 
+    def test_too_big_sum_of_partition_sizes(self) -> None:
+        """Test sum of partition_sizes greater than the size of the dataset."""
+        num_rows = 113
+        partition_by = "labels"
+        alpha = 1.0
+        partition_sizes = [60, 60, 30, 43]
+
+        _, partitioner = _dummy_setup(num_rows, partition_by, partition_sizes, alpha)
+        with self.assertRaises(ValueError):
+            _ = partitioner.load_partition(0)
+
 
 if __name__ == "__main__":
     unittest.main()

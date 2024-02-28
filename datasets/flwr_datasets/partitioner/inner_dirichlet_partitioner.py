@@ -102,6 +102,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         # requested. Only the first call creates the indices assignments for all the
         # partition indices.
         self._check_num_partitions_correctness_if_needed()
+        self._check_partition_sizes_correctness_if_needed()
         self._check_the_sum_of_partition_sizes()
         self._determine_num_unique_classes_if_needed()
         self._alpha = self._initialize_alpha_if_needed(self._initial_alpha)
@@ -234,8 +235,17 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         if not self._node_id_to_indices_determined:
             if self._num_partitions > self.dataset.num_rows:
                 raise ValueError(
-                    "The number of partitions needs to be smaller than the number of "
-                    "samples in the dataset."
+                    "The number of partitions needs to be smaller or equal to "
+                    " the number of samples in the dataset."
+                )
+
+    def _check_partition_sizes_correctness_if_needed(self) -> None:
+        """Test partition_sizes when the dataset is given (in load_partition)."""
+        if not self._node_id_to_indices_determined:
+            if sum(self._partition_sizes) > self.dataset.num_rows:
+                raise ValueError(
+                    "The sum of the `partition_sizes` needs to be smaller or equal to "
+                    "the number of samples in the dataset."
                 )
 
     def _check_num_partitions_greater_than_zero(self) -> None:
