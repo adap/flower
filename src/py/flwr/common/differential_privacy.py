@@ -15,7 +15,7 @@
 """Utility functions for differential privacy."""
 
 
-import warnings
+from logging import WARNING
 from typing import Optional, Tuple
 
 import numpy as np
@@ -26,6 +26,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.common.logger import log
 
 
 def get_norm(input_arrays: NDArrays) -> float:
@@ -147,11 +148,11 @@ def compute_adaptive_noise_params(
 
         adding_noise = noise_multiplier_value / noise_multiplier
         if adding_noise >= 2:
-            warnings.warn(
+            log(
+                WARNING,
                 f"A significant amount of noise ({adding_noise}) has to be "
                 f"added. Consider increasing `clipped_count_stddev` or "
                 f"`num_sampled_clients`.",
-                stacklevel=2,
             )
 
     else:
