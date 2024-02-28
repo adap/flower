@@ -33,6 +33,7 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
 )
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
+from py.flwr.common.retry_invoker import RetryInvoker, exponential
 
 from .connection import grpc_connection
 
@@ -127,7 +128,16 @@ def test_integration_connection() -> None:
     def run_client() -> int:
         messages_received: int = 0
 
-        with grpc_connection(server_address=f"[::]:{port}", insecure=True) as conn:
+        with grpc_connection(
+            server_address=f"[::]:{port}",
+            insecure=True,
+            retry_invoker=RetryInvoker(
+                wait_factory=exponential,
+                recoverable_exceptions=grpc.RpcError,
+                max_tries=1,
+                max_time=None,
+            ),
+        ) as conn:
             receive, send, _, _ = conn
 
             # Setup processing loop
