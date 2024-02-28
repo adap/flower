@@ -366,11 +366,7 @@ def run_superlink() -> None:
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-<<<<<<< HEAD
-        data = _try_setup_client_authentication(args)
-=======
         data = _try_setup_client_authentication(args, certificates)
->>>>>>> add-server-auth-interceptor
         interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
         if data is not None:
             (
@@ -426,10 +422,6 @@ def run_superlink() -> None:
 
 def _try_setup_client_authentication(
     args: argparse.Namespace,
-<<<<<<< HEAD
-) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePublicKey, ec.EllipticCurvePrivateKey]]:
-    if args.require_client_authentication:
-=======
     certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePublicKey, ec.EllipticCurvePrivateKey]]:
     if args.require_client_authentication:
@@ -439,7 +431,6 @@ def _try_setup_client_authentication(
                 "Please provide certificate paths with '--certificates' before "
                 "enabling '--require-client-authentication'."
             )
->>>>>>> add-server-auth-interceptor
         client_keys_file_path = Path(args.require_client_authentication[0])
         if client_keys_file_path.exists():
             client_public_keys: Set[bytes] = set()
