@@ -138,7 +138,7 @@ async def add_taskins_to_queue(
         log(
             DEBUG,
             "Simulation Engine stats: "
-            "(Active workers: (%i/%i) | %s (%i workers) | Tasks in queue: %i)",
+            "Active workers: (%i/%i) | %s (%i workers) | Tasks in queue: %i)",
             num_active,
             num_initial_consumers,
             backend.__class__.__name__,
