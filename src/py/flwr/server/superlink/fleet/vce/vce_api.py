@@ -48,7 +48,7 @@ def _register_nodes(
 
 # pylint: disable=too-many-arguments,too-many-locals
 async def worker(
-    app: Callable[[], ClientApp],
+    app_fn: Callable[[], ClientApp],
     queue: "asyncio.Queue[TaskIns]",
     node_states: Dict[int, NodeState],
     state_factory: StateFactory,
@@ -73,7 +73,7 @@ async def worker(
 
             # Let backend process message
             out_mssg, updated_context = await backend.process_message(
-                app, message, context
+                app_fn, message, context
             )
 
             # Update Context
@@ -150,7 +150,7 @@ async def add_taskins_to_queue(
 
 
 async def run(
-    app: Callable[[], ClientApp],
+    app_fn: Callable[[], ClientApp],
     backend: Backend,
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
@@ -168,7 +168,9 @@ async def run(
         # Add workers (they submit Messages to Backend)
         worker_tasks = [
             asyncio.create_task(
-                worker(app, queue, node_states, state_factory, nodes_mapping, backend)
+                worker(
+                    app_fn, queue, node_states, state_factory, nodes_mapping, backend
+                )
             )
             for _ in range(backend.num_workers)
         ]
@@ -239,7 +241,8 @@ def start_vce(
     if existing_nodes_mapping:
         if state_factory is None:
             raise ValueError(
-                "`existing_nodes_mapping` was passed, but no `state_factory` was passed."
+                "`existing_nodes_mapping` was passed, but no `state_factory` was "
+                "passed."
             )
         log(INFO, "Using exiting NodeToPartitionMapping and StateFactory.")
         # Use mapping constructed externally. This also means nodes
@@ -289,11 +292,11 @@ def start_vce(
         app: ClientApp = load_client_app(client_app_module_name)
         return app
 
-    app = _load
+    app_fn = _load
 
     asyncio.run(
         run(
-            app,
+            app_fn,
             backend,
             nodes_mapping,
             state_factory,

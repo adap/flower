@@ -147,7 +147,7 @@ class RayBackend(Backend):
             # Submite a task to the pool
             future = await self.pool.submit(
                 lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-                (app, message, str(node_id), context),
+                (app, message, str(partition_id), context),
             )
 
             await future
