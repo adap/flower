@@ -22,11 +22,10 @@ from json import JSONDecodeError
 from math import pi
 from pathlib import Path
 from time import sleep
-from typing import Dict, Optional, Set
+from typing import Dict, Optional, Set, Tuple
 from unittest import IsolatedAsyncioTestCase
 from uuid import UUID
 
-from flwr.client.client_app import LoadClientAppError
 from flwr.common import GetPropertiesIns, Message, Metadata
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
@@ -45,12 +44,36 @@ def terminate_simulation(f_stop: asyncio.Event, sleep_duration: int) -> None:
     f_stop.set()
 
 
+def init_state_factory_nodes_mapping(
+    num_nodes: int,
+    num_messages: int,
+    erroneous_message: Optional[bool] = False,
+) -> Tuple[StateFactory, NodeToPartitionMapping, Dict[UUID, float]]:
+    """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
+    # Register a state and a run_id in it
+    run_id = 1234
+    state_factory = StateFactory(":flwr-in-memory-state:")
+
+    # Register a few nodes
+    nodes_mapping = _register_nodes(num_nodes=num_nodes, state_factory=state_factory)
+
+    expected_results = register_messages_into_state(
+        state_factory=state_factory,
+        nodes_mapping=nodes_mapping,
+        run_id=run_id,
+        num_messages=num_messages,
+        erroneous_message=erroneous_message,
+    )
+    return state_factory, nodes_mapping, expected_results
+
+
 # pylint: disable=too-many-locals
 def register_messages_into_state(
     state_factory: StateFactory,
     nodes_mapping: NodeToPartitionMapping,
     run_id: int,
     num_messages: int,
+    erroneous_message: Optional[bool] = False,
 ) -> Dict[UUID, float]:
     """Register `num_messages` into the state factory."""
     state: InMemoryState = state_factory.state()  # type: ignore
@@ -76,7 +99,11 @@ def register_messages_into_state(
                 dst_node_id=dst_node_id,  # indicate destination node
                 reply_to_message="",
                 ttl="",
-                message_type=MESSAGE_TYPE_GET_PROPERTIES,
+                message_type=(
+                    "a bad message"
+                    if erroneous_message
+                    else MESSAGE_TYPE_GET_PROPERTIES
+                ),
             ),
         )
         # Convert Message to TaskIns
@@ -110,18 +137,24 @@ def start_and_shutdown(
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
     nodes_mapping: Optional[NodeToPartitionMapping] = None,
-    duration: int = 10,
+    duration: int = 0,
     backend_config: str = "{}",
 ) -> None:
-    """Start Simulation Engine and terminate after specified number of seconds."""
+    """Start Simulation Engine and terminate after specified number of seconds.
+
+    Some tests need to be terminated by triggering externally an asyncio.Event. This
+    is enabled whtn passing `duration`>0.
+    """
     f_stop = asyncio.Event()
 
-    # Setup thread that will set the f_stop event, triggering the termination of all
-    # asyncio logic in the Simulation Engine. It will also terminate the Backend.
-    termination_th = threading.Thread(
-        target=terminate_simulation, args=(f_stop, duration)
-    )
-    termination_th.start()
+    if duration:
+
+        # Setup thread that will set the f_stop event, triggering the termination of all
+        # asyncio logic in the Simulation Engine. It will also terminate the Backend.
+        termination_th = threading.Thread(
+            target=terminate_simulation, args=(f_stop, duration)
+        )
+        termination_th.start()
 
     # Resolve working directory if not passed
     if not working_dir:
@@ -138,10 +171,8 @@ def start_and_shutdown(
         existing_nodes_mapping=nodes_mapping,
     )
 
-    # Trigger stop event
-    f_stop.set()
-
-    termination_th.join()
+    if duration:
+        termination_th.join()
 
 
 class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
@@ -150,31 +181,38 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
     def test_erroneous_no_supernodes_client_mapping(self) -> None:
         """Test with unset arguments."""
         with self.assertRaises(ValueError):
-            start_and_shutdown()
+            start_and_shutdown(duration=2)
 
     def test_erroneous_clientapp_module_name(self) -> None:
         """Tests attempt to load a ClientApp that can't be found."""
         num_messages = 7
         num_nodes = 59
 
-        # Register a state and a run_id in it
-        run_id = 1234
-        state_factory = StateFactory(":flwr-in-memory-state:")
-
-        # Register a few nodes
-        nodes_mapping = _register_nodes(
-            num_nodes=num_nodes, state_factory=state_factory
+        state_factory, nodes_mapping, _ = init_state_factory_nodes_mapping(
+            num_nodes=num_nodes, num_messages=num_messages
         )
-
-        _ = register_messages_into_state(
-            state_factory=state_factory,
-            nodes_mapping=nodes_mapping,
-            run_id=run_id,
-            num_messages=num_messages,
-        )
-        with self.assertRaises(LoadClientAppError):
+        with self.assertRaises(RuntimeError):
             start_and_shutdown(
                 clientapp_module="totally_fictitious_app:client",
+                state_factory=state_factory,
+                nodes_mapping=nodes_mapping,
+            )
+
+    def test_erroneous_messages(self) -> None:
+        """Test handling of error in async worker (consumer).
+
+        We register messages which will trigger an error when handling, triggering an
+        error.
+        """
+        num_messages = 100
+        num_nodes = 59
+
+        state_factory, nodes_mapping, _ = init_state_factory_nodes_mapping(
+            num_nodes=num_nodes, num_messages=num_messages, erroneous_message=True
+        )
+
+        with self.assertRaises(RuntimeError):
+            start_and_shutdown(
                 state_factory=state_factory,
                 nodes_mapping=nodes_mapping,
             )
@@ -211,7 +249,7 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
 
     def test_start_and_shutdown(self) -> None:
         """Start Simulation Engine Fleet and terminate it."""
-        start_and_shutdown(num_supernodes=50)
+        start_and_shutdown(num_supernodes=50, duration=10)
 
     # pylint: disable=too-many-locals
     def test_start_and_shutdown_with_tasks_in_state(self) -> None:
@@ -222,27 +260,19 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
         producer/consumer logic must function. This also severs to evaluate a valid
         ClientApp.
         """
-        num_messages = 113
+        num_messages = 229
         num_nodes = 59
 
-        # Register a state and a run_id in it
-        run_id = 1234
-        state_factory = StateFactory(":flwr-in-memory-state:")
-
-        # Register a few nodes
-        nodes_mapping = _register_nodes(
-            num_nodes=num_nodes, state_factory=state_factory
-        )
-
-        expected_results = register_messages_into_state(
-            state_factory=state_factory,
-            nodes_mapping=nodes_mapping,
-            run_id=run_id,
-            num_messages=num_messages,
+        state_factory, nodes_mapping, expected_results = (
+            init_state_factory_nodes_mapping(
+                num_nodes=num_nodes, num_messages=num_messages
+            )
         )
 
         # Run
-        start_and_shutdown(state_factory=state_factory, nodes_mapping=nodes_mapping)
+        start_and_shutdown(
+            state_factory=state_factory, nodes_mapping=nodes_mapping, duration=10
+        )
 
         # Get all TaskRes
         state = state_factory.state()

@@ -193,30 +193,28 @@ server_app = fl.server.ServerApp(
 )
 
 
-fl.simulation.run_simulation(server_app=server_app, client_app=client_app, num_supernodes=NUM_CLIENTS)
+def main():
+    # Parse input arguments
+    args = parser.parse_args()
 
-# def main():
-#     # Parse input arguments
-#     args = parser.parse_args()
+    # Resources to be assigned to each virtual client
+    client_resources = {
+        "num_cpus": args.num_cpus,
+        "num_gpus": args.num_gpus,
+    }
 
-#     # Resources to be assigned to each virtual client
-#     client_resources = {
-#         "num_cpus": args.num_cpus,
-#         "num_gpus": args.num_gpus,
-#     }
-
-#     # Start simulation
-#     fl.simulation.start_simulation(
-#         client_fn=get_client_fn(mnist_fds),
-#         num_clients=NUM_CLIENTS,
-#         client_resources=client_resources,
-#         config=fl.server.ServerConfig(num_rounds=NUM_ROUNDS),
-#         strategy=strategy,
-#         actor_kwargs={
-#             "on_actor_init_fn": disable_progress_bar  # disable tqdm on each actor/process spawning virtual clients
-#         },
-#     )
+    # Start simulation
+    fl.simulation.start_simulation(
+        client_fn=get_client_fn(mnist_fds),
+        num_clients=NUM_CLIENTS,
+        client_resources=client_resources,
+        config=fl.server.ServerConfig(num_rounds=NUM_ROUNDS),
+        strategy=strategy,
+        actor_kwargs={
+            "on_actor_init_fn": disable_progress_bar  # disable tqdm on each actor/process spawning virtual clients
+        },
+    )
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

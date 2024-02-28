@@ -163,10 +163,9 @@ class RayBackend(Backend):
         except LoadClientAppError as load_ex:
             log(
                 ERROR,
-                "An exception was raised when processing a message. Terminating %s",
+                "An exception was raised when processing a message by %s",
                 self.__class__.__name__,
             )
-            await self.terminate()
             raise load_ex
 
     async def terminate(self) -> None:

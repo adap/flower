@@ -27,6 +27,7 @@ from flwr.common.exit_handlers import register_exit_handlers
 from flwr.server.driver.driver import Driver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
+from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.state import StateFactory
 
 
@@ -41,9 +42,11 @@ def run_simulation_from_cli() -> None:
         backend_config=args.backend_config,
         working_dir=args.dir,
         server_app_module_name=args.server_app,
+        driver_api_address=args.driver_api_address,
     )
 
 
+# pylint: disable=too-many-arguments
 def run_simulation(
     num_supernodes: int,
     server_app: Optional[ServerApp] = None,
@@ -51,21 +54,20 @@ def run_simulation(
     backend_name: str = "ray",
     backend_config: str = "{}",
     client_app_module_name: Optional[str] = None,
-    server_app_module_name: Optional[str] = None,
+    server_app_module_name: str = "",
     working_dir: str = "",
+    driver_api_address: str = "0.0.0.0:9091",
 ) -> None:
     """."""
     # TODO: below create circular imports
     from flwr.server.app import _run_driver_api_grpc
-    from flwr.server.superlink.fleet.vce import start_vce
 
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
 
     # Start Driver API
-    driver_address = "0.0.0.0:9091"
     driver_server: grpc.Server = _run_driver_api_grpc(
-        address=driver_address,
+        address=driver_api_address,
         state_factory=state_factory,
         certificates=None,
     )
@@ -73,7 +75,7 @@ def run_simulation(
     # Superlink with Simulation Engine
     f_stop = asyncio.Event()
     superlink_th = threading.Thread(
-        target=start_vce,
+        target=vce.start_vce,
         kwargs={
             "num_supernodes": num_supernodes,
             "client_app_module_name": client_app_module_name,
@@ -92,7 +94,7 @@ def run_simulation(
 
     # Initialize Driver
     driver = Driver(
-        driver_service_address=driver_address,
+        driver_service_address=driver_api_address,
         root_certificates=None,
     )
 
@@ -125,6 +127,12 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--server-app",
         required=True,
+        help="For example: `server:app` or `project.package.module:wrapper.app`",
+    )
+    parser.add_argument(
+        "--driver-api-address",
+        default="0.0.0.0:9091",
+        type=str,
         help="For example: `server:app` or `project.package.module:wrapper.app`",
     )
     parser.add_argument(
