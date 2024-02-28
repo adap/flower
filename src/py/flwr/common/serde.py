@@ -20,6 +20,7 @@ from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, 
 from google.protobuf.message import Message as GrpcMessage
 
 # pylint: disable=E0611
+from flwr.proto.error_pb2 import Error as ProtoError
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import Array as ProtoArray
 from flwr.proto.recordset_pb2 import BoolList, BytesList
@@ -44,7 +45,7 @@ from flwr.proto.transport_pb2 import (
 
 # pylint: enable=E0611
 from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, typing
-from .message import Message, Metadata
+from .message import Error, Message, Metadata
 from .record.typeddict import TypedDict
 
 #  === Parameters message ===
@@ -512,6 +513,21 @@ def configs_record_from_proto(record_proto: ProtoConfigsRecord) -> ConfigsRecord
     )
 
 
+# === Error message ===
+
+
+def error_to_proto(error: Error) -> ProtoError:
+    """Serialize Error to ProtoBuf."""
+    reason = error.reason if error.reason else ""
+    return ProtoError(code=error.code, reason=reason)
+
+
+def error_from_proto(error_proto: ProtoError) -> Error:
+    """Deserialize Error from ProtoBuf."""
+    reason = error_proto.reason if len(error_proto.reason) > 0 else None
+    return Error(code=error_proto.code, reason=reason)
+
+
 # === RecordSet message ===
 
 
@@ -563,6 +579,7 @@ def message_to_taskins(message: Message) -> TaskIns:
             ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
             task_type=md.message_type,
             recordset=recordset_to_proto(message.content),
+            error=error_to_proto(message.error),
         ),
     )
 
@@ -581,11 +598,15 @@ def message_from_taskins(taskins: TaskIns) -> Message:
         message_type=taskins.task.task_type,
     )
 
-    # Return the Message
-    return Message(
+    # Construct Message
+    message = Message(
         metadata=metadata,
         content=recordset_from_proto(taskins.task.recordset),
     )
+
+    # Add error field
+    message.error = error_from_proto(taskins.task.error)
+    return message
 
 
 def message_to_taskres(message: Message) -> TaskRes:
@@ -602,6 +623,7 @@ def message_to_taskres(message: Message) -> TaskRes:
             ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
             task_type=md.message_type,
             recordset=recordset_to_proto(message.content),
+            error=error_to_proto(message.error),
         ),
     )
 
@@ -620,8 +642,12 @@ def message_from_taskres(taskres: TaskRes) -> Message:
         message_type=taskres.task.task_type,
     )
 
-    # Return the Message
-    return Message(
+    # Construct the Message
+    message = Message(
         metadata=metadata,
         content=recordset_from_proto(taskres.task.recordset),
     )
+
+    # Add error field
+    message.error = error_from_proto(taskres.task.error)
+    return message

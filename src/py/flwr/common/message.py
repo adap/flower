@@ -204,6 +204,7 @@ class Message:
     def __init__(self, metadata: Metadata, content: RecordSet) -> None:
         self._metadata = metadata
         self._content = content
+        self._error = Error(code=0) # TODO: decide about codes, init with default "NO_ERROR" code?
 
     @property
     def metadata(self) -> Metadata:
