@@ -24,22 +24,20 @@ from flwr.common import EventType, event
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.server.driver.driver import Driver
 from flwr.server.run_serverapp import run
+from flwr.server.superlink.driver.driver_grpc import run_driver_api_grpc
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.state import StateFactory
 
 
 def run_simulation() -> None:
-    """."""
-    # TODO: below create circular imports
-    from flwr.server.app import _run_driver_api_grpc
-
+    """Run Simulation Engine."""
     args = _parse_args_run_simulation().parse_args()
 
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
 
     # Start Driver API
-    driver_server: grpc.Server = _run_driver_api_grpc(
+    driver_server: grpc.Server = run_driver_api_grpc(
         address=args.driver_api_address,
         state_factory=state_factory,
         certificates=None,
