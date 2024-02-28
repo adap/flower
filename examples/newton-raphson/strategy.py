@@ -19,7 +19,7 @@ class NewtonRaphsonStrategy(fl.server.strategy.FedAvg):
         fit_metrics_aggregation_fn=None,
         evaluate_metrics_aggregation_fn=None,
         inplace=True,
-        damping_factor=0.8
+        damping_factor=0.8,
     ):
         super().__init__(
             fraction_fit=fraction_fit,
