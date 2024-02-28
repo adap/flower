@@ -599,7 +599,6 @@ def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
-    interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
     # Create Fleet API gRPC server
@@ -612,7 +611,6 @@ def _run_fleet_api_grpc_rere(
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=certificates,
-        interceptors=interceptors,
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)

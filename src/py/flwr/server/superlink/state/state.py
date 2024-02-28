@@ -157,24 +157,24 @@ class State(abc.ABC):
     def store_server_public_private_key(
         self, public_key: bytes, private_key: bytes
     ) -> None:
-        """Store server's `public_key` and `private_key` in state."""
+        """Store `server_public_key` and `server_private_key` in state."""
 
     @abc.abstractmethod
     def get_server_private_key(self) -> bytes:
-        """Get server private key in urlsafe bytes."""
+        """Retrieve `server_private_key` in urlsafe bytes."""
 
     @abc.abstractmethod
     def get_server_public_key(self) -> bytes:
-        """Get server public key in urlsafe bytes."""
+        """Retrieve `server_public_key` in urlsafe bytes."""
 
     @abc.abstractmethod
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-        """Store a set of client public keys in state."""
+        """Store a set of `client_public_keys` in state."""
 
     @abc.abstractmethod
     def store_client_public_key(self, public_key: bytes) -> None:
-        """Retrieve a client public key in state."""
+        """Store a `client_public_key` in state."""
 
     @abc.abstractmethod
     def get_client_public_keys(self) -> Set[bytes]:
-        """Retrieve all currently stored client public keys as a set."""
+        """Retrieve all currently stored `client_public_keys` as a set."""
