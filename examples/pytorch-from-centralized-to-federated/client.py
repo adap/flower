@@ -81,11 +81,11 @@ class CifarClient(fl.client.NumPyClient):
 def main() -> None:
     """Load data, start CifarClient."""
     parser = argparse.ArgumentParser(description="Flower")
-    parser.add_argument("--node-id", type=int, required=True, choices=range(0, 10))
+    parser.add_argument("--partition-id", type=int, required=True, choices=range(0, 10))
     args = parser.parse_args()
 
     # Load data
-    trainloader, testloader = cifar.load_data(args.node_id)
+    trainloader, testloader = cifar.load_data(args.partition_id)
 
     # Load model
     model = cifar.Net().to(DEVICE).train()
