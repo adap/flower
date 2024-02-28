@@ -42,14 +42,14 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--node-id",
+        "--partition-id",
         type=int,
         choices=range(0, N_CLIENTS),
         required=True,
-        help="Specifies the node id of artificially partitioned datasets.",
+        help="Specifies the partition id of artificially partitioned datasets.",
     )
     args = parser.parse_args()
-    partition_id = args.node_id
+    partition_id = args.partition_id
 
     # Load the partition data
     fds = FederatedDataset(dataset="hitorilabs/iris", partitioners={"train": N_CLIENTS})

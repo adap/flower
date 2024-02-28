@@ -86,7 +86,7 @@ Configuring individual clients
 
 In some cases, it is necessary to send different configuration values to different clients.
 
-This can be achieved by customizing an existing strategy or by `implementing a custom strategy from scratch <https://flower.ai/docs/framework/how-to-implement-strategies.html>`_. Here's a nonsensical example that customizes :code:`FedAvg` by adding a custom ``"hello": "world"`` configuration key/value pair to the config dict of a *single client* (only the first client in the list, the other clients in this round to not receive this "special" config value):
+This can be achieved by customizing an existing strategy or by :doc:`implementing a custom strategy from scratch <how-to-implement-strategies>`. Here's a nonsensical example that customizes :code:`FedAvg` by adding a custom ``"hello": "world"`` configuration key/value pair to the config dict of a *single client* (only the first client in the list, the other clients in this round to not receive this "special" config value):
 
 .. code-block:: python
 
