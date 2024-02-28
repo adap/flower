@@ -65,7 +65,7 @@ python = "^3.8"
 numpy = "^1.21.0"
 grpcio = "^1.60.0"
 protobuf = "^4.25.2"
-cryptography = "^41.0.2"
+cryptography = "^42.0.4"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
 typer = { version = "^0.9.0", extras=["all"] }
