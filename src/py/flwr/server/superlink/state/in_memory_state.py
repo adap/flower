@@ -16,6 +16,7 @@
 
 
 import os
+import threading
 from datetime import datetime, timedelta
 from logging import ERROR
 from typing import Dict, List, Optional, Set
@@ -38,6 +39,7 @@ class InMemoryState(State):
         self.client_public_keys: Set[bytes] = set()
         self.server_public_key: bytes = b""
         self.server_private_key: bytes = b""
+        self.lock = threading.Lock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
@@ -60,7 +62,8 @@ class InMemoryState(State):
         task_ins.task_id = str(task_id)
         task_ins.task.created_at = created_at.isoformat()
         task_ins.task.ttl = ttl.isoformat()
-        self.task_ins_store[task_id] = task_ins
+        with self.lock:
+            self.task_ins_store[task_id] = task_ins
 
         # Return the new task_id
         return task_id
@@ -74,22 +77,23 @@ class InMemoryState(State):
 
         # Find TaskIns for node_id that were not delivered yet
         task_ins_list: List[TaskIns] = []
-        for _, task_ins in self.task_ins_store.items():
-            # pylint: disable=too-many-boolean-expressions
-            if (
-                node_id is not None  # Not anonymous
-                and task_ins.task.consumer.anonymous is False
-                and task_ins.task.consumer.node_id == node_id
-                and task_ins.task.delivered_at == ""
-            ) or (
-                node_id is None  # Anonymous
-                and task_ins.task.consumer.anonymous is True
-                and task_ins.task.consumer.node_id == 0
-                and task_ins.task.delivered_at == ""
-            ):
-                task_ins_list.append(task_ins)
-            if limit and len(task_ins_list) == limit:
-                break
+        with self.lock:
+            for _, task_ins in self.task_ins_store.items():
+                # pylint: disable=too-many-boolean-expressions
+                if (
+                    node_id is not None  # Not anonymous
+                    and task_ins.task.consumer.anonymous is False
+                    and task_ins.task.consumer.node_id == node_id
+                    and task_ins.task.delivered_at == ""
+                ) or (
+                    node_id is None  # Anonymous
+                    and task_ins.task.consumer.anonymous is True
+                    and task_ins.task.consumer.node_id == 0
+                    and task_ins.task.delivered_at == ""
+                ):
+                    task_ins_list.append(task_ins)
+                if limit and len(task_ins_list) == limit:
+                    break
 
         # Mark all of them as delivered
         delivered_at = now().isoformat()
@@ -167,7 +171,8 @@ class InMemoryState(State):
                 task_res_to_be_deleted.add(task_res_id)
 
         for task_id in task_ins_to_be_deleted:
-            del self.task_ins_store[task_id]
+            with self.lock:
+                del self.task_ins_store[task_id]
         for task_id in task_res_to_be_deleted:
             del self.task_res_store[task_id]
 
