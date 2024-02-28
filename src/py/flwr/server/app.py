@@ -36,9 +36,6 @@ from flwr.common.constant import (
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
-from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
-    add_DriverServicer_to_server,
-)
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -48,7 +45,7 @@ from .history import History
 from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
 from .strategy import Strategy
-from .superlink.driver.driver_servicer import DriverServicer
+from .superlink.driver.driver_grpc import run_driver_api_grpc
 from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
@@ -204,7 +201,7 @@ def run_driver_api() -> None:
     state_factory = StateFactory(args.database)
 
     # Start server
-    grpc_server: grpc.Server = _run_driver_api_grpc(
+    grpc_server: grpc.Server = run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
         certificates=certificates,
@@ -313,7 +310,7 @@ def run_superlink() -> None:
     state_factory = StateFactory(args.database)
 
     # Start Driver API
-    driver_server: grpc.Server = _run_driver_api_grpc(
+    driver_server: grpc.Server = run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
         certificates=certificates,
@@ -412,30 +409,6 @@ def _try_obtain_certificates(
             "in insecure mode using '--insecure' if you understand the risks."
         )
     return certificates
-
-
-def _run_driver_api_grpc(
-    address: str,
-    state_factory: StateFactory,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
-) -> grpc.Server:
-    """Run Driver API (gRPC, request-response)."""
-    # Create Driver API gRPC server
-    driver_servicer: grpc.Server = DriverServicer(
-        state_factory=state_factory,
-    )
-    driver_add_servicer_to_server_fn = add_DriverServicer_to_server
-    driver_grpc_server = generic_create_grpc_server(
-        servicer_and_add_fn=(driver_servicer, driver_add_servicer_to_server_fn),
-        server_address=address,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=certificates,
-    )
-
-    log(INFO, "Flower ECE: Starting Driver API (gRPC-rere) on %s", address)
-    driver_grpc_server.start()
-
-    return driver_grpc_server
 
 
 def _run_fleet_api_grpc_rere(
