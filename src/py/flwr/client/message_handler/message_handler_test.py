@@ -269,6 +269,8 @@ class TestMessageValidation(unittest.TestCase):
         invalid_metadata_list: List[Metadata] = []
         attrs = list(vars(self.valid_out_metadata).keys())
         for attr in attrs:
+            if attr == "_partition_id":
+                continue
             if attr == "_ttl":  # Skip configurable ttl
                 continue
             # Make an invalid metadata

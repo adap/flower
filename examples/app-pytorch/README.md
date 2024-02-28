@@ -12,10 +12,12 @@ Let's assume the following project structure:
 ```bash
 $ tree .
 .
-├── client.py         # <-- contains `ClientApp`
-├── server.py         # <-- contains `ServerApp`
-├── task.py           # <-- task-specific code (model, data)
-└── requirements.txt  # <-- dependencies
+├── client.py           # <-- contains `ClientApp`
+├── server.py           # <-- contains `ServerApp`
+├── server_workflow.py  # <-- contains `ServerApp` with workflow
+├── server_custom.py    # <-- contains `ServerApp` with custom main function
+├── task.py             # <-- task-specific code (model, data)
+└── requirements.txt    # <-- dependencies
 ```
 
 ## Install dependencies
@@ -50,6 +52,12 @@ With both the long-running server (SuperLink) and two clients (SuperNode) up and
 
 ```bash
 flower-server-app server:app --insecure
+```
+
+Or, to try the workflow example, run:
+
+```bash
+flower-server-app server_workflow:app --insecure
 ```
 
 Or, to try the custom server function example, run:

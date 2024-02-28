@@ -71,7 +71,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
 
         # Execute
         value: flwr.common.GetParametersRes = client.get_parameters(
-            ins=get_parameters_ins, timeout=None
+            ins=get_parameters_ins, timeout=None, group_id=0
         )
 
         # Assert
@@ -88,7 +88,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
 
         # Execute
-        fit_res = client.fit(ins=ins, timeout=None)
+        fit_res = client.fit(ins=ins, timeout=None, group_id=0)
 
         # Assert
         assert fit_res.parameters.tensor_type == "np"
@@ -106,7 +106,7 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         evaluate_ins: flwr.common.EvaluateIns = flwr.common.EvaluateIns(parameters, {})
 
         # Execute
-        evaluate_res = client.evaluate(evaluate_ins, timeout=None)
+        evaluate_res = client.evaluate(evaluate_ins, timeout=None, group_id=1)
 
         # Assert
         assert (0, 0.0) == (
@@ -127,7 +127,9 @@ class GrpcClientProxyTestCase(unittest.TestCase):
         )
 
         # Execute
-        value: flwr.common.GetPropertiesRes = client.get_properties(ins, timeout=None)
+        value: flwr.common.GetPropertiesRes = client.get_properties(
+            ins, timeout=None, group_id=0
+        )
 
         # Assert
         assert value.properties["tensor_type"] == "numpy.ndarray"
