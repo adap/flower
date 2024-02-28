@@ -12,14 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Custom types for Flower servers."""
+"""Workflows."""
 
 
-from typing import Callable
+from .default_workflows import DefaultWorkflow
 
-from flwr.common import Context
-
-from .driver import Driver
-
-ServerAppCallable = Callable[[Driver, Context], None]
-Workflow = Callable[[Driver, Context], None]
+__all__ = [
+    "DefaultWorkflow",
+]
