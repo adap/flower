@@ -155,6 +155,36 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
 
 
 @dataclass
+class Error:
+    """A dataclass that stores information about an error that ocurred.
+
+    Parameters
+    ----------
+    code : int
+        An identifier for the error.
+    reasong : Optional[str]
+        A reason for why the error arised (e.g. an exception stack-trace)
+    """
+
+    _code: int
+    _reason: str | None = None
+
+    def __init__(self, code: int, reason: str | None = None) -> None:
+        self._code = code
+        self._reason = reason
+
+    @property
+    def code(self) -> int:
+        """Eerror code."""
+        return self._code
+
+    @property
+    def reason(self) -> str | None:
+        """Reason reported about the error."""
+        return self._reason
+
+
+@dataclass
 class Message:
     """State of your application from the viewpoint of the entity using it.
 
@@ -169,6 +199,7 @@ class Message:
 
     _metadata: Metadata
     _content: RecordSet
+    _error: Error
 
     def __init__(self, metadata: Metadata, content: RecordSet) -> None:
         self._metadata = metadata
@@ -188,6 +219,32 @@ class Message:
     def content(self, value: RecordSet) -> None:
         """Set content."""
         self._content = value
+
+    def construct_error_message(
+        self,
+        error_code: int,
+        error_reason: str | None = None,
+        content: RecordSet | None = None,
+        ttl: str = "",
+    ) -> Message:
+        """Construct valid response message indicating an error happened.
+
+        Parameters
+        ----------
+        error_code : int
+            Error code.
+        error_reason : Optional[str]
+            A reason for why the error arised (e.g. an exception stack-trace)
+        content : Optional[RecordSet]
+            The content for the reply message.
+        ttl : str (default: "")
+            Time-to-live for this message.
+        """
+        message_content = content if content else RecordSet()
+        message = self.create_reply(content=message_content, ttl=ttl)
+        # Set error
+        message._error = Error(code=error_code, reason=error_reason)
+        return message
 
     def create_reply(self, content: RecordSet, ttl: str) -> Message:
         """Create a reply to this message with specified content and TTL.
