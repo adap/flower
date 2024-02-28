@@ -132,7 +132,9 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
             return self._alpha
         if isinstance(alpha, int):
             assert self._num_unique_classes is not None
-            alpha = np.array([float(alpha)], dtype=float).repeat(self._num_unique_classes)
+            alpha = np.array([float(alpha)], dtype=float).repeat(
+                self._num_unique_classes
+            )
         elif isinstance(alpha, float):
             assert self._num_unique_classes is not None
             alpha = np.array([alpha], dtype=float).repeat(self._num_unique_classes)
