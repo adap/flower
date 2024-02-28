@@ -68,7 +68,7 @@ async def worker(
 
             # Convert TaskIns to Message
             message = message_from_taskins(task_ins)
-            # Replace node ID with data partition ID
+            # Set partition_id
             message.metadata.partition_id = nodes_mapping[node_id]
 
             # Let backend process message
@@ -239,7 +239,7 @@ def start_vce(
     if existing_nodes_mapping:
         if state_factory is None:
             raise ValueError(
-                "You passed `existing_nodes_mapping` but no `state_factory` was passed."
+                "`existing_nodes_mapping` was passed, but no `state_factory` was passed."
             )
         log(INFO, "Using exiting NodeToPartitionMapping and StateFactory.")
         # Use mapping constructed externally. This also means nodes
