@@ -229,7 +229,7 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
     On the client, add the `fixedclipping_mod` to the client-side mods:
 
     >>> app = fl.client.ClientApp(
-    >>>     client_fn=FlowerClient().to_client(), mods=[fixedclipping_mod]
+    >>>     client_fn=client_fn, mods=[fixedclipping_mod]
     >>> )
     """
 
