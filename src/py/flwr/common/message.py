@@ -220,12 +220,22 @@ class Message:
         """Set content."""
         self._content = value
 
+    @property
+    def error(self) -> Error:
+        """Error captured by this message."""
+        return self._error
+
+    @error.setter
+    def error(self, value: Error) -> None:
+        """Set error."""
+        self._error = value
+
     def construct_error_message(
         self,
         error_code: int,
+        ttl: str,
         error_reason: str | None = None,
         content: RecordSet | None = None,
-        ttl: str = "",
     ) -> Message:
         """Construct valid response message indicating an error happened.
 
@@ -233,17 +243,17 @@ class Message:
         ----------
         error_code : int
             Error code.
+        ttl : str
+            Time-to-live for this message.
         error_reason : Optional[str]
             A reason for why the error arised (e.g. an exception stack-trace)
         content : Optional[RecordSet]
             The content for the reply message.
-        ttl : str (default: "")
-            Time-to-live for this message.
         """
         message_content = content if content else RecordSet()
         message = self.create_reply(content=message_content, ttl=ttl)
         # Set error
-        message._error = Error(code=error_code, reason=error_reason)
+        message.error = Error(code=error_code, reason=error_reason)
         return message
 
     def create_reply(self, content: RecordSet, ttl: str) -> Message:
