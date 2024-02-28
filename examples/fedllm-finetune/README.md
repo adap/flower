@@ -1,16 +1,17 @@
 # Federated Large Language Model (LLM) Fine-tuning
-Large language models (LLMs), which have been trained on vast amounts of publicly accessible data, have shown remarkable effectiveness in a wide range of areas. 
+
+Large language models (LLMs), which have been trained on vast amounts of publicly accessible data, have shown remarkable effectiveness in a wide range of areas.
 However, despite the fact that more data typically leads to improved performance, there is a concerning prospect that the supply of high-quality public data will deplete within a few years.
 Federated LLM training could unlock access to an endless pool of distributed private data by allowing multiple data owners to collaboratively train a shared model without the need to exchange raw data.
 
-This introductory example conducts federated instruction tuning with pretrained [LLama2](https://huggingface.co/openlm-research) models on [Alpaca-GPT4](https://huggingface.co/datasets/vicgalle/alpaca-gpt4) dataset. 
+This introductory example conducts federated instruction tuning with pretrained [LLama2](https://huggingface.co/openlm-research) models on [Alpaca-GPT4](https://huggingface.co/datasets/vicgalle/alpaca-gpt4) dataset.
 We use [Flower Datasets](https://flower.dev/docs/datasets/) to download, partition and preprocess the dataset.
-The fine-tuning is done using the [🤗PEFT](https://huggingface.co/docs/peft/en/index) library. 
-We use Flower's Simulation Engine to simulate the LLM fine-tuning process in federated way, 
+The fine-tuning is done using the [🤗PEFT](https://huggingface.co/docs/peft/en/index) library.
+We use Flower's Simulation Engine to simulate the LLM fine-tuning process in federated way,
 which allows users to perform the training on a single GPU.
 
-
 ## Environments Setup
+
 Start by cloning the code example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
@@ -30,7 +31,6 @@ This will create a new directory called `fedllm-finetune` containing the followi
 -- requirements.txt    <- Example dependencies
 ```
 
-
 ### Installing dependencies
 
 Project dependencies are defined in `requirements.txt`. Install them with:
@@ -38,7 +38,6 @@ Project dependencies are defined in `requirements.txt`. Install them with:
 ```shell
 pip install -r requirements.txt
 ```
-
 
 ## Run LLM Fine-tuning
 
@@ -48,6 +47,7 @@ With an activated Python environment, run the example with default config values
 # Run with default config
 python main.py
 ```
+
 This command will run FL simulations with an 8-bit [OpenLLaMA 3Bv2](https://huggingface.co/openlm-research/open_llama_3b_v2) model involving 2 clients per rounds for 100 FL rounds. You can override configuration parameters directly from the command line. Below are a few settings you might want to test:
 
 ```bash
@@ -62,19 +62,19 @@ python main.py num_rounds=50 fraction_fit.fraction_fit=0.25
 
 ![](_static/train_loss_smooth.png)
 
-As expected, LLama2-7B model works better than its 3B version with lower training loss. With the hyperparameters tested, the 8-bit model seems to deliver lower training loss for the smaller 3B model compared to its 4-bit version. 
+As expected, LLama2-7B model works better than its 3B version with lower training loss. With the hyperparameters tested, the 8-bit model seems to deliver lower training loss for the smaller 3B model compared to its 4-bit version.
 
 You can run all 8 experiments with a single command as:
 
 ```bash
-python main.py --multirun model.name="openlm-research/open_llama_7b_v2","openlm-research/open_llama_3b_v2" model.quantization=8,4 strategy.fraction_fit=0.1,0.2 
+python main.py --multirun model.name="openlm-research/open_llama_7b_v2","openlm-research/open_llama_3b_v2" model.quantization=8,4 strategy.fraction_fit=0.1,0.2
 ```
 
 ## VRAM Consumption
 
 | Models | 7-billion (8-bit) | 7-billion (4-bit) | 3-billion (8-bit) | 3-billion (4-bit) |
-|:------:|:-----------------:|:-----------------:|:-----------------:|:-----------------:|
-| VRAM   | ~22.00 GB          | ~16.50 GB          | ~13.50 GB          | ~10.60 GB          |
+| :----: | :---------------: | :---------------: | :---------------: | :---------------: |
+|  VRAM  |     ~22.00 GB     |     ~16.50 GB     |     ~13.50 GB     |     ~10.60 GB     |
 
 We make use of the [bitsandbytes](https://huggingface.co/docs/bitsandbytes/main/en/index) library in conjunction with [PEFT](https://huggingface.co/docs/peft/en/index) to derive LLMs that can be fine-tuned efficiently.
 The above table shows the VRAM consumption per client for the different models considered in this example.
@@ -86,14 +86,13 @@ For example, it is easy to train 2 concurrent clients on each GPU (24 GB VRAM) i
 python main.py model.name="openlm-research/open_llama_3b_v2" model.quantization=4 client_resources.num_gpus=0.5
 ```
 
-
 ## Test with your Questions
 
 We provide a script to test your trained model by passing your specified questions. For example:
 
 ```bash
 python test.py --peft-path=/path/to/trained-model-dir/ \
-               --question="What is the ideal 1-day plan in London?"
+    --question="What is the ideal 1-day plan in London?"
 ```
 
 An answer generated from federated trained 7-billion (8-bit) LLama2 model:
@@ -109,5 +108,5 @@ From there, cross the river Thames to the Tower of London, which is home to the 
 Finally, end your day with a relaxing visit to the London Eye, the tallest Ferris wheel in Europe, for a beautiful view of the city.
 ```
 
-The [`Vicuna`](https://huggingface.co/lmsys/vicuna-13b-v1.1) template we used in this example is for a chat assistant. 
+The [`Vicuna`](https://huggingface.co/lmsys/vicuna-13b-v1.1) template we used in this example is for a chat assistant.
 The generated answer is expected to be a multi-turn conversations. Feel free to try more interesting questions!
