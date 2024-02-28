@@ -28,10 +28,9 @@ from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 from flwr.client import ClientFn
 from flwr.common import EventType, event
 from flwr.common.logger import log
-from flwr.server import Server
-from flwr.server.app import init_defaults, run_fl
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
+from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_actor import (
@@ -220,7 +219,7 @@ def start_simulation(
     log(
         INFO,
         "Optimize your simulation with Flower VCE: "
-        "https://flower.dev/docs/framework/how-to-run-simulations.html",
+        "https://flower.ai/docs/framework/how-to-run-simulations.html",
     )
 
     # Log the resources that a single client will be able to use
@@ -338,7 +337,7 @@ def start_simulation(
             "disconnected. The head node might still be alive but cannot accommodate "
             "any actor with resources: %s."
             "\nTake a look at the Flower simulation examples for guidance "
-            "<https://flower.dev/docs/framework/how-to-run-simulations.html>.",
+            "<https://flower.ai/docs/framework/how-to-run-simulations.html>.",
             client_resources,
             client_resources,
         )

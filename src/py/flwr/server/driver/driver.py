@@ -18,8 +18,7 @@
 import time
 from typing import Iterable, List, Optional, Tuple
 
-from flwr.common.message import Message, Metadata
-from flwr.common.recordset import RecordSet
+from flwr.common import Message, Metadata, RecordSet
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -45,6 +44,7 @@ class Driver:
         Tuple containing root certificate, server certificate, and private key
         to start a secure SSL-enabled server. The tuple is expected to have
         three bytes elements in the following order:
+
             * CA certificate.
             * server certificate.
             * server private key.
