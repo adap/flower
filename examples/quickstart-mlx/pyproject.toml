@@ -6,11 +6,11 @@ build-backend = "poetry.core.masonry.api"
 name = "quickstart-mlx"
 version = "0.1.0"
 description = "MLX Federated Learning Quickstart with Flower"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"
 mlx = "==0.0.3"
 numpy = "==1.24.4"
-flwr-datasets = {extras = ["vision"], version = "^0.0.2"}
+flwr-datasets = { extras = ["vision"], version = "^0.0.2" }

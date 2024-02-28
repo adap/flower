@@ -6,7 +6,7 @@ build-backend = "poetry.masonry.api"
 name = "quickstart-pytorch-lightning"
 version = "0.1.0"
 description = "Federated Learning Quickstart with Flower and PyTorch Lightning"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"

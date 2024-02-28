@@ -7,11 +7,11 @@ name = "fedvssl" # <----- Ensure it matches the name of your baseline directory 
 version = "1.0.0"
 description = "Federated Self-supervised Learning for Video Understanding"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev"
+documentation = "https://flower.ai"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -46,12 +46,12 @@ mmengine = "0.10.0"
 yapf = "0.40.1"
 tensorboard = "2.15.1"
 numpy = "1.23.0"
-mmcv-full = { url = "https://download.openmmlab.com/mmcv/dist/cu117/torch1.13.0/mmcv_full-1.7.1-cp310-cp310-manylinux1_x86_64.whl"}
+mmcv-full = { url = "https://download.openmmlab.com/mmcv/dist/cu117/torch1.13.0/mmcv_full-1.7.1-cp310-cp310-manylinux1_x86_64.whl" }
 
 [tool.poetry.dev-dependencies]
-isort = "==5.11.5"
-black = "==23.1.0"
-docformatter = "==1.5.1"
+isort = "==5.13.2"
+black = "==24.2.0"
+docformatter = "==1.7.5"
 mypy = "==1.4.1"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"
@@ -88,7 +88,7 @@ plugins = "numpy.typing.mypy_plugin"
 [tool.pylint."MESSAGES CONTROL"]
 disable = "bad-continuation,duplicate-code,too-few-public-methods,useless-import-alias"
 good-names = "i,j,k,f,_,x,y,X,Y,mu,v"
-signature-mutators="hydra.main.main"
+signature-mutators = "hydra.main.main"
 
 [[tool.mypy.overrides]]
 module = [
@@ -100,7 +100,7 @@ follow_imports_for_stubs = true
 disallow_untyped_calls = false
 
 [tool.pylint.typecheck]
-generated-members="numpy.*, torch.*, tensorflow.*"
+generated-members = "numpy.*, torch.*, tensorflow.*"
 # ignore-paths="fedvssl/CtP/"
 
 [[tool.mypy.overrides]]
