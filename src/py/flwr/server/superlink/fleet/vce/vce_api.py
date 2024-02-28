@@ -48,7 +48,7 @@ def _register_nodes(
 
 # pylint: disable=too-many-arguments,too-many-locals
 async def worker(
-    app: Callable[[], ClientApp],
+    app_fn: Callable[[], ClientApp],
     queue: "asyncio.Queue[TaskIns]",
     node_states: Dict[int, NodeState],
     state_factory: StateFactory,
@@ -68,12 +68,12 @@ async def worker(
 
             # Convert TaskIns to Message
             message = message_from_taskins(task_ins)
-            # Replace node ID with data partition ID
+            # Set partition_id
             message.metadata.partition_id = nodes_mapping[node_id]
 
             # Let backend process message
             out_mssg, updated_context = await backend.process_message(
-                app, message, context
+                app_fn, message, context
             )
 
             # Update Context
@@ -138,7 +138,7 @@ async def add_taskins_to_queue(
         log(
             DEBUG,
             "Simulation Engine stats: "
-            "(Active workers: (%i/%i) | %s (%i workers) | Tasks in queue: %i)",
+            "Active workers: (%i/%i) | %s (%i workers) | Tasks in queue: %i)",
             num_active,
             num_initial_consumers,
             backend.__class__.__name__,
@@ -150,25 +150,30 @@ async def add_taskins_to_queue(
 
 
 async def run(
-    app: Callable[[], ClientApp],
-    backend: Backend,
+    app_fn: Callable[[], ClientApp],
+    backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
     node_states: Dict[int, NodeState],
     f_stop: asyncio.Event,
 ) -> None:
     """Run the VCE async."""
-    # pylint: disable=fixme
     queue: "asyncio.Queue[TaskIns]" = asyncio.Queue(128)
 
     try:
+
+        # Instantiate backend
+        backend = backend_fn()
+
         # Build backend
         await backend.build()
 
         # Add workers (they submit Messages to Backend)
         worker_tasks = [
             asyncio.create_task(
-                worker(app, queue, node_states, state_factory, nodes_mapping, backend)
+                worker(
+                    app_fn, queue, node_states, state_factory, nodes_mapping, backend
+                )
             )
             for _ in range(backend.num_workers)
         ]
@@ -246,7 +251,8 @@ def start_vce(
     if existing_nodes_mapping:
         if state_factory is None:
             raise ValueError(
-                "You passed `existing_nodes_mapping` but no `state_factory` was passed."
+                "`existing_nodes_mapping` was passed, but no `state_factory` was "
+                "passed."
             )
         log(INFO, "Using exiting NodeToPartitionMapping and StateFactory.")
         # Use mapping constructed externally. This also means nodes
@@ -276,7 +282,6 @@ def start_vce(
 
     try:
         backend_type = supported_backends[backend_name]
-        backend = backend_type(backend_config, work_dir=working_dir)
     except KeyError as ex:
         log(
             ERROR,
@@ -290,6 +295,10 @@ def start_vce(
 
         raise ex
 
+    def backend_fn() -> Backend:
+        """Instantiate a Backend."""
+        return backend_type(backend_config, work_dir=working_dir)
+
     log(INFO, "client_app_module_name = %s", client_app_module_name)
 
     def _load() -> ClientApp:
@@ -300,12 +309,12 @@ def start_vce(
         )
         return app
 
-    app = _load
+    app_fn = _load
 
     asyncio.run(
         run(
-            app,
-            backend,
+            app_fn,
+            backend_fn,
             nodes_mapping,
             state_factory,
             node_states,

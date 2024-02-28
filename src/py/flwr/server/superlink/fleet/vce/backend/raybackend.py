@@ -141,13 +141,13 @@ class RayBackend(Backend):
 
         Return output message and updated context.
         """
-        node_id = message.metadata.partition_id
+        partition_id = message.metadata.partition_id
 
         try:
             # Submite a task to the pool
             future = await self.pool.submit(
                 lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-                (app, message, str(node_id), context),
+                (app, message, str(partition_id), context),
             )
 
             await future
