@@ -150,9 +150,10 @@ def compute_adaptive_noise_params(
         if adding_noise >= 2:
             log(
                 WARNING,
-                f"A significant amount of noise ({adding_noise}) has to be "
-                f"added. Consider increasing `clipped_count_stddev` or "
-                f"`num_sampled_clients`.",
+                "A significant amount of noise (%s) has to be "
+                "added. Consider increasing `clipped_count_stddev` or "
+                "`num_sampled_clients`.",
+                adding_noise,
             )
 
     else:
