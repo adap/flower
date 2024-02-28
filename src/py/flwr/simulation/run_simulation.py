@@ -39,9 +39,8 @@ def run_simulation() -> None:
     state_factory = StateFactory(":flwr-in-memory-state:")
 
     # Start Driver API
-    driver_address = "0.0.0.0:9098"
     driver_server: grpc.Server = _run_driver_api_grpc(
-        address=driver_address,
+        address=args.driver_api_address,
         state_factory=state_factory,
         certificates=None,
     )
@@ -67,7 +66,7 @@ def run_simulation() -> None:
 
     # Initialize Driver
     driver = Driver(
-        driver_service_address=driver_address,
+        driver_service_address=args.driver_api_address,
         root_certificates=None,
     )
 
@@ -100,6 +99,12 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--server-app",
         required=True,
+        help="For example: `server:app` or `project.package.module:wrapper.app`",
+    )
+    parser.add_argument(
+        "--driver-api-address",
+        default="0.0.0.0:9091",
+        type=str,
         help="For example: `server:app` or `project.package.module:wrapper.app`",
     )
     parser.add_argument(
