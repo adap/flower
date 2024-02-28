@@ -16,6 +16,7 @@
 
 
 from .bulyan import Bulyan as Bulyan
+from .dp_adaptive_clipping import DifferentialPrivacyClientSideAdaptiveClipping
 from .dp_fixed_clipping import (
     DifferentialPrivacyClientSideFixedClipping,
     DifferentialPrivacyServerSideFixedClipping,
@@ -41,26 +42,27 @@ from .qfedavg import QFedAvg as QFedAvg
 from .strategy import Strategy as Strategy
 
 __all__ = [
-    "FaultTolerantFedAvg",
-    "FedAdagrad",
-    "FedAdam",
-    "FedAvg",
-    "FedXgbNnAvg",
-    "FedXgbBagging",
-    "FedXgbCyclic",
-    "FedAvgAndroid",
-    "FedAvgM",
-    "FedOpt",
-    "FedProx",
-    "FedYogi",
-    "QFedAvg",
-    "FedMedian",
-    "FedTrimmedAvg",
-    "Krum",
     "Bulyan",
     "DPFedAvgAdaptive",
     "DPFedAvgFixed",
-    "Strategy",
-    "DifferentialPrivacyServerSideFixedClipping",
+    "DifferentialPrivacyClientSideAdaptiveClipping",
     "DifferentialPrivacyClientSideFixedClipping",
+    "DifferentialPrivacyServerSideFixedClipping",
+    "FedAdagrad",
+    "FedAdam",
+    "FedAvg",
+    "FedAvgAndroid",
+    "FedAvgM",
+    "FedMedian",
+    "FedOpt",
+    "FedProx",
+    "FedTrimmedAvg",
+    "FedXgbBagging",
+    "FedXgbCyclic",
+    "FedXgbNnAvg",
+    "FedYogi",
+    "FaultTolerantFedAvg",
+    "Krum",
+    "QFedAvg",
+    "Strategy",
 ]
