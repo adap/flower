@@ -60,7 +60,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self,
         partition_sizes: Union[List[int], NDArrayInt],
         partition_by: str,
-        alpha: Union[float, List[float], NDArrayFloat],
+        alpha: Union[int, float, List[float], NDArrayFloat],
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
@@ -109,7 +109,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         return self.dataset.select(self._node_id_to_indices[node_id])
 
     def _initialize_alpha_if_needed(
-        self, alpha: Union[float, List[float], NDArrayFloat]
+        self, alpha: Union[int, float, List[float], NDArrayFloat]
     ) -> NDArrayFloat:
         """Convert alpha to the used format in the code a NDArrayFloat.
 
@@ -130,7 +130,10 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         if self._initialized_alpha:
             assert self._alpha is not None
             return self._alpha
-        if isinstance(alpha, float):
+        if isinstance(alpha, int):
+            assert self._num_unique_classes is not None
+            alpha = np.array([float(alpha)], dtype=float).repeat(self._num_unique_classes)
+        elif isinstance(alpha, float):
             assert self._num_unique_classes is not None
             alpha = np.array([alpha], dtype=float).repeat(self._num_unique_classes)
         elif isinstance(alpha, List):
