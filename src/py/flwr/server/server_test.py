@@ -256,7 +256,7 @@ def test_setup_client_auth() -> None:
         )
 
         # Run _try_setup_client_authentication
-        result = _try_setup_client_authentication(mock_args)
+        result = _try_setup_client_authentication(mock_args, (b"", b"", b""))
 
         expected_private_key = load_ssh_private_key(server_private_key, None)
         expected_public_key = load_ssh_public_key(server_public_key)

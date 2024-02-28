@@ -28,7 +28,7 @@ from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
 
 
-class InMemoryState(State):
+class InMemoryState(State):  # pylint: disable=R0902
     """In-memory State implementation."""
 
     def __init__(self) -> None:
@@ -233,26 +233,26 @@ class InMemoryState(State):
     def store_server_public_private_key(
         self, public_key: bytes, private_key: bytes
     ) -> None:
-        """Store server's `public_key` and `private_key` in state."""
+        """Store `server_public_key` and `server_private_key` in state."""
         self.server_private_key = private_key
         self.server_public_key = public_key
 
     def get_server_private_key(self) -> bytes:
-        """Get server private key in urlsafe bytes."""
+        """Retrieve `server_private_key` in urlsafe bytes."""
         return self.server_private_key
 
     def get_server_public_key(self) -> bytes:
-        """Get server public key in urlsafe bytes."""
+        """Retrieve `server_public_key` in urlsafe bytes."""
         return self.server_public_key
 
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-        """Store a set of client public keys in state."""
+        """Store a set of `client_public_keys` in state."""
         self.client_public_keys = public_keys
 
     def store_client_public_key(self, public_key: bytes) -> None:
-        """Retrieve a client public key in state."""
+        """Store a `client_public_key` in state."""
         self.client_public_keys.add(public_key)
 
     def get_client_public_keys(self) -> Set[bytes]:
-        """Retrieve all currently stored client public keys as a set."""
+        """Retrieve all currently stored `client_public_keys` as a set."""
         return self.client_public_keys
