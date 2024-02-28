@@ -15,8 +15,8 @@
 """Flower server app."""
 
 import argparse
-import csv
 import asyncio
+import csv
 import importlib.util
 import sys
 import threading

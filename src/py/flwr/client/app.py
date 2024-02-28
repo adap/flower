@@ -44,8 +44,8 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
 
-from .client_interceptor import AuthenticateClientInterceptor
 from .client_app import load_client_app
+from .client_interceptor import AuthenticateClientInterceptor
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
