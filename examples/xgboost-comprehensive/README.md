@@ -120,10 +120,10 @@ You can also run the example without the scripts. First, launch the server:
 python server.py --train-method=bagging/cyclic --pool-size=N --num-clients-per-round=N
 ```
 
-Then run at least two clients (each on a new terminal or computer in your network) passing different `NODE_ID` and all using the same `N` (denoting the total number of clients or data partitions):
+Then run at least two clients (each on a new terminal or computer in your network) passing different `PARTITION_ID` and all using the same `N` (denoting the total number of clients or data partitions):
 
 ```bash
-python client.py --train-method=bagging/cyclic --node-id=NODE_ID --num-partitions=N
+python client.py --train-method=bagging/cyclic --partition-id=PARTITION_ID --num-partitions=N
 ```
 
 ### Flower Simulation Setup
