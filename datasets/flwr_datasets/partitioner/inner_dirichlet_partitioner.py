@@ -139,23 +139,23 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         elif isinstance(alpha, List):
             if len(alpha) != self._num_unique_classes:
                 raise ValueError(
-                    "The alpha parameter needs to be of length of equal to the "
-                    "number of unique classes."
+                    "When passing alpha as a List, its length needs needs to be "
+                    "of length equal to the number of unique classes."
                 )
             alpha = np.asarray(alpha)
         elif isinstance(alpha, np.ndarray):
             # pylint: disable=R1720
             if alpha.ndim == 1 and alpha.shape[0] != self._num_unique_classes:
                 raise ValueError(
-                    "The alpha parameter needs to be of length of equal to"
-                    "the number of unique classes."
+                    "When passing alpha as an NDArray, its length needs needs to be "
+                    "of length equal to the number of unique classes."
                 )
             elif alpha.ndim == 2:
                 alpha = alpha.flatten()
                 if alpha.shape[0] != self._num_unique_classes:
                     raise ValueError(
-                        "The alpha parameter needs to be of length of equal to "
-                        "the number of unique classes."
+                        "When passing alpha as an NDArray, its length needs needs to be"
+                        " of length equal to the number of unique classes."
                     )
         else:
             raise ValueError("The given alpha format is not supported.")
