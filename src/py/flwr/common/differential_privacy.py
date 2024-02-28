@@ -128,7 +128,7 @@ def compute_adaptive_noise_params(
 ) -> Tuple[float, float]:
     """Compute noising parameters for the adaptive clipping.
 
-    paper: https://arxiv.org/abs/1905.03871
+    Paper: https://arxiv.org/abs/1905.03871
     """
     if noise_multiplier > 0:
         if clipped_count_stddev is None:
