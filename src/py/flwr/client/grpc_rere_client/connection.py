@@ -54,9 +54,9 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 def grpc_request_response(
     server_address: str,
     insecure: bool,
+    retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
-    retry_invoker: Optional[RetryInvoker] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
@@ -79,16 +79,16 @@ def grpc_request_response(
     insecure : bool
         Starts an insecure gRPC connection when True. Enables HTTPS connection
         when False, using system certificates if `root_certificates` is None.
+    retry_invoker: RetryInvoker
+        `RetryInvoker` object that will try to reconnect the client to the server
+        after gRPC errors. If None, the client will only try to
+        reconnect once after a failure.
     max_message_length : int
         Ignored, only present to preserve API-compatibility.
     root_certificates : Optional[Union[bytes, str]] (default: None)
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
-    retry_invoker: Optional[RetryInvoker] (default: None)
-        `RetryInvoker` object that will try to reconnect the client to the server
-        after gRPC errors. If None, the client will only try to
-        reconnect once after a failure.
 
     Returns
     -------
@@ -116,17 +116,6 @@ def grpc_request_response(
 
     # Enable create_node and delete_node to store node
     node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
-
-    retry_invoker = (
-        RetryInvoker(
-            exponential,
-            grpc.RpcError,
-            max_tries=1,
-            max_time=None,
-        )
-        if retry_invoker is None
-        else retry_invoker
-    )
 
     ###########################################################################
     # receive/send functions

@@ -63,9 +63,9 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 def grpc_connection(  # pylint: disable=R0915
     server_address: str,
     insecure: bool,
+    retry_invoker: RetryInvoker,  # pylint: disable=unused-argument
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
-    retry_invoker: Optional[RetryInvoker] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
@@ -85,6 +85,8 @@ def grpc_connection(  # pylint: disable=R0915
     insecure : bool
         Starts an insecure gRPC connection when True. Enables HTTPS connection
         when False, using system certificates if `root_certificates` is None.
+    retry_invoker: RetryInvoker
+        Unused argument present for compatibilty.
     max_message_length : int
         The maximum length of gRPC messages that can be exchanged with the Flower
         server. The default should be sufficient for most models. Users who train
@@ -97,8 +99,6 @@ def grpc_connection(  # pylint: disable=R0915
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
-    retry_invoker: Optional[RetryInvoker] (default: None)
-        Unused argument present for compatibilty.
 
     Returns
     -------

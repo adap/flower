@@ -27,7 +27,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
-from flwr.common.retry_invoker import RetryInvoker, exponential
+from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -62,11 +62,11 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 def http_request_response(
     server_address: str,
     insecure: bool,  # pylint: disable=unused-argument
+    retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
-    retry_invoker: Optional[RetryInvoker] = None,  # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
@@ -88,16 +88,16 @@ def http_request_response(
         on port 8080, then `server_address` would be `"http://[::]:8080"`.
     insecure : bool
         Unused argument present for compatibilty.
+    retry_invoker: RetryInvoker
+        `RetryInvoker` object that will try to reconnect the client to the server
+        after REST connection errors. If None, the client will only try to
+        reconnect once after a failure.
     max_message_length : int
         Ignored, only present to preserve API-compatibility.
     root_certificates : Optional[Union[bytes, str]] (default: None)
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
-    retry_invoker: Optional[RetryInvoker] (default: None)
-        `RetryInvoker` object that will try to reconnect the client to the server
-        after REST connection errors. If None, the client will only try to
-        reconnect once after a failure.
 
     Returns
     -------
@@ -133,16 +133,6 @@ def http_request_response(
     # Enable create_node and delete_node to store node
     node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
 
-    retry_invoker = (
-        RetryInvoker(
-            exponential,
-            requests.exceptions.ConnectionError,
-            max_tries=1,
-            max_time=None,
-        )
-        if retry_invoker is None
-        else retry_invoker
-    )
     ###########################################################################
     # receive/send functions
     ###########################################################################
