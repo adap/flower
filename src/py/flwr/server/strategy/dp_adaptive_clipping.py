@@ -52,7 +52,8 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
-    """Wrapper for Central DP with Server Side Adaptive Clipping.
+    """Strategy wrapper for central differential privacy with server-side adaptive
+    clipping.
 
     Parameters
     ----------
@@ -73,9 +74,6 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
     clipped_count_stddev : float
         The stddev of the noise added to the count of updates currently below the estimate.
         Andrew et al. recommends to set to `expected_num_records/20`
-    use_geometric_update : bool
-        Use geometric updating of clip. Defaults to True.
-        It is recommended by Andrew et al. to use it.
 
     Examples
     --------
