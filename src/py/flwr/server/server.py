@@ -83,14 +83,13 @@ class Server:
         return self._client_manager
 
     # pylint: disable=too-many-locals
-    def fit(self, num_rounds: int, timeout: Optional[float]) -> Tuple[History, int]:
+    def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
         """Run federated averaging for a number of rounds."""
         history = History()
-        server_round = 0
 
         # Initialize parameters
         log(INFO, "Initializing global parameters")
-        self.parameters = self._get_initial_parameters(server_round, timeout=timeout)
+        self.parameters = self._get_initial_parameters(server_round=0, timeout=timeout)
         log(INFO, "Evaluating initial parameters")
         res = self.strategy.evaluate(0, parameters=self.parameters)
         if res is not None:
@@ -108,8 +107,6 @@ class Server:
         start_time = timeit.default_timer()
 
         for current_round in range(1, num_rounds + 1):
-            server_round = current_round
-
             # Train model and replace previous global model
             res_fit = self.fit_round(
                 server_round=current_round,
@@ -156,7 +153,7 @@ class Server:
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
         log(INFO, "FL finished in %s", elapsed)
-        return history, server_round
+        return history
 
     def evaluate_round(
         self,
@@ -257,9 +254,7 @@ class Server:
         parameters_aggregated, metrics_aggregated = aggregated_result
         return parameters_aggregated, metrics_aggregated, (results, failures)
 
-    def disconnect_all_clients(
-        self, server_round: int, timeout: Optional[float]
-    ) -> None:
+    def disconnect_all_clients(self, timeout: Optional[float]) -> None:
         """Send shutdown signal to all clients."""
         all_clients = self._client_manager.all()
         clients = [all_clients[k] for k in all_clients.keys()]
@@ -269,7 +264,6 @@ class Server:
             client_instructions=client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
-            group_id=server_round,
         )
 
     def _get_initial_parameters(
@@ -299,12 +293,11 @@ def reconnect_clients(
     client_instructions: List[Tuple[ClientProxy, ReconnectIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
-    group_id: int,
 ) -> ReconnectResultsAndFailures:
     """Instruct clients to disconnect and never reconnect."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         submitted_fs = {
-            executor.submit(reconnect_client, client_proxy, ins, timeout, group_id)
+            executor.submit(reconnect_client, client_proxy, ins, timeout)
             for client_proxy, ins in client_instructions
         }
         finished_fs, _ = concurrent.futures.wait(
@@ -329,13 +322,12 @@ def reconnect_client(
     client: ClientProxy,
     reconnect: ReconnectIns,
     timeout: Optional[float],
-    group_id: int,
 ) -> Tuple[ClientProxy, DisconnectRes]:
     """Instruct client to disconnect and (optionally) reconnect later."""
     disconnect = client.reconnect(
         reconnect,
         timeout=timeout,
-        group_id=group_id,
+        group_id=None,
     )
     return client, disconnect
 
@@ -491,9 +483,7 @@ def run_fl(
     config: ServerConfig,
 ) -> History:
     """Train a model on the given server and return the History object."""
-    hist, last_round = server.fit(
-        num_rounds=config.num_rounds, timeout=config.round_timeout
-    )
+    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
     log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
     log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
     log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
@@ -501,6 +491,6 @@ def run_fl(
     log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
 
     # Graceful shutdown
-    server.disconnect_all_clients(server_round=last_round, timeout=config.round_timeout)
+    server.disconnect_all_clients(timeout=config.round_timeout)
 
     return hist

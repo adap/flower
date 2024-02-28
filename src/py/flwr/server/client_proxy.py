@@ -47,7 +47,7 @@ class ClientProxy(ABC):
         self,
         ins: GetPropertiesIns,
         timeout: Optional[float],
-        group_id: int,
+        group_id: Optional[int],
     ) -> GetPropertiesRes:
         """Return the client's properties."""
 
@@ -56,7 +56,7 @@ class ClientProxy(ABC):
         self,
         ins: GetParametersIns,
         timeout: Optional[float],
-        group_id: int,
+        group_id: Optional[int],
     ) -> GetParametersRes:
         """Return the current local model parameters."""
 
@@ -65,7 +65,7 @@ class ClientProxy(ABC):
         self,
         ins: FitIns,
         timeout: Optional[float],
-        group_id: int,
+        group_id: Optional[int],
     ) -> FitRes:
         """Refine the provided parameters using the locally held dataset."""
 
@@ -74,7 +74,7 @@ class ClientProxy(ABC):
         self,
         ins: EvaluateIns,
         timeout: Optional[float],
-        group_id: int,
+        group_id: Optional[int],
     ) -> EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset."""
 
@@ -83,6 +83,6 @@ class ClientProxy(ABC):
         self,
         ins: ReconnectIns,
         timeout: Optional[float],
-        group_id: int,
+        group_id: Optional[int],
     ) -> DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
