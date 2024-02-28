@@ -49,7 +49,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Load model and data (simple CNN, CIFAR-10)
-    trainloader, _, testloader, num_class = load_data(total_partitions, args.partition_id)
+    trainloader, _, testloader, num_class = load_data(
+        total_partitions, args.partition_id
+    )
     net = DenseNet121(spatial_dims=2, in_channels=1, out_channels=num_class).to(DEVICE)
 
     # Start Flower client
