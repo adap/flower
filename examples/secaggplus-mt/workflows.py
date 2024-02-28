@@ -9,7 +9,6 @@ from flwr.common import (
     Scalar,
     bytes_to_ndarray,
     log,
-    ndarray_to_bytes,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
