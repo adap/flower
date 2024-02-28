@@ -30,10 +30,10 @@ from ..strategy import FedAvg, Strategy
 class LegacyContext(Context):
     """Legacy Context."""
 
-    client_manager: ClientManager
-    history: History
     config: ServerConfig
     strategy: Strategy
+    client_manager: ClientManager
+    history: History
 
     def __init__(
         self,
@@ -44,10 +44,10 @@ class LegacyContext(Context):
     ) -> None:
         if config is None:
             config = ServerConfig()
-        if client_manager is None:
-            client_manager = SimpleClientManager()
         if strategy is None:
             strategy = FedAvg()
+        if client_manager is None:
+            client_manager = SimpleClientManager()
         self.config = config
         self.strategy = strategy
         self.client_manager = client_manager

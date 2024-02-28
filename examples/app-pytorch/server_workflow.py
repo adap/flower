@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 import flwr as fl
 from flwr.common import Context, Metrics
-from flwr.server import DefaultWorkflow, Driver, LegacyContext
+from flwr.server import Driver, LegacyContext
 
 
 # Define metric aggregation function
@@ -49,7 +49,7 @@ def main(driver: Driver, context: Context) -> None:
     )
 
     # Create the workflow
-    workflow = DefaultWorkflow()
+    workflow = fl.server.workflow.DefaultWorkflow()
 
     # Execute
     workflow(driver, context)

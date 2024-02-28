@@ -47,8 +47,10 @@ def start_update_client_manager_thread(
 
     Returns
     -------
-    Tuple[threading.Thread, threading.Event]
-        The thread updating the ClientManager and the stop event.
+    threading.Thread
+        A thread that updates the ClientManager and handles the stop event.
+    threading.Event
+        An event that, when set, signals the thread to stop.
     """
     f_stop = threading.Event()
     thread = threading.Thread(

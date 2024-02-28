@@ -92,6 +92,18 @@ class DefaultWorkflow:
         elapsed = end_time - start_time
         log(INFO, "FL finished in %s", elapsed)
 
+        # Log results
+        hist = context.history
+        log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
+        log(
+            INFO,
+            "app_fit: metrics_distributed_fit %s",
+            str(hist.metrics_distributed_fit),
+        )
+        log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
+        log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
+        log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
+
         # Terminate the thread
         f_stop.set()
         del driver
@@ -259,10 +271,9 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
             parameters_aggregated, True
         )
         context.state.parameters_records[PARAMS_RECORD_KEY] = paramsrecord
-
-    context.history.add_metrics_distributed_fit(
-        server_round=current_round, metrics=metrics_aggregated
-    )
+        context.history.add_metrics_distributed_fit(
+            server_round=current_round, metrics=metrics_aggregated
+        )
 
 
 def default_evaluate_workflow(driver: Driver, context: Context) -> None:

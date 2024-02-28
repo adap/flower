@@ -16,6 +16,7 @@
 
 
 from . import strategy
+from . import workflow as workflow
 from .app import run_driver_api as run_driver_api
 from .app import run_fleet_api as run_fleet_api
 from .app import run_superlink as run_superlink
@@ -30,11 +31,9 @@ from .run_serverapp import run_server_app as run_server_app
 from .server import Server as Server
 from .server_app import ServerApp as ServerApp
 from .server_config import ServerConfig as ServerConfig
-from .workflow import DefaultWorkflow as DefaultWorkflow
 
 __all__ = [
     "ClientManager",
-    "DefaultWorkflow",
     "Driver",
     "History",
     "LegacyContext",
@@ -49,4 +48,5 @@ __all__ = [
     "start_driver",
     "start_server",
     "strategy",
+    "workflow",
 ]
