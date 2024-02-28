@@ -22,10 +22,15 @@ from pathlib import Path
 from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple, Union, cast
 
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Message, Metadata, RecordSet
+from flwr.common import (
+    GRPC_MAX_MESSAGE_LENGTH,
+    ConfigsRecord,
+    Message,
+    Metadata,
+    RecordSet,
+)
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
-from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import (
     MESSAGE_TYPE_EVALUATE,
     MESSAGE_TYPE_FIT,
@@ -154,8 +159,8 @@ def grpc_connection(  # pylint: disable=R0915
             message_type = MESSAGE_TYPE_EVALUATE
         elif field == "reconnect_ins":
             recordset = RecordSet()
-            recordset.set_configs(
-                "config", ConfigsRecord({"seconds": proto.reconnect_ins.seconds})
+            recordset.configs_records["config"] = ConfigsRecord(
+                {"seconds": proto.reconnect_ins.seconds}
             )
             message_type = "reconnect"
         else:
@@ -169,9 +174,11 @@ def grpc_connection(  # pylint: disable=R0915
             metadata=Metadata(
                 run_id=0,
                 message_id=str(uuid.uuid4()),
+                src_node_id=0,
+                dst_node_id=0,
+                reply_to_message="",
                 group_id="",
                 ttl="",
-                node_id=0,
                 message_type=message_type,
             ),
             content=recordset,
@@ -200,12 +207,14 @@ def grpc_connection(  # pylint: disable=R0915
             evalres = compat.recordset_to_evaluateres(recordset)
             msg_proto = ClientMessage(evaluate_res=serde.evaluate_res_to_proto(evalres))
         elif message_type == "reconnect":
-            reason = cast(Reason.ValueType, recordset.get_configs("config")["reason"])
+            reason = cast(
+                Reason.ValueType, recordset.configs_records["config"]["reason"]
+            )
             msg_proto = ClientMessage(
                 disconnect_res=ClientMessage.DisconnectRes(reason=reason)
             )
         else:
-            raise ValueError(f"Invalid task type: {message_type}")
+            raise ValueError(f"Invalid message type: {message_type}")
 
         # Send ClientMessage proto
         return queue.put(msg_proto, block=False)

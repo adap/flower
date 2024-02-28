@@ -19,8 +19,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from flwr.common.context import Context
-from flwr.common.recordset import RecordSet
+from flwr.common import Context, RecordSet
 from flwr.server import ServerApp, ServerConfig
 from flwr.server.driver import Driver
 

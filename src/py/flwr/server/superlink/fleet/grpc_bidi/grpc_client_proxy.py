@@ -46,6 +46,7 @@ class GrpcClientProxy(ClientProxy):
         self,
         ins: common.GetPropertiesIns,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.GetPropertiesRes:
         """Request client's set of internal properties."""
         get_properties_msg = serde.get_properties_ins_to_proto(ins)
@@ -65,6 +66,7 @@ class GrpcClientProxy(ClientProxy):
         self,
         ins: common.GetParametersIns,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
         get_parameters_msg = serde.get_parameters_ins_to_proto(ins)
@@ -84,6 +86,7 @@ class GrpcClientProxy(ClientProxy):
         self,
         ins: common.FitIns,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.FitRes:
         """Refine the provided parameters using the locally held dataset."""
         fit_ins_msg = serde.fit_ins_to_proto(ins)
@@ -102,6 +105,7 @@ class GrpcClientProxy(ClientProxy):
         self,
         ins: common.EvaluateIns,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset."""
         evaluate_msg = serde.evaluate_ins_to_proto(ins)
@@ -119,6 +123,7 @@ class GrpcClientProxy(ClientProxy):
         self,
         ins: common.ReconnectIns,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         reconnect_ins_msg = serde.reconnect_ins_to_proto(ins)
