@@ -141,13 +141,13 @@ class RayBackend(Backend):
 
         Return output message and updated context.
         """
-        node_id = message.metadata.dst_node_id
+        partition_id = message.metadata.partition_id
 
         try:
             # Submite a task to the pool
             future = await self.pool.submit(
                 lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-                (app, message, str(node_id), context),
+                (app, message, str(partition_id), context),
             )
 
             await future
@@ -163,10 +163,9 @@ class RayBackend(Backend):
         except LoadClientAppError as load_ex:
             log(
                 ERROR,
-                "An exception was raised when processing a message. Terminating %s",
+                "An exception was raised when processing a message by %s",
                 self.__class__.__name__,
             )
-            await self.terminate()
             raise load_ex
 
     async def terminate(self) -> None:
