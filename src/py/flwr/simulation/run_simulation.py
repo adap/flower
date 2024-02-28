@@ -61,8 +61,8 @@ def run_simulation() -> None:
         daemon=False,
     )
 
-    event(EventType.RUN_SUPERLINK_ENTER)
     superlink_th.start()
+    event(EventType.RUN_SUPERLINK_ENTER)
 
     # Initialize Driver
     driver = Driver(
