@@ -22,8 +22,6 @@ import threading
 from logging import ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from signal import SIGINT, SIGTERM, signal
-from types import FrameType
 from typing import List, Optional, Tuple
 
 import grpc
@@ -34,7 +32,9 @@ from flwr.common.constant import (
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
+    TRANSPORT_TYPE_VCE,
 )
+from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
 from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
     add_DriverServicer_to_server,
@@ -43,17 +43,18 @@ from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
 
-from .client_manager import ClientManager, SimpleClientManager
+from .client_manager import ClientManager
 from .history import History
-from .server import Server
+from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
-from .strategy import FedAvg, Strategy
+from .strategy import Strategy
 from .superlink.driver.driver_servicer import DriverServicer
 from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
 )
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from .superlink.fleet.vce import start_vce
 from .superlink.state import StateFactory
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
@@ -183,47 +184,6 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     return hist
 
 
-def init_defaults(
-    server: Optional[Server],
-    config: Optional[ServerConfig],
-    strategy: Optional[Strategy],
-    client_manager: Optional[ClientManager],
-) -> Tuple[Server, ServerConfig]:
-    """Create server instance if none was given."""
-    if server is None:
-        if client_manager is None:
-            client_manager = SimpleClientManager()
-        if strategy is None:
-            strategy = FedAvg()
-        server = Server(client_manager=client_manager, strategy=strategy)
-    elif strategy is not None:
-        log(WARN, "Both server and strategy were provided, ignoring strategy")
-
-    # Set default config values
-    if config is None:
-        config = ServerConfig()
-
-    return server, config
-
-
-def run_fl(
-    server: Server,
-    config: ServerConfig,
-) -> History:
-    """Train a model on the given server and return the History object."""
-    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
-    log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
-    log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
-    log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
-    log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
-    log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
-
-    # Graceful shutdown
-    server.disconnect_all_clients(timeout=config.round_timeout)
-
-    return hist
-
-
 def run_driver_api() -> None:
     """Run Flower server (Driver API)."""
     log(INFO, "Starting Flower server (Driver API)")
@@ -251,10 +211,10 @@ def run_driver_api() -> None:
     )
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_DRIVER_API_LEAVE,
         grpc_servers=[grpc_server],
         bckg_threads=[],
-        event_type=EventType.RUN_DRIVER_API_LEAVE,
     )
 
     # Block
@@ -319,10 +279,10 @@ def run_fleet_api() -> None:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_FLEET_API_LEAVE,
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_FLEET_API_LEAVE,
     )
 
     # Block
@@ -401,14 +361,23 @@ def run_superlink() -> None:
             certificates=certificates,
         )
         grpc_servers.append(fleet_server)
+    elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
+        _run_fleet_api_vce(
+            num_supernodes=args.num_supernodes,
+            client_app_module_name=args.client_app,
+            backend_name=args.backend,
+            backend_config_json_stream=args.backend_config,
+            working_dir=args.dir,
+            state_factory=state_factory,
+        )
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_SUPERLINK_LEAVE,
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_SUPERLINK_LEAVE,
     )
 
     # Block
@@ -441,52 +410,6 @@ def _try_obtain_certificates(
             "in insecure mode using '--insecure' if you understand the risks."
         )
     return certificates
-
-
-def _register_exit_handlers(
-    grpc_servers: List[grpc.Server],
-    bckg_threads: List[threading.Thread],
-    event_type: EventType,
-) -> None:
-    default_handlers = {
-        SIGINT: None,
-        SIGTERM: None,
-    }
-
-    def graceful_exit_handler(  # type: ignore
-        signalnum,
-        frame: FrameType,  # pylint: disable=unused-argument
-    ) -> None:
-        """Exit handler to be registered with signal.signal.
-
-        When called will reset signal handler to original signal handler from
-        default_handlers.
-        """
-        # Reset to default handler
-        signal(signalnum, default_handlers[signalnum])
-
-        event_res = event(event_type=event_type)
-
-        for grpc_server in grpc_servers:
-            grpc_server.stop(grace=1)
-
-        for bckg_thread in bckg_threads:
-            bckg_thread.join()
-
-        # Ensure event has happend
-        event_res.result()
-
-        # Setup things for graceful exit
-        sys.exit(0)
-
-    default_handlers[SIGINT] = signal(  # type: ignore
-        SIGINT,
-        graceful_exit_handler,  # type: ignore
-    )
-    default_handlers[SIGTERM] = signal(  # type: ignore
-        SIGTERM,
-        graceful_exit_handler,  # type: ignore
-    )
 
 
 def _run_driver_api_grpc(
@@ -535,6 +458,27 @@ def _run_fleet_api_grpc_rere(
     fleet_grpc_server.start()
 
     return fleet_grpc_server
+
+
+# pylint: disable=too-many-arguments
+def _run_fleet_api_vce(
+    num_supernodes: int,
+    client_app_module_name: str,
+    backend_name: str,
+    backend_config_json_stream: str,
+    working_dir: str,
+    state_factory: StateFactory,
+) -> None:
+    log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
+
+    start_vce(
+        num_supernodes=num_supernodes,
+        client_app_module_name=client_app_module_name,
+        backend_name=backend_name,
+        backend_config_json_stream=backend_config_json_stream,
+        state_factory=state_factory,
+        working_dir=working_dir,
+    )
 
 
 # pylint: disable=import-outside-toplevel,too-many-arguments
@@ -714,6 +658,14 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="Start a Fleet API server (REST, experimental)",
     )
 
+    ex_group.add_argument(
+        "--vce",
+        action="store_const",
+        dest="fleet_api_type",
+        const=TRANSPORT_TYPE_VCE,
+        help="Start a Fleet API server (VirtualClientEngine)",
+    )
+
     # Fleet API gRPC-rere options
     grpc_rere_group = parser.add_argument_group(
         "Fleet API (gRPC-rere) server options", ""
@@ -748,4 +700,37 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="Set the number of concurrent workers for the Fleet API REST server.",
         type=int,
         default=1,
+    )
+
+    # Fleet API VCE options
+    vce_group = parser.add_argument_group("Fleet API (VCE) server options", "")
+    vce_group.add_argument(
+        "--client-app",
+        help="For example: `client:app` or `project.package.module:wrapper.app`.",
+    )
+    vce_group.add_argument(
+        "--num-supernodes",
+        type=int,
+        help="Number of simulated SuperNodes.",
+    )
+    vce_group.add_argument(
+        "--backend",
+        default="ray",
+        type=str,
+        help="Simulation backend that executes the ClientApp.",
+    )
+    vce_group.add_argument(
+        "--backend-config",
+        type=str,
+        default='{"client_resources": {"num_cpus":1, "num_gpus":0.0}, "tensorflow": 0}',
+        help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
+        "configure a backend. Values supported in <value> are those included by "
+        "`flwr.common.typing.ConfigsRecordValues`. ",
+    )
+    parser.add_argument(
+        "--dir",
+        default="",
+        help="Add specified directory to the PYTHONPATH and load"
+        "ClientApp from there."
+        " Default: current working directory.",
     )

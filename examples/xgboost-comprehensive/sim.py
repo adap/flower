@@ -98,9 +98,9 @@ def main():
 
     # Load and process all client partitions. This upfront cost is amortized soon
     # after the simulation begins since clients wont need to preprocess their partition.
-    for node_id in tqdm(range(args.pool_size), desc="Extracting client partition"):
-        # Extract partition for client with node_id
-        partition = fds.load_partition(node_id=node_id, split="train")
+    for partition_id in tqdm(range(args.pool_size), desc="Extracting client partition"):
+        # Extract partition for client with partition_id
+        partition = fds.load_partition(partition_id=partition_id, split="train")
         partition.set_format("numpy")
 
         if args.centralised_eval_client:

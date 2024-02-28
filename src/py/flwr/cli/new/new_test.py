@@ -77,17 +77,23 @@ def test_new(tmp_path: str) -> None:
         "client.py",
     }
 
-    # Change into the temprorary directory
-    os.chdir(tmp_path)
+    # Current directory
+    origin = os.getcwd()
 
-    # Execute
-    new(project_name=project_name, framework=framework)
+    try:
+        # Change into the temprorary directory
+        os.chdir(tmp_path)
 
-    # Assert
-    file_list = os.listdir(os.path.join(tmp_path, project_name.lower()))
-    assert set(file_list) == expected_files_top_level
+        # Execute
+        new(project_name=project_name, framework=framework)
 
-    file_list = os.listdir(
-        os.path.join(tmp_path, project_name.lower(), project_name.lower())
-    )
-    assert set(file_list) == expected_files_module
+        # Assert
+        file_list = os.listdir(os.path.join(tmp_path, project_name.lower()))
+        assert set(file_list) == expected_files_top_level
+
+        file_list = os.listdir(
+            os.path.join(tmp_path, project_name.lower(), project_name.lower())
+        )
+        assert set(file_list) == expected_files_module
+    finally:
+        os.chdir(origin)
