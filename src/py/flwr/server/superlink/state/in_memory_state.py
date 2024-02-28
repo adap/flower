@@ -28,7 +28,7 @@ from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
 
 
-class InMemoryState(State):
+class InMemoryState(State):  # pylint: disable=R0902
     """In-memory State implementation."""
 
     def __init__(self) -> None:

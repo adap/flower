@@ -366,7 +366,7 @@ def run_superlink() -> None:
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-        data = _try_setup_client_authentication(args)
+        data = _try_setup_client_authentication(args, certificates)
         interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
         if data is not None:
             (
@@ -420,8 +420,15 @@ def run_superlink() -> None:
 
 def _try_setup_client_authentication(
     args: argparse.Namespace,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePublicKey, ec.EllipticCurvePrivateKey]]:
     if args.require_client_authentication:
+        if certificates is None:
+            sys.exit(
+                "Certificates are required to enable client authentication. "
+                "Please provide certificate paths with '--certificates' before "
+                "enabling '--require-client-authentication'."
+            )
         client_keys_file_path = Path(args.require_client_authentication[0])
         if client_keys_file_path.exists():
             client_public_keys: Set[bytes] = set()
@@ -522,6 +529,7 @@ def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
+    interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
     # Create Fleet API gRPC server
@@ -534,6 +542,7 @@ def _run_fleet_api_grpc_rere(
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=certificates,
+        interceptors=interceptors,
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
