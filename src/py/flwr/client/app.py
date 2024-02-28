@@ -388,22 +388,26 @@ def _start_client_internal(
         RequestsConnectionError if transport == "rest" else RpcError,
         max_tries=retry_max_tries,
         max_time=retry_max_time,
-        on_giveup=lambda retry_state: log(
-            DEBUG,
-            "Giving up reconnection after %.2f seconds and %s tries.",
-            retry_state.elapsed_time,
-            retry_state.tries,
-        )
-        if retry_state.tries > 1
-        else None,
-        on_success=lambda retry_state: log(
-            DEBUG,
-            "Reconnection successful after %.2f seconds and %s tries.",
-            retry_state.elapsed_time,
-            retry_state.tries,
-        )
-        if retry_state.tries > 1
-        else None,
+        on_giveup=lambda retry_state: (
+            log(
+                DEBUG,
+                "Giving up reconnection after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+            if retry_state.tries > 1
+            else None
+        ),
+        on_success=lambda retry_state: (
+            log(
+                DEBUG,
+                "Reconnection successful after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+            if retry_state.tries > 1
+            else None
+        ),
         on_backoff=lambda retry_state: log(
             DEBUG,
             "Reconnection attempt failed, retrying in %.2f seconds",
@@ -579,9 +583,7 @@ def start_numpy_client(
     )
 
 
-def _init_connection(
-    transport: Optional[str], server_address: str
-) -> Tuple[
+def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     Callable[
         [str, bool, int, Union[bytes, str, None], Optional[RetryInvoker]],
         ContextManager[
