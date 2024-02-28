@@ -15,12 +15,13 @@
 """Mods."""
 
 
-from .centraldp_mods import fixedclipping_mod
+from .centraldp_mods import adaptiveclipping_mod, fixedclipping_mod
 from .secure_aggregation.secaggplus_mod import secaggplus_mod
 from .utils import make_ffn
 
 __all__ = [
+    "adaptiveclipping_mod",
+    "fixedclipping_mod",
     "make_ffn",
     "secaggplus_mod",
-    "fixedclipping_mod",
 ]
