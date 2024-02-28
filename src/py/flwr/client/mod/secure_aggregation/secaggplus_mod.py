@@ -21,14 +21,17 @@ from logging import INFO, WARNING
 from typing import Any, Callable, Dict, List, Tuple, cast
 
 from flwr.client.typing import ClientAppCallable
-from flwr.common import ndarray_to_bytes, parameters_to_ndarrays
+from flwr.common import (
+    ConfigsRecord,
+    Context,
+    Message,
+    RecordSet,
+    ndarray_to_bytes,
+    parameters_to_ndarrays,
+)
 from flwr.common import recordset_compat as compat
-from flwr.common.configsrecord import ConfigsRecord
 from flwr.common.constant import MESSAGE_TYPE_FIT
-from flwr.common.context import Context
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata
-from flwr.common.recordset import RecordSet
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_private_key,
@@ -172,13 +175,13 @@ def secaggplus_mod(
         return call_next(msg, ctxt)
 
     # Retrieve local state
-    if RECORD_KEY_STATE not in ctxt.state.configs:
-        ctxt.state.set_configs(RECORD_KEY_STATE, ConfigsRecord({}))
-    state_dict = ctxt.state.get_configs(RECORD_KEY_STATE).data
+    if RECORD_KEY_STATE not in ctxt.state.configs_records:
+        ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord({})
+    state_dict = ctxt.state.configs_records[RECORD_KEY_STATE]
     state = SecAggPlusState(**state_dict)
 
     # Retrieve incoming configs
-    configs = msg.content.get_configs(RECORD_KEY_CONFIGS).data
+    configs = msg.content.configs_records[RECORD_KEY_CONFIGS]
 
     # Check the validity of the next stage
     check_stage(state.current_stage, configs)
@@ -203,23 +206,14 @@ def secaggplus_mod(
         raise ValueError(f"Unknown secagg stage: {state.current_stage}")
 
     # Save state
-    ctxt.state.set_configs(RECORD_KEY_STATE, ConfigsRecord(state.to_dict()))
+    ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
 
     # Return message
-    return Message(
-        metadata=Metadata(
-            run_id=0,
-            message_id="",
-            group_id="",
-            node_id=0,
-            ttl="",
-            message_type=MESSAGE_TYPE_FIT,
-        ),
-        content=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)}),
-    )
+    content = RecordSet(configs_records={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)})
+    return msg.create_reply(content, ttl="")
 
 
-def check_stage(current_stage: str, configs: Dict[str, ConfigsRecordValues]) -> None:
+def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
     """Check the validity of the next stage."""
     # Check the existence of KEY_STAGE
     if KEY_STAGE not in configs:
@@ -251,7 +245,7 @@ def check_stage(current_stage: str, configs: Dict[str, ConfigsRecordValues]) -> 
 
 
 # pylint: disable-next=too-many-branches
-def check_configs(stage: str, configs: Dict[str, ConfigsRecordValues]) -> None:
+def check_configs(stage: str, configs: ConfigsRecord) -> None:
     """Check the validity of the configs."""
     # Check `named_values` for the setup stage
     if stage == STAGE_SETUP:
@@ -342,7 +336,7 @@ def check_configs(stage: str, configs: Dict[str, ConfigsRecordValues]) -> None:
 
 
 def _setup(
-    state: SecAggPlusState, configs: Dict[str, ConfigsRecordValues]
+    state: SecAggPlusState, configs: ConfigsRecord
 ) -> Dict[str, ConfigsRecordValues]:
     # Assigning parameter values to object fields
     sec_agg_param_dict = configs
@@ -378,7 +372,7 @@ def _setup(
 
 # pylint: disable-next=too-many-locals
 def _share_keys(
-    state: SecAggPlusState, configs: Dict[str, ConfigsRecordValues]
+    state: SecAggPlusState, configs: ConfigsRecord
 ) -> Dict[str, ConfigsRecordValues]:
     named_bytes_tuples = cast(Dict[str, Tuple[bytes, bytes]], configs)
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_bytes_tuples.items()}
@@ -441,7 +435,7 @@ def _share_keys(
 # pylint: disable-next=too-many-locals
 def _collect_masked_input(
     state: SecAggPlusState,
-    configs: Dict[str, ConfigsRecordValues],
+    configs: ConfigsRecord,
     fit: Callable[[], FitRes],
 ) -> Dict[str, ConfigsRecordValues]:
     log(INFO, "Client %d: starting stage 2...", state.sid)
@@ -516,7 +510,7 @@ def _collect_masked_input(
 
 
 def _unmask(
-    state: SecAggPlusState, configs: Dict[str, ConfigsRecordValues]
+    state: SecAggPlusState, configs: ConfigsRecord
 ) -> Dict[str, ConfigsRecordValues]:
     log(INFO, "Client %d: starting stage 3...", state.sid)
 

@@ -1,0 +1,5 @@
+flwr-nightly
+flwr-datasets>=0.0.2, <1.0.0
+numpy>=1.23.2
+pandas>=2.0.0
+lifelines>=0.28.0

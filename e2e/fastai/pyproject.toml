@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 name = "quickstart-fastai"
 version = "0.1.0"
 description = "Fastai Federated Learning E2E test with Flower"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"

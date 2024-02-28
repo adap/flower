@@ -8,7 +8,7 @@ sleep 5  # Sleep for 5s to give the server enough time to start
 
 for i in `seq 0 1`; do
     echo "Starting client $i"
-    python3 client.py --node-id=$i &
+    python3 client.py --partition-id=$i &
 done
 
 # Enable CTRL+C to stop all background processes

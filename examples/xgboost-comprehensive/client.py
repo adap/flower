@@ -35,9 +35,9 @@ fds = FederatedDataset(
     resplitter=resplit,
 )
 
-# Load the partition for this `node_id`
+# Load the partition for this `partition_id`
 log(INFO, "Loading partition...")
-partition = fds.load_partition(node_id=args.node_id, split="train")
+partition = fds.load_partition(partition_id=args.partition_id, split="train")
 partition.set_format("numpy")
 
 if args.centralised_eval:

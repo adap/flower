@@ -19,11 +19,8 @@ from itertools import product
 from typing import Callable, Dict, List
 
 from flwr.client.mod import make_ffn
-from flwr.common.configsrecord import ConfigsRecord
+from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet
 from flwr.common.constant import MESSAGE_TYPE_FIT
-from flwr.common.context import Context
-from flwr.common.message import Message, Metadata
-from flwr.common.recordset import RecordSet
 from flwr.common.secure_aggregation.secaggplus_constants import (
     KEY_ACTIVE_SECURE_ID_LIST,
     KEY_CIPHERTEXT_LIST,
@@ -52,55 +49,49 @@ from .secaggplus_mod import SecAggPlusState, check_configs, secaggplus_mod
 
 def get_test_handler(
     ctxt: Context,
-) -> Callable[[Dict[str, ConfigsRecordValues]], Dict[str, ConfigsRecordValues]]:
+) -> Callable[[Dict[str, ConfigsRecordValues]], ConfigsRecord]:
     """."""
 
-    def empty_ffn(_: Message, _2: Context) -> Message:
-        return Message(
-            metadata=Metadata(
-                run_id=0,
-                message_id="",
-                group_id="",
-                node_id=0,
-                ttl="",
-                message_type=MESSAGE_TYPE_FIT,
-            ),
-            content=RecordSet(),
-        )
+    def empty_ffn(_msg: Message, _2: Context) -> Message:
+        return _msg.create_reply(RecordSet(), ttl="")
 
     app = make_ffn(empty_ffn, [secaggplus_mod])
 
-    def func(configs: Dict[str, ConfigsRecordValues]) -> Dict[str, ConfigsRecordValues]:
+    def func(configs: Dict[str, ConfigsRecordValues]) -> ConfigsRecord:
         in_msg = Message(
             metadata=Metadata(
                 run_id=0,
                 message_id="",
+                src_node_id=0,
+                dst_node_id=123,
+                reply_to_message="",
                 group_id="",
-                node_id=0,
                 ttl="",
                 message_type=MESSAGE_TYPE_FIT,
             ),
-            content=RecordSet(configs={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}),
+            content=RecordSet(
+                configs_records={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}
+            ),
         )
         out_msg = app(in_msg, ctxt)
-        return out_msg.content.get_configs(RECORD_KEY_CONFIGS).data
+        return out_msg.content.configs_records[RECORD_KEY_CONFIGS]
 
     return func
 
 
 def _make_ctxt() -> Context:
     cfg = ConfigsRecord(SecAggPlusState().to_dict())
-    return Context(RecordSet(configs={RECORD_KEY_STATE: cfg}))
+    return Context(RecordSet(configs_records={RECORD_KEY_STATE: cfg}))
 
 
 def _make_set_state_fn(
     ctxt: Context,
 ) -> Callable[[str], None]:
     def set_stage(stage: str) -> None:
-        state_dict = ctxt.state.get_configs(RECORD_KEY_STATE).data
+        state_dict = ctxt.state.configs_records[RECORD_KEY_STATE]
         state = SecAggPlusState(**state_dict)
         state.current_stage = stage
-        ctxt.state.set_configs(RECORD_KEY_STATE, ConfigsRecord(state.to_dict()))
+        ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
 
     return set_stage
 
@@ -184,7 +175,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid `named_values`
         try:
-            check_configs(STAGE_SETUP, valid_configs.copy())
+            check_configs(STAGE_SETUP, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
@@ -227,7 +218,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid `named_values`
         try:
-            check_configs(STAGE_SHARE_KEYS, valid_configs.copy())
+            check_configs(STAGE_SHARE_KEYS, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
@@ -263,7 +254,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid `named_values`
         try:
-            check_configs(STAGE_COLLECT_MASKED_INPUT, valid_configs.copy())
+            check_configs(STAGE_COLLECT_MASKED_INPUT, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
@@ -307,7 +298,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid `named_values`
         try:
-            check_configs(STAGE_UNMASK, valid_configs.copy())
+            check_configs(STAGE_UNMASK, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")

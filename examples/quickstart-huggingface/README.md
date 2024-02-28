@@ -62,13 +62,13 @@ Now you are ready to start the Flower clients which will participate in the lear
 Start client 1 in the first terminal:
 
 ```shell
-python3 client.py --node-id 0
+python3 client.py --partition-id 0
 ```
 
 Start client 2 in the second terminal:
 
 ```shell
-python3 client.py --node-id 1
+python3 client.py --partition-id 1
 ```
 
 You will see that PyTorch is starting a federated training.
