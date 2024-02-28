@@ -151,17 +151,20 @@ async def add_taskins_to_queue(
 
 async def run(
     app_fn: Callable[[], ClientApp],
-    backend: Backend,
+    backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
     node_states: Dict[int, NodeState],
     f_stop: asyncio.Event,
 ) -> None:
     """Run the VCE async."""
-    # pylint: disable=fixme
     queue: "asyncio.Queue[TaskIns]" = asyncio.Queue(128)
 
     try:
+
+        # Instantiate backend
+        backend = backend_fn()
+
         # Build backend
         await backend.build()
 
@@ -272,7 +275,6 @@ def start_vce(
 
     try:
         backend_type = supported_backends[backend_name]
-        backend = backend_type(backend_config, work_dir=working_dir)
     except KeyError as ex:
         log(
             ERROR,
@@ -286,6 +288,10 @@ def start_vce(
 
         raise ex
 
+    def backend_fn() -> Backend:
+        """Instantiate a Backend."""
+        return backend_type(backend_config, work_dir=working_dir)
+
     log(INFO, "client_app_module_name = %s", client_app_module_name)
 
     def _load() -> ClientApp:
@@ -297,7 +303,7 @@ def start_vce(
     asyncio.run(
         run(
             app_fn,
-            backend,
+            backend_fn,
             nodes_mapping,
             state_factory,
             node_states,
