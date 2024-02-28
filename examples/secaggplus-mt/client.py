@@ -5,11 +5,11 @@ import numpy as np
 import flwr as fl
 from flwr.common import Status, FitIns, FitRes, Code
 from flwr.common.parameter import ndarrays_to_parameters
-from flwr.client.secure_aggregation import SecAggPlusHandler
+from flwr.client.mod import secaggplus_mod
 
 
 # Define Flower client with the SecAgg+ protocol
-class FlowerClient(fl.client.Client, SecAggPlusHandler):
+class FlowerClient(fl.client.Client):
     def fit(self, fit_ins: FitIns) -> FitRes:
         ret_vec = [np.ones(3)]
         ret = FitRes(
@@ -19,17 +19,30 @@ class FlowerClient(fl.client.Client, SecAggPlusHandler):
             metrics={},
         )
         # Force a significant delay for testing purposes
-        if self._shared_state.sid == 0:
-            print(f"Client {self._shared_state.sid} dropped for testing purposes.")
+        if fit_ins.config["drop"]:
+            print(f"Client dropped for testing purposes.")
             time.sleep(4)
             return ret
-        print(f"Client {self._shared_state.sid} uploading {ret_vec[0]}...")
+        print(f"Client uploading {ret_vec[0]}...")
         return ret
 
 
-# Start Flower client
-fl.client.start_client(
-    server_address="0.0.0.0:9092",
-    client=FlowerClient(),
-    transport="grpc-rere",
+def client_fn(cid: str):
+    """."""
+    return FlowerClient().to_client()
+
+
+# To run this: `flower-client-app client:app`
+app = fl.client.ClientApp(
+    client_fn=client_fn,
+    mods=[secaggplus_mod],
 )
+
+
+if __name__ == "__main__":
+    # Start Flower client
+    fl.client.start_client(
+        server_address="0.0.0.0:9092",
+        client=FlowerClient(),
+        transport="grpc-rere",
+    )

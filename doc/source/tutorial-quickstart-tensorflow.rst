@@ -84,11 +84,11 @@ to actually run this client:
 
 .. code-block:: python
 
-     fl.client.start_numpy_client(server_address="[::]:8080", client=CifarClient())
+     fl.client.start_client(server_address="[::]:8080", client=CifarClient().to_client())
 
 
 That's it for the client. We only have to implement :code:`Client` or
-:code:`NumPyClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
+:code:`NumPyClient` and call :code:`fl.client.start_client()`. If you implement a client of type :code:`NumPyClient` you'll need to first call its :code:`to_client()` method. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
 :code:`"[::]:8080"`. If we run a truly federated workload with the server and
 clients running on different machines, all that needs to change is the
 :code:`server_address` we point the client at.

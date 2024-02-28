@@ -50,8 +50,8 @@ MetricsScalar = Union[int, float]
 MetricsScalarList = Union[List[int], List[float]]
 MetricsRecordValues = Union[MetricsScalar, MetricsScalarList]
 # Value types for common.ConfigsRecord
-ConfigsScalar = Union[MetricsScalar, str, bytes]
-ConfigsScalarList = Union[MetricsScalarList, List[str], List[bytes]]
+ConfigsScalar = Union[MetricsScalar, str, bytes, bool]
+ConfigsScalarList = Union[MetricsScalarList, List[str], List[bytes], List[bool]]
 ConfigsRecordValues = Union[ConfigsScalar, ConfigsScalarList]
 
 Metrics = Dict[str, Scalar]

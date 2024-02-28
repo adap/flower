@@ -44,12 +44,12 @@ if __name__ == "__main__":
     total_partitions = 10
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--node-id", type=int, choices=range(total_partitions), required=True
+        "--partition-id", type=int, choices=range(total_partitions), required=True
     )
     args = parser.parse_args()
 
     # Load model and data (simple CNN, CIFAR-10)
-    trainloader, _, testloader, num_class = load_data(total_partitions, args.node_id)
+    trainloader, _, testloader, num_class = load_data(total_partitions, args.partition_id)
     net = DenseNet121(spatial_dims=2, in_channels=1, out_channels=num_class).to(DEVICE)
 
     # Start Flower client

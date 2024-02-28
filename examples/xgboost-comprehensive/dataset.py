@@ -39,10 +39,16 @@ def train_test_split(partition: Dataset, test_fraction: float, seed: int):
 
 def transform_dataset_to_dmatrix(data: Union[Dataset, DatasetDict]) -> xgb.core.DMatrix:
     """Transform dataset to DMatrix format for xgboost."""
-    x = data["inputs"]
-    y = data["label"]
+    x, y = separate_xy(data)
     new_data = xgb.DMatrix(x, label=y)
     return new_data
+
+
+def separate_xy(data: Union[Dataset, DatasetDict]):
+    """Return outputs of x (data) and y (labels) ."""
+    x = data["inputs"]
+    y = data["label"]
+    return x, y
 
 
 def resplit(dataset: DatasetDict) -> DatasetDict:
