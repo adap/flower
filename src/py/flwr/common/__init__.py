@@ -31,6 +31,7 @@ from .record import ConfigsRecord as ConfigsRecord
 from .record import MetricsRecord as MetricsRecord
 from .record import ParametersRecord as ParametersRecord
 from .record import RecordSet as RecordSet
+from .record import array_from_numpy as array_from_numpy
 from .telemetry import EventType as EventType
 from .telemetry import event as event
 from .typing import ClientMessage as ClientMessage
@@ -58,6 +59,7 @@ from .typing import Status as Status
 
 __all__ = [
     "Array",
+    "array_from_numpy",
     "bytes_to_ndarray",
     "ClientMessage",
     "Code",
