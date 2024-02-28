@@ -41,8 +41,7 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
-    """Strategy wrapper for central differential privacy with client-side adaptive
-    clipping.
+    """Strategy wrapper for central DP with client-side adaptive clipping.
 
     Use `adaptiveclipping_mod` modifier at the client side.
 
