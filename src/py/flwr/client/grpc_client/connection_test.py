@@ -26,6 +26,7 @@ import grpc
 from flwr.common import ConfigsRecord, Message, Metadata, RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
+from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.typing import Code, GetPropertiesRes, Status
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
@@ -33,7 +34,6 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
 )
 from flwr.server.client_manager import SimpleClientManager
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
-from py.flwr.common.retry_invoker import RetryInvoker, exponential
 
 from .connection import grpc_connection
 
