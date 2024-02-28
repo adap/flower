@@ -22,8 +22,6 @@ import threading
 from logging import ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from signal import SIGINT, SIGTERM, signal
-from types import FrameType
 from typing import List, Optional, Tuple
 
 import grpc
@@ -36,6 +34,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPE_VCE,
 )
+from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
 from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
     add_DriverServicer_to_server,
@@ -212,10 +211,10 @@ def run_driver_api() -> None:
     )
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_DRIVER_API_LEAVE,
         grpc_servers=[grpc_server],
         bckg_threads=[],
-        event_type=EventType.RUN_DRIVER_API_LEAVE,
     )
 
     # Block
@@ -280,10 +279,10 @@ def run_fleet_api() -> None:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_FLEET_API_LEAVE,
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_FLEET_API_LEAVE,
     )
 
     # Block
@@ -375,10 +374,10 @@ def run_superlink() -> None:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_SUPERLINK_LEAVE,
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_SUPERLINK_LEAVE,
     )
 
     # Block
@@ -411,52 +410,6 @@ def _try_obtain_certificates(
             "in insecure mode using '--insecure' if you understand the risks."
         )
     return certificates
-
-
-def _register_exit_handlers(
-    grpc_servers: List[grpc.Server],
-    bckg_threads: List[threading.Thread],
-    event_type: EventType,
-) -> None:
-    default_handlers = {
-        SIGINT: None,
-        SIGTERM: None,
-    }
-
-    def graceful_exit_handler(  # type: ignore
-        signalnum,
-        frame: FrameType,  # pylint: disable=unused-argument
-    ) -> None:
-        """Exit handler to be registered with signal.signal.
-
-        When called will reset signal handler to original signal handler from
-        default_handlers.
-        """
-        # Reset to default handler
-        signal(signalnum, default_handlers[signalnum])
-
-        event_res = event(event_type=event_type)
-
-        for grpc_server in grpc_servers:
-            grpc_server.stop(grace=1)
-
-        for bckg_thread in bckg_threads:
-            bckg_thread.join()
-
-        # Ensure event has happend
-        event_res.result()
-
-        # Setup things for graceful exit
-        sys.exit(0)
-
-    default_handlers[SIGINT] = signal(  # type: ignore
-        SIGINT,
-        graceful_exit_handler,  # type: ignore
-    )
-    default_handlers[SIGTERM] = signal(  # type: ignore
-        SIGTERM,
-        graceful_exit_handler,  # type: ignore
-    )
 
 
 def _run_driver_api_grpc(

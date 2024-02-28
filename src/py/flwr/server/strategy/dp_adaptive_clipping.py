@@ -52,8 +52,7 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
-    """Strategy wrapper for central differential privacy with server-side adaptive
-    clipping.
+    """Strategy wrapper for central DP with server-side adaptive clipping.
 
     Parameters
     ----------
@@ -246,8 +245,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
 
 
 class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
-    """Strategy wrapper for central differential privacy with client-side adaptive
-    clipping.
+    """Strategy wrapper for central DP with client-side adaptive clipping.
 
     Use `adaptiveclipping_mod` modifier at the client side.
 
@@ -291,7 +289,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
     On the client, add the `adaptiveclipping_mod` to the client-side mods:
 
     >>> app = fl.client.ClientApp(
-    >>>     client_fn=FlowerClient().to_client(), mods=[adaptiveclipping_mod]
+    >>>     client_fn=client_fn, mods=[adaptiveclipping_mod]
     >>> )
     """
 

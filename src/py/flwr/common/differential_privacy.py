@@ -15,7 +15,7 @@
 """Utility functions for differential privacy."""
 
 
-import warnings
+from logging import WARNING
 from typing import Optional, Tuple
 
 import numpy as np
@@ -26,6 +26,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.common.logger import log
 
 
 def get_norm(input_arrays: NDArrays) -> float:
@@ -79,7 +80,7 @@ def adaptive_clip_inputs_inplace(input_arrays: NDArrays, clipping_norm: float) -
     """Clip model update based on the clipping norm in-place.
 
     It returns true if scaling_factor < 1 which is used for norm_bit
-    FlatClip method of the paper: https://arxiv.org/pdf/1710.06963.pdf
+    FlatClip method of the paper: https://arxiv.org/abs/1710.06963
     """
     input_norm = get_norm(input_arrays)
     scaling_factor = min(1, clipping_norm / input_norm)
@@ -127,7 +128,7 @@ def compute_adaptive_noise_params(
 ) -> Tuple[float, float]:
     """Compute noising parameters for the adaptive clipping.
 
-    paper: https://arxiv.org/abs/1905.03871
+    Paper: https://arxiv.org/abs/1905.03871
     """
     if noise_multiplier > 0:
         if clipped_count_stddev is None:
@@ -147,11 +148,12 @@ def compute_adaptive_noise_params(
 
         adding_noise = noise_multiplier_value / noise_multiplier
         if adding_noise >= 2:
-            warnings.warn(
-                f"A significant amount of noise ({adding_noise}) has to be "
-                f"added. Consider increasing `clipped_count_stddev` or "
-                f"`num_sampled_clients`.",
-                stacklevel=2,
+            log(
+                WARNING,
+                "A significant amount of noise (%s) has to be "
+                "added. Consider increasing `clipped_count_stddev` or "
+                "`num_sampled_clients`.",
+                adding_noise,
             )
 
     else:
