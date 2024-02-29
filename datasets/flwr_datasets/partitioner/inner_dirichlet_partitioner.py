@@ -35,7 +35,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         The sizes of all partitions.
     partition_by : str
         Column name of the labels (targets) based on which Dirichlet sampling works.
-    alpha : Union[float, List[float], NDArrayFloat]
+    alpha : Union[int, float, List[float], NDArrayFloat]
         Concentration parameter to the Dirichlet distribution
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
@@ -120,7 +120,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
         Parameters
         ----------
-        alpha : Union[float, List[float], NDArrayFloat]
+        alpha : Union[int, float, List[float], NDArrayFloat]
             Concentration parameter to the Dirichlet distribution
 
         Returns
@@ -210,7 +210,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
                 curr_class = self._rng.choice(
                     list(range(self._num_unique_classes)), p=current_probabilities
                 )
-                # Redraw class label if there are no samples left to allocated from
+                # Redraw class label if there are no samples left to be allocated from
                 # that class
                 if class_sizes[curr_class] == 0:
                     # Class got exhausted, set probabilities to 0
