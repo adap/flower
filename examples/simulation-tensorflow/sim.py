@@ -1,5 +1,4 @@
 import os
-import math
 import argparse
 from typing import Dict, List, Tuple
 
@@ -147,13 +146,12 @@ strategy = fl.server.strategy.FedAvg(
 
 
 # ClientApp for Flower-Next
-client_app = fl.client.ClientApp(
+client = fl.client.ClientApp(
     client_fn=get_client_fn(mnist_fds),
 )
 
 # ServerApp for Flower-Next
-# TODO: Unclear how to enable GPU growth for the ServerApp
-server_app = fl.server.ServerApp(
+server = fl.server.ServerApp(
     config=fl.server.ServerConfig(num_rounds=NUM_ROUNDS),
     strategy=strategy,
 )
