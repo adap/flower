@@ -1,4 +1,4 @@
-// Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+// Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,33 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/node.proto";
-import "flwr/proto/recordset.proto";
-import "flwr/proto/transport.proto";
-import "flwr/proto/error.proto";
-
-message Task {
-  Node producer = 1;
-  Node consumer = 2;
-  string created_at = 3;
-  string delivered_at = 4;
-  string ttl = 5;
-  repeated string ancestry = 6;
-  string task_type = 7;
-  RecordSet recordset = 8;
-  Error error = 9;
-}
-
-message TaskIns {
-  string task_id = 1;
-  string group_id = 2;
-  sint64 run_id = 3;
-  Task task = 4;
-}
-
-message TaskRes {
-  string task_id = 1;
-  string group_id = 2;
-  sint64 run_id = 3;
-  Task task = 4;
+message Error {
+  sint64 code = 1;
+  string reason = 2;
 }
