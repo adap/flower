@@ -242,8 +242,13 @@ class Message:
             raise ValueError("A message with an error set cannot have content.")
 
     @property
-    def error(self) -> Error | None:
+    def error(self) -> Error:
         """Error captured by this message."""
+        if self._error is None:
+            raise ValueError(
+                "Message error is None. Use <message>.has_error() "
+                "if you'd like to check first if a message carries an error."
+            )
         return self._error
 
     @error.setter
@@ -256,6 +261,10 @@ class Message:
     def has_content(self) -> bool:
         """Return True if message has content, else False."""
         return self._content is not None
+
+    def has_error(self) -> bool:
+        """Return True if message has an error, else False."""
+        return self._error is not None
 
     def create_error(
         self,

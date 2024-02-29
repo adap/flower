@@ -15,17 +15,7 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import (
-    Any,
-    Dict,
-    List,
-    MutableMapping,
-    Optional,
-    OrderedDict,
-    Type,
-    TypeVar,
-    cast,
-)
+from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
@@ -532,12 +522,10 @@ def error_to_proto(error: Error) -> ProtoError:
     return ProtoError(code=error.code, reason=reason)
 
 
-def error_from_proto(error_proto: ProtoError) -> Optional[Error]:
+def error_from_proto(error_proto: ProtoError) -> Error:
     """Deserialize Error from ProtoBuf."""
-    if error_proto.code > 0:
-        reason = error_proto.reason if len(error_proto.reason) > 0 else None
-        return Error(code=error_proto.code, reason=reason)
-    return None
+    reason = error_proto.reason if len(error_proto.reason) > 0 else None
+    return Error(code=error_proto.code, reason=reason)
 
 
 # === RecordSet message ===
@@ -593,7 +581,7 @@ def message_to_taskins(message: Message) -> TaskIns:
             recordset=(
                 recordset_to_proto(message.content) if message.has_content() else None
             ),
-            error=error_to_proto(message.error) if message.error else None,
+            error=error_to_proto(message.error) if message.has_error() else None,
         ),
     )
 
@@ -615,8 +603,16 @@ def message_from_taskins(taskins: TaskIns) -> Message:
     # Construct Message
     return Message(
         metadata=metadata,
-        content=recordset_from_proto(taskins.task.recordset),
-        error=error_from_proto(taskins.task.error),
+        content=(
+            recordset_from_proto(taskins.task.recordset)
+            if taskins.task.HasField("recordset")
+            else None
+        ),
+        error=(
+            error_from_proto(taskins.task.error)
+            if taskins.task.HasField("error")
+            else None
+        ),
     )
 
 
@@ -633,8 +629,10 @@ def message_to_taskres(message: Message) -> TaskRes:
             ttl=md.ttl,
             ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
             task_type=md.message_type,
-            recordset=recordset_to_proto(message.content),
-            error=error_to_proto(message.error) if message.error else None,
+            recordset=(
+                recordset_to_proto(message.content) if message.has_content() else None
+            ),
+            error=error_to_proto(message.error) if message.has_error() else None,
         ),
     )
 
@@ -656,6 +654,14 @@ def message_from_taskres(taskres: TaskRes) -> Message:
     # Construct the Message
     return Message(
         metadata=metadata,
-        content=recordset_from_proto(taskres.task.recordset),
-        error=error_from_proto(taskres.task.error),
+        content=(
+            recordset_from_proto(taskres.task.recordset)
+            if taskres.task.HasField("recordset")
+            else None
+        ),
+        error=(
+            error_from_proto(taskres.task.error)
+            if taskres.task.HasField("error")
+            else None
+        ),
     )
