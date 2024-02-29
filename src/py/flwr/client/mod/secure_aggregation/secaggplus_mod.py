@@ -52,31 +52,10 @@ from flwr.common.secure_aggregation.ndarrays_arithmetic import (
 )
 from flwr.common.secure_aggregation.quantization import quantize
 from flwr.common.secure_aggregation.secaggplus_constants import (
-    KEY_ACTIVE_SECURE_ID_LIST,
-    KEY_CIPHERTEXT_LIST,
-    KEY_CLIPPING_RANGE,
-    KEY_DEAD_SECURE_ID_LIST,
-    KEY_DESTINATION_LIST,
-    KEY_MASKED_PARAMETERS,
-    KEY_MOD_RANGE,
-    KEY_PUBLIC_KEY_1,
-    KEY_PUBLIC_KEY_2,
-    KEY_SAMPLE_NUMBER,
-    KEY_SECURE_ID,
-    KEY_SECURE_ID_LIST,
-    KEY_SHARE_LIST,
-    KEY_SHARE_NUMBER,
-    KEY_SOURCE_LIST,
-    KEY_STAGE,
-    KEY_TARGET_RANGE,
-    KEY_THRESHOLD,
     RECORD_KEY_CONFIGS,
     RECORD_KEY_STATE,
-    STAGE_COLLECT_MASKED_INPUT,
-    STAGE_SETUP,
-    STAGE_SHARE_KEYS,
-    STAGE_UNMASK,
-    STAGES,
+    Key,
+    Stage,
 )
 from flwr.common.secure_aggregation.secaggplus_utils import (
     pseudo_rand_gen,
@@ -91,7 +70,7 @@ from flwr.common.typing import ConfigsRecordValues, FitRes
 class SecAggPlusState:
     """State of the SecAgg+ protocol."""
 
-    current_stage: str = STAGE_UNMASK
+    current_stage: str = Stage.UNMASK
 
     sid: int = 0
     sample_num: int = 0
@@ -187,20 +166,20 @@ def secaggplus_mod(
     check_stage(state.current_stage, configs)
 
     # Update the current stage
-    state.current_stage = cast(str, configs.pop(KEY_STAGE))
+    state.current_stage = cast(str, configs.pop(Key.STAGE))
 
     # Check the validity of the configs based on the current stage
     check_configs(state.current_stage, configs)
 
     # Execute
-    if state.current_stage == STAGE_SETUP:
+    if state.current_stage == Stage.SETUP:
         res = _setup(state, configs)
-    elif state.current_stage == STAGE_SHARE_KEYS:
+    elif state.current_stage == Stage.SHARE_KEYS:
         res = _share_keys(state, configs)
-    elif state.current_stage == STAGE_COLLECT_MASKED_INPUT:
+    elif state.current_stage == Stage.COLLECT_MASKED_INPUT:
         fit = _get_fit_fn(msg, ctxt, call_next)
         res = _collect_masked_input(state, configs, fit)
-    elif state.current_stage == STAGE_UNMASK:
+    elif state.current_stage == Stage.UNMASK:
         res = _unmask(state, configs)
     else:
         raise ValueError(f"Unknown secagg stage: {state.current_stage}")
@@ -215,28 +194,29 @@ def secaggplus_mod(
 
 def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
     """Check the validity of the next stage."""
-    # Check the existence of KEY_STAGE
-    if KEY_STAGE not in configs:
+    # Check the existence of Config.STAGE
+    if Key.STAGE not in configs:
         raise KeyError(
-            f"The required key '{KEY_STAGE}' is missing from the input `named_values`."
+            f"The required key '{Key.STAGE}' is missing from the input `named_values`."
         )
 
-    # Check the value type of the KEY_STAGE
-    next_stage = configs[KEY_STAGE]
+    # Check the value type of the Config.STAGE
+    next_stage = configs[Key.STAGE]
     if not isinstance(next_stage, str):
         raise TypeError(
-            f"The value for the key '{KEY_STAGE}' must be of type {str}, "
+            f"The value for the key '{Key.STAGE}' must be of type {str}, "
             f"but got {type(next_stage)} instead."
         )
 
     # Check the validity of the next stage
-    if next_stage == STAGE_SETUP:
-        if current_stage != STAGE_UNMASK:
+    if next_stage == Stage.SETUP:
+        if current_stage != Stage.UNMASK:
             log(WARNING, "Restart from the setup stage")
     # If stage is not "setup",
     # the stage from `named_values` should be the expected next stage
     else:
-        expected_next_stage = STAGES[(STAGES.index(current_stage) + 1) % len(STAGES)]
+        stages = Stage.all()
+        expected_next_stage = stages[(stages.index(current_stage) + 1) % len(stages)]
         if next_stage != expected_next_stage:
             raise ValueError(
                 "Abort secure aggregation: "
@@ -248,20 +228,20 @@ def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
 def check_configs(stage: str, configs: ConfigsRecord) -> None:
     """Check the validity of the configs."""
     # Check `named_values` for the setup stage
-    if stage == STAGE_SETUP:
+    if stage == Stage.SETUP:
         key_type_pairs = [
-            (KEY_SAMPLE_NUMBER, int),
-            (KEY_SECURE_ID, int),
-            (KEY_SHARE_NUMBER, int),
-            (KEY_THRESHOLD, int),
-            (KEY_CLIPPING_RANGE, float),
-            (KEY_TARGET_RANGE, int),
-            (KEY_MOD_RANGE, int),
+            (Key.SAMPLE_NUMBER, int),
+            (Key.SECURE_ID, int),
+            (Key.SHARE_NUMBER, int),
+            (Key.THRESHOLD, int),
+            (Key.CLIPPING_RANGE, float),
+            (Key.TARGET_RANGE, int),
+            (Key.MOD_RANGE, int),
         ]
         for key, expected_type in key_type_pairs:
             if key not in configs:
                 raise KeyError(
-                    f"Stage {STAGE_SETUP}: the required key '{key}' is "
+                    f"Stage {Stage.SETUP}: the required key '{key}' is "
                     "missing from the input `named_values`."
                 )
             # Bool is a subclass of int in Python,
@@ -269,11 +249,11 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
             # pylint: disable-next=unidiomatic-typecheck
             if type(configs[key]) is not expected_type:
                 raise TypeError(
-                    f"Stage {STAGE_SETUP}: The value for the key '{key}' "
+                    f"Stage {Stage.SETUP}: The value for the key '{key}' "
                     f"must be of type {expected_type}, "
                     f"but got {type(configs[key])} instead."
                 )
-    elif stage == STAGE_SHARE_KEYS:
+    elif stage == Stage.SHARE_KEYS:
         for key, value in configs.items():
             if (
                 not isinstance(value, list)
@@ -282,18 +262,18 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 or not isinstance(value[1], bytes)
             ):
                 raise TypeError(
-                    f"Stage {STAGE_SHARE_KEYS}: "
+                    f"Stage {Stage.SHARE_KEYS}: "
                     f"the value for the key '{key}' must be a list of two bytes."
                 )
-    elif stage == STAGE_COLLECT_MASKED_INPUT:
+    elif stage == Stage.COLLECT_MASKED_INPUT:
         key_type_pairs = [
-            (KEY_CIPHERTEXT_LIST, bytes),
-            (KEY_SOURCE_LIST, int),
+            (Key.CIPHERTEXT_LIST, bytes),
+            (Key.SOURCE_LIST, int),
         ]
         for key, expected_type in key_type_pairs:
             if key not in configs:
                 raise KeyError(
-                    f"Stage {STAGE_COLLECT_MASKED_INPUT}: "
+                    f"Stage {Stage.COLLECT_MASKED_INPUT}: "
                     f"the required key '{key}' is "
                     "missing from the input `named_values`."
                 )
@@ -304,19 +284,19 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 if type(elm) is not expected_type
             ):
                 raise TypeError(
-                    f"Stage {STAGE_COLLECT_MASKED_INPUT}: "
+                    f"Stage {Stage.COLLECT_MASKED_INPUT}: "
                     f"the value for the key '{key}' "
                     f"must be of type List[{expected_type.__name__}]"
                 )
-    elif stage == STAGE_UNMASK:
+    elif stage == Stage.UNMASK:
         key_type_pairs = [
-            (KEY_ACTIVE_SECURE_ID_LIST, int),
-            (KEY_DEAD_SECURE_ID_LIST, int),
+            (Key.ACTIVE_SECURE_ID_LIST, int),
+            (Key.DEAD_SECURE_ID_LIST, int),
         ]
         for key, expected_type in key_type_pairs:
             if key not in configs:
                 raise KeyError(
-                    f"Stage {STAGE_UNMASK}: "
+                    f"Stage {Stage.UNMASK}: "
                     f"the required key '{key}' is "
                     "missing from the input `named_values`."
                 )
@@ -327,7 +307,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 if type(elm) is not expected_type
             ):
                 raise TypeError(
-                    f"Stage {STAGE_UNMASK}: "
+                    f"Stage {Stage.UNMASK}: "
                     f"the value for the key '{key}' "
                     f"must be of type List[{expected_type.__name__}]"
                 )
@@ -340,15 +320,15 @@ def _setup(
 ) -> Dict[str, ConfigsRecordValues]:
     # Assigning parameter values to object fields
     sec_agg_param_dict = configs
-    state.sample_num = cast(int, sec_agg_param_dict[KEY_SAMPLE_NUMBER])
-    state.sid = cast(int, sec_agg_param_dict[KEY_SECURE_ID])
+    state.sample_num = cast(int, sec_agg_param_dict[Key.SAMPLE_NUMBER])
+    state.sid = cast(int, sec_agg_param_dict[Key.SECURE_ID])
     log(INFO, "Client %d: starting stage 0...", state.sid)
 
-    state.share_num = cast(int, sec_agg_param_dict[KEY_SHARE_NUMBER])
-    state.threshold = cast(int, sec_agg_param_dict[KEY_THRESHOLD])
-    state.clipping_range = cast(float, sec_agg_param_dict[KEY_CLIPPING_RANGE])
-    state.target_range = cast(int, sec_agg_param_dict[KEY_TARGET_RANGE])
-    state.mod_range = cast(int, sec_agg_param_dict[KEY_MOD_RANGE])
+    state.share_num = cast(int, sec_agg_param_dict[Key.SHARE_NUMBER])
+    state.threshold = cast(int, sec_agg_param_dict[Key.THRESHOLD])
+    state.clipping_range = cast(float, sec_agg_param_dict[Key.CLIPPING_RANGE])
+    state.target_range = cast(int, sec_agg_param_dict[Key.TARGET_RANGE])
+    state.mod_range = cast(int, sec_agg_param_dict[Key.MOD_RANGE])
 
     # Dictionaries containing client secure IDs as keys
     # and their respective secret shares as values.
@@ -367,7 +347,7 @@ def _setup(
     state.sk1, state.pk1 = private_key_to_bytes(sk1), public_key_to_bytes(pk1)
     state.sk2, state.pk2 = private_key_to_bytes(sk2), public_key_to_bytes(pk2)
     log(INFO, "Client %d: stage 0 completes. uploading public keys...", state.sid)
-    return {KEY_PUBLIC_KEY_1: state.pk1, KEY_PUBLIC_KEY_2: state.pk2}
+    return {Key.PUBLIC_KEY_1: state.pk1, Key.PUBLIC_KEY_2: state.pk2}
 
 
 # pylint: disable-next=too-many-locals
@@ -429,7 +409,7 @@ def _share_keys(
             ciphertexts.append(ciphertext)
 
     log(INFO, "Client %d: stage 1 completes. uploading key shares...", state.sid)
-    return {KEY_DESTINATION_LIST: dsts, KEY_CIPHERTEXT_LIST: ciphertexts}
+    return {Key.DESTINATION_LIST: dsts, Key.CIPHERTEXT_LIST: ciphertexts}
 
 
 # pylint: disable-next=too-many-locals
@@ -440,8 +420,8 @@ def _collect_masked_input(
 ) -> Dict[str, ConfigsRecordValues]:
     log(INFO, "Client %d: starting stage 2...", state.sid)
     available_clients: List[int] = []
-    ciphertexts = cast(List[bytes], configs[KEY_CIPHERTEXT_LIST])
-    srcs = cast(List[int], configs[KEY_SOURCE_LIST])
+    ciphertexts = cast(List[bytes], configs[Key.CIPHERTEXT_LIST])
+    srcs = cast(List[int], configs[Key.SOURCE_LIST])
     if len(ciphertexts) + 1 < state.threshold:
         raise ValueError("Not enough available neighbour clients.")
 
@@ -505,7 +485,7 @@ def _collect_masked_input(
     quantized_parameters = parameters_mod(quantized_parameters, state.mod_range)
     log(INFO, "Client %d: stage 2 completes. uploading masked parameters...", state.sid)
     return {
-        KEY_MASKED_PARAMETERS: [ndarray_to_bytes(arr) for arr in quantized_parameters]
+        Key.MASKED_PARAMETERS: [ndarray_to_bytes(arr) for arr in quantized_parameters]
     }
 
 
@@ -514,8 +494,8 @@ def _unmask(
 ) -> Dict[str, ConfigsRecordValues]:
     log(INFO, "Client %d: starting stage 3...", state.sid)
 
-    active_sids = cast(List[int], configs[KEY_ACTIVE_SECURE_ID_LIST])
-    dead_sids = cast(List[int], configs[KEY_DEAD_SECURE_ID_LIST])
+    active_sids = cast(List[int], configs[Key.ACTIVE_SECURE_ID_LIST])
+    dead_sids = cast(List[int], configs[Key.DEAD_SECURE_ID_LIST])
     # Send private mask seed share for every avaliable client (including itclient)
     # Send first private key share for building pairwise mask for every dropped client
     if len(active_sids) < state.threshold:
@@ -528,4 +508,4 @@ def _unmask(
     shares += [state.sk1_share_dict[sid] for sid in dead_sids]
 
     log(INFO, "Client %d: stage 3 completes. uploading key shares...", state.sid)
-    return {KEY_SECURE_ID_LIST: sids, KEY_SHARE_LIST: shares}
+    return {Key.SECURE_ID_LIST: sids, Key.SHARE_LIST: shares}
