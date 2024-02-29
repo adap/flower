@@ -151,15 +151,15 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         "--retry_max_tries",
         type=int,
         default=1,
-        help="The maximum number of times the client will try to reconnect to the"
+        help="The maximum number of times the client will try to connect to the"
         "server before giving up in case of a connection error. If set to None,"
         "there is no limit to the number of tries.",
     )
     parser.add_argument(
         "--retry_max_time",
         type=float,
-        help="The maximum total amount of time before the client stops trying to"
-        "reconnect to the server before giving up in case of connection error."
+        help="The maximum duration before the client stops trying to"
+        "connect to the server in case of connection error."
         "If set to None, there is no limit to the total time.",
     )
     parser.add_argument(
@@ -237,12 +237,12 @@ def start_client(
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
     retry_max_tries: Optional[int]
-        The maximum number of times the client will try to reconnect to the
+        The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
         there is no limit to the number of tries.
     retry_max_time: Optional[float]
-        The maximum total amount of time before the client stops trying to
-        reconnect to the server before giving up in case of connection error.
+        The maximum duration before the client stops trying to
+        connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
 
     Examples
@@ -343,12 +343,12 @@ def _start_client_internal(
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
     retry_max_tries: Optional[int]
-        The maximum number of times the client will try to reconnect to the
+        The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
         there is no limit to the number of tries.
     retry_max_time: Optional[float]
-        The maximum total amount of time before the client stops trying to
-        reconnect to the server before giving up in case of connection error.
+        The maximum duration before the client stops trying to
+        connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
     """
     if insecure is None:
