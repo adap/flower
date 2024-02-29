@@ -288,7 +288,7 @@ class Message:
         ----------
         ttl : str
             Time-to-live for this message.
-        content : RecordSet
+        content : Optional[RecordSet]
             The content for the reply message.
 
         Returns
