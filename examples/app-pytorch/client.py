@@ -9,7 +9,8 @@ from task import DEVICE, Net, get_parameters, load_data, set_parameters, test, t
 import flwr as fl
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common import Context, Message, NDArrays, Scalar
-from flwr.common.constant import MESSAGE_TYPE_EVALUATE, MESSAGE_TYPE_FIT
+from flwr.common.constant import MESSAGE_TYPE_FIT
+from flwr.common.record import ConfigsRecord
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
@@ -56,15 +57,9 @@ def get_tensorboard_mod(logdir) -> Mod:
     def tensorboard_mod(
         fwd: Message, context: Context, app: ClientAppCallable
     ) -> Message:
-        group_id = fwd.metadata.group_id
+        client_id = str(fwd.metadata.dst_node_id)
 
-        client_id = str(fwd.metadata.node_id)
-
-        config = fwd.content.configs
-        if "round" in config:
-            round = str(config["round"])
-        else:
-            round = group_id
+        round = int(fwd.metadata.group_id)
 
         start_time = time.time()
 
@@ -72,25 +67,19 @@ def get_tensorboard_mod(logdir) -> Mod:
 
         time_diff = time.time() - start_time
 
-        if bwd.metadata.message_type == (MESSAGE_TYPE_FIT or MESSAGE_TYPE_EVALUATE):
+        if bwd.metadata.message_type == MESSAGE_TYPE_FIT:
             writer = tf.summary.create_file_writer(os.path.join(logdir_run, client_id))
 
-            metrics = bwd.content.metrics
-            msg_type = bwd.metadata.message_type
-
+            metrics = dict(
+                bwd.content.configs_records.get("fitres.metrics", ConfigsRecord())
+            )
             # Write aggregated loss
             with writer.as_default(step=round):  # pylint: disable=not-context-manager
-                tf.summary.scalar(f"{msg_type}_time", time_diff, step=int(round))
-                if "accuracy" in metrics:
+                tf.summary.scalar(f"fit_time", time_diff, step=round)
+                for metric in metrics:
                     tf.summary.scalar(
-                        f"{msg_type}_accuracy",
-                        metrics["accuracy"],
-                        step=round,
-                    )
-                if "loss" in metrics:
-                    tf.summary.scalar(
-                        f"{msg_type}_loss",
-                        metrics["loss"],
+                        f"{metric}",
+                        metrics[metric],
                         step=round,
                     )
                 writer.flush()
