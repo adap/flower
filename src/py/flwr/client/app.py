@@ -390,7 +390,7 @@ def _start_client_internal(
         max_time=retry_max_time,
         on_giveup=lambda retry_state: (
             log(
-                DEBUG,
+                WARN,
                 "Giving up reconnection after %.2f seconds and %s tries.",
                 retry_state.elapsed_time,
                 retry_state.tries,
@@ -400,18 +400,22 @@ def _start_client_internal(
         ),
         on_success=lambda retry_state: (
             log(
-                DEBUG,
-                "Reconnection successful after %.2f seconds and %s tries.",
+                INFO,
+                "Connection successful after %.2f seconds and %s tries.",
                 retry_state.elapsed_time,
                 retry_state.tries,
             )
             if retry_state.tries > 1
             else None
         ),
-        on_backoff=lambda retry_state: log(
-            DEBUG,
-            "Reconnection attempt failed, retrying in %.2f seconds",
-            retry_state.actual_wait,
+        on_backoff=lambda retry_state: (
+            log(WARN, "Connection attempt failed, retrying...")
+            if retry_state.tries == 1
+            else log(
+                DEBUG,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
         ),
     )
 
