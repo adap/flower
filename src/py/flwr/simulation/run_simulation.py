@@ -118,7 +118,7 @@ def run_simulation() -> None:
 def _parse_args_run_simulation() -> argparse.ArgumentParser:
     """Parse flower-simulation command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Start a Flower Simulation",
+        description="Start a Flower simulation",
     )
     parser.add_argument(
         "--client-app",
