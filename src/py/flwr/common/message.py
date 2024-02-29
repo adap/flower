@@ -162,7 +162,7 @@ class Error:
     ----------
     code : int
         An identifier for the error.
-    reasong : Optional[str]
+    reason : Optional[str]
         A reason for why the error arised (e.g. an exception stack-trace)
     """
 
