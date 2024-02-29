@@ -16,22 +16,42 @@
 
 import argparse
 import asyncio
+import json
 import threading
+import traceback
+from logging import ERROR, INFO, WARNING
 
 import grpc
 
-from flwr.common import EventType, event
+from flwr.common import EventType, event, log
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.server.driver.driver import Driver
 from flwr.server.run_serverapp import run
 from flwr.server.superlink.driver.driver_grpc import run_driver_api_grpc
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.state import StateFactory
+from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
 
 def run_simulation() -> None:
     """Run Simulation Engine."""
     args = _parse_args_run_simulation().parse_args()
+
+    # Load JSON config
+    backend_config_dict = json.loads(args.backend_config)
+
+    # Enable GPU memory growth (relevant only for TF)
+    if args.enable_tf_gpu_growth:
+        log(INFO, "Enabling GPU growth for Tensorflow on the main thread.")
+        enable_tf_gpu_growth()
+        # Check that Backend config has also enabled using GPU growth
+        use_tf = backend_config_dict.get("tensorflow", False)
+        if not use_tf:
+            log(WARNING, "Enabling GPU growth for your backend.")
+            backend_config_dict["tensorflow"] = True
+
+    # Convert back to JSON stream
+    backend_config = json.dumps(backend_config_dict)
 
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
@@ -51,7 +71,7 @@ def run_simulation() -> None:
             "num_supernodes": args.num_supernodes,
             "client_app_module_name": args.client_app,
             "backend_name": args.backend,
-            "backend_config_json_stream": args.backend_config,
+            "backend_config_json_stream": backend_config,
             "working_dir": args.dir,
             "state_factory": state_factory,
             "f_stop": f_stop,
@@ -62,26 +82,37 @@ def run_simulation() -> None:
     superlink_th.start()
     event(EventType.RUN_SUPERLINK_ENTER)
 
-    # Initialize Driver
-    driver = Driver(
-        driver_service_address=args.driver_api_address,
-        root_certificates=None,
-    )
+    try:
+        # Initialize Driver
+        driver = Driver(
+            driver_service_address=args.driver_api_address,
+            root_certificates=None,
+        )
 
-    # Launch server app
-    run(args.server_app, driver, args.dir)
+        # Launch server app
+        run(args.server_app, driver, args.dir)
 
-    del driver
+    except Exception as ex:
 
-    # Trigger stop event
-    f_stop.set()
+        log(ERROR, "An exception occured !! %s", ex)
+        log(ERROR, traceback.format_exc())
+        raise RuntimeError(
+            "An error was encountered by the Simulation Engine. Ending Simulation."
+        ) from ex
 
-    register_exit_handlers(
-        grpc_servers=[driver_server],
-        bckg_threads=[superlink_th],
-        event_type=EventType.RUN_SUPERLINK_LEAVE,
-    )
-    superlink_th.join()
+    finally:
+
+        del driver
+
+        # Trigger stop event
+        f_stop.set()
+
+        register_exit_handlers(
+            grpc_servers=[driver_server],
+            bckg_threads=[superlink_th],
+            event_type=EventType.RUN_SUPERLINK_LEAVE,
+        )
+        superlink_th.join()
 
 
 def _parse_args_run_simulation() -> argparse.ArgumentParser:
@@ -116,6 +147,16 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         default="ray",
         type=str,
         help="Simulation backend that executes the ClientApp.",
+    )
+    parser.add_argument(
+        "--enable-tf-gpu-growth",
+        action="store_true",
+        help="Enables GPU growth on the main thread. This is desirable if you make "
+        "use of a TensorFlow model on your `ServerApp` while having your `ClientApp` "
+        "running on the same GPU. Without enabling this, you might encounter an "
+        "out-of-memory error becasue TensorFlow by default allocates all GPU memory."
+        "Read mor about how `tf.config.experimental.set_memory_growth()` works in "
+        "the TensorFlow documentation: https://www.tensorflow.org/api/stable.",
     )
     parser.add_argument(
         "--backend-config",
