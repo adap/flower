@@ -135,7 +135,7 @@ def run_simulation(
     backend_config_stream = json.dumps(backend_config)
 
     # Initialize StateFactory
-    state_factory = StateFactory(":flwr-in-memory-state:")
+    state_factory = StateFactory(":flwr-in-memory-state-with-mapping:")
 
     # Start Driver API
     driver_server: grpc.Server = run_driver_api_grpc(
