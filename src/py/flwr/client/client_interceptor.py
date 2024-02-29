@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Flower client interceptor."""
+
 
 import base64
 import collections
@@ -80,7 +81,12 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
         client_call_details: grpc.ClientCallDetails,
         request: Request,
     ) -> grpc.Call:
-        """Flower client interceptor."""
+        """Flower client interceptor.
+
+        Intercept unary call from client and do authentication process by validating
+        metadata sent from client. Continue RPC call if client is authenticated, else,
+        terminate RPC call by setting context to abort.
+        """
         metadata = []
         postprocess = False
         if client_call_details.metadata is not None:
