@@ -1,15 +1,15 @@
-Differential Privacy Explainer
+Differential Privacy
 ==============================
-The information in datasets like healthcare, financial transactions, user preferences, and etc. is valuable and has the potential for scientific breakthroughs and provide important business insights. However, such data is also sensitive and there is a risk of compromising individual privacy.
+The information in datasets like healthcare, financial transactions, user preferences, etc., is valuable and has the potential for scientific breakthroughs and provide important business insights. However, such data is also sensitive and there is a risk of compromising individual privacy.
 Traditional methods like anonymization alone would not work because of attacks like Re-identification and Data Linkage.
-That's where differential privacy comes in. It provides the possibility of analyzing data while ensuring the privacy of individual.
+That's where differential privacy comes in. It provides the possibility of analyzing data while ensuring the privacy of individuals.
 
 
 Differential Privacy
 --------------------
-Imagine two datasets that are identical except for a single record (for instance Alice's data).
+Imagine two datasets that are identical except for a single record (for instance, Alice's data).
 Differential Privacy (DP) guarantees that any analysis (M), like calculating the average income, will produce nearly identical results for both datasets (O and O' would be similar).
-This preserves group patterns while obscuring individual details, ensuring individual's information remains hidden in the crowd.
+This preserves group patterns while obscuring individual details, ensuring the individual's information remains hidden in the crowd.
 
 .. image:: ./_static/DP/dp-intro.png
   :align: center
@@ -17,7 +17,7 @@ This preserves group patterns while obscuring individual details, ensuring indiv
   :alt: DP Intro
 
 
-One of the most commonly used mechanisms achieve DP is adding enough noise to the outputof the analysis to mask the contribution of each individual in the data while preserving the overall accuracy of the analysis.
+One of the most commonly used mechanisms to achieve DP is adding enough noise to the output of the analysis to mask the contribution of each individual in the data while preserving the overall accuracy of the analysis.
 
 Formal Definition
 ~~~~~~~~~~~~~~~~~
@@ -42,7 +42,7 @@ The amount of noise needed to achieve differential privacy is proportional to th
 Differential Privacy in Machine Learning
 ----------------------------------------
 DP can be utilized in machine learning to preserve the privacy of the training data.
-Differentially private machine learning algorithms are designed in a way to prevent the algorithm to learn any specific information about any individual data points and subsecuntly prevents the model from revealing sensitive information.
+Differentially private machine learning algorithms are designed in a way to prevent the algorithm to learn any specific information about any individual data points and subsequently prevent the model from revealing sensitive information.
 Depending on the stage at which noise is introduced, various methods exist for applying DP to machine learning algorithms.
 One approach involves adding noise to the training data (either to the features or labels), while another method entails injecting noise into the gradients of the loss function during model training.
 Additionally, such noise can be incorporated into the model's output.
@@ -53,7 +53,7 @@ Federated learning is a data minimization approach that allows multiple parties 
 However, federated learning also introduces new privacy challenges. The model updates between parties and the central server can leak information about the local data.
 These leaks can be exploited by attacks such as membership inference and property inference attacks, or model inversion attacks.
 
-DP can play a curcial role in federated learning to provide privacy for the clients' data.
+DP can play a crucial role in federated learning to provide privacy for the clients' data.
 
 Depending on the granularity of privacy provision or the location of noise addition, different forms of DP exist in federated learning.
 In this explainer, we focus on two approaches of DP utilization in federated learning based on where the noise is added: at the server (also known as the center) or at the client (also known as the local).
@@ -73,18 +73,18 @@ In this approach, which is also known as user-level DP, the central server is re
 
 While there are various ways to implement central DP in federated learning, we concentrate on the algorithms proposed by [2] and [3].
 The overall approach is to clip the model updates sent by the clients and add some amount of noise to the aggregated model.
-In each iteration, a random set of clients are chosen for training.
+In each iteration, a random set of clients is chosen with a specific probability for training.
 Each client performs local training on its own data.
 The updates of each client is then clipped by some value `S` (sensitivity S).
 This would limit the impact of any individual client which is crucial for privacy and often beneficial for robustness.
-A common approach to achieve this is by restricting the `L2` norm of its model update, ensuring that larger updates are scaled down to fit within the norm `S`.
+A common approach to achieve this is by restricting the `L2` norm of the clients' model updates, ensuring that larger updates are scaled down to fit within the norm `S`.
 
 .. image:: ./_static/DP/clipping.png
   :align: center
   :width: 300
   :alt: clipping
 
-Afterwards, Gaussian mechanism is used to add noise in order to distort the sum of all clients' updates.
+Afterwards, the Gaussian mechanism is used to add noise in order to distort the sum of all clients' updates.
 The amount of noise is scaled to the sensitivity value to obtain a privacy guarantee.
 The Gaussian mechanism is used with a noise sampled from `N (0, σ²)` where `σ =( noise_scale * S ) / (number of sampled clients)`.
 
@@ -95,7 +95,7 @@ There are two forms of clipping commonly used in Central DP: Fixed Clipping and 
 
 - **Fixed Clipping** : A predefined fix threshold is set for the magnitude of clients' updates. Any update exceeding this threshold is clipped back to the threshold value.
 
-- **Adaptive Clipping** : The clipping threshold dynamically adjusts based on the observed update distribution [4]. It means that the clipping value is tuned during the rounds with respect to quantile of the update norm distribution.
+- **Adaptive Clipping** : The clipping threshold dynamically adjusts based on the observed update distribution [4]. It means that the clipping value is tuned during the rounds with respect to the quantile of the update norm distribution.
 
 The choice between fixed and adaptive clipping depends on various factors such as privacy requirements, data distribution, model complexity, and etc.
 
@@ -120,110 +120,10 @@ In this explainer, we focus on two forms of achieving Local DP:
     \frac{∆ \times \sqrt{2 \times \log\left(\frac{1.25}{\delta}\right)}}{\epsilon}
 
 
-- Each client adds noise to the gradients of the model during the local training (DP-SGD). More specifically, in this approach, gradients are clipped and amount of calibrated noise is injected into the gradients.
+- Each client adds noise to the gradients of the model during the local training (DP-SGD). More specifically, in this approach, gradients are clipped and an amount of calibrated noise is injected into the gradients.
 
 
 Please note that these two approaches are providing privacy at different levels.
-
-Differential Privacy in Flower
-------------------------------
-Below, we explain how users can utilize differential privacy in the Flower framework.
-
-.. warning::
-
-   Differential Privacy in Flower is at the experimental phase. If you plan to use these features in a production environment or with sensitive data, please contact us to discuss your needs and to receive guidance on how to best use these features.
-
-
-Central Differential Privacy
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This approach consists of two seprate phases: clipping of the updates and adding noise to the aggregated model.
-For the clipping phase, Flower framework has made it possible to decide whether to perform clipping at the server side or the client side.
-
-- **Server-side Clipping**: This approach has the advantage of the server enforcing uniform clipping across all clients' updates and reducing the communication overhead for clipping values. However, it also has the disadvantage of increasing the computational load on the server due to the need to perform the clipping operation for all clients.
-- **Client-side Clipping**: This approach has the advantage of reducing the computational overhead on the server. However, it also has the disadvantage of lacking centralized control, as the server has less control over the clipping process.
-
-
-
-Server-side Clipping
-^^^^^^^^^^^^^^^^^^^^
-To utilize the central DP with server side clipping, there are two wrapper classes :code:`DifferentialPrivacyServerSideFixedClipping` and :code:`DifferentialPrivacyServerSideAdaptiveClipping` to be used for fixed or adaptive clipping.
-
-.. image:: ./_static/DP/serversideCDP.png
-  :align: center
-  :width: 700
-  :alt: server side clipping
-
-
-Below is a sample code that enables a strategy using :code:`DifferentialPrivacyServerSideFixedClipping` wrapper class. The same approach can be used with :code:`DifferentialPrivacyServerSideAdaptiveClipping` by adjusting the corresponding input parameters.
-
-.. code-block:: python
-
-  from flwr.server.strategy.dp_fixed_clipping import DifferentialPrivacyServerSideFixedClipping
-  # Configure the strategy
-  strategy = fl.server.strategy.FedAvg( ... )
-  # Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
-  dp_strategy = DifferentialPrivacyServerSideFixedClipping(strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients)
-
-
-
-Client-side Clipping
-^^^^^^^^^^^^^^^^^^^^
-For client-side clipping, the server sends the clipping value to selected clients on each round. Clients can use existing Flower :code:`Mods` [5] to perform the clipping.
-Two mods are available for fixed and adaptive client-side clipping: :code:`fixedclipping_mod` and :code:`adaptiveclipping_mod` with corresponding server-side wrappers :code:`DifferentialPrivacyClientSideFixedClipping` and :code:`DifferentialPrivacyClientSideAdaptiveClipping`.
-
-.. image:: ./_static/DP/clientsideCDP.png
-  :align: center
-  :width: 800
-  :alt: client side clipping
-
-
-Below is a sample code that enables a strategy using :code:`DifferentialPrivacyClientSideFixedClipping` wrapper class. On the client, `fixedclipping_mod` can be added to the client-side mods:
-
-.. code-block:: python
-
-  # Server-side:
-  from flwr.server.strategy.dp_fixed_clipping import DifferentialPrivacyClientSideFixedClipping
-  # Configure the strategy
-  strategy = fl.server.strategy.FedAvg( ... )
-  # Wrap the strategy with the DifferentialPrivacyClientSideFixedClipping wrapper
-  dp_strategy = DifferentialPrivacyClientSideFixedClipping(strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients)
-
-
-.. code-block:: python
-
-  # Client-side:
-  from flwr.client.mod.centraldp_mods import fixedclipping_mod
-  # Add fixedclipping_mod to the client-side mods
-  app = fl.client.ClientApp(client_fn=FlowerClient().to_client(), mods=[fixedclipping_mod])
-
-
-Please note that the order of mods, especially those that modify parameters, is important when using multiple modifiers. Typically, differential privacy (DP) modifiers should be the last to operate on parameters.
-
-
-
-Local Differential Privacy
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-To use local DP to add noise to the client model parameters before sending them to the server in Flower, users can use the :code:`LocalDpMod`. Users are required to provide the hyperparameters: clipping norm value, sensitivity, epsilon, and delta.
-
-.. image:: ./_static/DP/localdp.png
-  :align: center
-  :width: 700
-  :alt: local DP mod
-
-Below is a sample code about how to use :code:`LocalDpMod`:
-
-.. code-block:: python
-
-  # Client-side
-  from flwr.client.mod.localdp_mod import LocalDpMod
-  # Create an instance of the mod with the required params
-  local_dp_obj = LocalDpMod(cfg.clipping_norm, cfg.sensitivity, cfg.epsilon, cfg.delta)
-  # Add local_dp_obj to the client-side mods
-  app = fl.client.ClientApp(client_fn=FlowerClient().to_client(), mods=[local_dp_obj])
-
-Local Training using Privacy Engines
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-To ensure data instance-level privacy during local model training on the client side, consider using privacy engines like Opacus and TensorFlow Privacy. For examples of using Flower with these engines, please refer to the Flower examples directory.
 
 
 **References:**
@@ -235,5 +135,3 @@ To ensure data instance-level privacy during local model training on the client 
 [3] Geyer et al. Differentially Private Federated Learning: A Client Level Perspective.
 
 [4] Galen et al. Differentially Private Learning with Adaptive Clipping.
-
-[5] https://github.com/adap/flower/blob/dp-explainer/doc/source/how-to-use-built-in-mods.rst
