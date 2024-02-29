@@ -47,12 +47,12 @@ def get_wandb_mod(name: str) -> Mod:
         group_id = fwd.metadata.group_id
         group_name = f"Workload ID: {run_id}"
 
-        client_id = str(fwd.metadata.node_id)
+        client_id = str(fwd.metadata.dst_node_id)
         run_name = f"Client ID: {client_id}"
 
         time_diff = None
 
-        config = fwd.content.configs
+        config = fwd.content.configs_records
         if "round" in config:
             round = str(config["round"])
         else:
@@ -80,13 +80,13 @@ def get_wandb_mod(name: str) -> Mod:
 
             results_to_log = {}
 
-            metrics = bwd.content.metrics
+            metrics = bwd.content.metrics_records
             msg_type = bwd.metadata.message_type
 
-            if "loss" in metrics:
-                results_to_log[f"{msg_type}_loss"] = metrics["loss"]
-            if "accuracy" in metrics:
-                results_to_log[f"{msg_type}_accuracy"] = metrics["accuracy"]
+            if "loss" in metrics.keys():
+                results_to_log[f"{msg_type}_loss"] = metrics.get("loss", None)
+            if "accuracy" in metrics.keys():
+                results_to_log[f"{msg_type}_accuracy"] = metrics.get("accuracy", None)
             if time_diff is not None:
                 results_to_log[f"{msg_type}_time"] = time_diff
 
