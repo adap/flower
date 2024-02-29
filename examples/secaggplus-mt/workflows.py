@@ -29,28 +29,8 @@ from flwr.common.secure_aggregation.ndarrays_arithmetic import (
 )
 from flwr.common.secure_aggregation.quantization import dequantize, quantize
 from flwr.common.secure_aggregation.secaggplus_constants import (
-    KEY_ACTIVE_SECURE_ID_LIST,
-    KEY_CIPHERTEXT_LIST,
-    KEY_CLIPPING_RANGE,
-    KEY_DEAD_SECURE_ID_LIST,
-    KEY_DESTINATION_LIST,
-    KEY_MASKED_PARAMETERS,
-    KEY_MOD_RANGE,
-    KEY_PUBLIC_KEY_1,
-    KEY_PUBLIC_KEY_2,
-    KEY_SAMPLE_NUMBER,
-    KEY_SECURE_ID,
-    KEY_SECURE_ID_LIST,
-    KEY_SHARE_LIST,
-    KEY_SHARE_NUMBER,
-    KEY_SOURCE_LIST,
-    KEY_STAGE,
-    KEY_TARGET_RANGE,
-    KEY_THRESHOLD,
-    STAGE_COLLECT_MASKED_INPUT,
-    STAGE_SETUP,
-    STAGE_SHARE_KEYS,
-    STAGE_UNMASK,
+    Key,
+    Stage,
     RECORD_KEY_CONFIGS,
 )
 from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
@@ -92,11 +72,11 @@ def _get_from_task(task: Task) -> Dict[str, ConfigsRecordValues]:
 
 
 _secure_aggregation_configuration = {
-    KEY_SHARE_NUMBER: 3,
-    KEY_THRESHOLD: 2,
-    KEY_CLIPPING_RANGE: 3.0,
-    KEY_TARGET_RANGE: 1 << 20,
-    KEY_MOD_RANGE: 1 << 30,
+    Key.SHARE_NUMBER: 3,
+    Key.THRESHOLD: 2,
+    Key.CLIPPING_RANGE: 3.0,
+    Key.TARGET_RANGE: 1 << 20,
+    Key.MOD_RANGE: 1 << 30,
 }
 
 
@@ -110,12 +90,12 @@ def workflow_with_sec_agg(
     """
     # Protocol config
     num_samples = len(sampled_node_ids)
-    num_shares = sec_agg_config[KEY_SHARE_NUMBER]
-    threshold = sec_agg_config[KEY_THRESHOLD]
-    mod_range = sec_agg_config[KEY_MOD_RANGE]
+    num_shares = sec_agg_config[Key.SHARE_NUMBER]
+    threshold = sec_agg_config[Key.THRESHOLD]
+    mod_range = sec_agg_config[Key.MOD_RANGE]
     # Quantization config
-    clipping_range = sec_agg_config[KEY_CLIPPING_RANGE]
-    target_range = sec_agg_config[KEY_TARGET_RANGE]
+    clipping_range = sec_agg_config[Key.CLIPPING_RANGE]
+    target_range = sec_agg_config[Key.TARGET_RANGE]
 
     if LOG_EXPLAIN:
         _quantized = quantize(
@@ -141,13 +121,13 @@ def workflow_with_sec_agg(
             "########################## Secure Aggregation Start ##########################"
         )
     cfg = {
-        KEY_STAGE: STAGE_SETUP,
-        KEY_SAMPLE_NUMBER: num_samples,
-        KEY_SHARE_NUMBER: num_shares,
-        KEY_THRESHOLD: threshold,
-        KEY_CLIPPING_RANGE: clipping_range,
-        KEY_TARGET_RANGE: target_range,
-        KEY_MOD_RANGE: mod_range,
+        Key.STAGE: Stage.SETUP,
+        Key.SAMPLE_NUMBER: num_samples,
+        Key.SHARE_NUMBER: num_shares,
+        Key.THRESHOLD: threshold,
+        Key.CLIPPING_RANGE: clipping_range,
+        Key.TARGET_RANGE: target_range,
+        Key.MOD_RANGE: mod_range,
     }
     # The number of shares should better be odd in the SecAgg+ protocol.
     if num_samples != num_shares and num_shares & 0x1 == 0:
@@ -179,7 +159,7 @@ def workflow_with_sec_agg(
         node_id: _wrap_in_task(
             named_values={
                 **cfg,
-                KEY_SECURE_ID: nid2sid[node_id],
+                Key.SECURE_ID: nid2sid[node_id],
             }
         )
         for node_id in surviving_node_ids
@@ -194,7 +174,7 @@ def workflow_with_sec_agg(
     sid2public_keys = {}
     for node_id, task in node_messages.items():
         key_dict = _get_from_task(task)
-        pk1, pk2 = key_dict[KEY_PUBLIC_KEY_1], key_dict[KEY_PUBLIC_KEY_2]
+        pk1, pk2 = key_dict[Key.PUBLIC_KEY_1], key_dict[Key.PUBLIC_KEY_2]
         sid2public_keys[nid2sid[node_id]] = [pk1, pk2]
 
     """
@@ -206,7 +186,7 @@ def workflow_with_sec_agg(
     yield {
         node_id: _wrap_in_task(
             named_values={
-                KEY_STAGE: STAGE_SHARE_KEYS,
+                Key.STAGE: Stage.SHARE_KEYS,
                 **{
                     str(sid): value
                     for sid, value in sid2public_keys.items()
@@ -232,9 +212,9 @@ def workflow_with_sec_agg(
     }  # dest secure ID -> list of src secure IDs
     for node_id, task in node_messages.items():
         res_dict = _get_from_task(task)
-        srcs += [nid2sid[node_id]] * len(res_dict[KEY_DESTINATION_LIST])
-        dsts += res_dict[KEY_DESTINATION_LIST]
-        ciphertexts += res_dict[KEY_CIPHERTEXT_LIST]
+        srcs += [nid2sid[node_id]] * len(res_dict[Key.DESTINATION_LIST])
+        dsts += res_dict[Key.DESTINATION_LIST]
+        ciphertexts += res_dict[Key.CIPHERTEXT_LIST]
 
     for src, dst, ciphertext in zip(srcs, dsts, ciphertexts):
         if dst in fwd_ciphertexts:
@@ -251,9 +231,9 @@ def workflow_with_sec_agg(
     yield {
         node_id: _wrap_in_task(
             named_values={
-                KEY_STAGE: STAGE_COLLECT_MASKED_INPUT,
-                KEY_CIPHERTEXT_LIST: fwd_ciphertexts[nid2sid[node_id]],
-                KEY_SOURCE_LIST: fwd_srcs[nid2sid[node_id]],
+                Key.STAGE: Stage.COLLECT_MASKED_INPUT,
+                Key.CIPHERTEXT_LIST: fwd_ciphertexts[nid2sid[node_id]],
+                Key.SOURCE_LIST: fwd_srcs[nid2sid[node_id]],
             },
             fit_ins=FitIns(
                 parameters=parameters, config={"drop": nid2sid[node_id] == 0}
@@ -281,7 +261,7 @@ def workflow_with_sec_agg(
             print(f"Client {sid} dropped out.")
     for node_id, task in node_messages.items():
         named_values = _get_from_task(task)
-        client_masked_vec = named_values[KEY_MASKED_PARAMETERS]
+        client_masked_vec = named_values[Key.MASKED_PARAMETERS]
         client_masked_vec = [bytes_to_ndarray(b) for b in client_masked_vec]
         if LOG_EXPLAIN:
             print(f"Received {client_masked_vec[1]} from Client {nid2sid[node_id]}.")
@@ -297,9 +277,9 @@ def workflow_with_sec_agg(
     yield {
         node_id: _wrap_in_task(
             named_values={
-                KEY_STAGE: STAGE_UNMASK,
-                KEY_DEAD_SECURE_ID_LIST: list(dead_sids & nid2neighbours[node_id]),
-                KEY_ACTIVE_SECURE_ID_LIST: list(active_sids & nid2neighbours[node_id]),
+                Key.STAGE: Stage.UNMASK,
+                Key.DEAD_SECURE_ID_LIST: list(dead_sids & nid2neighbours[node_id]),
+                Key.ACTIVE_SECURE_ID_LIST: list(active_sids & nid2neighbours[node_id]),
             }
         )
         for node_id in surviving_node_ids
@@ -319,7 +299,7 @@ def workflow_with_sec_agg(
     for _, task in node_messages.items():
         named_values = _get_from_task(task)
         for owner_sid, share in zip(
-            named_values[KEY_SECURE_ID_LIST], named_values[KEY_SHARE_LIST]
+            named_values[Key.SECURE_ID_LIST], named_values[Key.SHARE_LIST]
         ):
             collected_shares_dict[owner_sid].append(share)
     # Remove mask for every client who is available before ask vectors stage,
