@@ -87,7 +87,7 @@ def train(  # pylint: disable=too-many-arguments
         Parameter for beta.
     """
     criterion = NTDLoss(num_classes=num_classes, tau=tau, beta=beta)
-    global_net = Net(num_classes)
+    global_net = Net(num_classes).to(device=device)
     global_net.load_state_dict(net.state_dict())
     net.train()
     for _ in range(epochs):
