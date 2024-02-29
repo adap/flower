@@ -3,6 +3,7 @@
 It includes processioning the dataset, instantiate strategy, specify how the global
 model is going to be evaluated, etc. At the end, this script saves the results.
 """
+
 # These are the basic packages you'll need here
 
 from argparse import Namespace

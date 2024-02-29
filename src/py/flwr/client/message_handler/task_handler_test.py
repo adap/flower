@@ -15,15 +15,10 @@
 """Tests for module task_handler."""
 
 
-from flwr.client.message_handler.task_handler import (
-    get_task_ins,
-    validate_task_ins,
-    validate_task_res,
-)
-from flwr.common import serde
-from flwr.common.recordset import RecordSet
+from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
+from flwr.common import RecordSet, serde
 from flwr.proto.fleet_pb2 import PullTaskInsResponse  # pylint: disable=E0611
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns  # pylint: disable=E0611
 
 
 def test_validate_task_ins_no_task() -> None:
@@ -45,38 +40,6 @@ def test_validate_task_ins_valid() -> None:
     task_ins = TaskIns(task=Task(recordset=serde.recordset_to_proto(RecordSet())))
 
     assert validate_task_ins(task_ins)
-
-
-def test_validate_task_res() -> None:
-    """Test validate_task_res."""
-    task_res = TaskRes(task=Task())
-    assert validate_task_res(task_res)
-
-    task_res.task_id = "123"
-    assert not validate_task_res(task_res)
-
-    task_res.Clear()
-    task_res.group_id = "123"
-    assert not validate_task_res(task_res)
-
-    task_res.Clear()
-    task_res.run_id = 61016
-    assert not validate_task_res(task_res)
-
-    task_res.Clear()
-    # pylint: disable-next=no-member
-    task_res.task.producer.node_id = 0
-    assert not validate_task_res(task_res)
-
-    task_res.Clear()
-    # pylint: disable-next=no-member
-    task_res.task.consumer.node_id = 0
-    assert not validate_task_res(task_res)
-
-    task_res.Clear()
-    # pylint: disable-next=no-member
-    task_res.task.ancestry.append("123")
-    assert not validate_task_res(task_res)
 
 
 def test_get_task_ins_empty_response() -> None:
