@@ -175,7 +175,7 @@ class Error:
 
     @property
     def code(self) -> int:
-        """Eerror code."""
+        """Error code."""
         return self._code
 
     @property
