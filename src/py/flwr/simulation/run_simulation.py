@@ -97,7 +97,7 @@ def run_simulation() -> None:
         log(ERROR, "An exception occurred: %s", ex)
         log(ERROR, traceback.format_exc())
         raise RuntimeError(
-            "An error was encountered by the Simulation Engine. Ending Simulation."
+            "An error was encountered by the Simulation Engine. Ending simulation."
         ) from ex
 
     finally:
