@@ -257,27 +257,24 @@ class Message:
         """Return True if message has content, else False."""
         return self._content is not None
 
-    def construct_error_message(
+    def create_error(
         self,
-        error_code: int,
+        error: Error,
         ttl: str,
-        error_reason: str | None = None,
     ) -> Message:
         """Construct valid response message indicating an error happened.
 
         Parameters
         ----------
-        error_code : int
-            Error code.
+        error : Error
+            The error that was encountered.
         ttl : str
             Time-to-live for this message.
-        error_reason : Optional[str]
-            A reason for why the error arised (e.g. an exception stack-trace)
         """
         # Create reply without content
         message = self.create_reply(ttl=ttl)
         # Set error
-        message.error = Error(code=error_code, reason=error_reason)
+        message.error = error
         return message
 
     def create_reply(self, ttl: str, content: RecordSet | None = None) -> Message:
