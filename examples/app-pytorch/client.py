@@ -1,5 +1,6 @@
 import time
 from typing import Dict, Tuple
+from flwr.common.recordset_compat import ConfigsRecord
 
 import wandb
 from task import DEVICE, Net, get_parameters, load_data, set_parameters, test, train
@@ -7,7 +8,7 @@ from task import DEVICE, Net, get_parameters, load_data, set_parameters, test, t
 import flwr as fl
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common import Context, Message, NDArrays, Parameters, Scalar
-from flwr.common.constant import MESSAGE_TYPE_EVALUATE, MESSAGE_TYPE_FIT
+from flwr.common.constant import MESSAGE_TYPE_FIT
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
@@ -75,22 +76,22 @@ def get_wandb_mod(name: str) -> Mod:
 
         bwd = app(fwd, context)
 
-        if bwd.metadata.message_type == (MESSAGE_TYPE_FIT or MESSAGE_TYPE_EVALUATE):
+        msg_type = bwd.metadata.message_type
+
+        if msg_type == MESSAGE_TYPE_FIT:
+
             time_diff = time.time() - start_time
 
-            results_to_log = {}
+            metrics = bwd.content.configs_records
 
-            metrics = bwd.content.metrics_records
-            msg_type = bwd.metadata.message_type
+            results_to_log = dict(
+                metrics.get(f"{msg_type}res.metrics", ConfigsRecord())
+            )
 
-            if "loss" in metrics.keys():
-                results_to_log[f"{msg_type}_loss"] = metrics.get("loss", None)
-            if "accuracy" in metrics.keys():
-                results_to_log[f"{msg_type}_accuracy"] = metrics.get("accuracy", None)
             if time_diff is not None:
                 results_to_log[f"{msg_type}_time"] = time_diff
 
-            wandb.log(results_to_log, step=int(round))
+            wandb.log(results_to_log, step=int(round), commit=True)
 
         return bwd
 
@@ -99,5 +100,5 @@ def get_wandb_mod(name: str) -> Mod:
 
 # Run via `flower-client-app client:app`
 app = fl.client.ClientApp(
-    client_fn=client_fn, mods=[get_wandb_mod("MT PyTorch Callable")]
+    client_fn=client_fn, mods=[get_wandb_mod("Flower PyTorch App")]
 )
