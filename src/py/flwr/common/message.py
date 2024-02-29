@@ -271,7 +271,7 @@ class Message:
         error: Error,
         ttl: str,
     ) -> Message:
-        """Construct valid response message indicating an error happened.
+        """Construct valid reply message indicating an error happened.
 
         Parameters
         ----------
