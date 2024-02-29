@@ -164,7 +164,7 @@ class TestDriver(unittest.TestCase):
         mock_response = Mock(task_ids=["id1"])
         self.mock_grpc_driver.push_task_ins.return_value = mock_response
         # The response message must include either `content` (i.e. a recordset) or
-        # an `Error`. We choose the later in this case
+        # an `Error`. We choose the latter in this case
         error_proto = error_to_proto(Error(code=0))
         mock_response = Mock(
             task_res_list=[TaskRes(task=Task(ancestry=["id1"], error=error_proto))]
