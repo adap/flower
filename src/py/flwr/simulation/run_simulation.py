@@ -20,13 +20,14 @@ import json
 import threading
 import traceback
 from logging import ERROR, INFO, WARNING
-from typing import Optional
+from typing import Dict, Optional
 
 import grpc
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.typing import ConfigsRecordValues
 from flwr.server.driver.driver import Driver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
@@ -42,12 +43,15 @@ def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
 
+    # Load JSON config
+    backend_config_dict = json.loads(args.backend_config)
+
     run_simulation(
         num_supernodes=args.num_supernodes,
         client_app_module_name=args.client_app,
         server_app_module_name=args.server_app,
         backend_name=args.backend,
-        backend_config=args.backend_config,
+        backend_config=backend_config_dict,
         working_dir=args.dir,
         driver_api_address=args.driver_api_address,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
@@ -60,7 +64,7 @@ def run_simulation(
     client_app: Optional[ClientApp] = None,
     server_app: Optional[ServerApp] = None,
     backend_name: str = "ray",
-    backend_config: str = "{}",
+    backend_config: Optional[Dict[str, ConfigsRecordValues]] = None,
     client_app_module_name: Optional[str] = None,
     server_app_module_name: Optional[str] = None,
     working_dir: str = "",
@@ -86,9 +90,9 @@ def run_simulation(
     backend_name : str (default: ray)
         A simulation backend that runs `ClientApp`s.
 
-    backend_config : str
-        'A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to
-        configure a backend. Values supported in <value> are those included by
+    backend_config : Optional[Dict[str, ConfigsRecordValues]]
+        'A dictionary, e.g {"<keyA>":<value>, "<keyB>":<value>} to configure a
+        backend. Values supported in <value> are those included by
         `flwr.common.typing.ConfigsRecordValues`.
 
     client_app_module_name : str
@@ -114,18 +118,21 @@ def run_simulation(
         all GPU memory. Read mor about how `tf.config.experimental.set_memory_growth()`
         works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
     """
-    # Load JSON config
-    backend_config_dict = json.loads(backend_config)
+    if backend_config is None:
+        backend_config = {}
 
     # Enable GPU memory growth (relevant only for TF)
     if enable_tf_gpu_growth:
         log(INFO, "Enabling GPU growth for Tensorflow on the main thread.")
         enable_gpu_growth()
         # Check that Backend config has also enabled using GPU growth
-        use_tf = backend_config_dict.get("tensorflow", False)
+        use_tf = backend_config.get("tensorflow", False)
         if not use_tf:
             log(WARNING, "Enabling GPU growth for your backend.")
-            backend_config_dict["tensorflow"] = True
+            backend_config["tensorflow"] = True
+
+    # Convert config to original JSON-stream format
+    backend_config_stream = json.dumps(backend_config)
 
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
@@ -146,7 +153,7 @@ def run_simulation(
             "client_app_module_name": client_app_module_name,
             "client_app": client_app,
             "backend_name": backend_name,
-            "backend_config_json_stream": backend_config,
+            "backend_config_json_stream": backend_config_stream,
             "working_dir": working_dir,
             "state_factory": state_factory,
             "f_stop": f_stop,
@@ -165,7 +172,12 @@ def run_simulation(
         )
 
         # Launch server app
-        run(server_app_module_name, driver, working_dir, loaded_server_app=server_app)
+        run(
+            driver=driver,
+            server_app_dir=working_dir,
+            server_app_attr=server_app_module_name,
+            loaded_server_app=server_app,
+        )
 
     except Exception as ex:
 

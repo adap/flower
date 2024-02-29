@@ -29,24 +29,32 @@ from .server_app import ServerApp, load_server_app
 
 
 def run(
-    server_app_attr: str,
     driver: Driver,
     server_app_dir: str,
+    server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
 ) -> None:
     """Run ServerApp with a given Driver."""
+    if not (server_app_attr is None) ^ (loaded_server_app is None):
+        raise ValueError(
+            "Either `server_app_attr` should `loaded_server_app` be set "
+            "but not both. "
+        )
+
     if server_app_dir is not None:
         sys.path.insert(0, server_app_dir)
 
-    def _load() -> ServerApp:
-        server_app: ServerApp = (
-            load_server_app(server_app_attr)
-            if loaded_server_app is None
-            else loaded_server_app
-        )
-        return server_app
+    # Load ServerApp if needed
+    if server_app_attr:
 
-    server_app = _load()
+        def _load() -> ServerApp:
+            server_app: ServerApp = load_server_app(server_app_attr)
+            return server_app
+
+        server_app = _load()
+
+    if loaded_server_app:
+        server_app = loaded_server_app
 
     # Initialize Context
     context = Context(state=RecordSet())
@@ -114,7 +122,7 @@ def run_server_app() -> None:
     )
 
     # Run the Server App with the Driver
-    run(server_app_attr, driver, server_app_dir)
+    run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
 
     # Clean up
     driver.__del__()  # pylint: disable=unnecessary-dunder-call
