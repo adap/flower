@@ -67,7 +67,7 @@ Below is a sample code that enables a strategy using :code:`DifferentialPrivacyC
   # Client-side:
   from flwr.client.mod.centraldp_mods import fixedclipping_mod
   # Add fixedclipping_mod to the client-side mods
-  app = fl.client.ClientApp(client_fn=FlowerClient().to_client(), mods=[fixedclipping_mod])
+  app = fl.client.ClientApp(client_fn=client_fn, mods=[fixedclipping_mod])
 
 
 Please note that the order of mods, especially those that modify parameters, is important when using multiple modifiers. Typically, differential privacy (DP) modifiers should be the last to operate on parameters.
