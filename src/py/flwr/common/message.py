@@ -266,12 +266,26 @@ class Message:
         """Return True if message has an error, else False."""
         return self._error is not None
 
-    def create_error(
+    def _create_reply_metadata(self, ttl: str) -> Metadata:
+        """Construct metadata for a reply message."""
+        return Metadata(
+            run_id=self.metadata.run_id,
+            message_id="",
+            src_node_id=self.metadata.dst_node_id,
+            dst_node_id=self.metadata.src_node_id,
+            reply_to_message=self.metadata.message_id,
+            group_id=self.metadata.group_id,
+            ttl=ttl,
+            message_type=self.metadata.message_type,
+            partition_id=self.metadata.partition_id,
+        )
+
+    def create_error_reply(
         self,
         error: Error,
         ttl: str,
     ) -> Message:
-        """Construct valid reply message indicating an error happened.
+        """Construct a reply message indicating an error happened.
 
         Parameters
         ----------
@@ -280,13 +294,11 @@ class Message:
         ttl : str
             Time-to-live for this message.
         """
-        # Create reply without content
-        message = self.create_reply(ttl=ttl)
-        # Set error
-        message.error = error
+        # Create reply with error
+        message = Message(metadata=self._create_reply_metadata(ttl), error=error)
         return message
 
-    def create_reply(self, ttl: str, content: RecordSet | None = None) -> Message:
+    def create_reply(self, content: RecordSet, ttl: str) -> Message:
         """Create a reply to this message with specified content and TTL.
 
         The method generates a new `Message` as a reply to this message.
@@ -295,10 +307,10 @@ class Message:
 
         Parameters
         ----------
+        content : RecordSet
+            The content for the reply message.
         ttl : str
             Time-to-live for this message.
-        content : Optional[RecordSet]
-            The content for the reply message.
 
         Returns
         -------
@@ -306,16 +318,6 @@ class Message:
             A new `Message` instance representing the reply.
         """
         return Message(
-            metadata=Metadata(
-                run_id=self.metadata.run_id,
-                message_id="",
-                src_node_id=self.metadata.dst_node_id,
-                dst_node_id=self.metadata.src_node_id,
-                reply_to_message=self.metadata.message_id,
-                group_id=self.metadata.group_id,
-                ttl=ttl,
-                message_type=self.metadata.message_type,
-                partition_id=self.metadata.partition_id,
-            ),
+            metadata=self._create_reply_metadata(ttl),
             content=content,
         )
