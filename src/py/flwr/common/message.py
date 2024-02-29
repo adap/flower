@@ -229,7 +229,7 @@ class Message:
         if self._content is None:
             raise ValueError(
                 "Message content is None. Use <message>.has_content() "
-                "if you'd like to check first if a message has content."
+                "to check if a message has content."
             )
         return self._content
 
@@ -247,7 +247,7 @@ class Message:
         if self._error is None:
             raise ValueError(
                 "Message error is None. Use <message>.has_error() "
-                "if you'd like to check first if a message carries an error."
+                "to check first if a message carries an error."
             )
         return self._error
 
