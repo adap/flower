@@ -83,9 +83,8 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
     ) -> grpc.Call:
         """Flower client interceptor.
 
-        Intercept unary call from client and do authentication process by validating
-        metadata sent from client. Continue RPC call if client is authenticated, else,
-        terminate RPC call by setting context to abort.
+        Intercept unary call from client and add necessary authentication header
+        in the RPC metadata.
         """
         metadata = []
         postprocess = False
