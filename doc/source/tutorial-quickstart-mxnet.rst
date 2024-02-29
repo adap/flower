@@ -4,14 +4,14 @@
 Quickstart MXNet
 ================
 
-.. warning:: MXNet is no longer maintained and has been moved into `Attic <https://attic.apache.org/projects/mxnet.html>`_. As a result, we would encourage you to use other ML frameworks alongise Flower, for example, PyTorch. This tutorial might be removed in future versions of Flower.
+.. warning:: MXNet is no longer maintained and has been moved into `Attic <https://attic.apache.org/projects/mxnet.html>`_. As a result, we would encourage you to use other ML frameworks alongside Flower, for example, PyTorch. This tutorial might be removed in future versions of Flower.
 
 .. meta::
    :description: Check out this Federated Learning quickstart tutorial for using Flower with MXNet to train a Sequential model on MNIST.
 
 In this tutorial, we will learn how to train a :code:`Sequential` model on MNIST using Flower and MXNet.
 
-It is recommended to create a virtual environment and run everything within this `virtualenv <https://flower.ai/docs/recommended-env-setup.html>`_.
+It is recommended to create a virtual environment and run everything within this :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
 Our example consists of one *server* and two *clients* all having the same model.
 

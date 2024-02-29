@@ -23,7 +23,7 @@ The TensorFlow/Keras quickstart example shows CIFAR-10 image classification
 with MobileNetV2:
 
 - `Quickstart TensorFlow (Code) <https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow>`_
-- `Quickstart TensorFlow (Tutorial) <https://flower.ai/docs/framework/tutorial-quickstart-tensorflow.html>`_
+- :doc:`Quickstart TensorFlow (Tutorial) <tutorial-quickstart-tensorflow>`
 - `Quickstart TensorFlow (Blog Post) <https://flower.ai/blog/2020-12-11-federated-learning-in-less-than-20-lines-of-code>`_
 
 
@@ -34,7 +34,7 @@ The PyTorch quickstart example shows CIFAR-10 image classification
 with a simple Convolutional Neural Network:
 
 - `Quickstart PyTorch (Code) <https://github.com/adap/flower/tree/main/examples/quickstart-pytorch>`_
-- `Quickstart PyTorch (Tutorial) <https://flower.ai/docs/framework/tutorial-quickstart-pytorch.html>`_
+- :doc:`Quickstart PyTorch (Tutorial) <tutorial-quickstart-pytorch>`
 
 
 PyTorch: From Centralized To Federated
@@ -43,7 +43,7 @@ PyTorch: From Centralized To Federated
 This example shows how a regular PyTorch project can be federated using Flower:
 
 - `PyTorch: From Centralized To Federated (Code) <https://github.com/adap/flower/tree/main/examples/pytorch-from-centralized-to-federated>`_
-- `PyTorch: From Centralized To Federated (Tutorial) <https://flower.ai/docs/framework/example-pytorch-from-centralized-to-federated.html>`_
+- :doc:`PyTorch: From Centralized To Federated (Tutorial) <example-pytorch-from-centralized-to-federated>`
 
 
 Federated Learning on Raspberry Pi and Nvidia Jetson
@@ -60,7 +60,7 @@ Legacy Examples (`flwr_example`)
 --------------------------------
 
 .. warning::
-   The useage examples in `flwr_example` are deprecated and will be removed in
+   The usage examples in `flwr_example` are deprecated and will be removed in
    the future. New examples are provided as standalone projects in
    `examples <https://github.com/adap/flower/tree/main/examples>`_.
 
@@ -114,7 +114,7 @@ For more details, see :code:`src/py/flwr_example/pytorch_cifar`.
 ImageNet-2012 Image Classification
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`ImageNet-2012 <http://www.image-net.org/>`_ is one of the major computer
+`ImageNet-2012 <https://www.image-net.org/>`_ is one of the major computer
 vision datasets. The Flower ImageNet example uses PyTorch to train a ResNet-18
 classifier in a federated learning setup with ten clients.
 

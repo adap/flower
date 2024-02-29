@@ -33,7 +33,7 @@ design of Flower is based on a few guiding principles:
 
 - **Framework-agnostic**: Different machine learning frameworks have different
   strengths. Flower can be used with any machine learning framework, for
-  example, [PyTorch](https://pytorch.org), [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), [fastai](https://www.fast.ai/), [MLX](https://ml-explore.github.io/mlx/build/html/index.html), [XGBoost](https://xgboost.readthedocs.io/en/stable/), [Pandas](https://pandas.pydata.org/) for federated analytics, or even raw [NumPy](https://numpy.org/)
+  example, [PyTorch](https://pytorch.org), [TensorFlow](https://tensorflow.org), [Hugging Face Transformers](https://huggingface.co/), [PyTorch Lightning](https://pytorchlightning.ai/), [scikit-learn](https://scikit-learn.org/), [JAX](https://jax.readthedocs.io/), [TFLite](https://tensorflow.org/lite/), [MONAI](https://docs.monai.io/en/latest/index.html), [fastai](https://www.fast.ai/), [MLX](https://ml-explore.github.io/mlx/build/html/index.html), [XGBoost](https://xgboost.readthedocs.io/en/stable/), [Pandas](https://pandas.pydata.org/) for federated analytics, or even raw [NumPy](https://numpy.org/)
   for users who enjoy computing gradients by hand.
 
 - **Understandable**: Flower is written with maintainability in mind. The
@@ -101,6 +101,7 @@ Flower Baselines is a collection of community-contributed projects that reproduc
 - [FedNova](https://github.com/adap/flower/tree/main/baselines/fednova)
 - [HeteroFL](https://github.com/adap/flower/tree/main/baselines/heterofl)
 - [FedAvgM](https://github.com/adap/flower/tree/main/baselines/fedavgm)
+- [FedStar](https://github.com/adap/flower/tree/main/baselines/fedstar)
 - [FedWav2vec2](https://github.com/adap/flower/tree/main/baselines/fedwav2vec2)
 - [FjORD](https://github.com/adap/flower/tree/main/baselines/fjord)
 - [MOON](https://github.com/adap/flower/tree/main/baselines/moon)
@@ -129,6 +130,7 @@ Quickstart examples:
 - [Quickstart (fastai)](https://github.com/adap/flower/tree/main/examples/quickstart-fastai)
 - [Quickstart (Pandas)](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)
 - [Quickstart (JAX)](https://github.com/adap/flower/tree/main/examples/quickstart-jax)
+- [Quickstart (MONAI)](https://github.com/adap/flower/tree/main/examples/quickstart-monai)
 - [Quickstart (scikit-learn)](https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist)
 - [Quickstart (XGBoost)](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
 - [Quickstart (Android [TFLite])](https://github.com/adap/flower/tree/main/examples/android)
@@ -148,6 +150,7 @@ Other [examples](https://github.com/adap/flower/tree/main/examples):
 - Single-Machine Simulation of Federated Learning Systems ([PyTorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch)) ([Tensorflow](https://github.com/adap/flower/tree/main/examples/simulation-tensorflow))
 - [Comprehensive Flower+XGBoost](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive)
 - [Flower through Docker Compose and with Grafana dashboard](https://github.com/adap/flower/tree/main/examples/flower-via-docker-compose)
+- [Flower with KaplanMeierFitter from the lifelines library](https://github.com/adap/flower/tree/main/examples/federated-kaplna-meier-fitter)
 
 ## Community
 

@@ -69,9 +69,9 @@ def upload_file(local_filepath: str, s3_key: Optional[str]) -> None:
                 Bucket=CONFIG["s3_bucket"],
                 Key=s3_key,
                 ExtraArgs={
-                    "ContentType": "application/pdf"
-                    if s3_key.endswith(".pdf")
-                    else "text/plain"
+                    "ContentType": (
+                        "application/pdf" if s3_key.endswith(".pdf") else "text/plain"
+                    )
                 },
             )
         # pylint: disable=broad-except

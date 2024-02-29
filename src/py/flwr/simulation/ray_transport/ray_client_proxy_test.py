@@ -22,9 +22,16 @@ from typing import Dict, List, Tuple, Type
 import ray
 
 from flwr.client import Client, NumPyClient
-from flwr.client.clientapp import ClientApp
-from flwr.common import Config, Context, Message, Metadata, RecordSet, Scalar
-from flwr.common.configsrecord import ConfigsRecord
+from flwr.client.client_app import ClientApp
+from flwr.common import (
+    Config,
+    ConfigsRecord,
+    Context,
+    Message,
+    Metadata,
+    RecordSet,
+    Scalar,
+)
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.recordset_compat import (
     getpropertiesins_to_recordset,
@@ -50,8 +57,8 @@ class DummyClient(NumPyClient):
         result = int(self.cid) * pi
 
         # store something in context
-        self.context.state.set_configs(
-            "result", record=ConfigsRecord({"result": str(result)})
+        self.context.state.configs_records["result"] = ConfigsRecord(
+            {"result": str(result)}
         )
         return {"result": result}
 
@@ -107,6 +114,7 @@ def test_cid_consistency_one_at_a_time() -> None:
             recordset,
             MESSAGE_TYPE_GET_PROPERTIES,
             timeout=None,
+            group_id=0,
         )
         message_out = prox._submit_job(  # pylint: disable=protected-access
             message=message, timeout=None
@@ -143,6 +151,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
             recordset,
             message_type=MESSAGE_TYPE_GET_PROPERTIES,
             timeout=None,
+            group_id=0,
         )
         prox.actor_pool.submit_client_job(
             lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
@@ -161,9 +170,9 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         assert int(prox.cid) * pi == res.properties["result"]
         assert (
             str(int(prox.cid) * pi)
-            == prox.proxy_state.retrieve_context(run_id).state.get_configs("result")[
+            == prox.proxy_state.retrieve_context(run_id).state.configs_records[
                 "result"
-            ]
+            ]["result"]
         )
 
     ray.shutdown()
@@ -189,10 +198,13 @@ def test_cid_consistency_without_proxies() -> None:
             metadata=Metadata(
                 run_id=0,
                 message_id="",
-                group_id="",
+                group_id=str(0),
+                src_node_id=0,
+                dst_node_id=12345,
+                reply_to_message="",
                 ttl="",
-                node_id=int(cid),
                 message_type=MESSAGE_TYPE_GET_PROPERTIES,
+                partition_id=int(cid),
             ),
         )
         pool.submit_client_job(
