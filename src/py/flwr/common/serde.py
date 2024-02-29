@@ -602,10 +602,9 @@ def message_from_taskins(taskins: TaskIns) -> Message:
     message = Message(
         metadata=metadata,
         content=recordset_from_proto(taskins.task.recordset),
+        error=error_from_proto(taskins.task.error),
     )
 
-    # Add error field
-    message.error = error_from_proto(taskins.task.error)
     return message
 
 
