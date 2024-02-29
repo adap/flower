@@ -75,7 +75,7 @@ python sim.py --num_cpus=2
 python sim.py --num_cpus=2 --num_gpus=0.25
 ```
 
-### Run with Flower-Next
+### Run with Flower Next (preview)
 
 Ensure you have activated your environment, then execute the command below. All `ClientApp` instances will run on CPU but the `ServerApp` will run on the GPU if one is available. Note that this is the case because the `Simulation Engine` only exposes certain resources to the `ClientApp` (based on the `client_resources` in `--backend-config`).
 
