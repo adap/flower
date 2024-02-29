@@ -224,14 +224,22 @@ class Message:
         return self._metadata
 
     @property
-    def content(self) -> RecordSet | None:
+    def content(self) -> RecordSet:
         """The content of this message."""
+        if self._content is None:
+            raise ValueError(
+                "Message content is None. Use <message>.has_content() "
+                "if you'd like to check first if a message has content."
+            )
         return self._content
 
     @content.setter
     def content(self, value: RecordSet) -> None:
         """Set content."""
-        self._content = value
+        if self._error is None:
+            self._content = value
+        else:
+            raise ValueError("A message with an error set cannot have content.")
 
     @property
     def error(self) -> Error | None:
@@ -241,7 +249,13 @@ class Message:
     @error.setter
     def error(self, value: Error) -> None:
         """Set error."""
+        if self.has_content():
+            raise ValueError("A message with content set cannot carry an error.")
         self._error = value
+
+    def has_content(self) -> bool:
+        """Return True if message has content, else False."""
+        return self._content is not None
 
     def construct_error_message(
         self,

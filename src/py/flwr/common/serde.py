@@ -579,7 +579,7 @@ def message_to_taskins(message: Message) -> TaskIns:
             ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
             task_type=md.message_type,
             recordset=recordset_to_proto(message.content),
-            error=error_to_proto(message.error),
+            error=error_to_proto(message.error) if message.error else None,
         ),
     )
 
@@ -623,7 +623,7 @@ def message_to_taskres(message: Message) -> TaskRes:
             ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
             task_type=md.message_type,
             recordset=recordset_to_proto(message.content),
-            error=error_to_proto(message.error),
+            error=error_to_proto(message.error) if message.error else None,
         ),
     )
 

@@ -53,7 +53,7 @@ def get_test_handler(
     """."""
 
     def empty_ffn(_msg: Message, _2: Context) -> Message:
-        return _msg.create_reply(RecordSet(), ttl="")
+        return _msg.create_reply(content=RecordSet(), ttl="")
 
     app = make_ffn(empty_ffn, [secaggplus_mod])
 
