@@ -192,19 +192,31 @@ class Message:
     ----------
     metadata : Metadata
         A dataclass including information about the message to be executed.
-    content : RecordSet
+    content : Optional[RecordSet]
         Holds records either sent by another entity (e.g. sent by the server-side
         logic to a client, or vice-versa) or that will be sent to it.
+    error : Optional[Error]
+        A dataclass that captures information about an error that took place
+        when processing another message.
     """
 
     _metadata: Metadata
-    _content: RecordSet
-    _error: Error
+    _content: RecordSet | None = None
+    _error: Error | None = None
 
-    def __init__(self, metadata: Metadata, content: RecordSet) -> None:
+    def __init__(
+        self,
+        metadata: Metadata,
+        content: RecordSet | None = None,
+        error: Error | None = None,
+    ) -> None:
         self._metadata = metadata
+
+        if not (content is None) ^ (error is None):
+            raise ValueError("Either `content` or `error` must be set, but not both.")
+
         self._content = content
-        self._error = Error(code=0) # TODO: decide about codes, init with default "NO_ERROR" code?
+        self._error = error
 
     @property
     def metadata(self) -> Metadata:
@@ -212,7 +224,7 @@ class Message:
         return self._metadata
 
     @property
-    def content(self) -> RecordSet:
+    def content(self) -> RecordSet | None:
         """The content of this message."""
         return self._content
 
@@ -222,7 +234,7 @@ class Message:
         self._content = value
 
     @property
-    def error(self) -> Error:
+    def error(self) -> Error | None:
         """Error captured by this message."""
         return self._error
 
@@ -236,7 +248,6 @@ class Message:
         error_code: int,
         ttl: str,
         error_reason: str | None = None,
-        content: RecordSet | None = None,
     ) -> Message:
         """Construct valid response message indicating an error happened.
 
@@ -248,16 +259,14 @@ class Message:
             Time-to-live for this message.
         error_reason : Optional[str]
             A reason for why the error arised (e.g. an exception stack-trace)
-        content : Optional[RecordSet]
-            The content for the reply message.
         """
-        message_content = content if content else RecordSet()
-        message = self.create_reply(content=message_content, ttl=ttl)
+        # Create reply without content
+        message = self.create_reply(ttl=ttl)
         # Set error
         message.error = Error(code=error_code, reason=error_reason)
         return message
 
-    def create_reply(self, content: RecordSet, ttl: str) -> Message:
+    def create_reply(self, ttl: str, content: RecordSet | None = None) -> Message:
         """Create a reply to this message with specified content and TTL.
 
         The method generates a new `Message` as a reply to this message.
@@ -266,10 +275,10 @@ class Message:
 
         Parameters
         ----------
-        content : RecordSet
-            The content for the reply message.
         ttl : str
             Time-to-live for this message.
+        content : RecordSet
+            The content for the reply message.
 
         Returns
         -------
