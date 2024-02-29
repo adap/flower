@@ -63,7 +63,7 @@ def run_simulation() -> None:
         certificates=None,
     )
 
-    # Superlink with Simulation Engine
+    # SuperLink with Simulation Engine
     f_stop = asyncio.Event()
     superlink_th = threading.Thread(
         target=vce.start_vce,
