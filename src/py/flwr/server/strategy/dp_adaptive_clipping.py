@@ -71,7 +71,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
         The learning rate for the clipping norm adaptation. Defaults to 0.2.
         Andrew et al. recommends to set to 0.2.
     clipped_count_stddev : float
-        The standard deviation of the noise added to the count of updates currently below the estimate.
+        The standard deviation of the noise added to the count of updates below the estimate.
         Andrew et al. recommends to set to `expected_num_records/20`
 
     Examples
