@@ -36,7 +36,9 @@ from .serde import (
     configs_record_from_proto,
     configs_record_to_proto,
     message_from_taskins,
+    message_from_taskres,
     message_to_taskins,
+    message_to_taskres,
     metrics_record_from_proto,
     metrics_record_to_proto,
     parameters_record_from_proto,
@@ -318,22 +320,22 @@ def test_message_to_and_from_taskins() -> None:
     assert metadata == deserialized.metadata
 
 
-# def test_message_to_and_from_taskres() -> None:
-#     """Test Message to and from TaskRes."""
-#     # Prepare
-#     maker = RecordMaker(state=2)
-#     metadata = maker.metadata()
-#     metadata.dst_node_id = 0  # Assume driver node
-#     original = Message(
-#         metadata=metadata,
-#         content=maker.recordset(1, 1, 1),
-#     )
+def test_message_to_and_from_taskres() -> None:
+    """Test Message to and from TaskRes."""
+    # Prepare
+    maker = RecordMaker(state=2)
+    metadata = maker.metadata()
+    metadata.dst_node_id = 0  # Assume driver node
+    original = Message(
+        metadata=metadata,
+        content=maker.recordset(1, 1, 1),
+    )
 
-#     # Execute
-#     taskres = message_to_taskres(original)
-#     taskres.task_id = metadata.message_id
-#     deserialized = message_from_taskres(taskres)
+    # Execute
+    taskres = message_to_taskres(original)
+    taskres.task_id = metadata.message_id
+    deserialized = message_from_taskres(taskres)
 
-#     # Assert
-#     assert original.content == deserialized.content
-#     assert metadata == deserialized.metadata
+    # Assert
+    assert original.content == deserialized.content
+    assert metadata == deserialized.metadata
