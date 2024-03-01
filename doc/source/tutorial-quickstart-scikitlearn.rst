@@ -7,13 +7,13 @@ Quickstart scikit-learn
 .. meta::
    :description: Check out this Federated Learning quickstart tutorial for using Flower with scikit-learn to train a linear regression model.
 
-In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit-learn. 
+In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit-learn.
 
-It is recommended to create a virtual environment and run everything within this `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_. 
+It is recommended to create a virtual environment and run everything within this :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
-Our example consists of one *server* and two *clients* all having the same model. 
+Our example consists of one *server* and two *clients* all having the same model.
 
-*Clients* are responsible for generating individual model parameter updates for the model based on their local datasets. 
+*Clients* are responsible for generating individual model parameter updates for the model based on their local datasets.
 These updates are then sent to the *server* which will aggregate them to produce an updated global model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of parameters updates is called a *round*.
 
@@ -23,7 +23,7 @@ Now that we have a rough idea of what is going on, let's get started. We first n
 
   $ pip install flwr
 
-Since we want to use scikt-learn, let's go ahead and install it:
+Since we want to use scikit-learn, let's go ahead and install it:
 
 .. code-block:: shell
 
@@ -43,7 +43,7 @@ Now that we have all our dependencies installed, let's run a simple distributed 
 However, before setting up the client and server, we will define all functionalities that we need for our federated learning setup within :code:`utils.py`. The :code:`utils.py` contains different functions defining all the machine learning basics:
 
 * :code:`get_model_parameters()`
-    * Returns the paramters of a :code:`sklearn` LogisticRegression model
+    * Returns the parameters of a :code:`sklearn` LogisticRegression model
 * :code:`set_model_params()`
     * Sets the parameters of a :code:`sklean` LogisticRegression model
 * :code:`set_initial_params()`
@@ -59,7 +59,7 @@ Please check out :code:`utils.py` `here <https://github.com/adap/flower/blob/mai
 The pre-defined functions are used in the :code:`client.py` and imported. The :code:`client.py` also requires to import several packages such as Flower and scikit-learn:
 
 .. code-block:: python
-      
+
   import warnings
   import flwr as fl
   import numpy as np
@@ -70,7 +70,7 @@ The pre-defined functions are used in the :code:`client.py` and imported. The :c
   import utils
 
 
-We load the MNIST dataset from `OpenML <https://www.openml.org/d/554>`_, a popular image classification dataset of handwritten digits for machine learning. The utility :code:`utils.load_mnist()` downloads the training and test data. The training set is split afterwards into 10 partitions with :code:`utils.partition()`. 
+We load the MNIST dataset from `OpenML <https://www.openml.org/search?type=data&sort=runs&id=554>`_, a popular image classification dataset of handwritten digits for machine learning. The utility :code:`utils.load_mnist()` downloads the training and test data. The training set is split afterwards into 10 partitions with :code:`utils.partition()`.
 
 .. code-block:: python
 
@@ -145,10 +145,10 @@ to actually run this client:
 
 .. code-block:: python
 
-    fl.client.start_numpy_client("0.0.0.0:8080", client=MnistClient())
+    fl.client.start_client("0.0.0.0:8080", client=MnistClient().to_client())
 
 That's it for the client. We only have to implement :code:`Client` or
-:code:`NumPyClient` and call :code:`fl.client.start_client()` or :code:`fl.client.start_numpy_client()`. The string :code:`"0.0.0.0:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
+:code:`NumPyClient` and call :code:`fl.client.start_client()`. If you implement a client of type :code:`NumPyClient` you'll need to first call its :code:`to_client()` method. The string :code:`"0.0.0.0:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
 :code:`"0.0.0.0:8080"`. If we run a truly federated workload with the server and
 clients running on different machines, all that needs to change is the
 :code:`server_address` we pass to the client.

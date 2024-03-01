@@ -11,7 +11,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 # Parse arguments
 parser = argparse.ArgumentParser(description="Flower")
 parser.add_argument(
-    "--node-id",
+    "--partition-id",
     type=int,
     choices=[0, 1, 2],
     required=True,
@@ -26,7 +26,7 @@ model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
 # Download and partition dataset
 fds = FederatedDataset(dataset="cifar10", partitioners={"train": 3})
-partition = fds.load_partition(args.node_id, "train")
+partition = fds.load_partition(args.partition_id, "train")
 partition.set_format("numpy")
 
 # Divide data on each node: 80% train, 20% test
@@ -52,4 +52,6 @@ class CifarClient(fl.client.NumPyClient):
 
 
 # Start Flower client
-fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=CifarClient())
+fl.client.start_client(
+    server_address="127.0.0.1:8080", client=CifarClient().to_client()
+)

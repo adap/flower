@@ -13,14 +13,14 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--node-id",
+        "--partition-id",
         type=int,
         choices=range(0, N_CLIENTS),
         required=True,
         help="Specifies the artificial data partition",
     )
     args = parser.parse_args()
-    partition_id = args.node_id
+    partition_id = args.partition_id
 
     # Load the partition data
     fds = FederatedDataset(dataset="mnist", partitioners={"train": N_CLIENTS})
@@ -62,4 +62,6 @@ if __name__ == "__main__":
             return loss, len(X_test), {"accuracy": accuracy}
 
     # Start Flower client
-    fl.client.start_numpy_client(server_address="0.0.0.0:8080", client=MnistClient())
+    fl.client.start_client(
+        server_address="0.0.0.0:8080", client=MnistClient().to_client()
+    )

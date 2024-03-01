@@ -69,10 +69,10 @@ def test(net, testloader):
     return loss, accuracy
 
 
-def load_data(node_id):
+def load_data(partition_id):
     """Load partition CIFAR10 data."""
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": 3})
-    partition = fds.load_partition(node_id)
+    partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2)
     pytorch_transforms = Compose(
@@ -94,20 +94,20 @@ def load_data(node_id):
 # 2. Federation of the pipeline with Flower
 # #############################################################################
 
-# Get node id
+# Get partition id
 parser = argparse.ArgumentParser(description="Flower")
 parser.add_argument(
-    "--node-id",
+    "--partition-id",
     choices=[0, 1, 2],
     required=True,
     type=int,
     help="Partition of the dataset divided into 3 iid partitions created artificially.",
 )
-node_id = parser.parse_args().node_id
+partition_id = parser.parse_args().partition_id
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
-trainloader, testloader = load_data(node_id=node_id)
+trainloader, testloader = load_data(partition_id=partition_id)
 
 
 # Define Flower client
@@ -132,7 +132,7 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 # Start Flower client
-fl.client.start_numpy_client(
+fl.client.start_client(
     server_address="127.0.0.1:8080",
-    client=FlowerClient(),
+    client=FlowerClient().to_client(),
 )

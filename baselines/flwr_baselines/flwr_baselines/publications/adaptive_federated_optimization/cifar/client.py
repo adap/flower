@@ -1,6 +1,5 @@
 """Flower Client for CIFAR10/100."""
 
-
 from collections import OrderedDict
 from pathlib import Path
 from typing import Callable, Dict, Tuple
