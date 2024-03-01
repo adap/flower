@@ -20,17 +20,61 @@ import json
 import threading
 import traceback
 from logging import ERROR, INFO, WARNING
+from time import sleep
+from typing import Any, Callable
 
 import grpc
 
 from flwr.common import EventType, event, log
-from flwr.common.exit_handlers import register_exit_handlers
 from flwr.server.driver.driver import Driver
 from flwr.server.run_serverapp import run
 from flwr.server.superlink.driver.driver_grpc import run_driver_api_grpc
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.state import StateFactory
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
+
+
+def run_serverapp_th(
+    server_app_attr: str,
+    driver: Driver,
+    server_app_dir: str,
+    f_stop: asyncio.Event,
+    delay_launch: int = 3,
+) -> threading.Thread:
+    """Run SeverApp in a thread."""
+    serverapp_th = threading.Thread(
+        target=run,
+        kwargs={
+            "server_app_attr": server_app_attr,
+            "driver": driver,
+            "server_app_dir": server_app_dir,
+            "stop_event": f_stop,  # will be set when `run()` finishes
+            # will trigger the shutdown of the Simulation Engine
+        },
+    )
+    sleep(delay_launch)
+    serverapp_th.start()
+    return serverapp_th
+
+
+def get_thread_exception_hook(stop_event: asyncio.Event) -> Callable[[Any], None]:
+    """Return a callback for when the ServerApp thread raises an exception."""
+
+    def execepthook(args: Any) -> None:
+        """Upon exception raised, log exception and trigger stop event."""
+        # log
+        log(
+            ERROR,
+            "The ServerApp thread triggered exception (%s): %s",
+            args.exc_type,
+            args.exc_value,
+        )
+        log(ERROR, traceback.format_exc())
+        # Set stop event
+        stop_event.set()
+        log(WARNING, "Triggered stop event for Simulation Engine.")
+
+    return execepthook
 
 
 def run_simulation() -> None:
@@ -63,25 +107,8 @@ def run_simulation() -> None:
         certificates=None,
     )
 
-    # SuperLink with Simulation Engine
     f_stop = asyncio.Event()
-    superlink_th = threading.Thread(
-        target=vce.start_vce,
-        kwargs={
-            "num_supernodes": args.num_supernodes,
-            "client_app_module_name": args.client_app,
-            "backend_name": args.backend,
-            "backend_config_json_stream": backend_config,
-            "working_dir": args.dir,
-            "state_factory": state_factory,
-            "f_stop": f_stop,
-        },
-        daemon=False,
-    )
-
-    superlink_th.start()
-    event(EventType.RUN_SUPERLINK_ENTER)
-
+    serverapp_th = None
     try:
         # Initialize Driver
         driver = Driver(
@@ -89,30 +116,42 @@ def run_simulation() -> None:
             root_certificates=None,
         )
 
-        # Launch server app
-        run(args.server_app, driver, args.dir)
+        # Get and run ServerApp thread
+        serverapp_th = run_serverapp_th(args.server_app, driver, args.dir, f_stop)
+        # Setup an exception hook
+        threading.excepthook = get_thread_exception_hook(f_stop)
+
+        # SuperLink with Simulation Engine
+        event(EventType.RUN_SUPERLINK_ENTER)
+        vce.start_vce(
+            num_supernodes=args.num_supernodes,
+            client_app_module_name=args.client_app,
+            backend_name=args.backend,
+            backend_config_json_stream=backend_config,
+            working_dir=args.dir,
+            state_factory=state_factory,
+            f_stop=f_stop,
+        )
 
     except Exception as ex:
 
         log(ERROR, "An exception occurred: %s", ex)
         log(ERROR, traceback.format_exc())
-        raise RuntimeError(
-            "An error was encountered by the Simulation Engine. Ending simulation."
-        ) from ex
+        raise RuntimeError("An error was encountered. Ending simulation.") from ex
 
     finally:
 
+        # Stop Driver
+        driver_server.stop(grace=0)
         del driver
-
         # Trigger stop event
         f_stop.set()
 
-        register_exit_handlers(
-            grpc_servers=[driver_server],
-            bckg_threads=[superlink_th],
-            event_type=EventType.RUN_SUPERLINK_LEAVE,
-        )
-        superlink_th.join()
+        event(EventType.RUN_SUPERLINK_LEAVE)
+        if serverapp_th:
+            serverapp_th.join()
+
+    log(INFO, "Stopping Simulation Engine now.")
 
 
 def _parse_args_run_simulation() -> argparse.ArgumentParser:
