@@ -110,7 +110,6 @@ def run_simulation() -> None:
     f_stop = asyncio.Event()
     serverapp_th = None
     try:
-
         # Initialize Driver
         driver = Driver(
             driver_service_address=args.driver_api_address,
