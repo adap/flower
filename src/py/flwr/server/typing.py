@@ -22,3 +22,4 @@ from flwr.common import Context
 from .driver import Driver
 
 ServerAppCallable = Callable[[Driver, Context], None]
+Workflow = Callable[[Driver, Context], None]

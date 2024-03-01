@@ -14,7 +14,6 @@
 # ==============================================================================
 """Message."""
 
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -46,6 +45,10 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     message_type : str
         A string that encodes the action to be executed on
         the receiving end.
+    partition_id : Optional[int]
+        An identifier that can be used when loading a particular
+        data partition for a ClientApp. Making use of this identifier
+        is more relevant when conducting simulations.
     """
 
     _run_id: int
@@ -56,6 +59,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     _group_id: str
     _ttl: str
     _message_type: str
+    _partition_id: int | None
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -67,6 +71,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         group_id: str,
         ttl: str,
         message_type: str,
+        partition_id: int | None = None,
     ) -> None:
         self._run_id = run_id
         self._message_id = message_id
@@ -76,6 +81,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         self._group_id = group_id
         self._ttl = ttl
         self._message_type = message_type
+        self._partition_id = partition_id
 
     @property
     def run_id(self) -> int:
@@ -137,6 +143,46 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         """Set message_type."""
         self._message_type = value
 
+    @property
+    def partition_id(self) -> int | None:
+        """An identifier telling which data partition a ClientApp should use."""
+        return self._partition_id
+
+    @partition_id.setter
+    def partition_id(self, value: int) -> None:
+        """Set patition_id."""
+        self._partition_id = value
+
+
+@dataclass
+class Error:
+    """A dataclass that stores information about an error that ocurred.
+
+    Parameters
+    ----------
+    code : int
+        An identifier for the error.
+    reason : Optional[str]
+        A reason for why the error arised (e.g. an exception stack-trace)
+    """
+
+    _code: int
+    _reason: str | None = None
+
+    def __init__(self, code: int, reason: str | None = None) -> None:
+        self._code = code
+        self._reason = reason
+
+    @property
+    def code(self) -> int:
+        """Error code."""
+        return self._code
+
+    @property
+    def reason(self) -> str | None:
+        """Reason reported about the error."""
+        return self._reason
+
 
 @dataclass
 class Message:
@@ -146,17 +192,31 @@ class Message:
     ----------
     metadata : Metadata
         A dataclass including information about the message to be executed.
-    content : RecordSet
+    content : Optional[RecordSet]
         Holds records either sent by another entity (e.g. sent by the server-side
         logic to a client, or vice-versa) or that will be sent to it.
+    error : Optional[Error]
+        A dataclass that captures information about an error that took place
+        when processing another message.
     """
 
     _metadata: Metadata
-    _content: RecordSet
+    _content: RecordSet | None = None
+    _error: Error | None = None
 
-    def __init__(self, metadata: Metadata, content: RecordSet) -> None:
+    def __init__(
+        self,
+        metadata: Metadata,
+        content: RecordSet | None = None,
+        error: Error | None = None,
+    ) -> None:
         self._metadata = metadata
+
+        if not (content is None) ^ (error is None):
+            raise ValueError("Either `content` or `error` must be set, but not both.")
+
         self._content = content
+        self._error = error
 
     @property
     def metadata(self) -> Metadata:
@@ -166,12 +226,77 @@ class Message:
     @property
     def content(self) -> RecordSet:
         """The content of this message."""
+        if self._content is None:
+            raise ValueError(
+                "Message content is None. Use <message>.has_content() "
+                "to check if a message has content."
+            )
         return self._content
 
     @content.setter
     def content(self, value: RecordSet) -> None:
         """Set content."""
-        self._content = value
+        if self._error is None:
+            self._content = value
+        else:
+            raise ValueError("A message with an error set cannot have content.")
+
+    @property
+    def error(self) -> Error:
+        """Error captured by this message."""
+        if self._error is None:
+            raise ValueError(
+                "Message error is None. Use <message>.has_error() "
+                "to check first if a message carries an error."
+            )
+        return self._error
+
+    @error.setter
+    def error(self, value: Error) -> None:
+        """Set error."""
+        if self.has_content():
+            raise ValueError("A message with content set cannot carry an error.")
+        self._error = value
+
+    def has_content(self) -> bool:
+        """Return True if message has content, else False."""
+        return self._content is not None
+
+    def has_error(self) -> bool:
+        """Return True if message has an error, else False."""
+        return self._error is not None
+
+    def _create_reply_metadata(self, ttl: str) -> Metadata:
+        """Construct metadata for a reply message."""
+        return Metadata(
+            run_id=self.metadata.run_id,
+            message_id="",
+            src_node_id=self.metadata.dst_node_id,
+            dst_node_id=self.metadata.src_node_id,
+            reply_to_message=self.metadata.message_id,
+            group_id=self.metadata.group_id,
+            ttl=ttl,
+            message_type=self.metadata.message_type,
+            partition_id=self.metadata.partition_id,
+        )
+
+    def create_error_reply(
+        self,
+        error: Error,
+        ttl: str,
+    ) -> Message:
+        """Construct a reply message indicating an error happened.
+
+        Parameters
+        ----------
+        error : Error
+            The error that was encountered.
+        ttl : str
+            Time-to-live for this message.
+        """
+        # Create reply with error
+        message = Message(metadata=self._create_reply_metadata(ttl), error=error)
+        return message
 
     def create_reply(self, content: RecordSet, ttl: str) -> Message:
         """Create a reply to this message with specified content and TTL.
@@ -193,15 +318,6 @@ class Message:
             A new `Message` instance representing the reply.
         """
         return Message(
-            metadata=Metadata(
-                run_id=self.metadata.run_id,
-                message_id="",
-                src_node_id=self.metadata.dst_node_id,
-                dst_node_id=self.metadata.src_node_id,
-                reply_to_message=self.metadata.message_id,
-                group_id=self.metadata.group_id,
-                ttl=ttl,
-                message_type=self.metadata.message_type,
-            ),
+            metadata=self._create_reply_metadata(ttl),
             content=content,
         )

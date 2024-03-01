@@ -18,7 +18,7 @@
 from abc import ABC, abstractmethod
 from typing import Callable, Dict, Tuple
 
-from flwr.client.clientapp import ClientApp
+from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.message import Message
 from flwr.common.typing import ConfigsRecordValues
@@ -52,6 +52,10 @@ class Backend(ABC):
     @abstractmethod
     def is_worker_idle(self) -> bool:
         """Report whether a backend worker is idle and can therefore run a ClientApp."""
+
+    @abstractmethod
+    async def terminate(self) -> None:
+        """Terminate backend."""
 
     @abstractmethod
     async def process_message(

@@ -47,57 +47,68 @@ class DriverClientProxy(ClientProxy):
         self.anonymous = anonymous
 
     def get_properties(
-        self, ins: common.GetPropertiesIns, timeout: Optional[float]
+        self,
+        ins: common.GetPropertiesIns,
+        timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.GetPropertiesRes:
         """Return client's properties."""
         # Ins to RecordSet
         out_recordset = compat.getpropertiesins_to_recordset(ins)
         # Fetch response
         in_recordset = self._send_receive_recordset(
-            out_recordset, MESSAGE_TYPE_GET_PROPERTIES, timeout
+            out_recordset, MESSAGE_TYPE_GET_PROPERTIES, timeout, group_id
         )
         # RecordSet to Res
         return compat.recordset_to_getpropertiesres(in_recordset)
 
     def get_parameters(
-        self, ins: common.GetParametersIns, timeout: Optional[float]
+        self,
+        ins: common.GetParametersIns,
+        timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.GetParametersRes:
         """Return the current local model parameters."""
         # Ins to RecordSet
         out_recordset = compat.getparametersins_to_recordset(ins)
         # Fetch response
         in_recordset = self._send_receive_recordset(
-            out_recordset, MESSAGE_TYPE_GET_PARAMETERS, timeout
+            out_recordset, MESSAGE_TYPE_GET_PARAMETERS, timeout, group_id
         )
         # RecordSet to Res
         return compat.recordset_to_getparametersres(in_recordset, False)
 
-    def fit(self, ins: common.FitIns, timeout: Optional[float]) -> common.FitRes:
+    def fit(
+        self, ins: common.FitIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> common.FitRes:
         """Train model parameters on the locally held dataset."""
         # Ins to RecordSet
         out_recordset = compat.fitins_to_recordset(ins, keep_input=True)
         # Fetch response
         in_recordset = self._send_receive_recordset(
-            out_recordset, MESSAGE_TYPE_FIT, timeout
+            out_recordset, MESSAGE_TYPE_FIT, timeout, group_id
         )
         # RecordSet to Res
         return compat.recordset_to_fitres(in_recordset, keep_input=False)
 
     def evaluate(
-        self, ins: common.EvaluateIns, timeout: Optional[float]
+        self, ins: common.EvaluateIns, timeout: Optional[float], group_id: Optional[int]
     ) -> common.EvaluateRes:
         """Evaluate model parameters on the locally held dataset."""
         # Ins to RecordSet
         out_recordset = compat.evaluateins_to_recordset(ins, keep_input=True)
         # Fetch response
         in_recordset = self._send_receive_recordset(
-            out_recordset, MESSAGE_TYPE_EVALUATE, timeout
+            out_recordset, MESSAGE_TYPE_EVALUATE, timeout, group_id
         )
         # RecordSet to Res
         return compat.recordset_to_evaluateres(in_recordset)
 
     def reconnect(
-        self, ins: common.ReconnectIns, timeout: Optional[float]
+        self,
+        ins: common.ReconnectIns,
+        timeout: Optional[float],
+        group_id: Optional[int],
     ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         return common.DisconnectRes(reason="")  # Nothing to do here (yet)
@@ -107,10 +118,11 @@ class DriverClientProxy(ClientProxy):
         recordset: RecordSet,
         task_type: str,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> RecordSet:
         task_ins = task_pb2.TaskIns(  # pylint: disable=E1101
             task_id="",
-            group_id="",
+            group_id=str(group_id) if group_id is not None else "",
             run_id=self.run_id,
             task=task_pb2.Task(  # pylint: disable=E1101
                 producer=node_pb2.Node(  # pylint: disable=E1101

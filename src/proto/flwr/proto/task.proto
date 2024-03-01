@@ -20,6 +20,7 @@ package flwr.proto;
 import "flwr/proto/node.proto";
 import "flwr/proto/recordset.proto";
 import "flwr/proto/transport.proto";
+import "flwr/proto/error.proto";
 
 message Task {
   Node producer = 1;
@@ -30,6 +31,7 @@ message Task {
   repeated string ancestry = 6;
   string task_type = 7;
   RecordSet recordset = 8;
+  Error error = 9;
 }
 
 message TaskIns {

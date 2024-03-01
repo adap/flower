@@ -14,12 +14,13 @@
 # ==============================================================================
 """Ray backend for the Fleet API using the Simulation Engine."""
 
-import asyncio
 import pathlib
-from logging import INFO
+from logging import ERROR, INFO
 from typing import Callable, Dict, List, Tuple, Union
 
-from flwr.client.clientapp import ClientApp
+import ray
+
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
@@ -28,6 +29,7 @@ from flwr.simulation.ray_transport.ray_actor import (
     ClientAppActor,
     init_ray,
 )
+from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
 from .backend import Backend, BackendConfig
 
@@ -46,6 +48,9 @@ class RayBackend(Backend):
         log(INFO, "Initialising: %s", self.__class__.__name__)
         log(INFO, "Backend config: %s", backend_config)
 
+        if not pathlib.Path(work_dir).exists():
+            raise ValueError(f"Specified work_dir {work_dir} does not exist.")
+
         # Init ray and append working dir if needed
         runtime_env = (
             self._configure_runtime_env(work_dir=work_dir) if work_dir else None
@@ -56,7 +61,9 @@ class RayBackend(Backend):
         self.client_resources_key = "client_resources"
 
         # Create actor pool
-        actor_kwargs = backend_config.get("actor_kwargs", {})
+        use_tf = backend_config.get("tensorflow", False)
+        actor_kwargs = {"on_actor_init_fn": enable_tf_gpu_growth} if use_tf else {}
+
         client_resources = self._validate_client_resources(config=backend_config)
         self.pool = BasicActorPool(
             actor_type=ClientAppActor,
@@ -134,20 +141,35 @@ class RayBackend(Backend):
 
         Return output message and updated context.
         """
-        node_id = message.metadata.dst_node_id
+        partition_id = message.metadata.partition_id
 
-        # Submite a task to the pool
-        future = await self.pool.submit(
-            lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-            (app, message, str(node_id), context),
-        )
+        try:
+            # Submite a task to the pool
+            future = await self.pool.submit(
+                lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
+                (app, message, str(partition_id), context),
+            )
 
-        await asyncio.wait([future])
+            await future
 
-        # Fetch result
-        (
-            out_mssg,
-            updated_context,
-        ) = await self.pool.fetch_result_and_return_actor_to_pool(future)
+            # Fetch result
+            (
+                out_mssg,
+                updated_context,
+            ) = await self.pool.fetch_result_and_return_actor_to_pool(future)
 
-        return out_mssg, updated_context
+            return out_mssg, updated_context
+
+        except LoadClientAppError as load_ex:
+            log(
+                ERROR,
+                "An exception was raised when processing a message by %s",
+                self.__class__.__name__,
+            )
+            raise load_ex
+
+    async def terminate(self) -> None:
+        """Terminate all actors in actor pool."""
+        await self.pool.terminate_all_actors()
+        ray.shutdown()
+        log(INFO, "Terminated %s", self.__class__.__name__)
