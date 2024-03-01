@@ -70,7 +70,7 @@ def test_parameters_to_array_and_back() -> None:
     """Test conversion between legacy Parameters and Array."""
     ndarrays = get_ndarrays()
 
-    # Array represents a single array, unlike Paramters, which represent a
+    # Array represents a single array, unlike parameters, which represent a
     # list of arrays
     ndarray = ndarrays[0]
 
@@ -296,7 +296,7 @@ def test_set_metrics_to_metricsrecord_with_and_without_keeping_input(
         (str, lambda x: x.flatten().astype("float").tolist()),  # str: List[float]
         (str, lambda x: x.flatten().astype("bool").tolist()),  # str: List[bool]
         (str, lambda x: [x.flatten().tobytes()]),  # str: List[bytes]
-        (str, lambda x: []),  # str: empyt list
+        (str, lambda x: []),  # str: emptyt list
     ],
 )
 def test_set_configs_to_configsrecord_with_correct_types(
