@@ -332,7 +332,7 @@ These functions can both be found inside the same :code:`quickstart-pytorch.mnis
             Neural network model used in this example.
 
         train_loader: torch.utils.data.DataLoader
-            DataLoader used in traning.
+            DataLoader used in training.
 
         epochs: int
             Number of epochs to run in each round.
@@ -344,7 +344,7 @@ These functions can both be found inside the same :code:`quickstart-pytorch.mnis
         Returns
         -------
         num_examples_train: int
-            Number of total samples used during traning.
+            Number of total samples used during training.
 
         """
         model.train()

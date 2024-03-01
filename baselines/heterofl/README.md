@@ -95,7 +95,7 @@ To run HeteroFL experiments in poetry activated environment:
 # The main experiment implemented in your baseline using default hyperparameters (that should be setup in the Hydra configs)
 # should run (including dataset download and necessary partitioning) by executing the command:
 
-python -m heterofl.main  # Which runs the heterofl with arguments availbale in heterfl/conf/base.yaml
+python -m heterofl.main  # Which runs the heterofl with arguments available in heterfl/conf/base.yaml
 
 # We could override the settings that were specified in base.yaml using the command-line-arguments
 # Here's an example for changing the dataset name, non-iid and model
