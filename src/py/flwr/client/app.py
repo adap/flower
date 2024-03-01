@@ -14,7 +14,6 @@
 # ==============================================================================
 """Flower client app."""
 
-
 import argparse
 import sys
 import time
@@ -25,7 +24,7 @@ from typing import Callable, ContextManager, Optional, Tuple, Union
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp
 from flwr.client.typing import ClientFn
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, RecordSet, event
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
@@ -36,6 +35,7 @@ from flwr.common.constant import (
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
+from flwr.common.message import Error
 
 from .client_app import load_client_app
 from .grpc_client.connection import grpc_connection
@@ -385,12 +385,16 @@ def _start_client_internal(
                     log(ERROR, "ClientApp raised an exception", exc_info=ex)
 
                     # Don't update/change NodeState
-                    # Return empty Message
-                    error_out_message = Message(
-                        metadata=message.metadata,
-                        content=RecordSet(),
-                    )
+
+                    # Create error message
+                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                    error = Error(code=0, reason=reason)
+                    error_out_message = message.create_error_reply(error=error)
+
+                    # Return error message
                     send(error_out_message)
+
                     continue
 
                 # Update node state
