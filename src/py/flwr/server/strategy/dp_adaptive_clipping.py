@@ -63,7 +63,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
     num_sampled_clients : int
         The number of clients that are sampled on each round.
     initial_clipping_norm : float
-        The initial value of clipping norm. Deafults to 0.1.
+        The initial value of clipping norm. Defaults to 0.1.
         Andrew et al. recommends to set to 0.1.
     target_clipped_quantile : float
         The desired quantile of updates which should be clipped. Defaults to 0.5.
@@ -263,7 +263,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
     num_sampled_clients : int
         The number of clients that are sampled on each round.
     initial_clipping_norm : float
-        The initial value of clipping norm. Deafults to 0.1.
+        The initial value of clipping norm. Defaults to 0.1.
         Andrew et al. recommends to set to 0.1.
     target_clipped_quantile : float
         The desired quantile of updates which should be clipped. Defaults to 0.5.
