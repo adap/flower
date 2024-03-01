@@ -93,7 +93,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         continuation: Callable[[Any], Any],
         handler_call_details: grpc.HandlerCallDetails,
     ) -> grpc.RpcMethodHandler:
-        """Flower server interceptor authentication logic. 
+        """Flower server interceptor authentication logic.
 
         Intercept unary call from client and do authentication process by validating
         metadata sent from client. Continue RPC call if client is authenticated, else,

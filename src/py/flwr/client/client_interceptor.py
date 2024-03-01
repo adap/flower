@@ -83,8 +83,8 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
     ) -> grpc.Call:
         """Flower client interceptor.
 
-        Intercept unary call from client and add necessary authentication header
-        in the RPC metadata.
+        Intercept unary call from client and add necessary authentication header in the
+        RPC metadata.
         """
         metadata = []
         postprocess = False
