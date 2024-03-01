@@ -293,6 +293,7 @@ def run_simulation(
             log(DEBUG, "Starting Simulation Engine on a new thread.")
             simulation_engine_th = threading.Thread(target=_main_loop, args=args)
             simulation_engine_th.start()
+            simulation_engine_th.join()
         else:
             log(DEBUG, "Starting Simulation Engine on the main thread.")
             _main_loop(*args)
