@@ -152,7 +152,7 @@ To run using `FedAvg`:
 # This is done so to match the experimental setup in the paper
 python -m fedvssl.main strategy.fedavg=true
 
-# This config can also be overriden.
+# This config can also be overridden.
 ```
 
 Running any of the above will create a directory structure in the form of `outputs/<DATE>/<TIME>/fedvssl_results` to save the global checkpoints and the local clients' training logs.

@@ -81,11 +81,11 @@ Optional improvements
 
 Along with the necessary changes above, there are a number of potential improvements that just became possible:
 
-- Remove "placeholder" methods from subclasses of ``Client`` or ``NumPyClient``. If you, for example, use server-side evaluation, then empy placeholder implementations of ``evaluate`` are no longer necessary.
+- Remove "placeholder" methods from subclasses of ``Client`` or ``NumPyClient``. If you, for example, use server-side evaluation, then empty placeholder implementations of ``evaluate`` are no longer necessary.
 - Configure the round timeout via ``start_simulation``: ``start_simulation(..., config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), ...)``
 
 
 Further help
 ------------
 
-Most official `Flower code examples <https://github.com/adap/flower/tree/main/examples>`_ are already updated to Flower 1.0, they can serve as a reference for using the Flower 1.0 API. If there are further questionsm, `join the Flower Slack <https://flower.ai/join-slack/>`_ and use the channgel ``#questions``.
+Most official `Flower code examples <https://github.com/adap/flower/tree/main/examples>`_ are already updated to Flower 1.0, they can serve as a reference for using the Flower 1.0 API. If there are further questions, `join the Flower Slack <https://flower.ai/join-slack/>`_ and use the channel ``#questions``.
