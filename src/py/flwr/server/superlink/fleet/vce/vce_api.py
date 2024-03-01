@@ -219,12 +219,12 @@ async def run(
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals
 def start_vce(
-    client_app_module_name: str,
     backend_name: str,
     backend_config_json_stream: str,
     working_dir: str,
     f_stop: asyncio.Event,
     client_app: Optional[ClientApp] = None,
+    client_app_module_name: Optional[str] = None,
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
@@ -301,12 +301,13 @@ def start_vce(
 
     log(INFO, "client_app_module_name = %s", client_app_module_name)
 
+    # Load ClientApp if needed
     def _load() -> ClientApp:
-        app: ClientApp = (
-            load_client_app(client_app_module_name)
-            if client_app is None
-            else client_app
-        )
+
+        if client_app_module_name:
+            app: ClientApp = load_client_app(client_app_module_name)
+        if client_app:
+            app = client_app
         return app
 
     app_fn = _load

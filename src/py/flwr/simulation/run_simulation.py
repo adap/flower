@@ -58,9 +58,10 @@ def run_simulation_from_cli() -> None:
     )
 
 
+# pylint: disable=too-many-arguments
 def run_serverapp_th(
-    server_app_attr: str,
-    server_app: ServerApp,
+    server_app_attr: Optional[str],
+    server_app: Optional[ServerApp],
     driver: Driver,
     server_app_dir: str,
     f_stop: asyncio.Event,

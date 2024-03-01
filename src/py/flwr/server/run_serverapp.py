@@ -47,16 +47,14 @@ def run(
         sys.path.insert(0, server_app_dir)
 
     # Load ServerApp if needed
-    if server_app_attr:
-
-        def _load() -> ServerApp:
+    def _load() -> ServerApp:
+        if server_app_attr:
             server_app: ServerApp = load_server_app(server_app_attr)
-            return server_app
+        if loaded_server_app:
+            server_app = loaded_server_app
+        return server_app
 
-        server_app = _load()
-
-    if loaded_server_app:
-        server_app = loaded_server_app
+    server_app = _load()
 
     # Initialize Context
     context = Context(state=RecordSet())
