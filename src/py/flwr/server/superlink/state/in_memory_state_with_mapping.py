@@ -17,7 +17,7 @@
 import random
 from datetime import datetime, timedelta
 from logging import ERROR
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
@@ -29,45 +29,6 @@ from .in_memory_state import InMemoryState
 
 class InMemoryStateWithMapping(InMemoryState):
     """In-memory State with Mapping implementation."""
-
-    def __init__(self) -> None:
-        self.task_ins_mapping: Dict[int, List[UUID]] = {}
-        super().__init__()
-
-    def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
-        """Store one TaskIns."""
-        # Validate task
-        errors = validate_task_ins_or_res(task_ins)
-        if any(errors):
-            log(ERROR, errors)
-            return None
-        # Validate run_id
-        if task_ins.run_id not in self.run_ids:
-            log(ERROR, "`run_id` is invalid")
-            return None
-
-        # Create task_id, created_at and ttl
-        task_id = uuid4()
-        created_at: datetime = now()
-        ttl: datetime = created_at + timedelta(hours=24)
-
-        # Store TaskIns
-        task_ins.task_id = str(task_id)
-        task_ins.task.created_at = created_at.isoformat()
-        task_ins.task.ttl = ttl.isoformat()
-        with self.lock:
-            self.task_ins_store[task_id] = task_ins
-            node_id = task_ins.task.consumer.node_id
-            if node_id:
-                # If not an annonymous node, let's construct or
-                # update the node_id:task_id mapping
-                if node_id in self.task_ins_mapping:
-                    self.task_ins_mapping[node_id].append(task_id)
-                else:
-                    self.task_ins_mapping[node_id] = [task_id]
-
-        # Return the new task_id
-        return task_id
 
     def get_task_ins(self, node_id: Optional[int], limit: Optional[int]) -> List[TaskIns]:
         """Get all TaskIns that have not been delivered yet."""
@@ -83,9 +44,10 @@ class InMemoryStateWithMapping(InMemoryState):
             if limit:
                 num_to_return = min(num_to_return, limit)
 
-            uuid = random.choice(list(self.task_ins_store.keys()))
-            taskins = self.task_ins_store.pop(uuid)
-            task_ins_list.append(taskins)
+            while len(task_ins_list) < num_to_return:
+                uuid = random.choice(list(self.task_ins_store.keys()))
+                taskins = self.task_ins_store.pop(uuid)
+                task_ins_list.append(taskins)
 
         # Mark all of them as delivered
         delivered_at = now().isoformat()
@@ -94,3 +56,9 @@ class InMemoryStateWithMapping(InMemoryState):
 
         # Return TaskIns
         return task_ins_list
+    
+    def delete_tasks(self, task_ids: Set[UUID]) -> None:
+        with self.lock:
+            #! Actually we wouldn't need to do all this if we 
+            #! handle the deletion of TaskIns inside the "get_task_ins"..
+            return super().delete_tasks(task_ids)
