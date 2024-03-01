@@ -23,7 +23,7 @@ import numpy as np
 from flwr_experimental.ops.instance import Instance
 
 # We assume that devices which are older will have at most
-# ~80% of the the Samsung Galaxy Note 5 compute performance.
+# ~80% of the Samsung Galaxy Note 5 compute performance.
 SCORE_MISSING = int(226 * 0.80)
 
 DEVICE_DISTRIBUTION = [
