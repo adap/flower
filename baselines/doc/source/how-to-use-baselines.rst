@@ -33,7 +33,7 @@ Setting up your machine
 
 Common to all baselines is `Poetry <https://python-poetry.org/docs/>`_, a tool to manage Python dependencies. Baselines also make use of `Pyenv <https://github.com/pyenv/pyenv>`_. You'll need to install both on your system before running a baseline. What follows is a step-by-step guide on getting :code:`pyenv` and :code:`Poetry` installed on your system.
 
-Let's begin by installing :code:`pyenv`. We'll be following the standard procedure. Please refere to the `pyenv docs <https://github.com/pyenv/pyenv#installation>`_ for alternative ways of installing it.
+Let's begin by installing :code:`pyenv`. We'll be following the standard procedure. Please refer to the `pyenv docs <https://github.com/pyenv/pyenv#installation>`_ for alternative ways of installing it.
 
 .. code-block:: bash
 
@@ -49,7 +49,7 @@ Let's begin by installing :code:`pyenv`. We'll be following the standard procedu
   command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
   eval "$(pyenv init -)"
 
-Verify your installtion by opening a new terminal and
+Verify your installation by opening a new terminal and
 
 .. code-block:: bash
 
@@ -63,7 +63,7 @@ Then you can proceed and install any version of Python. Most baselines currently
 
   pyenv install 3.10.6
   # this will take a little while
-  # once done, you should see that that version is avaialble
+  # once done, you should see that that version is available
   pyenv versions
   # system
   # * 3.10.6  # <-- you just installed this
