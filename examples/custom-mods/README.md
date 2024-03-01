@@ -1,4 +1,4 @@
-# Flower App (PyTorch) 🧪
+# Using custom mods 🧪
 
 > 🧪 = This example covers experimental features that might change in future versions of Flower
 > Please consult the regular PyTorch code examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
@@ -35,14 +35,30 @@ flower-superlink --insecure
 In a new terminal window, start the first long-running Flower client:
 
 ```bash
-flower-client-app client:app --insecure
+flower-client-app client:wandb_app --insecure
 ```
+
+For Weights and Biases, or,
+
+```bash
+flower-client-app client:tb_app --insecure
+```
+
+for Tensorboard.
 
 In yet another new terminal window, start the second long-running Flower client:
 
 ```bash
-flower-client-app client:app --insecure
+flower-client-app client:wandb_app --insecure
 ```
+
+For Weights and Biases, or,
+
+```bash
+flower-client-app client:tb_app --insecure
+```
+
+for Tensorboard.
 
 ## Run the Flower App
 
