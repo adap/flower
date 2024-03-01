@@ -58,7 +58,7 @@ def run_serverapp_th(
 
 
 def get_thread_exception_hook(stop_event: asyncio.Event) -> Callable[[Any], None]:
-    """Return a callback for when the serverapp thread raises an exception."""
+    """Return a callback for when the ServerApp thread raises an exception."""
 
     def execepthook(args: Any) -> None:
         """Upon exception raised, log exception and trigger stop event."""
