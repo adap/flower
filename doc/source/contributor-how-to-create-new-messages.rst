@@ -75,7 +75,7 @@ Once that is done, we will compile the file with:
 
   $ python -m flwr_tool.protoc
 
-If it compiles succesfully, you should see the following message:
+If it compiles successfully, you should see the following message:
 
 .. code-block:: shell
 
