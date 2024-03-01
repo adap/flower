@@ -214,7 +214,7 @@ class FlClient(fl.client.Client):
         aggregated_trees = ins.parameters[1]  # type: ignore # noqa: E501 # pylint: disable=line-too-long
 
         if isinstance(aggregated_trees, list):
-            print("Client " + self.cid + ": recieved", len(aggregated_trees), "trees")
+            print("Client " + self.cid + ": received", len(aggregated_trees), "trees")
         else:
             print("Client " + self.cid + ": only had its own tree")
         trainloader: Any = single_tree_preds_from_each_client(
