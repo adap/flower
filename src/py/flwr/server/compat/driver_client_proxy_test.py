@@ -45,6 +45,7 @@ from flwr.common.typing import (
 )
 from flwr.proto import (  # pylint: disable=E0611
     driver_pb2,
+    error_pb2,
     node_pb2,
     recordset_pb2,
     task_pb2,
@@ -316,10 +317,9 @@ class DriverClientProxyTestCase(unittest.TestCase):
             group_id="",
             run_id=0,
             task=task_pb2.Task(  # pylint: disable=E1101
-                recordset=recordset_pb2.RecordSet(  # pylint: disable=E1101
-                    parameters={},
-                    metrics={},
-                    configs={},
+                error=error_pb2.Error(  # pylint: disable=E1101
+                    code=0,
+                    reason="Some reason",
                 )
             ),
         )
