@@ -151,4 +151,6 @@ def get_tensorboard_mod(logdir) -> Mod:
 # Run via `flower-client-app client:app`
 app = fl.client.ClientApp(
     client_fn=client_fn,
+    mods=[get_wandb_mod("Custom mods example")],
+    # mods=[get_tensorboard_mod(".runs_history/")],
 )
