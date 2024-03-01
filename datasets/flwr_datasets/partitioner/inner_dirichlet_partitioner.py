@@ -26,8 +26,16 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
     """Partitioner based on Dirichlet distribution.
 
-    Implementation based on Federated Learning Based on Dynamic Regularization
-    https://arxiv.org/abs/2111.04263.
+    Each partition is created based on the Dirichlet distribution, where the
+    probability corresponds to the fractions of samples of specific classes.
+    This process is iterative (sample by sample assignment), where first, the
+    partition ID to which the class will be assigned is chosen (at random, uniformly),
+    and then the class is decided based on the Dirichlet probabilities (note that when
+    a class gets exhausted - no more samples exists to sample from - the probability of
+    sampling this class is set as zero and the remaining probabilities renormalized).
+
+    Implementation based on: Federated Learning Based on Dynamic Regularization
+    (https://arxiv.org/abs/2111.04263).
 
     Parameters
     ----------
@@ -36,7 +44,9 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
     partition_by : str
         Column name of the labels (targets) based on which Dirichlet sampling works.
     alpha : Union[int, float, List[float], NDArrayFloat]
-        Concentration parameter to the Dirichlet distribution
+        Concentration parameter to the Dirichlet distribution (a single value for
+        symmetric Dirichlet distribution, or a list/NDArray of lenght equal to the
+        number of unique classes)
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to nodes.
