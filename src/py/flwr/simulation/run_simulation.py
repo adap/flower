@@ -19,7 +19,7 @@ import asyncio
 import json
 import threading
 import traceback
-from logging import ERROR, INFO, WARNING
+from logging import DEBUG, ERROR, INFO, WARNING
 from time import sleep
 from typing import Any, Callable, Dict, Optional
 
@@ -40,7 +40,7 @@ from flwr.simulation.ray_transport.utils import (
 
 
 def run_simulation_from_cli() -> None:
-    """Run Simulation Engine from the CLI."""
+    """Start Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
 
     # Load JSON config
@@ -102,6 +102,87 @@ def get_thread_exception_hook(stop_event: asyncio.Event) -> Callable[[Any], None
         log(WARNING, "Triggered stop event for Simulation Engine.")
 
     return execepthook
+
+
+def _main_loop(
+    num_supernodes: int,
+    backend_name: str,
+    backend_config_stream: str,
+    driver_api_address: str,
+    working_dir: str,
+    client_app: Optional[ClientApp] = None,
+    client_app_module_name: Optional[str] = None,
+    server_app: Optional[ServerApp] = None,
+    server_app_module_name: Optional[str] = None,
+) -> None:
+    """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread.
+
+    Everything runs on the main thread or a separate one, depening on whether the main
+    thread already contains a running Asyncio event loop. This is the case if running
+    the Simulation Engine on a Jupyter/Colab notebook.
+    """
+    # Initialize StateFactory
+    state_factory = StateFactory(":flwr-in-memory-state:")
+
+    # Start Driver API
+    driver_server: grpc.Server = run_driver_api_grpc(
+        address=driver_api_address,
+        state_factory=state_factory,
+        certificates=None,
+    )
+
+    f_stop = asyncio.Event()
+    serverapp_th = None
+    try:
+        # Initialize Driver
+        driver = Driver(
+            driver_service_address=driver_api_address,
+            root_certificates=None,
+        )
+
+        # Get and run ServerApp thread
+        serverapp_th = run_serverapp_th(
+            server_app_attr=server_app_module_name,
+            server_app=server_app,
+            driver=driver,
+            server_app_dir=working_dir,
+            f_stop=f_stop,
+        )
+        # Setup an exception hook
+        threading.excepthook = get_thread_exception_hook(f_stop)
+
+        # SuperLink with Simulation Engine
+        event(EventType.RUN_SUPERLINK_ENTER)
+        vce.start_vce(
+            num_supernodes=num_supernodes,
+            client_app_module_name=client_app_module_name,
+            client_app=client_app,
+            backend_name=backend_name,
+            backend_config_json_stream=backend_config_stream,
+            working_dir=working_dir,
+            state_factory=state_factory,
+            f_stop=f_stop,
+        )
+
+    except Exception as ex:
+
+        log(ERROR, "An exception occured !! %s", ex)
+        log(ERROR, traceback.format_exc())
+        raise RuntimeError("An error was encountered. Ending simulation.") from ex
+
+    finally:
+
+        # Stop Driver
+        driver_server.stop(grace=0)
+        del driver
+        # Trigger stop event
+        f_stop.set()
+
+        event(EventType.RUN_SUPERLINK_LEAVE)
+        if serverapp_th:
+            serverapp_th.join()
+
+    log(INFO, "Stopping Simulation Engine now.")
 
 
 # pylint: disable=too-many-arguments,too-many-locals
@@ -180,68 +261,41 @@ def run_simulation(
     # Convert config to original JSON-stream format
     backend_config_stream = json.dumps(backend_config)
 
-    # Initialize StateFactory
-    state_factory = StateFactory(":flwr-in-memory-state:")
-
-    # Start Driver API
-    driver_server: grpc.Server = run_driver_api_grpc(
-        address=driver_api_address,
-        state_factory=state_factory,
-        certificates=None,
+    simulation_engine_th = None
+    args = (
+        num_supernodes,
+        backend_name,
+        backend_config_stream,
+        driver_api_address,
+        working_dir,
+        client_app,
+        client_app_module_name,
+        server_app,
+        server_app_module_name,
     )
-
-    f_stop = asyncio.Event()
-    serverapp_th = None
+    # Detect if there is an Asyncio event loop already running.
+    # If yes, run everything on a separate thread. In environmnets
+    # like Jupyter/Colab notebooks, there is an event loop present.
+    run_in_thread = False
     try:
-        # Initialize Driver
-        driver = Driver(
-            driver_service_address=driver_api_address,
-            root_certificates=None,
-        )
+        _ = (
+            asyncio.get_running_loop()
+        )  # Raises RuntimeError if no event loop is present
+        log(DEBUG, "Asyncio event loop already running.")
 
-        # Get and run ServerApp thread
-        serverapp_th = run_serverapp_th(
-            server_app_attr=server_app_module_name,
-            server_app=server_app,
-            driver=driver,
-            server_app_dir=working_dir,
-            f_stop=f_stop,
-        )
-        # Setup an exception hook
-        threading.excepthook = get_thread_exception_hook(f_stop)
+        run_in_thread = True
 
-        # SuperLink with Simulation Engine
-        event(EventType.RUN_SUPERLINK_ENTER)
-        vce.start_vce(
-            num_supernodes=num_supernodes,
-            client_app_module_name=client_app_module_name,
-            client_app=client_app,
-            backend_name=backend_name,
-            backend_config_json_stream=backend_config_stream,
-            working_dir=working_dir,
-            state_factory=state_factory,
-            f_stop=f_stop,
-        )
-
-    except Exception as ex:
-
-        log(ERROR, "An exception occured !! %s", ex)
-        log(ERROR, traceback.format_exc())
-        raise RuntimeError("An error was encountered. Ending simulation.") from ex
+    except RuntimeError:
+        log(DEBUG, "No asyncio event loop runnig")
 
     finally:
-
-        # Stop Driver
-        driver_server.stop(grace=0)
-        del driver
-        # Trigger stop event
-        f_stop.set()
-
-        event(EventType.RUN_SUPERLINK_LEAVE)
-        if serverapp_th:
-            serverapp_th.join()
-
-    log(INFO, "Stopping Simulation Engine now.")
+        if run_in_thread:
+            log(DEBUG, "Starting Simulation Engine on a new thread.")
+            simulation_engine_th = threading.Thread(target=_main_loop, args=args)
+            simulation_engine_th.start()
+        else:
+            log(DEBUG, "Starting Simulation Engine on the main thread.")
+            _main_loop(*args)
 
 
 def _parse_args_run_simulation() -> argparse.ArgumentParser:
