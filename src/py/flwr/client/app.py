@@ -390,7 +390,7 @@ def _start_client_internal(
                     # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
                     reason = str(type(ex)) + ":<'" + str(ex) + "'>"
                     error = Error(code=0, reason=reason)
-                    error_out_message = message.create_error_reply(error=error)
+                    error_out_message = message.create_error_reply(error=error, ttl="")
 
                     # Return error message
                     send(error_out_message)
