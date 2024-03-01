@@ -58,6 +58,7 @@ flower-fleet-api = "flwr.server:run_fleet_api"
 flower-superlink = "flwr.server:run_superlink"
 flower-client-app = "flwr.client:run_client_app"
 flower-server-app = "flwr.server:run_server_app"
+flower-simulation = "flwr.simulation:run_simulation"
 
 [tool.poetry.dependencies]
 python = "^3.8"

@@ -20,6 +20,7 @@ from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, 
 from google.protobuf.message import Message as GrpcMessage
 
 # pylint: disable=E0611
+from flwr.proto.error_pb2 import Error as ProtoError
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import Array as ProtoArray
 from flwr.proto.recordset_pb2 import BoolList, BytesList
@@ -44,7 +45,7 @@ from flwr.proto.transport_pb2 import (
 
 # pylint: enable=E0611
 from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, typing
-from .message import Message, Metadata
+from .message import Error, Message, Metadata
 from .record.typeddict import TypedDict
 
 #  === Parameters message ===
@@ -512,6 +513,21 @@ def configs_record_from_proto(record_proto: ProtoConfigsRecord) -> ConfigsRecord
     )
 
 
+# === Error message ===
+
+
+def error_to_proto(error: Error) -> ProtoError:
+    """Serialize Error to ProtoBuf."""
+    reason = error.reason if error.reason else ""
+    return ProtoError(code=error.code, reason=reason)
+
+
+def error_from_proto(error_proto: ProtoError) -> Error:
+    """Deserialize Error from ProtoBuf."""
+    reason = error_proto.reason if len(error_proto.reason) > 0 else None
+    return Error(code=error_proto.code, reason=reason)
+
+
 # === RecordSet message ===
 
 
@@ -562,7 +578,10 @@ def message_to_taskins(message: Message) -> TaskIns:
             ttl=md.ttl,
             ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
             task_type=md.message_type,
-            recordset=recordset_to_proto(message.content),
+            recordset=(
+                recordset_to_proto(message.content) if message.has_content() else None
+            ),
+            error=error_to_proto(message.error) if message.has_error() else None,
         ),
     )
 
@@ -581,10 +600,19 @@ def message_from_taskins(taskins: TaskIns) -> Message:
         message_type=taskins.task.task_type,
     )
 
-    # Return the Message
+    # Construct Message
     return Message(
         metadata=metadata,
-        content=recordset_from_proto(taskins.task.recordset),
+        content=(
+            recordset_from_proto(taskins.task.recordset)
+            if taskins.task.HasField("recordset")
+            else None
+        ),
+        error=(
+            error_from_proto(taskins.task.error)
+            if taskins.task.HasField("error")
+            else None
+        ),
     )
 
 
@@ -601,7 +629,10 @@ def message_to_taskres(message: Message) -> TaskRes:
             ttl=md.ttl,
             ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
             task_type=md.message_type,
-            recordset=recordset_to_proto(message.content),
+            recordset=(
+                recordset_to_proto(message.content) if message.has_content() else None
+            ),
+            error=error_to_proto(message.error) if message.has_error() else None,
         ),
     )
 
@@ -620,8 +651,17 @@ def message_from_taskres(taskres: TaskRes) -> Message:
         message_type=taskres.task.task_type,
     )
 
-    # Return the Message
+    # Construct the Message
     return Message(
         metadata=metadata,
-        content=recordset_from_proto(taskres.task.recordset),
+        content=(
+            recordset_from_proto(taskres.task.recordset)
+            if taskres.task.HasField("recordset")
+            else None
+        ),
+        error=(
+            error_from_proto(taskres.task.error)
+            if taskres.task.HasField("error")
+            else None
+        ),
     )
