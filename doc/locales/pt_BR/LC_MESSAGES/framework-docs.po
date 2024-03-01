@@ -11711,7 +11711,7 @@ msgid ""
 " "
 "[strategy](https://github.com/adap/flower/tree/main/src/py/flwr/server/strategy/fedxgb_nn_avg.py),"
 " and a [code "
-"example](https://github.com/adap/flower/tree/main/examples/quickstart_xgboost_horizontal)"
+"example](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)"
 " that demonstrates the usage of this new strategy in an XGBoost project."
 msgstr ""
 
@@ -11852,7 +11852,7 @@ msgstr ""
 msgid ""
 "TabNet is a powerful and flexible framework for training machine learning"
 " models on tabular data. We now have a federated example using Flower: "
-"[https://github.com/adap/flower/tree/main/examples/tabnet](https://github.com/adap/flower/tree/main/examples/quickstart_tabnet)."
+"[quickstart-tabnet](https://github.com/adap/flower/tree/main/examples/quickstart-tabnet)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:334
@@ -11990,9 +11990,9 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:374
 msgid ""
-"A new code example (`quickstart_fastai`) demonstrates federated learning "
+"A new code example (`quickstart-fastai`) demonstrates federated learning "
 "with [fastai](https://www.fast.ai/) and Flower. You can find it here: "
-"[quickstart_fastai](https://github.com/adap/flower/tree/main/examples/quickstart_fastai)."
+"[quickstart-fastai](https://github.com/adap/flower/tree/main/examples/quickstart-fastai)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:376
@@ -12281,9 +12281,9 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:453
 msgid ""
-"A new code example (`quickstart_pandas`) demonstrates federated analytics"
+"A new code example (`quickstart-pandas`) demonstrates federated analytics"
 " with Pandas and Flower. You can find it here: "
-"[quickstart_pandas](https://github.com/adap/flower/tree/main/examples/quickstart_pandas)."
+"[quickstart-pandas](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:455
@@ -12608,7 +12608,7 @@ msgid ""
 "[@mrinaald](https://github.com/mrinaald), "
 "[@zliel](https://github.com/zliel), "
 "[@MeiruiJiang](https://github.com/MeiruiJiang), "
-"[@sandracl72](https://github.com/sandracl72), "
+"[@sancarlim](https://github.com/sancarlim), "
 "[@gubertoli](https://github.com/gubertoli), "
 "[@Vingt100](https://github.com/Vingt100), "
 "[@MakGulati](https://github.com/MakGulati), "
