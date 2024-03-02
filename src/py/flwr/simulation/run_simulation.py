@@ -166,7 +166,7 @@ def _main_loop(
 
     except Exception as ex:
 
-        log(ERROR, "An exception occured !! %s", ex)
+        log(ERROR, "An exception occurred !! %s", ex)
         log(ERROR, traceback.format_exc())
         raise RuntimeError("An error was encountered. Ending simulation.") from ex
 
