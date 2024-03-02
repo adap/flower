@@ -39,7 +39,7 @@ def run(
     """Run ServerApp with a given Driver."""
     if not (server_app_attr is None) ^ (loaded_server_app is None):
         raise ValueError(
-            "Either `server_app_attr` should `loaded_server_app` be set "
+            "Either `server_app_attr` or `loaded_server_app` should be set "
             "but not both. "
         )
 
