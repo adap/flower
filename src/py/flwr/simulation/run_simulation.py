@@ -40,7 +40,7 @@ from flwr.simulation.ray_transport.utils import (
 
 
 def run_simulation_from_cli() -> None:
-    """Start Simulation Engine from the CLI."""
+    """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
 
     # Load JSON config
