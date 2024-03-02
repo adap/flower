@@ -132,7 +132,7 @@ def _autoresolve_working_dir(rel_client_app_dir: str = "backend") -> str:
 # pylint: disable=too-many-arguments
 def start_and_shutdown(
     backend: str = "ray",
-    clientapp_module: str = "raybackend_test:client_app",
+    client_app_attr: str = "raybackend_test:client_app",
     working_dir: str = "",
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
@@ -162,7 +162,7 @@ def start_and_shutdown(
 
     start_vce(
         num_supernodes=num_supernodes,
-        client_app_module_name=clientapp_module,
+        client_app_attr=client_app_attr,
         backend_name=backend,
         backend_config_json_stream=backend_config,
         state_factory=state_factory,
@@ -183,7 +183,7 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
         with self.assertRaises(ValueError):
             start_and_shutdown(duration=2)
 
-    def test_erroneous_clientapp_module_name(self) -> None:
+    def test_erroneous_client_app_attr(self) -> None:
         """Tests attempt to load a ClientApp that can't be found."""
         num_messages = 7
         num_nodes = 59
@@ -193,7 +193,7 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
         )
         with self.assertRaises(RuntimeError):
             start_and_shutdown(
-                clientapp_module="totally_fictitious_app:client",
+                client_app_attr="totally_fictitious_app:client",
                 state_factory=state_factory,
                 nodes_mapping=nodes_mapping,
             )

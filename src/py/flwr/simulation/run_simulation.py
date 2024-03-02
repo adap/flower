@@ -39,6 +39,7 @@ from flwr.simulation.ray_transport.utils import (
 )
 
 
+# Entry point from CLI
 def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
@@ -46,15 +47,67 @@ def run_simulation_from_cli() -> None:
     # Load JSON config
     backend_config_dict = json.loads(args.backend_config)
 
-    run_simulation(
+    _run_simulation(
         num_supernodes=args.num_supernodes,
-        client_app_module_name=args.client_app,
-        server_app_module_name=args.server_app,
+        client_app_attr=args.client_app,
+        server_app_attr=args.server_app,
         backend_name=args.backend,
         backend_config=backend_config_dict,
         working_dir=args.dir,
         driver_api_address=args.driver_api_address,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
+    )
+
+
+# Entry point from Python session (script or notebook)
+# pylint: disable=too-many-arguments
+def run_simulation(
+    num_supernodes: int,
+    client_app: ClientApp,
+    server_app: ServerApp,
+    backend_name: str = "ray",
+    backend_config: Optional[Dict[str, ConfigsRecordValues]] = None,
+    enable_tf_gpu_growth: bool = False,
+) -> None:
+    r"""Launch the Simulation Engine.
+
+    Parameters
+    ----------
+    num_supernodes : int
+        Number of nodes that run a ClientApp. They can be sampled by a
+        Driver in the ServerApp and receive a Message describing what the ClientApp
+        should perform.
+
+    client_app : ClientApp
+        The `ClientApp` to be executed by each of the `SuperNodes`. It will receive
+        messages sent by the `ServerApp`.
+
+    server_app : ServerApp
+        The `ServerApp` to be executed.
+
+    backend_name : str (default: ray)
+        A simulation backend that runs `ClientApp`s.
+
+    backend_config : Optional[Dict[str, ConfigsRecordValues]]
+        'A dictionary, e.g {"<keyA>":<value>, "<keyB>":<value>} to configure a
+        backend. Values supported in <value> are those included by
+        `flwr.common.typing.ConfigsRecordValues`.
+
+    enable_tf_gpu_growth : bool (default: False)
+        A boolean to indicate whether to enable GPU growth on the main thread. This is
+        desirable if you make use of a TensorFlow model on your `ServerApp` while
+        having your `ClientApp` running on the same GPU. Without enabling this, you
+        might encounter an out-of-memory error becasue TensorFlow by default allocates
+        all GPU memory. Read mor about how `tf.config.experimental.set_memory_growth()`
+        works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
+    """
+    _run_simulation(
+        num_supernodes=num_supernodes,
+        client_app=client_app,
+        server_app=server_app,
+        backend_name=backend_name,
+        backend_config=backend_config,
+        enable_tf_gpu_growth=enable_tf_gpu_growth,
     )
 
 
@@ -111,9 +164,9 @@ def _main_loop(
     driver_api_address: str,
     working_dir: str,
     client_app: Optional[ClientApp] = None,
-    client_app_module_name: Optional[str] = None,
+    client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
-    server_app_module_name: Optional[str] = None,
+    server_app_attr: Optional[str] = None,
 ) -> None:
     """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread.
 
@@ -142,7 +195,7 @@ def _main_loop(
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(
-            server_app_attr=server_app_module_name,
+            server_app_attr=server_app_attr,
             server_app=server_app,
             driver=driver,
             server_app_dir=working_dir,
@@ -155,7 +208,7 @@ def _main_loop(
         event(EventType.RUN_SUPERLINK_ENTER)
         vce.start_vce(
             num_supernodes=num_supernodes,
-            client_app_module_name=client_app_module_name,
+            client_app_attr=client_app_attr,
             client_app=client_app,
             backend_name=backend_name,
             backend_config_json_stream=backend_config_stream,
@@ -186,14 +239,14 @@ def _main_loop(
 
 
 # pylint: disable=too-many-arguments,too-many-locals
-def run_simulation(
+def _run_simulation(
     num_supernodes: int,
     client_app: Optional[ClientApp] = None,
     server_app: Optional[ServerApp] = None,
     backend_name: str = "ray",
     backend_config: Optional[Dict[str, ConfigsRecordValues]] = None,
-    client_app_module_name: Optional[str] = None,
-    server_app_module_name: Optional[str] = None,
+    client_app_attr: Optional[str] = None,
+    server_app_attr: Optional[str] = None,
     working_dir: str = "",
     driver_api_address: str = "0.0.0.0:9091",
     enable_tf_gpu_growth: bool = False,
@@ -222,11 +275,11 @@ def run_simulation(
         backend. Values supported in <value> are those included by
         `flwr.common.typing.ConfigsRecordValues`.
 
-    client_app_module_name : str
+    client_app_attr : str
         A path to a `ClientApp` module to be loaded: For example: `client:app` or
         `project.package.module:wrapper.app`."
 
-    server_app_module_name : str
+    server_app_attr : str
         A path to a `ServerApp` module to be loaded: For example: `server:app` or
         `project.package.module:wrapper.app`."
 
@@ -269,9 +322,9 @@ def run_simulation(
         driver_api_address,
         working_dir,
         client_app,
-        client_app_module_name,
+        client_app_attr,
         server_app,
-        server_app_module_name,
+        server_app_attr,
     )
     # Detect if there is an Asyncio event loop already running.
     # If yes, run everything on a separate thread. In environmnets

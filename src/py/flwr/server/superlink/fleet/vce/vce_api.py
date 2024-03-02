@@ -224,15 +224,15 @@ def start_vce(
     working_dir: str,
     f_stop: asyncio.Event,
     client_app: Optional[ClientApp] = None,
-    client_app_module_name: Optional[str] = None,
+    client_app_attr: Optional[str] = None,
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
     """Start Fleet API with the Simulation Engine."""
-    if client_app_module_name is not None and client_app is not None:
+    if client_app_attr is not None and client_app is not None:
         raise ValueError(
-            "Both `client_app_module_name` and `client_app` are provided, "
+            "Both `client_app_attr` and `client_app` are provided, "
             "but only one is allowed."
         )
 
@@ -299,13 +299,13 @@ def start_vce(
         """Instantiate a Backend."""
         return backend_type(backend_config, work_dir=working_dir)
 
-    log(INFO, "client_app_module_name = %s", client_app_module_name)
+    log(INFO, "client_app_attr = %s", client_app_attr)
 
     # Load ClientApp if needed
     def _load() -> ClientApp:
 
-        if client_app_module_name:
-            app: ClientApp = load_client_app(client_app_module_name)
+        if client_app_attr:
+            app: ClientApp = load_client_app(client_app_attr)
         if client_app:
             app = client_app
         return app
