@@ -15,7 +15,7 @@
 """Driver API servicer."""
 
 
-from logging import INFO
+from logging import DEBUG, INFO
 from typing import List, Optional, Set
 from uuid import UUID
 
@@ -70,7 +70,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PushTaskInsRequest, context: grpc.ServicerContext
     ) -> PushTaskInsResponse:
         """Push a set of TaskIns."""
-        log(INFO, "DriverServicer.PushTaskIns")
+        log(DEBUG, "DriverServicer.PushTaskIns")
 
         # Validate request
         _raise_if(len(request.task_ins_list) == 0, "`task_ins_list` must not be empty")
@@ -95,7 +95,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PullTaskResRequest, context: grpc.ServicerContext
     ) -> PullTaskResResponse:
         """Pull a set of TaskRes."""
-        log(INFO, "DriverServicer.PullTaskRes")
+        log(DEBUG, "DriverServicer.PullTaskRes")
 
         # Convert each task_id str to UUID
         task_ids: Set[UUID] = {UUID(task_id) for task_id in request.task_ids}
@@ -105,7 +105,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         # Register callback
         def on_rpc_done() -> None:
-            log(INFO, "DriverServicer.PullTaskRes callback: delete TaskIns/TaskRes")
+            log(DEBUG, "DriverServicer.PullTaskRes callback: delete TaskIns/TaskRes")
 
             if context.is_active():
                 return
