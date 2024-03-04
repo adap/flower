@@ -95,7 +95,7 @@ def new(
             if value == framework_value
         ]
         framework_str = selected_value[0]
-    
+
     framework_str = framework_str.lower()
 
     # Set project directory path
@@ -117,7 +117,9 @@ def new(
 
     # In case framework is MlFramework.PYTORCH generate additionally the utils.py file
     if framework_str == MlFramework.PYTORCH.value.lower():
-        files[f"{pnl}/utils.py"] = {"template": f"app/code/utils.{framework_str}.py.tpl"}
+        files[f"{pnl}/utils.py"] = {
+            "template": f"app/code/utils.{framework_str}.py.tpl"
+        }
 
     context = {"project_name": project_name}
 
