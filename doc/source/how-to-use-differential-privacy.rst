@@ -1,5 +1,5 @@
 Use Differential Privacy
-------------------------------
+------------------------
 Below, we explain how users can utilize differential privacy in the Flower framework. If you are not familiar with differential privacy, you can refer to :doc:`explanation-differential-privacy`.
 
 .. warning::
