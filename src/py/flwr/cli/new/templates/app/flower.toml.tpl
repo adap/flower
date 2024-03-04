@@ -1,4 +1,4 @@
-[flower]
+[project]
 name = "$project_name"
 version = "1.0.0"
 description = ""
