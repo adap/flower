@@ -156,14 +156,14 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
 
 @dataclass
 class Error:
-    """A dataclass that stores information about an error that ocurred.
+    """A dataclass that stores information about an error that occurred.
 
     Parameters
     ----------
     code : int
         An identifier for the error.
     reason : Optional[str]
-        A reason for why the error arised (e.g. an exception stack-trace)
+        A reason for why the error arose (e.g. an exception stack-trace)
     """
 
     _code: int
