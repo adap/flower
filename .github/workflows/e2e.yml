@@ -140,6 +140,9 @@ jobs:
       - name: Run driver test with SQLite database
         if: ${{ matrix.directory == 'bare' }}
         run: ./../test_driver.sh bare sqlite
+      - name: Run driver test with client authentication
+        if: ${{ matrix.directory == 'pytorch' }}
+        run: ./../test_driver.sh pytorch client-auth
 
   strategies:
     runs-on: ubuntu-22.04
@@ -177,3 +180,5 @@ jobs:
       - name: Test strategies
         run: |
           python test.py "${{ matrix.strat }}"
+
+  

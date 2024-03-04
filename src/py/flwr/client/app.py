@@ -20,7 +20,14 @@ import sys
 import time
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Callable, ContextManager, Optional, Tuple, Union
+from typing import Callable, ContextManager, Optional, Sequence, Tuple, Union
+
+import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp
@@ -38,6 +45,7 @@ from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
 
 from .client_app import load_client_app
+from .client_interceptor import AuthenticateClientInterceptor
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
@@ -98,14 +106,60 @@ def run_client_app() -> None:
         client_app: ClientApp = load_client_app(getattr(args, "client-app"))
         return client_app
 
+    data = _try_setup_client_authentication(args)
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
+    if data is not None:
+        (
+            client_public_key,
+            client_private_key,
+        ) = data
+        interceptors = AuthenticateClientInterceptor(
+            client_private_key, client_public_key
+        )
+
     _start_client_internal(
         server_address=args.server,
         load_client_app_fn=_load,
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
         insecure=args.insecure,
+        interceptors=interceptors,
     )
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
+
+
+def _try_setup_client_authentication(
+    args: argparse.Namespace,
+) -> Optional[Tuple[ec.EllipticCurvePublicKey, ec.EllipticCurvePrivateKey]]:
+    if args.authentication_keys:
+        public_key = load_ssh_public_key(Path(args.authentication_keys[0]).read_bytes())
+        private_key = load_ssh_private_key(
+            Path(args.authentication_keys[1]).read_bytes(),
+            None,
+        )
+        log(INFO, type(public_key))
+        log(INFO, type(private_key))
+        if not isinstance(public_key, ec.EllipticCurvePublicKey):
+            sys.exit(
+                "An eliptic curve public and private key pair is required for "
+                "client authentication. Please provide the file path containing "
+                "valid public and private key to '--require-client-authentication'."
+            )
+        server_public_key = public_key
+        if not isinstance(private_key, ec.EllipticCurvePrivateKey):
+            sys.exit(
+                "An eliptic curve public and private key pair is required for "
+                "client authentication. Please provide the file path containing "
+                "valid public and private key to '--require-client-authentication'."
+            )
+        server_private_key = private_key
+
+        return (
+            server_public_key,
+            server_private_key,
+        )
+
+    return None
 
 
 def _parse_args_run_client_app() -> argparse.ArgumentParser:
@@ -148,6 +202,13 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         "app from there."
         " Default: current working directory.",
     )
+    parser.add_argument(
+        "--authentication-keys",
+        nargs=2,
+        metavar=("CLIENT_PUBLIC_KEY", "CLIENT_PRIVATE_KEY"),
+        type=str,
+        help="Paths to client public and private key, in that order.",
+    )
 
     return parser
 
@@ -180,6 +241,7 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -254,6 +316,7 @@ def start_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
+        interceptors=interceptors,
     )
     event(EventType.START_CLIENT_LEAVE)
 
@@ -272,6 +335,7 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -349,6 +413,7 @@ def _start_client_internal(
             insecure,
             grpc_max_message_length,
             root_certificates,
+            interceptors,
         ) as conn:
             receive, send, create_node, delete_node = conn
 
@@ -509,7 +574,13 @@ def start_numpy_client(
 
 def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     Callable[
-        [str, bool, int, Union[bytes, str, None]],
+        [
+            str,
+            bool,
+            int,
+            Union[bytes, str, None],
+            Union[Sequence[grpc.UnaryUnaryClientInterceptor], None],
+        ],
         ContextManager[
             Tuple[
                 Callable[[], Optional[Message]],
