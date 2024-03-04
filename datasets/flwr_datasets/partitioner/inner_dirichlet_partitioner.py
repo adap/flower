@@ -45,7 +45,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         Column name of the labels (targets) based on which Dirichlet sampling works.
     alpha : Union[int, float, List[float], NDArrayFloat]
         Concentration parameter to the Dirichlet distribution (a single value for
-        symmetric Dirichlet distribution, or a list/NDArray of lenght equal to the
+        symmetric Dirichlet distribution, or a list/NDArray of length equal to the
         number of unique classes)
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
