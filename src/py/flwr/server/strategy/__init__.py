@@ -16,10 +16,17 @@
 
 
 from .bulyan import Bulyan as Bulyan
-from .dp_adaptive_clipping import DifferentialPrivacyClientSideAdaptiveClipping
+from .dp_adaptive_clipping import (
+    DifferentialPrivacyClientSideAdaptiveClipping as DifferentialPrivacyClientSideAdaptiveClipping,
+)
+from .dp_adaptive_clipping import (
+    DifferentialPrivacyServerSideAdaptiveClipping as DifferentialPrivacyServerSideAdaptiveClipping,
+)
 from .dp_fixed_clipping import (
-    DifferentialPrivacyClientSideFixedClipping,
-    DifferentialPrivacyServerSideFixedClipping,
+    DifferentialPrivacyClientSideFixedClipping as DifferentialPrivacyClientSideFixedClipping,
+)
+from .dp_fixed_clipping import (
+    DifferentialPrivacyServerSideFixedClipping as DifferentialPrivacyServerSideFixedClipping,
 )
 from .dpfedavg_adaptive import DPFedAvgAdaptive as DPFedAvgAdaptive
 from .dpfedavg_fixed import DPFedAvgFixed as DPFedAvgFixed
@@ -46,6 +53,7 @@ __all__ = [
     "DPFedAvgAdaptive",
     "DPFedAvgFixed",
     "DifferentialPrivacyClientSideAdaptiveClipping",
+    "DifferentialPrivacyServerSideAdaptiveClipping",
     "DifferentialPrivacyClientSideFixedClipping",
     "DifferentialPrivacyServerSideFixedClipping",
     "FedAdagrad",
