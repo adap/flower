@@ -31,7 +31,9 @@ Below is a sample code that enables a strategy using :code:`DifferentialPrivacyS
 
 .. code-block:: python
 
+  # Server-side:
   from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping
+  
   # Configure the strategy
   strategy = fl.server.strategy.FedAvg(...)
   # Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
@@ -71,7 +73,7 @@ Below is a sample code that enables a strategy using :code:`DifferentialPrivacyC
 
   # Client-side:
   from flwr.client.mod.centraldp_mods import fixedclipping_mod
-  
+
   # Add fixedclipping_mod to the client-side mods
   app = fl.client.ClientApp(client_fn=client_fn, mods=[fixedclipping_mod])
 
