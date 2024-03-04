@@ -31,11 +31,13 @@ Below is a sample code that enables a strategy using :code:`DifferentialPrivacyS
 
 .. code-block:: python
 
-  from flwr.server.strategy.dp_fixed_clipping import DifferentialPrivacyServerSideFixedClipping
+  from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping
   # Configure the strategy
-  strategy = fl.server.strategy.FedAvg( ... )
+  strategy = fl.server.strategy.FedAvg(...)
   # Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
-  dp_strategy = DifferentialPrivacyServerSideFixedClipping(strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients)
+  dp_strategy = DifferentialPrivacyServerSideFixedClipping(
+    strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+  )
 
 
 
@@ -55,17 +57,21 @@ Below is a sample code that enables a strategy using :code:`DifferentialPrivacyC
 .. code-block:: python
 
   # Server-side:
-  from flwr.server.strategy.dp_fixed_clipping import DifferentialPrivacyClientSideFixedClipping
+  from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping
+
   # Configure the strategy
-  strategy = fl.server.strategy.FedAvg( ... )
+  strategy = fl.server.strategy.FedAvg(...)
   # Wrap the strategy with the DifferentialPrivacyClientSideFixedClipping wrapper
-  dp_strategy = DifferentialPrivacyClientSideFixedClipping(strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients)
+  dp_strategy = DifferentialPrivacyClientSideFixedClipping(
+    strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
+  )
 
 
 .. code-block:: python
 
   # Client-side:
   from flwr.client.mod.centraldp_mods import fixedclipping_mod
+  
   # Add fixedclipping_mod to the client-side mods
   app = fl.client.ClientApp(client_fn=client_fn, mods=[fixedclipping_mod])
 
