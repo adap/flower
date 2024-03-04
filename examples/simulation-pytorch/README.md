@@ -89,7 +89,7 @@ flower-simulation --client-app=sim:client --server-app=sim:server --num-supernod
 You can change the default resources assigned to each `ClientApp` by means of the `--backend-config` argument:
 
 ```bash
-# Tells the VCE to resever 2x CPUs and 25% of available VRAM for each ClientApp
+# Tells the VCE to reserve 2x CPUs and 25% of available VRAM for each ClientApp
 flower-simulation --client-app=sim:client --server-app=sim:server --num-supernodes=100 \
     --backend-config='{"client_resources": {"num_cpus":2, "num_gpus":0.25}}'
 ```
