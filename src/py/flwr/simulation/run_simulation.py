@@ -62,9 +62,9 @@ def run_simulation_from_cli() -> None:
 # Entry point from Python session (script or notebook)
 # pylint: disable=too-many-arguments
 def run_simulation(
-    num_supernodes: int,
-    client_app: ClientApp,
     server_app: ServerApp,
+    client_app: ClientApp,
+    num_supernodes: int,
     backend_name: str = "ray",
     backend_config: Optional[Dict[str, ConfigsRecordValues]] = None,
     enable_tf_gpu_growth: bool = False,
@@ -73,17 +73,17 @@ def run_simulation(
 
     Parameters
     ----------
-    num_supernodes : int
-        Number of nodes that run a ClientApp. They can be sampled by a
-        Driver in the ServerApp and receive a Message describing what the ClientApp
-        should perform.
+    server_app : ServerApp
+        The `ServerApp` to be executed.
 
     client_app : ClientApp
         The `ClientApp` to be executed by each of the `SuperNodes`. It will receive
         messages sent by the `ServerApp`.
 
-    server_app : ServerApp
-        The `ServerApp` to be executed.
+    num_supernodes : int
+        Number of nodes that run a ClientApp. They can be sampled by a
+        Driver in the ServerApp and receive a Message describing what the ClientApp
+        should perform.
 
     backend_name : str (default: ray)
         A simulation backend that runs `ClientApp`s.
@@ -118,18 +118,38 @@ def run_serverapp_th(
     driver: Driver,
     server_app_dir: str,
     f_stop: asyncio.Event,
+    enable_tf_gpu_growth: bool,
     delay_launch: int = 3,
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
+
+    def server_th_with_start_checks(  # type: ignore
+        tf_gpu_growth: bool, stop_event: asyncio.Event, **kwargs
+    ) -> None:
+        """Run SeverApp, after check if GPU memory grouwth has to be set."""
+        try:
+            if tf_gpu_growth:
+                log(INFO, "Enabling GPU growth for Tensorflow on the main thread.")
+                enable_gpu_growth()
+            run(**kwargs)
+        except Exception as ex:  # pylint: disable=broad-exception-caught
+            log(ERROR, "ServerApp thread raised an exception: %s", ex)
+            log(ERROR, traceback.format_exc())
+        finally:
+            log(DEBUG, "ServerApp finished running.")
+            # Upon completion, trigger stop event if one was passed
+            if stop_event is not None:
+                log(DEBUG, "Triggering stop event.")
+                stop_event.set()
+
     serverapp_th = threading.Thread(
-        target=run,
+        target=server_th_with_start_checks,
+        args=(enable_tf_gpu_growth, f_stop),
         kwargs={
             "server_app_attr": server_app_attr,
             "loaded_server_app": server_app,
             "driver": driver,
             "server_app_dir": server_app_dir,
-            "stop_event": f_stop,  # will be set when `run()` finishes
-            # will trigger the shutdown of the Simulation Engine
         },
     )
     sleep(delay_launch)
@@ -157,12 +177,14 @@ def get_thread_exception_hook(stop_event: asyncio.Event) -> Callable[[Any], None
     return execepthook
 
 
+# pylint: disable=too-many-locals
 def _main_loop(
     num_supernodes: int,
     backend_name: str,
     backend_config_stream: str,
     driver_api_address: str,
     working_dir: str,
+    enable_tf_gpu_growth: bool,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
@@ -200,6 +222,7 @@ def _main_loop(
             driver=driver,
             server_app_dir=working_dir,
             f_stop=f_stop,
+            enable_tf_gpu_growth=enable_tf_gpu_growth,
         )
         # Setup an exception hook
         threading.excepthook = get_thread_exception_hook(f_stop)
@@ -301,10 +324,7 @@ def _run_simulation(
     if backend_config is None:
         backend_config = {}
 
-    # Enable GPU memory growth (relevant only for TF)
     if enable_tf_gpu_growth:
-        log(INFO, "Enabling GPU growth for Tensorflow on the main thread.")
-        enable_gpu_growth()
         # Check that Backend config has also enabled using GPU growth
         use_tf = backend_config.get("tensorflow", False)
         if not use_tf:
@@ -321,6 +341,7 @@ def _run_simulation(
         backend_config_stream,
         driver_api_address,
         working_dir,
+        enable_tf_gpu_growth,
         client_app,
         client_app_attr,
         server_app,

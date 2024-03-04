@@ -16,7 +16,6 @@
 
 
 import argparse
-import asyncio
 import sys
 from logging import DEBUG, WARN
 from pathlib import Path
@@ -34,7 +33,6 @@ def run(
     server_app_dir: str,
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
-    stop_event: Optional[asyncio.Event] = None,
 ) -> None:
     """Run ServerApp with a given Driver."""
     if not (server_app_attr is None) ^ (loaded_server_app is None):
@@ -63,10 +61,6 @@ def run(
     server_app(driver=driver, context=context)
 
     log(DEBUG, "ServerApp finished running.")
-    # Upon completion, trigger stop event if one was passed
-    if stop_event is not None:
-        log(DEBUG, "Triggering stop event.")
-        stop_event.set()
 
 
 def run_server_app() -> None:
