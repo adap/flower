@@ -223,7 +223,7 @@ app = fl.client.ClientApp(
 
 ### Tensorboard Flower Mod
 
-The [Tensorboard] Mod will only differ in the initialization and how the data is sent to Tensorboard:
+The [Tensorboard](https://www.tensorflow.org/tensorboard) Mod will only differ in the initialization and how the data is sent to Tensorboard:
 
 ```python
 def get_tensorboard_mod(logdir) -> Mod:
@@ -267,6 +267,15 @@ def get_tensorboard_mod(logdir) -> Mod:
 ```
 
 For the initialization, Tensorboard uses a custom directory path, which can, in this case, be passed as an argument to the wrapper function.
+
+It can be used in the following way:
+
+```python
+app = fl.client.ClientApp(
+    client_fn=client_fn,
+    mods=[get_tensorboard_mod(".runs_history/")],
+)
+```
 
 ## Running the example
 
@@ -337,4 +346,4 @@ For Tensorboard, you will need to run the following command in your terminal:
 tensorboard --logdir <LOG_DIR>
 ```
 
-Where `<LOG_DIR>` needs to be replaced by the directory passed as an argument to the wrapper function (`.runs_history/` by default). 
+Where `<LOG_DIR>` needs to be replaced by the directory passed as an argument to the wrapper function (`.runs_history/` by default).
