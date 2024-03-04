@@ -139,7 +139,7 @@ def group_instances_by_specs(instances: List[Instance]) -> List[List[Instance]]:
 
 
 class Cluster:
-    """Compute enviroment independend compute cluster."""
+    """Compute environment independend compute cluster."""
 
     def __init__(
         self,

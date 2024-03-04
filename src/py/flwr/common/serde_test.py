@@ -14,10 +14,12 @@
 # ==============================================================================
 """(De-)serialization tests."""
 
-
 import random
 import string
-from typing import Any, Optional, OrderedDict, Type, TypeVar, Union, cast
+from contextlib import ExitStack
+from typing import Any, Callable, Optional, OrderedDict, Type, TypeVar, Union, cast
+
+import pytest
 
 # pylint: disable=E0611
 from flwr.proto import transport_pb2 as pb2
@@ -29,7 +31,7 @@ from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 
 # pylint: enable=E0611
 from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, typing
-from .message import Message, Metadata
+from .message import Error, Message, Metadata
 from .serde import (
     array_from_proto,
     array_to_proto,
@@ -298,44 +300,115 @@ def test_recordset_serialization_deserialization() -> None:
     assert original == deserialized
 
 
-def test_message_to_and_from_taskins() -> None:
+@pytest.mark.parametrize(
+    "content_fn, error_fn, context",
+    [
+        (
+            lambda maker: maker.recordset(1, 1, 1),
+            None,
+            None,
+        ),  # check when only content is set
+        (None, lambda code: Error(code=code), None),  # check when only error is set
+        (
+            lambda maker: maker.recordset(1, 1, 1),
+            lambda code: Error(code=code),
+            pytest.raises(ValueError),
+        ),  # check when both are set (ERROR)
+        (None, None, pytest.raises(ValueError)),  # check when neither is set (ERROR)
+    ],
+)
+def test_message_to_and_from_taskins(
+    content_fn: Callable[
+        [
+            RecordMaker,
+        ],
+        RecordSet,
+    ],
+    error_fn: Callable[[int], Error],
+    context: Any,
+) -> None:
     """Test Message to and from TaskIns."""
     # Prepare
+
     maker = RecordMaker(state=1)
     metadata = maker.metadata()
     # pylint: disable-next=protected-access
     metadata._src_node_id = 0  # Assume driver node
-    original = Message(
-        metadata=metadata,
-        content=maker.recordset(1, 1, 1),
-    )
 
-    # Execute
-    taskins = message_to_taskins(original)
-    taskins.task_id = metadata.message_id
-    deserialized = message_from_taskins(taskins)
+    with ExitStack() as stack:
+        if context:
+            stack.enter_context(context)
 
-    # Assert
-    assert original.content == deserialized.content
-    assert metadata == deserialized.metadata
+        original = Message(
+            metadata=metadata,
+            content=None if content_fn is None else content_fn(maker),
+            error=None if error_fn is None else error_fn(0),
+        )
+
+        # Execute
+        taskins = message_to_taskins(original)
+        taskins.task_id = metadata.message_id
+        deserialized = message_from_taskins(taskins)
+
+        # Assert
+        if original.has_content():
+            assert original.content == deserialized.content
+        if original.has_error():
+            assert original.error == deserialized.error
+        assert metadata == deserialized.metadata
 
 
-def test_message_to_and_from_taskres() -> None:
+@pytest.mark.parametrize(
+    "content_fn, error_fn, context",
+    [
+        (
+            lambda maker: maker.recordset(1, 1, 1),
+            None,
+            None,
+        ),  # check when only content is set
+        (None, lambda code: Error(code=code), None),  # check when only error is set
+        (
+            lambda maker: maker.recordset(1, 1, 1),
+            lambda code: Error(code=code),
+            pytest.raises(ValueError),
+        ),  # check when both are set (ERROR)
+        (None, None, pytest.raises(ValueError)),  # check when neither is set (ERROR)
+    ],
+)
+def test_message_to_and_from_taskres(
+    content_fn: Callable[
+        [
+            RecordMaker,
+        ],
+        RecordSet,
+    ],
+    error_fn: Callable[[int], Error],
+    context: Any,
+) -> None:
     """Test Message to and from TaskRes."""
     # Prepare
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
     metadata.dst_node_id = 0  # Assume driver node
-    original = Message(
-        metadata=metadata,
-        content=maker.recordset(1, 1, 1),
-    )
 
-    # Execute
-    taskres = message_to_taskres(original)
-    taskres.task_id = metadata.message_id
-    deserialized = message_from_taskres(taskres)
+    with ExitStack() as stack:
+        if context:
+            stack.enter_context(context)
 
-    # Assert
-    assert original.content == deserialized.content
-    assert metadata == deserialized.metadata
+        original = Message(
+            metadata=metadata,
+            content=None if content_fn is None else content_fn(maker),
+            error=None if error_fn is None else error_fn(0),
+        )
+
+        # Execute
+        taskres = message_to_taskres(original)
+        taskres.task_id = metadata.message_id
+        deserialized = message_from_taskres(taskres)
+
+        # Assert
+        if original.has_content():
+            assert original.content == deserialized.content
+        if original.has_error():
+            assert original.error == deserialized.error
+        assert metadata == deserialized.metadata
