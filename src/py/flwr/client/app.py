@@ -108,8 +108,8 @@ def run_client_app() -> None:
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
         insecure=args.insecure,
-        retry_max_tries=args.retry_max_tries,
-        retry_max_time=args.retry_max_time,
+        max_retries=args.max_retries,
+        max_wait_time=args.max_wait_time,
     )
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
@@ -148,7 +148,7 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         help="Server address",
     )
     parser.add_argument(
-        "--retry_max_tries",
+        "--max-retries",
         type=int,
         default=1,
         help="The maximum number of times the client will try to connect to the"
@@ -156,7 +156,7 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         "there is no limit to the number of tries.",
     )
     parser.add_argument(
-        "--retry_max_time",
+        "--max-wait-time",
         type=float,
         help="The maximum duration before the client stops trying to"
         "connect to the server in case of connection error."
@@ -201,8 +201,8 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
-    retry_max_tries: Optional[int] = 1,
-    retry_max_time: Optional[float] = None,
+    max_retries: Optional[int] = 1,
+    max_wait_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -236,11 +236,11 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
-    retry_max_tries: Optional[int]
+    max_retries: Optional[int]
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
         there is no limit to the number of tries.
-    retry_max_time: Optional[float]
+    max_wait_time: Optional[float]
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
@@ -285,8 +285,8 @@ def start_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
-        retry_max_tries=retry_max_tries,
-        retry_max_time=retry_max_time,
+        max_retries=max_retries,
+        max_wait_time=max_wait_time,
     )
     event(EventType.START_CLIENT_LEAVE)
 
@@ -305,8 +305,8 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
-    retry_max_tries: Optional[int] = 1,
-    retry_max_time: Optional[float] = None,
+    max_retries: Optional[int] = 1,
+    max_wait_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -342,11 +342,11 @@ def _start_client_internal(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
-    retry_max_tries: Optional[int]
+    max_retries: Optional[int]
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
         there is no limit to the number of tries.
-    retry_max_time: Optional[float]
+    max_wait_time: Optional[float]
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
@@ -386,8 +386,8 @@ def _start_client_internal(
     retry_invoker = RetryInvoker(
         exponential,
         RequestsConnectionError if transport == "rest" else RpcError,
-        max_tries=retry_max_tries,
-        max_time=retry_max_time,
+        max_tries=max_retries,
+        max_time=max_wait_time,
         on_giveup=lambda retry_state: (
             log(
                 WARN,
