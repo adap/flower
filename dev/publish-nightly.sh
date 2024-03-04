@@ -20,7 +20,7 @@ cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 # This script will build and publish a nightly release of Flower under the condition
 # that at least one commit was made in the last 24 hours.
-# It will rename the the package name in the pyproject.toml to from "flwr" to "flwr-nightly".
+# It will rename the package name in the pyproject.toml to from "flwr" to "flwr-nightly".
 # The version name in the pyproject.toml will be appended with "-dev" and the current date.
 # The result will be a release on PyPi of the package "flwr-nightly" of version e.g. 
 # "0.1.1.dev20200716" as seen at https://pypi.org/project/flwr-nightly/
