@@ -1,4 +1,4 @@
-"""$project_name: A Flower / PyTorch app."""
+"""fedgpt: A Flower / PyTorch app."""
 
 from collections import OrderedDict
 from typing import Dict, Tuple, List

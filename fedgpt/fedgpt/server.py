@@ -1,4 +1,6 @@
-"""$project_name: A Flower / PyTorch app."""
+"""fedgpt: A Flower / PyTorch app."""
+
+"""fedgpt: A Flower / PyTorch app."""
 
 from collections import OrderedDict
 from typing import Dict, Tuple, List
@@ -10,58 +12,14 @@ import flwr as fl
 from flwr.common import Metrics
 from flwr.common.typing import Scalar
 
+from datasets import Dataset
+from datasets.utils.logging import disable_progress_bar
 from flwr_datasets import FederatedDataset
 
-from utils import Net, train, test, apply_transforms
+from utils import Net, test, apply_transforms
 
 NUM_CLIENTS = 100
 NUM_ROUNDS = 10
-
-
-# Flower client, adapted from Pytorch quickstart example
-class FlowerClient(fl.client.NumPyClient):
-    def __init__(self, trainset, valset):
-        self.trainset = trainset
-        self.valset = valset
-
-        # Instantiate model
-        self.model = Net()
-
-        # Determine device
-        self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.model.to(self.device)  # send model to device
-
-    def get_parameters(self, config):
-        return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
-
-    def fit(self, parameters, config):
-        set_params(self.model, parameters)
-
-        # Read from config
-        batch, epochs = config["batch_size"], config["epochs"]
-
-        # Construct dataloader
-        trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)
-
-        # Define optimizer
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=0.01, momentum=0.9)
-        # Train
-        train(self.model, trainloader, optimizer, epochs=epochs, device=self.device)
-
-        # Return local model and statistics
-        return self.get_parameters({}), len(trainloader.dataset), {}
-
-    def evaluate(self, parameters, config):
-        set_params(self.model, parameters)
-
-        # Construct dataloader
-        valloader = DataLoader(self.valset, batch_size=64)
-
-        # Evaluate
-        loss, accuracy = test(self.model, valloader, device=self.device)
-
-        # Return statistics
-        return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
 
 
 def get_client_fn(dataset: FederatedDataset):
@@ -120,10 +78,53 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     return {"accuracy": sum(accuracies) / sum(examples)}
 
 
+def get_evaluate_fn(
+    centralized_testset: Dataset,
+):
+    """Return an evaluation function for centralized evaluation."""
+
+    def evaluate(
+        server_round: int, parameters: fl.common.NDArrays, config: Dict[str, Scalar]
+    ):
+        """Use the entire CIFAR-10 test set for evaluation."""
+
+        # Determine device
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+        model = Net()
+        set_params(model, parameters)
+        model.to(device)
+
+        # Apply transform to dataset
+        testset = centralized_testset.with_transform(apply_transforms)
+
+        # Disable tqdm for dataset preprocessing
+        disable_progress_bar()
+
+        testloader = DataLoader(testset, batch_size=50)
+        loss, accuracy = test(model, testloader, device=device)
+
+        return loss, {"accuracy": accuracy}
+
+    return evaluate
+
+
 # Download MNIST dataset and partition it
 mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
+centralized_testset = mnist_fds.load_full("test")
 
-# ClientApp for Flower-Next
-app = fl.client.ClientApp(
-    client_fn=get_client_fn(mnist_fds),
+# Configure the strategy
+strategy = fl.server.strategy.FedAvg(
+    fraction_fit=0.1,  # Sample 10% of available clients for training
+    fraction_evaluate=0.05,  # Sample 5% of available clients for evaluation
+    min_available_clients=10,
+    on_fit_config_fn=fit_config,
+    evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
+    evaluate_fn=get_evaluate_fn(centralized_testset),  # Global evaluation function
+)
+
+# ServerApp for Flower-Next
+server = fl.server.ServerApp(
+    config=fl.server.ServerConfig(num_rounds=NUM_ROUNDS),
+    strategy=strategy,
 )

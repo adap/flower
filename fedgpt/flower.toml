@@ -1,13 +1,13 @@
 [project]
-name = "$project_name"
+name = "fedgpt"
 version = "1.0.0"
 description = ""
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
 
 [flower.components]
-serverapp = "$project_name.server:app"
-clientapp = "$project_name.client:app"
+serverapp = "fedgpt.server:app"
+clientapp = "fedgpt.client:app"
 
 [flower.engine]
 name = "simulation" # optional

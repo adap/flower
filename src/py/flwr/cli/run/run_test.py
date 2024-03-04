@@ -14,20 +14,34 @@
 # ==============================================================================
 """Test for Flower command line interface `run` command."""
 
-from .run import load_flower_toml
+import os
+import textwrap
+
+from .run import load_flower_toml, validate_object_reference
 
 
-def test_load_flower_toml() -> None:
+def test_load_flower_toml(tmp_path: str) -> None:
     """Test if load_template returns a string."""
     # Prepare
-    template_file = "flower.toml.tpl"
+    flower_toml_content = """
+        [project]
+        name = "fedgpt"
+
+        [flower.components]
+        serverapp = "fedgpt.server:app"
+        clientapp = "fedgpt.client:app"
+
+        [flower.engine]
+        name = "simulation" # optional
+
+        [flower.engine.simulation.super-node]
+        count = 10 # optional
+    """
     expected_config = {
-        "flower": {
+        "project": {
             "name": "fedgpt",
-            "version": "1.0.0",
-            "description": "",
-            "license": "Apache-2.0",
-            "authors": ["The Flower Authors <hello@flower.ai>"],
+        },
+        "flower": {
             "components": {
                 "serverapp": "fedgpt.server:app",
                 "clientapp": "fedgpt.client:app",
@@ -36,50 +50,44 @@ def test_load_flower_toml() -> None:
                 "name": "simulation",
                 "simulation": {"super-node": {"count": 10}},
             },
-        }
+        },
     }
 
+    # Current directory
+    origin = os.getcwd()
+
+    try:
+        # Change into the temporary directory
+        os.chdir(tmp_path)
+        with open("flower.toml", "w", encoding="utf-8") as f:
+            f.write(textwrap.dedent(flower_toml_content))
+
+        # Execute
+        config = load_flower_toml()
+
+        # Assert
+        assert config == expected_config
+    finally:
+        os.chdir(origin)
+
+def test_validate_object_reference() -> None:
+    # Prepare
+    ref = "flwr.cli.run:run"
+
     # Execute
-    config = load_flower_toml()
+    is_valid, error = validate_object_reference(ref)
 
     # Assert
-    assert isinstance(config, expected_config)
+    assert is_valid
+    assert error is None
 
+def test_validate_object_reference_fails() -> None:
+    # Prepare
+    ref = "flwr.cli.run:runa"
 
-# def test_new(tmp_path: str) -> None:
-#     """Test if project is created for framework."""
-#     # Prepare
-#     project_name = "FedGPT"
-#     framework = MlFramework.PYTORCH
-#     expected_files_top_level = {
-#         "requirements.txt",
-#         "fedgpt",
-#         "README.md",
-#         "flower.toml",
-#     }
-#     expected_files_module = {
-#         "__init__.py",
-#         "server.py",
-#         "client.py",
-#     }
+    # Execute
+    is_valid, error = validate_object_reference(ref)
 
-#     # Current directory
-#     origin = os.getcwd()
-
-#     try:
-#         # Change into the temprorary directory
-#         os.chdir(tmp_path)
-
-#         # Execute
-#         new(project_name=project_name, framework=framework)
-
-#         # Assert
-#         file_list = os.listdir(os.path.join(tmp_path, project_name.lower()))
-#         assert set(file_list) == expected_files_top_level
-
-#         file_list = os.listdir(
-#             os.path.join(tmp_path, project_name.lower(), project_name.lower())
-#         )
-#         assert set(file_list) == expected_files_module
-#     finally:
-#         os.chdir(origin)
+    # Assert
+    assert not is_valid
+    assert error == "Unable to load attribute runa from module flwr.cli.run"
