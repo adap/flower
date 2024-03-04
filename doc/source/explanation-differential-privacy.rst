@@ -1,6 +1,8 @@
 Differential Privacy
-==============================
-The information in datasets like healthcare, financial transactions, user preferences, etc., is valuable and has the potential for scientific breakthroughs and provide important business insights. However, such data is also sensitive and there is a risk of compromising individual privacy.
+====================
+The information in datasets like healthcare, financial transactions, user preferences, etc., is valuable and has the potential for scientific breakthroughs and provides important business insights.
+However, such data is also sensitive and there is a risk of compromising individual privacy.
+
 Traditional methods like anonymization alone would not work because of attacks like Re-identification and Data Linkage.
 That's where differential privacy comes in. It provides the possibility of analyzing data while ensuring the privacy of individuals.
 
@@ -75,7 +77,7 @@ While there are various ways to implement central DP in federated learning, we c
 The overall approach is to clip the model updates sent by the clients and add some amount of noise to the aggregated model.
 In each iteration, a random set of clients is chosen with a specific probability for training.
 Each client performs local training on its own data.
-The updates of each client is then clipped by some value `S` (sensitivity S).
+The update of each client is then clipped by some value `S` (sensitivity `S`).
 This would limit the impact of any individual client which is crucial for privacy and often beneficial for robustness.
 A common approach to achieve this is by restricting the `L2` norm of the clients' model updates, ensuring that larger updates are scaled down to fit within the norm `S`.
 
@@ -86,7 +88,7 @@ A common approach to achieve this is by restricting the `L2` norm of the clients
 
 Afterwards, the Gaussian mechanism is used to add noise in order to distort the sum of all clients' updates.
 The amount of noise is scaled to the sensitivity value to obtain a privacy guarantee.
-The Gaussian mechanism is used with a noise sampled from `N (0, σ²)` where `σ =( noise_scale * S ) / (number of sampled clients)`.
+The Gaussian mechanism is used with a noise sampled from `N (0, σ²)` where `σ = ( noise_scale * S ) / (number of sampled clients)`.
 
 Clipping
 ^^^^^^^^
@@ -97,7 +99,7 @@ There are two forms of clipping commonly used in Central DP: Fixed Clipping and 
 
 - **Adaptive Clipping** : The clipping threshold dynamically adjusts based on the observed update distribution [4]. It means that the clipping value is tuned during the rounds with respect to the quantile of the update norm distribution.
 
-The choice between fixed and adaptive clipping depends on various factors such as privacy requirements, data distribution, model complexity, and etc.
+The choice between fixed and adaptive clipping depends on various factors such as privacy requirements, data distribution, model complexity, and others.
 
 Local Differential Privacy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
