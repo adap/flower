@@ -48,21 +48,17 @@ def client_fn(cid: str):
 
 
 def get_wandb_mod(name: str) -> Mod:
-    def wandb_mod(fwd: Message, context: Context, app: ClientAppCallable) -> Message:
-        start_time = None
+    def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message:
+        round = int(msg.metadata.group_id)
 
-        project_name = name
-        run_id = fwd.metadata.run_id
-        round = int(fwd.metadata.group_id)
+        run_id = msg.metadata.run_id
         group_name = f"Workload ID: {run_id}"
 
-        client_id = str(fwd.metadata.dst_node_id)
+        client_id = str(msg.metadata.dst_node_id)
         run_name = f"Client ID: {client_id}"
 
-        time_diff = None
-
         wandb.init(
-            project=project_name,
+            project=name,
             group=group_name,
             name=run_name,
             id=f"{run_id}{client_id}",
@@ -72,7 +68,7 @@ def get_wandb_mod(name: str) -> Mod:
 
         start_time = time.time()
 
-        bwd = app(fwd, context)
+        bwd = app(msg, context)
 
         msg_type = bwd.metadata.message_type
 
@@ -86,8 +82,7 @@ def get_wandb_mod(name: str) -> Mod:
                 metrics.get(f"{msg_type}res.metrics", ConfigsRecord())
             )
 
-            if time_diff is not None:
-                results_to_log[f"{msg_type}_time"] = time_diff
+            results_to_log[f"{msg_type}_time"] = time_diff
 
             wandb.log(results_to_log, step=int(round), commit=True)
 
@@ -99,30 +94,18 @@ def get_wandb_mod(name: str) -> Mod:
 def get_tensorboard_mod(logdir) -> Mod:
     os.makedirs(logdir, exist_ok=True)
 
-    # To allow multiple runs and group those we will create a subdir
-    # in the logdir which is named as number of directories in logdir + 1
-    run_id = str(
-        len(
-            [
-                name
-                for name in os.listdir(logdir)
-                if os.path.isdir(os.path.join(logdir, name))
-            ]
-        )
-    )
-    run_id = run_id + "-" + datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-    logdir_run = os.path.join(logdir, run_id)
-
     def tensorboard_mod(
-        fwd: Message, context: Context, app: ClientAppCallable
+        msg: Message, context: Context, app: ClientAppCallable
     ) -> Message:
-        client_id = str(fwd.metadata.dst_node_id)
+        logdir_run = os.path.join(logdir, msg.metadata.run_id)
 
-        round = int(fwd.metadata.group_id)
+        client_id = str(msg.metadata.dst_node_id)
+
+        round = int(msg.metadata.group_id)
 
         start_time = time.time()
 
-        bwd = app(fwd, context)
+        bwd = app(msg, context)
 
         time_diff = time.time() - start_time
 
