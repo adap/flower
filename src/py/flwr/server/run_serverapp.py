@@ -16,9 +16,11 @@
 
 
 import argparse
+import asyncio
 import sys
 from logging import DEBUG, WARN
 from pathlib import Path
+from typing import Optional
 
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.logger import log
@@ -27,7 +29,12 @@ from .driver.driver import Driver
 from .server_app import ServerApp, load_server_app
 
 
-def run(server_app_attr: str, driver: Driver, server_app_dir: str) -> None:
+def run(
+    server_app_attr: str,
+    driver: Driver,
+    server_app_dir: str,
+    stop_event: Optional[asyncio.Event] = None,
+) -> None:
     """Run ServerApp with a given Driver."""
     if server_app_dir is not None:
         sys.path.insert(0, server_app_dir)
@@ -43,6 +50,12 @@ def run(server_app_attr: str, driver: Driver, server_app_dir: str) -> None:
 
     # Call ServerApp
     server_app(driver=driver, context=context)
+
+    log(DEBUG, "ServerApp finished running.")
+    # Upon completion, trigger stop event if one was passed
+    if stop_event is not None:
+        log(DEBUG, "Triggering stop event.")
+        stop_event.set()
 
 
 def run_server_app() -> None:

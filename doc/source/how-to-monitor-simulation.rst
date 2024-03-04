@@ -161,7 +161,7 @@ However, you can overwrite the defaults. When starting a simulation, do the foll
   ram_memory = 16_000 * 1024 * 1024  # 16 GB
   fl.simulation.start_simulation(
       # ...
-      # all the args you were specyfing before
+      # all the args you were specifying before
       # ...
       ray_init_args = {
               "include_dashboard": True, # we need this one for tracking
@@ -187,7 +187,7 @@ Let’s also specify the resource for a single client.
 
   fl.simulation.start_simulation(
       # ...
-      # all the args you were specyfing before
+      # all the args you were specifying before
       # ...
       ray_init_args = {
               "include_dashboard": True, # we need this one for tracking

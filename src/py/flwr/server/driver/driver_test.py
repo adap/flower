@@ -20,6 +20,8 @@ import unittest
 from unittest.mock import Mock, patch
 
 from flwr.common import RecordSet
+from flwr.common.message import Error
+from flwr.common.serde import error_to_proto, recordset_to_proto
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     GetNodesRequest,
     PullTaskResRequest,
@@ -132,9 +134,13 @@ class TestDriver(unittest.TestCase):
         """Test pulling messages with specific message IDs."""
         # Prepare
         mock_response = Mock()
+        # A Message must have either content or error set so we prepare
+        # two tasks that contain these.
         mock_response.task_res_list = [
-            TaskRes(task=Task(ancestry=["id2"])),
-            TaskRes(task=Task(ancestry=["id3"])),
+            TaskRes(
+                task=Task(ancestry=["id2"], recordset=recordset_to_proto(RecordSet()))
+            ),
+            TaskRes(task=Task(ancestry=["id3"], error=error_to_proto(Error(code=0)))),
         ]
         self.mock_grpc_driver.pull_task_res.return_value = mock_response
         msg_ids = ["id1", "id2", "id3"]
@@ -157,7 +163,12 @@ class TestDriver(unittest.TestCase):
         # Prepare
         mock_response = Mock(task_ids=["id1"])
         self.mock_grpc_driver.push_task_ins.return_value = mock_response
-        mock_response = Mock(task_res_list=[TaskRes(task=Task(ancestry=["id1"]))])
+        # The response message must include either `content` (i.e. a recordset) or
+        # an `Error`. We choose the latter in this case
+        error_proto = error_to_proto(Error(code=0))
+        mock_response = Mock(
+            task_res_list=[TaskRes(task=Task(ancestry=["id1"], error=error_proto))]
+        )
         self.mock_grpc_driver.pull_task_res.return_value = mock_response
         msgs = [self.driver.create_message(RecordSet(), "", 0, "", "")]
 
