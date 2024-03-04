@@ -75,6 +75,7 @@ def test_new(tmp_path: str) -> None:
         "__init__.py",
         "server.py",
         "client.py",
+        "utils.py",
     }
 
     # Current directory
