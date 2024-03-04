@@ -1,4 +1,5 @@
 #include "message_handler.h"
+#include "flwr/proto/task.pb.h"
 
 std::tuple<flwr::proto::ClientMessage, int>
 _reconnect(flwr::proto::ServerMessage_ReconnectIns reconnect_msg) {
@@ -52,21 +53,20 @@ _evaluate(flwr_local::Client *client,
 }
 
 std::tuple<flwr::proto::ClientMessage, int, bool>
-handle(flwr_local::Client *client, flwr::proto::ServerMessage server_msg) {
-  if (server_msg.has_reconnect_ins()) {
+handle(flwr_local::Client *client, flwr::proto::Task task) {
+  if (task.task_type() == "") {
     std::tuple<flwr::proto::ClientMessage, int> rec =
-        _reconnect(server_msg.reconnect_ins());
+        _reconnect(task.recordset());
     return std::make_tuple(std::get<0>(rec), std::get<1>(rec), false);
   }
-  if (server_msg.has_get_parameters_ins()) {
+  if (task.task_type() == "") {
     return std::make_tuple(_get_parameters(client), 0, true);
   }
-  if (server_msg.has_fit_ins()) {
-    return std::make_tuple(_fit(client, server_msg.fit_ins()), 0, true);
+  if (task.task_type() == "") {
+    return std::make_tuple(_fit(client, task.recordset()), 0, true);
   }
-  if (server_msg.has_evaluate_ins()) {
-    return std::make_tuple(_evaluate(client, server_msg.evaluate_ins()), 0,
-                           true);
+  if (task.task_type() == "") {
+    return std::make_tuple(_evaluate(client, task.recordset()), 0, true);
   }
   throw "Unkown server message";
 }
@@ -74,18 +74,10 @@ handle(flwr_local::Client *client, flwr::proto::ServerMessage server_msg) {
 std::tuple<flwr::proto::TaskRes, int, bool>
 handle_task(flwr_local::Client *client, const flwr::proto::TaskIns &task_ins) {
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  if (!task_ins.task().has_legacy_server_message()) {
-    // TODO: Handle SecureAggregation
-    throw std::runtime_error("Task still needs legacy server message");
-  }
-  flwr::proto::ServerMessage server_msg =
-      task_ins.task().legacy_server_message();
-#pragma GCC diagnostic pop
+  flwr::proto::Task task = task_ins.task();
 
   std::tuple<flwr::proto::ClientMessage, int, bool> legacy_res =
-      handle(client, server_msg);
+      handle(client, task);
   std::unique_ptr<flwr::proto::ClientMessage> client_message =
       std::make_unique<flwr::proto::ClientMessage>(std::get<0>(legacy_res));
 

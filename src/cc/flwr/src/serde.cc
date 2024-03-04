@@ -1,4 +1,6 @@
 #include "serde.h"
+#include "flwr/proto/recordset.pb.h"
+#include "typing.h"
 
 /**
  * Serialize client parameters to protobuf parameters message
@@ -184,4 +186,101 @@ evaluate_res_to_proto(flwr_local::EvaluateRes res) {
   }
 
   return cres;
+}
+
+flwr_local::ParametersRecord
+parameters_record_from_proto(flwr::proto::ParametersRecord protoRecord) {
+  flwr_local::ParametersRecord record;
+  for (const auto &[key, value] : protoRecord) {
+    // Add the key
+    *record.add_data_keys() = key;
+    // Convert the value to Proto and add it
+    *record.add_data_values() = array_to_proto(value);
+  }
+  return record;
+}
+
+flwr::proto::ParametersRecord
+parameters_record_to_proto(flwr_local::ParametersRecord record) {
+  flwr::proto::ParametersRecord protoRecord;
+  for (const auto &[key, value] : record) {
+    // Add the key
+    *protoRecord.add_data_keys() = key;
+    // Convert the value to Proto and add it
+    *protoRecord.add_data_values() = array_to_proto(value);
+  }
+  return protoRecord;
+}
+
+flwr::proto::Array array_to_proto(const Array &array) {
+  flwr::proto::Array protoArray;
+  protoArray.set_dtype(array.dtype);
+  for (int32_t dim : array.shape) {
+    protoArray.add_shape(dim);
+  }
+  protoArray.set_stype(array.stype);
+  protoArray.set_data({array.data.begin(), array.data.end()});
+  return protoArray;
+}
+
+flwr_local::Array array_from_proto(const flwr::proto::Array &protoArray) {
+  flwr_local::Array array;
+  array.dtype = protoArray.dtype();
+  array.shape.assign(protoArray.shape().begin(), protoArray.shape().end());
+  array.stype = protoArray.stype();
+
+  // Assuming the data is stored as bytes in the ProtoBuf message
+  const std::string &protoData = protoArray.data();
+  array.data.assign(protoData.begin(), protoData.end());
+
+  return array;
+}
+
+Parameters parametersrecord_to_parameters(const ParametersRecord &record,
+                                          bool keep_input) {
+  std::list<std::string> tensors;
+  std::string tensor_type;
+
+  for (const auto &[key, array] : record) {
+    tensors.push_back(array->data);
+
+    if (tensor_type.empty()) {
+      tensor_type = array->stype;
+    }
+  }
+
+  return Parameters(tensors, tensor_type);
+}
+
+ParametersRecord parameters_to_parametersrecord(const Parameters &parameters,
+                                                bool keep_input) {
+  ParametersRecord record;
+  auto tensors =
+      parameters.getTensors(); // Copy or reference based on your need
+  std::string tensor_type = parameters.getTensor_type();
+
+  int idx = 0;
+  for (const auto &tensor : tensors) {
+    // Assuming Array constructor matches the Python version's attributes
+    flwr_local::Array array =
+        flwr_local::Array(tensor, "", tensor_type, std::vector<int>());
+    record[std::to_string(idx++)] = array;
+
+    if (!keep_input) {
+    }
+  }
+
+  return record;
+}
+
+flwr_local::Message message_from_taskins(flwr::proto::TaskIns taskins) {
+  flwr_local::Metadata metadata;
+  metadata.setRunId(taskins.run_id());
+  metadata.setSrcNodeId(taskins.task().producer().node_id());
+  metadata.setDstNodeId(taskins.task().consumer().node_id());
+  metadata.setGroupId(taskins.group_id());
+  metadata.setTtl(taskins.task().ttl());
+  metadata.setMessageType(taskins.task().task_type());
+
+  return flwr_local::Message(metadata, taskins.task().recordset());
 }

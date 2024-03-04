@@ -21,14 +21,7 @@ std::optional<flwr::proto::Node> get_node_from_store() {
 
 bool validate_task_ins(const flwr::proto::TaskIns &task_ins,
                        const bool discard_reconnect_ins) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  return !(!task_ins.has_task() ||
-           (!task_ins.task().has_legacy_server_message() &&
-            !task_ins.task().has_sa()) ||
-           (discard_reconnect_ins &&
-            task_ins.task().legacy_server_message().has_reconnect_ins()));
-#pragma GCC diagnostic pop
+  return task_ins.has_task() && task_ins.task().has_recordset();
 }
 
 bool validate_task_res(const flwr::proto::TaskRes &task_res) {

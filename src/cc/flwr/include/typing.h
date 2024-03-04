@@ -239,4 +239,120 @@ private:
   Properties properties;
 };
 
+struct Array {
+  std::string dtype;
+  std::vector<int32_t> shape;
+  std::string stype;
+  std::vector<uint8_t> data; // Using vector<uint8_t> to represent bytes
+};
+
+using ParametersRecord = std::map<std::string, Array>;
+using MetricsRecord =
+    std::map<std::string,
+             std::variant<int, float, std::vector<int>, std::vector<float>>>;
+
+using ConfigsRecord = std::map<
+    std::string,
+    std::variant<int, float, std::string, std::vector<uint8_t>, bool,
+                 std::vector<int>, std::vector<float>, std::vector<std::string>,
+                 std::vector<std::vector<uint8_t>>, std::vector<bool>>>;
+
+class Metadata {
+public:
+  Metadata(int runId, const std::string &messageId, int srcNodeId,
+           int dstNodeId, const std::string &replyToMessage,
+           const std::string &groupId, const std::string &ttl,
+           const std::string &messageType,
+           std::optional<int> partitionId = std::nullopt)
+      : _runId(runId), _messageId(messageId), _srcNodeId(srcNodeId),
+        _dstNodeId(dstNodeId), _replyToMessage(replyToMessage),
+        _groupId(groupId), _ttl(ttl), _messageType(messageType),
+        _partitionId(partitionId) {}
+
+  int getRunId() const { return _runId; }
+  const std::string &getMessageId() const { return _messageId; }
+  int getSrcNodeId() const { return _srcNodeId; }
+  int getDstNodeId() const { return _dstNodeId; }
+  const std::string &getReplyToMessage() const { return _replyToMessage; }
+  const std::string &getGroupId() const { return _groupId; }
+  const std::string &getTtl() const { return _ttl; }
+  const std::string &getMessageType() const { return _messageType; }
+  std::optional<int> getPartitionId() const { return _partitionId; }
+
+  // Setters if needed
+  void setSrcNodeId(int srcNodeId) { _srcNodeId = srcNodeId; }
+  void setDstNodeId(int dstNodeId) { _dstNodeId = dstNodeId; }
+  void setGroupId(const std::string &groupId) { _groupId = groupId; }
+  void setRunId(const std::string &runId) { _runId = runId; }
+  void setTtl(const std::string &ttl) { _ttl = ttl; }
+  void setMessageType(const std::string &messageType) {
+    _messageType = messageType;
+  }
+  void setPartitionId(std::optional<int> partitionId) {
+    _partitionId = partitionId;
+  }
+
+private:
+  int _runId;
+  std::string _messageId;
+  int _srcNodeId;
+  int _dstNodeId;
+  std::string _replyToMessage;
+  std::string _groupId;
+  std::string _ttl;
+  std::string _messageType;
+  std::optional<int> _partitionId;
+};
+
+class RecordSet {
+public:
+  RecordSet(
+      const std::map<std::string, ParametersRecord> &parametersRecords = {},
+      const std::map<std::string, MetricsRecord> &metricsRecords = {},
+      const std::map<std::string, ConfigsRecord> &configsRecords = {})
+      : _parametersRecords(parametersRecords), _metricsRecords(metricsRecords),
+        _configsRecords(configsRecords) {}
+
+  const std::map<std::string, ParametersRecord> &getParametersRecords() const {
+    return _parametersRecords;
+  }
+  const std::map<std::string, MetricsRecord> &getMetricsRecords() const {
+    return _metricsRecords;
+  }
+  const std::map<std::string, ConfigsRecord> &getConfigsRecords() const {
+    return _configsRecords;
+  }
+
+  // Optionally, setters if needed
+
+private:
+  std::map<std::string, ParametersRecord> _parametersRecords;
+  std::map<std::string, MetricsRecord> _metricsRecords;
+  std::map<std::string, ConfigsRecord> _configsRecords;
+};
+
+class Message {
+public:
+  Message(const Metadata &metadata, const RecordSet &content)
+      : _metadata(metadata), _content(content) {}
+
+  const Metadata &getMetadata() const { return _metadata; }
+  const RecordSet &getContent() const { return _content; }
+
+  void setContent(const RecordSet &content) { _content = content; }
+
+  // Implement createReply similar to the Python version
+  Message createReply(const RecordSet &content, const std::string &ttl) const {
+    Metadata replyMetadata(_metadata.getRunId(), "", _metadata.getDstNodeId(),
+                           _metadata.getSrcNodeId(), _metadata.getMessageId(),
+                           _metadata.getGroupId(), ttl,
+                           _metadata.getMessageType(),
+                           _metadata.getPartitionId());
+    return Message(replyMetadata, content);
+  }
+
+private:
+  Metadata _metadata;
+  RecordSet _content;
+};
 } // namespace flwr_local
