@@ -17,11 +17,12 @@
 import argparse
 import asyncio
 import json
+import logging
 import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
 from time import sleep
-from typing import Any, Callable, Dict, Optional
+from typing import Dict, Optional
 
 import grpc
 
@@ -48,14 +49,15 @@ def run_simulation_from_cli() -> None:
     backend_config_dict = json.loads(args.backend_config)
 
     _run_simulation(
-        num_supernodes=args.num_supernodes,
-        client_app_attr=args.client_app,
         server_app_attr=args.server_app,
+        client_app_attr=args.client_app,
+        num_supernodes=args.num_supernodes,
         backend_name=args.backend,
         backend_config=backend_config_dict,
         working_dir=args.dir,
         driver_api_address=args.driver_api_address,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
+        verbose_logging=args.verbose,
     )
 
 
@@ -68,6 +70,7 @@ def run_simulation(
     backend_name: str = "ray",
     backend_config: Optional[Dict[str, ConfigsRecordValues]] = None,
     enable_tf_gpu_growth: bool = False,
+    verbose_logging: bool = False,
 ) -> None:
     r"""Launch the Simulation Engine.
 
@@ -100,6 +103,10 @@ def run_simulation(
         might encounter an out-of-memory error becasue TensorFlow by default allocates
         all GPU memory. Read mor about how `tf.config.experimental.set_memory_growth()`
         works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
+
+    verbose_logging : bool (default: False)
+        When diabled, only INFO, WARNING and ERROR log messages will be shown. If
+        enabled, DEBUG-level logs will be displayed.
     """
     _run_simulation(
         num_supernodes=num_supernodes,
@@ -108,6 +115,7 @@ def run_simulation(
         backend_name=backend_name,
         backend_config=backend_config,
         enable_tf_gpu_growth=enable_tf_gpu_growth,
+        verbose_logging=verbose_logging,
     )
 
 
@@ -126,11 +134,16 @@ def run_serverapp_th(
     def server_th_with_start_checks(  # type: ignore
         tf_gpu_growth: bool, stop_event: asyncio.Event, **kwargs
     ) -> None:
-        """Run SeverApp, after check if GPU memory grouwth has to be set."""
+        """Run SeverApp, after check if GPU memory grouwth has to be set.
+
+        Upon exception, trigger stop event for Simulation Engine.
+        """
         try:
             if tf_gpu_growth:
                 log(INFO, "Enabling GPU growth for Tensorflow on the main thread.")
                 enable_gpu_growth()
+
+            # Run ServerApp
             run(**kwargs)
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, "ServerApp thread raised an exception: %s", ex)
@@ -139,8 +152,8 @@ def run_serverapp_th(
             log(DEBUG, "ServerApp finished running.")
             # Upon completion, trigger stop event if one was passed
             if stop_event is not None:
-                log(DEBUG, "Triggering stop event.")
                 stop_event.set()
+                log(WARNING, "Triggered stop event for Simulation Engine.")
 
     serverapp_th = threading.Thread(
         target=server_th_with_start_checks,
@@ -155,26 +168,6 @@ def run_serverapp_th(
     sleep(delay_launch)
     serverapp_th.start()
     return serverapp_th
-
-
-def get_thread_exception_hook(stop_event: asyncio.Event) -> Callable[[Any], None]:
-    """Return a callback for when the ServerApp thread raises an exception."""
-
-    def execepthook(args: Any) -> None:
-        """Upon exception raised, log exception and trigger stop event."""
-        # log
-        log(
-            ERROR,
-            "The ServerApp thread triggered exception (%s): %s",
-            args.exc_type,
-            args.exc_value,
-        )
-        log(ERROR, traceback.format_exc())
-        # Set stop event
-        stop_event.set()
-        log(WARNING, "Triggered stop event for Simulation Engine.")
-
-    return execepthook
 
 
 # pylint: disable=too-many-locals
@@ -224,8 +217,6 @@ def _main_loop(
             f_stop=f_stop,
             enable_tf_gpu_growth=enable_tf_gpu_growth,
         )
-        # Setup an exception hook
-        threading.excepthook = get_thread_exception_hook(f_stop)
 
         # SuperLink with Simulation Engine
         event(EventType.RUN_SUPERLINK_ENTER)
@@ -241,13 +232,11 @@ def _main_loop(
         )
 
     except Exception as ex:
-
         log(ERROR, "An exception occurred !! %s", ex)
         log(ERROR, traceback.format_exc())
         raise RuntimeError("An error was encountered. Ending simulation.") from ex
 
     finally:
-
         # Stop Driver
         driver_server.stop(grace=0)
         del driver
@@ -273,6 +262,7 @@ def _run_simulation(
     working_dir: str = "",
     driver_api_address: str = "0.0.0.0:9091",
     enable_tf_gpu_growth: bool = False,
+    verbose_logging: bool = False,
 ) -> None:
     r"""Launch the Simulation Engine.
 
@@ -320,7 +310,16 @@ def _run_simulation(
         might encounter an out-of-memory error becasue TensorFlow by default allocates
         all GPU memory. Read mor about how `tf.config.experimental.set_memory_growth()`
         works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
+
+    verbose_logging : bool (default: False)
+        When diabled, only INFO, WARNING and ERROR log messages will be shown. If
+        enabled, DEBUG-level logs will be displayed.
     """
+    # Set logging level
+    if not verbose_logging:
+        logger = logging.getLogger("flwr")
+        logger.setLevel(INFO)
+
     if backend_config is None:
         backend_config = {}
 
@@ -430,6 +429,13 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         help="Add specified directory to the PYTHONPATH and load"
         "ClientApp and ServerApp from there."
         " Default: current working directory.",
+    )
+
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="When unset, only INFO, WARNING and ERROR log messages will be shown. "
+        "If set, DEBUG-level logs will be displayed. ",
     )
 
     return parser
