@@ -1,4 +1,4 @@
-Differential Privacy in Flower
+Use Differential Privacy
 ------------------------------
 Below, we explain how users can utilize differential privacy in the Flower framework. If you are not familiar with differential privacy, you can refer to :doc:`explanation-differential-privacy`.
 
@@ -33,7 +33,7 @@ Below is a sample code that enables a strategy using :code:`DifferentialPrivacyS
 
   # Server-side:
   from flwr.server.strategy import DifferentialPrivacyClientSideFixedClipping
-  
+
   # Configure the strategy
   strategy = fl.server.strategy.FedAvg(...)
   # Wrap the strategy with the DifferentialPrivacyServerSideFixedClipping wrapper
