@@ -95,8 +95,6 @@ def new(
             if value == framework_value
         ]
         framework_str = selected_value[0]
-    
-    framework_str = framework_str.lower()
 
     # Set project directory path
     cwd = os.getcwd()
@@ -108,17 +106,18 @@ def new(
         "README.md": {
             "template": "app/README.md.tpl",
         },
-        "requirements.txt": {"template": f"app/requirements.{framework_str}.txt.tpl"},
+        "requirements.txt": {
+            "template": f"app/requirements.{framework_str.lower()}.txt.tpl"
+        },
         "flower.toml": {"template": "app/flower.toml.tpl"},
         f"{pnl}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-        f"{pnl}/server.py": {"template": f"app/code/server.{framework_str}.py.tpl"},
-        f"{pnl}/client.py": {"template": f"app/code/client.{framework_str}.py.tpl"},
+        f"{pnl}/server.py": {
+            "template": f"app/code/server.{framework_str.lower()}.py.tpl"
+        },
+        f"{pnl}/client.py": {
+            "template": f"app/code/client.{framework_str.lower()}.py.tpl"
+        },
     }
-
-    # In case framework is MlFramework.PYTORCH generate additionally the utils.py file
-    if framework_str == MlFramework.PYTORCH.value.lower():
-        files[f"{pnl}/utils.py"] = {"template": f"app/code/utils.{framework_str}.py.tpl"}
-
     context = {"project_name": project_name}
 
     for file_path, value in files.items():
