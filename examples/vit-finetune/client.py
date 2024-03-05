@@ -63,8 +63,10 @@ class FedViTClient(NumPyClient):
             {"train_loss": avg_train_loss},
         )
 
+
 # Downloads and partition dataset
 federated_c100, _ = get_dataset_with_partitions(num_partitions=20)
+
 
 def client_fn(cid: str):
     """Return a FedViTClient that trains with the cid-th data partition."""

@@ -52,7 +52,6 @@ python main.py
 
 ![](_static/central_evaluation.png)
 
-
 Running the example as-is on an RTX 3090Ti should take ~1min/round running 4 clients in parallel (plus the _global model_ during centralized evaluation stages) in a single GPU. Note that more clients could fit in VRAM, but since the GPU utilization is high (99%-100%) we are probably better off not doing that (at least in this case).
 
 You can adjust the `client_resources` passed to `start_simulation()` so more/less clients run at the same time in the GPU. Take a look at the [Documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) for more details on how you can customise your simulation.
@@ -83,7 +82,6 @@ You can adjust the `client_resources` passed to `start_simulation()` so more/les
 |    0   N/A  N/A     31422      C   ray::DefaultActor.run                      1536MiB |
 +---------------------------------------------------------------------------------------+
 ```
-
 
 ### Run with Flower Next (preview)
 
