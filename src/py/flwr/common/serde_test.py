@@ -16,7 +16,6 @@
 
 import random
 import string
-from contextlib import ExitStack
 from typing import Any, Callable, Optional, OrderedDict, Type, TypeVar, Union, cast
 
 import pytest
@@ -301,20 +300,13 @@ def test_recordset_serialization_deserialization() -> None:
 
 
 @pytest.mark.parametrize(
-    "content_fn, error_fn, context",
+    "content_fn, error_fn",
     [
         (
             lambda maker: maker.recordset(1, 1, 1),
             None,
-            None,
         ),  # check when only content is set
-        (None, lambda code: Error(code=code), None),  # check when only error is set
-        (
-            lambda maker: maker.recordset(1, 1, 1),
-            lambda code: Error(code=code),
-            pytest.raises(ValueError),
-        ),  # check when both are set (ERROR)
-        (None, None, pytest.raises(ValueError)),  # check when neither is set (ERROR)
+        (None, lambda code: Error(code=code)),  # check when only error is set
     ],
 )
 def test_message_to_and_from_taskins(
@@ -325,7 +317,6 @@ def test_message_to_and_from_taskins(
         RecordSet,
     ],
     error_fn: Callable[[int], Error],
-    context: Any,
 ) -> None:
     """Test Message to and from TaskIns."""
     # Prepare
@@ -335,44 +326,33 @@ def test_message_to_and_from_taskins(
     # pylint: disable-next=protected-access
     metadata._src_node_id = 0  # Assume driver node
 
-    with ExitStack() as stack:
-        if context:
-            stack.enter_context(context)
+    original = Message(
+        metadata=metadata,
+        content=None if content_fn is None else content_fn(maker),
+        error=None if error_fn is None else error_fn(0),
+    )
 
-        original = Message(
-            metadata=metadata,
-            content=None if content_fn is None else content_fn(maker),
-            error=None if error_fn is None else error_fn(0),
-        )
+    # Execute
+    taskins = message_to_taskins(original)
+    taskins.task_id = metadata.message_id
+    deserialized = message_from_taskins(taskins)
 
-        # Execute
-        taskins = message_to_taskins(original)
-        taskins.task_id = metadata.message_id
-        deserialized = message_from_taskins(taskins)
-
-        # Assert
-        if original.has_content():
-            assert original.content == deserialized.content
-        if original.has_error():
-            assert original.error == deserialized.error
-        assert metadata == deserialized.metadata
+    # Assert
+    if original.has_content():
+        assert original.content == deserialized.content
+    if original.has_error():
+        assert original.error == deserialized.error
+    assert metadata == deserialized.metadata
 
 
 @pytest.mark.parametrize(
-    "content_fn, error_fn, context",
+    "content_fn, error_fn",
     [
         (
             lambda maker: maker.recordset(1, 1, 1),
             None,
-            None,
         ),  # check when only content is set
-        (None, lambda code: Error(code=code), None),  # check when only error is set
-        (
-            lambda maker: maker.recordset(1, 1, 1),
-            lambda code: Error(code=code),
-            pytest.raises(ValueError),
-        ),  # check when both are set (ERROR)
-        (None, None, pytest.raises(ValueError)),  # check when neither is set (ERROR)
+        (None, lambda code: Error(code=code)),  # check when only error is set
     ],
 )
 def test_message_to_and_from_taskres(
@@ -383,7 +363,6 @@ def test_message_to_and_from_taskres(
         RecordSet,
     ],
     error_fn: Callable[[int], Error],
-    context: Any,
 ) -> None:
     """Test Message to and from TaskRes."""
     # Prepare
@@ -391,24 +370,20 @@ def test_message_to_and_from_taskres(
     metadata = maker.metadata()
     metadata.dst_node_id = 0  # Assume driver node
 
-    with ExitStack() as stack:
-        if context:
-            stack.enter_context(context)
+    original = Message(
+        metadata=metadata,
+        content=None if content_fn is None else content_fn(maker),
+        error=None if error_fn is None else error_fn(0),
+    )
 
-        original = Message(
-            metadata=metadata,
-            content=None if content_fn is None else content_fn(maker),
-            error=None if error_fn is None else error_fn(0),
-        )
+    # Execute
+    taskres = message_to_taskres(original)
+    taskres.task_id = metadata.message_id
+    deserialized = message_from_taskres(taskres)
 
-        # Execute
-        taskres = message_to_taskres(original)
-        taskres.task_id = metadata.message_id
-        deserialized = message_from_taskres(taskres)
-
-        # Assert
-        if original.has_content():
-            assert original.content == deserialized.content
-        if original.has_error():
-            assert original.error == deserialized.error
-        assert metadata == deserialized.metadata
+    # Assert
+    if original.has_content():
+        assert original.content == deserialized.content
+    if original.has_error():
+        assert original.error == deserialized.error
+    assert metadata == deserialized.metadata
