@@ -9,9 +9,9 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from models import get_model
 from dataset import get_tokenizer_and_data_collator_and_propt_formatting
-from client import gen_client_fn, set_parameters
+from utils import get_on_fit_config, fit_weighted_average, get_evaluate_fn
+from client import gen_client_fn
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -55,45 +55,6 @@ def main(cfg: DictConfig) -> None:
         cfg.train,
         save_path,
     )
-
-    # Get function that will be executed by the strategy's evaluate() method
-    # Here we use it to save global model checkpoints
-    def get_evaluate_fn(model_cfg, save_every_round, total_round, save_path):
-        """Return an evaluation function for saving global model."""
-
-        def evaluate(server_round: int, parameters, config):
-            # Save model
-            if server_round != 0 and (
-                server_round == total_round or server_round % save_every_round == 0
-            ):
-                # Init model
-                model = get_model(model_cfg)
-                set_parameters(model, parameters)
-
-                model.save_pretrained(f"{save_path}/peft_{server_round}")
-
-            return 0.0, {}
-
-        return evaluate
-
-    # Get a function that will be used to construct the config that the client's
-    # fit() method will receive
-    def get_on_fit_config():
-        def fit_config_fn(server_round: int):
-            fit_config = {}
-            fit_config["current_round"] = server_round
-            return fit_config
-
-        return fit_config_fn
-
-    def fit_weighted_average(metrics):
-        """Aggregation function for (federated) evaluation metrics."""
-        # Multiply accuracy of each client by number of examples used
-        losses = [num_examples * m["train_loss"] for num_examples, m in metrics]
-        examples = [num_examples for num_examples, _ in metrics]
-
-        # Aggregate and return custom metric (weighted average)
-        return {"train_loss": sum(losses) / sum(examples)}
 
     # Instantiate strategy according to config. Here we pass other arguments
     # that are only defined at run time.

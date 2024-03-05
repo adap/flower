@@ -26,6 +26,7 @@ This will create a new directory called `fedllm-finetune` containing the followi
 -- client.py           <- Flower client constructor
 -- model.py            <- Model build
 -- dataset.py          <- Dataset and tokenizer build
+-- utils.py            <- Utility functions
 -- test.py             <- Test pre-trained model
 -- conf/config.yaml    <- Configuration file
 -- requirements.txt    <- Example dependencies
@@ -40,6 +41,8 @@ pip install -r requirements.txt
 ```
 
 ## Run LLM Fine-tuning
+
+### Run with `start_simulation()`
 
 With an activated Python environment, run the example with default config values. The config is in `conf/config.yaml` and is loaded automatically.
 
@@ -57,6 +60,28 @@ python main.py model.name="openlm-research/open_llama_7b_v2" model.quantization=
 # Run for 50 rounds but increasing the fraction of clients that participate per round to 25%
 python main.py num_rounds=50 fraction_fit.fraction_fit=0.25
 ```
+
+### Run with Flower Next (demo)
+1. Start the long-running Flower server (SuperLink)
+    ```bash
+    flower-superlink --insecure
+    ```
+2. Start the long-running Flower client (SuperNode)
+    ```bash
+    # In a new terminal window, start the first long-running Flower client:
+    flower-client-app app:client --insecure
+    ```
+   ```bash
+    # In another new terminal window, start the second long-running Flower client:
+    flower-client-app app:client --insecure
+    ```
+3. Run the Flower App
+    ```bash
+    # With both the long-running server (SuperLink) and two clients (SuperNode) up and running, 
+    # we can now run the actual Flower App:
+    flower-server-app app:server --insecure
+    ```
+
 
 ## Expected Results
 
