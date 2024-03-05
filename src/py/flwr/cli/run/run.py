@@ -18,7 +18,8 @@ import sys
 
 import typer
 
-from flwr.cli.flower_toml import load_flower_toml, validate_flower_toml
+from flwr.cli.flower_toml import apply_defaults, load_flower_toml, validate_flower_toml
+from flwr.simulation.run_simulation import _run_simulation
 
 
 def run() -> None:
@@ -41,6 +42,35 @@ def run() -> None:
             typer.style(
                 "Project configuration could not be loaded.\nflower.toml is invalid:\n"
                 + "\n".join([f"- {line}" for line in reasons]),
+                fg=typer.colors.RED,
+                bold=True,
+            )
+        )
+
+    # Apply defaults
+    defaults = {
+        "flower": {
+            "engine": {"name": "simulation", "simulation": {"super-node": {"num": 100}}}
+        }
+    }
+    config = apply_defaults(config, defaults)
+
+    server_app_ref = config["flower"]["components"]["serverapp"]
+    client_app_ref = config["flower"]["components"]["clientapp"]
+    engine = config["flower"]["engine"]["name"]
+
+    if engine == "simulation":
+        num_supernodes = config["flower"]["engine"]["simulation"]["super-node"]["num"]
+
+        _run_simulation(
+            server_app_attr=server_app_ref,
+            client_app_attr=client_app_ref,
+            num_supernodes=num_supernodes,
+        )
+    else:
+        print(
+            typer.style(
+                f"Engine '{engine}' is not yet supported in `flwr run`",
                 fg=typer.colors.RED,
                 bold=True,
             )

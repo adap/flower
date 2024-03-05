@@ -137,3 +137,17 @@ def validate_flower_toml(config: Dict[str, Any]) -> Tuple[bool, List[str]]:
         return False, [reason]
 
     return True, []
+
+
+def apply_defaults(
+    config: Dict[str, Any],
+    defaults: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Apply defaults to config."""
+    for key in defaults:
+        if key in config:
+            if isinstance(config[key], dict) and isinstance(defaults[key], dict):
+                apply_defaults(config[key], defaults[key])
+        else:
+            config[key] = defaults[key]
+    return config
