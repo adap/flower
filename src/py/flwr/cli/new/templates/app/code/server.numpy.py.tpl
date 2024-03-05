@@ -5,7 +5,7 @@ import flwr as fl
 # Configure the strategy
 strategy = fl.server.strategy.FedAvg()
 
-# ServerApp for Flower-Next
+# Flower ServerApp
 app = fl.server.ServerApp(
     config=fl.server.ServerConfig(num_rounds=1),
     strategy=strategy,
