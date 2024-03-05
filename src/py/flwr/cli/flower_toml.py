@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Utility to validate the flower.toml file.
-
-This module will be improved over time.
-"""
+"""Utility to validate the `flower.toml` file."""
 
 import importlib
 import os
