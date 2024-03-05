@@ -102,7 +102,7 @@ def run_simulation(
         desirable if you make use of a TensorFlow model on your `ServerApp` while
         having your `ClientApp` running on the same GPU. Without enabling this, you
         might encounter an out-of-memory error because TensorFlow, by default, allocates
-        all GPU memory. Read mor about how `tf.config.experimental.set_memory_growth()`
+        all GPU memory. Read more about how `tf.config.experimental.set_memory_growth()`
         works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
 
     verbose_logging : bool (default: False)
