@@ -255,7 +255,7 @@ def get_tensorboard_mod(logdir) -> Mod:
     return tensorboard_mod
 ```
 
-For the initialization, Tensorboard uses a custom directory path, which can, in this case, be passed as an argument to the wrapper function.
+For the initialization, TensorBoard uses a custom directory path, which can, in this case, be passed as an argument to the wrapper function.
 
 It can be used in the following way:
 
@@ -309,7 +309,7 @@ for W&B monitoring, and:
 flower-client-app client:tb_app --insecure
 ```
 
-for Tensorboard.
+for TensorBoard.
 
 In yet another new terminal window, start the second long-running Flower client (with the mod of your choice):
 
@@ -329,7 +329,7 @@ flower-server-app server:app --insecure
 
 For W&B, you will need to login on the [website](wandb.ai).
 
-For Tensorboard, you will need to run the following command in your terminal:
+For TensorBoard, you will need to run the following command in your terminal:
 
 ```sh
 tensorboard --logdir <LOG_DIR>
