@@ -106,6 +106,7 @@ class FedCiR(FedAvg):
         lambda_align_g=1.0,
         prior_steps=5000,
         stats_run_file=None,
+        latent_dim=16,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -168,7 +169,8 @@ class FedCiR(FedAvg):
         self.steps_gen = steps_g
         self.gen_stats = gen_stats
         self.device = device
-        self.gen_model = VAE(z_dim=16, encoder_only=True).to(self.device)
+        self.latent_dim = latent_dim
+        self.gen_model = VAE(z_dim=self.latent_dim, encoder_only=True).to(self.device)
         self.prior_steps = prior_steps
         self.alignment_loader = alignment_dataloader
         self.ref_mu, self.ref_logvar = None, None  # not computing ref stats
@@ -176,7 +178,9 @@ class FedCiR(FedAvg):
         self.stats_run_file = stats_run_file
 
     def compute_ref_stats(self, use_PCA=True):
-        ref_model = infoVAE(latent_size=16, dis_hidden_size=4).to(self.device)
+        ref_model = infoVAE(latent_size=self.latent_dim, dis_hidden_size=4).to(
+            self.device
+        )
         opt_ref = torch.optim.Adam(ref_model.parameters(), lr=1e-3)
         for ep in range(self.prior_steps):
             for images, labels in self.alignment_loader:
@@ -388,7 +392,8 @@ class FedCiR(FedAvg):
             for _, fit_res in results
         ]
         temp_local_models = [
-            VAE(z_dim=16).to(self.device) for _ in range(len(weights_results))
+            VAE(z_dim=self.latent_dim).to(self.device)
+            for _ in range(len(weights_results))
         ]
         optimizer = torch.optim.Adam(self.gen_model.parameters(), lr=self.lr_gen)
 

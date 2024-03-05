@@ -24,6 +24,7 @@ from utils_mnist import (
     non_iid_train_iid_test_6789,
     subset_alignment_dataloader,
     visualize_plotly_latent_representation,
+    sample_latents,
 )
 from utils_mnist import VAE
 import os
@@ -50,10 +51,13 @@ parser.add_argument(
 )
 parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
 parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
+parser.add_argument("--latent_dim", type=int, required=True, help="Latent dimension.")
+
 import wandb
 
 args = parser.parse_args()
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+LATENT_DIM = args.latent_dim
 IDENTIFIER = args.identifier
 if not os.path.exists(IDENTIFIER):
     os.makedirs(IDENTIFIER)
@@ -69,7 +73,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.cid = cid
 
         # Instantiate model
-        self.model = VAE(z_dim=16)
+        self.model = VAE(z_dim=LATENT_DIM)
 
         # Determine device
         self.device = DEVICE
@@ -221,13 +225,14 @@ def main():
             # Determine device
             device = DEVICE
 
-            model = VAE(z_dim=16)
+            model = VAE(z_dim=LATENT_DIM)
             model.to(device)
             set_params(model, parameters)
             model.eval()
             if server_round == 0 or server_round == args.num_rounds:
                 with open(
-                    f"{IDENTIFIER}/weights_avg_round_{server_round}.npy", "wb"
+                    f"{IDENTIFIER}/{run.name}-weights_avg_round_{server_round}.npy",
+                    "wb",
                 ) as f:
                     np.save(f, np.array(parameters, dtype=object))
                 wandb.watch(model)
@@ -249,8 +254,9 @@ def main():
             )
             global_val_loss = eval_reconstrution(model, testloader, device)
             with torch.no_grad():
-                z = torch.randn(64, 16).to(device)
-                recon = model.decoder(z).cpu()
+                z_sample_np = sample_latents(model, testloader, device, 64)
+                z_sample = torch.tensor(z_sample_np, dtype=torch.float32).to(device)
+                recon = model.decoder(z_sample).cpu()
                 recon = recon.view(-1, 1, 28, 28)
                 fig, ax = plt.subplots(figsize=(10, 10))
                 img = make_grid(recon, nrow=8, normalize=True).permute(1, 2, 0).numpy()
@@ -274,7 +280,7 @@ def main():
 
     # Download dataset and partition it
     trainsets, valsets = non_iid_train_iid_test()
-    net = VAE(z_dim=16).to(DEVICE)
+    net = VAE(z_dim=LATENT_DIM).to(DEVICE)
 
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)

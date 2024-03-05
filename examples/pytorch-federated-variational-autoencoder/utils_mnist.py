@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from torchvision.utils import save_image
 from collections import OrderedDict
 import copy
-
+import flwr as fl
 from flwr.common import parameters_to_ndarrays
 from torch.nn.parameter import Parameter
 from typing import List, Tuple
@@ -321,6 +321,13 @@ def iid_train_iid_test():
     return partition_datasets_train, partition_datasets_test
 
 
+def set_params(model: torch.nn.ModuleList, params: List[fl.common.NDArrays]):
+    """Set model weights from a list of NumPy ndarrays."""
+    params_dict = zip(model.state_dict().keys(), params)
+    state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
+    model.load_state_dict(state_dict, strict=True)
+
+
 def train(
     net,
     trainloader,
@@ -433,7 +440,7 @@ def train_align(
 ):
     """Train the network on the training set."""
     net.train()
-    temp_gen_model = VAE(z_dim=16, encoder_only=True).to(device)
+    temp_gen_model = VAE(z_dim=config["latent_dim"], encoder_only=True).to(device)
     gen_weights = parameters_to_ndarrays(config["gen_params"])
     params_dict = zip(temp_gen_model.state_dict().keys(), gen_weights)
     state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
@@ -645,32 +652,37 @@ def visualize_plotly_latent_representation(
     model, test_loader, device, use_PCA=False, num_class=10
 ):
     model.eval()
-    all_latents = []
+    all_recons = []
     all_labels = []
     all_means = []
 
     with torch.no_grad():
         for data, labels in test_loader:
             data = data.to(device)
-            z, mu, _ = model(data)
-            all_latents.append(z.cpu().numpy())
+            recon, mu, _ = model(data)
+            all_recons.append(recon.cpu().numpy())
             all_means.append(mu.cpu().numpy())
             all_labels.append(labels.numpy())
 
-    all_latents = np.concatenate(all_latents, axis=0)
-    all_labels = np.concatenate(all_labels, axis=0)
+    all_recons = np.concatenate(all_recons, axis=0)
     all_means = np.concatenate(all_means, axis=0)
-    reduced_latents = all_latents
+    all_labels = np.concatenate(all_labels, axis=0)
+    reduced_latents = all_means
     if use_PCA:
-        # Apply PCA using PyTorch
-        cov_matrix = torch.tensor(np.cov(all_latents.T), dtype=torch.float32)
-        _, _, V = torch.svd_lowrank(cov_matrix, q=2)
+        # # Apply PCA using PyTorch
+        # cov_matrix = torch.tensor(np.cov(all_means.T), dtype=torch.float32)
+        # _, _, V = torch.svd_lowrank(cov_matrix, q=2)
 
-        # Project data onto the first two principal components
-        reduced_latents = torch.mm(torch.tensor(all_latents, dtype=torch.float32), V)
+        # # Project data onto the first two principal components
+        # reduced_latents = torch.mm(torch.tensor(all_means, dtype=torch.float32), V)
 
-        # Convert to numpy array
-        reduced_latents = reduced_latents.numpy()
+        # # Convert to numpy array
+        # reduced_latents = reduced_latents.numpy()
+        from sklearn.decomposition import PCA
+
+        pca = PCA(n_components=2)
+        reduced_latents = pca.fit_transform(all_means)
+
     traces = []
     for label in np.unique(all_labels):
         indices = np.where(all_labels == label)
@@ -703,6 +715,26 @@ def sample(net, device):
         z = z.to(device)
         gen_image = net.decode(z)
     return gen_image
+
+
+def sample_latents(model, test_loader, device, num_samples=64):
+    model.eval()
+
+    all_means = []
+
+    with torch.no_grad():
+        for data, labels in test_loader:
+            data = data.to(device)
+            _, mu, _ = model(data)
+            all_means.append(mu.cpu().numpy())
+
+    all_means = np.concatenate(all_means, axis=0)
+    from sklearn.mixture import GaussianMixture
+
+    gmm = GaussianMixture(n_components=20, covariance_type="diag", random_state=0)
+    gmm.fit(all_means)
+
+    return gmm.sample(num_samples)[0]
 
 
 def denormalize(tensor):

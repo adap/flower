@@ -22,6 +22,7 @@ from utils_mnist import (
     train_align,
     eval_reconstrution,
     visualize_plotly_latent_representation,
+    sample_latents,
 )
 from utils_mnist import VAE
 import os
@@ -48,6 +49,7 @@ parser.add_argument(
 )
 parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
 parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
+parser.add_argument("--latent_dim", type=int, required=True, help="Latent dimension.")
 args = parser.parse_args()
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -60,6 +62,8 @@ if not os.path.exists(prior_stats_dir):
     os.makedirs(prior_stats_dir)
 import ray
 
+LATENT_DIM = args.latent_dim
+
 
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, trainset, valset, cid):
@@ -68,7 +72,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.cid = cid
 
         # Instantiate model
-        self.model = VAE(z_dim=16)
+        self.model = VAE(z_dim=LATENT_DIM)
 
         # Determine device
         self.device = DEVICE
@@ -196,7 +200,6 @@ def main():
     )
 
     print(f"running these hparams-> {wandb.config}")
-
     wandb.define_metric("server_round")
     wandb.define_metric("global_*", step_metric="server_round")
     wandb.define_metric("generated_*", step_metric="server_round")
@@ -217,6 +220,7 @@ def main():
             "lr_g": wandb.config["lr_g"],
             "steps_g": wandb.config["steps_g"],
             "beta": wandb.config["beta"],
+            "latent_dim": LATENT_DIM,
         }
         return config
 
@@ -232,14 +236,15 @@ def main():
             # Determine device
             device = DEVICE
 
-            model = VAE(z_dim=16)
+            model = VAE(z_dim=LATENT_DIM)
             model.to(device)
             set_params(model, parameters)
             model.eval()
             if server_round == 0 or server_round == args.num_rounds:
                 # Save global model weights of first and last round
                 with open(
-                    f"{IDENTIFIER}/weights_cir_round_{server_round}.npy", "wb"
+                    f"{IDENTIFIER}/{run.name}-weights_cir_round_{server_round}.npy",
+                    "wb",
                 ) as f:
                     np.save(f, np.array(parameters, dtype=object))
                 wandb.watch(model)
@@ -262,14 +267,14 @@ def main():
             )
             global_val_loss = eval_reconstrution(model, testloader, device)
             with torch.no_grad():
-                z = torch.randn(64, 16).to(device)
-                recon = model.decoder(z).cpu()
+                z_sample_np = sample_latents(model, testloader, device, 64)
+                z_sample = torch.tensor(z_sample_np, dtype=torch.float32).to(device)
+                recon = model.decoder(z_sample).cpu()
                 recon = recon.view(-1, 1, 28, 28)
                 fig, ax = plt.subplots(figsize=(10, 10))
                 img = make_grid(recon, nrow=8, normalize=True).permute(1, 2, 0).numpy()
                 ax.imshow(img)
                 ax.axis("off")
-                # fig.savefig(f"{IDENTIFIER}/generated_cir_round_{server_round}.png")
 
             wandb.log(
                 {
@@ -287,8 +292,8 @@ def main():
 
     # Download dataset and partition it
     trainsets, valsets = non_iid_train_iid_test()
-    net = VAE(z_dim=16).to(DEVICE)
-    gen_net = VAE(z_dim=16, encoder_only=True).to(DEVICE)
+    net = VAE(z_dim=LATENT_DIM).to(DEVICE)
+    gen_net = VAE(z_dim=LATENT_DIM, encoder_only=True).to(DEVICE)
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)
     n2 = [val.cpu().numpy() for _, val in gen_net.state_dict().items()]
@@ -315,6 +320,7 @@ def main():
         num_classes=NUM_CLASSES,
         prior_steps=wandb.config["prior_steps"],
         stats_run_file=os.path.join(prior_stats_dir, f"{wandb.run.name}.npy"),
+        latent_dim=LATENT_DIM,
     )
 
     # Resources to be assigned to each virtual client
