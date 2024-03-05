@@ -17,7 +17,7 @@
 
 import importlib
 
-from flwr.simulation.run_simulation import run_simulation
+from flwr.simulation.run_simulation import run_simulation, run_simulation_from_cli
 
 is_ray_installed = importlib.util.find_spec("ray") is not None
 
@@ -36,7 +36,4 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
         raise ImportError(RAY_IMPORT_ERROR)
 
 
-__all__ = [
-    "start_simulation",
-    "run_simulation",
-]
+__all__ = ["start_simulation", "run_simulation_from_cli", "run_simulation"]
