@@ -49,7 +49,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: GetNodesRequest, context: grpc.ServicerContext
     ) -> GetNodesResponse:
         """Get available nodes."""
-        log(INFO, "DriverServicer.GetNodes")
+        log(DEBUG, "DriverServicer.GetNodes")
         state: State = self.state_factory.state()
         all_ids: Set[int] = state.get_nodes(request.run_id)
         nodes: List[Node] = [
