@@ -93,7 +93,7 @@ def run_simulation(
         A simulation backend that runs `ClientApp`s.
 
     backend_config : Optional[Dict[str, ConfigsRecordValues]]
-        'A dictionary, e.g {"<keyA>":<value>, "<keyB>":<value>} to configure a
+        'A dictionary, e.g {"<keyA>": <value>, "<keyB>": <value>} to configure a
         backend. Values supported in <value> are those included by
         `flwr.common.typing.ConfigsRecordValues`.
 
