@@ -102,7 +102,7 @@ def divide_dataset(
         Dataset to be divided.
     division: Union[List[float], Tuple[float, ...], Dict[str, float]]
         Configuration specifying how the dataset is divided. Each fraction has to be
-        >0 and <1. They have to sum up to at most 1 (smaller sum is possible).
+        >0 and <=1. They have to sum up to at most 1 (smaller sum is possible).
 
     Returns
     -------
