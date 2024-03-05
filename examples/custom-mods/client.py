@@ -49,44 +49,40 @@ def client_fn(cid: str):
 
 def get_wandb_mod(name: str) -> Mod:
     def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message:
-        round = int(msg.metadata.group_id)
+        server_round = int(msg.metadata.group_id)
 
         run_id = msg.metadata.run_id
-        group_name = f"Workload ID: {run_id}"
+        group_name = f"Run ID: {run_id}"
 
-        client_id = str(msg.metadata.dst_node_id)
-        run_name = f"Client ID: {client_id}"
+        node_id = str(msg.metadata.dst_node_id)
+        run_name = f"Node ID: {node_id}"
 
         wandb.init(
             project=name,
             group=group_name,
             name=run_name,
-            id=f"{run_id}{client_id}",
+            id=f"{run_id}{node_id}",
             resume="allow",
             reinit=True,
         )
 
         start_time = time.time()
 
-        bwd = app(msg, context)
+        reply = app(msg, context)
 
-        msg_type = bwd.metadata.message_type
+        time_diff = time.time() - start_time
 
-        if msg_type == MESSAGE_TYPE_FIT:
+        if reply.metadata.message_type == MESSAGE_TYPE_FIT and reply.has_content():
 
-            time_diff = time.time() - start_time
+            metrics = reply.content.configs_records
 
-            metrics = bwd.content.configs_records
+            results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
 
-            results_to_log = dict(
-                metrics.get(f"{msg_type}res.metrics", ConfigsRecord())
-            )
+            results_to_log["fit_time"] = time_diff
 
-            results_to_log[f"{msg_type}_time"] = time_diff
+            wandb.log(results_to_log, step=int(server_round), commit=True)
 
-            wandb.log(results_to_log, step=int(round), commit=True)
-
-        return bwd
+        return reply
 
     return wandb_mod
 
@@ -97,36 +93,36 @@ def get_tensorboard_mod(logdir) -> Mod:
     def tensorboard_mod(
         msg: Message, context: Context, app: ClientAppCallable
     ) -> Message:
-        logdir_run = os.path.join(logdir, msg.metadata.run_id)
+        logdir_run = os.path.join(logdir, str(msg.metadata.run_id))
 
-        client_id = str(msg.metadata.dst_node_id)
+        node_id = str(msg.metadata.dst_node_id)
 
-        round = int(msg.metadata.group_id)
+        server_round = int(msg.metadata.group_id)
 
         start_time = time.time()
 
-        bwd = app(msg, context)
+        reply = app(msg, context)
 
         time_diff = time.time() - start_time
 
-        if bwd.metadata.message_type == MESSAGE_TYPE_FIT:
-            writer = tf.summary.create_file_writer(os.path.join(logdir_run, client_id))
+        if reply.metadata.message_type == MESSAGE_TYPE_FIT and reply.has_content():
+            writer = tf.summary.create_file_writer(os.path.join(logdir_run, node_id))
 
             metrics = dict(
-                bwd.content.configs_records.get("fitres.metrics", ConfigsRecord())
+                reply.content.configs_records.get("fitres.metrics", ConfigsRecord())
             )
-            # Write aggregated loss
-            with writer.as_default(step=round):  # pylint: disable=not-context-manager
-                tf.summary.scalar(f"fit_time", time_diff, step=round)
+
+            with writer.as_default(step=server_round):
+                tf.summary.scalar(f"fit_time", time_diff, step=server_round)
                 for metric in metrics:
                     tf.summary.scalar(
                         f"{metric}",
                         metrics[metric],
-                        step=round,
+                        step=server_round,
                     )
                 writer.flush()
 
-        return bwd
+        return reply
 
     return tensorboard_mod
 
@@ -134,11 +130,15 @@ def get_tensorboard_mod(logdir) -> Mod:
 # Run via `flower-client-app client:wandb_app`
 wandb_app = fl.client.ClientApp(
     client_fn=client_fn,
-    mods=[get_wandb_mod("Custom mods example")],
+    mods=[
+        get_wandb_mod("Custom mods example"),
+    ],
 )
 
 # Run via `flower-client-app client:tb_app`
 tb_app = fl.client.ClientApp(
     client_fn=client_fn,
-    mods=[get_tensorboard_mod(".runs_history/")],
+    mods=[
+        get_tensorboard_mod(".runs_history/"),
+    ],
 )

@@ -15,10 +15,10 @@ As described [here](https://flower.ai/docs/framework/how-to-use-built-in-mods.ht
 def basic_mod(msg: Message, context: Context, app: ClientApp) -> Message:
     # Do something with incoming Message (or Context)
     # before passing to the inner ``ClientApp``
-    msg = app(msg, context)
+    reply = app(msg, context)
     # Do something with outgoing Message (or Context)
     # before returning
-    return msg
+    return reply
 ```
 
 and used when defining the `ClientApp`:
@@ -76,7 +76,7 @@ def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message
 Now, before the message is processed by the server, we will store the starting time and the round number, in order to compute the time it took the client to perform its fit step.
 
 ```python
-round = int(msg.metadata.group_id)
+server_round = int(msg.metadata.group_id)
 start_time = time.time()
 ```
 
@@ -89,71 +89,62 @@ reply = app(msg, context)
 And now, with the message we got back, we can gather our metrics:
 
 ```python
-msg_type = reply.metadata.message_type
-
-if msg_type == MESSAGE_TYPE_FIT:
+if reply.metadata.message_type == MESSAGE_TYPE_FIT and reply.has_content():
 
     time_diff = time.time() - start_time
 
     metrics = reply.content.configs_records
 
-    results_to_log = dict(
-        metrics.get(f"{msg_type}res.metrics", ConfigsRecord())
-    )
-
-    results_to_log[f"{msg_type}_time"] = time_diff
+    results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
+    results_to_log["fit_time"] = time_diff
 ```
 
-Note that we store our metrics in the `results_to_log` variable and that we only initialize this variable when our client is sending back fit results.
+Note that we store our metrics in the `results_to_log` variable and that we only initialize this variable when our client is sending back fit results (with content in it).
 
 Finally, we can send our results to W&B using:
 
 ```python
-wandb.log(results_to_log, step=int(round), commit=True)
+wandb.log(results_to_log, step=int(server_round), commit=True)
 ```
 
 The complete mod becomes:
 
 ```python
 def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message:
-    round = int(msg.metadata.group_id)
+    server_round = int(msg.metadata.group_id)
 
     run_id = msg.metadata.run_id
-    group_name = f"Workload ID: {run_id}"
+    group_name = f"Run ID: {run_id}"
 
-    client_id = str(msg.metadata.dst_node_id)
-    run_name = f"Client ID: {client_id}"
+    node_id = str(msg.metadata.dst_node_id)
+    run_name = f"Node ID: {node_id}"
 
     wandb.init(
         project="Mod Name",
         group=group_name,
         name=run_name,
-        id=f"{run_id}{client_id}",
+        id=f"{run_id}{node_id}",
         resume="allow",
         reinit=True,
     )
 
     start_time = time.time()
 
-    bwd = app(msg, context)
+    reply = app(msg, context)
 
-    msg_type = bwd.metadata.message_type
-
-    if msg_type == MESSAGE_TYPE_FIT:
+    if reply.metadata.message_type == MESSAGE_TYPE_FIT and reply.has_content():
 
         time_diff = time.time() - start_time
 
-        metrics = bwd.content.configs_records
+        metrics = reply.content.configs_records
 
-        results_to_log = dict(
-            metrics.get(f"{msg_type}res.metrics", ConfigsRecord())
-        )
+        results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
 
-        results_to_log[f"{msg_type}_time"] = time_diff
+        results_to_log["fit_time"] = time_diff
 
-        wandb.log(results_to_log, step=int(round), commit=True)
+        wandb.log(results_to_log, step=int(server_round), commit=True)
 
-    return bwd
+    return reply
 ```
 
 And it can be used like:
@@ -170,44 +161,40 @@ If we want to pass an argument to our mod, we can use a wrapper function:
 ```python
 def get_wandb_mod(name: str) -> Mod:
     def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message:
-        round = int(msg.metadata.group_id)
+        server_round = int(msg.metadata.group_id)
 
         run_id = msg.metadata.run_id
-        group_name = f"Workload ID: {run_id}"
+        group_name = f"Run ID: {run_id}"
 
-        client_id = str(msg.metadata.dst_node_id)
-        run_name = f"Client ID: {client_id}"
+        node_id = str(msg.metadata.dst_node_id)
+        run_name = f"Node ID: {node_id}"
 
         wandb.init(
             project=name,
             group=group_name,
             name=run_name,
-            id=f"{run_id}{client_id}",
+            id=f"{run_id}{node_id}",
             resume="allow",
             reinit=True,
         )
 
         start_time = time.time()
 
-        bwd = app(msg, context)
+        reply = app(msg, context)
 
-        msg_type = bwd.metadata.message_type
-
-        if msg_type == MESSAGE_TYPE_FIT:
+        if reply.metadata.message_type == MESSAGE_TYPE_FIT and reply.has_content():
 
             time_diff = time.time() - start_time
 
-            metrics = bwd.content.configs_records
+            metrics = reply.content.configs_records
 
-            results_to_log = dict(
-                metrics.get(f"{msg_type}res.metrics", ConfigsRecord())
-            )
+            results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))
 
-            results_to_log[f"{msg_type}_time"] = time_diff
+            results_to_log["fit_time"] = time_diff
 
-            wandb.log(results_to_log, step=int(round), commit=True)
+            wandb.log(results_to_log, step=int(server_round), commit=True)
 
-        return bwd
+        return reply
 
     return wandb_mod
 ```
@@ -234,36 +221,36 @@ def get_tensorboard_mod(logdir) -> Mod:
     def tensorboard_mod(
         msg: Message, context: Context, app: ClientAppCallable
     ) -> Message:
-        logdir_run = os.path.join(logdir, msg.metadata.run_id)
+        logdir_run = os.path.join(logdir, str(msg.metadata.run_id))
 
-        client_id = str(msg.metadata.dst_node_id)
+        node_id = str(msg.metadata.dst_node_id)
 
-        round = int(msg.metadata.group_id)
+        server_round = int(msg.metadata.group_id)
 
         start_time = time.time()
 
-        bwd = app(msg, context)
+        reply = app(msg, context)
 
         time_diff = time.time() - start_time
 
-        if bwd.metadata.message_type == MESSAGE_TYPE_FIT:
-            writer = tf.summary.create_file_writer(os.path.join(logdir_run, client_id))
+        if reply.metadata.message_type == MESSAGE_TYPE_FIT and reply.has_content():
+            writer = tf.summary.create_file_writer(os.path.join(logdir_run, node_id))
 
             metrics = dict(
-                bwd.content.configs_records.get("fitres.metrics", ConfigsRecord())
+                reply.content.configs_records.get("fitres.metrics", ConfigsRecord())
             )
-            # Write aggregated loss
-            with writer.as_default(step=round):  # pylint: disable=not-context-manager
-                tf.summary.scalar(f"fit_time", time_diff, step=round)
+
+            with writer.as_default(step=server_round):
+                tf.summary.scalar(f"fit_time", time_diff, step=server_round)
                 for metric in metrics:
                     tf.summary.scalar(
                         f"{metric}",
                         metrics[metric],
-                        step=round,
+                        step=server_round,
                     )
                 writer.flush()
 
-        return bwd
+        return reply
 
     return tensorboard_mod
 ```
