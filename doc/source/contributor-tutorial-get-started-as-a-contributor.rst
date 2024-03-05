@@ -70,7 +70,7 @@ Convenience Scripts
 
 The Flower repository contains a number of convenience scripts to make
 recurring development tasks easier and less error-prone. See the :code:`/dev`
-subdirectory for a full list. The following scripts are amonst the most
+subdirectory for a full list. The following scripts are amongst the most
 important ones:
 
 Create/Delete Virtual Environment
