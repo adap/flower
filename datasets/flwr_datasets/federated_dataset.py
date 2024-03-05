@@ -13,7 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """FederatedDataset."""
-import warnings
+
+
 from typing import Dict, List, Optional, Tuple, Union
 
 import datasets
@@ -117,7 +118,6 @@ class FederatedDataset:
         self,
         node_id: int,
         split: Optional[str] = None,
-        inner_split: Optional[Union[int, str]] = None,
     ) -> Union[Dataset, List[Dataset], DatasetDict]:
         """Load the partition specified by the idx in the selected split.
 
@@ -140,11 +140,6 @@ class FederatedDataset:
             not need to provide this argument, but if `partitioners={"train": 10,
             "test": 100}`, you need to set it to differentiate which partitioner should
             be used.
-        inner_split:  Optional[Union[int, str]]
-            In case of the `partition_split` specification you can identify the split
-            after the division that you want to return, otherwise all are returned. If
-            `partition_split` is list or tuple specify int, if it is dict specify the
-            str.
 
         Returns
         -------
@@ -169,28 +164,11 @@ class FederatedDataset:
         self._assign_dataset_to_partitioner(split)
         partition = partitioner.load_partition(node_id)
         if self._partition_division is None:
-            if inner_split is not None:
-                warnings.warn(
-                    "`inner_split` was specified but it does not have any "
-                    "effect when the `partition_division` is None."
-                )
             return partition
         divided_partition: Union[List[Dataset], DatasetDict] = divide_dataset(
             partition, self._partition_division
         )
-        if inner_split is None:
-            return divided_partition
-        if isinstance(divided_partition, list):
-            if isinstance(inner_split, int):
-                return divided_partition[inner_split]
-            raise ValueError(
-                "The type of `inner_split` = {type(inner_split)}, does not "
-                "work with the specified type `divide_partition` that "
-                "results in list."
-            )
-        if isinstance(divided_partition, DatasetDict):
-            return divided_partition[inner_split]
-        raise ValueError("The types of divided_partition should be list or dict only.")
+        return divided_partition
 
     def load_full(self, split: str) -> Dataset:
         """Load the full split of the dataset.
