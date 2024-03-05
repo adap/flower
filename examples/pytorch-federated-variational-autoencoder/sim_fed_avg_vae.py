@@ -210,7 +210,7 @@ def main():
             "epochs": wandb.config["epochs"],  # Number of local epochs done by clients
             "batch_size": wandb.config["batch_size"],
             "server_round": server_round,
-            "beta": 1,
+            "beta": wandb.config["beta"],
         }
         return config
 
@@ -324,8 +324,9 @@ if __name__ == "__main__":
             # "epochs": {"values": [2, 5, 10]},
             "epochs": {"values": [5]},
             "batch_size": {"values": [128]},
+            "beta": {"values": [1, 0]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=1)
+    wandb.agent(sweep_id, function=main, count=4)
