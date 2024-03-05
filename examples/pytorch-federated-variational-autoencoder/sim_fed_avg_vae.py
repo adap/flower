@@ -200,6 +200,7 @@ def main():
     print(f"running these hparams-> {wandb.config}")
     wandb.define_metric("server_round")
     wandb.define_metric("global_*", step_metric="server_round")
+    wandb.define_metric("generated_*", step_metric="server_round")
     wandb.define_metric("client_round")
     wandb.define_metric("train_*", step_metric="client_round")
     wandb.define_metric("eval_*", step_metric="client_round")
@@ -271,7 +272,7 @@ def main():
                     f"global_latent_rep": latent_reps,
                     f"global_val_loss": global_val_loss,
                     "server_round": server_round,
-                    f"generated_avg_round_{server_round}": plt,
+                    f"generated_avg_round": plt,
                 }
             )
             plt.close("all")
