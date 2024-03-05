@@ -51,7 +51,7 @@ wandb.init(
 
 In our case, the group should be the `run_id`, specific to a `ServerApp` run, and the `name` should be the `node_id`. This will make it easy to navigate our W&B project, as for each run we will be able to see the computed results as a whole or for each individual client.
 
-The `id` needs to be unique, so it will be a combinaison of `run_id` and `node_id`.
+The `id` needs to be unique, so it will be a combination of `run_id` and `node_id`.
 
 In the end we have:
 
