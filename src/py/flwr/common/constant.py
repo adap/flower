@@ -45,8 +45,6 @@ MESSAGE_TYPE_EVALUATE = "evaluate"
 class MessageType:
     """Message type."""
 
-    GET_PROPERTIES = "get_properties"
-    GET_PARAMETERS = "get_parameters"
     TRAIN = "train"
     EVALUATE = "evaluate"
 
