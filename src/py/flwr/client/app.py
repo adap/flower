@@ -602,7 +602,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         ],
     ],
     str,
-    type[Exception],
+    Type[Exception],
 ]:
     # Parse IP address
     parsed_address = parse_address(server_address)
