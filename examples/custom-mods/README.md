@@ -58,16 +58,16 @@ In the end we have:
 ```python
 def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message:
     run_id = msg.metadata.run_id
-    group_name = f"Workload ID: {run_id}"
+    group_name = f"Run ID: {run_id}"
 
-    client_id = str(msg.metadata.dst_node_id)
-    run_name = f"Client ID: {client_id}"
+    node_id = str(msg.metadata.dst_node_id)
+    run_name = f"Node ID: {node_id}"
 
     wandb.init(
         project="Mod Name",
         group=group_name,
         name=run_name,
-        id=f"{run_id}{client_id}",
+        id=f"{run_id}{node_id}",
         resume="allow",
         reinit=True,
     )
@@ -83,19 +83,19 @@ start_time = time.time()
 And then, we can send the message to the client:
 
 ```python
-bwd = app(msg, context)
+reply = app(msg, context)
 ```
 
-And now, we the message we got back, we can gather our metrics:
+And now, with the message we got back, we can gather our metrics:
 
 ```python
-msg_type = bwd.metadata.message_type
+msg_type = reply.metadata.message_type
 
 if msg_type == MESSAGE_TYPE_FIT:
 
     time_diff = time.time() - start_time
 
-    metrics = bwd.content.configs_records
+    metrics = reply.content.configs_records
 
     results_to_log = dict(
         metrics.get(f"{msg_type}res.metrics", ConfigsRecord())
@@ -217,13 +217,15 @@ And use it like:
 ```python
 app = fl.client.ClientApp(
     client_fn=client_fn,
-    mods=[get_wandb_mod("Custom mods example")],
+    mods=[
+        get_wandb_mod("Custom mods example"),
+     ],
 )
 ```
 
-### Tensorboard Flower Mod
+### TensorBoard Flower Mod
 
-The [Tensorboard](https://www.tensorflow.org/tensorboard) Mod will only differ in the initialization and how the data is sent to Tensorboard:
+The [TensorBoard](https://www.tensorflow.org/tensorboard) Mod will only differ in the initialization and how the data is sent to TensorBoard:
 
 ```python
 def get_tensorboard_mod(logdir) -> Mod:
