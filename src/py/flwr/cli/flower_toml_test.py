@@ -40,7 +40,7 @@ def test_load_flower_toml_load_from_cwd(tmp_path: str) -> None:
         [flower.engine]
         name = "simulation" # optional
 
-        [flower.engine.simulation.super-node]
+        [flower.engine.simulation.supernode]
         count = 10 # optional
     """
     expected_config = {
