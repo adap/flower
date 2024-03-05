@@ -72,7 +72,7 @@ def run_simulation(
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
 ) -> None:
-    r"""Launch the Simulation Engine.
+    r"""Run a Flower App using the Simulation Engine.
 
     Parameters
     ----------
