@@ -365,7 +365,7 @@ def run_superlink() -> None:
             client_app_attr=args.client_app,
             backend_name=args.backend,
             backend_config_json_stream=args.backend_config,
-            working_dir=args.dir,
+            working_dir=args.app_dir,
             state_factory=state_factory,
             f_stop=f_stop,
         )
@@ -705,7 +705,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "`flwr.common.typing.ConfigsRecordValues`. ",
     )
     parser.add_argument(
-        "--dir",
+        "--app-dir",
         default="",
         help="Add specified directory to the PYTHONPATH and load"
         "ClientApp from there."
