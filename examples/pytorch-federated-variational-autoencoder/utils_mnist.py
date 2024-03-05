@@ -462,6 +462,7 @@ def train_align(
             z_g, mu_g, logvar_g = temp_gen_model(images)
             vae_loss2 = vae_loss(net.decoder(z_g), images, mu_g, logvar_g, beta)
             loss = vae_loss1 + lambda_reg * vae_loss2
+            accumulate_align_loss = 0
             for align_img, _ in align_loader:
                 align_img = align_img.to(device)
                 _, mu_g, log_var_g = temp_gen_model(align_img)
@@ -470,7 +471,8 @@ def train_align(
                 loss_align = 0.5 * (log_var_g - log_var - 1) + (
                     log_var.exp() + (mu - mu_g).pow(2)
                 ) / (2 * log_var_g.exp())
-            loss_align_reduced = loss_align.sum(dim=1).sum()
+                accumulate_align_loss += loss_align.sum(dim=1).sum()
+            loss_align_reduced = accumulate_align_loss
             loss += lambda_align * loss_align_reduced
             loss.backward()
             optimizer.step()

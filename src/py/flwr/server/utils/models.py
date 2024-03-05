@@ -340,7 +340,7 @@ class infoVAE(nn.Module):
         recon_x = self.decode(z, y)
         pred_y = self.discriminate(z)
 
-        return recon_x, mu, logvar, pred_y
+        return recon_x, mu, logvar, pred_y, z
 
 
 if __name__ == "__main__":

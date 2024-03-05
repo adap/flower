@@ -5,8 +5,7 @@ from utils_mnist import (
     test,
     visualize_gen_image,
     visualize_gmm_latent_representation,
-    non_iid_train_iid_test_6789,
-    subset_alignment_dataloader,
+    non_iid_train_iid_test,
     alignment_dataloader,
     train_align,
     eval_reconstrution,
@@ -22,7 +21,7 @@ from torch.utils.data import DataLoader
 NUM_CLIENTS = 2
 NUM_CLASSES = 10
 samples_per_class = 200
-sub_alignment_dataloader = subset_alignment_dataloader(
+sub_alignment_dataloader = alignment_dataloader(
     samples_per_class=samples_per_class,
     batch_size=samples_per_class * NUM_CLASSES,
     shuffle=True,
@@ -132,7 +131,7 @@ class infoVAE(nn.Module):
         recon_x = self.decode(z, y)
         pred_y = self.discriminate(z)
 
-        return recon_x, mu, logvar, pred_y
+        return recon_x, mu, logvar, pred_y, z
 
 
 def info_vae_loss(recon_x, x, mu, logvar, y, y_pred, lambda_kl=0.01, lambda_info=1.0):
@@ -210,7 +209,7 @@ def train():
         ref_model.eval()
         with torch.no_grad():
             test_latents = []
-            test_labels = []  
+            test_labels = []
             for (
                 x,
                 labels,

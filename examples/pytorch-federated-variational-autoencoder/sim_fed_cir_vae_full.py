@@ -4,7 +4,6 @@ from typing import Dict, Tuple, List
 from torch.utils.data import DataLoader
 from logging import WARNING, DEBUG
 import torch
-
 import flwr as fl
 from flwr.common import Metrics, ndarrays_to_parameters
 from flwr.common.logger import configure, log
@@ -13,7 +12,8 @@ import wandb
 import os
 
 os.environ["WANDB_START_METHOD"] = "thread"
-
+if not os.path.exists("prior_stats_folder"):
+    os.makedirs("prior_stats_folder")
 from utils_mnist import (
     test,
     visualize_gen_image,
@@ -27,6 +27,8 @@ from utils_mnist import VAE
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from torchvision.utils import make_grid
+
 
 NUM_CLIENTS = 5
 NUM_CLASSES = 10
@@ -53,6 +55,9 @@ IDENTIFIER = args.identifier
 if not os.path.exists(IDENTIFIER):
     os.makedirs(IDENTIFIER)
 configure(identifier=IDENTIFIER, filename=f"logs_{IDENTIFIER}.log")
+prior_stats_dir = f"{IDENTIFIER}/prior_stats_dir"
+if not os.path.exists(prior_stats_dir):
+    os.makedirs(prior_stats_dir)
 import ray
 
 
@@ -191,8 +196,10 @@ def main():
     )
 
     print(f"running these hparams-> {wandb.config}")
+
     wandb.define_metric("server_round")
     wandb.define_metric("global_*", step_metric="server_round")
+    wandb.define_metric("generated_*", step_metric="server_round")
     wandb.define_metric("client_round")
     wandb.define_metric("train_*", step_metric="client_round")
     wandb.define_metric("eval_*", step_metric="client_round")
@@ -228,6 +235,7 @@ def main():
             model = VAE(z_dim=16)
             model.to(device)
             set_params(model, parameters)
+            model.eval()
             if server_round == 0 or server_round == args.num_rounds:
                 # Save global model weights of first and last round
                 with open(
@@ -253,6 +261,16 @@ def main():
                 use_PCA=True,
             )
             global_val_loss = eval_reconstrution(model, testloader, device)
+            with torch.no_grad():
+                z = torch.randn(64, 16).to(device)
+                recon = model.decoder(z).cpu()
+                recon = recon.view(-1, 1, 28, 28)
+                fig, ax = plt.subplots(figsize=(10, 10))
+                img = make_grid(recon, nrow=8, normalize=True).permute(1, 2, 0).numpy()
+                ax.imshow(img)
+                ax.axis("off")
+                # fig.savefig(f"{IDENTIFIER}/generated_cir_round_{server_round}.png")
+
             wandb.log(
                 {
                     f"global_true_image": wandb.Image(true_img),
@@ -260,6 +278,7 @@ def main():
                     f"global_latent_rep": latent_reps,
                     f"global_val_loss": global_val_loss,
                     "server_round": server_round,
+                    f"generated_cir_samples": plt,
                 }
             )
             plt.close("all")
@@ -295,6 +314,7 @@ def main():
         device=DEVICE,
         num_classes=NUM_CLASSES,
         prior_steps=wandb.config["prior_steps"],
+        stats_run_file=os.path.join(prior_stats_dir, f"{wandb.run.name}.npy"),
     )
 
     # Resources to be assigned to each virtual client
@@ -323,12 +343,12 @@ if __name__ == "__main__":
         "method": "random",
         "metric": {"name": "global_val_loss", "goal": "minimize"},
         "parameters": {
-            "sample_per_class": {"values": [100, 200, 300]},
+            "sample_per_class": {"values": [200]},
             # "lambda_reg": {"min": 0.0, "max": 1.0},
             # "lambda_align_g": {"min": 1e-6, "max": 1e-3},
-            "lambda_align_g": {"values": [0.1, 0.01]},  # kl term for generator
+            "lambda_align_g": {"values": [0.1, 1]},  # kl term for generator
             "lambda_reg": {"values": [0.1, 1]},
-            "lambda_align": {"values": [1, 2]},
+            "lambda_align": {"values": [1]},
             # "lambda_align": {"min": 1e-6, "max": 1e-3},
             "lr_g": {
                 "values": [
@@ -336,11 +356,11 @@ if __name__ == "__main__":
                     # 1e-4,
                 ]
             },
-            "steps_g": {"values": [200, 100]},  # number of epochs for generator
-            "epochs": {"values": [5]},
+            "steps_g": {"values": [100, 200]},  # number of epochs for generator
+            "epochs": {"values": [5, 10]},
             "batch_size": {"values": [128]},
             "beta": {"values": [0]},  # for local kl loss
-            "prior_steps": {"values": [5000, 1]},
+            "prior_steps": {"values": [5000, 1000]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)

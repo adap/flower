@@ -25,6 +25,8 @@ import wandb
 import matplotlib
 import numpy as np
 import plotly.graph_objects as go
+from sklearn.decomposition import PCA
+from sklearn.metrics import silhouette_score
 
 matplotlib.use("Agg")
 
@@ -37,26 +39,6 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 import torch
 import torch.nn as nn
 from collections import OrderedDict
-
-
-def vae_loss(recon_img, img, mu, logvar, beta=1.0):
-    # Reconstruction loss using binary cross-entropy
-    condition = (recon_img >= 0.0) & (recon_img <= 1.0)
-    # assert torch.all(condition), "Values should be between 0 and 1"
-    if not torch.all(condition):
-        ValueError("Values should be between 0 and 1")
-        recon_img = torch.clamp(recon_img, 0.0, 1.0)
-    recon_loss = F.binary_cross_entropy(
-        recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="sum"
-    )
-
-    # KL divergence loss
-    kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-
-    # Total VAE loss
-    total_loss = recon_loss + kld_loss * beta
-
-    return total_loss
 
 
 def info_vae_loss(recon_x, x, mu, logvar, y, y_pred, lambda_kl=0.01, lambda_info=10.0):
@@ -75,6 +57,19 @@ def info_vae_loss(recon_x, x, mu, logvar, y, y_pred, lambda_kl=0.01, lambda_info
     total_loss = recon_loss + lambda_kl * kl_loss + lambda_info * info_loss
 
     return total_loss, recon_loss.item(), kl_loss.item(), info_loss.item()
+
+
+def pca_cluster_loss(z, torch_label, lambda_pca=2):
+    pca = PCA(n_components=2)
+    z_pca = pca.fit_transform(z.detach().cpu().numpy())
+    labels = torch_label.cpu().numpy()
+    # Calculate Silhouette score to measure cluster separation
+    sil_score = silhouette_score(z_pca, labels)
+
+    # Encourage a high silhouette score (well-separated clusters)
+    pca_loss = -sil_score  # Negative Silhouette score to be minimized
+
+    return lambda_pca * pca_loss
 
 
 class FedCiR(FedAvg):
@@ -110,6 +105,7 @@ class FedCiR(FedAvg):
         device=None,
         lambda_align_g=1.0,
         prior_steps=5000,
+        stats_run_file=None,
     ) -> None:
         """Federated Averaging strategy.
 
@@ -175,8 +171,9 @@ class FedCiR(FedAvg):
         self.gen_model = VAE(z_dim=16, encoder_only=True).to(self.device)
         self.prior_steps = prior_steps
         self.alignment_loader = alignment_dataloader
-        self.ref_mu, self.ref_logvar = self.compute_ref_stats()
+        self.ref_mu, self.ref_logvar = None, None  # not computing ref stats
         self.lambda_align_g = lambda_align_g
+        self.stats_run_file = stats_run_file
 
     def compute_ref_stats(self, use_PCA=True):
         ref_model = infoVAE(latent_size=16, dis_hidden_size=4).to(self.device)
@@ -186,7 +183,7 @@ class FedCiR(FedAvg):
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 opt_ref.zero_grad()
-                recon_images, mu, logvar, y_pred = ref_model(images, labels)
+                recon_images, mu, logvar, y_pred, z = ref_model(images, labels)
                 total_loss, recon_loss, kl_loss, info_loss = info_vae_loss(
                     recon_images,
                     images,
@@ -197,6 +194,8 @@ class FedCiR(FedAvg):
                     1,
                     10,
                 )
+                # pca_loss = pca_cluster_loss(z, labels)
+                # total_loss += pca_loss
                 total_loss.backward()
                 opt_ref.step()
             if ep % 100 == 0:
@@ -213,7 +212,7 @@ class FedCiR(FedAvg):
             for images, labels in self.alignment_loader:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
-                _, ref_mu, ref_logvar, _ = ref_model(images, labels)
+                _, ref_mu, ref_logvar, _, _ = ref_model(images, labels)
                 test_latents.append(ref_mu.cpu().numpy())
                 test_labels.append(labels.cpu().numpy())
             test_latents = np.concatenate(test_latents, axis=0)
@@ -254,6 +253,8 @@ class FedCiR(FedAvg):
             # Create figure
             fig = go.Figure(data=traces, layout=layout)
             wandb.log({"latent_space": fig})
+            with open(self.stats_run_file, "wb") as f:
+                np.save(f, ref_mu)
         return ref_mu, ref_logvar
 
     def __repr__(self) -> str:
@@ -362,6 +363,25 @@ class FedCiR(FedAvg):
 
             return total_loss
 
+        def vae_loss(recon_img, img, mu, logvar, beta=1.0):
+            # Reconstruction loss using binary cross-entropy
+            condition = (recon_img >= 0.0) & (recon_img <= 1.0)
+            # assert torch.all(condition), "Values should be between 0 and 1"
+            if not torch.all(condition):
+                ValueError("Values should be between 0 and 1")
+                recon_img = torch.clamp(recon_img, 0.0, 1.0)
+            recon_loss = F.binary_cross_entropy(
+                recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="sum"
+            )
+
+            # KL divergence loss
+            kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+
+            # Total VAE loss
+            total_loss = recon_loss + kld_loss * self.lambda_align_g
+
+            return total_loss
+
         # Convert results
         weights_results = [
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
@@ -397,22 +417,21 @@ class FedCiR(FedAvg):
                     # mu_s.append(mu)
                     # logvar_s.append(logvar)
 
-                # loss = vae_loss(
-                #     torch.stack(preds).mean(dim=0),
-                #     align_img,
-                #     mu_g,
-                #     logvar_g,
-                # )
-                loss = vae_loss_connect(
+                loss = vae_loss(
                     torch.stack(preds).mean(dim=0),
                     align_img,
                     mu_g,
                     logvar_g,
-                    self.ref_mu,
-                    self.ref_logvar,
-                    # torch.stack(mu_s).mean(dim=0),
-                    # torch.stack(logvar_s).mean(dim=0),
                 )
+                # loss = vae_loss_connect(
+                #     torch.stack(preds).mean(dim=0),
+                #     align_img,
+                #     mu_g,
+                #     logvar_g,
+                #     self.ref_mu,
+                #     self.ref_logvar,
+
+                # )
                 threshold = 1e-6  # Define a threshold for the negligible loss
                 log(DEBUG, f"generator loss at ep {ep_g} step {step}: {loss}")
 

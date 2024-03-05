@@ -29,6 +29,7 @@ from utils_mnist import VAE
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from torchvision.utils import make_grid
 import ray
 
 NUM_CLIENTS = 5
@@ -38,13 +39,13 @@ parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 parser.add_argument(
     "--num_cpus",
     type=int,
-    default=7,
+    default=5,
     help="Number of CPUs to assign to a virtual client",
 )
 parser.add_argument(
     "--num_gpus",
     type=float,
-    default=1 / NUM_CLIENTS,
+    default=1 / 3,
     help="Ratio of GPU memory to assign to a virtual client",
 )
 parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
@@ -205,7 +206,7 @@ def main():
             "epochs": wandb.config["epochs"],  # Number of local epochs done by clients
             "batch_size": wandb.config["batch_size"],
             "server_round": server_round,
-            "beta": 0,
+            "beta": 1,
         }
         return config
 
@@ -223,6 +224,7 @@ def main():
             model = VAE(z_dim=16)
             model.to(device)
             set_params(model, parameters)
+            model.eval()
             if server_round == 0 or server_round == args.num_rounds:
                 with open(
                     f"{IDENTIFIER}/weights_avg_round_{server_round}.npy", "wb"
@@ -246,6 +248,16 @@ def main():
                 use_PCA=True,
             )
             global_val_loss = eval_reconstrution(model, testloader, device)
+            with torch.no_grad():
+                z = torch.randn(64, 16).to(device)
+                recon = model.decoder(z).cpu()
+                recon = recon.view(-1, 1, 28, 28)
+                fig, ax = plt.subplots(figsize=(10, 10))
+                img = make_grid(recon, nrow=8, normalize=True).permute(1, 2, 0).numpy()
+                ax.imshow(img)
+                ax.axis("off")
+                # fig.savefig(f"{IDENTIFIER}/generated_avg_round_{server_round}.png")
+
             wandb.log(
                 {
                     f"global_true_image": wandb.Image(true_img),
@@ -253,6 +265,7 @@ def main():
                     f"global_latent_rep": latent_reps,
                     f"global_val_loss": global_val_loss,
                     "server_round": server_round,
+                    f"generated_avg_round_{server_round}": plt,
                 }
             )
             plt.close("all")
@@ -302,10 +315,11 @@ if __name__ == "__main__":
         "method": "random",
         "metric": {"name": "global_val_loss", "goal": "minimize"},
         "parameters": {
-            "epochs": {"values": [2, 5, 10]},
+            # "epochs": {"values": [2, 5, 10]},
+            "epochs": {"values": [5]},
             "batch_size": {"values": [128]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=6)
+    wandb.agent(sweep_id, function=main, count=1)
