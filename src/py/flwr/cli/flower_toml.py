@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Utility to validate the flower.toml file.
-
-This module will be improved over time.
-"""
+"""Utility to validate the `flower.toml` file."""
 
 import importlib
 import os
@@ -80,7 +77,8 @@ def validate_object_reference(ref: str) -> Tuple[bool, Optional[str]]:
 
     Returns
     -------
-    tuple(bool, Optional[str]): is_valid, reason why it might not be
+    Tuple[bool, Optional[str]]
+        A boolean indicating whether an object reference is valid and the reason why it might not be.
     """
     module_str, _, attributes_str = ref.partition(":")
     if not module_str:
