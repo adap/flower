@@ -81,7 +81,7 @@ def run_simulation(
         instances running on different (virtual) SuperNodes.
 
     client_app : ClientApp
-        The `ClientApp` to be executed by each of the `SuperNodes`. It will receive
+        The `ClientApp` to be executed by each of the SuperNodes. It will receive
         messages sent by the `ServerApp`.
 
     num_supernodes : int
