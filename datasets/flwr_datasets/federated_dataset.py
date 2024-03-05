@@ -56,7 +56,7 @@ class FederatedDataset:
         but at most, one per split.
     partition_division : Optional[Union[List[float], Tuple[float, ...], Dict[str,
     float]]]
-        Divide each partition into splits (e.g. into train and evaluation) and
+        Divide each partition into splits (e.g. into train and validation) and
         control the size of the splits - fractions of the data. You can also name the
         splits for verification.
     shuffle : bool
@@ -72,14 +72,18 @@ class FederatedDataset:
     Use MNIST dataset for Federated Learning with 100 clients (edge devices):
 
     >>> mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
-
-    Load partition for client with ID 10.
-
+    >>> # Load partition for client with ID 10.
     >>> partition = mnist_fds.load_partition(10, "train")
-
-    Use test split for centralized evaluation.
-
+    >>> # Use test split for centralized evaluation.
     >>> centralized = mnist_fds.load_full("test")
+
+    Automatically divde the data returned from `load_partition`
+    >>> mnist_fds = FederatedDataset(
+    >>>     dataset="mnist",
+    >>>     partitioners={"train": 100},
+    >>>     partition_division=[0.8, 0.2],
+    >>> )
+    >>> partition_train, partition_test = mnist_fds.load_partition(10, "train")
     """
 
     # pylint: disable=too-many-instance-attributes
