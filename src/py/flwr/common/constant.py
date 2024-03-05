@@ -47,7 +47,7 @@ class MessageType:
 
     GET_PROPERTIES = "get_properties"
     GET_PARAMETERS = "get_parameters"
-    FIT = "fit"
+    TRAIN = "train"
     EVALUATE = "evaluate"
 
     def __new__(cls) -> MessageType:
