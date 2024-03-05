@@ -20,7 +20,7 @@ import sys
 import time
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Callable, ContextManager, Optional, Tuple, Union
+from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 
 from grpc import RpcError
 
