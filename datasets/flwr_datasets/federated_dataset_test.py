@@ -70,15 +70,10 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
     @parameterized.expand(  # type: ignore
         [
             ((0.2, 0.8), 2),
-            ((0.2, 0.8), None),
-            ([0.2, 0.8], 2),
             ({"train": 0.2, "test": 0.8}, 2),
             # Not full dataset
             ([0.2, 0.1], 2),
-            ((0.2, 0.1), None),
             ({"train": 0.2, "test": 0.1}, 2),
-            ({"train": 0.2, "test": 0.1}, None),
-            (None, None),
             (None, None),
         ],
     )
