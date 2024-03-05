@@ -38,7 +38,8 @@ def run() -> None:
     if not is_valid:
         print(
             typer.style(
-                "Project configuration could not be loaded.\nflower.toml is invalid:\n" + "\n".join([f"- {line}" for line in reasons]),
+                "Project configuration could not be loaded.\nflower.toml is invalid:\n"
+                + "\n".join([f"- {line}" for line in reasons]),
                 fg=typer.colors.RED,
                 bold=True,
             )

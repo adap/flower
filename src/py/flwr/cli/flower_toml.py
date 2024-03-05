@@ -17,9 +17,9 @@
 This module will be improved over time.
 """
 
-import os
 import importlib
-from typing import Dict, Optional, Tuple, List, Any
+import os
+from typing import Any, Dict, List, Optional, Tuple
 
 import tomli
 
@@ -81,7 +81,6 @@ def validate_object_reference(ref: str) -> Tuple[bool, Optional[str]]:
     Returns
     -------
     tuple(bool, Optional[str]): is_valid as bool, reason as string in case string is not valid
-
     """
     module_str, _, attributes_str = ref.partition(":")
     if not module_str:
