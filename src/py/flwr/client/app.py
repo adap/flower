@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Union
 
 from grpc import RpcError
-from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp
@@ -150,17 +149,18 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
     parser.add_argument(
         "--max-retries",
         type=int,
-        default=1,
+        default=None,
         help="The maximum number of times the client will try to connect to the"
-        "server before giving up in case of a connection error. If set to None,"
-        "there is no limit to the number of tries.",
+        "server before giving up in case of a connection error. By default,"
+        "it is set to None, meaning there is no limit to the number of tries.",
     )
     parser.add_argument(
         "--max-wait-time",
         type=float,
+        default=None,
         help="The maximum duration before the client stops trying to"
-        "connect to the server in case of connection error."
-        "If set to None, there is no limit to the total time.",
+        "connect to the server in case of connection error. By default, it"
+        "is set to None, meaning there is no limit to the total time.",
     )
     parser.add_argument(
         "--dir",
@@ -201,7 +201,7 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
-    max_retries: Optional[int] = 1,
+    max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
@@ -236,7 +236,7 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
-    max_retries: Optional[int] (default: 1)
+    max_retries: Optional[int] (default: None)
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
         there is no limit to the number of tries.
@@ -305,7 +305,7 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
-    max_retries: Optional[int] = 1,
+    max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
@@ -342,7 +342,7 @@ def _start_client_internal(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
-    max_retries: Optional[int] (default: 1)
+    max_retries: Optional[int] (default: None)
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
         there is no limit to the number of tries.
@@ -381,11 +381,13 @@ def _start_client_internal(
     # Both `client` and `client_fn` must not be used directly
 
     # Initialize connection context manager
-    connection, address = _init_connection(transport, server_address)
+    connection, address, connection_error_type = _init_connection(
+        transport, server_address
+    )
 
     retry_invoker = RetryInvoker(
-        exponential,
-        RequestsConnectionError if transport == "rest" else RpcError,
+        wait_factory=exponential,
+        recoverable_exceptions=connection_error_type,
         max_tries=max_retries,
         max_time=max_wait_time,
         on_giveup=lambda retry_state: (
@@ -600,6 +602,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         ],
     ],
     str,
+    type[Exception],
 ]:
     # Parse IP address
     parsed_address = parse_address(server_address)
@@ -615,6 +618,8 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     # Use either gRPC bidirectional streaming or REST request/response
     if transport == TRANSPORT_TYPE_REST:
         try:
+            from requests.exceptions import ConnectionError as RequestsConnectionError
+
             from .rest_client.connection import http_request_response
         except ModuleNotFoundError:
             sys.exit(MISSING_EXTRA_REST)
@@ -623,14 +628,14 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
                 "When using the REST API, please provide `https://` or "
                 "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
             )
-        connection = http_request_response
+        connection, error_type = http_request_response, RequestsConnectionError
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
-        connection = grpc_request_response
+        connection, error_type = grpc_request_response, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection = grpc_connection
+        connection, error_type = grpc_connection, RpcError
     else:
         raise ValueError(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
         )
 
-    return connection, address
+    return connection, address, error_type
