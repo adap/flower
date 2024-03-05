@@ -16,30 +16,38 @@ NUM_ROUNDS = 2
 save_path = "./results/"
 
 # Define model config
-model_cfg = OmegaConf.create({"name": "openlm-research/open_llama_3b_v2",
-                              "quantization": 4,
-                              "gradient_checkpointing": True,
-                              "lora": {"peft_lora_r": 32, "peft_lora_alpha": 64},
-                              })
+model_cfg = OmegaConf.create(
+    {
+        "name": "openlm-research/open_llama_3b_v2",
+        "quantization": 4,
+        "gradient_checkpointing": True,
+        "lora": {"peft_lora_r": 32, "peft_lora_alpha": 64},
+    }
+)
 # Define training config
-train_cfg = OmegaConf.create({"num_rounds": NUM_ROUNDS,
-                              "save_every_round": 5,
-                              "learning_rate_max": 5e-5,
-                              "learning_rate_min": 1e-6,
-                              "seq_length": 512,
-                              "training_arguments": {"output_dir": None,
-                                                     "learning_rate": None,
-                                                     "per_device_train_batch_size": 16,
-                                                     "gradient_accumulation_steps": 1,
-                                                     "logging_steps": 10,
-                                                     "num_train_epochs": 3,
-                                                     "max_steps": 10,
-                                                     "report_to": None,
-                                                     "save_steps": 1000,
-                                                     "save_total_limit": 10,
-                                                     "gradient_checkpointing": model_cfg.gradient_checkpointing,
-                                                     "lr_scheduler_type": "constant",
-                                                     }})
+train_cfg = OmegaConf.create(
+    {
+        "num_rounds": NUM_ROUNDS,
+        "save_every_round": 5,
+        "learning_rate_max": 5e-5,
+        "learning_rate_min": 1e-6,
+        "seq_length": 512,
+        "training_arguments": {
+            "output_dir": None,
+            "learning_rate": None,
+            "per_device_train_batch_size": 16,
+            "gradient_accumulation_steps": 1,
+            "logging_steps": 10,
+            "num_train_epochs": 3,
+            "max_steps": 10,
+            "report_to": None,
+            "save_steps": 1000,
+            "save_total_limit": 10,
+            "gradient_checkpointing": model_cfg.gradient_checkpointing,
+            "lr_scheduler_type": "constant",
+        },
+    }
+)
 
 # Create output directory
 if not os.path.exists(save_path):
@@ -47,9 +55,7 @@ if not os.path.exists(save_path):
 
 # Partition dataset and get dataloaders
 # We set the number of partitions to 20 for fast processing.
-fds = FederatedDataset(
-    dataset="vicgalle/alpaca-gpt4", partitioners={"train": 20}
-)
+fds = FederatedDataset(dataset="vicgalle/alpaca-gpt4", partitioners={"train": 20})
 (
     tokenizer,
     data_collator,

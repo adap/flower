@@ -62,26 +62,29 @@ python main.py num_rounds=50 fraction_fit.fraction_fit=0.25
 ```
 
 ### Run with Flower Next (demo)
-1. Start the long-running Flower server (SuperLink)
-    ```bash
-    flower-superlink --insecure
-    ```
-2. Start the long-running Flower client (SuperNode)
-    ```bash
-    # In a new terminal window, start the first long-running Flower client:
-    flower-client-app app:client --insecure
-    ```
-   ```bash
-    # In another new terminal window, start the second long-running Flower client:
-    flower-client-app app:client --insecure
-    ```
-3. Run the Flower App
-    ```bash
-    # With both the long-running server (SuperLink) and two clients (SuperNode) up and running, 
-    # we can now run the actual Flower App:
-    flower-server-app app:server --insecure
-    ```
 
+We conduct a 2-client setting to demonstrate how to run federated LLM fine-tuning with Flower Next.
+Please follow the steps below:
+
+1. Start the long-running Flower server (SuperLink)
+   ```bash
+   flower-superlink --insecure
+   ```
+2. Start the long-running Flower client (SuperNode)
+   ```bash
+   # In a new terminal window, start the first long-running Flower client:
+   flower-client-app app:client --insecure
+   ```
+   ```bash
+   # In another new terminal window, start the second long-running Flower client:
+   flower-client-app app:client --insecure
+   ```
+3. Run the Flower App
+   ```bash
+   # With both the long-running server (SuperLink) and two clients (SuperNode) up and running,
+   # we can now run the actual Flower App:
+   flower-server-app app:server --insecure
+   ```
 
 ## Expected Results
 
