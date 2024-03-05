@@ -1,4 +1,3 @@
-import datetime
 import os
 import time
 
@@ -21,6 +20,7 @@ from task import (
     test,
 )
 
+os.environ["WANDB_SILENT"] = "true"
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
