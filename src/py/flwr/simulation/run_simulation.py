@@ -227,7 +227,7 @@ def _main_loop(
             client_app=client_app,
             backend_name=backend_name,
             backend_config_json_stream=backend_config_stream,
-            working_dir=app_dir,
+            app_dir=app_dir,
             state_factory=state_factory,
             f_stop=f_stop,
         )

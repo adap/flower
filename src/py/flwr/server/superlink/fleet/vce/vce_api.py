@@ -221,7 +221,7 @@ async def run(
 def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
-    working_dir: str,
+    app_dir: str,
     f_stop: asyncio.Event,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
@@ -297,7 +297,7 @@ def start_vce(
 
     def backend_fn() -> Backend:
         """Instantiate a Backend."""
-        return backend_type(backend_config, work_dir=working_dir)
+        return backend_type(backend_config, work_dir=app_dir)
 
     log(INFO, "client_app_attr = %s", client_app_attr)
 

@@ -166,7 +166,7 @@ def start_and_shutdown(
         backend_name=backend,
         backend_config_json_stream=backend_config,
         state_factory=state_factory,
-        working_dir=working_dir,
+        app_dir=working_dir,
         f_stop=f_stop,
         existing_nodes_mapping=nodes_mapping,
     )
