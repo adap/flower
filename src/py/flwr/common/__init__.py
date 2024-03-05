@@ -20,6 +20,7 @@ from .date import now as now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
 from .logger import configure as configure
 from .logger import log as log
+from .message import Error as Error
 from .message import Message as Message
 from .message import Metadata as Metadata
 from .parameter import bytes_to_ndarray as bytes_to_ndarray
@@ -74,6 +75,7 @@ __all__ = [
     "EventType",
     "FitIns",
     "FitRes",
+    "Error",
     "GetParametersIns",
     "GetParametersRes",
     "GetPropertiesIns",
