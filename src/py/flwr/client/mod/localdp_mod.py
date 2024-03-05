@@ -14,6 +14,7 @@
 # ==============================================================================
 """Local DP modifier."""
 
+
 from flwr.client.typing import ClientAppCallable
 from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common import recordset_compat as compat
@@ -29,6 +30,11 @@ from flwr.common.message import Message
 class LocalDpMod:
     """Modifier for local differential privacy.
 
+    This mod clips the client model updates and
+    add noise to the params before sending them to the server.
+
+    It operates on messages with type MESSAGE_TYPE_FIT.
+
     Parameters
     ----------
     clipping_norm : float
@@ -37,15 +43,38 @@ class LocalDpMod:
         The sensitivity of the client model.
     epsilon : float
         The privacy budget.
+        Smaller value of epsilon indicates a higher level of privacy protection.
     delta : float
         The failure probability.
         The probability that the privacy mechanism
         fails to provide the desired level of privacy.
+        A smaller value of delta indicates a stricter privacy guarantee.
+
+    Examples
+    --------
+    Create an instance of the local DP mod and add it to the client-side mods:
+
+    >>> local_dp_mod = LocalDpMod( ... )
+    >>> app = fl.client.ClientApp(
+    >>>     client_fn=client_fn, mods=[local_dp_mod]
+    >>> )
     """
 
     def __init__(
         self, clipping_norm: float, sensitivity: float, epsilon: float, delta: float
     ) -> None:
+        if clipping_norm <= 0:
+            raise ValueError("The clipping norm should be a positive value.")
+
+        if sensitivity < 0:
+            raise ValueError("The sensitivity should be a non-negative value.")
+
+        if epsilon < 0:
+            raise ValueError("The epsilon should be a non-negative value.")
+
+        if delta < 0:
+            raise ValueError("The delta should be a non-negative value.")
+
         self.clipping_norm = clipping_norm
         self.sensitivity = sensitivity
         self.epsilon = epsilon
@@ -70,30 +99,31 @@ class LocalDpMod:
         Message
             The modified message to be sent back to the server.
         """
-        if msg.metadata.message_type == MESSAGE_TYPE_FIT:
-            fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
-            server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
+        if msg.metadata.message_type != MESSAGE_TYPE_FIT:
+            return call_next(msg, ctxt)
 
-            # Call inner app
-            out_msg = call_next(msg, ctxt)
-            fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
+        fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
+        server_to_client_params = parameters_to_ndarrays(fit_ins.parameters)
 
-            client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
+        # Call inner app
+        out_msg = call_next(msg, ctxt)
+        fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
 
-            # Clip the client update
-            compute_clip_model_update(
-                client_to_server_params,
-                server_to_client_params,
-                self.clipping_norm,
-            )
+        client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
 
-            fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
+        # Clip the client update
+        compute_clip_model_update(
+            client_to_server_params,
+            server_to_client_params,
+            self.clipping_norm,
+        )
 
-            # Add noise to model params
-            add_localdp_gaussian_noise_to_params(
-                fit_res.parameters, self.sensitivity, self.epsilon, self.delta
-            )
+        fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
 
-            out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)
-            return out_msg
-        return call_next(msg, ctxt)
+        # Add noise to model params
+        add_localdp_gaussian_noise_to_params(
+            fit_res.parameters, self.sensitivity, self.epsilon, self.delta
+        )
+
+        out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)
+        return out_msg
