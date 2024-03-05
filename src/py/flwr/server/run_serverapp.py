@@ -16,7 +16,6 @@
 
 
 import argparse
-import asyncio
 import sys
 from logging import DEBUG, WARN
 from pathlib import Path
@@ -30,17 +29,27 @@ from .server_app import ServerApp, load_server_app
 
 
 def run(
-    server_app_attr: str,
     driver: Driver,
     server_app_dir: str,
-    stop_event: Optional[asyncio.Event] = None,
+    server_app_attr: Optional[str] = None,
+    loaded_server_app: Optional[ServerApp] = None,
 ) -> None:
     """Run ServerApp with a given Driver."""
+    if not (server_app_attr is None) ^ (loaded_server_app is None):
+        raise ValueError(
+            "Either `server_app_attr` or `loaded_server_app` should be set "
+            "but not both. "
+        )
+
     if server_app_dir is not None:
         sys.path.insert(0, server_app_dir)
 
+    # Load ServerApp if needed
     def _load() -> ServerApp:
-        server_app: ServerApp = load_server_app(server_app_attr)
+        if server_app_attr:
+            server_app: ServerApp = load_server_app(server_app_attr)
+        if loaded_server_app:
+            server_app = loaded_server_app
         return server_app
 
     server_app = _load()
@@ -52,10 +61,6 @@ def run(
     server_app(driver=driver, context=context)
 
     log(DEBUG, "ServerApp finished running.")
-    # Upon completion, trigger stop event if one was passed
-    if stop_event is not None:
-        log(DEBUG, "Triggering stop event.")
-        stop_event.set()
 
 
 def run_server_app() -> None:
@@ -117,7 +122,7 @@ def run_server_app() -> None:
     )
 
     # Run the Server App with the Driver
-    run(server_app_attr, driver, server_app_dir)
+    run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
 
     # Clean up
     driver.__del__()  # pylint: disable=unnecessary-dunder-call
