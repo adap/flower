@@ -17,7 +17,7 @@
 
 import concurrent.futures
 import timeit
-from logging import DEBUG, INFO, WARN
+from logging import INFO, WARN
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
@@ -173,7 +173,7 @@ class Server:
             log(INFO, "evaluate_round %s: no clients selected, cancel", server_round)
             return None
         log(
-            DEBUG,
+            INFO,
             "evaluate_round %s: strategy sampled %s clients (out of %s)",
             server_round,
             len(client_instructions),
@@ -188,7 +188,7 @@ class Server:
             group_id=server_round,
         )
         log(
-            DEBUG,
+            INFO,
             "evaluate_round %s received %s results and %s failures",
             server_round,
             len(results),
@@ -223,7 +223,7 @@ class Server:
             log(INFO, "fit_round %s: no clients selected, cancel", server_round)
             return None
         log(
-            DEBUG,
+            INFO,
             "fit_round %s: strategy sampled %s clients (out of %s)",
             server_round,
             len(client_instructions),
@@ -238,7 +238,7 @@ class Server:
             group_id=server_round,
         )
         log(
-            DEBUG,
+            INFO,
             "fit_round %s received %s results and %s failures",
             server_round,
             len(results),
