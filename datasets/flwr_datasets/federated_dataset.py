@@ -125,11 +125,6 @@ class FederatedDataset:
     ) -> Union[Dataset, List[Dataset], DatasetDict]:
         """Load the partition specified by the idx in the selected split.
 
-        If the partition is divided as specified in `partition_split` then you can
-        return only the specific split by specifying `inner_split` otherwise all split
-        are return. If the `partition_split` was specified as `Dict` give the string
-        name, otherwise give the index.
-
         The dataset is downloaded only when the first call to `load_partition` or
         `load_full` is made.
 
@@ -148,11 +143,11 @@ class FederatedDataset:
         Returns
         -------
         partition : Union[Dataset, List[Dataset], DatasetDict]
-            Single partition from the dataset split which can be further divided.
-            If `partition_split` specified and `inner_split` not given then
-            `List[Dataset]` is returned in case of `List` or `Tuple` specification of
-            the `partition_split` and `DatasetDict` in case of `Dict` specification.
-            If `partition_split` specified and the `inner_split` given, then Dataset is
+            Undivided or divided partition from the dataset split.
+            If `partition_division` is not specified then `Dataset` is returned.
+            If `partition_division` is specified as `List` or `Tuple` then
+            `List[Dataset]` is returned.
+            If `partition_division` is specified as `Dict` then `DatasetDict` is
             returned.
         """
         if not self._dataset_prepared:
