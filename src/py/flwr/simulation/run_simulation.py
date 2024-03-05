@@ -77,7 +77,7 @@ def run_simulation(
     Parameters
     ----------
     server_app : ServerApp
-        The `ServerApp` to be executed.
+        The `ServerApp` to be executed. It will send messages to different `ClientApp` instances.
 
     client_app : ClientApp
         The `ClientApp` to be executed by each of the `SuperNodes`. It will receive
