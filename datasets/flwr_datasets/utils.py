@@ -118,7 +118,6 @@ def divide_dataset(
         return split_partition
     if isinstance(division, dict):
         split_partition_dict: Dict[str, Dataset] = {}
-        ranges = _create_division_indices_ranges(dataset_length, division)
         for split_name, single_range in zip(division.keys(), ranges):
             split_partition_dict[split_name] = dataset.select(single_range)
         return DatasetDict(split_partition_dict)
