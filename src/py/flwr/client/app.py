@@ -236,11 +236,11 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
-    max_retries: Optional[int]
+    max_retries: Optional[int] (default: 1)
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
         there is no limit to the number of tries.
-    max_wait_time: Optional[float]
+    max_wait_time: Optional[float] (default: None)
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
@@ -342,11 +342,11 @@ def _start_client_internal(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
-    max_retries: Optional[int]
+    max_retries: Optional[int] (default: 1)
         The maximum number of times the client will try to connect to the
         server before giving up in case of a connection error. If set to None,
         there is no limit to the number of tries.
-    max_wait_time: Optional[float]
+    max_wait_time: Optional[float] (default: None)
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
