@@ -108,6 +108,15 @@ def divide_dataset(
     -------
     `List[Dataset]` is returned in case of `List` or `Tuple` of the division
     `DatasetDict` in case of `Dict` specification
+
+    Examples
+    --------
+    Use `divide_dataset` with division specified as a list.
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.utils import divide_dataset
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+    >>> partition = fds.load_partition(0)
+    >>> train, test = divide_dataset(dataset=partition, division=[0.8, 0.2])
     """
     dataset_length = len(dataset)
     ranges = _create_division_indices_ranges(dataset_length, division)
