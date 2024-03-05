@@ -13,8 +13,3 @@
 # limitations under the License.
 # ==============================================================================
 """Test for Flower command line interface `run` command."""
-
-import os
-import textwrap
-
-from .run import run

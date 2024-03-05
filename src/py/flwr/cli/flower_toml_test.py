@@ -16,12 +16,13 @@
 
 import os
 import textwrap
+from typing import Any, Dict
 
 from .flower_toml import (
     load_flower_toml,
-    validate_object_reference,
-    validate_flower_toml_fields,
     validate_flower_toml,
+    validate_flower_toml_fields,
+    validate_object_reference,
 )
 
 
@@ -128,8 +129,9 @@ def test_load_flower_toml_from_path(tmp_path: str) -> None:
 
 
 def test_validate_flower_toml_fields_empty() -> None:
+    """Test that validate_flower_toml_fields fails correctly."""
     # Prepare
-    config = {}
+    config: Dict[str, Any] = {}
 
     # Execute
     is_valid, reasons = validate_flower_toml_fields(config)
@@ -140,6 +142,7 @@ def test_validate_flower_toml_fields_empty() -> None:
 
 
 def test_validate_flower_toml_fields_no_flower() -> None:
+    """Test that validate_flower_toml_fields fails correctly."""
     # Prepare
     config = {
         "project": {
@@ -160,6 +163,7 @@ def test_validate_flower_toml_fields_no_flower() -> None:
 
 
 def test_validate_flower_toml_fields_no_flower_components() -> None:
+    """Test that validate_flower_toml_fields fails correctly."""
     # Prepare
     config = {
         "project": {
@@ -181,6 +185,7 @@ def test_validate_flower_toml_fields_no_flower_components() -> None:
 
 
 def test_validate_flower_toml_fields_no_server_and_client_app() -> None:
+    """Test that validate_flower_toml_fields fails correctly."""
     # Prepare
     config = {
         "project": {
@@ -202,6 +207,7 @@ def test_validate_flower_toml_fields_no_server_and_client_app() -> None:
 
 
 def test_validate_flower_toml_fields() -> None:
+    """Test that validate_flower_toml_fields succeeds correctly."""
     # Prepare
     config = {
         "project": {
@@ -223,6 +229,7 @@ def test_validate_flower_toml_fields() -> None:
 
 
 def test_validate_object_reference() -> None:
+    """Test that validate_object_reference succeeds correctly."""
     # Prepare
     ref = "flwr.cli.run:run"
 
@@ -235,6 +242,7 @@ def test_validate_object_reference() -> None:
 
 
 def test_validate_object_reference_fails() -> None:
+    """Test that validate_object_reference fails correctly."""
     # Prepare
     ref = "flwr.cli.run:runa"
 
@@ -247,6 +255,7 @@ def test_validate_object_reference_fails() -> None:
 
 
 def test_validate_flower_toml() -> None:
+    """Test that validate_flower_toml succeeds correctly."""
     # Prepare
     config = {
         "project": {
@@ -273,6 +282,7 @@ def test_validate_flower_toml() -> None:
 
 
 def test_validate_flower_toml_fail() -> None:
+    """Test that validate_flower_toml fails correctly."""
     # Prepare
     config = {
         "project": {

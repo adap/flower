@@ -80,7 +80,7 @@ def validate_object_reference(ref: str) -> Tuple[bool, Optional[str]]:
 
     Returns
     -------
-    tuple(bool, Optional[str]): is_valid as bool, reason as string in case string is not valid
+    tuple(bool, Optional[str]): is_valid, reason why it might not be
     """
     module_str, _, attributes_str = ref.partition(":")
     if not module_str:
@@ -116,7 +116,6 @@ def validate_object_reference(ref: str) -> Tuple[bool, Optional[str]]:
 
 def validate_flower_toml(config: Dict[str, Any]) -> Tuple[bool, List[str]]:
     """Validate flower.toml."""
-
     is_valid, reasons = validate_flower_toml_fields(config)
 
     if not is_valid:
@@ -126,7 +125,7 @@ def validate_flower_toml(config: Dict[str, Any]) -> Tuple[bool, List[str]]:
     is_valid, reason = validate_object_reference(
         config["flower"]["components"]["serverapp"]
     )
-    if not is_valid:
+    if not is_valid and isinstance(reason, str):
         return False, [reason]
 
     # Validate clientapp
@@ -134,7 +133,7 @@ def validate_flower_toml(config: Dict[str, Any]) -> Tuple[bool, List[str]]:
         config["flower"]["components"]["clientapp"]
     )
 
-    if not is_valid:
+    if not is_valid and isinstance(reason, str):
         return False, [reason]
 
     return True, []

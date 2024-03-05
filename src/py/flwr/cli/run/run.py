@@ -14,6 +14,8 @@
 # ==============================================================================
 """Flower command line interface `new` command."""
 
+import sys
+
 import typer
 
 from flwr.cli.flower_toml import load_flower_toml, validate_flower_toml
@@ -22,7 +24,6 @@ from flwr.cli.flower_toml import load_flower_toml, validate_flower_toml
 def run() -> None:
     """Run Flower project."""
     config = load_flower_toml()
-
     if not config:
         print(
             typer.style(
@@ -32,9 +33,9 @@ def run() -> None:
                 bold=True,
             )
         )
+        sys.exit()
 
     is_valid, reasons = validate_flower_toml(config)
-
     if not is_valid:
         print(
             typer.style(
