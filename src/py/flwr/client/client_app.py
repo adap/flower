@@ -121,34 +121,7 @@ class ClientApp:
         def train_decorator(train_fn: ClientAppCallable) -> ClientAppCallable:
             """Register the main fn with the ServerApp object."""
             if self._call:
-                raise ValueError(
-                    """Use either `@app.train()` or `client_fn`, but not both.
-
-                    Use the `ClientApp` with an existing `client_fn`:
-
-                    >>> class FlowerClient(NumPyClient):
-                    >>>     # ...
-                    >>>
-                    >>> def client_fn(cid) -> Client:
-                    >>>     return FlowerClient().to_client()
-                    >>>
-                    >>> app = ClientApp()
-                    >>>     client_fn=client_fn,
-                    >>> )
-
-                    Use the `ClientApp` with a custom train function:
-
-                    >>> app = ClientApp()
-                    >>>
-                    >>> @app.train()
-                    >>> def train(message: Message, context: Context) -> Message:
-                    >>>    print("ClientApp training running")
-                    >>>    # Create and return an echo reply message
-                    >>>    return message.create_reply(
-                    >>>        content=message.content(), ttl=""
-                    >>>    )
-                    """,
-                )
+                raise _registration_error(MessageType.TRAIN)
 
             # Register provided function with the ClientApp object
             self._train = train_fn
@@ -175,34 +148,7 @@ class ClientApp:
         def evaluate_decorator(evaluate_fn: ClientAppCallable) -> ClientAppCallable:
             """Register the main fn with the ServerApp object."""
             if self._call:
-                raise ValueError(
-                    """Use either `@app.evaluate()` or `client_fn`, but not both.
-
-                    Use the `ClientApp` with an existing `client_fn`:
-
-                    >>> class FlowerClient(NumPyClient):
-                    >>>     # ...
-                    >>>
-                    >>> def client_fn(cid) -> Client:
-                    >>>     return FlowerClient().to_client()
-                    >>>
-                    >>> app = ClientApp()
-                    >>>     client_fn=client_fn,
-                    >>> )
-
-                    Use the `ClientApp` with a custom evaluate function:
-
-                    >>> app = ClientApp()
-                    >>>
-                    >>> @app.evaluate()
-                    >>> def evaluate(message: Message, context: Context) -> Message:
-                    >>>    print("ClientApp evaluation running")
-                    >>>    # Create and return an echo reply message
-                    >>>    return message.create_reply(
-                    >>>        content=message.content(), ttl=""
-                    >>>    )
-                    """,
-                )
+                raise _registration_error(MessageType.EVALUATE)
 
             # Register provided function with the ClientApp object
             self._evaluate = evaluate_fn
@@ -229,34 +175,7 @@ class ClientApp:
         def query_decorator(query_fn: ClientAppCallable) -> ClientAppCallable:
             """Register the main fn with the ServerApp object."""
             if self._call:
-                raise ValueError(
-                    """Use either `@app.query()` or `client_fn`, but not both.
-
-                    Use the `ClientApp` with an existing `client_fn`:
-
-                    >>> class FlowerClient(NumPyClient):
-                    >>>     # ...
-                    >>>
-                    >>> def client_fn(cid) -> Client:
-                    >>>     return FlowerClient().to_client()
-                    >>>
-                    >>> app = ClientApp()
-                    >>>     client_fn=client_fn,
-                    >>> )
-
-                    Use the `ClientApp` with a custom query function:
-
-                    >>> app = ClientApp()
-                    >>>
-                    >>> @app.query()
-                    >>> def query(message: Message, context: Context) -> Message:
-                    >>>    print("ClientApp query running")
-                    >>>    # Create and return an echo reply message
-                    >>>    return message.create_reply(
-                    >>>        content=message.content(), ttl=""
-                    >>>    )
-                    """,
-                )
+                raise _registration_error(MessageType.QUERY)
 
             # Register provided function with the ClientApp object
             self._query = query_fn
@@ -314,3 +233,34 @@ def load_client_app(module_attribute_str: str) -> ClientApp:
         ) from None
 
     return cast(ClientApp, attribute)
+
+
+def _registration_error(fn_name: str) -> ValueError:
+    return ValueError(
+        f"""Use either `@app.{fn_name}()` or `client_fn`, but not both.
+
+        Use the `ClientApp` with an existing `client_fn`:
+
+        >>> class FlowerClient(NumPyClient):
+        >>>     # ...
+        >>>
+        >>> def client_fn(cid) -> Client:
+        >>>     return FlowerClient().to_client()
+        >>>
+        >>> app = ClientApp()
+        >>>     client_fn=client_fn,
+        >>> )
+
+        Use the `ClientApp` with a custom {fn_name} function:
+
+        >>> app = ClientApp()
+        >>>
+        >>> @app.{fn_name}()
+        >>> def {fn_name}(message: Message, context: Context) -> Message:
+        >>>    print("ClientApp {fn_name} running")
+        >>>    # Create and return an echo reply message
+        >>>    return message.create_reply(
+        >>>        content=message.content(), ttl=""
+        >>>    )
+        """,
+    )
