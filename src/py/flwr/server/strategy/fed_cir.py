@@ -173,9 +173,9 @@ class FedCiR(FedAvg):
         self.gen_model = VAE(z_dim=self.latent_dim, encoder_only=True).to(self.device)
         self.prior_steps = prior_steps
         self.alignment_loader = alignment_dataloader
-        self.ref_mu, self.ref_logvar = None, None  # not computing ref stats
-        self.lambda_align_g = lambda_align_g
         self.stats_run_file = stats_run_file
+        self.ref_mu, self.ref_logvar = self.compute_ref_stats()
+        self.lambda_align_g = lambda_align_g
 
     def compute_ref_stats(self, use_PCA=True):
         ref_model = infoVAE(latent_size=self.latent_dim, dis_hidden_size=4).to(
@@ -221,6 +221,8 @@ class FedCiR(FedAvg):
                 test_labels.append(labels.cpu().numpy())
             test_latents = np.concatenate(test_latents, axis=0)
             test_labels = np.concatenate(test_labels, axis=0)
+            with open(self.stats_run_file, "wb") as f:
+                np.save(f, test_latents)
             if use_PCA:
                 # Apply PCA using PyTorch
                 cov_matrix = torch.tensor(np.cov(test_latents.T), dtype=torch.float32)
@@ -257,8 +259,6 @@ class FedCiR(FedAvg):
             # Create figure
             fig = go.Figure(data=traces, layout=layout)
             wandb.log({"latent_space": fig})
-            with open(self.stats_run_file, "wb") as f:
-                np.save(f, ref_mu)
         return ref_mu, ref_logvar
 
     def __repr__(self) -> str:
@@ -422,21 +422,20 @@ class FedCiR(FedAvg):
                     # mu_s.append(mu)
                     # logvar_s.append(logvar)
 
-                loss = vae_loss(
-                    torch.stack(preds).mean(dim=0),
-                    align_img,
-                    mu_g,
-                    logvar_g,
-                )
-                # loss = vae_loss_connect(
+                # loss = vae_loss(
                 #     torch.stack(preds).mean(dim=0),
                 #     align_img,
                 #     mu_g,
                 #     logvar_g,
-                #     self.ref_mu,
-                #     self.ref_logvar,
-
                 # )
+                loss = vae_loss_connect(
+                    torch.stack(preds).mean(dim=0),
+                    align_img,
+                    mu_g,
+                    logvar_g,
+                    self.ref_mu,
+                    self.ref_logvar,
+                )
                 threshold = 1e-6  # Define a threshold for the negligible loss
                 log(DEBUG, f"generator loss at ep {ep_g} step {step}: {loss}")
 

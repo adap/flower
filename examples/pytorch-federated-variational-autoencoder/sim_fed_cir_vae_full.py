@@ -23,6 +23,7 @@ from utils_mnist import (
     eval_reconstrution,
     visualize_plotly_latent_representation,
     sample_latents,
+    get_fisher_ratio,
 )
 from utils_mnist import VAE
 import os
@@ -275,6 +276,9 @@ def main():
                 img = make_grid(recon, nrow=8, normalize=True).permute(1, 2, 0).numpy()
                 ax.imshow(img)
                 ax.axis("off")
+                fisher_score = float(
+                    get_fisher_ratio(model, testloader, LATENT_DIM, device)
+                )
 
             wandb.log(
                 {
@@ -282,6 +286,7 @@ def main():
                     f"global_gen_image": wandb.Image(gen_img),
                     f"global_latent_rep": latent_reps,
                     f"global_val_loss": global_val_loss,
+                    f"global_fisher_score": fisher_score,
                     "server_round": server_round,
                     f"generated_cir_samples": plt,
                 }
@@ -366,9 +371,9 @@ if __name__ == "__main__":
             "epochs": {"values": [5, 10]},
             "batch_size": {"values": [128]},
             "beta": {"values": [0]},  # for local kl loss
-            "prior_steps": {"values": [5000, 1000]},
+            "prior_steps": {"values": [1000]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=10)
+    wandb.agent(sweep_id, function=main, count=2)
