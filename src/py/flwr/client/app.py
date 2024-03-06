@@ -375,12 +375,18 @@ def _start_client_internal(
                 # Retrieve context for this run
                 context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
-                # Load ClientApp instance
-                client_app: ClientApp = load_client_app_fn()
-
-                # Handle task message
+                # Handle app loading and task message
                 try:
+
+                    # Load ClientApp instance
+                    client_app: ClientApp = load_client_app_fn()
+
                     out_message = client_app(message=message, context=context)
+                    # Update node state
+                    node_state.update_context(
+                        run_id=message.metadata.run_id,
+                        context=context,
+                    )
                 except Exception as ex:  # pylint: disable=broad-exception-caught
                     log(ERROR, "ClientApp raised an exception", exc_info=ex)
 
@@ -390,21 +396,12 @@ def _start_client_internal(
                     # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
                     reason = str(type(ex)) + ":<'" + str(ex) + "'>"
                     error = Error(code=0, reason=reason)
-                    error_out_message = message.create_error_reply(error=error, ttl="")
+                    out_message = message.create_error_reply(error=error, ttl="")
 
-                    # Return error message
-                    send(error_out_message)
+                finally:
 
-                    continue
-
-                # Update node state
-                node_state.update_context(
-                    run_id=message.metadata.run_id,
-                    context=context,
-                )
-
-                # Send
-                send(out_message)
+                    # Send
+                    send(out_message)
 
             # Unregister node
             if delete_node is not None:
