@@ -28,6 +28,7 @@ This will create a new directory called `fedllm-finetune` containing the followi
 -- dataset.py          <- Dataset and tokenizer build
 -- utils.py            <- Utility functions
 -- test.py             <- Test pre-trained model
+-- app.py              <- ServerApp/ClientApp for Flower-Next
 -- conf/config.yaml    <- Configuration file
 -- requirements.txt    <- Example dependencies
 ```
