@@ -55,7 +55,6 @@ def train(net, trainloader, optimizer, epochs, device):
     return avg_loss / len(trainloader)
 
 
-# borrowed from Pytorch quickstart example
 def test(net, testloader, device: str):
     """Validate the network on the entire test set."""
     criterion = torch.nn.CrossEntropyLoss()
