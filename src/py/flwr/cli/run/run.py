@@ -36,12 +36,23 @@ def run() -> None:
         )
         sys.exit()
 
-    is_valid, reasons = validate_flower_toml(config)
+    is_valid, errors, warnings = validate_flower_toml(config)
+    if warnings:
+        print(
+            typer.style(
+                "Project configuration is missing the following "
+                "recommended properties:\n"
+                + "\n".join([f"- {line}" for line in warnings]),
+                fg=typer.colors.RED,
+                bold=True,
+            )
+        )
+
     if not is_valid:
         print(
             typer.style(
                 "Project configuration could not be loaded.\nflower.toml is invalid:\n"
-                + "\n".join([f"- {line}" for line in reasons]),
+                + "\n".join([f"- {line}" for line in errors]),
                 fg=typer.colors.RED,
                 bold=True,
             )

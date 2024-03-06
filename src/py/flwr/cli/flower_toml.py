@@ -37,39 +37,38 @@ def load_flower_toml(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
         return data
 
 
-def validate_flower_toml_fields(config: Dict[str, Any]) -> Tuple[bool, List[str]]:
+def validate_flower_toml_fields(
+    config: Dict[str, Any]
+) -> Tuple[bool, List[str], List[str]]:
     """Validate flower.toml fields."""
-    invalid_reasons = []
+    errors = []
+    warnings = []
 
     if "project" not in config:
-        invalid_reasons.append("Missing [project] section")
+        errors.append("Missing [project] section")
     else:
         if "name" not in config["project"]:
-            invalid_reasons.append('Property "name" missing in [project]')
+            errors.append('Property "name" missing in [project]')
         if "version" not in config["project"]:
-            invalid_reasons.append('Property "version" missing in [project]')
+            errors.append('Property "version" missing in [project]')
         if "description" not in config["project"]:
-            invalid_reasons.append('Property "description" missing in [project]')
+            warnings.append('Recommended property "description" missing in [project]')
         if "license" not in config["project"]:
-            invalid_reasons.append('Property "license" missing in [project]')
+            warnings.append('Recommended property "license" missing in [project]')
         if "authors" not in config["project"]:
-            invalid_reasons.append('Property "authors" missing in [project]')
+            warnings.append('Recommended property "authors" missing in [project]')
 
     if "flower" not in config:
-        invalid_reasons.append("Missing [flower] section")
+        errors.append("Missing [flower] section")
     elif "components" not in config["flower"]:
-        invalid_reasons.append("Missing [flower.components] section")
+        errors.append("Missing [flower.components] section")
     else:
         if "serverapp" not in config["flower"]["components"]:
-            invalid_reasons.append(
-                'Property "serverapp" missing in [flower.components]'
-            )
+            errors.append('Property "serverapp" missing in [flower.components]')
         if "clientapp" not in config["flower"]["components"]:
-            invalid_reasons.append(
-                'Property "clientapp" missing in [flower.components]'
-            )
+            errors.append('Property "clientapp" missing in [flower.components]')
 
-    return len(invalid_reasons) == 0, invalid_reasons
+    return len(errors) == 0, errors, warnings
 
 
 def validate_object_reference(ref: str) -> Tuple[bool, Optional[str]]:
@@ -78,7 +77,8 @@ def validate_object_reference(ref: str) -> Tuple[bool, Optional[str]]:
     Returns
     -------
     Tuple[bool, Optional[str]]
-        A boolean indicating whether an object reference is valid and the reason why it might not be.
+        A boolean indicating whether an object reference is valid and
+        the reason why it might not be.
     """
     module_str, _, attributes_str = ref.partition(":")
     if not module_str:
@@ -112,19 +112,19 @@ def validate_object_reference(ref: str) -> Tuple[bool, Optional[str]]:
     return (True, None)
 
 
-def validate_flower_toml(config: Dict[str, Any]) -> Tuple[bool, List[str]]:
+def validate_flower_toml(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
     """Validate flower.toml."""
-    is_valid, reasons = validate_flower_toml_fields(config)
+    is_valid, errors, warnings = validate_flower_toml_fields(config)
 
     if not is_valid:
-        return False, reasons
+        return False, errors, warnings
 
     # Validate serverapp
     is_valid, reason = validate_object_reference(
         config["flower"]["components"]["serverapp"]
     )
     if not is_valid and isinstance(reason, str):
-        return False, [reason]
+        return False, [reason], []
 
     # Validate clientapp
     is_valid, reason = validate_object_reference(
@@ -132,9 +132,9 @@ def validate_flower_toml(config: Dict[str, Any]) -> Tuple[bool, List[str]]:
     )
 
     if not is_valid and isinstance(reason, str):
-        return False, [reason]
+        return False, [reason], []
 
-    return True, []
+    return True, [], []
 
 
 def apply_defaults(

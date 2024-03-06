@@ -54,7 +54,7 @@ def test_load_flower_toml_load_from_cwd(tmp_path: str) -> None:
             },
             "engine": {
                 "name": "simulation",
-                "simulation": {"super-node": {"count": 10}},
+                "simulation": {"supernode": {"count": 10}},
             },
         },
     }
@@ -91,7 +91,7 @@ def test_load_flower_toml_from_path(tmp_path: str) -> None:
         [flower.engine]
         name = "simulation" # optional
 
-        [flower.engine.simulation.super-node]
+        [flower.engine.simulation.supernode]
         count = 10 # optional
     """
     expected_config = {
@@ -105,7 +105,7 @@ def test_load_flower_toml_from_path(tmp_path: str) -> None:
             },
             "engine": {
                 "name": "simulation",
-                "simulation": {"super-node": {"count": 10}},
+                "simulation": {"supernode": {"count": 10}},
             },
         },
     }
@@ -134,11 +134,12 @@ def test_validate_flower_toml_fields_empty() -> None:
     config: Dict[str, Any] = {}
 
     # Execute
-    is_valid, reasons = validate_flower_toml_fields(config)
+    is_valid, errors, warnings = validate_flower_toml_fields(config)
 
     # Assert
     assert not is_valid
-    assert len(reasons) == 2
+    assert len(errors) == 2
+    assert len(warnings) == 0
 
 
 def test_validate_flower_toml_fields_no_flower() -> None:
@@ -155,11 +156,12 @@ def test_validate_flower_toml_fields_no_flower() -> None:
     }
 
     # Execute
-    is_valid, reasons = validate_flower_toml_fields(config)
+    is_valid, errors, warnings = validate_flower_toml_fields(config)
 
     # Assert
     assert not is_valid
-    assert len(reasons) == 1
+    assert len(errors) == 1
+    assert len(warnings) == 0
 
 
 def test_validate_flower_toml_fields_no_flower_components() -> None:
@@ -177,11 +179,12 @@ def test_validate_flower_toml_fields_no_flower_components() -> None:
     }
 
     # Execute
-    is_valid, reasons = validate_flower_toml_fields(config)
+    is_valid, errors, warnings = validate_flower_toml_fields(config)
 
     # Assert
     assert not is_valid
-    assert len(reasons) == 1
+    assert len(errors) == 1
+    assert len(warnings) == 0
 
 
 def test_validate_flower_toml_fields_no_server_and_client_app() -> None:
@@ -199,11 +202,12 @@ def test_validate_flower_toml_fields_no_server_and_client_app() -> None:
     }
 
     # Execute
-    is_valid, reasons = validate_flower_toml_fields(config)
+    is_valid, errors, warnings = validate_flower_toml_fields(config)
 
     # Assert
     assert not is_valid
-    assert len(reasons) == 2
+    assert len(errors) == 2
+    assert len(warnings) == 0
 
 
 def test_validate_flower_toml_fields() -> None:
@@ -221,11 +225,12 @@ def test_validate_flower_toml_fields() -> None:
     }
 
     # Execute
-    is_valid, reasons = validate_flower_toml_fields(config)
+    is_valid, errors, warnings = validate_flower_toml_fields(config)
 
     # Assert
     assert is_valid
-    assert len(reasons) == 0
+    assert len(errors) == 0
+    assert len(warnings) == 0
 
 
 def test_validate_object_reference() -> None:
@@ -274,11 +279,12 @@ def test_validate_flower_toml() -> None:
     }
 
     # Execute
-    is_valid, reasons = validate_flower_toml(config)
+    is_valid, errors, warnings = validate_flower_toml(config)
 
     # Assert
     assert is_valid
-    assert not reasons
+    assert not errors
+    assert not warnings
 
 
 def test_validate_flower_toml_fail() -> None:
@@ -301,8 +307,9 @@ def test_validate_flower_toml_fail() -> None:
     }
 
     # Execute
-    is_valid, reasons = validate_flower_toml(config)
+    is_valid, errors, warnings = validate_flower_toml(config)
 
     # Assert
     assert not is_valid
-    assert len(reasons) == 1
+    assert len(errors) == 1
+    assert len(warnings) == 0
