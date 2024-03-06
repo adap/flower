@@ -18,7 +18,7 @@
 from flwr.client.typing import ClientAppCallable
 from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common import recordset_compat as compat
-from flwr.common.constant import MESSAGE_TYPE_FIT
+from flwr.common.constant import MessageType
 from flwr.common.context import Context
 from flwr.common.differential_privacy import (
     add_localdp_gaussian_noise_to_params,
@@ -33,7 +33,7 @@ class LocalDpMod:
     This mod clips the client model updates and
     add noise to the params before sending them to the server.
 
-    It operates on messages with type MESSAGE_TYPE_FIT.
+    It operates on messages with type MessageType.TRAIN.
 
     Parameters
     ----------
@@ -99,7 +99,7 @@ class LocalDpMod:
         Message
             The modified message to be sent back to the server.
         """
-        if msg.metadata.message_type != MESSAGE_TYPE_FIT:
+        if msg.metadata.message_type != MessageType.TRAIN:
             return call_next(msg, ctxt)
 
         fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
