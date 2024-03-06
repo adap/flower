@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Utils for mocking datasets."""
+
+
 import io
 import random
 import string
@@ -29,7 +31,22 @@ from datasets import ClassLabel, Dataset, DatasetDict, Features, Value
 def _generate_artificial_strings(
     num_rows: int, num_unique: int, string_length: int
 ) -> List[str]:
-    """Create list of strings."""
+    """Create list of strings for categories or labels mocking.
+
+    Parameters
+    ----------
+    num_rows: int
+        Number of rows = number of elements in the list.
+    num_unique: int
+        Number of unique strings that will be initially created.
+    string_length: int
+        Length of each string.
+
+    Returns
+    -------
+    string_column : List[str]
+        List of generated strings.
+    """
     unique_strings: Set[str] = set()
     while len(unique_strings) < num_unique:
         random_str = "".join(
@@ -249,131 +266,13 @@ def _mock_sentiment140(num_rows: int) -> Dataset:
 
 def _mock_cifar100(num_rows: int) -> Dataset:
     imgs = _generate_random_image_column(num_rows, (32, 32, 3), "PNG")
-    unique_fine_labels = [
-        "apple",
-        "aquarium_fish",
-        "baby",
-        "bear",
-        "beaver",
-        "bed",
-        "bee",
-        "beetle",
-        "bicycle",
-        "bottle",
-        "bowl",
-        "boy",
-        "bridge",
-        "bus",
-        "butterfly",
-        "camel",
-        "can",
-        "castle",
-        "caterpillar",
-        "cattle",
-        "chair",
-        "chimpanzee",
-        "clock",
-        "cloud",
-        "cockroach",
-        "couch",
-        "cra",
-        "crocodile",
-        "cup",
-        "dinosaur",
-        "dolphin",
-        "elephant",
-        "flatfish",
-        "forest",
-        "fox",
-        "girl",
-        "hamster",
-        "house",
-        "kangaroo",
-        "keyboard",
-        "lamp",
-        "lawn_mower",
-        "leopard",
-        "lion",
-        "lizard",
-        "lobster",
-        "man",
-        "maple_tree",
-        "motorcycle",
-        "mountain",
-        "mouse",
-        "mushroom",
-        "oak_tree",
-        "orange",
-        "orchid",
-        "otter",
-        "palm_tree",
-        "pear",
-        "pickup_truck",
-        "pine_tree",
-        "plain",
-        "plate",
-        "poppy",
-        "porcupine",
-        "possum",
-        "rabbit",
-        "raccoon",
-        "ray",
-        "road",
-        "rocket",
-        "rose",
-        "sea",
-        "seal",
-        "shark",
-        "shrew",
-        "skunk",
-        "skyscraper",
-        "snail",
-        "snake",
-        "spider",
-        "squirrel",
-        "streetcar",
-        "sunflower",
-        "sweet_pepper",
-        "table",
-        "tank",
-        "telephone",
-        "television",
-        "tiger",
-        "tractor",
-        "train",
-        "trout",
-        "tulip",
-        "turtle",
-        "wardrobe",
-        "whale",
-        "willow_tree",
-        "wolf",
-        "woman",
-        "worm",
-    ]
+    unique_fine_labels = _generate_artificial_strings(
+        num_rows=100, num_unique=100, string_length=10
+    )
     fine_label = _generate_artificial_categories(num_rows, unique_fine_labels)
-    unique_coarse_labels = [
-        "aquatic_mammals",
-        "fish",
-        "flowers",
-        "food_containers",
-        "fruit_and_vegetables",
-        "household_electrical_devices",
-        "household_furniture",
-        "insects",
-        "large_carnivores",
-        "large_man-made_outdoor_things",
-        "large_natural_outdoor_scenes",
-        "large_omnivores_and_herbivores",
-        "medium_mammals",
-        "non-insect_invertebrates",
-        "people",
-        "reptiles",
-        "small_mammals",
-        "trees",
-        "vehicles_1",
-        "vehicles_2",
-    ]
+    unique_coarse_labels = _generate_artificial_strings(
+        num_rows=20, num_unique=20, string_length=10
+    )
 
     coarse_label = _generate_artificial_categories(num_rows, unique_coarse_labels)
     features = Features(
