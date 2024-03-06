@@ -23,7 +23,7 @@ from flwr.client.message_handler.message_handler import (
 )
 from flwr.client.mod.utils import make_ffn
 from flwr.client.typing import ClientFn, Mod
-from flwr.common import Context, Message
+from flwr.common import Context, Message, MessageType
 
 from .typing import ClientAppCallable
 
@@ -86,11 +86,11 @@ class ClientApp:
         if self._call:
             return self._call(message, context)
 
-        if message.metadata.message_type == "train":
+        if message.metadata.message_type == MessageType.TRAIN:
             return self._train(message, context)
-        if message.metadata.message_type == "evaluate":
+        if message.metadata.message_type == MessageType.EVALUATE:
             return self._evaluate(message, context)
-        if message.metadata.message_type == "query":
+        if message.metadata.message_type == MessageType.QUERY:
             return self._query(message, context)
         raise ValueError(f"Unknown message_type: {message.metadata.message_type}")
 
