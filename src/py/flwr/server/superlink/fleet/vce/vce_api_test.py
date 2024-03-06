@@ -119,21 +119,21 @@ def register_messages_into_state(
     return expected_results
 
 
-def _autoresolve_working_dir(rel_client_app_dir: str = "backend") -> str:
-    """Correctly resolve working directory."""
+def _autoresolve_app_dir(rel_client_app_dir: str = "backend") -> str:
+    """Correctly resolve working directory for the app."""
     file_path = Path(__file__)
-    working_dir = Path.cwd()
-    rel_workdir = file_path.relative_to(working_dir)
+    app_dir = Path.cwd()
+    rel_app_dir = file_path.relative_to(app_dir)
 
     # Susbtract lats element and append "backend/test" (wher the client module is.)
-    return str(rel_workdir.parent / rel_client_app_dir)
+    return str(rel_app_dir.parent / rel_client_app_dir)
 
 
 # pylint: disable=too-many-arguments
 def start_and_shutdown(
     backend: str = "ray",
     client_app_attr: str = "raybackend_test:client_app",
-    working_dir: str = "",
+    app_dir: str = "",
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
     nodes_mapping: Optional[NodeToPartitionMapping] = None,
@@ -157,8 +157,8 @@ def start_and_shutdown(
         termination_th.start()
 
     # Resolve working directory if not passed
-    if not working_dir:
-        working_dir = _autoresolve_working_dir()
+    if not app_dir:
+        app_dir = _autoresolve_app_dir()
 
     start_vce(
         num_supernodes=num_supernodes,
@@ -166,7 +166,7 @@ def start_and_shutdown(
         backend_name=backend,
         backend_config_json_stream=backend_config,
         state_factory=state_factory,
-        working_dir=working_dir,
+        app_dir=app_dir,
         f_stop=f_stop,
         existing_nodes_mapping=nodes_mapping,
     )
