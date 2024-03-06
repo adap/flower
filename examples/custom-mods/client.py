@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 
@@ -8,7 +9,7 @@ from flwr.common import ConfigsRecord
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common.context import Context
 from flwr.common.message import Message
-from flwr.common.constant import MESSAGE_TYPE_FIT
+from flwr.common.constant import MessageType
 
 from task import (
     Net,
@@ -20,7 +21,15 @@ from task import (
     test,
 )
 
-os.environ["WANDB_SILENT"] = "true"
+
+class WBLoggingFilter(logging.Filter):
+    def filter(self, record):
+        return (
+            "login" in record.getMessage()
+            or "View project at" in record.getMessage()
+            or "View run at" in record.getMessage()
+        )
+
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
@@ -49,22 +58,26 @@ def client_fn(cid: str):
 
 def get_wandb_mod(name: str) -> Mod:
     def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message:
+        """Flower Mod that logs the metrics dictionary returned by the client's
+        fit function to Weights & Biases.
+        """
         server_round = int(msg.metadata.group_id)
 
-        run_id = msg.metadata.run_id
-        group_name = f"Run ID: {run_id}"
+        if server_round == 1 and msg.metadata.message_type == MessageType.TRAIN:
+            run_id = msg.metadata.run_id
+            group_name = f"Run ID: {run_id}"
 
-        node_id = str(msg.metadata.dst_node_id)
-        run_name = f"Node ID: {node_id}"
+            node_id = str(msg.metadata.dst_node_id)
+            run_name = f"Node ID: {node_id}"
 
-        wandb.init(
-            project=name,
-            group=group_name,
-            name=run_name,
-            id=f"{run_id}{node_id}",
-            resume="allow",
-            reinit=True,
-        )
+            wandb.init(
+                project=name,
+                group=group_name,
+                name=run_name,
+                id=f"{run_id}_{node_id}",
+                resume="allow",
+                reinit=True,
+            )
 
         start_time = time.time()
 
@@ -72,7 +85,8 @@ def get_wandb_mod(name: str) -> Mod:
 
         time_diff = time.time() - start_time
 
-        if reply.metadata.message_type == MESSAGE_TYPE_FIT and reply.has_content():
+        # if the `ClientApp` just processed a "fit" message, let's log some metrics to W&B
+        if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
 
             metrics = reply.content.configs_records
 
@@ -93,6 +107,9 @@ def get_tensorboard_mod(logdir) -> Mod:
     def tensorboard_mod(
         msg: Message, context: Context, app: ClientAppCallable
     ) -> Message:
+        """Flower Mod that logs the metrics dictionary returned by the client's
+        fit function to TensorBoard.
+        """
         logdir_run = os.path.join(logdir, str(msg.metadata.run_id))
 
         node_id = str(msg.metadata.dst_node_id)
@@ -105,7 +122,8 @@ def get_tensorboard_mod(logdir) -> Mod:
 
         time_diff = time.time() - start_time
 
-        if reply.metadata.message_type == MESSAGE_TYPE_FIT and reply.has_content():
+        # if the `ClientApp` just processed a "fit" message, let's log some metrics to TensorBoard
+        if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
             writer = tf.summary.create_file_writer(os.path.join(logdir_run, node_id))
 
             metrics = dict(

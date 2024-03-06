@@ -67,7 +67,7 @@ def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message
         project="Mod Name",
         group=group_name,
         name=run_name,
-        id=f"{run_id}{node_id}",
+        id=f"{run_id}_{node_id}",
         resume="allow",
         reinit=True,
     )
@@ -89,7 +89,7 @@ reply = app(msg, context)
 And now, with the message we got back, we can gather our metrics:
 
 ```python
-if reply.metadata.message_type == MESSAGE_TYPE_FIT and reply.has_content():
+if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
 
     time_diff = time.time() - start_time
 
@@ -113,26 +113,27 @@ The complete mod becomes:
 def wandb_mod(msg: Message, context: Context, app: ClientAppCallable) -> Message:
     server_round = int(msg.metadata.group_id)
 
-    run_id = msg.metadata.run_id
-    group_name = f"Run ID: {run_id}"
+    if reply.metadata.message_type == MessageType.TRAIN and server_round == 1:
+        run_id = msg.metadata.run_id
+        group_name = f"Run ID: {run_id}"
 
-    node_id = str(msg.metadata.dst_node_id)
-    run_name = f"Node ID: {node_id}"
+        node_id = str(msg.metadata.dst_node_id)
+        run_name = f"Node ID: {node_id}"
 
-    wandb.init(
-        project="Mod Name",
-        group=group_name,
-        name=run_name,
-        id=f"{run_id}{node_id}",
-        resume="allow",
-        reinit=True,
-    )
+        wandb.init(
+            project="Mod Name",
+            group=group_name,
+            name=run_name,
+            id=f"{run_id}_{node_id}",
+            resume="allow",
+            reinit=True,
+        )
 
     start_time = time.time()
 
     reply = app(msg, context)
 
-    if reply.metadata.message_type == MESSAGE_TYPE_FIT and reply.has_content():
+    if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
 
         time_diff = time.time() - start_time
 
@@ -173,7 +174,7 @@ def get_wandb_mod(name: str) -> Mod:
             project=name,
             group=group_name,
             name=run_name,
-            id=f"{run_id}{node_id}",
+            id=f"{run_id}_{node_id}",
             resume="allow",
             reinit=True,
         )
@@ -182,7 +183,7 @@ def get_wandb_mod(name: str) -> Mod:
 
         reply = app(msg, context)
 
-        if reply.metadata.message_type == MESSAGE_TYPE_FIT and reply.has_content():
+        if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
 
             time_diff = time.time() - start_time
 
@@ -233,7 +234,7 @@ def get_tensorboard_mod(logdir) -> Mod:
 
         time_diff = time.time() - start_time
 
-        if reply.metadata.message_type == MESSAGE_TYPE_FIT and reply.has_content():
+        if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
             writer = tf.summary.create_file_writer(os.path.join(logdir_run, node_id))
 
             metrics = dict(
