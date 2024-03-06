@@ -19,15 +19,9 @@ import time
 from typing import List, Optional
 
 from flwr import common
-from flwr.common import RecordSet
+from flwr.common import MessageType, MessageTypeLegacy, RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
-from flwr.common.constant import (
-    MESSAGE_TYPE_EVALUATE,
-    MESSAGE_TYPE_FIT,
-    MESSAGE_TYPE_GET_PARAMETERS,
-    MESSAGE_TYPE_GET_PROPERTIES,
-)
 from flwr.proto import driver_pb2, node_pb2, task_pb2  # pylint: disable=E0611
 from flwr.server.client_proxy import ClientProxy
 
@@ -57,7 +51,7 @@ class DriverClientProxy(ClientProxy):
         out_recordset = compat.getpropertiesins_to_recordset(ins)
         # Fetch response
         in_recordset = self._send_receive_recordset(
-            out_recordset, MESSAGE_TYPE_GET_PROPERTIES, timeout, group_id
+            out_recordset, MessageTypeLegacy.GET_PROPERTIES, timeout, group_id
         )
         # RecordSet to Res
         return compat.recordset_to_getpropertiesres(in_recordset)
@@ -73,7 +67,7 @@ class DriverClientProxy(ClientProxy):
         out_recordset = compat.getparametersins_to_recordset(ins)
         # Fetch response
         in_recordset = self._send_receive_recordset(
-            out_recordset, MESSAGE_TYPE_GET_PARAMETERS, timeout, group_id
+            out_recordset, MessageTypeLegacy.GET_PARAMETERS, timeout, group_id
         )
         # RecordSet to Res
         return compat.recordset_to_getparametersres(in_recordset, False)
@@ -86,7 +80,7 @@ class DriverClientProxy(ClientProxy):
         out_recordset = compat.fitins_to_recordset(ins, keep_input=True)
         # Fetch response
         in_recordset = self._send_receive_recordset(
-            out_recordset, MESSAGE_TYPE_FIT, timeout, group_id
+            out_recordset, MessageType.TRAIN, timeout, group_id
         )
         # RecordSet to Res
         return compat.recordset_to_fitres(in_recordset, keep_input=False)
@@ -99,7 +93,7 @@ class DriverClientProxy(ClientProxy):
         out_recordset = compat.evaluateins_to_recordset(ins, keep_input=True)
         # Fetch response
         in_recordset = self._send_receive_recordset(
-            out_recordset, MESSAGE_TYPE_EVALUATE, timeout, group_id
+            out_recordset, MessageType.EVALUATE, timeout, group_id
         )
         # RecordSet to Res
         return compat.recordset_to_evaluateres(in_recordset)

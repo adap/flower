@@ -37,7 +37,7 @@ from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
 from flwr.common.typing import ConfigsRecordValues, FitIns
 from flwr.proto.task_pb2 import Task
 from flwr.common import serde
-from flwr.common.constant import MESSAGE_TYPE_FIT
+from flwr.common.constant import MessageType
 from flwr.common import RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.common import ConfigsRecord
@@ -61,7 +61,7 @@ def _wrap_in_task(
         recordset = RecordSet()
     recordset.configs_records[RECORD_KEY_CONFIGS] = ConfigsRecord(named_values)
     return Task(
-        task_type=MESSAGE_TYPE_FIT,
+        task_type=MessageType.TRAIN,
         recordset=serde.recordset_to_proto(recordset),
     )
 

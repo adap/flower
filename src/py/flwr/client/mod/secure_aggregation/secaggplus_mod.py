@@ -30,7 +30,7 @@ from flwr.common import (
     parameters_to_ndarrays,
 )
 from flwr.common import recordset_compat as compat
-from flwr.common.constant import MESSAGE_TYPE_FIT
+from flwr.common.constant import MessageType
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.shamir import create_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -150,7 +150,7 @@ def secaggplus_mod(
 ) -> Message:
     """Handle incoming message and return results, following the SecAgg+ protocol."""
     # Ignore non-fit messages
-    if msg.metadata.message_type != MESSAGE_TYPE_FIT:
+    if msg.metadata.message_type != MessageType.TRAIN:
         return call_next(msg, ctxt)
 
     # Retrieve local state

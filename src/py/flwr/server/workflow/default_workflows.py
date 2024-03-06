@@ -21,11 +21,7 @@ from typing import Optional, cast
 
 import flwr.common.recordset_compat as compat
 from flwr.common import ConfigsRecord, Context, GetParametersIns, log
-from flwr.common.constant import (
-    MESSAGE_TYPE_EVALUATE,
-    MESSAGE_TYPE_FIT,
-    MESSAGE_TYPE_GET_PARAMETERS,
-)
+from flwr.common.constant import MessageType, MessageTypeLegacy
 
 from ..compat.app_utils import start_update_client_manager_thread
 from ..compat.legacy_context import LegacyContext
@@ -134,7 +130,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
             [
                 driver.create_message(
                     content=content,
-                    message_type=MESSAGE_TYPE_GET_PARAMETERS,
+                    message_type=MessageTypeLegacy.GET_PARAMETERS,
                     dst_node_id=random_client.node_id,
                     group_id="",
                     ttl="",
@@ -232,7 +228,7 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
     out_messages = [
         driver.create_message(
             content=compat.fitins_to_recordset(fitins, True),
-            message_type=MESSAGE_TYPE_FIT,
+            message_type=MessageType.TRAIN,
             dst_node_id=proxy.node_id,
             group_id="",
             ttl="",
@@ -313,7 +309,7 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     out_messages = [
         driver.create_message(
             content=compat.evaluateins_to_recordset(evalins, True),
-            message_type=MESSAGE_TYPE_EVALUATE,
+            message_type=MessageType.EVALUATE,
             dst_node_id=proxy.node_id,
             group_id="",
             ttl="",
