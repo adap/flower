@@ -53,3 +53,5 @@ def main(driver: Driver, context: Context) -> None:
 
     # Execute
     workflow(driver, context)
+    
+    print(context.history)

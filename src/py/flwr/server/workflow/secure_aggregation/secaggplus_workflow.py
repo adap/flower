@@ -18,10 +18,32 @@
 from __future__ import annotations
 
 from flwr.server.driver import Driver
-from flwr.common import Context, log
+from flwr.common import Context, log, RecordSet, ConfigsRecord, Message
+from flwr.server.compat.legacy_context import LegacyContext
+import flwr.common.recordset_compat as compat
+from flwr.common.constant import MESSAGE_TYPE_FIT
 from flwr.common.secure_aggregation.secaggplus_constants import Key, Stage, RECORD_KEY_CONFIGS, RECORD_KEY_STATE
+from dataclasses import dataclass, field
+from logging import WARN, INFO, ERROR
+from typing import List, Dict
+from ..default_workflows import KEY_CURRENT_ROUND, CONFIGS_RECORD_KEY, PARAMS_RECORD_KEY
+import random
 
-from logging import WARN, INFO
+
+LOG_EXPLAIN = True
+
+
+@dataclass
+class WorkflowState:
+    """The state of the SecAgg+ protocol."""
+    sampled_node_ids: set[int] = field(default_factory=set)
+    active_node_ids: set[int] = field(default_factory=set)
+    num_shares: int = 0
+    threshold: int = 0
+    clipping_range: float = 0.0
+    quantization_range: int = 0
+    mod_range: int = 0
+    nid_to_neighbours: dict[int, set[int]] = {}
 
 
 class SecAggPlusWorkflow:
@@ -57,6 +79,10 @@ class SecAggPlusWorkflow:
     modulus_range : int, optional (default: 2147483648, this equals 2**30)
         The range of values from which random mask entries are uniformly sampled
         ([0, modulus_range-1]).
+    timeout : Optional[float] (default: None)
+        The timeout duration in seconds. If specified, the workflow will wait for
+        replies for this duration each time. If `None`, there is no time limit and 
+        the workflow will wait until replies for all messages are received.
 
     Notes
     -----
@@ -83,17 +109,18 @@ class SecAggPlusWorkflow:
         reconstruction_threshold: int | float,
         *,
         max_weight: float = 1000.0,
-        quantization_range: float = 8.0,
-        target_range: int = 1048576,
-        mod_range: int = 2147483648,
+        clipping_range: float = 8.0,
+        quantization_range: int = 1048576,
+        modulus_range: int = 2147483648,
+        timeout: float | None = None,
     ) -> None:
         self.num_shares = num_shares
         self.reconstruction_threshold = reconstruction_threshold
         self.max_weight = max_weight
+        self.clipping_range = clipping_range
         self.quantization_range = quantization_range
-        self.target_range = target_range
-        self.mod_range = mod_range
-        self.sampled_node_ids: List[int] = []
+        self.modulus_range = modulus_range
+        self.timeout = timeout
         
         self._check_init_params()
     
@@ -107,7 +134,7 @@ class SecAggPlusWorkflow:
         if isinstance(self.num_shares, int):
             if self.num_shares <= 2:
                 raise ValueError("`num_shares` as an integer must be greater than 2.")
-            if self.num_shares > self.mod_range / self.target_range:
+            if self.num_shares > self.modulus_range / self.quantization_range:
                 log(
                     WARN, 
                     "A `num_shares` larger than `mod_range / target_range` will potentially "
@@ -145,15 +172,101 @@ class SecAggPlusWorkflow:
             raise ValueError("`quantization_range` must be greater than 0.")
         
         # Check `target_range`
-        if not isinstance(self.target_range, int) or self.target_range <= 0:
+        if not isinstance(self.quantization_range, int) or self.quantization_range <= 0:
             raise ValueError("`target_range` must be an integer and greater than 0.")
         
         # Check `mod_range`
-        if not isinstance(self.mod_range, int) or self.mod_range <= self.target_range:
+        if not isinstance(self.modulus_range, int) or self.modulus_range <= self.quantization_range:
             raise ValueError("`mod_range` must be an integer and greater than `target_range`.")
 
-    def _setup(self, driver: Driver, context: Context) -> None:
-        # Protocol config
-        self.sampled_node_ids = driver.get_node_ids()
-        cfg = context.state.configs_records[RECORD_KEY_STATE]
+    def _check_threshold(self, state: WorkflowState) -> bool:
+        for node_id in state.active_node_ids:
+            active_neighbors = state.nid_to_neighbours[node_id]
+            active_neighbors.intersection_update(state.active_node_ids)
+            if len(active_neighbors) < state.threshold:
+                log(ERROR, "Insufficient available nodes.")
+                return False
+        return True
+
+    def _setup(self, driver: Driver, context: LegacyContext, state: WorkflowState) -> bool:
+        context.strategy.configure_fit()
         
+        # Protocol config
+        state.sampled_node_ids = set(driver.get_node_ids())
+        num_samples = len(state.sampled_node_ids)
+        if num_samples < 2:
+            log(ERROR, "The number of samples should be greater than 1.")
+            return False
+        if isinstance(self.num_shares, float):
+            state.num_shares = round(self.num_shares * num_samples)
+            # If even
+            if state.num_shares < num_samples and state.num_shares & 1 == 0:
+                state.num_shares += 1
+            # If too small
+            if state.num_shares <= 2:
+                state.num_shares = num_samples
+        if isinstance(self.reconstruction_threshold, float):
+            state.threshold = round(self.reconstruction_threshold * state.num_shares)
+            # If too small
+            if state.threshold < 2:
+                state.threshold = 2
+        state.active_node_ids = state.sampled_node_ids
+        state.clipping_range = self.clipping_range
+        state.quantization_range = self.quantization_range
+        state.mod_range = self.modulus_range
+        
+        sa_params_dict = {
+            Key.STAGE: Stage.SETUP,
+            Key.SAMPLE_NUMBER: num_samples,
+            Key.SHARE_NUMBER: state.num_shares,
+            Key.THRESHOLD: state.threshold,
+            Key.CLIPPING_RANGE: state.clipping_range,
+            Key.TARGET_RANGE: state.quantization_range,
+            Key.MOD_RANGE: state.mod_range,
+        }
+        
+        # The number of shares should better be odd in the SecAgg+ protocol.
+        if num_samples != state.num_shares and state.num_shares & 1 == 0:
+            log(WARN, "Number of shares in the SecAgg+ protocol should be odd.")
+            state.num_shares += 1
+
+        # Randomly assign secure IDs to clients
+        random.shuffle(state.sampled_node_ids)
+        # Build neighbour relations (node ID -> secure IDs of neighbours)
+        half_share = state.num_shares >> 1
+        state.nid_to_neighbours = {
+            nid: {
+                state.sampled_node_ids[(idx + offset) % num_samples]
+                for offset in range(-half_share, half_share + 1)
+            }
+            for idx, nid in enumerate(state.sampled_node_ids)
+        }
+
+        state.active_node_ids = state.sampled_node_ids
+        
+        # Send setup configuration to clients
+        cfgs = ConfigsRecord(sa_params_dict)
+        content = RecordSet(configs_records={RECORD_KEY_CONFIGS: cfgs})
+        def make(nid: int) -> Message:
+            return driver.create_message(
+                content=content,
+                message_type=MESSAGE_TYPE_FIT,
+                dst_node_id=nid,
+                group_id="",
+                ttl="",
+            )
+        
+        msgs = driver.send_and_receive([
+            make(node_id) for node_id in state.active_node_ids
+        ], timeout=self.timeout)
+        state.active_node_ids = {msg.metadata.src_node_id for msg in msgs if not msg.has_error()}
+        if LOG_EXPLAIN:
+            print(f"Received public keys from {len(state.active_node_ids)} clients.")
+
+        nid2public_keys = {}
+        for msg in msgs:
+            if msg.has_error():
+                continue
+        return True
+
+
