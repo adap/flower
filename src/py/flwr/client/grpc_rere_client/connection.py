@@ -27,6 +27,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log, warn_experimental_feature
 from flwr.common.message import Message, Metadata
+from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -51,6 +52,7 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 def grpc_request_response(
     server_address: str,
     insecure: bool,
+    retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
 ) -> Iterator[
@@ -72,6 +74,13 @@ def grpc_request_response(
         The IPv6 address of the server with `http://` or `https://`.
         If the Flower server runs on the same machine
         on port 8080, then `server_address` would be `"http://[::]:8080"`.
+    insecure : bool
+        Starts an insecure gRPC connection when True. Enables HTTPS connection
+        when False, using system certificates if `root_certificates` is None.
+    retry_invoker: RetryInvoker
+        `RetryInvoker` object that will try to reconnect the client to the server
+        after gRPC errors. If None, the client will only try to
+        reconnect once after a failure.
     max_message_length : int
         Ignored, only present to preserve API-compatibility.
     root_certificates : Optional[Union[bytes, str]] (default: None)
@@ -113,7 +122,8 @@ def grpc_request_response(
     def create_node() -> None:
         """Set create_node."""
         create_node_request = CreateNodeRequest()
-        create_node_response = stub.CreateNode(
+        create_node_response = retry_invoker.invoke(
+            stub.CreateNode,
             request=create_node_request,
         )
         node_store[KEY_NODE] = create_node_response.node
@@ -127,7 +137,7 @@ def grpc_request_response(
         node: Node = cast(Node, node_store[KEY_NODE])
 
         delete_node_request = DeleteNodeRequest(node=node)
-        stub.DeleteNode(request=delete_node_request)
+        retry_invoker.invoke(stub.DeleteNode, request=delete_node_request)
 
         del node_store[KEY_NODE]
 
@@ -141,7 +151,7 @@ def grpc_request_response(
 
         # Request instructions (task) from server
         request = PullTaskInsRequest(node=node)
-        response = stub.PullTaskIns(request=request)
+        response = retry_invoker.invoke(stub.PullTaskIns, request=request)
 
         # Get the current TaskIns
         task_ins: Optional[TaskIns] = get_task_ins(response)
@@ -185,7 +195,7 @@ def grpc_request_response(
 
         # Serialize ProtoBuf to bytes
         request = PushTaskResRequest(task_res_list=[task_res])
-        _ = stub.PushTaskRes(request)
+        _ = retry_invoker.invoke(stub.PushTaskRes, request)
 
         state[KEY_METADATA] = None
 

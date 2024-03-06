@@ -15,6 +15,7 @@
 """Common components shared between server and client."""
 
 
+from .constant import MessageType as MessageType
 from .context import Context as Context
 from .date import now as now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
@@ -83,6 +84,7 @@ __all__ = [
     "GRPC_MAX_MESSAGE_LENGTH",
     "log",
     "Message",
+    "MessageType",
     "Metadata",
     "Metrics",
     "MetricsAggregationFn",
