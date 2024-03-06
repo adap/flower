@@ -60,8 +60,6 @@ python main.py model.name="openlm-research/open_llama_7b_v2" model.quantization=
 python main.py num_rounds=50 fraction_fit.fraction_fit=0.25
 ```
 
-
-
 ## Expected Results
 
 ![](_static/train_loss_smooth.png)
