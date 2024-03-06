@@ -1,4 +1,4 @@
-# This python file refers to https://github.com/lm-sys/FastChat/blob/main/fastchat/llm_judge/gen_model_answer.py
+# This python file is adapted from https://github.com/lm-sys/FastChat/blob/main/fastchat/llm_judge/gen_model_answer.py
 
 import argparse
 import torch
