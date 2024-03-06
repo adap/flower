@@ -36,11 +36,6 @@ TRANSPORT_TYPES = [
     TRANSPORT_TYPE_VCE,
 ]
 
-MESSAGE_TYPE_GET_PROPERTIES = "get_properties"
-MESSAGE_TYPE_GET_PARAMETERS = "get_parameters"
-MESSAGE_TYPE_FIT = "train"
-MESSAGE_TYPE_EVALUATE = "evaluate"
-
 
 class MessageType:
     """Message type."""
