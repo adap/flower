@@ -25,14 +25,30 @@ LOGGER_NAME = "flwr"
 FLOWER_LOGGER = logging.getLogger(LOGGER_NAME)
 FLOWER_LOGGER.setLevel(logging.DEBUG)
 
-DEFAULT_FORMATTER = logging.Formatter(
-    "%(levelname)s %(name)s %(asctime)s | %(filename)s:%(lineno)d | %(message)s"
-)
+LOG_COLORS = {
+    "DEBUG": "\033[94m",  # Blue
+    "INFO": "\033[92m",  # Green
+    "WARNING": "\033[93m",  # Yellow
+    "ERROR": "\033[91m",  # Red
+    "CRITICAL": "\033[95m",  # Magenta
+    "RESET": "\033[0m",  # Reset to default
+}
+
+
+class ColorFormatter(logging.Formatter):
+    def format(self, record):
+        log_fmt = (
+            f"{LOG_COLORS[record.levelname]}"
+            f"[%(levelname)s] %(message)s{LOG_COLORS['RESET']}"
+        )
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
 
 # Configure console logger
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.DEBUG)
-console_handler.setFormatter(DEFAULT_FORMATTER)
+console_handler.setFormatter(ColorFormatter())
 FLOWER_LOGGER.addHandler(console_handler)
 
 
