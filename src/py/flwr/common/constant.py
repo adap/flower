@@ -53,13 +53,13 @@ class MessageType:
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
 
-class LegacyMessageType:
+class MessageTypeLegacy:
     """Legacy message type."""
 
     GET_PROPERTIES = "get_properties"
     GET_PARAMETERS = "get_parameters"
 
-    def __new__(cls) -> LegacyMessageType:
+    def __new__(cls) -> MessageTypeLegacy:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
 

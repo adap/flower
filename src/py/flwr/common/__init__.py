@@ -15,8 +15,8 @@
 """Common components shared between server and client."""
 
 
-from .constant import LegacyMessageType as LegacyMessageType
 from .constant import MessageType as MessageType
+from .constant import MessageTypeLegacy as MessageTypeLegacy
 from .context import Context as Context
 from .date import now as now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
@@ -83,10 +83,10 @@ __all__ = [
     "GetPropertiesIns",
     "GetPropertiesRes",
     "GRPC_MAX_MESSAGE_LENGTH",
-    "LegacyMessageType",
     "log",
     "Message",
     "MessageType",
+    "MessageTypeLegacy",
     "Metadata",
     "Metrics",
     "MetricsAggregationFn",
