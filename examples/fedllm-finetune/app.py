@@ -53,6 +53,7 @@ client1 = fl.client.ClientApp(
     ),
 )
 
+
 # ClientApp for client #2 (Flower Next)
 client2 = fl.client.ClientApp(
     client_fn=gen_client_fn(
