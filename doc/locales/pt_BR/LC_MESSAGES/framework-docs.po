@@ -29,7 +29,7 @@ msgstr ""
 
 #: ../../source/contributor-explanation-architecture.rst:7
 msgid ""
-"`Flower <https://flower.dev>`_ core framework architecture with Edge "
+"`Flower <https://flower.ai>`_ core framework architecture with Edge "
 "Client Engine"
 msgstr ""
 
@@ -39,7 +39,7 @@ msgstr ""
 
 #: ../../source/contributor-explanation-architecture.rst:15
 msgid ""
-"`Flower <https://flower.dev>`_ core framework architecture with Virtual "
+"`Flower <https://flower.ai>`_ core framework architecture with Virtual "
 "Client Engine"
 msgstr ""
 
@@ -49,7 +49,7 @@ msgstr ""
 
 #: ../../source/contributor-explanation-architecture.rst:23
 msgid ""
-"`Flower <https://flower.dev>`_ core framework architecture with both "
+"`Flower <https://flower.ai>`_ core framework architecture with both "
 "Virtual Client Engine and Edge Client Engine"
 msgstr ""
 
@@ -84,7 +84,7 @@ msgstr ""
 #: ../../source/contributor-how-to-build-docker-images.rst:19
 msgid ""
 "Please follow the first section on `Run Flower using Docker "
-"<https://flower.dev/docs/framework/how-to-run-flower-using-docker>`_ "
+"<https://flower.ai/docs/framework/how-to-run-flower-using-docker>`_ "
 "which covers this step in more detail."
 msgstr ""
 
@@ -280,7 +280,7 @@ msgstr ""
 
 #: ../../source/contributor-how-to-contribute-translations.rst:4
 msgid ""
-"Since `Flower 1.5 <https://flower.dev/docs/framework/ref-"
+"Since `Flower 1.5 <https://flower.ai/docs/framework/ref-"
 "changelog.html#v1-5-0-2023-08-31>`_ we have introduced translations to "
 "our doc pages, but, as you might have noticed, the translations are often"
 " imperfect. If you speak languages other than English, you might be able "
@@ -376,7 +376,7 @@ msgstr ""
 #: ../../source/contributor-how-to-contribute-translations.rst:69
 msgid ""
 "If you want to add a new language, you will first have to contact us, "
-"either on `Slack <https://flower.dev/join-slack>`_, or by opening an "
+"either on `Slack <https://flower.ai/join-slack>`_, or by opening an "
 "issue on our `GitHub repo <https://github.com/adap/flower>`_."
 msgstr ""
 
@@ -442,7 +442,7 @@ msgid "Once that is done, we will compile the file with:"
 msgstr ""
 
 #: ../../source/contributor-how-to-create-new-messages.rst:78
-msgid "If it compiles succesfully, you should see the following message:"
+msgid "If it compiles successfully, you should see the following message:"
 msgstr ""
 
 #: ../../source/contributor-how-to-create-new-messages.rst:87
@@ -823,7 +823,7 @@ msgstr ""
 
 #: ../../source/contributor-how-to-release-flower.rst:25
 msgid ""
-"Merge the pull request on the same day (i.e., before a new nighly release"
+"Merge the pull request on the same day (i.e., before a new nightly release"
 " gets published to PyPI)."
 msgstr ""
 
@@ -837,7 +837,7 @@ msgstr ""
 
 #: ../../source/contributor-how-to-release-flower.rst:33
 msgid ""
-"PyPI supports pre-releases (alpha, beta, release candiate). Pre-releases "
+"PyPI supports pre-releases (alpha, beta, release candidate). Pre-releases "
 "MUST use one of the following naming patterns:"
 msgstr ""
 
@@ -850,7 +850,7 @@ msgid "Beta: ``MAJOR.MINOR.PATCHbN``"
 msgstr ""
 
 #: ../../source/contributor-how-to-release-flower.rst:37
-msgid "Release candiate (RC): ``MAJOR.MINOR.PATCHrcN``"
+msgid "Release candidate (RC): ``MAJOR.MINOR.PATCHrcN``"
 msgstr ""
 
 #: ../../source/contributor-how-to-release-flower.rst:39
@@ -1114,7 +1114,7 @@ msgstr ""
 #: ../../source/contributor-ref-good-first-contributions.rst:25
 msgid ""
 "If you are not familiar with Flower Baselines, you should probably check-"
-"out our `contributing guide for baselines <https://flower.dev/docs"
+"out our `contributing guide for baselines <https://flower.ai/docs"
 "/contributing-baselines.html>`_."
 msgstr ""
 
@@ -1209,7 +1209,7 @@ msgstr ""
 msgid ""
 "If you're familiar with how contributing on GitHub works, you can "
 "directly checkout our `getting started guide for contributors "
-"<https://flower.dev/docs/contributor-tutorial-get-started-"
+"<https://flower.ai/docs/contributor-tutorial-get-started-"
 "as-a-contributor.html>`_."
 msgstr ""
 
@@ -1667,7 +1667,7 @@ msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:280
 msgid ""
-"Build the docs and check the result: `<https://flower.dev/docs/writing-"
+"Build the docs and check the result: `<https://flower.ai/docs/writing-"
 "documentation.html#edit-an-existing-page>`_"
 msgstr ""
 
@@ -1835,7 +1835,7 @@ msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:346
 msgid ""
-"`Good first contributions <https://flower.dev/docs/framework/contributor-"
+"`Good first contributions <https://flower.ai/docs/framework/contributor-"
 "ref-good-first-contributions.html>`_, where you should particularly look "
 "into the :code:`baselines` contributions."
 msgstr ""
@@ -2093,7 +2093,7 @@ msgid ""
 "The Flower repository contains a number of convenience scripts to make "
 "recurring development tasks easier and less error-prone. See the "
 ":code:`/dev` subdirectory for a full list. The following scripts are "
-"amonst the most important ones:"
+"amongst the most important ones:"
 msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:77
@@ -2173,7 +2173,7 @@ msgid ""
 "designed for non-iid data. We are using PyTorch to train a Convolutional "
 "Neural Network(with Batch Normalization layers) on the CIFAR-10 dataset. "
 "When applying FedBN, only few changes needed compared to `Example: "
-"PyTorch - From Centralized To Federated <https://flower.dev/docs/examples"
+"PyTorch - From Centralized To Federated <https://flower.ai/docs/examples"
 "/pytorch-from-centralized-to-federated.html>`_."
 msgstr ""
 
@@ -2185,7 +2185,7 @@ msgstr ""
 #: ../../source/example-fedbn-pytorch-from-centralized-to-federated.rst:10
 msgid ""
 "All files are revised based on `Example: PyTorch - From Centralized To "
-"Federated <https://flower.dev/docs/examples/pytorch-from-centralized-to-"
+"Federated <https://flower.ai/docs/examples/pytorch-from-centralized-to-"
 "federated.html>`_. The only thing to do is modifying the file called "
 ":code:`cifar.py`, revised part is shown below:"
 msgstr ""
@@ -2217,11 +2217,11 @@ msgstr ""
 #: ../../source/example-fedbn-pytorch-from-centralized-to-federated.rst:53
 msgid ""
 "If you have read `Example: PyTorch - From Centralized To Federated "
-"<https://flower.dev/docs/examples/pytorch-from-centralized-to-"
+"<https://flower.ai/docs/examples/pytorch-from-centralized-to-"
 "federated.html>`_, the following parts are easy to follow, onyl "
 ":code:`get_parameters` and :code:`set_parameters` function in "
 ":code:`client.py` needed to revise. If not, please read the `Example: "
-"PyTorch - From Centralized To Federated <https://flower.dev/docs/examples"
+"PyTorch - From Centralized To Federated <https://flower.ai/docs/examples"
 "/pytorch-from-centralized-to-federated.html>`_. first."
 msgstr ""
 
@@ -2730,7 +2730,7 @@ msgid ""
 "Implementing a Flower *client* basically means implementing a subclass of"
 " either :code:`flwr.client.Client` or :code:`flwr.client.NumPyClient`. "
 "Our implementation will be based on :code:`flwr.client.NumPyClient` and "
-"we'll call it :code:`MNISTClient`. :code:`NumPyClient` is slighly easier "
+"we'll call it :code:`MNISTClient`. :code:`NumPyClient` is slightly easier "
 "to implement than :code:`Client` if you use a framework with good NumPy "
 "interoperability (like PyTorch or MXNet) because it avoids some of the "
 "boilerplate that would otherwise be necessary. :code:`MNISTClient` needs "
@@ -2892,7 +2892,7 @@ msgid ""
 "The concept is easy to understand. We have to start a *server* and then "
 "use the code in :code:`cifar.py` for the *clients* that are connected to "
 "the *server*. The *server* sends model parameters to the clients. The "
-"*clients* run the training and update the paramters. The updated "
+"*clients* run the training and update the parameters. The updated "
 "parameters are sent back to the *server* which averages all received "
 "parameter updates. This describes one round of the federated learning "
 "process and we repeat this for multiple rounds."
@@ -2903,7 +2903,7 @@ msgid ""
 "Finally, we will define our *client* logic in :code:`client.py` and build"
 " upon the previously defined centralized training in :code:`cifar.py`. "
 "Our *client* needs to import :code:`flwr`, but also :code:`torch` to "
-"update the paramters on our PyTorch model:"
+"update the parameters on our PyTorch model:"
 msgstr ""
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:213
@@ -2911,7 +2911,7 @@ msgid ""
 "Implementing a Flower *client* basically means implementing a subclass of"
 " either :code:`flwr.client.Client` or :code:`flwr.client.NumPyClient`. "
 "Our implementation will be based on :code:`flwr.client.NumPyClient` and "
-"we'll call it :code:`CifarClient`. :code:`NumPyClient` is slighly easier "
+"we'll call it :code:`CifarClient`. :code:`NumPyClient` is slightly easier "
 "to implement than :code:`Client` if you use a framework with good NumPy "
 "interoperability (like PyTorch or TensorFlow/Keras) because it avoids "
 "some of the boilerplate that would otherwise be necessary. "
@@ -2941,7 +2941,7 @@ msgid ""
 "data, creates a :code:`CifarClient`, and starts this client. You load "
 "your data and model by using :code:`cifar.py`. Start :code:`CifarClient` "
 "with the function :code:`fl.client.start_client()` by pointing it at the "
-"same IP adress we used in :code:`server.py`:"
+"same IP address we used in :code:`server.py`:"
 msgstr ""
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:307
@@ -4260,7 +4260,7 @@ msgstr ""
 msgid ""
 "This can be achieved by customizing an existing strategy or by "
 "`implementing a custom strategy from scratch "
-"<https://flower.dev/docs/framework/how-to-implement-strategies.html>`_. "
+"<https://flower.ai/docs/framework/how-to-implement-strategies.html>`_. "
 "Here's a nonsensical example that customizes :code:`FedAvg` by adding a "
 "custom ``\"hello\": \"world\"`` configuration key/value pair to the "
 "config dict of a *single client* (only the first client in the list, the "
@@ -4342,7 +4342,7 @@ msgid ""
 "otherwise gathering logs from all entities (i.e. the server and the "
 "clients) might be cumbersome. Note that in Flower simulation, the server "
 "automatically displays all logs. You can still specify a "
-":code:`HTTPHandler` should you whish to backup or analyze the logs "
+":code:`HTTPHandler` should you wish to backup or analyze the logs "
 "somewhere else."
 msgstr ""
 
@@ -4806,7 +4806,7 @@ msgstr ""
 
 #: ../../source/how-to-install-flower.rst:60
 msgid ""
-"`How to run Flower using Docker <https://flower.dev/docs/framework/how-"
+"`How to run Flower using Docker <https://flower.ai/docs/framework/how-"
 "to-run-flower-using-docker.html>`_"
 msgstr ""
 
@@ -5153,7 +5153,7 @@ msgstr ""
 msgid ""
 "The ``--insecure`` flag enables insecure communication (using HTTP, not "
 "HTTPS) and should only be used for testing purposes. We strongly "
-"recommend enabling `SSL <https://flower.dev/docs/framework/how-to-run-"
+"recommend enabling `SSL <https://flower.ai/docs/framework/how-to-run-"
 "flower-using-docker.html#enabling-ssl-for-secure-connections>`_ when "
 "deploying to a production environment."
 msgstr ""
@@ -5200,7 +5200,7 @@ msgstr ""
 #: ../../source/how-to-run-flower-using-docker.rst:92
 msgid ""
 "For testing purposes, you can generate your own self-signed certificates."
-" The `Enable SSL connections <https://flower.dev/docs/framework/how-to-"
+" The `Enable SSL connections <https://flower.ai/docs/framework/how-to-"
 "enable-ssl-connections.html#certificates>`_ page contains a section that "
 "will guide you through the process."
 msgstr ""
@@ -5954,7 +5954,7 @@ msgstr ""
 msgid ""
 "Remove \"placeholder\" methods from subclasses of ``Client`` or "
 "``NumPyClient``. If you, for example, use server-side evaluation, then "
-"empy placeholder implementations of ``evaluate`` are no longer necessary."
+"empty placeholder implementations of ``evaluate`` are no longer necessary."
 msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:85
@@ -5973,8 +5973,8 @@ msgid ""
 "Most official `Flower code examples "
 "<https://github.com/adap/flower/tree/main/examples>`_ are already updated"
 " to Flower 1.0, they can serve as a reference for using the Flower 1.0 "
-"API. If there are further questionsm, `join the Flower Slack "
-"<https://flower.dev/join-slack/>`_ and use the channgel ``#questions``."
+"API. If there are further questions, `join the Flower Slack "
+"<https://flower.ai/join-slack/>`_ and use the channel ``#questions``."
 msgstr ""
 
 #: ../../source/how-to-use-built-in-mods.rst:2
@@ -6161,7 +6161,7 @@ msgid ""
 "providing a function to :code:`on_fit_config_fn`. The provided function "
 "will be called by the strategy and must return a dictionary of "
 "configuration key values pairs that will be sent to the client. It must "
-"return a dictionary of arbitraty configuration values  :code:`client.fit`"
+"return a dictionary of arbitrary configuration values  :code:`client.fit`"
 " and :code:`client.evaluate` functions during each round of federated "
 "learning."
 msgstr ""
@@ -6255,7 +6255,7 @@ msgstr ""
 
 #: ../../source/index.rst:7
 msgid ""
-"Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a "
+"Welcome to Flower's documentation. `Flower <https://flower.ai>`_ is a "
 "friendly federated learning framework."
 msgstr ""
 
@@ -6480,7 +6480,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/ref-api/flwr.client.rst:33:<autosummary>:1
-#: flwr.client.clientapp.ClientApp:1 of
+#: flwr.client.client_app.ClientApp:1 of
 msgid "Flower ClientApp."
 msgstr ""
 
@@ -6779,7 +6779,7 @@ msgstr ""
 msgid "ClientApp"
 msgstr ""
 
-#: flwr.client.clientapp.ClientApp:1 flwr.common.typing.ClientMessage:1
+#: flwr.client.client_app.ClientApp:1 flwr.common.typing.ClientMessage:1
 #: flwr.common.typing.DisconnectRes:1 flwr.common.typing.EvaluateIns:1
 #: flwr.common.typing.EvaluateRes:1 flwr.common.typing.FitIns:1
 #: flwr.common.typing.FitRes:1 flwr.common.typing.GetParametersIns:1
@@ -6794,24 +6794,24 @@ msgid "Bases: :py:class:`object`"
 msgstr ""
 
 #: flwr.client.app.start_client:33 flwr.client.app.start_numpy_client:36
-#: flwr.client.clientapp.ClientApp:4 flwr.server.app.start_server:41
+#: flwr.client.client_app.ClientApp:4 flwr.server.app.start_server:41
 #: flwr.server.driver.app.start_driver:30 of
 msgid "Examples"
 msgstr ""
 
-#: flwr.client.clientapp.ClientApp:5 of
+#: flwr.client.client_app.ClientApp:5 of
 msgid ""
 "Assuming a typical `Client` implementation named `FlowerClient`, you can "
 "wrap it in a `ClientApp` as follows:"
 msgstr ""
 
-#: flwr.client.clientapp.ClientApp:16 of
+#: flwr.client.client_app.ClientApp:16 of
 msgid ""
 "If the above code is in a Python module called `client`, it can be "
 "started as follows:"
 msgstr ""
 
-#: flwr.client.clientapp.ClientApp:21 of
+#: flwr.client.client_app.ClientApp:21 of
 msgid ""
 "In this `client:app` example, `client` refers to the Python module "
 "`client.py` in which the previous code lives in and `app` refers to the "
@@ -10709,7 +10709,7 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:29
 msgid ""
-"Flower has official support for federated learning using [Appple "
+"Flower has official support for federated learning using [Apple "
 "MLX](https://ml-explore.github.io/mlx) via the new `quickstart-mlx` code "
 "example."
 msgstr ""
@@ -10772,7 +10772,7 @@ msgstr ""
 msgid ""
 "The Flower server can now be run using an official Docker image. A new "
 "how-to guide explains [how to run Flower using "
-"Docker](https://flower.dev/docs/framework/how-to-run-flower-using-"
+"Docker](https://flower.ai/docs/framework/how-to-run-flower-using-"
 "docker.html). An official Flower client Docker image will follow."
 msgstr ""
 
@@ -10806,7 +10806,7 @@ msgstr ""
 #: ../../source/ref-changelog.md:55
 msgid ""
 "Several code examples were updated to use [Flower "
-"Datasets](https://flower.dev/docs/datasets/)."
+"Datasets](https://flower.ai/docs/datasets/)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:57
@@ -11405,10 +11405,10 @@ msgstr ""
 #: ../../source/ref-changelog.md:216
 msgid ""
 "Comprehensive documentation includes a new [how-to run "
-"simulations](https://flower.dev/docs/framework/how-to-run-"
+"simulations](https://flower.ai/docs/framework/how-to-run-"
 "simulations.html) guide, new [simulation-"
-"pytorch](https://flower.dev/docs/examples/simulation-pytorch.html) and "
-"[simulation-tensorflow](https://flower.dev/docs/examples/simulation-"
+"pytorch](https://flower.ai/docs/examples/simulation-pytorch.html) and "
+"[simulation-tensorflow](https://flower.ai/docs/examples/simulation-"
 "tensorflow.html) notebooks, and a new [YouTube tutorial "
 "series](https://www.youtube.com/watch?v=cRebUIGB5RU&list=PLNG4feLHqCWlnj8a_E1A_n5zr2-8pafTB)."
 msgstr ""
@@ -11448,7 +11448,7 @@ msgstr ""
 #: ../../source/ref-changelog.md:220
 msgid ""
 "Much effort went into a completely restructured Flower docs experience. "
-"The documentation on [flower.dev/docs](flower.dev/docs) is now divided "
+"The documentation on [flower.ai/docs](flower.ai/docs) is now divided "
 "into Flower Framework, Flower Baselines, Flower Android SDK, Flower iOS "
 "SDK, and code example projects."
 msgstr ""
@@ -11711,7 +11711,7 @@ msgid ""
 " "
 "[strategy](https://github.com/adap/flower/tree/main/src/py/flwr/server/strategy/fedxgb_nn_avg.py),"
 " and a [code "
-"example](https://github.com/adap/flower/tree/main/examples/quickstart_xgboost_horizontal)"
+"example](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)"
 " that demonstrates the usage of this new strategy in an XGBoost project."
 msgstr ""
 
@@ -11742,7 +11742,7 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:306
 msgid ""
-"A new [entry-level tutorial](https://flower.dev/docs/framework/tutorial-"
+"A new [entry-level tutorial](https://flower.ai/docs/framework/tutorial-"
 "what-is-federated-learning.html) in our documentation explains the basics"
 " of Fedetated Learning. It enables anyone who's unfamiliar with Federated"
 " Learning to start their journey with Flower. Forward it to anyone who's "
@@ -11763,7 +11763,7 @@ msgid ""
 "This new baseline replicates the MNIST+CNN task from the paper [Federated"
 " Optimization in Heterogeneous Networks (Li et al., "
 "2018)](https://arxiv.org/abs/1812.06127). It uses the `FedProx` strategy,"
-" which aims at making convergence more robust in heterogenous settings."
+" which aims at making convergence more robust in heterogeneous settings."
 msgstr ""
 
 #: ../../source/ref-changelog.md:312
@@ -11852,7 +11852,7 @@ msgstr ""
 msgid ""
 "TabNet is a powerful and flexible framework for training machine learning"
 " models on tabular data. We now have a federated example using Flower: "
-"[https://github.com/adap/flower/tree/main/examples/tabnet](https://github.com/adap/flower/tree/main/examples/quickstart_tabnet)."
+"[quickstart-tabnet](https://github.com/adap/flower/tree/main/examples/quickstart-tabnet)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:334
@@ -11990,9 +11990,9 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:374
 msgid ""
-"A new code example (`quickstart_fastai`) demonstrates federated learning "
+"A new code example (`quickstart-fastai`) demonstrates federated learning "
 "with [fastai](https://www.fast.ai/) and Flower. You can find it here: "
-"[quickstart_fastai](https://github.com/adap/flower/tree/main/examples/quickstart_fastai)."
+"[quickstart-fastai](https://github.com/adap/flower/tree/main/examples/quickstart-fastai)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:376
@@ -12149,7 +12149,7 @@ msgid ""
 "revisit well known papers from the literature, and be suitable for "
 "integration in your own application or for experimentation, in order to "
 "deepen your knowledge of FL in general. Today's release is the first in "
-"this series. [Read more.](https://flower.dev/blog/2023-01-12-fl-starter-"
+"this series. [Read more.](https://flower.ai/blog/2023-01-12-fl-starter-"
 "pack-fedavg-mnist-cnn/)"
 msgstr ""
 
@@ -12183,25 +12183,25 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:430
 msgid ""
-"[An Introduction to Federated Learning](https://flower.dev/docs/framework"
+"[An Introduction to Federated Learning](https://flower.ai/docs/framework"
 "/tutorial-get-started-with-flower-pytorch.html)"
 msgstr ""
 
 #: ../../source/ref-changelog.md:431
 msgid ""
-"[Strategies in Federated Learning](https://flower.dev/docs/framework"
+"[Strategies in Federated Learning](https://flower.ai/docs/framework"
 "/tutorial-use-a-federated-learning-strategy-pytorch.html)"
 msgstr ""
 
 #: ../../source/ref-changelog.md:432
 msgid ""
-"[Building a Strategy](https://flower.dev/docs/framework/tutorial-build-a"
+"[Building a Strategy](https://flower.ai/docs/framework/tutorial-build-a"
 "-strategy-from-scratch-pytorch.html)"
 msgstr ""
 
 #: ../../source/ref-changelog.md:433
 msgid ""
-"[Client and NumPyClient](https://flower.dev/docs/framework/tutorial-"
+"[Client and NumPyClient](https://flower.ai/docs/framework/tutorial-"
 "customize-the-client-pytorch.html)"
 msgstr ""
 
@@ -12228,7 +12228,7 @@ msgid ""
 "**Flower is a friendly framework for collaborative AI and data science.**"
 " Staying true to this statement, Flower makes it easy to disable "
 "telemetry for users who do not want to share anonymous usage metrics. "
-"[Read more.](https://flower.dev/docs/telemetry.html)."
+"[Read more.](https://flower.ai/docs/telemetry.html)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:441
@@ -12281,9 +12281,9 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:453
 msgid ""
-"A new code example (`quickstart_pandas`) demonstrates federated analytics"
+"A new code example (`quickstart-pandas`) demonstrates federated analytics"
 " with Pandas and Flower. You can find it here: "
-"[quickstart_pandas](https://github.com/adap/flower/tree/main/examples/quickstart_pandas)."
+"[quickstart-pandas](https://github.com/adap/flower/tree/main/examples/quickstart-pandas)."
 msgstr ""
 
 #: ../../source/ref-changelog.md:455
@@ -12346,7 +12346,7 @@ msgstr ""
 #: ../../source/ref-changelog.md:471
 msgid ""
 "One highlight is the new [first time contributor "
-"guide](https://flower.dev/docs/first-time-contributors.html): if you've "
+"guide](https://flower.ai/docs/first-time-contributors.html): if you've "
 "never contributed on GitHub before, this is the perfect place to start!"
 msgstr ""
 
@@ -12608,7 +12608,7 @@ msgid ""
 "[@mrinaald](https://github.com/mrinaald), "
 "[@zliel](https://github.com/zliel), "
 "[@MeiruiJiang](https://github.com/MeiruiJiang), "
-"[@sandracl72](https://github.com/sandracl72), "
+"[@sancarlim](https://github.com/sancarlim), "
 "[@gubertoli](https://github.com/gubertoli), "
 "[@Vingt100](https://github.com/Vingt100), "
 "[@MakGulati](https://github.com/MakGulati), "
@@ -12981,9 +12981,9 @@ msgid ""
 "The first preview release of Flower Baselines has arrived! We're "
 "kickstarting Flower Baselines with implementations of FedOpt (FedYogi, "
 "FedAdam, FedAdagrad), FedBN, and FedAvgM. Check the documentation on how "
-"to use [Flower Baselines](https://flower.dev/docs/using-baselines.html). "
+"to use [Flower Baselines](https://flower.ai/docs/using-baselines.html). "
 "With this first preview release we're also inviting the community to "
-"[contribute their own baselines](https://flower.dev/docs/contributing-"
+"[contribute their own baselines](https://flower.ai/docs/contributing-"
 "baselines.html)."
 msgstr ""
 
@@ -13135,7 +13135,7 @@ msgstr ""
 #: ../../source/ref-changelog.md:706
 msgid ""
 "New documentation for [implementing "
-"strategies](https://flower.dev/docs/framework/how-to-implement-"
+"strategies](https://flower.ai/docs/framework/how-to-implement-"
 "strategies.html) ([#1097](https://github.com/adap/flower/pull/1097), "
 "[#1175](https://github.com/adap/flower/pull/1175))"
 msgstr ""
@@ -13553,7 +13553,7 @@ msgstr ""
 msgid ""
 "The strategy named `QffedAvg` was renamed to `QFedAvg` to better reflect "
 "the notation given in the original paper (q-FFL is the optimization "
-"objective, q-FedAvg is the proposed solver). Note the the original (now "
+"objective, q-FedAvg is the proposed solver). Note the original (now "
 "deprecated) `QffedAvg` class is still available for compatibility reasons"
 " (it will be removed in a future release)."
 msgstr ""
@@ -13607,7 +13607,7 @@ msgstr ""
 msgid ""
 "Custom metric dictionaries are now used in two user-facing APIs: they are"
 " returned from Strategy methods `aggregate_fit`/`aggregate_evaluate` and "
-"they enable evaluation functions passed to build-in strategies (via "
+"they enable evaluation functions passed to built-in strategies (via "
 "`eval_fn`) to return more than two evaluation metrics. Strategies can "
 "even return *aggregated* metrics dictionaries for the server to keep "
 "track of."
@@ -13615,7 +13615,7 @@ msgstr ""
 
 #: ../../source/ref-changelog.md:847
 msgid ""
-"Stratey implementations should migrate their `aggregate_fit` and "
+"Strategy implementations should migrate their `aggregate_fit` and "
 "`aggregate_evaluate` methods to the new return type (e.g., by simply "
 "returning an empty `{}`), server-side evaluation functions should migrate"
 " from `return loss, accuracy` to `return loss, {\"accuracy\": accuracy}`."
@@ -13683,7 +13683,7 @@ msgstr ""
 msgid ""
 "Built-in strategies implement this approach by handling serialization and"
 " deserialization to/from `Weights` internally. Custom/3rd-party Strategy "
-"implementations should update to the slighly changed Strategy method "
+"implementations should update to the slightly changed Strategy method "
 "definitions. Strategy authors can consult PR "
 "[#721](https://github.com/adap/flower/pull/721) to see how strategies can"
 " easily migrate to the new format."
@@ -13994,13 +13994,13 @@ msgstr ""
 
 #: ../../source/ref-example-projects.rst:26
 msgid ""
-"`Quickstart TensorFlow (Tutorial) <https://flower.dev/docs/framework"
+"`Quickstart TensorFlow (Tutorial) <https://flower.ai/docs/framework"
 "/tutorial-quickstart-tensorflow.html>`_"
 msgstr ""
 
 #: ../../source/ref-example-projects.rst:27
 msgid ""
-"`Quickstart TensorFlow (Blog Post) <https://flower.dev/blog/2020-12-11"
+"`Quickstart TensorFlow (Blog Post) <https://flower.ai/blog/2020-12-11"
 "-federated-learning-in-less-than-20-lines-of-code>`_"
 msgstr ""
 
@@ -14023,7 +14023,7 @@ msgstr ""
 
 #: ../../source/ref-example-projects.rst:37
 msgid ""
-"`Quickstart PyTorch (Tutorial) <https://flower.dev/docs/framework"
+"`Quickstart PyTorch (Tutorial) <https://flower.ai/docs/framework"
 "/tutorial-quickstart-pytorch.html>`_"
 msgstr ""
 
@@ -14047,7 +14047,7 @@ msgstr ""
 #: ../../source/ref-example-projects.rst:46
 msgid ""
 "`PyTorch: From Centralized To Federated (Tutorial) "
-"<https://flower.dev/docs/framework/example-pytorch-from-centralized-to-"
+"<https://flower.ai/docs/framework/example-pytorch-from-centralized-to-"
 "federated.html>`_"
 msgstr ""
 
@@ -14070,7 +14070,7 @@ msgstr ""
 #: ../../source/ref-example-projects.rst:55
 msgid ""
 "`Federated Learning on Raspberry Pi and Nvidia Jetson (Blog Post) "
-"<https://flower.dev/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_"
+"<https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_"
 msgstr ""
 
 #: ../../source/ref-example-projects.rst:60
@@ -14257,7 +14257,7 @@ msgstr ""
 #: ../../source/ref-faq.rst:15
 msgid ""
 "Find the `blog post about federated learning on embedded device here "
-"<https://flower.dev/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_"
+"<https://flower.ai/blog/2020-12-16-running_federated_learning_applications_on_embedded_devices_with_flower>`_"
 " and the corresponding `GitHub code example "
 "<https://github.com/adap/flower/tree/main/examples/embedded-devices>`_."
 msgstr ""
@@ -14269,18 +14269,18 @@ msgstr ""
 #: ../../source/ref-faq.rst:19
 msgid ""
 "Yes, it does. Please take a look at our `blog post "
-"<https://flower.dev/blog/2021-12-15-federated-learning-on-android-"
+"<https://flower.ai/blog/2021-12-15-federated-learning-on-android-"
 "devices-with-flower>`_ or check out the code examples:"
 msgstr ""
 
 #: ../../source/ref-faq.rst:21
 msgid ""
-"`Android Kotlin example <https://flower.dev/docs/examples/android-"
+"`Android Kotlin example <https://flower.ai/docs/examples/android-"
 "kotlin.html>`_"
 msgstr ""
 
 #: ../../source/ref-faq.rst:22
-msgid "`Android Java example <https://flower.dev/docs/examples/android.html>`_"
+msgid "`Android Java example <https://flower.ai/docs/examples/android.html>`_"
 msgstr ""
 
 #: ../../source/ref-faq.rst
@@ -14466,7 +14466,7 @@ msgstr ""
 msgid ""
 "You may delete the source ID at any time. If you wish for all events "
 "logged under a specific source ID to be deleted, you can send a deletion "
-"request mentioning the source ID to `telemetry@flower.dev`. All events "
+"request mentioning the source ID to `telemetry@flower.ai`. All events "
 "related to that source ID will then be permanently deleted."
 msgstr ""
 
@@ -14514,8 +14514,8 @@ msgstr ""
 msgid ""
 "We want to hear from you. If you have any feedback or ideas on how to "
 "improve the way we handle anonymous usage metrics, reach out to us via "
-"[Slack](https://flower.dev/join-slack/) (channel `#telemetry`) or email "
-"(`telemetry@flower.dev`)."
+"[Slack](https://flower.ai/join-slack/) (channel `#telemetry`) or email "
+"(`telemetry@flower.ai`)."
 msgstr ""
 
 #: ../../source/tutorial-quickstart-android.rst:-1
@@ -14737,7 +14737,7 @@ msgstr ""
 msgid ""
 "First of all, for running the Flower Python server, it is recommended to "
 "create a virtual environment and run everything within a `virtualenv "
-"<https://flower.dev/docs/recommended-env-setup.html>`_. For the Flower "
+"<https://flower.ai/docs/recommended-env-setup.html>`_. For the Flower "
 "client implementation in iOS, it is recommended to use Xcode as our IDE."
 msgstr ""
 
@@ -14918,7 +14918,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-scikitlearn.rst:12
 msgid ""
 "It is recommended to create a virtual environment and run everything "
-"within this `virtualenv <https://flower.dev/docs/recommended-env-"
+"within this `virtualenv <https://flower.ai/docs/recommended-env-"
 "setup.html>`_."
 msgstr ""
 
@@ -15166,7 +15166,7 @@ msgstr ""
 #: ../../source/tutorial-quickstart-xgboost.rst:39
 msgid ""
 "First of all, it is recommended to create a virtual environment and run "
-"everything within a `virtualenv <https://flower.dev/docs/recommended-env-"
+"everything within a `virtualenv <https://flower.ai/docs/recommended-env-"
 "setup.html>`_."
 msgstr ""
 
@@ -15338,7 +15338,7 @@ msgid ":code:`get_model_parameters()`"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:46
-msgid "Returns the paramters of a :code:`sklearn` LogisticRegression model"
+msgid "Returns the parameters of a :code:`sklearn` LogisticRegression model"
 msgstr ""
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:47
@@ -15876,7 +15876,7 @@ msgid ""
 "comprehensive>`_), we provide more options to define various experimental"
 " setups, including aggregation strategies, data partitioning and "
 "centralised/distributed evaluation. We also support `Flower simulation "
-"<https://flower.dev/docs/framework/how-to-run-simulations.html>`_ making "
+"<https://flower.ai/docs/framework/how-to-run-simulations.html>`_ making "
 "it easy to simulate large client cohorts in a resource-aware manner. "
 "Let's take a look!"
 msgstr ""
@@ -16077,10 +16077,10 @@ msgstr ""
 msgid ""
 "Welcome to the third part of the Flower federated learning tutorial. In "
 "previous parts of this tutorial, we introduced federated learning with "
-"PyTorch and Flower (`part 1 <https://flower.dev/docs/framework/tutorial-"
+"PyTorch and Flower (`part 1 <https://flower.ai/docs/framework/tutorial-"
 "get-started-with-flower-pytorch.html>`__) and we learned how strategies "
 "can be used to customize the execution on both the server and the clients"
-" (`part 2 <https://flower.dev/docs/framework/tutorial-use-a-federated-"
+" (`part 2 <https://flower.ai/docs/framework/tutorial-use-a-federated-"
 "learning-strategy-pytorch.html>`__)."
 msgstr ""
 
@@ -16088,7 +16088,7 @@ msgstr ""
 msgid ""
 "In this notebook, we'll continue to customize the federated learning "
 "system we built previously by creating a custom version of FedAvg (again,"
-" using `Flower <https://flower.dev/>`__ and `PyTorch "
+" using `Flower <https://flower.ai/>`__ and `PyTorch "
 "<https://pytorch.org/>`__)."
 msgstr ""
 
@@ -16099,7 +16099,7 @@ msgstr ""
 msgid ""
 "`Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join "
 "the Flower community on Slack to connect, ask questions, and get help: "
-"`Join Slack <https://flower.dev/join-slack>`__ 🌼 We'd love to hear from "
+"`Join Slack <https://flower.ai/join-slack>`__ 🌼 We'd love to hear from "
 "you in the ``#introductions`` channel! And if anything is unclear, head "
 "over to the ``#questions`` channel."
 msgstr ""
@@ -16248,7 +16248,7 @@ msgstr ""
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:369
 msgid ""
 "Before you continue, make sure to join the Flower community on Slack: "
-"`Join Slack <https://flower.dev/join-slack/>`__"
+"`Join Slack <https://flower.ai/join-slack/>`__"
 msgstr ""
 
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.ipynb:552
@@ -16264,7 +16264,7 @@ msgstr ""
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.ipynb:554
 msgid ""
 "The `Flower Federated Learning Tutorial - Part 4 "
-"<https://flower.dev/docs/framework/tutorial-customize-the-client-"
+"<https://flower.ai/docs/framework/tutorial-customize-the-client-"
 "pytorch.html>`__ introduces ``Client``, the flexible API underlying "
 "``NumPyClient``."
 msgstr ""
@@ -16277,12 +16277,12 @@ msgstr ""
 msgid ""
 "Welcome to the fourth part of the Flower federated learning tutorial. In "
 "the previous parts of this tutorial, we introduced federated learning "
-"with PyTorch and Flower (`part 1 <https://flower.dev/docs/framework"
+"with PyTorch and Flower (`part 1 <https://flower.ai/docs/framework"
 "/tutorial-get-started-with-flower-pytorch.html>`__), we learned how "
 "strategies can be used to customize the execution on both the server and "
-"the clients (`part 2 <https://flower.dev/docs/framework/tutorial-use-a"
+"the clients (`part 2 <https://flower.ai/docs/framework/tutorial-use-a"
 "-federated-learning-strategy-pytorch.html>`__), and we built our own "
-"custom strategy from scratch (`part 3 <https://flower.dev/docs/framework"
+"custom strategy from scratch (`part 3 <https://flower.ai/docs/framework"
 "/tutorial-build-a-strategy-from-scratch-pytorch.html>`__)."
 msgstr ""
 
@@ -16488,7 +16488,7 @@ msgstr ""
 
 #: ../../source/tutorial-series-customize-the-client-pytorch.ipynb:615
 msgid ""
-"To be able to able to serialize our ``ndarray``\\ s into sparse "
+"To be able to serialize our ``ndarray``\\ s into sparse "
 "parameters, we will just have to call our custom functions in our "
 "``flwr.client.Client``."
 msgstr ""
@@ -16565,7 +16565,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-customize-the-client-pytorch.ipynb:954
-msgid "`Read Flower Docs <https://flower.dev/docs/>`__"
+msgid "`Read Flower Docs <https://flower.ai/docs/>`__"
 msgstr ""
 
 #: ../../source/tutorial-series-customize-the-client-pytorch.ipynb:955
@@ -16577,12 +16577,12 @@ msgstr ""
 #: ../../source/tutorial-series-customize-the-client-pytorch.ipynb:956
 msgid ""
 "`Use Flower Baselines for your research "
-"<https://flower.dev/docs/baselines/>`__"
+"<https://flower.ai/docs/baselines/>`__"
 msgstr ""
 
 #: ../../source/tutorial-series-customize-the-client-pytorch.ipynb:957
 msgid ""
-"`Watch Flower Summit 2023 videos <https://flower.dev/conf/flower-"
+"`Watch Flower Summit 2023 videos <https://flower.ai/conf/flower-"
 "summit-2023/>`__"
 msgstr ""
 
@@ -16598,7 +16598,7 @@ msgstr ""
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.ipynb:13
 msgid ""
 "In this notebook, we'll build a federated learning system using Flower, "
-"`Flower Datasets <https://flower.dev/docs/datasets/>`__ and PyTorch. In "
+"`Flower Datasets <https://flower.ai/docs/datasets/>`__ and PyTorch. In "
 "part 1, we use PyTorch for the model training pipeline and data loading. "
 "In part 2, we continue to federate the PyTorch-based pipeline using "
 "Flower."
@@ -17034,7 +17034,7 @@ msgstr ""
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.ipynb:733
 msgid ""
 "The `Flower Federated Learning Tutorial - Part 2 "
-"<https://flower.dev/docs/framework/tutorial-use-a-federated-learning-"
+"<https://flower.ai/docs/framework/tutorial-use-a-federated-learning-"
 "strategy-pytorch.html>`__ goes into more depth about strategies and all "
 "the advanced things you can build with them."
 msgstr ""
@@ -17047,7 +17047,7 @@ msgstr ""
 msgid ""
 "Welcome to the next part of the federated learning tutorial. In previous "
 "parts of this tutorial, we introduced federated learning with PyTorch and"
-" Flower (`part 1 <https://flower.dev/docs/framework/tutorial-get-started-"
+" Flower (`part 1 <https://flower.ai/docs/framework/tutorial-get-started-"
 "with-flower-pytorch.html>`__)."
 msgstr ""
 
@@ -17055,7 +17055,7 @@ msgstr ""
 msgid ""
 "In this notebook, we'll begin to customize the federated learning system "
 "we built in the introductory notebook (again, using `Flower "
-"<https://flower.dev/>`__ and `PyTorch <https://pytorch.org/>`__)."
+"<https://flower.ai/>`__ and `PyTorch <https://pytorch.org/>`__)."
 msgstr ""
 
 #: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.ipynb:17
@@ -17253,7 +17253,7 @@ msgstr ""
 #: ../../source/tutorial-series-use-a-federated-learning-strategy-pytorch.ipynb:719
 msgid ""
 "The `Flower Federated Learning Tutorial - Part 3 "
-"<https://flower.dev/docs/framework/tutorial-build-a-strategy-from-"
+"<https://flower.ai/docs/framework/tutorial-build-a-strategy-from-"
 "scratch-pytorch.html>`__ shows how to build a fully custom ``Strategy`` "
 "from scratch."
 msgstr ""
@@ -17281,7 +17281,7 @@ msgstr ""
 msgid ""
 "`Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ and join "
 "the open-source Flower community on Slack to connect, ask questions, and "
-"get help: `Join Slack <https://flower.dev/join-slack>`__ 🌼 We'd love to "
+"get help: `Join Slack <https://flower.ai/join-slack>`__ 🌼 We'd love to "
 "hear from you in the ``#introductions`` channel! And if anything is "
 "unclear, head over to the ``#questions`` channel."
 msgstr ""
@@ -17504,7 +17504,7 @@ msgid ""
 "The popularity of privacy-enhancing systems like the `Brave "
 "<https://brave.com/>`__ browser or the `Signal <https://signal.org/>`__ "
 "messenger shows that users care about privacy. In fact, they choose the "
-"privacy-enhancing version over other alternatives, if such an alernative "
+"privacy-enhancing version over other alternatives, if such an alternative "
 "exists. But what can we do to apply machine learning and data science to "
 "these cases to utilize private data? After all, these are all areas that "
 "would benefit significantly from recent advances in AI."
@@ -17797,7 +17797,7 @@ msgstr ""
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:373
 msgid ""
 "The `Flower Federated Learning Tutorial - Part 1 "
-"<https://flower.dev/docs/framework/tutorial-get-started-with-flower-"
+"<https://flower.ai/docs/framework/tutorial-get-started-with-flower-"
 "pytorch.html>`__ shows how to build a simple federated learning system "
 "with PyTorch and Flower."
 msgstr ""
@@ -17897,10 +17897,10 @@ msgstr ""
 #~ "If you're familiar with how contributing"
 #~ " on GitHub works, you can directly"
 #~ " checkout our `getting started guide "
-#~ "for contributors <https://flower.dev/docs/getting-"
+#~ "for contributors <https://flower.ai/docs/getting-"
 #~ "started-for-contributors.html>`_ and examples "
 #~ "of `good first contributions "
-#~ "<https://flower.dev/docs/good-first-contributions.html>`_."
+#~ "<https://flower.ai/docs/good-first-contributions.html>`_."
 #~ msgstr ""
 
 #~ msgid ""

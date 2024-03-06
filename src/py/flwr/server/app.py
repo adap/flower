@@ -14,17 +14,14 @@
 # ==============================================================================
 """Flower server app."""
 
-
 import argparse
+import asyncio
 import importlib.util
 import sys
 import threading
-from dataclasses import dataclass
-from logging import DEBUG, ERROR, INFO, WARN
+from logging import ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from signal import SIGINT, SIGTERM, signal
-from types import FrameType
 from typing import List, Optional, Tuple
 
 import grpc
@@ -35,25 +32,27 @@ from flwr.common.constant import (
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
+    TRANSPORT_TYPE_VCE,
 )
+from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
-from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
-    add_DriverServicer_to_server,
-)
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
-from flwr.server.client_manager import ClientManager, SimpleClientManager
-from flwr.server.history import History
-from flwr.server.server import Server
-from flwr.server.strategy import FedAvg, Strategy
-from flwr.server.superlink.driver.driver_servicer import DriverServicer
-from flwr.server.superlink.fleet.grpc_bidi.grpc_server import (
+
+from .client_manager import ClientManager
+from .history import History
+from .server import Server, init_defaults, run_fl
+from .server_config import ServerConfig
+from .strategy import Strategy
+from .superlink.driver.driver_grpc import run_driver_api_grpc
+from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
 )
-from flwr.server.superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
-from flwr.server.superlink.state import StateFactory
+from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from .superlink.fleet.vce import start_vce
+from .superlink.state import StateFactory
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
@@ -61,72 +60,6 @@ ADDRESS_FLEET_API_GRPC_BIDI = "[::]:8080"  # IPv6 to keep start_server compatibl
 ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
 DATABASE = ":flwr-in-memory-state:"
-
-
-@dataclass
-class ServerConfig:
-    """Flower server config.
-
-    All attributes have default values which allows users to configure just the ones
-    they care about.
-    """
-
-    num_rounds: int = 1
-    round_timeout: Optional[float] = None
-
-
-def run_server_app() -> None:
-    """Run Flower server app."""
-    event(EventType.RUN_SERVER_APP_ENTER)
-
-    args = _parse_args_run_server_app().parse_args()
-
-    # Obtain certificates
-    if args.insecure:
-        if args.root_certificates is not None:
-            sys.exit(
-                "Conflicting options: The '--insecure' flag disables HTTPS, "
-                "but '--root-certificates' was also specified. Please remove "
-                "the '--root-certificates' option when running in insecure mode, "
-                "or omit '--insecure' to use HTTPS."
-            )
-        log(
-            WARN,
-            "Option `--insecure` was set. "
-            "Starting insecure HTTP client connected to %s.",
-            args.server,
-        )
-        root_certificates = None
-    else:
-        # Load the certificates if provided, or load the system certificates
-        cert_path = args.root_certificates
-        if cert_path is None:
-            root_certificates = None
-        else:
-            root_certificates = Path(cert_path).read_bytes()
-        log(
-            DEBUG,
-            "Starting secure HTTPS client connected to %s "
-            "with the following certificates: %s.",
-            args.server,
-            cert_path,
-        )
-
-    log(
-        DEBUG,
-        "Flower will load ServerApp `%s`",
-        getattr(args, "server-app"),
-    )
-
-    log(
-        DEBUG,
-        "root_certificates: `%s`",
-        root_certificates,
-    )
-
-    log(WARN, "Not implemented: run_server_app")
-
-    event(EventType.RUN_SERVER_APP_LEAVE)
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -248,47 +181,6 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     return hist
 
 
-def init_defaults(
-    server: Optional[Server],
-    config: Optional[ServerConfig],
-    strategy: Optional[Strategy],
-    client_manager: Optional[ClientManager],
-) -> Tuple[Server, ServerConfig]:
-    """Create server instance if none was given."""
-    if server is None:
-        if client_manager is None:
-            client_manager = SimpleClientManager()
-        if strategy is None:
-            strategy = FedAvg()
-        server = Server(client_manager=client_manager, strategy=strategy)
-    elif strategy is not None:
-        log(WARN, "Both server and strategy were provided, ignoring strategy")
-
-    # Set default config values
-    if config is None:
-        config = ServerConfig()
-
-    return server, config
-
-
-def run_fl(
-    server: Server,
-    config: ServerConfig,
-) -> History:
-    """Train a model on the given server and return the History object."""
-    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
-    log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
-    log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
-    log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
-    log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
-    log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
-
-    # Graceful shutdown
-    server.disconnect_all_clients(timeout=config.round_timeout)
-
-    return hist
-
-
 def run_driver_api() -> None:
     """Run Flower server (Driver API)."""
     log(INFO, "Starting Flower server (Driver API)")
@@ -309,17 +201,17 @@ def run_driver_api() -> None:
     state_factory = StateFactory(args.database)
 
     # Start server
-    grpc_server: grpc.Server = _run_driver_api_grpc(
+    grpc_server: grpc.Server = run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
         certificates=certificates,
     )
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_DRIVER_API_LEAVE,
         grpc_servers=[grpc_server],
         bckg_threads=[],
-        event_type=EventType.RUN_DRIVER_API_LEAVE,
     )
 
     # Block
@@ -384,10 +276,10 @@ def run_fleet_api() -> None:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_FLEET_API_LEAVE,
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_FLEET_API_LEAVE,
     )
 
     # Block
@@ -418,7 +310,7 @@ def run_superlink() -> None:
     state_factory = StateFactory(args.database)
 
     # Start Driver API
-    driver_server: grpc.Server = _run_driver_api_grpc(
+    driver_server: grpc.Server = run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
         certificates=certificates,
@@ -466,14 +358,25 @@ def run_superlink() -> None:
             certificates=certificates,
         )
         grpc_servers.append(fleet_server)
+    elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
+        f_stop = asyncio.Event()  # Does nothing
+        _run_fleet_api_vce(
+            num_supernodes=args.num_supernodes,
+            client_app_attr=args.client_app,
+            backend_name=args.backend,
+            backend_config_json_stream=args.backend_config,
+            app_dir=args.app_dir,
+            state_factory=state_factory,
+            f_stop=f_stop,
+        )
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_SUPERLINK_LEAVE,
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_SUPERLINK_LEAVE,
     )
 
     # Block
@@ -508,76 +411,6 @@ def _try_obtain_certificates(
     return certificates
 
 
-def _register_exit_handlers(
-    grpc_servers: List[grpc.Server],
-    bckg_threads: List[threading.Thread],
-    event_type: EventType,
-) -> None:
-    default_handlers = {
-        SIGINT: None,
-        SIGTERM: None,
-    }
-
-    def graceful_exit_handler(  # type: ignore
-        signalnum,
-        frame: FrameType,  # pylint: disable=unused-argument
-    ) -> None:
-        """Exit handler to be registered with signal.signal.
-
-        When called will reset signal handler to original signal handler from
-        default_handlers.
-        """
-        # Reset to default handler
-        signal(signalnum, default_handlers[signalnum])
-
-        event_res = event(event_type=event_type)
-
-        for grpc_server in grpc_servers:
-            grpc_server.stop(grace=1)
-
-        for bckg_thread in bckg_threads:
-            bckg_thread.join()
-
-        # Ensure event has happend
-        event_res.result()
-
-        # Setup things for graceful exit
-        sys.exit(0)
-
-    default_handlers[SIGINT] = signal(  # type: ignore
-        SIGINT,
-        graceful_exit_handler,  # type: ignore
-    )
-    default_handlers[SIGTERM] = signal(  # type: ignore
-        SIGTERM,
-        graceful_exit_handler,  # type: ignore
-    )
-
-
-def _run_driver_api_grpc(
-    address: str,
-    state_factory: StateFactory,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
-) -> grpc.Server:
-    """Run Driver API (gRPC, request-response)."""
-    # Create Driver API gRPC server
-    driver_servicer: grpc.Server = DriverServicer(
-        state_factory=state_factory,
-    )
-    driver_add_servicer_to_server_fn = add_DriverServicer_to_server
-    driver_grpc_server = generic_create_grpc_server(
-        servicer_and_add_fn=(driver_servicer, driver_add_servicer_to_server_fn),
-        server_address=address,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=certificates,
-    )
-
-    log(INFO, "Flower ECE: Starting Driver API (gRPC-rere) on %s", address)
-    driver_grpc_server.start()
-
-    return driver_grpc_server
-
-
 def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
@@ -600,6 +433,29 @@ def _run_fleet_api_grpc_rere(
     fleet_grpc_server.start()
 
     return fleet_grpc_server
+
+
+# pylint: disable=too-many-arguments
+def _run_fleet_api_vce(
+    num_supernodes: int,
+    client_app_attr: str,
+    backend_name: str,
+    backend_config_json_stream: str,
+    app_dir: str,
+    state_factory: StateFactory,
+    f_stop: asyncio.Event,
+) -> None:
+    log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
+
+    start_vce(
+        num_supernodes=num_supernodes,
+        client_app_attr=client_app_attr,
+        backend_name=backend_name,
+        backend_config_json_stream=backend_config_json_stream,
+        state_factory=state_factory,
+        app_dir=app_dir,
+        f_stop=f_stop,
+    )
 
 
 # pylint: disable=import-outside-toplevel,too-many-arguments
@@ -779,6 +635,14 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="Start a Fleet API server (REST, experimental)",
     )
 
+    ex_group.add_argument(
+        "--vce",
+        action="store_const",
+        dest="fleet_api_type",
+        const=TRANSPORT_TYPE_VCE,
+        help="Start a Fleet API server (VirtualClientEngine)",
+    )
+
     # Fleet API gRPC-rere options
     grpc_rere_group = parser.add_argument_group(
         "Fleet API (gRPC-rere) server options", ""
@@ -815,41 +679,35 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         default=1,
     )
 
-
-def _parse_args_run_server_app() -> argparse.ArgumentParser:
-    """Parse flower-server-app command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Start a Flower server app",
+    # Fleet API VCE options
+    vce_group = parser.add_argument_group("Fleet API (VCE) server options", "")
+    vce_group.add_argument(
+        "--client-app",
+        help="For example: `client:app` or `project.package.module:wrapper.app`.",
     )
-
-    parser.add_argument(
-        "server-app",
-        help="For example: `server:app` or `project.package.module:wrapper.app`",
+    vce_group.add_argument(
+        "--num-supernodes",
+        type=int,
+        help="Number of simulated SuperNodes.",
     )
-    parser.add_argument(
-        "--insecure",
-        action="store_true",
-        help="Run the server app without HTTPS. By default, the app runs with "
-        "HTTPS enabled. Use this flag only if you understand the risks.",
-    )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
+    vce_group.add_argument(
+        "--backend",
+        default="ray",
         type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
+        help="Simulation backend that executes the ClientApp.",
+    )
+    vce_group.add_argument(
+        "--backend-config",
+        type=str,
+        default='{"client_resources": {"num_cpus":1, "num_gpus":0.0}, "tensorflow": 0}',
+        help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
+        "configure a backend. Values supported in <value> are those included by "
+        "`flwr.common.typing.ConfigsRecordValues`. ",
     )
     parser.add_argument(
-        "--server",
-        default="0.0.0.0:9092",
-        help="Server address",
-    )
-    parser.add_argument(
-        "--dir",
+        "--app-dir",
         default="",
-        help="Add specified directory to the PYTHONPATH and load Flower "
-        "app from there."
+        help="Add specified directory to the PYTHONPATH and load"
+        "ClientApp from there."
         " Default: current working directory.",
     )
-
-    return parser

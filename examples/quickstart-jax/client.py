@@ -1,6 +1,5 @@
 """Flower client example using JAX for linear regression."""
 
-
 from typing import Dict, List, Tuple, Callable
 
 import flwr as fl

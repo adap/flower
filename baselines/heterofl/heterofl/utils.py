@@ -1,4 +1,5 @@
 """Contains utility functions."""
+
 import errno
 import os
 from pathlib import Path
