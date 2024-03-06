@@ -40,7 +40,7 @@ def fixedclipping_mod(
 
     This mod clips the client model updates before sending them to the server.
 
-    It operates on messages with type MessageType.FIT.
+    It operates on messages with type MessageType.TRAIN.
 
     Notes
     -----
@@ -93,7 +93,7 @@ def adaptiveclipping_mod(
 
     It also sends KEY_NORM_BIT to the server for computing the new clipping value.
 
-    It operates on messages with type MessageType.FIT.
+    It operates on messages with type MessageType.TRAIN.
 
     Notes
     -----
