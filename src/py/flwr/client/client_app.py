@@ -59,6 +59,8 @@ class ClientApp:
         client_fn: Optional[ClientFn] = None,  # Only for backward compatibility
         mods: Optional[List[Mod]] = None,
     ) -> None:
+        self._call: Optional[ClientAppCallable] = None
+
         # Create wrapper function for `handle`
         if client_fn is not None:
 
@@ -73,8 +75,6 @@ class ClientApp:
 
             # Wrap mods around the wrapped handle function
             self._call = make_ffn(ffn, mods if mods is not None else [])
-        else:
-            self._call = None
 
         # Step functions
         self._train: Optional[ClientAppCallable] = None
@@ -83,15 +83,25 @@ class ClientApp:
 
     def __call__(self, message: Message, context: Context) -> Message:
         """Execute `ClientApp`."""
+        # Execute message using `client_fn`
         if self._call:
             return self._call(message, context)
 
+        # Execute message using a new
         if message.metadata.message_type == MessageType.TRAIN:
-            return self._train(message, context)
+            if self._train:
+                return self._train(message, context)
+            raise ValueError("No `train` function registered")
         if message.metadata.message_type == MessageType.EVALUATE:
-            return self._evaluate(message, context)
+            if self._evaluate:
+                return self._evaluate(message, context)
+            raise ValueError("No `evaluate` function registered")
         if message.metadata.message_type == MessageType.QUERY:
-            return self._query(message, context)
+            if self._query:
+                return self._query(message, context)
+            raise ValueError("No `query` function registered")
+
+        # Message type did not match one of the known message types abvoe
         raise ValueError(f"Unknown message_type: {message.metadata.message_type}")
 
     def train(self) -> Callable[[ClientAppCallable], ClientAppCallable]:
