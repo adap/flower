@@ -25,7 +25,7 @@ import grpc
 
 from flwr.common import ConfigsRecord, Message, Metadata, RecordSet
 from flwr.common import recordset_compat as compat
-from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
+from flwr.common.constant import MessageTypeLegacy
 from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.typing import Code, GetPropertiesRes, Status
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
@@ -51,7 +51,7 @@ MESSAGE_GET_PROPERTIES = Message(
         reply_to_message="",
         group_id="",
         ttl="",
-        message_type=MESSAGE_TYPE_GET_PROPERTIES,
+        message_type=MessageTypeLegacy.GET_PROPERTIES,
     ),
     content=compat.getpropertiesres_to_recordset(
         GetPropertiesRes(Status(Code.OK, ""), {})

@@ -26,8 +26,7 @@ from typing import Dict, Optional, Set, Tuple
 from unittest import IsolatedAsyncioTestCase
 from uuid import UUID
 
-from flwr.common import GetPropertiesIns, Message, Metadata
-from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
+from flwr.common import GetPropertiesIns, Message, MessageTypeLegacy, Metadata
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.server.superlink.fleet.vce.vce_api import (
@@ -102,7 +101,7 @@ def register_messages_into_state(
                 message_type=(
                     "a bad message"
                     if erroneous_message
-                    else MESSAGE_TYPE_GET_PROPERTIES
+                    else MessageTypeLegacy.GET_PROPERTIES
                 ),
             ),
         )
