@@ -100,7 +100,7 @@ def gen_client_fn(
     model_cfg: DictConfig,
     train_cfg: DictConfig,
     save_path: str,
-    client_id: int = 0,
+    partition_id: int = 0,
     api: bool = False,
 ) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
     """Generate the client function that creates the Flower Clients."""
@@ -110,7 +110,7 @@ def gen_client_fn(
 
         # Let's get the partition corresponding to the i-th client
         client_trainset = (
-            fds.load_partition(client_id, "train")
+            fds.load_partition(partition_id, "train")
             if api
             else fds.load_partition(int(cid), "train")
         )

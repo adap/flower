@@ -48,7 +48,7 @@ client1 = fl.client.ClientApp(
         cfg.model,
         cfg.train,
         save_path,
-        client_id=0,
+        partition_id=0,
         api=True,
     ),
 )
@@ -63,7 +63,7 @@ client2 = fl.client.ClientApp(
         cfg.model,
         cfg.train,
         save_path,
-        client_id=1,
+        partition_id=1,
         api=True,
     ),
 )
