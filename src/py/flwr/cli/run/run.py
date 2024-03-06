@@ -24,6 +24,10 @@ from flwr.simulation.run_simulation import _run_simulation
 
 def run() -> None:
     """Run Flower project."""
+    print(
+        typer.style("Loading project configuration... ", fg=typer.colors.BLUE),
+        end="",
+    )
     config = load_flower_toml()
     if not config:
         print(
@@ -35,7 +39,12 @@ def run() -> None:
             )
         )
         sys.exit()
+    print(typer.style("Success", fg=typer.colors.GREEN))
 
+    print(
+        typer.style("Validating project configuration... ", fg=typer.colors.BLUE),
+        end="",
+    )
     is_valid, errors, warnings = validate_flower_toml(config)
     if warnings:
         print(
@@ -57,6 +66,8 @@ def run() -> None:
                 bold=True,
             )
         )
+        sys.exit()
+    print(typer.style("Success", fg=typer.colors.GREEN))
 
     # Apply defaults
     defaults = {
@@ -73,6 +84,9 @@ def run() -> None:
     if engine == "simulation":
         num_supernodes = config["flower"]["engine"]["simulation"]["super-node"]["num"]
 
+        print(
+            typer.style("Starting run... ", fg=typer.colors.BLUE),
+        )
         _run_simulation(
             server_app_attr=server_app_ref,
             client_app_attr=client_app_ref,
