@@ -30,11 +30,11 @@ from flwr.common import (
     Context,
     GetPropertiesIns,
     Message,
+    MessageTypeLegacy,
     Metadata,
     RecordSet,
     Scalar,
 )
-from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
 
@@ -105,7 +105,7 @@ def _create_message_and_context() -> Tuple[Message, Context, float]:
             dst_node_id=0,
             reply_to_message="",
             ttl="",
-            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
     )
 
