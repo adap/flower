@@ -54,7 +54,7 @@ def run_simulation_from_cli() -> None:
         num_supernodes=args.num_supernodes,
         backend_name=args.backend,
         backend_config=backend_config_dict,
-        working_dir=args.dir,
+        app_dir=args.app_dir,
         driver_api_address=args.driver_api_address,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
         verbose_logging=args.verbose,
@@ -125,7 +125,7 @@ def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
     driver: Driver,
-    server_app_dir: str,
+    app_dir: str,
     f_stop: asyncio.Event,
     enable_tf_gpu_growth: bool,
     delay_launch: int = 3,
@@ -163,7 +163,7 @@ def run_serverapp_th(
             "server_app_attr": server_app_attr,
             "loaded_server_app": server_app,
             "driver": driver,
-            "server_app_dir": server_app_dir,
+            "server_app_dir": app_dir,
         },
     )
     sleep(delay_launch)
@@ -177,7 +177,7 @@ def _main_loop(
     backend_name: str,
     backend_config_stream: str,
     driver_api_address: str,
-    working_dir: str,
+    app_dir: str,
     enable_tf_gpu_growth: bool,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
@@ -214,7 +214,7 @@ def _main_loop(
             server_app_attr=server_app_attr,
             server_app=server_app,
             driver=driver,
-            server_app_dir=working_dir,
+            app_dir=app_dir,
             f_stop=f_stop,
             enable_tf_gpu_growth=enable_tf_gpu_growth,
         )
@@ -227,7 +227,7 @@ def _main_loop(
             client_app=client_app,
             backend_name=backend_name,
             backend_config_json_stream=backend_config_stream,
-            working_dir=working_dir,
+            app_dir=app_dir,
             state_factory=state_factory,
             f_stop=f_stop,
         )
@@ -260,7 +260,7 @@ def _run_simulation(
     backend_config: Optional[Dict[str, ConfigsRecordValues]] = None,
     client_app_attr: Optional[str] = None,
     server_app_attr: Optional[str] = None,
-    working_dir: str = "",
+    app_dir: str = "",
     driver_api_address: str = "0.0.0.0:9091",
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
@@ -297,7 +297,7 @@ def _run_simulation(
         A path to a `ServerApp` module to be loaded: For example: `server:app` or
         `project.package.module:wrapper.app`."
 
-    working_dir : str
+    app_dir : str
         Add specified directory to the PYTHONPATH and load `ClientApp` from there.
         (Default: current working directory.)
 
@@ -340,7 +340,7 @@ def _run_simulation(
         backend_name,
         backend_config_stream,
         driver_api_address,
-        working_dir,
+        app_dir,
         enable_tf_gpu_growth,
         client_app,
         client_app_attr,
@@ -379,20 +379,14 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         description="Start a Flower simulation",
     )
     parser.add_argument(
-        "--client-app",
-        required=True,
-        help="For example: `client:app` or `project.package.module:wrapper.app`",
-    )
-    parser.add_argument(
         "--server-app",
         required=True,
         help="For example: `server:app` or `project.package.module:wrapper.app`",
     )
     parser.add_argument(
-        "--driver-api-address",
-        default="0.0.0.0:9091",
-        type=str,
-        help="For example: `server:app` or `project.package.module:wrapper.app`",
+        "--client-app",
+        required=True,
+        help="For example: `client:app` or `project.package.module:wrapper.app`",
     )
     parser.add_argument(
         "--num-supernodes",
@@ -401,10 +395,24 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         help="Number of simulated SuperNodes.",
     )
     parser.add_argument(
+        "--driver-api-address",
+        default="0.0.0.0:9091",
+        type=str,
+        help="For example: `server:app` or `project.package.module:wrapper.app`",
+    )
+    parser.add_argument(
         "--backend",
         default="ray",
         type=str,
         help="Simulation backend that executes the ClientApp.",
+    )
+    parser.add_argument(
+        "--backend-config",
+        type=str,
+        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0}, "tensorflow": 0}',
+        help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
+        "configure a backend. Values supported in <value> are those included by "
+        "`flwr.common.typing.ConfigsRecordValues`. ",
     )
     parser.add_argument(
         "--enable-tf-gpu-growth",
@@ -417,26 +425,17 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         "the TensorFlow documentation: https://www.tensorflow.org/api/stable.",
     )
     parser.add_argument(
-        "--backend-config",
-        type=str,
-        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0}, "tensorflow": 0}',
-        help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
-        "configure a backend. Values supported in <value> are those included by "
-        "`flwr.common.typing.ConfigsRecordValues`. ",
-    )
-    parser.add_argument(
-        "--dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load"
-        "ClientApp and ServerApp from there."
-        " Default: current working directory.",
-    )
-
-    parser.add_argument(
         "--verbose",
         action="store_true",
         help="When unset, only INFO, WARNING and ERROR log messages will be shown. "
         "If set, DEBUG-level logs will be displayed. ",
+    )
+    parser.add_argument(
+        "--app-dir",
+        default="",
+        help="Add specified directory to the PYTHONPATH and load"
+        "ClientApp and ServerApp from there."
+        " Default: current working directory.",
     )
 
     return parser
