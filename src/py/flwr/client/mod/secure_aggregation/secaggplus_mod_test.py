@@ -20,7 +20,7 @@ from typing import Callable, Dict, List
 
 from flwr.client.mod import make_ffn
 from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet
-from flwr.common.constant import MESSAGE_TYPE_FIT
+from flwr.common.constant import MessageType
 from flwr.common.secure_aggregation.secaggplus_constants import (
     RECORD_KEY_CONFIGS,
     RECORD_KEY_STATE,
@@ -52,7 +52,7 @@ def get_test_handler(
                 reply_to_message="",
                 group_id="",
                 ttl="",
-                message_type=MESSAGE_TYPE_FIT,
+                message_type=MessageType.TRAIN,
             ),
             content=RecordSet(
                 configs_records={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}
