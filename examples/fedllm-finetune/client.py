@@ -100,6 +100,8 @@ def gen_client_fn(
     model_cfg: DictConfig,
     train_cfg: DictConfig,
     save_path: str,
+    client_id: int = 0,
+    api: bool = False,
 ) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
     """Generate the client function that creates the Flower Clients."""
 
@@ -107,38 +109,11 @@ def gen_client_fn(
         """Create a Flower client representing a single organization."""
 
         # Let's get the partition corresponding to the i-th client
-        client_trainset = fds.load_partition(int(cid), "train")
-        client_trainset = client_trainset.rename_column("output", "response")
-
-        return FlowerClient(
-            model_cfg,
-            train_cfg,
-            client_trainset,
-            tokenizer,
-            formatting_prompts_func,
-            data_collator,
-            save_path,
-        ).to_client()
-
-    return client_fn
-
-
-def gen_client_fn_api(
-    fds,
-    tokenizer,
-    formatting_prompts_func,
-    data_collator,
-    model_cfg: DictConfig,
-    train_cfg: DictConfig,
-    save_path: str,
-) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
-    """Generate the client function that creates the Flower Clients."""
-
-    def client_fn(cid: str) -> FlowerClient:
-        """Create a Flower client representing a single organization."""
-
-        # Let's use the first partition for simulation
-        client_trainset = fds.load_partition(0, "train")
+        client_trainset = (
+            fds.load_partition(client_id, "train")
+            if api
+            else fds.load_partition(int(cid), "train")
+        )
         client_trainset = client_trainset.rename_column("output", "response")
 
         return FlowerClient(

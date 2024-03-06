@@ -73,11 +73,11 @@ Please follow the steps below:
 2. Start the long-running Flower client (SuperNode)
    ```bash
    # In a new terminal window, start the first long-running Flower client:
-   flower-client-app app:client --insecure
+   flower-client-app app:client1 --insecure
    ```
    ```bash
    # In another new terminal window, start the second long-running Flower client:
-   flower-client-app app:client --insecure
+   flower-client-app app:client2 --insecure
    ```
 3. Run the Flower App
    ```bash

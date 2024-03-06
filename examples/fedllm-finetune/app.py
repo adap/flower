@@ -1,12 +1,12 @@
 import os
 import warnings
-from omegaconf import DictConfig, OmegaConf
+from hydra import compose, initialize
 
 import flwr as fl
 from flwr_datasets import FederatedDataset
 
 from dataset import get_tokenizer_and_data_collator_and_propt_formatting
-from client import gen_client_fn_api
+from client import gen_client_fn
 from utils import get_on_fit_config, fit_weighted_average
 
 
@@ -15,39 +15,12 @@ warnings.filterwarnings("ignore", category=UserWarning)
 NUM_ROUNDS = 2
 save_path = "./results/"
 
-# Define model config
-model_cfg = OmegaConf.create(
-    {
-        "name": "openlm-research/open_llama_3b_v2",
-        "quantization": 4,
-        "gradient_checkpointing": True,
-        "lora": {"peft_lora_r": 32, "peft_lora_alpha": 64},
-    }
-)
-# Define training config
-train_cfg = OmegaConf.create(
-    {
-        "num_rounds": NUM_ROUNDS,
-        "save_every_round": 5,
-        "learning_rate_max": 5e-5,
-        "learning_rate_min": 1e-6,
-        "seq_length": 512,
-        "training_arguments": {
-            "output_dir": None,
-            "learning_rate": None,
-            "per_device_train_batch_size": 16,
-            "gradient_accumulation_steps": 1,
-            "logging_steps": 10,
-            "num_train_epochs": 3,
-            "max_steps": 10,
-            "report_to": None,
-            "save_steps": 1000,
-            "save_total_limit": 10,
-            "gradient_checkpointing": model_cfg.gradient_checkpointing,
-            "lr_scheduler_type": "constant",
-        },
-    }
-)
+with initialize(config_path="conf"):
+    cfg = compose(config_name="config")
+
+# Reset the number of number
+cfg.num_rounds = NUM_ROUNDS
+cfg.train.num_rounds = NUM_ROUNDS
 
 # Create output directory
 if not os.path.exists(save_path):
@@ -55,24 +28,43 @@ if not os.path.exists(save_path):
 
 # Partition dataset and get dataloaders
 # We set the number of partitions to 20 for fast processing.
-fds = FederatedDataset(dataset="vicgalle/alpaca-gpt4", partitioners={"train": 20})
+fds = FederatedDataset(
+    dataset=cfg.dataset.name, partitioners={"train": cfg.num_clients}
+)
 (
     tokenizer,
     data_collator,
     formatting_prompts_func,
-) = get_tokenizer_and_data_collator_and_propt_formatting(model_cfg.name)
+) = get_tokenizer_and_data_collator_and_propt_formatting(cfg.model.name)
 
 
-# ClientApp for Flower-Next
-client = fl.client.ClientApp(
-    client_fn=gen_client_fn_api(
+# ClientApp #1 for Flower-Next
+client1 = fl.client.ClientApp(
+    client_fn=gen_client_fn(
         fds,
         tokenizer,
         formatting_prompts_func,
         data_collator,
-        model_cfg,
-        train_cfg,
+        cfg.model,
+        cfg.train,
         save_path,
+        client_id=0,
+        api=True,
+    ),
+)
+
+# ClientApp #2 for Flower-Next
+client2 = fl.client.ClientApp(
+    client_fn=gen_client_fn(
+        fds,
+        tokenizer,
+        formatting_prompts_func,
+        data_collator,
+        cfg.model,
+        cfg.train,
+        save_path,
+        client_id=1,
+        api=True,
     ),
 )
 
