@@ -41,7 +41,7 @@ from flwr.common import (
 )
 from flwr.common import recordset_compat as compat
 from flwr.common import typing
-from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
+from flwr.common.constant import MessageTypeLegacy
 
 from .message_handler import handle_legacy_message_from_msgtype, validate_out_message
 
@@ -132,7 +132,7 @@ def test_client_without_get_properties() -> None:
             dst_node_id=1123,
             reply_to_message="",
             ttl="",
-            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=recordset,
     )
@@ -162,7 +162,7 @@ def test_client_without_get_properties() -> None:
             dst_node_id=0,
             reply_to_message=message.metadata.message_id,
             ttl="",
-            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=expected_rs,
     )
@@ -185,7 +185,7 @@ def test_client_with_get_properties() -> None:
             dst_node_id=1123,
             reply_to_message="",
             ttl="",
-            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=recordset,
     )
@@ -215,7 +215,7 @@ def test_client_with_get_properties() -> None:
             dst_node_id=0,
             reply_to_message=message.metadata.message_id,
             ttl="",
-            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=expected_rs,
     )
