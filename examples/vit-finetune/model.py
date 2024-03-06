@@ -11,11 +11,11 @@ def get_model():
     model = vit_b_16(weights=ViT_B_16_Weights.IMAGENET1K_V1)
 
     # We're going to federated the finetuning of this model
-    # using the CIFAR-100 dataset. One easy way to achieve this
-    # is by re-initializing the output block of the ViT so it
-    # outputs 100 clases instead of the default 1k
+    # using the Oxford Flowers-102 dataset. One easy way to achieve
+    # this is by re-initializing the output block of the ViT so it
+    # outputs 102 clases instead of the default 1k
     in_features = model.heads[-1].in_features
-    model.heads[-1] = torch.nn.Linear(in_features, 100)
+    model.heads[-1] = torch.nn.Linear(in_features, 102)
 
     # Disable gradients for everything
     model.requires_grad_(False)
@@ -45,7 +45,7 @@ def train(net, trainloader, optimizer, epochs, device):
     # A very standard training loop for image classification
     for _ in range(epochs):
         for batch in trainloader:
-            images, labels = batch["img"].to(device), batch["fine_label"].to(device)
+            images, labels = batch["image"].to(device), batch["label"].to(device)
             optimizer.zero_grad()
             loss = criterion(net(images), labels)
             avg_loss += loss.item() / labels.shape[0]
@@ -62,7 +62,7 @@ def test(net, testloader, device: str):
     net.eval()
     with torch.no_grad():
         for data in testloader:
-            images, labels = data["img"].to(device), data["fine_label"].to(device)
+            images, labels = data["image"].to(device), data["label"].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)

@@ -1,6 +1,6 @@
 # Federated finetuning of a ViT
 
-This example shows how to use Flower's Simulation Engine to federate the finetuning of a Vision Transformer ([ViT-Base-16](https://pytorch.org/vision/main/models/generated/torchvision.models.vit_b_16.html#torchvision.models.vit_b_16)) that has been pretrained on ImageNet. To keep things simple we'll be finetuning it to CIFAR-100, creating 20 partitions using [Flower Datasets](https://flower.ai/docs/datasets/). We'll be finetuning just the exit `head` of the ViT, this means that the training is not that costly and each client requires just ~1.5GB of VRAM (for a batch size of 64 images).
+This example shows how to use Flower's Simulation Engine to federate the finetuning of a Vision Transformer ([ViT-Base-16](https://pytorch.org/vision/main/models/generated/torchvision.models.vit_b_16.html#torchvision.models.vit_b_16)) that has been pretrained on ImageNet. To keep things simple we'll be finetuning it to [Oxford Flower-102](https://www.robots.ox.ac.uk/~vgg/data/flowers/102/index.html) datasset, creating 20 partitions using [Flower Datasets](https://flower.ai/docs/datasets/). We'll be finetuning just the exit `head` of the ViT, this means that the training is not that costly and each client requires just ~1GB of VRAM (for a batch size of 32 images).
 
 ## Running the example
 
@@ -44,7 +44,7 @@ pip install -r requirements.txt
 
 ### Run with `start_simulation()`
 
-Running the example is quite straightforward. You can control the number of rounds `--num-rounds` (which defaults to 10).
+Running the example is quite straightforward. You can control the number of rounds `--num-rounds` (which defaults to 20).
 
 ```bash
 python main.py
@@ -52,12 +52,11 @@ python main.py
 
 ![](_static/central_evaluation.png)
 
-Running the example as-is on an RTX 3090Ti should take ~1min/round running 4 clients in parallel (plus the _global model_ during centralized evaluation stages) in a single GPU. Note that more clients could fit in VRAM, but since the GPU utilization is high (99%-100%) we are probably better off not doing that (at least in this case).
+Running the example as-is on an RTX 3090Ti should take ~15s/round running 5 clients in parallel (plus the _global model_ during centralized evaluation stages) in a single GPU. Note that more clients could fit in VRAM, but since the GPU utilization is high (99%-100%) we are probably better off not doing that (at least in this case).
 
 You can adjust the `client_resources` passed to `start_simulation()` so more/less clients run at the same time in the GPU. Take a look at the [Documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) for more details on how you can customise your simulation.
 
 ```bash
-
 +---------------------------------------------------------------------------------------+
 | NVIDIA-SMI 535.161.07             Driver Version: 535.161.07   CUDA Version: 12.2     |
 |-----------------------------------------+----------------------+----------------------+
@@ -66,7 +65,7 @@ You can adjust the `client_resources` passed to `start_simulation()` so more/les
 |                                         |                      |               MIG M. |
 |=========================================+======================+======================|
 |   0  NVIDIA GeForce RTX 3090 Ti     Off | 00000000:0B:00.0 Off |                  Off |
-| 59%   82C    P2             444W / 450W |   8127MiB / 24564MiB |    100%      Default |
+| 44%   74C    P2             441W / 450W |   7266MiB / 24564MiB |    100%      Default |
 |                                         |                      |                  N/A |
 +-----------------------------------------+----------------------+----------------------+
 
@@ -75,11 +74,12 @@ You can adjust the `client_resources` passed to `start_simulation()` so more/les
 |  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
 |        ID   ID                                                             Usage      |
 |=======================================================================================|
-|    0   N/A  N/A     30741      C   python                                     1966MiB |
-|    0   N/A  N/A     31419      C   ray::DefaultActor.run                      1536MiB |
-|    0   N/A  N/A     31420      C   ray::DefaultActor.run                      1536MiB |
-|    0   N/A  N/A     31421      C   ray::DefaultActor.run                      1536MiB |
-|    0   N/A  N/A     31422      C   ray::DefaultActor.run                      1536MiB |
+|    0   N/A  N/A    173812      C   python                                     1966MiB |
+|    0   N/A  N/A    174510      C   ray::ClientAppActor.run                    1056MiB |
+|    0   N/A  N/A    174512      C   ray::ClientAppActor.run                    1056MiB |
+|    0   N/A  N/A    174513      C   ray::ClientAppActor.run                    1056MiB |
+|    0   N/A  N/A    174514      C   ray::ClientAppActor.run                    1056MiB |
+|    0   N/A  N/A    174516      C   ray::ClientAppActor.run                    1056MiB |
 +---------------------------------------------------------------------------------------+
 ```
 

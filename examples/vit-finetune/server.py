@@ -10,8 +10,8 @@ from model import get_model, set_parameters, test
 def fit_config(server_round: int):
     """Return a configuration with static batch size and (local) epochs."""
     config = {
-        "lr": 0.001,  # Learning rate used by clients
-        "batch_size": 64,  # Batch size to use by clients during fit()
+        "lr": 0.01,  # Learning rate used by clients
+        "batch_size": 32,  # Batch size to use by clients during fit()
     }
     return config
 
@@ -22,7 +22,7 @@ def get_evaluate_fn(
     """Return an evaluation function for centralized evaluation."""
 
     def evaluate(server_round, parameters, config):
-        """Use the entire CIFAR-100 test set for evaluation."""
+        """Use the entire Oxford Flowers-102 test set for evaluation."""
 
         # Determine device
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

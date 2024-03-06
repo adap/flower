@@ -49,7 +49,7 @@ class FedViTClient(NumPyClient):
         )
 
         # Set optimizer
-        optimizer = torch.optim.SGD(self.model.parameters(), lr=lr, momentum=0.9)
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
         # Train locally
         avg_train_loss = train(
             self.model, trainloader, optimizer, epochs=1, device=self.device
@@ -63,13 +63,13 @@ class FedViTClient(NumPyClient):
 
 
 # Downloads and partition dataset
-federated_c100, _ = get_dataset_with_partitions(num_partitions=20)
+federated_ox_flowers, _ = get_dataset_with_partitions(num_partitions=20)
 
 
 def client_fn(cid: str):
     """Return a FedViTClient that trains with the cid-th data partition."""
 
-    trainset_for_this_client = federated_c100.load_partition(int(cid), "train")
+    trainset_for_this_client = federated_ox_flowers.load_partition(int(cid), "train")
 
     trainset = trainset_for_this_client.with_transform(apply_transforms)
 

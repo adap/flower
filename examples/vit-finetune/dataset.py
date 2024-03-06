@@ -11,18 +11,18 @@ from flwr_datasets import FederatedDataset
 
 
 def get_dataset_with_partitions(num_partitions: int):
-    """Get CIFAR-100 datasets and partition it.
+    """Get Oxford Flowers datasets and partition it.
 
     Return partitioned dataset as well as the whole test set.
     """
 
-    # Get CIFAR-100 and divide it into 20 IID partitions
-    c100_fds = FederatedDataset(
-        dataset="cifar100", partitioners={"train": num_partitions}
+    # Get Oxford Flowers-102 and divide it into 20 IID partitions
+    ox_flowers_fds = FederatedDataset(
+        dataset="nelorth/oxford-flowers", partitioners={"train": num_partitions}
     )
 
-    centralized_testset = c100_fds.load_full("test")
-    return c100_fds, centralized_testset
+    centralized_testset = ox_flowers_fds.load_full("test")
+    return ox_flowers_fds, centralized_testset
 
 
 def apply_eval_transforms(batch):
@@ -35,7 +35,7 @@ def apply_eval_transforms(batch):
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
     )
-    batch["img"] = [transforms(img) for img in batch["img"]]
+    batch["image"] = [transforms(img) for img in batch["image"]]
     return batch
 
 
@@ -48,5 +48,5 @@ def apply_transforms(batch):
             Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
     )
-    batch["img"] = [transforms(img) for img in batch["img"]]
+    batch["image"] = [transforms(img) for img in batch["image"]]
     return batch

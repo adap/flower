@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "--num-rounds",
     type=int,
-    default=10,
+    default=20,
     help="Number of rounds.",
 )
 
@@ -24,10 +24,10 @@ def main():
 
     # To control the degree of parallelism
     # With default settings in this example,
-    # each client should take just ~2GB of VRAM.
+    # each client should take just ~1GB of VRAM.
     client_resources = {
         "num_cpus": 4,
-        "num_gpus": 0.25,
+        "num_gpus": 0.2,
     }
 
     # Launch simulation
@@ -43,13 +43,14 @@ def main():
 
     # Basic plotting
     global_accuracy_centralised = history.metrics_centralized["accuracy"]
-    round = [data[0] for data in global_accuracy_centralised]
+    round = [int(data[0]) for data in global_accuracy_centralised]
     acc = [100.0 * data[1] for data in global_accuracy_centralised]
     plt.plot(round, acc)
+    plt.xticks(round)
     plt.grid()
     plt.ylabel("Accuracy (%)")
     plt.xlabel("Round")
-    plt.title("Federated finetuning of ViT for CIFAR-100")
+    plt.title("Federated finetuning of ViT for Flowers-102")
     plt.savefig("central_evaluation.png")
 
 
