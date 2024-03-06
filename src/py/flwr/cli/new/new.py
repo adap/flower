@@ -28,6 +28,7 @@ from ..utils import prompt_options
 class MlFramework(str, Enum):
     """Available frameworks."""
 
+    NUMPY = "NumPy"
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
 
