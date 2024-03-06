@@ -3,8 +3,6 @@ from torch.utils.data import DataLoader
 
 import flwr
 from flwr.client import NumPyClient
-
-
 from dataset import apply_transforms, get_dataset_with_partitions
 from model import get_model, set_parameters, train
 

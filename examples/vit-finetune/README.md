@@ -1,6 +1,6 @@
 # Federated finetuning of a ViT
 
-This example shows how to use Flower's Simulation Engine to federate the finetuning of a Vision Transformer ([ViT-Base-16](https://pytorch.org/vision/main/models/generated/torchvision.models.vit_b_16.html#torchvision.models.vit_b_16)) that has been pretrained on ImageNet. To keep things simple we'll be finetuning it to CIFAR-100, creating 20 partitions using [Flower-datasets](https://flower.ai/docs/datasets/). We'll be finetuning just the exit `head` of the ViT, this means that the training is not that costly and each client requires just ~1.5GB of VRAM (for a batch size of 64 images).
+This example shows how to use Flower's Simulation Engine to federate the finetuning of a Vision Transformer ([ViT-Base-16](https://pytorch.org/vision/main/models/generated/torchvision.models.vit_b_16.html#torchvision.models.vit_b_16)) that has been pretrained on ImageNet. To keep things simple we'll be finetuning it to CIFAR-100, creating 20 partitions using [Flower Datasets](https://flower.ai/docs/datasets/). We'll be finetuning just the exit `head` of the ViT, this means that the training is not that costly and each client requires just ~1.5GB of VRAM (for a batch size of 64 images).
 
 ## Running the example
 
@@ -10,7 +10,7 @@ If you haven't cloned the Flower repository already you might want to clone code
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/vit-finetune . && rm -rf flower && cd vit-finetune
 ```
 
-This will create a new directory called `simulation-pytorch` containing the following files:
+This will create a new directory called `vit-finetune` containing the following files:
 
 ```
 -- README.md         <- Your're reading this right now
@@ -19,8 +19,8 @@ This will create a new directory called `simulation-pytorch` containing the foll
 -- server.py         <- Contains Flower server code and ServerApp
 -- model.py          <- Defines model and train/eval functions
 -- dataset.py        <- Downloads, partitions and processes dataset
--- pyproject.toml    <- Example dependencies
--- requirements.txt  <- Example dependencies
+-- pyproject.toml    <- Example dependencies, installable using Poetry
+-- requirements.txt  <- Example dependencies, installable using pip
 ```
 
 ### Installing Dependencies
@@ -86,6 +86,9 @@ You can adjust the `client_resources` passed to `start_simulation()` so more/les
 ### Run with Flower Next (preview)
 
 ```bash
-flower-simulation --client-app=client:app --server-app=server:app --num-supernodes=20 \
+flower-simulation \
+    --client-app=client:app \
+    --server-app=server:app \
+    --num-supernodes=20 \
     --backend-config='{"client_resources": {"num_cpus":4, "num_gpus":0.25}}'
 ```
