@@ -38,7 +38,7 @@ fds = FederatedDataset(
 ) = get_tokenizer_and_data_collator_and_propt_formatting(cfg.model.name)
 
 
-# ClientApp #1 for Flower-Next
+# ClientApp for client #1 (Flower Next)
 client1 = fl.client.ClientApp(
     client_fn=gen_client_fn(
         fds,
@@ -53,7 +53,7 @@ client1 = fl.client.ClientApp(
     ),
 )
 
-# ClientApp #2 for Flower-Next
+# ClientApp for client #2 (Flower Next)
 client2 = fl.client.ClientApp(
     client_fn=gen_client_fn(
         fds,
