@@ -26,6 +26,7 @@ import grpc
 from flwr.common import ConfigsRecord, Message, Metadata, RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
+from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.typing import Code, GetPropertiesRes, Status
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
@@ -127,7 +128,16 @@ def test_integration_connection() -> None:
     def run_client() -> int:
         messages_received: int = 0
 
-        with grpc_connection(server_address=f"[::]:{port}", insecure=True) as conn:
+        with grpc_connection(
+            server_address=f"[::]:{port}",
+            insecure=True,
+            retry_invoker=RetryInvoker(
+                wait_factory=exponential,
+                recoverable_exceptions=grpc.RpcError,
+                max_tries=1,
+                max_time=None,
+            ),
+        ) as conn:
             receive, send, _, _ = conn
 
             # Setup processing loop
