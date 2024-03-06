@@ -304,7 +304,7 @@ In a new terminal window, start the first long-running Flower client using:
 flower-client-app client:wandb_app --insecure
 ```
 
-for W&B monitoring, and:
+for W&B monitoring, or:
 
 ```bash
 flower-client-app client:tb_app --insecure
@@ -328,7 +328,7 @@ flower-server-app server:app --insecure
 
 ### Check the results
 
-For W&B, you will need to login on the [website](wandb.ai).
+For W&B, you will need to login to the [website](wandb.ai).
 
 For TensorBoard, you will need to run the following command in your terminal:
 
