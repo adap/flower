@@ -375,11 +375,12 @@ def _start_client_internal(
                 # Retrieve context for this run
                 context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
-                # Load ClientApp instance
-                client_app: ClientApp = load_client_app_fn()
-
-                # Handle task message
+                # Handle app loading and task message
                 try:
+
+                    # Load ClientApp instance
+                    client_app: ClientApp = load_client_app_fn()
+
                     out_message = client_app(message=message, context=context)
                     # Update node state
                     node_state.update_context(
