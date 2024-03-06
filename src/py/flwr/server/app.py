@@ -365,7 +365,7 @@ def run_superlink() -> None:
             client_app_attr=args.client_app,
             backend_name=args.backend,
             backend_config_json_stream=args.backend_config,
-            working_dir=args.dir,
+            app_dir=args.app_dir,
             state_factory=state_factory,
             f_stop=f_stop,
         )
@@ -441,7 +441,7 @@ def _run_fleet_api_vce(
     client_app_attr: str,
     backend_name: str,
     backend_config_json_stream: str,
-    working_dir: str,
+    app_dir: str,
     state_factory: StateFactory,
     f_stop: asyncio.Event,
 ) -> None:
@@ -453,7 +453,7 @@ def _run_fleet_api_vce(
         backend_name=backend_name,
         backend_config_json_stream=backend_config_json_stream,
         state_factory=state_factory,
-        working_dir=working_dir,
+        app_dir=app_dir,
         f_stop=f_stop,
     )
 
@@ -705,7 +705,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "`flwr.common.typing.ConfigsRecordValues`. ",
     )
     parser.add_argument(
-        "--dir",
+        "--app-dir",
         default="",
         help="Add specified directory to the PYTHONPATH and load"
         "ClientApp from there."
