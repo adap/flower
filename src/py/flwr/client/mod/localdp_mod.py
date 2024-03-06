@@ -70,10 +70,10 @@ class LocalDpMod:
             raise ValueError("The sensitivity should be a non-negative value.")
 
         if epsilon < 0:
-            raise ValueError("The epsilon should be a non-negative value.")
+            raise ValueError("Epsilon should be a non-negative value.")
 
         if delta < 0:
-            raise ValueError("The delta should be a non-negative value.")
+            raise ValueError("Delta should be a non-negative value.")
 
         self.clipping_norm = clipping_norm
         self.sensitivity = sensitivity
