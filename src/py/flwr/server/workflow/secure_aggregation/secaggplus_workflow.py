@@ -24,14 +24,18 @@ from typing import cast
 
 import flwr.common.recordset_compat as compat
 from flwr.common import (
+    Code,
     ConfigsRecord,
     Context,
+    FitRes,
     Message,
     MessageType,
     NDArrays,
     RecordSet,
+    Status,
     bytes_to_ndarray,
     log,
+    ndarrays_to_parameters,
 )
 from flwr.common.secure_aggregation.crypto.shamir import combine_shares
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
@@ -43,7 +47,6 @@ from flwr.common.secure_aggregation.ndarrays_arithmetic import (
     factor_extract,
     get_parameters_shape,
     parameters_addition,
-    parameters_divide,
     parameters_mod,
     parameters_subtraction,
 )
@@ -54,6 +57,7 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
     Stage,
 )
 from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
+from flwr.server.compat.driver_client_proxy import DriverClientProxy
 from flwr.server.compat.legacy_context import LegacyContext
 from flwr.server.driver import Driver
 
@@ -489,6 +493,7 @@ class SecAggPlusWorkflow:
         if LOG_EXPLAIN:
             print("\nRequesting key shares to unmask the aggregate vector...")
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+        current_round = cast(int, cfg[DefaultKey.CURRENT_ROUND])
 
         # Construct active node IDs and dead node IDs
         active_nids = state.active_node_ids
@@ -508,7 +513,7 @@ class SecAggPlusWorkflow:
                 content=content,
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
-                group_id=str(cfg[DefaultKey.CURRENT_ROUND]),
+                group_id=str(current_round),
                 ttl="",
             )
 
@@ -571,9 +576,7 @@ class SecAggPlusWorkflow:
                         )
         recon_parameters = parameters_mod(masked_vector, state.mod_range)
         q_total_ratio, recon_parameters = factor_extract(recon_parameters)
-        dq_total_ratio = q_total_ratio / state.quantization_range
-        if LOG_EXPLAIN:
-            print(f"Unmasked sum of vectors (quantized): {recon_parameters[0]}")
+        inv_dq_total_ratio = state.quantization_range / q_total_ratio
         # recon_parameters = parameters_divide(recon_parameters, total_weights_factor)
         aggregated_vector = dequantize(
             recon_parameters,
@@ -583,9 +586,18 @@ class SecAggPlusWorkflow:
         offset = -(len(active_nids) - 1) * state.clipping_range
         for vec in aggregated_vector:
             vec += offset
-        if LOG_EXPLAIN:
-            print(f"Unmasked sum of vectors (dequantized): {aggregated_vector[0]}")
-            print(f"Aggregate vector: {aggregated_vector[0] / dq_total_ratio}")
-        aggregated_vector = parameters_divide(aggregated_vector, dq_total_ratio)
-
+            vec *= inv_dq_total_ratio
+        final_fitres = FitRes(
+            status=Status(code=Code.OK, message=""),
+            parameters=ndarrays_to_parameters(aggregated_vector),
+            num_examples=round(state.max_weight / inv_dq_total_ratio),
+            metrics={},
+        )
+        empty_proxy = DriverClientProxy(
+            0,
+            driver.grpc_driver,  # type: ignore
+            False,
+            driver.run_id,  # type: ignore
+        )
+        context.strategy.aggregate_fit(current_round, [(empty_proxy, final_fitres)], [])
         return True
