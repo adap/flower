@@ -43,8 +43,10 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 from flwr.common.secure_aggregation.ndarrays_arithmetic import (
     get_parameters_shape,
     parameters_addition,
+    parameters_divide,
     parameters_mod,
     parameters_subtraction,
+    factor_extract,
 )
 from flwr.common.secure_aggregation.quantization import dequantize, quantize
 from flwr.common.secure_aggregation.secaggplus_constants import (
@@ -74,6 +76,7 @@ class WorkflowState:
     clipping_range: float = 0.0
     quantization_range: int = 0
     mod_range: int = 0
+    max_weight: float = 0.0
     nid_to_neighbours: dict[int, set[int]] = field(default_factory=dict)
     nid_to_publickeys: dict[int, list[int]] = field(default_factory=dict)
     forward_srcs: dict[int, list[int]] = field(default_factory=dict)
@@ -107,11 +110,11 @@ class SecAggPlusWorkflow:
         The range within which model parameters are clipped before quantization.
         This parameter ensures each model parameter is bounded within
         [-clipping_range, clipping_range], facilitating quantization.
-    quantization_range : int, optional (default: 1048576, this equals 2**20)
+    quantization_range : int, optional (default: 4194304, this equals 2**22)
         The size of the range into which floating-point model parameters are quantized,
         mapping each parameter to an integer in [0, quantization_range-1]. This
         facilitates cryptographic operations on the model updates.
-    modulus_range : int, optional (default: 2147483648, this equals 2**30)
+    modulus_range : int, optional (default: 4294967296, this equals 2**32)
         The range of values from which random mask entries are uniformly sampled
         ([0, modulus_range-1]).
     timeout : Optional[float] (default: None)
@@ -145,8 +148,8 @@ class SecAggPlusWorkflow:
         *,
         max_weight: float = 1000.0,
         clipping_range: float = 8.0,
-        quantization_range: int = 1048576,
-        modulus_range: int = 2147483648,
+        quantization_range: int = 4194304,
+        modulus_range: int = 4294967296,
         timeout: float | None = None,
     ) -> None:
         self.num_shares = num_shares
@@ -290,6 +293,7 @@ class SecAggPlusWorkflow:
         state.clipping_range = self.clipping_range
         state.quantization_range = self.quantization_range
         state.mod_range = self.modulus_range
+        state.max_weight = self.max_weight
         if LOG_EXPLAIN:
             _quantized = quantize(
                 [np.ones(3) for _ in range(num_samples)],
@@ -323,8 +327,8 @@ class SecAggPlusWorkflow:
             Key.CLIPPING_RANGE: state.clipping_range,
             Key.TARGET_RANGE: state.quantization_range,
             Key.MOD_RANGE: state.mod_range,
+            Key.MAX_WEIGHT: state.max_weight,
         }
-        print(sa_params_dict)
 
         # The number of shares should better be odd in the SecAgg+ protocol.
         if num_samples != state.num_shares and state.num_shares & 1 == 0:
@@ -586,6 +590,8 @@ class SecAggPlusWorkflow:
                             masked_vector, pairwise_mask
                         )
         recon_parameters = parameters_mod(masked_vector, state.mod_range)
+        q_total_ratio, recon_parameters = factor_extract(recon_parameters)
+        dq_total_ratio = q_total_ratio / state.quantization_range 
         if LOG_EXPLAIN:
             print(f"Unmasked sum of vectors (quantized): {recon_parameters[0]}")
         # recon_parameters = parameters_divide(recon_parameters, total_weights_factor)
@@ -599,9 +605,10 @@ class SecAggPlusWorkflow:
             vec += offset
         if LOG_EXPLAIN:
             print(f"Unmasked sum of vectors (dequantized): {aggregated_vector[0]}")
-            print(f"Aggregate vector: {aggregated_vector[0] / len(active_nids)}")
+            print(f"Aggregate vector: {aggregated_vector[0] / dq_total_ratio}")
             print(
                 "########################### Secure Aggregation End ###########################\n\n"
             )
+        aggregated_vector = parameters_divide(aggregated_vector, dq_total_ratio)
 
         return True

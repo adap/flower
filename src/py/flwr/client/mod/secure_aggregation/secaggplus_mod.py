@@ -54,6 +54,7 @@ from flwr.common.secure_aggregation.quantization import quantize
 from flwr.common.secure_aggregation.secaggplus_constants import (
     RECORD_KEY_CONFIGS,
     RECORD_KEY_STATE,
+    RATIO_QUANTIZATION_RANGE,
     Key,
     Stage,
 )
@@ -79,6 +80,7 @@ class SecAggPlusState:
     clipping_range: float = 0.0
     target_range: int = 0
     mod_range: int = 0
+    max_weight: float = 0.0
 
     # Secret key (sk) and public key (pk)
     sk1: bytes = b""
@@ -328,6 +330,7 @@ def _setup(
     state.clipping_range = cast(float, sec_agg_param_dict[Key.CLIPPING_RANGE])
     state.target_range = cast(int, sec_agg_param_dict[Key.TARGET_RANGE])
     state.mod_range = cast(int, sec_agg_param_dict[Key.MOD_RANGE])
+    state.max_weight = cast(float, sec_agg_param_dict[Key.MAX_WEIGHT])
 
     # Dictionaries containing node IDs as keys
     # and their respective secret shares as values.
@@ -447,16 +450,19 @@ def _collect_masked_input(
 
     # Fit client
     fit_res = fit()
-    parameters_factor = fit_res.num_examples
+    ratio = fit_res.num_examples / state.max_weight
+    q_ratio = round(ratio * state.target_range)
+    dq_ratio = q_ratio / state.target_range
+    
     parameters = parameters_to_ndarrays(fit_res.parameters)
+    parameters = parameters_multiply(parameters, dq_ratio)
 
     # Quantize parameter update (vector)
     quantized_parameters = quantize(
         parameters, state.clipping_range, state.target_range
     )
-
-    quantized_parameters = parameters_multiply(quantized_parameters, parameters_factor)
-    quantized_parameters = factor_combine(parameters_factor, quantized_parameters)
+    
+    quantized_parameters = factor_combine(q_ratio, quantized_parameters)
 
     dimensions_list: List[Tuple[int, ...]] = [a.shape for a in quantized_parameters]
 

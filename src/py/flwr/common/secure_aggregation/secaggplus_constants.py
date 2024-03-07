@@ -19,6 +19,7 @@ from __future__ import annotations
 
 RECORD_KEY_STATE = "secaggplus_state"
 RECORD_KEY_CONFIGS = "secaggplus_configs"
+RATIO_QUANTIZATION_RANGE = 1073741824  # 1 << 30
 
 
 class Stage:
@@ -50,6 +51,7 @@ class Key:
     CLIPPING_RANGE = "clipping_range"
     TARGET_RANGE = "target_range"
     MOD_RANGE = "mod_range"
+    MAX_WEIGHT = "max_weight"
     PUBLIC_KEY_1 = "pk1"
     PUBLIC_KEY_2 = "pk2"
     DESTINATION_LIST = "dsts"
