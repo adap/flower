@@ -78,7 +78,7 @@ class WorkflowState:
     nid_to_publickeys: dict[int, tuple[int, int]] = field(default_factory=dict)
     forward_srcs: dict[int, list[int]] = field(default_factory=dict)
     forward_ciphertexts: dict[int, list[bytes]] = field(default_factory=dict)
-    aggregate_ndarrays: NDArrays = []
+    aggregate_ndarrays: NDArrays = field(default_factory=list)
 
 
 class SecAggPlusWorkflow:
@@ -187,8 +187,9 @@ class SecAggPlusWorkflow:
             if self.num_shares > self.modulus_range / self.quantization_range:
                 log(
                     WARN,
-                    "A `num_shares` larger than `mod_range / target_range` will potentially "
-                    "cause overflow when computing the aggregated model parameters.",
+                    "A `num_shares` larger than `mod_range / target_range` "
+                    "will potentially cause overflow when computing the aggregated "
+                    "model parameters.",
                 )
             if self.num_shares == 1:
                 self.num_shares = 1.0
@@ -255,14 +256,17 @@ class SecAggPlusWorkflow:
         proxy_fitins_lst = context.strategy.configure_fit(
             cfg[DefaultKey.CURRENT_ROUND], parameters, context.client_manager
         )
-        state.nid_to_fitins = {
-            proxy.node_id: compat.fitins_to_recordset(fitins, False)
-            for proxy, fitins in proxy_fitins_lst
-        }
+        for idx, (proxy, fitins) in enumerate(proxy_fitins_lst):
+            fitins.config["drop"] = (idx == 0)
+            state.nid_to_fitins[proxy.node_id] = compat.fitins_to_recordset(fitins, True)
+        # state.nid_to_fitins = {
+        #     proxy.node_id: compat.fitins_to_recordset(fitins, False)
+        #     for proxy, fitins in proxy_fitins_lst
+        # }
 
         # Protocol config
-        state.sampled_node_ids = set(state.nid_to_fitins.keys())
-        num_samples = len(state.sampled_node_ids)
+        sampled_node_ids = list(state.nid_to_fitins.keys())
+        num_samples = len(sampled_node_ids)
         if num_samples < 2:
             log(ERROR, "The number of samples should be greater than 1.")
             return False
@@ -274,12 +278,16 @@ class SecAggPlusWorkflow:
             # If too small
             if state.num_shares <= 2:
                 state.num_shares = num_samples
+        else: 
+            state.num_shares = self.num_shares
         if isinstance(self.reconstruction_threshold, float):
             state.threshold = round(self.reconstruction_threshold * state.num_shares)
             # If too small
             if state.threshold < 2:
                 state.threshold = 2
-        state.active_node_ids = state.sampled_node_ids
+        else:
+            state.threshold = self.reconstruction_threshold
+        state.active_node_ids = set(sampled_node_ids)
         state.clipping_range = self.clipping_range
         state.quantization_range = self.quantization_range
         state.mod_range = self.modulus_range
@@ -317,25 +325,26 @@ class SecAggPlusWorkflow:
             Key.TARGET_RANGE: state.quantization_range,
             Key.MOD_RANGE: state.mod_range,
         }
+        print(sa_params_dict)
 
         # The number of shares should better be odd in the SecAgg+ protocol.
         if num_samples != state.num_shares and state.num_shares & 1 == 0:
             log(WARN, "Number of shares in the SecAgg+ protocol should be odd.")
             state.num_shares += 1
 
-        # Randomly assign secure IDs to clients
-        random.shuffle(state.sampled_node_ids)
+        # Shuffle node IDs
+        random.shuffle(sampled_node_ids)
         # Build neighbour relations (node ID -> secure IDs of neighbours)
         half_share = state.num_shares >> 1
         state.nid_to_neighbours = {
             nid: {
-                state.sampled_node_ids[(idx + offset) % num_samples]
+                sampled_node_ids[(idx + offset) % num_samples]
                 for offset in range(-half_share, half_share + 1)
             }
-            for idx, nid in enumerate(state.sampled_node_ids)
+            for idx, nid in enumerate(sampled_node_ids)
         }
 
-        state.active_node_ids = state.sampled_node_ids
+        state.sampled_node_ids = state.active_node_ids
 
         # Send setup configuration to clients
         cfgs_record = ConfigsRecord(sa_params_dict)

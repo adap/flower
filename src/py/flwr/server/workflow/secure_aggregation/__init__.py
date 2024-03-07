@@ -15,8 +15,8 @@
 """Secure Aggregation workflows."""
 
 
-from .default_workflows import DefaultWorkflow
+from .secaggplus_workflow import SecAggPlusWorkflow
 
 __all__ = [
-    "DefaultWorkflow",
+    "SecAggPlusWorkflow",
 ]

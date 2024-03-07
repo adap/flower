@@ -156,6 +156,8 @@ def load_server_app(module_attribute_str: str) -> ServerApp:
     try:
         module = importlib.import_module(module_str)
     except ModuleNotFoundError:
+        import traceback
+        traceback.print_exc()
         raise LoadServerAppError(
             f"Unable to load module {module_str}",
         ) from None

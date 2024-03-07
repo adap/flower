@@ -57,9 +57,9 @@ class Key:
     SOURCE_LIST = "srcs"
     PARAMETERS = "params"
     MASKED_PARAMETERS = "masked_params"
-    ACTIVE_NODE_ID_LIST = "active_sids"
-    DEAD_NODE_ID_LIST = "dead_sids"
-    NODE_ID_LIST = "sids"
+    ACTIVE_NODE_ID_LIST = "active_nids"
+    DEAD_NODE_ID_LIST = "dead_nids"
+    NODE_ID_LIST = "nids"
     SHARE_LIST = "shares"
 
     def __new__(cls) -> Key:
