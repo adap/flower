@@ -119,7 +119,7 @@ class ClientApp:
         """
 
         def train_decorator(train_fn: ClientAppCallable) -> ClientAppCallable:
-            """Register the main fn with the ServerApp object."""
+            """Register the train fn with the ServerApp object."""
             if self._call:
                 raise _registration_error(MessageType.TRAIN)
 
@@ -146,7 +146,7 @@ class ClientApp:
         """
 
         def evaluate_decorator(evaluate_fn: ClientAppCallable) -> ClientAppCallable:
-            """Register the main fn with the ServerApp object."""
+            """Register the evaluate fn with the ServerApp object."""
             if self._call:
                 raise _registration_error(MessageType.EVALUATE)
 
@@ -173,7 +173,7 @@ class ClientApp:
         """
 
         def query_decorator(query_fn: ClientAppCallable) -> ClientAppCallable:
-            """Register the main fn with the ServerApp object."""
+            """Register the query fn with the ServerApp object."""
             if self._call:
                 raise _registration_error(MessageType.QUERY)
 
