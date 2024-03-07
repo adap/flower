@@ -457,13 +457,18 @@ def _start_client_internal(
                 # Retrieve context for this run
                 context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
+                # Create an error reply message that will never be used to prevent
+                # the used-before-assignment linting error
+                reply_message = message.create_error_reply(
+                    error=Error(code=0, reason="Unknown"), ttl=message.metadata.ttl
+                )
+
                 # Handle app loading and task message
                 try:
-
                     # Load ClientApp instance
                     client_app: ClientApp = load_client_app_fn()
 
-                    out_message = client_app(message=message, context=context)
+                    reply_message = client_app(message=message, context=context)
                     # Update node state
                     node_state.update_context(
                         run_id=message.metadata.run_id,
@@ -477,13 +482,13 @@ def _start_client_internal(
                     # Create error message
                     # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
                     reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-                    error = Error(code=0, reason=reason)
-                    out_message = message.create_error_reply(error=error, ttl="")
+                    reply_message = message.create_error_reply(
+                        error=Error(code=0, reason=reason), ttl=message.metadata.ttl
+                    )
 
                 finally:
-
                     # Send
-                    send(out_message)
+                    send(reply_message)
 
             # Unregister node
             if delete_node is not None:
