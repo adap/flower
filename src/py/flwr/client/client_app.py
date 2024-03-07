@@ -59,9 +59,10 @@ class ClientApp:
         client_fn: Optional[ClientFn] = None,  # Only for backward compatibility
         mods: Optional[List[Mod]] = None,
     ) -> None:
-        self._call: Optional[ClientAppCallable] = None
+        self._mods: List[Mod] = mods if mods is not None else []
 
         # Create wrapper function for `handle`
+        self._call: Optional[ClientAppCallable] = None
         if client_fn is not None:
 
             def ffn(
@@ -124,7 +125,8 @@ class ClientApp:
                 raise _registration_error(MessageType.TRAIN)
 
             # Register provided function with the ClientApp object
-            self._train = train_fn
+            # Wrap mods around the wrapped step function
+            self._train = make_ffn(train_fn, self._mods)
 
             # Return provided function unmodified
             return train_fn
@@ -151,7 +153,8 @@ class ClientApp:
                 raise _registration_error(MessageType.EVALUATE)
 
             # Register provided function with the ClientApp object
-            self._evaluate = evaluate_fn
+            # Wrap mods around the wrapped step function
+            self._evaluate = make_ffn(evaluate_fn, self._mods)
 
             # Return provided function unmodified
             return evaluate_fn
@@ -178,7 +181,8 @@ class ClientApp:
                 raise _registration_error(MessageType.QUERY)
 
             # Register provided function with the ClientApp object
-            self._query = query_fn
+            # Wrap mods around the wrapped step function
+            self._query = make_ffn(query_fn, self._mods)
 
             # Return provided function unmodified
             return query_fn
