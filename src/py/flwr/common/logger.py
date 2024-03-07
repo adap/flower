@@ -37,9 +37,10 @@ LOG_COLORS = {
 
 class ColorFormatter(logging.Formatter):
     def format(self, record):
+        seperator = " " * (8 - len(record.levelname))
         log_fmt = (
             f"{LOG_COLORS[record.levelname]}"
-            f"[%(levelname)s] %(message)s{LOG_COLORS['RESET']}"
+            f"%(levelname)s{LOG_COLORS['RESET']}: {seperator} %(message)s"
         )
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
@@ -47,7 +48,7 @@ class ColorFormatter(logging.Formatter):
 
 # Configure console logger
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
+console_handler.setLevel(logging.INFO)
 console_handler.setFormatter(ColorFormatter())
 FLOWER_LOGGER.addHandler(console_handler)
 
