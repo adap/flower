@@ -75,7 +75,7 @@ class WorkflowState:
     quantization_range: int = 0
     mod_range: int = 0
     nid_to_neighbours: dict[int, set[int]] = field(default_factory=dict)
-    nid_to_publickeys: dict[int, tuple[int, int]] = field(default_factory=dict)
+    nid_to_publickeys: dict[int, list[int]] = field(default_factory=dict)
     forward_srcs: dict[int, list[int]] = field(default_factory=dict)
     forward_ciphertexts: dict[int, list[bytes]] = field(default_factory=dict)
     aggregate_ndarrays: NDArrays = field(default_factory=list)
@@ -378,7 +378,7 @@ class SecAggPlusWorkflow:
             key_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             node_id = msg.metadata.src_node_id
             pk1, pk2 = key_dict[Key.PUBLIC_KEY_1], key_dict[Key.PUBLIC_KEY_2]
-            state.nid_to_publickeys[node_id] = (pk1, pk2)
+            state.nid_to_publickeys[node_id] = [pk1, pk2]
 
         return self._check_threshold(state)
 
