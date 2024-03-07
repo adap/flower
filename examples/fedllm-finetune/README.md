@@ -28,6 +28,7 @@ This will create a new directory called `fedllm-finetune` containing the followi
 -- dataset.py          <- Dataset and tokenizer build
 -- utils.py            <- Utility functions
 -- test.py             <- Test pre-trained model
+-- app.py              <- ServerApp/ClientApp for Flower-Next
 -- conf/config.yaml    <- Configuration file
 -- requirements.txt    <- Example dependencies
 ```
@@ -41,8 +42,6 @@ pip install -r requirements.txt
 ```
 
 ## Run LLM Fine-tuning
-
-### Run with `start_simulation()`
 
 With an activated Python environment, run the example with default config values. The config is in `conf/config.yaml` and is loaded automatically.
 
@@ -60,31 +59,6 @@ python main.py model.name="openlm-research/open_llama_7b_v2" model.quantization=
 # Run for 50 rounds but increasing the fraction of clients that participate per round to 25%
 python main.py num_rounds=50 fraction_fit.fraction_fit=0.25
 ```
-
-### Run with Flower Next (demo)
-
-We conduct a 2-client setting to demonstrate how to run federated LLM fine-tuning with Flower Next.
-Please follow the steps below:
-
-1. Start the long-running Flower server (SuperLink)
-   ```bash
-   flower-superlink --insecure
-   ```
-2. Start the long-running Flower client (SuperNode)
-   ```bash
-   # In a new terminal window, start the first long-running Flower client:
-   flower-client-app app:client1 --insecure
-   ```
-   ```bash
-   # In another new terminal window, start the second long-running Flower client:
-   flower-client-app app:client2 --insecure
-   ```
-3. Run the Flower App
-   ```bash
-   # With both the long-running server (SuperLink) and two clients (SuperNode) up and running,
-   # we can now run the actual Flower App:
-   flower-server-app app:server --insecure
-   ```
 
 ## Expected Results
 
@@ -138,3 +112,28 @@ Finally, end your day with a relaxing visit to the London Eye, the tallest Ferri
 
 The [`Vicuna`](https://huggingface.co/lmsys/vicuna-13b-v1.1) template we used in this example is for a chat assistant.
 The generated answer is expected to be a multi-turn conversations. Feel free to try more interesting questions!
+
+## Run with Flower Next (preview)
+
+We conduct a 2-client setting to demonstrate how to run federated LLM fine-tuning with Flower Next.
+Please follow the steps below:
+
+1. Start the long-running Flower server (SuperLink)
+   ```bash
+   flower-superlink --insecure
+   ```
+2. Start the long-running Flower client (SuperNode)
+   ```bash
+   # In a new terminal window, start the first long-running Flower client:
+   flower-client-app app:client1 --insecure
+   ```
+   ```bash
+   # In another new terminal window, start the second long-running Flower client:
+   flower-client-app app:client2 --insecure
+   ```
+3. Run the Flower App
+   ```bash
+   # With both the long-running server (SuperLink) and two clients (SuperNode) up and running,
+   # we can now run the actual Flower App:
+   flower-server-app app:server --insecure
+   ```
