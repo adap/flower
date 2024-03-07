@@ -1,0 +1,6 @@
+flwr-nightly[rest,simulation]>=1.0, <2.0
+tensorboard==2.16.2
+torch==1.13.1
+torchvision==0.14.1
+tqdm==4.65.0
+wandb==0.16.3
