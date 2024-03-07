@@ -39,6 +39,7 @@ class ColorFormatter(logging.Formatter):
     """Log formatter that adds color to the log level."""
 
     def format(self, record):
+        """Format function that adds colors to log level."""
         seperator = " " * (8 - len(record.levelname))
         log_fmt = (
             f"{LOG_COLORS[record.levelname]}"
