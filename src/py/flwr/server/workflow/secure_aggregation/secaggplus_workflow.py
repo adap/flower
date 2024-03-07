@@ -20,8 +20,7 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass, field
 from logging import ERROR, WARN
-
-import numpy as np
+from typing import cast
 
 import flwr.common.recordset_compat as compat
 from flwr.common import (
@@ -41,14 +40,14 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_shared_key,
 )
 from flwr.common.secure_aggregation.ndarrays_arithmetic import (
+    factor_extract,
     get_parameters_shape,
     parameters_addition,
     parameters_divide,
     parameters_mod,
     parameters_subtraction,
-    factor_extract,
 )
-from flwr.common.secure_aggregation.quantization import dequantize, quantize
+from flwr.common.secure_aggregation.quantization import dequantize
 from flwr.common.secure_aggregation.secaggplus_constants import (
     RECORD_KEY_CONFIGS,
     Key,
@@ -65,7 +64,7 @@ LOG_EXPLAIN = True
 
 
 @dataclass
-class WorkflowState:
+class WorkflowState:  # pylint: disable=R0902
     """The state of the SecAgg+ protocol."""
 
     nid_to_fitins: dict[int, RecordSet] = field(default_factory=dict)
@@ -78,7 +77,7 @@ class WorkflowState:
     mod_range: int = 0
     max_weight: float = 0.0
     nid_to_neighbours: dict[int, set[int]] = field(default_factory=dict)
-    nid_to_publickeys: dict[int, list[int]] = field(default_factory=dict)
+    nid_to_publickeys: dict[int, list[bytes]] = field(default_factory=dict)
     forward_srcs: dict[int, list[int]] = field(default_factory=dict)
     forward_ciphertexts: dict[int, list[bytes]] = field(default_factory=dict)
     aggregate_ndarrays: NDArrays = field(default_factory=list)
@@ -141,7 +140,7 @@ class SecAggPlusWorkflow:
     in balancing privacy, robustness, and efficiency within the SecAgg+ protocol.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=R0913
         self,
         num_shares: int | float,
         reconstruction_threshold: int | float,
@@ -180,7 +179,7 @@ class SecAggPlusWorkflow:
             if not step(driver, context, state):
                 return
 
-    def _check_init_params(self) -> None:
+    def _check_init_params(self) -> None:  # pylint: disable=R0912
         # Check `num_shares`
         if not isinstance(self.num_shares, (int, float)):
             raise TypeError("`num_shares` must be of type int or float.")
@@ -211,7 +210,7 @@ class SecAggPlusWorkflow:
             if self.reconstruction_threshold == 1:
                 self.reconstruction_threshold = 1.0
         else:
-            if not (0 < self.reconstruction_threshold <= 1):
+            if not 0 < self.reconstruction_threshold <= 1:
                 raise ValueError(
                     "If `reconstruction_threshold` is a float, "
                     "it must be greater than 0 and less than or equal to 1."
@@ -246,21 +245,24 @@ class SecAggPlusWorkflow:
                 return False
         return True
 
-    def _setup(
+    def _setup(  # pylint: disable=R0912, R0914, R0915
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
         # Obtain fit instructions
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+        current_round = cast(int, cfg[DefaultKey.CURRENT_ROUND])
         parameters = compat.parametersrecord_to_parameters(
             context.state.parameters_records[MAIN_PARAMS_RECORD],
             keep_input=True,
         )
         proxy_fitins_lst = context.strategy.configure_fit(
-            cfg[DefaultKey.CURRENT_ROUND], parameters, context.client_manager
+            current_round, parameters, context.client_manager
         )
         for idx, (proxy, fitins) in enumerate(proxy_fitins_lst):
-            fitins.config["drop"] = (idx == 0)
-            state.nid_to_fitins[proxy.node_id] = compat.fitins_to_recordset(fitins, True)
+            fitins.config["drop"] = idx == 0
+            state.nid_to_fitins[proxy.node_id] = compat.fitins_to_recordset(
+                fitins, True
+            )
         # state.nid_to_fitins = {
         #     proxy.node_id: compat.fitins_to_recordset(fitins, False)
         #     for proxy, fitins in proxy_fitins_lst
@@ -280,13 +282,12 @@ class SecAggPlusWorkflow:
             # If too small
             if state.num_shares <= 2:
                 state.num_shares = num_samples
-        else: 
+        else:
             state.num_shares = self.num_shares
         if isinstance(self.reconstruction_threshold, float):
             state.threshold = round(self.reconstruction_threshold * state.num_shares)
-            # If too small
-            if state.threshold < 2:
-                state.threshold = 2
+            # Avoid too small threshold
+            state.threshold = max(state.threshold, 2)
         else:
             state.threshold = self.reconstruction_threshold
         state.active_node_ids = set(sampled_node_ids)
@@ -294,31 +295,6 @@ class SecAggPlusWorkflow:
         state.quantization_range = self.quantization_range
         state.mod_range = self.modulus_range
         state.max_weight = self.max_weight
-        if LOG_EXPLAIN:
-            _quantized = quantize(
-                [np.ones(3) for _ in range(num_samples)],
-                state.clipping_range,
-                state.quantization_range,
-            )
-            print(
-                "\n\n################################ Introduction ################################\n"
-                "In the example, each client will upload a vector [1.0, 1.0, 1.0] instead of\n"
-                "model updates for demonstration purposes.\n"
-                "Client 0 is configured to drop out before uploading the masked vector.\n"
-                "After quantization, the raw vectors will be:"
-            )
-            for i in range(1, num_samples):
-                print(f"\t{_quantized[i]} from Client {i}")
-            print(
-                "Numbers are rounded to integers stochastically during the quantization\n"
-                ", and thus not all entries are identical."
-            )
-            print(
-                "The above raw vectors are hidden from the driver through adding masks.\n"
-            )
-            print(
-                "########################## Secure Aggregation Start ##########################"
-            )
         sa_params_dict = {
             Key.STAGE: Stage.SETUP,
             Key.SAMPLE_NUMBER: num_samples,
@@ -350,7 +326,7 @@ class SecAggPlusWorkflow:
         state.sampled_node_ids = state.active_node_ids
 
         # Send setup configuration to clients
-        cfgs_record = ConfigsRecord(sa_params_dict)
+        cfgs_record = ConfigsRecord(sa_params_dict)  # type: ignore
         content = RecordSet(configs_records={RECORD_KEY_CONFIGS: cfgs_record})
 
         def make(nid: int) -> Message:
@@ -364,7 +340,8 @@ class SecAggPlusWorkflow:
 
         if LOG_EXPLAIN:
             print(
-                f"Sending configurations to {num_samples} clients and allocating secure IDs..."
+                f"Sending configurations to {num_samples} clients "
+                "and allocating secure IDs..."
             )
         msgs = driver.send_and_receive(
             [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
@@ -382,11 +359,11 @@ class SecAggPlusWorkflow:
             key_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             node_id = msg.metadata.src_node_id
             pk1, pk2 = key_dict[Key.PUBLIC_KEY_1], key_dict[Key.PUBLIC_KEY_2]
-            state.nid_to_publickeys[node_id] = [pk1, pk2]
+            state.nid_to_publickeys[node_id] = [cast(bytes, pk1), cast(bytes, pk2)]
 
         return self._check_threshold(state)
 
-    def _share_keys(
+    def _share_keys(  # pylint: disable=R0914
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
         if LOG_EXPLAIN:
@@ -417,24 +394,26 @@ class SecAggPlusWorkflow:
         }
 
         if LOG_EXPLAIN:
-            print(
-                f"Received encrypted key shares from {len(state.active_node_ids)} clients."
-            )
+            print(f"Received key shares from {len(state.active_node_ids)} clients.")
 
         # Build forward packet list dictionary
-        srcs, dsts, ciphertexts = [], [], []
+        srcs: list[int] = []
+        dsts: list[int] = []
+        ciphertexts: list[bytes] = []
         fwd_ciphertexts: dict[int, list[bytes]] = {
             nid: [] for nid in state.active_node_ids
         }  # dest node ID -> list of ciphertexts
-        fwd_srcs: dict[int, list[bytes]] = {
-            nid: [] for nid in fwd_ciphertexts
-        }  # dest node ID -> list of src secure IDs
+        fwd_srcs: dict[int, list[int]] = {
+            nid: [] for nid in state.active_node_ids
+        }  # dest node ID -> list of src node IDs
         for msg in msgs:
             node_id = msg.metadata.src_node_id
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
-            srcs += [node_id] * len(res_dict[Key.DESTINATION_LIST])
-            dsts += res_dict[Key.DESTINATION_LIST]
-            ciphertexts += res_dict[Key.CIPHERTEXT_LIST]
+            dst_lst = cast(list[int], res_dict[Key.DESTINATION_LIST])
+            ctxt_lst = cast(list[bytes], res_dict[Key.CIPHERTEXT_LIST])
+            srcs += [node_id] * len(dst_lst)
+            dsts += dst_lst
+            ciphertexts += ctxt_lst
 
         for src, dst, ciphertext in zip(srcs, dsts, ciphertexts):
             if dst in fwd_ciphertexts:
@@ -460,7 +439,7 @@ class SecAggPlusWorkflow:
                 Key.CIPHERTEXT_LIST: state.forward_ciphertexts[nid],
                 Key.SOURCE_LIST: state.forward_srcs[nid],
             }
-            cfgs_record = ConfigsRecord(cfgs_dict)
+            cfgs_record = ConfigsRecord(cfgs_dict)  # type: ignore
             content = state.nid_to_fitins[nid]
             content.configs_records[RECORD_KEY_CONFIGS] = cfgs_record
             return driver.create_message(
@@ -481,7 +460,7 @@ class SecAggPlusWorkflow:
         # Clear cache
         del state.forward_ciphertexts, state.forward_srcs, state.nid_to_fitins
 
-        # Add all collected masked vectors and compuute available and dropout clients set
+        # Sum collected masked vectors and compute active/dead node IDs
         if LOG_EXPLAIN:
             dead_nids = state.sampled_node_ids - state.active_node_ids
             for nid in dead_nids:
@@ -489,21 +468,22 @@ class SecAggPlusWorkflow:
         masked_vector = None
         for msg in msgs:
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
-            client_masked_vec = [
-                bytes_to_ndarray(b) for b in res_dict[Key.MASKED_PARAMETERS]
-            ]
+            bytes_list = cast(list[bytes], res_dict[Key.MASKED_PARAMETERS])
+            client_masked_vec = [bytes_to_ndarray(b) for b in bytes_list]
             if LOG_EXPLAIN:
-                print(f"Received {client_masked_vec[1]} from Client {nid}.")
+                src_nid = msg.metadata.src_node_id
+                print(f"Received {client_masked_vec[1]} from Client {src_nid}.")
             if masked_vector is None:
                 masked_vector = client_masked_vec
             else:
                 masked_vector = parameters_addition(masked_vector, client_masked_vec)
-        masked_vector = parameters_mod(masked_vector, state.mod_range)
-        state.aggregate_ndarrays = masked_vector
+        if masked_vector is not None:
+            masked_vector = parameters_mod(masked_vector, state.mod_range)
+            state.aggregate_ndarrays = masked_vector
 
         return self._check_threshold(state)
 
-    def _unmask(
+    def _unmask(  # pylint: disable=R0912, R0914
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
         if LOG_EXPLAIN:
@@ -522,7 +502,7 @@ class SecAggPlusWorkflow:
                 Key.ACTIVE_NODE_ID_LIST: list(neighbours & active_nids),
                 Key.DEAD_NODE_ID_LIST: list(neighbours & dead_nids),
             }
-            cfgs_record = ConfigsRecord(cfgs_dict)
+            cfgs_record = ConfigsRecord(cfgs_dict)  # type: ignore
             content = RecordSet(configs_records={RECORD_KEY_CONFIGS: cfgs_record})
             return driver.create_message(
                 content=content,
@@ -547,9 +527,9 @@ class SecAggPlusWorkflow:
             collected_shares_dict[nid] = []
         for msg in msgs:
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
-            for owner_nid, share in zip(
-                res_dict[Key.NODE_ID_LIST], res_dict[Key.SHARE_LIST]
-            ):
+            nids = cast(list[int], res_dict[Key.NODE_ID_LIST])
+            shares = cast(list[bytes], res_dict[Key.SHARE_LIST])
+            for owner_nid, share in zip(nids, shares):
                 collected_shares_dict[owner_nid].append(share)
 
         # Remove mask for every client who is available after collect_masked_input stage
@@ -591,7 +571,7 @@ class SecAggPlusWorkflow:
                         )
         recon_parameters = parameters_mod(masked_vector, state.mod_range)
         q_total_ratio, recon_parameters = factor_extract(recon_parameters)
-        dq_total_ratio = q_total_ratio / state.quantization_range 
+        dq_total_ratio = q_total_ratio / state.quantization_range
         if LOG_EXPLAIN:
             print(f"Unmasked sum of vectors (quantized): {recon_parameters[0]}")
         # recon_parameters = parameters_divide(recon_parameters, total_weights_factor)
@@ -606,9 +586,6 @@ class SecAggPlusWorkflow:
         if LOG_EXPLAIN:
             print(f"Unmasked sum of vectors (dequantized): {aggregated_vector[0]}")
             print(f"Aggregate vector: {aggregated_vector[0] / dq_total_ratio}")
-            print(
-                "########################### Secure Aggregation End ###########################\n\n"
-            )
         aggregated_vector = parameters_divide(aggregated_vector, dq_total_ratio)
 
         return True
