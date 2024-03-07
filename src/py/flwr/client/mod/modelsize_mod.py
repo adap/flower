@@ -17,7 +17,6 @@
 
 from logging import INFO
 
-
 from flwr.client.typing import ClientAppCallable
 from flwr.common.constant import MessageType
 from flwr.common.context import Context

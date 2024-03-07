@@ -16,6 +16,7 @@
 
 
 from .centraldp_mods import adaptiveclipping_mod, fixedclipping_mod
+from .modelsize_mod import modelsize_mod as modelsize_logger_mod
 from .secure_aggregation.secaggplus_mod import secaggplus_mod
 from .utils import make_ffn
 
@@ -24,4 +25,5 @@ __all__ = [
     "fixedclipping_mod",
     "make_ffn",
     "secaggplus_mod",
+    "modelsize_logger_mod",
 ]
