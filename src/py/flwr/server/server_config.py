@@ -31,6 +31,7 @@ class ServerConfig:
     round_timeout: Optional[float] = None
 
     def __repr__(self) -> str:
+        """Return the string representation of the ServerConfig."""
         timeout_string = (
             "no round_timeout"
             if self.round_timeout is None

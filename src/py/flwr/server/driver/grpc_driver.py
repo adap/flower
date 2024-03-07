@@ -15,7 +15,7 @@
 """Flower driver service client."""
 
 
-from logging import DEBUG, ERROR, INFO, WARNING
+from logging import DEBUG, ERROR, WARNING
 from typing import Optional
 
 import grpc
