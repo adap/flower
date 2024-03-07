@@ -17,16 +17,16 @@
 
 from __future__ import annotations
 
-
 MAIN_CONFIGS_RECORD = "config"
 MAIN_PARAMS_RECORD = "parameters"
 
 
 class Key:
     """Constants for default workflows."""
+
     CURRENT_ROUND = "current_round"
     START_TIME = "start_time"
-    
+
     def __new__(cls) -> Key:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")

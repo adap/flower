@@ -45,7 +45,6 @@ class Key:
 
     STAGE = "stage"
     SAMPLE_NUMBER = "sample_num"
-    SECURE_ID = "secure_id"
     SHARE_NUMBER = "share_num"
     THRESHOLD = "threshold"
     CLIPPING_RANGE = "clipping_range"
@@ -58,9 +57,9 @@ class Key:
     SOURCE_LIST = "srcs"
     PARAMETERS = "params"
     MASKED_PARAMETERS = "masked_params"
-    ACTIVE_SECURE_ID_LIST = "active_sids"
-    DEAD_SECURE_ID_LIST = "dead_sids"
-    SECURE_ID_LIST = "sids"
+    ACTIVE_NODE_ID_LIST = "active_sids"
+    DEAD_NODE_ID_LIST = "dead_sids"
+    NODE_ID_LIST = "sids"
     SHARE_LIST = "shares"
 
     def __new__(cls) -> Key:

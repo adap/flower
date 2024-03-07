@@ -36,7 +36,7 @@ from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
 from flwr.common.typing import ConfigsRecordValues, FitIns
 from flwr.proto.task_pb2 import Task
 from flwr.common import serde
-from flwr.common.constant import MessageType
+from flwr.common.constant import MESSAGE_TYPE_FIT
 from flwr.common import RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.common import ConfigsRecord
@@ -60,7 +60,7 @@ def _wrap_in_task(
         recordset = RecordSet()
     recordset.configs_records[RECORD_KEY_CONFIGS] = ConfigsRecord(named_values)
     return Task(
-        task_type=MessageType.TRAIN,
+        task_type=MESSAGE_TYPE_FIT,
         recordset=serde.recordset_to_proto(recordset),
     )
 
@@ -277,8 +277,8 @@ def workflow_with_sec_agg(
         node_id: _wrap_in_task(
             named_values={
                 Key.STAGE: Stage.UNMASK,
-                Key.DEAD_SECURE_ID_LIST: list(dead_sids & nid2neighbours[node_id]),
-                Key.ACTIVE_SECURE_ID_LIST: list(active_sids & nid2neighbours[node_id]),
+                Key.DEAD_NODE_ID_LIST: list(dead_sids & nid2neighbours[node_id]),
+                Key.ACTIVE_NODE_ID_LIST: list(active_sids & nid2neighbours[node_id]),
             }
         )
         for node_id in surviving_node_ids
@@ -298,7 +298,7 @@ def workflow_with_sec_agg(
     for _, task in node_messages.items():
         named_values = _get_from_task(task)
         for owner_sid, share in zip(
-            named_values[Key.SECURE_ID_LIST], named_values[Key.SHARE_LIST]
+            named_values[Key.NODE_ID_LIST], named_values[Key.SHARE_LIST]
         ):
             collected_shares_dict[owner_sid].append(share)
     # Remove mask for every client who is available before ask vectors stage,

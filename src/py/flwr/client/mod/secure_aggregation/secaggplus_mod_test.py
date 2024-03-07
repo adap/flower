@@ -139,7 +139,6 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         valid_key_type_pairs = [
             (Key.SAMPLE_NUMBER, int),
-            (Key.SECURE_ID, int),
             (Key.SHARE_NUMBER, int),
             (Key.THRESHOLD, int),
             (Key.CLIPPING_RANGE, float),
@@ -279,8 +278,8 @@ class TestSecAggPlusHandler(unittest.TestCase):
         set_stage = _make_set_state_fn(ctxt)
 
         valid_configs: Dict[str, ConfigsRecordValues] = {
-            Key.ACTIVE_SECURE_ID_LIST: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            Key.DEAD_SECURE_ID_LIST: [32, 51324, 32324123, -3],
+            Key.ACTIVE_NODE_ID_LIST: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            Key.DEAD_NODE_ID_LIST: [32, 51324, 32324123, -3],
         }
 
         # Test valid `named_values`

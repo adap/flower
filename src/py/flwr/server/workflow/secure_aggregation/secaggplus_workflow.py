@@ -17,23 +17,47 @@
 
 from __future__ import annotations
 
-import numpy as np
-from flwr.common.secure_aggregation.quantization import dequantize, quantize
-from flwr.server.driver import Driver
-from flwr.common import Context, log, RecordSet, ConfigsRecord, Message, MessageType
-from flwr.server.compat.legacy_context import LegacyContext
-import flwr.common.recordset_compat as compat
-from flwr.common.secure_aggregation.secaggplus_constants import Key, Stage, RECORD_KEY_CONFIGS, RECORD_KEY_STATE
-from dataclasses import dataclass, field
-from flwr.common import bytes_to_ndarray
-from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
-from flwr.common.secure_aggregation.ndarrays_arithmetic import parameters_addition, parameters_divide, parameters_mod, parameters_multiply, parameters_subtraction
-from logging import WARN, INFO, ERROR
-from typing import List, Dict
-from ..default_constant import Key as DefaultKey
-from ..default_constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD
 import random
+from dataclasses import dataclass, field
+from logging import ERROR, WARN
 
+import numpy as np
+
+import flwr.common.recordset_compat as compat
+from flwr.common import (
+    ConfigsRecord,
+    Context,
+    Message,
+    MessageType,
+    NDArrays,
+    RecordSet,
+    bytes_to_ndarray,
+    log,
+)
+from flwr.common.secure_aggregation.crypto.shamir import combine_shares
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    bytes_to_private_key,
+    bytes_to_public_key,
+    generate_shared_key,
+)
+from flwr.common.secure_aggregation.ndarrays_arithmetic import (
+    get_parameters_shape,
+    parameters_addition,
+    parameters_mod,
+    parameters_subtraction,
+)
+from flwr.common.secure_aggregation.quantization import dequantize, quantize
+from flwr.common.secure_aggregation.secaggplus_constants import (
+    RECORD_KEY_CONFIGS,
+    Key,
+    Stage,
+)
+from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
+from flwr.server.compat.legacy_context import LegacyContext
+from flwr.server.driver import Driver
+
+from ..default_constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD
+from ..default_constant import Key as DefaultKey
 
 LOG_EXPLAIN = True
 
@@ -41,6 +65,7 @@ LOG_EXPLAIN = True
 @dataclass
 class WorkflowState:
     """The state of the SecAgg+ protocol."""
+
     nid_to_fitins: dict[int, RecordSet] = field(default_factory=dict)
     sampled_node_ids: set[int] = field(default_factory=set)
     active_node_ids: set[int] = field(default_factory=set)
@@ -53,6 +78,8 @@ class WorkflowState:
     nid_to_publickeys: dict[int, tuple[int, int]] = field(default_factory=dict)
     forward_srcs: dict[int, list[int]] = field(default_factory=dict)
     forward_ciphertexts: dict[int, list[bytes]] = field(default_factory=dict)
+    aggregate_ndarrays: NDArrays = []
+
 
 class SecAggPlusWorkflow:
     """The workflow for the SecAgg+ protocol.
@@ -73,8 +100,8 @@ class SecAggPlusWorkflow:
         for the recovery of contributions from dropped clients during aggregation,
         without compromising individual client data.
     max_weight : Optional[float] (default: 1000.0)
-        The maximum value of the weight that can be assigned to any single client's 
-        update during the weighted average calculation on the server side, e.g., in the 
+        The maximum value of the weight that can be assigned to any single client's
+        update during the weighted average calculation on the server side, e.g., in the
         FedAvg algorithm.
     clipping_range : float, optional (default: 8.0)
         The range within which model parameters are clipped before quantization.
@@ -89,18 +116,18 @@ class SecAggPlusWorkflow:
         ([0, modulus_range-1]).
     timeout : Optional[float] (default: None)
         The timeout duration in seconds. If specified, the workflow will wait for
-        replies for this duration each time. If `None`, there is no time limit and 
+        replies for this duration each time. If `None`, there is no time limit and
         the workflow will wait until replies for all messages are received.
 
     Notes
     -----
     - Generally, higher `num_shares` means more robust to dropouts while increasing the
-    computational costs; higher `reconstruction_threshold` means better privacy 
+    computational costs; higher `reconstruction_threshold` means better privacy
     guarantees but less tolerance to dropouts.
     - Too large `max_weight` may compromise the precision of the quantization.
     - `modulus_range` must be larger than `quantization_range`.
     - When `num_shares` is a float, it is interpreted as the proportion of all selected
-    clients, and hence the number of shares will be determined in the runtime. This 
+    clients, and hence the number of shares will be determined in the runtime. This
     allows for dynamic adjustment based on the total number of participating clients.
     - Similarly, when `reconstruction_threshold` is a float, it is interpreted as the
     proportion of the number of shares needed for the reconstruction of a private key.
@@ -129,9 +156,9 @@ class SecAggPlusWorkflow:
         self.quantization_range = quantization_range
         self.modulus_range = modulus_range
         self.timeout = timeout
-        
+
         self._check_init_params()
-    
+
     def __call__(self, driver: Driver, context: Context) -> None:
         """Run the SecAgg+ protocol."""
         if not isinstance(context, LegacyContext):
@@ -139,12 +166,16 @@ class SecAggPlusWorkflow:
                 f"Expect a LegacyContext, but get {type(context).__name__}."
             )
         state = WorkflowState()
-        
-        steps = (self._setup, self._share_keys, self._collect_masked_input, self._unmask)
+
+        steps = (
+            self._setup,
+            self._share_keys,
+            self._collect_masked_input,
+            self._unmask,
+        )
         for step in steps:
             if not step(driver, context, state):
                 return
-        
 
     def _check_init_params(self) -> None:
         # Check `num_shares`
@@ -155,15 +186,15 @@ class SecAggPlusWorkflow:
                 raise ValueError("`num_shares` as an integer must be greater than 2.")
             if self.num_shares > self.modulus_range / self.quantization_range:
                 log(
-                    WARN, 
+                    WARN,
                     "A `num_shares` larger than `mod_range / target_range` will potentially "
-                    "cause overflow when computing the aggregated model parameters."
+                    "cause overflow when computing the aggregated model parameters.",
                 )
             if self.num_shares == 1:
                 self.num_shares = 1.0
         elif self.num_shares <= 0:
             raise ValueError("`num_shares` as a float must be greater than 0.")
-        
+
         # Check `reconstruction_threshold`
         if not isinstance(self.reconstruction_threshold, (int, float)):
             raise TypeError("`reconstruction_threshold` must be of type int or float.")
@@ -181,22 +212,27 @@ class SecAggPlusWorkflow:
                     "If `reconstruction_threshold` is a float, "
                     "it must be greater than 0 and less than or equal to 1."
                 )
-        
+
         # Check `max_weight`
         if self.max_weight <= 0:
             raise ValueError("`max_weight` must be greater than 0.")
-        
+
         # Check `quantization_range`
         if self.quantization_range <= 0:
             raise ValueError("`quantization_range` must be greater than 0.")
-        
+
         # Check `target_range`
         if not isinstance(self.quantization_range, int) or self.quantization_range <= 0:
             raise ValueError("`target_range` must be an integer and greater than 0.")
-        
+
         # Check `mod_range`
-        if not isinstance(self.modulus_range, int) or self.modulus_range <= self.quantization_range:
-            raise ValueError("`mod_range` must be an integer and greater than `target_range`.")
+        if (
+            not isinstance(self.modulus_range, int)
+            or self.modulus_range <= self.quantization_range
+        ):
+            raise ValueError(
+                "`mod_range` must be an integer and greater than `target_range`."
+            )
 
     def _check_threshold(self, state: WorkflowState) -> bool:
         for node_id in state.active_node_ids:
@@ -207,18 +243,23 @@ class SecAggPlusWorkflow:
                 return False
         return True
 
-    def _setup(self, driver: Driver, context: LegacyContext, state: WorkflowState) -> bool:
+    def _setup(
+        self, driver: Driver, context: LegacyContext, state: WorkflowState
+    ) -> bool:
         # Obtain fit instructions
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
         parameters = compat.parametersrecord_to_parameters(
             context.state.parameters_records[MAIN_PARAMS_RECORD],
             keep_input=True,
         )
-        proxy_fitins_lst = context.strategy.configure_fit(cfg[DefaultKey.CURRENT_ROUND], parameters, context.client_manager)
+        proxy_fitins_lst = context.strategy.configure_fit(
+            cfg[DefaultKey.CURRENT_ROUND], parameters, context.client_manager
+        )
         state.nid_to_fitins = {
-            proxy.node_id: compat.fitins_to_recordset(fitins, False) for proxy, fitins in proxy_fitins_lst
+            proxy.node_id: compat.fitins_to_recordset(fitins, False)
+            for proxy, fitins in proxy_fitins_lst
         }
-        
+
         # Protocol config
         state.sampled_node_ids = set(state.nid_to_fitins.keys())
         num_samples = len(state.sampled_node_ids)
@@ -244,19 +285,21 @@ class SecAggPlusWorkflow:
         state.mod_range = self.modulus_range
         if LOG_EXPLAIN:
             _quantized = quantize(
-                [np.ones(3) for _ in range(num_samples)], clipping_range, target_range
+                [np.ones(3) for _ in range(num_samples)],
+                state.clipping_range,
+                state.quantization_range,
             )
             print(
                 "\n\n################################ Introduction ################################\n"
                 "In the example, each client will upload a vector [1.0, 1.0, 1.0] instead of\n"
                 "model updates for demonstration purposes.\n"
                 "Client 0 is configured to drop out before uploading the masked vector.\n"
-                f"After quantization, the raw vectors will be:"
+                "After quantization, the raw vectors will be:"
             )
             for i in range(1, num_samples):
                 print(f"\t{_quantized[i]} from Client {i}")
             print(
-                f"Numbers are rounded to integers stochastically during the quantization\n"
+                "Numbers are rounded to integers stochastically during the quantization\n"
                 ", and thus not all entries are identical."
             )
             print(
@@ -274,7 +317,7 @@ class SecAggPlusWorkflow:
             Key.TARGET_RANGE: state.quantization_range,
             Key.MOD_RANGE: state.mod_range,
         }
-        
+
         # The number of shares should better be odd in the SecAgg+ protocol.
         if num_samples != state.num_shares and state.num_shares & 1 == 0:
             log(WARN, "Number of shares in the SecAgg+ protocol should be odd.")
@@ -293,10 +336,11 @@ class SecAggPlusWorkflow:
         }
 
         state.active_node_ids = state.sampled_node_ids
-        
+
         # Send setup configuration to clients
         cfgs_record = ConfigsRecord(sa_params_dict)
         content = RecordSet(configs_records={RECORD_KEY_CONFIGS: cfgs_record})
+
         def make(nid: int) -> Message:
             return driver.create_message(
                 content=content,
@@ -305,12 +349,18 @@ class SecAggPlusWorkflow:
                 group_id=str(cfg[DefaultKey.CURRENT_ROUND]),
                 ttl="",
             )
-        
-        msgs = driver.send_and_receive([
-            make(node_id) for node_id in state.active_node_ids
-        ], timeout=self.timeout)
-        state.active_node_ids = {msg.metadata.src_node_id for msg in msgs if not msg.has_error()}
-        
+
+        if LOG_EXPLAIN:
+            print(
+                f"Sending configurations to {num_samples} clients and allocating secure IDs..."
+            )
+        msgs = driver.send_and_receive(
+            [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
+        )
+        state.active_node_ids = {
+            msg.metadata.src_node_id for msg in msgs if not msg.has_error()
+        }
+
         if LOG_EXPLAIN:
             print(f"Received public keys from {len(state.active_node_ids)} clients.")
 
@@ -321,22 +371,22 @@ class SecAggPlusWorkflow:
             node_id = msg.metadata.src_node_id
             pk1, pk2 = key_dict[Key.PUBLIC_KEY_1], key_dict[Key.PUBLIC_KEY_2]
             state.nid_to_publickeys[node_id] = (pk1, pk2)
-            
+
         return self._check_threshold(state)
 
-    def _share_keys(self, driver: Driver, context: LegacyContext, state: WorkflowState) -> bool:
+    def _share_keys(
+        self, driver: Driver, context: LegacyContext, state: WorkflowState
+    ) -> bool:
         if LOG_EXPLAIN:
-            print(f"\nForwarding public keys...")
+            print("\nForwarding public keys...")
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
-        
+
         def make(nid: int) -> Message:
             neighbours = state.nid_to_neighbours[nid]
-            cfgs_record = ConfigsRecord({
-                Key.STAGE: Stage.SHARE_KEYS,
-                **{
-                    str(nid): state.nid_to_publickeys[nid] for nid in neighbours
-                }
-            })
+            cfgs_record = ConfigsRecord(
+                {str(nid): state.nid_to_publickeys[nid] for nid in neighbours}
+            )
+            cfgs_record[Key.STAGE] = Stage.SHARE_KEYS
             content = RecordSet(configs_records={RECORD_KEY_CONFIGS: cfgs_record})
             return driver.create_message(
                 content=content,
@@ -345,22 +395,26 @@ class SecAggPlusWorkflow:
                 group_id=str(cfg[DefaultKey.CURRENT_ROUND]),
                 ttl="",
             )
-        
+
         # Broadcast public keys to clients and receive secret key shares
-        msgs = driver.send_and_receive([
-            make(node_id) for node_id in state.active_node_ids
-        ], timeout=self.timeout)
-        state.active_node_ids = {msg.metadata.src_node_id for msg in msgs if not msg.has_error()}
-        
+        msgs = driver.send_and_receive(
+            [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
+        )
+        state.active_node_ids = {
+            msg.metadata.src_node_id for msg in msgs if not msg.has_error()
+        }
+
         if LOG_EXPLAIN:
-            print(f"Received encrypted key shares from {len(state.active_node_ids)} clients.")
-        
+            print(
+                f"Received encrypted key shares from {len(state.active_node_ids)} clients."
+            )
+
         # Build forward packet list dictionary
         srcs, dsts, ciphertexts = [], [], []
         fwd_ciphertexts: dict[int, list[bytes]] = {
             nid: [] for nid in state.active_node_ids
         }  # dest node ID -> list of ciphertexts
-        fwd_srcs: Dict[int, List[bytes]] = {
+        fwd_srcs: dict[int, list[bytes]] = {
             nid: [] for nid in fwd_ciphertexts
         }  # dest node ID -> list of src secure IDs
         for msg in msgs:
@@ -374,25 +428,27 @@ class SecAggPlusWorkflow:
             if dst in fwd_ciphertexts:
                 fwd_ciphertexts[dst].append(ciphertext)
                 fwd_srcs[dst].append(src)
-        
+
         state.forward_srcs = fwd_srcs
         state.forward_ciphertexts = fwd_ciphertexts
 
         return self._check_threshold(state)
-        
-    def _collect_masked_input(self, driver: Driver, context: LegacyContext, state: WorkflowState) -> bool:
+
+    def _collect_masked_input(
+        self, driver: Driver, context: LegacyContext, state: WorkflowState
+    ) -> bool:
         if LOG_EXPLAIN:
-            print(f"\nForwarding encrypted key shares and requesting masked input...")
+            print("\nForwarding encrypted key shares and requesting masked input...")
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
-        
+
         # Send secret key shares to clients (plus FitIns) and collect masked input
         def make(nid: int) -> Message:
-            cfgs = {
+            cfgs_dict = {
                 Key.STAGE: Stage.COLLECT_MASKED_INPUT,
                 Key.CIPHERTEXT_LIST: state.forward_ciphertexts[nid],
                 Key.SOURCE_LIST: state.forward_srcs[nid],
             }
-            cfgs_record = ConfigsRecord(cfgs)
+            cfgs_record = ConfigsRecord(cfgs_dict)
             content = state.nid_to_fitins[nid]
             content.configs_records[RECORD_KEY_CONFIGS] = cfgs_record
             return driver.create_message(
@@ -402,15 +458,17 @@ class SecAggPlusWorkflow:
                 group_id=str(cfg[DefaultKey.CURRENT_ROUND]),
                 ttl="",
             )
-        
-        msgs = driver.send_and_receive([
-            make(node_id) for node_id in state.active_node_ids
-        ], timeout=self.timeout)
-        state.active_node_ids = {msg.metadata.src_node_id for msg in msgs if not msg.has_error()}
-        
+
+        msgs = driver.send_and_receive(
+            [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
+        )
+        state.active_node_ids = {
+            msg.metadata.src_node_id for msg in msgs if not msg.has_error()
+        }
+
         # Clear cache
         del state.forward_ciphertexts, state.forward_srcs, state.nid_to_fitins
-        
+
         # Add all collected masked vectors and compuute available and dropout clients set
         if LOG_EXPLAIN:
             dead_nids = state.sampled_node_ids - state.active_node_ids
@@ -419,8 +477,9 @@ class SecAggPlusWorkflow:
         masked_vector = None
         for msg in msgs:
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
-            client_masked_vec = res_dict[Key.MASKED_PARAMETERS]
-            client_masked_vec = [bytes_to_ndarray(b) for b in client_masked_vec]
+            client_masked_vec = [
+                bytes_to_ndarray(b) for b in res_dict[Key.MASKED_PARAMETERS]
+            ]
             if LOG_EXPLAIN:
                 print(f"Received {client_masked_vec[1]} from Client {nid}.")
             if masked_vector is None:
@@ -428,9 +487,113 @@ class SecAggPlusWorkflow:
             else:
                 masked_vector = parameters_addition(masked_vector, client_masked_vec)
         masked_vector = parameters_mod(masked_vector, state.mod_range)
-        
+        state.aggregate_ndarrays = masked_vector
+
         return self._check_threshold(state)
-    
-    def _unmask(self, driver: Driver, context: LegacyContext, state: WorkflowState) -> bool:
+
+    def _unmask(
+        self, driver: Driver, context: LegacyContext, state: WorkflowState
+    ) -> bool:
         if LOG_EXPLAIN:
             print("\nRequesting key shares to unmask the aggregate vector...")
+        cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+
+        # Construct active node IDs and dead node IDs
+        active_nids = state.active_node_ids
+        dead_nids = state.sampled_node_ids - active_nids
+
+        # Send secure IDs of active and dead clients and collect key shares from clients
+        def make(nid: int) -> Message:
+            neighbours = state.nid_to_neighbours[nid]
+            cfgs_dict = {
+                Key.STAGE: Stage.UNMASK,
+                Key.ACTIVE_NODE_ID_LIST: list(neighbours & active_nids),
+                Key.DEAD_NODE_ID_LIST: list(neighbours & dead_nids),
+            }
+            cfgs_record = ConfigsRecord(cfgs_dict)
+            content = RecordSet(configs_records={RECORD_KEY_CONFIGS: cfgs_record})
+            return driver.create_message(
+                content=content,
+                message_type=MessageType.TRAIN,
+                dst_node_id=nid,
+                group_id=str(cfg[DefaultKey.CURRENT_ROUND]),
+                ttl="",
+            )
+
+        msgs = driver.send_and_receive(
+            [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
+        )
+        state.active_node_ids = {
+            msg.metadata.src_node_id for msg in msgs if not msg.has_error()
+        }
+        if LOG_EXPLAIN:
+            print(f"Received key shares from {len(state.active_node_ids)} clients.")
+
+        # Build collected shares dict
+        collected_shares_dict: dict[int, list[bytes]] = {}
+        for nid in state.sampled_node_ids:
+            collected_shares_dict[nid] = []
+        for msg in msgs:
+            res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
+            for owner_nid, share in zip(
+                res_dict[Key.NODE_ID_LIST], res_dict[Key.SHARE_LIST]
+            ):
+                collected_shares_dict[owner_nid].append(share)
+
+        # Remove mask for every client who is available after collect_masked_input stage
+        masked_vector = state.aggregate_ndarrays
+        del state.aggregate_ndarrays
+        for nid, share_list in collected_shares_dict.items():
+            if len(share_list) < state.threshold:
+                log(
+                    ERROR, "Not enough shares to recover secret in unmask vectors stage"
+                )
+                return False
+            secret = combine_shares(share_list)
+            if nid in active_nids:
+                # The seed for PRG is the private mask seed of an active client.
+                private_mask = pseudo_rand_gen(
+                    secret, state.mod_range, get_parameters_shape(masked_vector)
+                )
+                masked_vector = parameters_subtraction(masked_vector, private_mask)
+            else:
+                # The seed for PRG is the secret key 1 of a dropped client.
+                neighbours = state.nid_to_neighbours[nid]
+                neighbours.remove(nid)
+
+                for neighbor_nid in neighbours:
+                    shared_key = generate_shared_key(
+                        bytes_to_private_key(secret),
+                        bytes_to_public_key(state.nid_to_publickeys[neighbor_nid][0]),
+                    )
+                    pairwise_mask = pseudo_rand_gen(
+                        shared_key, state.mod_range, get_parameters_shape(masked_vector)
+                    )
+                    if nid > neighbor_nid:
+                        masked_vector = parameters_addition(
+                            masked_vector, pairwise_mask
+                        )
+                    else:
+                        masked_vector = parameters_subtraction(
+                            masked_vector, pairwise_mask
+                        )
+        recon_parameters = parameters_mod(masked_vector, state.mod_range)
+        if LOG_EXPLAIN:
+            print(f"Unmasked sum of vectors (quantized): {recon_parameters[0]}")
+        # recon_parameters = parameters_divide(recon_parameters, total_weights_factor)
+        aggregated_vector = dequantize(
+            recon_parameters,
+            state.clipping_range,
+            state.quantization_range,
+        )
+        offset = -(len(active_nids) - 1) * state.clipping_range
+        for vec in aggregated_vector:
+            vec += offset
+        if LOG_EXPLAIN:
+            print(f"Unmasked sum of vectors (dequantized): {aggregated_vector[0]}")
+            print(f"Aggregate vector: {aggregated_vector[0] / len(active_nids)}")
+            print(
+                "########################### Secure Aggregation End ###########################\n\n"
+            )
+
+        return True

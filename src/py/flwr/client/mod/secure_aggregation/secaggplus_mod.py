@@ -72,7 +72,7 @@ class SecAggPlusState:
 
     current_stage: str = Stage.UNMASK
 
-    sid: int = 0
+    nid: int = 0
     sample_num: int = 0
     share_num: int = 0
     threshold: int = 0
@@ -173,6 +173,7 @@ def secaggplus_mod(
 
     # Execute
     if state.current_stage == Stage.SETUP:
+        state.nid = msg.metadata.dst_node_id
         res = _setup(state, configs)
     elif state.current_stage == Stage.SHARE_KEYS:
         res = _share_keys(state, configs)
@@ -290,8 +291,8 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 )
     elif stage == Stage.UNMASK:
         key_type_pairs = [
-            (Key.ACTIVE_SECURE_ID_LIST, int),
-            (Key.DEAD_SECURE_ID_LIST, int),
+            (Key.ACTIVE_NODE_ID_LIST, int),
+            (Key.DEAD_NODE_ID_LIST, int),
         ]
         for key, expected_type in key_type_pairs:
             if key not in configs:
@@ -321,8 +322,7 @@ def _setup(
     # Assigning parameter values to object fields
     sec_agg_param_dict = configs
     state.sample_num = cast(int, sec_agg_param_dict[Key.SAMPLE_NUMBER])
-    state.sid = cast(int, sec_agg_param_dict[Key.SECURE_ID])
-    log(INFO, "Client %d: starting stage 0...", state.sid)
+    log(INFO, "Client %d: starting stage 0...", state.nid)
 
     state.share_num = cast(int, sec_agg_param_dict[Key.SHARE_NUMBER])
     state.threshold = cast(int, sec_agg_param_dict[Key.THRESHOLD])
@@ -330,11 +330,11 @@ def _setup(
     state.target_range = cast(int, sec_agg_param_dict[Key.TARGET_RANGE])
     state.mod_range = cast(int, sec_agg_param_dict[Key.MOD_RANGE])
 
-    # Dictionaries containing client secure IDs as keys
+    # Dictionaries containing node IDs as keys
     # and their respective secret shares as values.
     state.rd_seed_share_dict = {}
     state.sk1_share_dict = {}
-    # Dictionary containing client secure IDs as keys
+    # Dictionary containing node IDs as keys
     # and their respective shared secrets (with this client) as values.
     state.ss2_dict = {}
 
@@ -346,7 +346,7 @@ def _setup(
 
     state.sk1, state.pk1 = private_key_to_bytes(sk1), public_key_to_bytes(pk1)
     state.sk2, state.pk2 = private_key_to_bytes(sk2), public_key_to_bytes(pk2)
-    log(INFO, "Client %d: stage 0 completes. uploading public keys...", state.sid)
+    log(INFO, "Client %d: stage 0 completes. uploading public keys...", state.nid)
     return {Key.PUBLIC_KEY_1: state.pk1, Key.PUBLIC_KEY_2: state.pk2}
 
 
@@ -356,7 +356,7 @@ def _share_keys(
 ) -> Dict[str, ConfigsRecordValues]:
     named_bytes_tuples = cast(Dict[str, Tuple[bytes, bytes]], configs)
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_bytes_tuples.items()}
-    log(INFO, "Client %d: starting stage 1...", state.sid)
+    log(INFO, "Client %d: starting stage 1...", state.nid)
     state.public_keys_dict = key_dict
 
     # Check if the size is larger than threshold
@@ -373,8 +373,8 @@ def _share_keys(
 
     # Check if public keys of this client are correct in the dictionary
     if (
-        state.public_keys_dict[state.sid][0] != state.pk1
-        or state.public_keys_dict[state.sid][1] != state.pk2
+        state.public_keys_dict[state.nid][0] != state.pk1
+        or state.public_keys_dict[state.nid][1] != state.pk2
     ):
         raise ValueError(
             "Own public keys are displayed in dict incorrectly, should not happen!"
@@ -390,25 +390,25 @@ def _share_keys(
     srcs, dsts, ciphertexts = [], [], []
 
     # Distribute shares
-    for idx, (sid, (_, pk2)) in enumerate(state.public_keys_dict.items()):
-        if sid == state.sid:
-            state.rd_seed_share_dict[state.sid] = b_shares[idx]
-            state.sk1_share_dict[state.sid] = sk1_shares[idx]
+    for idx, (nid, (_, pk2)) in enumerate(state.public_keys_dict.items()):
+        if nid == state.nid:
+            state.rd_seed_share_dict[state.nid] = b_shares[idx]
+            state.sk1_share_dict[state.nid] = sk1_shares[idx]
         else:
             shared_key = generate_shared_key(
                 bytes_to_private_key(state.sk2),
                 bytes_to_public_key(pk2),
             )
-            state.ss2_dict[sid] = shared_key
+            state.ss2_dict[nid] = shared_key
             plaintext = share_keys_plaintext_concat(
-                state.sid, sid, b_shares[idx], sk1_shares[idx]
+                state.nid, nid, b_shares[idx], sk1_shares[idx]
             )
             ciphertext = encrypt(shared_key, plaintext)
-            srcs.append(state.sid)
-            dsts.append(sid)
+            srcs.append(state.nid)
+            dsts.append(nid)
             ciphertexts.append(ciphertext)
 
-    log(INFO, "Client %d: stage 1 completes. uploading key shares...", state.sid)
+    log(INFO, "Client %d: stage 1 completes. uploading key shares...", state.nid)
     return {Key.DESTINATION_LIST: dsts, Key.CIPHERTEXT_LIST: ciphertexts}
 
 
@@ -418,7 +418,7 @@ def _collect_masked_input(
     configs: ConfigsRecord,
     fit: Callable[[], FitRes],
 ) -> Dict[str, ConfigsRecordValues]:
-    log(INFO, "Client %d: starting stage 2...", state.sid)
+    log(INFO, "Client %d: starting stage 2...", state.nid)
     available_clients: List[int] = []
     ciphertexts = cast(List[bytes], configs[Key.CIPHERTEXT_LIST])
     srcs = cast(List[int], configs[Key.SOURCE_LIST])
@@ -435,12 +435,12 @@ def _collect_masked_input(
         available_clients.append(src)
         if src != actual_src:
             raise ValueError(
-                f"Client {state.sid}: received ciphertext "
+                f"Client {state.nid}: received ciphertext "
                 f"from {actual_src} instead of {src}."
             )
-        if dst != state.sid:
+        if dst != state.nid:
             raise ValueError(
-                f"Client {state.sid}: received an encrypted message"
+                f"Client {state.nid}: received an encrypted message"
                 f"for Client {dst} from Client {src}."
             )
         state.rd_seed_share_dict[src] = rd_seed_share
@@ -465,14 +465,14 @@ def _collect_masked_input(
     private_mask = pseudo_rand_gen(state.rd_seed, state.mod_range, dimensions_list)
     quantized_parameters = parameters_addition(quantized_parameters, private_mask)
 
-    for client_id in available_clients:
+    for node_id in available_clients:
         # Add pairwise masks
         shared_key = generate_shared_key(
             bytes_to_private_key(state.sk1),
-            bytes_to_public_key(state.public_keys_dict[client_id][0]),
+            bytes_to_public_key(state.public_keys_dict[node_id][0]),
         )
         pairwise_mask = pseudo_rand_gen(shared_key, state.mod_range, dimensions_list)
-        if state.sid > client_id:
+        if state.nid > node_id:
             quantized_parameters = parameters_addition(
                 quantized_parameters, pairwise_mask
             )
@@ -483,7 +483,7 @@ def _collect_masked_input(
 
     # Take mod of final weight update vector and return to server
     quantized_parameters = parameters_mod(quantized_parameters, state.mod_range)
-    log(INFO, "Client %d: stage 2 completes. uploading masked parameters...", state.sid)
+    log(INFO, "Client %d: stage 2 completes. uploading masked parameters...", state.nid)
     return {
         Key.MASKED_PARAMETERS: [ndarray_to_bytes(arr) for arr in quantized_parameters]
     }
@@ -492,20 +492,19 @@ def _collect_masked_input(
 def _unmask(
     state: SecAggPlusState, configs: ConfigsRecord
 ) -> Dict[str, ConfigsRecordValues]:
-    log(INFO, "Client %d: starting stage 3...", state.sid)
+    log(INFO, "Client %d: starting stage 3...", state.nid)
 
-    active_sids = cast(List[int], configs[Key.ACTIVE_SECURE_ID_LIST])
-    dead_sids = cast(List[int], configs[Key.DEAD_SECURE_ID_LIST])
+    active_nids = cast(List[int], configs[Key.ACTIVE_NODE_ID_LIST])
+    dead_nids = cast(List[int], configs[Key.DEAD_NODE_ID_LIST])
     # Send private mask seed share for every avaliable client (including itclient)
     # Send first private key share for building pairwise mask for every dropped client
-    if len(active_sids) < state.threshold:
+    if len(active_nids) < state.threshold:
         raise ValueError("Available neighbours number smaller than threshold")
 
-    sids, shares = [], []
-    sids += active_sids
-    shares += [state.rd_seed_share_dict[sid] for sid in active_sids]
-    sids += dead_sids
-    shares += [state.sk1_share_dict[sid] for sid in dead_sids]
+    all_nids, shares = [], []
+    all_nids = active_nids + dead_nids
+    shares += [state.rd_seed_share_dict[nid] for nid in active_nids]
+    shares += [state.sk1_share_dict[nid] for nid in dead_nids]
 
-    log(INFO, "Client %d: stage 3 completes. uploading key shares...", state.sid)
-    return {Key.SECURE_ID_LIST: sids, Key.SHARE_LIST: shares}
+    log(INFO, "Client %d: stage 3 completes. uploading key shares...", state.nid)
+    return {Key.NODE_ID_LIST: all_nids, Key.SHARE_LIST: shares}
