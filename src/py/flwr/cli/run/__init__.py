@@ -12,26 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface."""
+"""Flower command line interface `run` command."""
 
-import typer
+from .run import run as run
 
-from .example import example
-from .new import new
-from .run import run
-
-app = typer.Typer(
-    help=typer.style(
-        "flwr is the Flower command line interface.",
-        fg=typer.colors.BRIGHT_YELLOW,
-        bold=True,
-    ),
-    no_args_is_help=True,
-)
-
-app.command()(new)
-app.command()(example)
-app.command()(run)
-
-if __name__ == "__main__":
-    app()
+__all__ = [
+    "run",
+]
