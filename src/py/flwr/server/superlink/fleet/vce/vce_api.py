@@ -21,9 +21,10 @@ import traceback
 from logging import DEBUG, ERROR, INFO, WARN
 from typing import Callable, Dict, List, Optional
 
-from flwr.client.client_app import ClientApp, LoadClientAppError, load_client_app
+from flwr.client.client_app import ClientApp, load_client_app
 from flwr.client.node_state import NodeState
 from flwr.common.logger import log
+from flwr.common.message import Error
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 from flwr.server.superlink.state import StateFactory
@@ -58,6 +59,7 @@ async def worker(
     """Get TaskIns from queue and pass it to an actor in the pool to execute it."""
     state = state_factory.state()
     while True:
+        out_mssg = None
         try:
             task_ins: TaskIns = await queue.get()
             node_id = task_ins.task.consumer.node_id
@@ -81,24 +83,23 @@ async def worker(
                 task_ins.run_id, context=updated_context
             )
 
-            # Convert to TaskRes
-            task_res = message_to_taskres(out_mssg)
-            # Store TaskRes in state
-            state.store_task_res(task_res)
-
         except asyncio.CancelledError as e:
-            log(DEBUG, "Async worker: %s", e)
+            log(DEBUG, "Terminating Async worker: %s", e)
             break
-
-        except LoadClientAppError as app_ex:
-            log(ERROR, "Async worker: %s", app_ex)
-            log(ERROR, traceback.format_exc())
-            raise
 
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, ex)
             log(ERROR, traceback.format_exc())
-            break
+            reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+            error = Error(code=0, reason=reason)
+            out_mssg = message.create_error_reply(error=error, ttl="")
+
+        finally:
+            if out_mssg:
+                # Convert to TaskRes
+                task_res = message_to_taskres(out_mssg)
+                # Store TaskRes in state
+                state.store_task_res(task_res)
 
 
 async def add_taskins_to_queue(

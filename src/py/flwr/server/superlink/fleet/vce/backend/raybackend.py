@@ -151,7 +151,6 @@ class RayBackend(Backend):
             )
 
             await future
-
             # Fetch result
             (
                 out_mssg,
