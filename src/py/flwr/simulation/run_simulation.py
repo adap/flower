@@ -247,13 +247,12 @@ def _main_loop(
         del driver
         # Trigger async stop event
         af_stop.set()
+        # Triggering stop event server thread
         f_stop.set()
 
         event(EventType.RUN_SUPERLINK_LEAVE)
         if serverapp_th:
-            log(INFO, "Joining server thread.")
             serverapp_th.join()
-            log(INFO, "Joined.")
 
     log(INFO, "Stopping Simulation Engine now.")
 

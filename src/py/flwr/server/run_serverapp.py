@@ -60,7 +60,7 @@ def run(
     context = Context(state=RecordSet())
 
     # Call ServerApp
-    server_app._f_stop = f_stop
+    server_app._f_stop = f_stop # TODO: not ideal way of handling this?
     server_app(driver=driver, context=context)
 
     log(DEBUG, "ServerApp finished running.")
