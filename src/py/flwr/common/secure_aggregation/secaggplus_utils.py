@@ -45,8 +45,8 @@ def share_keys_plaintext_concat(
     """
     return b"".join(
         [
-            int.to_bytes(source, 8, "little"),
-            int.to_bytes(destination, 8, "little"),
+            int.to_bytes(source, 8, "little", signed=True),
+            int.to_bytes(destination, 8, "little", signed=True),
             int.to_bytes(len(b_share), 4, "little"),
             b_share,
             sk_share,
@@ -74,11 +74,11 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
         the secret key share of the source sent to the destination.
     """
     src, dst, mark = (
-        int.from_bytes(plaintext[:8], "little"),
-        int.from_bytes(plaintext[8:16], "little"),
+        int.from_bytes(plaintext[:8], "little", signed=True),
+        int.from_bytes(plaintext[8:16], "little", signed=True),
         int.from_bytes(plaintext[16:20], "little"),
     )
-    ret = (src, dst, plaintext[12 : 12 + mark], plaintext[12 + mark :])
+    ret = (src, dst, plaintext[20 : 20 + mark], plaintext[20 + mark :])
     return ret
 
 
