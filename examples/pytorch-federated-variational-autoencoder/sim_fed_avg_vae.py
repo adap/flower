@@ -25,6 +25,10 @@ from utils_mnist import (
     subset_alignment_dataloader,
     visualize_plotly_latent_representation,
     sample_latents,
+    get_fisher_ratio,
+    non_iid_wo9_train_iid_test,
+    compute_ref_stats,
+    train_align_prox,
 )
 from utils_mnist import VAE
 import os
@@ -67,9 +71,10 @@ configure(identifier=IDENTIFIER, filename=f"logs_{IDENTIFIER}.log")
 
 # Flower client, adapted from Pytorch quickstart example
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(self, trainset, valset, cid):
+    def __init__(self, trainset, valset, align_loader, cid):
         self.trainset = trainset
         self.valset = valset
+        self.align_loader = align_loader
         self.cid = cid
 
         # Instantiate model
@@ -94,17 +99,26 @@ class FlowerClient(fl.client.NumPyClient):
         # optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         # Train
-        loss = train(
+        # loss = train(
+        #     self.model,
+        #     trainloader,
+        #     optimizer,
+        #     config,
+        #     epochs=epochs,
+        #     device=self.device,
+        #     num_classes=NUM_CLASSES,
+        # )
+        vae_loss, align_term = train_align_prox(
             self.model,
             trainloader,
+            self.align_loader,
             optimizer,
             config,
-            epochs=epochs,
-            device=self.device,
-            num_classes=NUM_CLASSES,
+            epochs,
+            self.device,
+            NUM_CLASSES,
         )
-
-        true_img, gen_img = true_img, gen_img = visualize_gen_image(
+        true_img, gen_img = visualize_gen_image(
             self.model,
             DataLoader(self.valset, batch_size=64, shuffle=True),
             self.device,
@@ -128,7 +142,9 @@ class FlowerClient(fl.client.NumPyClient):
                 "gen_image": gen_img,
                 "latent_rep": latent_reps,
                 "client_round": config["server_round"],
-                "train_loss": float(loss),
+                # "train_loss": float(loss),
+                "train_loss": float(vae_loss),
+                "align_term": float(align_term),
             },
         )
 
@@ -152,7 +168,7 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
-def get_client_fn(train_partitions, val_partitions):
+def get_client_fn(train_partitions, val_partitions, align_loader):
     """Return a function to construct a client.
 
     The VirtualClientEngine will exectue this function whenever a client is sampled by
@@ -166,7 +182,7 @@ def get_client_fn(train_partitions, val_partitions):
         trainset, valset = train_partitions[int(cid)], val_partitions[int(cid)]
 
         # Create and return client
-        return FlowerClient(trainset, valset, cid).to_client()
+        return FlowerClient(trainset, valset, align_loader, cid).to_client()
 
     return client_fn
 
@@ -205,6 +221,19 @@ def main():
     wandb.define_metric("train_*", step_metric="client_round")
     wandb.define_metric("eval_*", step_metric="client_round")
 
+    samples_per_class = wandb.config["sample_per_class"]
+    ALIGNMENT_DATALOADER = alignment_dataloader(
+        samples_per_class=samples_per_class,
+        batch_size=samples_per_class * NUM_CLASSES,
+    )
+    other_config = {"prior_steps": 3000, "latent_dim": LATENT_DIM}  # TODO
+    (mu_g, log_var_g), fig = compute_ref_stats(
+        ALIGNMENT_DATALOADER,
+        other_config,
+        DEVICE,
+    )
+    wandb.log({"prior_plot": fig})
+
     def fit_config(server_round: int) -> Dict[str, Scalar]:
         """Return a configuration with static batch size and (local) epochs."""
         config = {
@@ -212,6 +241,9 @@ def main():
             "batch_size": wandb.config["batch_size"],
             "server_round": server_round,
             "beta": wandb.config["beta"],
+            "mu_g": mu_g,
+            "log_var_g": log_var_g,
+            "lambda_align": wandb.config["lambda_align"],
         }
         return config
 
@@ -263,7 +295,9 @@ def main():
                 img = make_grid(recon, nrow=8, normalize=True).permute(1, 2, 0).numpy()
                 ax.imshow(img)
                 ax.axis("off")
-                # fig.savefig(f"{IDENTIFIER}/generated_avg_round_{server_round}.png")
+                fisher_score = float(
+                    get_fisher_ratio(model, testloader, LATENT_DIM, device)
+                )
 
             wandb.log(
                 {
@@ -271,7 +305,8 @@ def main():
                     f"global_gen_image": wandb.Image(gen_img),
                     f"global_latent_rep": latent_reps,
                     f"global_val_loss": global_val_loss,
-                    "server_round": server_round,
+                    f"global_fisher_score": fisher_score,
+                    f"server_round": server_round,
                     f"generated_avg_round": plt,
                 }
             )
@@ -280,7 +315,7 @@ def main():
         return evaluate
 
     # Download dataset and partition it
-    trainsets, valsets = non_iid_train_iid_test()
+    trainsets, valsets = non_iid_wo9_train_iid_test()
     net = VAE(z_dim=LATENT_DIM).to(DEVICE)
 
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
@@ -304,7 +339,7 @@ def main():
 
     # Start simulation
     fl.simulation.start_simulation(
-        client_fn=get_client_fn(trainsets, valsets),
+        client_fn=get_client_fn(trainsets, valsets, ALIGNMENT_DATALOADER),
         num_clients=NUM_CLIENTS,
         client_resources=client_resources,
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
@@ -325,9 +360,11 @@ if __name__ == "__main__":
             # "epochs": {"values": [2, 5, 10]},
             "epochs": {"values": [5]},
             "batch_size": {"values": [128]},
-            "beta": {"values": [1, 0]},
+            "beta": {"values": [0]},
+            "sample_per_class": {"values": [200]},
+            "lambda_align": {"values": [1]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=4)
+    wandb.agent(sweep_id, function=main, count=3)
