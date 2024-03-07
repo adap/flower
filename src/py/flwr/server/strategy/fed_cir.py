@@ -174,7 +174,8 @@ class FedCiR(FedAvg):
         self.prior_steps = prior_steps
         self.alignment_loader = alignment_dataloader
         self.stats_run_file = stats_run_file
-        self.ref_mu, self.ref_logvar = self.compute_ref_stats()
+        # self.ref_mu, self.ref_logvar = self.compute_ref_stats()
+        self.ref_mu, self.ref_logvar = None, None
         self.lambda_align_g = lambda_align_g
 
     def compute_ref_stats(self, use_PCA=True):
@@ -422,20 +423,20 @@ class FedCiR(FedAvg):
                     # mu_s.append(mu)
                     # logvar_s.append(logvar)
 
-                # loss = vae_loss(
-                #     torch.stack(preds).mean(dim=0),
-                #     align_img,
-                #     mu_g,
-                #     logvar_g,
-                # )
-                loss = vae_loss_connect(
+                loss = vae_loss(
                     torch.stack(preds).mean(dim=0),
                     align_img,
                     mu_g,
                     logvar_g,
-                    self.ref_mu,
-                    self.ref_logvar,
                 )
+                # loss = vae_loss_connect(
+                #     torch.stack(preds).mean(dim=0),
+                #     align_img,
+                #     mu_g,
+                #     logvar_g,
+                #     self.ref_mu,
+                #     self.ref_logvar,
+                # )
                 threshold = 1e-6  # Define a threshold for the negligible loss
                 log(DEBUG, f"generator loss at ep {ep_g} step {step}: {loss}")
 

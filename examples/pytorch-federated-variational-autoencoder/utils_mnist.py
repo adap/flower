@@ -151,6 +151,35 @@ def alignment_dataloader(samples_per_class=100, batch_size=8, shuffle=False):
     return alignment_loader
 
 
+def alignment_dataloader_wo_9(samples_per_class=100, batch_size=8, shuffle=False):
+    # Load the MNIST test dataset
+    mnist_test = MNIST(
+        root="./mnist_data/",
+        train=False,
+        download=True,
+        transform=transforms.ToTensor(),
+    )
+
+    # Create an alignment dataset with 20 samples for each class
+    alignment_datasets = []
+    # excluding 9
+    for class_label in range(9):
+        class_indices = [
+            i for i, (img, label) in enumerate(mnist_test) if label == class_label
+        ]
+        selected_indices = class_indices[:samples_per_class]
+        alignment_dataset = Subset(mnist_test, selected_indices)
+        alignment_datasets.append(alignment_dataset)
+    # Concatenate the alignment datasets into one
+    alignment_dataset = ConcatDataset(alignment_datasets)
+
+    # Create a DataLoader for the alignment dataset
+    alignment_loader = DataLoader(
+        alignment_dataset, batch_size=batch_size, shuffle=shuffle
+    )
+    return alignment_loader
+
+
 def subset_alignment_dataloader(samples_per_class=100, batch_size=8, shuffle=True):
     test_dataset = MNIST(
         root="./mnist_data", train=False, download=True, transform=transforms.ToTensor()
@@ -539,6 +568,7 @@ def vae_loss(recon_img, img, mu, logvar, beta=1.0):
 def train_align(
     net,
     trainloader,
+    align_loader,
     optimizer,
     config,
     epochs,
@@ -552,7 +582,6 @@ def train_align(
     params_dict = zip(temp_gen_model.state_dict().keys(), gen_weights)
     state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
     temp_gen_model.load_state_dict(state_dict, strict=True)
-    # copied_model = copy.deepcopy(temp_gen_model)
 
     temp_gen_model.eval()
     # sample_per_class = config.get("sample_per_class", 100)
@@ -564,9 +593,7 @@ def train_align(
     # lambda_align = config.get("lambda_align", 100)
     lambda_align = config["lambda_align"]
     beta = config["beta"]
-    align_loader = subset_alignment_dataloader(
-        samples_per_class=sample_per_class, batch_size=sample_per_class * num_classes
-    )
+
     for _ in range(epochs):
         for images, _ in trainloader:
             images = images.to(device)

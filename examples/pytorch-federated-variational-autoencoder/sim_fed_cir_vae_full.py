@@ -19,6 +19,7 @@ from utils_mnist import (
     visualize_gen_image,
     non_iid_train_iid_test,
     alignment_dataloader,
+    alignment_dataloader_wo_9,
     train_align,
     eval_reconstrution,
     visualize_plotly_latent_representation,
@@ -67,9 +68,10 @@ LATENT_DIM = args.latent_dim
 
 
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(self, trainset, valset, cid):
+    def __init__(self, trainset, valset, align_loader, cid):
         self.trainset = trainset
         self.valset = valset
+        self.align_loader = align_loader
         self.cid = cid
 
         # Instantiate model
@@ -95,6 +97,7 @@ class FlowerClient(fl.client.NumPyClient):
         vae_loss_term, reg_term, align_term = train_align(
             self.model,
             trainloader,
+            self.align_loader,
             optimizer,
             config,
             epochs=epochs,
@@ -156,7 +159,7 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
-def get_client_fn(train_partitions, val_partitions):
+def get_client_fn(train_partitions, val_partitions, align_loader):
     """Return a function to construct a client.
 
     The VirtualClientEngine will exectue this function whenever a client is sampled by
@@ -170,7 +173,7 @@ def get_client_fn(train_partitions, val_partitions):
         trainset, valset = train_partitions[int(cid)], val_partitions[int(cid)]
 
         # Create and return client
-        return FlowerClient(trainset, valset, cid).to_client()
+        return FlowerClient(trainset, valset, align_loader, cid).to_client()
 
     return client_fn
 
@@ -304,6 +307,10 @@ def main():
     n2 = [val.cpu().numpy() for _, val in gen_net.state_dict().items()]
     initial_gen_params = ndarrays_to_parameters(n2)
     samples_per_class = wandb.config["sample_per_class"]
+    ALIGNMENT_DATALOADER = alignment_dataloader(
+        samples_per_class=samples_per_class,
+        batch_size=samples_per_class * NUM_CLASSES,
+    )
     strategy = fl.server.strategy.FedCiR(
         initial_parameters=initial_params,
         initial_generator_params=initial_gen_params,
@@ -314,10 +321,7 @@ def main():
         on_fit_config_fn=fit_config,
         evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
         evaluate_fn=get_evaluate_fn(valsets[-1]),  # Global evaluation function
-        alignment_dataloader=alignment_dataloader(
-            samples_per_class=samples_per_class,
-            batch_size=samples_per_class * NUM_CLASSES,
-        ),
+        alignment_dataloader=ALIGNMENT_DATALOADER,
         lr_g=wandb.config["lr_g"],
         steps_g=wandb.config["steps_g"],
         lambda_align_g=wandb.config["lambda_align_g"],
@@ -336,7 +340,7 @@ def main():
 
     # Start simulation
     fl.simulation.start_simulation(
-        client_fn=get_client_fn(trainsets, valsets),
+        client_fn=get_client_fn(trainsets, valsets, ALIGNMENT_DATALOADER),
         num_clients=NUM_CLIENTS,
         client_resources=client_resources,
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
@@ -357,7 +361,7 @@ if __name__ == "__main__":
             "sample_per_class": {"values": [200]},
             # "lambda_reg": {"min": 0.0, "max": 1.0},
             # "lambda_align_g": {"min": 1e-6, "max": 1e-3},
-            "lambda_align_g": {"values": [0.1, 1]},  # kl term for generator
+            "lambda_align_g": {"values": [1]},  # kl term for generator
             "lambda_reg": {"values": [0.1, 1]},
             "lambda_align": {"values": [1]},
             # "lambda_align": {"min": 1e-6, "max": 1e-3},
