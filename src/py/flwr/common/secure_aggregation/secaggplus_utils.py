@@ -30,9 +30,9 @@ def share_keys_plaintext_concat(
     Parameters
     ----------
     source : int
-        the secure ID of the source.
+        the node ID of the source.
     destination : int
-        the secure ID of the destination.
+        the node ID of the destination.
     b_share : bytes
         the private key share of the source sent to the destination.
     sk_share : bytes
@@ -45,8 +45,8 @@ def share_keys_plaintext_concat(
     """
     return b"".join(
         [
-            int.to_bytes(source, 4, "little"),
-            int.to_bytes(destination, 4, "little"),
+            int.to_bytes(source, 8, "little"),
+            int.to_bytes(destination, 8, "little"),
             int.to_bytes(len(b_share), 4, "little"),
             b_share,
             sk_share,
@@ -65,18 +65,18 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
     Returns
     -------
     source : int
-        the secure ID of the source.
+        the node ID of the source.
     destination : int
-        the secure ID of the destination.
+        the node ID of the destination.
     b_share : bytes
         the private key share of the source sent to the destination.
     sk_share : bytes
         the secret key share of the source sent to the destination.
     """
     src, dst, mark = (
-        int.from_bytes(plaintext[:4], "little"),
-        int.from_bytes(plaintext[4:8], "little"),
-        int.from_bytes(plaintext[8:12], "little"),
+        int.from_bytes(plaintext[:8], "little"),
+        int.from_bytes(plaintext[8:16], "little"),
+        int.from_bytes(plaintext[16:20], "little"),
     )
     ret = (src, dst, plaintext[12 : 12 + mark], plaintext[12 + mark :])
     return ret
