@@ -14,6 +14,7 @@
 # ==============================================================================
 """ThreadPool backend for the Fleet API using the Simulation Engine."""
 
+import asyncio
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from logging import DEBUG, ERROR, INFO
@@ -55,6 +56,9 @@ class ThreadPoolExecutorBackend(Backend):
 
         self.pool = None
 
+        # Maing event loop
+        self.loop = asyncio.get_running_loop()
+
     @property
     def num_workers(self) -> int:
         return self.pool._max_workers
@@ -76,11 +80,12 @@ class ThreadPoolExecutorBackend(Backend):
     ) -> Tuple[Message, Context]:
 
         try:
+            future = self.loop.run_in_executor(
+                self.pool, _run_client_app, app, message, context
+            )
 
-            future = self.pool.submit(_run_client_app, app, message, context)
-
-            # Fetch result
-            out_mssg, updated_context = future.result()
+            # Await result
+            out_mssg, updated_context = await future
 
             return out_mssg, updated_context
 
