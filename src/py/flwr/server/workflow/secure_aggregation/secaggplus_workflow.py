@@ -64,8 +64,6 @@ from flwr.server.driver import Driver
 from ..default_constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD
 from ..default_constant import Key as DefaultKey
 
-LOG_EXPLAIN = True
-
 
 @dataclass
 class WorkflowState:  # pylint: disable=R0902
@@ -119,7 +117,7 @@ class SecAggPlusWorkflow:
         facilitates cryptographic operations on the model updates.
     modulus_range : int, optional (default: 4294967296, this equals 2**32)
         The range of values from which random mask entries are uniformly sampled
-        ([0, modulus_range-1]).
+        ([0, modulus_range-1]). `modulus_range` must be less than 4294967296.
     timeout : Optional[float] (default: None)
         The timeout duration in seconds. If specified, the workflow will wait for
         replies for this duration each time. If `None`, there is no time limit and
@@ -342,20 +340,12 @@ class SecAggPlusWorkflow:
                 ttl="",
             )
 
-        if LOG_EXPLAIN:
-            print(
-                f"Sending configurations to {num_samples} clients "
-                "and allocating secure IDs..."
-            )
         msgs = driver.send_and_receive(
             [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
         )
         state.active_node_ids = {
             msg.metadata.src_node_id for msg in msgs if not msg.has_error()
         }
-
-        if LOG_EXPLAIN:
-            print(f"Received public keys from {len(state.active_node_ids)} clients.")
 
         for msg in msgs:
             if msg.has_error():
@@ -370,8 +360,6 @@ class SecAggPlusWorkflow:
     def _share_keys(  # pylint: disable=R0914
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
-        if LOG_EXPLAIN:
-            print("\nForwarding public keys...")
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
 
         def make(nid: int) -> Message:
@@ -396,9 +384,6 @@ class SecAggPlusWorkflow:
         state.active_node_ids = {
             msg.metadata.src_node_id for msg in msgs if not msg.has_error()
         }
-
-        if LOG_EXPLAIN:
-            print(f"Received key shares from {len(state.active_node_ids)} clients.")
 
         # Build forward packet list dictionary
         srcs: list[int] = []
@@ -432,8 +417,6 @@ class SecAggPlusWorkflow:
     def _collect_masked_input(
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
-        if LOG_EXPLAIN:
-            print("\nForwarding encrypted key shares and requesting masked input...")
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
 
         # Send secret key shares to clients (plus FitIns) and collect masked input
@@ -465,18 +448,11 @@ class SecAggPlusWorkflow:
         del state.forward_ciphertexts, state.forward_srcs, state.nid_to_fitins
 
         # Sum collected masked vectors and compute active/dead node IDs
-        if LOG_EXPLAIN:
-            dead_nids = state.sampled_node_ids - state.active_node_ids
-            for nid in dead_nids:
-                print(f"Client {nid} dropped out.")
         masked_vector = None
         for msg in msgs:
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
             bytes_list = cast(list[bytes], res_dict[Key.MASKED_PARAMETERS])
             client_masked_vec = [bytes_to_ndarray(b) for b in bytes_list]
-            if LOG_EXPLAIN:
-                src_nid = msg.metadata.src_node_id
-                print(f"Received {client_masked_vec[1]} from Client {src_nid}.")
             if masked_vector is None:
                 masked_vector = client_masked_vec
             else:
@@ -490,8 +466,6 @@ class SecAggPlusWorkflow:
     def _unmask(  # pylint: disable=R0912, R0914
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
-        if LOG_EXPLAIN:
-            print("\nRequesting key shares to unmask the aggregate vector...")
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
         current_round = cast(int, cfg[DefaultKey.CURRENT_ROUND])
 
@@ -523,8 +497,6 @@ class SecAggPlusWorkflow:
         state.active_node_ids = {
             msg.metadata.src_node_id for msg in msgs if not msg.has_error()
         }
-        if LOG_EXPLAIN:
-            print(f"Received key shares from {len(state.active_node_ids)} clients.")
 
         # Build collected shares dict
         collected_shares_dict: dict[int, list[bytes]] = {}
