@@ -1,0 +1,18 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "app-pytorch"
+version = "0.1.0"
+description = "Multi-Tenant Federated Learning with Flower and PyTorch"
+authors = ["The Flower Authors <hello@flower.ai>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+flwr = { path = "../../", develop = true, extras = ["simulation"] }
+tensorboard = "2.16.2"
+torch = "1.13.1"
+torchvision = "0.14.1"
+tqdm = "4.65.0"
+wandb = "0.16.3"
