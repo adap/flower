@@ -236,9 +236,8 @@ class SecAggPlusWorkflow:
             )
 
     def _check_threshold(self, state: WorkflowState) -> bool:
-        for node_id in state.active_node_ids:
-            active_neighbors = state.nid_to_neighbours[node_id]
-            active_neighbors.intersection_update(state.active_node_ids)
+        for node_id in state.sampled_node_ids:
+            active_neighbors = state.nid_to_neighbours[node_id] & state.active_node_ids
             if len(active_neighbors) < state.threshold:
                 log(ERROR, "Insufficient available nodes.")
                 return False
