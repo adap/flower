@@ -32,9 +32,18 @@ def message_size_mod(
     """
     message_size_in_bytes = 0
 
+    for record in msg.content.parameters_records.values():
+        for data in record.values():
+            message_size_in_bytes += getsizeof(data.data)
 
-    # TODO:    
-    
+    for record in msg.content.configs_records.values():
+        for data in record.values():
+            message_size_in_bytes += getsizeof(data)
+
+    for record in msg.content.metrics_records.values():
+        for data in record.values():
+            message_size_in_bytes += getsizeof(data)
+
     log(INFO, "Message size: %i Bytes", message_size_in_bytes)
 
     return call_next(msg, ctxt)
