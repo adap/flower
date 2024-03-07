@@ -232,7 +232,6 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
     if stage == Stage.SETUP:
         key_type_pairs = [
             (Key.SAMPLE_NUMBER, int),
-            (Key.SECURE_ID, int),
             (Key.SHARE_NUMBER, int),
             (Key.THRESHOLD, int),
             (Key.CLIPPING_RANGE, float),
