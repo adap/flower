@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Model size and Message size mods."""
+"""Mods that report statistics about message communication."""
 
 from logging import INFO
-from sys import getsizeof
+
+import numpy as np
 
 from flwr.client.typing import ClientAppCallable
 from flwr.common.context import Context
@@ -32,17 +33,14 @@ def message_size_mod(
     """
     message_size_in_bytes = 0
 
-    for record in msg.content.parameters_records.values():
-        for data in record.values():
-            message_size_in_bytes += getsizeof(data.data)
+    for p_record in msg.content.parameters_records.values():
+        message_size_in_bytes += p_record.count_bytes()
 
-    for record in msg.content.configs_records.values():
-        for data in record.values():
-            message_size_in_bytes += getsizeof(data)
+    for c_record in msg.content.configs_records.values():
+        message_size_in_bytes += c_record.count_bytes()
 
-    for record in msg.content.metrics_records.values():
-        for data in record.values():
-            message_size_in_bytes += getsizeof(data)
+    for m_record in msg.content.metrics_records.values():
+        message_size_in_bytes += m_record.count_bytes()
 
     log(INFO, "Message size: %i Bytes", message_size_in_bytes)
 
@@ -58,20 +56,24 @@ def parameters_size_mod(
     size in Bytes.
     """
     model_size_stats = {}
-    for record_name, parameters in msg.content.parameters_records.items():
+    parameters_size_in_bytes = 0
+    for record_name, p_record in msg.content.parameters_records.items():
+        p_record_bytes = p_record.count_bytes()
+        parameters_size_in_bytes += p_record_bytes
         parameter_count = 0
-        parameter_count_in_bytes = 0
-        for _, array in parameters.items():
-            ndarray = array.numpy()
-            parameter_count += ndarray.size
-            parameter_count_in_bytes += ndarray.size * ndarray.itemsize
+        for array in p_record.values():
+            parameter_count += (
+                int(np.prod(array.shape)) if array.shape else array.numpy().size
+            )
 
         model_size_stats[f"{record_name}"] = {
             "parameters": parameter_count,
-            "bytes": parameter_count_in_bytes,
+            "bytes": p_record_bytes,
         }
 
     if model_size_stats:
         log(INFO, model_size_stats)
+
+    log(INFO, "Total parameters transmited: %i Bytes", parameters_size_in_bytes)
 
     return call_next(msg, ctxt)
