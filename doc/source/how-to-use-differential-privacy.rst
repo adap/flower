@@ -105,7 +105,6 @@ Below is a code example that shows how to use :code:`LocalDpMod`:
 
 .. code-block:: python
 
-  # Client-side
   from flwr.client.mod.localdp_mod import LocalDpMod
 
   # Create an instance of the mod with the required params
