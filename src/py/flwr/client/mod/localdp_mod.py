@@ -31,7 +31,7 @@ class LocalDpMod:
     """Modifier for local differential privacy.
 
     This mod clips the client model updates and
-    add noise to the params before sending them to the server.
+    adds noise to the params before sending them to the server.
 
     It operates on messages of type `MessageType.TRAIN`.
 
