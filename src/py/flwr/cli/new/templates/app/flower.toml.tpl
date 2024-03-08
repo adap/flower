@@ -11,9 +11,3 @@ readme = "README.md"
 [flower.components]
 serverapp = "$project_name.server:app"
 clientapp = "$project_name.client:app"
-
-[flower.engine]
-name = "simulation" # optional
-
-[flower.engine.simulation.super-node]
-count = 10 # optional
