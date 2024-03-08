@@ -92,12 +92,12 @@ class SecAggPlusWorkflow:
     multiple parties, without accessing any individual integer vector. This workflow
     allows the server to compute the weighted average of model parameters across all
     clients, ensuring individual contributions remain private. This is achieved by
-    clients sending a combination of their weights and a weighted version of their
-    model parameters, masked for privacy. Specifically, each client uploads
-    "[w, w * params]" with masks, where 'w' is the number of examples ('num_examples')
-    and 'params' represents the model parameters ('parameters') from the client's
-    `FitRes`. The server then aggregates these contributions to compute the weighted
-    average of model parameters.
+    clients sending both, a weighting factor and a weighted version of the locally
+    updated parameters, both of which are masked for privacy. Specifically, each
+    client uploads "[w, w * params]" with masks, where weighting factor 'w' is the
+    number of examples ('num_examples') and 'params' represents the model parameters
+    ('parameters') from the client's `FitRes`. The server then aggregates these
+    contributions to compute the weighted average of model parameters.
 
     The protocol involves four main stages:
     - 'setup': Send SecAgg+ configuration to clients and collect their public keys.
