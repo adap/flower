@@ -306,7 +306,7 @@ def start_vce(
     def _load() -> ClientApp:
 
         if client_app_attr:
-            app = load_app(client_app_attr, LoadClientAppError)
+            app: ClientApp = load_app(client_app_attr, LoadClientAppError)
 
             if not isinstance(app, ClientApp):
                 raise LoadClientAppError(
