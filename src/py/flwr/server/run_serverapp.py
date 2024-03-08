@@ -48,13 +48,13 @@ def run(
     # Load ServerApp if needed
     def _load() -> ServerApp:
         if server_app_attr:
-            app_attr = load_app(server_app_attr, LoadServerAppError)
-            if not isinstance(app_attr, ServerApp):
+            server_app = load_app(server_app_attr, LoadServerAppError)
+
+            if not isinstance(server_app, ServerApp):
                 raise LoadServerAppError(
                     f"Attribute {server_app_attr} is not of type {ServerApp}",
                 ) from None
 
-            server_app = cast(ServerApp, app_attr)
         if loaded_server_app:
             server_app = loaded_server_app
         return server_app

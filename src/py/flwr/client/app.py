@@ -102,14 +102,14 @@ def run_client_app() -> None:
         raise LoadClientAppError(error_msg) from None
 
     def _load() -> ClientApp:
-        client_app_attr = load_app(getattr(args, "client-app"), LoadClientAppError)
+        client_app = load_app(getattr(args, "client-app"), LoadClientAppError)
 
-        if not isinstance(client_app_attr, ClientApp):
+        if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
                 f"Attribute {getattr(args, 'client-app')} is not of type {ClientApp}",
             ) from None
 
-        return cast(ClientApp, client_app_attr)
+        return client_app
 
     _start_client_internal(
         server_address=args.server,

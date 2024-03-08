@@ -306,14 +306,13 @@ def start_vce(
     def _load() -> ClientApp:
 
         if client_app_attr:
-            app_attr = load_app(client_app_attr, LoadClientAppError)
+            app = load_app(client_app_attr, LoadClientAppError)
 
-            if not isinstance(client_app_attr, ClientApp):
+            if not isinstance(app, ClientApp):
                 raise LoadClientAppError(
                     f"Attribute {client_app_attr} is not of type {ClientApp}",
                 ) from None
 
-            app = cast(ClientApp, app_attr)
         if client_app:
             app = client_app
         return app

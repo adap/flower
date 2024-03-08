@@ -68,14 +68,14 @@ client_app = ClientApp(
 
 def _load_from_module(client_app_module_name: str) -> Callable[[], ClientApp]:
     def _load_app() -> ClientApp:
-        client_app_attr = load_app(client_app_module_name, LoadClientAppError)
+        client_app = load_app(client_app_module_name, LoadClientAppError)
 
-        if not isinstance(client_app_attr, ClientApp):
+        if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
                 f"Attribute {client_app_module_name} is not of type {ClientApp}",
             ) from None
 
-        return cast(ClientApp, client_app_attr)
+        return client_app
 
     return _load_app
 
