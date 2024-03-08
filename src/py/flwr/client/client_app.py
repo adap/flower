@@ -94,12 +94,11 @@ def _find_attribute_in_module(file_path, attribute_name):
 
 
 def find_client_spec_and_check_attr(module_attribute_str: str) -> None:
-    """Check that the `ClientApp` object specified in a module attribute string
-    exists.
+    """Check that the `ClientApp` object specified in a module attribute string exists.
 
     The module/attribute string should have the form <module>:<attribute>. Valid
-    examples include `client:app` and `project.package.module:wrapper.app`. It
-    must refer to a module on the PYTHONPATH, the module needs to have the specified
+    examples include `client:app` and `project.package.module:wrapper.app`. It must
+    refer to a module on the PYTHONPATH, the module needs to have the specified
     attribute, and the attribute must be of type `ClientApp`.
     """
     module_str, _, attributes_str = module_attribute_str.partition(":")
@@ -129,8 +128,8 @@ def load_client_app(module_attribute_str: str) -> ClientApp:
     """Load the `ClientApp` object specified in a module attribute string.
 
     The module/attribute string should have the form <module>:<attribute>. Valid
-    examples include `client:app` and `project.package.module:wrapper.app`. It
-    must refer to a module on the PYTHONPATH, the module needs to have the specified
+    examples include `client:app` and `project.package.module:wrapper.app`. It must
+    refer to a module on the PYTHONPATH, the module needs to have the specified
     attribute, and the attribute must be of type `ClientApp`.
     """
     module_str, _, attributes_str = module_attribute_str.partition(":")
