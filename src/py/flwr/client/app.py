@@ -20,7 +20,7 @@ import sys
 import time
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Callable, ContextManager, Optional, Tuple, Type, Union
+from typing import Callable, ContextManager, Optional, Tuple, Type, Union, cast
 
 from grpc import RpcError
 
@@ -102,10 +102,16 @@ def run_client_app() -> None:
         raise LoadClientAppError(error_msg) from None
 
     def _load() -> ClientApp:
-        client_app: ClientApp = load_app(
-            getattr(args, "client-app"), ClientApp, LoadClientAppError
+        client_app_attr: ClientApp = load_app(
+            getattr(args, "client-app"), LoadClientAppError
         )
-        return client_app
+
+        if not isinstance(client_app_attr, ClientApp):
+            raise LoadClientAppError(
+                f"Attribute {getattr(args, 'client-app')} is not of type {ClientApp}",
+            ) from None
+
+        return cast(ClientApp, client_app_attr)
 
     _start_client_internal(
         server_address=args.server,

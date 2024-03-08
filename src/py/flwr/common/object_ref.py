@@ -18,10 +18,7 @@
 import ast
 import importlib
 from importlib.util import find_spec
-from typing import Optional, Tuple, Type, Union, cast, overload
-
-from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.server.server_app import LoadServerAppError, ServerApp
+from typing import Any, Optional, Tuple, Type
 
 
 def validate(
@@ -68,33 +65,16 @@ def validate(
         )
 
 
-@overload
 def load_app(
     module_attribute_str: str,
-    app_type: Type[ClientApp],
-    error_type: Type[LoadClientAppError],
-) -> ClientApp: ...
-
-
-@overload
-def load_app(
-    module_attribute_str: str,
-    app_type: Type[ServerApp],
-    error_type: Type[LoadServerAppError],
-) -> ServerApp: ...
-
-
-def load_app(
-    module_attribute_str: str,
-    app_type: Union[Type[ClientApp], Type[ServerApp]],
-    error_type: Union[Type[LoadClientAppError], Type[LoadServerAppError]],
-) -> Union[ClientApp, ServerApp]:
-    """Load the `app_type` object specified in a module attribute string.
+    error_type: Type[Exception],
+) -> Any:
+    """Return the object specified in a module attribute string.
 
     The module/attribute string should have the form <module>:<attribute>. Valid
     examples include `client:app` and `project.package.module:wrapper.app`. It must
     refer to a module on the PYTHONPATH, the module needs to have the specified
-    attribute, and the attribute must be of type `app_type`.
+    attribute.
     """
     valid, error_msg = validate(module_attribute_str)
     if not valid and error_msg:
@@ -119,13 +99,7 @@ def load_app(
             f"Unable to load attribute {attributes_str} from module {module_str}",
         ) from None
 
-    # Check type
-    if not isinstance(attribute, app_type):
-        raise error_type(
-            f"Attribute {attributes_str} is not of type {app_type}",
-        ) from None
-
-    return cast(app_type, attribute)
+    return attribute
 
 
 def _find_attribute_in_module(file_path: str, attribute_name: str) -> bool:

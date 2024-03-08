@@ -19,7 +19,7 @@ import asyncio
 import json
 import traceback
 from logging import DEBUG, ERROR, INFO, WARN
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, cast
 
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.node_state import NodeState
@@ -306,7 +306,14 @@ def start_vce(
     def _load() -> ClientApp:
 
         if client_app_attr:
-            app: ClientApp = load_app(client_app_attr, ClientApp, LoadClientAppError)
+            app_attr: ClientApp = load_app(client_app_attr, LoadClientAppError)
+
+            if not isinstance(client_app_attr, ClientApp):
+                raise LoadClientAppError(
+                    f"Attribute {client_app_attr} is not of type {ClientApp}",
+                ) from None
+
+            app = cast(ClientApp, app_attr)
         if client_app:
             app = client_app
         return app

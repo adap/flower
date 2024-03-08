@@ -17,7 +17,7 @@
 import asyncio
 from math import pi
 from pathlib import Path
-from typing import Callable, Dict, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Tuple, Union, cast
 from unittest import IsolatedAsyncioTestCase
 
 import ray
@@ -68,8 +68,16 @@ client_app = ClientApp(
 
 def _load_from_module(client_app_module_name: str) -> Callable[[], ClientApp]:
     def _load_app() -> ClientApp:
-        app: ClientApp = load_app(client_app_module_name, ClientApp, LoadClientAppError)
-        return app
+        client_app_attr: ClientApp = load_app(
+            client_app_module_name, LoadClientAppError
+        )
+
+        if not isinstance(client_app_attr, ClientApp):
+            raise LoadClientAppError(
+                f"Attribute {client_app_module_name} is not of type {ClientApp}",
+            ) from None
+
+        return cast(ClientApp, client_app_attr)
 
     return _load_app
 
