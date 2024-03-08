@@ -40,7 +40,7 @@ def fixedclipping_mod(
 
     This mod clips the client model updates before sending them to the server.
 
-    It operates on messages with type MessageType.TRAIN.
+    It operates on messages of type `MessageType.TRAIN`.
 
     Notes
     -----
@@ -63,6 +63,11 @@ def fixedclipping_mod(
 
     # Call inner app
     out_msg = call_next(msg, ctxt)
+
+    # Check if the msg has error
+    if out_msg.has_error():
+        return out_msg
+
     fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
 
     client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
@@ -93,7 +98,7 @@ def adaptiveclipping_mod(
 
     It also sends KEY_NORM_BIT to the server for computing the new clipping value.
 
-    It operates on messages with type MessageType.TRAIN.
+    It operates on messages of type `MessageType.TRAIN`.
 
     Notes
     -----
@@ -119,6 +124,11 @@ def adaptiveclipping_mod(
 
     # Call inner app
     out_msg = call_next(msg, ctxt)
+
+    # Check if the msg has error
+    if out_msg.has_error():
+        return out_msg
+
     fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
 
     client_to_server_params = parameters_to_ndarrays(fit_res.parameters)

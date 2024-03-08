@@ -3,27 +3,22 @@ import random
 import time
 
 import flwr as fl
-from flwr.server import Driver
-from flwr.common import Context
-
 from flwr.common import (
-    ServerMessage,
+    Context,
     FitIns,
     ndarrays_to_parameters,
-    serde,
     parameters_to_ndarrays,
-    ClientMessage,
     NDArrays,
     Code,
+    Message,
+    MessageType,
+    Metrics,
 )
-from flwr.proto import driver_pb2, task_pb2, node_pb2, transport_pb2
-from flwr.server.strategy.aggregate import aggregate
-from flwr.common import Metrics
-from flwr.server import History
-from flwr.common import serde
-from task import Net, get_parameters, set_parameters
 from flwr.common.recordset_compat import fitins_to_recordset, recordset_to_fitres
-from flwr.common import Message
+from flwr.server import Driver, History
+from flwr.server.strategy.aggregate import aggregate
+
+from task import Net, get_parameters
 
 
 # Define metric aggregation function
@@ -56,7 +51,6 @@ def main(driver: Driver, context: Context) -> None:
     """."""
     print("RUNNING!!!!!")
 
-    anonymous_client_nodes = False
     num_client_nodes_per_round = 2
     sleep_time = 1
     num_rounds = 3
@@ -92,7 +86,7 @@ def main(driver: Driver, context: Context) -> None:
         for node_id in sampled_nodes:
             message = driver.create_message(
                 content=recordset,
-                message_type="fit",
+                message_type=MessageType.TRAIN,
                 dst_node_id=node_id,
                 group_id=str(server_round),
                 ttl="",
