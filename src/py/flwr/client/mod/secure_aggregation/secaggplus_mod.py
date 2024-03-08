@@ -487,7 +487,7 @@ def _collect_masked_input(
 
     # Take mod of final weight update vector and return to server
     quantized_parameters = parameters_mod(quantized_parameters, state.mod_range)
-    log(INFO, "Client %d: stage 2 completes. uploading masked parameters...", state.nid)
+    log(INFO, "Node %d: stage 2 completed, uploading masked parameters...", state.nid)
     return {
         Key.MASKED_PARAMETERS: [ndarray_to_bytes(arr) for arr in quantized_parameters]
     }
