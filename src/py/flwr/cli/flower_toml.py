@@ -17,9 +17,9 @@
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
-from flwr.common.object_ref import validate
-
 import tomli
+
+from flwr.common.object_ref import validate
 
 
 def load_flower_toml(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
