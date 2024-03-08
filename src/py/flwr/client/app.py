@@ -40,7 +40,7 @@ from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
 from flwr.common.retry_invoker import RetryInvoker, exponential
 
-from .client_app import load_client_app
+from .client_app import find_client_spec_and_check_attr, load_client_app
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
@@ -96,6 +96,8 @@ def run_client_app() -> None:
     client_app_dir = args.dir
     if client_app_dir is not None:
         sys.path.insert(0, client_app_dir)
+
+    find_client_spec_and_check_attr(getattr(args, "client-app"))
 
     def _load() -> ClientApp:
         client_app: ClientApp = load_client_app(getattr(args, "client-app"))
