@@ -20,8 +20,6 @@ trainloader, testloader = load_data()
 
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
-    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-        return get_parameters(net)
 
     def fit(self, parameters, config):
         set_parameters(net, parameters)
@@ -42,3 +40,11 @@ def client_fn(cid: str):
 app = fl.client.ClientApp(
     client_fn=client_fn,
 )
+
+
+# Legacy mode
+if __name__ == "__main__":
+    fl.client.start_client(
+        server_address="127.0.0.1:8080",
+        client=FlowerClient().to_client(),
+    )
