@@ -102,7 +102,9 @@ def load_app(
     return attribute
 
 
-def _find_attribute_in_module(file_path: str, attribute_name: str) -> bool:
+def _find_attribute_in_module(
+    file_path: str, attribute_name: str
+) -> bool:  # pylint: disable=too-many-nested-blocks
     """Check if a given attribute_name exists in the abstract symbolic tree of a
     module."""
     with open(file_path, encoding="utf-8") as file:
