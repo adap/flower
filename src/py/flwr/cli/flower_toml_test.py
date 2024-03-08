@@ -18,11 +18,12 @@ import os
 import textwrap
 from typing import Any, Dict
 
+from flwr.common.object_ref import validate
+
 from .flower_toml import (
     load_flower_toml,
     validate_flower_toml,
     validate_flower_toml_fields,
-    validate_object_reference,
 )
 
 
@@ -239,7 +240,7 @@ def test_validate_object_reference() -> None:
     ref = "flwr.cli.run:run"
 
     # Execute
-    is_valid, error = validate_object_reference(ref)
+    is_valid, error = validate(ref)
 
     # Assert
     assert is_valid
@@ -252,7 +253,7 @@ def test_validate_object_reference_fails() -> None:
     ref = "flwr.cli.run:runa"
 
     # Execute
-    is_valid, error = validate_object_reference(ref)
+    is_valid, error = validate(ref)
 
     # Assert
     assert not is_valid
