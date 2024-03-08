@@ -63,6 +63,11 @@ def fixedclipping_mod(
 
     # Call inner app
     out_msg = call_next(msg, ctxt)
+
+    # Check if the msg has error
+    if out_msg.has_error():
+        return out_msg
+
     fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
 
     client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
@@ -119,6 +124,11 @@ def adaptiveclipping_mod(
 
     # Call inner app
     out_msg = call_next(msg, ctxt)
+
+    # Check if the msg has error
+    if out_msg.has_error():
+        return out_msg
+
     fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
 
     client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
