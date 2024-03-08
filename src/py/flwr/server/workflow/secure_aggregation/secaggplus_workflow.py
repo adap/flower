@@ -284,15 +284,10 @@ class SecAggPlusWorkflow:
         proxy_fitins_lst = context.strategy.configure_fit(
             current_round, parameters, context.client_manager
         )
-        for idx, (proxy, fitins) in enumerate(proxy_fitins_lst):
-            fitins.config["drop"] = idx == 0
-            state.nid_to_fitins[proxy.node_id] = compat.fitins_to_recordset(
-                fitins, True
-            )
-        # state.nid_to_fitins = {
-        #     proxy.node_id: compat.fitins_to_recordset(fitins, False)
-        #     for proxy, fitins in proxy_fitins_lst
-        # }
+        state.nid_to_fitins = {
+            proxy.node_id: compat.fitins_to_recordset(fitins, False)
+            for proxy, fitins in proxy_fitins_lst
+        }
 
         # Protocol config
         sampled_node_ids = list(state.nid_to_fitins.keys())
@@ -388,7 +383,7 @@ class SecAggPlusWorkflow:
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
 
         def make(nid: int) -> Message:
-            neighbours = state.nid_to_neighbours[nid]
+            neighbours = state.nid_to_neighbours[nid] & state.active_node_ids
             cfgs_record = ConfigsRecord(
                 {str(nid): state.nid_to_publickeys[nid] for nid in neighbours}
             )
@@ -586,6 +581,7 @@ class SecAggPlusWorkflow:
         for vec in aggregated_vector:
             vec += offset
             vec *= inv_dq_total_ratio
+        state.aggregate_ndarrays = aggregated_vector
         final_fitres = FitRes(
             status=Status(code=Code.OK, message=""),
             parameters=ndarrays_to_parameters(aggregated_vector),
