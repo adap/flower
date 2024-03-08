@@ -457,6 +457,7 @@ def _collect_masked_input(
     ratio = fit_res.num_examples / state.max_weight
     if ratio > 1:
         log(
+            WARNING,
             "Potential overflow warning: the provided weight (%s) exceeds the specified"
             " max_weight (%s). This may lead to overflow issues.",
             fit_res.num_examples,
