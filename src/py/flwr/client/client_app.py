@@ -15,7 +15,9 @@
 """Flower ClientApp."""
 
 
+import ast
 import importlib
+from importlib.util import find_spec
 from typing import List, Optional, cast
 
 from flwr.client.message_handler.message_handler import (
@@ -79,8 +81,21 @@ class LoadClientAppError(Exception):
     """Error when trying to load `ClientApp`."""
 
 
-def load_client_app(module_attribute_str: str) -> ClientApp:
-    """Load the `ClientApp` object specified in a module attribute string.
+def _find_attribute_in_module(file_path, attribute_name):
+    with open(file_path, "r") as file:
+        node = ast.parse(file.read(), filename=file_path)
+
+    for n in ast.walk(node):
+        if isinstance(n, ast.Assign):
+            for target in n.targets:
+                if isinstance(target, ast.Name) and target.id == attribute_name:
+                    return True
+    return False
+
+
+def find_client_spec_and_check_attr(module_attribute_str: str) -> None:
+    """Check that the `ClientApp` object specified in a module attribute string
+    exists.
 
     The module/attribute string should have the form <module>:<attribute>. Valid
     examples include `client:app` and `project.package.module:wrapper.app`. It
@@ -98,6 +113,30 @@ def load_client_app(module_attribute_str: str) -> ClientApp:
         ) from None
 
     # Load module
+    module = find_spec(module_str)
+    if module:
+        if not _find_attribute_in_module(module.origin, attributes_str):
+            raise LoadClientAppError(
+                f"Unable to find attribute {attributes_str} in module {module_str}",
+            ) from None
+    else:
+        raise LoadClientAppError(
+            f"Unable to load module {module_str}",
+        ) from None
+
+
+def load_client_app(module_attribute_str: str) -> ClientApp:
+    """Load the `ClientApp` object specified in a module attribute string.
+
+    The module/attribute string should have the form <module>:<attribute>. Valid
+    examples include `client:app` and `project.package.module:wrapper.app`. It
+    must refer to a module on the PYTHONPATH, the module needs to have the specified
+    attribute, and the attribute must be of type `ClientApp`.
+    """
+    module_str, _, attributes_str = module_attribute_str.partition(":")
+
+    find_client_spec_and_check_attr(module_attribute_str)
+
     try:
         module = importlib.import_module(module_str)
     except ModuleNotFoundError:
