@@ -102,7 +102,6 @@ def load_app(
     return attribute
 
 
-# pylint: disable-next=too-many-nested-blocks
 def _find_attribute_in_module(file_path: str, attribute_name: str) -> bool:
     """Check if a given attribute_name exists in the abstract symbolic tree of a
     module."""
@@ -114,14 +113,20 @@ def _find_attribute_in_module(file_path: str, attribute_name: str) -> bool:
             for target in n.targets:
                 if isinstance(target, ast.Name) and target.id == attribute_name:
                     return True
-                if isinstance(target, ast.Name) and target.id == "__all__":
-                    # Now check if attribute_name is in __all__
-                    if isinstance(n.value, ast.List):
-                        for elt in n.value.elts:
-                            if isinstance(elt, ast.Str) and elt.s == attribute_name:
-                                return True
-                    elif isinstance(n.value, ast.Tuple):
-                        for elt in n.value.elts:
-                            if isinstance(elt, ast.Str) and elt.s == attribute_name:
-                                return True
+                if _is_module_in_all(attribute_name, target, n):
+                    return True
+    return False
+
+
+def _is_module_in_all(attribute_name, target, n) -> bool:
+    """Now check if attribute_name is in __all__."""
+    if isinstance(target, ast.Name) and target.id == "__all__":
+        if isinstance(n.value, ast.List):
+            for elt in n.value.elts:
+                if isinstance(elt, ast.Str) and elt.s == attribute_name:
+                    return True
+        elif isinstance(n.value, ast.Tuple):
+            for elt in n.value.elts:
+                if isinstance(elt, ast.Str) and elt.s == attribute_name:
+                    return True
     return False
