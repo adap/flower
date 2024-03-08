@@ -13,7 +13,7 @@ app = fl.server.ServerApp()
 
 @app.main()
 def main(driver: Driver, context: Context) -> None:
-    """."""
+    """This is a stub example that simply sends and receives messages."""
     print("Starting test run")
     for server_round in range(3):
         print(f"Commencing server round {server_round + 1}")
