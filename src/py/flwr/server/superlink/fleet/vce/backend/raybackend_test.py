@@ -68,9 +68,7 @@ client_app = ClientApp(
 
 def _load_from_module(client_app_module_name: str) -> Callable[[], ClientApp]:
     def _load_app() -> ClientApp:
-        client_app_attr: ClientApp = load_app(
-            client_app_module_name, LoadClientAppError
-        )
+        client_app_attr = load_app(client_app_module_name, LoadClientAppError)
 
         if not isinstance(client_app_attr, ClientApp):
             raise LoadClientAppError(
