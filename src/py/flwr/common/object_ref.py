@@ -118,7 +118,7 @@ def _find_attribute_in_module(file_path: str, attribute_name: str) -> bool:
     return False
 
 
-def _is_module_in_all(attribute_name, target, n) -> bool:
+def _is_module_in_all(attribute_name: str, target: ast.expr, n: ast.Assign) -> bool:
     """Now check if attribute_name is in __all__."""
     if isinstance(target, ast.Name) and target.id == "__all__":
         if isinstance(n.value, ast.List):
