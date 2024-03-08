@@ -94,7 +94,7 @@ In addition to the server-side strategy wrapper, the :code:`ClientApp` needs to 
 
 Local Differential Privacy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-To utilize local differential privacy (DP) and add noise to the client model parameters before transmitting them to the server in Flower, users can employ the `LocalDpMod`. They are required to provide the following hyperparameters: clipping norm value, sensitivity, epsilon, and delta.
+To utilize local differential privacy (DP) and add noise to the client model parameters before transmitting them to the server in Flower, you can use the `LocalDpMod`. The following hyperparameters need to be set: clipping norm value, sensitivity, epsilon, and delta.
 
 .. image:: ./_static/DP/localdp.png
   :align: center
