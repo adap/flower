@@ -102,9 +102,9 @@ class SecAggPlusWorkflow:
     The protocol involves four main stages:
     - 'setup': Send SecAgg+ configuration to clients and collect their public keys.
     - 'share keys': Broadcast public keys among clients and collect encrypted secret
-    key shares.
+      key shares.
     - 'collect masked inputs': Forward encrypted secret key shares to target clients
-    and collect masked model parameters.
+      and collect masked model parameters.
     - 'unmask': Collect secret key shares to decrypt and aggregate the model parameters.
 
     Only the aggregated model parameters are exposed and passed to
@@ -148,20 +148,21 @@ class SecAggPlusWorkflow:
     Notes
     -----
     - Generally, higher `num_shares` means more robust to dropouts while increasing the
-    computational costs; higher `reconstruction_threshold` means better privacy
-    guarantees but less tolerance to dropouts.
+      computational costs; higher `reconstruction_threshold` means better privacy
+      guarantees but less tolerance to dropouts.
     - Too large `max_weight` may compromise the precision of the quantization.
     - `modulus_range` must be larger than `quantization_range`.
     - When `num_shares` is a float, it is interpreted as the proportion of all selected
-    clients, and hence the number of shares will be determined in the runtime. This
-    allows for dynamic adjustment based on the total number of participating clients.
+      clients, and hence the number of shares will be determined in the runtime. This
+      allows for dynamic adjustment based on the total number of participating clients.
     - Similarly, when `reconstruction_threshold` is a float, it is interpreted as the
-    proportion of the number of shares needed for the reconstruction of a private key.
-    This feature enables flexibility in setting the security threshold relative to the
-    number of distributed shares.
+      proportion of the number of shares needed for the reconstruction of a private key.
+      This feature enables flexibility in setting the security threshold relative to the
+      number of distributed shares.
     - `num_shares`, `reconstruction_threshold`, and the quantization parameters
-    (`clipping_range`, `target_quantization_range`, `modulus_range`) play critical roles
-    in balancing privacy, robustness, and efficiency within the SecAgg+ protocol.
+      (`clipping_range`, `target_quantization_range`, `modulus_range`) play critical
+      roles in balancing privacy, robustness, and efficiency within the SecAgg+
+      protocol.
     """
 
     def __init__(  # pylint: disable=R0913
