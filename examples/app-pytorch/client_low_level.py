@@ -3,9 +3,9 @@ from flwr.common import Message, Context
 
 
 def hello_world_mod(msg, ctx, call_next) -> Message:
-    print("Hello, ... [pause for dramatic effect]")
+    print("Hello, ...[pause for dramatic effect]...")
     out = call_next(msg, ctx)
-    print("[pause was long enough] ... World!")
+    print("...[pause was long enough]... World!")
     return out
 
 
