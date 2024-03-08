@@ -91,7 +91,7 @@ class Server:
         # Initialize parameters
         log(INFO, "Initializing global parameters")
         self.parameters = self._get_initial_parameters(server_round=0, timeout=timeout)
-        log(INFO, "Evaluating initial parameters")
+        log(INFO, "\tEvaluating initial parameters")
         res = self.strategy.evaluate(0, parameters=self.parameters)
         if res is not None:
             log(

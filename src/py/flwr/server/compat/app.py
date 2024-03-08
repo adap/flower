@@ -127,7 +127,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     )
     log(
         INFO,
-        "Starting Flower server app, config: %s",
+        "Starting Flower ServerApp, config: %s",
         initialized_config,
     )
     log(INFO, "")
