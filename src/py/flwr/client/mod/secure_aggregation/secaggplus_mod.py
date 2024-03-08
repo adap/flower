@@ -322,7 +322,7 @@ def _setup(
     # Assigning parameter values to object fields
     sec_agg_param_dict = configs
     state.sample_num = cast(int, sec_agg_param_dict[Key.SAMPLE_NUMBER])
-    log(INFO, "Client %d: starting stage 0...", state.nid)
+    log(INFO, "Node %d: starting stage 0...", state.nid)
 
     state.share_num = cast(int, sec_agg_param_dict[Key.SHARE_NUMBER])
     state.threshold = cast(int, sec_agg_param_dict[Key.THRESHOLD])
