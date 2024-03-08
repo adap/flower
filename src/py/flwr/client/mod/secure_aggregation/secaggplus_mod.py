@@ -449,7 +449,19 @@ def _collect_masked_input(
 
     # Fit client
     fit_res = fit()
+    if len(fit_res.metrics) > 0:
+        log(
+            WARNING,
+            "The metrics in FitRes will not be preserved or sent to the server.",
+        )
     ratio = fit_res.num_examples / state.max_weight
+    if ratio > 1:
+        log(
+            "Potential overflow warning: the provided weight (%s) exceeds the specified"
+            " max_weight (%s). This may lead to overflow issues.",
+            fit_res.num_examples,
+            state.max_weight,
+        )
     q_ratio = round(ratio * state.target_range)
     dq_ratio = q_ratio / state.target_range
 
