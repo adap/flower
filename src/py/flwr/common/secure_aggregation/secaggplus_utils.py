@@ -23,15 +23,15 @@ from flwr.common.typing import NDArrayInt
 
 
 def share_keys_plaintext_concat(
-    source: int, destination: int, b_share: bytes, sk_share: bytes
+    src_node_id: int, dst_node_id: int, b_share: bytes, sk_share: bytes
 ) -> bytes:
     """Combine arguments to bytes.
 
     Parameters
     ----------
-    source : int
+    src_node_id : int
         the node ID of the source.
-    destination : int
+    dst_node_id : int
         the node ID of the destination.
     b_share : bytes
         the private key share of the source sent to the destination.
@@ -45,8 +45,8 @@ def share_keys_plaintext_concat(
     """
     return b"".join(
         [
-            int.to_bytes(source, 8, "little", signed=True),
-            int.to_bytes(destination, 8, "little", signed=True),
+            int.to_bytes(src_node_id, 8, "little", signed=True),
+            int.to_bytes(dst_node_id, 8, "little", signed=True),
             int.to_bytes(len(b_share), 4, "little"),
             b_share,
             sk_share,
@@ -64,9 +64,9 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
 
     Returns
     -------
-    source : int
+    src_node_id : int
         the node ID of the source.
-    destination : int
+    dst_node_id : int
         the node ID of the destination.
     b_share : bytes
         the private key share of the source sent to the destination.
