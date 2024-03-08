@@ -112,7 +112,11 @@ Below is a code example that shows how to use :code:`LocalDpMod`:
       cfg.clipping_norm, cfg.sensitivity, cfg.epsilon, cfg.delta
   )
   # Add local_dp_obj to the client-side mods
-  app = fl.client.ClientApp(client_fn=client_fn, mods=[local_dp_obj])
+
+  app = fl.client.ClientApp(
+    client_fn=client_fn,
+    mods=[local_dp_obj],
+  )
 
 
 Please note that the order of mods, especially those that modify parameters, is important when using multiple modifiers. Typically, differential privacy (DP) modifiers should be the last to operate on parameters.
