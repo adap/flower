@@ -16,9 +16,11 @@
 
 
 import time
+from logging import INFO
 from typing import Iterable, List, Optional, Tuple
 
 from flwr.common import Message, Metadata, RecordSet
+from flwr.common.logger import log
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -161,6 +163,13 @@ class Driver:
         # Construct TaskIns
         task_ins_list: List[TaskIns] = []
         for msg in messages:
+            log(
+                INFO,
+                "Run %s: %s message sent to %s",
+                msg.metadata.run_id,
+                msg.metadata.message_type,
+                msg.metadata.dst_node_id,
+            )
             # Check message
             self._check_message(msg)
             # Convert Message to TaskIns
