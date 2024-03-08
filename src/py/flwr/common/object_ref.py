@@ -58,11 +58,11 @@ def validate(
                 f"Unable to find attribute {attributes_str} in module {module_str}",
             )
         return (True, None)
-    else:
-        return (
-            False,
-            f"Unable to load module {module_str}",
-        )
+
+    return (
+        False,
+        f"Unable to load module {module_str}",
+    )
 
 
 def load_app(
@@ -105,7 +105,7 @@ def load_app(
 def _find_attribute_in_module(file_path: str, attribute_name: str) -> bool:
     """Check if a given attribute_name exists in the abstract symbolic tree of a
     module."""
-    with open(file_path) as file:
+    with open(file_path, encoding="utf-8") as file:
         node = ast.parse(file.read(), filename=file_path)
 
     for n in ast.walk(node):
