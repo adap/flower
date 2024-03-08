@@ -13,7 +13,7 @@ sleep 2
 # Number of client processes to start
 N=5 # Replace with your desired value
 
-echo "Starting $N clients in background..."
+echo "Starting $N ClientApps in background..."
 
 # Start N client processes
 for i in $(seq 1 $N)
@@ -22,8 +22,8 @@ do
   sleep 0.1
 done
 
-echo "Starting driver..."
-python driver.py
+echo "Starting ServerApp..."
+flower-server-app --insecure server:app
 
 echo "Clearing background processes..."
 

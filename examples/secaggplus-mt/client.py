@@ -3,28 +3,20 @@ import time
 import numpy as np
 
 import flwr as fl
-from flwr.common import Status, FitIns, FitRes, Code
-from flwr.common.parameter import ndarrays_to_parameters
 from flwr.client.mod import secaggplus_mod
 
 
 # Define Flower client with the SecAgg+ protocol
-class FlowerClient(fl.client.Client):
-    def fit(self, fit_ins: FitIns) -> FitRes:
+class FlowerClient(fl.client.NumPyClient):
+    def fit(self, parameters, config):
         ret_vec = [np.ones(3)]
-        ret = FitRes(
-            status=Status(code=Code.OK, message="Success"),
-            parameters=ndarrays_to_parameters(ret_vec),
-            num_examples=1,
-            metrics={},
-        )
         # Force a significant delay for testing purposes
-        if fit_ins.config["drop"]:
+        if "drop" in config and config["drop"]:
             print(f"Client dropped for testing purposes.")
-            time.sleep(4)
-            return ret
-        print(f"Client uploading {ret_vec[0]}...")
-        return ret
+            time.sleep(8)
+        else:
+            print(f"Client uploading {ret_vec[0]}...")
+        return ret_vec, 1, {}
 
 
 def client_fn(cid: str):
@@ -37,12 +29,3 @@ app = fl.client.ClientApp(
     client_fn=client_fn,
     mods=[secaggplus_mod],
 )
-
-
-if __name__ == "__main__":
-    # Start Flower client
-    fl.client.start_client(
-        server_address="0.0.0.0:9092",
-        client=FlowerClient(),
-        transport="grpc-rere",
-    )
