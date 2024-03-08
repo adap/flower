@@ -33,7 +33,7 @@ class LocalDpMod:
     This mod clips the client model updates and
     add noise to the params before sending them to the server.
 
-    It operates on messages with type MessageType.TRAIN.
+    It operates on messages of type `MessageType.TRAIN`.
 
     Parameters
     ----------

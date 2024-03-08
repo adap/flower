@@ -123,4 +123,4 @@ Please note that the order of mods, especially those that modify parameters, is 
 
 Local Training using Privacy Engines
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-For ensuring data instance-level privacy during local model training on the client side, consider leveraging privacy engines such as Opacus and TensorFlow Privacy. For examples of using Flower with these engines, please refer to the Flower examples directory.
+For ensuring data instance-level privacy during local model training on the client side, consider leveraging privacy engines such as Opacus and TensorFlow Privacy. For examples of using Flower with these engines, please refer to the Flower examples directory (`Opacus <https://github.com/adap/flower/tree/main/examples/opacus>`_, `Tensorflow Privacy <https://github.com/adap/flower/tree/main/examples/dp-sgd-mnist>`_).
