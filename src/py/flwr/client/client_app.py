@@ -192,6 +192,7 @@ class ClientApp:
 class LoadClientAppError(Exception):
     """Error when trying to load `ClientApp`."""
 
+
 def _registration_error(fn_name: str) -> ValueError:
     return ValueError(
         f"""Use either `@app.{fn_name}()` or `client_fn`, but not both.
