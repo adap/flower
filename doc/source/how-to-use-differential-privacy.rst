@@ -101,7 +101,7 @@ To utilize local differential privacy (DP) and add noise to the client model par
   :width: 700
   :alt: local DP mod
 
-Below is a sample code about how to use :code:`LocalDpMod`:
+Below is a code example that shows how to use :code:`LocalDpMod`:
 
 .. code-block:: python
 
