@@ -15,7 +15,7 @@
 """ConfigsRecord."""
 
 
-from typing import Dict, Optional, get_args
+from typing import Dict, List, Optional, get_args
 
 from flwr.common.typing import ConfigsRecordValues, ConfigsScalar
 
@@ -85,3 +85,34 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
                 self[k] = configs_dict[k]
                 if not keep_input:
                     del configs_dict[k]
+
+    def count_bytes(self) -> int:
+        """Return number of Bytes stored in this object.
+
+        This function counts booleans as ocupying 1 Byte.
+        """
+
+        def get_var_bytes(value: ConfigsScalar) -> int:
+            """Return Bytes of value passed."""
+            if isinstance(value, bool):
+                var_bytes = 1
+            if isinstance(value, (str, bytes)):
+                var_bytes = len(value)
+            if isinstance(value, (int, float)):
+                var_bytes = 4
+            return var_bytes
+
+        num_bytes = 0
+
+        for v in self.values():
+            if isinstance(v, List):
+                if isinstance(v[0], (bytes, str)):
+                    # not all str are of equal length necesarily
+                    # for both the footprint of each element is 1 Byte
+                    num_bytes += int(sum(len(s) for s in v))  # type: ignore
+                else:
+                    num_bytes += get_var_bytes(v[0]) * len(v)
+            else:
+                num_bytes += get_var_bytes(v)
+
+        return num_bytes

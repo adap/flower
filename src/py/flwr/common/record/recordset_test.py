@@ -359,3 +359,39 @@ def test_set_configs_to_configsrecord_with_incorrect_types(
 
     with pytest.raises(TypeError):
         c_record.update(my_configs)
+
+
+def test_count_bytes_metricsrecord() -> None:
+    """Test counting bytes in MetricsRecord."""
+    data = {"a": 1, "b": 2.0, "c": [1, 2, 3], "d": [1.0, 2.0, 3.0, 4.0, 5.0]}
+    bytes_in_dict = 4 + 4 + 3 * 4 + 5 * 4
+
+    m_record = MetricsRecord()
+    m_record.update(OrderedDict(data))
+    record_bytest_count = m_record.count_bytes()
+    assert bytes_in_dict == record_bytest_count
+
+
+def test_count_bytes_configsrecord() -> None:
+    """Test counting bytes in ConfigsRecord."""
+    data = {"a": 1, "b": 2.0, "c": [1, 2, 3], "d": [1.0, 2.0, 3.0, 4.0, 5.0]}
+    bytes_in_dict = 4 + 4 + 3 * 4 + 5 * 4
+
+    to_add = {
+        "aa": True,
+        "bb": "False",
+        "cc": bytes(9),
+        "dd": [True, False, False],
+        "ee": ["True", "False"],
+        "ff": [bytes(1), bytes(13), bytes(51)],
+    }
+    data = {**data, **to_add}
+    bytes_in_dict += 1 + 5 + 9 + 3 + (4 + 5) + (1 + 13 + 51)
+
+    bytes_in_dict = int(bytes_in_dict)
+
+    c_record = ConfigsRecord()
+    c_record.update(OrderedDict(data))
+
+    record_bytest_count = c_record.count_bytes()
+    assert bytes_in_dict == record_bytest_count
