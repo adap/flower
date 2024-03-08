@@ -113,4 +113,14 @@ def _find_attribute_in_module(file_path: str, attribute_name: str) -> bool:
             for target in n.targets:
                 if isinstance(target, ast.Name) and target.id == attribute_name:
                     return True
+                if isinstance(target, ast.Name) and target.id == "__all__":
+                    # Now check if attribute_name is in __all__
+                    if isinstance(n.value, ast.List):
+                        for elt in n.value.elts:
+                            if isinstance(elt, ast.Str) and elt.s == attribute_name:
+                                return True
+                    elif isinstance(n.value, ast.Tuple):
+                        for elt in n.value.elts:
+                            if isinstance(elt, ast.Str) and elt.s == attribute_name:
+                                return True
     return False
