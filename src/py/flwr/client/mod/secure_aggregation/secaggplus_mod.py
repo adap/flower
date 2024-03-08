@@ -496,7 +496,7 @@ def _collect_masked_input(
 def _unmask(
     state: SecAggPlusState, configs: ConfigsRecord
 ) -> Dict[str, ConfigsRecordValues]:
-    log(INFO, "Client %d: starting stage 3...", state.nid)
+    log(INFO, "Node %d: starting stage 3...", state.nid)
 
     active_nids = cast(List[int], configs[Key.ACTIVE_NODE_ID_LIST])
     dead_nids = cast(List[int], configs[Key.DEAD_NODE_ID_LIST])
