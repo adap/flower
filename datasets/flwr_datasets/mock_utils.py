@@ -19,7 +19,7 @@ import io
 import random
 import string
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Set, Tuple, Union
+from typing import Any, Dict, List, Set, Tuple, Union
 
 import numpy as np
 from PIL import Image
@@ -78,11 +78,12 @@ def _generate_artificial_categories(num_rows: int, choices: List[Any]) -> List[s
 
 
 def _generate_random_word(length: int) -> str:
-    # Generate a random word of the given length
+    """Generate a random word of the given length."""
     return "".join(random.choices(string.ascii_letters, k=length))
 
 
 def _generate_random_text_column(num_rows: int, length: int) -> List[str]:
+    """Generate a list of random text of specified length."""
     text_col = []
     for _ in range(num_rows):
         text_col.append(_generate_random_word(length))
@@ -95,7 +96,7 @@ def _generate_random_sentence(
     min_sentence_length: int,
     max_sentence_length: int,
 ) -> str:
-    # Generate a random sentence with words of random lengths
+    """Generate a random sentence with words of random lengths."""
     sentence_length = random.randint(min_sentence_length, max_sentence_length)
     sentence: List[str] = []
     while len(" ".join(sentence)) < sentence_length:
@@ -112,7 +113,7 @@ def _generate_random_sentences(
     min_sentence_length: int,
     max_sentence_length: int,
 ) -> List[str]:
-    # Generate a list of random sentences
+    """Generate a list of random sentences."""
     text_col = [
         _generate_random_sentence(
             min_word_length, max_word_length, min_sentence_length, max_sentence_length
@@ -123,10 +124,12 @@ def _generate_random_sentences(
 
 
 def _make_num_rows_none(column: List[Any], num_none: int) -> List[Any]:
-    none_positions = random.sample(range(len(column)), num_none)
+    """Assign none num_none times to the given list."""
+    column_copy = column.copy()
+    none_positions = random.sample(range(len(column_copy)), num_none)
     for pos in none_positions:
-        column[pos] = None
-    return column
+        column_copy[pos] = None
+    return column_copy
 
 
 def _generate_random_date(
@@ -160,10 +163,12 @@ def _generate_random_date_column(
 
 
 def _generate_random_int_column(num_rows: int, min_int: int, max_int: int) -> List[int]:
+    """Generate a list of ints."""
     return [random.randint(min_int, max_int) for _ in range(num_rows)]
 
 
 def _generate_random_bool_column(num_rows: int) -> List[bool]:
+    """Generate a list of bools."""
     return [random.choice([True, False]) for _ in range(num_rows)]
 
 
@@ -273,11 +278,11 @@ def _mock_sentiment140(num_rows: int) -> Dataset:
 def _mock_cifar100(num_rows: int) -> Dataset:
     imgs = _generate_random_image_column(num_rows, (32, 32, 3), "PNG")
     unique_fine_labels = _generate_artificial_strings(
-        num_rows=100, num_unique=100, string_length=10
+        num_rows=100, num_unique=100, string_length=10, seed=42
     )
     fine_label = _generate_artificial_categories(num_rows, unique_fine_labels)
     unique_coarse_labels = _generate_artificial_strings(
-        num_rows=20, num_unique=20, string_length=10
+        num_rows=20, num_unique=20, string_length=10, seed=42
     )
 
     coarse_label = _generate_artificial_categories(num_rows, unique_coarse_labels)
@@ -348,15 +353,6 @@ def _mock_speach_commands(num_rows: int) -> Dataset:
         features=features,
     )
     return dataset
-
-
-def _mock_dict_dataset(
-    num_rows: List[int], split_names: List[str], function: Callable[[int], Dataset]
-) -> DatasetDict:
-    dataset_dict = {}
-    for params in zip(num_rows, split_names):
-        dataset_dict[params[1]] = function(params[0])
-    return datasets.DatasetDict(dataset_dict)
 
 
 dataset_name_to_mock_function = {
