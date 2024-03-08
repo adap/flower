@@ -14,14 +14,24 @@
 # ==============================================================================
 """Unit tests for ParametersRecord and Array."""
 
-
 import unittest
+from collections import OrderedDict
 from io import BytesIO
+from typing import List
 
 import numpy as np
+import pytest
 
 from ..constant import SType
-from .parametersrecord import Array
+from ..typing import NDArray
+from .parametersrecord import Array, ParametersRecord
+
+
+def _get_buffer_from_ndarray(array: NDArray) -> bytes:
+    """Return a bytes buffer froma given NumPy array."""
+    buffer = BytesIO()
+    np.save(buffer, array, allow_pickle=False)
+    return buffer.getvalue()
 
 
 class TestArray(unittest.TestCase):
@@ -31,16 +41,15 @@ class TestArray(unittest.TestCase):
         """Test the numpy method with valid Array instance."""
         # Prepare
         original_array = np.array([1, 2, 3], dtype=np.float32)
-        buffer = BytesIO()
-        np.save(buffer, original_array, allow_pickle=False)
-        buffer.seek(0)
+
+        buffer = _get_buffer_from_ndarray(original_array)
 
         # Execute
         array_instance = Array(
             dtype=str(original_array.dtype),
             shape=list(original_array.shape),
             stype=SType.NUMPY,
-            data=buffer.read(),
+            data=buffer,
         )
         converted_array = array_instance.numpy()
 
@@ -60,3 +69,36 @@ class TestArray(unittest.TestCase):
         # Execute and assert
         with self.assertRaises(TypeError):
             array_instance.numpy()
+
+
+@pytest.mark.parametrize(
+    "shape, dtype, expected_bytes",
+    [
+        (
+            [100],
+            "float32",
+            100 * 4,
+        ),
+        ([31, 31], "int8", 31 * 31 * 1),
+        (
+            [31, 153],
+            "bool_",
+            31 * 153 * 1,
+        ),  # bool_ is represented as a whole Byte in NumPy
+    ],
+)
+def test_count_bytes(shape: List[int], dtype: str, expected_bytes: int) -> None:
+    """Test bytes in a ParametersRecord are computed correctly."""
+    original_array = np.random.randn(*shape).astype(np.dtype(dtype))
+
+    buffer = _get_buffer_from_ndarray(original_array)
+
+    array_instance = Array(
+        dtype=str(original_array.dtype),
+        shape=list(original_array.shape),
+        stype=SType.NUMPY,
+        data=buffer,
+    )
+    p_record = ParametersRecord(OrderedDict({"data": array_instance}))
+
+    assert expected_bytes == p_record.count_bytes()
