@@ -219,16 +219,23 @@ async def run(
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals
 def start_vce(
-    client_app_module_name: str,
     backend_name: str,
     backend_config_json_stream: str,
-    working_dir: str,
+    app_dir: str,
     f_stop: asyncio.Event,
+    client_app: Optional[ClientApp] = None,
+    client_app_attr: Optional[str] = None,
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
     """Start Fleet API with the Simulation Engine."""
+    if client_app_attr is not None and client_app is not None:
+        raise ValueError(
+            "Both `client_app_attr` and `client_app` are provided, "
+            "but only one is allowed."
+        )
+
     if num_supernodes is not None and existing_nodes_mapping is not None:
         raise ValueError(
             "Both `num_supernodes` and `existing_nodes_mapping` are provided, "
@@ -290,12 +297,17 @@ def start_vce(
 
     def backend_fn() -> Backend:
         """Instantiate a Backend."""
-        return backend_type(backend_config, work_dir=working_dir)
+        return backend_type(backend_config, work_dir=app_dir)
 
-    log(INFO, "client_app_module_name = %s", client_app_module_name)
+    log(INFO, "client_app_attr = %s", client_app_attr)
 
+    # Load ClientApp if needed
     def _load() -> ClientApp:
-        app: ClientApp = load_client_app(client_app_module_name)
+
+        if client_app_attr:
+            app: ClientApp = load_client_app(client_app_attr)
+        if client_app:
+            app = client_app
         return app
 
     app_fn = _load
