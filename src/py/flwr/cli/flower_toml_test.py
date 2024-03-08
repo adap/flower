@@ -257,7 +257,7 @@ def test_validate_object_reference_fails() -> None:
 
     # Assert
     assert not is_valid
-    assert error == "Unable to load attribute runa from module flwr.cli.run"
+    assert error == "Unable to find attribute runa in module flwr.cli.run"
 
 
 def test_validate_flower_toml() -> None:
