@@ -19,7 +19,7 @@ import asyncio
 import json
 import traceback
 from logging import DEBUG, ERROR, INFO, WARN
-from typing import Callable, Dict, List, Optional, cast
+from typing import Callable, Dict, List, Optional
 
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.node_state import NodeState

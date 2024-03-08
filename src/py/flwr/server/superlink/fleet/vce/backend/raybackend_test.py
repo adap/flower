@@ -17,7 +17,7 @@
 import asyncio
 from math import pi
 from pathlib import Path
-from typing import Callable, Dict, Optional, Tuple, Union, cast
+from typing import Callable, Dict, Optional, Tuple, Union
 from unittest import IsolatedAsyncioTestCase
 
 import ray

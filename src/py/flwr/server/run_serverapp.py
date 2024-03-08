@@ -19,7 +19,7 @@ import argparse
 import sys
 from logging import DEBUG, WARN
 from pathlib import Path
-from typing import Optional, cast
+from typing import Optional
 
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.logger import log
