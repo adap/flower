@@ -20,7 +20,7 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass, field
 from logging import ERROR, WARN
-from typing import cast
+from typing import List, cast
 
 import flwr.common.recordset_compat as compat
 from flwr.common import (
@@ -87,6 +87,28 @@ class WorkflowState:  # pylint: disable=R0902
 
 class SecAggPlusWorkflow:
     """The workflow for the SecAgg+ protocol.
+
+    The SecAgg+ protocol ensures the secure summation of integer vectors owned by
+    multiple parties, without accessing any individual integer vector. This workflow
+    allows the server to compute the weighted average of model parameters across all
+    clients, ensuring individual contributions remain private. This is achieved by
+    clients sending a combination of their weights and a weighted version of their
+    model parameters, masked for privacy. Specifically, each client uploads
+    "[w, w * params]" with masks, where 'w' is the number of examples ('num_examples')
+    and 'params' represents the model parameters ('parameters') from the client's
+    `FitRes`. The server then aggregates these contributions to compute the weighted
+    average of model parameters.
+
+    The protocol involves four main stages:
+    - 'setup': Send SecAgg+ configuration to clients and collect their public keys.
+    - 'share keys': Broadcast public keys among clients and collect encrypted secret
+    key shares.
+    - 'collect masked inputs': Forward encrypted secret key shares to target clients
+    and collect masked model parameters.
+    - 'unmask': Collect secret key shares to decrypt and aggregate the model parameters.
+
+    Only the aggregated model parameters are exposed and passed to
+    `Strategy.aggregate_fit`, ensuring individual data privacy.
 
     Parameters
     ----------
@@ -172,10 +194,10 @@ class SecAggPlusWorkflow:
         state = WorkflowState()
 
         steps = (
-            self._setup,
-            self._share_keys,
-            self._collect_masked_input,
-            self._unmask,
+            self.setup_stage,
+            self.share_keys_stage,
+            self.collect_masked_input_stage,
+            self.unmask_stage,
         )
         for step in steps:
             if not step(driver, context, state):
@@ -247,9 +269,10 @@ class SecAggPlusWorkflow:
                 return False
         return True
 
-    def _setup(  # pylint: disable=R0912, R0914, R0915
+    def setup_stage(  # pylint: disable=R0912, R0914, R0915
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
+        """Execute the 'setup' stage."""
         # Obtain fit instructions
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
         current_round = cast(int, cfg[DefaultKey.CURRENT_ROUND])
@@ -357,9 +380,10 @@ class SecAggPlusWorkflow:
 
         return self._check_threshold(state)
 
-    def _share_keys(  # pylint: disable=R0914
+    def share_keys_stage(  # pylint: disable=R0914
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
+        """Execute the 'share keys' stage."""
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
 
         def make(nid: int) -> Message:
@@ -398,8 +422,8 @@ class SecAggPlusWorkflow:
         for msg in msgs:
             node_id = msg.metadata.src_node_id
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
-            dst_lst = cast(list[int], res_dict[Key.DESTINATION_LIST])
-            ctxt_lst = cast(list[bytes], res_dict[Key.CIPHERTEXT_LIST])
+            dst_lst = cast(List[int], res_dict[Key.DESTINATION_LIST])
+            ctxt_lst = cast(List[bytes], res_dict[Key.CIPHERTEXT_LIST])
             srcs += [node_id] * len(dst_lst)
             dsts += dst_lst
             ciphertexts += ctxt_lst
@@ -414,9 +438,10 @@ class SecAggPlusWorkflow:
 
         return self._check_threshold(state)
 
-    def _collect_masked_input(
+    def collect_masked_input_stage(
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
+        """Execute the 'collect masked input' stage."""
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
 
         # Send secret key shares to clients (plus FitIns) and collect masked input
@@ -451,7 +476,7 @@ class SecAggPlusWorkflow:
         masked_vector = None
         for msg in msgs:
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
-            bytes_list = cast(list[bytes], res_dict[Key.MASKED_PARAMETERS])
+            bytes_list = cast(List[bytes], res_dict[Key.MASKED_PARAMETERS])
             client_masked_vec = [bytes_to_ndarray(b) for b in bytes_list]
             if masked_vector is None:
                 masked_vector = client_masked_vec
@@ -463,9 +488,10 @@ class SecAggPlusWorkflow:
 
         return self._check_threshold(state)
 
-    def _unmask(  # pylint: disable=R0912, R0914
+    def unmask_stage(  # pylint: disable=R0912, R0914
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
+        """Execute the 'unmask' stage."""
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
         current_round = cast(int, cfg[DefaultKey.CURRENT_ROUND])
 
@@ -504,8 +530,8 @@ class SecAggPlusWorkflow:
             collected_shares_dict[nid] = []
         for msg in msgs:
             res_dict = msg.content.configs_records[RECORD_KEY_CONFIGS]
-            nids = cast(list[int], res_dict[Key.NODE_ID_LIST])
-            shares = cast(list[bytes], res_dict[Key.SHARE_LIST])
+            nids = cast(List[int], res_dict[Key.NODE_ID_LIST])
+            shares = cast(List[bytes], res_dict[Key.SHARE_LIST])
             for owner_nid, share in zip(nids, shares):
                 collected_shares_dict[owner_nid].append(share)
 
