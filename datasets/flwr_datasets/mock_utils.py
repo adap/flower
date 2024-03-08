@@ -29,9 +29,12 @@ from datasets import ClassLabel, Dataset, DatasetDict, Features, Value
 
 
 def _generate_artificial_strings(
-    num_rows: int, num_unique: int, string_length: int
+    num_rows: int, num_unique: int, string_length: int, seed: int = 42
 ) -> List[str]:
     """Create list of strings for categories or labels mocking.
+
+    Note to keep the seed the same if you reuse this function for in creation of the
+    dataset for multiple splits.
 
     Parameters
     ----------
@@ -41,12 +44,15 @@ def _generate_artificial_strings(
         Number of unique strings that will be initially created.
     string_length: int
         Length of each string.
+    seed: int
+        Seed to the random package.
 
     Returns
     -------
     string_column : List[str]
         List of generated strings.
     """
+    random.seed(seed)
     unique_strings: Set[str] = set()
     while len(unique_strings) < num_unique:
         random_str = "".join(
