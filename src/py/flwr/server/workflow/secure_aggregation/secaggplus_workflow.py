@@ -59,8 +59,8 @@ from flwr.server.compat.driver_client_proxy import DriverClientProxy
 from flwr.server.compat.legacy_context import LegacyContext
 from flwr.server.driver import Driver
 
-from ..default_constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD
-from ..default_constant import Key as DefaultKey
+from ..constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD
+from ..constant import Key as WorkflowKey
 
 
 @dataclass
@@ -274,7 +274,7 @@ class SecAggPlusWorkflow:
         """Execute the 'setup' stage."""
         # Obtain fit instructions
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
-        current_round = cast(int, cfg[DefaultKey.CURRENT_ROUND])
+        current_round = cast(int, cfg[WorkflowKey.CURRENT_ROUND])
         parameters = compat.parametersrecord_to_parameters(
             context.state.parameters_records[MAIN_PARAMS_RECORD],
             keep_input=True,
@@ -353,7 +353,7 @@ class SecAggPlusWorkflow:
                 content=content,
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
-                group_id=str(cfg[DefaultKey.CURRENT_ROUND]),
+                group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
                 ttl="",
             )
 
@@ -391,7 +391,7 @@ class SecAggPlusWorkflow:
                 content=content,
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
-                group_id=str(cfg[DefaultKey.CURRENT_ROUND]),
+                group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
                 ttl="",
             )
 
@@ -452,7 +452,7 @@ class SecAggPlusWorkflow:
                 content=content,
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
-                group_id=str(cfg[DefaultKey.CURRENT_ROUND]),
+                group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
                 ttl="",
             )
 
@@ -487,7 +487,7 @@ class SecAggPlusWorkflow:
     ) -> bool:
         """Execute the 'unmask' stage."""
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
-        current_round = cast(int, cfg[DefaultKey.CURRENT_ROUND])
+        current_round = cast(int, cfg[WorkflowKey.CURRENT_ROUND])
 
         # Construct active node IDs and dead node IDs
         active_nids = state.active_node_ids

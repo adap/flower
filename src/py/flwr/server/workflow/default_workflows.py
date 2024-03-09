@@ -27,7 +27,7 @@ from ..compat.app_utils import start_update_client_manager_thread
 from ..compat.legacy_context import LegacyContext
 from ..driver import Driver
 from ..typing import Workflow
-from .default_constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD, Key
+from .constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD, Key
 
 
 class DefaultWorkflow:
