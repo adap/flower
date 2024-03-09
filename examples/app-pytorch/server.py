@@ -1,7 +1,8 @@
 from typing import List, Tuple
 
 import flwr as fl
-from flwr.common import Metrics
+from flwr.common import Metrics, ndarrays_to_parameters
+from task import Net, get_parameters
 
 
 # Define metric aggregation function
@@ -25,17 +26,36 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     }
 
 
+# Initialize model parameters
+ndarrays = get_parameters(Net())
+parameters = ndarrays_to_parameters(ndarrays)
+
+
 # Define strategy
 strategy = fl.server.strategy.FedAvg(
     fraction_fit=1.0,  # Select all available clients
     fraction_evaluate=0.0,  # Disable evaluation
     min_available_clients=2,
     fit_metrics_aggregation_fn=weighted_average,
+    initial_parameters=parameters,
 )
+
+
+# Define config
+config = fl.server.ServerConfig(num_rounds=3)
 
 
 # Run via `flower-server-app server:app`
 app = fl.server.ServerApp(
-    config=fl.server.ServerConfig(num_rounds=3),
+    config=config,
     strategy=strategy,
 )
+
+
+# Legacy mode
+if __name__ == "__main__":
+    fl.server.start_server(
+        server_address="0.0.0.0:8080",
+        config=config,
+        strategy=strategy,
+    )
