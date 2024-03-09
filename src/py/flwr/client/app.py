@@ -445,6 +445,8 @@ def _start_client_internal(
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
+                log(INFO, "Received message")
+
                 # Handle control message
                 out_message, sleep_duration = handle_control_message(message)
                 if out_message:
@@ -489,6 +491,7 @@ def _start_client_internal(
                 finally:
                     # Send
                     send(reply_message)
+                    log(INFO, "Sent reply")
 
             # Unregister node
             if delete_node is not None:
