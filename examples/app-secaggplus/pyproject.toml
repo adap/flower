@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "app-secaggplus"
 version = "0.1.0"
-description = "Example usage of the SecAggPlusWorkflow."
+description = "Example usage of the SecAggPlusWorkflow and the secaggplus_mod."
 authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]

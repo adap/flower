@@ -9,8 +9,8 @@ from workflow_with_log import SecAggPlusWorkflowWithLogs
 strategy = fl.server.strategy.FedAvg(
     fraction_fit=1.0,  # Select all available clients
     fraction_evaluate=0.0,  # Disable evaluation
-    min_available_clients=3,
-    fit_metrics_aggregation_fn=lambda _: {},
+    min_available_clients=5,
+    fit_metrics_aggregation_fn=lambda _: {},  # No metrics aggregation
 )
 
 

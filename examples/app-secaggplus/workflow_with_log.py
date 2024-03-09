@@ -10,8 +10,8 @@ from flwr.common.secure_aggregation.quantization import quantize
 class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
     """The SecAggPlusWorkflow augmented for this example.
 
-    The class has extra logging, and it will amend one of the FitIns to inform the
-    target client to fake a dropout.
+    This class includes additional logging and modifies one of the FitIns to instruct
+    the target client to simulate a dropout.
     """
 
     node_ids = []
@@ -33,7 +33,7 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
             print(f"\t{_quantized[i]} from Client {i}")
         print(
             f"Numbers are rounded to integers stochastically during the quantization\n"
-            ", and thus not all entries are identical."
+            ", and thus entries may not be identical."
         )
         print(
             "The above raw vectors are hidden from the driver through adding masks.\n"
