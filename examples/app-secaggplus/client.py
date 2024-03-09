@@ -6,9 +6,11 @@ import flwr as fl
 from flwr.client.mod import secaggplus_mod
 
 
-# Define Flower client with the SecAgg+ protocol
+# Define the Flower client
 class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
+        # Instead of training and returning model parameters,
+        # the client directly returns [1.0, 1.0, 1.0] for demonstration purposes.
         ret_vec = [np.ones(3)]
         # Force a significant delay for testing purposes
         if "drop" in config and config["drop"]:

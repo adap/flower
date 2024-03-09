@@ -34,11 +34,10 @@ def main(driver: Driver, context: Context) -> None:
             reconstruction_threshold=2,
             timeout=5,
         )
-        # # Use the following code in practice
+        # # For real-world applications, use the following code instead
         # fit_workflow=SecAggPlusWorkflow(
-        #     num_shares=3,
-        #     reconstruction_threshold=2,
-        #     timeout=5,
+        #     num_shares=<number of shares>,
+        #     reconstruction_threshold=<reconstruction threshold>,
         # )
     )
 

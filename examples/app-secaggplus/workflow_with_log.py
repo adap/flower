@@ -1,4 +1,3 @@
-from flwr.common import Context
 from flwr.server import Driver, LegacyContext
 from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
     SecAggPlusWorkflow,
@@ -9,6 +8,11 @@ from flwr.common.secure_aggregation.quantization import quantize
 
 
 class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
+    """The SecAggPlusWorkflow augmented for this example.
+
+    The class has extra logging, and it will amend one of the FitIns to inform the
+    target client to fake a dropout.
+    """
 
     node_ids = []
 
