@@ -314,7 +314,7 @@ def main():
     strategy = fl.server.strategy.FedCiR(
         initial_parameters=initial_params,
         initial_generator_params=initial_gen_params,
-        gen_stats=initial_gen_params,
+        gen_stats=None,
         min_fit_clients=NUM_CLIENTS,
         min_available_clients=NUM_CLIENTS,
         min_evaluate_clients=NUM_CLIENTS,
@@ -380,4 +380,4 @@ if __name__ == "__main__":
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=2)
+    wandb.agent(sweep_id, function=main, count=1)

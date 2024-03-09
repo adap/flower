@@ -44,19 +44,41 @@ from collections import OrderedDict
 def info_vae_loss(recon_x, x, mu, logvar, y, y_pred, lambda_kl=0.01, lambda_info=10.0):
     # Reconstruction loss
     recon_loss = F.binary_cross_entropy(
-        recon_x, x.view(-1, 784), reduction="sum"
+        recon_x, x.view(-1, 784), reduction="mean"
     )  # Adjust for your data type
 
     # KL divergence loss
-    kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+    kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=1).mean()
 
     # Information loss (cross-entropy between predicted and true auxiliary variable)
-    info_loss = F.cross_entropy(y_pred, y, reduction="sum")
+    info_loss = F.cross_entropy(y_pred, y, reduction="mean")
 
     # Total loss
     total_loss = recon_loss + lambda_kl * kl_loss + lambda_info * info_loss
 
     return total_loss, recon_loss.item(), kl_loss.item(), info_loss.item()
+
+
+def vae_loss(recon_img, img, mu, logvar, beta=1.0, separate=False):
+    # Reconstruction loss using binary cross-entropy
+    condition = (recon_img >= 0.0) & (recon_img <= 1.0)
+    # assert torch.all(condition), "Values should be between 0 and 1"
+    if not torch.all(condition):
+        ValueError("Values should be between 0 and 1")
+        recon_img = torch.clamp(recon_img, 0.0, 1.0)
+    recon_loss = F.binary_cross_entropy(
+        recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="mean"
+    )
+
+    # KL divergence loss
+    kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=1).mean()
+
+    # Total VAE loss
+    total_loss = recon_loss + kld_loss * beta
+    if separate:
+        return total_loss, recon_loss.item(), kld_loss.item()
+    else:
+        return total_loss
 
 
 def pca_cluster_loss(z, torch_label, lambda_pca=2):
@@ -174,40 +196,54 @@ class FedCiR(FedAvg):
         self.prior_steps = prior_steps
         self.alignment_loader = alignment_dataloader
         self.stats_run_file = stats_run_file
-        # self.ref_mu, self.ref_logvar = self.compute_ref_stats()
-        self.ref_mu, self.ref_logvar = None, None
+        self.ref_mu, self.ref_logvar = self.compute_ref_stats()
+        # self.ref_mu, self.ref_logvar = None, None
         self.lambda_align_g = lambda_align_g
 
-    def compute_ref_stats(self, use_PCA=True):
-        ref_model = infoVAE(latent_size=self.latent_dim, dis_hidden_size=4).to(
-            self.device
-        )
+    def compute_ref_stats(self, use_PCA=True, given_labels=True):
+        if given_labels:
+            ref_model = infoVAE(latent_size=self.latent_dim, dis_hidden_size=4).to(
+                self.device
+            )
+        else:
+            ref_model = VAE(z_dim=self.latent_dim).to(self.device)
         opt_ref = torch.optim.Adam(ref_model.parameters(), lr=1e-3)
         for ep in range(self.prior_steps):
             for images, labels in self.alignment_loader:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
                 opt_ref.zero_grad()
-                recon_images, mu, logvar, y_pred, z = ref_model(images, labels)
-                total_loss, recon_loss, kl_loss, info_loss = info_vae_loss(
-                    recon_images,
-                    images,
-                    mu,
-                    logvar,
-                    labels,
-                    y_pred,
-                    1,
-                    10,
-                )
-                # pca_loss = pca_cluster_loss(z, labels)
-                # total_loss += pca_loss
+                if given_labels:
+                    recon_images, mu, logvar, y_pred, z = ref_model(images, labels)
+                    total_loss, recon_loss, kl_loss, info_loss = info_vae_loss(
+                        recon_images,
+                        images,
+                        mu,
+                        logvar,
+                        labels,
+                        y_pred,
+                        1,
+                        10,
+                    )
+                else:
+                    recon_images, mu, logvar = ref_model(images)
+                    total_loss, recon_loss, kl_loss = vae_loss(
+                        recon_images, images, mu, logvar, beta=1.0, separate=True
+                    )
+
                 total_loss.backward()
                 opt_ref.step()
             if ep % 100 == 0:
-                log(
-                    DEBUG,
-                    f"Epoch {ep}, Loss {total_loss.item()}, Recon Loss {recon_loss}, KL Loss {kl_loss}, Info Loss {info_loss}",
-                )
+                if given_labels:
+                    log(
+                        DEBUG,
+                        f"Epoch {ep}, Loss {total_loss.item()}, Recon Loss {recon_loss}, KL Loss {kl_loss}, Info Loss {info_loss}",
+                    )
+                else:
+                    log(
+                        DEBUG,
+                        f"Epoch {ep}, Loss {total_loss.item()}, Recon Loss {recon_loss}, KL Loss {kl_loss}",
+                    )
 
                 log(DEBUG, f"--------------------------------------------------")
         ref_model.eval()
@@ -217,7 +253,10 @@ class FedCiR(FedAvg):
             for images, labels in self.alignment_loader:
                 images = images.to(self.device)
                 labels = labels.to(self.device)
-                _, ref_mu, ref_logvar, _, _ = ref_model(images, labels)
+                if given_labels:
+                    _, ref_mu, ref_logvar, _, _ = ref_model(images, labels)
+                else:
+                    _, ref_mu, ref_logvar = ref_model(images)
                 test_latents.append(ref_mu.cpu().numpy())
                 test_labels.append(labels.cpu().numpy())
             test_latents = np.concatenate(test_latents, axis=0)
@@ -260,6 +299,7 @@ class FedCiR(FedAvg):
             # Create figure
             fig = go.Figure(data=traces, layout=layout)
             wandb.log({"latent_space": fig})
+            self.gen_stats = (ref_mu, ref_logvar)
         return ref_mu, ref_logvar
 
     def __repr__(self) -> str:
@@ -285,11 +325,7 @@ class FedCiR(FedAvg):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-        # config = {
-        #     "z_g": self.gen_stats.tensors[0],
-        #     "mu_g": self.gen_stats.tensors[1],
-        #     "log_var_g": self.gen_stats.tensors[2],
-        # }
+
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(server_round)
@@ -355,35 +391,16 @@ class FedCiR(FedAvg):
                 ValueError("Values should be between 0 and 1")
                 recon_img = torch.clamp(recon_img, 0.0, 1.0)
             recon_loss = F.binary_cross_entropy(
-                recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="sum"
+                recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="mean"
             )
 
             # KL divergence loss
             loss_align = 0.5 * (logvar_ref - logvar - 1) + (
                 logvar.exp() + (mu - mu_ref).pow(2)
             ) / (2 * logvar_ref.exp())
-            loss_align_reduced = loss_align.sum(dim=1).sum()
+            loss_align_reduced = loss_align.sum(dim=1).mean()
             # Total VAE loss
             total_loss = self.lambda_align_g * loss_align_reduced + recon_loss
-
-            return total_loss
-
-        def vae_loss(recon_img, img, mu, logvar, beta=1.0):
-            # Reconstruction loss using binary cross-entropy
-            condition = (recon_img >= 0.0) & (recon_img <= 1.0)
-            # assert torch.all(condition), "Values should be between 0 and 1"
-            if not torch.all(condition):
-                ValueError("Values should be between 0 and 1")
-                recon_img = torch.clamp(recon_img, 0.0, 1.0)
-            recon_loss = F.binary_cross_entropy(
-                recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="sum"
-            )
-
-            # KL divergence loss
-            kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-
-            # Total VAE loss
-            total_loss = recon_loss + kld_loss * self.lambda_align_g
 
             return total_loss
 
@@ -396,6 +413,13 @@ class FedCiR(FedAvg):
             VAE(z_dim=self.latent_dim).to(self.device)
             for _ in range(len(weights_results))
         ]
+        # load generator weights
+        gen_params_dict = zip(
+            self.gen_model.state_dict().keys(),
+            parameters_to_ndarrays(self.initial_generator_params),
+        )
+        gen_state_dict = OrderedDict({k: torch.tensor(v) for k, v in gen_params_dict})
+        self.gen_model.load_state_dict(gen_state_dict, strict=True)
         optimizer = torch.optim.Adam(self.gen_model.parameters(), lr=self.lr_gen)
 
         for temp_local_model in temp_local_models:
@@ -428,6 +452,7 @@ class FedCiR(FedAvg):
                     align_img,
                     mu_g,
                     logvar_g,
+                    self.lambda_align_g,
                 )
                 # loss = vae_loss_connect(
                 #     torch.stack(preds).mean(dim=0),
@@ -451,8 +476,10 @@ class FedCiR(FedAvg):
                         f"Skipping optimization at step {step} due to negligible loss",
                     )
         wandb.log(data={f"final_gen_loss": loss.item(), "client_round": server_round})
-        # z_g, mu_g, log_var_g = self.gen_model(one_hot_all_labels)
-        self.gen_stats = ndarrays_to_parameters(
+        # self.gen_stats = ndarrays_to_parameters(
+        #     [val.cpu().numpy() for _, val in self.gen_model.state_dict().items()]
+        # )
+        self.initial_generator_params = ndarrays_to_parameters(
             [val.cpu().numpy() for _, val in self.gen_model.state_dict().items()]
         )
         parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))

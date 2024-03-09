@@ -446,11 +446,11 @@ def vae_loss(recon_img, img, mu, logvar, beta=1.0):
     condition = (recon_img >= 0) & (recon_img <= 1)
     assert torch.all(condition), "Values should be between 0 and 1"
     recon_loss = F.binary_cross_entropy(
-        recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="sum"
+        recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="mean"
     )
 
     # KL divergence loss
-    kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+    kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=1).mean()
 
     # Total VAE loss
     total_loss = recon_loss + kld_loss * beta
@@ -471,19 +471,17 @@ def train_align(
     """Train the network on the training set."""
     net.train()
     temp_gen_model = VAE(z_dim=config["latent_dim"], encoder_only=True).to(device)
-    gen_weights = parameters_to_ndarrays(config["gen_params"])
-    params_dict = zip(temp_gen_model.state_dict().keys(), gen_weights)
-    state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
-    temp_gen_model.load_state_dict(state_dict, strict=True)
+    # TODO: load the weights from the global model
+    # gen_weights = parameters_to_ndarrays(config["gen_params"])
+    # params_dict = zip(temp_gen_model.state_dict().keys(), gen_weights)
+    # state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
+    # temp_gen_model.load_state_dict(state_dict, strict=True)
 
     temp_gen_model.eval()
-    # sample_per_class = config.get("sample_per_class", 100)
-    sample_per_class = config["sample_per_class"]
-
-    # lambda_reg = config.get("lambda_reg", 0.1)
+    fixed_gen_stats = config["gen_params"]
+    print(f"fixed mu: {fixed_gen_stats[0]}")
     lambda_reg = config["lambda_reg"]
 
-    # lambda_align = config.get("lambda_align", 100)
     lambda_align = config["lambda_align"]
     beta = config["beta"]
 
@@ -493,19 +491,22 @@ def train_align(
             optimizer.zero_grad()
             recon_images, mu, logvar = net(images)
             vae_loss1 = vae_loss(recon_images, images, mu, logvar, beta)
-            z_g, mu_g, logvar_g = temp_gen_model(images)
-            vae_loss2 = vae_loss(net.decoder(z_g), images, mu_g, logvar_g, beta)
-            loss = vae_loss1 + lambda_reg * vae_loss2
+            # z_g, mu_g, logvar_g = temp_gen_model(images)
+            # vae_loss2 = vae_loss(net.decoder(z_g), images, mu_g, logvar_g, beta)
+            loss = vae_loss1
+            # loss+= lambda_reg * vae_loss2
             accumulate_align_loss = 0
             for align_img, _ in align_loader:
                 align_img = align_img.to(device)
-                _, mu_g, log_var_g = temp_gen_model(align_img)
+                # _, mu_g, log_var_g = temp_gen_model(align_img)
                 _, mu, log_var = net(align_img)
+                mu_g, log_var_g = fixed_gen_stats
 
                 loss_align = 0.5 * (log_var_g - log_var - 1) + (
                     log_var.exp() + (mu - mu_g).pow(2)
                 ) / (2 * log_var_g.exp())
-                accumulate_align_loss += loss_align.sum(dim=1).sum()
+                accumulate_align_loss += loss_align.sum(dim=1).mean()
+
             loss_align_reduced = accumulate_align_loss
             loss += lambda_align * loss_align_reduced
             loss.backward()
@@ -513,7 +514,7 @@ def train_align(
 
     return (
         vae_loss1.item(),
-        lambda_reg * vae_loss2.item(),
+        0,  # lambda_reg * vae_loss2.item(),
         lambda_align * loss_align_reduced.item(),
     )
 
