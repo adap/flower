@@ -17,7 +17,7 @@
 
 import concurrent.futures
 import timeit
-from logging import DEBUG, INFO
+from logging import INFO, WARN
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
@@ -33,10 +33,12 @@ from flwr.common import (
 )
 from flwr.common.logger import log
 from flwr.common.typing import GetParametersIns
-from flwr.server.client_manager import ClientManager
+from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import FedAvg, Strategy
+
+from .server_config import ServerConfig
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -87,7 +89,7 @@ class Server:
 
         # Initialize parameters
         log(INFO, "Initializing global parameters")
-        self.parameters = self._get_initial_parameters(timeout=timeout)
+        self.parameters = self._get_initial_parameters(server_round=0, timeout=timeout)
         log(INFO, "Evaluating initial parameters")
         res = self.strategy.evaluate(0, parameters=self.parameters)
         if res is not None:
@@ -171,7 +173,7 @@ class Server:
             log(INFO, "evaluate_round %s: no clients selected, cancel", server_round)
             return None
         log(
-            DEBUG,
+            INFO,
             "evaluate_round %s: strategy sampled %s clients (out of %s)",
             server_round,
             len(client_instructions),
@@ -183,9 +185,10 @@ class Server:
             client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
+            group_id=server_round,
         )
         log(
-            DEBUG,
+            INFO,
             "evaluate_round %s received %s results and %s failures",
             server_round,
             len(results),
@@ -220,7 +223,7 @@ class Server:
             log(INFO, "fit_round %s: no clients selected, cancel", server_round)
             return None
         log(
-            DEBUG,
+            INFO,
             "fit_round %s: strategy sampled %s clients (out of %s)",
             server_round,
             len(client_instructions),
@@ -232,9 +235,10 @@ class Server:
             client_instructions=client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
+            group_id=server_round,
         )
         log(
-            DEBUG,
+            INFO,
             "fit_round %s received %s results and %s failures",
             server_round,
             len(results),
@@ -262,7 +266,9 @@ class Server:
             timeout=timeout,
         )
 
-    def _get_initial_parameters(self, timeout: Optional[float]) -> Parameters:
+    def _get_initial_parameters(
+        self, server_round: int, timeout: Optional[float]
+    ) -> Parameters:
         """Get initial parameters from one of the available clients."""
         # Server-side parameter initialization
         parameters: Optional[Parameters] = self.strategy.initialize_parameters(
@@ -276,7 +282,9 @@ class Server:
         log(INFO, "Requesting initial parameters from one random client")
         random_client = self._client_manager.sample(1)[0]
         ins = GetParametersIns(config={})
-        get_parameters_res = random_client.get_parameters(ins=ins, timeout=timeout)
+        get_parameters_res = random_client.get_parameters(
+            ins=ins, timeout=timeout, group_id=server_round
+        )
         log(INFO, "Received initial parameters from one random client")
         return get_parameters_res.parameters
 
@@ -319,6 +327,7 @@ def reconnect_client(
     disconnect = client.reconnect(
         reconnect,
         timeout=timeout,
+        group_id=None,
     )
     return client, disconnect
 
@@ -327,11 +336,12 @@ def fit_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
+    group_id: int,
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         submitted_fs = {
-            executor.submit(fit_client, client_proxy, ins, timeout)
+            executor.submit(fit_client, client_proxy, ins, timeout, group_id)
             for client_proxy, ins in client_instructions
         }
         finished_fs, _ = concurrent.futures.wait(
@@ -350,10 +360,10 @@ def fit_clients(
 
 
 def fit_client(
-    client: ClientProxy, ins: FitIns, timeout: Optional[float]
+    client: ClientProxy, ins: FitIns, timeout: Optional[float], group_id: int
 ) -> Tuple[ClientProxy, FitRes]:
     """Refine parameters on a single client."""
-    fit_res = client.fit(ins, timeout=timeout)
+    fit_res = client.fit(ins, timeout=timeout, group_id=group_id)
     return client, fit_res
 
 
@@ -386,11 +396,12 @@ def evaluate_clients(
     client_instructions: List[Tuple[ClientProxy, EvaluateIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
+    group_id: int,
 ) -> EvaluateResultsAndFailures:
     """Evaluate parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         submitted_fs = {
-            executor.submit(evaluate_client, client_proxy, ins, timeout)
+            executor.submit(evaluate_client, client_proxy, ins, timeout, group_id)
             for client_proxy, ins in client_instructions
         }
         finished_fs, _ = concurrent.futures.wait(
@@ -412,9 +423,10 @@ def evaluate_client(
     client: ClientProxy,
     ins: EvaluateIns,
     timeout: Optional[float],
+    group_id: int,
 ) -> Tuple[ClientProxy, EvaluateRes]:
     """Evaluate parameters on a single client."""
-    evaluate_res = client.evaluate(ins, timeout=timeout)
+    evaluate_res = client.evaluate(ins, timeout=timeout, group_id=group_id)
     return client, evaluate_res
 
 
@@ -441,3 +453,44 @@ def _handle_finished_future_after_evaluate(
 
     # Not successful, client returned a result where the status code is not OK
     failures.append(result)
+
+
+def init_defaults(
+    server: Optional[Server],
+    config: Optional[ServerConfig],
+    strategy: Optional[Strategy],
+    client_manager: Optional[ClientManager],
+) -> Tuple[Server, ServerConfig]:
+    """Create server instance if none was given."""
+    if server is None:
+        if client_manager is None:
+            client_manager = SimpleClientManager()
+        if strategy is None:
+            strategy = FedAvg()
+        server = Server(client_manager=client_manager, strategy=strategy)
+    elif strategy is not None:
+        log(WARN, "Both server and strategy were provided, ignoring strategy")
+
+    # Set default config values
+    if config is None:
+        config = ServerConfig()
+
+    return server, config
+
+
+def run_fl(
+    server: Server,
+    config: ServerConfig,
+) -> History:
+    """Train a model on the given server and return the History object."""
+    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
+    log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
+    log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
+    log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
+    log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
+    log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
+
+    # Graceful shutdown
+    server.disconnect_all_clients(timeout=config.round_timeout)
+
+    return hist

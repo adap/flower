@@ -24,12 +24,7 @@ import numpy as np
 import flwr
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
-from flwr.common.constant import (
-    MESSAGE_TYPE_EVALUATE,
-    MESSAGE_TYPE_FIT,
-    MESSAGE_TYPE_GET_PARAMETERS,
-    MESSAGE_TYPE_GET_PROPERTIES,
-)
+from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.typing import (
     Code,
     Config,
@@ -57,16 +52,16 @@ def _make_task(
     res: Union[GetParametersRes, GetPropertiesRes, FitRes, EvaluateRes]
 ) -> task_pb2.Task:  # pylint: disable=E1101
     if isinstance(res, GetParametersRes):
-        message_type = MESSAGE_TYPE_GET_PARAMETERS
+        message_type = MessageTypeLegacy.GET_PARAMETERS
         recordset = compat.getparametersres_to_recordset(res, True)
     elif isinstance(res, GetPropertiesRes):
-        message_type = MESSAGE_TYPE_GET_PROPERTIES
+        message_type = MessageTypeLegacy.GET_PROPERTIES
         recordset = compat.getpropertiesres_to_recordset(res)
     elif isinstance(res, FitRes):
-        message_type = MESSAGE_TYPE_FIT
+        message_type = MessageType.TRAIN
         recordset = compat.fitres_to_recordset(res, True)
     elif isinstance(res, EvaluateRes):
-        message_type = MESSAGE_TYPE_EVALUATE
+        message_type = MessageType.EVALUATE
         recordset = compat.evaluateres_to_recordset(res)
     else:
         raise ValueError(f"Unsupported type: {type(res)}")
@@ -103,7 +98,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 task_res_list=[
                     task_pb2.TaskRes(  # pylint: disable=E1101
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                        group_id="",
+                        group_id=str(0),
                         run_id=0,
                         task=_make_task(
                             GetPropertiesRes(
@@ -123,7 +118,9 @@ class DriverClientProxyTestCase(unittest.TestCase):
         )
 
         # Execute
-        value: flwr.common.GetPropertiesRes = client.get_properties(ins, timeout=None)
+        value: flwr.common.GetPropertiesRes = client.get_properties(
+            ins, timeout=None, group_id=0
+        )
 
         # Assert
         assert value.properties["tensor_type"] == "numpy.ndarray"
@@ -141,7 +138,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 task_res_list=[
                     task_pb2.TaskRes(  # pylint: disable=E1101
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                        group_id="",
+                        group_id=str(0),
                         run_id=0,
                         task=_make_task(
                             GetParametersRes(
@@ -160,7 +157,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
 
         # Execute
         value: flwr.common.GetParametersRes = client.get_parameters(
-            ins=get_parameters_ins, timeout=None
+            ins=get_parameters_ins, timeout=None, group_id=0
         )
 
         # Assert
@@ -179,7 +176,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 task_res_list=[
                     task_pb2.TaskRes(  # pylint: disable=E1101
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                        group_id="",
+                        group_id=str(1),
                         run_id=0,
                         task=_make_task(
                             FitRes(
@@ -200,7 +197,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
 
         # Execute
-        fit_res = client.fit(ins=ins, timeout=None)
+        fit_res = client.fit(ins=ins, timeout=None, group_id=1)
 
         # Assert
         assert fit_res.parameters.tensor_type == "np"
@@ -220,7 +217,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 task_res_list=[
                     task_pb2.TaskRes(  # pylint: disable=E1101
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                        group_id="",
+                        group_id=str(1),
                         run_id=0,
                         task=_make_task(
                             EvaluateRes(
@@ -241,7 +238,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         evaluate_ins = EvaluateIns(parameters, {})
 
         # Execute
-        evaluate_res = client.evaluate(evaluate_ins, timeout=None)
+        evaluate_res = client.evaluate(evaluate_ins, timeout=None, group_id=1)
 
         # Assert
         assert 0.0 == evaluate_res.loss

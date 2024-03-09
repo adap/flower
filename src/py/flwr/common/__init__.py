@@ -15,11 +15,14 @@
 """Common components shared between server and client."""
 
 
+from .constant import MessageType as MessageType
+from .constant import MessageTypeLegacy as MessageTypeLegacy
 from .context import Context as Context
 from .date import now as now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
 from .logger import configure as configure
 from .logger import log as log
+from .message import Error as Error
 from .message import Message as Message
 from .message import Metadata as Metadata
 from .parameter import bytes_to_ndarray as bytes_to_ndarray
@@ -31,6 +34,7 @@ from .record import ConfigsRecord as ConfigsRecord
 from .record import MetricsRecord as MetricsRecord
 from .record import ParametersRecord as ParametersRecord
 from .record import RecordSet as RecordSet
+from .record import array_from_numpy as array_from_numpy
 from .telemetry import EventType as EventType
 from .telemetry import event as event
 from .typing import ClientMessage as ClientMessage
@@ -58,6 +62,7 @@ from .typing import Status as Status
 
 __all__ = [
     "Array",
+    "array_from_numpy",
     "bytes_to_ndarray",
     "ClientMessage",
     "Code",
@@ -72,6 +77,7 @@ __all__ = [
     "EventType",
     "FitIns",
     "FitRes",
+    "Error",
     "GetParametersIns",
     "GetParametersRes",
     "GetPropertiesIns",
@@ -79,6 +85,8 @@ __all__ = [
     "GRPC_MAX_MESSAGE_LENGTH",
     "log",
     "Message",
+    "MessageType",
+    "MessageTypeLegacy",
     "Metadata",
     "Metrics",
     "MetricsAggregationFn",

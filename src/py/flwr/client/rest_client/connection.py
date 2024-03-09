@@ -27,6 +27,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
+from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -61,6 +62,7 @@ PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 def http_request_response(
     server_address: str,
     insecure: bool,  # pylint: disable=unused-argument
+    retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[
         Union[bytes, str]
@@ -84,6 +86,12 @@ def http_request_response(
         The IPv6 address of the server with `http://` or `https://`.
         If the Flower server runs on the same machine
         on port 8080, then `server_address` would be `"http://[::]:8080"`.
+    insecure : bool
+        Unused argument present for compatibilty.
+    retry_invoker: RetryInvoker
+        `RetryInvoker` object that will try to reconnect the client to the server
+        after REST connection errors. If None, the client will only try to
+        reconnect once after a failure.
     max_message_length : int
         Ignored, only present to preserve API-compatibility.
     root_certificates : Optional[Union[bytes, str]] (default: None)
@@ -134,7 +142,8 @@ def http_request_response(
         create_node_req_proto = CreateNodeRequest()
         create_node_req_bytes: bytes = create_node_req_proto.SerializeToString()
 
-        res = requests.post(
+        res = retry_invoker.invoke(
+            requests.post,
             url=f"{base_url}/{PATH_CREATE_NODE}",
             headers={
                 "Accept": "application/protobuf",
@@ -177,7 +186,8 @@ def http_request_response(
         node: Node = cast(Node, node_store[KEY_NODE])
         delete_node_req_proto = DeleteNodeRequest(node=node)
         delete_node_req_req_bytes: bytes = delete_node_req_proto.SerializeToString()
-        res = requests.post(
+        res = retry_invoker.invoke(
+            requests.post,
             url=f"{base_url}/{PATH_DELETE_NODE}",
             headers={
                 "Accept": "application/protobuf",
@@ -218,7 +228,8 @@ def http_request_response(
         pull_task_ins_req_bytes: bytes = pull_task_ins_req_proto.SerializeToString()
 
         # Request instructions (task) from server
-        res = requests.post(
+        res = retry_invoker.invoke(
+            requests.post,
             url=f"{base_url}/{PATH_PULL_TASK_INS}",
             headers={
                 "Accept": "application/protobuf",
@@ -298,7 +309,8 @@ def http_request_response(
         )
 
         # Send ClientMessage to server
-        res = requests.post(
+        res = retry_invoker.invoke(
+            requests.post,
             url=f"{base_url}/{PATH_PUSH_TASK_RES}",
             headers={
                 "Accept": "application/protobuf",

@@ -20,10 +20,12 @@ import sys
 import time
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Callable, ContextManager, Optional, Tuple, Union
+from typing import Callable, ContextManager, Optional, Tuple, Type, Union
+
+from grpc import RpcError
 
 from flwr.client.client import Client
-from flwr.client.clientapp import ClientApp
+from flwr.client.client_app import ClientApp
 from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
@@ -34,9 +36,11 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
 )
+from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
+from flwr.common.retry_invoker import RetryInvoker, exponential
 
-from .clientapp import load_client_app
+from .client_app import load_client_app
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
@@ -103,8 +107,10 @@ def run_client_app() -> None:
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
         insecure=args.insecure,
+        max_retries=args.max_retries,
+        max_wait_time=args.max_wait_time,
     )
-    event(EventType.RUN_CLIENT_APP_LEAVE)
+    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
 def _parse_args_run_client_app() -> argparse.ArgumentParser:
@@ -139,6 +145,22 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         "--server",
         default="0.0.0.0:9092",
         help="Server address",
+    )
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=None,
+        help="The maximum number of times the client will try to connect to the"
+        "server before giving up in case of a connection error. By default,"
+        "it is set to None, meaning there is no limit to the number of tries.",
+    )
+    parser.add_argument(
+        "--max-wait-time",
+        type=float,
+        default=None,
+        help="The maximum duration before the client stops trying to"
+        "connect to the server in case of connection error. By default, it"
+        "is set to None, meaning there is no limit to the total time.",
     )
     parser.add_argument(
         "--dir",
@@ -179,6 +201,8 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    max_retries: Optional[int] = None,
+    max_wait_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -212,6 +236,14 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    max_retries: Optional[int] (default: None)
+        The maximum number of times the client will try to connect to the
+        server before giving up in case of a connection error. If set to None,
+        there is no limit to the number of tries.
+    max_wait_time: Optional[float] (default: None)
+        The maximum duration before the client stops trying to
+        connect to the server in case of connection error.
+        If set to None, there is no limit to the total time.
 
     Examples
     --------
@@ -253,6 +285,8 @@ def start_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
+        max_retries=max_retries,
+        max_wait_time=max_wait_time,
     )
     event(EventType.START_CLIENT_LEAVE)
 
@@ -271,6 +305,8 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    max_retries: Optional[int] = None,
+    max_wait_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -298,7 +334,7 @@ def _start_client_internal(
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
-    insecure : bool (default: True)
+    insecure : Optional[bool] (default: None)
         Starts an insecure gRPC connection when True. Enables HTTPS connection
         when False, using system certificates if `root_certificates` is None.
     transport : Optional[str] (default: None)
@@ -306,6 +342,14 @@ def _start_client_internal(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    max_retries: Optional[int] (default: None)
+        The maximum number of times the client will try to connect to the
+        server before giving up in case of a connection error. If set to None,
+        there is no limit to the number of tries.
+    max_wait_time: Optional[float] (default: None)
+        The maximum duration before the client stops trying to
+        connect to the server in case of connection error.
+        If set to None, there is no limit to the total time.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -337,7 +381,45 @@ def _start_client_internal(
     # Both `client` and `client_fn` must not be used directly
 
     # Initialize connection context manager
-    connection, address = _init_connection(transport, server_address)
+    connection, address, connection_error_type = _init_connection(
+        transport, server_address
+    )
+
+    retry_invoker = RetryInvoker(
+        wait_factory=exponential,
+        recoverable_exceptions=connection_error_type,
+        max_tries=max_retries,
+        max_time=max_wait_time,
+        on_giveup=lambda retry_state: (
+            log(
+                WARN,
+                "Giving up reconnection after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+            if retry_state.tries > 1
+            else None
+        ),
+        on_success=lambda retry_state: (
+            log(
+                INFO,
+                "Connection successful after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+            if retry_state.tries > 1
+            else None
+        ),
+        on_backoff=lambda retry_state: (
+            log(WARN, "Connection attempt failed, retrying...")
+            if retry_state.tries == 1
+            else log(
+                DEBUG,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
+        ),
+    )
 
     node_state = NodeState()
 
@@ -346,6 +428,7 @@ def _start_client_internal(
         with connection(
             address,
             insecure,
+            retry_invoker,
             grpc_max_message_length,
             root_certificates,
         ) as conn:
@@ -361,6 +444,8 @@ def _start_client_internal(
                 if message is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
+
+                log(INFO, "Received message")
 
                 # Handle control message
                 out_message, sleep_duration = handle_control_message(message)
@@ -388,6 +473,7 @@ def _start_client_internal(
 
                 # Send
                 send(out_message)
+                log(INFO, "Sent reply")
 
             # Unregister node
             if delete_node is not None:
@@ -506,11 +592,9 @@ def start_numpy_client(
     )
 
 
-def _init_connection(
-    transport: Optional[str], server_address: str
-) -> Tuple[
+def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     Callable[
-        [str, bool, int, Union[bytes, str, None]],
+        [str, bool, RetryInvoker, int, Union[bytes, str, None]],
         ContextManager[
             Tuple[
                 Callable[[], Optional[Message]],
@@ -521,6 +605,7 @@ def _init_connection(
         ],
     ],
     str,
+    Type[Exception],
 ]:
     # Parse IP address
     parsed_address = parse_address(server_address)
@@ -536,6 +621,8 @@ def _init_connection(
     # Use either gRPC bidirectional streaming or REST request/response
     if transport == TRANSPORT_TYPE_REST:
         try:
+            from requests.exceptions import ConnectionError as RequestsConnectionError
+
             from .rest_client.connection import http_request_response
         except ModuleNotFoundError:
             sys.exit(MISSING_EXTRA_REST)
@@ -544,14 +631,14 @@ def _init_connection(
                 "When using the REST API, please provide `https://` or "
                 "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
             )
-        connection = http_request_response
+        connection, error_type = http_request_response, RequestsConnectionError
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
-        connection = grpc_request_response
+        connection, error_type = grpc_request_response, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection = grpc_connection
+        connection, error_type = grpc_connection, RpcError
     else:
         raise ValueError(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
         )
 
-    return connection, address
+    return connection, address, error_type
