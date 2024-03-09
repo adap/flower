@@ -1,64 +1,96 @@
+"""$project_name: A Flower / PyTorch app."""
+
+import warnings
+from collections import OrderedDict
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-from torchvision.transforms import ToTensor, Normalize, Compose
-
-
-# transformation to convert images to tensors and apply normalization
-def apply_transforms(batch):
-    transforms = Compose([ToTensor(), Normalize((0.1307,), (0.3081,))])
-    batch["image"] = [transforms(img) for img in batch["image"]]
-    return batch
+from torch.utils.data import DataLoader
+from torchvision.datasets import CIFAR10
+from torchvision.transforms import Compose, Normalize, ToTensor
+from tqdm import tqdm
 
 
-# Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+
 class Net(nn.Module):
-    def __init__(self, num_classes: int = 10) -> None:
+    """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
+
+    def __init__(self) -> None:
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(1, 6, 5)
+        self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 4 * 4, 120)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
         self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, num_classes)
+        self.fc3 = nn.Linear(84, 10)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 4 * 4)
+        x = x.view(-1, 16 * 5 * 5)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+        return self.fc3(x)
 
 
-# borrowed from Pytorch quickstart example
-def train(net, trainloader, optim, epochs, device: str):
-    """Train the network on the training set."""
-    criterion = torch.nn.CrossEntropyLoss()
+def load_data():
+    """Load CIFAR-10 (training and test set)."""
+    trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    trainset = CIFAR10("./data", train=True, download=True, transform=trf)
+    testset = CIFAR10("./data", train=False, download=True, transform=trf)
+    return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
+
+
+def train(net, trainloader, valloader, epochs, device):
+    """Train the model on the training set."""
+    print("Starting training...")
+    net.to(device)  # move model to GPU if available
+    criterion = torch.nn.CrossEntropyLoss().to(device)
+    optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     net.train()
     for _ in range(epochs):
-        for batch in trainloader:
-            images, labels = batch["image"].to(device), batch["label"].to(device)
-            optim.zero_grad()
+        for images, labels in trainloader:
+            images, labels = images.to(device), labels.to(device)
+            optimizer.zero_grad()
             loss = criterion(net(images), labels)
             loss.backward()
-            optim.step()
+            optimizer.step()
+
+    train_loss, train_acc = test(net, trainloader)
+    val_loss, val_acc = test(net, valloader)
+
+    results = {
+        "train_loss": train_loss,
+        "train_accuracy": train_acc,
+        "val_loss": val_loss,
+        "val_accuracy": val_acc,
+    }
+    return results
 
 
-# borrowed from Pytorch quickstart example
-def test(net, testloader, device: str):
-    """Validate the network on the entire test set."""
+def test(net, testloader):
+    """Validate the model on the test set."""
+    net.to(DEVICE)
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
-    net.eval()
     with torch.no_grad():
-        for data in testloader:
-            images, labels = data["image"].to(device), data["label"].to(device)
-            outputs = net(images)
+        for images, labels in tqdm(testloader):
+            outputs = net(images.to(DEVICE))
+            labels = labels.to(DEVICE)
             loss += criterion(outputs, labels).item()
-            _, predicted = torch.max(outputs.data, 1)
-            correct += (predicted == labels).sum().item()
+            correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy
+
+
+def get_params(net):
+    return [val.cpu().numpy() for _, val in net.state_dict().items()]
+
+
+def set_params(net, parameters):
+    params_dict = zip(net.state_dict().keys(), parameters)
+    state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+    net.load_state_dict(state_dict, strict=True)
