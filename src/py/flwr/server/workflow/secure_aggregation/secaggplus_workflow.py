@@ -209,17 +209,17 @@ class SecAggPlusWorkflow:
         if not isinstance(self.num_shares, (int, float)):
             raise TypeError("`num_shares` must be of type int or float.")
         if isinstance(self.num_shares, int):
-            if self.num_shares <= 2:
+            if self.num_shares == 1:
+                self.num_shares = 1.0
+            elif self.num_shares <= 2:
                 raise ValueError("`num_shares` as an integer must be greater than 2.")
-            if self.num_shares > self.modulus_range / self.quantization_range:
+            elif self.num_shares > self.modulus_range / self.quantization_range:
                 log(
                     WARN,
                     "A `num_shares` larger than `mod_range / target_range` "
                     "will potentially cause overflow when computing the aggregated "
                     "model parameters.",
                 )
-            if self.num_shares == 1:
-                self.num_shares = 1.0
         elif self.num_shares <= 0:
             raise ValueError("`num_shares` as a float must be greater than 0.")
 
@@ -227,13 +227,13 @@ class SecAggPlusWorkflow:
         if not isinstance(self.reconstruction_threshold, (int, float)):
             raise TypeError("`reconstruction_threshold` must be of type int or float.")
         if isinstance(self.reconstruction_threshold, int):
-            if isinstance(self.num_shares, int):
+            if self.reconstruction_threshold == 1:
+                self.reconstruction_threshold = 1.0
+            elif isinstance(self.num_shares, int):
                 if self.reconstruction_threshold >= self.num_shares:
                     raise ValueError(
                         "`reconstruction_threshold` must be less than `num_shares`."
                     )
-            if self.reconstruction_threshold == 1:
-                self.reconstruction_threshold = 1.0
         else:
             if not 0 < self.reconstruction_threshold <= 1:
                 raise ValueError(
