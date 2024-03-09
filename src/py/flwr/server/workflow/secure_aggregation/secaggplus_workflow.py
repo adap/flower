@@ -15,12 +15,10 @@
 """Workflow for the SecAgg+ protocol."""
 
 
-from __future__ import annotations
-
 import random
 from dataclasses import dataclass, field
 from logging import ERROR, WARN
-from typing import List, cast
+from typing import Dict, List, Optional, Set, Union, cast
 
 import flwr.common.recordset_compat as compat
 from flwr.common import (
@@ -69,19 +67,19 @@ from ..default_constant import Key as DefaultKey
 class WorkflowState:  # pylint: disable=R0902
     """The state of the SecAgg+ protocol."""
 
-    nid_to_fitins: dict[int, RecordSet] = field(default_factory=dict)
-    sampled_node_ids: set[int] = field(default_factory=set)
-    active_node_ids: set[int] = field(default_factory=set)
+    nid_to_fitins: Dict[int, RecordSet] = field(default_factory=dict)
+    sampled_node_ids: Set[int] = field(default_factory=set)
+    active_node_ids: Set[int] = field(default_factory=set)
     num_shares: int = 0
     threshold: int = 0
     clipping_range: float = 0.0
     quantization_range: int = 0
     mod_range: int = 0
     max_weight: float = 0.0
-    nid_to_neighbours: dict[int, set[int]] = field(default_factory=dict)
-    nid_to_publickeys: dict[int, list[bytes]] = field(default_factory=dict)
-    forward_srcs: dict[int, list[int]] = field(default_factory=dict)
-    forward_ciphertexts: dict[int, list[bytes]] = field(default_factory=dict)
+    nid_to_neighbours: Dict[int, Set[int]] = field(default_factory=dict)
+    nid_to_publickeys: Dict[int, List[bytes]] = field(default_factory=dict)
+    forward_srcs: Dict[int, List[int]] = field(default_factory=dict)
+    forward_ciphertexts: Dict[int, List[bytes]] = field(default_factory=dict)
     aggregate_ndarrays: NDArrays = field(default_factory=list)
 
 
@@ -167,14 +165,14 @@ class SecAggPlusWorkflow:
 
     def __init__(  # pylint: disable=R0913
         self,
-        num_shares: int | float,
-        reconstruction_threshold: int | float,
+        num_shares: Union[int, float],
+        reconstruction_threshold: Union[int, float],
         *,
         max_weight: float = 1000.0,
         clipping_range: float = 8.0,
         quantization_range: int = 4194304,
         modulus_range: int = 4294967296,
-        timeout: float | None = None,
+        timeout: Optional[float] = None,
     ) -> None:
         self.num_shares = num_shares
         self.reconstruction_threshold = reconstruction_threshold
@@ -406,13 +404,13 @@ class SecAggPlusWorkflow:
         }
 
         # Build forward packet list dictionary
-        srcs: list[int] = []
-        dsts: list[int] = []
-        ciphertexts: list[bytes] = []
-        fwd_ciphertexts: dict[int, list[bytes]] = {
+        srcs: List[int] = []
+        dsts: List[int] = []
+        ciphertexts: List[bytes] = []
+        fwd_ciphertexts: Dict[int, List[bytes]] = {
             nid: [] for nid in state.active_node_ids
         }  # dest node ID -> list of ciphertexts
-        fwd_srcs: dict[int, list[int]] = {
+        fwd_srcs: Dict[int, List[int]] = {
             nid: [] for nid in state.active_node_ids
         }  # dest node ID -> list of src node IDs
         for msg in msgs:
@@ -521,7 +519,7 @@ class SecAggPlusWorkflow:
         }
 
         # Build collected shares dict
-        collected_shares_dict: dict[int, list[bytes]] = {}
+        collected_shares_dict: Dict[int, List[bytes]] = {}
         for nid in state.sampled_node_ids:
             collected_shares_dict[nid] = []
         for msg in msgs:

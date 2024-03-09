@@ -347,7 +347,7 @@ def _setup(
 
     state.sk1, state.pk1 = private_key_to_bytes(sk1), public_key_to_bytes(pk1)
     state.sk2, state.pk2 = private_key_to_bytes(sk2), public_key_to_bytes(pk2)
-    log(INFO, "Client %d: stage 0 completes. uploading public keys...", state.nid)
+    log(INFO, "Node %d: stage 0 completes. uploading public keys...", state.nid)
     return {Key.PUBLIC_KEY_1: state.pk1, Key.PUBLIC_KEY_2: state.pk2}
 
 
@@ -357,7 +357,7 @@ def _share_keys(
 ) -> Dict[str, ConfigsRecordValues]:
     named_bytes_tuples = cast(Dict[str, Tuple[bytes, bytes]], configs)
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_bytes_tuples.items()}
-    log(INFO, "Client %d: starting stage 1...", state.nid)
+    log(INFO, "Node %d: starting stage 1...", state.nid)
     state.public_keys_dict = key_dict
 
     # Check if the size is larger than threshold
@@ -409,7 +409,7 @@ def _share_keys(
             dsts.append(nid)
             ciphertexts.append(ciphertext)
 
-    log(INFO, "Client %d: stage 1 completes. uploading key shares...", state.nid)
+    log(INFO, "Node %d: stage 1 completes. uploading key shares...", state.nid)
     return {Key.DESTINATION_LIST: dsts, Key.CIPHERTEXT_LIST: ciphertexts}
 
 
@@ -419,7 +419,7 @@ def _collect_masked_input(
     configs: ConfigsRecord,
     fit: Callable[[], FitRes],
 ) -> Dict[str, ConfigsRecordValues]:
-    log(INFO, "Client %d: starting stage 2...", state.nid)
+    log(INFO, "Node %d: starting stage 2...", state.nid)
     available_clients: List[int] = []
     ciphertexts = cast(List[bytes], configs[Key.CIPHERTEXT_LIST])
     srcs = cast(List[int], configs[Key.SOURCE_LIST])
@@ -436,13 +436,13 @@ def _collect_masked_input(
         available_clients.append(src)
         if src != actual_src:
             raise ValueError(
-                f"Client {state.nid}: received ciphertext "
+                f"Node {state.nid}: received ciphertext "
                 f"from {actual_src} instead of {src}."
             )
         if dst != state.nid:
             raise ValueError(
-                f"Client {state.nid}: received an encrypted message"
-                f"for Client {dst} from Client {src}."
+                f"Node {state.nid}: received an encrypted message"
+                f"for Node {dst} from Node {src}."
             )
         state.rd_seed_share_dict[src] = rd_seed_share
         state.sk1_share_dict[src] = sk1_share
@@ -523,5 +523,5 @@ def _unmask(
     shares += [state.rd_seed_share_dict[nid] for nid in active_nids]
     shares += [state.sk1_share_dict[nid] for nid in dead_nids]
 
-    log(INFO, "Client %d: stage 3 completes. uploading key shares...", state.nid)
+    log(INFO, "Node %d: stage 3 completes. uploading key shares...", state.nid)
     return {Key.NODE_ID_LIST: all_nids, Key.SHARE_LIST: shares}
