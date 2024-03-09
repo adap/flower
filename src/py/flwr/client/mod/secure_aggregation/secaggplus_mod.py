@@ -513,7 +513,7 @@ def _unmask(
 
     active_nids = cast(List[int], configs[Key.ACTIVE_NODE_ID_LIST])
     dead_nids = cast(List[int], configs[Key.DEAD_NODE_ID_LIST])
-    # Send private mask seed share for every avaliable client (including itclient)
+    # Send private mask seed share for every avaliable client (including itself)
     # Send first private key share for building pairwise mask for every dropped client
     if len(active_nids) < state.threshold:
         raise ValueError("Available neighbours number smaller than threshold")
