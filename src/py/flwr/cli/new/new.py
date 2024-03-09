@@ -106,11 +106,10 @@ def new(
 
     # List of files to render
     files = {
-        "README.md": {
-            "template": "app/README.md.tpl",
-        },
+        "README.md": {"template": "app/README.md.tpl"},
         "requirements.txt": {"template": f"app/requirements.{framework_str}.txt.tpl"},
         "flower.toml": {"template": "app/flower.toml.tpl"},
+        "pyproject.toml": {"template": "app/pyproject.toml.tpl"},
         f"{pnl}/__init__.py": {"template": "app/code/__init__.py.tpl"},
         f"{pnl}/server.py": {"template": f"app/code/server.{framework_str}.py.tpl"},
         f"{pnl}/client.py": {"template": f"app/code/client.{framework_str}.py.tpl"},
