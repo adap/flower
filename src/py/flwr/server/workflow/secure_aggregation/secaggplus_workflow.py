@@ -138,6 +138,7 @@ class SecAggPlusWorkflow:
     modulus_range : int, optional (default: 4294967296, this equals 2**32)
         The range of values from which random mask entries are uniformly sampled
         ([0, modulus_range-1]). `modulus_range` must be less than 4294967296.
+        Please use 2**n values for `modulus_range` to prevent overflow issues.
     timeout : Optional[float] (default: None)
         The timeout duration in seconds. If specified, the workflow will wait for
         replies for this duration each time. If `None`, there is no time limit and
@@ -149,7 +150,7 @@ class SecAggPlusWorkflow:
       computational costs; higher `reconstruction_threshold` means better privacy
       guarantees but less tolerance to dropouts.
     - Too large `max_weight` may compromise the precision of the quantization.
-    - `modulus_range` must be larger than `quantization_range`.
+    - `modulus_range` must be 2**n and larger than `quantization_range`.
     - When `num_shares` is a float, it is interpreted as the proportion of all selected
       clients, and hence the number of shares will be determined in the runtime. This
       allows for dynamic adjustment based on the total number of participating clients.
@@ -158,9 +159,8 @@ class SecAggPlusWorkflow:
       This feature enables flexibility in setting the security threshold relative to the
       number of distributed shares.
     - `num_shares`, `reconstruction_threshold`, and the quantization parameters
-      (`clipping_range`, `target_quantization_range`, `modulus_range`) play critical
-      roles in balancing privacy, robustness, and efficiency within the SecAgg+
-      protocol.
+      (`clipping_range`, `quantization_range`, `modulus_range`) play critical roles in
+      balancing privacy, robustness, and efficiency within the SecAgg+ protocol.
     """
 
     def __init__(  # pylint: disable=R0913
@@ -214,7 +214,7 @@ class SecAggPlusWorkflow:
             elif self.num_shares > self.modulus_range / self.quantization_range:
                 log(
                     WARN,
-                    "A `num_shares` larger than `mod_range / target_range` "
+                    "A `num_shares` larger than `modulus_range / quantization_range` "
                     "will potentially cause overflow when computing the aggregated "
                     "model parameters.",
                 )
@@ -247,18 +247,23 @@ class SecAggPlusWorkflow:
         if self.quantization_range <= 0:
             raise ValueError("`quantization_range` must be greater than 0.")
 
-        # Check `target_range`
+        # Check `quantization_range`
         if not isinstance(self.quantization_range, int) or self.quantization_range <= 0:
-            raise ValueError("`target_range` must be an integer and greater than 0.")
+            raise ValueError(
+                "`quantization_range` must be an integer and greater than 0."
+            )
 
-        # Check `mod_range`
+        # Check `modulus_range`
         if (
             not isinstance(self.modulus_range, int)
             or self.modulus_range <= self.quantization_range
         ):
             raise ValueError(
-                "`mod_range` must be an integer and greater than `target_range`."
+                "`modulus_range` must be an integer and "
+                "greater than `quantization_range`."
             )
+        if bin(self.modulus_range).count("1") != 1:
+            raise ValueError("`modulus_range` must be a power of 2.")
 
     def _check_threshold(self, state: WorkflowState) -> bool:
         for node_id in state.sampled_node_ids:
