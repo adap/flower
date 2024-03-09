@@ -262,6 +262,46 @@ def non_iid_train_iid_test():
     return partition_datasets_train, partition_datasets_test
 
 
+def non_iid_wo9_train_iid_test():
+    # Load the MNIST training dataset
+    train_dataset = MNIST(
+        root="./mnist_data/", train=True, download=True, transform=transforms.ToTensor()
+    )
+
+    # Define class pairs for each partition
+    class_partitions = [(0, 1), (2, 3), (4, 5), (6, 7), (8,)]
+
+    # Create a list to store datasets for each partition
+    partition_datasets_train = []
+
+    # Iterate over class pairs and create a dataset for each partition
+    for class_pair in class_partitions:
+        class_filter = lambda label: label in class_pair
+        filtered_indices = [
+            i for i, (_, label) in enumerate(train_dataset) if class_filter(label)
+        ]
+
+        # Use Subset to create a dataset with filtered indices
+        partition_dataset = torch.utils.data.Subset(train_dataset, filtered_indices)
+        partition_datasets_train.append(partition_dataset)
+
+        # Load the MNIST test dataset
+    test_dataset = MNIST(
+        root="./mnist_data", train=False, download=True, transform=transforms.ToTensor()
+    )
+
+    # Specify the size of each partition
+    partition_sizes = [len(test_dataset) // 5] * 4 + [
+        len(test_dataset) - (len(test_dataset) // 5) * 4
+    ]
+
+    # Use random_split to create 5 datasets with random samples
+    partition_datasets_test = torch.utils.data.random_split(
+        test_dataset, partition_sizes
+    )
+    return partition_datasets_train, partition_datasets_test
+
+
 def non_iid_train_iid_test_6789(seed=6789, alignment=False):
     # Load the MNIST training dataset
     torch.manual_seed(seed)
@@ -412,6 +452,73 @@ def train_prox(
     return vae_term, prox_term
 
 
+def compute_ref_stats(alignment_loader, config, device, use_PCA=True):
+    ref_model = VAE(z_dim=config["latent_dim"]).to(device)
+    opt_ref = torch.optim.Adam(ref_model.parameters(), lr=1e-3)
+    for ep in range(config["prior_steps"]):
+        for images, labels in alignment_loader:
+            images = images.to(device)
+            # labels = labels.to(device)
+            opt_ref.zero_grad()
+            recon_images, mu, logvar = ref_model(images)
+            total_loss = vae_loss(recon_images, images, mu, logvar, 1)
+            total_loss.backward()
+            opt_ref.step()
+        if ep % 100 == 0:
+            print(f"Epoch {ep}, Loss {total_loss.item()}")
+
+            print(f"--------------------------------------------------")
+    ref_model.eval()
+    test_latents = []
+    test_labels = []
+    with torch.no_grad():
+        for images, labels in alignment_loader:
+            images = images.to(device)
+            labels = labels.to(device)
+            _, ref_mu, ref_logvar = ref_model(images)
+            test_latents.append(ref_mu.cpu().numpy())
+            test_labels.append(labels.cpu().numpy())
+        test_latents = np.concatenate(test_latents, axis=0)
+        test_labels = np.concatenate(test_labels, axis=0)
+
+        if use_PCA:
+            # Apply PCA using PyTorch
+            cov_matrix = torch.tensor(np.cov(test_latents.T), dtype=torch.float32)
+            _, _, V = torch.svd_lowrank(cov_matrix, q=2)
+
+            # Project data onto the first two principal components
+            reduced_latents = torch.mm(
+                torch.tensor(test_latents, dtype=torch.float32), V
+            )
+
+            # Convert to numpy array
+            test_latents = reduced_latents.numpy()
+        # Create traces for each class
+        traces = []
+        for label in np.unique(test_labels):
+            indices = np.where(test_labels == label)
+            trace = go.Scatter(
+                x=test_latents[indices, 0].flatten(),
+                y=test_latents[indices, 1].flatten(),
+                mode="markers",
+                name=str(label),
+                marker=dict(size=8),
+            )
+            traces.append(trace)
+
+        # Create layout
+        layout = go.Layout(
+            title="Latent Space Visualization of Test Set with Class Highlight",
+            xaxis=dict(title="Latent Dimension 1"),
+            yaxis=dict(title="Latent Dimension 2"),
+            legend=dict(title="Class"),
+        )
+
+        # Create figure
+        fig = go.Figure(data=traces, layout=layout)
+    return (ref_mu, ref_logvar), fig
+
+
 def _train_one_epoch(
     net,
     global_params: List[Parameter],
@@ -515,6 +622,60 @@ def train_align(
     return (
         vae_loss1.item(),
         0,  # lambda_reg * vae_loss2.item(),
+        lambda_align * loss_align_reduced.item(),
+    )
+
+
+def train_align_prox(
+    net,
+    trainloader,
+    align_loader,
+    optimizer,
+    config,
+    epochs,
+    device,
+    num_classes=None,
+):
+    """Train the network on the training set."""
+    net.train()
+    # temp_gen_model = VAE(z_dim=config["latent_dim"], encoder_only=True).to(device)
+    # gen_weights = parameters_to_ndarrays(config["gen_params"])
+    # params_dict = zip(temp_gen_model.state_dict().keys(), gen_weights)
+    # state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
+    # temp_gen_model.load_state_dict(state_dict, strict=True)
+    # temp_gen_model.eval()
+
+    beta = config["beta"]
+    mu_g = config["mu_g"]
+    log_var_g = config["log_var_g"]
+    lambda_align = config["lambda_align"]
+
+    for _ in range(epochs):
+        for images, _ in trainloader:
+            images = images.to(device)
+            optimizer.zero_grad()
+            recon_images, mu, logvar = net(images)
+            vae_loss1 = vae_loss(recon_images, images, mu, logvar, beta)
+            # z_g, mu_g, logvar_g = temp_gen_model(images)
+            # vae_loss2 = vae_loss(net.decoder(z_g), images, mu_g, logvar_g, beta)
+            loss = vae_loss1
+            accumulate_align_loss = 0
+            for align_img, _ in align_loader:
+                align_img = align_img.to(device)
+
+                _, mu, log_var = net(align_img)
+
+                loss_align = 0.5 * (log_var_g - log_var - 1) + (
+                    log_var.exp() + (mu - mu_g).pow(2)
+                ) / (2 * log_var_g.exp())
+                accumulate_align_loss += loss_align.sum(dim=1).sum()
+            loss_align_reduced = accumulate_align_loss
+            loss += lambda_align * loss_align_reduced
+            loss.backward()
+            optimizer.step()
+
+    return (
+        vae_loss1.item(),
         lambda_align * loss_align_reduced.item(),
     )
 
