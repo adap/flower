@@ -103,8 +103,7 @@ def load_app(
 
 
 def _find_attribute_in_module(file_path: str, attribute_name: str) -> bool:
-    """Check if a given attribute_name exists in the abstract symbolic tree of a
-    module."""
+    """Check if attribute_name exists in module's abstract symbolic tree."""
     with open(file_path, encoding="utf-8") as file:
         node = ast.parse(file.read(), filename=file_path)
 

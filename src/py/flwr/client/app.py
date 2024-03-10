@@ -97,16 +97,17 @@ def run_client_app() -> None:
     if client_app_dir is not None:
         sys.path.insert(0, client_app_dir)
 
-    valid, error_msg = validate(getattr(args, "client-app"))
+    app_ref: str = getattr(args, "client-app")
+    valid, error_msg = validate(app_ref)
     if not valid and error_msg:
         raise LoadClientAppError(error_msg) from None
 
     def _load() -> ClientApp:
-        client_app = load_app(getattr(args, "client-app"), LoadClientAppError)
+        client_app = load_app(app_ref, LoadClientAppError)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
-                f"Attribute {getattr(args, 'client-app')} is not of type {ClientApp}",
+                f"Attribute {app_ref} is not of type {ClientApp}",
             ) from None
 
         return client_app
