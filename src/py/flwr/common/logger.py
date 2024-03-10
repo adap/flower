@@ -18,7 +18,7 @@
 import logging
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
-from typing import Any, Dict, Optional, TextIO, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Optional, TextIO, Tuple
 
 # Create logger
 LOGGER_NAME = "flwr"
@@ -34,8 +34,13 @@ LOG_COLORS = {
     "RESET": "\033[0m",  # Reset to default
 }
 
+if TYPE_CHECKING:
+    StreamHandler = logging.StreamHandler[Any]
+else:
+    StreamHandler = logging.StreamHandler
 
-class ConsoleHandler(logging.StreamHandler[Any]):
+
+class ConsoleHandler(StreamHandler):
     """Console handler that allows configurable formatting."""
 
     def __init__(
@@ -77,15 +82,12 @@ class ConsoleHandler(logging.StreamHandler[Any]):
         return formatter.format(record)
 
 
-def update_console_handler(
-    level: int, timestamps: bool, json: bool, colored: bool
-) -> None:
+def update_console_handler(level: int, timestamps: bool, colored: bool) -> None:
     """Update the logging handler."""
     for handler in logging.getLogger(LOGGER_NAME).handlers:
         if isinstance(handler, ConsoleHandler):
             handler.setLevel(level)
             handler.timestamps = timestamps
-            handler.json = json
             handler.colored = colored
 
 
