@@ -16,6 +16,7 @@
 
 
 import argparse
+import signal
 import sys
 import time
 from logging import DEBUG, INFO, WARN
@@ -396,6 +397,19 @@ def _start_client_internal(
         transport, server_address
     )
 
+    exit_handler = ExitHandler()
+
+    def on_backoff(retry_state):
+        exit_handler.connection = False
+        if retry_state.tries == 1:
+            log(WARN, "Connection attempt failed, retrying...")
+        else:
+            log(
+                DEBUG,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
+
     retry_invoker = RetryInvoker(
         wait_factory=exponential,
         recoverable_exceptions=connection_error_type,
@@ -421,20 +435,12 @@ def _start_client_internal(
             if retry_state.tries > 1
             else None
         ),
-        on_backoff=lambda retry_state: (
-            log(WARN, "Connection attempt failed, retrying...")
-            if retry_state.tries == 1
-            else log(
-                DEBUG,
-                "Connection attempt failed, retrying in %.2f seconds",
-                retry_state.actual_wait,
-            )
-        ),
+        on_backoff=on_backoff,
     )
 
     node_state = NodeState()
 
-    while True:
+    while not exit_handler.should_exit:
         try:
             sleep_duration: int = 0
             with connection(
@@ -446,12 +452,22 @@ def _start_client_internal(
             ) as conn:
                 receive, send, create_node, delete_node = conn
 
-                try:
-                    # Register node
-                    if create_node is not None:
-                        create_node()  # pylint: disable=not-callable
+                # def signal_handler(sig, frame):
+                #     if delete_node is not None:
+                #         delete_node()
+                #     exit_handler.should_exit = True
+                #     raise KeyboardInterrupt
+                #     # sys.exit(0)
 
-                    while True:
+                # signal.signal(signal.SIGINT, signal_handler)
+                # signal.signal(signal.SIGTERM, signal_handler)
+
+                # Register node
+                if create_node is not None:
+                    create_node()  # pylint: disable=not-callable
+
+                while not exit_handler.should_exit:
+                    try:
                         # Receive
                         message = receive()
                         if message is None:
@@ -489,15 +505,16 @@ def _start_client_internal(
                         # Send
                         send(out_message)
                         log(INFO, "Sent reply")
+                    except KeyboardInterrupt:
+                        if delete_node is not None and exit_handler.connection:
+                            delete_node()
+                        exit_handler.should_exit = True
+                        sleep_duration = 0
+                        raise KeyboardInterrupt
 
-                    # Unregister node
-                    if delete_node is not None:
-                        delete_node()  # pylint: disable=not-callable
-
-                except KeyboardInterrupt as err:
-                    if delete_node is not None:
-                        delete_node()  # pylint: disable=not-callable
-                    raise err from None
+                # Unregister node
+                if delete_node is not None:
+                    delete_node()  # pylint: disable=not-callable
 
             if sleep_duration == 0:
                 log(INFO, "Disconnect and shut down")
@@ -509,7 +526,6 @@ def _start_client_internal(
                 sleep_duration,
             )
             time.sleep(sleep_duration)
-
         except KeyboardInterrupt:
             break
 
@@ -665,3 +681,9 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         )
 
     return connection, address, error_type
+
+
+class ExitHandler:
+    def __init__(self) -> None:
+        self.should_exit = False
+        self.connection = True
