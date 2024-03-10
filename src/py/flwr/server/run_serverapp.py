@@ -23,9 +23,10 @@ from typing import Optional
 
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.logger import log, update_console_handler
+from flwr.common.object_ref import load_app
 
 from .driver.driver import Driver
-from .server_app import ServerApp, load_server_app
+from .server_app import LoadServerAppError, ServerApp
 
 
 def run(
@@ -47,7 +48,13 @@ def run(
     # Load ServerApp if needed
     def _load() -> ServerApp:
         if server_app_attr:
-            server_app: ServerApp = load_server_app(server_app_attr)
+            server_app: ServerApp = load_app(server_app_attr, LoadServerAppError)
+
+            if not isinstance(server_app, ServerApp):
+                raise LoadServerAppError(
+                    f"Attribute {server_app_attr} is not of type {ServerApp}",
+                ) from None
+
         if loaded_server_app:
             server_app = loaded_server_app
         return server_app

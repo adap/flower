@@ -25,7 +25,7 @@ from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 from grpc import RpcError
 
 from flwr.client.client import Client
-from flwr.client.client_app import ClientApp
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
@@ -38,9 +38,9 @@ from flwr.common.constant import (
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
+from flwr.common.object_ref import load_app, validate
 from flwr.common.retry_invoker import RetryInvoker, exponential
 
-from .client_app import load_client_app
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
@@ -97,8 +97,19 @@ def run_client_app() -> None:
     if client_app_dir is not None:
         sys.path.insert(0, client_app_dir)
 
+    app_ref: str = getattr(args, "client-app")
+    valid, error_msg = validate(app_ref)
+    if not valid and error_msg:
+        raise LoadClientAppError(error_msg) from None
+
     def _load() -> ClientApp:
-        client_app: ClientApp = load_client_app(getattr(args, "client-app"))
+        client_app = load_app(app_ref, LoadClientAppError)
+
+        if not isinstance(client_app, ClientApp):
+            raise LoadClientAppError(
+                f"Attribute {app_ref} is not of type {ClientApp}",
+            ) from None
+
         return client_app
 
     _start_client_internal(
