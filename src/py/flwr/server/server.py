@@ -171,7 +171,7 @@ class Server:
             client_manager=self._client_manager,
         )
         if not client_instructions:
-            log(INFO, "configure_evaluate: no clients selected, cancel")
+            log(INFO, "configure_evaluate: no clients selected, skipping evaluation")
             return None
         log(
             INFO,
