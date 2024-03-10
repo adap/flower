@@ -106,8 +106,9 @@ def divide_dataset(
 
     Returns
     -------
-    `List[Dataset]` is returned in case of `List` or `Tuple` of the division
-    `DatasetDict` in case of `Dict` specification
+    divided_dataset : Union[List[Dataset], DatasetDict]
+        If `division` is `List` or `Tuple` then `List[Dataset]` is returned else if
+        `division` is `Dict` then `DatasetDict` is returned.
 
     Examples
     --------
