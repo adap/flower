@@ -27,11 +27,7 @@ from ..compat.app_utils import start_update_client_manager_thread
 from ..compat.legacy_context import LegacyContext
 from ..driver import Driver
 from ..typing import Workflow
-
-KEY_CURRENT_ROUND = "current_round"
-KEY_START_TIME = "start_time"
-CONFIGS_RECORD_KEY = "config"
-PARAMS_RECORD_KEY = "parameters"
+from .constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD, Key
 
 
 class DefaultWorkflow:
@@ -68,11 +64,11 @@ class DefaultWorkflow:
         log(INFO, "FL starting")
         start_time = timeit.default_timer()
         cfg = ConfigsRecord()
-        cfg[KEY_START_TIME] = start_time
-        context.state.configs_records[CONFIGS_RECORD_KEY] = cfg
+        cfg[Key.START_TIME] = start_time
+        context.state.configs_records[MAIN_CONFIGS_RECORD] = cfg
 
         for current_round in range(1, context.config.num_rounds + 1):
-            cfg[KEY_CURRENT_ROUND] = current_round
+            cfg[Key.CURRENT_ROUND] = current_round
 
             # Fit round
             self.fit_workflow(driver, context)
@@ -141,7 +137,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
         msg = list(messages)[0]
         paramsrecord = next(iter(msg.content.parameters_records.values()))
 
-    context.state.parameters_records[PARAMS_RECORD_KEY] = paramsrecord
+    context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
 
     # Evaluate initial parameters
     log(INFO, "Evaluating initial parameters")
@@ -164,13 +160,13 @@ def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
     # Retrieve current_round and start_time from the context
-    cfg = context.state.configs_records[CONFIGS_RECORD_KEY]
-    current_round = cast(int, cfg[KEY_CURRENT_ROUND])
-    start_time = cast(float, cfg[KEY_START_TIME])
+    cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+    current_round = cast(int, cfg[Key.CURRENT_ROUND])
+    start_time = cast(float, cfg[Key.START_TIME])
 
     # Centralized evaluation
     parameters = compat.parametersrecord_to_parameters(
-        record=context.state.parameters_records[PARAMS_RECORD_KEY],
+        record=context.state.parameters_records[MAIN_PARAMS_RECORD],
         keep_input=True,
     )
     res_cen = context.strategy.evaluate(current_round, parameters=parameters)
@@ -196,9 +192,9 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
     # Get current_round and parameters
-    cfg = context.state.configs_records[CONFIGS_RECORD_KEY]
-    current_round = cast(int, cfg[KEY_CURRENT_ROUND])
-    parametersrecord = context.state.parameters_records[PARAMS_RECORD_KEY]
+    cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+    current_round = cast(int, cfg[Key.CURRENT_ROUND])
+    parametersrecord = context.state.parameters_records[MAIN_PARAMS_RECORD]
     parameters = compat.parametersrecord_to_parameters(
         parametersrecord, keep_input=True
     )
@@ -266,7 +262,7 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
         paramsrecord = compat.parameters_to_parametersrecord(
             parameters_aggregated, True
         )
-        context.state.parameters_records[PARAMS_RECORD_KEY] = paramsrecord
+        context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
         context.history.add_metrics_distributed_fit(
             server_round=current_round, metrics=metrics_aggregated
         )
@@ -278,9 +274,9 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
     # Get current_round and parameters
-    cfg = context.state.configs_records[CONFIGS_RECORD_KEY]
-    current_round = cast(int, cfg[KEY_CURRENT_ROUND])
-    parametersrecord = context.state.parameters_records[PARAMS_RECORD_KEY]
+    cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+    current_round = cast(int, cfg[Key.CURRENT_ROUND])
+    parametersrecord = context.state.parameters_records[MAIN_PARAMS_RECORD]
     parameters = compat.parametersrecord_to_parameters(
         parametersrecord, keep_input=True
     )
