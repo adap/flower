@@ -17,12 +17,13 @@
 
 import argparse
 import sys
-from logging import DEBUG, WARN
+from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
 
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.logger import log
+from flwr.common.logger import log, update_console_handler
 from flwr.common.object_ref import load_app
 
 from .driver.driver import Driver
@@ -75,6 +76,12 @@ def run_server_app() -> None:
     event(EventType.RUN_SERVER_APP_ENTER)
 
     args = _parse_args_run_server_app().parse_args()
+
+    update_console_handler(
+        level=DEBUG if args.verbose else INFO,
+        timestamps=args.verbose,
+        colored=True,
+    )
 
     # Obtain certificates
     if args.insecure:
@@ -152,6 +159,11 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         action="store_true",
         help="Run the server app without HTTPS. By default, the app runs with "
         "HTTPS enabled. Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Set the logging to `DEBUG`.",
     )
     parser.add_argument(
         "--root-certificates",

@@ -127,9 +127,10 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     )
     log(
         INFO,
-        "Starting Flower server, config: %s",
+        "Starting Flower ServerApp, config: %s",
         initialized_config,
     )
+    log(INFO, "")
 
     # Start the thread updating nodes
     thread, f_stop = start_update_client_manager_thread(
