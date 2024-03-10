@@ -94,10 +94,10 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
 
         def get_var_bytes(value: ConfigsScalar) -> int:
             """Return Bytes of value passed."""
-            if isinstance(value, (int, float)):
-                var_bytes = 4
             if isinstance(value, bool):
                 var_bytes = 1
+            elif isinstance(value, (int, float)):
+                var_bytes = 4
             if isinstance(value, (str, bytes)):
                 var_bytes = len(value)
             return var_bytes
