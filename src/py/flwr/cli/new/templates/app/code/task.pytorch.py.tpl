@@ -1,3 +1,5 @@
+"""$project_name: A Flower / PyTorch app."""
+
 import warnings
 from collections import OrderedDict
 
@@ -10,7 +12,6 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
 
-warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -85,11 +86,11 @@ def test(net, testloader):
     return loss, accuracy
 
 
-def get_parameters(net):
+def get_weights(net):
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
 
-def set_parameters(net, parameters):
+def set_weights(net, parameters):
     params_dict = zip(net.state_dict().keys(), parameters)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)
