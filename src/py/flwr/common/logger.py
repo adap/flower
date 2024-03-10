@@ -35,7 +35,7 @@ LOG_COLORS = {
 }
 
 
-class ConsoleHandler(logging.StreamHandler):
+class ConsoleHandler(logging.StreamHandler[Any]):
     """Console handler that allows configurable formatting."""
 
     def __init__(
