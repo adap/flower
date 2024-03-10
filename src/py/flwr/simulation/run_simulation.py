@@ -421,6 +421,11 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         "If set, DEBUG-level logs will be displayed. ",
     )
     parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Set the logging format to JSON.",
+    )
+    parser.add_argument(
         "--app-dir",
         default="",
         help="Add specified directory to the PYTHONPATH and load"
