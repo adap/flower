@@ -98,7 +98,7 @@ def divide_dataset(
 
     Parameters
     ----------
-    dataset: Dataset
+    dataset : Dataset
         Dataset to be divided.
     division: Union[List[float], Tuple[float, ...], Dict[str, float]]
         Configuration specifying how the dataset is divided. Each fraction has to be
@@ -114,6 +114,7 @@ def divide_dataset(
     Use `divide_dataset` with division specified as a list.
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.utils import divide_dataset
+    >>>
     >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
     >>> partition = fds.load_partition(0)
     >>> division = [0.8, 0.2]
@@ -122,6 +123,7 @@ def divide_dataset(
     Use `divide_dataset` with division specified as a dict.
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.utils import divide_dataset
+    >>>
     >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
     >>> partition = fds.load_partition(0)
     >>> division = {"train": 0.8, "test": 0.2}
