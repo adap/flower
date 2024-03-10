@@ -97,6 +97,8 @@ def new(
         ]
         framework_str = selected_value[0]
 
+    framework_str = framework_str.lower()
+
     # Set project directory path
     cwd = os.getcwd()
     pnl = project_name.lower()
@@ -104,21 +106,19 @@ def new(
 
     # List of files to render
     files = {
-        "README.md": {
-            "template": "app/README.md.tpl",
-        },
-        "requirements.txt": {
-            "template": f"app/requirements.{framework_str.lower()}.txt.tpl"
-        },
+        "README.md": {"template": "app/README.md.tpl"},
+        "requirements.txt": {"template": f"app/requirements.{framework_str}.txt.tpl"},
         "flower.toml": {"template": "app/flower.toml.tpl"},
+        "pyproject.toml": {"template": "app/pyproject.toml.tpl"},
         f"{pnl}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-        f"{pnl}/server.py": {
-            "template": f"app/code/server.{framework_str.lower()}.py.tpl"
-        },
-        f"{pnl}/client.py": {
-            "template": f"app/code/client.{framework_str.lower()}.py.tpl"
-        },
+        f"{pnl}/server.py": {"template": f"app/code/server.{framework_str}.py.tpl"},
+        f"{pnl}/client.py": {"template": f"app/code/client.{framework_str}.py.tpl"},
     }
+
+    # In case framework is MlFramework.PYTORCH generate additionally the task.py file
+    if framework_str == MlFramework.PYTORCH.value.lower():
+        files[f"{pnl}/task.py"] = {"template": f"app/code/task.{framework_str}.py.tpl"}
+
     context = {"project_name": project_name}
 
     for file_path, value in files.items():

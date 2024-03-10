@@ -72,7 +72,7 @@ def run() -> None:
     # Apply defaults
     defaults = {
         "flower": {
-            "engine": {"name": "simulation", "simulation": {"super-node": {"num": 100}}}
+            "engine": {"name": "simulation", "simulation": {"supernode": {"num": 2}}}
         }
     }
     config = apply_defaults(config, defaults)
@@ -82,7 +82,7 @@ def run() -> None:
     engine = config["flower"]["engine"]["name"]
 
     if engine == "simulation":
-        num_supernodes = config["flower"]["engine"]["simulation"]["super-node"]["num"]
+        num_supernodes = config["flower"]["engine"]["simulation"]["supernode"]["num"]
 
         print(
             typer.style("Starting run... ", fg=typer.colors.BLUE),
