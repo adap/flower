@@ -69,7 +69,7 @@ def validate(
 
     return (
         False,
-        f"Unable to load module {module_str}" f"{OBJECT_REF_HELP_STR}",
+        f"Unable to load module {module_str}{OBJECT_REF_HELP_STR}",
     )
 
 
