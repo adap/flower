@@ -17,12 +17,12 @@
 
 import argparse
 import sys
-from logging import DEBUG, WARN
+from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
 
 from flwr.common import Context, EventType, RecordSet, event
-from flwr.common.logger import log, logger
+from flwr.common.logger import log, update_console_handler
 
 from .driver.driver import Driver
 from .server_app import ServerApp, load_server_app
@@ -69,9 +69,12 @@ def run_server_app() -> None:
 
     args = _parse_args_run_server_app().parse_args()
 
-    if args.verbose:
-        for handler in logger.handlers:
-            handler.setLevel(DEBUG)
+    update_console_handler(
+        level=DEBUG if args.verbose else INFO,
+        timestamps=args.verbose,
+        json=args.json,
+        colored=not args.json,
+    )
 
     # Obtain certificates
     if args.insecure:
@@ -154,6 +157,11 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         "--verbose",
         action="store_true",
         help="Set the logging to `DEBUG`.",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Set the logging format to JSON.",
     )
     parser.add_argument(
         "--root-certificates",

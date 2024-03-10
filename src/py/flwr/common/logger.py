@@ -35,24 +35,66 @@ LOG_COLORS = {
 }
 
 
-class ColorFormatter(logging.Formatter):
-    """Log formatter that adds color to the log level."""
+class ConsoleHandler(logging.StreamHandler):
+    """Console handler that allows configurable formatting."""
+
+    def __init__(
+        self,
+        timestamps: bool = False,
+        json: bool = False,
+        colored: bool = True,
+        stream=None,
+    ) -> None:
+        super().__init__(stream)
+        self.timestamps = timestamps
+        self.json = json
+        self.colored = colored
+
+    def emit(self, record):
+        """Emit a record."""
+        if self.json:
+            record.message = record.getMessage().replace("\t", "").strip()
+
+            # Check if the message is empty
+            if not record.message:
+                return
+
+        super().emit(record)
 
     def format(self, record: LogRecord) -> str:
         """Format function that adds colors to log level."""
         seperator = " " * (8 - len(record.levelname))
-        log_fmt = (
-            f"{LOG_COLORS[record.levelname]}"
-            f"%(levelname)s{LOG_COLORS['RESET']}: {seperator} %(message)s"
-        )
+        if self.json:
+            log_fmt = "{lvl='%(levelname)s', time='%(asctime)s', msg='%(message)s'}"
+        else:
+            log_fmt = (
+                f"{LOG_COLORS[record.levelname] if self.colored else ''}"
+                f"%(levelname)s {'%(asctime)s' if self.timestamps else ''}"
+                f"{LOG_COLORS['RESET'] if self.colored else ''}: {seperator} %(message)s"
+            )
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
 
+def update_console_handler(
+    level: int, timestamps: bool, json: bool, colored: bool
+) -> None:
+    """Update the logging handler."""
+    for handler in logging.getLogger(LOGGER_NAME).handlers:
+        if isinstance(handler, ConsoleHandler):
+            handler.setLevel(level)
+            handler.timestamps = timestamps
+            handler.json = json
+            handler.colored = colored
+
+
 # Configure console logger
-console_handler = logging.StreamHandler()
+console_handler = ConsoleHandler(
+    timestamps=False,
+    json=False,
+    colored=True,
+)
 console_handler.setLevel(logging.INFO)
-console_handler.setFormatter(ColorFormatter())
 FLOWER_LOGGER.addHandler(console_handler)
 
 
