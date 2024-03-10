@@ -12,13 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Workflows."""
+"""Constants for default workflows."""
 
 
-from .default_workflows import DefaultWorkflow
-from .secure_aggregation import SecAggPlusWorkflow
+from __future__ import annotations
 
-__all__ = [
-    "DefaultWorkflow",
-    "SecAggPlusWorkflow",
-]
+MAIN_CONFIGS_RECORD = "config"
+MAIN_PARAMS_RECORD = "parameters"
+
+
+class Key:
+    """Constants for default workflows."""
+
+    CURRENT_ROUND = "current_round"
+    START_TIME = "start_time"
+
+    def __new__(cls) -> Key:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
