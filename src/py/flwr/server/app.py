@@ -19,7 +19,7 @@ import asyncio
 import importlib.util
 import sys
 import threading
-from logging import ERROR, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -35,7 +35,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_VCE,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log
+from flwr.common.logger import log, update_console_handler
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -183,9 +183,17 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
 
 def run_driver_api() -> None:
     """Run Flower server (Driver API)."""
-    log(INFO, "Starting Flower server (Driver API)")
     event(EventType.RUN_DRIVER_API_ENTER)
     args = _parse_args_run_driver_api().parse_args()
+
+    update_console_handler(
+        level=DEBUG if args.verbose else INFO,
+        timestamps=args.verbose,
+        colored=not args.json,
+        json=args.json,
+    )
+
+    log(INFO, "Starting Flower server (Driver API)")
 
     # Parse IP address
     parsed_address = parse_address(args.driver_api_address)
@@ -220,9 +228,17 @@ def run_driver_api() -> None:
 
 def run_fleet_api() -> None:
     """Run Flower server (Fleet API)."""
-    log(INFO, "Starting Flower server (Fleet API)")
     event(EventType.RUN_FLEET_API_ENTER)
     args = _parse_args_run_fleet_api().parse_args()
+
+    update_console_handler(
+        level=DEBUG if args.verbose else INFO,
+        timestamps=args.verbose,
+        colored=not args.json,
+        json=args.json,
+    )
+
+    log(INFO, "Starting Flower server (Fleet API)")
 
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
@@ -292,9 +308,17 @@ def run_fleet_api() -> None:
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
 def run_superlink() -> None:
     """Run Flower server (Driver API and Fleet API)."""
-    log(INFO, "Starting Flower server")
     event(EventType.RUN_SUPERLINK_ENTER)
     args = _parse_args_run_superlink().parse_args()
+
+    update_console_handler(
+        level=DEBUG if args.verbose else INFO,
+        timestamps=args.verbose,
+        colored=not args.json,
+        json=args.json,
+    )
+
+    log(INFO, "Starting Flower server")
 
     # Parse IP address
     parsed_address = parse_address(args.driver_api_address)
@@ -605,6 +629,16 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "instead of on disk. If nothing is provided, "
         "Flower will just create a state in memory.",
         default=DATABASE,
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Set the logging to `DEBUG`.",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Set the logging format to JSON.",
     )
 
 

@@ -37,7 +37,12 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
+from flwr.common.logger import (
+    log,
+    update_console_handler,
+    warn_deprecated_feature,
+    warn_experimental_feature,
+)
 from flwr.common.retry_invoker import RetryInvoker, exponential
 
 from .client_app import load_client_app
@@ -52,9 +57,16 @@ def run_client_app() -> None:
     """Run Flower client app."""
     event(EventType.RUN_CLIENT_APP_ENTER)
 
-    log(INFO, "Long-running Flower client starting")
-
     args = _parse_args_run_client_app().parse_args()
+
+    update_console_handler(
+        level=DEBUG if args.verbose else INFO,
+        timestamps=args.verbose,
+        colored=not args.json,
+        json=args.json,
+    )
+
+    log(INFO, "Long-running Flower client starting")
 
     # Obtain certificates
     if args.insecure:
@@ -133,6 +145,16 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         "--rest",
         action="store_true",
         help="Use REST as a transport layer for the client.",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Set the logging to `DEBUG`.",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Set the logging format to JSON.",
     )
     parser.add_argument(
         "--root-certificates",

@@ -72,7 +72,8 @@ def run_server_app() -> None:
     update_console_handler(
         level=DEBUG if args.verbose else INFO,
         timestamps=args.verbose,
-        colored=True,
+        colored=not args.json,
+        json=args.json,
     )
 
     # Obtain certificates
@@ -156,6 +157,11 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         "--verbose",
         action="store_true",
         help="Set the logging to `DEBUG`.",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Set the logging format to JSON.",
     )
     parser.add_argument(
         "--root-certificates",

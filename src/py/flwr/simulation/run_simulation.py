@@ -17,7 +17,6 @@
 import argparse
 import asyncio
 import json
-import logging
 import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
@@ -28,6 +27,7 @@ import grpc
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
+from flwr.common.logger import update_console_handler
 from flwr.common.typing import ConfigsRecordValues
 from flwr.server.driver.driver import Driver
 from flwr.server.run_serverapp import run
@@ -45,6 +45,13 @@ def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
 
+    update_console_handler(
+        level=DEBUG if args.verbose else INFO,
+        timestamps=args.verbose,
+        colored=not args.json,
+        json=args.json,
+    )
+
     # Load JSON config
     backend_config_dict = json.loads(args.backend_config)
 
@@ -57,7 +64,6 @@ def run_simulation_from_cli() -> None:
         app_dir=args.app_dir,
         driver_api_address=args.driver_api_address,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
-        verbose_logging=args.verbose,
     )
 
 
@@ -70,7 +76,6 @@ def run_simulation(
     backend_name: str = "ray",
     backend_config: Optional[Dict[str, ConfigsRecordValues]] = None,
     enable_tf_gpu_growth: bool = False,
-    verbose_logging: bool = False,
 ) -> None:
     r"""Run a Flower App using the Simulation Engine.
 
@@ -104,10 +109,6 @@ def run_simulation(
         might encounter an out-of-memory error because TensorFlow, by default, allocates
         all GPU memory. Read more about how `tf.config.experimental.set_memory_growth()`
         works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
-
-    verbose_logging : bool (default: False)
-        When diabled, only INFO, WARNING and ERROR log messages will be shown. If
-        enabled, DEBUG-level logs will be displayed.
     """
     _run_simulation(
         num_supernodes=num_supernodes,
@@ -116,7 +117,6 @@ def run_simulation(
         backend_name=backend_name,
         backend_config=backend_config,
         enable_tf_gpu_growth=enable_tf_gpu_growth,
-        verbose_logging=verbose_logging,
     )
 
 
@@ -263,7 +263,6 @@ def _run_simulation(
     app_dir: str = "",
     driver_api_address: str = "0.0.0.0:9091",
     enable_tf_gpu_growth: bool = False,
-    verbose_logging: bool = False,
 ) -> None:
     r"""Launch the Simulation Engine.
 
@@ -311,16 +310,7 @@ def _run_simulation(
         might encounter an out-of-memory error becasue TensorFlow by default allocates
         all GPU memory. Read mor about how `tf.config.experimental.set_memory_growth()`
         works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
-
-    verbose_logging : bool (default: False)
-        When diabled, only INFO, WARNING and ERROR log messages will be shown. If
-        enabled, DEBUG-level logs will be displayed.
     """
-    # Set logging level
-    if not verbose_logging:
-        logger = logging.getLogger("flwr")
-        logger.setLevel(INFO)
-
     if backend_config is None:
         backend_config = {}
 

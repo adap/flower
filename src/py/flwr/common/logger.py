@@ -46,14 +46,14 @@ class ConsoleHandler(StreamHandler):
     def __init__(
         self,
         timestamps: bool = False,
-        json: bool = False,
         colored: bool = True,
+        json: bool = False,
         stream: Optional[TextIO] = None,
     ) -> None:
         super().__init__(stream)
         self.timestamps = timestamps
-        self.json = json
         self.colored = colored
+        self.json = json
 
     def emit(self, record: LogRecord) -> None:
         """Emit a record."""
@@ -82,20 +82,23 @@ class ConsoleHandler(StreamHandler):
         return formatter.format(record)
 
 
-def update_console_handler(level: int, timestamps: bool, colored: bool) -> None:
+def update_console_handler(
+    level: int, timestamps: bool, colored: bool, json: bool
+) -> None:
     """Update the logging handler."""
     for handler in logging.getLogger(LOGGER_NAME).handlers:
         if isinstance(handler, ConsoleHandler):
             handler.setLevel(level)
             handler.timestamps = timestamps
             handler.colored = colored
+            handler.json = json
 
 
 # Configure console logger
 console_handler = ConsoleHandler(
     timestamps=False,
-    json=False,
     colored=True,
+    json=False,
 )
 console_handler.setLevel(logging.INFO)
 FLOWER_LOGGER.addHandler(console_handler)
