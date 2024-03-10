@@ -20,7 +20,6 @@ import importlib
 from importlib.util import find_spec
 from typing import Any, Optional, Tuple, Type
 
-
 OBJECT_REF_HELP_STR = """
 \nThe object reference string should have the form <module>:<attribute>. Valid
 examples include `client:app` and `project.package.module:wrapper.app`. It must

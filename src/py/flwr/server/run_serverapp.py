@@ -22,7 +22,6 @@ from pathlib import Path
 from typing import Optional
 
 from flwr.common import Context, EventType, RecordSet, event
-from flwr.common.logger import log
 from flwr.common.logger import log, update_console_handler
 from flwr.common.object_ref import load_app
 
