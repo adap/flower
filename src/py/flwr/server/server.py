@@ -110,6 +110,7 @@ class Server:
 
         for current_round in range(1, num_rounds + 1):
             log(INFO, "")
+            log(INFO, "[ROUND %s]", current_round)
             # Train model and replace previous global model
             res_fit = self.fit_round(
                 server_round=current_round,
@@ -129,7 +130,7 @@ class Server:
                 loss_cen, metrics_cen = res_cen
                 log(
                     INFO,
-                    "\tfit progress: (%s, %s, %s, %s)",
+                    "fit progress: (%s, %s, %s, %s)",
                     current_round,
                     loss_cen,
                     metrics_cen,
@@ -175,11 +176,11 @@ class Server:
             client_manager=self._client_manager,
         )
         if not client_instructions:
-            log(INFO, "\tevaluate_round %s: no clients selected, cancel", server_round)
+            log(INFO, "evaluate_round %s: no clients selected, cancel", server_round)
             return None
         log(
             INFO,
-            "\tevaluate_round %s: strategy sampled %s clients (out of %s)",
+            "evaluate_round %s: strategy sampled %s clients (out of %s)",
             server_round,
             len(client_instructions),
             self._client_manager.num_available(),
@@ -194,7 +195,7 @@ class Server:
         )
         log(
             INFO,
-            "\tevaluate_round %s received %s results and %s failures",
+            "evaluate_round %s received %s results and %s failures",
             server_round,
             len(results),
             len(failures),
@@ -225,11 +226,11 @@ class Server:
         )
 
         if not client_instructions:
-            log(INFO, "\tfit_round %s: no clients selected, cancel", server_round)
+            log(INFO, "fit_round %s: no clients selected, cancel", server_round)
             return None
         log(
             INFO,
-            "\tfit_round %s: strategy sampled %s clients (out of %s)",
+            "fit_round %s: strategy sampled %s clients (out of %s)",
             server_round,
             len(client_instructions),
             self._client_manager.num_available(),
@@ -244,7 +245,7 @@ class Server:
         )
         log(
             INFO,
-            "\tfit_round %s received %s results and %s failures",
+            "fit_round %s received %s results and %s failures",
             server_round,
             len(results),
             len(failures),
@@ -491,8 +492,11 @@ def run_fl(
     hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
 
     log(INFO, "Summary")
-    for line in io.StringIO(str(hist)):
-        log(INFO, "\t%s", line.strip("\n"))
+    for idx, line in enumerate(io.StringIO(str(hist))):
+        if idx == 0:
+            log(INFO, "%s", line.strip("\n"))
+        else:
+            log(INFO, "\t%s", line.strip("\n"))
 
     # Graceful shutdown
     server.disconnect_all_clients(timeout=config.round_timeout)
