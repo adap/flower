@@ -12,13 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Workflows."""
+"""Secure Aggregation workflows."""
 
 
-from .default_workflows import DefaultWorkflow
-from .secure_aggregation import SecAggPlusWorkflow
+from .secaggplus_workflow import SecAggPlusWorkflow
 
 __all__ = [
-    "DefaultWorkflow",
     "SecAggPlusWorkflow",
 ]
