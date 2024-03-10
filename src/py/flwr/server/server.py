@@ -486,6 +486,7 @@ def run_fl(
 
     log(INFO, "")
     log(INFO, "Run summary (finished in %.2f)", elapsed_time)
+    log(INFO, "")
     for idx, line in enumerate(io.StringIO(str(hist))):
         if idx == 0:
             log(INFO, "%s", line.strip("\n"))
