@@ -15,7 +15,7 @@
 """FederatedDataset."""
 
 
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 import datasets
 from datasets import Dataset, DatasetDict
@@ -54,11 +54,19 @@ class FederatedDataset:
         (representing the number of IID partitions that this split should be partitioned
         into). One or multiple `Partitioner` objects can be specified in that manner,
         but at most, one per split.
-    partition_division : Optional[Union[List[float], Tuple[float, ...], Dict[str,
-    float]]]
-        Divide each partition into splits (e.g. into train and validation) and
-        control the size of the splits - fractions of the data. You can also name the
-        splits for verification.
+    partition_division : Optional[Union[List[float], Tuple[float, ...],
+    Dict[str, float], Dict[str, Optional[Union[List[float], Tuple[float, ...],
+    Dict[str, float]]]]]]
+        Fractions specifing the division of the partition assiciated with certain split
+        (and partitioner) that enable returning already divided partition from the
+        `load_partition` method. You can think of this as on-edge division of the data
+        into multiple divisions (e.g. into train and validation). You can also name the
+        divisions by using the Dict or create specify it as a List/Tuple. If you
+        specified a single partitioner you can provide the simplified form e.g.
+        [0.8, 0.2] or {"partition_train": 0.8, "partition_test": 0.2} but when multiple
+        partitioners are specified you need to indicate the result of which partitioner
+        are further divided e.g. {"train": [0.8, 0.2]} would result in dividing only the
+        partitions that are created from the "train" split.
     shuffle : bool
         Whether to randomize the order of samples. Applied prior to resplitting,
         speratelly to each of the present splits in the dataset. It uses the `seed`
@@ -95,7 +103,15 @@ class FederatedDataset:
         resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]] = None,
         partitioners: Dict[str, Union[Partitioner, int]],
         partition_division: Optional[
-            Union[List[float], Tuple[float, ...], Dict[str, float]]
+            Union[
+                List[float],
+                Tuple[float, ...],
+                Dict[str, float],
+                Dict[
+                    str,
+                    Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]],
+                ],
+            ]
         ] = None,
         shuffle: bool = True,
         seed: Optional[int] = 42,
@@ -109,7 +125,9 @@ class FederatedDataset:
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
             partitioners
         )
-        self._partition_division = partition_division
+        self._partition_division = self._initialize_partition_division(
+            partition_division
+        )
         self._shuffle = shuffle
         self._seed = seed
         #  _dataset is prepared lazily on the first call to `load_partition`
@@ -164,8 +182,11 @@ class FederatedDataset:
         partition = partitioner.load_partition(node_id)
         if self._partition_division is None:
             return partition
+        partition_division = self._partition_division.get(split)
+        if partition_division is None:
+            return partition
         divided_partition: Union[List[Dataset], DatasetDict] = divide_dataset(
-            partition, self._partition_division
+            partition, partition_division
         )
         return divided_partition
 
@@ -261,3 +282,62 @@ class FederatedDataset:
                 "Please set the `split` argument. You can only omit the split keyword "
                 "if there is exactly one partitioner specified."
             )
+
+    def _initialize_partition_division(
+        self,
+        partition_division: Optional[
+            Union[
+                List[float],
+                Tuple[float, ...],
+                Dict[str, float],
+                Dict[
+                    str,
+                    Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]],
+                ],
+            ]
+        ],
+    ) -> Optional[
+        Dict[
+            str,
+            Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]],
+        ]
+    ]:
+        """Create the partition division in the full format.
+
+        Reduced format (possible if only one partitioner exist):
+
+        Union[List[float], Tuple[float, ...], Dict[str, float]
+
+        Full format: Dict[str, Reduced format]
+        Full format represents the split to division mapping.
+        """
+        # Check for simple dict, list, or tuple types directly
+        if isinstance(partition_division, (list, tuple)) or (
+            isinstance(partition_division, dict)
+            and all(isinstance(value, float) for value in partition_division.values())
+        ):
+            if len(self._partitioners) > 1:
+                raise ValueError(
+                    f"The specified partition_division {partition_division} does not "
+                    f"provide mapping to split but more than one partitioners is "
+                    f"specified. Please adjust the partition_division specification to "
+                    f"have the split names as the keys."
+                )
+            return cast(
+                Dict[
+                    str,
+                    Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]],
+                ],
+                {list(self._partitioners.keys())[0]: partition_division},
+            )
+        if isinstance(partition_division, dict):
+            return cast(
+                Dict[
+                    str,
+                    Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]],
+                ],
+                partition_division,
+            )
+        if partition_division is None:
+            return None
+        raise TypeError("Unsupported type for partition_division")

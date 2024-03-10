@@ -69,25 +69,38 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
 
     @parameterized.expand(  # type: ignore
         [
-            ((0.2, 0.8), 2),
-            ({"train": 0.2, "test": 0.8}, 2),
+            ((0.2, 0.8), 2, False),
+            ({"train": 0.2, "test": 0.8}, 2, False),
+            ({"train": {"train": 0.2, "test": 0.8}}, 2, True),
             # Not full dataset
-            ([0.2, 0.1], 2),
-            ({"train": 0.2, "test": 0.1}, 2),
-            (None, None),
+            ([0.2, 0.1], 2, False),
+            ({"train": 0.2, "test": 0.1}, 2, False),
+            (None, None, False),
         ],
     )
     def test_divide_partition_integration_size(
         self,
         partition_division: Optional[
-            Union[List[float], Tuple[float, ...], Dict[str, float]]
+            Union[
+                List[float],
+                Tuple[float, ...],
+                Dict[str, float],
+                Dict[
+                    str,
+                    Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]],
+                ],
+            ]
         ],
         expected_length: Optional[int],
+        add_test_partitioner: bool,
     ):
         """Test is the `partition_division` create correct data."""
+        partitioners: Dict[str, Union[Partitioner, int]] = {"train": 10}
+        if add_test_partitioner:
+            partitioners[self.test_split] = 10
         dataset_fds = FederatedDataset(
             dataset=self.dataset_name,
-            partitioners={"train": 100},
+            partitioners=partitioners,
             partition_division=partition_division,
         )
         partition = dataset_fds.load_partition(0, "train")
