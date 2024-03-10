@@ -70,7 +70,8 @@ class ConsoleHandler(logging.StreamHandler):
             log_fmt = (
                 f"{LOG_COLORS[record.levelname] if self.colored else ''}"
                 f"%(levelname)s {'%(asctime)s' if self.timestamps else ''}"
-                f"{LOG_COLORS['RESET'] if self.colored else ''}: {seperator} %(message)s"
+                f"{LOG_COLORS['RESET'] if self.colored else ''}"
+                f": {seperator} %(message)s"
             )
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
