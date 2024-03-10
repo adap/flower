@@ -16,9 +16,9 @@
 
 
 import argparse
-import signal
 import sys
 import time
+from dataclasses import dataclass
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Type, Union
@@ -397,10 +397,10 @@ def _start_client_internal(
         transport, server_address
     )
 
-    exit_handler = ExitHandler()
+    connection_tracker = _ConnectionTracker()
 
     def on_backoff(retry_state):
-        exit_handler.connection = False
+        connection_tracker.connection = False
         if retry_state.tries == 1:
             log(WARN, "Connection attempt failed, retrying...")
         else:
@@ -440,7 +440,7 @@ def _start_client_internal(
 
     node_state = NodeState()
 
-    while not exit_handler.should_exit:
+    while True:
         try:
             sleep_duration: int = 0
             with connection(
@@ -452,21 +452,11 @@ def _start_client_internal(
             ) as conn:
                 receive, send, create_node, delete_node = conn
 
-                # def signal_handler(sig, frame):
-                #     if delete_node is not None:
-                #         delete_node()
-                #     exit_handler.should_exit = True
-                #     raise KeyboardInterrupt
-                #     # sys.exit(0)
-
-                # signal.signal(signal.SIGINT, signal_handler)
-                # signal.signal(signal.SIGTERM, signal_handler)
-
                 # Register node
                 if create_node is not None:
                     create_node()  # pylint: disable=not-callable
 
-                while not exit_handler.should_exit:
+                while True:
                     try:
                         # Receive
                         message = receive()
@@ -505,12 +495,11 @@ def _start_client_internal(
                         # Send
                         send(out_message)
                         log(INFO, "Sent reply")
-                    except KeyboardInterrupt:
-                        if delete_node is not None and exit_handler.connection:
+                    except KeyboardInterrupt as err:
+                        if delete_node is not None and connection_tracker.connection:
                             delete_node()
-                        exit_handler.should_exit = True
                         sleep_duration = 0
-                        raise KeyboardInterrupt
+                        raise err from None
 
                 # Unregister node
                 if delete_node is not None:
@@ -683,7 +672,6 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     return connection, address, error_type
 
 
-class ExitHandler:
-    def __init__(self) -> None:
-        self.should_exit = False
-        self.connection = True
+@dataclass
+class _ConnectionTracker:
+    connection: bool = True
