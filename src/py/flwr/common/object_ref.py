@@ -21,7 +21,7 @@ from importlib.util import find_spec
 from typing import Any, Optional, Tuple, Type
 
 OBJECT_REF_HELP_STR = """
-\nThe object reference string should have the form <module>:<attribute>. Valid
+\n\nThe object reference string should have the form <module>:<attribute>. Valid
 examples include `client:app` and `project.package.module:wrapper.app`. It must
 refer to a module on the PYTHONPATH and the module needs to have the specified
 attribute.
