@@ -84,19 +84,19 @@ class Server:
         return self._client_manager
 
     # pylint: disable=too-many-locals
-    def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
+    def fit(self, num_rounds: int, timeout: Optional[float]) -> Tuple[History, float]:
         """Run federated averaging for a number of rounds."""
         history = History()
 
         # Initialize parameters
-        log(INFO, "Initializing global parameters")
+        log(INFO, "[INIT]")
         self.parameters = self._get_initial_parameters(server_round=0, timeout=timeout)
-        log(INFO, "\tEvaluating initial parameters")
+        log(INFO, "Evaluating initial global parameters")
         res = self.strategy.evaluate(0, parameters=self.parameters)
         if res is not None:
             log(
                 INFO,
-                "\tinitial parameters (loss, other metrics): %s, %s",
+                "initial parameters (loss, other metrics): %s, %s",
                 res[0],
                 res[1],
             )
@@ -104,8 +104,6 @@ class Server:
             history.add_metrics_centralized(server_round=0, metrics=res[1])
 
         # Run federated learning for num_rounds
-        log(INFO, "")
-        log(INFO, "FL starting")
         start_time = timeit.default_timer()
 
         for current_round in range(1, num_rounds + 1):
@@ -156,10 +154,7 @@ class Server:
         # Bookkeeping
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
-        log(INFO, "")
-        log(INFO, "FL finished in %.2fs", elapsed)
-        log(INFO, "")
-        return history
+        return history, elapsed
 
     def evaluate_round(
         self,
@@ -176,12 +171,11 @@ class Server:
             client_manager=self._client_manager,
         )
         if not client_instructions:
-            log(INFO, "evaluate_round %s: no clients selected, cancel", server_round)
+            log(INFO, "configure_evaluate: no clients selected, cancel")
             return None
         log(
             INFO,
-            "evaluate_round %s: strategy sampled %s clients (out of %s)",
-            server_round,
+            "configure_evaluate: strategy sampled %s clients (out of %s)",
             len(client_instructions),
             self._client_manager.num_available(),
         )
@@ -195,8 +189,7 @@ class Server:
         )
         log(
             INFO,
-            "evaluate_round %s received %s results and %s failures",
-            server_round,
+            "aggregate_evaluate: received %s results and %s failures",
             len(results),
             len(failures),
         )
@@ -226,12 +219,11 @@ class Server:
         )
 
         if not client_instructions:
-            log(INFO, "fit_round %s: no clients selected, cancel", server_round)
+            log(INFO, "configure_fit: no clients selected, cancel")
             return None
         log(
             INFO,
-            "fit_round %s: strategy sampled %s clients (out of %s)",
-            server_round,
+            "configure_fit: strategy sampled %s clients (out of %s)",
             len(client_instructions),
             self._client_manager.num_available(),
         )
@@ -245,8 +237,7 @@ class Server:
         )
         log(
             INFO,
-            "fit_round %s received %s results and %s failures",
-            server_round,
+            "aggregate_fit: received %s results and %s failures",
             len(results),
             len(failures),
         )
@@ -281,17 +272,17 @@ class Server:
             client_manager=self._client_manager
         )
         if parameters is not None:
-            log(INFO, "\tUsing initial parameters provided by strategy")
+            log(INFO, "Using initial global parameters provided by strategy")
             return parameters
 
         # Get initial parameters from one of the clients
-        log(INFO, "\tRequesting initial parameters from one random client")
+        log(INFO, "Requesting initial parameters from one random client")
         random_client = self._client_manager.sample(1)[0]
         ins = GetParametersIns(config={})
         get_parameters_res = random_client.get_parameters(
             ins=ins, timeout=timeout, group_id=server_round
         )
-        log(INFO, "\tReceived initial parameters from one random client")
+        log(INFO, "Received initial parameters from one random client")
         return get_parameters_res.parameters
 
 
@@ -489,9 +480,12 @@ def run_fl(
     config: ServerConfig,
 ) -> History:
     """Train a model on the given server and return the History object."""
-    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
+    hist, elapsed_time = server.fit(
+        num_rounds=config.num_rounds, timeout=config.round_timeout
+    )
 
-    log(INFO, "Summary")
+    log(INFO, "")
+    log(INFO, "Run summary (finished in %.2f)", elapsed_time)
     for idx, line in enumerate(io.StringIO(str(hist))):
         if idx == 0:
             log(INFO, "%s", line.strip("\n"))
