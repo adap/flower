@@ -12,7 +12,7 @@ from utils import get_on_fit_config, fit_weighted_average
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
-NUM_ROUNDS = 2
+NUM_ROUNDS = 100
 save_path = "./results/"
 
 with initialize(config_path="conf"):
