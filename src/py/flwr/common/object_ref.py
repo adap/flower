@@ -21,6 +21,14 @@ from importlib.util import find_spec
 from typing import Any, Optional, Tuple, Type
 
 
+OBJECT_REF_HELP_STR = """
+\nThe object reference string should have the form <module>:<attribute>. Valid
+examples include `client:app` and `project.package.module:wrapper.app`. It must
+refer to a module on the PYTHONPATH and the module needs to have the specified
+attribute.
+"""
+
+
 def validate(
     module_attribute_str: str,
 ) -> Tuple[bool, Optional[str]]:
@@ -41,12 +49,12 @@ def validate(
     if not module_str:
         return (
             False,
-            f"Missing module in {module_attribute_str}",
+            f"Missing module in {module_attribute_str}{OBJECT_REF_HELP_STR}",
         )
     if not attributes_str:
         return (
             False,
-            f"Missing attribute in {module_attribute_str}",
+            f"Missing attribute in {module_attribute_str}{OBJECT_REF_HELP_STR}",
         )
 
     # Load module
@@ -55,13 +63,14 @@ def validate(
         if not _find_attribute_in_module(module.origin, attributes_str):
             return (
                 False,
-                f"Unable to find attribute {attributes_str} in module {module_str}",
+                f"Unable to find attribute {attributes_str} in module {module_str}"
+                f"{OBJECT_REF_HELP_STR}",
             )
         return (True, None)
 
     return (
         False,
-        f"Unable to load module {module_str}",
+        f"Unable to load module {module_str}" f"{OBJECT_REF_HELP_STR}",
     )
 
 
@@ -86,7 +95,7 @@ def load_app(
         module = importlib.import_module(module_str)
     except ModuleNotFoundError:
         raise error_type(
-            f"Unable to load module {module_str}",
+            f"Unable to load module {module_str}{OBJECT_REF_HELP_STR}",
         ) from None
 
     # Recursively load attribute
@@ -96,7 +105,8 @@ def load_app(
             attribute = getattr(attribute, attribute_str)
     except AttributeError:
         raise error_type(
-            f"Unable to load attribute {attributes_str} from module {module_str}",
+            f"Unable to load attribute {attributes_str} from module {module_str}"
+            f"{OBJECT_REF_HELP_STR}",
         ) from None
 
     return attribute
