@@ -40,7 +40,7 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
 from flwr.common.object_ref import load_app, validate
-from flwr.common.retry_invoker import RetryInvoker, exponential
+from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
@@ -399,7 +399,7 @@ def _start_client_internal(
 
     connection_tracker = _ConnectionTracker()
 
-    def on_backoff(retry_state):
+    def _on_backoff(retry_state: RetryState) -> None:
         connection_tracker.connection = False
         if retry_state.tries == 1:
             log(WARN, "Connection attempt failed, retrying...")
@@ -435,7 +435,7 @@ def _start_client_internal(
             if retry_state.tries > 1
             else None
         ),
-        on_backoff=on_backoff,
+        on_backoff=_on_backoff,
     )
 
     node_state = NodeState()
