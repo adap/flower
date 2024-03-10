@@ -15,7 +15,7 @@
 """Flower driver service client."""
 
 
-from logging import ERROR, INFO, WARNING
+from logging import DEBUG, ERROR, WARNING
 from typing import Optional
 
 import grpc
@@ -70,19 +70,19 @@ class GrpcDriver:
             root_certificates=self.root_certificates,
         )
         self.stub = DriverStub(self.channel)
-        log(INFO, "[Driver] Connected to %s", self.driver_service_address)
+        log(DEBUG, "[Driver] Connected to %s", self.driver_service_address)
 
     def disconnect(self) -> None:
         """Disconnect from the Driver API."""
         event(EventType.DRIVER_DISCONNECT)
         if self.channel is None or self.stub is None:
-            log(WARNING, "Already disconnected")
+            log(DEBUG, "Already disconnected")
             return
         channel = self.channel
         self.channel = None
         self.stub = None
         channel.close()
-        log(INFO, "[Driver] Disconnected")
+        log(DEBUG, "[Driver] Disconnected")
 
     def create_run(self, req: CreateRunRequest) -> CreateRunResponse:
         """Request for run ID."""
