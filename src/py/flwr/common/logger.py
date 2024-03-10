@@ -18,7 +18,7 @@
 import logging
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, TextIO, Tuple
 
 # Create logger
 LOGGER_NAME = "flwr"
@@ -43,7 +43,7 @@ class ConsoleHandler(logging.StreamHandler):
         timestamps: bool = False,
         json: bool = False,
         colored: bool = True,
-        stream=None,
+        stream: Optional[TextIO] = None,
     ) -> None:
         super().__init__(stream)
         self.timestamps = timestamps
