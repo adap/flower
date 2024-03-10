@@ -14,7 +14,7 @@
 # ==============================================================================
 """Tests for the validation function of object refs."""
 
-from .object_ref import validate
+from .object_ref import OBJECT_REF_HELP_STR, validate
 
 
 def test_validate_object_reference() -> None:
@@ -40,4 +40,7 @@ def test_validate_object_reference_fails() -> None:
 
     # Assert
     assert not is_valid
-    assert error == "Unable to find attribute runa in module flwr.cli.run"
+    assert (
+        error
+        == f"Unable to find attribute runa in module flwr.cli.run{OBJECT_REF_HELP_STR}"
+    )
