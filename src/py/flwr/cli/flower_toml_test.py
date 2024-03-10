@@ -18,8 +18,6 @@ import os
 import textwrap
 from typing import Any, Dict
 
-from flwr.common.object_ref import validate
-
 from .flower_toml import (
     load_flower_toml,
     validate_flower_toml,
@@ -232,32 +230,6 @@ def test_validate_flower_toml_fields() -> None:
     assert is_valid
     assert len(errors) == 0
     assert len(warnings) == 0
-
-
-def test_validate_object_reference() -> None:
-    """Test that validate_object_reference succeeds correctly."""
-    # Prepare
-    ref = "flwr.cli.run:run"
-
-    # Execute
-    is_valid, error = validate(ref)
-
-    # Assert
-    assert is_valid
-    assert error is None
-
-
-def test_validate_object_reference_fails() -> None:
-    """Test that validate_object_reference fails correctly."""
-    # Prepare
-    ref = "flwr.cli.run:runa"
-
-    # Execute
-    is_valid, error = validate(ref)
-
-    # Assert
-    assert not is_valid
-    assert error == "Unable to find attribute runa in module flwr.cli.run"
 
 
 def test_validate_flower_toml() -> None:
