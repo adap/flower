@@ -50,7 +50,7 @@ class ConsoleHandler(logging.StreamHandler):
         self.json = json
         self.colored = colored
 
-    def emit(self, record):
+    def emit(self, record: LogRecord) -> None:
         """Emit a record."""
         if self.json:
             record.message = record.getMessage().replace("\t", "").strip()
