@@ -59,7 +59,7 @@ mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
 class BaseFederatedDatasetsTest(unittest.TestCase):
     """Test Real/Mocked Datasets used in FederatedDatasets.
 
-    The setUp method mocks the dataset download via datasets.load_dataset  if it is in
+    The setUp method mocks the dataset download via datasets.load_dataset if it is in
     the `mocked_datasets` list.
     """
 
