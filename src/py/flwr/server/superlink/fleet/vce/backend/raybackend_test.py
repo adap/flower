@@ -23,7 +23,7 @@ from unittest import IsolatedAsyncioTestCase
 import ray
 
 from flwr.client import Client, NumPyClient
-from flwr.client.client_app import ClientApp, LoadClientAppError, load_client_app
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import (
     Config,
     ConfigsRecord,
@@ -35,6 +35,7 @@ from flwr.common import (
     RecordSet,
     Scalar,
 )
+from flwr.common.object_ref import load_app
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
 
@@ -67,7 +68,13 @@ client_app = ClientApp(
 
 def _load_from_module(client_app_module_name: str) -> Callable[[], ClientApp]:
     def _load_app() -> ClientApp:
-        app: ClientApp = load_client_app(client_app_module_name)
+        app = load_app(client_app_module_name, LoadClientAppError)
+
+        if not isinstance(app, ClientApp):
+            raise LoadClientAppError(
+                f"Attribute {client_app_module_name} is not of type {ClientApp}",
+            ) from None
+
         return app
 
     return _load_app
