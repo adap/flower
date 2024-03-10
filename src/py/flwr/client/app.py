@@ -435,71 +435,83 @@ def _start_client_internal(
     node_state = NodeState()
 
     while True:
-        sleep_duration: int = 0
-        with connection(
-            address,
-            insecure,
-            retry_invoker,
-            grpc_max_message_length,
-            root_certificates,
-        ) as conn:
-            receive, send, create_node, delete_node = conn
+        try:
+            sleep_duration: int = 0
+            with connection(
+                address,
+                insecure,
+                retry_invoker,
+                grpc_max_message_length,
+                root_certificates,
+            ) as conn:
+                receive, send, create_node, delete_node = conn
 
-            # Register node
-            if create_node is not None:
-                create_node()  # pylint: disable=not-callable
+                try:
+                    # Register node
+                    if create_node is not None:
+                        create_node()  # pylint: disable=not-callable
 
-            while True:
-                # Receive
-                message = receive()
-                if message is None:
-                    time.sleep(3)  # Wait for 3s before asking again
-                    continue
+                    while True:
+                        # Receive
+                        message = receive()
+                        if message is None:
+                            time.sleep(3)  # Wait for 3s before asking again
+                            continue
 
-                log(INFO, "Received message")
+                        log(INFO, "Received message")
 
-                # Handle control message
-                out_message, sleep_duration = handle_control_message(message)
-                if out_message:
-                    send(out_message)
-                    break
+                        # Handle control message
+                        out_message, sleep_duration = handle_control_message(message)
+                        if out_message:
+                            send(out_message)
+                            break
 
-                # Register context for this run
-                node_state.register_context(run_id=message.metadata.run_id)
+                        # Register context for this run
+                        node_state.register_context(run_id=message.metadata.run_id)
 
-                # Retrieve context for this run
-                context = node_state.retrieve_context(run_id=message.metadata.run_id)
+                        # Retrieve context for this run
+                        context = node_state.retrieve_context(
+                            run_id=message.metadata.run_id
+                        )
 
-                # Load ClientApp instance
-                client_app: ClientApp = load_client_app_fn()
+                        # Load ClientApp instance
+                        client_app: ClientApp = load_client_app_fn()
 
-                # Handle task message
-                out_message = client_app(message=message, context=context)
+                        # Handle task message
+                        out_message = client_app(message=message, context=context)
 
-                # Update node state
-                node_state.update_context(
-                    run_id=message.metadata.run_id,
-                    context=context,
-                )
+                        # Update node state
+                        node_state.update_context(
+                            run_id=message.metadata.run_id,
+                            context=context,
+                        )
 
-                # Send
-                send(out_message)
-                log(INFO, "Sent reply")
+                        # Send
+                        send(out_message)
+                        log(INFO, "Sent reply")
 
-            # Unregister node
-            if delete_node is not None:
-                delete_node()  # pylint: disable=not-callable
+                    # Unregister node
+                    if delete_node is not None:
+                        delete_node()  # pylint: disable=not-callable
 
-        if sleep_duration == 0:
-            log(INFO, "Disconnect and shut down")
+                except KeyboardInterrupt as err:
+                    if delete_node is not None:
+                        delete_node()  # pylint: disable=not-callable
+                    raise err from None
+
+            if sleep_duration == 0:
+                log(INFO, "Disconnect and shut down")
+                break
+            # Sleep and reconnect afterwards
+            log(
+                INFO,
+                "Disconnect, then re-establish connection after %s second(s)",
+                sleep_duration,
+            )
+            time.sleep(sleep_duration)
+
+        except KeyboardInterrupt:
             break
-        # Sleep and reconnect afterwards
-        log(
-            INFO,
-            "Disconnect, then re-establish connection after %s second(s)",
-            sleep_duration,
-        )
-        time.sleep(sleep_duration)
 
 
 def start_numpy_client(
