@@ -485,8 +485,8 @@ def run_fl(
     )
 
     log(INFO, "")
-    log(INFO, "Run summary (finished in %.2f)", elapsed_time)
-    log(INFO, "")
+    log(INFO, "[SUMMARY]")
+    log(INFO, "Run finished %s rounds in %.2fs", config.num_rounds, elapsed_time)
     for idx, line in enumerate(io.StringIO(str(hist))):
         if idx == 0:
             log(INFO, "%s", line.strip("\n"))
