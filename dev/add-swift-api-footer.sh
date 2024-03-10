@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,11 +18,17 @@
 set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
-ROOT=$(pwd)
+footer_template_file="dev/swift-docs-resources/footer.html"
+footer_template=$(<"$footer_template_file")
+placeholder='<body data-color-scheme="auto">'
+html_file="Swiftdoc/html/documentation/flwr/index.html"
 
-# Build and deploy Flower iOS docs
-cd "$ROOT"
-./dev/build-swift-api-ref.sh
-./dev/add-swift-api-footer.sh
-cd SwiftDoc/html
-aws s3 sync --delete --exclude ".*" --cache-control "no-cache" ./ s3://flower.ai/docs/ios
+sed -i '' -e "s#$(printf '%s' "$placeholder" | sed 's/[&/\]/\\&/g')#$placeholder\n$footer_template#" "$html_file"
+
+flower_logo='dev/swift-docs-resources/logo_secondary-w-border.png'
+footer_template_css="dev/swift-docs-resources/footer.css"
+destination_images="Swiftdoc/html/images/"
+destination_css="Swiftdoc/html/css/"
+
+cp "$flower_logo" "$destination_images"
+cp "$footer_template_css" "$destination_css"
