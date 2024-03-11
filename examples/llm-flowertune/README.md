@@ -50,7 +50,7 @@ With an activated Python environment, run the example with default config values
 python main.py
 ```
 
-This command will run FL simulations with n 4-bit [OpenLLaMA 7Bv2](https://huggingface.co/openlm-research/open_llama_7b_v2) model involving 2 clients per rounds for 100 FL rounds. You can override configuration parameters directly from the command line. Below are a few settings you might want to test:
+This command will run FL simulations with a 4-bit [OpenLLaMA 7Bv2](https://huggingface.co/openlm-research/open_llama_7b_v2) model involving 2 clients per rounds for 100 FL rounds. You can override configuration parameters directly from the command line. Below are a few settings you might want to test:
 
 ```bash
 # Use OpenLLaMA-3B instead of 7B and 8-bits quantization
