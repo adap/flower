@@ -12,7 +12,7 @@ Start by cloning the example. We prepared a single-line command that you can cop
 git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/sample-level-dp-opacus . && rm -rf flower && cd sample-level-dp-opacus
 ```
 
-This will create a new directory called `quickstart-pytorch` containing the following files:
+This will create a new directory called `sample-level-dp-opacus` containing the following files:
 
 ```shell
 -- requirements.txt
