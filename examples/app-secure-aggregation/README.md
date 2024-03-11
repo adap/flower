@@ -47,10 +47,16 @@ pip install -r requirements.txt
 
 If you don't see any errors you're good to go!
 
-## Run the example with one command
+## Run the example with one command (recommended)
 
 ```bash
 ./run.sh
+```
+
+## Run the example with the simulation engine
+
+```bash
+flower-simulation --server-app server:app --client-app client:app --num-supernodes 5
 ```
 
 ## Alternatively, run the example (in 7 terminal windows)
