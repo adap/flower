@@ -3,11 +3,12 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "secaggplus-mt"
+name = "app-secure-aggregation"
 version = "0.1.0"
-description = "Secure Aggregation with Driver API"
+description = "Flower Secure Aggregation example."
 authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-flwr-nightly = { version = "^1.5.0.dev20230629", extras = ["simulation", "rest"] }
+python = "^3.8"
+# Mandatory dependencies
+flwr-nightly = { version = "1.8.0.dev20240309", extras = ["simulation"] }
