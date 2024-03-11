@@ -78,7 +78,9 @@ class DirichletPartitioner(Partitioner):
     >>> print(partition[0])  # Print the first example
     {'image': <PIL.PngImagePlugin.PngImageFile image mode=L size=28x28 at 0x127B92170>,
     'label': 4}
-    >>> partition_sizes = [len(fds.load_partition(node_id)) for node_id in range(10)]
+    >>> partition_sizes = partition_sizes = [
+    >>>     len(fds.load_partition(partition_id)) for partition_id in range(10)
+    >>> ]
     >>> print(sorted(partition_sizes))
     [2134, 2615, 3646, 6011, 6170, 6386, 6715, 7653, 8435, 10235]
     """

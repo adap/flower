@@ -24,20 +24,20 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class SizePartitioner(Partitioner):
-    """Base class for the deterministic size partitioning based on the `node_id`.
+    """Base class for the deterministic size partitioning based on the `partition_id`.
 
-    The client with `node_id` has the following relationship regarding the number of
-    samples.
+    The client with `partition_id` has the following relationship regarding the number
+    of samples.
 
-    `node_id_to_size_fn(node_id)` ~ number of samples for `node_id`
+    `node_id_to_size_fn(partition_id)` ~ number of samples for `partition_id`
 
-    If the function doesn't transform the `node_id` it's a linear correlation between
-    the number of sample for the node and the value of `node_id`. For instance, if the
-    node ids range from 1 to M, node with id 1 gets 1 unit of data, client 2 gets 2
-    units, and so on, up to node M which gets M units.
+    If the function doesn't transform the `partition_id` it's a linear correlation
+    between the number of sample for the node and the value of `partition_id`. For
+    instance, if the node ids range from 1 to M, node with id 1 gets 1 unit of data,
+    client 2 gets 2 units, and so on, up to node M which gets M units.
 
-    Note that size corresponding to the `node_id` is deterministic, yet in case of
-    different dataset shuffling the assignment of samples to `node_id` will vary.
+    Note that size corresponding to the `partition_id` is deterministic, yet in case of
+    different dataset shuffling the assignment of samples to `partition_id` will vary.
 
     Parameters
     ----------
@@ -67,7 +67,7 @@ class SizePartitioner(Partitioner):
     def load_partition(self, node_id: int) -> datasets.Dataset:
         """Load a single partition based on the partition index.
 
-        The number of samples is dependent on the partition node_id.
+        The number of samples is dependent on the partition partition_id.
 
         Parameters
         ----------

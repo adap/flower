@@ -100,7 +100,9 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     >>> print(partition[0])  # Print the first example
     {'image': <PIL.PngImagePlugin.PngImageFile image mode=L size=28x28 at 0x15F616C50>,
     'label': 3}
-    >>> partition_sizes = [len(fds.load_partition(node_id)) for node_id in range(10)]
+    >>> partition_sizes = [
+    >>>     len(fds.load_partition(partition_id)) for partition_id in range(10)
+    >>> ]
     >>> print(partition_sizes)
     [2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000]
 
@@ -112,7 +114,9 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     >>> partitioner = ShardPartitioner(num_partitions=9, partition_by="label",
     >>>                                shard_size=1_000)
     >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
-    >>> partition_sizes = [len(fds.load_partition(node_id)) for node_id in range(9)]
+    >>> partition_sizes = [
+    >>>     len(fds.load_partition(partition_id)) for partition_id in range(9)
+    >>> ]
     >>> print(partition_sizes)
     [7000, 7000, 7000, 7000, 7000, 7000, 6000, 6000, 6000]
 
@@ -123,7 +127,9 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     >>> partitioner = ShardPartitioner(num_partitions=10, partition_by="label",
     >>>                                shard_size=990, keep_incomplete_shard=True)
     >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
-    >>> partition_sizes = [len(fds.load_partition(node_id)) for node_id in range(10)]
+    >>> partition_sizes = [
+    >>>     len(fds.load_partition(partition_id)) for partition_id in range(10)
+    >>> ]
     >>> print(sorted(partition_sizes))
     [5550, 5940, 5940, 5940, 5940, 5940, 5940, 5940, 5940, 6930]
     """
@@ -273,14 +279,14 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         shard_indices_array = self._rng.permutation(num_usable_shards_in_dataset)[
             : self._num_shards_used
         ]
-        # Randomly assign shards to node_id
+        # Randomly assign shards to partition_id
         nid_to_shard_indices = np.split(
             shard_indices_array, indices_on_which_to_split_shards
         )[:-1]
         node_id_to_indices: Dict[int, List[int]] = {
             cid: [] for cid in range(self._num_partitions)
         }
-        # Compute node_id to sample indices based on the shard indices
+        # Compute partition_id to sample indices based on the shard indices
         for node_id in range(self._num_partitions):
             for shard_idx in nid_to_shard_indices[node_id]:
                 start_id = int(shard_idx * self._shard_size)
