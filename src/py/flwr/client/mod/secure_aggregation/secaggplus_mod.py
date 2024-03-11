@@ -178,9 +178,9 @@ def secaggplus_mod(
         res = _setup(state, configs)
     elif state.current_stage == Stage.SHARE_KEYS:
         res = _share_keys(state, configs)
-    elif state.current_stage == Stage.COLLECT_MASKED_INPUT:
+    elif state.current_stage == Stage.COLLECT_MASKED_VECTORS:
         fit = _get_fit_fn(msg, ctxt, call_next)
-        res = _collect_masked_input(state, configs, fit)
+        res = _collect_masked_vectors(state, configs, fit)
     elif state.current_stage == Stage.UNMASK:
         res = _unmask(state, configs)
     else:
@@ -199,7 +199,7 @@ def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
     # Check the existence of Config.STAGE
     if Key.STAGE not in configs:
         raise KeyError(
-            f"The required key '{Key.STAGE}' is missing from the input `named_values`."
+            f"The required key '{Key.STAGE}' is missing from the ConfigsRecord."
         )
 
     # Check the value type of the Config.STAGE
@@ -215,7 +215,7 @@ def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
         if current_stage != Stage.UNMASK:
             log(WARNING, "Restart from the setup stage")
     # If stage is not "setup",
-    # the stage from `named_values` should be the expected next stage
+    # the stage from configs should be the expected next stage
     else:
         stages = Stage.all()
         expected_next_stage = stages[(stages.index(current_stage) + 1) % len(stages)]
@@ -229,7 +229,7 @@ def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
 # pylint: disable-next=too-many-branches
 def check_configs(stage: str, configs: ConfigsRecord) -> None:
     """Check the validity of the configs."""
-    # Check `named_values` for the setup stage
+    # Check configs for the setup stage
     if stage == Stage.SETUP:
         key_type_pairs = [
             (Key.SAMPLE_NUMBER, int),
@@ -243,7 +243,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
             if key not in configs:
                 raise KeyError(
                     f"Stage {Stage.SETUP}: the required key '{key}' is "
-                    "missing from the input `named_values`."
+                    "missing from the ConfigsRecord."
                 )
             # Bool is a subclass of int in Python,
             # so `isinstance(v, int)` will return True even if v is a boolean.
@@ -266,7 +266,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                     f"Stage {Stage.SHARE_KEYS}: "
                     f"the value for the key '{key}' must be a list of two bytes."
                 )
-    elif stage == Stage.COLLECT_MASKED_INPUT:
+    elif stage == Stage.COLLECT_MASKED_VECTORS:
         key_type_pairs = [
             (Key.CIPHERTEXT_LIST, bytes),
             (Key.SOURCE_LIST, int),
@@ -274,9 +274,9 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
         for key, expected_type in key_type_pairs:
             if key not in configs:
                 raise KeyError(
-                    f"Stage {Stage.COLLECT_MASKED_INPUT}: "
+                    f"Stage {Stage.COLLECT_MASKED_VECTORS}: "
                     f"the required key '{key}' is "
-                    "missing from the input `named_values`."
+                    "missing from the ConfigsRecord."
                 )
             if not isinstance(configs[key], list) or any(
                 elm
@@ -285,7 +285,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 if type(elm) is not expected_type
             ):
                 raise TypeError(
-                    f"Stage {Stage.COLLECT_MASKED_INPUT}: "
+                    f"Stage {Stage.COLLECT_MASKED_VECTORS}: "
                     f"the value for the key '{key}' "
                     f"must be of type List[{expected_type.__name__}]"
                 )
@@ -299,7 +299,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 raise KeyError(
                     f"Stage {Stage.UNMASK}: "
                     f"the required key '{key}' is "
-                    "missing from the input `named_values`."
+                    "missing from the ConfigsRecord."
                 )
             if not isinstance(configs[key], list) or any(
                 elm
@@ -414,7 +414,7 @@ def _share_keys(
 
 
 # pylint: disable-next=too-many-locals
-def _collect_masked_input(
+def _collect_masked_vectors(
     state: SecAggPlusState,
     configs: ConfigsRecord,
     fit: Callable[[], FitRes],
