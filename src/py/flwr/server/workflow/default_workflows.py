@@ -94,6 +94,7 @@ class DefaultWorkflow:
                 log(INFO, "%s", line.strip("\n"))
             else:
                 log(INFO, "\t%s", line.strip("\n"))
+        log(INFO, "")
 
         # Terminate the thread
         f_stop.set()
