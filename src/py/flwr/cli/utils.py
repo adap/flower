@@ -21,7 +21,6 @@ import typer
 
 def prompt_text(text: str) -> str:
     """Ask user to enter text input."""
-    # Turn options into a list with index as in " [ 0] quickstart-pytorch"
     while True:
         result = typer.prompt(
             typer.style(f"\n💬 {text}", fg=typer.colors.MAGENTA, bold=True)
