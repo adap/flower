@@ -161,6 +161,11 @@ class FederatedDataset:
         self._check_if_split_present(split)
         return self._dataset[split]
 
+    @property
+    def partitioners(self) -> Dict[str, Partitioner]:
+        """Split to associated partitioners dictionary."""
+        return self._partitioners
+
     def _check_if_split_present(self, split: str) -> None:
         """Check if the split (for partitioning or full return) is in the dataset."""
         if self._dataset is None:
