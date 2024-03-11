@@ -362,13 +362,13 @@ if __name__ == "__main__":
             # "lambda_reg": {"min": 0.0, "max": 1.0},
             # "lambda_align_g": {"min": 1e-6, "max": 1e-3},
             "lambda_align_g": {"values": [1]},  # kl term for generator
-            "lambda_reg": {"values": [0.1, 1]},
+            "lambda_reg": {"values": [0.1]},
             "lambda_align": {"values": [1]},
             # "lambda_align": {"min": 1e-6, "max": 1e-3},
             "lr_g": {
                 "values": [
                     1e-3,
-                    # 1e-4,
+                    # 1e-5,
                 ]
             },
             "steps_g": {"values": [100, 200]},  # number of epochs for generator
@@ -380,4 +380,4 @@ if __name__ == "__main__":
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=1)
+    wandb.agent(sweep_id, function=main, count=2)

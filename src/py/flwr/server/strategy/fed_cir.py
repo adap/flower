@@ -66,13 +66,21 @@ def vae_loss(recon_img, img, mu, logvar, beta=1.0, separate=False):
     if not torch.all(condition):
         ValueError("Values should be between 0 and 1")
         recon_img = torch.clamp(recon_img, 0.0, 1.0)
-    recon_loss = F.binary_cross_entropy(
-        recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="mean"
+    bce_loss_per_pixel = F.binary_cross_entropy(
+        recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="none"
     )
+    # Sum along dimension 1 (sum over pixels for each image)
+    bce_loss_sum_per_image = torch.sum(
+        bce_loss_per_pixel, dim=1
+    )  # Shape: (batch_size,)
+
+    # Take the mean along dimension 0 (mean over images in the batch)
+    recon_loss = torch.mean(bce_loss_sum_per_image)  # Shape: scalar
 
     # KL divergence loss
-    kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=1).mean()
-
+    kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=1)
+    # Take the mean along dimension 0 (mean over images in the batch)
+    kld_loss = torch.mean(kld_loss)
     # Total VAE loss
     total_loss = recon_loss + kld_loss * beta
     if separate:
@@ -196,8 +204,8 @@ class FedCiR(FedAvg):
         self.prior_steps = prior_steps
         self.alignment_loader = alignment_dataloader
         self.stats_run_file = stats_run_file
-        self.ref_mu, self.ref_logvar = self.compute_ref_stats()
-        # self.ref_mu, self.ref_logvar = None, None
+        # self.ref_mu, self.ref_logvar = self.compute_ref_stats()
+        self.ref_mu, self.ref_logvar = None, None
         self.lambda_align_g = lambda_align_g
 
     def compute_ref_stats(self, use_PCA=True, given_labels=True):
@@ -329,7 +337,8 @@ class FedCiR(FedAvg):
         if self.on_fit_config_fn is not None:
             # Custom fit config function provided
             config = self.on_fit_config_fn(server_round)
-            config["gen_params"] = self.gen_stats
+            # config["gen_params"] = self.gen_stats
+            config["gen_params"] = self.initial_generator_params
         fit_ins = FitIns(parameters, config)
 
         # Sample clients
