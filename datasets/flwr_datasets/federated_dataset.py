@@ -71,7 +71,7 @@ class FederatedDataset:
 
     Use test split for centralized evaluation.
 
-    >>> centralized = mnist_fds.load_full("test")
+    >>> centralized = mnist_fds.load_split("test")
     """
 
     # pylint: disable=too-many-instance-attributes
@@ -97,16 +97,16 @@ class FederatedDataset:
         self._shuffle = shuffle
         self._seed = seed
         #  _dataset is prepared lazily on the first call to `load_partition`
-        #  or `load_full`. See _prepare_datasets for more details
+        #  or `load_split`. See _prepare_datasets for more details
         self._dataset: Optional[DatasetDict] = None
-        # Indicate if the dataset is prepared for `load_partition` or `load_full`
+        # Indicate if the dataset is prepared for `load_partition` or `load_split`
         self._dataset_prepared: bool = False
 
     def load_partition(self, node_id: int, split: Optional[str] = None) -> Dataset:
         """Load the partition specified by the idx in the selected split.
 
         The dataset is downloaded only when the first call to `load_partition` or
-        `load_full` is made.
+        `load_split` is made.
 
         Parameters
         ----------
@@ -138,11 +138,11 @@ class FederatedDataset:
         self._assign_dataset_to_partitioner(split)
         return partitioner.load_partition(node_id)
 
-    def load_full(self, split: str) -> Dataset:
+    def load_split(self, split: str) -> Dataset:
         """Load the full split of the dataset.
 
         The dataset is downloaded only when the first call to `load_partition` or
-        `load_full` is made.
+        `load_split` is made.
 
         Parameters
         ----------

@@ -112,7 +112,7 @@ def prepare_dataset(use_mnist: bool):
         partition = partition.with_transform(apply_transforms)
         trainsets.append(partition["train"])
         validsets.append(partition["test"])
-    testset = fds.load_full("test")
+    testset = fds.load_split("test")
     testset = testset.with_transform(apply_transforms)
     return trainsets, validsets, testset
 
