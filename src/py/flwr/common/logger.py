@@ -16,6 +16,7 @@
 
 
 import logging
+import sys
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
 from typing import TYPE_CHECKING, Any, Dict, Optional, TextIO, Tuple
@@ -96,6 +97,7 @@ console_handler = ConsoleHandler(
     timestamps=False,
     json=False,
     colored=True,
+    stream=sys.stdout,
 )
 console_handler.setLevel(logging.INFO)
 FLOWER_LOGGER.addHandler(console_handler)
