@@ -16,8 +16,7 @@
 
 import random
 from logging import WARN
-from typing import List, Optional, Set
-from uuid import UUID
+from typing import List, Optional
 
 from flwr.common import now
 from flwr.common.logger import log
@@ -74,10 +73,3 @@ class SimpleInMemoryState(InMemoryState):
 
         # Return TaskIns
         return task_ins_list
-
-    def delete_tasks(self, task_ids: Set[UUID]) -> None:
-        """Delete Tasks from task_x_store."""
-        with self.lock:
-            # Delegate it to the parent class. Must be behind lock
-            # since we are poping from dict in `get_task_ins`
-            return super().delete_tasks(task_ids)
