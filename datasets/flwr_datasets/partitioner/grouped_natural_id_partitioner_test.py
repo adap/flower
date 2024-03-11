@@ -16,7 +16,7 @@ from flwr_datasets.partitioner.group_natural_id_partitioner import (
 
 def _dummy_setup(
     num_rows: int, n_unique_natural_ids: int, num_nodes: int
-) -> Tuple[Dataset, GroupNaturalIdPartitioner]:
+) -> Tuple[Dataset, GroupedNaturalIdPartitioner]:
     """Create a dummy dataset and partitioner based on given arguments.
 
     The partitioner has automatically the dataset assigned to it.
@@ -39,7 +39,7 @@ def _create_dataset(num_rows: int, n_unique_natural_ids: int) -> Dataset:
     return dataset
 
 
-class TestGroupNaturalIdPartitioner(unittest.TestCase):
+class TestGroupedNaturalIdPartitioner(unittest.TestCase):
     """Test IidPartitioner."""
 
     @parameterized.expand(  # type: ignore

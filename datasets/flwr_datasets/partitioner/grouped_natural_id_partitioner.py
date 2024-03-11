@@ -33,6 +33,7 @@ class GroupNaturalIdPartitioner(NaturalIdPartitioner):
             )
         unique_natural_ids = self.dataset.unique(self._partition_by)
 
+
         # Divides the labels between the number of nodes/ groups
         split_natural_ids = np.array_split(unique_natural_ids, self._num_groups)
 
