@@ -1,4 +1,4 @@
-from flwr.common import Context, log
+from flwr.common import Context, log, parameters_to_ndarrays
 from logging import INFO
 from flwr.server import Driver, LegacyContext
 from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
@@ -7,6 +7,8 @@ from flwr.server.workflow.secure_aggregation.secaggplus_workflow import (
 )
 import numpy as np
 from flwr.common.secure_aggregation.quantization import quantize
+from flwr.server.workflow.constant import MAIN_PARAMS_RECORD
+import flwr.common.recordset_compat as compat
 
 
 class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
@@ -56,6 +58,14 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
 
         super().__call__(driver, context)
 
+        paramsrecord = context.state.parameters_records[MAIN_PARAMS_RECORD]
+        parameters = compat.parametersrecord_to_parameters(paramsrecord, True)
+        ndarrays = parameters_to_ndarrays(parameters)
+        log(
+            INFO,
+            "Weighted average of vectors (dequantized): %s",
+            ndarrays[0],
+        )
         log(
             INFO,
             "########################### Secure Aggregation End ###########################",
@@ -79,16 +89,4 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
         for node_id in state.sampled_node_ids - state.active_node_ids:
             log(INFO, "Client %s dropped out.", self.node_ids.index(node_id))
         log(INFO, "Obtained sum of masked vectors: %s", state.aggregate_ndarrays[1])
-        return ret
-
-    def unmask_stage(
-        self, driver: Driver, context: LegacyContext, state: WorkflowState
-    ) -> bool:
-        ret = super().unmask_stage(driver, context, state)
-
-        log(
-            INFO,
-            "Weighted average of vectors (dequantized): %s",
-            state.aggregate_ndarrays[0],
-        )
         return ret
