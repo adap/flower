@@ -456,7 +456,14 @@ def _start_client_internal(
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
-                log(INFO, "Received message")
+                log(
+                    INFO,
+                    "Received: %s message %s for group %s of run %s",
+                    message.metadata.message_type,
+                    message.metadata.message_id,
+                    message.metadata.group_id,
+                    message.metadata.run_id,
+                )
 
                 # Handle control message
                 out_message, sleep_duration = handle_control_message(message)
@@ -484,7 +491,14 @@ def _start_client_internal(
 
                 # Send
                 send(out_message)
-                log(INFO, "Sent reply")
+                log(
+                    INFO,
+                    "Sent: %s reply %s for group %s of run %s",
+                    out_message.metadata.message_type,
+                    out_message.metadata.message_id,
+                    out_message.metadata.group_id,
+                    out_message.metadata.run_id,
+                )
 
             # Unregister node
             if delete_node is not None:
