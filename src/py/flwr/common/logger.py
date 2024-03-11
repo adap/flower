@@ -73,14 +73,14 @@ class ConsoleHandler(StreamHandler):
             if self.init_pattern.search(record.message):
                 self.stage = "init"
                 return
-            elif self.summary_pattern.search(record.message):
+            if self.summary_pattern.search(record.message):
                 self.stage = "summary"
                 return
-            else:
-                round_match = self.round_pattern.search(record.message)
-                if round_match:
-                    self.stage = f"round {round_match.group(1)}"
-                    return
+
+            round_match = self.round_pattern.search(record.message)
+            if round_match:
+                self.stage = f"round {round_match.group(1)}"
+                return
 
             record.message = " ".join(record.message.split())
 
