@@ -9,5 +9,6 @@ description = "Example usage of the SecAggPlusWorkflow and the secaggplus_mod."
 authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-flwr = { path = "../../", develop = true, extras = ["simulation"] }
+python = "^3.8"
+# Mandatory dependencies
+flwr-nightly = { version = "1.8.0.dev20240309", extras = ["simulation"] }

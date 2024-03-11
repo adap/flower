@@ -2,6 +2,7 @@ from flwr.common import Context
 from flwr.server import Driver, LegacyContext, ServerApp, ServerConfig
 from flwr.server.strategy import FedAvg
 from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow
+
 from workflow_with_log import SecAggPlusWorkflowWithLogs
 
 
@@ -13,7 +14,7 @@ strategy = FedAvg(
 )
 
 
-# Run via `flower-server-app server_workflow:app`
+# Flower ServerApp
 app = ServerApp()
 
 
