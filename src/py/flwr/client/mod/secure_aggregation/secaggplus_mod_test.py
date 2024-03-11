@@ -20,7 +20,7 @@ from typing import Callable, Dict, List
 
 from flwr.client.mod import make_ffn
 from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet
-from flwr.common.constant import MESSAGE_TYPE_FIT
+from flwr.common.constant import MessageType
 from flwr.common.secure_aggregation.secaggplus_constants import (
     RECORD_KEY_CONFIGS,
     RECORD_KEY_STATE,
@@ -52,7 +52,7 @@ def get_test_handler(
                 reply_to_message="",
                 group_id="",
                 ttl="",
-                message_type=MESSAGE_TYPE_FIT,
+                message_type=MessageType.TRAIN,
             ),
             content=RecordSet(
                 configs_records={RECORD_KEY_CONFIGS: ConfigsRecord(configs)}
@@ -139,7 +139,6 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         valid_key_type_pairs = [
             (Key.SAMPLE_NUMBER, int),
-            (Key.SECURE_ID, int),
             (Key.SHARE_NUMBER, int),
             (Key.THRESHOLD, int),
             (Key.CLIPPING_RANGE, float),
@@ -279,8 +278,8 @@ class TestSecAggPlusHandler(unittest.TestCase):
         set_stage = _make_set_state_fn(ctxt)
 
         valid_configs: Dict[str, ConfigsRecordValues] = {
-            Key.ACTIVE_SECURE_ID_LIST: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            Key.DEAD_SECURE_ID_LIST: [32, 51324, 32324123, -3],
+            Key.ACTIVE_NODE_ID_LIST: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            Key.DEAD_NODE_ID_LIST: [32, 51324, 32324123, -3],
         }
 
         # Test valid `named_values`

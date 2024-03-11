@@ -18,6 +18,7 @@ import typer
 
 from .example import example
 from .new import new
+from .run import run
 
 app = typer.Typer(
     help=typer.style(
@@ -30,6 +31,7 @@ app = typer.Typer(
 
 app.command()(new)
 app.command()(example)
+app.command()(run)
 
 if __name__ == "__main__":
     app()
