@@ -456,6 +456,7 @@ def _start_client_internal(
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
+                log(INFO, "")
                 log(
                     INFO,
                     "[RUN %s, ROUND %s]",
