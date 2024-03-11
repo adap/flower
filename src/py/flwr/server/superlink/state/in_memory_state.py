@@ -36,7 +36,7 @@ class InMemoryState(State):
         self.run_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
