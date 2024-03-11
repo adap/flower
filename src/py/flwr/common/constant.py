@@ -36,10 +36,28 @@ TRANSPORT_TYPES = [
     TRANSPORT_TYPE_VCE,
 ]
 
-MESSAGE_TYPE_GET_PROPERTIES = "get_properties"
-MESSAGE_TYPE_GET_PARAMETERS = "get_parameters"
-MESSAGE_TYPE_FIT = "fit"
-MESSAGE_TYPE_EVALUATE = "evaluate"
+
+class MessageType:
+    """Message type."""
+
+    TRAIN = "train"
+    EVALUATE = "evaluate"
+    QUERY = "query"
+
+    def __new__(cls) -> MessageType:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class MessageTypeLegacy:
+    """Legacy message type."""
+
+    GET_PROPERTIES = "get_properties"
+    GET_PARAMETERS = "get_parameters"
+
+    def __new__(cls) -> MessageTypeLegacy:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
 
 
 class SType:

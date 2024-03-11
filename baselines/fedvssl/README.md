@@ -22,13 +22,13 @@ dataset: [UCF-101, Kinectics-400]
 ## About this baseline
 
 **Whats's implemented:** The code in this directory replicates the experiments in *Federated Self-supervised Learning for Video Understanding* (Rehman et al., 2022) for UCF-101, which proposed the FedVSSL algorithm. Specifically, it replicates the results for UCF-101 in Table 4 in the paper.
-As common SSL training pipline, this code has two parts: SSL pre-training in FL and downstream fine-tuning.
+As common SSL training pipeline, this code has two parts: SSL pre-training in FL and downstream fine-tuning.
 
 **Dataset:** [UCF-101](https://www.crcv.ucf.edu/data/UCF101.php)
 
 **Hardware Setup:** These experiments (SSL pre-train + downstream fine-tuning) were on a server with 6x RTX-3090 GPU and 128 CPU threads. Assuming a single client runs per GPU, on a RTX 3090 it takes 34s for a client to complete its local training (1 epoch); on an A100 this goes down to 17s. In this baseline 5 clients participate in each round for a total of 20 rounds. On a single A100 you can run the federated pre-training in under 1h.
 
-**Contributers:** Yasar Abbas Ur Rehman and Yan Gao
+**Contributors:** Yasar Abbas Ur Rehman and Yan Gao
 
 ## Experimental Setup
 
@@ -65,7 +65,7 @@ For UCF-101 dataset, one can simply follow the dataset preparation instruction b
 ## Environment Setup
 Please make sure you have installed CUDA 11.7 on your machine 
 (see [NVIDIA CUDA Toolkit website](https://developer.nvidia.com/cuda-11-7-0-download-archive)).
-To construct the Python environment follow these steps (asuming you arelady have `pyenv` and `Poetry` in your system):
+To construct the Python environment follow these steps (assuming you arelady have `pyenv` and `Poetry` in your system):
 
 ```bash
 # Set directory to use python 3.10 (install with `pyenv install <version>` if you don't have it)
@@ -152,7 +152,7 @@ To run using `FedAvg`:
 # This is done so to match the experimental setup in the paper
 python -m fedvssl.main strategy.fedavg=true
 
-# This config can also be overriden.
+# This config can also be overridden.
 ```
 
 Running any of the above will create a directory structure in the form of `outputs/<DATE>/<TIME>/fedvssl_results` to save the global checkpoints and the local clients' training logs.

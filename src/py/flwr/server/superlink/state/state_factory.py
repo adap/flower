@@ -41,7 +41,7 @@ class StateFactory:
                 self.state_instance = InMemoryState()
             log(DEBUG, "Using InMemoryState")
             return self.state_instance
-        elif self.database == ":flwr-in-memory-state-with-mapping:":
+        if self.database == ":flwr-simple-in-memory-state:":
             if self.state_instance is None:
                 self.state_instance = SimpleInMemoryState()
             log(DEBUG, "Using SimpleInMemoryState")

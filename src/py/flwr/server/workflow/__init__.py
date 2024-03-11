@@ -16,7 +16,9 @@
 
 
 from .default_workflows import DefaultWorkflow
+from .secure_aggregation import SecAggPlusWorkflow
 
 __all__ = [
     "DefaultWorkflow",
+    "SecAggPlusWorkflow",
 ]

@@ -17,15 +17,16 @@
 
 import argparse
 import sys
-from logging import DEBUG, WARN
+from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
 
 from flwr.common import Context, EventType, RecordSet, event
-from flwr.common.logger import log
+from flwr.common.logger import log, update_console_handler
+from flwr.common.object_ref import load_app
 
 from .driver.driver import Driver
-from .server_app import ServerApp, load_server_app
+from .server_app import LoadServerAppError, ServerApp
 
 
 def run(
@@ -37,7 +38,7 @@ def run(
     """Run ServerApp with a given Driver."""
     if not (server_app_attr is None) ^ (loaded_server_app is None):
         raise ValueError(
-            "Either `server_app_attr` should `loaded_server_app` be set "
+            "Either `server_app_attr` or `loaded_server_app` should be set "
             "but not both. "
         )
 
@@ -45,16 +46,20 @@ def run(
         sys.path.insert(0, server_app_dir)
 
     # Load ServerApp if needed
-    if server_app_attr:
+    def _load() -> ServerApp:
+        if server_app_attr:
+            server_app: ServerApp = load_app(server_app_attr, LoadServerAppError)
 
-        def _load() -> ServerApp:
-            server_app: ServerApp = load_server_app(server_app_attr)
-            return server_app
+            if not isinstance(server_app, ServerApp):
+                raise LoadServerAppError(
+                    f"Attribute {server_app_attr} is not of type {ServerApp}",
+                ) from None
 
-        server_app = _load()
+        if loaded_server_app:
+            server_app = loaded_server_app
+        return server_app
 
-    if loaded_server_app:
-        server_app = loaded_server_app
+    server_app = _load()
 
     # Initialize Context
     context = Context(state=RecordSet())
@@ -62,12 +67,20 @@ def run(
     # Call ServerApp
     server_app(driver=driver, context=context)
 
+    log(DEBUG, "ServerApp finished running.")
+
 
 def run_server_app() -> None:
     """Run Flower server app."""
     event(EventType.RUN_SERVER_APP_ENTER)
 
     args = _parse_args_run_server_app().parse_args()
+
+    update_console_handler(
+        level=DEBUG if args.verbose else INFO,
+        timestamps=args.verbose,
+        colored=True,
+    )
 
     # Obtain certificates
     if args.insecure:
@@ -145,6 +158,11 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         action="store_true",
         help="Run the server app without HTTPS. By default, the app runs with "
         "HTTPS enabled. Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Set the logging to `DEBUG`.",
     )
     parser.add_argument(
         "--root-certificates",

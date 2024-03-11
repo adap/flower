@@ -76,7 +76,7 @@ class SimpleInMemoryState(InMemoryState):
         return task_ins_list
 
     def delete_tasks(self, task_ids: Set[UUID]) -> None:
-        """Delet Tasks from task_x_store."""
+        """Delete Tasks from task_x_store."""
         with self.lock:
             # Delegate it to the parent class. Must be behind lock
             # since we are poping from dict in `get_task_ins`

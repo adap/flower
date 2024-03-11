@@ -76,7 +76,7 @@ python sim.py --num_cpus=2 --num_gpus=0.25
 
 Because TensorFlow by default maps all the available VRAM, we need to [enable GPU memory growth](https://www.tensorflow.org/guide/gpu#limiting_gpu_memory_growth), see how it is done in the example (`sim.py`) for both the "main" process (where the server/strategy runs) and for the clients (using the `actor_kwargs`)
 
-### Run with Flower-Next
+### Run with Flower Next (preview)
 
 Ensure you have activated your environment, then execute the command below. All `ClientApp` instances will run on CPU but the `ServerApp` will run on the GPU if one is available. Note that this is the case because the `Simulation Engine` only exposes certain resources to the `ClientApp` (based on the `client_resources` in `--backend-config`). For TensorFlow simulations, it is desirable to make use of TF's [memory growth](https://www.tensorflow.org/api_docs/python/tf/config/experimental/set_memory_growth) feature. You can enable that easily with the `--enable-tf-gpu-growth` flag.
 
@@ -90,7 +90,7 @@ flower-simulation --client-app=sim:client --server-app=sim:server --num-supernod
 You can change the default resources assigned to each `ClientApp` using the `--backend-config` argument.
 
 ```bash
-# Tells the VCE to resever 2x CPUs and 25% of available VRAM for each ClientApp
+# Tells the VCE to reserve 2x CPUs and 25% of available VRAM for each ClientApp
 flower-simulation --client-app=sim:client --server-app=sim:server --num-supernodes=100 \
     --backend-config='{"client_resources": {"num_cpus":2, "num_gpus":0.25}}' --enable-tf-gpu-growth
 ```

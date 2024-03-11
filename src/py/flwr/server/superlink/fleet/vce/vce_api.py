@@ -21,9 +21,10 @@ import traceback
 from logging import DEBUG, ERROR, INFO, WARN
 from typing import Callable, Dict, List, Optional
 
-from flwr.client.client_app import ClientApp, LoadClientAppError, load_client_app
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.node_state import NodeState
 from flwr.common.logger import log
+from flwr.common.object_ref import load_app
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 from flwr.server.superlink.state import StateFactory
@@ -219,20 +220,20 @@ async def run(
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals
 def start_vce(
-    client_app_module_name: str,
     backend_name: str,
     backend_config_json_stream: str,
-    working_dir: str,
+    app_dir: str,
     f_stop: asyncio.Event,
     client_app: Optional[ClientApp] = None,
+    client_app_attr: Optional[str] = None,
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
     existing_nodes_mapping: Optional[NodeToPartitionMapping] = None,
 ) -> None:
     """Start Fleet API with the Simulation Engine."""
-    if client_app_module_name is not None and client_app is not None:
+    if client_app_attr is not None and client_app is not None:
         raise ValueError(
-            "Both `client_app_module_name` and `client_app` are provided, "
+            "Both `client_app_attr` and `client_app` are provided, "
             "but only one is allowed."
         )
 
@@ -297,16 +298,23 @@ def start_vce(
 
     def backend_fn() -> Backend:
         """Instantiate a Backend."""
-        return backend_type(backend_config, work_dir=working_dir)
+        return backend_type(backend_config, work_dir=app_dir)
 
-    log(INFO, "client_app_module_name = %s", client_app_module_name)
+    log(INFO, "client_app_attr = %s", client_app_attr)
 
+    # Load ClientApp if needed
     def _load() -> ClientApp:
-        app: ClientApp = (
-            load_client_app(client_app_module_name)
-            if client_app is None
-            else client_app
-        )
+
+        if client_app_attr:
+            app: ClientApp = load_app(client_app_attr, LoadClientAppError)
+
+            if not isinstance(app, ClientApp):
+                raise LoadClientAppError(
+                    f"Attribute {client_app_attr} is not of type {ClientApp}",
+                ) from None
+
+        if client_app:
+            app = client_app
         return app
 
     app_fn = _load

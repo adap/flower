@@ -88,7 +88,7 @@ As for the parameters ratio ($\gamma$) we use the following model sizes. As in t
 
 - The Jacobian correction was not incorporated into our implementation, primarily due to the lack of explicit instructions in the paper regarding the specific implementation of the dual update principle mentioned in the Jacobian correction section.
 
-- It was observed that data generation is crutial for model convergence
+- It was observed that data generation is crucial for model convergence
 
 ## Environment Setup
 To construct the Python environment follow these steps:
