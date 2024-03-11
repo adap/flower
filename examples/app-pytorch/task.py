@@ -1,8 +1,10 @@
 from collections import OrderedDict
+from logging import INFO
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from flwr.common.logger import log
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
@@ -42,7 +44,7 @@ def load_data():
 
 def train(net, trainloader, valloader, epochs, device):
     """Train the model on the training set."""
-    print("Starting training...")
+    log(INFO, "Starting training...")
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
