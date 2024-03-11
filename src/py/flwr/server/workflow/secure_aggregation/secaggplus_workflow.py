@@ -655,9 +655,8 @@ class SecAggPlusWorkflow:
         )
         empty_proxy = DriverClientProxy(
             0,
-            driver.grpc_driver,  # type: ignore
+            driver,
             False,
-            driver.run_id,  # type: ignore
         )
         aggregated_result = context.strategy.aggregate_fit(
             current_round, [(empty_proxy, final_fitres)], []
