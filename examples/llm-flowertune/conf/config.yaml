@@ -8,8 +8,8 @@ dataset:
   name: "vicgalle/alpaca-gpt4"
 
 model:
-  name: "openlm-research/open_llama_3b_v2"
-  quantization: 8 # 8 or 4 if you want to do quantization with BitsAndBytes
+  name: "openlm-research/open_llama_7b_v2"
+  quantization: 4 # 8 or 4 if you want to do quantization with BitsAndBytes
   gradient_checkpointing: True
   lora:
     peft_lora_r: 32
