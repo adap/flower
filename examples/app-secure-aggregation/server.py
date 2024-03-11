@@ -1,21 +1,20 @@
-import flwr as fl
 from flwr.common import Context
-from flwr.server import Driver, LegacyContext
-from flwr.server.workflow import SecAggPlusWorkflow
+from flwr.server import Driver, LegacyContext, ServerApp, ServerConfig
+from flwr.server.strategy import FedAvg
+from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow
 from workflow_with_log import SecAggPlusWorkflowWithLogs
 
 
 # Define strategy
-strategy = fl.server.strategy.FedAvg(
+strategy = FedAvg(
     fraction_fit=1.0,  # Select all available clients
     fraction_evaluate=0.0,  # Disable evaluation
     min_available_clients=5,
-    fit_metrics_aggregation_fn=lambda _: {},  # No metrics aggregation
 )
 
 
 # Run via `flower-server-app server_workflow:app`
-app = fl.server.ServerApp()
+app = ServerApp()
 
 
 @app.main()
@@ -23,12 +22,12 @@ def main(driver: Driver, context: Context) -> None:
     # Construct the LegacyContext
     context = LegacyContext(
         state=context.state,
-        config=fl.server.ServerConfig(num_rounds=3),
+        config=ServerConfig(num_rounds=3),
         strategy=strategy,
     )
 
     # Create the workflow
-    workflow = fl.server.workflow.DefaultWorkflow(
+    workflow = DefaultWorkflow(
         fit_workflow=SecAggPlusWorkflowWithLogs(
             num_shares=3,
             reconstruction_threshold=2,

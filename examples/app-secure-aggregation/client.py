@@ -2,12 +2,12 @@ import time
 
 import numpy as np
 
-import flwr as fl
+from flwr.client import ClientApp, NumPyClient
 from flwr.client.mod import secaggplus_mod
 
 
-# Define the Flower client
-class FlowerClient(fl.client.NumPyClient):
+# Define FlowerClient and client_fn
+class FlowerClient(NumPyClient):
     def fit(self, parameters, config):
         # Instead of training and returning model parameters,
         # the client directly returns [1.0, 1.0, 1.0] for demonstration purposes.
@@ -22,12 +22,14 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 def client_fn(cid: str):
-    """."""
+    """Create and return an instance of Flower `Client`."""
     return FlowerClient().to_client()
 
 
-# To run this: `flower-client-app client:app`
-app = fl.client.ClientApp(
+# Flower ClientApp
+app = ClientApp(
     client_fn=client_fn,
-    mods=[secaggplus_mod],
+    mods=[
+        secaggplus_mod,
+    ],
 )
