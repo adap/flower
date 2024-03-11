@@ -15,8 +15,9 @@
 """Legacy default workflows."""
 
 
+import io
 import timeit
-from logging import DEBUG, INFO
+from logging import INFO
 from typing import Optional, cast
 
 import flwr.common.recordset_compat as compat
@@ -58,16 +59,18 @@ class DefaultWorkflow:
         )
 
         # Initialize parameters
+        log(INFO, "[INIT]")
         default_init_params_workflow(driver, context)
 
         # Run federated learning for num_rounds
-        log(INFO, "FL starting")
         start_time = timeit.default_timer()
         cfg = ConfigsRecord()
         cfg[Key.START_TIME] = start_time
         context.state.configs_records[MAIN_CONFIGS_RECORD] = cfg
 
         for current_round in range(1, context.config.num_rounds + 1):
+            log(INFO, "")
+            log(INFO, "[ROUND %s]", current_round)
             cfg[Key.CURRENT_ROUND] = current_round
 
             # Fit round
@@ -79,22 +82,19 @@ class DefaultWorkflow:
             # Evaluate round
             self.evaluate_workflow(driver, context)
 
-        # Bookkeeping
+        # Bookkeeping and log results
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
-        log(INFO, "FL finished in %s", elapsed)
-
-        # Log results
         hist = context.history
-        log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
-        log(
-            INFO,
-            "app_fit: metrics_distributed_fit %s",
-            str(hist.metrics_distributed_fit),
-        )
-        log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
-        log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
-        log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
+        log(INFO, "")
+        log(INFO, "[SUMMARY]")
+        log(INFO, "Run finished %s rounds in %.2fs", context.config.num_rounds, elapsed)
+        for idx, line in enumerate(io.StringIO(str(hist))):
+            if idx == 0:
+                log(INFO, "%s", line.strip("\n"))
+            else:
+                log(INFO, "\t%s", line.strip("\n"))
+        log(INFO, "")
 
         # Terminate the thread
         f_stop.set()
@@ -107,12 +107,11 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
-    log(INFO, "Initializing global parameters")
     parameters = context.strategy.initialize_parameters(
         client_manager=context.client_manager
     )
     if parameters is not None:
-        log(INFO, "Using initial parameters provided by strategy")
+        log(INFO, "Using initial global parameters provided by strategy")
         paramsrecord = compat.parameters_to_parametersrecord(
             parameters, keep_input=True
         )
@@ -140,7 +139,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
     context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
 
     # Evaluate initial parameters
-    log(INFO, "Evaluating initial parameters")
+    log(INFO, "Evaluating initial global parameters")
     parameters = compat.parametersrecord_to_parameters(paramsrecord, keep_input=True)
     res = context.strategy.evaluate(0, parameters=parameters)
     if res is not None:
@@ -186,7 +185,9 @@ def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None
         )
 
 
-def default_fit_workflow(driver: Driver, context: Context) -> None:
+def default_fit_workflow(  # pylint: disable=R0914
+    driver: Driver, context: Context
+) -> None:
     """Execute the default workflow for a single fit round."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
@@ -207,12 +208,11 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
     )
 
     if not client_instructions:
-        log(INFO, "fit_round %s: no clients selected, cancel", current_round)
+        log(INFO, "configure_fit: no clients selected, cancel")
         return
     log(
-        DEBUG,
-        "fit_round %s: strategy sampled %s clients (out of %s)",
-        current_round,
+        INFO,
+        "configure_fit: strategy sampled %s clients (out of %s)",
         len(client_instructions),
         context.client_manager.num_available(),
     )
@@ -236,14 +236,14 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
     # collect `fit` results from all clients participating in this round
     messages = list(driver.send_and_receive(out_messages))
     del out_messages
+    num_failures = len([msg for msg in messages if msg.has_error()])
 
     # No exception/failure handling currently
     log(
-        DEBUG,
-        "fit_round %s received %s results and %s failures",
-        current_round,
-        len(messages),
-        0,
+        INFO,
+        "aggregate_fit: received %s results and %s failures",
+        len(messages) - num_failures,
+        num_failures,
     )
 
     # Aggregate training results
@@ -288,12 +288,11 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
         client_manager=context.client_manager,
     )
     if not client_instructions:
-        log(INFO, "evaluate_round %s: no clients selected, cancel", current_round)
+        log(INFO, "configure_evaluate: no clients selected, skipping evaluation")
         return
     log(
-        DEBUG,
-        "evaluate_round %s: strategy sampled %s clients (out of %s)",
-        current_round,
+        INFO,
+        "configure_evaluate: strategy sampled %s clients (out of %s)",
         len(client_instructions),
         context.client_manager.num_available(),
     )
@@ -317,14 +316,14 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     # collect `evaluate` results from all clients participating in this round
     messages = list(driver.send_and_receive(out_messages))
     del out_messages
+    num_failures = len([msg for msg in messages if msg.has_error()])
 
     # No exception/failure handling currently
     log(
-        DEBUG,
-        "evaluate_round %s received %s results and %s failures",
-        current_round,
-        len(messages),
-        0,
+        INFO,
+        "aggregate_evaluate: received %s results and %s failures",
+        len(messages) - num_failures,
+        num_failures,
     )
 
     # Aggregate the evaluation results
