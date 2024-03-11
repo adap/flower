@@ -9,8 +9,8 @@ import numpy as np
 from parameterized import parameterized
 
 from datasets import Dataset
-from flwr_datasets.partitioner.group_natural_id_partitioner import (
-    GroupNaturalIdPartitioner,
+from flwr_datasets.partitioner.grouped_natural_id_partitioner import (
+    GroupedNaturalIdPartitioner,
 )
 
 
@@ -22,7 +22,7 @@ def _dummy_setup(
     The partitioner has automatically the dataset assigned to it.
     """
     dataset = _create_dataset(num_rows, n_unique_natural_ids)
-    partitioner = GroupNaturalIdPartitioner(
+    partitioner = GroupedNaturalIdPartitioner(
         partition_by="natural_id", num_groups=num_nodes
     )
     partitioner.dataset = dataset
