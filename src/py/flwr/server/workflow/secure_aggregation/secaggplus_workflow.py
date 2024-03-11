@@ -17,7 +17,7 @@
 
 import random
 from dataclasses import dataclass, field
-from logging import ERROR, WARN
+from logging import ERROR, INFO, WARN
 from typing import Dict, List, Optional, Set, Union, cast
 
 import flwr.common.recordset_compat as compat
@@ -101,7 +101,7 @@ class SecAggPlusWorkflow:
     - 'setup': Send SecAgg+ configuration to clients and collect their public keys.
     - 'share keys': Broadcast public keys among clients and collect encrypted secret
       key shares.
-    - 'collect masked inputs': Forward encrypted secret key shares to target clients
+    - 'collect masked vectors': Forward encrypted secret key shares to target clients
       and collect masked model parameters.
     - 'unmask': Collect secret key shares to decrypt and aggregate the model parameters.
 
@@ -195,12 +195,15 @@ class SecAggPlusWorkflow:
         steps = (
             self.setup_stage,
             self.share_keys_stage,
-            self.collect_masked_input_stage,
+            self.collect_masked_vectors_stage,
             self.unmask_stage,
         )
+        log(INFO, "Secure aggregation commencing.")
         for step in steps:
             if not step(driver, context, state):
+                log(INFO, "Secure aggregation halted.")
                 return
+        log(INFO, "Secure aggregation completed.")
 
     def _check_init_params(self) -> None:  # pylint: disable=R0912
         # Check `num_shares`
@@ -287,6 +290,16 @@ class SecAggPlusWorkflow:
         proxy_fitins_lst = context.strategy.configure_fit(
             current_round, parameters, context.client_manager
         )
+        if not proxy_fitins_lst:
+            log(INFO, "configure_fit: no clients selected, cancel")
+            return False
+        log(
+            INFO,
+            "configure_fit: strategy sampled %s clients (out of %s)",
+            len(proxy_fitins_lst),
+            context.client_manager.num_available(),
+        )
+
         state.nid_to_fitins = {
             proxy.node_id: compat.fitins_to_recordset(fitins, False)
             for proxy, fitins in proxy_fitins_lst
@@ -437,16 +450,16 @@ class SecAggPlusWorkflow:
 
         return self._check_threshold(state)
 
-    def collect_masked_input_stage(
+    def collect_masked_vectors_stage(
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
-        """Execute the 'collect masked input' stage."""
+        """Execute the 'collect masked vectors' stage."""
         cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
 
-        # Send secret key shares to clients (plus FitIns) and collect masked input
+        # Send secret key shares to clients (plus FitIns) and collect masked vectors
         def make(nid: int) -> Message:
             cfgs_dict = {
-                Key.STAGE: Stage.COLLECT_MASKED_INPUT,
+                Key.STAGE: Stage.COLLECT_MASKED_VECTORS,
                 Key.CIPHERTEXT_LIST: state.forward_ciphertexts[nid],
                 Key.SOURCE_LIST: state.forward_srcs[nid],
             }
@@ -534,7 +547,7 @@ class SecAggPlusWorkflow:
             for owner_nid, share in zip(nids, shares):
                 collected_shares_dict[owner_nid].append(share)
 
-        # Remove mask for every client who is available after collect_masked_input stage
+        # Remove masks for every active client after collect_masked_vectors stage
         masked_vector = state.aggregate_ndarrays
         del state.aggregate_ndarrays
         for nid, share_list in collected_shares_dict.items():
@@ -585,6 +598,15 @@ class SecAggPlusWorkflow:
             vec += offset
             vec *= inv_dq_total_ratio
         state.aggregate_ndarrays = aggregated_vector
+
+        # No exception/failure handling currently
+        log(
+            INFO,
+            "aggregate_fit: received %s results and %s failures",
+            1,
+            0,
+        )
+
         final_fitres = FitRes(
             status=Status(code=Code.OK, message=""),
             parameters=ndarrays_to_parameters(aggregated_vector),

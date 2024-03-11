@@ -60,11 +60,11 @@ class SecAggPlusWorkflowWithLogs(SecAggPlusWorkflow):
         )
         return ret
 
-    def collect_masked_input_stage(
+    def collect_masked_vectors_stage(
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
         print(f"\nForwarding encrypted key shares and requesting masked vectors...")
-        ret = super().collect_masked_input_stage(driver, context, state)
+        ret = super().collect_masked_vectors_stage(driver, context, state)
         for node_id in state.sampled_node_ids - state.active_node_ids:
             print(f"Client {self.node_ids.index(node_id)} dropped out.")
         for node_id in state.active_node_ids:

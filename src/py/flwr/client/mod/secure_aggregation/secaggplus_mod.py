@@ -178,9 +178,9 @@ def secaggplus_mod(
         res = _setup(state, configs)
     elif state.current_stage == Stage.SHARE_KEYS:
         res = _share_keys(state, configs)
-    elif state.current_stage == Stage.COLLECT_MASKED_INPUT:
+    elif state.current_stage == Stage.COLLECT_MASKED_VECTORS:
         fit = _get_fit_fn(msg, ctxt, call_next)
-        res = _collect_masked_input(state, configs, fit)
+        res = _collect_masked_vectors(state, configs, fit)
     elif state.current_stage == Stage.UNMASK:
         res = _unmask(state, configs)
     else:
@@ -266,7 +266,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                     f"Stage {Stage.SHARE_KEYS}: "
                     f"the value for the key '{key}' must be a list of two bytes."
                 )
-    elif stage == Stage.COLLECT_MASKED_INPUT:
+    elif stage == Stage.COLLECT_MASKED_VECTORS:
         key_type_pairs = [
             (Key.CIPHERTEXT_LIST, bytes),
             (Key.SOURCE_LIST, int),
@@ -274,7 +274,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
         for key, expected_type in key_type_pairs:
             if key not in configs:
                 raise KeyError(
-                    f"Stage {Stage.COLLECT_MASKED_INPUT}: "
+                    f"Stage {Stage.COLLECT_MASKED_VECTORS}: "
                     f"the required key '{key}' is "
                     "missing from the input `named_values`."
                 )
@@ -285,7 +285,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 if type(elm) is not expected_type
             ):
                 raise TypeError(
-                    f"Stage {Stage.COLLECT_MASKED_INPUT}: "
+                    f"Stage {Stage.COLLECT_MASKED_VECTORS}: "
                     f"the value for the key '{key}' "
                     f"must be of type List[{expected_type.__name__}]"
                 )
@@ -414,7 +414,7 @@ def _share_keys(
 
 
 # pylint: disable-next=too-many-locals
-def _collect_masked_input(
+def _collect_masked_vectors(
     state: SecAggPlusState,
     configs: ConfigsRecord,
     fit: Callable[[], FitRes],

@@ -93,7 +93,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
         assert Stage.all() == (
             Stage.SETUP,
             Stage.SHARE_KEYS,
-            Stage.COLLECT_MASKED_INPUT,
+            Stage.COLLECT_MASKED_VECTORS,
             Stage.UNMASK,
         )
 
@@ -101,13 +101,13 @@ class TestSecAggPlusHandler(unittest.TestCase):
             # From one stage to the next stage
             (Stage.UNMASK, Stage.SETUP),
             (Stage.SETUP, Stage.SHARE_KEYS),
-            (Stage.SHARE_KEYS, Stage.COLLECT_MASKED_INPUT),
-            (Stage.COLLECT_MASKED_INPUT, Stage.UNMASK),
+            (Stage.SHARE_KEYS, Stage.COLLECT_MASKED_VECTORS),
+            (Stage.COLLECT_MASKED_VECTORS, Stage.UNMASK),
             # From any stage to the initial stage
             # Such transitions will log a warning.
             (Stage.SETUP, Stage.SETUP),
             (Stage.SHARE_KEYS, Stage.SETUP),
-            (Stage.COLLECT_MASKED_INPUT, Stage.SETUP),
+            (Stage.COLLECT_MASKED_VECTORS, Stage.SETUP),
         }
 
         invalid_transitions = set(product(Stage.all(), Stage.all())).difference(
@@ -227,8 +227,8 @@ class TestSecAggPlusHandler(unittest.TestCase):
             with self.assertRaises(TypeError):
                 handler(invalid_configs.copy())
 
-    def test_stage_collect_masked_input_check(self) -> None:
-        """Test content checking for the collect masked input stage."""
+    def test_stage_collect_masked_vectors_check(self) -> None:
+        """Test content checking for the collect masked vectors stage."""
         ctxt = _make_ctxt()
         handler = get_test_handler(ctxt)
         set_stage = _make_set_state_fn(ctxt)
@@ -240,13 +240,13 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         # Test valid `named_values`
         try:
-            check_configs(Stage.COLLECT_MASKED_INPUT, ConfigsRecord(valid_configs))
+            check_configs(Stage.COLLECT_MASKED_VECTORS, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
             self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
 
         # Set the stage
-        valid_configs[Key.STAGE] = Stage.COLLECT_MASKED_INPUT
+        valid_configs[Key.STAGE] = Stage.COLLECT_MASKED_VECTORS
 
         # Test invalid `named_values`
         # Test missing keys
@@ -300,7 +300,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
             invalid_configs = valid_configs.copy()
             invalid_configs.pop(key)
 
-            set_stage(Stage.COLLECT_MASKED_INPUT)
+            set_stage(Stage.COLLECT_MASKED_VECTORS)
             with self.assertRaises(KeyError):
                 handler(invalid_configs)
 
@@ -311,6 +311,6 @@ class TestSecAggPlusHandler(unittest.TestCase):
             invalid_configs = valid_configs.copy()
             invalid_configs[key] = [True, False, True, False]
 
-            set_stage(Stage.COLLECT_MASKED_INPUT)
+            set_stage(Stage.COLLECT_MASKED_VECTORS)
             with self.assertRaises(TypeError):
                 handler(invalid_configs)
