@@ -1,4 +1,4 @@
-# Federated Large Language Model (LLM) Fine-tuning
+# Federated Large Language Model (LLM) Fine-tuning with Flower
 
 Large language models (LLMs), which have been trained on vast amounts of publicly accessible data, have shown remarkable effectiveness in a wide range of areas.
 However, despite the fact that more data typically leads to improved performance, there is a concerning prospect that the supply of high-quality public data will deplete within a few years.
@@ -15,10 +15,10 @@ which allows users to perform the training on a single GPU.
 Start by cloning the code example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/fedllm-finetune . && rm -rf flower && cd fedllm-finetune
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/llm-flowertune . && rm -rf flower && cd llm-flowertune
 ```
 
-This will create a new directory called `fedllm-finetune` containing the following files:
+This will create a new directory called `llm-flowertune` containing the following files:
 
 ```
 -- README.md           <- Your're reading this right now
