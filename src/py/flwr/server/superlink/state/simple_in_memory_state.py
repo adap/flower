@@ -15,25 +15,42 @@
 """In-memory State with Mapping implementation."""
 
 import random
-from datetime import datetime, timedelta
-from logging import ERROR
-from typing import Dict, List, Optional, Set
-from uuid import UUID, uuid4
+from logging import WARN
+from typing import List, Optional, Set
+from uuid import UUID
 
-from flwr.common import log, now
+from flwr.common import now
+from flwr.common.logger import log
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
-from flwr.server.utils import validate_task_ins_or_res
 
 from .in_memory_state import InMemoryState
 
 
-class InMemoryStateWithMapping(InMemoryState):
-    """In-memory State with Mapping implementation."""
+class SimpleInMemoryState(InMemoryState):
+    """Variation of In-memory State (`InMemoryState`) better suited for simulation.
 
-    def get_task_ins(self, node_id: Optional[int], limit: Optional[int]) -> List[TaskIns]:
-        """Get all TaskIns that have not been delivered yet."""
+    In particular, `get_task_ins` relaxes the extraction of tasks by returning any N
+    TaskIns. Ignoring the node-id field of a TaskIns is particularly beneficial when
+    many thousands or millions of nodes are registered with the SuperLink.
+    """
+
+    def get_task_ins(
+        self, node_id: Optional[int], limit: Optional[int]
+    ) -> List[TaskIns]:
+        """Get `limit` TaskIns that have not been delivered yet.
+
+        TaskIns are extracted from the store and returned regardless of their node_id
+        assignment.
+        """
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
+
+        if node_id:
+            log(
+                WARN,
+                "%s won't return TaskIns of the specified node.",
+                self.__class__.__name__,
+            )
 
         # Find TaskIns for node_id that were not delivered yet
         task_ins_list: List[TaskIns] = []
@@ -41,6 +58,7 @@ class InMemoryStateWithMapping(InMemoryState):
             num_to_return = self.num_task_ins()
             if num_to_return == 0:
                 return task_ins_list
+            # ensure we don't return more tasks than what the state has
             if limit:
                 num_to_return = min(num_to_return, limit)
 
@@ -56,9 +74,10 @@ class InMemoryStateWithMapping(InMemoryState):
 
         # Return TaskIns
         return task_ins_list
-    
+
     def delete_tasks(self, task_ids: Set[UUID]) -> None:
+        """Delet Tasks from task_x_store."""
         with self.lock:
-            #! Actually we wouldn't need to do all this if we 
-            #! handle the deletion of TaskIns inside the "get_task_ins"..
+            # Delegate it to the parent class. Must be behind lock
+            # since we are poping from dict in `get_task_ins`
             return super().delete_tasks(task_ids)

@@ -21,7 +21,7 @@ from typing import Optional
 from flwr.common.logger import log
 
 from .in_memory_state import InMemoryState
-from .in_memory_state_with_mapping import InMemoryStateWithMapping
+from .simple_in_memory_state import SimpleInMemoryState
 from .sqlite_state import SqliteState
 from .state import State
 
@@ -43,8 +43,8 @@ class StateFactory:
             return self.state_instance
         elif self.database == ":flwr-in-memory-state-with-mapping:":
             if self.state_instance is None:
-                self.state_instance = InMemoryStateWithMapping()
-            log(DEBUG, "Using InMemoryStateWithMapping")
+                self.state_instance = SimpleInMemoryState()
+            log(DEBUG, "Using SimpleInMemoryState")
             return self.state_instance
 
         # SqliteState
