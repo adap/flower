@@ -122,6 +122,12 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
     @property
     def num_partitions(self) -> int:
         """Total number of partitions."""
+        self._check_num_partitions_correctness_if_needed()
+        self._check_partition_sizes_correctness_if_needed()
+        self._check_the_sum_of_partition_sizes()
+        self._determine_num_unique_classes_if_needed()
+        self._alpha = self._initialize_alpha_if_needed(self._initial_alpha)
+        self._determine_node_id_to_indices_if_needed()
         return self._num_partitions
 
     def _initialize_alpha_if_needed(

@@ -68,6 +68,8 @@ class NaturalIdPartitioner(Partitioner):
     @property
     def num_partitions(self) -> int:
         """Total number of partitions."""
+        if len(self._node_id_to_natural_id) == 0:
+            self._create_int_node_id_to_natural_id()
         return len(self._node_id_to_natural_id)
 
     @property

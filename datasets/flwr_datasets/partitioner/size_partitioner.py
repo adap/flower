@@ -87,6 +87,7 @@ class SizePartitioner(Partitioner):
     @property
     def num_partitions(self) -> int:
         """Total number of partitions."""
+        self._determine_node_id_to_indices_if_needed()
         return self._num_partitions
 
     @property
