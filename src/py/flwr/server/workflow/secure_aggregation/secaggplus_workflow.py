@@ -17,7 +17,7 @@
 
 import random
 from dataclasses import dataclass, field
-from logging import ERROR, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from typing import Dict, List, Optional, Set, Union, cast
 
 import flwr.common.recordset_compat as compat
@@ -375,12 +375,22 @@ class SecAggPlusWorkflow:
                 ttl="",
             )
 
+        log(
+            DEBUG,
+            "[Stage 0] Sending configurations to %s clients.",
+            len(state.active_node_ids),
+        )
         msgs = driver.send_and_receive(
             [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
         )
         state.active_node_ids = {
             msg.metadata.src_node_id for msg in msgs if not msg.has_error()
         }
+        log(
+            DEBUG,
+            "[Stage 0] Received public keys from %s clients.",
+            len(state.active_node_ids),
+        )
 
         for msg in msgs:
             if msg.has_error():
@@ -414,12 +424,22 @@ class SecAggPlusWorkflow:
             )
 
         # Broadcast public keys to clients and receive secret key shares
+        log(
+            DEBUG,
+            "[Stage 1] Forwarding public keys to %s clients.",
+            len(state.active_node_ids),
+        )
         msgs = driver.send_and_receive(
             [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
         )
         state.active_node_ids = {
             msg.metadata.src_node_id for msg in msgs if not msg.has_error()
         }
+        log(
+            DEBUG,
+            "[Stage 1] Received encrypted key shares from %s clients.",
+            len(state.active_node_ids),
+        )
 
         # Build forward packet list dictionary
         srcs: List[int] = []
@@ -474,12 +494,22 @@ class SecAggPlusWorkflow:
                 ttl="",
             )
 
+        log(
+            DEBUG,
+            "[Stage 2] Forwarding encrypted key shares to %s clients.",
+            len(state.active_node_ids),
+        )
         msgs = driver.send_and_receive(
             [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
         )
         state.active_node_ids = {
             msg.metadata.src_node_id for msg in msgs if not msg.has_error()
         }
+        log(
+            DEBUG,
+            "[Stage 2] Received masked vectors from %s clients.",
+            len(state.active_node_ids),
+        )
 
         # Clear cache
         del state.forward_ciphertexts, state.forward_srcs, state.nid_to_fitins
@@ -529,12 +559,22 @@ class SecAggPlusWorkflow:
                 ttl="",
             )
 
+        log(
+            DEBUG,
+            "[Stage 3] Requesting key shares from %s clients to remove masks.",
+            len(state.active_node_ids),
+        )
         msgs = driver.send_and_receive(
             [make(node_id) for node_id in state.active_node_ids], timeout=self.timeout
         )
         state.active_node_ids = {
             msg.metadata.src_node_id for msg in msgs if not msg.has_error()
         }
+        log(
+            DEBUG,
+            "[Stage 3] Received key shares from %s clients.",
+            len(state.active_node_ids),
+        )
 
         # Build collected shares dict
         collected_shares_dict: Dict[int, List[bytes]] = {}
