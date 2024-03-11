@@ -7,7 +7,7 @@ Run simulations
 
 Simulating Federated Learning workloads is useful for a multitude of use-cases: you might want to run your workload on a large cohort of clients but without having to source, configure and mange a large number of physical devices; you might want to run your FL workloads as fast as possible on the compute systems you have access to without having to go through a complex setup process; you might want to validate your algorithm on different scenarios at varying levels of data and system heterogeneity, client availability, privacy budgets, etc. These are among some of the use-cases where simulating FL workloads makes sense. Flower can accommodate these scenarios by means of its `VirtualClientEngine <contributor-explanation-architecture.html#virtual-client-engine>`_ or VCE.
 
-The :code:`VirtualClientEngine` schedules, launches and manages `virtual` clients. These clients are identical to `non-virtual` clients (i.e. the ones you launch via the command `flwr.client.start_numpy_client <ref-api-flwr.html#start-numpy-client>`_) in the sense that they can be configure by creating a class inheriting, for example, from `flwr.client.NumPyClient <ref-api-flwr.html#flwr.client.NumPyClient>`_ and therefore behave in an identical way. In addition to that, clients managed by the :code:`VirtualClientEngine` are:
+The :code:`VirtualClientEngine` schedules, launches and manages `virtual` clients. These clients are identical to `non-virtual` clients (i.e. the ones you launch via the command `flwr.client.start_client <ref-api-flwr.html#start-client>`_) in the sense that they can be configure by creating a class inheriting, for example, from `flwr.client.NumPyClient <ref-api-flwr.html#flwr.client.NumPyClient>`_ and therefore behave in an identical way. In addition to that, clients managed by the :code:`VirtualClientEngine` are:
 
 * resource-aware: this means that each client gets assigned a portion of the compute and memory on your system. You as a user can control this at the beginning of the simulation and allows you to control the degree of parallelism of your Flower FL simulation. The fewer the resources per client, the more clients can run concurrently on the same hardware.
 * self-managed: this means that you as a user do not need to launch clients manually, instead this gets delegated to :code:`VirtualClientEngine`'s internals.
@@ -29,7 +29,7 @@ Running Flower simulations still require you to define your client class, a stra
     
     def client_fn(cid: str):
         # Return a standard Flower client
-        return MyFlowerClient()
+        return MyFlowerClient().to_client()
 
     # Launch the simulation
     hist = fl.simulation.start_simulation(

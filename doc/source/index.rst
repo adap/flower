@@ -4,7 +4,7 @@ Flower Framework Documentation
 .. meta::
    :description: Check out the documentation of the main Flower Framework enabling easy Python development for Federated Learning.
 
-Welcome to Flower's documentation. `Flower <https://flower.dev>`_ is a friendly federated learning framework.
+Welcome to Flower's documentation. `Flower <https://flower.ai>`_ is a friendly federated learning framework.
 
 
 Join the Flower Community
@@ -12,7 +12,7 @@ Join the Flower Community
 
 The Flower Community is growing quickly - we're a friendly group of researchers, engineers, students, professionals, academics, and other enthusiasts.
 
-.. button-link:: https://flower.dev/join-slack
+.. button-link:: https://flower.ai/join-slack
     :color: primary
     :shadow:
 
@@ -91,8 +91,9 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    how-to-configure-logging
    how-to-enable-ssl-connections
    how-to-upgrade-to-flower-1.0
-   how-to-use-built-in-middleware-layers
+   how-to-use-built-in-mods
    how-to-run-flower-using-docker
+   how-to-use-differential-privacy
 
 .. toctree::
    :maxdepth: 1

@@ -8,7 +8,7 @@ When working on the Flower framework we want to ensure that all contributors use
 
   Workspace files are mounted from the local file system or copied or cloned into the container. Extensions are installed and run inside the container, where they have full access to the tools, platform, and file system. This means that you can seamlessly switch your entire development environment just by connecting to a different container.
 
-Source: `Official VSCode documentation <https://code.visualstudio.com/docs/remote/containers>`_
+Source: `Official VSCode documentation <https://code.visualstudio.com/docs/devcontainers/containers>`_
 
 
 Getting started
@@ -20,5 +20,5 @@ Now you should be good to go. When starting VSCode, it will ask you to run in th
 
 In some cases your setup might be more involved. For those cases consult the following sources:
 
-* `Developing inside a Container <https://code.visualstudio.com/docs/remote/containers#_system-requirements>`_
-* `Remote development in Containers <https://code.visualstudio.com/docs/remote/containers-tutorial>`_
+* `Developing inside a Container <https://code.visualstudio.com/docs/devcontainers/containers#_system-requirements>`_
+* `Remote development in Containers <https://code.visualstudio.com/docs/devcontainers/tutorial>`_

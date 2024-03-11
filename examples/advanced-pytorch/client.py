@@ -150,9 +150,8 @@ def main() -> None:
             trainset = trainset.select(range(10))
             testset = testset.select(range(10))
         # Start Flower client
-        client = CifarClient(trainset, testset, device, args.model)
-
-        fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
+        client = CifarClient(trainset, testset, device, args.model).to_client()
+        fl.client.start_client(server_address="127.0.0.1:8080", client=client)
 
 
 if __name__ == "__main__":

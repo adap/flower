@@ -192,7 +192,8 @@ On the machine of your choice, launch the server:
 # Launch your server.
 # Will wait for at least 2 clients to be connected, then will train for 3 FL rounds
 # The command below will sample all clients connected (since sample_fraction=1.0)
-python server.py --rounds 3 --min_num_clients 2 --sample_fraction 1.0 # append `--mnist` if you want to use that dataset/model setting
+# The server is dataset agnostic (use the same command for MNIST and CIFAR10)
+python server.py --rounds 3 --min_num_clients 2 --sample_fraction 1.0
 ```
 
 > If you are on macOS with Apple Silicon (i.e. M1, M2 chips), you might encounter a `grpcio`-related issue when launching your server. If you are in a conda environment you can solve this easily by doing: `pip uninstall grpcio` and then `conda install grpcio`.

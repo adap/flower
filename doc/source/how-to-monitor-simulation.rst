@@ -161,7 +161,7 @@ However, you can overwrite the defaults. When starting a simulation, do the foll
   ram_memory = 16_000 * 1024 * 1024  # 16 GB
   fl.simulation.start_simulation(
       # ...
-      # all the args you were specyfing before
+      # all the args you were specifying before
       # ...
       ray_init_args = {
               "include_dashboard": True, # we need this one for tracking
@@ -187,7 +187,7 @@ Let’s also specify the resource for a single client.
 
   fl.simulation.start_simulation(
       # ...
-      # all the args you were specyfing before
+      # all the args you were specifying before
       # ...
       ray_init_args = {
               "include_dashboard": True, # we need this one for tracking
@@ -231,6 +231,6 @@ A: Either the simulation has already finished, or you still need to start Promet
 Resources
 ---------
 
-Ray Dashboard: `<https://docs.ray.io/en/latest/ray-core/ray-dashboard.html>`_
+Ray Dashboard: `<https://docs.ray.io/en/latest/ray-observability/getting-started.html>`_
 
-Ray Metrics: `<https://docs.ray.io/en/latest/ray-observability/ray-metrics.html>`_
+Ray Metrics: `<https://docs.ray.io/en/latest/cluster/metrics.html>`_

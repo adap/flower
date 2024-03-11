@@ -120,7 +120,7 @@ Federated evaluation can be configured from the server side. Built-in strategies
 
     # Create strategy
     strategy = fl.server.strategy.FedAvg(
-        # ... other FedAvg agruments
+        # ... other FedAvg arguments
         fraction_evaluate=0.2,
         min_evaluate_clients=2,
         min_available_clients=10,
