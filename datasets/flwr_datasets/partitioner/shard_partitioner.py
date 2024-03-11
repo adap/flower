@@ -179,6 +179,11 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         self._determine_node_id_to_indices_if_needed()
         return self.dataset.select(self._node_id_to_indices[node_id])
 
+    @property
+    def num_partitions(self) -> int:
+        """Total number of partitions."""
+        return self._num_partitions
+
     def _determine_node_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
         """Assign sample indices to each node id.
 
