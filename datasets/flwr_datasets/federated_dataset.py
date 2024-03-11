@@ -15,10 +15,11 @@
 """FederatedDataset."""
 
 
+import warnings
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 import datasets
-from datasets import Dataset, DatasetDict
+from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.partitioner import Partitioner
 from flwr_datasets.resplitter import Resplitter
 from flwr_datasets.utils import (
@@ -125,6 +126,7 @@ class FederatedDataset:
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
             partitioners
         )
+        self._partition_type = None
         self._partition_division = self._initialize_partition_division(
             partition_division
         )
@@ -212,6 +214,72 @@ class FederatedDataset:
             raise ValueError("Dataset is not loaded yet.")
         self._check_if_split_present(split)
         return self._dataset[split]
+
+    def concatenate_divisions(
+        self, division_id: Union[int, str], split: Optional[str] = None
+    ) -> Dataset:
+        """Concatenate the divisions of the partitions.
+
+        The divisions are created based on the `partition_division` and accessed based
+        on the `division_id`. If you specified the divisions for more than 1 partitioner
+        you need to specify the split associated with a partitioner that creates the
+        divisions. It can be used to create e.g. centralized dataset from federated
+        on-edge test sets.
+        sets
+
+        Parameters
+        ----------
+        division_id: Union[int, str]
+            The way to access the division (from a List or DatasetDict).
+        split: Optional[str]
+            Split associated with a partitioner that creates the division. It needs to
+            be specified if `partition_division` specifies divisions for more than
+            one partitioner.
+
+        Returns
+        -------
+        concatenated_divisions: Dataset
+            A dataset created as concatenation of the divisions from all partitions.
+        """
+        if self._partition_division is None:
+            raise ValueError(
+                "The division concatenation is possible only if the partition_division "
+                "is specified. To access all of the undivided partitions use "
+                "load_split."
+            )
+        if split is None:
+            self._check_if_no_split_keyword_possible()
+            split = list(self._partitioners.keys())[0]
+        divisions = []
+        zero_len_divisions = 0
+        for partition_id in range(self._partitioners[split].num_partitions):
+            partition = self.load_partition(partition_id, split)
+            if isinstance(partition, List):
+                if not isinstance(division_id, int):
+                    raise TypeError(
+                        "The division_id needs to be an int in case of "
+                        "partition_division specification as List."
+                    )
+                division = partition[division_id]
+            elif isinstance(partition, DatasetDict):
+                division = partition[division_id]
+            else:
+                raise TypeError(
+                    "The type of partition needs to be List of DatasetDict in this "
+                    "context."
+                )
+            if len(division) == 0:
+                zero_len_divisions += 1
+            divisions.append(division)
+
+        if zero_len_divisions == self._partitioners[split].num_partitions:
+            raise ValueError(
+                "The concatenated dataset is of length 0. Please change the "
+                "partition_division parameter to change this behavior."
+            )
+        if zero_len_divisions != 0:
+            warnings.warn(f"{zero_len_divisions} division(s) have length zero.")
+        return concatenate_datasets(divisions)
 
     def _check_if_split_present(self, split: str) -> None:
         """Check if the split (for partitioning or full return) is in the dataset."""

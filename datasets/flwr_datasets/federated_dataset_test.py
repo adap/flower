@@ -198,6 +198,59 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
         dataset_length = sum([len(ds) for ds in dataset.values()])
         self.assertEqual(len(full), dataset_length)
 
+    @parameterized.expand(  # type: ignore
+        [
+            (
+                [0.8, 0.2],
+                1,
+            ),
+            ({"train": 0.8, "test": 0.2}, "test"),
+        ]
+    )
+    def test_concatenate_divisions(
+        self,
+        partition_division: Optional[
+            Union[
+                List[float],
+                Tuple[float, ...],
+                Dict[str, float],
+                Dict[
+                    str,
+                    Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]],
+                ],
+            ]
+        ],
+        division_id: Union[int, str],
+    ) -> None:
+        """Test if the length of the divisions match the concatenated dataset."""
+        dataset_fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners={"train": 10},
+            partition_division=partition_division,
+        )
+        centralized_from_federated_test = dataset_fds.concatenate_divisions(division_id)
+
+        lengths = []
+        for partition_id in range(dataset_fds._partitioners["train"].num_partitions):
+            partition = dataset_fds.load_partition(partition_id, "train")
+            if isinstance(partition, List):
+                if not isinstance(division_id, int):
+                    raise TypeError(
+                        "The division_id needs to be an int in case of "
+                        "partition_division specification as List."
+                    )
+                division = partition[division_id]
+            elif isinstance(partition, DatasetDict):
+                division = partition[division_id]
+            else:
+                raise TypeError(
+                    "The type of partition needs to be List of DatasetDict in this "
+                    "context."
+                )
+            lengths.append(len(division))
+
+        self.assertEqual(len(centralized_from_federated_test), sum(lengths))
+
 
 class ArtificialDatasetTest(unittest.TestCase):
     """Test using small artificial dataset, mocked load_dataset."""
@@ -392,6 +445,27 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             fds.load_partition(0, "train")
+
+    def test_concatenate_division_without_partition_division_param(self) -> None:
+        """Test raises when no specification of partition_division and using concat."""
+        dataset_fds = FederatedDataset(
+            dataset="mnist",
+            partitioners={"train": 10},
+        )
+        division_id = 1
+        with self.assertRaises(ValueError):
+            _ = dataset_fds.concatenate_divisions(division_id)
+
+    def test_all_divisions_to_concat_size_zero(self) -> None:
+        """Test raises when all divisions for concatenations are zero."""
+        dataset_fds = FederatedDataset(
+            dataset="mnist",
+            partitioners={"train": 10},
+            partition_division=[0.8, 0.0],
+        )
+        division_id = 1
+        with self.assertRaises(ValueError):
+            _ = dataset_fds.concatenate_divisions(division_id)
 
 
 def datasets_are_equal(ds1: Dataset, ds2: Dataset) -> bool:
