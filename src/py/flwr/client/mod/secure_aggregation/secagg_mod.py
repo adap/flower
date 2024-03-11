@@ -12,13 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Secure Aggregation workflows."""
+"""Modifier for the SecAgg protocol."""
 
 
-from .secagg_workflow import SecAggWorkflow
-from .secaggplus_workflow import SecAggPlusWorkflow
+from flwr.client.typing import ClientAppCallable
+from flwr.common import Context, Message
 
-__all__ = [
-    "SecAggPlusWorkflow",
-    "SecAggWorkflow",
-]
+from .secaggplus_mod import secaggplus_mod
+
+
+def secagg_mod(
+    msg: Message,
+    ctxt: Context,
+    call_next: ClientAppCallable,
+) -> Message:
+    """Handle incoming message and return results, following the SecAgg protocol."""
+    return secaggplus_mod(msg, ctxt, call_next)
