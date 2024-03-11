@@ -19,8 +19,7 @@ from pyproject import validate_project_name
 
 def test_valid_name_with_dashes():
     assert validate_project_name(
-        "valid-project-name",
-        "Expected 'valid-project-name' to be valid",
+        "valid-project-name", "Expected 'valid-project-name' to be valid"
     )
 
 
@@ -37,9 +36,7 @@ def test_invalid_name_with_upper_letters():
 
 
 def test_name_with_spaces():
-    assert not validate_project_name(
-        "name with spaces"
-    ), "Spaces are not allowed"
+    assert not validate_project_name("name with spaces"), "Spaces are not allowed"
 
 
 def test_empty_name():
@@ -47,21 +44,13 @@ def test_empty_name():
 
 
 def test_long_name():
-    # It can be more than 40 but generally 
+    # It can be more than 40 but generally
     # it is recommended not to be more than 40
     long_name = "a" * 41
     assert not validate_project_name(
         long_name
-    ), f"Name longer than 40 characters is not recommended"
+    ), "Name longer than 40 characters is not recommended"
 
 
 def test_name_with_special_characters():
-    assert not validate_project_name(
-        "name!@#"
-    ), "Special characters are not allowed"
-
-
-def test_name_with_special_characters():
-    assert not validate_project_name(
-        "name!@#"
-    ), "Special characters are not allowed"
+    assert not validate_project_name("name!@#"), "Special characters are not allowed"

@@ -37,10 +37,6 @@ def validate_project_name(name: str) -> bool:
     bool
         True if the name is valid, False otherwise.
     """
-    if (
-        not name
-        or len(name) > 40
-        or not re.match(r"^[a-z0-9-]+$", name)
-    ):
+    if not name or len(name) > 40 or not re.match(r"^[a-z0-9-]+$", name):
         return False
     return True
