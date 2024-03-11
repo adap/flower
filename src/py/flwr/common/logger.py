@@ -16,6 +16,7 @@
 
 
 import logging
+import re
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
 from typing import TYPE_CHECKING, Any, Dict, Optional, TextIO, Tuple
@@ -54,15 +55,34 @@ class ConsoleHandler(StreamHandler):
         self.timestamps = timestamps
         self.colored = colored
         self.json = json
+        self.stage = ""
+        self.init_pattern = re.compile(r"\[INIT\]")
+        self.round_pattern = re.compile(r"\[ROUND (\d+)\]")
+        self.summary_pattern = re.compile(r"\[SUMMARY\]")
 
     def emit(self, record: LogRecord) -> None:
         """Emit a record."""
         if self.json:
-            record.message = record.getMessage().replace("\t", "").strip()
+            record.message = record.getMessage().strip()
 
             # Check if the message is empty
-            if not record.message:
+            if len(record.message) == 0:
                 return
+
+            # Check the message for each pattern and update the record accordingly
+            if self.init_pattern.search(record.message):
+                self.stage = "init"
+                return
+            elif self.summary_pattern.search(record.message):
+                self.stage = "summary"
+                return
+            else:
+                round_match = self.round_pattern.search(record.message)
+                if round_match:
+                    self.stage = f"round {round_match.group(1)}"
+                    return
+
+            record.message = " ".join(record.message.split())
 
         super().emit(record)
 
@@ -70,7 +90,10 @@ class ConsoleHandler(StreamHandler):
         """Format function that adds colors to log level."""
         seperator = " " * (8 - len(record.levelname))
         if self.json:
-            log_fmt = "{lvl='%(levelname)s', time='%(asctime)s', msg='%(message)s'}"
+            log_fmt = (
+                '{lvl="%(levelname)s", time="%(asctime)s", '
+                f"stage=\"{self.stage}\", msg=\"%(message)s\"{'}'}"
+            )
         else:
             log_fmt = (
                 f"{LOG_COLORS[record.levelname] if self.colored else ''}"
