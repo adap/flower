@@ -24,12 +24,7 @@ import numpy as np
 import flwr
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
-from flwr.common.constant import (
-    MESSAGE_TYPE_EVALUATE,
-    MESSAGE_TYPE_FIT,
-    MESSAGE_TYPE_GET_PARAMETERS,
-    MESSAGE_TYPE_GET_PROPERTIES,
-)
+from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.typing import (
     Code,
     Config,
@@ -57,16 +52,16 @@ def _make_task(
     res: Union[GetParametersRes, GetPropertiesRes, FitRes, EvaluateRes]
 ) -> task_pb2.Task:  # pylint: disable=E1101
     if isinstance(res, GetParametersRes):
-        message_type = MESSAGE_TYPE_GET_PARAMETERS
+        message_type = MessageTypeLegacy.GET_PARAMETERS
         recordset = compat.getparametersres_to_recordset(res, True)
     elif isinstance(res, GetPropertiesRes):
-        message_type = MESSAGE_TYPE_GET_PROPERTIES
+        message_type = MessageTypeLegacy.GET_PROPERTIES
         recordset = compat.getpropertiesres_to_recordset(res)
     elif isinstance(res, FitRes):
-        message_type = MESSAGE_TYPE_FIT
+        message_type = MessageType.TRAIN
         recordset = compat.fitres_to_recordset(res, True)
     elif isinstance(res, EvaluateRes):
-        message_type = MESSAGE_TYPE_EVALUATE
+        message_type = MessageType.EVALUATE
         recordset = compat.evaluateres_to_recordset(res)
     else:
         raise ValueError(f"Unsupported type: {type(res)}")

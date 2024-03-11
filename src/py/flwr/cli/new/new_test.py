@@ -70,11 +70,13 @@ def test_new(tmp_path: str) -> None:
         "fedgpt",
         "README.md",
         "flower.toml",
+        "pyproject.toml",
     }
     expected_files_module = {
         "__init__.py",
         "server.py",
         "client.py",
+        "task.py",
     }
 
     # Current directory
