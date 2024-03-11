@@ -57,7 +57,7 @@ pip install -r requirements.txt
 
 ## Run Federated Learning with TensorFlow/Keras and Flower
 
-The included `run.sh` will call a script to generate certificates (which will be used by server and clients), start the Flower server (using `server.py`), sleep for 10 seconds to ensure the the server is up, and then start 10 Flower clients (using `client.py`). You can simply start everything in a terminal as follows:
+The included `run.sh` will call a script to generate certificates (which will be used by server and clients), start the Flower server (using `server.py`), sleep for 10 seconds to ensure the server is up, and then start 10 Flower clients (using `client.py`). You can simply start everything in a terminal as follows:
 
 ```shell
 # Once you have activated your environment

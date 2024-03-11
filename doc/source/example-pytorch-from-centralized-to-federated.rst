@@ -174,7 +174,7 @@ However, with Flower you can evolve your pre-existing code into a federated lear
 
 The concept is easy to understand.
 We have to start a *server* and then use the code in :code:`cifar.py` for the *clients* that are connected to the *server*.
-The *server* sends model parameters to the clients. The *clients* run the training and update the paramters.
+The *server* sends model parameters to the clients. The *clients* run the training and update the parameters.
 The updated parameters are sent back to the *server* which averages all received parameter updates.
 This describes one round of the federated learning process and we repeat this for multiple rounds. 
 
@@ -195,7 +195,7 @@ We can already start the *server*:
     python3 server.py
 
 Finally, we will define our *client* logic in :code:`client.py` and build upon the previously defined centralized training in :code:`cifar.py`.
-Our *client* needs to import :code:`flwr`, but also :code:`torch` to update the paramters on our PyTorch model:
+Our *client* needs to import :code:`flwr`, but also :code:`torch` to update the parameters on our PyTorch model:
 
 .. code-block:: python
 
@@ -212,7 +212,7 @@ Our *client* needs to import :code:`flwr`, but also :code:`torch` to update the 
 
 Implementing a Flower *client* basically means implementing a subclass of either :code:`flwr.client.Client` or :code:`flwr.client.NumPyClient`.
 Our implementation will be based on :code:`flwr.client.NumPyClient` and we'll call it :code:`CifarClient`.
-:code:`NumPyClient` is slighly easier to implement than :code:`Client` if you use a framework with good NumPy interoperability (like PyTorch or TensorFlow/Keras) because it avoids some of the boilerplate that would otherwise be necessary.
+:code:`NumPyClient` is slightly easier to implement than :code:`Client` if you use a framework with good NumPy interoperability (like PyTorch or TensorFlow/Keras) because it avoids some of the boilerplate that would otherwise be necessary.
 :code:`CifarClient` needs to implement four methods, two methods for getting/setting model parameters, one method for training the model, and one method for testing the model:
 
 #. :code:`set_parameters`
@@ -278,7 +278,7 @@ We included type annotations to give you a better understanding of the data type
             return float(loss), self.num_examples["testset"], {"accuracy": float(accuracy)}
 
 All that's left to do it to define a function that loads both model and data, creates a :code:`CifarClient`, and starts this client.
-You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient` with the function :code:`fl.client.start_client()` by pointing it at the same IP adress we used in :code:`server.py`: 
+You load your data and model by using :code:`cifar.py`. Start :code:`CifarClient` with the function :code:`fl.client.start_client()` by pointing it at the same IP address we used in :code:`server.py`: 
 
 .. code-block:: python
 

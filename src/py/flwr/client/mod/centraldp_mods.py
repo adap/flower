@@ -18,7 +18,7 @@
 from flwr.client.typing import ClientAppCallable
 from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common import recordset_compat as compat
-from flwr.common.constant import MESSAGE_TYPE_FIT
+from flwr.common.constant import MessageType
 from flwr.common.context import Context
 from flwr.common.differential_privacy import (
     compute_adaptive_clip_model_update,
@@ -40,7 +40,7 @@ def fixedclipping_mod(
 
     This mod clips the client model updates before sending them to the server.
 
-    It operates on messages with type MESSAGE_TYPE_FIT.
+    It operates on messages of type `MessageType.TRAIN`.
 
     Notes
     -----
@@ -48,7 +48,7 @@ def fixedclipping_mod(
 
     Typically, fixedclipping_mod should be the last to operate on params.
     """
-    if msg.metadata.message_type != MESSAGE_TYPE_FIT:
+    if msg.metadata.message_type != MessageType.TRAIN:
         return call_next(msg, ctxt)
     fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
     if KEY_CLIPPING_NORM not in fit_ins.config:
@@ -63,6 +63,11 @@ def fixedclipping_mod(
 
     # Call inner app
     out_msg = call_next(msg, ctxt)
+
+    # Check if the msg has error
+    if out_msg.has_error():
+        return out_msg
+
     fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
 
     client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
@@ -93,7 +98,7 @@ def adaptiveclipping_mod(
 
     It also sends KEY_NORM_BIT to the server for computing the new clipping value.
 
-    It operates on messages with type MESSAGE_TYPE_FIT.
+    It operates on messages of type `MessageType.TRAIN`.
 
     Notes
     -----
@@ -101,7 +106,7 @@ def adaptiveclipping_mod(
 
     Typically, adaptiveclipping_mod should be the last to operate on params.
     """
-    if msg.metadata.message_type != MESSAGE_TYPE_FIT:
+    if msg.metadata.message_type != MessageType.TRAIN:
         return call_next(msg, ctxt)
 
     fit_ins = compat.recordset_to_fitins(msg.content, keep_input=True)
@@ -119,6 +124,11 @@ def adaptiveclipping_mod(
 
     # Call inner app
     out_msg = call_next(msg, ctxt)
+
+    # Check if the msg has error
+    if out_msg.has_error():
+        return out_msg
+
     fit_res = compat.recordset_to_fitres(out_msg.content, keep_input=True)
 
     client_to_server_params = parameters_to_ndarrays(fit_res.parameters)
