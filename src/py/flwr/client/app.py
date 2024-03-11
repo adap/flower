@@ -464,13 +464,7 @@ def _start_client_internal(
                         time.sleep(3)  # Wait for 3s before asking again
                         continue
 
-                    log(
-                        INFO,
-                        "Received group %s message of type %s for run %s",
-                        message.metadata.group_id,
-                        message.metadata.message_type,
-                        message.metadata.run_id,
-                    )
+                    log(INFO, "Received message")
 
                     # Handle control message
                     out_message, sleep_duration = handle_control_message(message)
@@ -500,13 +494,7 @@ def _start_client_internal(
 
                     # Send
                     send(out_message)
-                    log(
-                        INFO,
-                        "Sent group %s reply of type %s for run %s",
-                        out_message.metadata.group_id,
-                        out_message.metadata.message_type,
-                        out_message.metadata.run_id,
-                    )
+                    log(INFO, "Sent reply")
                 except KeyboardInterrupt:
                     sleep_duration = 0
                     break
