@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""The SecAgg+ protocol handler tests."""
+"""The SecAgg+ protocol modifier tests."""
 
 import unittest
 from itertools import product
