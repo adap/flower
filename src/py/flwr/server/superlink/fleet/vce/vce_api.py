@@ -114,10 +114,10 @@ async def add_taskins_to_queue(
     state = state_factory.state()
     num_initial_consumers = len(consumers)
     while not f_stop.is_set():
-        for node_id in nodes_mapping.keys():
-            task_ins = state.get_task_ins(node_id=node_id, limit=1)
-            if task_ins:
-                await queue.put(task_ins[0])
+        for _ in nodes_mapping.keys():
+            task_ins = state.get_task_ins(node_id=None, limit=1)
+            for t_in in task_ins:
+                await queue.put(t_in)
 
         # Count consumers that are running
         num_active = sum(not (cc.done()) for cc in consumers)

@@ -34,7 +34,7 @@ from flwr.server.superlink.fleet.vce.vce_api import (
     _register_nodes,
     start_vce,
 )
-from flwr.server.superlink.state import InMemoryState, StateFactory
+from flwr.server.superlink.state import SimmpleInMemoryState, StateFactory
 
 
 def terminate_simulation(f_stop: asyncio.Event, sleep_duration: int) -> None:
@@ -51,7 +51,7 @@ def init_state_factory_nodes_mapping(
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
     run_id = 1234
-    state_factory = StateFactory(":flwr-in-memory-state:")
+    state_factory = StateFactory(":flwr-simple-in-memory-state:")
 
     # Register a few nodes
     nodes_mapping = _register_nodes(num_nodes=num_nodes, state_factory=state_factory)
@@ -75,7 +75,7 @@ def register_messages_into_state(
     erroneous_message: Optional[bool] = False,
 ) -> Dict[UUID, float]:
     """Register `num_messages` into the state factory."""
-    state: InMemoryState = state_factory.state()  # type: ignore
+    state: SimmpleInMemoryState = state_factory.state()  # type: ignore
     state.run_ids.add(run_id)
     # Artificially add TaskIns to state so they can be processed
     # by the Simulation Engine logic

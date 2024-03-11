@@ -17,7 +17,6 @@
 import argparse
 import asyncio
 import json
-import logging
 import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
@@ -28,6 +27,7 @@ import grpc
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
+from flwr.common.logger import update_console_handler
 from flwr.common.typing import ConfigsRecordValues
 from flwr.server.driver.driver import Driver
 from flwr.server.run_serverapp import run
@@ -191,7 +191,7 @@ def _main_loop(
     the Simulation Engine on a Jupyter/Colab notebook.
     """
     # Initialize StateFactory
-    state_factory = StateFactory(":flwr-in-memory-state:")
+    state_factory = StateFactory(":flwr-simple-in-memory-state:")
 
     # Start Driver API
     driver_server: grpc.Server = run_driver_api_grpc(
@@ -316,10 +316,9 @@ def _run_simulation(
         When diabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
-    # Set logging level
-    if not verbose_logging:
-        logger = logging.getLogger("flwr")
-        logger.setLevel(INFO)
+    # Set verbose logging level
+    if verbose_logging:
+        update_console_handler(DEBUG, timestamps=True, colored=True)
 
     if backend_config is None:
         backend_config = {}
