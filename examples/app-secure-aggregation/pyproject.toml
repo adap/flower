@@ -3,9 +3,9 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "app-secaggplus"
+name = "app-secure-aggregation"
 version = "0.1.0"
-description = "Example usage of the SecAggPlusWorkflow and the secaggplus_mod."
+description = "Flower Secure Aggregation example."
 authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
