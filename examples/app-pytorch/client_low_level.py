@@ -1,4 +1,4 @@
-import flwr
+from flwr.client import ClientApp
 from flwr.common import Message, Context
 
 
@@ -9,8 +9,8 @@ def hello_world_mod(msg, ctx, call_next) -> Message:
     return out
 
 
-# Run via `flower-client-app client:app`
-app = flwr.client.ClientApp(
+# Flower ClientApp
+app = ClientApp(
     mods=[
         hello_world_mod,
     ],

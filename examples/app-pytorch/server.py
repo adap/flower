@@ -2,7 +2,8 @@ from typing import List, Tuple
 
 import flwr as fl
 from flwr.common import Metrics, ndarrays_to_parameters
-from task import Net, get_parameters
+
+from task import Net, get_weights
 
 
 # Define metric aggregation function
@@ -27,7 +28,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 # Initialize model parameters
-ndarrays = get_parameters(Net())
+ndarrays = get_weights(Net())
 parameters = ndarrays_to_parameters(ndarrays)
 
 

@@ -1,6 +1,5 @@
 """$project_name: A Flower / PyTorch app."""
 
-import warnings
 from collections import OrderedDict
 
 import torch
@@ -9,7 +8,6 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
-from tqdm import tqdm
 
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -77,7 +75,7 @@ def test(net, testloader):
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
-        for images, labels in tqdm(testloader):
+        for images, labels in testloader:
             outputs = net(images.to(DEVICE))
             labels = labels.to(DEVICE)
             loss += criterion(outputs, labels).item()
