@@ -159,17 +159,17 @@ class TestSecAggPlusHandler(unittest.TestCase):
             for key, value_type in valid_key_type_pairs
         }
 
-        # Test valid `named_values`
+        # Test valid configs
         try:
             check_configs(Stage.SETUP, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
-            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
+            self.fail(f"check_configs() raised {type(exc)} unexpectedly!")
 
         # Set the stage
         valid_configs[Key.STAGE] = Stage.SETUP
 
-        # Test invalid `named_values`
+        # Test invalid configs
         for key, value_type in valid_key_type_pairs:
             invalid_configs = valid_configs.copy()
 
@@ -202,17 +202,17 @@ class TestSecAggPlusHandler(unittest.TestCase):
             "3": [b"public key 1", b"public key 2"],
         }
 
-        # Test valid `named_values`
+        # Test valid configs
         try:
             check_configs(Stage.SHARE_KEYS, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
-            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
+            self.fail(f"check_configs() raised {type(exc)} unexpectedly!")
 
         # Set the stage
         valid_configs[Key.STAGE] = Stage.SHARE_KEYS
 
-        # Test invalid `named_values`
+        # Test invalid configs
         invalid_values: List[ConfigsRecordValues] = [
             b"public key 1",
             [b"public key 1"],
@@ -238,17 +238,17 @@ class TestSecAggPlusHandler(unittest.TestCase):
             Key.SOURCE_LIST: [32, 51324, 32324123, -3],
         }
 
-        # Test valid `named_values`
+        # Test valid configs
         try:
             check_configs(Stage.COLLECT_MASKED_VECTORS, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
-            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
+            self.fail(f"check_configs() raised {type(exc)} unexpectedly!")
 
         # Set the stage
         valid_configs[Key.STAGE] = Stage.COLLECT_MASKED_VECTORS
 
-        # Test invalid `named_values`
+        # Test invalid configs
         # Test missing keys
         for key in list(valid_configs.keys()):
             if key == Key.STAGE:
@@ -282,17 +282,17 @@ class TestSecAggPlusHandler(unittest.TestCase):
             Key.DEAD_NODE_ID_LIST: [32, 51324, 32324123, -3],
         }
 
-        # Test valid `named_values`
+        # Test valid configs
         try:
             check_configs(Stage.UNMASK, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
-            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
+            self.fail(f"check_configs() raised {type(exc)} unexpectedly!")
 
         # Set the stage
         valid_configs[Key.STAGE] = Stage.UNMASK
 
-        # Test invalid `named_values`
+        # Test invalid configs
         # Test missing keys
         for key in list(valid_configs.keys()):
             if key == Key.STAGE:

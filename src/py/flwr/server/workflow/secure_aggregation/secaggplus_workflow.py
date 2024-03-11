@@ -530,7 +530,7 @@ class SecAggPlusWorkflow:
 
         return self._check_threshold(state)
 
-    def unmask_stage(  # pylint: disable=R0912, R0914
+    def unmask_stage(  # pylint: disable=R0912, R0914, R0915
         self, driver: Driver, context: LegacyContext, state: WorkflowState
     ) -> bool:
         """Execute the 'unmask' stage."""
