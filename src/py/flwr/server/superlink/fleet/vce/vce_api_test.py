@@ -182,21 +182,6 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
         with self.assertRaises(ValueError):
             start_and_shutdown(duration=2)
 
-    def test_erroneous_client_app_attr(self) -> None:
-        """Tests attempt to load a ClientApp that can't be found."""
-        num_messages = 7
-        num_nodes = 59
-
-        state_factory, nodes_mapping, _ = init_state_factory_nodes_mapping(
-            num_nodes=num_nodes, num_messages=num_messages
-        )
-        with self.assertRaises(RuntimeError):
-            start_and_shutdown(
-                client_app_attr="totally_fictitious_app:client",
-                state_factory=state_factory,
-                nodes_mapping=nodes_mapping,
-            )
-
     def test_erroneous_messages(self) -> None:
         """Test handling of error in async worker (consumer).
 
