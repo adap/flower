@@ -659,5 +659,18 @@ class SecAggPlusWorkflow:
             False,
             driver.run_id,  # type: ignore
         )
-        context.strategy.aggregate_fit(current_round, [(empty_proxy, final_fitres)], [])
+        aggregated_result = context.strategy.aggregate_fit(
+            current_round, [(empty_proxy, final_fitres)], []
+        )
+        parameters_aggregated, metrics_aggregated = aggregated_result
+
+        # Update the parameters and write history
+        if parameters_aggregated:
+            paramsrecord = compat.parameters_to_parametersrecord(
+                parameters_aggregated, True
+            )
+            context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
+            context.history.add_metrics_distributed_fit(
+                server_round=current_round, metrics=metrics_aggregated
+            )
         return True
