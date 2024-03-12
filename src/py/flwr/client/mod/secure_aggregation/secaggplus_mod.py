@@ -18,13 +18,14 @@
 import os
 from dataclasses import dataclass, field
 from logging import DEBUG, WARNING
-from typing import Any, Callable, Dict, List, Tuple, cast
+from typing import Any, Dict, List, Tuple, cast
 
 from flwr.client.typing import ClientAppCallable
 from flwr.common import (
     ConfigsRecord,
     Context,
     Message,
+    Parameters,
     RecordSet,
     ndarray_to_bytes,
     parameters_to_ndarrays,
@@ -62,7 +63,7 @@ from flwr.common.secure_aggregation.secaggplus_utils import (
     share_keys_plaintext_concat,
     share_keys_plaintext_separate,
 )
-from flwr.common.typing import ConfigsRecordValues, FitRes
+from flwr.common.typing import ConfigsRecordValues
 
 
 @dataclass
@@ -132,18 +133,6 @@ class SecAggPlusState:
         return ret
 
 
-def _get_fit_fn(
-    msg: Message, ctxt: Context, call_next: ClientAppCallable
-) -> Callable[[], FitRes]:
-    """Get the fit function."""
-
-    def fit() -> FitRes:
-        out_msg = call_next(msg, ctxt)
-        return compat.recordset_to_fitres(out_msg.content, keep_input=False)
-
-    return fit
-
-
 def secaggplus_mod(
     msg: Message,
     ctxt: Context,
@@ -173,25 +162,32 @@ def secaggplus_mod(
     check_configs(state.current_stage, configs)
 
     # Execute
+    out_content = RecordSet()
     if state.current_stage == Stage.SETUP:
         state.nid = msg.metadata.dst_node_id
         res = _setup(state, configs)
     elif state.current_stage == Stage.SHARE_KEYS:
         res = _share_keys(state, configs)
     elif state.current_stage == Stage.COLLECT_MASKED_VECTORS:
-        fit = _get_fit_fn(msg, ctxt, call_next)
-        res = _collect_masked_vectors(state, configs, fit)
+        out_msg = call_next(msg, ctxt)
+        out_content = out_msg.content
+        fitres = compat.recordset_to_fitres(out_content, keep_input=True)
+        res = _collect_masked_vectors(
+            state, configs, fitres.num_examples, fitres.parameters
+        )
+        for p_record in out_content.parameters_records.values():
+            p_record.clear()
     elif state.current_stage == Stage.UNMASK:
         res = _unmask(state, configs)
     else:
-        raise ValueError(f"Unknown secagg stage: {state.current_stage}")
+        raise ValueError(f"Unknown SecAgg/SecAgg+ stage: {state.current_stage}")
 
     # Save state
     ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
 
     # Return message
-    content = RecordSet(configs_records={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)})
-    return msg.create_reply(content, ttl="")
+    out_content.configs_records[RECORD_KEY_CONFIGS] = ConfigsRecord(res, False)
+    return msg.create_reply(out_content, ttl="")
 
 
 def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
@@ -417,7 +413,8 @@ def _share_keys(
 def _collect_masked_vectors(
     state: SecAggPlusState,
     configs: ConfigsRecord,
-    fit: Callable[[], FitRes],
+    num_examples: int,
+    updated_parameters: Parameters,
 ) -> Dict[str, ConfigsRecordValues]:
     log(DEBUG, "Node %d: starting stage 2...", state.nid)
     available_clients: List[int] = []
@@ -447,26 +444,20 @@ def _collect_masked_vectors(
         state.rd_seed_share_dict[src] = rd_seed_share
         state.sk1_share_dict[src] = sk1_share
 
-    # Fit client
-    fit_res = fit()
-    if len(fit_res.metrics) > 0:
-        log(
-            WARNING,
-            "The metrics in FitRes will not be preserved or sent to the server.",
-        )
-    ratio = fit_res.num_examples / state.max_weight
+    # Fit
+    ratio = num_examples / state.max_weight
     if ratio > 1:
         log(
             WARNING,
             "Potential overflow warning: the provided weight (%s) exceeds the specified"
             " max_weight (%s). This may lead to overflow issues.",
-            fit_res.num_examples,
+            num_examples,
             state.max_weight,
         )
     q_ratio = round(ratio * state.target_range)
     dq_ratio = q_ratio / state.target_range
 
-    parameters = parameters_to_ndarrays(fit_res.parameters)
+    parameters = parameters_to_ndarrays(updated_parameters)
     parameters = parameters_multiply(parameters, dq_ratio)
 
     # Quantize parameter update (vector)
