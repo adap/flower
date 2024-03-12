@@ -23,7 +23,7 @@ do
 done
 
 echo "Starting ServerApp..."
-flower-server-app --insecure server:app
+flower-server-app --insecure server:app --verbose
 
 echo "Clearing background processes..."
 

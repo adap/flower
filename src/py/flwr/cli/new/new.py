@@ -22,7 +22,7 @@ from typing import Dict, Optional
 import typer
 from typing_extensions import Annotated
 
-from ..utils import prompt_options
+from ..utils import prompt_options, prompt_text
 
 
 class MlFramework(str, Enum):
@@ -72,9 +72,9 @@ def render_and_create(file_path: str, template: str, context: Dict[str, str]) ->
 
 def new(
     project_name: Annotated[
-        str,
+        Optional[str],
         typer.Argument(metavar="project_name", help="The name of the project"),
-    ],
+    ] = None,
     framework: Annotated[
         Optional[MlFramework],
         typer.Option(case_sensitive=False, help="The ML framework to use"),
@@ -82,6 +82,9 @@ def new(
 ) -> None:
     """Create new Flower project."""
     print(f"Creating Flower project {project_name}...")
+
+    if project_name is None:
+        project_name = prompt_text("Please provide project name")
 
     if framework is not None:
         framework_str = str(framework.value)
