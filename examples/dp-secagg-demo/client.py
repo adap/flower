@@ -1,15 +1,7 @@
+from task import DEVICE, Net, get_weights, load_data, set_weights, test, train
+
 from flwr.client import ClientApp, NumPyClient
-
-from task import (
-    Net,
-    DEVICE,
-    load_data,
-    get_weights,
-    set_weights,
-    train,
-    test,
-)
-
+from flwr.client.mod import secaggplus_mod
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
@@ -38,14 +30,7 @@ def client_fn(cid: str):
 # Flower ClientApp
 app = ClientApp(
     client_fn=client_fn,
+    mods=[
+        secaggplus_mod,
+    ],
 )
-
-
-# Legacy mode
-if __name__ == "__main__":
-    from flwr.client import start_client
-
-    start_client(
-        server_address="127.0.0.1:8080",
-        client=FlowerClient().to_client(),
-    )

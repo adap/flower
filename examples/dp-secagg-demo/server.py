@@ -5,6 +5,7 @@ from task import Net, get_weights
 import flwr as fl
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import Driver, LegacyContext
+from flwr.server.workflow import SecAggPlusWorkflow
 
 
 # Define metric aggregation function
@@ -35,9 +36,9 @@ parameters = ndarrays_to_parameters(ndarrays)
 
 # Define strategy
 strategy = fl.server.strategy.FedAvg(
-    fraction_fit=1.0,  # Select all available clients
+    fraction_fit=0.2,  # Select 20% of all available clients
     fraction_evaluate=0.0,  # Disable evaluation
-    min_available_clients=2,
+    min_available_clients=100,
     fit_metrics_aggregation_fn=weighted_average,
     initial_parameters=parameters,
 )
@@ -57,7 +58,12 @@ def main(driver: Driver, context: Context) -> None:
     )
 
     # Create the workflow
-    workflow = fl.server.workflow.DefaultWorkflow()
+    workflow = fl.server.workflow.DefaultWorkflow(
+        fit_workflow=SecAggPlusWorkflow(
+            num_shares=7,
+            reconstruction_threshold=4,
+        )
+    )
 
     # Execute
     workflow(driver, context)
