@@ -18,11 +18,10 @@
 import random
 from dataclasses import dataclass, field
 from logging import DEBUG, ERROR, INFO, WARN
-from typing import Dict, List, Optional, Set, Union, cast
+from typing import Dict, List, Optional, Set, Tuple, Union, cast
 
 import flwr.common.recordset_compat as compat
 from flwr.common import (
-    Code,
     ConfigsRecord,
     Context,
     FitRes,
@@ -30,7 +29,6 @@ from flwr.common import (
     MessageType,
     NDArrays,
     RecordSet,
-    Status,
     bytes_to_ndarray,
     log,
     ndarrays_to_parameters,
@@ -55,7 +53,7 @@ from flwr.common.secure_aggregation.secaggplus_constants import (
     Stage,
 )
 from flwr.common.secure_aggregation.secaggplus_utils import pseudo_rand_gen
-from flwr.server.compat.driver_client_proxy import DriverClientProxy
+from flwr.server.client_proxy import ClientProxy
 from flwr.server.compat.legacy_context import LegacyContext
 from flwr.server.driver import Driver
 
@@ -67,6 +65,7 @@ from ..constant import Key as WorkflowKey
 class WorkflowState:  # pylint: disable=R0902
     """The state of the SecAgg+ protocol."""
 
+    nid_to_proxies: Dict[int, ClientProxy] = field(default_factory=dict)
     nid_to_fitins: Dict[int, RecordSet] = field(default_factory=dict)
     sampled_node_ids: Set[int] = field(default_factory=set)
     active_node_ids: Set[int] = field(default_factory=set)
@@ -304,6 +303,7 @@ class SecAggPlusWorkflow:
             proxy.node_id: compat.fitins_to_recordset(fitins, True)
             for proxy, fitins in proxy_fitins_lst
         }
+        state.nid_to_proxies = {proxy.node_id: proxy for proxy, _ in proxy_fitins_lst}
 
         # Protocol config
         sampled_node_ids = list(state.nid_to_fitins.keys())
@@ -637,31 +637,25 @@ class SecAggPlusWorkflow:
         for vec in aggregated_vector:
             vec += offset
             vec *= inv_dq_total_ratio
-        state.aggregate_ndarrays = aggregated_vector
+
+
+        # Backward compatibility with Strategy
+        results: List[Tuple[ClientProxy, FitRes]] = []
+        parameters = ndarrays_to_parameters(aggregated_vector)
+        for msg in msgs:
+            fitres = compat.recordset_to_fitres(msg.content, True)
+            fitres.parameters = parameters
+            proxy = state.nid_to_proxies[msg.metadata.src_node_id]
+            results.append((proxy, fitres))
 
         # No exception/failure handling currently
         log(
             INFO,
             "aggregate_fit: received %s results and %s failures",
-            1,
+            len(results),
             0,
         )
-
-        final_fitres = FitRes(
-            status=Status(code=Code.OK, message=""),
-            parameters=ndarrays_to_parameters(aggregated_vector),
-            num_examples=round(state.max_weight / inv_dq_total_ratio),
-            metrics={},
-        )
-        empty_proxy = DriverClientProxy(
-            0,
-            driver.grpc_driver,  # type: ignore
-            False,
-            driver.run_id,  # type: ignore
-        )
-        aggregated_result = context.strategy.aggregate_fit(
-            current_round, [(empty_proxy, final_fitres)], []
-        )
+        aggregated_result = context.strategy.aggregate_fit(current_round, results, [])
         parameters_aggregated, metrics_aggregated = aggregated_result
 
         # Update the parameters and write history
