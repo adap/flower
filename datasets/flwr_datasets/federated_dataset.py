@@ -126,7 +126,6 @@ class FederatedDataset:
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
             partitioners
         )
-        self._partition_type = None
         self._partition_division = self._initialize_partition_division(
             partition_division
         )

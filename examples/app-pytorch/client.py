@@ -16,7 +16,7 @@ net = Net().to(DEVICE)
 trainloader, testloader = load_data()
 
 
-# Define Flower client
+# Define FlowerClient and client_fn
 class FlowerClient(NumPyClient):
 
     def fit(self, parameters, config):
@@ -31,16 +31,21 @@ class FlowerClient(NumPyClient):
 
 
 def client_fn(cid: str):
+    """Create and return an instance of Flower `Client`."""
     return FlowerClient().to_client()
 
 
-# Run via `flower-client-app client:app`
-app = ClientApp(client_fn=client_fn)
+# Flower ClientApp
+app = ClientApp(
+    client_fn=client_fn,
+)
 
 
 # Legacy mode
 if __name__ == "__main__":
-    fl.client.start_client(
+    from flwr.client import start_client
+
+    start_client(
         server_address="127.0.0.1:8080",
         client=FlowerClient().to_client(),
     )
