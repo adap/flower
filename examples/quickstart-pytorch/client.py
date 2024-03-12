@@ -2,7 +2,7 @@ import argparse
 import warnings
 from collections import OrderedDict
 
-import flwr as fl
+from flwr.client import NumPyClient, ClientApp
 from flwr_datasets import FederatedDataset
 import torch
 import torch.nn as nn
@@ -111,7 +111,7 @@ trainloader, testloader = load_data(partition_id=partition_id)
 
 
 # Define Flower client
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -131,8 +131,17 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
-# Start Flower client
-fl.client.start_client(
-    server_address="127.0.0.1:8080",
-    client=FlowerClient().to_client(),
+# Flower ClientApp
+app = ClientApp(
+    client_fn=client_fn,
 )
+
+
+# Legacy mode
+if __name__ == "__main__":
+    from flwr.client import start_client
+
+    start_client(
+        server_address="127.0.0.1:8080",
+        client=FlowerClient().to_client(),
+    )
