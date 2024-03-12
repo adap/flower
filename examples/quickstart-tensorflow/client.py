@@ -1,7 +1,7 @@
 import argparse
 import os
 
-import flwr as fl
+from flwr.client import ClientApp, NumPyClient
 import tensorflow as tf
 from flwr_datasets import FederatedDataset
 
@@ -36,7 +36,7 @@ x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
 
 
 # Define Flower client
-class CifarClient(fl.client.NumPyClient):
+class CifarClient(NumPyClient):
     def get_parameters(self, config):
         return model.get_weights()
 
@@ -51,7 +51,17 @@ class CifarClient(fl.client.NumPyClient):
         return loss, len(x_test), {"accuracy": accuracy}
 
 
-# Start Flower client
-fl.client.start_client(
-    server_address="127.0.0.1:8080", client=CifarClient().to_client()
+# Flower ClientApp
+app = ClientApp(
+    client_fn=client_fn,
 )
+
+
+# Legacy mode
+if __name__ == "__main__":
+    from flwr.client import start_client
+
+    start_client(
+        server_address="127.0.0.1:8080",
+        client=FlowerClient().to_client(),
+    )
