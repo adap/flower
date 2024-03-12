@@ -163,7 +163,15 @@ class FederatedDataset:
 
     @property
     def partitioners(self) -> Dict[str, Partitioner]:
-        """Split to associated partitioners dictionary."""
+        """Dictionary mapping split to associated partitioners."""
+        if not self._dataset_prepared:
+            self._prepare_dataset()
+        if self._dataset is None:
+            raise ValueError("Dataset is not loaded yet.")
+        partitioners_keys = list(self._partitioners.keys())
+        for split in partitioners_keys:
+            self._check_if_split_present(split)
+            self._assign_dataset_to_partitioner(split)
         return self._partitioners
 
     def _check_if_split_present(self, split: str) -> None:
