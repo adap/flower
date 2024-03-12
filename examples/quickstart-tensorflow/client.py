@@ -50,7 +50,10 @@ class CifarClient(NumPyClient):
         loss, accuracy = model.evaluate(x_test, y_test)
         return loss, len(x_test), {"accuracy": accuracy}
 
-
+def client_fn(cid: str):
+    """Create and return an instance of Flower `Client`."""
+    return FlowerClient().to_client()
+    
 # Flower ClientApp
 app = ClientApp(
     client_fn=client_fn,
