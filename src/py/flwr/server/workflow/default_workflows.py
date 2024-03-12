@@ -127,7 +127,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
                     content=content,
                     message_type=MessageTypeLegacy.GET_PARAMETERS,
                     dst_node_id=random_client.node_id,
-                    group_id="",
+                    group_id="0",
                     ttl="",
                 )
             ]
@@ -226,7 +226,7 @@ def default_fit_workflow(  # pylint: disable=R0914
             content=compat.fitins_to_recordset(fitins, True),
             message_type=MessageType.TRAIN,
             dst_node_id=proxy.node_id,
-            group_id="",
+            group_id=str(current_round),
             ttl="",
         )
         for proxy, fitins in client_instructions
@@ -306,7 +306,7 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
             content=compat.evaluateins_to_recordset(evalins, True),
             message_type=MessageType.EVALUATE,
             dst_node_id=proxy.node_id,
-            group_id="",
+            group_id=str(current_round),
             ttl="",
         )
         for proxy, evalins in client_instructions
