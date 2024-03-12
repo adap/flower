@@ -643,6 +643,9 @@ def train_align(
                 ) / (2 * log_var_g.exp())
 
             loss_align_reduced = torch.mean(loss_align.sum(dim=1))
+            print(f"lambda_align: {lambda_align }")
+            print(f"loss_align_term: {lambda_align * loss_align_reduced}")
+
             loss += lambda_align * loss_align_reduced
             loss.backward()
             optimizer.step()
@@ -697,7 +700,7 @@ def train_align_prox(
                 loss_align = 0.5 * (log_var_g - log_var - 1) + (
                     log_var.exp() + (mu - mu_g).pow(2)
                 ) / (2 * log_var_g.exp())
-                accumulate_align_loss += loss_align.sum(dim=1).sum()
+                accumulate_align_loss += torch.mean(loss_align.sum(dim=1))
             loss_align_reduced = accumulate_align_loss
             loss += lambda_align * loss_align_reduced
             loss.backward()
@@ -735,8 +738,8 @@ def test(net, testloader, device, kl_term=0):
             total += len(images)
     # TODO: accu=-1*loss
     # return (loss.item() / total), -1 * (loss.item() / total)
-            # batch_loss = loss.item()
-    return (loss.item() / (idx+1)), -1 * (loss.item() / (idx+1))
+    # batch_loss = loss.item()
+    return (loss.item() / (idx + 1)), -1 * (loss.item() / (idx + 1))
 
 
 def eval_reconstrution(net, testloader, device):
@@ -762,7 +765,7 @@ def eval_reconstrution(net, testloader, device):
             recon_loss = torch.mean(bce_loss_sum_per_image)  # Shape: scalar
             loss += recon_loss
             # total += len(images)
-    return loss.item() / (idx+1)
+    return loss.item() / (idx + 1)
 
 
 def visualize_gen_image(net, testloader, device, rnd=None, folder=None):

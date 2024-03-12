@@ -484,7 +484,10 @@ class FedCiR(FedAvg):
                         DEBUG,
                         f"Skipping optimization at step {step} due to negligible loss",
                     )
-        wandb.log(data={f"final_gen_loss": loss.item(), "client_round": server_round})
+        wandb.log(
+            data={f"final_gen_loss": loss.item(), "client_round": server_round},
+            step=server_round,
+        )
         # self.gen_stats = ndarrays_to_parameters(
         #     [val.cpu().numpy() for _, val in self.gen_model.state_dict().items()]
         # )
@@ -524,7 +527,7 @@ class FedCiR(FedAvg):
                 "client_round": fit_metric[1]["client_round"],
             }
 
-            wandb.log(data)
+            wandb.log(data=data, step=server_round)
             plt.close("all")
         return parameters_aggregated, metrics_aggregated
 
@@ -568,6 +571,6 @@ class FedCiR(FedAvg):
                 "client_round": server_round,
             }
 
-            wandb.log(data)
+            wandb.log(data=data, step=server_round)
 
         return loss_aggregated, metrics_aggregated

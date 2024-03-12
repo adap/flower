@@ -290,9 +290,10 @@ def main():
                     f"global_latent_rep": latent_reps,
                     f"global_val_loss": global_val_loss,
                     f"global_fisher_score": fisher_score,
-                    "server_round": server_round,
+                    f"server_round": server_round,
                     f"generated_cir_samples": plt,
-                }
+                },
+                step=server_round,
             )
             plt.close("all")
 
@@ -361,9 +362,9 @@ if __name__ == "__main__":
             "sample_per_class": {"values": [200]},
             # "lambda_reg": {"min": 0.0, "max": 1.0},
             # "lambda_align_g": {"min": 1e-6, "max": 1e-3},
-            "lambda_align_g": {"values": [1]},  # kl term for generator
+            "lambda_align_g": {"values": [0.1]},  # kl term for generator
             "lambda_reg": {"values": [0.1]},
-            "lambda_align": {"values": [1]},
+            "lambda_align": {"values": [0.1]},
             # "lambda_align": {"min": 1e-6, "max": 1e-3},
             "lr_g": {
                 "values": [
@@ -380,4 +381,4 @@ if __name__ == "__main__":
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=2)
+    wandb.agent(sweep_id, function=main, count=1)
