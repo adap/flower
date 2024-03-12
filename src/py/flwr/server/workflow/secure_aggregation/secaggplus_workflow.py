@@ -301,7 +301,7 @@ class SecAggPlusWorkflow:
         )
 
         state.nid_to_fitins = {
-            proxy.node_id: compat.fitins_to_recordset(fitins, False)
+            proxy.node_id: compat.fitins_to_recordset(fitins, True)
             for proxy, fitins in proxy_fitins_lst
         }
 
