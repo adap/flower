@@ -18,7 +18,7 @@
 import os
 from dataclasses import dataclass, field
 from logging import DEBUG, WARNING
-from typing import Any, Callable, Dict, List, Tuple, cast
+from typing import Any, Dict, List, Tuple, cast
 
 from flwr.client.typing import ClientAppCallable
 from flwr.common import (
@@ -63,7 +63,7 @@ from flwr.common.secure_aggregation.secaggplus_utils import (
     share_keys_plaintext_concat,
     share_keys_plaintext_separate,
 )
-from flwr.common.typing import ConfigsRecordValues, FitRes
+from flwr.common.typing import ConfigsRecordValues
 
 
 @dataclass
@@ -131,18 +131,6 @@ class SecAggPlusState:
                 else:
                     ret[f"{k}:V"] = list(v.values())
         return ret
-
-
-def _get_fit_fn(
-    msg: Message, ctxt: Context, call_next: ClientAppCallable
-) -> Callable[[], FitRes]:
-    """Get the fit function."""
-
-    def fit() -> FitRes:
-        out_msg = call_next(msg, ctxt)
-        return compat.recordset_to_fitres(out_msg.content, keep_input=False)
-
-    return fit
 
 
 def secaggplus_mod(

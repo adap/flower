@@ -80,6 +80,7 @@ class WorkflowState:  # pylint: disable=R0902
     forward_srcs: Dict[int, List[int]] = field(default_factory=dict)
     forward_ciphertexts: Dict[int, List[bytes]] = field(default_factory=dict)
     aggregate_ndarrays: NDArrays = field(default_factory=list)
+    legacy_results: List[Tuple[ClientProxy, FitRes]] = field(default_factory=list)
 
 
 class SecAggPlusWorkflow:
@@ -528,6 +529,12 @@ class SecAggPlusWorkflow:
             masked_vector = parameters_mod(masked_vector, state.mod_range)
             state.aggregate_ndarrays = masked_vector
 
+        # Backward compatibility with Strategy
+        for msg in msgs:
+            fitres = compat.recordset_to_fitres(msg.content, True)
+            proxy = state.nid_to_proxies[msg.metadata.src_node_id]
+            state.legacy_results.append((proxy, fitres))
+
         return self._check_threshold(state)
 
     def unmask_stage(  # pylint: disable=R0912, R0914, R0915
@@ -638,15 +645,11 @@ class SecAggPlusWorkflow:
             vec += offset
             vec *= inv_dq_total_ratio
 
-
         # Backward compatibility with Strategy
-        results: List[Tuple[ClientProxy, FitRes]] = []
+        results = state.legacy_results
         parameters = ndarrays_to_parameters(aggregated_vector)
-        for msg in msgs:
-            fitres = compat.recordset_to_fitres(msg.content, True)
+        for _, fitres in results:
             fitres.parameters = parameters
-            proxy = state.nid_to_proxies[msg.metadata.src_node_id]
-            results.append((proxy, fitres))
 
         # No exception/failure handling currently
         log(
