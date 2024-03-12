@@ -17,7 +17,7 @@
 
 import os
 from dataclasses import dataclass, field
-from logging import INFO, WARNING
+from logging import DEBUG, WARNING
 from typing import Any, Callable, Dict, List, Tuple, cast
 
 from flwr.client.typing import ClientAppCallable
@@ -330,7 +330,7 @@ def _setup(
     # Assigning parameter values to object fields
     sec_agg_param_dict = configs
     state.sample_num = cast(int, sec_agg_param_dict[Key.SAMPLE_NUMBER])
-    log(INFO, "Node %d: starting stage 0...", state.nid)
+    log(DEBUG, "Node %d: starting stage 0...", state.nid)
 
     state.share_num = cast(int, sec_agg_param_dict[Key.SHARE_NUMBER])
     state.threshold = cast(int, sec_agg_param_dict[Key.THRESHOLD])
@@ -355,7 +355,7 @@ def _setup(
 
     state.sk1, state.pk1 = private_key_to_bytes(sk1), public_key_to_bytes(pk1)
     state.sk2, state.pk2 = private_key_to_bytes(sk2), public_key_to_bytes(pk2)
-    log(INFO, "Node %d: stage 0 completes. uploading public keys...", state.nid)
+    log(DEBUG, "Node %d: stage 0 completes. uploading public keys...", state.nid)
     return {Key.PUBLIC_KEY_1: state.pk1, Key.PUBLIC_KEY_2: state.pk2}
 
 
@@ -365,7 +365,7 @@ def _share_keys(
 ) -> Dict[str, ConfigsRecordValues]:
     named_bytes_tuples = cast(Dict[str, Tuple[bytes, bytes]], configs)
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_bytes_tuples.items()}
-    log(INFO, "Node %d: starting stage 1...", state.nid)
+    log(DEBUG, "Node %d: starting stage 1...", state.nid)
     state.public_keys_dict = key_dict
 
     # Check if the size is larger than threshold
@@ -417,7 +417,7 @@ def _share_keys(
             dsts.append(nid)
             ciphertexts.append(ciphertext)
 
-    log(INFO, "Node %d: stage 1 completes. uploading key shares...", state.nid)
+    log(DEBUG, "Node %d: stage 1 completes. uploading key shares...", state.nid)
     return {Key.DESTINATION_LIST: dsts, Key.CIPHERTEXT_LIST: ciphertexts}
 
 
@@ -428,7 +428,7 @@ def _collect_masked_vectors(
     num_examples: int,
     updated_parameters: Parameters,
 ) -> Dict[str, ConfigsRecordValues]:
-    log(INFO, "Node %d: starting stage 2...", state.nid)
+    log(DEBUG, "Node %d: starting stage 2...", state.nid)
     available_clients: List[int] = []
     ciphertexts = cast(List[bytes], configs[Key.CIPHERTEXT_LIST])
     srcs = cast(List[int], configs[Key.SOURCE_LIST])
@@ -503,7 +503,7 @@ def _collect_masked_vectors(
 
     # Take mod of final weight update vector and return to server
     quantized_parameters = parameters_mod(quantized_parameters, state.mod_range)
-    log(INFO, "Node %d: stage 2 completed, uploading masked parameters...", state.nid)
+    log(DEBUG, "Node %d: stage 2 completed, uploading masked parameters...", state.nid)
     return {
         Key.MASKED_PARAMETERS: [ndarray_to_bytes(arr) for arr in quantized_parameters]
     }
@@ -512,7 +512,7 @@ def _collect_masked_vectors(
 def _unmask(
     state: SecAggPlusState, configs: ConfigsRecord
 ) -> Dict[str, ConfigsRecordValues]:
-    log(INFO, "Node %d: starting stage 3...", state.nid)
+    log(DEBUG, "Node %d: starting stage 3...", state.nid)
 
     active_nids = cast(List[int], configs[Key.ACTIVE_NODE_ID_LIST])
     dead_nids = cast(List[int], configs[Key.DEAD_NODE_ID_LIST])
@@ -526,5 +526,5 @@ def _unmask(
     shares += [state.rd_seed_share_dict[nid] for nid in active_nids]
     shares += [state.sk1_share_dict[nid] for nid in dead_nids]
 
-    log(INFO, "Node %d: stage 3 completes. uploading key shares...", state.nid)
+    log(DEBUG, "Node %d: stage 3 completes. uploading key shares...", state.nid)
     return {Key.NODE_ID_LIST: all_nids, Key.SHARE_LIST: shares}
