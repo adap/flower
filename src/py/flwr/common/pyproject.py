@@ -12,19 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for the validation function of name property."""
-
+"""Validates the project's name property."""
 
 import re
 
 
 def validate_project_name(name: str) -> bool:
-    """
-    Validates the project name against the specifications outlined in PEP 621
-    and PEP 503 for pyproject.toml `name` property. Conventions at a glance:
+    """Validate the project name against PEP 621 and PEP 503 specifications.
+
+    Conventions at a glance:
     - Must be lowercase
-    - Should use hyphens instead of spaces or underscores
-    - Should not contain special characters
+    - Must not contain special characters
+    - Must use hyphens(recommended) or underscores. No spaces.
     - Recommended to be no more than 40 characters long (But it can be)
 
     Parameters
@@ -37,6 +36,6 @@ def validate_project_name(name: str) -> bool:
     bool
         True if the name is valid, False otherwise.
     """
-    if not name or len(name) > 40 or not re.match(r"^[a-z0-9-]+$", name):
+    if not name or len(name) > 40 or not re.match(r"^[a-z0-9-_]+$", name):
         return False
     return True

@@ -12,45 +12,97 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for the validation function of name property."""
+"""Tests for the function that validates name property."""
 
-from pyproject import validate_project_name
-
-
-def test_valid_name_with_dashes():
-    assert validate_project_name(
-        "valid-project-name", "Expected 'valid-project-name' to be valid"
-    )
+from .pyproject import validate_project_name
 
 
-def test_valid_name_with_underscores():
-    assert validate_project_name(
-        "valid_project_name"
-    ), "Expected 'valid_project_name' to be valid"
+# Happy Flow
+def test_valid_name_with_lower_case() -> None:
+    """Test a valid single-word project name with all lower case."""
+    # Prepare
+    name = "myproject"
+    expected = True
+    # Execute
+    actual = validate_project_name(name)
+    # Assert
+    assert actual == expected, f"Expected {name} to be valid"
 
 
-def test_invalid_name_with_upper_letters():
-    assert not validate_project_name(
-        "Invalid Project Name"
-    ), "Upper Case and Spaces are not allowed"
+def test_valid_name_with_dashes() -> None:
+    """Test a valid project name with hyphens inbetween."""
+    # Prepare
+    name = "valid-project-name"
+    expected = True
+    # Execute
+    actual = validate_project_name(name)
+    # Assert
+    assert actual == expected, f"Expected {name} to be valid"
 
 
-def test_name_with_spaces():
-    assert not validate_project_name("name with spaces"), "Spaces are not allowed"
+def test_valid_name_with_underscores() -> None:
+    """Test a valid project name with underscores inbetween."""
+    # Prepare
+    name = "valid_project_name"
+    expected = True
+    # Execute
+    actual = validate_project_name(name)
+    # Assert
+    assert actual == expected, f"Expected {name} to be valid"
 
 
-def test_empty_name():
-    assert not validate_project_name(""), "Empty name is not valid"
+def test_invalid_name_with_upper_letters() -> None:
+    """Tests a project name with Spaces and Uppercase letter."""
+    # Prepare
+    name = "Invalid Project Name"
+    expected = False
+    # Execute
+    actual = validate_project_name(name)
+    # Assert
+    assert actual == expected, "Upper Case and Spaces are not allowed"
 
 
-def test_long_name():
+def test_name_with_spaces() -> None:
+    """Tests a project name with spaces inbetween."""
+    # Prepare
+    name = "name with spaces"
+    expected = False
+    # Execute
+    actual = validate_project_name(name)
+    # Assert
+    assert actual == expected, "Spaces are not allowed"
+
+
+def test_empty_name() -> None:
+    """Tests use-case for an empty project name."""
+    # Prepare
+    name = ""
+    expected = False
+    # Execute
+    actual = validate_project_name(name)
+    # Assert
+    assert actual == expected, "Empty name is not valid"
+
+
+def test_long_name() -> None:
+    """Tests for long project names."""
+    # Prepare
+    name = "a" * 41
+    expected = False
+    # Execute
+    actual = validate_project_name(name)
+    # Assert
     # It can be more than 40 but generally
     # it is recommended not to be more than 40
-    long_name = "a" * 41
-    assert not validate_project_name(
-        long_name
-    ), "Name longer than 40 characters is not recommended"
+    assert actual == expected, "Name longer than 40 characters is not recommended"
 
 
-def test_name_with_special_characters():
-    assert not validate_project_name("name!@#"), "Special characters are not allowed"
+def test_name_with_special_characters() -> None:
+    """Tests for project names with special characters."""
+    # Prepare
+    name = "name!@#"
+    expected = False
+    # Execute
+    actual = validate_project_name(name)
+    # Assert
+    assert actual == expected, "Special characters are not allowed"
