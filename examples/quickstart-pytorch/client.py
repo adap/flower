@@ -130,6 +130,9 @@ class FlowerClient(NumPyClient):
         loss, accuracy = test(net, testloader)
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
+def client_fn(cid: str):
+    """Create and return an instance of Flower `Client`."""
+    return FlowerClient().to_client()
 
 # Flower ClientApp
 app = ClientApp(
