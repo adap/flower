@@ -493,23 +493,27 @@ def compute_ref_stats(alignment_loader, config, device, use_PCA=True):
 
         if use_PCA:
             # Apply PCA using PyTorch
-            cov_matrix = torch.tensor(np.cov(test_latents.T), dtype=torch.float32)
-            _, _, V = torch.svd_lowrank(cov_matrix, q=2)
+            # cov_matrix = torch.tensor(np.cov(test_latents.T), dtype=torch.float32)
+            # _, _, V = torch.svd_lowrank(cov_matrix, q=2)
 
-            # Project data onto the first two principal components
-            reduced_latents = torch.mm(
-                torch.tensor(test_latents, dtype=torch.float32), V
-            )
+            # # Project data onto the first two principal components
+            # reduced_latents = torch.mm(
+            #     torch.tensor(test_latents, dtype=torch.float32), V
+            # )
 
-            # Convert to numpy array
-            test_latents = reduced_latents.numpy()
+            # # Convert to numpy array
+            # test_latents = reduced_latents.numpy()
+            from sklearn.decomposition import PCA
+
+            pca = PCA(n_components=2)
+            reduced_latents = pca.fit_transform(test_latents)
         # Create traces for each class
         traces = []
         for label in np.unique(test_labels):
             indices = np.where(test_labels == label)
             trace = go.Scatter(
-                x=test_latents[indices, 0].flatten(),
-                y=test_latents[indices, 1].flatten(),
+                x=reduced_latents[indices, 0].flatten(),
+                y=reduced_latents[indices, 1].flatten(),
                 mode="markers",
                 name=str(label),
                 marker=dict(size=8),
@@ -703,6 +707,7 @@ def train_align_prox(
                 accumulate_align_loss += torch.mean(loss_align.sum(dim=1))
             loss_align_reduced = accumulate_align_loss
             loss += lambda_align * loss_align_reduced
+            print(f"align term: {lambda_align * loss_align_reduced.item() }")
             loss.backward()
             optimizer.step()
 
@@ -974,7 +979,7 @@ def sample_latents(model, test_loader, device, num_samples=64):
     all_means = np.concatenate(all_means, axis=0)
     from sklearn.mixture import GaussianMixture
 
-    gmm = GaussianMixture(n_components=20, covariance_type="diag", random_state=0)
+    gmm = GaussianMixture(n_components=10, covariance_type="diag", random_state=0)
     gmm.fit(all_means)
 
     return gmm.sample(num_samples)[0]

@@ -308,14 +308,15 @@ def main():
                     f"global_fisher_score": fisher_score,
                     f"server_round": server_round,
                     f"generated_avg_round": plt,
-                }
+                },
+                step=server_round,
             )
             plt.close("all")
 
         return evaluate
 
     # Download dataset and partition it
-    trainsets, valsets = non_iid_wo9_train_iid_test()
+    trainsets, valsets = non_iid_train_iid_test()
     net = VAE(z_dim=LATENT_DIM).to(DEVICE)
 
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
@@ -367,4 +368,4 @@ if __name__ == "__main__":
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=3)
+    wandb.agent(sweep_id, function=main, count=1)

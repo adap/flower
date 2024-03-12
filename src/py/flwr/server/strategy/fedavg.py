@@ -259,7 +259,7 @@ class FedAvg(Strategy):
                 f'train_align_term_{fit_metric[1]["cid"]}': fit_metric[1]["align_term"],
             }
 
-            wandb.log(data)
+            wandb.log(data=data, step=server_round)
         plt.close("all")
         return parameters_aggregated, metrics_aggregated
 
@@ -303,5 +303,5 @@ class FedAvg(Strategy):
                 "client_round": server_round,
             }
 
-            wandb.log(data)
+            wandb.log(data=data, step=server_round)
         return loss_aggregated, metrics_aggregated
