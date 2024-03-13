@@ -114,12 +114,12 @@ class DirichletPartitioner(Partitioner):
         self._node_id_to_indices: Dict[int, List[int]] = {}
         self._node_id_to_indices_determined = False
 
-    def load_partition(self, node_id: int) -> datasets.Dataset:
+    def load_partition(self, partition_id: int) -> datasets.Dataset:
         """Load a partition based on the partition index.
 
         Parameters
         ----------
-        node_id : int
+        partition_id : int
             the index that corresponds to the requested partition
 
         Returns
@@ -132,7 +132,7 @@ class DirichletPartitioner(Partitioner):
         # partition indices.
         self._check_num_partitions_correctness_if_needed()
         self._determine_node_id_to_indices_if_needed()
-        return self.dataset.select(self._node_id_to_indices[node_id])
+        return self.dataset.select(self._node_id_to_indices[partition_id])
 
     @property
     def num_partitions(self) -> int:

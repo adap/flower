@@ -49,7 +49,7 @@ class TestLinearPartitioner(unittest.TestCase):
         partitioner.dataset = dataset
         # Run a single partition loading to trigger the division
         _ = partitioner.load_partition(0)
-        total_samples = sum(partitioner.node_id_to_size.values())
+        total_samples = sum(partitioner.partition_id_to_size.values())
         self.assertEqual(total_samples, num_rows)
 
         # Testing if each partition is getting more than the previous one

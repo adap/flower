@@ -34,12 +34,12 @@ class IidPartitioner(Partitioner):
             raise ValueError("The number of partitions must be greater than zero.")
         self._num_partitions = num_partitions
 
-    def load_partition(self, node_id: int) -> datasets.Dataset:
+    def load_partition(self, partition_id: int) -> datasets.Dataset:
         """Load a single IID partition based on the partition index.
 
         Parameters
         ----------
-        node_id : int
+        partition_id : int
             the index that corresponds to the requested partition
 
         Returns
@@ -48,7 +48,7 @@ class IidPartitioner(Partitioner):
             single dataset partition
         """
         return self.dataset.shard(
-            num_shards=self._num_partitions, index=node_id, contiguous=True
+            num_shards=self._num_partitions, index=partition_id, contiguous=True
         )
 
     @property
