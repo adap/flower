@@ -167,7 +167,7 @@ class FederatedDataset:
 
         The returned partitioners have the splits of the dataset assigned to them.
         """
-        # This function trigger the dataset download (laizy download) and checks
+        # This function triggers the dataset download (laizy download) and checks
         # the partitioner specification correctness (which can also happen lazily only
         # after the dataset download).
         if not self._dataset_prepared:
