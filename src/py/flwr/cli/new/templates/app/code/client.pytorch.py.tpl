@@ -1,6 +1,5 @@
 """$project_name: A Flower / PyTorch app."""
 
-from flwr_datasets import FederatedDataset
 from flwr.client import NumPyClient, ClientApp
 
 from $project_name.task import (

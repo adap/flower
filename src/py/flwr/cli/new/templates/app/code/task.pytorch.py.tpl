@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
-
+from flwr_datasets import FederatedDataset
 
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
