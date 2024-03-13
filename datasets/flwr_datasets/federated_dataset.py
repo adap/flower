@@ -163,7 +163,7 @@ class FederatedDataset:
 
     @property
     def partitioners(self) -> Dict[str, Partitioner]:
-        """Dictionary mapping split to associated partitioners.
+        """Dictionary mapping each split to its associated partitioner.
 
         The returned partitioners have the splits of the dataset assigned to them.
         """
