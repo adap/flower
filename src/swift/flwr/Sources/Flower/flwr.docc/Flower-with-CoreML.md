@@ -8,7 +8,7 @@ This tutorial is based on https://github.com/adap/flower/tree/main/examples/ios,
 
 ### Layer wrapper
 
-Due to CoreML black box approach in running machine learning training, we can't federate our training using CoreML easily. One particular problem is that CoreML does not provide us the ability to get initial weights and its shape. To fix this, we need to peek inside the CoreML model specification before federating our training.
+Due to the CoreML black-box approach in running machine learning training, we can't easily federate our training using CoreML. One particular problem is that CoreML needs to give us the ability to get initial weights and their shape. We need to peek inside the CoreML model specification before federating our training to fix this.
 
 ```swift
 private func getLayerWrapper(layer: CoreML_Specification_NeuralNetworkLayer) -> MLLayerWrapper? {
