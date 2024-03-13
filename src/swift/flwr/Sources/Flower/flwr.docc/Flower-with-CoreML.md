@@ -8,7 +8,7 @@ This tutorial is based on https://github.com/adap/flower/tree/main/examples/ios,
 
 ### Layer wrapper
 
-Due to CoreML black box approach in running machine learning training, we can't federate our training using CoreML easily. One particular problem is that CoreML does not provide us the ability to get initial weights and its shape. To fix this, we need to peek inside the CoreML model specification before federating our training.
+Due to the CoreML black-box approach in running machine learning training, we can't easily federate our training using CoreML. One particular problem is that CoreML needs to give us the ability to get initial weights and their shape. We need to peek inside the CoreML model specification before federating our training to fix this.
 
 ```swift
 private func getLayerWrapper(layer: CoreML_Specification_NeuralNetworkLayer) -> MLLayerWrapper? {
@@ -42,12 +42,12 @@ The `getLayerWrapper()` function maps the CoreML model specification into LayerW
 
 ### Parameters to weights
 
-`weightsToParameters()` and `parametersToWeights()` is responsible to serialize our weights to a format that can be communicated and understood by the server during federated learning. To learn more about this, check out our <doc:Configure-Serialization> tutorial.
+`weightsToParameters()` and `parametersToWeights()` are responsible for serializing our weights to a format that the server can communicate and understand during federated learning. Check out our <doc:Configure-Serialization> tutorial to learn more about this.
 
 
 ### Run local machine learning pipeline
 
-To update a CoreML model, you need to instantiate `MLUpdateTask`, this is basically what `runMLTask` does. In a nutshell, `runMLTask` differentiates test (evaluate) and train (fit). For train, we update our `LayerWrapper` weights and saves the new model by overwriting the old model with the new one and for test we just get the loss value. 
+To update a CoreML model, you need to instantiate `MLUpdateTask`, this is basically what `runMLTask` does. In a nutshell, `runMLTask` differentiates test (evaluate) and train (fit). For the train, we update our `LayerWrapper` weights and save the new model by overwriting the old model with the new one, and for the test, we just get the loss value.
 
 ```swift
 let completionHandler: (MLUpdateContext) -> Void = { finalContext in
@@ -62,9 +62,9 @@ let completionHandler: (MLUpdateContext) -> Void = { finalContext in
 }
 ```
 
-To instantiate MLUpdateTask you need four arguments: URL to the CoreML, training data, configuration, and progress handler. We would not cover how to provide training data here, feel free to check out CoreML official documentation and our code example for that.
+To instantiate MLUpdateTask you need four arguments: URL to the CoreML, training data, configuration, and progress handler. We do not cover how to provide training data here, so feel free to check out CoreML official documentation and our code example.
 
-After creating our progress handlers to differentiate test and train, we can instantiate MLUpdateTask. To execute CoreML update task call the resume() function.
+After creating our progress handlers to differentiate, test, and train, we can instantiate MLUpdateTask. To execute the CoreML update task, call the resume() function.
 
 ```swift
 let updateTask = try MLUpdateTask(forModelAt: compiledModelUrl,
@@ -76,7 +76,7 @@ updateTask.resume()
 
 ### Flower client
 
-After we get our local training pipeline sorted, let's build our Flower client. To conform to Flower client, we need to implement four functions: `getParameters()`, `getProperties()`, `fit()`, and `evaluate()`. In the following sections we provide detailed description of each function.
+Let's build our Flower client after we get our local training pipeline sorted. To conform to Flower client, we need to implement four functions: `getParameters()`, `getProperties()`, `fit()`, and `evaluate()`. In the following sections, we provide a detailed description of each function.
 
 ```swift
 public protocol Client {
@@ -125,7 +125,7 @@ public func fit(ins: FitIns) -> FitRes {
 
 ### Evaluate
 
-`evaluate()` is a function that runs the local machine learning evaluation. It expects to return `EvaluateRes` object. In this case we call our `runMLTask()` function and add `.test` as its arguments and convert the result as `EvaluateRes`.
+`evaluate()` is a function that runs the local machine learning evaluation. It expects to return the `EvaluateRes` object. In this case, we call our `runMLTask()` function, add `.test` as its argument, and convert the result to `EvaluateRes`.
 
 ```swift
 public func evaluate(ins: EvaluateIns) -> EvaluateRes {
@@ -138,7 +138,7 @@ public func evaluate(ins: EvaluateIns) -> EvaluateRes {
 
 ### Run Flower client
 
-Great, now you have your own Flower client. To run your Flower client and enable communicating with the server follow the steps below:
+Great, now you have your own Flower client. To run your Flower client and enable communicating with the server, follow the steps below:
 
 ```swift
 let flwrGRPC = FlwrGRPC(serverHost: hostname, serverPort: port)
