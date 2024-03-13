@@ -89,7 +89,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
     def count_bytes(self) -> int:
         """Return number of Bytes stored in this object.
 
-        This function counts booleans as ocupying 1 Byte.
+        This function counts booleans as occupying 1 Byte.
         """
 
         def get_var_bytes(value: ConfigsScalar) -> int:
