@@ -47,7 +47,7 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
----
+______________________________________________________________________
 
 ## Run Federated Learning with PyTorch and Flower
 
@@ -75,7 +75,7 @@ python3 client.py --partition-id 1
 
 You will see that PyTorch is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) for a detailed explanation.
 
----
+______________________________________________________________________
 
 ## Run Federated Learning with PyTorch and `Flower Next`
 
