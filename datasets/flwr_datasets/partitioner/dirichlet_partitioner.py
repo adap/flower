@@ -39,10 +39,10 @@ class DirichletPartitioner(Partitioner):
     even though the alpha stays the same).
 
     The notion of balancing is explicitly introduced here (not mentioned in paper but
-    implemented in the code). It is a mechanism that excludes the node from
-    assigning new samples to it if the current number of samples on that node exceeds
-    the average number that the node would get in case of even data distribution.
-    It is controlled by`self_balancing` parameter.
+    implemented in the code). It is a mechanism that excludes the partition from
+    assigning new samples to it if the current number of samples on that partition
+    exceeds the average number that the partition would get in case of even data 
+    distribution. It is controlled by`self_balancing` parameter.
 
     Parameters
     ----------
@@ -61,7 +61,7 @@ class DirichletPartitioner(Partitioner):
         paper's code although not mentioned in paper itself).
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
-        samples assignment to nodes.
+        samples assignment to partitions.
     seed: int
         Seed used for dataset shuffling. It has no effect if `shuffle` is False.
 
@@ -109,7 +109,7 @@ class DirichletPartitioner(Partitioner):
 
         # Utility attributes
         # The attributes below are determined during the first call to load_partition
-        self._avg_num_of_samples_per_node: Optional[float] = None
+        self._avg_num_of_samples_per_partition: Optional[float] = None
         self._unique_classes: Optional[Union[List[int], List[str]]] = None
         self._partition_id_to_indices: Dict[int, List[int]] = {}
         self._partition_id_to_indices_determined = False
@@ -205,7 +205,7 @@ class DirichletPartitioner(Partitioner):
         self._unique_classes = self.dataset.unique(self._partition_by)
         assert self._unique_classes is not None
         # This is needed only if self._self_balancing is True (the default option)
-        self._avg_num_of_samples_per_node = self.dataset.num_rows / self._num_partitions
+        self._avg_num_of_samples_per_partition = self.dataset.num_rows / self._num_partitions
 
         # Change targets list data type to numpy
         targets = np.array(self.dataset[self._partition_by])
@@ -214,7 +214,7 @@ class DirichletPartitioner(Partitioner):
         # min_partition_size is reached.
         sampling_try = 0
         while True:
-            # Prepare data structure to store indices assigned to node ids
+            # Prepare data structure to store indices assigned to partition ids
             partition_id_to_indices: Dict[int, List[int]] = {}
             for nid in range(self._num_partitions):
                 partition_id_to_indices[nid] = []
@@ -232,16 +232,16 @@ class DirichletPartitioner(Partitioner):
                         nid
                     ]
                 # Balancing (not mentioned in the paper but implemented)
-                # Do not assign additional samples to the node if it already has more
+                # Do not assign additional samples to the partition if it already has more
                 # than the average numbers of samples per partition. Note that it might
                 # especially affect classes that are later in the order. This is the
                 # reason for more sparse division that the alpha might suggest.
                 if self._self_balancing:
-                    assert self._avg_num_of_samples_per_node is not None
+                    assert self._avg_num_of_samples_per_partition is not None
                     for nid in nid_to_proportion_of_k_samples.copy():
                         if (
                             len(partition_id_to_indices[nid])
-                            > self._avg_num_of_samples_per_node
+                            > self._avg_num_of_samples_per_partition
                         ):
                             nid_to_proportion_of_k_samples[nid] = 0
 

@@ -49,7 +49,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         number of unique classes)
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
-        samples assignment to nodes.
+        samples assignment to partitions.
     seed: int
         Seed used for dataset shuffling. It has no effect if `shuffle` is False.
 
@@ -91,7 +91,6 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._num_unique_classes: Optional[int] = None
         self._num_partitions = len(self._partition_sizes)
 
-        # self._avg_num_of_samples_per_node: Optional[float] = None
         self._partition_id_to_indices: Dict[int, List[int]] = {}
         self._partition_id_to_indices_determined = False
 
@@ -211,18 +210,18 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
             for cid in range(self._num_partitions)
         ]
 
-        # Node id to number of sample left for allocation for that node id
+        # Node id to number of sample left for allocation for that partition id
         partition_id_to_left_to_allocate = dict(
             zip(range(self._num_partitions), self._partition_sizes)
         )
 
         not_full_partition_ids = list(range(self._num_partitions))
         while np.sum(list(partition_id_to_left_to_allocate.values())) != 0:
-            # Choose a node
+            # Choose a partition
             current_partition_id = self._rng.choice(not_full_partition_ids)
-            # If current node is full resample a client
+            # If current partition is full resample a client
             if partition_id_to_left_to_allocate[current_partition_id] == 0:
-                # When the node is full, exclude it from the sampling nodes list
+                # When the partition is full, exclude it from the sampling partitions list
                 not_full_partition_ids.pop(
                     not_full_partition_ids.index(current_partition_id)
                 )

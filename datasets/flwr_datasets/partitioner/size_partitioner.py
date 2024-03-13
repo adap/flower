@@ -32,9 +32,9 @@ class SizePartitioner(Partitioner):
     `partition_id_to_size_fn(partition_id)` ~ number of samples for `partition_id`
 
     If the function doesn't transform the `partition_id` it's a linear correlation
-    between the number of sample for the node and the value of `partition_id`. For
+    between the number of sample for the partition and the value of `partition_id`. For
     instance, if the partition ids range from 1 to M, partition with id 1 gets 1 unit of
-    data, client 2 gets 2 units, and so on, up to node M which gets M units.
+    data, client 2 gets 2 units, and so on, up to partition M which gets M units.
 
     Note that size corresponding to the `partition_id` is deterministic, yet in case of
     different dataset shuffling the assignment of samples to `partition_id` will vary.
@@ -44,7 +44,7 @@ class SizePartitioner(Partitioner):
     num_partitions : int
         The total number of partitions that the data will be divided into.
     partition_id_to_size_fn : Callable
-        Function that defines the relationship between node id and the number of
+        Function that defines the relationship between partition id and the number of
         samples.
     """
 
