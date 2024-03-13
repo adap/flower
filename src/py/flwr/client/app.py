@@ -399,7 +399,6 @@ def _start_client_internal(
     )
 
     run_tracker = _RunTracker()
-    run_tracker.register_signal_handler()
 
     def _on_sucess(retry_state: RetryState) -> None:
         run_tracker.connection = True
@@ -458,6 +457,7 @@ def _start_client_internal(
             if create_node is not None:
                 create_node()  # pylint: disable=not-callable
 
+            run_tracker.register_signal_handler()
             while True:
                 try:
                     # Receive
