@@ -89,7 +89,7 @@ class DirichletPartitioner(Partitioner):
         partition_by: str,
         alpha: Union[int, float, List[float], NDArrayFloat],
         min_partition_size: int = 10,
-        self_balancing: bool = True,
+        self_balancing: bool = False,
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
@@ -131,6 +131,13 @@ class DirichletPartitioner(Partitioner):
         self._check_num_partitions_correctness_if_needed()
         self._determine_node_id_to_indices_if_needed()
         return self.dataset.select(self._node_id_to_indices[node_id])
+
+    @property
+    def num_partitions(self) -> int:
+        """Total number of partitions."""
+        self._check_num_partitions_correctness_if_needed()
+        self._determine_node_id_to_indices_if_needed()
+        return self._num_partitions
 
     def _initialize_alpha(
         self, alpha: Union[int, float, List[float], NDArrayFloat]

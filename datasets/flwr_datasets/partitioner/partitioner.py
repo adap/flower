@@ -79,3 +79,8 @@ class Partitioner(ABC):
             True if a dataset is assigned, otherwise False.
         """
         return self._dataset is not None
+
+    @property
+    @abstractmethod
+    def num_partitions(self) -> int:
+        """Total number of partitions."""
