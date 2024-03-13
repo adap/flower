@@ -54,9 +54,7 @@ class FederatedDataset:
         (representing the number of IID partitions that this split should be partitioned
         into). One or multiple `Partitioner` objects can be specified in that manner,
         but at most, one per split.
-    partition_division : Optional[Union[List[float], Tuple[float, ...],
-    Dict[str, float], Dict[str, Optional[Union[List[float], Tuple[float, ...],
-    Dict[str, float]]]]]]
+    partition_division : Optional[Union[List[float], Tuple[float, ...], Dict[str, float], Dict[str, Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]]]]]
         Fractions specifing the division of the partition assiciated with certain split
         (and partitioner) that enable returning already divided partition from the
         `load_partition` method. You can think of this as on-edge division of the data
