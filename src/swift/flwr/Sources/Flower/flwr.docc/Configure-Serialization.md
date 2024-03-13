@@ -4,7 +4,7 @@ This tutorial provides instructions on configuring serialization in the Flower i
 
 ## Overview
 
-Serialization in the Flower iOS SDK can be configured to suit different requirements. This tutorial covers default serialization settings with Python process under the hood and how to implement float byte serialization for environments where using a Python process is not desired.
+Serialization in the Flower iOS SDK can be configured to suit different requirements. This tutorial covers default serialization settings with a Python process under the hood and how to implement float-byte serialization for environments where using a Python process is not desired.
 
 
 ### Default serialization
