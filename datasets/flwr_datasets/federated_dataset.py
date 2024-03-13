@@ -84,6 +84,7 @@ class FederatedDataset:
     >>> centralized = mnist_fds.load_split("test")
 
     Automatically divde the data returned from `load_partition`
+
     >>> mnist_fds = FederatedDataset(
     >>>     dataset="mnist",
     >>>     partitioners={"train": 100},
