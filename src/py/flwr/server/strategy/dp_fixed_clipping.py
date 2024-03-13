@@ -175,7 +175,7 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
 
             log(
                 INFO,
-                "aggregate_fit: central dp noise with standard deviation: %s added to params.",
+                "aggregate_fit: central DP noise with standard deviation: %s added to parameters.",
                 compute_stdv(
                     self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
                 ),
@@ -332,7 +332,7 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
             )
             log(
                 INFO,
-                "aggregate_fit: central dp noise with standard deviation: %s added to params.",
+                "aggregate_fit: central DP noise with standard deviation: %s added to parameters.",
                 compute_stdv(
                     self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
                 ),
