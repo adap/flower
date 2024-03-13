@@ -16,6 +16,7 @@
 
 
 import argparse
+import signal
 import sys
 import time
 from dataclasses import dataclass
@@ -397,10 +398,10 @@ def _start_client_internal(
         transport, server_address
     )
 
-    connection_tracker = _ConnectionTracker()
+    run_tracker = _RunTracker()
 
     def _on_sucess(retry_state: RetryState) -> None:
-        connection_tracker.connection = True
+        run_tracker.connection = True
         if retry_state.tries > 1:
             log(
                 INFO,
@@ -410,7 +411,7 @@ def _start_client_internal(
             )
 
     def _on_backoff(retry_state: RetryState) -> None:
-        connection_tracker.connection = False
+        run_tracker.connection = False
         if retry_state.tries == 1:
             log(WARN, "Connection attempt failed, retrying...")
         else:
@@ -441,7 +442,9 @@ def _start_client_internal(
 
     node_state = NodeState()
 
-    while True:
+    run_tracker.register_signal_handler()
+
+    while not run_tracker.should_exit:
         sleep_duration: int = 0
         with connection(
             address,
@@ -518,12 +521,12 @@ def _start_client_internal(
                         out_message.metadata.message_type,
                         message.metadata.message_id,
                     )
-                except KeyboardInterrupt:
+                except StopIteration:
                     sleep_duration = 0
                     break
 
             # Unregister node
-            if delete_node is not None and connection_tracker.connection:
+            if delete_node is not None and run_tracker.connection:
                 delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
@@ -692,5 +695,14 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
 
 
 @dataclass
-class _ConnectionTracker:
+class _RunTracker:
     connection: bool = True
+    should_exit: bool = False
+
+    def register_signal_handler(self):
+        def signal_handler(sig, frame):
+            self.should_exit = True
+            raise StopIteration
+
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
