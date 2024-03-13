@@ -39,15 +39,18 @@ parameters = ndarrays_to_parameters(ndarrays)
 
 # Define strategy
 strategy = fl.server.strategy.FedAvg(
-    fraction_fit=1.0,  # Select 20% of all available clients
+    fraction_fit=0.2,
     fraction_evaluate=0.0,  # Disable evaluation
-    min_fit_clients=40,
-    min_available_clients=40,
+    min_fit_clients=20,
+    min_available_clients=20,
     fit_metrics_aggregation_fn=weighted_average,
     initial_parameters=parameters,
 )
 
-dp_strategy = DifferentialPrivacyClientSideFixedClipping(strategy, 0.1, 10, 40)
+dp_strategy = DifferentialPrivacyClientSideFixedClipping(strategy, 
+                                                         noise_multiplier=0.1, 
+                                                         clipping_norm=10,
+                                                         num_sampled_clients=20)
 
 
 # Run via `flower-server-app server_workflow:app`
@@ -59,7 +62,7 @@ def main(driver: Driver, context: Context) -> None:
     # Construct the LegacyContext
     context = LegacyContext(
         state=context.state,
-        config=fl.server.ServerConfig(num_rounds=3),
+        config=fl.server.ServerConfig(num_rounds=10),
         strategy=dp_strategy,
     )
 
