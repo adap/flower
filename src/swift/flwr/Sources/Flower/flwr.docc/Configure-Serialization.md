@@ -4,7 +4,7 @@ This tutorial provides instructions on configuring serialization in the Flower i
 
 ## Overview
 
-Serialization in the Flower iOS SDK can be configured to suit different requirements. This tutorial covers default serialization settings with Python process under the hood and how to implement float byte serialization for environments where using a Python process is not desired.
+Serialization in the Flower iOS SDK can be configured to suit different requirements. This tutorial covers default serialization settings with a Python process under the hood and how to implement float-byte serialization for environments where using a Python process is not desired.
 
 
 ### Default serialization
@@ -13,7 +13,7 @@ The default serialization in Flower iOS SDK involves opening a Python process un
 
 ### Float byte serialization
 
-If you do not want to use Python process in your Flower client, you can do some tweaks in the Python server to enable all strategies to be used in the server. The most crucial change is to convert numpy array to raw float bytes instead calling `np.save()` for serialization.
+If you prefer not to use a Python process in your Flower client, you can make some changes to the Python server to allow all strategies to be used in the server. The most important change is to convert the numpy array to raw float bytes, rather than using `np.save()` for serialization.sed in the server. The most crucial change is to convert the numpy array to raw float bytes instead of calling `np.save()` for serialization.
 
 ```python
 def _ndarrays_to_float_parameters(self, ndarrays: NDArrays) -> Parameters:
@@ -21,7 +21,7 @@ def _ndarrays_to_float_parameters(self, ndarrays: NDArrays) -> Parameters:
     return Parameters(tensors=tensors, tensor_type="float_array")
 ```
 
-For deserialization, we cast the raw float bytes into an numpy array. Note that this results in the numpy array to lose its shape. With Flower client and CoreML it's not a problem since the CoreML model specification stores the shape info and we can retrieve it anytime to reconstruct the raw float bytes into the right shape.
+For deserialization, we cast the raw float bytes into a numpy array. Note that this results in the numpy array to lose its shape. With Flower client and CoreML, it's not a problem since the CoreML model specification stores the shape info, and we can retrieve it anytime to reconstruct the raw float bytes into the right shape.
 
 ```python
 def _float_parameters_to_ndarrays(self, parameters: Parameters) -> NDArrays:
