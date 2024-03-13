@@ -18,7 +18,7 @@ Papers: https://arxiv.org/abs/1712.07557, https://arxiv.org/abs/1710.06963
 """
 
 
-from logging import DEBUG, INFO, WARNING
+from logging import INFO, WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
@@ -172,9 +172,9 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
                 self.clipping_norm,
                 self.num_sampled_clients,
             )
-            log(INFO, "aggregate_fit: central dp noise added to params.")
+
             log(
-                DEBUG,
+                INFO,
                 "aggregate_fit: central dp noise with standard deviation: %s added to params.",
                 compute_stdv(
                     self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
@@ -330,9 +330,8 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
                 self.clipping_norm,
                 self.num_sampled_clients,
             )
-            log(INFO, "aggregate_fit: central dp noise added to params.")
             log(
-                DEBUG,
+                INFO,
                 "aggregate_fit: central dp noise with standard deviation: %s added to params.",
                 compute_stdv(
                     self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
