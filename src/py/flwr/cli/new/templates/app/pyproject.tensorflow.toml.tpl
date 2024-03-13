@@ -13,7 +13,7 @@ authors = [
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = ">=3.9,<3.11"
 # Mandatory dependencies
 flwr-nightly = { version = "1.8.0.dev20240309", extras = ["simulation"] }
 flwr-datasets = { version = "^0.0.2", extras = ["vision"] }
