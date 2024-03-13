@@ -47,7 +47,7 @@ The `getLayerWrapper()` function maps the CoreML model specification into LayerW
 
 ### Run local machine learning pipeline
 
-To update a CoreML model, you need to instantiate `MLUpdateTask`, this is basically what `runMLTask` does. In a nutshell, `runMLTask` differentiates test (evaluate) and train (fit). For train, we update our `LayerWrapper` weights and saves the new model by overwriting the old model with the new one and for test we just get the loss value. 
+To update a CoreML model, you need to instantiate `MLUpdateTask`, this is basically what `runMLTask` does. In a nutshell, `runMLTask` differentiates test (evaluate) and train (fit). For the train, we update our `LayerWrapper` weights and save the new model by overwriting the old model with the new one, and for the test, we just get the loss value.
 
 ```swift
 let completionHandler: (MLUpdateContext) -> Void = { finalContext in
