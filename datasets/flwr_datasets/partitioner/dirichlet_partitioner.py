@@ -25,7 +25,7 @@ from flwr_datasets.common.typing import NDArrayFloat
 from flwr_datasets.partitioner.partitioner import Partitioner
 
 
-# pylint: disable=R0902, R0912
+# pylint: disable=R0902, R0912, R0914
 class DirichletPartitioner(Partitioner):
     """Partitioner based on Dirichlet distribution.
 
@@ -196,7 +196,7 @@ class DirichletPartitioner(Partitioner):
 
     def _determine_partition_id_to_indices_if_needed(
         self,
-    ) -> None:  # pylint: disable=R0914
+    ) -> None:
         """Create an assignment of indices to the partition indices."""
         if self._partition_id_to_indices_determined:
             return

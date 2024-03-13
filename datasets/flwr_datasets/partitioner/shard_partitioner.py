@@ -15,7 +15,7 @@
 """Shard partitioner class."""
 
 
-# pylint: disable=R0912
+# pylint: disable=R0912, R0914
 import math
 from typing import Dict, List, Optional
 
@@ -198,7 +198,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
 
     def _determine_partition_id_to_indices_if_needed(
         self,
-    ) -> None:  # pylint: disable=R0914
+    ) -> None:
         """Assign sample indices to each partition id.
 
         This method works on sorted datasets. A "shard" is a part of the dataset of
