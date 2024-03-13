@@ -29,7 +29,7 @@ class SizePartitioner(Partitioner):
     The client with `partition_id` has the following relationship regarding the number
     of samples.
 
-    `node_id_to_size_fn(partition_id)` ~ number of samples for `partition_id`
+    `partition_id_to_size_fn(partition_id)` ~ number of samples for `partition_id`
 
     If the function doesn't transform the `partition_id` it's a linear correlation
     between the number of sample for the node and the value of `partition_id`. For
@@ -43,7 +43,7 @@ class SizePartitioner(Partitioner):
     ----------
     num_partitions : int
         The total number of partitions that the data will be divided into.
-    node_id_to_size_fn : Callable
+    partition_id_to_size_fn : Callable
         Function that defines the relationship between node id and the number of
         samples.
     """
@@ -51,27 +51,27 @@ class SizePartitioner(Partitioner):
     def __init__(
         self,
         num_partitions: int,
-        node_id_to_size_fn: Callable,  # type: ignore[type-arg]
+        partition_id_to_size_fn: Callable,  # type: ignore[type-arg]
     ) -> None:
         super().__init__()
         if num_partitions <= 0:
             raise ValueError("The number of partitions must be greater than zero.")
         self._num_partitions = num_partitions
-        self._node_id_to_size_fn = node_id_to_size_fn
+        self._partition_id_to_size_fn = partition_id_to_size_fn
 
-        self._node_id_to_size: Dict[int, int] = {}
-        self._node_id_to_indices: Dict[int, List[int]] = {}
+        self._partition_id_to_size: Dict[int, int] = {}
+        self._partition_id_to_indices: Dict[int, List[int]] = {}
         # A flag to perform only a single compute to determine the indices
-        self._node_id_to_indices_determined = False
+        self._partition_id_to_indices_determined = False
 
-    def load_partition(self, node_id: int) -> datasets.Dataset:
+    def load_partition(self, partition_id: int) -> datasets.Dataset:
         """Load a single partition based on the partition index.
 
         The number of samples is dependent on the partition partition_id.
 
         Parameters
         ----------
-        node_id : int
+        partition_id : int
             the index that corresponds to the requested partition
 
         Returns
@@ -81,28 +81,28 @@ class SizePartitioner(Partitioner):
         """
         # The partitioning is done lazily - only when the first partition is requested.
         # A single run creates the indices assignments for all the partition indices.
-        self._determine_node_id_to_indices_if_needed()
-        return self.dataset.select(self._node_id_to_indices[node_id])
+        self._determine_partition_id_to_indices_if_needed()
+        return self.dataset.select(self._partition_id_to_indices[partition_id])
 
     @property
     def num_partitions(self) -> int:
         """Total number of partitions."""
-        self._determine_node_id_to_indices_if_needed()
+        self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
 
     @property
-    def node_id_to_size(self) -> Dict[int, int]:
+    def partition_id_to_size(self) -> Dict[int, int]:
         """Node id to the number of samples."""
-        return self._node_id_to_size
+        return self._partition_id_to_size
 
     @property
-    def node_id_to_indices(self) -> Dict[int, List[int]]:
+    def partition_id_to_indices(self) -> Dict[int, List[int]]:
         """Node id to the list of indices."""
-        return self._node_id_to_indices
+        return self._partition_id_to_indices
 
-    def _determine_node_id_to_size(self) -> None:
+    def _determine_partition_id_to_size(self) -> None:
         """Determine data quantity associated with partition indices."""
-        data_division_in_units = self._node_id_to_size_fn(
+        data_division_in_units = self._partition_id_to_size_fn(
             np.linspace(start=1, stop=self._num_partitions, num=self._num_partitions)
         )
         total_units: Union[int, float] = data_division_in_units.sum()

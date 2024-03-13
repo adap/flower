@@ -71,7 +71,7 @@ class TestShardPartitionerSpec1(unittest.TestCase):
             keep_incomplete_shard,
         )
         _ = partitioner.load_partition(0)
-        num_partitions_created = len(partitioner._node_id_to_indices.keys())
+        num_partitions_created = len(partitioner._partition_id_to_indices.keys())
         self.assertEqual(num_partitions_created, num_partitions)
 
     def test_correct_partition_sizes(self) -> None:
@@ -145,7 +145,7 @@ class TestShardPartitionerSpec2(unittest.TestCase):
             keep_incomplete_shard,
         )
         _ = partitioner.load_partition(0)
-        num_partitions_created = len(partitioner._node_id_to_indices.keys())
+        num_partitions_created = len(partitioner._partition_id_to_indices.keys())
         self.assertEqual(num_partitions_created, num_partitions)
 
     def test_correct_partition_sizes(self) -> None:
@@ -219,7 +219,7 @@ class TestShardPartitionerSpec3(unittest.TestCase):
             keep_incomplete_shard,
         )
         _ = partitioner.load_partition(0)
-        num_partitions_created = len(partitioner._node_id_to_indices.keys())
+        num_partitions_created = len(partitioner._partition_id_to_indices.keys())
         self.assertEqual(num_partitions_created, num_partitions)
 
     def test_correct_partition_sizes(self) -> None:
@@ -292,7 +292,7 @@ class TestShardPartitionerSpec4(unittest.TestCase):
             keep_incomplete_shard,
         )
         _ = partitioner.load_partition(0)
-        num_partitions_created = len(partitioner._node_id_to_indices.keys())
+        num_partitions_created = len(partitioner._partition_id_to_indices.keys())
         self.assertEqual(num_partitions_created, num_partitions)
 
     def test_correct_partition_sizes(self) -> None:

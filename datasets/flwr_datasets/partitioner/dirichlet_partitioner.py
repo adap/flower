@@ -111,8 +111,8 @@ class DirichletPartitioner(Partitioner):
         # The attributes below are determined during the first call to load_partition
         self._avg_num_of_samples_per_node: Optional[float] = None
         self._unique_classes: Optional[Union[List[int], List[str]]] = None
-        self._node_id_to_indices: Dict[int, List[int]] = {}
-        self._node_id_to_indices_determined = False
+        self._partition_id_to_indices: Dict[int, List[int]] = {}
+        self._partition_id_to_indices_determined = False
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
         """Load a partition based on the partition index.
@@ -131,14 +131,14 @@ class DirichletPartitioner(Partitioner):
         # requested. Only the first call creates the indices assignments for all the
         # partition indices.
         self._check_num_partitions_correctness_if_needed()
-        self._determine_node_id_to_indices_if_needed()
-        return self.dataset.select(self._node_id_to_indices[partition_id])
+        self._determine_partition_id_to_indices_if_needed()
+        return self.dataset.select(self._partition_id_to_indices[partition_id])
 
     @property
     def num_partitions(self) -> int:
         """Total number of partitions."""
         self._check_num_partitions_correctness_if_needed()
-        self._determine_node_id_to_indices_if_needed()
+        self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
 
     def _initialize_alpha(
@@ -194,9 +194,9 @@ class DirichletPartitioner(Partitioner):
             )
         return alpha
 
-    def _determine_node_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
+    def _determine_partition_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
         """Create an assignment of indices to the partition indices."""
-        if self._node_id_to_indices_determined:
+        if self._partition_id_to_indices_determined:
             return
 
         # Generate information needed for Dirichlet partitioning
@@ -213,9 +213,9 @@ class DirichletPartitioner(Partitioner):
         sampling_try = 0
         while True:
             # Prepare data structure to store indices assigned to node ids
-            node_id_to_indices: Dict[int, List[int]] = {}
+            partition_id_to_indices: Dict[int, List[int]] = {}
             for nid in range(self._num_partitions):
-                node_id_to_indices[nid] = []
+                partition_id_to_indices[nid] = []
 
             # Iterated over all unique labels (they are not necessarily of type int)
             for k in self._unique_classes:
@@ -238,7 +238,7 @@ class DirichletPartitioner(Partitioner):
                     assert self._avg_num_of_samples_per_node is not None
                     for nid in nid_to_proportion_of_k_samples.copy():
                         if (
-                            len(node_id_to_indices[nid])
+                            len(partition_id_to_indices[nid])
                             > self._avg_num_of_samples_per_node
                         ):
                             nid_to_proportion_of_k_samples[nid] = 0
@@ -264,18 +264,18 @@ class DirichletPartitioner(Partitioner):
                 )
 
                 # Append new indices (coming from class k) to the existing indices
-                for nid, indices in node_id_to_indices.items():
+                for nid, indices in partition_id_to_indices.items():
                     indices.extend(split_indices[nid].tolist())
 
             # Determine if the indices assignment meets the min_partition_size
             # If it does not mean the requirement repeat the Dirichlet sampling process
             # Otherwise break the while loop
             min_sample_size_on_client = min(
-                len(indices) for indices in node_id_to_indices.values()
+                len(indices) for indices in partition_id_to_indices.values()
             )
             if min_sample_size_on_client >= self._min_partition_size:
                 break
-            sample_sizes = [len(indices) for indices in node_id_to_indices.values()]
+            sample_sizes = [len(indices) for indices in partition_id_to_indices.values()]
             alpha_not_met = [
                 self._alpha[i]
                 for i, ss in enumerate(sample_sizes)
@@ -311,10 +311,10 @@ class DirichletPartitioner(Partitioner):
         # Shuffle the indices not to have the datasets with targets in sequences like
         # [00000, 11111, ...]) if the shuffle is True
         if self._shuffle:
-            for indices in node_id_to_indices.values():
+            for indices in partition_id_to_indices.values():
                 # In place shuffling
                 self._rng.shuffle(indices)
-        self._node_id_to_indices = node_id_to_indices
+        self._partition_id_to_indices = partition_id_to_indices
         self._node_id_to_indices_determined = True
 
     def _check_num_partitions_correctness_if_needed(self) -> None:

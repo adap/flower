@@ -69,20 +69,20 @@ class NaturalIdPartitioner(Partitioner):
     def num_partitions(self) -> int:
         """Total number of partitions."""
         if len(self._partition_id_to_natural_id) == 0:
-            self._create_int_node_id_to_natural_id()
-        return len(self._node_id_to_natural_id)
+            self._create_int_partition_id_to_natural_id()
+        return len(self._partition_id_to_natural_id)
 
     @property
-    def node_id_to_natural_id(self) -> Dict[int, str]:
+    def partition_id_to_natural_id(self) -> Dict[int, str]:
         """Node id to corresponding natural id present.
 
         Natural ids are the unique values in `partition_by` column in dataset.
         """
-        return self._node_id_to_natural_id
+        return self._partition_id_to_natural_id
 
     # pylint: disable=R0201
-    @node_id_to_natural_id.setter
-    def node_id_to_natural_id(self, value: Dict[int, str]) -> None:
+    @partition_id_to_natural_id.setter
+    def partition_id_to_natural_id(self, value: Dict[int, str]) -> None:
         raise AttributeError(
-            "Setting the node_id_to_natural_id dictionary is not allowed."
+            "Setting the partition_id_to_natural_id dictionary is not allowed."
         )

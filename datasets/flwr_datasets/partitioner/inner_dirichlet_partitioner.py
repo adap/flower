@@ -92,15 +92,15 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._num_partitions = len(self._partition_sizes)
 
         # self._avg_num_of_samples_per_node: Optional[float] = None
-        self._node_id_to_indices: Dict[int, List[int]] = {}
-        self._node_id_to_indices_determined = False
+        self._partition_id_to_indices: Dict[int, List[int]] = {}
+        self._partition_id_to_indices_determined = False
 
-    def load_partition(self, node_id: int) -> datasets.Dataset:
+    def load_partition(self, partition_id: int) -> datasets.Dataset:
         """Load a partition based on the partition index.
 
         Parameters
         ----------
-        node_id : int
+        partition_id : int
             the index that corresponds to the requested partition
 
         Returns
@@ -116,8 +116,8 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._check_the_sum_of_partition_sizes()
         self._determine_num_unique_classes_if_needed()
         self._alpha = self._initialize_alpha_if_needed(self._initial_alpha)
-        self._determine_node_id_to_indices_if_needed()
-        return self.dataset.select(self._node_id_to_indices[node_id])
+        self._determine_partition_id_to_indices_if_needed()
+        return self.dataset.select(self._partition_id_to_indices[partition_id])
 
     @property
     def num_partitions(self) -> int:
@@ -127,7 +127,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._check_the_sum_of_partition_sizes()
         self._determine_num_unique_classes_if_needed()
         self._alpha = self._initialize_alpha_if_needed(self._initial_alpha)
-        self._determine_node_id_to_indices_if_needed()
+        self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
 
     def _initialize_alpha_if_needed(
@@ -190,9 +190,9 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
             )
         return alpha
 
-    def _determine_node_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
+    def _determine_partition_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
         """Create an assignment of indices to the partition indices."""
-        if self._node_id_to_indices_determined:
+        if self._partition_id_to_indices_determined:
             return
 
         # Create class priors for the whole partitioning process
@@ -210,14 +210,14 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         ]
 
         # Node id to number of sample left for allocation for that node id
-        node_id_to_left_to_allocate = dict(
+        partition_id_to_left_to_allocate = dict(
             zip(range(self._num_partitions), self._partition_sizes)
         )
 
-        not_full_node_ids = list(range(self._num_partitions))
-        while np.sum(list(node_id_to_left_to_allocate.values())) != 0:
+        not_full_partition_ids = list(range(self._num_partitions))
+        while np.sum(list(partition_id_to_left_to_allocate.values())) != 0:
             # Choose a node
-            current_node_id = self._rng.choice(not_full_node_ids)
+            current_partition_id = self._rng.choice(not_full_partition_ids)
             # If current node is full resample a client
             if node_id_to_left_to_allocate[current_node_id] == 0:
                 # When the node is full, exclude it from the sampling nodes list

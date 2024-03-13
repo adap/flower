@@ -58,7 +58,7 @@ class Partitioner(ABC):
 
         Parameters
         ----------
-        node_id : int
+        partition_id : int
             the index that corresponds to the requested partition
 
         Returns

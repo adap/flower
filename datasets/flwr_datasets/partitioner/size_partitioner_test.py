@@ -55,7 +55,7 @@ class TestLinearPartitioner(unittest.TestCase):
         # Testing if each partition is getting more than the previous one
         last_count = 0
         for i in range(num_partitions):
-            current_count = partitioner.node_id_to_size[i]
+            current_count = partitioner.partition_id_to_size[i]
             self.assertGreaterEqual(current_count, last_count)
             last_count = current_count
 
@@ -77,7 +77,7 @@ class TestLinearPartitioner(unittest.TestCase):
         actual_samples_in_last_partition = len(
             partitioner.load_partition(last_partition_id)
         )
-        expected_samples_in_last_partition = partitioner.node_id_to_size[
+        expected_samples_in_last_partition = partitioner.partition_id_to_size[
             last_partition_id
         ]
         self.assertEqual(

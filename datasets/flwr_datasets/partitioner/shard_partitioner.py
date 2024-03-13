@@ -160,15 +160,15 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
 
         # Utility attributes
         self._rng = np.random.default_rng(seed=self._seed)  # NumPy random generator
-        self._node_id_to_indices: Dict[int, List[int]] = {}
-        self._node_id_to_indices_determined = False
+        self._partition_id_to_indices: Dict[int, List[int]] = {}
+        self._partition_id_to_indices_determined = False
 
-    def load_partition(self, node_id: int) -> datasets.Dataset:
+    def load_partition(self, partition_id: int) -> datasets.Dataset:
         """Load a partition based on the partition index.
 
         Parameters
         ----------
-        node_id : int
+        partition_id : int
             the index that corresponds to the requested partition
 
         Returns
@@ -182,8 +182,8 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         self._check_num_partitions_correctness_if_needed()
         self._check_possibility_of_partitions_creation()
         self._sort_dataset_if_needed()
-        self._determine_node_id_to_indices_if_needed()
-        return self.dataset.select(self._node_id_to_indices[node_id])
+        self._determine_partition_id_to_indices_if_needed()
+        return self.dataset.select(self._partition_id_to_indices[partition_id])
 
     @property
     def num_partitions(self) -> int:
@@ -191,18 +191,18 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         self._check_num_partitions_correctness_if_needed()
         self._check_possibility_of_partitions_creation()
         self._sort_dataset_if_needed()
-        self._determine_node_id_to_indices_if_needed()
+        self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
 
-    def _determine_node_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
+    def _determine_partition_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
         """Assign sample indices to each node id.
 
         This method works on sorted datasets. A "shard" is a part of the dataset of
         consecutive samples (if self._keep_incomplete_shard is False, each shard is same
         size).
         """
-        # No need to do anything if that node_id_to_indices are already determined
-        if self._node_id_to_indices_determined:
+        # No need to do anything if that partition_id_to_indices are already determined
+        if self._partition_id_to_indices_determined:
             return
 
         # One of the specification allows to skip the `num_shards_per_node` param
@@ -292,20 +292,20 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         nid_to_shard_indices = np.split(
             shard_indices_array, indices_on_which_to_split_shards
         )[:-1]
-        node_id_to_indices: Dict[int, List[int]] = {
+        partition_id_to_indices: Dict[int, List[int]] = {
             cid: [] for cid in range(self._num_partitions)
         }
         # Compute partition_id to sample indices based on the shard indices
-        for node_id in range(self._num_partitions):
-            for shard_idx in nid_to_shard_indices[node_id]:
+        for partition_id in range(self._num_partitions):
+            for shard_idx in nid_to_shard_indices[partition_id]:
                 start_id = int(shard_idx * self._shard_size)
                 end_id = min(int((shard_idx + 1) * self._shard_size), len(self.dataset))
-                node_id_to_indices[node_id].extend(list(range(start_id, end_id)))
+                partition_id_to_indices[partition_id].extend(list(range(start_id, end_id)))
         if self._shuffle:
-            for indices in node_id_to_indices.values():
+            for indices in partition_id_to_indices.values():
                 # In place shuffling
                 self._rng.shuffle(indices)
-        self._node_id_to_indices = node_id_to_indices
+        self._partition_id_to_indices = node_id_to_indices
         self._node_id_to_indices_determined = True
 
     def _check_num_partitions_correctness_if_needed(self) -> None:
