@@ -15,7 +15,5 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.9"
 # Mandatory dependencies
-flwr-nightly = { version = "1.8.0.dev20240309", extras = ["simulation"] }
-flwr-datasets = { version = "^0.0.2", extras = ["vision"] }
-torch = "2.2.1"
-torchvision = "0.17.1"
+numpy = "^1.21.0"
+flwr = { version = "^1.8.0", extras = ["simulation"] }
