@@ -156,6 +156,11 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
             compute_clip_model_update(
                 param, self.current_round_params, self.clipping_norm
             )
+            log(
+                INFO,
+                "aggregate_fit: parameters are clipped by value: $s.",
+                self.clipping_norm,
+            )
             # Convert back to parameters
             res.parameters = ndarrays_to_parameters(param)
 
