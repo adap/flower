@@ -39,15 +39,15 @@ parameters = ndarrays_to_parameters(ndarrays)
 
 # Define strategy
 strategy = fl.server.strategy.FedAvg(
-    fraction_fit=0.2,  # Select 20% of all available clients
+    fraction_fit=1.0,  # Select 20% of all available clients
     fraction_evaluate=0.0,  # Disable evaluation
-    min_fit_clients=20,
-    min_available_clients=100,
+    min_fit_clients=40,
+    min_available_clients=40,
     fit_metrics_aggregation_fn=weighted_average,
     initial_parameters=parameters,
 )
 
-dp_strategy = DifferentialPrivacyClientSideFixedClipping(strategy, 0.5, 10, 20)
+dp_strategy = DifferentialPrivacyClientSideFixedClipping(strategy, 0.1, 10, 40)
 
 
 # Run via `flower-server-app server_workflow:app`
