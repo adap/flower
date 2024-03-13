@@ -48,6 +48,8 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
+______________________________________________________________________
+
 ## Run Federated Learning with TensorFlow/Keras and Flower
 
 Afterward, you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
@@ -71,3 +73,41 @@ poetry run python3 client.py
 ```
 
 You will see that Keras is starting a federated training. Have a look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) for a detailed explanation. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).
+
+______________________________________________________________________
+
+## Run Federated Learning with TensorFlow/Keras and `Flower Next`
+
+### 1. Start the long-running Flower server (SuperLink)
+
+```bash
+flower-superlink --insecure
+```
+
+### 2. Start the long-running Flower clients (SuperNodes)
+
+Start 2 long-running Flower clients in 2 separate terminal windows, using:
+
+```bash
+flower-client-app client:app --insecure
+```
+
+### 3. Run the Flower App
+
+With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App, using:
+
+```bash
+flower-server-app server:app --insecure
+```
+
+Or, to try the workflow example, run:
+
+```bash
+flower-server-app server_workflow:app --insecure
+```
+
+Or, to try the custom server function example, run:
+
+```bash
+flower-server-app server_custom:app --insecure
+```
