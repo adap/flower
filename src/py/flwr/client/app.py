@@ -699,6 +699,8 @@ class _RunTracker:
     connection: bool = True
 
     def register_signal_handler(self) -> None:
+        """Register handlers for exit signals."""
+
         def signal_handler(sig, frame):  # type: ignore
             # pylint: disable=unused-argument
             raise StopIteration from None
