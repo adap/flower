@@ -18,11 +18,7 @@ import os
 import textwrap
 from typing import Any, Dict
 
-from .flower_toml import (
-    load_flower_toml,
-    validate_flower_toml,
-    validate_flower_toml_fields,
-)
+from .flower_toml import load, validate, validate_fields
 
 
 def test_load_flower_toml_load_from_cwd(tmp_path: str) -> None:
@@ -68,7 +64,7 @@ def test_load_flower_toml_load_from_cwd(tmp_path: str) -> None:
             f.write(textwrap.dedent(flower_toml_content))
 
         # Execute
-        config = load_flower_toml()
+        config = load()
 
         # Assert
         assert config == expected_config
@@ -119,7 +115,7 @@ def test_load_flower_toml_from_path(tmp_path: str) -> None:
             f.write(textwrap.dedent(flower_toml_content))
 
         # Execute
-        config = load_flower_toml(path=os.path.join(tmp_path, "flower.toml"))
+        config = load(path=os.path.join(tmp_path, "flower.toml"))
 
         # Assert
         assert config == expected_config
@@ -133,7 +129,7 @@ def test_validate_flower_toml_fields_empty() -> None:
     config: Dict[str, Any] = {}
 
     # Execute
-    is_valid, errors, warnings = validate_flower_toml_fields(config)
+    is_valid, errors, warnings = validate_fields(config)
 
     # Assert
     assert not is_valid
@@ -155,7 +151,7 @@ def test_validate_flower_toml_fields_no_flower() -> None:
     }
 
     # Execute
-    is_valid, errors, warnings = validate_flower_toml_fields(config)
+    is_valid, errors, warnings = validate_fields(config)
 
     # Assert
     assert not is_valid
@@ -178,7 +174,7 @@ def test_validate_flower_toml_fields_no_flower_components() -> None:
     }
 
     # Execute
-    is_valid, errors, warnings = validate_flower_toml_fields(config)
+    is_valid, errors, warnings = validate_fields(config)
 
     # Assert
     assert not is_valid
@@ -201,7 +197,7 @@ def test_validate_flower_toml_fields_no_server_and_client_app() -> None:
     }
 
     # Execute
-    is_valid, errors, warnings = validate_flower_toml_fields(config)
+    is_valid, errors, warnings = validate_fields(config)
 
     # Assert
     assert not is_valid
@@ -224,7 +220,7 @@ def test_validate_flower_toml_fields() -> None:
     }
 
     # Execute
-    is_valid, errors, warnings = validate_flower_toml_fields(config)
+    is_valid, errors, warnings = validate_fields(config)
 
     # Assert
     assert is_valid
@@ -252,7 +248,7 @@ def test_validate_flower_toml() -> None:
     }
 
     # Execute
-    is_valid, errors, warnings = validate_flower_toml(config)
+    is_valid, errors, warnings = validate(config)
 
     # Assert
     assert is_valid
@@ -280,7 +276,7 @@ def test_validate_flower_toml_fail() -> None:
     }
 
     # Execute
-    is_valid, errors, warnings = validate_flower_toml(config)
+    is_valid, errors, warnings = validate(config)
 
     # Assert
     assert not is_valid
