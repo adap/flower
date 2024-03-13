@@ -4,8 +4,7 @@ This tutorial provides instructions on configuring serialization in the Flower i
 
 ## Overview
 
-Serialization in the Flower iOS SDK can be configured to suit different requirements. This tutorial covers default serialization settings with a Python process under the hood and how to implement float-byte serialization for environments where using a Python process is not desired.
-
+Serialization in the Flower iOS SDK can be configured to suit different requirements. This tutorial covers default serialization settings with a Python process under the hood and how to implement float byte serialization for environments where using a Python process is not desired.
 
 ### Default serialization
 
@@ -32,7 +31,7 @@ def _float_parameters_to_ndarrays(self, parameters: Parameters) -> NDArrays:
     ]
 ```
 
-Then we need to call this functions in suitable functions of `Strategy`, i.e. `evaluate()`, `aggregate_fit()`, `configure_fit()`. The full `StrategyWrapper` implementation can be seen below:
+Then we need to call these functions in suitable functions of `Strategy`, i.e. `evaluate()`, `aggregate_fit()`, `configure_fit()`. The whole `StrategyWrapper` implementation can be seen below:
 
 ```python
 class StrategyWrapper(flwr.server.strategy.FedAvg):
