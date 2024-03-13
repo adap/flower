@@ -128,7 +128,7 @@ class LocalDpMod:
             self.clipping_norm,
         )
         log(
-            INFO, "LocalDpMod: parameters are clipped by value: $s.", self.clipping_norm
+            INFO, "LocalDpMod: parameters are clipped by value: %s.", self.clipping_norm
         )
 
         fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
