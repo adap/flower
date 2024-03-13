@@ -138,7 +138,7 @@ def run_server_app() -> None:
     run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
 
     # Clean up
-    driver.__del__()  # pylint: disable=unnecessary-dunder-call
+    driver.close()
 
     event(EventType.RUN_SERVER_APP_LEAVE)
 
