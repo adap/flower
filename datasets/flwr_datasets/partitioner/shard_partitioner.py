@@ -305,12 +305,12 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
             for indices in partition_id_to_indices.values():
                 # In place shuffling
                 self._rng.shuffle(indices)
-        self._partition_id_to_indices = node_id_to_indices
-        self._node_id_to_indices_determined = True
+        self._partition_id_to_indices = partition_id_to_indices
+        self._partition_id_to_indices_determined = True
 
     def _check_num_partitions_correctness_if_needed(self) -> None:
         """Test num_partitions when the dataset is given (in load_partition)."""
-        if not self._node_id_to_indices_determined:
+        if not self._partition_id_to_indices_determined:
             if self._num_partitions > self.dataset.num_rows:
                 raise ValueError(
                     "The number of partitions needs to be smaller than the number of "
@@ -323,7 +323,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         Operation only needed to be performed one time. It's required for the creation
         of shards with the same labels.
         """
-        if self._node_id_to_indices_determined:
+        if self._partition_id_to_indices_determined:
             return
         self._dataset = self.dataset.sort(self._partition_by)
 

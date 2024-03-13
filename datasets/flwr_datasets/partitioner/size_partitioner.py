@@ -118,25 +118,25 @@ class SizePartitioner(Partitioner):
         # If there is any sample(s) left unassigned, assign it to the largest partition.
         partition_sizes_as_num_of_samples[-1] += left_unassigned_samples
         for idx, partition_size in enumerate(partition_sizes_as_num_of_samples):
-            self._node_id_to_size[idx] = partition_size
+            self._partition_id_to_size[idx] = partition_size
 
-        self._check_if_node_id_to_size_possible()
+        self._check_if_partition_id_to_size_possible()
 
-    def _determine_node_id_to_indices_if_needed(self) -> None:
+    def _determine_partition_id_to_indices_if_needed(self) -> None:
         """Create an assignment of indices to the partition indices.."""
-        if self._node_id_to_indices_determined is True:
+        if self._partition_id_to_indices_determined is True:
             return
-        self._determine_node_id_to_size()
+        self._determine_partition_id_to_size()
         total_samples_assigned = 0
-        for idx, quantity in self._node_id_to_size.items():
-            self._node_id_to_indices[idx] = list(
+        for idx, quantity in self._partition_id_to_size.items():
+            self._partition_id_to_indices[idx] = list(
                 range(total_samples_assigned, total_samples_assigned + quantity)
             )
             total_samples_assigned += quantity
-        self._node_id_to_indices_determined = True
+        self._partition_id_to_indices_determined = True
 
-    def _check_if_node_id_to_size_possible(self) -> None:
-        all_positive = all(value >= 1 for value in self.node_id_to_size.values())
+    def _check_if_partition_id_to_size_possible(self) -> None:
+        all_positive = all(value >= 1 for value in self.partition_id_to_size.values())
         if not all_positive:
             raise ValueError(
                 f"The given specification of the parameter num_partitions"
