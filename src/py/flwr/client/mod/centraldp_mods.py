@@ -144,6 +144,11 @@ def adaptiveclipping_mod(
         server_to_client_params,
         clipping_norm,
     )
+    log(
+        INFO,
+        "adaptiveclipping_mod: parameters are clipped by value: $s.",
+        clipping_norm,
+    )
 
     fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
 
