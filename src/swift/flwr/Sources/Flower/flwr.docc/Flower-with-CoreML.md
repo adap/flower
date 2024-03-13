@@ -62,7 +62,7 @@ let completionHandler: (MLUpdateContext) -> Void = { finalContext in
 }
 ```
 
-To instantiate MLUpdateTask you need four arguments: URL to the CoreML, training data, configuration, and progress handler. We would not cover how to provide training data here, feel free to check out CoreML official documentation and our code example for that.
+To instantiate MLUpdateTask you need four arguments: URL to the CoreML, training data, configuration, and progress handler. We do not cover how to provide training data here, so feel free to check out CoreML official documentation and our code example.
 
 After creating our progress handlers to differentiate, test, and train, we can instantiate MLUpdateTask. To execute the CoreML update task, call the resume() function.
 
