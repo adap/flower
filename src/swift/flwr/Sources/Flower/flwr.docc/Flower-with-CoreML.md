@@ -76,7 +76,7 @@ updateTask.resume()
 
 ### Flower client
 
-After we get our local training pipeline sorted, let's build our Flower client. To conform to Flower client, we need to implement four functions: `getParameters()`, `getProperties()`, `fit()`, and `evaluate()`. In the following sections we provide detailed description of each function.
+Let's build our Flower client after we get our local training pipeline sorted. To conform to Flower client, we need to implement four functions: `getParameters()`, `getProperties()`, `fit()`, and `evaluate()`. In the following sections, we provide a detailed description of each function.
 
 ```swift
 public protocol Client {
