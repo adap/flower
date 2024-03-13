@@ -1,6 +1,6 @@
 # How to federate CoreML with Flower
 
-This tutorial offers a comprehensive guide to federating CoreML with Flower, and to enable federated learning on iOS devices.
+This tutorial offers a comprehensive guide to federating CoreML with Flower and enabling federated learning on iOS devices.
 
 ## Overview
 
