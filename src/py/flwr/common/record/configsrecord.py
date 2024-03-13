@@ -89,7 +89,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
     def count_bytes(self) -> int:
         """Return number of Bytes stored in this object.
 
-        This function counts booleans as ocupying 1 Byte.
+        This function counts booleans as occupying 1 Byte.
         """
 
         def get_var_bytes(value: ConfigsScalar) -> int:
@@ -109,7 +109,7 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
         for k, v in self.items():
             if isinstance(v, List):
                 if isinstance(v[0], (bytes, str)):
-                    # not all str are of equal length necesarily
+                    # not all str are of equal length necessarily
                     # for both the footprint of each element is 1 Byte
                     num_bytes += int(sum(len(s) for s in v))  # type: ignore
                 else:
