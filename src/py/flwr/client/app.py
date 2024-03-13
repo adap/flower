@@ -22,6 +22,7 @@ import time
 from dataclasses import dataclass
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
+from types import FrameType
 from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 
 from grpc import RpcError
@@ -699,8 +700,8 @@ class _RunTracker:
     connection: bool = True
     should_exit: bool = False
 
-    def register_signal_handler(self):
-        def signal_handler(sig, frame):
+    def register_signal_handler(self) -> None:
+        def signal_handler(sig: int, frame: Optional[FrameType]) -> None:
             self.should_exit = True
             raise StopIteration from None
 
