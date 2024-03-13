@@ -40,7 +40,7 @@ parameters = ndarrays_to_parameters(ndarrays)
 # Define strategy
 strategy = fl.server.strategy.FedAvg(
     fraction_fit=0.2,
-    fraction_evaluate=0.0,  # Disable evaluation
+    fraction_evaluate=0.0,  # Disable evaluation for demo purpose
     min_fit_clients=20,
     min_available_clients=20,
     fit_metrics_aggregation_fn=weighted_average,
