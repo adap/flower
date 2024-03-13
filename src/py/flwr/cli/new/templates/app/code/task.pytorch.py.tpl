@@ -34,7 +34,7 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
-def load_data(partition_id, total_partitions: int = 2):
+def load_data(partition_id: int, total_partitions: int):
     """Load partition CIFAR10 data."""
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": total_partitions})
     partition = fds.load_partition(partition_id)

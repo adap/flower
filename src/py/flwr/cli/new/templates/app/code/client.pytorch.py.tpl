@@ -31,13 +31,18 @@ class FlowerClient(NumPyClient):
         loss, accuracy = test(self.net, self.valloader)
         return loss, len(self.valloader.dataset), {"accuracy": accuracy}
 
+
+# Load config
 cfg, *_ = load_and_validate_with_defaults()
 
 def client_fn(cid: str):
     # Load model and data
     net = Net().to(DEVICE)
-    print(cfg)
-    trainloader, valloader = load_data(partition_id=int(cid))
+    engine = cfg["flower"]["engine"]
+    num_partitions = 2
+    if "simulation" in engine:
+        num_partitions = engine["simulation"]["supernode"]["num"]
+    trainloader, valloader = load_data(int(cid), num_partitions)
 
     # Return Client instance
     return FlowerClient(net, trainloader, valloader).to_client()
