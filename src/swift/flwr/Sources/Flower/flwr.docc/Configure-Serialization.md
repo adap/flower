@@ -9,7 +9,7 @@ Serialization in the Flower iOS SDK can be configured to suit different requirem
 
 ### Default serialization
 
-The default serialization in Flower iOS SDK involves opening a Python process under the hood and we provide the implementation as an object ``ParameterConverter``. This is because we want to be able to use the Python server out of the box without changing anything. The Python process is responsible to convert the numpy byte format into `MLMultiArray` or `Array`. ``ParameterConverter`` is available only as a singleton and there is a `finalize()` function that you can call to shut down the Python process gracefully.
+The default serialization in Flower iOS SDK involves opening a Python process under the hood, and we provide the implementation as an object called ``ParameterConverter``. We want to use the Python server outside the box without changing anything. The Python process is responsible for converting the numpy byte format into `MLMultiArray` or `Array`. ``ParameterConverter`` is available only as a singleton, and there is a `finalize()` function that you can call to shut down the Python process gracefully. ``ParameterConverter`` is available only as a singleton and there is a `finalize()` function that you can call to shut down the Python process gracefully.
 
 ### Float byte serialization
 
