@@ -67,7 +67,9 @@ class TestNaturalIdPartitioner(unittest.TestCase):
         _, partitioner = _dummy_setup(num_rows, num_unique_natural_id)
         # Simulate usage to start lazy partition_id_to_natural_id creation
         _ = partitioner.load_partition(0)
-        self.assertEqual(len(partitioner.partition_id_to_natural_id), num_unique_natural_id)
+        self.assertEqual(
+            len(partitioner.partition_id_to_natural_id), num_unique_natural_id
+        )
 
     @parameterized.expand(  # type: ignore
         # num_rows, num_unique_natural_ids
@@ -106,7 +108,9 @@ class TestNaturalIdPartitioner(unittest.TestCase):
         """Test if the # of available partitions is equal to # of unique clients."""
         _, partitioner = _dummy_setup(num_rows, num_unique_natural_ids)
         _ = partitioner.load_partition(partition_id=0)
-        self.assertEqual(len(partitioner.partition_id_to_natural_id), num_unique_natural_ids)
+        self.assertEqual(
+            len(partitioner.partition_id_to_natural_id), num_unique_natural_ids
+        )
 
     def test_cannot_set_partition_id_to_natural_id(self) -> None:
         """Test the lack of ability to set partition_id_to_natural_id."""

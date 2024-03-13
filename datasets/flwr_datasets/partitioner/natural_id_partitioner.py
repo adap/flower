@@ -62,7 +62,8 @@ class NaturalIdPartitioner(Partitioner):
             self._create_int_partition_id_to_natural_id()
 
         return self.dataset.filter(
-            lambda row: row[self._partition_by] == self._partition_id_to_natural_id[partition_id]
+            lambda row: row[self._partition_by]
+            == self._partition_id_to_natural_id[partition_id]
         )
 
     @property

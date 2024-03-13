@@ -194,7 +194,9 @@ class DirichletPartitioner(Partitioner):
             )
         return alpha
 
-    def _determine_partition_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
+    def _determine_partition_id_to_indices_if_needed(
+        self,
+    ) -> None:  # pylint: disable=R0914
         """Create an assignment of indices to the partition indices."""
         if self._partition_id_to_indices_determined:
             return
@@ -275,7 +277,9 @@ class DirichletPartitioner(Partitioner):
             )
             if min_sample_size_on_client >= self._min_partition_size:
                 break
-            sample_sizes = [len(indices) for indices in partition_id_to_indices.values()]
+            sample_sizes = [
+                len(indices) for indices in partition_id_to_indices.values()
+            ]
             alpha_not_met = [
                 self._alpha[i]
                 for i, ss in enumerate(sample_sizes)

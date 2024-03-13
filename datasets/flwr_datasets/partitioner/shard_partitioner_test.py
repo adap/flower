@@ -27,7 +27,7 @@ def _dummy_setup(
     num_rows: int,
     partition_by: str,
     num_partitions: int,
-    num_shards_per_node: Optional[int],
+    num_shards_per_partition: Optional[int],
     shard_size: Optional[int],
     keep_incomplete_shard: bool = False,
 ) -> Tuple[Dataset, ShardPartitioner]:
@@ -39,7 +39,7 @@ def _dummy_setup(
     dataset = Dataset.from_dict(data)
     partitioner = ShardPartitioner(
         num_partitions=num_partitions,
-        num_shards_per_node=num_shards_per_node,
+        num_shards_per_partition=num_shards_per_partition,
         partition_by=partition_by,
         shard_size=shard_size,
         keep_incomplete_shard=keep_incomplete_shard,
@@ -51,7 +51,7 @@ def _dummy_setup(
 class TestShardPartitionerSpec1(unittest.TestCase):
     """Test first possible initialization of ShardPartitioner.
 
-    Specify num_shards_per_node and shard_size arguments.
+    Specify num_shards_per_partition and shard_size arguments.
     """
 
     def test_correct_num_partitions(self) -> None:
@@ -59,14 +59,14 @@ class TestShardPartitionerSpec1(unittest.TestCase):
         partition_by = "label"
         num_rows = 113
         num_partitions = 3
-        num_shards_per_node = 3
+        num_shards_per_partition = 3
         shard_size = 10
         keep_incomplete_shard = False
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -79,14 +79,14 @@ class TestShardPartitionerSpec1(unittest.TestCase):
         partition_by = "label"
         num_rows = 113
         num_partitions = 3
-        num_shards_per_node = 3
+        num_shards_per_partition = 3
         shard_size = 10
         keep_incomplete_shard = False
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -102,14 +102,14 @@ class TestShardPartitionerSpec1(unittest.TestCase):
         partition_by = "label"
         num_rows = 113
         num_partitions = 3
-        num_shards_per_node = 3
+        num_shards_per_partition = 3
         shard_size = 10
         keep_incomplete_shard = False
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -133,14 +133,14 @@ class TestShardPartitionerSpec2(unittest.TestCase):
         partition_by = "label"
         num_rows = 113
         num_partitions = 3
-        num_shards_per_node = None
+        num_shards_per_partition = None
         shard_size = 10
         keep_incomplete_shard = False
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -153,14 +153,14 @@ class TestShardPartitionerSpec2(unittest.TestCase):
         partition_by = "label"
         num_rows = 113
         num_partitions = 3
-        num_shards_per_node = None
+        num_shards_per_partition = None
         shard_size = 10
         keep_incomplete_shard = False
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -176,14 +176,14 @@ class TestShardPartitionerSpec2(unittest.TestCase):
         partition_by = "label"
         num_rows = 113
         num_partitions = 3
-        num_shards_per_node = None
+        num_shards_per_partition = None
         shard_size = 10
         keep_incomplete_shard = False
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -207,14 +207,14 @@ class TestShardPartitionerSpec3(unittest.TestCase):
         partition_by = "label"
         num_rows = 113
         num_partitions = 3
-        num_shards_per_node = None
+        num_shards_per_partition = None
         shard_size = 10
         keep_incomplete_shard = True
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -227,14 +227,14 @@ class TestShardPartitionerSpec3(unittest.TestCase):
         partition_by = "label"
         num_rows = 113
         num_partitions = 3
-        num_shards_per_node = None
+        num_shards_per_partition = None
         shard_size = 10
         keep_incomplete_shard = True
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -250,14 +250,14 @@ class TestShardPartitionerSpec3(unittest.TestCase):
         partition_by = "label"
         num_rows = 113
         num_partitions = 3
-        num_shards_per_node = None
+        num_shards_per_partition = None
         shard_size = 10
         keep_incomplete_shard = True
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -272,7 +272,7 @@ class TestShardPartitionerSpec3(unittest.TestCase):
 class TestShardPartitionerSpec4(unittest.TestCase):
     """Test fourth possible initialization of ShardPartitioner.
 
-    Specify num_shards_per_node but not shard_size arguments.
+    Specify num_shards_per_partition but not shard_size arguments.
     """
 
     def test_correct_num_partitions(self) -> None:
@@ -280,14 +280,14 @@ class TestShardPartitionerSpec4(unittest.TestCase):
         partition_by = "label"
         num_rows = 113
         num_partitions = 3
-        num_shards_per_node = 3
+        num_shards_per_partition = 3
         shard_size = None
         keep_incomplete_shard = False
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -300,14 +300,14 @@ class TestShardPartitionerSpec4(unittest.TestCase):
         partition_by = "label"
         num_rows = 113
         num_partitions = 3
-        num_shards_per_node = 3
+        num_shards_per_partition = 3
         shard_size = None
         keep_incomplete_shard = False
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -323,14 +323,14 @@ class TestShardPartitionerSpec4(unittest.TestCase):
         partition_by = "label"
         num_rows = 113
         num_partitions = 3
-        num_shards_per_node = 3
+        num_shards_per_partition = 3
         shard_size = None
         keep_incomplete_shard = False
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -354,14 +354,14 @@ class TestShardPartitionerIncorrectSpec(unittest.TestCase):
         partition_by = "label"
         num_rows = 10
         num_partitions = 3
-        num_shards_per_node = 2
+        num_shards_per_partition = 2
         shard_size = 10
         keep_incomplete_shard = False
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )
@@ -373,14 +373,14 @@ class TestShardPartitionerIncorrectSpec(unittest.TestCase):
         partition_by = "label"
         num_rows = 20
         num_partitions = 3
-        num_shards_per_node = None
+        num_shards_per_partition = None
         shard_size = 10
         keep_incomplete_shard = False
         _, partitioner = _dummy_setup(
             num_rows,
             partition_by,
             num_partitions,
-            num_shards_per_node,
+            num_shards_per_partition,
             shard_size,
             keep_incomplete_shard,
         )

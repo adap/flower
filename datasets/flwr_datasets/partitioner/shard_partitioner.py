@@ -68,7 +68,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         The total number of partitions that the data will be divided into.
     partition_by : str
         Column name of the labels (targets) based on which Dirichlet sampling works.
-    num_shards_per_node : Optional[int]
+    num_shards_per_partition : Optional[int]
         Number of shards to assign to a single partitioner. It's an alternative to
         `num_partitions`.
     shard_size : Optional[int]
@@ -94,7 +94,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     >>> from flwr_datasets.partitioner import ShardPartitioner
     >>>
     >>> partitioner = ShardPartitioner(num_partitions=10, partition_by="label",
-    >>>                                num_shards_per_node=2, shard_size=1_000)
+    >>>                                num_shards_per_partition=2, shard_size=1_000)
     >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
     >>> partition = fds.load_partition(0)
     >>> print(partition[0])  # Print the first example
@@ -138,7 +138,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         self,
         num_partitions: int,
         partition_by: str,
-        num_shards_per_node: Optional[int] = None,
+        num_shards_per_partition: Optional[int] = None,
         shard_size: Optional[int] = None,
         keep_incomplete_shard: bool = False,
         shuffle: bool = True,
@@ -149,8 +149,8 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         _check_if_natual_number(num_partitions, "num_partitions")
         self._num_partitions = num_partitions
         self._partition_by = partition_by
-        _check_if_natual_number(num_shards_per_node, "num_shards_per_node", True)
-        self._num_shards_per_node = num_shards_per_node
+        _check_if_natual_number(num_shards_per_partition, "num_shards_per_partition", True)
+        self._num_shards_per_node = num_shards_per_partition
         self._num_shards_used: Optional[int] = None
         _check_if_natual_number(shard_size, "shard_size", True)
         self._shard_size = shard_size
@@ -194,7 +194,9 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
 
-    def _determine_partition_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
+    def _determine_partition_id_to_indices_if_needed(
+        self,
+    ) -> None:  # pylint: disable=R0914
         """Assign sample indices to each node id.
 
         This method works on sorted datasets. A "shard" is a part of the dataset of
@@ -205,7 +207,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         if self._partition_id_to_indices_determined:
             return
 
-        # One of the specification allows to skip the `num_shards_per_node` param
+        # One of the specification allows to skip the `num_shards_per_partition` param
         if self._num_shards_per_node is not None:
             self._num_shards_used = int(
                 self._num_partitions * self._num_shards_per_node
@@ -232,7 +234,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
             if self._shard_size is None:
                 raise ValueError(
                     "The shard_size needs to be specified if the "
-                    "num_shards_per_node is None"
+                    "num_shards_per_partition is None"
                 )
             if self._keep_incomplete_shard is False:
                 self._num_shards_used = int(
@@ -300,7 +302,9 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
             for shard_idx in nid_to_shard_indices[partition_id]:
                 start_id = int(shard_idx * self._shard_size)
                 end_id = min(int((shard_idx + 1) * self._shard_size), len(self.dataset))
-                partition_id_to_indices[partition_id].extend(list(range(start_id, end_id)))
+                partition_id_to_indices[partition_id].extend(
+                    list(range(start_id, end_id))
+                )
         if self._shuffle:
             for indices in partition_id_to_indices.values():
                 # In place shuffling

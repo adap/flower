@@ -77,7 +77,9 @@ class TestDirichletPartitionerSuccess(unittest.TestCase):
     def test_min_partition_size_requirement(self) -> None:
         """Test if partitions are created with min partition size required."""
         _, partitioner = _dummy_setup(3, 0.5, 100, "labels")
-        partition_list = [partitioner.load_partition(partition_id) for partition_id in [0, 1, 2]]
+        partition_list = [
+            partitioner.load_partition(partition_id) for partition_id in [0, 1, 2]
+        ]
         self.assertTrue(
             all(len(p) > partitioner._min_partition_size for p in partition_list)
         )

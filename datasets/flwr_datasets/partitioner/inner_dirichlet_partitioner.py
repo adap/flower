@@ -190,7 +190,9 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
             )
         return alpha
 
-    def _determine_partition_id_to_indices_if_needed(self) -> None:  # pylint: disable=R0914
+    def _determine_partition_id_to_indices_if_needed(
+        self,
+    ) -> None:  # pylint: disable=R0914
         """Create an assignment of indices to the partition indices."""
         if self._partition_id_to_indices_determined:
             return
@@ -221,7 +223,9 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
             # If current node is full resample a client
             if partition_id_to_left_to_allocate[current_partition_id] == 0:
                 # When the node is full, exclude it from the sampling nodes list
-                not_full_partition_ids.pop(not_full_partition_ids.index(current_partition_id))
+                not_full_partition_ids.pop(
+                    not_full_partition_ids.index(current_partition_id)
+                )
                 continue
             partition_id_to_left_to_allocate[current_partition_id] -= 1
             # Access the label distribution of the chosen client

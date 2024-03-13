@@ -33,8 +33,8 @@ class SizePartitioner(Partitioner):
 
     If the function doesn't transform the `partition_id` it's a linear correlation
     between the number of sample for the node and the value of `partition_id`. For
-    instance, if the node ids range from 1 to M, node with id 1 gets 1 unit of data,
-    client 2 gets 2 units, and so on, up to node M which gets M units.
+    instance, if the partition ids range from 1 to M, partition with id 1 gets 1 unit of
+    data, client 2 gets 2 units, and so on, up to node M which gets M units.
 
     Note that size corresponding to the `partition_id` is deterministic, yet in case of
     different dataset shuffling the assignment of samples to `partition_id` will vary.

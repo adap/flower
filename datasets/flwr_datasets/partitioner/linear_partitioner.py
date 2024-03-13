@@ -32,6 +32,8 @@ class LinearPartitioner(SizePartitioner):
     """
 
     def __init__(self, num_partitions: int) -> None:
-        super().__init__(num_partitions=num_partitions, partition_id_to_size_fn=lambda x: x)
+        super().__init__(
+            num_partitions=num_partitions, partition_id_to_size_fn=lambda x: x
+        )
         if num_partitions <= 0:
             raise ValueError("The number of partitions must be greater than zero.")
