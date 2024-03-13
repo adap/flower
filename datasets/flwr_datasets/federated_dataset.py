@@ -228,16 +228,16 @@ class FederatedDataset:
 
         Parameters
         ----------
-        division_id: Union[int, str]
+        division_id : Union[int, str]
             The way to access the division (from a List or DatasetDict).
-        split: Optional[str]
+        split : Optional[str]
             Split associated with a partitioner that creates the division. It needs to
             be specified if `partition_division` specifies divisions for more than
             one partitioner.
 
         Returns
         -------
-        concatenated_divisions: Dataset
+        concatenated_divisions : Dataset
             A dataset created as concatenation of the divisions from all partitions.
         """
         if self._partition_division is None:
