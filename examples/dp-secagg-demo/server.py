@@ -37,15 +37,15 @@ parameters = ndarrays_to_parameters(ndarrays)
 
 # Define strategy
 strategy = fl.server.strategy.FedAvg(
-    fraction_fit=1.0,  # Select 20% of all available clients
+    fraction_fit=0.2,  # Select 20% of all available clients
     fraction_evaluate=0.0,  # Disable evaluation
-    min_fit_clients=3,
-    min_available_clients=3,
+    min_fit_clients=20,
+    min_available_clients=100,
     fit_metrics_aggregation_fn=weighted_average,
     initial_parameters=parameters,
 )
 
-dp_strategy = DifferentialPrivacyClientSideFixedClipping(strategy, 0.5, 10, 3)
+dp_strategy = DifferentialPrivacyClientSideFixedClipping(strategy, 0.5, 10, 20)
 
 
 # Run via `flower-server-app server_workflow:app`
@@ -64,8 +64,8 @@ def main(driver: Driver, context: Context) -> None:
     # Create the workflow
     workflow = fl.server.workflow.DefaultWorkflow(
         fit_workflow=SecAggPlusWorkflow(
-            num_shares=3,
-            reconstruction_threshold=2,
+            num_shares=7,
+            reconstruction_threshold=4,
         )
     )
 

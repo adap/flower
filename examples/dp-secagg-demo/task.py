@@ -42,13 +42,14 @@ def load_data():
     return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
 
 
-def train(net, trainloader, valloader, epochs, device):
+def train(net, trainloader, valloader, epochs, iters, device):
     """Train the model on the training set."""
     log(INFO, "Starting training...")
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     net.train()
+    iter_cnt = 0
     for _ in range(epochs):
         for images, labels in trainloader:
             images, labels = images.to(device), labels.to(device)
@@ -56,6 +57,9 @@ def train(net, trainloader, valloader, epochs, device):
             loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
+            # iter_cnt += 1
+            # if iter_cnt >= iters:
+            #     return
 
     train_loss, train_acc = test(net, trainloader)
     val_loss, val_acc = test(net, valloader)
