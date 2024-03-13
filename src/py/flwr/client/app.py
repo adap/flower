@@ -22,7 +22,6 @@ import time
 from dataclasses import dataclass
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from types import FrameType
 from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 
 from grpc import RpcError
@@ -400,6 +399,7 @@ def _start_client_internal(
     )
 
     run_tracker = _RunTracker()
+    run_tracker.register_signal_handler()
 
     def _on_sucess(retry_state: RetryState) -> None:
         run_tracker.connection = True
@@ -443,9 +443,7 @@ def _start_client_internal(
 
     node_state = NodeState()
 
-    run_tracker.register_signal_handler()
-
-    while not run_tracker.should_exit:
+    while True:
         sleep_duration: int = 0
         with connection(
             address,
@@ -533,6 +531,7 @@ def _start_client_internal(
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
             break
+
         # Sleep and reconnect afterwards
         log(
             INFO,
@@ -698,12 +697,10 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
 @dataclass
 class _RunTracker:
     connection: bool = True
-    should_exit: bool = False
 
     def register_signal_handler(self) -> None:
         def signal_handler(sig, frame):  # type: ignore
             # pylint: disable=unused-argument
-            self.should_exit = True
             raise StopIteration from None
 
         signal.signal(signal.SIGINT, signal_handler)
