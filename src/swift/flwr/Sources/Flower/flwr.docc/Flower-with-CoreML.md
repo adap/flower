@@ -111,7 +111,7 @@ public func getParameters() -> GetParametersRes {
 
 ### Fit
 
-`fit()` is a function that runs the local machine learning training. It expects to return `FitRes` object. In this case we call our `runMLTask()` function and add `.train` as its arguments and convert the result together with the weights as `FitRes`.
+`fit()` is a function that runs the local machine learning training. It expects to return `FitRes` object. In this case, we call our `runMLTask()` function and add `.train` as its arguments and convert the result with the weights as `FitRes`.
 
 ```swift
 public func fit(ins: FitIns) -> FitRes {
