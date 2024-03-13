@@ -89,7 +89,7 @@ class DirichletPartitioner(Partitioner):
         partition_by: str,
         alpha: Union[int, float, List[float], NDArrayFloat],
         min_partition_size: int = 10,
-        self_balancing: bool = True,
+        self_balancing: bool = False,
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
