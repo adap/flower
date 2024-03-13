@@ -131,7 +131,7 @@ def get_evaluate_fn(testset: Dataset):
 # Download MNIST dataset and partition it
 mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
 # Get the whole test set for centralised evaluation
-centralized_testset = mnist_fds.load_full("test").to_tf_dataset(
+centralized_testset = mnist_fds.load_split("test").to_tf_dataset(
     columns="image", label_cols="label", batch_size=64
 )
 
