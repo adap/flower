@@ -81,7 +81,13 @@ def new(
     ] = None,
 ) -> None:
     """Create new Flower project."""
-    print(f"Creating Flower project {project_name}...")
+    print(
+        typer.style(
+            f"🔨 Creating Flower project {project_name}...",
+            fg=typer.colors.GREEN,
+            bold=True,
+        )
+    )
 
     if project_name is None:
         project_name = prompt_text("Please provide project name")
@@ -131,4 +137,18 @@ def new(
             context=context,
         )
 
-    print("Project creation successful.")
+    print(
+        typer.style(
+            "🎊 Project creation successful.\n\n"
+            "Use the following command to run your project:\n",
+            fg=typer.colors.GREEN,
+            bold=True,
+        )
+    )
+    print(
+        typer.style(
+            f"	cd {project_name}\n" + "	pip install .\n	flwr run\n",
+            fg=typer.colors.BRIGHT_CYAN,
+            bold=True,
+        )
+    )
