@@ -158,7 +158,7 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
             )
             log(
                 INFO,
-                "aggregate_fit: parameters are clipped by value: $s.",
+                "aggregate_fit: parameters are clipped by value: %s.",
                 self.clipping_norm,
             )
             # Convert back to parameters
