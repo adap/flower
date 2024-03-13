@@ -16,3 +16,4 @@ readme = "README.md"
 python = "^3.9"
 # Mandatory dependencies
 numpy = "^1.21.0"
+flwr-nightly = { version = "1.8.0.dev20240309", extras = ["simulation"] }
