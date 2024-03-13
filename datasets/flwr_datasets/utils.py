@@ -274,9 +274,7 @@ def concatenate_divisions(
     zero_len_divisions = 0
     for partition_id in range(partitioner.num_partitions):
         partition = partitioner.load_partition(partition_id)
-        if isinstance(partition_division, list) or isinstance(
-            partition_division, tuple
-        ):
+        if isinstance(partition_division, (list, tuple)):
             if not isinstance(division_id, int):
                 raise TypeError(
                     "The division_id needs to be an int in case of "
