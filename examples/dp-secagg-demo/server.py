@@ -47,10 +47,9 @@ strategy = fl.server.strategy.FedAvg(
     initial_parameters=parameters,
 )
 
-dp_strategy = DifferentialPrivacyClientSideFixedClipping(strategy, 
-                                                         noise_multiplier=0.1, 
-                                                         clipping_norm=10,
-                                                         num_sampled_clients=20)
+dp_strategy = DifferentialPrivacyClientSideFixedClipping(
+    strategy, noise_multiplier=0.1, clipping_norm=10, num_sampled_clients=20
+)
 
 
 # Run via `flower-server-app server_workflow:app`
