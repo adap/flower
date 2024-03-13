@@ -47,7 +47,7 @@ def create_node(
 def delete_node(request: DeleteNodeRequest, state: State) -> DeleteNodeResponse:
     """."""
     # Validate node_id
-    if request.node.anonymous or request.node.node_id <= 0:
+    if request.node.anonymous or request.node.node_id == 0:
         return DeleteNodeResponse()
 
     # Update state
