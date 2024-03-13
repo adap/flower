@@ -702,7 +702,7 @@ class _RunTracker:
     def register_signal_handler(self):
         def signal_handler(sig, frame):
             self.should_exit = True
-            raise StopIteration
+            raise StopIteration from None
 
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
