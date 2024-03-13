@@ -6,7 +6,7 @@
 # Using pip
 pip install .
 
-# or Poetry
+# Or using Poetry
 poetry install
 ```
 
