@@ -13,7 +13,7 @@ The default serialization in Flower iOS SDK involves opening a Python process un
 
 ### Float byte serialization
 
-If you do not want to use Python process in your Flower client, you can do some tweaks in the Python server to enable all strategies to be used in the server. The most crucial change is to convert numpy array to raw float bytes instead calling `np.save()` for serialization.
+If you prefer not to use a Python process in your Flower client, you can make some changes to the Python server to allow all strategies to be used in the server. The most important change is to convert the numpy array to raw float bytes, rather than using `np.save()` for serialization.sed in the server. The most crucial change is to convert the numpy array to raw float bytes instead of calling `np.save()` for serialization.
 
 ```python
 def _ndarrays_to_float_parameters(self, ndarrays: NDArrays) -> Parameters:
