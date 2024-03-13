@@ -137,6 +137,9 @@ def run_server_app() -> None:
     # Run the Server App with the Driver
     run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
 
+    # Clean up
+    driver.close()
+
     event(EventType.RUN_SERVER_APP_LEAVE)
 
 
