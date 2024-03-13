@@ -248,7 +248,7 @@ class Driver:
         return ret
 
     def close(self) -> None:
-        """Disconnect from the super link if connected."""
+        """Disconnect from the SuperLink if connected."""
         # Check if GrpcDriver is initialized
         if self.grpc_driver is None:
             return
