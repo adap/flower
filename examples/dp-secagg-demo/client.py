@@ -7,26 +7,30 @@ from flwr.client.mod.centraldp_mods import fixedclipping_mod
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
-trainloader, testloader = load_data()
 
 
 # Define FlowerClient and client_fn
 class FlowerClient(NumPyClient):
+    
+    def __init__(self, trainloader, testloader) -> None:
+        self.trainloader = trainloader
+        self.testloader = testloader
 
     def fit(self, parameters, config):
         set_weights(net, parameters)
-        results = train(net, trainloader, testloader, iters=10, epochs=1, device=DEVICE)
-        return get_weights(net), len(trainloader.dataset), results
+        results = train(net, self.trainloader, self.testloader, epochs=1, device=DEVICE)
+        return get_weights(net), len(self.trainloader.dataset), results
 
     def evaluate(self, parameters, config):
         set_weights(net, parameters)
-        loss, accuracy = test(net, testloader)
-        return loss, len(testloader.dataset), {"accuracy": accuracy}
+        loss, accuracy = test(net, self.testloader)
+        return loss, len(self.testloader.dataset), {"accuracy": accuracy}
 
 
 def client_fn(cid: str):
     """Create and return an instance of Flower `Client`."""
-    return FlowerClient().to_client()
+    trainloader, testloader = load_data(partition_id=int(cid))
+    return FlowerClient(trainloader, testloader).to_client()
 
 
 # Flower ClientApp
