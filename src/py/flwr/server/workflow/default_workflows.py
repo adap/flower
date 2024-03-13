@@ -98,7 +98,6 @@ class DefaultWorkflow:
 
         # Terminate the thread
         f_stop.set()
-        del driver
         thread.join()
 
 
