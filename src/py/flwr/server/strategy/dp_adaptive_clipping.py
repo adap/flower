@@ -19,7 +19,7 @@ Paper (Andrew et al.): https://arxiv.org/abs/1905.03871
 
 
 import math
-from logging import DEBUG, INFO, WARNING
+from logging import INFO, WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -226,9 +226,8 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
                 self.clipping_norm,
                 self.num_sampled_clients,
             )
-            log(INFO, "aggregate_fit: central dp noise added to params.")
             log(
-                DEBUG,
+                INFO,
                 "aggregate_fit: central dp noise with standard deviation: %s added to params.",
                 compute_stdv(
                     self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
@@ -417,9 +416,8 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
                 self.clipping_norm,
                 self.num_sampled_clients,
             )
-            log(INFO, "aggregate_fit: central dp noise added to params.")
             log(
-                DEBUG,
+                INFO,
                 "aggregate_fit: central dp noise with standard deviation: %s added to params.",
                 compute_stdv(
                     self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
