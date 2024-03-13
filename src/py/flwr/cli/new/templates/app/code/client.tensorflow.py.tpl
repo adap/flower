@@ -1,10 +1,8 @@
 """$project_name: A Flower / TensorFlow app."""
 
 import os
-from logging import INFO
 
 from flwr.client import NumPyClient, ClientApp
-from flwr.common import log
 
 from $project_name.task import load_data, load_model
 
@@ -26,16 +24,12 @@ class FlowerClient(NumPyClient):
 
     def fit(self, parameters, config):
         self.model.set_weights(parameters)
-        log(INFO, "Started training")
         self.model.fit(self.x_train, self.y_train, epochs=1, batch_size=32, verbose=0)
-        log(INFO, "Finished training")
         return self.model.get_weights(), len(self.x_train), {}
 
     def evaluate(self, parameters, config):
         self.model.set_weights(parameters)
-        log(INFO, "Started evaluation")
         loss, accuracy = self.model.evaluate(self.x_test, self.y_test, verbose=0)
-        log(INFO, "Finished evaluation")
         return loss, len(self.x_test), {"accuracy": accuracy}
 
 
