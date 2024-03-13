@@ -242,9 +242,9 @@ class FederatedDataset:
         """
         if self._partition_division is None:
             raise ValueError(
-                "The division concatenation is possible only if the partition_division "
+                "The division concatenation is possible only if the `partition_division` "
                 "is specified. To access all of the undivided partitions use "
-                "load_split."
+                "`load_split`."
             )
         if split is None:
             self._check_if_no_split_keyword_possible()
@@ -257,7 +257,7 @@ class FederatedDataset:
                 if not isinstance(division_id, int):
                     raise TypeError(
                         "The division_id needs to be an int in case of "
-                        "partition_division specification as List."
+                        "`partition_division` specification as List."
                     )
                 division = partition[division_id]
             elif isinstance(partition, DatasetDict):
@@ -274,7 +274,7 @@ class FederatedDataset:
         if zero_len_divisions == self._partitioners[split].num_partitions:
             raise ValueError(
                 "The concatenated dataset is of length 0. Please change the "
-                "partition_division parameter to change this behavior."
+                "`partition_division` parameter to change this behavior."
             )
         if zero_len_divisions != 0:
             warnings.warn(f"{zero_len_divisions} division(s) have length zero.")
