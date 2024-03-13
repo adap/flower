@@ -57,17 +57,16 @@ def load_data(partition_id, total_partitions: int = 2):
 
 def train(net, trainloader, valloader, epochs, device):
     """Train the model on the training set."""
-    print("Starting training...")
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     net.train()
     for _ in range(epochs):
-        for images, labels in trainloader:
-            images, labels = images.to(device), labels.to(device)
+        for batch in trainloader:
+            images = batch["img"]
+            labels = batch["label"]
             optimizer.zero_grad()
-            loss = criterion(net(images), labels)
-            loss.backward()
+            criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
             optimizer.step()
 
     train_loss, train_acc = test(net, trainloader)
@@ -84,13 +83,13 @@ def train(net, trainloader, valloader, epochs, device):
 
 def test(net, testloader):
     """Validate the model on the test set."""
-    net.to(DEVICE)
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
-        for images, labels in testloader:
-            outputs = net(images.to(DEVICE))
-            labels = labels.to(DEVICE)
+        for batch in testloader:
+            images = batch["img"].to(DEVICE)
+            labels = batch["label"].to(DEVICE)
+            outputs = net(images)
             loss += criterion(outputs, labels).item()
             correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
     accuracy = correct / len(testloader.dataset)
