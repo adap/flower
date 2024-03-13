@@ -138,7 +138,7 @@ class FederatedDataset:
 
     def load_partition(
         self,
-        node_id: int,
+        partition_id: int,
         split: Optional[str] = None,
     ) -> Union[Dataset, List[Dataset], DatasetDict]:
         """Load the partition specified by the idx in the selected split.
@@ -148,7 +148,7 @@ class FederatedDataset:
 
         Parameters
         ----------
-        node_id : int
+        partition_id : int
             Partition index for the selected split, idx in {0, ..., num_partitions - 1}.
         split : Optional[str]
             Name of the (partitioned) split (e.g. "train", "test"). You can skip this
@@ -179,7 +179,7 @@ class FederatedDataset:
         self._check_if_split_possible_to_federate(split)
         partitioner: Partitioner = self._partitioners[split]
         self._assign_dataset_to_partitioner(split)
-        partition = partitioner.load_partition(node_id)
+        partition = partitioner.load_partition(partition_id)
         if self._partition_division is None:
             return partition
         partition_division = self._partition_division.get(split)
