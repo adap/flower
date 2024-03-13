@@ -6,6 +6,7 @@ import flwr as fl
 from flwr.common import Context, Metrics, ndarrays_to_parameters
 from flwr.server import Driver, LegacyContext
 from flwr.server.workflow import SecAggPlusWorkflow
+from flwr.server.strategy.dp_fixed_clipping import DifferentialPrivacyClientSideFixedClipping
 
 
 # Define metric aggregation function
@@ -36,12 +37,15 @@ parameters = ndarrays_to_parameters(ndarrays)
 
 # Define strategy
 strategy = fl.server.strategy.FedAvg(
-    fraction_fit=0.2,  # Select 20% of all available clients
+    fraction_fit=1.0,  # Select 20% of all available clients
     fraction_evaluate=0.0,  # Disable evaluation
-    min_available_clients=100,
+    min_fit_clients=3,
+    min_available_clients=3,
     fit_metrics_aggregation_fn=weighted_average,
     initial_parameters=parameters,
 )
+
+dp_strategy = DifferentialPrivacyClientSideFixedClipping(strategy, 0.5, 10, 3)
 
 
 # Run via `flower-server-app server_workflow:app`
@@ -54,14 +58,14 @@ def main(driver: Driver, context: Context) -> None:
     context = LegacyContext(
         state=context.state,
         config=fl.server.ServerConfig(num_rounds=3),
-        strategy=strategy,
+        strategy=dp_strategy,
     )
 
     # Create the workflow
     workflow = fl.server.workflow.DefaultWorkflow(
         fit_workflow=SecAggPlusWorkflow(
-            num_shares=7,
-            reconstruction_threshold=4,
+            num_shares=3,
+            reconstruction_threshold=2,
         )
     )
 
