@@ -42,7 +42,7 @@ The `getLayerWrapper()` function maps the CoreML model specification into LayerW
 
 ### Parameters to weights
 
-`weightsToParameters()` and `parametersToWeights()` is responsible to serialize our weights to a format that can be communicated and understood by the server during federated learning. To learn more about this, check out our <doc:Configure-Serialization> tutorial.
+`weightsToParameters()` and `parametersToWeights()` are responsible for serializing our weights to a format that the server can communicate and understand during federated learning. Check out our <doc:Configure-Serialization> tutorial to learn more about this.
 
 
 ### Run local machine learning pipeline
