@@ -21,7 +21,7 @@ def _ndarrays_to_float_parameters(self, ndarrays: NDArrays) -> Parameters:
     return Parameters(tensors=tensors, tensor_type="float_array")
 ```
 
-For deserialization, we cast the raw float bytes into an numpy array. Note that this results in the numpy array to lose its shape. With Flower client and CoreML it's not a problem since the CoreML model specification stores the shape info and we can retrieve it anytime to reconstruct the raw float bytes into the right shape.
+For deserialization, we cast the raw float bytes into a numpy array. Note that this results in the numpy array to lose its shape. With Flower client and CoreML, it's not a problem since the CoreML model specification stores the shape info, and we can retrieve it anytime to reconstruct the raw float bytes into the right shape.
 
 ```python
 def _float_parameters_to_ndarrays(self, parameters: Parameters) -> NDArrays:
