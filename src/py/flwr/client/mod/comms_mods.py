@@ -52,7 +52,7 @@ def parameters_size_mod(
 ) -> Message:
     """Parameters size mod.
 
-    This mod logs the number of parameters transmited in the message as well as their
+    This mod logs the number of parameters transmitted in the message as well as their
     size in Bytes.
     """
     model_size_stats = {}
