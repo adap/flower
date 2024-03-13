@@ -89,10 +89,14 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
         """Return number of Bytes stored in this object."""
         num_bytes = 0
 
-        for v in self.values():
+        for k, v in self.items():
             if isinstance(v, List):
-                # both int and float take 4 bytes
-                num_bytes += 4 * len(v)
+                # both int and float normally take 4 bytes
+                # But MetricRecords are mapped to 64bit int/float
+                # during protobuffing
+                num_bytes += 8 * len(v)
             else:
-                num_bytes += 4
+                num_bytes += 8
+            # We also count the bytes footprint of the keys
+            num_bytes += len(k)
         return num_bytes

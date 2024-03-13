@@ -22,6 +22,8 @@ from typing import List
 import numpy as np
 import pytest
 
+from flwr.common import ndarray_to_bytes
+
 from ..constant import SType
 from ..typing import NDArray
 from .parametersrecord import Array, ParametersRecord
@@ -72,24 +74,18 @@ class TestArray(unittest.TestCase):
 
 
 @pytest.mark.parametrize(
-    "shape, dtype, expected_bytes",
+    "shape, dtype",
     [
-        (
-            [100],
-            "float32",
-            100 * 4,
-        ),
-        ([31, 31], "int8", 31 * 31 * 1),
-        (
-            [31, 153],
-            "bool_",
-            31 * 153 * 1,
-        ),  # bool_ is represented as a whole Byte in NumPy
+        ([100], "float32"),
+        ([31, 31], "int8"),
+        ([31, 153], "bool_"),  # bool_ is represented as a whole Byte in NumPy
     ],
 )
-def test_count_bytes(shape: List[int], dtype: str, expected_bytes: int) -> None:
+def test_count_bytes(shape: List[int], dtype: str) -> None:
     """Test bytes in a ParametersRecord are computed correctly."""
     original_array = np.random.randn(*shape).astype(np.dtype(dtype))
+
+    buff = ndarray_to_bytes(original_array)
 
     buffer = _get_buffer_from_ndarray(original_array)
 
@@ -99,6 +95,7 @@ def test_count_bytes(shape: List[int], dtype: str, expected_bytes: int) -> None:
         stype=SType.NUMPY,
         data=buffer,
     )
-    p_record = ParametersRecord(OrderedDict({"data": array_instance}))
+    key_name = "data"
+    p_record = ParametersRecord(OrderedDict({key_name: array_instance}))
 
-    assert expected_bytes == p_record.count_bytes()
+    assert len(buff) + len(key_name) == p_record.count_bytes()

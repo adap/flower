@@ -14,11 +14,12 @@
 # ==============================================================================
 """Utility to validate the `flower.toml` file."""
 
-import importlib
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
 import tomli
+
+from flwr.common.object_ref import validate
 
 
 def load_flower_toml(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
@@ -71,47 +72,6 @@ def validate_flower_toml_fields(
     return len(errors) == 0, errors, warnings
 
 
-def validate_object_reference(ref: str) -> Tuple[bool, Optional[str]]:
-    """Validate object reference.
-
-    Returns
-    -------
-    Tuple[bool, Optional[str]]
-        A boolean indicating whether an object reference is valid and
-        the reason why it might not be.
-    """
-    module_str, _, attributes_str = ref.partition(":")
-    if not module_str:
-        return (
-            False,
-            f"Missing module in {ref}",
-        )
-    if not attributes_str:
-        return (
-            False,
-            f"Missing attribute in {ref}",
-        )
-
-    # Load module
-    try:
-        module = importlib.import_module(module_str)
-    except ModuleNotFoundError:
-        return False, f"Unable to load module {module_str}"
-
-    # Recursively load attribute
-    attribute = module
-    try:
-        for attribute_str in attributes_str.split("."):
-            attribute = getattr(attribute, attribute_str)
-    except AttributeError:
-        return (
-            False,
-            f"Unable to load attribute {attributes_str} from module {module_str}",
-        )
-
-    return (True, None)
-
-
 def validate_flower_toml(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
     """Validate flower.toml."""
     is_valid, errors, warnings = validate_flower_toml_fields(config)
@@ -120,16 +80,12 @@ def validate_flower_toml(config: Dict[str, Any]) -> Tuple[bool, List[str], List[
         return False, errors, warnings
 
     # Validate serverapp
-    is_valid, reason = validate_object_reference(
-        config["flower"]["components"]["serverapp"]
-    )
+    is_valid, reason = validate(config["flower"]["components"]["serverapp"])
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
 
     # Validate clientapp
-    is_valid, reason = validate_object_reference(
-        config["flower"]["components"]["clientapp"]
-    )
+    is_valid, reason = validate(config["flower"]["components"]["clientapp"])
 
     if not is_valid and isinstance(reason, str):
         return False, [reason], []

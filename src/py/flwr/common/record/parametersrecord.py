@@ -119,15 +119,18 @@ class ParametersRecord(TypedDict[str, Array]):
                     del array_dict[k]
 
     def count_bytes(self) -> int:
-        """Return number of Bytes stored in this object."""
+        """Return number of Bytes stored in this object.
+
+        Note that a small amount of Bytes might also be included in this counting that
+        correspond to metadata of the serialized object (e.g. of NumPy array) needed for
+        deseralization.
+        """
         num_bytes = 0
 
-        for v in self.values():
-            if v.dtype and v.shape:
-                num_bytes += int(np.prod(v.shape)) * np.dtype(v.dtype).itemsize
-            else:
-                # If datatype and shape aren't encoding during serialization
-                # we need to deserialize the data to accurately count its
-                # footprint in Bytes.
-                num_bytes += v.numpy().nbytes
+        for k, v in self.items():
+            num_bytes += len(v.data)
+
+            # We also count the bytes footprint of the keys
+            num_bytes += len(k)
+
         return num_bytes

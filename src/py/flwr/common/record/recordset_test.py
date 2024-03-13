@@ -364,7 +364,8 @@ def test_set_configs_to_configsrecord_with_incorrect_types(
 def test_count_bytes_metricsrecord() -> None:
     """Test counting bytes in MetricsRecord."""
     data = {"a": 1, "b": 2.0, "c": [1, 2, 3], "d": [1.0, 2.0, 3.0, 4.0, 5.0]}
-    bytes_in_dict = 4 + 4 + 3 * 4 + 5 * 4
+    bytes_in_dict = 8 + 8 + 3 * 8 + 5 * 8
+    bytes_in_dict += 4  # represnting the keys
 
     m_record = MetricsRecord()
     m_record.update(OrderedDict(data))
@@ -375,7 +376,8 @@ def test_count_bytes_metricsrecord() -> None:
 def test_count_bytes_configsrecord() -> None:
     """Test counting bytes in ConfigsRecord."""
     data = {"a": 1, "b": 2.0, "c": [1, 2, 3], "d": [1.0, 2.0, 3.0, 4.0, 5.0]}
-    bytes_in_dict = 4 + 4 + 3 * 4 + 5 * 4
+    bytes_in_dict = 8 + 8 + 3 * 8 + 5 * 8
+    bytes_in_dict += 4  # represnting the keys
 
     to_add = {
         "aa": True,
@@ -387,6 +389,7 @@ def test_count_bytes_configsrecord() -> None:
     }
     data = {**data, **to_add}
     bytes_in_dict += 1 + 5 + 9 + 3 + (4 + 5) + (1 + 13 + 51)
+    bytes_in_dict += 12  # represnting the keys
 
     bytes_in_dict = int(bytes_in_dict)
 
