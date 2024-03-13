@@ -1,5 +1,6 @@
 """$project_name: A Flower / PyTorch app."""
 
+from flwr_datasets import FederatedDataset
 from flwr.client import NumPyClient, ClientApp
 
 from $project_name.task import (
@@ -34,7 +35,7 @@ class FlowerClient(NumPyClient):
 def client_fn(cid: str):
     # Load model and data
     net = Net().to(DEVICE)
-    trainloader, valloader = load_data()
+    trainloader, valloader = load_data(partition_id=int(cid))
 
     # Return Client instance
     return FlowerClient(net, trainloader, valloader).to_client()
