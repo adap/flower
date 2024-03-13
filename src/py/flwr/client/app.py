@@ -701,7 +701,8 @@ class _RunTracker:
     should_exit: bool = False
 
     def register_signal_handler(self) -> None:
-        def signal_handler(sig: int, frame: Optional[FrameType]) -> None:
+        def signal_handler(sig, frame):  # type: ignore
+            # pylint: disable=unused-argument
             self.should_exit = True
             raise StopIteration from None
 
