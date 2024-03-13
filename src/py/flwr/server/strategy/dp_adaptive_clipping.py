@@ -198,6 +198,12 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
             norm_bit = adaptive_clip_inputs_inplace(model_update, self.clipping_norm)
             norm_bit_set_count += norm_bit
 
+            log(
+                INFO,
+                "aggregate_fit: parameters are clipped by value: $s.",
+                self.clipping_norm,
+            )
+
             for i, _ in enumerate(self.current_round_params):
                 param[i] = self.current_round_params[i] + model_update[i]
             # Convert back to parameters
