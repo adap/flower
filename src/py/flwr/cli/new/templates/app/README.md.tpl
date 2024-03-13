@@ -3,7 +3,11 @@
 ## Install dependencies
 
 ```bash
-pip install -r requirements.txt
+# Using pip
+pip install .
+
+# or Poetry
+poetry install
 ```
 
 ## Run (Simulation Engine)
