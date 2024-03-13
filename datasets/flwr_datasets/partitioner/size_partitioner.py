@@ -85,6 +85,12 @@ class SizePartitioner(Partitioner):
         return self.dataset.select(self._node_id_to_indices[node_id])
 
     @property
+    def num_partitions(self) -> int:
+        """Total number of partitions."""
+        self._determine_node_id_to_indices_if_needed()
+        return self._num_partitions
+
+    @property
     def node_id_to_size(self) -> Dict[int, int]:
         """Node id to the number of samples."""
         return self._node_id_to_size
