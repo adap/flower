@@ -50,3 +50,8 @@ class IidPartitioner(Partitioner):
         return self.dataset.shard(
             num_shards=self._num_partitions, index=node_id, contiguous=True
         )
+
+    @property
+    def num_partitions(self) -> int:
+        """Total number of partitions."""
+        return self._num_partitions
