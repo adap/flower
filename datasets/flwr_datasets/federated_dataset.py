@@ -163,7 +163,13 @@ class FederatedDataset:
 
     @property
     def partitioners(self) -> Dict[str, Partitioner]:
-        """Dictionary mapping split to associated partitioners."""
+        """Dictionary mapping split to associated partitioners.
+
+        The returned partitioners have the splits of the dataset assigned to them.
+        """
+        # This function trigger the dataset download (laizy download) and checks
+        # the partitioner specification correctness (which can also happen lazily only
+        # after the dataset download).
         if not self._dataset_prepared:
             self._prepare_dataset()
         if self._dataset is None:
