@@ -27,9 +27,9 @@ class Stage:
 
     SETUP = "setup"
     SHARE_KEYS = "share_keys"
-    COLLECT_MASKED_INPUT = "collect_masked_input"
+    COLLECT_MASKED_VECTORS = "collect_masked_vectors"
     UNMASK = "unmask"
-    _stages = (SETUP, SHARE_KEYS, COLLECT_MASKED_INPUT, UNMASK)
+    _stages = (SETUP, SHARE_KEYS, COLLECT_MASKED_VECTORS, UNMASK)
 
     @classmethod
     def all(cls) -> tuple[str, str, str, str]:

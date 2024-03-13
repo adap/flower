@@ -38,7 +38,7 @@ To iid partition your dataset, choose the split you want to partition and the nu
 
   fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
   partition = fds.load_partition(0, "train")
-  centralized_dataset = fds.load_full("test")
+  centralized_dataset = fds.load_split("test")
 
 Now you're ready to go. You have ten partitions created from the train split of the CIFAR10 dataset and the test split
 for the centralized evaluation. We will convert the type of the dataset from Hugging Face's `Dataset` type to the one

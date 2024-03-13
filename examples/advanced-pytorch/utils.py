@@ -21,7 +21,7 @@ def load_partition(partition_id, toy: bool = False):
 
 def load_centralized_data():
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
-    centralized_data = fds.load_full("test")
+    centralized_data = fds.load_split("test")
     centralized_data = centralized_data.with_transform(apply_transforms)
     return centralized_data
 
