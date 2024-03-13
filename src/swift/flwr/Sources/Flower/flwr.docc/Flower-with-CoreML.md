@@ -125,7 +125,7 @@ public func fit(ins: FitIns) -> FitRes {
 
 ### Evaluate
 
-`evaluate()` is a function that runs the local machine learning evaluation. It expects to return `EvaluateRes` object. In this case we call our `runMLTask()` function and add `.test` as its arguments and convert the result as `EvaluateRes`.
+`evaluate()` is a function that runs the local machine learning evaluation. It expects to return the `EvaluateRes` object. In this case, we call our `runMLTask()` function, add `.test` as its argument, and convert the result to `EvaluateRes`.
 
 ```swift
 public func evaluate(ins: EvaluateIns) -> EvaluateRes {
