@@ -19,7 +19,7 @@ Paper (Andrew et al.): https://arxiv.org/abs/1905.03871
 
 
 import math
-from logging import WARNING
+from logging import DEBUG, INFO, WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -39,6 +39,7 @@ from flwr.common.differential_privacy import (
     adaptive_clip_inputs_inplace,
     add_gaussian_noise_to_params,
     compute_adaptive_noise_params,
+    compute_stdv,
 )
 from flwr.common.differential_privacy_constants import (
     CLIENTS_DISCREPANCY_WARNING,
@@ -225,6 +226,14 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
                 self.clipping_norm,
                 self.num_sampled_clients,
             )
+            log(INFO, "aggregate_fit: central dp noise added to params.")
+            log(
+                DEBUG,
+                "aggregate_fit: central dp noise with standard deviation: %s added to params.",
+                compute_stdv(
+                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+                ),
+            )
 
         return aggregated_params, metrics
 
@@ -407,6 +416,14 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
                 self.noise_multiplier,
                 self.clipping_norm,
                 self.num_sampled_clients,
+            )
+            log(INFO, "aggregate_fit: central dp noise added to params.")
+            log(
+                DEBUG,
+                "aggregate_fit: central dp noise with standard deviation: %s added to params.",
+                compute_stdv(
+                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+                ),
             )
 
         return aggregated_params, metrics
