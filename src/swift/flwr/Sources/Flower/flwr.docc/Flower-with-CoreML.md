@@ -138,7 +138,7 @@ public func evaluate(ins: EvaluateIns) -> EvaluateRes {
 
 ### Run Flower client
 
-Great, now you have your own Flower client. To run your Flower client and enable communicating with the server follow the steps below:
+Great, now you have your own Flower client. To run your Flower client and enable communicating with the server, follow the steps below:
 
 ```swift
 let flwrGRPC = FlwrGRPC(serverHost: hostname, serverPort: port)
