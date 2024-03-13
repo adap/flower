@@ -97,14 +97,16 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
             if isinstance(value, bool):
                 var_bytes = 1
             elif isinstance(value, (int, float)):
-                var_bytes = 4
+                var_bytes = (
+                    8  # the profobufing represents int/floats in ConfigRecords as 64bit
+                )
             if isinstance(value, (str, bytes)):
                 var_bytes = len(value)
             return var_bytes
 
         num_bytes = 0
 
-        for v in self.values():
+        for k, v in self.items():
             if isinstance(v, List):
                 if isinstance(v[0], (bytes, str)):
                     # not all str are of equal length necesarily
@@ -114,5 +116,8 @@ class ConfigsRecord(TypedDict[str, ConfigsRecordValues]):
                     num_bytes += get_var_bytes(v[0]) * len(v)
             else:
                 num_bytes += get_var_bytes(v)
+
+            # We also count the bytes footprint of the keys
+            num_bytes += len(k)
 
         return num_bytes

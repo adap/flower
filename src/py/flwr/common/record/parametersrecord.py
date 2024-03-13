@@ -122,7 +122,7 @@ class ParametersRecord(TypedDict[str, Array]):
         """Return number of Bytes stored in this object."""
         num_bytes = 0
 
-        for v in self.values():
+        for k, v in self.items():
             if v.dtype and v.shape:
                 num_bytes += int(np.prod(v.shape)) * np.dtype(v.dtype).itemsize
             else:
@@ -130,4 +130,8 @@ class ParametersRecord(TypedDict[str, Array]):
                 # we need to deserialize the data to accurately count its
                 # footprint in Bytes.
                 num_bytes += v.numpy().nbytes
+
+            # We also count the bytes footprint of the keys
+            num_bytes += len(k)
+
         return num_bytes

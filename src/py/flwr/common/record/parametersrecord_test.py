@@ -99,6 +99,7 @@ def test_count_bytes(shape: List[int], dtype: str, expected_bytes: int) -> None:
         stype=SType.NUMPY,
         data=buffer,
     )
-    p_record = ParametersRecord(OrderedDict({"data": array_instance}))
+    key_name = "data"
+    p_record = ParametersRecord(OrderedDict({key_name: array_instance}))
 
-    assert expected_bytes == p_record.count_bytes()
+    assert expected_bytes + len(key_name) == p_record.count_bytes()
