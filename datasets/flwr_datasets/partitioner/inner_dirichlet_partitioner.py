@@ -221,7 +221,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
             current_partition_id = self._rng.choice(not_full_partition_ids)
             # If current partition is full resample a client
             if partition_id_to_left_to_allocate[current_partition_id] == 0:
-                # When the partition is full, exclude it from the sampling partitions list
+                # When the partition is full, exclude it from the sampling list
                 not_full_partition_ids.pop(
                     not_full_partition_ids.index(current_partition_id)
                 )

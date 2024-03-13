@@ -50,10 +50,10 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     a) `num_shards_per_partitions`, `shard_size`; or b) `num_shards_per_partition`)
     In case of b the `shard_size` is calculated as floor(len(dataset) /
     (`num_shards_per_partitions` * `num_partitions`))
-    2) possibly different number of shards per partition (use nearly all data) + the same
-    shard size (specify: `shard_size` + `keep_incomplete_shard=False`)
-    3) possibly different number of shards per partition (use all data) + possibly different
-    shard size (specify: `shard_size` + `keep_incomplete_shard=True`)
+    2) possibly different number of shards per partition (use nearly all data) + the
+    same shard size (specify: `shard_size` + `keep_incomplete_shard=False`)
+    3) possibly different number of shards per partition (use all data) + possibly
+    different shard size (specify: `shard_size` + `keep_incomplete_shard=True`)
 
 
     Algorithm based on the description in Communication-Efficient Learning of Deep
@@ -88,8 +88,8 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
 
     Examples
     --------
-    1) If you need same number of shards per partitions + the same shard size (and you know
-    both of these values)
+    1) If you need same number of shards per partitions + the same shard size (and you
+    know both of these values)
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import ShardPartitioner
     >>>
@@ -149,7 +149,9 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         _check_if_natual_number(num_partitions, "num_partitions")
         self._num_partitions = num_partitions
         self._partition_by = partition_by
-        _check_if_natual_number(num_shards_per_partition, "num_shards_per_partition", True)
+        _check_if_natual_number(
+            num_shards_per_partition, "num_shards_per_partition", True
+        )
         self._num_shards_per_partition = num_shards_per_partition
         self._num_shards_used: Optional[int] = None
         _check_if_natual_number(shard_size, "shard_size", True)

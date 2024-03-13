@@ -41,7 +41,7 @@ class DirichletPartitioner(Partitioner):
     The notion of balancing is explicitly introduced here (not mentioned in paper but
     implemented in the code). It is a mechanism that excludes the partition from
     assigning new samples to it if the current number of samples on that partition
-    exceeds the average number that the partition would get in case of even data 
+    exceeds the average number that the partition would get in case of even data
     distribution. It is controlled by`self_balancing` parameter.
 
     Parameters
@@ -205,7 +205,9 @@ class DirichletPartitioner(Partitioner):
         self._unique_classes = self.dataset.unique(self._partition_by)
         assert self._unique_classes is not None
         # This is needed only if self._self_balancing is True (the default option)
-        self._avg_num_of_samples_per_partition = self.dataset.num_rows / self._num_partitions
+        self._avg_num_of_samples_per_partition = (
+            self.dataset.num_rows / self._num_partitions
+        )
 
         # Change targets list data type to numpy
         targets = np.array(self.dataset[self._partition_by])
@@ -232,10 +234,10 @@ class DirichletPartitioner(Partitioner):
                         nid
                     ]
                 # Balancing (not mentioned in the paper but implemented)
-                # Do not assign additional samples to the partition if it already has more
-                # than the average numbers of samples per partition. Note that it might
-                # especially affect classes that are later in the order. This is the
-                # reason for more sparse division that the alpha might suggest.
+                # Do not assign additional samples to the partition if it already has
+                # more than the average numbers of samples per partition. Note that it
+                # might especially affect classes that are later in the order. This is
+                # the reason for more sparse division that the alpha might suggest.
                 if self._self_balancing:
                     assert self._avg_num_of_samples_per_partition is not None
                     for nid in nid_to_proportion_of_k_samples.copy():
