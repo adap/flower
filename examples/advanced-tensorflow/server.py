@@ -47,7 +47,7 @@ def get_evaluate_fn(model):
 
     # Load data here to avoid the overhead of doing it in `evaluate` itself
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
-    test = fds.load_full("test")
+    test = fds.load_split("test")
     test.set_format("numpy")
     x_test, y_test = test["img"] / 255.0, test["label"]
 

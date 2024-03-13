@@ -17,7 +17,7 @@ def get_evaluate_fn(model: LogisticRegression):
 
     # Load test data here to avoid the overhead of doing it in `evaluate` itself
     fds = FederatedDataset(dataset="mnist", partitioners={"train": 10})
-    dataset = fds.load_full("test").with_format("numpy")
+    dataset = fds.load_split("test").with_format("numpy")
     X_test, y_test = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
 
     # The `evaluate` function will be called after every round
