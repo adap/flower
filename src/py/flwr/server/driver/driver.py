@@ -247,8 +247,8 @@ class Driver:
             time.sleep(3)
         return ret
 
-    def __del__(self) -> None:
-        """Disconnect GrpcDriver if connected."""
+    def close(self) -> None:
+        """Disconnect from the super link if connected."""
         # Check if GrpcDriver is initialized
         if self.grpc_driver is None:
             return

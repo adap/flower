@@ -98,8 +98,8 @@ class DefaultWorkflow:
 
         # Terminate the thread
         f_stop.set()
-        del driver
         thread.join()
+        driver.close()
 
 
 def default_init_params_workflow(driver: Driver, context: Context) -> None:
