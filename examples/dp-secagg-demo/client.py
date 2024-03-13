@@ -11,7 +11,7 @@ net = Net().to(DEVICE)
 
 # Define FlowerClient and client_fn
 class FlowerClient(NumPyClient):
-    
+
     def __init__(self, trainloader, testloader) -> None:
         self.trainloader = trainloader
         self.testloader = testloader

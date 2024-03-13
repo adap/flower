@@ -64,8 +64,9 @@ def train(net, trainloader, valloader, epochs, device):
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
     net.train()
     for _ in range(epochs):
-        for images, labels in trainloader:
-            images, labels = images.to(device), labels.to(device)
+        for batch in trainloader:
+            images = batch["img"].to(device)
+            labels = batch["label"].to(device)
             optimizer.zero_grad()
             loss = criterion(net(images), labels)
             loss.backward()
@@ -89,7 +90,9 @@ def test(net, testloader):
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
-        for images, labels in testloader:
+        for batch in testloader:
+            images = batch["img"].to(DEVICE)
+            labels = batch["label"].to(DEVICE)
             outputs = net(images.to(DEVICE))
             labels = labels.to(DEVICE)
             loss += criterion(outputs, labels).item()
