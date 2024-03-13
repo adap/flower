@@ -9,3 +9,4 @@ The example uses the CIFAR-10 dataset with a total of 100 clients, with 20 clien
 
 ```shell
 flower-simulation --server-app server:app --client-app client:app --num-supernodes 100
+```
