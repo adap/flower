@@ -104,11 +104,146 @@ the server with the ``--certificates`` flag.
     -p 9091:9091 -p 9092:9092 -v ./certificates/:/app/ flwr/server:1.7.0-py3.11-ubuntu22.04 \
     --certificates ca.crt server.pem server.key
 
+Flower client
+-------------
+
+Docker client images come with a pre-installed version of Flower and serve as a base for building
+your own client image. Therefore, they don't run anything when you try to start them. We will use an
+example to illustrate how you can dockerize your client code. You can find the full example
+`here <https://github.com/adap/flower/tree/main/examples/docker-client>`_.
+
+Project layout
+~~~~~~~~~~~~~~
+
+Let's assume the following project layout:
+
+.. code-block:: bash
+
+  $ tree .
+  .
+  ├── Dockerfile
+  ├── client-code
+  │   ├── client.py
+  │   └── requirements.txt
+  ├── driver.py
+  └── requirements.txt
+
+We briefly go through each of the files to understand what their purpose is.
+
+**Dockerfile**
+
+The ``Dockerfile`` contains the instructions that assemble the client image.
+
+.. code-block:: dockerfile
+  :linenos:
+
+  FROM flwr/client:1.6.0-py3.8-ubuntu22.04
+
+  WORKDIR /app
+  COPY requirements.txt .
+  RUN python -m pip install -U --no-cache-dir -r requirements.txt
+
+  COPY client.py .
+  ENTRYPOINT ["python", "-c", "from flwr.client import run_client; run_client()", "--callable", "client:flower"]
+
+In the first three lines, we instruct Docker to use the client image tagged
+``1.6.0-py3.8-ubuntu22.04`` as a base and set our working directory to ``/app``. All of the
+following instructions will now be executed in the ``/app`` directory. In lines 4-5, we install the
+Python dependencies by copying the ``client-code/requirements.txt`` file into the image and running
+``pip`` install on it. In the last two lines, we copy the ``client-code/client.py`` file into
+the image and set the entry point. The entry point may look a little unusual, but it is the same as
+if we ran the command ``flower-client --callable client:flower`` in a terminal.
+
+You may be wondering why we don't copy all files in the client-code directory in a single
+``COPY`` instruction and then install the dependencies. The reason we do this split is to use the
+Docker build cache to reduce build time. If both files are copied in a single ``COPY`` instruction,
+exactly one image layer will be created. The layer will be cached for future builds. However, the
+layer is recreated as soon as one of the files is changed. This means that the dependencies are
+reinstalled every time, even though we only change the client code. To prevent this behavior, we
+first install the dependencies and after that copy the client code.
+
+**client-code directory**
+
+The directory contains the client implementation (``client.py``) and a list of python dependencies
+(``requirements.txt``) which are used in the client code.
+
+**driver.py and requirements.txt**
+
+``driver.py`` contains the driver implementation and ``requirements.txt`` the list of python
+dependencies which are used in the driver code.
+
+Building the client image
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+First, we will build the client image and install the ``driver.py`` dependencies.
+
+.. code-block:: bash
+
+  $ cd examples/docker-client
+  $ docker build -f Dockerfile -t flwr-client:0.1.0 client-code
+  # Install dependencies for driver.py on your local machine
+  # you might want to do this in a python environment
+  $ pip install -r requirements.txt
+
+Next, we create a new bridge network called ``flwr-net``. User-defined networks like
+``flwr-net`` can resolve a container name to an IP address. This feature is not available in the
+default bridge network. Using container names simplifies the example because we don't have to first
+figure out what the server's IP address is.
+
+.. code-block:: bash
+
+  $ docker network create --driver bridge flwr-net
+
+Running the example
+~~~~~~~~~~~~~~~~~~~
+
+Start the long-running Flower server.
+
+.. code-block:: bash
+
+  $ docker run --name flwr-server \
+    --rm -p 9091:9091 -p 9092:9092 \
+    --network flwr-net \
+    flwr/server:1.6.0-py3.11-ubuntu22.04 --insecure
+
+In a new terminal window, start the first long-running Flower client.
+
+.. code-block:: bash
+
+  $ docker run --rm \
+    --network flwr-net \
+    flwr-client:0.1.0 --insecure --server flwr-server:9092
+
+In yet another new terminal window, start the second long-running Flower client.
+
+.. code-block:: bash
+
+  $ docker run --rm \
+    --network flwr-net \
+    flwr-client:0.1.0 --insecure --server flwr-server:9092
+
+Start the driver script.
+
+.. code-block:: bash
+
+  $ python driver.py
+
+As soon as the driver script has finished, we can stop the server and client containers and
+remove the previously created network.
+
+.. code-block:: bash
+
+  $ docker network rm flwr-net
+
+
+Advanced Docker options
+-----------------------
+
 Using a different Flower or Python version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to use a different version of Flower or Python, you can do so by changing the tag.
-All versions we provide are available on `Docker Hub <https://hub.docker.com/r/flwr/server/tags>`_.
+All versions we provide are available on `Docker Hub <https://hub.docker.com/r/flwr>`_.
 
 Pinning a Docker image to a specific version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
