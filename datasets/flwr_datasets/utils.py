@@ -113,6 +113,7 @@ def divide_dataset(
     Examples
     --------
     Use `divide_dataset` with division specified as a list.
+
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.utils import divide_dataset
     >>>
@@ -122,6 +123,7 @@ def divide_dataset(
     >>> train, test = divide_dataset(dataset=partition, division=division)
 
     Use `divide_dataset` with division specified as a dict.
+
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.utils import divide_dataset
     >>>

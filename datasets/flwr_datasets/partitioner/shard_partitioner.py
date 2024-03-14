@@ -90,6 +90,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     --------
     1) If you need same number of shards per partitions + the same shard size (and you
     know both of these values)
+
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import ShardPartitioner
     >>>
@@ -108,6 +109,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
 
     2) If you want to use nearly all the data and do not need to have the number of
     shard per each partition to be the same
+
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import ShardPartitioner
     >>>
@@ -121,7 +123,8 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
     [7000, 7000, 7000, 7000, 7000, 7000, 6000, 6000, 6000]
 
     3) If you want to use all the data
-        >>> from flwr_datasets import FederatedDataset
+
+    >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import ShardPartitioner
     >>>
     >>> partitioner = ShardPartitioner(num_partitions=10, partition_by="label",
