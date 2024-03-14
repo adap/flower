@@ -15,7 +15,7 @@
 """FederatedDataset."""
 
 
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, Optional, Tuple, Union
 
 import datasets
 from datasets import Dataset, DatasetDict
@@ -25,7 +25,6 @@ from flwr_datasets.utils import (
     _check_if_dataset_tested,
     _instantiate_partitioners,
     _instantiate_resplitter_if_needed,
-    divide_dataset,
 )
 
 
@@ -54,19 +53,6 @@ class FederatedDataset:
         (representing the number of IID partitions that this split should be partitioned
         into). One or multiple `Partitioner` objects can be specified in that manner,
         but at most, one per split.
-    partition_division : Optional[Union[List[float], Tuple[float, ...],
-    Dict[str, float], Dict[str, Optional[Union[List[float], Tuple[float, ...],
-    Dict[str, float]]]]]]
-        Fractions specifing the division of the partition assiciated with certain split
-        (and partitioner) that enable returning already divided partition from the
-        `load_partition` method. You can think of this as on-edge division of the data
-        into multiple divisions (e.g. into train and validation). You can also name the
-        divisions by using the Dict or create specify it as a List/Tuple. If you
-        specified a single partitioner you can provide the simplified form e.g.
-        [0.8, 0.2] or {"partition_train": 0.8, "partition_test": 0.2} but when multiple
-        partitioners are specified you need to indicate the result of which partitioner
-        are further divided e.g. {"train": [0.8, 0.2]} would result in dividing only the
-        partitions that are created from the "train" split.
     shuffle : bool
         Whether to randomize the order of samples. Applied prior to resplitting,
         speratelly to each of the present splits in the dataset. It uses the `seed`
@@ -84,14 +70,6 @@ class FederatedDataset:
     >>> partition = mnist_fds.load_partition(10, "train")
     >>> # Use test split for centralized evaluation.
     >>> centralized = mnist_fds.load_split("test")
-
-    Automatically divde the data returned from `load_partition`
-    >>> mnist_fds = FederatedDataset(
-    >>>     dataset="mnist",
-    >>>     partitioners={"train": 100},
-    >>>     partition_division=[0.8, 0.2],
-    >>> )
-    >>> partition_train, partition_test = mnist_fds.load_partition(10, "train")
     """
 
     # pylint: disable=too-many-instance-attributes
@@ -102,17 +80,6 @@ class FederatedDataset:
         subset: Optional[str] = None,
         resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]] = None,
         partitioners: Dict[str, Union[Partitioner, int]],
-        partition_division: Optional[
-            Union[
-                List[float],
-                Tuple[float, ...],
-                Dict[str, float],
-                Dict[
-                    str,
-                    Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]],
-                ],
-            ]
-        ] = None,
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
@@ -124,9 +91,6 @@ class FederatedDataset:
         )
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
             partitioners
-        )
-        self._partition_division = self._initialize_partition_division(
-            partition_division
         )
         self._shuffle = shuffle
         self._seed = seed
@@ -140,7 +104,7 @@ class FederatedDataset:
         self,
         partition_id: int,
         split: Optional[str] = None,
-    ) -> Union[Dataset, List[Dataset], DatasetDict]:
+    ) -> Dataset:
         """Load the partition specified by the idx in the selected split.
 
         The dataset is downloaded only when the first call to `load_partition` or
@@ -160,13 +124,8 @@ class FederatedDataset:
 
         Returns
         -------
-        partition : Union[Dataset, List[Dataset], DatasetDict]
-            Undivided or divided partition from the dataset split.
-            If `partition_division` is not specified then `Dataset` is returned.
-            If `partition_division` is specified as `List` or `Tuple` then
-            `List[Dataset]` is returned.
-            If `partition_division` is specified as `Dict` then `DatasetDict` is
-            returned.
+        partition : Dataset
+            Single partition from the dataset split.
         """
         if not self._dataset_prepared:
             self._prepare_dataset()
@@ -179,16 +138,7 @@ class FederatedDataset:
         self._check_if_split_possible_to_federate(split)
         partitioner: Partitioner = self._partitioners[split]
         self._assign_dataset_to_partitioner(split)
-        partition = partitioner.load_partition(partition_id)
-        if self._partition_division is None:
-            return partition
-        partition_division = self._partition_division.get(split)
-        if partition_division is None:
-            return partition
-        divided_partition: Union[List[Dataset], DatasetDict] = divide_dataset(
-            partition, partition_division
-        )
-        return divided_partition
+        return partitioner.load_partition(partition_id)
 
     def load_split(self, split: str) -> Dataset:
         """Load the full split of the dataset.
@@ -301,62 +251,3 @@ class FederatedDataset:
                 "Please set the `split` argument. You can only omit the split keyword "
                 "if there is exactly one partitioner specified."
             )
-
-    def _initialize_partition_division(
-        self,
-        partition_division: Optional[
-            Union[
-                List[float],
-                Tuple[float, ...],
-                Dict[str, float],
-                Dict[
-                    str,
-                    Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]],
-                ],
-            ]
-        ],
-    ) -> Optional[
-        Dict[
-            str,
-            Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]],
-        ]
-    ]:
-        """Create the partition division in the full format.
-
-        Reduced format (possible if only one partitioner exist):
-
-        Union[List[float], Tuple[float, ...], Dict[str, float]
-
-        Full format: Dict[str, Reduced format]
-        Full format represents the split to division mapping.
-        """
-        # Check for simple dict, list, or tuple types directly
-        if isinstance(partition_division, (list, tuple)) or (
-            isinstance(partition_division, dict)
-            and all(isinstance(value, float) for value in partition_division.values())
-        ):
-            if len(self._partitioners) > 1:
-                raise ValueError(
-                    f"The specified partition_division {partition_division} does not "
-                    f"provide mapping to split but more than one partitioners is "
-                    f"specified. Please adjust the partition_division specification to "
-                    f"have the split names as the keys."
-                )
-            return cast(
-                Dict[
-                    str,
-                    Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]],
-                ],
-                {list(self._partitioners.keys())[0]: partition_division},
-            )
-        if isinstance(partition_division, dict):
-            return cast(
-                Dict[
-                    str,
-                    Optional[Union[List[float], Tuple[float, ...], Dict[str, float]]],
-                ],
-                partition_division,
-            )
-        if partition_division is None:
-            return None
-        raise TypeError("Unsupported type for partition_division")
