@@ -15,7 +15,7 @@ from $project_name.task import (
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
-    def __init__(self, net, trainloader, valloader):
+    def __init__(self, net, trainloader, valloader) -> None:
         self.net = net
         self.trainloader = trainloader
         self.valloader = valloader
