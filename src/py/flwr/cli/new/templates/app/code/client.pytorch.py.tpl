@@ -1,6 +1,7 @@
 """$project_name: A Flower / PyTorch app."""
 
 from flwr.client import NumPyClient, ClientApp
+from flwr.cli.flower_toml import load_and_validate_with_defaults
 
 from $project_name.task import (
     Net,
@@ -31,10 +32,17 @@ class FlowerClient(NumPyClient):
         return loss, len(self.valloader.dataset), {"accuracy": accuracy}
 
 
+# Load config
+cfg, *_ = load_and_validate_with_defaults()
+
 def client_fn(cid: str):
     # Load model and data
     net = Net().to(DEVICE)
-    trainloader, valloader = load_data()
+    engine = cfg["flower"]["engine"]
+    num_partitions = 2
+    if "simulation" in engine:
+        num_partitions = engine["simulation"]["supernode"]["num"]
+    trainloader, valloader = load_data(int(cid), num_partitions)
 
     # Return Client instance
     return FlowerClient(net, trainloader, valloader).to_client()
