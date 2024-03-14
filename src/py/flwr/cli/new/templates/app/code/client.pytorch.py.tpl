@@ -41,4 +41,6 @@ def client_fn(cid: str):
 
 
 # Flower ClientApp
-app = ClientApp(client_fn)
+app = ClientApp(
+    client_fn,
+)
