@@ -262,7 +262,10 @@ def concatenate_divisions(
         (e.g. into train and validation). E.g. [0.8, 0.2] or
         {"partition_train": 0.8, "partition_test": 0.2}.
     division_id : Union[int, str]
-        The way to access the division (from a List or DatasetDict). If your `partition_division` is specified as a list, then `division_id` represents an index to an element in that list. If `partition_division` is passed as a `Dict`, then `division_id` is a key of such dictionary.
+        The way to access the division (from a List or DatasetDict). If your
+        `partition_division` is specified as a list, then `division_id` represents an
+        index to an element in that list. If `partition_division` is passed as a
+        `Dict`, then `division_id` is a key of such dictionary.
 
     Returns
     -------
