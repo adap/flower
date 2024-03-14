@@ -16,10 +16,10 @@ def load_model():
     return model
 
 
-def load_data(cid, num_partitions):
+def load_data(partition_id, num_partitions):
     # Download and partition dataset
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": num_partitions})
-    partition = fds.load_partition(int(cid), "train")
+    partition = fds.load_partition(partition_id, "train")
     partition.set_format("numpy")
 
     # Divide data on each node: 80% train, 20% test
