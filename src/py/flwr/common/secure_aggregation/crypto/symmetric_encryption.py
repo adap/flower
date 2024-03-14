@@ -18,8 +18,9 @@
 import base64
 from typing import Tuple, cast
 
+from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.hazmat.primitives import hashes, hmac, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
@@ -98,3 +99,21 @@ def decrypt(key: bytes, ciphertext: bytes) -> bytes:
     # The input key must be url safe
     fernet = Fernet(key)
     return fernet.decrypt(ciphertext)
+
+
+def compute_hmac(key: bytes, message: bytes) -> bytes:
+    """Compute hmac of a message using key as hash."""
+    computed_hmac = hmac.HMAC(key, hashes.SHA256())
+    computed_hmac.update(message)
+    return computed_hmac.finalize()
+
+
+def verify_hmac(key: bytes, message: bytes, hmac_value: bytes) -> bool:
+    """Verify hmac of a message using key as hash."""
+    computed_hmac = hmac.HMAC(key, hashes.SHA256())
+    computed_hmac.update(message)
+    try:
+        computed_hmac.verify(hmac_value)
+        return True
+    except InvalidSignature:
+        return False

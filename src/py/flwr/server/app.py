@@ -16,15 +16,21 @@
 
 import argparse
 import asyncio
+import csv
 import importlib.util
 import sys
 import threading
 from logging import ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Sequence, Set, Tuple
 
 import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
@@ -36,6 +42,9 @@ from flwr.common.constant import (
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    public_key_to_bytes,
+)
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -44,6 +53,7 @@ from .client_manager import ClientManager
 from .history import History
 from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
+from .server_interceptor import AuthenticateServerInterceptor
 from .strategy import Strategy
 from .superlink.driver.driver_grpc import run_driver_api_grpc
 from .superlink.fleet.grpc_bidi.grpc_server import (
@@ -352,10 +362,29 @@ def run_superlink() -> None:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
+        data = _try_setup_client_authentication(args, certificates)
+        interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
+        if data is not None:
+            (
+                client_public_keys,
+                server_public_key,
+                server_private_key,
+            ) = data
+            interceptors = [
+                AuthenticateServerInterceptor(
+                    state_factory,
+                    client_public_keys,
+                    server_private_key,
+                    server_public_key,
+                )
+            ]
+
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
             state_factory=state_factory,
             certificates=certificates,
+            interceptors=interceptors,
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
@@ -388,6 +417,59 @@ def run_superlink() -> None:
         driver_server.wait_for_termination(timeout=1)
 
 
+def _try_setup_client_authentication(
+    args: argparse.Namespace,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
+) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePublicKey, ec.EllipticCurvePrivateKey]]:
+    if args.require_client_authentication:
+        if certificates is None:
+            sys.exit(
+                "Certificates are required to enable client authentication. "
+                "Please provide certificate paths with '--certificates' before "
+                "enabling '--require-client-authentication'."
+            )
+        client_keys_file_path = Path(args.require_client_authentication[0])
+        if not client_keys_file_path.exists():
+            sys.exit(
+                "Client public keys csv file are required for client authentication. "
+                "Please provide the csv file path containing known client public keys "
+                "to '--require-client-authentication'."
+            )
+        client_public_keys: Set[bytes] = set()
+        public_key = load_ssh_public_key(
+            Path(args.require_client_authentication[1]).read_bytes()
+        )
+        private_key = load_ssh_private_key(
+            Path(args.require_client_authentication[2]).read_bytes(),
+            None,
+        )
+        if not isinstance(public_key, ec.EllipticCurvePublicKey) or not isinstance(
+            private_key, ec.EllipticCurvePrivateKey
+        ):
+            sys.exit(
+                "An eliptic curve public and private key pair is required for "
+                "client authentication. Please provide the file path containing "
+                "valid public and private key to '--require-client-authentication'."
+            )
+        server_public_key = public_key
+        server_private_key = private_key
+
+        with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                for element in row:
+                    public_key = load_ssh_public_key(element.encode())
+                    if isinstance(public_key, ec.EllipticCurvePublicKey):
+                        client_public_keys.add(public_key_to_bytes(public_key))
+            return (
+                client_public_keys,
+                server_public_key,
+                server_private_key,
+            )
+    else:
+        return None
+
+
 def _try_obtain_certificates(
     args: argparse.Namespace,
 ) -> Optional[Tuple[bytes, bytes, bytes]]:
@@ -415,6 +497,7 @@ def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
+    interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
     # Create Fleet API gRPC server
@@ -427,6 +510,7 @@ def _run_fleet_api_grpc_rere(
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=certificates,
+        interceptors=interceptors,
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
@@ -605,6 +689,14 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "instead of on disk. If nothing is provided, "
         "Flower will just create a state in memory.",
         default=DATABASE,
+    )
+    parser.add_argument(
+        "--require-client-authentication",
+        nargs=3,
+        metavar=("CLIENT_KEYS", "SERVER_PUBLIC_KEY", "SERVER_PRIVATE_KEY"),
+        type=str,
+        help="Paths to .csv file containing list of known client public keys for "
+        "authentication, server public key, and server private key, in that order.",
     )
 
 
