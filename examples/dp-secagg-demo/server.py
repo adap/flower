@@ -48,7 +48,7 @@ strategy = fl.server.strategy.FedAvg(
 )
 
 dp_strategy = DifferentialPrivacyClientSideFixedClipping(
-    strategy, noise_multiplier=0.1, clipping_norm=10, num_sampled_clients=20
+    strategy, noise_multiplier=0.2, clipping_norm=10, num_sampled_clients=20
 )
 
 
