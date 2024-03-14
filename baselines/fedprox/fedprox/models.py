@@ -76,7 +76,7 @@ class LogisticRegression(nn.Module):
         torch.Tensor
             The resulting Tensor after it has passed through the network
         """
-        output_tensor = self.linear(torch.flatten(input_tensor, 1))
+        output_tensor = torch.sigmoid(self.linear(torch.flatten(input_tensor, 1)))
         return output_tensor
 
 
