@@ -1,1 +1,1 @@
-"""fl_dp_secaggplus."""
+"""fl_dp_sa: A Flower / PyTorch app."""

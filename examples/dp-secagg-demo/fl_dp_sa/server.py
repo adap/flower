@@ -1,3 +1,5 @@
+"""fl_dp_sa: A Flower / PyTorch app."""
+
 from typing import List, Tuple
 
 from flwr.server import Driver, LegacyContext, ServerApp, ServerConfig
@@ -8,7 +10,7 @@ from flwr.server.strategy import (
 )
 from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow
 
-from task import Net, get_weights
+from fl_dp_sa.task import Net, get_weights
 
 
 # Define metric aggregation function

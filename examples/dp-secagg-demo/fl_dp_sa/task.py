@@ -1,3 +1,5 @@
+"""fl_dp_sa: A Flower / PyTorch app."""
+
 from collections import OrderedDict
 from logging import INFO
 from flwr_datasets import FederatedDataset

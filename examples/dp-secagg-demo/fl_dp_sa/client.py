@@ -1,7 +1,9 @@
+"""fl_dp_sa: A Flower / PyTorch app."""
+
 from flwr.client import ClientApp, NumPyClient
 from flwr.client.mod import fixedclipping_mod, secaggplus_mod
 
-from task import DEVICE, Net, get_weights, load_data, set_weights, test, train
+from fl_dp_sa.task import DEVICE, Net, get_weights, load_data, set_weights, test, train
 
 
 # Load model and data (simple CNN, CIFAR-10)
