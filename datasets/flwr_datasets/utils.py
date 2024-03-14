@@ -18,7 +18,7 @@
 import warnings
 from typing import Dict, List, Optional, Tuple, Union, cast
 
-from datasets import Dataset, DatasetDict
+from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
 from flwr_datasets.resplitter import Resplitter
 from flwr_datasets.resplitter.merge_resplitter import MergeResplitter
@@ -239,3 +239,70 @@ def _check_division_config_correctness(
 ) -> None:
     _check_division_config_types_correctness(division)
     _check_division_config_values_correctness(division)
+
+
+def concatenate_divisions(
+    partitioner: Partitioner,
+    partition_division: Union[List[float], Tuple[float, ...], Dict[str, float]],
+    division_id: Union[int, str],
+) -> Dataset:
+    """Create a dataset by concatenation of all partitions in the same division.
+
+    The divisions are created based on the `partition_division` and accessed based
+    on the `division_id`. It can be used to create e.g. centralized dataset from
+    federated on-edge test sets.
+
+    Parameters
+    ----------
+    partitioner : Partitioner
+        Partitioner object with assigned dataset.
+    partition_division : Union[List[float], Tuple[float, ...], Dict[str, float]]
+        Fractions specifying the division of the partitions of a `partitioner`. You can
+        think of this as on-edge division of the data into multiple divisions
+        (e.g. into train and validation). E.g. [0.8, 0.2] or
+        {"partition_train": 0.8, "partition_test": 0.2}.
+    division_id : Union[int, str]
+        The way to access the division (from a List or DatasetDict). If your
+        `partition_division` is specified as a list, then `division_id` represents an
+        index to an element in that list. If `partition_division` is passed as a
+        `Dict`, then `division_id` is a key of such dictionary.
+
+    Returns
+    -------
+    concatenated_divisions : Dataset
+        A dataset created as concatenation of the divisions from all partitions.
+    """
+    divisions = []
+    zero_len_divisions = 0
+    for partition_id in range(partitioner.num_partitions):
+        partition = partitioner.load_partition(partition_id)
+        if isinstance(partition_division, (list, tuple)):
+            if not isinstance(division_id, int):
+                raise TypeError(
+                    "The `division_id` needs to be an int in case of "
+                    "`partition_division` specification as List."
+                )
+            partition = divide_dataset(partition, partition_division)
+            division = partition[division_id]
+        elif isinstance(partition_division, Dict):
+            partition = divide_dataset(partition, partition_division)
+            division = partition[division_id]
+        else:
+            raise TypeError(
+                "The type of partition needs to be List of DatasetDict in this "
+                "context."
+            )
+        if len(division) == 0:
+            zero_len_divisions += 1
+        divisions.append(division)
+
+    if zero_len_divisions == partitioner.num_partitions:
+        raise ValueError(
+            "The concatenated dataset is of length 0. Please change the "
+            "`partition_division` parameter to change this behavior."
+        )
+    if zero_len_divisions != 0:
+        warnings.warn(
+            f"{zero_len_divisions} division(s) have length zero.", stacklevel=1
+        )
+    return concatenate_datasets(divisions)
