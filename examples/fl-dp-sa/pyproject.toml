@@ -3,8 +3,8 @@ requires = ["poetry-core>=1.4.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "fl_dp_sa"
-version = "1.0.0"
+name = "fl-dp-sa"
+version = "0.1.0"
 description = ""
 license = "Apache-2.0"
 authors = [
