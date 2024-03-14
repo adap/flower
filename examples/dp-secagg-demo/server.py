@@ -1,14 +1,14 @@
 from typing import List, Tuple
 
-from task import Net, get_weights
-
-import flwr as fl
+from flwr.server import Driver, LegacyContext, ServerApp, ServerConfig
 from flwr.common import Context, Metrics, ndarrays_to_parameters
-from flwr.server import Driver, LegacyContext
-from flwr.server.workflow import SecAggPlusWorkflow
-from flwr.server.strategy.dp_fixed_clipping import (
+from flwr.server.strategy import (
     DifferentialPrivacyClientSideFixedClipping,
+    FedAvg,
 )
+from flwr.server.workflow import DefaultWorkflow, SecAggPlusWorkflow
+
+from task import Net, get_weights
 
 
 # Define metric aggregation function
@@ -37,8 +37,8 @@ ndarrays = get_weights(Net())
 parameters = ndarrays_to_parameters(ndarrays)
 
 
-# Define strategy
-strategy = fl.server.strategy.FedAvg(
+# Define core strategy
+strategy = FedAvg(
     fraction_fit=0.2,
     fraction_evaluate=0.0,  # Disable evaluation for demo purpose
     min_fit_clients=20,
@@ -47,13 +47,13 @@ strategy = fl.server.strategy.FedAvg(
     initial_parameters=parameters,
 )
 
-dp_strategy = DifferentialPrivacyClientSideFixedClipping(
+# Wrap the core strategy
+strategy = DifferentialPrivacyClientSideFixedClipping(
     strategy, noise_multiplier=0.1, clipping_norm=10, num_sampled_clients=20
 )
 
 
-# Run via `flower-server-app server_workflow:app`
-app = fl.server.ServerApp()
+app = ServerApp()
 
 
 @app.main()
@@ -61,12 +61,12 @@ def main(driver: Driver, context: Context) -> None:
     # Construct the LegacyContext
     context = LegacyContext(
         state=context.state,
-        config=fl.server.ServerConfig(num_rounds=3),
-        strategy=dp_strategy,
+        config=ServerConfig(num_rounds=3),
+        strategy=strategy,
     )
 
-    # Create the workflow
-    workflow = fl.server.workflow.DefaultWorkflow(
+    # Create the train/evaluate workflow
+    workflow = DefaultWorkflow(
         fit_workflow=SecAggPlusWorkflow(
             num_shares=7,
             reconstruction_threshold=4,

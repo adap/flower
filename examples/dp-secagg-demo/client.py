@@ -1,9 +1,8 @@
+from flwr.client import ClientApp, NumPyClient
+from flwr.client.mod import fixedclipping_mod, secaggplus_mod
+
 from task import DEVICE, Net, get_weights, load_data, set_weights, test, train
 
-from flwr.client import ClientApp, NumPyClient
-from flwr.client.mod import secaggplus_mod
-
-from flwr.client.mod.centraldp_mods import fixedclipping_mod
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
