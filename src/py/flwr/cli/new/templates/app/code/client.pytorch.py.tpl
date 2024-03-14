@@ -34,7 +34,7 @@ class FlowerClient(NumPyClient):
 def client_fn(cid: str):
     # Load model and data
     net = Net().to(DEVICE)
-    trainloader, valloader = load_data(partition_id=int(cid), num_partitions=2)
+    trainloader, valloader = load_data(int(cid), 2)
 
     # Return Client instance
     return FlowerClient(net, trainloader, valloader).to_client()
