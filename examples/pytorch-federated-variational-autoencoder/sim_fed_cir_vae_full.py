@@ -25,6 +25,7 @@ from utils_mnist import (
     visualize_plotly_latent_representation,
     sample_latents,
     get_fisher_ratio,
+    train_align_dec_frozen,
 )
 from utils_mnist import VAE
 import os
@@ -94,11 +95,11 @@ class FlowerClient(fl.client.NumPyClient):
 
         optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         # Train
-        vae_loss_term, reg_term, align_term = train_align(
+        vae_loss_term, reg_term, align_term = train_align_dec_frozen(
             self.model,
             trainloader,
             self.align_loader,
-            optimizer,
+            None,
             config,
             epochs=epochs,
             device=self.device,
@@ -363,8 +364,8 @@ if __name__ == "__main__":
             # "lambda_reg": {"min": 0.0, "max": 1.0},
             # "lambda_align_g": {"min": 1e-6, "max": 1e-3},
             "lambda_align_g": {"values": [0.1]},  # kl term for generator
-            "lambda_reg": {"values": [0.1]},
-            "lambda_align": {"values": [0.1]},
+            "lambda_reg": {"values": [1]},
+            "lambda_align": {"values": [1]},
             # "lambda_align": {"min": 1e-6, "max": 1e-3},
             "lr_g": {
                 "values": [
@@ -376,9 +377,9 @@ if __name__ == "__main__":
             "epochs": {"values": [5, 10]},
             "batch_size": {"values": [128]},
             "beta": {"values": [0]},  # for local kl loss
-            "prior_steps": {"values": [1000]},
+            "prior_steps": {"values": [3000]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=1)
+    wandb.agent(sweep_id, function=main, count=2)

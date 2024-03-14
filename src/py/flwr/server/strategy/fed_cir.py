@@ -208,7 +208,7 @@ class FedCiR(FedAvg):
         self.ref_mu, self.ref_logvar = None, None
         self.lambda_align_g = lambda_align_g
 
-    def compute_ref_stats(self, use_PCA=True, given_labels=True):
+    def compute_ref_stats(self, use_PCA=True, given_labels=False):
         if given_labels:
             ref_model = infoVAE(latent_size=self.latent_dim, dis_hidden_size=4).to(
                 self.device
@@ -273,23 +273,27 @@ class FedCiR(FedAvg):
                 np.save(f, test_latents)
             if use_PCA:
                 # Apply PCA using PyTorch
-                cov_matrix = torch.tensor(np.cov(test_latents.T), dtype=torch.float32)
-                _, _, V = torch.svd_lowrank(cov_matrix, q=2)
+                # cov_matrix = torch.tensor(np.cov(test_latents.T), dtype=torch.float32)
+                # _, _, V = torch.svd_lowrank(cov_matrix, q=2)
 
-                # Project data onto the first two principal components
-                reduced_latents = torch.mm(
-                    torch.tensor(test_latents, dtype=torch.float32), V
-                )
+                # # Project data onto the first two principal components
+                # reduced_latents = torch.mm(
+                #     torch.tensor(test_latents, dtype=torch.float32), V
+                # )
 
-                # Convert to numpy array
-                test_latents = reduced_latents.numpy()
+                # # Convert to numpy array
+                # test_latents = reduced_latents.numpy()
+                from sklearn.decomposition import PCA
+
+                pca = PCA(n_components=2)
+                reduced_latents = pca.fit_transform(test_latents)
             # Create traces for each class
             traces = []
             for label in np.unique(test_labels):
                 indices = np.where(test_labels == label)
                 trace = go.Scatter(
-                    x=test_latents[indices, 0].flatten(),
-                    y=test_latents[indices, 1].flatten(),
+                    x=reduced_latents[indices, 0].flatten(),
+                    y=reduced_latents[indices, 1].flatten(),
                     mode="markers",
                     name=str(label),
                     marker=dict(size=8),
@@ -392,24 +396,31 @@ class FedCiR(FedAvg):
         if not self.accept_failures and failures:
             return None, {}
 
-        def vae_loss_connect(recon_img, img, mu, logvar, mu_ref, logvar_ref):
+        def vae_loss_connect(recon_img, img, mu, logvar, mu_ref, logvar_ref, beta):
             # Reconstruction loss using binary cross-entropy
             condition = (recon_img >= 0.0) & (recon_img <= 1.0)
             # assert torch.all(condition), "Values should be between 0 and 1"
             if not torch.all(condition):
                 ValueError("Values should be between 0 and 1")
                 recon_img = torch.clamp(recon_img, 0.0, 1.0)
-            recon_loss = F.binary_cross_entropy(
-                recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="mean"
+            bce_loss_per_pixel = F.binary_cross_entropy(
+                recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="none"
             )
+            # Sum along dimension 1 (sum over pixels for each image)
+            bce_loss_sum_per_image = torch.sum(
+                bce_loss_per_pixel, dim=1
+            )  # Shape: (batch_size,)
+
+            # Take the mean along dimension 0 (mean over images in the batch)
+            recon_loss = torch.mean(bce_loss_sum_per_image)  # Shape: scalar
 
             # KL divergence loss
             loss_align = 0.5 * (logvar_ref - logvar - 1) + (
                 logvar.exp() + (mu - mu_ref).pow(2)
             ) / (2 * logvar_ref.exp())
-            loss_align_reduced = loss_align.sum(dim=1).mean()
+            loss_align_reduced = torch.mean(loss_align.sum(dim=1))
             # Total VAE loss
-            total_loss = self.lambda_align_g * loss_align_reduced + recon_loss
+            total_loss = beta * loss_align_reduced + recon_loss
 
             return total_loss
 
@@ -470,6 +481,7 @@ class FedCiR(FedAvg):
                 #     logvar_g,
                 #     self.ref_mu,
                 #     self.ref_logvar,
+                #     self.lambda_align_g,
                 # )
                 threshold = 1e-6  # Define a threshold for the negligible loss
                 log(DEBUG, f"generator loss at ep {ep_g} step {step}: {loss}")

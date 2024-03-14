@@ -636,21 +636,24 @@ def train_align(
             vae_loss2 = vae_loss(net.decoder(z_g), images, mu_g, logvar_g, beta)
             loss = vae_loss1
             loss += lambda_reg * vae_loss2
-            for align_img, _ in align_loader:
-                align_img = align_img.to(device)
-                _, mu_g, log_var_g = temp_gen_model(align_img)
-                _, mu, log_var = net(align_img)
-                # mu_g, log_var_g = fixed_gen_stats
+            for align_epoch in range(100):
+                accumulate_align_loss = 0
+                for align_img, _ in align_loader:
+                    align_img = align_img.to(device)
+                    _, mu_g, log_var_g = temp_gen_model(align_img)
+                    _, mu, log_var = net(align_img)
+                    # mu_g, log_var_g = fixed_gen_stats
 
-                loss_align = 0.5 * (log_var_g - log_var - 1) + (
-                    log_var.exp() + (mu - mu_g).pow(2)
-                ) / (2 * log_var_g.exp())
+                    loss_align = 0.5 * (log_var_g - log_var - 1) + (
+                        log_var.exp() + (mu - mu_g).pow(2)
+                    ) / (2 * log_var_g.exp())
 
-            loss_align_reduced = torch.mean(loss_align.sum(dim=1))
-            print(f"lambda_align: {lambda_align }")
-            print(f"loss_align_term: {lambda_align * loss_align_reduced}")
-
-            loss += lambda_align * loss_align_reduced
+                loss_align_reduced = torch.mean(loss_align.sum(dim=1))
+                accumulate_align_loss += loss_align_reduced
+                print(f"lambda_align: {lambda_align }")
+                print(f"loss_align_term: {lambda_align * loss_align_reduced}")
+            avg_accumulate_align_loss = accumulate_align_loss / (align_epoch + 1)
+            loss += lambda_align * avg_accumulate_align_loss
             loss.backward()
             optimizer.step()
 
@@ -658,6 +661,99 @@ def train_align(
         vae_loss1.item(),
         # 0,
         lambda_reg * vae_loss2.item(),
+        lambda_align * avg_accumulate_align_loss.item(),
+    )
+
+
+def train_align_dec_frozen(
+    net,
+    trainloader,
+    align_loader,
+    optimizer,
+    config,
+    epochs,
+    device,
+    num_classes=None,
+):
+    """Train the network on the training set."""
+    net.train()
+    temp_gen_model = VAE(z_dim=config["latent_dim"], encoder_only=True).to(device)
+    # TODO: load the weights from the global model
+    gen_weights = parameters_to_ndarrays(config["gen_params"])
+    params_dict = zip(temp_gen_model.state_dict().keys(), gen_weights)
+    state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
+    temp_gen_model.load_state_dict(state_dict, strict=True)
+
+    temp_gen_model.eval()
+    # fixed_gen_stats = config["gen_params"]
+    # print(f"fixed mu: {fixed_gen_stats[0]}")
+    print(f"gen_weights: {gen_weights[7]}")
+
+    lambda_reg = config["lambda_reg"]
+
+    lambda_align = config["lambda_align"]
+    beta = config["beta"]
+    latent_diff_loss = nn.MSELoss(reduction="none")
+    opt1 = torch.optim.Adam(net.parameters(), lr=1e-3)
+    for _ in range(epochs):
+        for images, _ in trainloader:
+            for name, param in net.named_parameters():
+                param.requires_grad = True
+
+            for idx, (align_img, _) in enumerate(align_loader):
+                opt1.zero_grad()
+                align_img = align_img.to(device)
+                _, mu_g, log_var_g = temp_gen_model(align_img)
+                recon_align_img, mu, log_var = net(align_img)
+                vae_loss1 = vae_loss(recon_align_img, align_img, mu, log_var, beta)
+                loss_ref = vae_loss1
+                # mu_g, log_var_g = fixed_gen_stats
+
+                loss_align = 0.5 * (log_var_g - log_var - 1) + (
+                    log_var.exp() + (mu - mu_g).pow(2)
+                ) / (2 * log_var_g.exp())
+
+                loss_align_reduced = torch.mean(loss_align.sum(dim=1))
+                print(f"align_idx: {idx }")
+                print(f"loss_align_term: {lambda_align * loss_align_reduced}")
+                for name, param in net.named_parameters():
+                    if "fc6" in name:
+                        print(f" before fc6 requires_grad: {param.requires_grad}")
+                        break
+
+            loss_ref += lambda_align * loss_align_reduced
+            loss_ref.backward()
+            opt1.step()
+
+            # Freeze parameters after fc4
+            parameters_except_decorder = []
+            for name, param in net.named_parameters():
+                if "fc5" in name or "fc6" in name or "fc7" in name or "fc8" in name:
+                    param.requires_grad = False
+                else:
+                    parameters_except_decorder.append(param)
+            opt2 = torch.optim.Adam(parameters_except_decorder, lr=1e-3)
+            opt2.zero_grad()
+            images = images.to(device)
+            recon_images, mu, logvar = net(images)
+            z = net.sampling(mu, logvar)
+            z_g, _, _ = temp_gen_model(images)
+
+            vae_loss2 = latent_diff_loss(z, z_g).sum(dim=1).mean()
+            loss_local = vae_loss2
+            loss_local += vae_loss(recon_images, images, mu, logvar, beta)
+            for name, param in net.named_parameters():
+                if "fc6" in name:
+                    print(f" after fc6 requires_grad: {param.requires_grad}")
+                    break
+            loss_local.backward()
+            opt2.step()
+
+    for name, param in net.named_parameters():
+        param.requires_grad = True
+    return (
+        loss_local.item(),
+        lambda_reg * loss_ref.item(),
         lambda_align * loss_align_reduced.item(),
     )
 
