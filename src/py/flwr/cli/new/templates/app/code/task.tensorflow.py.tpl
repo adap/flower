@@ -16,9 +16,9 @@ def load_model():
     return model
 
 
-def load_data(cid):
+def load_data(cid, num_partitions):
     # Download and partition dataset
-    fds = FederatedDataset(dataset="cifar10", partitioners={"train": 3})
+    fds = FederatedDataset(dataset="cifar10", partitioners={"train": num_partitions})
     partition = fds.load_partition(int(cid), "train")
     partition.set_format("numpy")
 
