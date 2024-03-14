@@ -51,7 +51,7 @@ def prepare_dataset(use_mnist: bool):
         )
         x_test, y_test = partition["test"][img_key] / 255.0, partition["test"]["label"]
         partitions.append(((x_train, y_train), (x_test, y_test)))
-    data_centralized = fds.load_full("test")
+    data_centralized = fds.load_split("test")
     data_centralized.set_format("numpy")
     x_centralized = data_centralized[img_key] / 255.0
     y_centralized = data_centralized["label"]

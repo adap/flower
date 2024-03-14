@@ -143,11 +143,8 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         config=initialized_config,
     )
 
+    # Terminate the thread
     f_stop.set()
-
-    # Stop the Driver API server and the thread
-    del driver
-
     thread.join()
 
     event(EventType.START_SERVER_LEAVE)

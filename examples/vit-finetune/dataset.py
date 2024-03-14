@@ -21,7 +21,7 @@ def get_dataset_with_partitions(num_partitions: int):
         dataset="nelorth/oxford-flowers", partitioners={"train": num_partitions}
     )
 
-    centralized_testset = ox_flowers_fds.load_full("test")
+    centralized_testset = ox_flowers_fds.load_split("test")
     return ox_flowers_fds, centralized_testset
 
 
