@@ -47,6 +47,7 @@ from .fedyogi import FedYogi as FedYogi
 from .krum import Krum as Krum
 from .qfedavg import QFedAvg as QFedAvg
 from .strategy import Strategy as Strategy
+from .FedAvgGrad import FedAvgGrad as FedAvgGrad
 
 __all__ = [
     "Bulyan",
@@ -73,4 +74,5 @@ __all__ = [
     "Krum",
     "QFedAvg",
     "Strategy",
+    "FedAvgGrad"
 ]

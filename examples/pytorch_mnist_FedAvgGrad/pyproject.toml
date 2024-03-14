@@ -1,0 +1,18 @@
+[build-system]
+requires = [
+    "poetry==1.1.6",
+]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "quickstart_pytorch"
+version = "0.1.0"
+description = "PyTorch Federated Learning Quickstart with Flower"
+authors = ["The Flower Authors <enquiries@flower.dev>"]
+
+[tool.poetry.dependencies]
+pillow = "8.1.0"
+python = "^3.6.2"
+flwr = { path = "../../" ,develop = true }
+torch = "1.7.1"
+torchvision = "0.8.2"
