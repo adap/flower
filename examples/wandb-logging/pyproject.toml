@@ -1,0 +1,17 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "wandb-logging"
+version = "0.1.0"
+description = "PyTorch Federated Learning with Flower and W&B Logging"
+authors = ["The Flower Authors <hello@flower.dev>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+flwr = {version = ">=1.0,<2.0", extras = ["simulation"]}
+torch = "1.13.1"
+torchvision = "0.14.1"
+tqdm = "4.65.0"
+wandb = "^0.15.8"
