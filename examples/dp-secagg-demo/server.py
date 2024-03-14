@@ -47,9 +47,10 @@ strategy = FedAvg(
     initial_parameters=parameters,
 )
 
+
 # Wrap the core strategy
 strategy = DifferentialPrivacyClientSideFixedClipping(
-    strategy, noise_multiplier=0.1, clipping_norm=10, num_sampled_clients=20
+    strategy, noise_multiplier=0.2, clipping_norm=10, num_sampled_clients=20
 )
 
 
