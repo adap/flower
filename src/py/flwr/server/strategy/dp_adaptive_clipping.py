@@ -296,7 +296,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
 
     Wrap the strategy with the `DifferentialPrivacyClientSideAdaptiveClipping` wrapper:
 
-    >>> DifferentialPrivacyClientSideAdaptiveClipping(
+    >>> dp_strategy = DifferentialPrivacyClientSideAdaptiveClipping(
     >>>     strategy, cfg.noise_multiplier, cfg.num_sampled_clients
     >>> )
 

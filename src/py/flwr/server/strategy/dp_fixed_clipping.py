@@ -234,7 +234,7 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
 
     Wrap the strategy with the `DifferentialPrivacyClientSideFixedClipping` wrapper:
 
-    >>> DifferentialPrivacyClientSideFixedClipping(
+    >>> dp_strategy = DifferentialPrivacyClientSideFixedClipping(
     >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
     >>> )
 
