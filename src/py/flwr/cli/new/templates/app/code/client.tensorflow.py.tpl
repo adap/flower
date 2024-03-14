@@ -2,7 +2,6 @@
 
 import os
 
-from flwr.cli.flower_toml import load_and_validate_with_defaults
 from flwr.client import NumPyClient, ClientApp
 
 from $project_name.task import load_data, load_model
@@ -33,16 +32,11 @@ class FlowerClient(NumPyClient):
         loss, accuracy = self.model.evaluate(self.x_test, self.y_test, verbose=0)
         return loss, len(self.x_test), {"accuracy": accuracy}
 
-cfg, *_ = load_and_validate_with_defaults()
 
 def client_fn(cid):
     # Load model and data
     net = load_model()
-    engine = cfg["flower"]["engine"]
-    num_partitions = 2
-    if "simulation" in engine:
-        num_partitions = engine["simulation"]["supernode"]["num"]
-    x_train, y_train, x_test, y_test = load_data(cid, num_partitions)
+    x_train, y_train, x_test, y_test = load_data(int(cid), 2)
 
     # Return Client instance
     return FlowerClient(net, x_train, y_train, x_test, y_test).to_client()
