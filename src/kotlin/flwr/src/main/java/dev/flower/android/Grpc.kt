@@ -24,7 +24,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 
-internal class FlowerGrpc
+internal class GrpcBidi
 @Throws constructor(
     channel: ManagedChannel,
     private val client: Client,
@@ -65,13 +65,19 @@ internal class FlowerGrpc
  * same machine on port 8080, then server_address would be “[::]:8080”.
  * @param useTLS Whether to use TLS to connect to the Flower server.
  * @param client The Flower client implementation.
+ * @param rere Whether to use Flower grpc-rere or grpc-bidi.
  */
 suspend fun startClient(
     serverAddress: String,
     useTls: Boolean,
     client: Client,
+    grpcRere: Boolean,
 ) {
-    FlowerGrpc(createChannel(serverAddress, useTls), client)
+    if (grpcRere) {
+        GrpcRere(createChannel(serverAddress, useTLS), client)
+    } else {
+        GrpcBidi(createChannel(serverAddress, useTls), client)
+    }
 }
 
 internal suspend fun createChannel(address: String, useTLS: Boolean = false): ManagedChannel {
@@ -87,7 +93,7 @@ internal suspend fun createChannel(address: String, useTLS: Boolean = false): Ma
 
 const val HUNDRED_MEBIBYTE = 100 * 1024 * 1024
 
-internal class FlwrRere
+internal class GrpcRere
 @Throws constructor(
     channel: ManagedChannel,
     private val client: Client,
@@ -225,12 +231,4 @@ internal class FlwrRere
             }
         }
     }
-}
-
-suspend fun createFlowerRere(
-    serverAddress: String,
-    useTLS: Boolean,
-    client: Client,
-) {
-    FlwrRere(createChannel(serverAddress, useTLS), client)
 }
