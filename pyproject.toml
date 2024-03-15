@@ -171,7 +171,6 @@ strict = true
 
 [[tool.mypy.overrides]]
 module = [
-    "flwr_example.*",
     "flwr_experimental.*",
 ]
 ignore_errors = true
