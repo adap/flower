@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 
 ARG UBUNTU_VERSION=22.04
 FROM ubuntu:$UBUNTU_VERSION as base

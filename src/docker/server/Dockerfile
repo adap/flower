@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 
 ARG BASE_REPOSITORY=flwr/base
 ARG BASE_IMAGE_TAG=py3.11-ubuntu22.04
