@@ -1,100 +1,139 @@
-Differential privacy
+Differential Privacy
 ====================
+The information in datasets like healthcare, financial transactions, user preferences, etc., is valuable and has the potential for scientific breakthroughs and provides important business insights.
+However, such data is also sensitive and there is a risk of compromising individual privacy.
 
-Flower provides differential privacy (DP) wrapper classes for the easy integration of the central DP guarantees provided by DP-FedAvg into training pipelines defined in any of the various ML frameworks that Flower is compatible with. 
-
-.. warning::
-  Please note that these components are still experimental; the correct configuration of DP for a specific task is still an unsolved problem.
-
-.. note::
-  The name DP-FedAvg is misleading since it can be applied on top of any FL algorithm that conforms to the general structure prescribed by the FedOpt family of algorithms.
-
-DP-FedAvg
----------
-
-DP-FedAvg, originally proposed by McMahan et al. [mcmahan]_ and extended by Andrew et al. [andrew]_, is essentially FedAvg with the following modifications. 
-
-* **Clipping** : The influence of each client's update is bounded by clipping it. This is achieved by enforcing a cap on the L2 norm of the update, scaling it down if needed.
-* **Noising** :  Gaussian noise, calibrated to the clipping threshold, is added to the average computed at the server.
-
-The distribution of the update norm has been shown to vary from task-to-task and to evolve as training progresses. This variability is crucial in understanding its impact on differential privacy guarantees, emphasizing the need for an adaptive approach [andrew]_ that continuously adjusts the clipping threshold to track a prespecified quantile of the update norm distribution.
-
-Simplifying Assumptions
-***********************
-
-We make (and attempt to enforce) a number of assumptions that must be satisfied to ensure that the training process actually realizes the :math:`(\epsilon, \delta)` guarantees the user has in mind when configuring the setup. 
-
-* **Fixed-size subsampling** :Fixed-size subsamples of the clients must be taken at each round, as opposed to variable-sized Poisson subsamples. 
-* **Unweighted averaging** : The contributions from all the clients must weighted equally in the aggregate to eliminate the requirement for the server to know in advance the sum of the weights of all clients available for selection.
-* **No client failures** : The set of available clients must stay constant across all rounds of training. In other words, clients cannot drop out or fail. 
-
-The first two are useful for eliminating a multitude of complications associated with calibrating the noise to the clipping threshold, while the third one is required to comply with the assumptions of the privacy analysis.
-
-.. note::
-   These restrictions are in line with constraints imposed by Andrew et al. [andrew]_.
-
-Customizable Responsibility for Noise injection
-***********************************************
-In contrast to other implementations where the addition of noise is performed at the server, you can configure the site of noise injection to better match your threat model. We provide users with the flexibility to set up the training such that each client independently adds a small amount of noise to the clipped update, with the result that simply aggregating the noisy updates is equivalent to the explicit addition of noise to the non-noisy aggregate at the server. 
+Traditional methods like anonymization alone would not work because of attacks like Re-identification and Data Linkage.
+That's where differential privacy comes in. It provides the possibility of analyzing data while ensuring the privacy of individuals.
 
 
-To be precise, if we let :math:`m` be the number of clients sampled each round and :math:`\sigma_\Delta` be the scale of the total Gaussian noise that needs to be added to the sum of the model updates, we can use simple maths to show that this is equivalent to each client adding noise with scale :math:`\sigma_\Delta/\sqrt{m}`.
+Differential Privacy
+--------------------
+Imagine two datasets that are identical except for a single record (for instance, Alice's data).
+Differential Privacy (DP) guarantees that any analysis (M), like calculating the average income, will produce nearly identical results for both datasets (O and O' would be similar).
+This preserves group patterns while obscuring individual details, ensuring the individual's information remains hidden in the crowd.
 
-Wrapper-based approach
-----------------------
-
-Introducing DP to an existing workload can be thought of as adding an extra layer of security around it. This inspired us to provide the additional server and client-side logic needed to make the training process differentially private as wrappers for instances of the :code:`Strategy` and :code:`NumPyClient` abstract classes respectively. This wrapper-based approach has the advantage of being easily composable with other wrappers that someone might contribute to the Flower library in the future, e.g., for secure aggregation. Using Inheritance instead can be tedious because that would require the creation of new sub- classes every time a new class implementing :code:`Strategy` or :code:`NumPyClient` is defined.
-
-Server-side logic
-*****************
-
-The first version of our solution was to define a decorator whose constructor accepted, among other things, a boolean-valued variable indicating whether adaptive clipping was to be enabled or not. We quickly realized that this would clutter its :code:`__init__()` function with variables corresponding to hyperparameters of adaptive clipping that would remain unused when it was disabled. A cleaner implementation could be achieved by splitting the functionality into two decorators, :code:`DPFedAvgFixed` and :code:`DPFedAvgAdaptive`, with the latter sub- classing the former. The constructors for both classes accept a boolean parameter :code:`server_side_noising`, which, as the name suggests, determines where noising is to be performed.
-
-DPFedAvgFixed
-:::::::::::::
-
-The server-side capabilities required for the original version of DP-FedAvg, i.e., the one which performed fixed clipping, can be completely captured with the help of wrapper logic for just the following two methods of the :code:`Strategy` abstract class.
-
-#. :code:`configure_fit()` : The config dictionary being sent by the wrapped :code:`Strategy` to each client needs to be augmented with an additional value equal to the clipping threshold (keyed under :code:`dpfedavg_clip_norm`) and, if :code:`server_side_noising=true`, another one equal to the scale of the Gaussian noise that needs to be added at the client (keyed under :code:`dpfedavg_noise_stddev`). This entails *post*-processing of the results returned by the wrappee's implementation of :code:`configure_fit()`.
-#. :code:`aggregate_fit()`: We check whether any of the sampled clients dropped out or failed to upload an update before the round timed out. In that case, we need to abort the current round, discarding any successful updates that were received, and move on to the next one. On the other hand, if all clients responded successfully, we must force the averaging of the updates to happen in an unweighted manner by intercepting the :code:`parameters` field of :code:`FitRes` for each received update and setting it to 1. Furthermore, if :code:`server_side_noising=true`, each update is perturbed with an amount of noise equal to what it would have been subjected to had client-side noising being enabled. This entails *pre*-processing of the arguments to this method before passing them on to the wrappee's implementation of :code:`aggregate_fit()`.
-
-.. note::
-  We can't directly change the aggregation function of the wrapped strategy to force it to add noise to the aggregate, hence we simulate client-side noising to implement server-side noising. 
-
-These changes have been put together into a class called :code:`DPFedAvgFixed`, whose constructor accepts the strategy being decorated, the clipping threshold and the number of clients sampled every round as compulsory arguments. The user is expected to specify the clipping threshold since the order of magnitude of the update norms is highly dependent on the model being trained and providing a default value would be misleading. The number of clients sampled at every round is required to calculate the amount of noise that must be added to each individual update, either by the server or the clients. 
-
-DPFedAvgAdaptive
-::::::::::::::::
-
-The additional functionality required to facilitate adaptive clipping has been provided in :code:`DPFedAvgAdaptive`, a subclass of :code:`DPFedAvgFixed`. It overrides the above-mentioned methods to do the following. 
-
-#. :code:`configure_fit()` : It intercepts the config dict returned by :code:`super.configure_fit()` to add the key-value pair :code:`dpfedavg_adaptive_clip_enabled:True` to it, which the client interprets as an instruction to include an indicator bit (1 if update norm <= clipping threshold, 0 otherwise) in the results returned by it. 
-
-#. :code:`aggregate_fit()` : It follows a call to :code:`super.aggregate_fit()` with one to :code:`__update_clip_norm__()`, a procedure which adjusts the clipping threshold on the basis of the indicator bits received from the sampled clients. 
+.. image:: ./_static/DP/dp-intro.png
+  :align: center
+  :width: 400
+  :alt: DP Intro
 
 
-Client-side logic
-*****************
+One of the most commonly used mechanisms to achieve DP is adding enough noise to the output of the analysis to mask the contribution of each individual in the data while preserving the overall accuracy of the analysis.
 
-The client-side capabilities required can be completely captured through wrapper logic for just the :code:`fit()` method of the :code:`NumPyClient` abstract class. To be precise, we need to *post-process* the update computed by the wrapped client to clip it, if necessary, to the threshold value supplied by the server as part of the config dictionary. In addition to this, it may need to perform some extra work if either (or both) of the following keys are also present in the dict.
+Formal Definition
+~~~~~~~~~~~~~~~~~
+Differential Privacy (DP) provides statistical guarantees against the information an adversary can infer through the output of a randomized algorithm.
+It provides an unconditional upper bound on the influence of a single individual on the output of the algorithm by adding noise [1].
+A randomized mechanism
+M provides (:math:`\epsilon`, :math:`\delta`)-differential privacy if for any two neighboring databases, D :sub:`1` and D :sub:`2`, that differ in only a single record,
+and for all possible outputs S ⊆ Range(A):
 
-* :code:`dpfedavg_noise_stddev` : Generate and add the specified amount of noise to the clipped update.
-* :code:`dpfedavg_adaptive_clip_enabled` : Augment the metrics dict in the :code:`FitRes` object being returned to the server with an indicator bit, calculated as described earlier.
+.. math::
+
+  \small
+  P[M(D_{1} \in A)] \leq e^{\delta} P[M(D_{2} \in A)] + \delta
 
 
-Performing the :math:`(\epsilon, \delta)` analysis
---------------------------------------------------
+The :math:`\epsilon` parameter, also known as the privacy budget, is a metric of privacy loss.
+It also controls the privacy-utility trade-off; lower :math:`\epsilon` values indicate higher levels of privacy but are likely to reduce utility as well.
+The :math:`\delta` parameter accounts for a small probability on which the upper bound :math:`\epsilon` does not hold.
+The amount of noise needed to achieve differential privacy is proportional to the sensitivity of the output, which measures the maximum change in the output due to the inclusion or removal of a single record.
 
-Assume you have trained for :math:`n` rounds with sampling fraction :math:`q` and noise multiplier :math:`z`. In order to calculate the :math:`\epsilon` value this would result in for a particular :math:`\delta`, the following script may be used. 
 
-.. code-block:: python
+Differential Privacy in Machine Learning
+----------------------------------------
+DP can be utilized in machine learning to preserve the privacy of the training data.
+Differentially private machine learning algorithms are designed in a way to prevent the algorithm to learn any specific information about any individual data points and subsequently prevent the model from revealing sensitive information.
+Depending on the stage at which noise is introduced, various methods exist for applying DP to machine learning algorithms.
+One approach involves adding noise to the training data (either to the features or labels), while another method entails injecting noise into the gradients of the loss function during model training.
+Additionally, such noise can be incorporated into the model's output.
 
-   import tensorflow_privacy as tfp
-   max_order = 32
-   orders = range(2, max_order + 1)
-   rdp = tfp.compute_rdp_sample_without_replacement(q, z, n, orders)
-   eps, _, _ = tfp.rdp_accountant.get_privacy_spent(rdp, target_delta=delta)
+Differential Privacy in Federated Learning
+------------------------------------------
+Federated learning is a data minimization approach that allows multiple parties to collaboratively train a model without sharing their raw data.
+However, federated learning also introduces new privacy challenges. The model updates between parties and the central server can leak information about the local data.
+These leaks can be exploited by attacks such as membership inference and property inference attacks, or model inversion attacks.
 
-.. [mcmahan] McMahan et al. "Learning Differentially Private Recurrent Language Models." International Conference on Learning Representations (ICLR), 2017.
+DP can play a crucial role in federated learning to provide privacy for the clients' data.
 
-.. [andrew] Andrew, Galen, et al. "Differentially Private Learning with Adaptive Clipping." Advances in Neural Information Processing Systems (NeurIPS), 2021.
+Depending on the granularity of privacy provision or the location of noise addition, different forms of DP exist in federated learning.
+In this explainer, we focus on two approaches of DP utilization in federated learning based on where the noise is added: at the server (also known as the center) or at the client (also known as the local).
+
+- **Central Differential Privacy**: DP is applied by the server and the goal is to prevent the aggregated model from leaking information about each client's data.
+
+- **Local Differential Privacy**: DP is applied on the client side before sending any information to the server and the goal is to prevent the updates that are sent to the server from leaking any information about the client's data.
+
+Central Differential Privacy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In this approach, which is also known as user-level DP, the central server is responsible for adding noise to the globally aggregated parameters. It should be noted that trust in the server is required.
+
+.. image:: ./_static/DP/CDP.png
+  :align: center
+  :width: 400
+  :alt: Central Differential Privacy
+
+While there are various ways to implement central DP in federated learning, we concentrate on the algorithms proposed by [2] and [3].
+The overall approach is to clip the model updates sent by the clients and add some amount of noise to the aggregated model.
+In each iteration, a random set of clients is chosen with a specific probability for training.
+Each client performs local training on its own data.
+The update of each client is then clipped by some value `S` (sensitivity `S`).
+This would limit the impact of any individual client which is crucial for privacy and often beneficial for robustness.
+A common approach to achieve this is by restricting the `L2` norm of the clients' model updates, ensuring that larger updates are scaled down to fit within the norm `S`.
+
+.. image:: ./_static/DP/clipping.png
+  :align: center
+  :width: 300
+  :alt: clipping
+
+Afterwards, the Gaussian mechanism is used to add noise in order to distort the sum of all clients' updates.
+The amount of noise is scaled to the sensitivity value to obtain a privacy guarantee.
+The Gaussian mechanism is used with a noise sampled from `N (0, σ²)` where `σ = ( noise_scale * S ) / (number of sampled clients)`.
+
+Clipping
+^^^^^^^^
+
+There are two forms of clipping commonly used in Central DP: Fixed Clipping and Adaptive Clipping.
+
+- **Fixed Clipping** : A predefined fix threshold is set for the magnitude of clients' updates. Any update exceeding this threshold is clipped back to the threshold value.
+
+- **Adaptive Clipping** : The clipping threshold dynamically adjusts based on the observed update distribution [4]. It means that the clipping value is tuned during the rounds with respect to the quantile of the update norm distribution.
+
+The choice between fixed and adaptive clipping depends on various factors such as privacy requirements, data distribution, model complexity, and others.
+
+Local Differential Privacy
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In this approach, each client is responsible for performing DP.
+Local DP avoids the need for a fully trusted aggregator, but it should be noted that local DP leads to a decrease in accuracy but better privacy in comparison to central DP.
+
+.. image:: ./_static/DP/LDP.png
+  :align: center
+  :width: 400
+  :alt: Local Differential Privacy
+
+
+In this explainer, we focus on two forms of achieving Local DP:
+
+- Each client adds noise to the local updates before sending them to the server. To achieve (:math:`\epsilon`, :math:`\delta`)-DP, considering the sensitivity of the local model to be ∆, Gaussian noise is applied with a noise scale of σ where:
+
+.. math::
+    \small
+    \frac{∆ \times \sqrt{2 \times \log\left(\frac{1.25}{\delta}\right)}}{\epsilon}
+
+
+- Each client adds noise to the gradients of the model during the local training (DP-SGD). More specifically, in this approach, gradients are clipped and an amount of calibrated noise is injected into the gradients.
+
+
+Please note that these two approaches are providing privacy at different levels.
+
+
+**References:**
+
+[1] Dwork et al. The Algorithmic Foundations of Differential Privacy.
+
+[2] McMahan et al. Learning Differentially Private Recurrent Language Models.
+
+[3] Geyer et al. Differentially Private Federated Learning: A Client Level Perspective.
+
+[4] Galen et al. Differentially Private Learning with Adaptive Clipping.

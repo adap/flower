@@ -16,6 +16,7 @@
 
 
 import os
+import threading
 from datetime import datetime, timedelta
 from logging import ERROR
 from typing import Dict, List, Optional, Set
@@ -35,6 +36,7 @@ class InMemoryState(State):
         self.run_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
+        self.lock = threading.Lock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
@@ -57,7 +59,8 @@ class InMemoryState(State):
         task_ins.task_id = str(task_id)
         task_ins.task.created_at = created_at.isoformat()
         task_ins.task.ttl = ttl.isoformat()
-        self.task_ins_store[task_id] = task_ins
+        with self.lock:
+            self.task_ins_store[task_id] = task_ins
 
         # Return the new task_id
         return task_id
@@ -71,22 +74,23 @@ class InMemoryState(State):
 
         # Find TaskIns for node_id that were not delivered yet
         task_ins_list: List[TaskIns] = []
-        for _, task_ins in self.task_ins_store.items():
-            # pylint: disable=too-many-boolean-expressions
-            if (
-                node_id is not None  # Not anonymous
-                and task_ins.task.consumer.anonymous is False
-                and task_ins.task.consumer.node_id == node_id
-                and task_ins.task.delivered_at == ""
-            ) or (
-                node_id is None  # Anonymous
-                and task_ins.task.consumer.anonymous is True
-                and task_ins.task.consumer.node_id == 0
-                and task_ins.task.delivered_at == ""
-            ):
-                task_ins_list.append(task_ins)
-            if limit and len(task_ins_list) == limit:
-                break
+        with self.lock:
+            for _, task_ins in self.task_ins_store.items():
+                # pylint: disable=too-many-boolean-expressions
+                if (
+                    node_id is not None  # Not anonymous
+                    and task_ins.task.consumer.anonymous is False
+                    and task_ins.task.consumer.node_id == node_id
+                    and task_ins.task.delivered_at == ""
+                ) or (
+                    node_id is None  # Anonymous
+                    and task_ins.task.consumer.anonymous is True
+                    and task_ins.task.consumer.node_id == 0
+                    and task_ins.task.delivered_at == ""
+                ):
+                    task_ins_list.append(task_ins)
+                if limit and len(task_ins_list) == limit:
+                    break
 
         # Mark all of them as delivered
         delivered_at = now().isoformat()
@@ -118,7 +122,8 @@ class InMemoryState(State):
         task_res.task_id = str(task_id)
         task_res.task.created_at = created_at.isoformat()
         task_res.task.ttl = ttl.isoformat()
-        self.task_res_store[task_id] = task_res
+        with self.lock:
+            self.task_res_store[task_id] = task_res
 
         # Return the new task_id
         return task_id
@@ -128,45 +133,47 @@ class InMemoryState(State):
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
-        # Find TaskRes that were not delivered yet
-        task_res_list: List[TaskRes] = []
-        for _, task_res in self.task_res_store.items():
-            if (
-                UUID(task_res.task.ancestry[0]) in task_ids
-                and task_res.task.delivered_at == ""
-            ):
-                task_res_list.append(task_res)
-            if limit and len(task_res_list) == limit:
-                break
+        with self.lock:
+            # Find TaskRes that were not delivered yet
+            task_res_list: List[TaskRes] = []
+            for _, task_res in self.task_res_store.items():
+                if (
+                    UUID(task_res.task.ancestry[0]) in task_ids
+                    and task_res.task.delivered_at == ""
+                ):
+                    task_res_list.append(task_res)
+                if limit and len(task_res_list) == limit:
+                    break
 
-        # Mark all of them as delivered
-        delivered_at = now().isoformat()
-        for task_res in task_res_list:
-            task_res.task.delivered_at = delivered_at
+            # Mark all of them as delivered
+            delivered_at = now().isoformat()
+            for task_res in task_res_list:
+                task_res.task.delivered_at = delivered_at
 
-        # Return TaskRes
-        return task_res_list
+            # Return TaskRes
+            return task_res_list
 
     def delete_tasks(self, task_ids: Set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
         task_ins_to_be_deleted: Set[UUID] = set()
         task_res_to_be_deleted: Set[UUID] = set()
 
-        for task_ins_id in task_ids:
-            # Find the task_id of the matching task_res
-            for task_res_id, task_res in self.task_res_store.items():
-                if UUID(task_res.task.ancestry[0]) != task_ins_id:
-                    continue
-                if task_res.task.delivered_at == "":
-                    continue
+        with self.lock:
+            for task_ins_id in task_ids:
+                # Find the task_id of the matching task_res
+                for task_res_id, task_res in self.task_res_store.items():
+                    if UUID(task_res.task.ancestry[0]) != task_ins_id:
+                        continue
+                    if task_res.task.delivered_at == "":
+                        continue
 
-                task_ins_to_be_deleted.add(task_ins_id)
-                task_res_to_be_deleted.add(task_res_id)
+                    task_ins_to_be_deleted.add(task_ins_id)
+                    task_res_to_be_deleted.add(task_res_id)
 
-        for task_id in task_ins_to_be_deleted:
-            del self.task_ins_store[task_id]
-        for task_id in task_res_to_be_deleted:
-            del self.task_res_store[task_id]
+            for task_id in task_ins_to_be_deleted:
+                del self.task_ins_store[task_id]
+            for task_id in task_res_to_be_deleted:
+                del self.task_res_store[task_id]
 
     def num_task_ins(self) -> int:
         """Calculate the number of task_ins in store.

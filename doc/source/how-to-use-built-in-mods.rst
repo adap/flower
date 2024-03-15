@@ -86,4 +86,4 @@ Conclusion
 
 By following this guide, you have learned how to effectively use mods to enhance your ``ClientApp``'s functionality. Remember that the order of mods is crucial and affects how the input and output are processed.
 
-Enjoy building more robust and flexible ``ClientApp``s with mods!
+Enjoy building a more robust and flexible ``ClientApp`` with mods!

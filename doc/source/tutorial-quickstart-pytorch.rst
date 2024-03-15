@@ -10,13 +10,13 @@ Quickstart PyTorch
 ..  youtube:: jOmmuzMIQ4c
    :width: 100%
 
-In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using Flower and PyTorch. 
+In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using Flower and PyTorch.
 
-First of all, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_. 
+First of all, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
-Our example consists of one *server* and two *clients* all having the same model. 
+Our example consists of one *server* and two *clients* all having the same model.
 
-*Clients* are responsible for generating individual weight-updates for the model based on their local datasets. 
+*Clients* are responsible for generating individual weight-updates for the model based on their local datasets.
 These updates are then sent to the *server* which will aggregate them to produce a better model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of weight updates is called a *round*.
 
@@ -26,7 +26,7 @@ Now that we have a rough idea of what is going on, let's get started. We first n
 
   $ pip install flwr
 
-Since we want to use PyTorch to solve a computer vision task, let's go ahead and install PyTorch and the **torchvision** library: 
+Since we want to use PyTorch to solve a computer vision task, let's go ahead and install PyTorch and the **torchvision** library:
 
 .. code-block:: shell
 
@@ -36,12 +36,12 @@ Since we want to use PyTorch to solve a computer vision task, let's go ahead and
 Flower Client
 -------------
 
-Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on PyTorch's `Deep Learning with PyTorch <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_. 
+Now that we have all our dependencies installed, let's run a simple distributed training with two clients and one server. Our training procedure and network architecture are based on PyTorch's `Deep Learning with PyTorch <https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_.
 
 In a file called :code:`client.py`, import Flower and PyTorch related packages:
 
 .. code-block:: python
-      
+
     from collections import OrderedDict
 
     import torch
@@ -59,7 +59,7 @@ In addition, we define the device allocation in PyTorch with:
 
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-We use PyTorch to load CIFAR10, a popular colored image classification dataset for machine learning. The PyTorch :code:`DataLoader()` downloads the training and test data that are then normalized. 
+We use PyTorch to load CIFAR10, a popular colored image classification dataset for machine learning. The PyTorch :code:`DataLoader()` downloads the training and test data that are then normalized.
 
 .. code-block:: python
 
@@ -75,7 +75,7 @@ We use PyTorch to load CIFAR10, a popular colored image classification dataset f
         num_examples = {"trainset" : len(trainset), "testset" : len(testset)}
         return trainloader, testloader, num_examples
 
-Define the loss and optimizer with PyTorch. The training of the dataset is done by looping over the dataset, measure the corresponding loss and optimize it. 
+Define the loss and optimizer with PyTorch. The training of the dataset is done by looping over the dataset, measure the corresponding loss and optimize it.
 
 .. code-block:: python
 
@@ -91,7 +91,7 @@ Define the loss and optimizer with PyTorch. The training of the dataset is done 
                 loss.backward()
                 optimizer.step()
 
-Define then the validation of the  machine learning network. We loop over the test set and measure the loss and accuracy of the test set. 
+Define then the validation of the  machine learning network. We loop over the test set and measure the loss and accuracy of the test set.
 
 .. code-block:: python
 
@@ -139,7 +139,7 @@ The Flower clients will use a simple CNN adapted from 'PyTorch: A 60 Minute Blit
     net = Net().to(DEVICE)
     trainloader, testloader, num_examples = load_data()
 
-After loading the data set with :code:`load_data()` we define the Flower interface. 
+After loading the data set with :code:`load_data()` we define the Flower interface.
 
 The Flower server interacts with clients through an interface called
 :code:`Client`. When the server selects a particular client for training, it

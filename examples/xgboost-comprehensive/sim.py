@@ -86,7 +86,7 @@ def main():
     # Load centralised test set
     if args.centralised_eval or args.centralised_eval_client:
         log(INFO, "Loading centralised test set...")
-        test_data = fds.load_full("test")
+        test_data = fds.load_split("test")
         test_data.set_format("numpy")
         num_test = test_data.shape[0]
         test_dmatrix = transform_dataset_to_dmatrix(test_data)
@@ -98,9 +98,9 @@ def main():
 
     # Load and process all client partitions. This upfront cost is amortized soon
     # after the simulation begins since clients wont need to preprocess their partition.
-    for node_id in tqdm(range(args.pool_size), desc="Extracting client partition"):
-        # Extract partition for client with node_id
-        partition = fds.load_partition(node_id=node_id, split="train")
+    for partition_id in tqdm(range(args.pool_size), desc="Extracting client partition"):
+        # Extract partition for client with partition_id
+        partition = fds.load_partition(partition_id=partition_id, split="train")
         partition.set_format("numpy")
 
         if args.centralised_eval_client:
@@ -124,21 +124,21 @@ def main():
     if args.train_method == "bagging":
         # Bagging training
         strategy = FedXgbBagging(
-            evaluate_function=get_evaluate_fn(test_dmatrix)
-            if args.centralised_eval
-            else None,
+            evaluate_function=(
+                get_evaluate_fn(test_dmatrix) if args.centralised_eval else None
+            ),
             fraction_fit=(float(args.num_clients_per_round) / args.pool_size),
             min_fit_clients=args.num_clients_per_round,
             min_available_clients=args.pool_size,
-            min_evaluate_clients=args.num_evaluate_clients
-            if not args.centralised_eval
-            else 0,
+            min_evaluate_clients=(
+                args.num_evaluate_clients if not args.centralised_eval else 0
+            ),
             fraction_evaluate=1.0 if not args.centralised_eval else 0.0,
             on_evaluate_config_fn=eval_config,
             on_fit_config_fn=fit_config,
-            evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation
-            if not args.centralised_eval
-            else None,
+            evaluate_metrics_aggregation_fn=(
+                evaluate_metrics_aggregation if not args.centralised_eval else None
+            ),
         )
     else:
         # Cyclic training

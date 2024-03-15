@@ -36,10 +36,10 @@ Example: The variable `rnd` was renamed to `server_round` to improve readability
 
 - [ ] Implement proposed change
 - [ ] Write tests
-- [ ] Update [documentation](https://flower.dev/docs/writing-documentation.html)
+- [ ] Update [documentation](https://flower.ai/docs/writing-documentation.html)
 - [ ] Update the changelog entry below
 - [ ] Make CI checks pass
-- [ ] Ping maintainers on [Slack](https://flower.dev/join-slack/) (channel `#contributions`)
+- [ ] Ping maintainers on [Slack](https://flower.ai/join-slack/) (channel `#contributions`)
 
 <!--
 Inside the following 'Changelog entry' section, you should put the description of your changes that will be added to the changelog alongside your PR title.
@@ -68,7 +68,7 @@ Smaller PRs with good descriptions can be considered much more easily.
 
 If you have an urgent request or question, please use the Flower Slack:
 
-    https://flower.dev/join-slack/ (channel: #contributions)
+    https://flower.ai/join-slack/ (channel: #contributions)
 
 Thank you for contributing to Flower!
 -->
