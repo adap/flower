@@ -1,4 +1,4 @@
-name: Update Text and Language Files
+name: Translations
 
 on:
   schedule:
@@ -7,47 +7,57 @@ on:
 
 jobs:
   update-and-pr:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    name: Update text
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.10'
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.10
 
-    - name: Update Text and Languages for All Locales
-      run: |
-        cd doc
-        make update-text
-        for langDir in locales/*; do
-          if [ -d "$langDir" ]; then
-            lang=$(basename $langDir)
-            echo "Updating language $lang"
-            make update-lang lang=$lang
-          fi
-        done
+      - name: Install dependencies (mandatory only)
+        run: | 
+          python -m poetry install
+          pip install sphinx==7.2.0
 
-    - name: Commit changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add .
-        git commit -m "Update text and language files" || echo "No changes to commit"
+      - name: Update Text and Languages for All Locales
+        run: |
+          cd doc
+          make update-text
+          for langDir in locales/*; do
+            if [ -d "$langDir" ]; then
+              lang=$(basename $langDir)
+              echo "Updating language $lang"
+              make update-lang lang=$lang
+            fi
+          done
 
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: 'create-pr-branch' # This is the branch where changes will be pushed
+      - name: Commit changes
+        id: commit_changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Update text and language files" || echo "::set-output name=changes::false"
+          echo "::set-output name=changes::true"
+        continue-on-error: true
 
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        branch: 'create-pr-branch' # Ensure this matches the branch above
-        delete-branch: true
-        title: 'Update text and language files'
-        body: 'This PR is auto-generated to update text and language files.'
-        draft: false
+      - name: Push changes
+        if: steps.commit_changes.outputs.changes == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: 'create-pr-branch' # This is the branch where changes will be pushed
+
+      - name: Create Pull Request
+        if: steps.commit_changes.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: 'create-pr-branch' # Ensure this matches the branch above
+          delete-branch: true
+          title: 'Update text and language files'
+          body: 'This PR is auto-generated to update text and language files.'
+          draft: false
