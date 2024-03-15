@@ -205,8 +205,7 @@ class TestDriver(unittest.TestCase):
         self.driver._get_grpc_driver_and_run_id()
 
         # Execute
-        # pylint: disable-next=unnecessary-dunder-call
-        self.driver.__del__()
+        self.driver.close()
 
         # Assert
         self.mock_grpc_driver.disconnect.assert_called_once()
@@ -214,8 +213,7 @@ class TestDriver(unittest.TestCase):
     def test_del_with_uninitialized_driver(self) -> None:
         """Test cleanup behavior when Driver is not initialized."""
         # Execute
-        # pylint: disable-next=unnecessary-dunder-call
-        self.driver.__del__()
+        self.driver.close()
 
         # Assert
         self.mock_grpc_driver.disconnect.assert_not_called()

@@ -1,0 +1,13 @@
+[project]
+name = "fl_dp_sa"
+version = "1.0.0"
+description = ""
+license = "Apache-2.0"
+authors = [
+    "The Flower Authors <hello@flower.ai>",
+]
+readme = "README.md"
+
+[flower.components]
+serverapp = "fl_dp_sa.server:app"
+clientapp = "fl_dp_sa.client:app"

@@ -14,9 +14,22 @@
 # ==============================================================================
 """Flower command line interface utils."""
 
-from typing import List
+from typing import List, cast
 
 import typer
+
+
+def prompt_text(text: str) -> str:
+    """Ask user to enter text input."""
+    while True:
+        result = typer.prompt(
+            typer.style(f"\n💬 {text}", fg=typer.colors.MAGENTA, bold=True)
+        )
+        if len(result) > 0:
+            break
+        print(typer.style("❌ Invalid entry", fg=typer.colors.RED, bold=True))
+
+    return cast(str, result)
 
 
 def prompt_options(text: str, options: List[str]) -> str:
