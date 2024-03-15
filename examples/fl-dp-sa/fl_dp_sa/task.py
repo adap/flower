@@ -58,7 +58,6 @@ def load_data(partition_id):
 
 def train(net, trainloader, valloader, epochs, device):
     """Train the model on the training set."""
-    log(INFO, "Starting training...")
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.Adam(net.parameters())

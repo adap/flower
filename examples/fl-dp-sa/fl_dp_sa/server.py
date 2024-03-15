@@ -39,7 +39,7 @@ ndarrays = get_weights(Net())
 parameters = ndarrays_to_parameters(ndarrays)
 
 
-# Define core strategy
+# Define strategy
 strategy = FedAvg(
     fraction_fit=0.2,
     fraction_evaluate=0.0,  # Disable evaluation for demo purpose
@@ -48,9 +48,6 @@ strategy = FedAvg(
     fit_metrics_aggregation_fn=weighted_average,
     initial_parameters=parameters,
 )
-
-
-# Wrap the core strategy
 strategy = DifferentialPrivacyClientSideFixedClipping(
     strategy, noise_multiplier=0.2, clipping_norm=10, num_sampled_clients=20
 )
