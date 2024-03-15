@@ -4,11 +4,11 @@ ARG BASE_IMAGE
 FROM $BASE_IMAGE
 
 # Update pip
-RUN pip3 install --upgrade pip
+RUN pip3 install --no-cache-dir --upgrade pip
 
 # Install flower
-RUN pip3 install flwr>=1.0
-RUN pip3 install flwr-datsets>=0.2
-RUN pip3 install tqdm==4.65.0
+RUN pip3 install --no-cache-dir flwr>=1.0
+RUN pip3 install --no-cache-dir flwr-datsets>=0.2
+RUN pip3 install --no-cache-dir tqdm==4.65.0
 
 WORKDIR /client
