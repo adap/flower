@@ -3,12 +3,11 @@ ARG BASE_IMAGE
 # Pull the base image from NVIDIA
 FROM $BASE_IMAGE
 
-# Update pip
-RUN pip3 install --no-cache-dir --upgrade pip
-
-# Install flower
-RUN pip3 install --no-cache-dir flwr>=1.0
-RUN pip3 install --no-cache-dir flwr-datsets>=0.2
-RUN pip3 install --no-cache-dir tqdm==4.65.0
+# Update pip && Install flower
+RUN pip3 install --no-cache-dir --upgrade pip \
+    && pip3 install --no-cache-dir \
+    flwr>=1.0 \
+    flwr-datsets>=0.2 \
+    tqdm==4.65.0
 
 WORKDIR /client
