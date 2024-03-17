@@ -4,8 +4,8 @@ ARG BASE_IMAGE
 FROM $BASE_IMAGE
 
 # Update pip && Install flower
-RUN pip3 install --no-cache-dir --upgrade pip \
-    && pip3 install --no-cache-dir \
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir \
     flwr>=1.0 \
     flwr-datsets>=0.2 \
     tqdm==4.65.0

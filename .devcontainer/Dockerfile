@@ -44,7 +44,7 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install --no-cache-dir \
+RUN pip install --no-cache-dir \
     pip==23.3.1 \
     setuptools==68.2.2 \
     poetry==1.7.1

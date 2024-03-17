@@ -14,9 +14,9 @@ RUN apt-get update \
 COPY requirements.txt /requirements.txt
 
 # fixes pyyaml installation issues
-RUN pip3 install --no-cache-dir --no-build-isolation \
+RUN pip install --no-cache-dir --no-build-isolation \
     pyyaml==5.4.1 \
-    && pip3 install --no-cache-dir -r /requirements.txt
+    && pip install --no-cache-dir -r /requirements.txt
 
 COPY mnist.py /workspace/mnist.py
 ENTRYPOINT ["python3", "/workspace/mnist.py"]
