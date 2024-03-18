@@ -5,11 +5,11 @@ tar -xvf data_splits.tar
 
 # Create datasets directory and navigate into it
 mkdir datasets
-cd datasets
+cd datasets || exit
 
 # Create speech_commands directory and navigate into it
 mkdir speech_commands
-cd speech_commands
+cd speech_commands || exit
 
 # Download and extract the training data
 wget http://download.tensorflow.org/data/speech_commands_v0.02.tar.gz -O train.tar.gz
@@ -27,7 +27,7 @@ mv ./Data/Train/_background_noise_ ./Data/Train/_silence_
 cd ..
 # Create speech_commands directory and navigate into it
 mkdir ambient_context
-cd ambient_context
+cd ambient_context || exit
 
 wget http://sensix.tech/datasets/ambientacousticcontext/audioset_1sec_v1.tar.gz -O ambient_data.tar.gz
 mkdir -p ./Data

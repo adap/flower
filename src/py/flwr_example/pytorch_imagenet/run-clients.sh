@@ -19,7 +19,7 @@ set -e
 
 SERVER_ADDRESS="[::]:8080"
 NUM_CLIENTS=40
-IMAGENET_PATH="~/Downloads/imagenet-object-localization-challenge/"
+IMAGENET_PATH="$HOME/Downloads/imagenet-object-localization-challenge/"
 
 echo "Starting $NUM_CLIENTS clients."
 for ((i = 0; i < $NUM_CLIENTS; i++))
