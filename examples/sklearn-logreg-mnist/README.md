@@ -1,7 +1,7 @@
 # Flower Example using scikit-learn
 
 This example of Flower uses `scikit-learn`'s `LogisticRegression` model to train a federated learning system. It will help you understand how to adapt Flower for use with `scikit-learn`.
-Running this example in itself is quite easy.
+Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the MNIST dataset.
 
 ## Project Setup
 
@@ -57,18 +57,24 @@ Afterwards you are ready to start the Flower server as well as the clients. You 
 poetry run python3 server.py
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminals and run the following command in each:
+Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two or more terminals and run the following command in each:
+
+Start client 1 in the first terminal:
 
 ```shell
-poetry run python3 client.py
+python3 client.py --partition-id 0 # or any integer in {0-9}
 ```
 
-Alternatively you can run all of it in one shell as follows:
+Start client 2 in the second terminal:
 
 ```shell
-poetry run python3 server.py &
-poetry run python3 client.py &
-poetry run python3 client.py
+python3 client.py --partition-id 1 # or any integer in {0-9}
+```
+
+Alternatively, you can run all of it in one shell as follows:
+
+```bash
+bash run.sh
 ```
 
 You will see that Flower is starting a federated training.

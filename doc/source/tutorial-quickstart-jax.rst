@@ -265,7 +265,7 @@ Having defined the federation process, we can run it.
 
         # Start Flower client
         client = FlowerClient(params, grad_fn, train_x, train_y, test_x, test_y)
-        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client)
+        fl.client.start_client(server_address="0.0.0.0:8080", client=client.to_client())
 
     if __name__ == "__main__":
         main()

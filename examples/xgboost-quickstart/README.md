@@ -67,13 +67,13 @@ To do so simply open two more terminal windows and run the following commands.
 Start client 1 in the first terminal:
 
 ```shell
-python3 client.py --node-id=0
+python3 client.py --partition-id=0
 ```
 
 Start client 2 in the second terminal:
 
 ```shell
-python3 client.py --node-id=1
+python3 client.py --partition-id=1
 ```
 
 You will see that XGBoost is starting a federated training.
@@ -85,4 +85,4 @@ poetry run ./run.sh
 ```
 
 Look at the [code](https://github.com/adap/flower/tree/main/examples/xgboost-quickstart)
-and [tutorial](https://flower.dev/docs/framework/tutorial-quickstart-xgboost.html) for a detailed explanation.
+and [tutorial](https://flower.ai/docs/framework/tutorial-quickstart-xgboost.html) for a detailed explanation.

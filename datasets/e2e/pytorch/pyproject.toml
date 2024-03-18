@@ -1,0 +1,16 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "fds-e2e-pytorch"
+version = "0.1.0"
+description = "Flower Datasets with PyTorch"
+authors = ["The Flower Authors <hello@flower.ai>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+flwr-datasets = { path = "./../../", extras = ["vision"] }
+torch = "^1.12.0"
+torchvision = "^0.14.1"
+parameterized = "==0.9.0"

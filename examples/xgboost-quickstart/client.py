@@ -24,13 +24,13 @@ from flwr_datasets.partitioner import IidPartitioner
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
-# Define arguments parser for the client/node ID.
+# Define arguments parser for the client/partition ID.
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--node-id",
+    "--partition-id",
     default=0,
     type=int,
-    help="Node ID used for the current client.",
+    help="Partition ID used for the current client.",
 )
 args = parser.parse_args()
 
@@ -61,9 +61,9 @@ def transform_dataset_to_dmatrix(data: Union[Dataset, DatasetDict]) -> xgb.core.
 partitioner = IidPartitioner(num_partitions=30)
 fds = FederatedDataset(dataset="jxie/higgs", partitioners={"train": partitioner})
 
-# Load the partition for this `node_id`
+# Load the partition for this `partition_id`
 log(INFO, "Loading partition...")
-partition = fds.load_partition(node_id=args.node_id, split="train")
+partition = fds.load_partition(partition_id=args.partition_id, split="train")
 partition.set_format("numpy")
 
 # Train/test splitting
@@ -173,4 +173,4 @@ class XgbClient(fl.client.Client):
 
 
 # Start Flower client
-fl.client.start_client(server_address="127.0.0.1:8080", client=XgbClient())
+fl.client.start_client(server_address="127.0.0.1:8080", client=XgbClient().to_client())
