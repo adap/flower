@@ -1,4 +1,5 @@
 """Run CNN federated learning for MNIST dataset."""
+
 import os
 from typing import Dict, List
 

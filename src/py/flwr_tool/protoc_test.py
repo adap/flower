@@ -28,4 +28,4 @@ def test_directories() -> None:
 
 def test_proto_file_count() -> None:
     """Test if the correct number of proto files were captured by the glob."""
-    assert len(PROTO_FILES) == 5
+    assert len(PROTO_FILES) == 7

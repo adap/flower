@@ -5,7 +5,6 @@ The code is generally adapted from:
 https://mxnet.apache.org/api/python/docs/tutorials/packages/gluon/image/mnist.html
 """
 
-
 import flwr as fl
 import numpy as np
 import mxnet as mx

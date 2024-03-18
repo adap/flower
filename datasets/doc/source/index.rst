@@ -2,7 +2,7 @@ Flower Datasets
 ===============
 
 Flower Datasets (``flwr-datasets``) is a library to quickly and easily create datasets for federated
-learning/analytics/evaluation. It is created by the ``Flower Labs`` team that also created `Flower <https://flower.dev>`_ - a Friendly Federated Learning Framework.
+learning/analytics/evaluation. It is created by the ``Flower Labs`` team that also created `Flower <https://flower.ai>`_ - a Friendly Federated Learning Framework.
 
 Flower Datasets Framework
 -------------------------
@@ -98,7 +98,7 @@ Join the Flower Community
 
 The Flower Community is growing quickly - we're a friendly group of researchers, engineers, students, professionals, academics, and other enthusiasts.
 
-.. button-link:: https://flower.dev/join-slack
+.. button-link:: https://flower.ai/join-slack
     :color: primary
     :shadow:
 

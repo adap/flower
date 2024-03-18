@@ -3,23 +3,15 @@ Release Flower
 
 This document describes the current release process. It may or may not change in the future.
 
-Before the release
-------------------
-
-Update the changelog (``changelog.md``) with all relevant changes that happened after the last release. If the last release was tagged ``v1.2.0``, you can use the following URL to see all commits that got merged into ``main`` since then:
-
-`GitHub: Compare v1.2.0...main <https://github.com/adap/flower/compare/v1.2.0...main>`_
-
-Thank the authors who contributed since the last release. This can be done by running the ``./dev/add-shortlog.sh <new version>`` convenience script (it can be ran multiple times and will update the names in the list if new contributors were added in the meantime).
-
 During the release
 ------------------
 
 The version number of a release is stated in ``pyproject.toml``. To release a new version of Flower, the following things need to happen (in that order):
 
-1. Update the ``changelog.md`` section header ``Unreleased`` to contain the version number and date for the release you are building. Create a pull request with the change.
-2. Tag the release commit with the version number as soon as the PR is merged: ``git tag v0.12.3``, then ``git push --tags``. This will create a draft release on GitHub containing the correct artifacts and the relevant part of the changelog.
-3. Check the draft release on GitHub, and if everything is good, publish it.
+1. Run ``python3 src/py/flwr_tool/update_changelog.py <YOUR_GH_TOKEN>`` in order to add every new change to the changelog (feel free to make manual changes to the changelog afterwards until it looks good).
+2. Once the changelog has been updated with all the changes, run ``./dev/prepare-release-changelog.sh v<NEW_VERSION>``, where ``<NEW_VERSION>`` is the version stated in ``pyproject.toml`` (notice the ``v`` added before it). This will replace the ``Unreleased`` header of the changelog by the version and current date, and it will add a thanking message for the contributors. Open a pull request with those changes.
+3. Once the pull request is merged, tag the release commit with the version number as soon as the PR is merged: ``git tag v<NEW_VERSION>`` (notice the ``v`` added before the version number), then ``git push --tags``. This will create a draft release on GitHub containing the correct artifacts and the relevant part of the changelog.
+4. Check the draft release on GitHub, and if everything is good, publish it.
 
 After the release
 -----------------
@@ -30,7 +22,7 @@ Create a pull request which contains the following changes:
 2. Update all files which contain the current version number if necessary.
 3. Add a new ``Unreleased`` section in ``changelog.md``.
 
-Merge the pull request on the same day (i.e., before a new nighly release gets published to PyPI).
+Merge the pull request on the same day (i.e., before a new nightly release gets published to PyPI).
 
 Publishing a pre-release
 ------------------------
@@ -38,11 +30,11 @@ Publishing a pre-release
 Pre-release naming
 ~~~~~~~~~~~~~~~~~~
 
-PyPI supports pre-releases (alpha, beta, release candiate). Pre-releases MUST use one of the following naming patterns:
+PyPI supports pre-releases (alpha, beta, release candidate). Pre-releases MUST use one of the following naming patterns:
 
 - Alpha: ``MAJOR.MINOR.PATCHaN``
 - Beta: ``MAJOR.MINOR.PATCHbN``
-- Release candiate (RC): ``MAJOR.MINOR.PATCHrcN``
+- Release candidate (RC): ``MAJOR.MINOR.PATCHrcN``
 
 Examples include:
 

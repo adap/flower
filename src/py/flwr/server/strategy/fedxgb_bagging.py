@@ -44,6 +44,11 @@ class FedXgbBagging(FedAvg):
         self.global_model: Optional[bytes] = None
         super().__init__(**kwargs)
 
+    def __repr__(self) -> str:
+        """Compute a string representation of the strategy."""
+        rep = f"FedXgbBagging(accept_failures={self.accept_failures})"
+        return rep
+
     def aggregate_fit(
         self,
         server_round: int,

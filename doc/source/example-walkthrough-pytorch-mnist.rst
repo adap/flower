@@ -1,11 +1,11 @@
 Example: Walk-Through PyTorch & MNIST
 =====================================
 
-In this tutorial we will learn, how to train a Convolutional Neural Network on MNIST using Flower and PyTorch. 
+In this tutorial we will learn, how to train a Convolutional Neural Network on MNIST using Flower and PyTorch.
 
-Our example consists of one *server* and two *clients* all having the same model. 
+Our example consists of one *server* and two *clients* all having the same model.
 
-*Clients* are responsible for generating individual weight-updates for the model based on their local datasets. 
+*Clients* are responsible for generating individual weight-updates for the model based on their local datasets.
 These updates are then sent to the *server* which will aggregate them to produce a better model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of weight updates is called a *round*.
 
@@ -15,7 +15,7 @@ Now that we have a rough idea of what is going on, let's get started. We first n
 
   $ pip install flwr
 
-Since we want to use PyTorch to solve a computer vision task, let's go ahead an install PyTorch and the **torchvision** library: 
+Since we want to use PyTorch to solve a computer vision task, let's go ahead an install PyTorch and the **torchvision** library:
 
 .. code-block:: shell
 
@@ -32,51 +32,51 @@ Go ahead and launch on a terminal the *run-server.sh* script first as follows:
 
 .. code-block:: shell
 
-  $ bash ./run-server.sh 
+  $ bash ./run-server.sh
 
 
-Now that the server is up and running, go ahead and launch the clients.  
+Now that the server is up and running, go ahead and launch the clients.
 
 .. code-block:: shell
 
-  $ bash ./run-clients.sh 
+  $ bash ./run-clients.sh
 
 
 Et voilà! You should be seeing the training procedure and, after a few iterations, the test accuracy for each client.
 
 .. code-block:: shell
 
-    Train Epoch: 10 [30000/30016 (100%)] Loss: 0.007014				
-    
-    Train Epoch: 10 [30000/30016 (100%)] Loss: 0.000403				
-    
-    Train Epoch: 11 [30000/30016 (100%)] Loss: 0.001280				
-    
-    Train Epoch: 11 [30000/30016 (100%)] Loss: 0.000641				
-    
-    Train Epoch: 12 [30000/30016 (100%)] Loss: 0.006784				
-    
-    Train Epoch: 12 [30000/30016 (100%)] Loss: 0.007134				
-    
-    Client 1 - Evaluate on 5000 samples: Average loss: 0.0290, Accuracy: 99.16%	
-    
+    Train Epoch: 10 [30000/30016 (100%)] Loss: 0.007014
+
+    Train Epoch: 10 [30000/30016 (100%)] Loss: 0.000403
+
+    Train Epoch: 11 [30000/30016 (100%)] Loss: 0.001280
+
+    Train Epoch: 11 [30000/30016 (100%)] Loss: 0.000641
+
+    Train Epoch: 12 [30000/30016 (100%)] Loss: 0.006784
+
+    Train Epoch: 12 [30000/30016 (100%)] Loss: 0.007134
+
+    Client 1 - Evaluate on 5000 samples: Average loss: 0.0290, Accuracy: 99.16%
+
     Client 0 - Evaluate on 5000 samples: Average loss: 0.0328, Accuracy: 99.14%
 
 
-Now, let's see what is really happening inside. 
+Now, let's see what is really happening inside.
 
 Flower Server
 -------------
 
 Inside the server helper script *run-server.sh* you will find the following code that basically runs the :code:`server.py`
 
-.. code-block:: bash 
+.. code-block:: bash
 
     python -m flwr_example.quickstart-pytorch.server
 
 
 We can go a bit deeper and see that :code:`server.py` simply launches a server that will coordinate three rounds of training.
-Flower Servers are very customizable, but for simple workloads, we can start a server using the :ref:`start_server <flwr-server-start_server-apiref>` function and leave all the configuration possibilities at their default values, as seen below.
+Flower Servers are very customizable, but for simple workloads, we can start a server using the `start_server <https://flower.ai/docs/framework/ref-api/flwr.server.start_server.html#flwr.server.start_server>`_ function and leave all the configuration possibilities at their default values, as seen below.
 
 .. code-block:: python
 
@@ -90,18 +90,18 @@ Flower Client
 
 Next, let's take a look at the *run-clients.sh* file. You will see that it contains the main loop that starts a set of *clients*.
 
-.. code-block:: bash 
+.. code-block:: bash
 
     python -m flwr_example.quickstart-pytorch.client \
       --cid=$i \
       --server_address=$SERVER_ADDRESS \
-      --nb_clients=$NUM_CLIENTS 
+      --nb_clients=$NUM_CLIENTS
 
 * **cid**: is the client ID. It is an integer that uniquely identifies client identifier.
-* **sever_address**: String that identifies IP and port of the server. 
+* **sever_address**: String that identifies IP and port of the server.
 * **nb_clients**: This defines the number of clients being created. This piece of information is not required by the client, but it helps us partition the original MNIST dataset to make sure that every client is working on unique subsets of both *training* and *test* sets.
 
-Again, we can go deeper and look inside :code:`flwr_example/quickstart-pytorch/client.py`. 
+Again, we can go deeper and look inside :code:`flwr_example/quickstart-pytorch/client.py`.
 After going through the argument parsing code at the beginning of our :code:`main` function, you will find a call to :code:`mnist.load_data`. This function is responsible for partitioning the original MNIST datasets (*training* and *test*) and returning a :code:`torch.utils.data.DataLoader` s for each of them.
 We then instantiate a :code:`PytorchMNISTClient` object with our client ID, our DataLoaders, the number of epochs in each round, and which device we want to use for training (CPU or GPU).
 
@@ -152,7 +152,7 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
 
             Parameters
             ----------
-            weights: fl.common.NDArrays 
+            weights: fl.common.NDArrays
                 Weights received by the server and set to local model
 
 
@@ -179,8 +179,8 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
 
             Parameters
             ----------
-            ins: fl.common.FitIns 
-            Parameters sent by the server to be used during training. 
+            ins: fl.common.FitIns
+            Parameters sent by the server to be used during training.
 
             Returns
             -------
@@ -214,9 +214,9 @@ Now, let's look closely into the :code:`PytorchMNISTClient` inside :code:`flwr_e
 
             Parameters
             ----------
-            ins: fl.common.EvaluateIns 
-            Parameters sent by the server to be used during testing. 
-                
+            ins: fl.common.EvaluateIns
+            Parameters sent by the server to be used during testing.
+
 
             Returns
             -------
@@ -262,9 +262,9 @@ The code for the CNN is available under :code:`quickstart-pytorch.mnist` and it 
 
             Parameters
             ----------
-            x: Tensor 
+            x: Tensor
                 Mini-batch of shape (N,28,28) containing images from MNIST dataset.
-                
+
 
             Returns
             -------
@@ -287,7 +287,7 @@ The code for the CNN is available under :code:`quickstart-pytorch.mnist` and it 
             return output
 
 
-The second thing to notice is that :code:`PytorchMNISTClient` class inherits from the :code:`fl.client.Client`, and hence it must implement the following methods:  
+The second thing to notice is that :code:`PytorchMNISTClient` class inherits from the :code:`fl.client.Client`, and hence it must implement the following methods:
 
 .. code-block:: python
 
@@ -312,7 +312,7 @@ The second thing to notice is that :code:`PytorchMNISTClient` class inherits fro
             """Evaluate the provided weights using the locally held dataset."""
 
 
-When comparing the abstract class to its derived class :code:`PytorchMNISTClient` you will notice that :code:`fit` calls a :code:`train` function and that :code:`evaluate` calls a :code:`test`: function. 
+When comparing the abstract class to its derived class :code:`PytorchMNISTClient` you will notice that :code:`fit` calls a :code:`train` function and that :code:`evaluate` calls a :code:`test`: function.
 
 These functions can both be found inside the same :code:`quickstart-pytorch.mnist` module:
 
@@ -330,21 +330,21 @@ These functions can both be found inside the same :code:`quickstart-pytorch.mnis
         ----------
         model: torch.nn.ModuleList
             Neural network model used in this example.
-            
+
         train_loader: torch.utils.data.DataLoader
-            DataLoader used in traning.
-            
-        epochs: int 
-            Number of epochs to run in each round. 
-            
-        device: torch.device 
+            DataLoader used in training.
+
+        epochs: int
+            Number of epochs to run in each round.
+
+        device: torch.device
             (Default value = torch.device("cpu"))
             Device where the network will be trained within a client.
 
         Returns
         -------
         num_examples_train: int
-            Number of total samples used during traning.
+            Number of total samples used during training.
 
         """
         model.train()
@@ -399,10 +399,10 @@ These functions can both be found inside the same :code:`quickstart-pytorch.mnis
         ----------
         model: torch.nn.ModuleList :
             Neural network model used in this example.
-            
+
         test_loader: torch.utils.data.DataLoader :
             DataLoader used in test.
-            
+
         device: torch.device :
             (Default value = torch.device("cpu"))
             Device where the network will be tested within a client.
@@ -435,19 +435,19 @@ These functions can both be found inside the same :code:`quickstart-pytorch.mnis
 
 
 Observe that these functions encapsulate regular training and test loops and provide :code:`fit` and :code:`evaluate` with final statistics for each round.
-You could substitute them with your custom train and test loops and change the network architecture, and the entire example would still work flawlessly. 
-As a matter of fact, why not try and modify the code to an example of your liking? 
+You could substitute them with your custom train and test loops and change the network architecture, and the entire example would still work flawlessly.
+As a matter of fact, why not try and modify the code to an example of your liking?
 
 
 
 Give It a Try
 -------------
-Looking through the quickstart code description above will have given a good understanding of how *clients* and *servers* work in Flower, how to run a simple experiment, and the internals of a client wrapper. 
+Looking through the quickstart code description above will have given a good understanding of how *clients* and *servers* work in Flower, how to run a simple experiment, and the internals of a client wrapper.
 Here are a few things you could try on your own and get more experience with Flower:
 
 - Try and change :code:`PytorchMNISTClient` so it can accept different architectures.
 - Modify the :code:`train` function so that it accepts different optimizers
 - Modify the :code:`test` function so that it proves not only the top-1 (regular accuracy) but also the top-5 accuracy?
-- Go larger! Try to adapt the code to larger images and datasets. Why not try training on ImageNet with a ResNet-50? 
+- Go larger! Try to adapt the code to larger images and datasets. Why not try training on ImageNet with a ResNet-50?
 
 You are ready now. Enjoy learning in a federated way!

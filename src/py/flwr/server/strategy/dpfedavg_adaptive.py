@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Tuple, Union
 import numpy as np
 
 from flwr.common import FitIns, FitRes, Parameters, Scalar
+from flwr.common.logger import warn_deprecated_feature
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.dpfedavg_fixed import DPFedAvgFixed
@@ -31,7 +32,12 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DPFedAvgAdaptive(DPFedAvgFixed):
-    """Wrapper for configuring a Strategy for DP with Adaptive Clipping."""
+    """Wrapper for configuring a Strategy for DP with Adaptive Clipping.
+
+    Warning
+    -------
+    This class is deprecated and will be removed in a future release.
+    """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
@@ -45,6 +51,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         clip_norm_target_quantile: float = 0.5,
         clip_count_stddev: Optional[float] = None,
     ) -> None:
+        warn_deprecated_feature("`DPFedAvgAdaptive` wrapper")
         super().__init__(
             strategy=strategy,
             num_sampled_clients=num_sampled_clients,
@@ -91,7 +98,7 @@ class DPFedAvgAdaptive(DPFedAvgFixed):
         norm_bit_set_count = 0
         for client_proxy, fit_res in results:
             if "dpfedavg_norm_bit" not in fit_res.metrics:
-                raise Exception(
+                raise KeyError(
                     f"Indicator bit not returned by client with id {client_proxy.cid}."
                 )
             if fit_res.metrics["dpfedavg_norm_bit"]:

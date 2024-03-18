@@ -7,13 +7,14 @@ name = "advanced-pytorch"
 version = "0.1.0"
 description = "Advanced Flower/PyTorch Example"
 authors = [
-    "The Flower Authors <hello@flower.dev>",
-    "Kaushik Amar Das <kaushik.das@iiitg.ac.in>"
+    "The Flower Authors <hello@flower.ai>",
+    "Kaushik Amar Das <kaushik.das@iiitg.ac.in>",
 ]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"
+flwr-datasets = { extras = ["vision"], version = ">=0.0.2,<1.0.0" }
 torch = "1.13.1"
 torchvision = "0.14.1"
 validators = "0.18.2"

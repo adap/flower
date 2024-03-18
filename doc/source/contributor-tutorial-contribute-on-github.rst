@@ -3,9 +3,7 @@ Contribute on GitHub
 
 This guide is for people who want to get involved with Flower, but who are not used to contributing to GitHub projects.
 
-If you're familiar with how contributing on GitHub works, you can directly checkout our 
-`getting started guide for contributors <https://flower.dev/docs/getting-started-for-contributors.html>`_ 
-and examples of `good first contributions <https://flower.dev/docs/good-first-contributions.html>`_.
+If you're familiar with how contributing on GitHub works, you can directly checkout our :doc:`getting started guide for contributors <contributor-tutorial-get-started-as-a-contributor>`.
 
 
 Setting up the repository
@@ -13,21 +11,21 @@ Setting up the repository
 
 1. **Create a GitHub account and setup Git**
     Git is a distributed version control tool. This allows for an entire codebase's history to be stored and every developer's machine.
-    It is a software that will need to be installed on your local machine, you can follow this `guide <https://docs.github.com/en/get-started/quickstart/set-up-git>`_ to set it up.
+    It is a software that will need to be installed on your local machine, you can follow this `guide <https://docs.github.com/en/get-started/getting-started-with-git/set-up-git>`_ to set it up.
 
     GitHub, itself, is a code hosting platform for version control and collaboration. It allows for everyone to collaborate and work from anywhere on remote repositories.
 
-    If you haven't already, you will need to create an account on `GitHub <https://github.com/signup>`_. 
+    If you haven't already, you will need to create an account on `GitHub <https://github.com/signup>`_.
 
-    The idea behind the generic Git and GitHub workflow boils down to this: 
+    The idea behind the generic Git and GitHub workflow boils down to this:
     you download code from a remote repository on GitHub, make changes locally and keep track of them using Git and then you upload your new history back to GitHub.
 
 2. **Forking the Flower repository**
-    A fork is a personal copy of a GitHub repository. To create one for Flower, you must navigate to https://github.com/adap/flower (while connected to your GitHub account)
+    A fork is a personal copy of a GitHub repository. To create one for Flower, you must navigate to `<https://github.com/adap/flower>`_ (while connected to your GitHub account)
     and click the ``Fork`` button situated on the top right of the page.
 
     .. image:: _static/fork_button.png
-    
+
     You can change the name if you want, but this is not necessary as this version of Flower will be yours and will sit inside your own account (i.e., in your own list of repositories).
     Once created, you should see on the top left corner that you are looking at your own version of Flower.
 
@@ -35,18 +33,18 @@ Setting up the repository
 
 3. **Cloning your forked repository**
     The next step is to download the forked repository on your machine to be able to make changes to it.
-    On your forked repository page, you should first click on the ``Code`` button on the right, 
+    On your forked repository page, you should first click on the ``Code`` button on the right,
     this will give you the ability to copy the HTTPS link of the repository.
 
     .. image:: _static/cloning_fork.png
 
     Once you copied the \<URL\>, you can open a terminal on your machine, navigate to the place you want to download the repository to and type:
 
-    .. code-block:: shell 
+    .. code-block:: shell
 
         $ git clone <URL>
 
-    This will create a `flower/` (or the name of your fork if you renamed it) folder in the current working directory.
+    This will create a ``flower/`` (or the name of your fork if you renamed it) folder in the current working directory.
 
 4. **Add origin**
     You can then go into the repository folder:
@@ -59,17 +57,17 @@ Setting up the repository
     To obtain it, we can do as previously mentioned by going to our fork repository on our GitHub account and copying the link.
 
     .. image:: _static/cloning_fork.png
-    
+
     Once the \<URL\> is copied, we can type the following command in our terminal:
 
     .. code-block:: shell
 
         $ git remote add origin <URL>
 
-    
+
 5. **Add upstream**
     Now we will add an upstream address to our repository.
-    Still in the same directroy, we must run the following command:
+    Still in the same directory, we must run the following command:
 
     .. code-block:: shell
 
@@ -77,10 +75,10 @@ Setting up the repository
 
     The following diagram visually explains what we did in the previous steps:
 
-    .. image:: _static/github_schema.png 
+    .. image:: _static/github_schema.png
 
-    The upstream is the GitHub remote address of the parent repository (in this case Flower), 
-    i.e. the one we eventually want to contribute to and therefore need an up-to-date history of. 
+    The upstream is the GitHub remote address of the parent repository (in this case Flower),
+    i.e. the one we eventually want to contribute to and therefore need an up-to-date history of.
     The origin is just the GitHub remote address of the forked repository we created, i.e. the copy (fork) in our own account.
 
     To make sure our local version of the fork is up-to-date with the latest changes from the Flower repository,
@@ -94,7 +92,7 @@ Setting up the repository
 Setting up the coding environment
 ---------------------------------
 
-This can be achieved by following this `getting started guide for contributors`_ (note that you won't need to clone the repository).
+This can be achieved by following this :doc:`getting started guide for contributors <contributor-tutorial-get-started-as-a-contributor>` (note that you won't need to clone the repository).
 Once you are able to write code and test it, you can finally start making changes!
 
 
@@ -114,9 +112,9 @@ And with Flower's repository:
     $ git pull upstream main
 
 1. **Create a new branch**
-    To make the history cleaner and easier to work with, it is good practice to 
+    To make the history cleaner and easier to work with, it is good practice to
     create a new branch for each feature/project that needs to be implemented.
-    
+
     To do so, just run the following command inside the repository's directory:
 
     .. code-block:: shell
@@ -138,7 +136,7 @@ And with Flower's repository:
         $ ./dev/test.sh # to test that your code can be accepted
         $ ./baselines/dev/format.sh # same as above but for code added to baselines
         $ ./baselines/dev/test.sh # same as above but for code added to baselines
-    
+
 4. **Stage changes**
     Before creating a commit that will update your history, you must specify to Git which files it needs to take into account.
 
@@ -180,22 +178,26 @@ Creating and merging a pull request (PR)
 
     .. image:: _static/compare_and_pr.png
 
-    Otherwise you can always find this option in the `Branches` page.
+    Otherwise you can always find this option in the ``Branches`` page.
 
-    Once you click the `Compare & pull request` button, you should see something similar to this:
+    Once you click the ``Compare & pull request`` button, you should see something similar to this:
 
     .. image:: _static/creating_pr.png
-    
+
     At the top you have an explanation of which branch will be merged where:
 
     .. image:: _static/merging_branch.png
-    
+
     In this example you can see that the request is to merge the branch ``doc-fixes`` from my forked repository to branch ``main`` from the Flower repository.
 
-    The input box in the middle is there for you to describe what your PR does and to link it to existing issues. 
+    The input box in the middle is there for you to describe what your PR does and to link it to existing issues.
     We have placed comments (that won't be rendered once the PR is opened) to guide you through the process.
 
-    At the bottom you will find the button to open the PR. This will notify reviewers that a new PR has been opened and 
+    It is important to follow the instructions described in comments. For instance, in order to not break how our changelog system works,
+    you should read the information above the ``Changelog entry`` section carefully.
+    You can also checkout some examples and details in the :ref:`changelogentry` appendix.
+
+    At the bottom you will find the button to open the PR. This will notify reviewers that a new PR has been opened and
     that they should look over it to merge or to request changes.
 
     If your PR is not yet ready for review, and you don't want to notify anyone, you have the option to create a draft pull request:
@@ -215,7 +217,7 @@ Creating and merging a pull request (PR)
     Merging will be blocked if there are ongoing requested changes.
 
     .. image:: _static/changes_requested.png
-    
+
     To resolve them, just push the necessary changes to the branch associated with the PR:
 
     .. image:: _static/make_changes.png
@@ -253,54 +255,54 @@ Example of first contribution
 Problem
 *******
 
-For our documentation, we’ve started to use the `Diàtaxis framework <https://diataxis.fr/>`_.
+For our documentation, we've started to use the `Diàtaxis framework <https://diataxis.fr/>`_.
 
-Our “How to” guides should have titles that continue the sencence “How to …”, for example, “How to upgrade to Flower 1.0”.
+Our "How to" guides should have titles that continue the sentence "How to …", for example, "How to upgrade to Flower 1.0".
 
 Most of our guides do not follow this new format yet, and changing their title is (unfortunately) more involved than one might think.
 
-This issue is about changing the title of a doc from present continious to present simple.
+This issue is about changing the title of a doc from present continuous to present simple.
 
-Let's take the example of “Saving Progress” which we changed to “Save Progress”. Does this pass our check?
+Let's take the example of "Saving Progress" which we changed to "Save Progress". Does this pass our check?
 
-Before: ”How to saving progress” ❌
+Before: "How to saving progress" ❌
 
-After: ”How to save progress” ✅
+After: "How to save progress" ✅
 
 Solution
 ********
 
-This is a tiny change, but it’ll allow us to test your end-to-end setup. After cloning and setting up the Flower repo, here’s what you should do:
+This is a tiny change, but it'll allow us to test your end-to-end setup. After cloning and setting up the Flower repo, here's what you should do:
 
-- Find the source file in `doc/source`
-- Make the change in the `.rst` file (beware, the dashes under the title should be the same length as the title itself)
-- Build the docs and check the result: `<https://flower.dev/docs/writing-documentation.html#edit-an-existing-page>`_
+- Find the source file in ``doc/source``
+- Make the change in the ``.rst`` file (beware, the dashes under the title should be the same length as the title itself)
+- Build the docs and `check the result <contributor-how-to-write-documentation.html#edit-an-existing-page>`_
 
 Rename file
 :::::::::::
 
-You might have noticed that the file name still reflects the old wording. 
+You might have noticed that the file name still reflects the old wording.
 If we just change the file, then we break all existing links to it - it is **very important** to avoid that, breaking links can harm our search engine ranking.
 
-Here’s how to change the file name:
+Here's how to change the file name:
 
-- Change the file name to `save-progress.rst`
-- Add a redirect rule to `doc/source/conf.py`
+- Change the file name to ``save-progress.rst``
+- Add a redirect rule to ``doc/source/conf.py``
 
-This will cause a redirect from `saving-progress.html` to `save-progress.html`, old links will continue to work.
+This will cause a redirect from ``saving-progress.html`` to ``save-progress.html``, old links will continue to work.
 
 Apply changes in the index file
 :::::::::::::::::::::::::::::::
 
-For the lateral navigation bar to work properly, it is very important to update the `index.rst` file as well. 
+For the lateral navigation bar to work properly, it is very important to update the ``index.rst`` file as well.
 This is where we define the whole arborescence of the navbar.
 
-- Find and modify the file name in `index.rst`
+- Find and modify the file name in ``index.rst``
 
 Open PR
 :::::::
 
-- Commit the changes (commit messages are always imperative: “Do something”, in this case “Change …”)
+- Commit the changes (commit messages are always imperative: "Do something", in this case "Change …")
 - Push the changes to your fork
 - Open a PR (as shown above)
 - Wait for it to be approved!
@@ -331,7 +333,7 @@ Here are a few positive examples which provide helpful information without repea
 * Update docs banner to mention Flower Summit 2023
 * Remove unnecessary XGBoost dependency
 * Remove redundant attributes in strategies subclassing FedAvg
-* Add CI job to deploy the staging system when the `main` branch changes
+* Add CI job to deploy the staging system when the ``main`` branch changes
 * Add new amazing library which will be used to improve the simulation engine
 
 
@@ -340,4 +342,77 @@ Next steps
 
 Once you have made your first PR, and want to contribute more, be sure to check out the following :
 
-- `Good first contributions <https://flower.dev/docs/framework/contributor-ref-good-first-contributions.html>`_, where you should particularly look into the :code:`baselines` contributions.
+- :doc:`Good first contributions <contributor-ref-good-first-contributions>`, where you should particularly look into the :code:`baselines` contributions.
+
+
+Appendix
+--------
+
+.. _changelogentry:
+
+Changelog entry
+***************
+
+When opening a new PR, inside its description, there should be a ``Changelog entry`` header.
+
+Above this header you should see the following comment that explains how to write your changelog entry:
+
+    Inside the following 'Changelog entry' section,
+    you should put the description of your changes that will be added to the changelog alongside your PR title.
+
+    If the section is completely empty (without any token) or non-existent,
+    the changelog will just contain the title of the PR for the changelog entry, without any description.
+
+    If the section contains some text other than tokens, it will use it to add a description to the change.
+
+    If the section contains one of the following tokens it will ignore any other text and put the PR under the corresponding section of the changelog:
+
+    <general> is for classifying a PR as a general improvement.
+
+    <skip> is to not add the PR to the changelog
+
+    <baselines> is to add a general baselines change to the PR
+
+    <examples> is to add a general examples change to the PR
+
+    <sdk> is to add a general sdk change to the PR
+
+    <simulations> is to add a general simulations change to the PR
+
+    Note that only one token should be used.
+
+Its content must have a specific format. We will break down what each possibility does:
+
+- If the ``### Changelog entry`` section contains nothing or doesn't exist, the following text will be added to the changelog::
+
+    - **PR TITLE** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+- If the ``### Changelog entry`` section contains a description (and no token), the following text will be added to the changelog::
+
+    - **PR TITLE** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+        DESCRIPTION FROM THE CHANGELOG ENTRY
+
+- If the ``### Changelog entry`` section contains ``<skip>``, nothing will change in the changelog.
+
+- If the ``### Changelog entry`` section contains ``<general>``, the following text will be added to the changelog::
+
+    - **General improvements** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+- If the ``### Changelog entry`` section contains ``<baselines>``, the following text will be added to the changelog::
+
+    - **General updates to Flower Baselines** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+- If the ``### Changelog entry`` section contains ``<examples>``, the following text will be added to the changelog::
+
+    - **General updates to Flower Examples** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+- If the ``### Changelog entry`` section contains ``<sdk>``, the following text will be added to the changelog::
+
+    - **General updates to Flower SDKs** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+- If the ``### Changelog entry`` section contains ``<simulations>``, the following text will be added to the changelog::
+
+    - **General updates to Flower Simulations** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
+
+Note that only one token must be provided, otherwise, only the first action (in the order listed above), will be performed.

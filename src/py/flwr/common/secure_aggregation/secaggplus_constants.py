@@ -15,30 +15,55 @@
 """Constants for the SecAgg/SecAgg+ protocol."""
 
 
-# Names of stages
-STAGE_SETUP = "setup"
-STAGE_SHARE_KEYS = "share_keys"
-STAGE_COLLECT_MASKED_INPUT = "collect_masked_input"
-STAGE_UNMASK = "unmask"
-STAGES = (STAGE_SETUP, STAGE_SHARE_KEYS, STAGE_COLLECT_MASKED_INPUT, STAGE_UNMASK)
+from __future__ import annotations
 
-# All valid keys in received/replied `named_values` dictionaries
-KEY_STAGE = "stage"
-KEY_SAMPLE_NUMBER = "sample_num"
-KEY_SECURE_ID = "secure_id"
-KEY_SHARE_NUMBER = "share_num"
-KEY_THRESHOLD = "threshold"
-KEY_CLIPPING_RANGE = "clipping_range"
-KEY_TARGET_RANGE = "target_range"
-KEY_MOD_RANGE = "mod_range"
-KEY_PUBLIC_KEY_1 = "pk1"
-KEY_PUBLIC_KEY_2 = "pk2"
-KEY_DESTINATION_LIST = "dsts"
-KEY_CIPHERTEXT_LIST = "ctxts"
-KEY_SOURCE_LIST = "srcs"
-KEY_PARAMETERS = "params"
-KEY_MASKED_PARAMETERS = "masked_params"
-KEY_ACTIVE_SECURE_ID_LIST = "active_sids"
-KEY_DEAD_SECURE_ID_LIST = "dead_sids"
-KEY_SECURE_ID_LIST = "sids"
-KEY_SHARE_LIST = "shares"
+RECORD_KEY_STATE = "secaggplus_state"
+RECORD_KEY_CONFIGS = "secaggplus_configs"
+RATIO_QUANTIZATION_RANGE = 1073741824  # 1 << 30
+
+
+class Stage:
+    """Stages for the SecAgg+ protocol."""
+
+    SETUP = "setup"
+    SHARE_KEYS = "share_keys"
+    COLLECT_MASKED_VECTORS = "collect_masked_vectors"
+    UNMASK = "unmask"
+    _stages = (SETUP, SHARE_KEYS, COLLECT_MASKED_VECTORS, UNMASK)
+
+    @classmethod
+    def all(cls) -> tuple[str, str, str, str]:
+        """Return all stages."""
+        return cls._stages
+
+    def __new__(cls) -> Stage:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class Key:
+    """Keys for the configs in the ConfigsRecord."""
+
+    STAGE = "stage"
+    SAMPLE_NUMBER = "sample_num"
+    SHARE_NUMBER = "share_num"
+    THRESHOLD = "threshold"
+    CLIPPING_RANGE = "clipping_range"
+    TARGET_RANGE = "target_range"
+    MOD_RANGE = "mod_range"
+    MAX_WEIGHT = "max_weight"
+    PUBLIC_KEY_1 = "pk1"
+    PUBLIC_KEY_2 = "pk2"
+    DESTINATION_LIST = "dsts"
+    CIPHERTEXT_LIST = "ctxts"
+    SOURCE_LIST = "srcs"
+    PARAMETERS = "params"
+    MASKED_PARAMETERS = "masked_params"
+    ACTIVE_NODE_ID_LIST = "active_nids"
+    DEAD_NODE_ID_LIST = "dead_nids"
+    NODE_ID_LIST = "nids"
+    SHARE_LIST = "shares"
+
+    def __new__(cls) -> Key:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")

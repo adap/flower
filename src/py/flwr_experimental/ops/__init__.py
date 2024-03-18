@@ -13,4 +13,4 @@
 # limitations under the License.
 # ==============================================================================
 """Flower ops provides an opinionated way to provision necessary compute
-infrastructure for running Flower workloads."""
+infrastructure for running Flower runs."""
