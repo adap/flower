@@ -1,12 +1,3 @@
----
-# this is the config that will be loaded as default by main.py
-# Please follow the provided structure (this will ensuring all baseline follow
-# a similar configuration structure and hence be easy to customise)
-#defaults:
-#  - _self_
-#  - override hydra/hydra_logging: disabled
-#  - override hydra/job_logging: disabled
-
 defaults:
   - _self_
   - strategy: fedavg
@@ -16,8 +7,8 @@ dataset: mnist
 
 server:
   _target_: flanders.server.EnhancedServer
-  num_rounds: 50
-  pool_size: 10
+  num_rounds: 100
+  pool_size: 100
   warmup_rounds: 30
   sampling: 500
   history_dir: clients_params
@@ -32,6 +23,5 @@ server_device: cpu
 seed: 33
  
 client_resources:
-  num_cpus: 10
-  num_gpus: 0.0
-  
+  num_cpus: 1
+  num_gpus: 0

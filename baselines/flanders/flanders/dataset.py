@@ -7,12 +7,8 @@ from pathlib import Path
 from typing import Any, Callable, Optional, Tuple
 
 import numpy as np
-import pandas as pd
 import torch
 from PIL import Image
-from sklearn import preprocessing
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OrdinalEncoder
 from torch.utils.data import DataLoader, SubsetRandomSampler
 from torchvision import datasets, transforms
 from torchvision.datasets import VisionDataset
@@ -135,16 +131,6 @@ def do_fl_partitioning(
 
     return splits_dir
 
-
-def cifar10_transformation(img):
-    """Return a torchvision.transforms object for CIFAR10 dataset."""
-    return transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-        ]
-    )(img)
-
 def mnist_transformation(img):
     """Return TorchVision transformation for MNIST."""
     return transforms.Compose(
@@ -207,43 +193,6 @@ class TorchVisionFL(VisionDataset):
         """Return length of dataset."""
         return len(self.data)
 
-
-def get_cifar_10(path_to_data="flanders/datasets_files/cifar_10/data"):
-    """Download CIFAR10 dataset."""
-    # download dataset and load train set
-    train_set = datasets.CIFAR10(root=path_to_data, train=True, download=True)
-
-    # fuse all data splits into a single "training.pt"
-    data_loc = Path(path_to_data) / "cifar-10-batches-py"
-    training_data = data_loc / "training.pt"
-    print("Generating unified CIFAR dataset")
-    torch.save([train_set.data, np.array(train_set.targets)], training_data)
-
-    test_set = datasets.CIFAR10(
-        root=path_to_data, train=False, transform=cifar10_transformation
-    )
-
-    # returns path where training data is and testset
-    return training_data, test_set
-
-def get_cifar_100(path_to_data="flanders/datasets_files/cifar_100/data"):
-    """Download CIFAR100 dataset."""
-    # download dataset and load train set
-    train_set = datasets.CIFAR100(root=path_to_data, train=True, download=True)
-
-    # fuse all data splits into a single "training.pt"
-    data_loc = Path(path_to_data) / "cifar-100-python"
-    training_data = data_loc / "training.pt"
-    print("Generating unified CIFAR100 dataset")
-    torch.save([train_set.data, np.array(train_set.targets)], training_data)
-
-    test_set = datasets.CIFAR100(
-        root=path_to_data, train=False, transform=cifar10_transformation
-    )
-
-    # returns path where training data is and testset
-    return training_data, test_set
-
 def get_mnist(path_to_data="flanders/datasets_files/mnist/data"):
     """Download MNIST dataset."""
     # download dataset and load train set
@@ -259,64 +208,26 @@ def get_mnist(path_to_data="flanders/datasets_files/mnist/data"):
         root=path_to_data, train=False, transform=mnist_transformation
     )
 
-    # Print the first image's shape and data type
-    image, label = test_set[0]
-    print("Image Shape:", image.shape)
-    print("Image Data Type:", image.dtype)
-
     # returns path where training data is and testset
     return training_data, test_set
 
+def get_fmnist(path_to_data="flanders/datasets_files/fmnist/data"):
+    """Download FashionMNIST dataset."""
+    # download dataset and load train set
+    train_set = datasets.FashionMNIST(root=path_to_data, train=True, download=True)
 
-#def get_mnist(
-#    data_root: str,
-#    batch_size: int,
-#    cid: int,
-#    workers=1,
-#    nb_clients=10,
-#    is_train=True,
-#):
-#    """Load both training and test datasets for MNIST.
-#
-#    Parameters
-#    ----------
-#    data_root: str
-#        Directory where MNIST dataset will be stored.
-#    train_batch_size: int
-#        Mini-batch size for training set.
-#    test_batch_size: int
-#        Mini-batch size for test set.
-#    cid: int
-#        Client ID used to select a specific partition.
-#    nb_clients: int
-#        Total number of clients launched during training.
-#        This value dictates the number of unique to be created.
-#
-#    Returns
-#    -------
-#    (train_loader, test_loader): Tuple[DataLoader, DataLoader]
-#        Tuple contaning DataLoaders for training and test sets.
-#    """
-#    transform = transforms.Compose(
-#        [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
-#    )
-#    if is_train:
-#        dataset = datasets.MNIST(
-#            data_root, train=True, download=True, transform=transform
-#        )
-#    else:
-#        dataset = datasets.MNIST(data_root, train=False, transform=transform)
-#
-#    loader = dataset_partitioner(
-#        dataset=dataset,
-#        batch_size=batch_size,
-#        client_id=cid,
-#        number_of_clients=nb_clients,
-#        workers=workers,
-#    )
-#
-#    return loader
+    # fuse all data splits into a single "training.pt"
+    data_loc = Path(path_to_data) / "FashionMNIST"
+    training_data = data_loc / "training.pt"
+    print("Generating unified FashionMNIST dataset")
+    torch.save([train_set.data, np.array(train_set.targets)], training_data)
 
+    test_set = datasets.FashionMNIST(
+        root=path_to_data, train=False, transform=mnist_transformation
+    )
+
+    # returns path where training data is and testset
+    return training_data, test_set
 
 def dataset_partitioner(
     dataset: torch.utils.data.Dataset,
@@ -366,64 +277,3 @@ def dataset_partitioner(
         num_workers=workers,
     )
     return data_loader
-
-
-def get_partitioned_income(path: str, pool_size: int, train_size=0.8, test_size=0.2):
-    """Return partitioned income dataset."""
-    data = pd.read_csv(path)
-    copy = data
-    encoder = OrdinalEncoder()
-    encoded_values = encoder.fit_transform(data)
-    data = pd.DataFrame(data=encoded_values, columns=copy.columns)
-    Y = data["income"]
-    data = data.loc[:, data.columns != "income"]
-
-    x_train, x_test, y_train, y_test = [], [], [], []
-    train_size = int((len(data) * train_size) // pool_size) + 2
-    test_size = int((len(data) * test_size) // pool_size) - 2
-    for i in range(pool_size):
-        xtrain, xtest, ytrain, ytest = train_test_split(
-            data,
-            Y,
-            train_size=train_size,
-            test_size=test_size,
-            random_state=i,
-            shuffle=True,
-            stratify=Y,
-        )
-        x_train.append(xtrain)
-        x_test.append(xtest)
-        y_train.append(ytrain)
-        y_test.append(ytest)
-
-    return x_train, x_test, y_train, y_test
-
-
-def get_partitioned_house(path: str, pool_size: int, train_size=0.8, test_size=0.2):
-    """Return partitioned house dataset."""
-    data = pd.read_csv(path)
-    Y = data["median_house_value"].values
-    data = data.drop(["median_house_value"], axis=1).values
-
-    x_train, x_test, y_train, y_test = [], [], [], []
-    train_size = int((len(data) * train_size) // pool_size) + 2
-    test_size = int((len(data) * test_size) // pool_size) - 2
-    for i in range(pool_size):
-        xtrain, xtest, ytrain, ytest = train_test_split(
-            data,
-            Y,
-            train_size=train_size,
-            test_size=test_size,
-            random_state=i,
-            shuffle=True,
-        )
-        transf = preprocessing.RobustScaler()
-        xtrain = transf.fit_transform(xtrain)
-        xtest = transf.fit_transform(xtest)
-
-        x_train.append(xtrain)
-        x_test.append(xtest)
-        y_train.append(ytrain)
-        y_test.append(ytest)
-
-    return x_train, x_test, y_train, y_test

@@ -16,6 +16,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.server.strategy.aggregate import aggregate
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
@@ -217,7 +218,6 @@ class Flanders(FedAvg):
             params_tensor = np.transpose(
                 params_tensor, (0, 2, 1)
             )  # (clients, params, time)
-            print("-- params_tensor", params_tensor.shape)
             ground_truth = params_tensor[:, :, -1].copy()
             pred_step = 1
             log(INFO, "Computing MAR on params_tensor %s", params_tensor.shape)
@@ -229,14 +229,11 @@ class Flanders(FedAvg):
                 beta=self.beta,
             )
 
-            #print("Ground truth: ", ground_truth)
-            #print("Predicted matrix: ", predicted_matrix[:, :, 0])
-
             log(INFO, "Computing anomaly scores")
             anomaly_scores = self.distance_function(
                 ground_truth, predicted_matrix[:, :, 0]
             )
-            log(INFO, "Anomaly scores: %s", anomaly_scores)
+            log(DEBUG, "Anomaly scores: %s", anomaly_scores)
 
             log(INFO, "Selecting good clients")
             good_clients_idx = sorted(
@@ -246,23 +243,14 @@ class Flanders(FedAvg):
                 np.argsort(anomaly_scores)[self.num_clients_to_keep :]
             )  # noqa
 
-            # TODO: remove this
-            # alternate between 2 malicious and 0 malicious clients every 10 rounds
-            #if (server_round > 9 and server_round < 20) or (server_round > 29 and server_round < #40) or (server_round > 49 and server_round < 60):
-            #    good_clients_idx = [2,3,4]
-            #    malicious_clients_idx = [0,1]
-            ##########################################
-            # Compute the average anomaly score for the good clients
             avg_anomaly_score_gc = np.mean(anomaly_scores[good_clients_idx])
-            print("avg anomaly score for good clients", avg_anomaly_score_gc)
+            log(DEBUG, "Average anomaly score for good clients", avg_anomaly_score_gc)
+            
             avg_anomaly_score_m = np.mean(anomaly_scores[malicious_clients_idx])
-            print("avg anomaly score for malicious clients", avg_anomaly_score_m)
+            log(DEBUG, "Average anomaly score for malicious clients", avg_anomaly_score_m)
 
             results = np.array(results)[good_clients_idx].tolist()
-            log(INFO, "Good clients: %s", good_clients_idx)
-            # Save the avg anomaly score into a file
-            with open("anomaly_scores.txt", "a") as f:
-                f.write(f"{server_round},{avg_anomaly_score_gc},{avg_anomaly_score_m}\n")
+            log(DEBUG, "Good clients: %s", good_clients_idx)
 
         log(INFO, "Applying aggregate_fn")
         # Convert results
@@ -271,21 +259,26 @@ class Flanders(FedAvg):
             for _, fit_res in results
         ]
 
-        # check that self.aggregate_fn has num_malicious parameter
+        # Check that self.aggregate_fn has num_malicious parameter
         if "num_malicious" in self.aggregate_fn.__code__.co_varnames:
-            # count the number of malicious clients in good_clients_idx by checking clients_state
+            # Count the number of malicious clients in good_clients_idx by checking clients_state
             num_malicious = sum([clients_state[str(cid)] for cid in good_clients_idx])
-            print("Number of malicious clients in good_clients_idx after FLANDERS filtering", num_malicious)
+            log(INFO, "Number of malicious clients in good_clients_idx after FLANDERS filtering: %s", num_malicious)
             self.aggregate_parameters["num_malicious"] = num_malicious
+            
         if "aggregation_rule" in self.aggregate_fn.__code__.co_varnames:
             module = importlib.import_module(self.aggregate_parameters["aggregation_module_name"])
             function_name = self.aggregate_parameters["aggregation_name"]
             self.aggregate_parameters["aggregation_rule"] = getattr(module, function_name)
-            # remove aggregation_module_name and aggregation_name from self.aggregate_parameters
+            # Remove aggregation_module_name and aggregation_name from self.aggregate_parameters
             aggregate_parameters = self.aggregate_parameters.copy()
             del aggregate_parameters["aggregation_module_name"]
             del aggregate_parameters["aggregation_name"]
-            parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results, **aggregate_parameters))
+            try:
+                parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results, **aggregate_parameters))
+            except ValueError as e:
+                log(WARNING, f"Error in aggregate_fn: {e}")
+                parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
         else:
             parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results, **self.aggregate_parameters))
 

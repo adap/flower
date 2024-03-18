@@ -1,8 +1,3 @@
-"""Create and connect the building blocks for your experiments; start the simulation.
-
-It includes processioning the dataset, instantiate strategy, specify how the global
-model is going to be evaluated, etc. At the end, this script saves the results.
-"""
 import os
 import shutil
 import importlib
@@ -18,25 +13,21 @@ from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
-from .attacks import fang_attack, gaussian_attack, lie_attack, minmax_attack
-from .client import CifarClient, HouseClient, IncomeClient, MnistClient, Cifar100Client
+from .attacks import fang_attack, gaussian_attack, lie_attack, minmax_attack, no_attack
+from .client import (
+    MnistClient,
+    FMnistClient,
+)
 from .dataset import (
     do_fl_partitioning,
-    get_cifar_10,
-    get_cifar_100,
     get_mnist,
-    get_partitioned_house,
-    get_partitioned_income,
+    get_fmnist,
 )
 from .server import EnhancedServer
 from .utils import (
-    cifar_evaluate,
-    house_evaluate,
-    income_evaluate,
     l2_norm,
-    cosine_distance,
     mnist_evaluate,
-    mobilenet_evaluate,
+    fmnist_evaluate,
 )
 
 
@@ -50,6 +41,7 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
+
     # 0. Set random seed
     seed = cfg.seed
     np.random.seed(seed)
@@ -61,19 +53,28 @@ def main(cfg: DictConfig) -> None:
     # 1. Print parsed config
     print(OmegaConf.to_yaml(cfg))
 
+    # Skip if:
+    # - strategy = bulyan and num_malicious > 20
+    # - attack_fn != gaussian and num_malicious = 0
+    if cfg.strategy.name == "bulyan" and cfg.server.num_malicious > 20:
+        print("Skipping experiment because strategy is bulyan and num_malicious is > 20")
+        return
+    #skip if attack_fn is not gaussian and num_malicious is 0, but continue if attack_fn is na
+    if cfg.server.attack_fn != "gaussian" and cfg.server.num_malicious == 0 and cfg.server.attack_fn != "na":
+        print("Skipping experiment because attack_fn is not gaussian and num_malicious is 0")
+        return
+        
     attacks = {
+        "na": no_attack,
         "gaussian": gaussian_attack,
         "lie": lie_attack,
-        "fang": fang_attack,
-        "minmax": minmax_attack,
+        "fang": fang_attack, # OPT
+        "minmax": minmax_attack, # AGR-MM
     }
 
     clients = {
         "mnist": (MnistClient, mnist_evaluate),
-        "cifar": (CifarClient, cifar_evaluate),
-        "house": (HouseClient, house_evaluate),
-        "income": (IncomeClient, income_evaluate),
-        "cifar100": (Cifar100Client, mobilenet_evaluate),
+        "fmnist": (FMnistClient, fmnist_evaluate),
     }
 
     # Delete old client_params
@@ -85,68 +86,28 @@ def main(cfg: DictConfig) -> None:
     num_malicious = cfg.server.num_malicious
 
     # 2. Prepare your dataset
-    if dataset_name == "cifar":
-        train_path, _ = get_cifar_10()
+    if dataset_name in ["mnist", "fmnist", "cifar"]:
+        if dataset_name == "mnist":
+            train_path, _ = get_mnist()
+        elif dataset_name == "fmnist":
+            train_path, _ = get_fmnist()
         fed_dir = do_fl_partitioning(
             train_path,
             pool_size=cfg.server.pool_size,
             alpha=cfg.server.noniidness,
             num_classes=10,
-            val_ratio=0.5,
+            val_ratio=0.2,
             seed=seed,
         )
-    elif dataset_name == "mnist":
-        train_path, _ = get_mnist()
-        fed_dir = do_fl_partitioning(
-            train_path,
-            pool_size=cfg.server.pool_size,
-            alpha=cfg.server.noniidness,
-            num_classes=10,
-            val_ratio=0.5,
-            seed=seed,
-        )
-    elif dataset_name == "cifar100":
-        train_path, _ = get_cifar_100()
-        fed_dir = do_fl_partitioning(
-            train_path,
-            pool_size=cfg.server.pool_size,
-            alpha=cfg.server.noniidness,
-            num_classes=100,
-            val_ratio=0.5,
-            seed=seed,
-        )
-    elif dataset_name == "income":
-        x_train, x_test, y_train, y_test = get_partitioned_income(
-            "flanders/datasets_files/adult.csv", cfg.server.pool_size
-        )
-    elif dataset_name == "house":
-        x_train, x_test, y_train, y_test = get_partitioned_house(
-            "flanders/datasets_files/houses_preprocessed.csv", cfg.server.pool_size
-        )
+    else:
+        raise ValueError("Dataset not supported")
 
     # 3. Define your clients
     # pylint: disable=no-else-return
     def client_fn(cid: str, pool_size: int = 10, dataset_name: str = dataset_name):
         client = clients[dataset_name][0]
-        cid_idx = int(cid)
-        if dataset_name in ["cifar", "mnist", "cifar100"]:
+        if dataset_name in ["mnist", "fmnist", "cifar", "cifar100"]:
             return client(cid, fed_dir)
-        elif dataset_name == "income":
-            return client(
-                cid,
-                x_train[cid_idx],
-                y_train[cid_idx],
-                x_test[cid_idx],
-                y_test[cid_idx],
-            )
-        elif dataset_name == "house":
-            return client(
-                cid,
-                x_train[cid_idx],
-                y_train[cid_idx],
-                x_test[cid_idx],
-                y_test[cid_idx],
-            )
         else:
             raise ValueError("Dataset not supported")
 

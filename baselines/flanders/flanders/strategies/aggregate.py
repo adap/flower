@@ -10,7 +10,6 @@ from ..utils import flatten_params
 def aggregate_dnc(results: List[Tuple[NDArrays, int]], c: float, niters: int, num_malicious: int) -> NDArrays:
     num_clients = len(results)
     flattened_params = [flatten_params(params) for params, _ in results]
-
     I_good = []
     for _ in range(niters):
         mu: NDArrays = [
@@ -21,7 +20,6 @@ def aggregate_dnc(results: List[Tuple[NDArrays, int]], c: float, niters: int, nu
         model_c = []
         for idx in range(len(flattened_params)):
             model_c.append(np.array(flattened_params[idx]) - np.array(mu))
-
         _, _, v = np.linalg.svd(model_c, full_matrices=False)
         s = [np.inner(model_i, v[0, :]) ** 2 for model_i in flattened_params]
 

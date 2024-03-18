@@ -1,8 +1,3 @@
-"""Create global evaluation function.
-
-Optionally, also define a new Server class (please note this is not needed in most
-settings).
-"""
 import timeit
 from logging import DEBUG, INFO
 from typing import Any, Callable, List, Tuple, Union
@@ -142,21 +137,16 @@ class EnhancedServer(Server):
             if res_cen is not None:
                 loss_cen, metrics_cen = res_cen
                 # Update confusion matrix
-                self.confusion_matrix = update_confusion_matrix(
-                    self.confusion_matrix,
-                    self.clients_state,
-                    self.malicious_clients_idx,
-                    self.good_clients_idx,
-                )
-                metrics_cen["TP"] = self.confusion_matrix["TP"]
-                metrics_cen["TN"] = self.confusion_matrix["TN"]
-                metrics_cen["FP"] = self.confusion_matrix["FP"]
-                metrics_cen["FN"] = self.confusion_matrix["FN"]
-                if current_round <= self.warmup_rounds:
-                    metrics_cen["TP"] = 0
-                    metrics_cen["TN"] = 0
-                    metrics_cen["FP"] = 0
-                    metrics_cen["FN"] = 0
+                if current_round > self.warmup_rounds:
+                    self.confusion_matrix = update_confusion_matrix(
+                        self.confusion_matrix,
+                        self.clients_state,
+                        self.malicious_clients_idx,
+                        self.good_clients_idx,
+                    )
+                    
+                metrics_cen = {key: self.confusion_matrix[key] for key in ["TP", "TN", "FP", "FN"]}
+                
                 log(
                     INFO,
                     "fit progress: (%s, %s, %s, %s)",
@@ -222,14 +212,6 @@ class EnhancedServer(Server):
         self.malicious_lst = np.random.choice(
             [proxy.cid for proxy, _ in client_instructions], size=size, replace=False
         )
-        # TODO: remove this
-        #if (server_round > 9 and server_round < 20) or (server_round > 29 and server_round < 40) or #(server_round > 49 and server_round < 60):
-        #    print("--- MALICIOUS ROUNDS ---")
-        #    self.malicious_lst = ["0","1"]
-        #else:
-        #    print("--- LEGIT ROUNDS ---")
-        #    self.malicious_lst = []
-        ####################
 
         # Create dict clients_state to keep track of malicious clients
         clients_state = dict()
@@ -295,9 +277,6 @@ class EnhancedServer(Server):
 
         # Apply attack function
         # the server simulates an attacker that controls a fraction of the clients
-        print(f"params shape: {self.aggregated_parameters[0].shape}")
-        print(f"params len: {len(self.aggregated_parameters)}")
-        print(f"num layers: {len(self.aggregated_parameters[0])}")
         if self.attack_fn is not None and server_round > self.warmup_rounds:
             log(INFO, "Applying attack function")
             results, others = self.attack_fn(
@@ -361,7 +340,7 @@ class EnhancedServer(Server):
             # their history with tha current global model, otherwise the
             # forecasting in next round won't be reliable (see the paper for
             # more details)
-            if self.warmup_rounds > server_round:
+            if server_round > self.warmup_rounds:
                 log(INFO, "Saving parameters of clients")
                 for idx in malicious_clients_idx:
                     if self.sampling > 0:
@@ -372,6 +351,8 @@ class EnhancedServer(Server):
                         new_params = flatten_params(
                             parameters_to_ndarrays(parameters_aggregated)
                         )
+
+                    log(INFO, "Saving parameters of client %s with shape %s", idx, new_params.shape)
                     save_params(
                         new_params,
                         idx,
