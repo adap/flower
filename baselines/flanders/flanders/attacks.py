@@ -41,7 +41,7 @@ def gaussian_attack(ordered_results, states, **kwargs):
     results = ordered_results.copy()
 
     def perturbate(vect):
-        return vect + np.random.normal(loc=0, scale=magnitude, size=len(vect))
+        return vect + np.random.normal(loc=0, scale=magnitude, size=vect.size)
 
     for proxy, fitres in ordered_results:
         if states[fitres.metrics["cid"]]:
@@ -51,7 +51,11 @@ def gaussian_attack(ordered_results, states, **kwargs):
             else:
                 new_params = []
                 for par in params:
-                    new_params.append(np.apply_along_axis(perturbate, 0, par))
+                    # if par is an array of one element, it is a scalar
+                    if par.size == 1:
+                        new_params.append(perturbate(par))
+                    else:
+                        new_params.append(np.apply_along_axis(perturbate, 0, par))
             fitres.parameters = ndarrays_to_parameters(new_params)
             results[int(fitres.metrics["cid"])] = (proxy, fitres)
     return results, {}
@@ -61,7 +65,7 @@ def gaussian_attack(ordered_results, states, **kwargs):
 def lie_attack(
     ordered_results,
     states,
-    omniscent,
+    omniscent=True,
     **kwargs,
 ):
     """Apply Omniscent LIE attack, Baruch et al. (2019) on parameters.
@@ -96,6 +100,7 @@ def lie_attack(
 
     num_clients = len(ordered_results)
     num_malicious = sum(val is True for val in states.values())
+
     # pylint: disable=c-extension-no-member
     num_supporters = math.floor((num_clients / 2) + 1) - num_malicious
 
@@ -115,7 +120,7 @@ def lie_attack(
 def fang_attack(
     ordered_results,
     states,
-    omniscent,
+    omniscent=True,
     **kwargs,
 ):
     """Apply Local Model Poisoning Attacks.
@@ -134,8 +139,8 @@ def fang_attack(
         otherwise).
     omniscent
         Whether the attacker knows the local models of all clients or not.
-    num_params
-        Number of parameters.
+    num_layers
+        Number of layers.
     w_re
         The received global model.
     old_lambda
@@ -150,11 +155,15 @@ def fang_attack(
     results
         List of tuples (client_proxy, fit_result) ordered by client id.
     """
-    num_params = kwargs.get("num_params", 1)
+    num_layers = kwargs.get("num_layers", 2)
     w_re = kwargs.get("w_re", None)  # the received global model
-    old_lambda = kwargs.get("old_lambda", 0.0)
-    threshold = kwargs.get("threshold", 0.0)
-    malicious_selected = kwargs.get("malicious_selected", False)
+    threshold = kwargs.get("threshold", 1e-5)
+
+    num_clients = len(ordered_results)
+    num_corrupted = sum(val is True for val in states.values())
+    # there can't be an attack with less than 2 malicious clients
+    # to avoid division by 0
+    num_corrupted = max(num_corrupted, 2)
 
     if not omniscent:
         # if not omniscent, the attacker doesn't know the
@@ -165,57 +174,40 @@ def fang_attack(
             if states[ordered_results[i][1].metrics["cid"]]
         ]
 
-    num_clients = len(ordered_results)
-    num_corrupted = sum(val is True for val in states.values())
+    # Initialize lambda
+    benign = [
+        (parameters_to_ndarrays(fitres.parameters), fitres.num_examples)
+        for _, fitres in ordered_results
+        if states[fitres.metrics["cid"]] is False
+    ]
+    all_params = [
+        (parameters_to_ndarrays(fitres.parameters), fitres.num_examples)
+        for _, fitres in ordered_results
+    ]
+    # Compute the smallest distance that Krum would choose
+    _, _, _, distances = _krum(all_params, num_corrupted, 1)
 
-    # there can't be an attack with less than 2 malicious clients
-    # to avoid division by 0
-    num_corrupted = max(num_corrupted, 2)
+    idx_benign = [int(cid) for cid in states.keys() if states[cid] is False]
 
-    # lambda initialization
-    if old_lambda == 0:
-        benign = [
-            (parameters_to_ndarrays(fitres.parameters), fitres.num_examples)
-            for _, fitres in ordered_results
-            if states[fitres.metrics["cid"]] is False
-        ]
-        all_params = [
-            (parameters_to_ndarrays(fitres.parameters), fitres.num_examples)
-            for _, fitres in ordered_results
-        ]
-        # Compute the smallest distance that Krum would choose
-        _, _, _, distances = _krum(all_params, num_corrupted, 1)
+    min_dist = np.min(np.array(distances)[idx_benign]) / (
+        ((num_clients - 2) * (num_corrupted - 1)) * np.sqrt(num_layers)
+    )
 
-        idx_benign = [int(cid) for cid in states.keys() if states[cid] is False]
+    # Compute max distance from w_re
+    dist_wre = np.zeros((len(benign)))
+    for i in range(len(benign)):
+        dist = [benign[i][0][j] - w_re[j] for j in range(num_layers)]
+        norm_sums = 0
+        for k in dist:
+            norm_sums += np.linalg.norm(k)
+        dist_wre[i] = norm_sums**2
+    max_dist = np.max(dist_wre) / np.sqrt(num_layers)
+    lamda = min(min_dist + max_dist, 999)  # lambda (capped to 999 to avoid numerical problems in specific settings)
 
-        min_dist = np.min(np.array(distances)[idx_benign]) / (
-            (num_clients - 2 * num_corrupted - 1) * np.sqrt(num_params)
-        )
-
-        # Compute max distance from w_re
-        dist_wre = np.zeros((len(benign)))
-        for i in range(len(benign)):
-            dist = [benign[i][0][j] - w_re[j] for j in range(num_params)]
-            norm_sums = 0
-            for k in dist:
-                norm_sums += np.linalg.norm(k)
-            dist_wre[i] = norm_sums**2
-
-        max_dist = np.max(dist_wre) / np.sqrt(num_params)
-        curr_lambda = min_dist + max_dist  # lambda
-    else:
-        # lambda halving search
-        curr_lambda = old_lambda
-        if old_lambda > threshold and malicious_selected is False:
-            curr_lambda = old_lambda * 0.5
-
-    # Compute sign vector num_supporters
-    magnitude = []
-    for _, _idx in enumerate(w_re):
-        magnitude.append(np.sign(w_re[i]) * curr_lambda)
-
-    w_1 = [w_re[i] - magnitude[i] for i in range(len(w_re))]  # corrupted model
-    corrupted_params = ndarrays_to_parameters(w_1)
+    malicious_selected, corrupted_params = _fang_corrupt_and_select(all_params, w_re, states, num_corrupted, lamda)
+    while lamda > threshold and malicious_selected is False:
+        lamda = lamda * 0.5
+        malicious_selected, corrupted_params = _fang_corrupt_and_select(all_params, w_re, states, num_corrupted, lamda)
 
     # Set corrupted clients' updates to w_1
     results = [
@@ -223,7 +215,7 @@ def fang_attack(
             proxy,
             FitRes(
                 fitres.status,
-                parameters=corrupted_params,
+                parameters=ndarrays_to_parameters(corrupted_params),
                 num_examples=fitres.num_examples,
                 metrics=fitres.metrics,
             ),
@@ -233,13 +225,13 @@ def fang_attack(
         for proxy, fitres in ordered_results
     ]
 
-    return results, {"lambda": curr_lambda}
+    return results, {}
 
 
 def minmax_attack(
     ordered_results,
     states,
-    omniscent,
+    omniscent=True,
     **kwargs,
 ):
     """Apply Min-Max agnostic attack.
@@ -271,7 +263,7 @@ def minmax_attack(
     """
     dataset_name = kwargs.get("dataset_name", None)
     threshold = kwargs.get("threshold", 1e-5)
-    lambda_init = kwargs.get("old_lambda", 5.0)
+    lambda_init = kwargs.get("lambda", 5.0)
     malicious_num = kwargs.get("malicious_num", 0)
 
     results = ordered_results.copy()
@@ -320,7 +312,7 @@ def minmax_attack(
 
         # Set corrupted clients' updates to corrupted_params
         params_c = [
-            corrupted_params if states[i] else params[i] for i in range(len(params))
+            corrupted_params if states[str(i)] else params[i] for i in range(len(params))
         ]
         distance_matrix = _compute_distances(params_c)
 
@@ -394,7 +386,7 @@ def minmax_attack(
         if states[fitres.metrics["cid"]]:
             fitres.parameters = corrupted_params
             results[int(fitres.metrics["cid"])] = (proxy, fitres)
-    return results, {"lambda": curr_lambda}
+    return results, {}
 
 
 def _krum(results, num_malicious, to_keep, num_closest=None):
@@ -417,6 +409,7 @@ def _krum(results, num_malicious, to_keep, num_closest=None):
     closest_indices = _get_closest_indices(
         distance_matrix, num_closest
     )  # indices of closest points
+
     scores = [
         np.sum(distance_matrix[i, closest_indices[i]])
         for i in range(len(distance_matrix))
@@ -458,8 +451,30 @@ def _get_closest_indices(distance_matrix, num_closest):
             list of lists of indices of the closest points for each vector.
     """
     closest_indices = []
-    for _, idx in enumerate(distance_matrix):
+    for idx, _ in enumerate(distance_matrix):
         closest_indices.append(
             np.argsort(distance_matrix[idx])[1 : num_closest + 1].tolist()
         )
     return closest_indices
+
+def _fang_corrupt_params(global_model, lamda):
+    # Compute sign vector num_supporters
+    magnitude = []
+    for i, _ in enumerate(global_model):
+        magnitude.append(np.sign(global_model[i]) * lamda)
+
+    corrupted_params = [global_model[i] - magnitude[i] for i in range(len(global_model))]  # corrupted model
+    return corrupted_params
+
+def _fang_corrupt_and_select(all_models, global_model, states, num_corrupted, lamda):
+    # Check that krum selects a malicious client
+    corrupted_params = _fang_corrupt_params(global_model, lamda)
+    all_models_m = [
+        (corrupted_params, num_examples) if states[str(i)] else (model, num_examples)
+        for i, (model, num_examples) in enumerate(all_models)
+    ]
+    _, idx_best_model, _, _ = _krum(all_models_m, num_corrupted, 1)
+
+    # Check if the best model is malicious
+    malicious_selected = states[str(idx_best_model)]
+    return malicious_selected, corrupted_params

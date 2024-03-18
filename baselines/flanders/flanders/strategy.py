@@ -3,6 +3,7 @@
 import typing
 from logging import INFO, WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
+import importlib
 
 import numpy as np
 from flwr.common import (
@@ -15,6 +16,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.server.strategy.aggregate import aggregate
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
@@ -58,6 +60,8 @@ class Flanders(FedAvg):
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         num_clients_to_keep: int = 1,
+        aggregate_fn: Callable = aggregate,
+        aggregate_parameters: Dict[str, Scalar] = {},
         window: int = 0,
         maxiter: int = 100,
         alpha: float = 1,
@@ -104,6 +108,9 @@ class Flanders(FedAvg):
         num_clients_to_keep : int, optional
             Number of clients to keep (i.e., to classify as "good"), by default
             1
+        aggregate_fn : Callable[[List[Tuple[NDArrays, int]]], NDArrays],
+        optional
+            Function to aggregate the parameters, by default FedAvg
         window : int, optional
             Sliding window size used as a "training set" of MAR, by default 0
         maxiter : int, optional
@@ -136,8 +143,9 @@ class Flanders(FedAvg):
         self.alpha = alpha
         self.beta = beta
         self.params_indexes = None
-        self.malicious_selected = False
         self.distance_function = distance_function
+        self.aggregate_fn = aggregate_fn
+        self.aggregate_parameters = aggregate_parameters
 
     @typing.no_type_check
     def configure_fit(
@@ -177,6 +185,7 @@ class Flanders(FedAvg):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
+        clients_state: Dict[str, bool],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Apply MAR forecasting to exclude malicious clients from FedAvg.
 
@@ -201,16 +210,14 @@ class Flanders(FedAvg):
         good_clients_idx = []
         malicious_clients_idx = []
         if server_round > 1:
-            win = self.window
             if server_round < self.window:
-                win = server_round
+                self.window = server_round
             params_tensor = load_all_time_series(
-                params_dir="clients_params", window=win
+                params_dir="clients_params", window=self.window
             )
             params_tensor = np.transpose(
                 params_tensor, (0, 2, 1)
             )  # (clients, params, time)
-
             ground_truth = params_tensor[:, :, -1].copy()
             pred_step = 1
             log(INFO, "Computing MAR on params_tensor %s", params_tensor.shape)
@@ -226,7 +233,7 @@ class Flanders(FedAvg):
             anomaly_scores = self.distance_function(
                 ground_truth, predicted_matrix[:, :, 0]
             )
-            log(INFO, "Anomaly scores: %s", anomaly_scores)
+            log(DEBUG, "Anomaly scores: %s", anomaly_scores)
 
             log(INFO, "Selecting good clients")
             good_clients_idx = sorted(
@@ -235,16 +242,45 @@ class Flanders(FedAvg):
             malicious_clients_idx = sorted(
                 np.argsort(anomaly_scores)[self.num_clients_to_keep :]
             )  # noqa
-            results = np.array(results)[good_clients_idx].tolist()
-            log(INFO, "Good clients: %s", good_clients_idx)
 
-        log(INFO, "Applying FedAvg")
+            avg_anomaly_score_gc = np.mean(anomaly_scores[good_clients_idx])
+            log(DEBUG, "Average anomaly score for good clients", avg_anomaly_score_gc)
+            
+            avg_anomaly_score_m = np.mean(anomaly_scores[malicious_clients_idx])
+            log(DEBUG, "Average anomaly score for malicious clients", avg_anomaly_score_m)
+
+            results = np.array(results)[good_clients_idx].tolist()
+            log(DEBUG, "Good clients: %s", good_clients_idx)
+
+        log(INFO, "Applying aggregate_fn")
         # Convert results
         weights_results = [
             (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
             for _, fit_res in results
         ]
-        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+
+        # Check that self.aggregate_fn has num_malicious parameter
+        if "num_malicious" in self.aggregate_fn.__code__.co_varnames:
+            # Count the number of malicious clients in good_clients_idx by checking clients_state
+            num_malicious = sum([clients_state[str(cid)] for cid in good_clients_idx])
+            log(INFO, "Number of malicious clients in good_clients_idx after FLANDERS filtering: %s", num_malicious)
+            self.aggregate_parameters["num_malicious"] = num_malicious
+            
+        if "aggregation_rule" in self.aggregate_fn.__code__.co_varnames:
+            module = importlib.import_module(self.aggregate_parameters["aggregation_module_name"])
+            function_name = self.aggregate_parameters["aggregation_name"]
+            self.aggregate_parameters["aggregation_rule"] = getattr(module, function_name)
+            # Remove aggregation_module_name and aggregation_name from self.aggregate_parameters
+            aggregate_parameters = self.aggregate_parameters.copy()
+            del aggregate_parameters["aggregation_module_name"]
+            del aggregate_parameters["aggregation_name"]
+            try:
+                parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results, **aggregate_parameters))
+            except ValueError as e:
+                log(WARNING, f"Error in aggregate_fn: {e}")
+                parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+        else:
+            parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results, **self.aggregate_parameters))
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
@@ -261,9 +297,23 @@ class Flanders(FedAvg):
             malicious_clients_idx,
         )
 
+    def evaluate(
+        self, server_round: int, parameters: Parameters
+    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
+        """Evaluate model parameters using an evaluation function."""
+        if self.evaluate_fn is None:
+            # No evaluation function provided
+            return None
+        parameters_ndarrays = parameters_to_ndarrays(parameters)
+        eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {})
+        if eval_res is None:
+            return None
+        loss, metrics = eval_res
+        return loss, metrics
+
 
 # pylint: disable=too-many-locals, too-many-arguments, invalid-name
-def mar(X, pred_step, alpha=1, beta=1, maxiter=100, window=0):
+def mar(X, pred_step, alpha=1, beta=1, maxiter=100):
     """Forecast the next tensor of params.
 
     Forecast the next tensor of params by using MAR algorithm.
@@ -276,8 +326,6 @@ def mar(X, pred_step, alpha=1, beta=1, maxiter=100, window=0):
     """
     m, n, T = X.shape
     start = 0
-    if window > 0:
-        start = T - window
 
     A = np.random.randn(m, m)
     B = np.random.randn(n, n)

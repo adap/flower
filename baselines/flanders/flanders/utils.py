@@ -2,28 +2,19 @@
 
 import os
 from threading import Lock
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict, Optional, Tuple, List
 
 import numpy as np
 import torch
 from flwr.common import NDArrays, Parameters, Scalar, parameters_to_ndarrays
 from natsort import natsorted
-from sklearn.linear_model import ElasticNet, LogisticRegression
-from sklearn.metrics import (
-    accuracy_score,
-    log_loss,
-    mean_absolute_percentage_error,
-    mean_squared_error,
-    r2_score,
-    roc_auc_score,
-)
+
 from torch.utils.data import DataLoader
 from torchvision import transforms
-from torchvision.datasets import MNIST
+from torchvision.datasets import MNIST, FashionMNIST
 
-from .client import set_params, set_sklearn_model_params
-from .dataset import get_cifar_10, get_partitioned_house, get_partitioned_income
-from .models import CifarNet, MnistNet, test_cifar, test_mnist
+from .client import set_params
+from .models import MnistNet, FMnistNet, test_mnist, test_fmnist
 
 lock = Lock()
 
@@ -46,7 +37,6 @@ def l2_norm(true_matrix, predicted_matrix):
     delta = np.subtract(true_matrix, predicted_matrix)
     anomaly_scores = np.sum(delta**2, axis=-1) ** (1.0 / 2)
     return anomaly_scores
-
 
 def save_params(
     parameters, cid, params_dir="clients_params", remove_last=False, rrl=False
@@ -129,7 +119,13 @@ def evaluate_aggregated(
 def mnist_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]):
     """Evaluate MNIST model on the test set."""
     # determine device
-    device = torch.device("cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+
 
     model = MnistNet()
     set_params(model, parameters)
@@ -141,60 +137,39 @@ def mnist_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Sc
 
     return loss, {"accuracy": accuracy, "auc": auc}
 
-
 # pylint: disable=unused-argument
-def cifar_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]):
-    """Evaluate CIFAR-10 model on the test set."""
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+def fmnist_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]):
+    """Evaluate MNIST model on the test set."""
+    # determine device
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
 
-    model = CifarNet()
+
+    model = FMnistNet()
     set_params(model, parameters)
     model.to(device)
 
-    _, testset = get_cifar_10()
-    testloader = torch.utils.data.DataLoader(testset, batch_size=32)
-    loss, accuracy, auc = test_cifar(model, testloader, device=device)
-
-    # return statistics
-    return loss, {"accuracy": accuracy, "auc": auc}
-
-
-# pylint: disable=unused-argument
-def income_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]):
-    """Evaluate Income model on the test set."""
-    model = LogisticRegression()
-    model = set_sklearn_model_params(model, parameters)
-    model.classes_ = np.array([0.0, 1.0])
-
-    _, x_test, _, y_test = get_partitioned_income(
-        "flanders/datasets_files/adult_server.csv", 1, train_size=0.0, test_size=1.0
-    )
-    x_test = x_test[0]
-    y_test = y_test[0]
-    y_pred = model.predict(x_test)
-    accuracy = accuracy_score(y_test, y_pred)
-    loss = log_loss(y_test, model.predict_proba(x_test))
-    auc = roc_auc_score(y_test, model.predict_proba(x_test)[:, 1])
+    testset = FashionMNIST("", train=False, download=True, transform=transforms.ToTensor())
+    testloader = DataLoader(testset, batch_size=32, shuffle=False, num_workers=1)
+    loss, accuracy, auc = test_fmnist(model, testloader, device=device)
 
     return loss, {"accuracy": accuracy, "auc": auc}
 
-
-# pylint: disable=unused-argument
-def house_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]):
-    """Evaluate House model on the test set."""
-    model = ElasticNet(alpha=1, warm_start=True)
-    model = set_sklearn_model_params(model, parameters)
-    _, x_test, _, y_test = get_partitioned_house(
-        "flanders/datasets_files/houses_server.csv", 1, train_size=0.0, test_size=1.0
-    )
-    x_test = x_test[0]
-    y_test = y_test[0]
-    y_pred = model.predict(x_test)
-    loss = mean_squared_error(y_test, y_pred)
-    mape = mean_absolute_percentage_error(y_test, y_pred)
-    rsq = r2_score(y_test, y_pred)
-    arsq = 1 - (1 - rsq) * (len(y_test) - 1) / (
-        len(y_test) - x_test.shape[1] - 1
-    )  # noqa
-
-    return loss, {"Adj-R2": arsq, "MAPE": mape}
+def update_confusion_matrix(confusion_matrix: Dict[str, int], clients_states: Dict[str, bool], malicious_clients_idx: List, good_clients_idx: List):
+    """Update TN, FP, FN, TP of confusion matrix."""
+    for client_idx, client_state in clients_states.items():
+        if int(client_idx) in malicious_clients_idx:
+            if client_state:
+                confusion_matrix["TP"] += 1
+            else:
+                confusion_matrix["FP"] += 1
+        elif int(client_idx) in good_clients_idx:
+            if client_state:
+                confusion_matrix["FN"] += 1
+            else:
+                confusion_matrix["TN"] += 1
+    return confusion_matrix
