@@ -145,7 +145,8 @@ class EnhancedServer(Server):
                         self.good_clients_idx,
                     )
                     
-                metrics_cen = {key: self.confusion_matrix[key] for key in ["TP", "TN", "FP", "FN"]}
+                for key, val in self.confusion_matrix.items():
+                    metrics_cen[key] = val
                 
                 log(
                     INFO,

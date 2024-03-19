@@ -233,7 +233,7 @@ class Flanders(FedAvg):
             anomaly_scores = self.distance_function(
                 ground_truth, predicted_matrix[:, :, 0]
             )
-            log(DEBUG, "Anomaly scores: %s", anomaly_scores)
+            log(INFO, "Anomaly scores: %s", anomaly_scores)
 
             log(INFO, "Selecting good clients")
             good_clients_idx = sorted(
@@ -244,13 +244,13 @@ class Flanders(FedAvg):
             )  # noqa
 
             avg_anomaly_score_gc = np.mean(anomaly_scores[good_clients_idx])
-            log(DEBUG, "Average anomaly score for good clients", avg_anomaly_score_gc)
+            log(INFO, "Average anomaly score for good clients: %s", avg_anomaly_score_gc)
             
             avg_anomaly_score_m = np.mean(anomaly_scores[malicious_clients_idx])
-            log(DEBUG, "Average anomaly score for malicious clients", avg_anomaly_score_m)
+            log(INFO, "Average anomaly score for malicious clients: %s", avg_anomaly_score_m)
 
             results = np.array(results)[good_clients_idx].tolist()
-            log(DEBUG, "Good clients: %s", good_clients_idx)
+            log(INFO, "Good clients: %s", good_clients_idx)
 
         log(INFO, "Applying aggregate_fn")
         # Convert results
@@ -296,20 +296,6 @@ class Flanders(FedAvg):
             good_clients_idx,
             malicious_clients_idx,
         )
-
-    def evaluate(
-        self, server_round: int, parameters: Parameters
-    ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
-        """Evaluate model parameters using an evaluation function."""
-        if self.evaluate_fn is None:
-            # No evaluation function provided
-            return None
-        parameters_ndarrays = parameters_to_ndarrays(parameters)
-        eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {})
-        if eval_res is None:
-            return None
-        loss, metrics = eval_res
-        return loss, metrics
 
 
 # pylint: disable=too-many-locals, too-many-arguments, invalid-name
