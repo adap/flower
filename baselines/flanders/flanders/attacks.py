@@ -202,12 +202,18 @@ def fang_attack(
             norm_sums += np.linalg.norm(k)
         dist_wre[i] = norm_sums**2
     max_dist = np.max(dist_wre) / np.sqrt(num_layers)
-    lamda = min(min_dist + max_dist, 999)  # lambda (capped to 999 to avoid numerical problems in specific settings)
+    lamda = min(
+        min_dist + max_dist, 999
+    )  # lambda (capped to 999 to avoid numerical problems in specific settings)
 
-    malicious_selected, corrupted_params = _fang_corrupt_and_select(all_params, w_re, states, num_corrupted, lamda)
+    malicious_selected, corrupted_params = _fang_corrupt_and_select(
+        all_params, w_re, states, num_corrupted, lamda
+    )
     while lamda > threshold and malicious_selected is False:
         lamda = lamda * 0.5
-        malicious_selected, corrupted_params = _fang_corrupt_and_select(all_params, w_re, states, num_corrupted, lamda)
+        malicious_selected, corrupted_params = _fang_corrupt_and_select(
+            all_params, w_re, states, num_corrupted, lamda
+        )
 
     # Set corrupted clients' updates to w_1
     results = [
@@ -312,7 +318,8 @@ def minmax_attack(
 
         # Set corrupted clients' updates to corrupted_params
         params_c = [
-            corrupted_params if states[str(i)] else params[i] for i in range(len(params))
+            corrupted_params if states[str(i)] else params[i]
+            for i in range(len(params))
         ]
         distance_matrix = _compute_distances(params_c)
 
@@ -457,14 +464,18 @@ def _get_closest_indices(distance_matrix, num_closest):
         )
     return closest_indices
 
+
 def _fang_corrupt_params(global_model, lamda):
     # Compute sign vector num_supporters
     magnitude = []
     for i, _ in enumerate(global_model):
         magnitude.append(np.sign(global_model[i]) * lamda)
 
-    corrupted_params = [global_model[i] - magnitude[i] for i in range(len(global_model))]  # corrupted model
+    corrupted_params = [
+        global_model[i] - magnitude[i] for i in range(len(global_model))
+    ]  # corrupted model
     return corrupted_params
+
 
 def _fang_corrupt_and_select(all_models, global_model, states, num_corrupted, lamda):
     # Check that krum selects a malicious client

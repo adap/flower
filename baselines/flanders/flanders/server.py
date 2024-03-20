@@ -1,6 +1,12 @@
+"""Server with enhanced functionality.
+
+It can be used to simulate an attacker that controls a fraction of the clients and to
+save the parameters of each client in its memory.
+"""
+
 import timeit
 from logging import DEBUG, INFO
-from typing import Any, Callable, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 import numpy as np
 from flwr.common import DisconnectRes, EvaluateRes, FitRes, parameters_to_ndarrays
@@ -85,9 +91,9 @@ class EnhancedServer(Server):
         self.omniscent = omniscent
         self.malicious_lst: List = []
         self.confusion_matrix = {"TP": 0, "TN": 0, "FP": 0, "FN": 0}
-        self.clients_state = {}
-        self.good_clients_idx = []
-        self.malicious_clients_idx = []
+        self.clients_state: Dict[str, bool] = {}
+        self.good_clients_idx: List[int] = []
+        self.malicious_clients_idx: List[int] = []
 
     # pylint: disable=too-many-locals
     def fit(self, num_rounds, timeout):
@@ -144,10 +150,10 @@ class EnhancedServer(Server):
                         self.malicious_clients_idx,
                         self.good_clients_idx,
                     )
-                    
+
                 for key, val in self.confusion_matrix.items():
                     metrics_cen[key] = val
-                
+
                 log(
                     INFO,
                     "fit progress: (%s, %s, %s, %s)",
@@ -215,8 +221,8 @@ class EnhancedServer(Server):
         )
 
         # Create dict clients_state to keep track of malicious clients
-        clients_state = dict()
-        for idx, (proxy, _) in enumerate(client_instructions):
+        clients_state = {}
+        for _, (proxy, _) in enumerate(client_instructions):
             clients_state[proxy.cid] = False
             if proxy.cid in self.malicious_lst:
                 clients_state[proxy.cid] = True
@@ -319,14 +325,15 @@ class EnhancedServer(Server):
                     )
         else:
             results = ordered_results
-            others = {}
-    
+
         good_clients_idx = []
         malicious_clients_idx = []
         if isinstance(self.strategy, Flanders):
             # Aggregate training results
             log(INFO, "fit_round - Aggregating training results")
-            aggregated_result = self.strategy.aggregate_fit(server_round, results, failures, clients_state)
+            aggregated_result = self.strategy.aggregate_fit(
+                server_round, results, failures, clients_state
+            )
             (
                 parameters_aggregated,
                 metrics_aggregated,
@@ -353,7 +360,12 @@ class EnhancedServer(Server):
                             parameters_to_ndarrays(parameters_aggregated)
                         )
 
-                    log(INFO, "Saving parameters of client %s with shape %s", idx, new_params.shape)
+                    log(
+                        INFO,
+                        "Saving parameters of client %s with shape %s",
+                        idx,
+                        new_params.shape,
+                    )
                     save_params(
                         new_params,
                         idx,
@@ -364,7 +376,9 @@ class EnhancedServer(Server):
         else:
             # Aggregate training results
             log(INFO, "fit_round - Aggregating training results")
-            aggregated_result = self.strategy.aggregate_fit(server_round, results, failures)
+            aggregated_result = self.strategy.aggregate_fit(
+                server_round, results, failures
+            )
             parameters_aggregated, metrics_aggregated = aggregated_result
 
         self.clients_state = clients_state

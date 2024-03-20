@@ -43,7 +43,12 @@ def get_dataset(path_to_data: Path, cid: str, partition: str, transform=None):
 
 
 def get_dataloader(
-    path_to_data: str, cid: str, is_train: bool, batch_size: int, workers: int, transform=None
+    path_to_data: str,
+    cid: str,
+    is_train: bool,
+    batch_size: int,
+    workers: int,
+    transform=None,
 ):
     """Generate trainset/valset object and returns appropiate dataloader."""
     partition = "train" if is_train else "val"
@@ -131,6 +136,7 @@ def do_fl_partitioning(
 
     return splits_dir
 
+
 def mnist_transformation(img):
     """Return TorchVision transformation for MNIST."""
     return transforms.Compose(
@@ -193,6 +199,7 @@ class TorchVisionFL(VisionDataset):
         """Return length of dataset."""
         return len(self.data)
 
+
 def get_mnist(path_to_data="flanders/datasets_files/mnist/data"):
     """Download MNIST dataset."""
     # download dataset and load train set
@@ -211,6 +218,7 @@ def get_mnist(path_to_data="flanders/datasets_files/mnist/data"):
     # returns path where training data is and testset
     return training_data, test_set
 
+
 def get_fmnist(path_to_data="flanders/datasets_files/fmnist/data"):
     """Download FashionMNIST dataset."""
     # download dataset and load train set
@@ -228,6 +236,7 @@ def get_fmnist(path_to_data="flanders/datasets_files/fmnist/data"):
 
     # returns path where training data is and testset
     return training_data, test_set
+
 
 def dataset_partitioner(
     dataset: torch.utils.data.Dataset,

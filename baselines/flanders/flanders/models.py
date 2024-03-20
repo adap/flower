@@ -18,12 +18,15 @@ def roc_auc_multiclass(y_true, y_pred):
 
 
 class MnistNet(nn.Module):
+    """Neural network for MNIST classification."""
+
     def __init__(self):
         super(MnistNet, self).__init__()
         self.fc1 = nn.Linear(28 * 28, 128)
         self.fc2 = nn.Linear(128, 10)
 
     def forward(self, x):
+        """Forward pass through the network."""
         x = x.view(-1, 28 * 28)
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
@@ -31,6 +34,7 @@ class MnistNet(nn.Module):
 
 
 def train_mnist(model, dataloader, epochs, device):
+    """Train the network on the training set."""
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
@@ -51,6 +55,7 @@ def train_mnist(model, dataloader, epochs, device):
                     f"Step [{i+1}/{len(dataloader)}], "
                     f"Loss: {loss.item():.4f}"
                 )
+
 
 # pylint: disable=too-many-locals
 def test_mnist(model, dataloader, device):
@@ -81,30 +86,34 @@ def test_mnist(model, dataloader, device):
 
 
 class FMnistNet(nn.Module):
+    """Neural network for Fashion MNIST classification."""
+
     def __init__(self):
         super().__init__()
         self.fc1 = nn.Linear(784, 256)
         self.fc2 = nn.Linear(256, 128)
         self.fc3 = nn.Linear(128, 64)
         self.fc4 = nn.Linear(64, 10)
-        
-        # Dropout module with a 0.2 drop probability 
+
+        # Dropout module with a 0.2 drop probability
         self.dropout = nn.Dropout(p=0.2)
-        
+
     def forward(self, x):
+        """Forward pass through the network."""
         # Flatten the input tensor
-        x = x.view(x.shape[0], -1)    
+        x = x.view(x.shape[0], -1)
         # Set the activation functions
         x = self.dropout(F.relu(self.fc1(x)))
         x = self.dropout(F.relu(self.fc2(x)))
         x = self.dropout(F.relu(self.fc3(x)))
         x = F.log_softmax(self.fc4(x), dim=1)
-    
+
         return x
-    
+
 
 def train_fmnist(model, dataloader, epochs, device):
-    criterion = nn.NLLLoss(reduction ='sum')
+    """Train the network on the training set."""
+    criterion = nn.NLLLoss(reduction="sum")
     optimizer = torch.optim.Adam(model.parameters(), lr=0.003)
 
     for epoch in range(epochs):
@@ -125,12 +134,13 @@ def train_fmnist(model, dataloader, epochs, device):
                     f"Loss: {loss.item():.4f}"
                 )
 
+
 # pylint: disable=too-many-locals
 def test_fmnist(model, dataloader, device):
     """Validate the network on the entire test set."""
     loss = 0
     model.eval()
-    criterion = nn.NLLLoss(reduction ='sum')
+    criterion = nn.NLLLoss(reduction="sum")
     y_true, y_pred = [], []
     with torch.no_grad():
         n_correct = 0

@@ -10,15 +10,16 @@ import torch
 
 from .dataset import get_dataloader, mnist_transformation
 from .models import (
-    MnistNet, 
-    test_mnist, 
-    train_mnist, 
-    test_fmnist, 
-    train_fmnist, 
-    FMnistNet
+    FMnistNet,
+    MnistNet,
+    test_fmnist,
+    test_mnist,
+    train_fmnist,
+    train_mnist,
 )
 
 XY = Tuple[np.ndarray, np.ndarray]
+
 
 def get_params(model):
     """Get model weights as a list of NumPy ndarrays."""
@@ -45,7 +46,7 @@ class MnistClient(fl.client.NumPyClient):
         self.net = MnistNet()
 
         # Determine device
-        #self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if torch.cuda.is_available():
             self.device = torch.device("cuda")
         elif torch.backends.mps.is_available():
@@ -89,14 +90,19 @@ class MnistClient(fl.client.NumPyClient):
         # Load data for this client and get trainloader
         num_workers = len(ray.worker.get_resource_ids()["CPU"])
         valloader = get_dataloader(
-            self.fed_dir, self.cid, is_train=False, batch_size=50, workers=num_workers, transform=mnist_transformation
+            self.fed_dir,
+            self.cid,
+            is_train=False,
+            batch_size=50,
+            workers=num_workers,
+            transform=mnist_transformation,
         )
 
         self.net.to(self.device)
         loss, accuracy = test_mnist(self.net, valloader, device=self.device)
 
         return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
-    
+
 
 class FMnistClient(fl.client.NumPyClient):
     """Implementation of MNIST image classification using PyTorch."""
@@ -111,7 +117,7 @@ class FMnistClient(fl.client.NumPyClient):
         self.net = FMnistNet()
 
         # Determine device
-        #self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if torch.cuda.is_available():
             self.device = torch.device("cuda")
         elif torch.backends.mps.is_available():
@@ -155,7 +161,12 @@ class FMnistClient(fl.client.NumPyClient):
         # Load data for this client and get trainloader
         num_workers = len(ray.worker.get_resource_ids()["CPU"])
         valloader = get_dataloader(
-            self.fed_dir, self.cid, is_train=False, batch_size=50, workers=num_workers, transform=mnist_transformation
+            self.fed_dir,
+            self.cid,
+            is_train=False,
+            batch_size=50,
+            workers=num_workers,
+            transform=mnist_transformation,
         )
 
         self.net.to(self.device)

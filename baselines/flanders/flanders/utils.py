@@ -2,19 +2,18 @@
 
 import os
 from threading import Lock
-from typing import Callable, Dict, Optional, Tuple, List
+from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
 from flwr.common import NDArrays, Parameters, Scalar, parameters_to_ndarrays
 from natsort import natsorted
-
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torchvision.datasets import MNIST, FashionMNIST
 
 from .client import set_params
-from .models import MnistNet, FMnistNet, test_mnist, test_fmnist
+from .models import FMnistNet, MnistNet, test_fmnist, test_mnist
 
 lock = Lock()
 
@@ -37,6 +36,7 @@ def l2_norm(true_matrix, predicted_matrix):
     delta = np.subtract(true_matrix, predicted_matrix)
     anomaly_scores = np.sum(delta**2, axis=-1) ** (1.0 / 2)
     return anomaly_scores
+
 
 def save_params(
     parameters, cid, params_dir="clients_params", remove_last=False, rrl=False
@@ -126,7 +126,6 @@ def mnist_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Sc
     else:
         device = torch.device("cpu")
 
-
     model = MnistNet()
     set_params(model, parameters)
     model.to(device)
@@ -136,6 +135,7 @@ def mnist_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Sc
     loss, accuracy, auc = test_mnist(model, testloader, device=device)
 
     return loss, {"accuracy": accuracy, "auc": auc}
+
 
 # pylint: disable=unused-argument
 def fmnist_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, Scalar]):
@@ -148,18 +148,25 @@ def fmnist_evaluate(server_round: int, parameters: NDArrays, config: Dict[str, S
     else:
         device = torch.device("cpu")
 
-
     model = FMnistNet()
     set_params(model, parameters)
     model.to(device)
 
-    testset = FashionMNIST("", train=False, download=True, transform=transforms.ToTensor())
+    testset = FashionMNIST(
+        "", train=False, download=True, transform=transforms.ToTensor()
+    )
     testloader = DataLoader(testset, batch_size=32, shuffle=False, num_workers=1)
     loss, accuracy, auc = test_fmnist(model, testloader, device=device)
 
     return loss, {"accuracy": accuracy, "auc": auc}
 
-def update_confusion_matrix(confusion_matrix: Dict[str, int], clients_states: Dict[str, bool], malicious_clients_idx: List, good_clients_idx: List):
+
+def update_confusion_matrix(
+    confusion_matrix: Dict[str, int],
+    clients_states: Dict[str, bool],
+    malicious_clients_idx: List,
+    good_clients_idx: List,
+):
     """Update TN, FP, FN, TP of confusion matrix."""
     for client_idx, client_state in clients_states.items():
         if int(client_idx) in malicious_clients_idx:

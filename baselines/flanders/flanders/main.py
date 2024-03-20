@@ -1,34 +1,25 @@
-import os
-import shutil
+"""FLANDERS main scrip."""
+
 import importlib
+import os
 import random
+import shutil
 
 import flwr as fl
-import numpy as np
-import torch
 import hydra
+import numpy as np
 import pandas as pd
+import torch
 from flwr.server.client_manager import SimpleClientManager
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
 
 from .attacks import fang_attack, gaussian_attack, lie_attack, minmax_attack, no_attack
-from .client import (
-    MnistClient,
-    FMnistClient,
-)
-from .dataset import (
-    do_fl_partitioning,
-    get_mnist,
-    get_fmnist,
-)
+from .client import FMnistClient, MnistClient
+from .dataset import do_fl_partitioning, get_fmnist, get_mnist
 from .server import EnhancedServer
-from .utils import (
-    l2_norm,
-    mnist_evaluate,
-    fmnist_evaluate,
-)
+from .utils import fmnist_evaluate, l2_norm, mnist_evaluate
 
 
 # pylint: disable=too-many-locals
@@ -41,7 +32,6 @@ def main(cfg: DictConfig) -> None:
     cfg : DictConfig
         An omegaconf object that stores the hydra config.
     """
-
     # 0. Set random seed
     seed = cfg.seed
     np.random.seed(seed)
@@ -57,19 +47,29 @@ def main(cfg: DictConfig) -> None:
     # - strategy = bulyan and num_malicious > 20
     # - attack_fn != gaussian and num_malicious = 0
     if cfg.strategy.name == "bulyan" and cfg.server.num_malicious > 20:
-        print("Skipping experiment because strategy is bulyan and num_malicious is > 20")
+        print(
+            "Skipping experiment because strategy is bulyan and num_malicious is > 20"
+        )
         return
-    #skip if attack_fn is not gaussian and num_malicious is 0, but continue if attack_fn is na
-    if cfg.server.attack_fn != "gaussian" and cfg.server.num_malicious == 0 and cfg.server.attack_fn != "na":
-        print("Skipping experiment because attack_fn is not gaussian and num_malicious is 0")
+    # skip if attack_fn is not gaussian and num_malicious is 0, but continue if
+    # attack_fn is na
+    if (
+        cfg.server.attack_fn != "gaussian"
+        and cfg.server.num_malicious == 0
+        and cfg.server.attack_fn != "na"
+    ):
+        print(
+            "Skipping experiment because attack_fn is not gaussian and "
+            "num_malicious is 0"
+        )
         return
-        
+
     attacks = {
         "na": no_attack,
         "gaussian": gaussian_attack,
         "lie": lie_attack,
-        "fang": fang_attack, # OPT
-        "minmax": minmax_attack, # AGR-MM
+        "fang": fang_attack,  # OPT
+        "minmax": minmax_attack,  # AGR-MM
     }
 
     clients = {
@@ -115,7 +115,7 @@ def main(cfg: DictConfig) -> None:
     strategy = None
     if cfg.strategy.name == "flanders":
         function_path = cfg.aggregate_fn.aggregate_fn.function
-        module_name, function_name = function_path.rsplit('.', 1)
+        module_name, function_name = function_path.rsplit(".", 1)
         module = importlib.import_module(module_name, package=__package__)
         aggregation_fn = getattr(module, function_name)
 
@@ -247,7 +247,7 @@ def main(cfg: DictConfig) -> None:
     _, fp = zip(*history.metrics_centralized["FP"])
     _, fn = zip(*history.metrics_centralized["FN"])
 
-    path_to_save = [os.path.join(save_path,"results.csv"), "outputs/all_results.csv"]
+    path_to_save = [os.path.join(save_path, "results.csv"), "outputs/all_results.csv"]
 
     for file_name in path_to_save:
         data = pd.DataFrame(
@@ -264,7 +264,9 @@ def main(cfg: DictConfig) -> None:
                 "dataset_name": [dataset_name for _ in range(len(rounds))],
                 "num_malicious": [num_malicious for _ in range(len(rounds))],
                 "strategy": [cfg.strategy.name for _ in range(len(rounds))],
-                "aggregate_fn": [cfg.aggregate_fn.aggregate_fn.function for _ in range(len(rounds))],
+                "aggregate_fn": [
+                    cfg.aggregate_fn.aggregate_fn.function for _ in range(len(rounds))
+                ],
             }
         )
         if os.path.exists(file_name):

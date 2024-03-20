@@ -1,9 +1,9 @@
 """FLANDERS strategy."""
 
+import importlib
 import typing
 from logging import INFO, WARNING
 from typing import Callable, Dict, List, Optional, Tuple, Union
-import importlib
 
 import numpy as np
 from flwr.common import (
@@ -16,7 +16,6 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from flwr.server.strategy.aggregate import aggregate
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
@@ -61,7 +60,7 @@ class Flanders(FedAvg):
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         num_clients_to_keep: int = 1,
         aggregate_fn: Callable = aggregate,
-        aggregate_parameters: Dict[str, Scalar] = {},
+        aggregate_parameters: Optional[Dict[str, Scalar]] = None,
         window: int = 0,
         maxiter: int = 100,
         alpha: float = 1,
@@ -146,6 +145,8 @@ class Flanders(FedAvg):
         self.distance_function = distance_function
         self.aggregate_fn = aggregate_fn
         self.aggregate_parameters = aggregate_parameters
+        if self.aggregate_parameters is None:
+            self.aggregate_parameters = {}
 
     @typing.no_type_check
     def configure_fit(
@@ -244,10 +245,16 @@ class Flanders(FedAvg):
             )  # noqa
 
             avg_anomaly_score_gc = np.mean(anomaly_scores[good_clients_idx])
-            log(INFO, "Average anomaly score for good clients: %s", avg_anomaly_score_gc)
-            
+            log(
+                INFO, "Average anomaly score for good clients: %s", avg_anomaly_score_gc
+            )
+
             avg_anomaly_score_m = np.mean(anomaly_scores[malicious_clients_idx])
-            log(INFO, "Average anomaly score for malicious clients: %s", avg_anomaly_score_m)
+            log(
+                INFO,
+                "Average anomaly score for malicious clients: %s",
+                avg_anomaly_score_m,
+            )
 
             results = np.array(results)[good_clients_idx].tolist()
             log(INFO, "Good clients: %s", good_clients_idx)
@@ -261,26 +268,42 @@ class Flanders(FedAvg):
 
         # Check that self.aggregate_fn has num_malicious parameter
         if "num_malicious" in self.aggregate_fn.__code__.co_varnames:
-            # Count the number of malicious clients in good_clients_idx by checking clients_state
+            # Count the number of malicious clients in
+            # good_clients_idx by checking clients_state
             num_malicious = sum([clients_state[str(cid)] for cid in good_clients_idx])
-            log(INFO, "Number of malicious clients in good_clients_idx after FLANDERS filtering: %s", num_malicious)
+            log(
+                INFO,
+                "Number of malicious clients in good_clients_idx after filtering: %s",
+                num_malicious,
+            )
             self.aggregate_parameters["num_malicious"] = num_malicious
-            
+
         if "aggregation_rule" in self.aggregate_fn.__code__.co_varnames:
-            module = importlib.import_module(self.aggregate_parameters["aggregation_module_name"])
+            module = importlib.import_module(
+                self.aggregate_parameters["aggregation_module_name"]
+            )
             function_name = self.aggregate_parameters["aggregation_name"]
-            self.aggregate_parameters["aggregation_rule"] = getattr(module, function_name)
-            # Remove aggregation_module_name and aggregation_name from self.aggregate_parameters
+            self.aggregate_parameters["aggregation_rule"] = getattr(
+                module, function_name
+            )
+            # Remove aggregation_module_name and aggregation_name
+            # from self.aggregate_parameters
             aggregate_parameters = self.aggregate_parameters.copy()
             del aggregate_parameters["aggregation_module_name"]
             del aggregate_parameters["aggregation_name"]
             try:
-                parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results, **aggregate_parameters))
+                parameters_aggregated = ndarrays_to_parameters(
+                    self.aggregate_fn(weights_results, **aggregate_parameters)
+                )
             except ValueError as e:
                 log(WARNING, f"Error in aggregate_fn: {e}")
-                parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+                parameters_aggregated = ndarrays_to_parameters(
+                    aggregate(weights_results)
+                )
         else:
-            parameters_aggregated = ndarrays_to_parameters(self.aggregate_fn(weights_results, **self.aggregate_parameters))
+            parameters_aggregated = ndarrays_to_parameters(
+                self.aggregate_fn(weights_results, **self.aggregate_parameters)
+            )
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}
