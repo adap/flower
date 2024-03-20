@@ -8,7 +8,7 @@ This introductory example conducts federated instruction tuning with pretrained 
 We implement LLM FlowerTune by integrating a bundle of techniques: 1) We use [Flower Datasets](https://flower.dev/docs/datasets/) to download, partition and preprocess the dataset. 2) The fine-tuning is done using the [🤗PEFT](https://huggingface.co/docs/peft/en/index) library. 3) We use Flower's Simulation Engine to simulate the LLM fine-tuning process in federated way,
 which allows users to perform the training on a single GPU.
 
-## Environments Setup
+## Environment Setup
 
 Start by cloning the code example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
