@@ -42,6 +42,7 @@ def get_dataset(path_to_data: Path, cid: str, partition: str, transform=None):
     return TorchVisionFL(path_to_data, transform=transform)
 
 
+# pylint: disable=too-many-arguments, too-many-locals
 def get_dataloader(
     path_to_data: str,
     cid: str,

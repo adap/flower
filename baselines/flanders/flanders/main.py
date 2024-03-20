@@ -35,7 +35,9 @@ def main(cfg: DictConfig) -> None:
     # 0. Set random seed
     seed = cfg.seed
     np.random.seed(seed)
-    np.random.set_state(np.random.RandomState(seed).get_state())
+    np.random.set_state(
+        np.random.RandomState(seed).get_state()
+    )  # pylint: disable=no-member
     random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
@@ -104,7 +106,7 @@ def main(cfg: DictConfig) -> None:
 
     # 3. Define your clients
     # pylint: disable=no-else-return
-    def client_fn(cid: str, pool_size: int = 10, dataset_name: str = dataset_name):
+    def client_fn(cid: str, dataset_name: str = dataset_name):
         client = clients[dataset_name][0]
         if dataset_name in ["mnist", "fmnist", "cifar", "cifar100"]:
             return client(cid, fed_dir)
@@ -242,10 +244,10 @@ def main(cfg: DictConfig) -> None:
     rounds, test_loss = zip(*history.losses_centralized)
     _, test_accuracy = zip(*history.metrics_centralized["accuracy"])
     _, test_auc = zip(*history.metrics_centralized["auc"])
-    _, tp = zip(*history.metrics_centralized["TP"])
-    _, tn = zip(*history.metrics_centralized["TN"])
-    _, fp = zip(*history.metrics_centralized["FP"])
-    _, fn = zip(*history.metrics_centralized["FN"])
+    _, truep = zip(*history.metrics_centralized["TP"])
+    _, truen = zip(*history.metrics_centralized["TN"])
+    _, falsep = zip(*history.metrics_centralized["FP"])
+    _, falsen = zip(*history.metrics_centralized["FN"])
 
     path_to_save = [os.path.join(save_path, "results.csv"), "outputs/all_results.csv"]
 
@@ -256,10 +258,10 @@ def main(cfg: DictConfig) -> None:
                 "loss": test_loss,
                 "accuracy": test_accuracy,
                 "auc": test_auc,
-                "TP": tp,
-                "TN": tn,
-                "FP": fp,
-                "FN": fn,
+                "TP": truep,
+                "TN": truen,
+                "FP": falsep,
+                "FN": falsen,
                 "attack_fn": [attack_fn for _ in range(len(rounds))],
                 "dataset_name": [dataset_name for _ in range(len(rounds))],
                 "num_malicious": [num_malicious for _ in range(len(rounds))],

@@ -21,7 +21,7 @@ class MnistNet(nn.Module):
     """Neural network for MNIST classification."""
 
     def __init__(self):
-        super(MnistNet, self).__init__()
+        super().__init__()
         self.fc1 = nn.Linear(28 * 28, 128)
         self.fc2 = nn.Linear(128, 10)
 

@@ -295,8 +295,8 @@ class Flanders(FedAvg):
                 parameters_aggregated = ndarrays_to_parameters(
                     self.aggregate_fn(weights_results, **aggregate_parameters)
                 )
-            except ValueError as e:
-                log(WARNING, f"Error in aggregate_fn: {e}")
+            except ValueError as err:
+                log(WARNING, "Error in aggregate_fn: %s", err)
                 parameters_aggregated = ndarrays_to_parameters(
                     aggregate(weights_results)
                 )

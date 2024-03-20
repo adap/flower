@@ -286,7 +286,7 @@ class EnhancedServer(Server):
         # the server simulates an attacker that controls a fraction of the clients
         if self.attack_fn is not None and server_round > self.warmup_rounds:
             log(INFO, "Applying attack function")
-            results, others = self.attack_fn(
+            results, _ = self.attack_fn(
                 ordered_results,
                 clients_state,
                 omniscent=self.omniscent,
