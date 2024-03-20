@@ -46,7 +46,6 @@ def terminate_simulation(f_stop: asyncio.Event, sleep_duration: int) -> None:
 def init_state_factory_nodes_mapping(
     num_nodes: int,
     num_messages: int,
-    erroneous_message: Optional[bool] = False,
 ) -> Tuple[StateFactory, NodeToPartitionMapping, Dict[UUID, float]]:
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
@@ -61,7 +60,6 @@ def init_state_factory_nodes_mapping(
         nodes_mapping=nodes_mapping,
         run_id=run_id,
         num_messages=num_messages,
-        erroneous_message=erroneous_message,
     )
     return state_factory, nodes_mapping, expected_results
 
@@ -72,7 +70,6 @@ def register_messages_into_state(
     nodes_mapping: NodeToPartitionMapping,
     run_id: int,
     num_messages: int,
-    erroneous_message: Optional[bool] = False,
 ) -> Dict[UUID, float]:
     """Register `num_messages` into the state factory."""
     state: InMemoryState = state_factory.state()  # type: ignore
@@ -98,11 +95,7 @@ def register_messages_into_state(
                 dst_node_id=dst_node_id,  # indicate destination node
                 reply_to_message="",
                 ttl="",
-                message_type=(
-                    "a bad message"
-                    if erroneous_message
-                    else MessageTypeLegacy.GET_PROPERTIES
-                ),
+                message_type=MessageTypeLegacy.GET_PROPERTIES
             ),
         )
         # Convert Message to TaskIns
