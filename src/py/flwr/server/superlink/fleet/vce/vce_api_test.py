@@ -95,7 +95,7 @@ def register_messages_into_state(
                 dst_node_id=dst_node_id,  # indicate destination node
                 reply_to_message="",
                 ttl="",
-                message_type=MessageTypeLegacy.GET_PROPERTIES
+                message_type=MessageTypeLegacy.GET_PROPERTIES,
             ),
         )
         # Convert Message to TaskIns
