@@ -67,12 +67,12 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
             len(dataset_partition0), len(dataset["train"]) // train_num_partitions
         )
 
-    def test_load_full(self) -> None:
-        """Test if the load_full works with the correct split name."""
+    def test_load_split(self) -> None:
+        """Test if the load_split works with the correct split name."""
         dataset_fds = FederatedDataset(
             dataset=self.dataset_name, partitioners={"train": 100}
         )
-        dataset_fds_test = dataset_fds.load_full(self.test_split)
+        dataset_fds_test = dataset_fds.load_split(self.test_split)
         dataset_test = datasets.load_dataset(self.dataset_name)[self.test_split]
         self.assertEqual(len(dataset_fds_test), len(dataset_test))
 
@@ -116,7 +116,7 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
             partitioners={"train": 100},
             resplitter={"full": ("train", self.test_split)},
         )
-        full = fds.load_full("full")
+        full = fds.load_split("full")
         self.assertEqual(dataset_length, len(full))
 
     # pylint: disable=protected-access
@@ -151,7 +151,7 @@ class RealDatasetsFederatedDatasetsTrainTest(unittest.TestCase):
         fds = FederatedDataset(
             dataset=self.dataset_name, partitioners={"train": 100}, resplitter=resplit
         )
-        full = fds.load_full("full")
+        full = fds.load_split("full")
         dataset = datasets.load_dataset(self.dataset_name)
         dataset_length = sum([len(ds) for ds in dataset.values()])
         self.assertEqual(len(full), dataset_length)
@@ -185,7 +185,7 @@ class ArtificialDatasetTest(unittest.TestCase):
         fds = FederatedDataset(
             dataset="does-not-matter", partitioners={"train": 10}, shuffle=True, seed=42
         )
-        train = fds.load_full("train")
+        train = fds.load_split("train")
         # This should be shuffled
         result = train["features"]
 
@@ -203,7 +203,7 @@ class ArtificialDatasetTest(unittest.TestCase):
             partitioners={"train": 10},
             shuffle=False,
         )
-        train = fds.load_full("train")
+        train = fds.load_split("train")
         # This should not be shuffled
         result = train["features"]
 
@@ -236,7 +236,7 @@ class ArtificialDatasetTest(unittest.TestCase):
             resplitter=resplit,
             shuffle=True,
         )
-        train = fds.load_full("train")
+        train = fds.load_split("train")
         # This should not be shuffled
         result = train["features"]
 

@@ -240,7 +240,7 @@ def _main_loop(
     finally:
         # Stop Driver
         driver_server.stop(grace=0)
-        del driver
+        driver.close()
         # Trigger stop event
         f_stop.set()
 

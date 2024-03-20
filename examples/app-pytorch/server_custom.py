@@ -18,7 +18,7 @@ from flwr.common.recordset_compat import fitins_to_recordset, recordset_to_fitre
 from flwr.server import Driver, History
 from flwr.server.strategy.aggregate import aggregate
 
-from task import Net, get_parameters
+from task import Net, get_weights
 
 
 # Define metric aggregation function
@@ -54,7 +54,7 @@ def main(driver: Driver, context: Context) -> None:
     num_client_nodes_per_round = 2
     sleep_time = 1
     num_rounds = 3
-    parameters = ndarrays_to_parameters(get_parameters(net=Net()))
+    parameters = ndarrays_to_parameters(get_weights(net=Net()))
 
     history = History()
     for server_round in range(num_rounds):

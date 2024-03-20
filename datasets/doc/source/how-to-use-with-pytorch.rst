@@ -8,7 +8,7 @@ Standard setup - download the dataset, choose the partitioning::
 
   fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
   partition = fds.load_partition(0, "train")
-  centralized_dataset = fds.load_full("test")
+  centralized_dataset = fds.load_split("test")
 
 Determine the names of the features (you can alternatively do that directly on the Hugging Face website). The name can
 vary e.g. "img" or "image", "label" or "labels"::

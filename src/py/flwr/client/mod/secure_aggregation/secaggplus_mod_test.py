@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""The SecAgg+ protocol handler tests."""
+"""The SecAgg+ protocol modifier tests."""
 
 import unittest
 from itertools import product
@@ -93,7 +93,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
         assert Stage.all() == (
             Stage.SETUP,
             Stage.SHARE_KEYS,
-            Stage.COLLECT_MASKED_INPUT,
+            Stage.COLLECT_MASKED_VECTORS,
             Stage.UNMASK,
         )
 
@@ -101,13 +101,13 @@ class TestSecAggPlusHandler(unittest.TestCase):
             # From one stage to the next stage
             (Stage.UNMASK, Stage.SETUP),
             (Stage.SETUP, Stage.SHARE_KEYS),
-            (Stage.SHARE_KEYS, Stage.COLLECT_MASKED_INPUT),
-            (Stage.COLLECT_MASKED_INPUT, Stage.UNMASK),
+            (Stage.SHARE_KEYS, Stage.COLLECT_MASKED_VECTORS),
+            (Stage.COLLECT_MASKED_VECTORS, Stage.UNMASK),
             # From any stage to the initial stage
             # Such transitions will log a warning.
             (Stage.SETUP, Stage.SETUP),
             (Stage.SHARE_KEYS, Stage.SETUP),
-            (Stage.COLLECT_MASKED_INPUT, Stage.SETUP),
+            (Stage.COLLECT_MASKED_VECTORS, Stage.SETUP),
         }
 
         invalid_transitions = set(product(Stage.all(), Stage.all())).difference(
@@ -139,7 +139,6 @@ class TestSecAggPlusHandler(unittest.TestCase):
 
         valid_key_type_pairs = [
             (Key.SAMPLE_NUMBER, int),
-            (Key.SECURE_ID, int),
             (Key.SHARE_NUMBER, int),
             (Key.THRESHOLD, int),
             (Key.CLIPPING_RANGE, float),
@@ -160,17 +159,17 @@ class TestSecAggPlusHandler(unittest.TestCase):
             for key, value_type in valid_key_type_pairs
         }
 
-        # Test valid `named_values`
+        # Test valid configs
         try:
             check_configs(Stage.SETUP, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
-            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
+            self.fail(f"check_configs() raised {type(exc)} unexpectedly!")
 
         # Set the stage
         valid_configs[Key.STAGE] = Stage.SETUP
 
-        # Test invalid `named_values`
+        # Test invalid configs
         for key, value_type in valid_key_type_pairs:
             invalid_configs = valid_configs.copy()
 
@@ -203,17 +202,17 @@ class TestSecAggPlusHandler(unittest.TestCase):
             "3": [b"public key 1", b"public key 2"],
         }
 
-        # Test valid `named_values`
+        # Test valid configs
         try:
             check_configs(Stage.SHARE_KEYS, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
-            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
+            self.fail(f"check_configs() raised {type(exc)} unexpectedly!")
 
         # Set the stage
         valid_configs[Key.STAGE] = Stage.SHARE_KEYS
 
-        # Test invalid `named_values`
+        # Test invalid configs
         invalid_values: List[ConfigsRecordValues] = [
             b"public key 1",
             [b"public key 1"],
@@ -228,8 +227,8 @@ class TestSecAggPlusHandler(unittest.TestCase):
             with self.assertRaises(TypeError):
                 handler(invalid_configs.copy())
 
-    def test_stage_collect_masked_input_check(self) -> None:
-        """Test content checking for the collect masked input stage."""
+    def test_stage_collect_masked_vectors_check(self) -> None:
+        """Test content checking for the collect masked vectors stage."""
         ctxt = _make_ctxt()
         handler = get_test_handler(ctxt)
         set_stage = _make_set_state_fn(ctxt)
@@ -239,17 +238,17 @@ class TestSecAggPlusHandler(unittest.TestCase):
             Key.SOURCE_LIST: [32, 51324, 32324123, -3],
         }
 
-        # Test valid `named_values`
+        # Test valid configs
         try:
-            check_configs(Stage.COLLECT_MASKED_INPUT, ConfigsRecord(valid_configs))
+            check_configs(Stage.COLLECT_MASKED_VECTORS, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
-            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
+            self.fail(f"check_configs() raised {type(exc)} unexpectedly!")
 
         # Set the stage
-        valid_configs[Key.STAGE] = Stage.COLLECT_MASKED_INPUT
+        valid_configs[Key.STAGE] = Stage.COLLECT_MASKED_VECTORS
 
-        # Test invalid `named_values`
+        # Test invalid configs
         # Test missing keys
         for key in list(valid_configs.keys()):
             if key == Key.STAGE:
@@ -279,21 +278,21 @@ class TestSecAggPlusHandler(unittest.TestCase):
         set_stage = _make_set_state_fn(ctxt)
 
         valid_configs: Dict[str, ConfigsRecordValues] = {
-            Key.ACTIVE_SECURE_ID_LIST: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            Key.DEAD_SECURE_ID_LIST: [32, 51324, 32324123, -3],
+            Key.ACTIVE_NODE_ID_LIST: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            Key.DEAD_NODE_ID_LIST: [32, 51324, 32324123, -3],
         }
 
-        # Test valid `named_values`
+        # Test valid configs
         try:
             check_configs(Stage.UNMASK, ConfigsRecord(valid_configs))
         # pylint: disable-next=broad-except
         except Exception as exc:
-            self.fail(f"check_named_values() raised {type(exc)} unexpectedly!")
+            self.fail(f"check_configs() raised {type(exc)} unexpectedly!")
 
         # Set the stage
         valid_configs[Key.STAGE] = Stage.UNMASK
 
-        # Test invalid `named_values`
+        # Test invalid configs
         # Test missing keys
         for key in list(valid_configs.keys()):
             if key == Key.STAGE:
@@ -301,7 +300,7 @@ class TestSecAggPlusHandler(unittest.TestCase):
             invalid_configs = valid_configs.copy()
             invalid_configs.pop(key)
 
-            set_stage(Stage.COLLECT_MASKED_INPUT)
+            set_stage(Stage.COLLECT_MASKED_VECTORS)
             with self.assertRaises(KeyError):
                 handler(invalid_configs)
 
@@ -312,6 +311,6 @@ class TestSecAggPlusHandler(unittest.TestCase):
             invalid_configs = valid_configs.copy()
             invalid_configs[key] = [True, False, True, False]
 
-            set_stage(Stage.COLLECT_MASKED_INPUT)
+            set_stage(Stage.COLLECT_MASKED_VECTORS)
             with self.assertRaises(TypeError):
                 handler(invalid_configs)

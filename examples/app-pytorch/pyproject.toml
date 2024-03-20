@@ -9,8 +9,9 @@ description = "Multi-Tenant Federated Learning with Flower and PyTorch"
 authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-flwr = { path = "../../", develop = true, extras = ["simulation"] }
-torch = "1.13.1"
-torchvision = "0.14.1"
-tqdm = "4.65.0"
+python = "^3.8"
+# Mandatory dependencies
+flwr-nightly = { version = "1.8.0.dev20240309", extras = ["simulation"] }
+flwr-datasets = { version = "0.0.2", extras = ["vision"] }
+torch = "2.2.1"
+torchvision = "0.17.1"
