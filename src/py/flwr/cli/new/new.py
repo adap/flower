@@ -22,7 +22,7 @@ from typing import Dict, Optional
 import typer
 from typing_extensions import Annotated
 
-from ..utils import prompt_options
+from ..utils import prompt_options, prompt_text
 
 
 class MlFramework(str, Enum):
@@ -72,16 +72,25 @@ def render_and_create(file_path: str, template: str, context: Dict[str, str]) ->
 
 def new(
     project_name: Annotated[
-        str,
+        Optional[str],
         typer.Argument(metavar="project_name", help="The name of the project"),
-    ],
+    ] = None,
     framework: Annotated[
         Optional[MlFramework],
         typer.Option(case_sensitive=False, help="The ML framework to use"),
     ] = None,
 ) -> None:
     """Create new Flower project."""
-    print(f"Creating Flower project {project_name}...")
+    print(
+        typer.style(
+            f"🔨 Creating Flower project {project_name}...",
+            fg=typer.colors.GREEN,
+            bold=True,
+        )
+    )
+
+    if project_name is None:
+        project_name = prompt_text("Please provide project name")
 
     if framework is not None:
         framework_str = str(framework.value)
@@ -97,6 +106,8 @@ def new(
         ]
         framework_str = selected_value[0]
 
+    framework_str = framework_str.lower()
+
     # Set project directory path
     cwd = os.getcwd()
     pnl = project_name.lower()
@@ -104,21 +115,19 @@ def new(
 
     # List of files to render
     files = {
-        "README.md": {
-            "template": "app/README.md.tpl",
-        },
-        "requirements.txt": {
-            "template": f"app/requirements.{framework_str.lower()}.txt.tpl"
-        },
+        "README.md": {"template": "app/README.md.tpl"},
+        "requirements.txt": {"template": f"app/requirements.{framework_str}.txt.tpl"},
         "flower.toml": {"template": "app/flower.toml.tpl"},
+        "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
         f"{pnl}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-        f"{pnl}/server.py": {
-            "template": f"app/code/server.{framework_str.lower()}.py.tpl"
-        },
-        f"{pnl}/client.py": {
-            "template": f"app/code/client.{framework_str.lower()}.py.tpl"
-        },
+        f"{pnl}/server.py": {"template": f"app/code/server.{framework_str}.py.tpl"},
+        f"{pnl}/client.py": {"template": f"app/code/client.{framework_str}.py.tpl"},
     }
+
+    # In case framework is MlFramework.PYTORCH generate additionally the task.py file
+    if framework_str == MlFramework.PYTORCH.value.lower():
+        files[f"{pnl}/task.py"] = {"template": f"app/code/task.{framework_str}.py.tpl"}
+
     context = {"project_name": project_name}
 
     for file_path, value in files.items():
@@ -128,4 +137,18 @@ def new(
             context=context,
         )
 
-    print("Project creation successful.")
+    print(
+        typer.style(
+            "🎊 Project creation successful.\n\n"
+            "Use the following command to run your project:\n",
+            fg=typer.colors.GREEN,
+            bold=True,
+        )
+    )
+    print(
+        typer.style(
+            f"	cd {project_name}\n" + "	pip install -e .\n	flwr run\n",
+            fg=typer.colors.BRIGHT_CYAN,
+            bold=True,
+        )
+    )

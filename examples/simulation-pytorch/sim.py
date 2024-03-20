@@ -169,7 +169,7 @@ def get_evaluate_fn(
 
 # Download MNIST dataset and partition it
 mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
-centralized_testset = mnist_fds.load_full("test")
+centralized_testset = mnist_fds.load_split("test")
 
 # Configure the strategy
 strategy = fl.server.strategy.FedAvg(

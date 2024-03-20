@@ -14,14 +14,50 @@
 # ==============================================================================
 """Utility to validate the `flower.toml` file."""
 
-import importlib
 import os
 from typing import Any, Dict, List, Optional, Tuple
 
 import tomli
 
+from flwr.common import object_ref
 
-def load_flower_toml(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
+
+def load_and_validate_with_defaults(
+    path: Optional[str] = None,
+) -> Tuple[Optional[Dict[str, Any]], List[str], List[str]]:
+    """Load and validate flower.toml as dict.
+
+    Returns
+    -------
+    Tuple[Optional[config], List[str], List[str]]
+        A tuple with the optional config in case it exists and is valid
+        and associated errors and warnings.
+    """
+    config = load(path)
+
+    if config is None:
+        errors = [
+            "Project configuration could not be loaded. flower.toml does not exist."
+        ]
+        return (None, errors, [])
+
+    is_valid, errors, warnings = validate(config)
+
+    if not is_valid:
+        return (None, errors, warnings)
+
+    # Apply defaults
+    defaults = {
+        "flower": {
+            "engine": {"name": "simulation", "simulation": {"supernode": {"num": 2}}}
+        }
+    }
+    config = apply_defaults(config, defaults)
+
+    return (config, errors, warnings)
+
+
+def load(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """Load flower.toml and return as dict."""
     if path is None:
         cur_dir = os.getcwd()
@@ -37,9 +73,7 @@ def load_flower_toml(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
         return data
 
 
-def validate_flower_toml_fields(
-    config: Dict[str, Any]
-) -> Tuple[bool, List[str], List[str]]:
+def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
     """Validate flower.toml fields."""
     errors = []
     warnings = []
@@ -71,65 +105,20 @@ def validate_flower_toml_fields(
     return len(errors) == 0, errors, warnings
 
 
-def validate_object_reference(ref: str) -> Tuple[bool, Optional[str]]:
-    """Validate object reference.
-
-    Returns
-    -------
-    Tuple[bool, Optional[str]]
-        A boolean indicating whether an object reference is valid and
-        the reason why it might not be.
-    """
-    module_str, _, attributes_str = ref.partition(":")
-    if not module_str:
-        return (
-            False,
-            f"Missing module in {ref}",
-        )
-    if not attributes_str:
-        return (
-            False,
-            f"Missing attribute in {ref}",
-        )
-
-    # Load module
-    try:
-        module = importlib.import_module(module_str)
-    except ModuleNotFoundError:
-        return False, f"Unable to load module {module_str}"
-
-    # Recursively load attribute
-    attribute = module
-    try:
-        for attribute_str in attributes_str.split("."):
-            attribute = getattr(attribute, attribute_str)
-    except AttributeError:
-        return (
-            False,
-            f"Unable to load attribute {attributes_str} from module {module_str}",
-        )
-
-    return (True, None)
-
-
-def validate_flower_toml(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
+def validate(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
     """Validate flower.toml."""
-    is_valid, errors, warnings = validate_flower_toml_fields(config)
+    is_valid, errors, warnings = validate_fields(config)
 
     if not is_valid:
         return False, errors, warnings
 
     # Validate serverapp
-    is_valid, reason = validate_object_reference(
-        config["flower"]["components"]["serverapp"]
-    )
+    is_valid, reason = object_ref.validate(config["flower"]["components"]["serverapp"])
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
 
     # Validate clientapp
-    is_valid, reason = validate_object_reference(
-        config["flower"]["components"]["clientapp"]
-    )
+    is_valid, reason = object_ref.validate(config["flower"]["components"]["clientapp"])
 
     if not is_valid and isinstance(reason, str):
         return False, [reason], []

@@ -24,7 +24,7 @@ from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 from grpc import RpcError
 
 from flwr.client.client import Client
-from flwr.client.client_app import ClientApp
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
@@ -38,9 +38,9 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
 from flwr.common.message import Error
+from flwr.common.object_ref import load_app, validate
 from flwr.common.retry_invoker import RetryInvoker, exponential
 
-from .client_app import load_client_app
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
@@ -97,8 +97,19 @@ def run_client_app() -> None:
     if client_app_dir is not None:
         sys.path.insert(0, client_app_dir)
 
+    app_ref: str = getattr(args, "client-app")
+    valid, error_msg = validate(app_ref)
+    if not valid and error_msg:
+        raise LoadClientAppError(error_msg) from None
+
     def _load() -> ClientApp:
-        client_app: ClientApp = load_client_app(getattr(args, "client-app"))
+        client_app = load_app(app_ref, LoadClientAppError)
+
+        if not isinstance(client_app, ClientApp):
+            raise LoadClientAppError(
+                f"Attribute {app_ref} is not of type {ClientApp}",
+            ) from None
+
         return client_app
 
     _start_client_internal(
@@ -445,6 +456,20 @@ def _start_client_internal(
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
 
+                log(INFO, "")
+                log(
+                    INFO,
+                    "[RUN %s, ROUND %s]",
+                    message.metadata.run_id,
+                    message.metadata.group_id,
+                )
+                log(
+                    INFO,
+                    "Received: %s message %s",
+                    message.metadata.message_type,
+                    message.metadata.message_id,
+                )
+
                 # Handle control message
                 out_message, sleep_duration = handle_control_message(message)
                 if out_message:
@@ -457,13 +482,18 @@ def _start_client_internal(
                 # Retrieve context for this run
                 context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
+                # Create an error reply message that will never be used to prevent
+                # the used-before-assignment linting error
+                reply_message = message.create_error_reply(
+                    error=Error(code=0, reason="Unknown"), ttl=message.metadata.ttl
+                )
+
                 # Handle app loading and task message
                 try:
-
                     # Load ClientApp instance
                     client_app: ClientApp = load_client_app_fn()
 
-                    out_message = client_app(message=message, context=context)
+                    reply_message = client_app(message=message, context=context)
                     # Update node state
                     node_state.update_context(
                         run_id=message.metadata.run_id,
@@ -477,13 +507,14 @@ def _start_client_internal(
                     # Create error message
                     # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
                     reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-                    error = Error(code=0, reason=reason)
-                    out_message = message.create_error_reply(error=error, ttl="")
+                    reply_message = message.create_error_reply(
+                        error=Error(code=0, reason=reason), ttl=message.metadata.ttl
+                    )
 
                 finally:
-
                     # Send
-                    send(out_message)
+                    send(reply_message)
+                    log(INFO, "Sent reply")
 
             # Unregister node
             if delete_node is not None:
