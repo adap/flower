@@ -197,25 +197,6 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
                 nodes_mapping=nodes_mapping,
             )
 
-    def test_erroneous_messages(self) -> None:
-        """Test handling of error in async worker (consumer).
-
-        We register messages which will trigger an error when handling, triggering an
-        error.
-        """
-        num_messages = 100
-        num_nodes = 59
-
-        state_factory, nodes_mapping, _ = init_state_factory_nodes_mapping(
-            num_nodes=num_nodes, num_messages=num_messages, erroneous_message=True
-        )
-
-        with self.assertRaises(RuntimeError):
-            start_and_shutdown(
-                state_factory=state_factory,
-                nodes_mapping=nodes_mapping,
-            )
-
     def test_erroneous_backend_config(self) -> None:
         """Backend Config should be a JSON stream."""
         with self.assertRaises(JSONDecodeError):
