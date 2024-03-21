@@ -77,7 +77,9 @@ class TestDirichletPartitionerSuccess(unittest.TestCase):
     def test_min_partition_size_requirement(self) -> None:
         """Test if partitions are created with min partition size required."""
         _, partitioner = _dummy_setup(3, 0.5, 100, "labels")
-        partition_list = [partitioner.load_partition(node_id) for node_id in [0, 1, 2]]
+        partition_list = [
+            partitioner.load_partition(partition_id) for partition_id in [0, 1, 2]
+        ]
         self.assertTrue(
             all(len(p) > partitioner._min_partition_size for p in partition_list)
         )
@@ -87,14 +89,14 @@ class TestDirichletPartitionerSuccess(unittest.TestCase):
         _, partitioner = _dummy_setup(3, np.array([1.0, 1.0, 1.0]), 100, "labels")
         self.assertTrue(np.all(partitioner._alpha == np.array([1.0, 1.0, 1.0])))
 
-    def test__determine_node_id_to_indices(self) -> None:
+    def test__determine_partition_id_to_indices(self) -> None:
         """Test the determine_nod_id_to_indices matches the flag after the call."""
         num_partitions, alpha, num_rows, partition_by = 3, 0.5, 100, "labels"
         _, partitioner = _dummy_setup(num_partitions, alpha, num_rows, partition_by)
-        partitioner._determine_node_id_to_indices_if_needed()
+        partitioner._determine_partition_id_to_indices_if_needed()
         self.assertTrue(
-            partitioner._node_id_to_indices_determined
-            and len(partitioner._node_id_to_indices) == num_partitions
+            partitioner._partition_id_to_indices_determined
+            and len(partitioner._partition_id_to_indices) == num_partitions
         )
 
 

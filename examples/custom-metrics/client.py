@@ -17,8 +17,8 @@ model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
 # Load data with Flower Datasets (CIFAR-10)
 fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
-train = fds.load_full("train")
-test = fds.load_full("test")
+train = fds.load_split("train")
+test = fds.load_split("test")
 
 # Using Numpy format
 train_np = train.with_format("numpy")
