@@ -36,7 +36,7 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         validation_errors.append("`created_at` must be an empty str")
     if tasks_ins_res.task.delivered_at != "":
         validation_errors.append("`delivered_at` must be an empty str")
-    if tasks_ins_res.task.ttl > 0:
+    if tasks_ins_res.task.ttl <= 0:
         validation_errors.append("`ttl` must be higher than zero")
 
     # TaskIns specific
