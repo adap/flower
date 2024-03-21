@@ -1,4 +1,5 @@
 """Clients implementation for Flanders."""
+
 from collections import OrderedDict
 from pathlib import Path
 from typing import Tuple
@@ -80,7 +81,7 @@ class MnistClient(fl.client.NumPyClient):
         return (
             get_params(self.net),
             len(trainloader.dataset),
-            {"cid": self.cid},
+            {"cid": self.cid, "malicious": config["malicious"]},
         )
 
     def evaluate(self, parameters, config):

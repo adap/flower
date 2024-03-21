@@ -101,9 +101,11 @@ class DnC(FedAvg):
         fit_ins_list = [
             FitIns(
                 parameters,
-                {}
-                if not self.on_fit_config_fn
-                else self.on_fit_config_fn(server_round),
+                (
+                    {}
+                    if not self.on_fit_config_fn
+                    else self.on_fit_config_fn(server_round)
+                ),
             )
             for _ in range(sample_size)
         ]

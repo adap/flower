@@ -22,7 +22,7 @@ from .server import EnhancedServer
 from .utils import fmnist_evaluate, l2_norm, mnist_evaluate
 
 
-# pylint: disable=too-many-locals
+# pylint: disable=too-many-locals, too-many-branches, too-many-statements
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run the baseline.
@@ -36,8 +36,8 @@ def main(cfg: DictConfig) -> None:
     seed = cfg.seed
     np.random.seed(seed)
     np.random.set_state(
-        np.random.RandomState(seed).get_state()
-    )  # pylint: disable=no-member
+        np.random.RandomState(seed).get_state()  # pylint: disable=no-member
+    )
     random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)

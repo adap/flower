@@ -218,16 +218,18 @@ def fang_attack(
     # Set corrupted clients' updates to w_1
     results = [
         (
-            proxy,
-            FitRes(
-                fitres.status,
-                parameters=ndarrays_to_parameters(corrupted_params),
-                num_examples=fitres.num_examples,
-                metrics=fitres.metrics,
-            ),
+            (
+                proxy,
+                FitRes(
+                    fitres.status,
+                    parameters=ndarrays_to_parameters(corrupted_params),
+                    num_examples=fitres.num_examples,
+                    metrics=fitres.metrics,
+                ),
+            )
+            if states[fitres.metrics["cid"]]
+            else (proxy, fitres)
         )
-        if states[fitres.metrics["cid"]]
-        else (proxy, fitres)
         for proxy, fitres in ordered_results
     ]
 

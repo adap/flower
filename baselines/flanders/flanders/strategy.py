@@ -162,9 +162,11 @@ class Flanders(FedAvg):
         fit_ins_list = [
             FitIns(
                 parameters,
-                {}
-                if not self.on_fit_config_fn
-                else self.on_fit_config_fn(server_round),
+                (
+                    {}
+                    if not self.on_fit_config_fn
+                    else self.on_fit_config_fn(server_round)
+                ),
             )
             for _ in range(sample_size)
         ]
@@ -186,7 +188,6 @@ class Flanders(FedAvg):
         server_round: int,
         results: List[Tuple[ClientProxy, FitRes]],
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
-        clients_state: Dict[str, bool],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Apply MAR forecasting to exclude malicious clients from FedAvg.
 
@@ -269,7 +270,11 @@ class Flanders(FedAvg):
         # Check that self.aggregate_fn has num_malicious parameter
         if "num_malicious" in self.aggregate_fn.__code__.co_varnames:
             # Count the number of malicious clients in
-            # good_clients_idx by checking clients_state
+            # good_clients_idx by checking FitRes
+            clients_state = {
+                str(fit_res.metrics["cid"]): fit_res.metrics["malicious"]
+                for _, fit_res in results
+            }
             num_malicious = sum([clients_state[str(cid)] for cid in good_clients_idx])
             log(
                 INFO,
@@ -313,12 +318,11 @@ class Flanders(FedAvg):
         elif server_round == 1:  # Only log this warning once
             log(WARNING, "No fit_metrics_aggregation_fn provided")
 
-        return (
-            parameters_aggregated,
-            metrics_aggregated,
-            good_clients_idx,
-            malicious_clients_idx,
-        )
+        # Add good_clients_idx and malicious_clients_idx to metrics_aggregated
+        metrics_aggregated["good_clients_idx"] = good_clients_idx
+        metrics_aggregated["malicious_clients_idx"] = malicious_clients_idx
+
+        return parameters_aggregated, metrics_aggregated
 
 
 # pylint: disable=too-many-locals, too-many-arguments, invalid-name

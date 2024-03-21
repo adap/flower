@@ -151,8 +151,8 @@ def mnist_transformation(img):
 class TorchVisionFL(VisionDataset):
     """TorchVision FL class.
 
-    Use this class by either passing a path to a torch file (.pt) containing
-    (data, targets) or pass the data, targets directly instead.
+    Use this class by either passing a path to a torch file (.pt) containing (data,
+    targets) or pass the data, targets directly instead.
 
     This is just a trimmed down version of torchvision.datasets.MNIST.
     """

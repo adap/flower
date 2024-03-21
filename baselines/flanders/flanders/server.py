@@ -221,11 +221,15 @@ class EnhancedServer(Server):
         )
 
         # Create dict clients_state to keep track of malicious clients
+        # and send the information to the clients
         clients_state = {}
-        for _, (proxy, _) in enumerate(client_instructions):
+        for _, (proxy, ins) in enumerate(client_instructions):
             clients_state[proxy.cid] = False
+            ins.config["malicious"] = False
             if proxy.cid in self.malicious_lst:
                 clients_state[proxy.cid] = True
+                ins.config["malicious"] = True
+                
         # Sort clients states
         clients_state = {k: clients_state[k] for k in sorted(clients_state)}
         log(
@@ -326,20 +330,18 @@ class EnhancedServer(Server):
         else:
             results = ordered_results
 
+        # Aggregate training results
+        log(INFO, "fit_round - Aggregating training results")
         good_clients_idx = []
         malicious_clients_idx = []
+        aggregated_result = self.strategy.aggregate_fit(
+            server_round, results, failures
+        )
         if isinstance(self.strategy, Flanders):
-            # Aggregate training results
-            log(INFO, "fit_round - Aggregating training results")
-            aggregated_result = self.strategy.aggregate_fit(
-                server_round, results, failures, clients_state
-            )
-            (
-                parameters_aggregated,
-                metrics_aggregated,
-                good_clients_idx,
-                malicious_clients_idx,
-            ) = aggregated_result
+            parameters_aggregated, metrics_aggregated = aggregated_result
+            malicious_clients_idx = metrics_aggregated["malicious_clients_idx"]
+            good_clients_idx = metrics_aggregated["good_clients_idx"]
+            
             log(INFO, "Malicious clients: %s", malicious_clients_idx)
 
             log(INFO, "clients_state: %s", clients_state)
@@ -376,9 +378,6 @@ class EnhancedServer(Server):
         else:
             # Aggregate training results
             log(INFO, "fit_round - Aggregating training results")
-            aggregated_result = self.strategy.aggregate_fit(
-                server_round, results, failures
-            )
             parameters_aggregated, metrics_aggregated = aggregated_result
 
         self.clients_state = clients_state
