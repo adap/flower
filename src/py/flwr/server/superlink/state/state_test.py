@@ -73,7 +73,6 @@ class StateTest(unittest.TestCase):
 
         assert task_ins.task.created_at == ""  # pylint: disable=no-member
         assert task_ins.task.delivered_at == ""  # pylint: disable=no-member
-        assert task_ins.task.ttl == ""  # pylint: disable=no-member
 
         # Execute
         state.store_task_ins(task_ins=task_ins)
@@ -91,7 +90,6 @@ class StateTest(unittest.TestCase):
 
         assert actual_task.created_at != ""
         assert actual_task.delivered_at != ""
-        assert actual_task.ttl != ""
 
         assert datetime.fromisoformat(actual_task.created_at) > datetime(
             2020, 1, 1, tzinfo=timezone.utc
@@ -99,9 +97,7 @@ class StateTest(unittest.TestCase):
         assert datetime.fromisoformat(actual_task.delivered_at) > datetime(
             2020, 1, 1, tzinfo=timezone.utc
         )
-        assert datetime.fromisoformat(actual_task.ttl) > datetime(
-            2020, 1, 1, tzinfo=timezone.utc
-        )
+        assert actual_task.ttl > 0
 
     def test_store_and_delete_tasks(self) -> None:
         """Test delete_tasks."""
