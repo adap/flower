@@ -26,7 +26,15 @@ from flwr.client.client import (
 )
 from flwr.client.numpy_client import NumPyClient
 from flwr.client.typing import ClientFn
-from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet, log
+from flwr.common import (
+    DEFAULT_TTL,
+    ConfigsRecord,
+    Context,
+    Message,
+    Metadata,
+    RecordSet,
+    log,
+)
 from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.recordset_compat import (
     evaluateres_to_recordset,
@@ -81,7 +89,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
         reason = cast(int, disconnect_msg.disconnect_res.reason)
         recordset = RecordSet()
         recordset.configs_records["config"] = ConfigsRecord({"reason": reason})
-        out_message = message.create_reply(recordset, ttl="")
+        out_message = message.create_reply(recordset, ttl=DEFAULT_TTL)
         # Return TaskRes and sleep duration
         return out_message, sleep_duration
 
@@ -143,7 +151,7 @@ def handle_legacy_message_from_msgtype(
         raise ValueError(f"Invalid message type: {message_type}")
 
     # Return Message
-    return message.create_reply(out_recordset, ttl="")
+    return message.create_reply(out_recordset, ttl=DEFAULT_TTL)
 
 
 def _reconnect(

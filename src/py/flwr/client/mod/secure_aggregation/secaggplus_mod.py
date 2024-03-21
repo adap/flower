@@ -22,6 +22,7 @@ from typing import Any, Dict, List, Tuple, cast
 
 from flwr.client.typing import ClientAppCallable
 from flwr.common import (
+    DEFAULT_TTL,
     ConfigsRecord,
     Context,
     Message,
@@ -187,7 +188,7 @@ def secaggplus_mod(
 
     # Return message
     out_content.configs_records[RECORD_KEY_CONFIGS] = ConfigsRecord(res, False)
-    return msg.create_reply(out_content, ttl="")
+    return msg.create_reply(out_content, ttl=DEFAULT_TTL)
 
 
 def check_stage(current_stage: str, configs: ConfigsRecord) -> None:

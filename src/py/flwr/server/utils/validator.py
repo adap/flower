@@ -66,8 +66,11 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         # Content check
         if tasks_ins_res.task.task_type == "":
             validation_errors.append("`task_type` MUST be set")
-        if not tasks_ins_res.task.HasField("recordset"):
-            validation_errors.append("`recordset` MUST be set")
+        if not (
+            tasks_ins_res.task.HasField("recordset")
+            ^ tasks_ins_res.task.HasField("error")
+        ):
+            validation_errors.append("Either `recordset` or `error` MUST be set")
 
         # Ancestors
         if len(tasks_ins_res.task.ancestry) != 0:
@@ -106,8 +109,11 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         # Content check
         if tasks_ins_res.task.task_type == "":
             validation_errors.append("`task_type` MUST be set")
-        if not tasks_ins_res.task.HasField("recordset"):
-            validation_errors.append("`recordset` MUST be set")
+        if not (
+            tasks_ins_res.task.HasField("recordset")
+            ^ tasks_ins_res.task.HasField("error")
+        ):
+            validation_errors.append("Either `recordset` or `error` MUST be set")
 
         # Ancestors
         if len(tasks_ins_res.task.ancestry) == 0:
