@@ -25,10 +25,8 @@ def plot_label_distributions(
     label: str,
     plot_type: str,
     size_unit: str,
-    legend: bool = True,
-    verbose_labels: bool = True,
+    cmap = None,
     partition_id_axis: str = "x",
-    other_plotting_details=None,
 ):
     """Plot the label distribution of the.
 
@@ -41,15 +39,12 @@ def plot_label_distributions(
     plot_type: str
         Type of plot, either "bar" or "heatmap".
     size_unit: str
-        "absolute" or "percentage". "absolute" - (number of samples) there is no limit to the biggest number. It result in bars of various heights and unbounded max value on the heatmap. "percentage" - normalizes each value, so they sum up to 100%. The bars are be of the same height.
-    legend: bool
-        Include the legend.
-    verbose_labels: bool
-        Whether to use the verbose versions of the labels or keep indices representing
-        them. E.g. in CIFAR10 the verbose labels are airplane, automobile, ...).
+        "absolute" or "percentage". "absolute" - (number of samples) there is no limit
+        to the biggest number. It results in bars of various heights and unbounded max
+        value on the heatmap. "percentage" - normalizes each value, so they sum up to
+        100%. The bars are be of the same height.
     partition_id_axis: str
         "x" or "y". The axis on which the partition_id (also known as clients or nodes) will be marked. The values are marked on the other axis.
-    other_plotting_details: Any
 
     Returns
     -------
@@ -68,12 +63,13 @@ def plot_label_distributions(
     for partition_id in range(partitioner.num_partitions):
         partitions.append(partitioner.load_partition(partition_id))
 
+    # Take any partition to gather the label
     partition = partitions[0]
-    all_labels = partition.features["label"].str2int(partition.features["label"].names)
+    all_labels = partition.features[label].str2int(partition.features[label].names)
 
     partition_id_to_label_absolute_size = {}
     for partition_id, partition in enumerate(partitions):
-        labels_series = pd.Series(partition["label"])
+        labels_series = pd.Series(partition[label])
         label_counts = labels_series.value_counts()
         label_counts = label_counts.reindex(all_labels, fill_value=0)
         partition_id_to_label_absolute_size[partition_id] = label_counts
