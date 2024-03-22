@@ -24,6 +24,7 @@ from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.aws import BucketManager
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log, warn_experimental_feature
 from flwr.common.message import Message, Metadata
@@ -55,6 +56,7 @@ def grpc_request_response(
     retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
+    bucket_manager: Optional[BucketManager] = None, # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
@@ -204,3 +206,4 @@ def grpc_request_response(
         yield (receive, send, create_node, delete_node)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
+

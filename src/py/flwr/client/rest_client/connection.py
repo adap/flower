@@ -24,6 +24,7 @@ from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.aws import BucketManager
 from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
@@ -66,7 +67,8 @@ def http_request_response(
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[
         Union[bytes, str]
-    ] = None,  # pylint: disable=unused-argument
+    ] = None,  # pylint: disable=unused-argument,
+    bucket_manager: Optional[BucketManager] = None # pylint: disable=unused-argument
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],

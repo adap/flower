@@ -83,6 +83,67 @@ class Parameters(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["tensor_type",b"tensor_type","tensors",b"tensors"]) -> None: ...
 global___Parameters = Parameters
 
+class ParametersStreamPacket(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class _EndOfStream:
+        ValueType = typing.NewType('ValueType', builtins.int)
+        V: typing_extensions.TypeAlias = ValueType
+    class _EndOfStreamEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ParametersStreamPacket._EndOfStream.ValueType], builtins.type):
+        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+        END_OF_STREAM: ParametersStreamPacket._EndOfStream.ValueType  # 0
+    class EndOfStream(_EndOfStream, metaclass=_EndOfStreamEnumTypeWrapper):
+        pass
+
+    END_OF_STREAM: ParametersStreamPacket.EndOfStream.ValueType  # 0
+
+    class Header(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        TENSOR_TYPE_FIELD_NUMBER: builtins.int
+        DIMENSIONS_FIELD_NUMBER: builtins.int
+        S3_OBJECT_KEY_FIELD_NUMBER: builtins.int
+        tensor_type: typing.Text
+        @property
+        def dimensions(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
+        s3_object_key: typing.Text
+        def __init__(self,
+            *,
+            tensor_type: typing.Text = ...,
+            dimensions: typing.Optional[typing.Iterable[builtins.int]] = ...,
+            s3_object_key: typing.Optional[typing.Text] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["_s3_object_key",b"_s3_object_key","s3_object_key",b"s3_object_key"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["_s3_object_key",b"_s3_object_key","dimensions",b"dimensions","s3_object_key",b"s3_object_key","tensor_type",b"tensor_type"]) -> None: ...
+        def WhichOneof(self, oneof_group: typing_extensions.Literal["_s3_object_key",b"_s3_object_key"]) -> typing.Optional[typing_extensions.Literal["s3_object_key"]]: ...
+
+    class Chunk(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        BYTES_FIELD_NUMBER: builtins.int
+        bytes: builtins.bytes
+        def __init__(self,
+            *,
+            bytes: builtins.bytes = ...,
+            ) -> None: ...
+        def ClearField(self, field_name: typing_extensions.Literal["bytes",b"bytes"]) -> None: ...
+
+    HEADER_FIELD_NUMBER: builtins.int
+    CHUNK_FIELD_NUMBER: builtins.int
+    IS_END_FIELD_NUMBER: builtins.int
+    @property
+    def header(self) -> global___ParametersStreamPacket.Header: ...
+    @property
+    def chunk(self) -> global___ParametersStreamPacket.Chunk: ...
+    is_end: global___ParametersStreamPacket.EndOfStream.ValueType
+    def __init__(self,
+        *,
+        header: typing.Optional[global___ParametersStreamPacket.Header] = ...,
+        chunk: typing.Optional[global___ParametersStreamPacket.Chunk] = ...,
+        is_end: global___ParametersStreamPacket.EndOfStream.ValueType = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["chunk",b"chunk","header",b"header","is_end",b"is_end","stream",b"stream"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["chunk",b"chunk","header",b"header","is_end",b"is_end","stream",b"stream"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["stream",b"stream"]) -> typing.Optional[typing_extensions.Literal["header","chunk","is_end"]]: ...
+global___ParametersStreamPacket = ParametersStreamPacket
+
 class ServerMessage(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     class ReconnectIns(google.protobuf.message.Message):
@@ -209,11 +270,100 @@ class ServerMessage(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["config",b"config","parameters",b"parameters"]) -> None: ...
 
+    class FitInsStream(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        class Header(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            class ConfigEntry(google.protobuf.message.Message):
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
+                KEY_FIELD_NUMBER: builtins.int
+                VALUE_FIELD_NUMBER: builtins.int
+                key: typing.Text
+                @property
+                def value(self) -> global___Scalar: ...
+                def __init__(self,
+                    *,
+                    key: typing.Text = ...,
+                    value: typing.Optional[global___Scalar] = ...,
+                    ) -> None: ...
+                def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+                def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+            CONFIG_FIELD_NUMBER: builtins.int
+            @property
+            def config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
+            def __init__(self,
+                *,
+                config: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+                ) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["config",b"config"]) -> None: ...
+
+        HEADER_FIELD_NUMBER: builtins.int
+        PARAMETERS_FIELD_NUMBER: builtins.int
+        @property
+        def header(self) -> global___ServerMessage.FitInsStream.Header: ...
+        @property
+        def parameters(self) -> global___ParametersStreamPacket: ...
+        def __init__(self,
+            *,
+            header: typing.Optional[global___ServerMessage.FitInsStream.Header] = ...,
+            parameters: typing.Optional[global___ParametersStreamPacket] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["field",b"field","header",b"header","parameters",b"parameters"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["field",b"field","header",b"header","parameters",b"parameters"]) -> None: ...
+        def WhichOneof(self, oneof_group: typing_extensions.Literal["field",b"field"]) -> typing.Optional[typing_extensions.Literal["header","parameters"]]: ...
+
+    class EvaluateInsStream(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        class Header(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            class ConfigEntry(google.protobuf.message.Message):
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
+                KEY_FIELD_NUMBER: builtins.int
+                VALUE_FIELD_NUMBER: builtins.int
+                key: typing.Text
+                @property
+                def value(self) -> global___Scalar: ...
+                def __init__(self,
+                    *,
+                    key: typing.Text = ...,
+                    value: typing.Optional[global___Scalar] = ...,
+                    ) -> None: ...
+                def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+                def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+            CONFIG_FIELD_NUMBER: builtins.int
+            @property
+            def config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
+            def __init__(self,
+                *,
+                config: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+                ) -> None: ...
+            def ClearField(self, field_name: typing_extensions.Literal["config",b"config"]) -> None: ...
+
+        HEADER_FIELD_NUMBER: builtins.int
+        PARAMETERS_FIELD_NUMBER: builtins.int
+        @property
+        def header(self) -> global___ServerMessage.EvaluateInsStream.Header: ...
+        @property
+        def parameters(self) -> global___ParametersStreamPacket: ...
+        def __init__(self,
+            *,
+            header: typing.Optional[global___ServerMessage.EvaluateInsStream.Header] = ...,
+            parameters: typing.Optional[global___ParametersStreamPacket] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["field",b"field","header",b"header","parameters",b"parameters"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["field",b"field","header",b"header","parameters",b"parameters"]) -> None: ...
+        def WhichOneof(self, oneof_group: typing_extensions.Literal["field",b"field"]) -> typing.Optional[typing_extensions.Literal["header","parameters"]]: ...
+
     RECONNECT_INS_FIELD_NUMBER: builtins.int
     GET_PROPERTIES_INS_FIELD_NUMBER: builtins.int
     GET_PARAMETERS_INS_FIELD_NUMBER: builtins.int
     FIT_INS_FIELD_NUMBER: builtins.int
     EVALUATE_INS_FIELD_NUMBER: builtins.int
+    FIT_INS_STREAM_FIELD_NUMBER: builtins.int
+    EVALUATE_INS_STREAM_FIELD_NUMBER: builtins.int
+    IS_END_FIELD_NUMBER: builtins.int
     @property
     def reconnect_ins(self) -> global___ServerMessage.ReconnectIns: ...
     @property
@@ -224,6 +374,13 @@ class ServerMessage(google.protobuf.message.Message):
     def fit_ins(self) -> global___ServerMessage.FitIns: ...
     @property
     def evaluate_ins(self) -> global___ServerMessage.EvaluateIns: ...
+    @property
+    def fit_ins_stream(self) -> global___ServerMessage.FitInsStream: ...
+    @property
+    def evaluate_ins_stream(self) -> global___ServerMessage.EvaluateInsStream: ...
+    is_end: builtins.bool
+    """Use to determine the last packet of a chunked message"""
+
     def __init__(self,
         *,
         reconnect_ins: typing.Optional[global___ServerMessage.ReconnectIns] = ...,
@@ -231,10 +388,16 @@ class ServerMessage(google.protobuf.message.Message):
         get_parameters_ins: typing.Optional[global___ServerMessage.GetParametersIns] = ...,
         fit_ins: typing.Optional[global___ServerMessage.FitIns] = ...,
         evaluate_ins: typing.Optional[global___ServerMessage.EvaluateIns] = ...,
+        fit_ins_stream: typing.Optional[global___ServerMessage.FitInsStream] = ...,
+        evaluate_ins_stream: typing.Optional[global___ServerMessage.EvaluateInsStream] = ...,
+        is_end: typing.Optional[builtins.bool] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters_ins",b"get_parameters_ins","get_properties_ins",b"get_properties_ins","msg",b"msg","reconnect_ins",b"reconnect_ins"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","fit_ins",b"fit_ins","get_parameters_ins",b"get_parameters_ins","get_properties_ins",b"get_properties_ins","msg",b"msg","reconnect_ins",b"reconnect_ins"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["reconnect_ins","get_properties_ins","get_parameters_ins","fit_ins","evaluate_ins"]]: ...
+    def HasField(self, field_name: typing_extensions.Literal["_is_end",b"_is_end","evaluate_ins",b"evaluate_ins","evaluate_ins_stream",b"evaluate_ins_stream","fit_ins",b"fit_ins","fit_ins_stream",b"fit_ins_stream","get_parameters_ins",b"get_parameters_ins","get_properties_ins",b"get_properties_ins","is_end",b"is_end","msg",b"msg","reconnect_ins",b"reconnect_ins"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_is_end",b"_is_end","evaluate_ins",b"evaluate_ins","evaluate_ins_stream",b"evaluate_ins_stream","fit_ins",b"fit_ins","fit_ins_stream",b"fit_ins_stream","get_parameters_ins",b"get_parameters_ins","get_properties_ins",b"get_properties_ins","is_end",b"is_end","msg",b"msg","reconnect_ins",b"reconnect_ins"]) -> None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_is_end",b"_is_end"]) -> typing.Optional[typing_extensions.Literal["is_end"]]: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["reconnect_ins","get_properties_ins","get_parameters_ins","fit_ins","evaluate_ins","fit_ins_stream","evaluate_ins_stream"]]: ...
 global___ServerMessage = ServerMessage
 
 class ClientMessage(google.protobuf.message.Message):
@@ -296,6 +459,35 @@ class ClientMessage(google.protobuf.message.Message):
         def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters","status",b"status"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["parameters",b"parameters","status",b"status"]) -> None: ...
 
+    class GetParametersResStream(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        class Header(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            STATUS_FIELD_NUMBER: builtins.int
+            @property
+            def status(self) -> global___Status: ...
+            def __init__(self,
+                *,
+                status: typing.Optional[global___Status] = ...,
+                ) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["status",b"status"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["status",b"status"]) -> None: ...
+
+        HEADER_FIELD_NUMBER: builtins.int
+        PARAMETERS_FIELD_NUMBER: builtins.int
+        @property
+        def header(self) -> global___ClientMessage.GetParametersResStream.Header: ...
+        @property
+        def parameters(self) -> global___ParametersStreamPacket: ...
+        def __init__(self,
+            *,
+            header: typing.Optional[global___ClientMessage.GetParametersResStream.Header] = ...,
+            parameters: typing.Optional[global___ParametersStreamPacket] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["field",b"field","header",b"header","parameters",b"parameters"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["field",b"field","header",b"header","parameters",b"parameters"]) -> None: ...
+        def WhichOneof(self, oneof_group: typing_extensions.Literal["field",b"field"]) -> typing.Optional[typing_extensions.Literal["header","parameters"]]: ...
+
     class FitRes(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
         class MetricsEntry(google.protobuf.message.Message):
@@ -333,6 +525,57 @@ class ClientMessage(google.protobuf.message.Message):
             ) -> None: ...
         def HasField(self, field_name: typing_extensions.Literal["parameters",b"parameters","status",b"status"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["metrics",b"metrics","num_examples",b"num_examples","parameters",b"parameters","status",b"status"]) -> None: ...
+
+    class FitResStream(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        class Header(google.protobuf.message.Message):
+            DESCRIPTOR: google.protobuf.descriptor.Descriptor
+            class MetricsEntry(google.protobuf.message.Message):
+                DESCRIPTOR: google.protobuf.descriptor.Descriptor
+                KEY_FIELD_NUMBER: builtins.int
+                VALUE_FIELD_NUMBER: builtins.int
+                key: typing.Text
+                @property
+                def value(self) -> global___Scalar: ...
+                def __init__(self,
+                    *,
+                    key: typing.Text = ...,
+                    value: typing.Optional[global___Scalar] = ...,
+                    ) -> None: ...
+                def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+                def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
+            STATUS_FIELD_NUMBER: builtins.int
+            NUM_EXAMPLES_FIELD_NUMBER: builtins.int
+            METRICS_FIELD_NUMBER: builtins.int
+            @property
+            def status(self) -> global___Status: ...
+            num_examples: builtins.int
+            @property
+            def metrics(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___Scalar]: ...
+            def __init__(self,
+                *,
+                status: typing.Optional[global___Status] = ...,
+                num_examples: builtins.int = ...,
+                metrics: typing.Optional[typing.Mapping[typing.Text, global___Scalar]] = ...,
+                ) -> None: ...
+            def HasField(self, field_name: typing_extensions.Literal["status",b"status"]) -> builtins.bool: ...
+            def ClearField(self, field_name: typing_extensions.Literal["metrics",b"metrics","num_examples",b"num_examples","status",b"status"]) -> None: ...
+
+        HEADER_FIELD_NUMBER: builtins.int
+        PARAMETERS_FIELD_NUMBER: builtins.int
+        @property
+        def header(self) -> global___ClientMessage.FitResStream.Header: ...
+        @property
+        def parameters(self) -> global___ParametersStreamPacket: ...
+        def __init__(self,
+            *,
+            header: typing.Optional[global___ClientMessage.FitResStream.Header] = ...,
+            parameters: typing.Optional[global___ParametersStreamPacket] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["field",b"field","header",b"header","parameters",b"parameters"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["field",b"field","header",b"header","parameters",b"parameters"]) -> None: ...
+        def WhichOneof(self, oneof_group: typing_extensions.Literal["field",b"field"]) -> typing.Optional[typing_extensions.Literal["header","parameters"]]: ...
 
     class EvaluateRes(google.protobuf.message.Message):
         DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -376,6 +619,9 @@ class ClientMessage(google.protobuf.message.Message):
     GET_PARAMETERS_RES_FIELD_NUMBER: builtins.int
     FIT_RES_FIELD_NUMBER: builtins.int
     EVALUATE_RES_FIELD_NUMBER: builtins.int
+    FIT_RES_STREAM_FIELD_NUMBER: builtins.int
+    GET_PARAMETERS_RES_STREAM_FIELD_NUMBER: builtins.int
+    IS_END_FIELD_NUMBER: builtins.int
     @property
     def disconnect_res(self) -> global___ClientMessage.DisconnectRes: ...
     @property
@@ -386,6 +632,13 @@ class ClientMessage(google.protobuf.message.Message):
     def fit_res(self) -> global___ClientMessage.FitRes: ...
     @property
     def evaluate_res(self) -> global___ClientMessage.EvaluateRes: ...
+    @property
+    def fit_res_stream(self) -> global___ClientMessage.FitResStream: ...
+    @property
+    def get_parameters_res_stream(self) -> global___ClientMessage.GetParametersResStream: ...
+    is_end: builtins.bool
+    """Use to determine the last packet of a chunked message"""
+
     def __init__(self,
         *,
         disconnect_res: typing.Optional[global___ClientMessage.DisconnectRes] = ...,
@@ -393,10 +646,16 @@ class ClientMessage(google.protobuf.message.Message):
         get_parameters_res: typing.Optional[global___ClientMessage.GetParametersRes] = ...,
         fit_res: typing.Optional[global___ClientMessage.FitRes] = ...,
         evaluate_res: typing.Optional[global___ClientMessage.EvaluateRes] = ...,
+        fit_res_stream: typing.Optional[global___ClientMessage.FitResStream] = ...,
+        get_parameters_res_stream: typing.Optional[global___ClientMessage.GetParametersResStream] = ...,
+        is_end: typing.Optional[builtins.bool] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["disconnect_res",b"disconnect_res","evaluate_res",b"evaluate_res","fit_res",b"fit_res","get_parameters_res",b"get_parameters_res","get_properties_res",b"get_properties_res","msg",b"msg"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["disconnect_res",b"disconnect_res","evaluate_res",b"evaluate_res","fit_res",b"fit_res","get_parameters_res",b"get_parameters_res","get_properties_res",b"get_properties_res","msg",b"msg"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["disconnect_res","get_properties_res","get_parameters_res","fit_res","evaluate_res"]]: ...
+    def HasField(self, field_name: typing_extensions.Literal["_is_end",b"_is_end","disconnect_res",b"disconnect_res","evaluate_res",b"evaluate_res","fit_res",b"fit_res","fit_res_stream",b"fit_res_stream","get_parameters_res",b"get_parameters_res","get_parameters_res_stream",b"get_parameters_res_stream","get_properties_res",b"get_properties_res","is_end",b"is_end","msg",b"msg"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["_is_end",b"_is_end","disconnect_res",b"disconnect_res","evaluate_res",b"evaluate_res","fit_res",b"fit_res","fit_res_stream",b"fit_res_stream","get_parameters_res",b"get_parameters_res","get_parameters_res_stream",b"get_parameters_res_stream","get_properties_res",b"get_properties_res","is_end",b"is_end","msg",b"msg"]) -> None: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["_is_end",b"_is_end"]) -> typing.Optional[typing_extensions.Literal["is_end"]]: ...
+    @typing.overload
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["disconnect_res","get_properties_res","get_parameters_res","fit_res","evaluate_res","fit_res_stream","get_parameters_res_stream"]]: ...
 global___ClientMessage = ClientMessage
 
 class Scalar(google.protobuf.message.Message):

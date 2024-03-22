@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt
@@ -32,18 +32,7 @@ NDArrays = List[NDArray]
 # not conform to other definitions of what a scalar is. Source:
 # https://developers.google.com/protocol-buffers/docs/overview#scalar
 Scalar = Union[bool, bytes, float, int, str]
-Value = Union[
-    bool,
-    bytes,
-    float,
-    int,
-    str,
-    List[bool],
-    List[bytes],
-    List[float],
-    List[int],
-    List[str],
-]
+
 
 # Value types for common.MetricsRecord
 MetricsScalar = Union[int, float]
@@ -87,6 +76,33 @@ class Parameters:
     tensor_type: str
 
 
+    @property
+    def dimensions(self) -> List[int]:
+        return [len(x) for x in self.tensors]
+    
+
+    @staticmethod
+    def parse_bytes(
+        tensor_type: str,
+        tensors_bytes: bytes,
+        dimensions: List[int]
+    ):
+        assert len(tensors_bytes) == sum(dimensions)
+
+        last_ptr = 0
+        tensors = []
+
+        for dim in dimensions:
+            tensors.append(tensors_bytes[last_ptr: last_ptr+dim])
+            last_ptr += dim
+        
+        return Parameters(
+            tensors=tensors,
+            tensor_type=tensor_type
+        )
+
+
+
 @dataclass
 class GetParametersIns:
     """Parameters request for a client."""
@@ -117,7 +133,7 @@ class FitRes:
     status: Status
     parameters: Parameters
     num_examples: int
-    metrics: Dict[str, Scalar]
+    metrics: Optional[Dict[str, Scalar]]
 
 
 @dataclass
@@ -135,7 +151,7 @@ class EvaluateRes:
     status: Status
     loss: float
     num_examples: int
-    metrics: Dict[str, Scalar]
+    metrics: Optional[Dict[str, Scalar]]
 
 
 @dataclass

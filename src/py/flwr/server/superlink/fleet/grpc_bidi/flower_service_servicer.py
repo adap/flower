@@ -18,8 +18,9 @@ Relevant knowledge for reading this modules code:
 - https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
 """
 
+import itertools
 import uuid
-from typing import Callable, Iterator
+from typing import Callable, Iterator, cast, Optional
 
 import grpc
 from iterators import TimeoutIterator
@@ -29,10 +30,10 @@ from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     ServerMessage,
 )
+from flwr.common.aws import BucketManager
 from flwr.server.client_manager import ClientManager
 from flwr.server.superlink.fleet.grpc_bidi.grpc_bridge import (
     GrpcBridge,
-    InsWrapper,
     ResWrapper,
 )
 from flwr.server.superlink.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
@@ -43,9 +44,9 @@ def default_bridge_factory() -> GrpcBridge:
     return GrpcBridge()
 
 
-def default_grpc_client_proxy_factory(cid: str, bridge: GrpcBridge) -> GrpcClientProxy:
+def default_grpc_client_proxy_factory(cid: str, bridge: GrpcBridge, bucket_manager: Optional[BucketManager]) -> GrpcClientProxy:
     """Return GrpcClientProxy instance."""
-    return GrpcClientProxy(cid=cid, bridge=bridge)
+    return GrpcClientProxy(cid=cid, bridge=bridge, bucket_manager=bucket_manager)
 
 
 def register_client_proxy(
@@ -73,12 +74,30 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         client_manager: ClientManager,
         grpc_bridge_factory: Callable[[], GrpcBridge] = default_bridge_factory,
         grpc_client_proxy_factory: Callable[
-            [str, GrpcBridge], GrpcClientProxy
+            [str, GrpcBridge, Optional[BucketManager]], GrpcClientProxy
         ] = default_grpc_client_proxy_factory,
+        bucket_manger: Optional[BucketManager] = None,
     ) -> None:
         self.client_manager: ClientManager = client_manager
         self.grpc_bridge_factory = grpc_bridge_factory
         self.client_proxy_factory = grpc_client_proxy_factory
+        self.bucket_manager = bucket_manger
+
+    def _consume_client_message(
+        self, client_message_stream: TimeoutIterator
+    ) -> Iterator[ResWrapper]:
+        """
+        Consume consecutive elements of a ClientMessage Timeout Iterator until it hits the end of a chunked message.
+        Raises TimeoutError at timeout.
+        """
+        for client_message in client_message_stream:
+            if client_message is client_message_stream.get_sentinel():
+                raise TimeoutError
+            msg = cast(ClientMessage, client_message)
+            res_wrapper = ResWrapper(msg)
+            yield res_wrapper
+            if res_wrapper.is_end:
+                break
 
     def Join(  # pylint: disable=invalid-name
         self,
@@ -100,7 +119,7 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         # use a `UUID4` that is unique.
         cid: str = uuid.uuid4().hex
         bridge = self.grpc_bridge_factory()
-        client_proxy = self.client_proxy_factory(cid, bridge)
+        client_proxy = self.client_proxy_factory(cid, bridge, self.bucket_manager)
         is_success = register_client_proxy(self.client_manager, client_proxy, context)
 
         if is_success:
@@ -114,23 +133,30 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
             while True:
                 try:
                     # Get ins_wrapper from bridge and yield server_message
-                    ins_wrapper: InsWrapper = next(ins_wrapper_iterator)
-                    yield ins_wrapper.server_message
+                    for ins_wrapper in ins_wrapper_iterator:
+                        yield ins_wrapper.server_message
+                        if ins_wrapper.is_end:
+                            break
+                    
+                    timeout = ins_wrapper.timeout
 
                     # Set current timeout, might be None
-                    if ins_wrapper.timeout is not None:
-                        client_message_iterator.set_timeout(ins_wrapper.timeout)
+                    if timeout is not None:
+                        client_message_iterator.set_timeout(timeout)
 
-                    # Wait for client message
-                    client_message = next(client_message_iterator)
-
-                    if client_message is client_message_iterator.get_sentinel():
+                    try:
+                        # Wait for client message
+                        for res_wrapper in self._consume_client_message(
+                            client_message_iterator
+                        ):
+                            bridge.set_res_wrapper(res_wrapper, res_wrapper.is_end)
+                    except TimeoutError:
                         # Important: calling `context.abort` in gRPC always
                         # raises an exception so that all code after the call to
                         # `context.abort` will not run. If subsequent code should
                         # be executed, the `rpc_termination_callback` can be used
                         # (as shown in the `register_client` function).
-                        details = f"Timeout of {ins_wrapper.timeout}sec was exceeded."
+                        details = f"Timeout of {timeout}sec was exceeded."
                         context.abort(
                             code=grpc.StatusCode.DEADLINE_EXCEEDED,
                             details=details,
@@ -140,9 +166,6 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                         # It does not understand that `context.abort` will terminate
                         # this execution context by raising an exception.
                         return
-
-                    bridge.set_res_wrapper(
-                        res_wrapper=ResWrapper(client_message=client_message)
-                    )
                 except StopIteration:
                     break
+                    # Wait for client message

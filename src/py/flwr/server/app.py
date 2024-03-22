@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 import grpc
+from mypy_boto3_s3.service_resource import Bucket
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
@@ -71,6 +72,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     client_manager: Optional[ClientManager] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    s3_bucket: Optional[Bucket] = None
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
 
@@ -159,6 +161,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
         server_address=address,
         max_message_length=grpc_max_message_length,
         certificates=certificates,
+        bucket=s3_bucket
     )
     log(
         INFO,

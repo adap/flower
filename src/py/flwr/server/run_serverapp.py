@@ -21,6 +21,8 @@ from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
 
+import boto3
+
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.logger import log, update_console_handler
 from flwr.common.object_ref import load_app

@@ -21,8 +21,10 @@ from logging import ERROR
 from typing import Any, Callable, Optional, Tuple, Union
 
 import grpc
+from mypy_boto3_s3.service_resource import Bucket
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.aws import BucketManager
 from flwr.common.logger import log
 from flwr.proto.transport_pb2_grpc import (  # pylint: disable=E0611
     add_FlowerServiceServicer_to_server,
@@ -62,6 +64,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     keepalive_time_ms: int = 210000,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    bucket: Optional[Bucket] = None,
 ) -> grpc.Server:
     """Create and start a gRPC server running FlowerServiceServicer.
 
@@ -134,7 +137,8 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
     >>>     ),
     >>> )
     """
-    servicer = FlowerServiceServicer(client_manager)
+    bucket_manager = None if bucket is None else BucketManager(bucket)
+    servicer = FlowerServiceServicer(client_manager, bucket_manger=bucket_manager)
     add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
 
     server = generic_create_grpc_server(

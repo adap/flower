@@ -25,7 +25,7 @@ import uuid
 from concurrent.futures import Future, ThreadPoolExecutor
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, TypedDict, Union
 
 from flwr.common.version import package_name, package_version
 
@@ -160,39 +160,35 @@ class EventType(str, Enum):
     RUN_SERVER_APP_ENTER = auto()
     RUN_SERVER_APP_LEAVE = auto()
 
-
+class TelemetryState(TypedDict, total=False):
+    executor: ThreadPoolExecutor
+    source: str
+    cluster: str
+    
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.
-state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
-    # Will be assigned ThreadPoolExecutor(max_workers=1)
-    # in event() the first time it's required
-    "executor": None,
-    "source": None,
-    "cluster": None,
-}
-
+state: TelemetryState = {}
 
 def event(
     event_type: EventType,
     event_details: Optional[Dict[str, Any]] = None,
 ) -> Future:  # type: ignore
     """Submit create_event to ThreadPoolExecutor to avoid blocking."""
-    if state["executor"] is None:
+
+    if not "executor" in state:
         state["executor"] = ThreadPoolExecutor(max_workers=1)
 
-    executor: ThreadPoolExecutor = cast(ThreadPoolExecutor, state["executor"])
-
-    result = executor.submit(create_event, event_type, event_details)
+    result = state["executor"].submit(create_event, event_type, event_details)
     return result
 
 
 def create_event(event_type: EventType, event_details: Optional[Dict[str, Any]]) -> str:
     """Create telemetry event."""
-    if state["source"] is None:
+    if not "source" in state:
         state["source"] = _get_source_id()
 
-    if state["cluster"] is None:
-        state["cluster"] = str(uuid.uuid4())
+    if not "cluster" in state:
+        state["cluster"] = str(uuid.uuid4()) 
 
     if event_details is None:
         event_details = {}

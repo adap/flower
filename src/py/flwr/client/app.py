@@ -23,11 +23,13 @@ from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 
 from grpc import RpcError
+from mypy_boto3_s3.service_resource import Bucket
 
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
+from flwr.common.aws import BucketManager
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
@@ -214,6 +216,7 @@ def start_client(
     transport: Optional[str] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
+    s3_bucket: Optional[Bucket] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -298,6 +301,7 @@ def start_client(
         transport=transport,
         max_retries=max_retries,
         max_wait_time=max_wait_time,
+        s3_bucket=s3_bucket
     )
     event(EventType.START_CLIENT_LEAVE)
 
@@ -318,6 +322,7 @@ def _start_client_internal(
     transport: Optional[str] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
+    s3_bucket: Optional[Bucket] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -391,6 +396,7 @@ def _start_client_internal(
     # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
 
+    bucket_manager = None if s3_bucket is None else BucketManager(bucket=s3_bucket)
     # Initialize connection context manager
     connection, address, connection_error_type = _init_connection(
         transport, server_address
@@ -442,6 +448,7 @@ def _start_client_internal(
             retry_invoker,
             grpc_max_message_length,
             root_certificates,
+            bucket_manager
         ) as conn:
             receive, send, create_node, delete_node = conn
 
@@ -626,9 +633,19 @@ def start_numpy_client(
     )
 
 
-def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
+def _init_connection(
+    transport: Optional[str],
+    server_address: str,
+) -> Tuple[
     Callable[
-        [str, bool, RetryInvoker, int, Union[bytes, str, None]],
+        [
+            str,
+            bool,
+            RetryInvoker,
+            int,
+            Union[bytes, str, None],
+            Optional[BucketManager],
+        ],
         ContextManager[
             Tuple[
                 Callable[[], Optional[Message]],

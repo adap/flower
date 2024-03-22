@@ -36,6 +36,26 @@ message Parameters {
   repeated bytes tensors = 1;
   string tensor_type = 2;
 }
+message ParametersStreamPacket {
+  message Header {
+    string tensor_type = 1;
+    repeated int64 dimensions = 2;
+    optional string s3_object_key = 3;
+  }
+  message Chunk {
+    bytes bytes = 1;
+  }
+  enum EndOfStream {
+    END_OF_STREAM = 0;
+  }
+  oneof stream {
+    Header header = 1;
+    Chunk chunk = 2;
+    EndOfStream is_end = 3;
+  }
+}
+
+
 enum Reason {
   UNKNOWN = 0;
   RECONNECT = 1;
@@ -56,13 +76,38 @@ message ServerMessage {
     Parameters parameters = 1;
     map<string, Scalar> config = 2;
   }
+
+  message FitInsStream {
+    message Header {
+      map<string, Scalar> config = 1; 
+    }
+    oneof field {
+      Header header = 1;
+      ParametersStreamPacket parameters = 2;
+    }
+  }
+
+  message EvaluateInsStream {
+    message Header {
+      map<string, Scalar> config = 1; 
+    }
+    oneof field {
+      Header header = 1;
+      ParametersStreamPacket parameters = 2;
+    }
+  }
+
   oneof msg {
     ReconnectIns reconnect_ins = 1;
     GetPropertiesIns get_properties_ins = 2;
     GetParametersIns get_parameters_ins = 3;
     FitIns fit_ins = 4;
     EvaluateIns evaluate_ins = 5;
+    FitInsStream fit_ins_stream = 6;
+    EvaluateInsStream evaluate_ins_stream = 7;
   }
+
+  optional bool is_end = 10; // Use to determine the last packet of a chunked message
 }
 
 message ClientMessage {
@@ -75,25 +120,52 @@ message ClientMessage {
     Status status = 1;
     Parameters parameters = 2;
   }
+  
+  message GetParametersResStream {
+    message Header {
+      Status status = 1;
+    }
+    oneof field {
+      Header header = 1;
+      ParametersStreamPacket parameters = 2;
+    }
+  }
+
   message FitRes {
     Status status = 1;
     Parameters parameters = 2;
     int64 num_examples = 3;
     map<string, Scalar> metrics = 4;
   }
+  message FitResStream {
+    message Header {
+      Status status = 1;
+      int64 num_examples = 2;
+      map<string, Scalar> metrics = 3;
+    }
+    oneof field {
+      Header header = 1;
+      ParametersStreamPacket parameters = 2;
+    }
+  }
+
   message EvaluateRes {
     Status status = 1;
     float loss = 2;
     int64 num_examples = 3;
     map<string, Scalar> metrics = 4;
   }
+
   oneof msg {
     DisconnectRes disconnect_res = 1;
     GetPropertiesRes get_properties_res = 2;
     GetParametersRes get_parameters_res = 3;
     FitRes fit_res = 4;
     EvaluateRes evaluate_res = 5;
+    FitResStream fit_res_stream = 6;
+    GetParametersResStream get_parameters_res_stream = 7;
   }
+  optional bool is_end = 10; // Use to determine the last packet of a chunked message
 }
 
 message Scalar {

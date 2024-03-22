@@ -15,7 +15,7 @@
 """RecordSet utilities."""
 
 
-from typing import Dict, Mapping, OrderedDict, Tuple, Union, cast, get_args
+from typing import Dict, Iterator, Mapping, OrderedDict, Tuple, Union, cast, get_args
 
 from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
 from .typing import (
