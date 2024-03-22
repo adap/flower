@@ -24,7 +24,7 @@ from flwr_datasets.partitioner import Partitioner
 
 
 def compute_counts(
-        labels: list,
+        labels: Union[List[int], List[str]],
         unique_labels: Union[List[int], List[str]]
 ) -> pd.Series:
     """
