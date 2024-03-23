@@ -19,8 +19,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 # Install system dependencies
 RUN apk add --no-cache \
-    git=2.43.0-r0 \
-    py3-pip=23.3.1-r0
+  git=2.43.0-r0 \
+  py3-pip=23.3.1-r0
 
 # Install specific version of pip
 ARG PIP_VERSION
