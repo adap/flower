@@ -82,7 +82,7 @@ END
     if [ "$current_version" = "v1.5.0" ]; then
       git restore source/conf.py
     fi
-    if [ changed ]; then
+    if [ $changed ]; then
       git restore locales/${current_language} || rm -rf locales/${current_language}
     fi
 

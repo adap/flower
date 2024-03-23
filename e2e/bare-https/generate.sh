@@ -5,8 +5,6 @@ set -e
 # Change directory to the script's directory
 cd "$(dirname "${BASH_SOURCE[0]}")"
 
-CA_PASSWORD=notsafe
-
 CERT_DIR=certificates
 
 # Generate directories if not exists

@@ -15,7 +15,7 @@
 # limitations under the License.
 # ==============================================================================
 
-IMAGENET_PATH="~/Downloads/imagenet-object-localization-challenge/"
+IMAGENET_PATH="$HOME/Downloads/imagenet-object-localization-challenge/"
 
 # Start a Flower server
 python -m flwr_example.pytorch_imagenet.server \
