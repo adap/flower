@@ -5,14 +5,14 @@ ARG ALPINE_VERSION=alpine3.19
 FROM python:${PYTHON_VERSION}-${ALPINE_VERSION} as base
 
 ENV DEBIAN_FRONTEND=noninteractive \
-# Send stdout and stderr stream directly to the terminal. Ensures that no
-# output is retained in a buffer if the application crashes.
+  # Send stdout and stderr stream directly to the terminal. Ensures that no
+  # output is retained in a buffer if the application crashes.
   PYTHONUNBUFFERED=1 \
-# Typically, bytecode is created on the first invocation to speed up following invocation.
-# However, in Docker we only make a single invocation (when we start the container).
-# Therefore, we can disable bytecode writing.
+  # Typically, bytecode is created on the first invocation to speed up following invocation.
+  # However, in Docker we only make a single invocation (when we start the container).
+  # Therefore, we can disable bytecode writing.
   PYTHONDONTWRITEBYTECODE=1 \
-# Ensure that python encoding is always UTF-8.
+  # Ensure that python encoding is always UTF-8.
   PYTHONIOENCODING=UTF-8 \
   LANG=C.UTF-8 \
   LC_ALL=C.UTF-8

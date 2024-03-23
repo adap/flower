@@ -9,7 +9,7 @@ ARG FLWR_VERSION
 RUN pip install -U --no-cache-dir \
     flwr[rest]==${FLWR_VERSION:-1.7.0}
 
-ENTRYPOINT ["python", "-c", "from flwr.server import run_superlink; run_superlink()"]
+ENTRYPOINT ["flower-server"]
 
 # Test if Flower can be successfully installed and imported
 FROM server as test
