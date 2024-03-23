@@ -18,6 +18,7 @@
 import os
 import re
 import sqlite3
+import time
 from datetime import datetime
 from logging import DEBUG, ERROR
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
@@ -192,6 +193,7 @@ class SqliteState(State):
         # Store TaskIns
         task_ins.task_id = str(task_id)
         task_ins.task.created_at = created_at.isoformat()
+        task_ins.task.ttl = time.time_ns()
         data = (task_ins_to_dict(task_ins),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
@@ -325,6 +327,7 @@ class SqliteState(State):
         # Store TaskIns
         task_res.task_id = str(task_id)
         task_res.task.created_at = created_at.isoformat()
+        task_res.task.ttl = time.time_ns()
         data = (task_res_to_dict(task_res),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"

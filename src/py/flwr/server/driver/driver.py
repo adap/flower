@@ -18,7 +18,7 @@
 import time
 from typing import Iterable, List, Optional, Tuple
 
-from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common import Message, Metadata, RecordSet
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -90,7 +90,7 @@ class Driver:
         message_type: str,
         dst_node_id: int,
         group_id: str,
-        ttl: int = DEFAULT_TTL,
+        ttl: int,
     ) -> Message:
         """Create a new message with specified parameters.
 
@@ -128,7 +128,7 @@ class Driver:
             dst_node_id=dst_node_id,
             reply_to_message="",
             group_id=group_id,
-            ttl=time.time_ns() + ttl,
+            ttl=ttl,
             message_type=message_type,
         )
         return Message(metadata=metadata, content=content)
