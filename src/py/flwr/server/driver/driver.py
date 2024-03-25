@@ -81,6 +81,7 @@ class Driver:
             and message.metadata.src_node_id == self.node.node_id
             and message.metadata.message_id == ""
             and message.metadata.reply_to_message == ""
+            and message.metadata.ttl > 0
         ):
             raise ValueError(f"Invalid message: {message}")
 
