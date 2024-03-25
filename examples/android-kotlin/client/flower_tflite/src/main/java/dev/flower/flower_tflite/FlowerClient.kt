@@ -1,6 +1,19 @@
 package dev.flower.flower_tflite
 
 import android.util.Log
+import dev.flower.android.Client
+import dev.flower.android.Code
+import dev.flower.android.EvaluateIns
+import dev.flower.android.EvaluateRes
+import dev.flower.android.FitIns
+import dev.flower.android.FitRes
+import dev.flower.android.GetParametersIns
+import dev.flower.android.GetParametersRes
+import dev.flower.android.GetPropertiesIns
+import dev.flower.android.GetPropertiesRes
+import dev.flower.android.Parameters
+import dev.flower.android.Scalar
+import dev.flower.android.Status
 import dev.flower.flower_tflite.helpers.assertIntsEqual
 import org.tensorflow.lite.Interpreter
 import java.lang.Integer.min
@@ -23,7 +36,8 @@ class FlowerClient<X : Any, Y : Any>(
     tfliteFileBuffer: MappedByteBuffer,
     val layersSizes: IntArray,
     val spec: SampleSpec<X, Y>,
-) : AutoCloseable {
+    val callback: (String) -> Unit,
+) : AutoCloseable, Client {
     val interpreter = Interpreter(tfliteFileBuffer)
     val interpreterLock = ReentrantLock()
     val trainingSamples = mutableListOf<Sample<X, Y>>()
@@ -215,6 +229,51 @@ class FlowerClient<X : Any, Y : Any>(
 
     override fun close() {
         interpreter.close()
+    }
+
+    override fun evaluate(ins: EvaluateIns): EvaluateRes {
+        Log.d(TAG, "Handling EvaluateIns")
+        callback("Handling Evaluate request from the server")
+        val layers = ins.parameters.tensors
+        assertIntsEqual(layers.size, layersSizes.size)
+        updateParameters(layers)
+        val (loss, accuracy) = evaluate()
+        callback("Test Accuracy after this round = $accuracy")
+        return EvaluateRes(Status(Code.OK, "Success"), loss, trainingSamples.size, emptyMap())
+    }
+
+    override fun fit(ins: FitIns): FitRes {
+        Log.d(TAG, "Handling FitIns")
+        callback("Handling Fit request from the server.")
+        val layers = ins.parameters.tensors
+        assertIntsEqual(layers.size, layersSizes.size)
+        val epochConfig = when (val scalar = ins.config.getOrDefault("local_epochs", Scalar.StringValue("1"))) {
+            is Scalar.StringValue -> scalar.value
+            else -> throw IllegalArgumentException("Unknown Scalar type: $scalar")
+        }
+        val epochs = epochConfig.toInt()
+        updateParameters(layers)
+        fit(
+            epochs,
+            lossCallback = { callback("Average loss: ${it.average()}.") })
+        val parameters = getParameters()
+        return FitRes(
+            Status(Code.OK, "Success"),
+            Parameters(parameters, "byteArray"),
+            trainingSamples.size,
+            emptyMap()
+        )
+    }
+
+    override fun getParameters(ins: GetParametersIns): GetParametersRes {
+        Log.d(TAG, "Handling GetParameters")
+        callback("Handling GetParameters message from the server.")
+        val parameters = getParameters()
+        return GetParametersRes(Status(Code.OK, "Success"), Parameters(parameters, "byteArray"))
+    }
+
+    override fun getProperties(ins: GetPropertiesIns): GetPropertiesRes {
+        return GetPropertiesRes(Status(Code.GET_PROPERTIES_NOT_IMPLEMENTED, "GetProperties not implemented"), emptyMap())
     }
 }
 
