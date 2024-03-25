@@ -238,7 +238,7 @@ metrics_record_to_proto(const flwr_local::MetricsRecord &record) {
   flwr::proto::MetricsRecord protoRecord;
 
   for (const auto &[key, value] : record) {
-    auto data = protoRecord.mutable_data()->operator[](key);
+    auto &data = (*protoRecord.mutable_data())[key];
 
     if (std::holds_alternative<int>(value)) {
       data.set_sint64(std::get<int>(value));
@@ -258,6 +258,7 @@ metrics_record_to_proto(const flwr_local::MetricsRecord &record) {
       }
     }
   }
+
   return protoRecord;
 }
 
@@ -292,44 +293,35 @@ configs_record_to_proto(const flwr_local::ConfigsRecord &record) {
   flwr::proto::ConfigsRecord protoRecord;
 
   for (const auto &[key, value] : record) {
-    auto data = protoRecord.mutable_data()->operator[](key);
+    auto &data = (*protoRecord.mutable_data())[key];
 
-    if (std::holds_alternative<std::vector<int>>(value)) {
-      auto &int_list = std::get<std::vector<int>>(value);
-      auto *list = data.mutable_sint64_list();
-      for (int val : int_list) {
-        list->add_vals(val);
-      }
-    } else if (std::holds_alternative<std::vector<double>>(value)) {
-      auto &double_list = std::get<std::vector<double>>(value);
-      auto *list = data.mutable_double_list();
-      for (double val : double_list) {
-        list->add_vals(val);
-      }
-    } else if (std::holds_alternative<std::vector<bool>>(value)) {
-      auto &bool_list = std::get<std::vector<bool>>(value);
-      auto *list = data.mutable_bool_list();
-      for (bool val : bool_list) {
-        list->add_vals(val);
-      }
-    } else if (std::holds_alternative<std::vector<std::string>>(value)) {
-      auto &string_list = std::get<std::vector<std::string>>(value);
-      auto *list = data.mutable_string_list();
-      for (const auto &val : string_list) {
-        list->add_vals(val);
-      }
-    } else if (std::holds_alternative<int>(value)) {
+    if (std::holds_alternative<int>(value)) {
       data.set_sint64(std::get<int>(value));
     } else if (std::holds_alternative<double>(value)) {
       data.set_double_(std::get<double>(value));
     } else if (std::holds_alternative<bool>(value)) {
       data.set_bool_(std::get<bool>(value));
     } else if (std::holds_alternative<std::string>(value)) {
-      const std::string &val = std::get<std::string>(value);
-      if (std::all_of(val.begin(), val.end(), ::isprint)) {
-        data.set_string(val);
-      } else {
-        data.set_bytes(val);
+      data.set_string(std::get<std::string>(value));
+    } else if (std::holds_alternative<std::vector<int>>(value)) {
+      auto &list = *data.mutable_sint64_list();
+      for (int val : std::get<std::vector<int>>(value)) {
+        list.add_vals(val);
+      }
+    } else if (std::holds_alternative<std::vector<double>>(value)) {
+      auto &list = *data.mutable_double_list();
+      for (double val : std::get<std::vector<double>>(value)) {
+        list.add_vals(val);
+      }
+    } else if (std::holds_alternative<std::vector<bool>>(value)) {
+      auto &list = *data.mutable_bool_list();
+      for (bool val : std::get<std::vector<bool>>(value)) {
+        list.add_vals(val);
+      }
+    } else if (std::holds_alternative<std::vector<std::string>>(value)) {
+      auto &list = *data.mutable_string_list();
+      for (const auto &val : std::get<std::vector<std::string>>(value)) {
+        list.add_vals(val);
       }
     }
   }
@@ -527,13 +519,15 @@ flwr_local::RecordSet recordset_from_get_parameters_res(
       {"getparametersres.parameters",
        parameters_to_parametersrecord(get_parameters_res.getParameters())}};
 
-  std::map<std::string, flwr_local::MetricsRecord> metrics_record = {{}};
-
   std::map<std::string, flwr_local::ConfigsRecord> configs_record = {
-      {"getparametersres.status", {{"code", 0}, {"message", "OK"}}}};
+      {"getparametersres.status", {{"code", 0}, {"message", "Success"}}}};
 
-  return flwr_local::RecordSet(parameters_record, metrics_record,
-                               configs_record);
+  flwr_local::RecordSet recordset = flwr_local::RecordSet();
+
+  recordset.setParametersRecords(parameters_record);
+  recordset.setConfigsRecords(configs_record);
+
+  return recordset;
 }
 
 flwr_local::RecordSet recordset_from_fit_res(const flwr_local::FitRes &fitres) {
@@ -544,40 +538,44 @@ flwr_local::RecordSet recordset_from_fit_res(const flwr_local::FitRes &fitres) {
   std::map<std::string, flwr_local::MetricsRecord> metrics_record = {
       {"fitres.num_examples", {{"num_examples", fitres.getNum_example()}}}};
 
-  std::map<std::string, flwr_local::ConfigsRecord> configs_record;
+  std::map<std::string, flwr_local::ConfigsRecord> configs_record = {
+      {"fitres.status", {{"code", 0}, {"message", "Success"}}}};
+
   if (fitres.getMetrics() != std::nullopt) {
-    configs_record = {{"fitres.metrics",
-                       metrics_to_config_record(fitres.getMetrics().value())},
-                      {"fitres.status", {{"code", 0}, {"message", "OK"}}}};
-  } else {
-    configs_record = {{"fitres.status", {{"code", 0}, {"message", "OK"}}}};
+    configs_record["fitres.metrics"] =
+        metrics_to_config_record(fitres.getMetrics().value());
   }
 
-  return flwr_local::RecordSet(parameters_record, metrics_record,
-                               configs_record);
+  flwr_local::RecordSet recordset = flwr_local::RecordSet();
+
+  recordset.setParametersRecords(parameters_record);
+  recordset.setMetricsRecords(metrics_record);
+  recordset.setConfigsRecords(configs_record);
+
+  return recordset;
 }
 
 flwr_local::RecordSet
 recordset_from_evaluate_res(const flwr_local::EvaluateRes &evaluate_res) {
-  std::map<std::string, flwr_local::ParametersRecord> parameters_record = {{}};
-
   std::map<std::string, flwr_local::MetricsRecord> metrics_record = {
       {"evaluateres.loss", {{"loss", evaluate_res.getLoss()}}},
       {"evaluateres.num_examples",
        {{"num_examples", evaluate_res.getNum_example()}}}};
 
-  std::map<std::string, flwr_local::ConfigsRecord> configs_record;
+  std::map<std::string, flwr_local::ConfigsRecord> configs_record = {
+      {"evaluateres.status", {{"code", 0}, {"message", "Success"}}}};
+
   if (evaluate_res.getMetrics() != std::nullopt) {
-    configs_record = {
-        {"evaluateres.metrics",
-         metrics_to_config_record(evaluate_res.getMetrics().value())},
-        {"evaluateres.status", {{"code", 0}, {"message", "OK"}}}};
-  } else {
-    configs_record = {{"evaluateres.status", {{"code", 0}, {"message", "OK"}}}};
+    configs_record["evaluateres.metrics"] =
+        metrics_to_config_record(evaluate_res.getMetrics().value());
   }
 
-  return flwr_local::RecordSet(parameters_record, metrics_record,
-                               configs_record);
+  flwr_local::RecordSet recordset = flwr_local::RecordSet();
+
+  recordset.setMetricsRecords(metrics_record);
+  recordset.setConfigsRecords(configs_record);
+
+  return recordset;
 }
 
 flwr_local::RecordSet

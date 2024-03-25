@@ -130,27 +130,26 @@ public:
   FitRes() {}
   FitRes(const Parameters &parameters, int num_examples, int num_examples_ceil,
          float fit_duration, const Metrics &metrics)
-      : parameters(parameters), num_examples(num_examples),
-        fit_duration(fit_duration), metrics(metrics) {}
+      : _parameters(parameters), _num_examples(num_examples),
+        _fit_duration(fit_duration), _metrics(metrics) {}
 
   // Getters
-  const Parameters getParameters() const { return parameters; }
-  const int getNum_example() const { return num_examples; }
-  const std::optional<float> getFit_duration() const { return fit_duration; }
-  const std::optional<Metrics> getMetrics() const { return metrics; }
+  const Parameters getParameters() const { return _parameters; }
+  const int getNum_example() const { return _num_examples; }
+  const std::optional<float> getFit_duration() const { return _fit_duration; }
+  const std::optional<Metrics> getMetrics() const { return _metrics; }
 
   // Setters
-  void setParameters(const Parameters &p) { parameters = p; }
-  void setNum_example(int n) { num_examples = n; }
-  void setFit_duration(float f) { fit_duration = f; }
-  void setMetrics(const flwr_local::Metrics &m) { metrics = m; }
+  void setParameters(const Parameters &p) { _parameters = p; }
+  void setNum_example(int n) { _num_examples = n; }
+  void setFit_duration(float f) { _fit_duration = f; }
+  void setMetrics(const flwr_local::Metrics &m) { _metrics = m; }
 
 private:
-  Parameters parameters;
-  int num_examples;
-  // std::optional<int> num_examples_ceil = std::nullopt;
-  std::optional<float> fit_duration = std::nullopt;
-  std::optional<Metrics> metrics = std::nullopt;
+  Parameters _parameters;
+  int _num_examples;
+  std::optional<float> _fit_duration = std::nullopt;
+  std::optional<Metrics> _metrics = std::nullopt;
 };
 
 /**
@@ -274,7 +273,21 @@ public:
     return _configsRecords;
   }
 
-  // Optionally, setters if needed
+  void
+  setParametersRecords(const std::map<std::string, flwr_local::ParametersRecord>
+                           &parametersRecords) {
+    _parametersRecords = parametersRecords;
+  }
+
+  void setMetricsRecords(
+      const std::map<std::string, flwr_local::MetricsRecord> &metricsRecords) {
+    _metricsRecords = metricsRecords;
+  }
+
+  void setConfigsRecords(
+      const std::map<std::string, flwr_local::ConfigsRecord> &configsRecords) {
+    _configsRecords = configsRecords;
+  }
 
 private:
   std::map<std::string, flwr_local::ParametersRecord> _parametersRecords;

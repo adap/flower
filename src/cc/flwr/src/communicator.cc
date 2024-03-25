@@ -26,10 +26,7 @@ bool validate_task_ins(const flwr::proto::TaskIns &task_ins,
 
 bool validate_task_res(const flwr::proto::TaskRes &task_res) {
   // Retrieve initialized fields in TaskRes
-  return (task_res.task_id().empty() && task_res.group_id().empty() &&
-          task_res.run_id() == 0 && !task_res.task().has_producer() &&
-          !task_res.task().has_producer() && !task_res.task().has_consumer() &&
-          task_res.task().ancestry_size() == 0);
+  return (!task_res.task_id().empty());
 }
 
 flwr::proto::TaskRes

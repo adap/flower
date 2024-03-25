@@ -17,8 +17,10 @@ void start::start_client(std::string server_address, flwr_local::Client *client,
         std::this_thread::sleep_for(std::chrono::seconds(3));
         continue;
       }
+
       auto [task_res, sleep_duration, keep_going] =
           handle_task(client, task_ins.value());
+
       send(&communicator, task_res);
       if (!keep_going) {
         break;
