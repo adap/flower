@@ -53,8 +53,5 @@ public:
   static void
   start_client(std::string server_address, flwr_local::Client *client,
                int grpc_max_message_length = GRPC_MAX_MESSAGE_LENGTH);
-  static void
-  start_rere_client(std::string server_address, flwr_local::Client *client,
-                    int grpc_max_message_length = GRPC_MAX_MESSAGE_LENGTH);
 };
 #endif

@@ -17,6 +17,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <variant>
 
 namespace flwr_local {
 /**
@@ -251,29 +252,34 @@ using ConfigsRecord =
 
 class RecordSet {
 public:
-  RecordSet(
-      const std::map<std::string, ParametersRecord> &parametersRecords = {},
-      const std::map<std::string, MetricsRecord> &metricsRecords = {},
-      const std::map<std::string, ConfigsRecord> &configsRecords = {})
+  RecordSet(const std::map<std::string, flwr_local::ParametersRecord>
+                &parametersRecords = {},
+            const std::map<std::string, flwr_local::MetricsRecord>
+                &metricsRecords = {},
+            const std::map<std::string, flwr_local::ConfigsRecord>
+                &configsRecords = {})
       : _parametersRecords(parametersRecords), _metricsRecords(metricsRecords),
         _configsRecords(configsRecords) {}
 
-  const std::map<std::string, ParametersRecord> &getParametersRecords() const {
+  const std::map<std::string, flwr_local::ParametersRecord> &
+  getParametersRecords() const {
     return _parametersRecords;
   }
-  const std::map<std::string, MetricsRecord> &getMetricsRecords() const {
+  const std::map<std::string, flwr_local::MetricsRecord> &
+  getMetricsRecords() const {
     return _metricsRecords;
   }
-  const std::map<std::string, ConfigsRecord> &getConfigsRecords() const {
+  const std::map<std::string, flwr_local::ConfigsRecord> &
+  getConfigsRecords() const {
     return _configsRecords;
   }
 
   // Optionally, setters if needed
 
 private:
-  std::map<std::string, ParametersRecord> _parametersRecords;
-  std::map<std::string, MetricsRecord> _metricsRecords;
-  std::map<std::string, ConfigsRecord> _configsRecords;
+  std::map<std::string, flwr_local::ParametersRecord> _parametersRecords;
+  std::map<std::string, flwr_local::MetricsRecord> _metricsRecords;
+  std::map<std::string, flwr_local::ConfigsRecord> _configsRecords;
 };
 
 } // namespace flwr_local
