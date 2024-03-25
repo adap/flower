@@ -58,7 +58,7 @@ class InMemoryState(State):
         # Store TaskIns
         task_ins.task_id = str(task_id)
         task_ins.task.created_at = created_at.isoformat()
-        task_ins.task.ttl = time.time_ns()
+        task_ins.task.ttl += time.time_ns()
         with self.lock:
             self.task_ins_store[task_id] = task_ins
 
@@ -120,7 +120,7 @@ class InMemoryState(State):
         # Store TaskRes
         task_res.task_id = str(task_id)
         task_res.task.created_at = created_at.isoformat()
-        task_res.task.ttl = time.time_ns()
+        task_res.task.ttl += time.time_ns()
         with self.lock:
             self.task_res_store[task_id] = task_res
 
