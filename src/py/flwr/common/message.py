@@ -42,8 +42,8 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     group_id : str
         An identifier for grouping messages. In some settings,
         this is used as the FL round.
-    ttl : int
-        Time-to-live for this message.
+    ttl : float
+        Time-to-live for this message in seconds.
     message_type : str
         A string that encodes the action to be executed on
         the receiving end.
@@ -59,7 +59,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     _dst_node_id: int
     _reply_to_message: str
     _group_id: str
-    _ttl: int
+    _ttl: float
     _message_type: str
     _partition_id: int | None
 
@@ -71,7 +71,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         dst_node_id: int,
         reply_to_message: str,
         group_id: str,
-        ttl: int,
+        ttl: float,
         message_type: str,
         partition_id: int | None = None,
     ) -> None:
@@ -126,12 +126,12 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         self._group_id = value
 
     @property
-    def ttl(self) -> int:
+    def ttl(self) -> float:
         """Time-to-live for this message."""
         return self._ttl
 
     @ttl.setter
-    def ttl(self, value: int) -> None:
+    def ttl(self, value: float) -> None:
         """Set ttl."""
         self._ttl = value
 
@@ -268,7 +268,7 @@ class Message:
         """Return True if message has an error, else False."""
         return self._error is not None
 
-    def _create_reply_metadata(self, ttl: int) -> Metadata:
+    def _create_reply_metadata(self, ttl: float) -> Metadata:
         """Construct metadata for a reply message."""
         return Metadata(
             run_id=self.metadata.run_id,
@@ -285,7 +285,7 @@ class Message:
     def create_error_reply(
         self,
         error: Error,
-        ttl: int,
+        ttl: float,
     ) -> Message:
         """Construct a reply message indicating an error happened.
 
@@ -300,7 +300,7 @@ class Message:
         message = Message(metadata=self._create_reply_metadata(ttl), error=error)
         return message
 
-    def create_reply(self, content: RecordSet, ttl: int) -> Message:
+    def create_reply(self, content: RecordSet, ttl: float = DEFAULT_TTL) -> Message:
         """Create a reply to this message with specified content and TTL.
 
         The method generates a new `Message` as a reply to this message.

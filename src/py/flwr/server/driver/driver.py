@@ -91,7 +91,7 @@ class Driver:
         message_type: str,
         dst_node_id: int,
         group_id: str,
-        ttl: int,
+        ttl: float,
     ) -> Message:
         """Create a new message with specified parameters.
 
@@ -111,10 +111,10 @@ class Driver:
         group_id : str
             The ID of the group to which this message is associated. In some settings,
             this is used as the FL round.
-        ttl : int
+        ttl : float
             Time-to-live for the round trip of this message, i.e., the time from sending
-            this message to receiving a reply. It specifies the duration for which the
-            message and its potential reply are considered valid.
+            this message to receiving a reply. It specifies in seconds the duration for
+            which the message and its potential reply are considered valid.
 
         Returns
         -------

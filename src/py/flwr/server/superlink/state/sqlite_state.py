@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS task_ins(
     consumer_node_id        INTEGER,
     created_at              TEXT,
     delivered_at            TEXT,
-    ttl                     INTEGER,
+    ttl                     FLOAT,
     ancestry                TEXT,
     task_type               TEXT,
     recordset               BLOB,
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS task_res(
     consumer_node_id        INTEGER,
     created_at              TEXT,
     delivered_at            TEXT,
-    ttl                     INTEGER,
+    ttl                     FLOAT,
     ancestry                TEXT,
     task_type               TEXT,
     recordset               BLOB,
@@ -193,7 +193,7 @@ class SqliteState(State):
         # Store TaskIns
         task_ins.task_id = str(task_id)
         task_ins.task.created_at = created_at.isoformat()
-        task_ins.task.ttl += time.time_ns()
+        task_ins.task.ttl += 1e9 * time.time_ns()
         data = (task_ins_to_dict(task_ins),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
@@ -327,7 +327,7 @@ class SqliteState(State):
         # Store TaskIns
         task_res.task_id = str(task_id)
         task_res.task.created_at = created_at.isoformat()
-        task_res.task.ttl += time.time_ns()
+        task_res.task.ttl += 1e9 * time.time_ns()
         data = (task_res_to_dict(task_res),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
