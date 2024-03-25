@@ -26,6 +26,7 @@ from utils_mnist import (
     sample_latents,
     get_fisher_ratio,
     train_align_dec_frozen,
+    synthetic_alignment_dataloader,
 )
 from utils_mnist import VAE
 import os
@@ -50,7 +51,7 @@ parser.add_argument(
     default=1 / 3,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
+parser.add_argument("--num_rounds", type=int, default=25, help="Number of FL rounds.")
 parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
 parser.add_argument("--latent_dim", type=int, required=True, help="Latent dimension.")
 args = parser.parse_args()
@@ -95,15 +96,17 @@ class FlowerClient(fl.client.NumPyClient):
 
         optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         # Train
-        vae_loss_term, reg_term, align_term = train_align_dec_frozen(
-            self.model,
-            trainloader,
-            self.align_loader,
-            None,
-            config,
-            epochs=epochs,
-            device=self.device,
-            num_classes=NUM_CLASSES,
+        local_loss_term, loss_ref_term, align_term, latent_diff_term = (
+            train_align_dec_frozen(
+                self.model,
+                trainloader,
+                self.align_loader,
+                None,
+                config,
+                epochs=epochs,
+                device=self.device,
+                num_classes=NUM_CLASSES,
+            )
         )
 
         true_img, gen_img = visualize_gen_image(
@@ -119,7 +122,7 @@ class FlowerClient(fl.client.NumPyClient):
             DataLoader(self.valset, batch_size=64),
             self.device,
             num_class=NUM_CLASSES,
-            use_PCA=True,
+            use_PCA=False,
         )
 
         # Return local model and statistics
@@ -128,14 +131,15 @@ class FlowerClient(fl.client.NumPyClient):
             len(trainloader.dataset),
             {
                 "cid": self.cid,
-                "vae_loss_term": vae_loss_term,
-                "reg_term": reg_term,
+                "local_loss_term": local_loss_term,
+                "loss_ref_term": loss_ref_term,
                 "align_term": align_term,
+                "latent_diff_term": latent_diff_term,
                 "true_image": true_img,
                 "gen_image": gen_img,
                 "latent_rep": latent_reps,
                 "client_round": config["server_round"],
-                "train_total_loss": vae_loss_term + reg_term + align_term,
+                "total_loss": local_loss_term + loss_ref_term,
             },
         )
 
@@ -190,11 +194,18 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     """Aggregation function for (federated) evaluation metrics, i.e. those returned by
     the client's evaluate() method."""
     # Multiply accuracy of each client by number of examples used
-    accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
+    # accuracies = [num_examples * m["accuracy"] for num_examples, m in metrics]
+    weighted_metrics = {
+        key: [num_examples * m[key] for num_examples, m in metrics if key != "cid"]
+        for num_examples, m in metrics
+        for key in m
+        if key != "cid"
+    }
     examples = [num_examples for num_examples, _ in metrics]
 
     # Aggregate and return custom metric (weighted average)
-    return {"accuracy": sum(accuracies) / sum(examples)}
+    # return {"accuracy": sum(accuracies) / sum(examples)}
+    return {key: sum(value) / sum(examples) for key, value in weighted_metrics.items()}
 
 
 def main():
@@ -221,6 +232,8 @@ def main():
             "server_round": server_round,
             "sample_per_class": wandb.config["sample_per_class"],
             "lambda_reg": wandb.config["lambda_reg"],
+            "lambda_latent_diff": wandb.config["lambda_latent_diff"],
+            # "lambda_reg_dec": wandb.config["lambda_reg_dec"],
             "lambda_align": wandb.config["lambda_align"],
             "lr_g": wandb.config["lr_g"],
             "steps_g": wandb.config["steps_g"],
@@ -268,11 +281,13 @@ def main():
                 testloader,
                 device,
                 num_class=NUM_CLASSES,
-                use_PCA=True,
+                use_PCA=False,
             )
             global_val_loss = eval_reconstrution(model, testloader, device)
             with torch.no_grad():
                 z_sample_np = sample_latents(model, testloader, device, 64)
+                if z_sample_np is None:
+                    return
                 z_sample = torch.tensor(z_sample_np, dtype=torch.float32).to(device)
                 recon = model.decoder(z_sample).cpu()
                 recon = recon.view(-1, 1, 28, 28)
@@ -312,7 +327,9 @@ def main():
     ALIGNMENT_DATALOADER = alignment_dataloader(
         samples_per_class=samples_per_class,
         batch_size=samples_per_class * NUM_CLASSES,
+        shuffle=True,
     )
+
     strategy = fl.server.strategy.FedCiR(
         initial_parameters=initial_params,
         initial_generator_params=initial_gen_params,
@@ -360,12 +377,14 @@ if __name__ == "__main__":
         "method": "random",
         "metric": {"name": "global_val_loss", "goal": "minimize"},
         "parameters": {
-            "sample_per_class": {"values": [200]},
+            "sample_per_class": {"values": [50]},
             # "lambda_reg": {"min": 0.0, "max": 1.0},
             # "lambda_align_g": {"min": 1e-6, "max": 1e-3},
-            "lambda_align_g": {"values": [0.1]},  # kl term for generator
+            "lambda_align_g": {"values": [0.1, 1]},  # kl term for generator
             "lambda_reg": {"values": [1]},
-            "lambda_align": {"values": [1]},
+            "lambda_align": {"values": [0]},
+            "lambda_latent_diff": {"values": [0.1, 1]},
+            # "lambda_reg_dec": {"values": [0.1, 1, 0]},
             # "lambda_align": {"min": 1e-6, "max": 1e-3},
             "lr_g": {
                 "values": [
@@ -373,8 +392,8 @@ if __name__ == "__main__":
                     # 1e-5,
                 ]
             },
-            "steps_g": {"values": [100, 200]},  # number of epochs for generator
-            "epochs": {"values": [5, 10]},
+            "steps_g": {"values": [2000, 1000]},  # number of epochs for generator
+            "epochs": {"values": [5]},
             "batch_size": {"values": [128]},
             "beta": {"values": [0]},  # for local kl loss
             "prior_steps": {"values": [3000]},
@@ -382,4 +401,4 @@ if __name__ == "__main__":
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=2)
+    wandb.agent(sweep_id, function=main, count=1)

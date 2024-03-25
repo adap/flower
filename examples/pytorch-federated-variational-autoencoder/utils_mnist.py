@@ -3,7 +3,7 @@ import torch.nn as nn
 from torchsummary import summary
 import torch.nn.functional as F
 import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, Subset, ConcatDataset
+from torch.utils.data import DataLoader, Subset, ConcatDataset, Dataset
 from torchvision.datasets import MNIST
 import numpy as np
 import matplotlib.pyplot as plt
@@ -85,8 +85,8 @@ class VAE(nn.Module):
         self.fc1 = nn.Linear(x_dim, h_dim1)
         self.fc2 = nn.Linear(h_dim1, h_dim2)
         self.fc3 = nn.Linear(h_dim2, h_dim3)
-        self.fc42 = nn.Linear(h_dim3, z_dim)
         self.fc41 = nn.Linear(h_dim3, z_dim)
+        self.fc42 = nn.Linear(h_dim3, z_dim)
         # decoder part
         self.fc5 = nn.Linear(z_dim, h_dim3)
         self.fc6 = nn.Linear(h_dim3, h_dim2)
@@ -610,7 +610,6 @@ def train_align(
     """Train the network on the training set."""
     net.train()
     temp_gen_model = VAE(z_dim=config["latent_dim"], encoder_only=True).to(device)
-    # TODO: load the weights from the global model
     gen_weights = parameters_to_ndarrays(config["gen_params"])
     params_dict = zip(temp_gen_model.state_dict().keys(), gen_weights)
     state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
@@ -678,7 +677,6 @@ def train_align_dec_frozen(
     """Train the network on the training set."""
     net.train()
     temp_gen_model = VAE(z_dim=config["latent_dim"], encoder_only=True).to(device)
-    # TODO: load the weights from the global model
     gen_weights = parameters_to_ndarrays(config["gen_params"])
     params_dict = zip(temp_gen_model.state_dict().keys(), gen_weights)
     state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
@@ -692,47 +690,54 @@ def train_align_dec_frozen(
     lambda_reg = config["lambda_reg"]
 
     lambda_align = config["lambda_align"]
+    lambda_latent_diff = config["lambda_latent_diff"]
+    # lambda_reg_dec = config["lambda_reg_dec"]
     beta = config["beta"]
     latent_diff_loss = nn.MSELoss(reduction="none")
     opt1 = torch.optim.Adam(net.parameters(), lr=1e-3)
+
+    # Freeze decoder parameters
+    encoder_params = (
+        list(net.fc1.parameters())
+        + list(net.fc2.parameters())
+        + list(net.fc3.parameters())
+        + list(net.fc41.parameters())
+        + list(net.fc42.parameters())
+    )
+    decorder_params = (
+        list(net.fc5.parameters())
+        + list(net.fc6.parameters())
+        + list(net.fc7.parameters())
+        + list(net.fc8.parameters())
+    )
+    opt2 = torch.optim.Adam(encoder_params, lr=1e-3)
+    opt3 = torch.optim.Adam(decorder_params, lr=1e-3)
     for _ in range(epochs):
         for images, _ in trainloader:
-            for name, param in net.named_parameters():
-                param.requires_grad = True
-
-            for idx, (align_img, _) in enumerate(align_loader):
+            for idx, (align_img, y) in enumerate(align_loader):
                 opt1.zero_grad()
                 align_img = align_img.to(device)
-                _, mu_g, log_var_g = temp_gen_model(align_img)
+                z_g, mu_g, log_var_g = temp_gen_model(align_img)
                 recon_align_img, mu, log_var = net(align_img)
                 vae_loss1 = vae_loss(recon_align_img, align_img, mu, log_var, beta)
                 loss_ref = vae_loss1
-                # mu_g, log_var_g = fixed_gen_stats
+                vae_loss_g = vae_loss(
+                    net.decoder(z_g), align_img, mu_g, log_var_g, beta
+                )
+                loss_ref += vae_loss_g * lambda_reg
 
                 loss_align = 0.5 * (log_var_g - log_var - 1) + (
                     log_var.exp() + (mu - mu_g).pow(2)
                 ) / (2 * log_var_g.exp())
 
-                loss_align_reduced = torch.mean(loss_align.sum(dim=1))
-                print(f"align_idx: {idx }")
-                print(f"loss_align_term: {lambda_align * loss_align_reduced}")
-                for name, param in net.named_parameters():
-                    if "fc6" in name:
-                        print(f" before fc6 requires_grad: {param.requires_grad}")
-                        break
+            loss_align_reduced = torch.mean(loss_align.sum(dim=1))
+            print(f"align_step: {idx }")
+            print(f"loss_align_term: {lambda_align * loss_align_reduced}")
 
             loss_ref += lambda_align * loss_align_reduced
             loss_ref.backward()
             opt1.step()
 
-            # Freeze parameters after fc4
-            parameters_except_decorder = []
-            for name, param in net.named_parameters():
-                if "fc5" in name or "fc6" in name or "fc7" in name or "fc8" in name:
-                    param.requires_grad = False
-                else:
-                    parameters_except_decorder.append(param)
-            opt2 = torch.optim.Adam(parameters_except_decorder, lr=1e-3)
             opt2.zero_grad()
             images = images.to(device)
             recon_images, mu, logvar = net(images)
@@ -740,21 +745,25 @@ def train_align_dec_frozen(
             z_g, _, _ = temp_gen_model(images)
 
             vae_loss2 = latent_diff_loss(z, z_g).sum(dim=1).mean()
-            loss_local = vae_loss2
-            loss_local += vae_loss(recon_images, images, mu, logvar, beta)
-            for name, param in net.named_parameters():
-                if "fc6" in name:
-                    print(f" after fc6 requires_grad: {param.requires_grad}")
-                    break
+            loss_local = vae_loss(recon_images, images, mu, logvar, beta)
+            loss_local += lambda_latent_diff * vae_loss2
+
             loss_local.backward()
             opt2.step()
 
-    for name, param in net.named_parameters():
-        param.requires_grad = True
+            # opt3.zero_grad()
+            # recon_images, mu, logvar = net(images)
+            # loss_local2 = (
+            #     vae_loss(recon_images, images, mu, logvar, beta) * lambda_reg_dec
+            # )
+            # loss_local2.backward()
+            # opt3.step()
+
     return (
         loss_local.item(),
-        lambda_reg * loss_ref.item(),
+        loss_ref.item(),
         lambda_align * loss_align_reduced.item(),
+        lambda_latent_diff * vae_loss2.item(),
     )
 
 
@@ -1013,15 +1022,7 @@ def visualize_plotly_latent_representation(
     all_labels = np.concatenate(all_labels, axis=0)
     reduced_latents = all_means
     if use_PCA:
-        # # Apply PCA using PyTorch
-        # cov_matrix = torch.tensor(np.cov(all_means.T), dtype=torch.float32)
-        # _, _, V = torch.svd_lowrank(cov_matrix, q=2)
 
-        # # Project data onto the first two principal components
-        # reduced_latents = torch.mm(torch.tensor(all_means, dtype=torch.float32), V)
-
-        # # Convert to numpy array
-        # reduced_latents = reduced_latents.numpy()
         from sklearn.decomposition import PCA
 
         pca = PCA(n_components=2)
@@ -1076,8 +1077,11 @@ def sample_latents(model, test_loader, device, num_samples=64):
     from sklearn.mixture import GaussianMixture
 
     gmm = GaussianMixture(n_components=10, covariance_type="diag", random_state=0)
-    gmm.fit(all_means)
-
+    try:
+        gmm.fit(all_means)
+    except:
+        print("Error in fitting GMM")
+        return None
     return gmm.sample(num_samples)[0]
 
 
@@ -1146,6 +1150,61 @@ def generate(net, image):
     """Reproduce the input with trained VAE."""
     with torch.no_grad():
         return net.forward(image)
+
+
+def synthetic_noise_data(samples_per_class=100, num_labels=10):
+    def generate_samples(label, num_samples):
+        # Generate random noise for features
+        features = np.random.rand(num_samples, 28, 28)
+        # Normalize the features
+        features = (features - 0.5) / 0.5
+        # Create labels
+        labels = np.full((num_samples,), label)
+        return features, labels
+
+    # Generate synthetic data for each label
+    synthetic_data = []
+    for label in range(num_labels):
+        features, labels = generate_samples(label, samples_per_class)
+        synthetic_data.append((features, labels))
+
+    # Shuffle the synthetic data
+    np.random.shuffle(synthetic_data)
+
+    # Split data into features and labels
+    all_features = np.concatenate([data[0] for data in synthetic_data], axis=0)
+    all_labels = np.concatenate([data[1] for data in synthetic_data], axis=0)
+    return (
+        all_features.reshape(
+            all_features.shape[0], 1, all_features.shape[-2], all_features.shape[-1]
+        ),
+        all_labels,
+    )
+
+
+class SyntheticDataset(Dataset):
+    def __init__(self, features, labels):
+        self.features = torch.tensor(features, dtype=torch.float32)
+        self.labels = torch.tensor(labels, dtype=torch.long)
+
+    def __len__(self):
+        return len(self.features)
+
+    def __getitem__(self, idx):
+        return self.features[idx], self.labels[idx]
+
+
+def synthetic_alignment_dataloader(
+    samples_per_class=100, num_labels=10, batch_size=1000, shuffle=True
+):
+    synthetic_features, synthetic_labels = synthetic_noise_data(
+        samples_per_class, num_labels
+    )
+    synthetic_dataset = SyntheticDataset(synthetic_features, synthetic_labels)
+    synthetic_dataloader = DataLoader(
+        synthetic_dataset, batch_size=batch_size, shuffle=shuffle
+    )
+    return synthetic_dataloader
 
 
 if __name__ == "__main__":

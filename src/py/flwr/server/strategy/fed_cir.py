@@ -29,7 +29,6 @@ from sklearn.decomposition import PCA
 from sklearn.metrics import silhouette_score
 
 matplotlib.use("Agg")
-
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
 Setting `min_available_clients` lower than `min_fit_clients` or
 `min_evaluate_clients` can cause the server to fail when there are too few clients
@@ -39,6 +38,57 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 import torch
 import torch.nn as nn
 from collections import OrderedDict
+
+
+def visualize_plotly_latent_representation(
+    model, test_loader, device, use_PCA=False, num_class=10
+):
+    model.eval()
+    all_recons = []
+    all_labels = []
+    all_means = []
+
+    with torch.no_grad():
+        for data, labels in test_loader:
+            data = data.to(device)
+            recon, mu, _ = model(data)
+            all_recons.append(recon.cpu().numpy())
+            all_means.append(mu.cpu().numpy())
+            all_labels.append(labels.numpy())
+
+    all_recons = np.concatenate(all_recons, axis=0)
+    all_means = np.concatenate(all_means, axis=0)
+    all_labels = np.concatenate(all_labels, axis=0)
+    reduced_latents = all_means
+    if use_PCA:
+
+        from sklearn.decomposition import PCA
+
+        pca = PCA(n_components=2)
+        reduced_latents = pca.fit_transform(all_means)
+
+    traces = []
+    for label in np.unique(all_labels):
+        indices = np.where(all_labels == label)
+        trace = go.Scatter(
+            x=reduced_latents[indices, 0].flatten(),
+            y=reduced_latents[indices, 1].flatten(),
+            mode="markers",
+            name=f"Digit {label}",
+            marker=dict(size=8),
+        )
+        traces.append(trace)
+
+    layout = go.Layout(
+        title="Latent Representation with True Labels",
+        xaxis=dict(title="Principal Component 1"),
+        yaxis=dict(title="Principal Component 2"),
+        legend=dict(title="True Labels"),
+        hovermode="closest",
+    )
+    fig = go.Figure(data=traces, layout=layout)
+
+    return fig
 
 
 def info_vae_loss(recon_x, x, mu, logvar, y, y_pred, lambda_kl=0.01, lambda_info=10.0):
@@ -191,7 +241,6 @@ class FedCiR(FedAvg):
         self.on_evaluate_config_fn = on_evaluate_config_fn
         self.accept_failures = accept_failures
         self.initial_parameters = initial_parameters
-        self.initial_generator_params = initial_generator_params
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
         self.lr_gen = lr_g
@@ -207,6 +256,81 @@ class FedCiR(FedAvg):
         # self.ref_mu, self.ref_logvar = self.compute_ref_stats()
         self.ref_mu, self.ref_logvar = None, None
         self.lambda_align_g = lambda_align_g
+        self.initial_generator_params = self.pretrain_generator(
+            initial_generator_params
+        )
+
+    def pretrain_generator(self, initial_generator_params):
+
+        temp_local_model = VAE(z_dim=self.latent_dim).to(self.device)
+
+        # load generator weights
+        gen_params_dict = zip(
+            self.gen_model.state_dict().keys(),
+            parameters_to_ndarrays(initial_generator_params),
+        )
+        gen_state_dict = OrderedDict({k: torch.tensor(v) for k, v in gen_params_dict})
+        self.gen_model.load_state_dict(gen_state_dict, strict=True)
+        optimizer = torch.optim.Adam(self.gen_model.parameters(), lr=self.lr_gen)
+
+        temp_local_model.eval()
+
+        for ep_g in range(self.steps_gen):
+            for step, (align_img, _) in enumerate(self.alignment_loader):
+
+                optimizer.zero_grad()
+                align_img = align_img.to(self.device)
+
+                params_dict = zip(
+                    temp_local_model.state_dict().keys(),
+                    parameters_to_ndarrays(self.initial_parameters),
+                )
+                state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
+                temp_local_model.load_state_dict(state_dict, strict=True)
+                z_g, mu_g, logvar_g = self.gen_model(align_img)
+                preds = temp_local_model.decoder(z_g)
+
+                loss = vae_loss(
+                    preds,
+                    align_img,
+                    mu_g,
+                    logvar_g,
+                    self.lambda_align_g,
+                    False,
+                )
+
+                threshold = 1e-6  # Define a threshold for the negligible loss
+                log(DEBUG, f"generator loss at ep {ep_g} step {step}: {loss}")
+
+                if (
+                    loss.item() > threshold
+                ):  # Check if the loss is greater than the threshold
+                    loss.backward(retain_graph=True)
+                    optimizer.step()
+                else:
+                    log(
+                        DEBUG,
+                        f"Skipping optimization at step {step} due to negligible loss",
+                    )
+            tmp_gen_fig = visualize_plotly_latent_representation(
+                self.gen_model,
+                self.alignment_loader,
+                self.device,
+                use_PCA=False,
+                num_class=self.num_classes,
+            )
+        wandb.log(
+            data={
+                f"final_gen_loss": loss.item(),
+                "client_round": 0,
+                "tmp_gen_latent_space": tmp_gen_fig,
+            },
+            step=0,
+        )
+
+        return ndarrays_to_parameters(
+            [val.cpu().numpy() for _, val in self.gen_model.state_dict().items()]
+        )
 
     def compute_ref_stats(self, use_PCA=True, given_labels=False):
         if given_labels:
@@ -466,13 +590,13 @@ class FedCiR(FedAvg):
                     # _, mu, logvar = temp_local_models[idx](align_img)
                     # mu_s.append(mu)
                     # logvar_s.append(logvar)
-
                 loss = vae_loss(
                     torch.stack(preds).mean(dim=0),
                     align_img,
                     mu_g,
                     logvar_g,
                     self.lambda_align_g,
+                    False,
                 )
                 # loss = vae_loss_connect(
                 #     torch.stack(preds).mean(dim=0),
@@ -496,8 +620,19 @@ class FedCiR(FedAvg):
                         DEBUG,
                         f"Skipping optimization at step {step} due to negligible loss",
                     )
+            tmp_gen_fig = visualize_plotly_latent_representation(
+                self.gen_model,
+                self.alignment_loader,
+                self.device,
+                use_PCA=False,
+                num_class=self.num_classes,
+            )
         wandb.log(
-            data={f"final_gen_loss": loss.item(), "client_round": server_round},
+            data={
+                f"final_gen_loss": loss.item(),
+                "client_round": server_round,
+                "tmp_gen_latent_space": tmp_gen_fig,
+            },
             step=server_round,
         )
         # self.gen_stats = ndarrays_to_parameters(
@@ -518,29 +653,47 @@ class FedCiR(FedAvg):
 
         fit_metrics = [(res.num_examples, res.metrics) for _, res in results]
 
+        # for fit_metric in fit_metrics:
+        #     data = {
+        #         f"train_num_examples_{fit_metric[1]['cid']}": fit_metric[0],
+        #         f"train_vae_loss_term_{fit_metric[1]['cid']}": fit_metric[1][
+        #             "vae_loss_term"
+        #         ],
+        #         f"train_reg_term_{fit_metric[1]['cid']}": fit_metric[1]["reg_term"],
+        #         f"train_align_term_{fit_metric[1]['cid']}": fit_metric[1]["align_term"],
+        #         f"train_total_loss_{fit_metric[1]['cid']}": fit_metric[1][
+        #             "train_total_loss"
+        #         ],
+        #         f"train_true_image_{fit_metric[1]['cid']}": wandb.Image(
+        #             fit_metric[1]["true_image"]
+        #         ),
+        #         f"train_gen_image_{fit_metric[1]['cid']}": wandb.Image(
+        #             fit_metric[1]["gen_image"]
+        #         ),
+        #         f"train_latent_rep_{fit_metric[1]['cid']}": fit_metric[1]["latent_rep"],
+        #         "client_round": fit_metric[1]["client_round"],
+        #     }
+
+        #     wandb.log(data=data, step=server_round)
+        #     plt.close("all")
         for fit_metric in fit_metrics:
-            data = {
-                f"train_num_examples_{fit_metric[1]['cid']}": fit_metric[0],
-                f"train_vae_loss_term_{fit_metric[1]['cid']}": fit_metric[1][
-                    "vae_loss_term"
-                ],
-                f"train_reg_term_{fit_metric[1]['cid']}": fit_metric[1]["reg_term"],
-                f"train_align_term_{fit_metric[1]['cid']}": fit_metric[1]["align_term"],
-                f"train_total_loss_{fit_metric[1]['cid']}": fit_metric[1][
-                    "train_total_loss"
-                ],
-                f"train_true_image_{fit_metric[1]['cid']}": wandb.Image(
-                    fit_metric[1]["true_image"]
-                ),
-                f"train_gen_image_{fit_metric[1]['cid']}": wandb.Image(
-                    fit_metric[1]["gen_image"]
-                ),
-                f"train_latent_rep_{fit_metric[1]['cid']}": fit_metric[1]["latent_rep"],
-                "client_round": fit_metric[1]["client_round"],
-            }
+            data = {}
+            for key, value in fit_metric[1].items():
+                if key in ["cid", "gen_image", "true_image"]:
+                    continue
+                data = {
+                    f"train_{key}_{fit_metric[1]['cid']}": value,
+                }
+
+            data[f"train_num_examples_{fit_metric[1]['cid']}"] = fit_metric[0]
+            data[f"train_true_image_{fit_metric[1]['cid']}"] = wandb.Image(
+                fit_metric[1]["true_image"]
+            )
+            data[f"train_gen_image_{fit_metric[1]['cid']}"] = wandb.Image(
+                fit_metric[1]["gen_image"]
+            )
 
             wandb.log(data=data, step=server_round)
-            plt.close("all")
         return parameters_aggregated, metrics_aggregated
 
     def aggregate_evaluate(
@@ -574,15 +727,33 @@ class FedCiR(FedAvg):
         eval_metrics = [(res.num_examples, res.metrics) for _, res in results]
 
         for eval_metric in eval_metrics:
-            data = {
-                f"eval_num_examples_{eval_metric[1]['cid']}": eval_metric[0],
-                f"eval_accuracy_{eval_metric[1]['cid']}": eval_metric[1]["accuracy"],
-                f"eval_local_val_loss_{eval_metric[1]['cid']}": eval_metric[1][
-                    "local_val_loss"
-                ],
-                "client_round": server_round,
-            }
+            data = {}
+            for key, value in eval_metric[1].items():
+                if key in ["cid"]:
+                    continue
+                data = {
+                    f"eval_{key}_{eval_metric[1]['cid']}": value,
+                }
+            data[f"eval_num_examples_{eval_metric[1]['cid']}"] = eval_metric[0]
+            # data = {
+            #     f"eval_num_examples_{eval_metric[1]['cid']}": eval_metric[0],
+            #     # f"eval_accuracy_{eval_metric[1]['cid']}": eval_metric[1]["accuracy"],
+            #     f"eval_local_val_loss_{eval_metric[1]['cid']}": eval_metric[1][
+            #         "local_val_loss"
+            #     ],
+            #     "client_round": server_round,
+            # }
 
             wandb.log(data=data, step=server_round)
+        data_agg = {
+            f"eval_{key}_aggregated": value for key, value in metrics_aggregated.items()
+        }
+        wandb.log(
+            data={
+                "eval_loss_aggregated": loss_aggregated,
+                **data_agg,
+            },
+            step=server_round,
+        )
 
         return loss_aggregated, metrics_aggregated
