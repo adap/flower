@@ -88,13 +88,12 @@ async def worker(
             log(DEBUG, "Terminating Async worker: %s", e)
             break
 
-        except LoadClientAppError as ex:
-            log(ERROR, ex)
+        except LoadClientAppError as load_ex:
+            log(ERROR, load_ex)
             log(ERROR, traceback.format_exc())
-            raise
+            raise load_ex
 
-        # All other exceptions aren't raised but reported
-        # as an error message
+        # Exceptions aren't raised but reported as an error message
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, ex)
             log(ERROR, traceback.format_exc())
