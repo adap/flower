@@ -3,7 +3,15 @@ import random
 import time
 
 import flwr as fl
-from flwr.common import Context, NDArrays, Message, MessageType, Metrics, RecordSet, DEFAULT_TTL
+from flwr.common import (
+    Context,
+    NDArrays,
+    Message,
+    MessageType,
+    Metrics,
+    RecordSet,
+    DEFAULT_TTL,
+)
 from flwr.server import Driver
 
 

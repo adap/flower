@@ -1,5 +1,5 @@
 from flwr.client import ClientApp
-from flwr.common import Message, Context,DEFAULT_TTL
+from flwr.common import Message, Context, DEFAULT_TTL
 
 
 def hello_world_mod(msg, ctx, call_next) -> Message:
