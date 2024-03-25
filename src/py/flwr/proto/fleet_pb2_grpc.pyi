@@ -16,6 +16,10 @@ class FleetStub:
         flwr.proto.fleet_pb2.DeleteNodeRequest,
         flwr.proto.fleet_pb2.DeleteNodeResponse]
 
+    Ping: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.PingRequest,
+        flwr.proto.fleet_pb2.PingResponse]
+
     PullTaskIns: grpc.UnaryUnaryMultiCallable[
         flwr.proto.fleet_pb2.PullTaskInsRequest,
         flwr.proto.fleet_pb2.PullTaskInsResponse]
@@ -45,6 +49,12 @@ class FleetServicer(metaclass=abc.ABCMeta):
         request: flwr.proto.fleet_pb2.DeleteNodeRequest,
         context: grpc.ServicerContext,
     ) -> flwr.proto.fleet_pb2.DeleteNodeResponse: ...
+
+    @abc.abstractmethod
+    def Ping(self,
+        request: flwr.proto.fleet_pb2.PingRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fleet_pb2.PingResponse: ...
 
     @abc.abstractmethod
     def PullTaskIns(self,
