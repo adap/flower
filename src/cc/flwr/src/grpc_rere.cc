@@ -1,4 +1,5 @@
 #include "grpc_rere.h"
+#include "flwr/proto/fleet.grpc.pb.h"
 
 gRPCRereCommunicator::gRPCRereCommunicator(std::string server_address,
                                            int grpc_max_message_length) {

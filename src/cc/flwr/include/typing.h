@@ -66,8 +66,8 @@ public:
       : tensors(tensors), tensor_type(tensor_type) {}
 
   // Getters
-  std::list<std::string> getTensors() { return tensors; }
-  std::string getTensor_type() { return tensor_type; }
+  const std::list<std::string> getTensors() const { return tensors; }
+  const std::string getTensor_type() const { return tensor_type; }
 
   // Setters
   void setTensors(const std::list<std::string> &tensors) {
@@ -90,7 +90,7 @@ public:
   explicit ParametersRes(const Parameters &parameters)
       : parameters(parameters) {}
 
-  Parameters getParameters() { return parameters; }
+  const Parameters getParameters() const { return parameters; }
   void setParameters(const Parameters &p) { parameters = p; }
 
 private:
@@ -133,22 +133,14 @@ public:
         fit_duration(fit_duration), metrics(metrics) {}
 
   // Getters
-  Parameters getParameters() { return parameters; }
-  int getNum_example() { return num_examples; }
-  /*std::optional<int> getNum_examples_ceil()
-  {
-          return num_examples_ceil;
-  }*/
-  std::optional<float> getFit_duration() { return fit_duration; }
-  std::optional<Metrics> getMetrics() { return metrics; }
+  const Parameters getParameters() const { return parameters; }
+  const int getNum_example() const { return num_examples; }
+  const std::optional<float> getFit_duration() const { return fit_duration; }
+  const std::optional<Metrics> getMetrics() const { return metrics; }
 
   // Setters
   void setParameters(const Parameters &p) { parameters = p; }
   void setNum_example(int n) { num_examples = n; }
-  /*void setNum_examples_ceil(int n)
-  {
-          num_examples_ceil = n;
-  }*/
   void setFit_duration(float f) { fit_duration = f; }
   void setMetrics(const flwr_local::Metrics &m) { metrics = m; }
 
@@ -195,9 +187,9 @@ public:
       : loss(loss), num_examples(num_examples), metrics(metrics) {}
 
   // Getters
-  float getLoss() { return loss; }
-  int getNum_example() { return num_examples; }
-  std::optional<Metrics> getMetrics() { return metrics; }
+  const float getLoss() const { return loss; }
+  const int getNum_example() const { return num_examples; }
+  const std::optional<Metrics> getMetrics() const { return metrics; }
 
   // Setters
   void setLoss(float f) { loss = f; }
@@ -243,66 +235,19 @@ struct Array {
   std::string dtype;
   std::vector<int32_t> shape;
   std::string stype;
-  std::vector<uint8_t> data; // Using vector<uint8_t> to represent bytes
+  std::string data; // use string to represent bytes
 };
 
 using ParametersRecord = std::map<std::string, Array>;
 using MetricsRecord =
     std::map<std::string,
-             std::variant<int, float, std::vector<int>, std::vector<float>>>;
+             std::variant<int, double, std::vector<int>, std::vector<double>>>;
 
-using ConfigsRecord = std::map<
-    std::string,
-    std::variant<int, float, std::string, std::vector<uint8_t>, bool,
-                 std::vector<int>, std::vector<float>, std::vector<std::string>,
-                 std::vector<std::vector<uint8_t>>, std::vector<bool>>>;
-
-class Metadata {
-public:
-  Metadata(int runId, const std::string &messageId, int srcNodeId,
-           int dstNodeId, const std::string &replyToMessage,
-           const std::string &groupId, const std::string &ttl,
-           const std::string &messageType,
-           std::optional<int> partitionId = std::nullopt)
-      : _runId(runId), _messageId(messageId), _srcNodeId(srcNodeId),
-        _dstNodeId(dstNodeId), _replyToMessage(replyToMessage),
-        _groupId(groupId), _ttl(ttl), _messageType(messageType),
-        _partitionId(partitionId) {}
-
-  int getRunId() const { return _runId; }
-  const std::string &getMessageId() const { return _messageId; }
-  int getSrcNodeId() const { return _srcNodeId; }
-  int getDstNodeId() const { return _dstNodeId; }
-  const std::string &getReplyToMessage() const { return _replyToMessage; }
-  const std::string &getGroupId() const { return _groupId; }
-  const std::string &getTtl() const { return _ttl; }
-  const std::string &getMessageType() const { return _messageType; }
-  std::optional<int> getPartitionId() const { return _partitionId; }
-
-  // Setters if needed
-  void setSrcNodeId(int srcNodeId) { _srcNodeId = srcNodeId; }
-  void setDstNodeId(int dstNodeId) { _dstNodeId = dstNodeId; }
-  void setGroupId(const std::string &groupId) { _groupId = groupId; }
-  void setRunId(const std::string &runId) { _runId = runId; }
-  void setTtl(const std::string &ttl) { _ttl = ttl; }
-  void setMessageType(const std::string &messageType) {
-    _messageType = messageType;
-  }
-  void setPartitionId(std::optional<int> partitionId) {
-    _partitionId = partitionId;
-  }
-
-private:
-  int _runId;
-  std::string _messageId;
-  int _srcNodeId;
-  int _dstNodeId;
-  std::string _replyToMessage;
-  std::string _groupId;
-  std::string _ttl;
-  std::string _messageType;
-  std::optional<int> _partitionId;
-};
+using ConfigsRecord =
+    std::map<std::string,
+             std::variant<int, double, std::string, bool, std::vector<int>,
+                          std::vector<double>, std::vector<std::string>,
+                          std::vector<bool>>>;
 
 class RecordSet {
 public:
@@ -331,28 +276,4 @@ private:
   std::map<std::string, ConfigsRecord> _configsRecords;
 };
 
-class Message {
-public:
-  Message(const Metadata &metadata, const RecordSet &content)
-      : _metadata(metadata), _content(content) {}
-
-  const Metadata &getMetadata() const { return _metadata; }
-  const RecordSet &getContent() const { return _content; }
-
-  void setContent(const RecordSet &content) { _content = content; }
-
-  // Implement createReply similar to the Python version
-  Message createReply(const RecordSet &content, const std::string &ttl) const {
-    Metadata replyMetadata(_metadata.getRunId(), "", _metadata.getDstNodeId(),
-                           _metadata.getSrcNodeId(), _metadata.getMessageId(),
-                           _metadata.getGroupId(), ttl,
-                           _metadata.getMessageType(),
-                           _metadata.getPartitionId());
-    return Message(replyMetadata, content);
-  }
-
-private:
-  Metadata _metadata;
-  RecordSet _content;
-};
 } // namespace flwr_local

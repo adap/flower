@@ -16,6 +16,7 @@
 #define GRPC_RERE_H
 #pragma once
 #include "communicator.h"
+#include "flwr/proto/fleet.grpc.pb.h"
 #include "message_handler.h"
 #include <grpcpp/grpcpp.h>
 

@@ -1,62 +1,52 @@
 #include "message_handler.h"
 #include "flwr/proto/task.pb.h"
 
-std::tuple<flwr::proto::ClientMessage, int>
-_reconnect(flwr::proto::ServerMessage_ReconnectIns reconnect_msg) {
+std::tuple<flwr_local::RecordSet, int>
+_reconnect(flwr::proto::RecordSet proto_recordset) {
+
   // Determine the reason for sending Disconnect message
   flwr::proto::Reason reason = flwr::proto::Reason::ACK;
   int sleep_duration = 0;
-  if (reconnect_msg.seconds() != 0) {
-    reason = flwr::proto::Reason::RECONNECT;
-    sleep_duration = reconnect_msg.seconds();
-  }
 
   // Build Disconnect message
-  flwr::proto::ClientMessage_DisconnectRes disconnect;
-  disconnect.set_reason(reason);
-  flwr::proto::ClientMessage cm;
-  *cm.mutable_disconnect_res() = disconnect;
-
-  return std::make_tuple(cm, sleep_duration);
+  return std::make_tuple(
+      flwr_local::RecordSet({{}}, {{}}, {{"config", {{"reason", reason}}}}),
+      sleep_duration);
 }
 
-flwr::proto::ClientMessage _get_parameters(flwr_local::Client *client) {
-  flwr::proto::ClientMessage cm;
-  *(cm.mutable_get_parameters_res()) =
-      parameters_res_to_proto(client->get_parameters());
-  return cm;
+flwr_local::RecordSet _get_parameters(flwr_local::Client *client) {
+  return recordset_from_get_parameters_res(client->get_parameters());
 }
 
-flwr::proto::ClientMessage _fit(flwr_local::Client *client,
-                                flwr::proto::ServerMessage_FitIns fit_msg) {
-  // Deserialize fit instruction
-  flwr_local::FitIns fit_ins = fit_ins_from_proto(fit_msg);
+flwr_local::RecordSet _fit(flwr_local::Client *client,
+                           flwr::proto::RecordSet proto_recordset) {
+  flwr_local::RecordSet recordset = recordset_from_proto(proto_recordset);
+  flwr_local::FitIns fit_ins = recordset_to_fit_ins(recordset, true);
   // Perform fit
   flwr_local::FitRes fit_res = client->fit(fit_ins);
-  // Serialize fit result
-  flwr::proto::ClientMessage cm;
-  *cm.mutable_fit_res() = fit_res_to_proto(fit_res);
-  return cm;
+
+  flwr_local::RecordSet out_recordset = recordset_from_fit_res(fit_res);
+  return out_recordset;
 }
 
-flwr::proto::ClientMessage
-_evaluate(flwr_local::Client *client,
-          flwr::proto::ServerMessage_EvaluateIns evaluate_msg) {
+flwr_local::RecordSet _evaluate(flwr_local::Client *client,
+                                flwr::proto::RecordSet proto_recordset) {
+  flwr_local::RecordSet recordset = recordset_from_proto(proto_recordset);
+  flwr_local::EvaluateIns evaluate_ins =
+      recordset_to_evaluate_ins(recordset, true);
   // Deserialize evaluate instruction
-  flwr_local::EvaluateIns evaluate_ins = evaluate_ins_from_proto(evaluate_msg);
   // Perform evaluation
   flwr_local::EvaluateRes evaluate_res = client->evaluate(evaluate_ins);
-  // Serialize evaluate result
-  flwr::proto::ClientMessage cm;
-  *cm.mutable_evaluate_res() = evaluate_res_to_proto(evaluate_res);
-  return cm;
+
+  flwr_local::RecordSet out_recordset =
+      recordset_from_evaluate_res(evaluate_res);
+  return out_recordset;
 }
 
-std::tuple<flwr::proto::ClientMessage, int, bool>
-handle(flwr_local::Client *client, flwr::proto::Task task) {
+std::tuple<flwr_local::RecordSet, int, bool> handle(flwr_local::Client *client,
+                                                    flwr::proto::Task task) {
   if (task.task_type() == "") {
-    std::tuple<flwr::proto::ClientMessage, int> rec =
-        _reconnect(task.recordset());
+    std::tuple<flwr_local::RecordSet, int> rec = _reconnect(task.recordset());
     return std::make_tuple(std::get<0>(rec), std::get<1>(rec), false);
   }
   if (task.task_type() == "") {
@@ -73,29 +63,26 @@ handle(flwr_local::Client *client, flwr::proto::Task task) {
 
 std::tuple<flwr::proto::TaskRes, int, bool>
 handle_task(flwr_local::Client *client, const flwr::proto::TaskIns &task_ins) {
+  flwr::proto::Task received_task = task_ins.task();
 
-  flwr::proto::Task task = task_ins.task();
-
-  std::tuple<flwr::proto::ClientMessage, int, bool> legacy_res =
-      handle(client, task);
-  std::unique_ptr<flwr::proto::ClientMessage> client_message =
-      std::make_unique<flwr::proto::ClientMessage>(std::get<0>(legacy_res));
+  std::tuple<flwr_local::RecordSet, int, bool> legacy_res =
+      handle(client, received_task);
 
   flwr::proto::TaskRes task_res;
-  task_res.set_task_id("");
-  task_res.set_group_id("");
-  task_res.set_run_id(0);
+  task_res.set_task_id(task_ins.task_id());
+  task_res.set_group_id(task_ins.group_id());
+  task_res.set_run_id(task_ins.run_id());
 
   std::unique_ptr<flwr::proto::Task> task =
       std::make_unique<flwr::proto::Task>();
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  task->set_allocated_legacy_client_message(
-      client_message.release()); // Ownership transferred to `task`
-#pragma GCC diagnostic pop
+  flwr::proto::RecordSet proto_recordset =
+      recordset_to_proto(std::get<0>(legacy_res));
+
+  task->set_allocated_recordset(&proto_recordset);
 
   task_res.set_allocated_task(task.release());
+
   return std::make_tuple(task_res, std::get<1>(legacy_res),
                          std::get<2>(legacy_res));
 }
