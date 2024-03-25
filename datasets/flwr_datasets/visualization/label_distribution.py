@@ -23,9 +23,9 @@ from metrics import compute_counts
 from partitioner import Partitioner
 import seaborn as sns
 
-sns.set_theme()
+# sns.set_theme()
 
-
+# sns.reset_orig()
 def plot_label_distributions(
         # Flower Datasets' specific parameters
         partitioner: Partitioner,
@@ -36,10 +36,11 @@ def plot_label_distributions(
         # Plotting specific parameters
         ax: matplotlib.axes.Axes = None,
         figsize: Optional[Tuple[int, int]] = None,
-        title: str = "",
+        title: str = "Per Partition Label Distribution",
         colormap=None,
         legend: bool = True,
-        verbose_labels: bool = False,
+        legend_name: Optional[str] = None,
+        verbose_labels: bool = True,
 ):
     """Plot the label distribution of the.
 
@@ -92,55 +93,147 @@ def plot_label_distributions(
     df = pd.DataFrame.from_dict(pid_to_label_absolute_size, orient="index")
     df.index.name = "Partition ID"
 
-    # Perform 'size_unit'-specific operations
+    # Adjust the data based on the size_unit
     if size_unit == "absolute":
-        y_axis_label = "Count"
         pass
     elif size_unit == "percent":
         # Divide by the total sum of samples per partition
         # Multiply by 100 (to get percentages)
         sums = df.sum(axis=1)
         df = df.div(sums, axis=0) * 100.0
-        y_axis_label = "Percent %"
     else:
         raise ValueError(
             f"The size_unit can be only 'absolute' and 'percentage' but given: "
             f"{size_unit}"
         )
 
+    # Transpose the data if the partition_id_axis == "y"
+    if partition_id_axis == "x" and plot_type == "heatmap":
+        df = df.T
+
+    # Figure out label naming
+    xlabel, ylabel = _initialize_xy_labels(plot_type, size_unit, partition_id_axis)
+
+    cbar_title = _initialize_cbar_title(plot_type, size_unit)
+
     if plot_type == "bar":
-        fig, ax = plt.subplots()
-        fig.tight_layout()
-        ax = df.plot(kind="bar", stacked=True, ax=ax)
-        ax.set_ylabel(y_axis_label)
-        if label:
+        fig, ax = plt.subplots(figsize=(6.4, 4.8))
+        if partition_id_axis == "x":
+            kind = "bar"
+        elif partition_id_axis == "y":
+            kind = "barh"
+        else:
+            raise ValueError(
+                f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
+        ax = df.plot(kind=kind, stacked=True, ax=ax, title=title, legend=False)
+        if xlabel:
+            ax.set_xlabel(xlabel)
+        if ylabel:
+            ax.set_ylabel(ylabel)
+        if legend:
             handles, legend = ax.get_legend_handles_labels()
-            legend_names = partition.features["label"].int2str([int(v) for v in legend])
-            _ = ax.legend(
+            if verbose_labels:
+                legend_names = partition.features[label].int2str([int(v) for v in legend])
+            else:
+                legend_names = legend
+            _ = fig.legend(
                 handles[::-1],
                 legend_names[::-1],
                 title="Labels",
-                loc="center right",
+                loc="outside center right",
                 bbox_to_anchor=(1.3, 0.5),
             )
+        # fig.tight_layout()
+        # fig.subplots_adjust()
+
 
     elif plot_type == "heatmap":
         if colormap is None:
             colormap = sns.light_palette("seagreen", as_cmap=True)
-        fig, ax = plt.subplots(figsize=(10, 2))
+        if figsize is None:
+            if partition_id_axis == "x":
+                figsize = (10, 8)
+            elif partition_id_axis == "y":
+                figsize = (2, 10)
+        fig, ax = plt.subplots(figsize=figsize)
+        if size_unit == "absolute":
+            fmt = ",d"
+        elif size_unit == "percent":
+            fmt = "0.2f"
+        else:
+            raise ValueError(
+                f"The size_unit can be only 'absolute' and 'percentage' but given: "
+                f"{size_unit}"
+            )
         sns.heatmap(
             df,
             ax=ax,
             cmap=colormap,
             annot=True,
-            fmt="0.2f",
+            fmt=fmt,
             cbar=legend,
+            cbar_kws={'label': cbar_title}
         )
         # ax.set_xlabel needs to be below the sns.heatmap
-        ax.set_xlabel("Label")
+        if xlabel:
+            ax.set_xlabel(xlabel)
+        if ylabel:
+            ax.set_ylabel(ylabel)
 
+        ax.set_title(title)
     else:
         raise ValueError(
             f"The plot_type must be 'bar' or 'heatmap' but given: {plot_type}"
         )
     return ax, df
+
+
+def _initialize_xy_labels(plot_type, size_unit, partition_id_axis):
+    xlabel = None
+    ylabel = None
+    if plot_type == "bar":
+        xlabel = "Partition ID"
+        if size_unit == "absolute":
+            ylabel = "Count"
+        elif size_unit == "percent":
+            ylabel = "Percent %"
+        else:
+            raise ValueError(
+                f"The size_unit can be only 'absolute' and 'percentage' but given: "
+                f"{size_unit}"
+            )
+    elif plot_type == "heatmap":
+        xlabel = "Partition ID"
+        ylabel = "Label"
+    else:
+        raise ValueError(
+            f"The plot_type must be 'bar' or 'heatmap' but given: {plot_type}"
+        )
+    # Flip the labels if partition_id_axis == "y"
+    if partition_id_axis == "x":
+        pass
+    elif partition_id_axis == "y":
+        temp = xlabel
+        xlabel = ylabel
+        ylabel = temp
+    else:
+        raise ValueError(
+            f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
+    return xlabel, ylabel
+
+
+def _initialize_cbar_title(plot_type, size_unit):
+    cbar_title = None
+    if plot_type == "heatmap":
+        if size_unit == "absolute":
+            cbar_title = "Count"
+        elif size_unit == "percent":
+            cbar_title = "Percent %"
+        else:
+            raise ValueError(
+                f"The size_unit can be only 'absolute' and 'percentage' but given: "
+                f"{size_unit}"
+            )
+    return cbar_title
+
+
