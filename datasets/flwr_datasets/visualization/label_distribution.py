@@ -24,8 +24,12 @@ from partitioner import Partitioner
 import seaborn as sns
 
 # sns.set_theme()
+import numpy as np
 
-# sns.reset_orig()
+sns.reset_orig()
+
+
+
 def plot_label_distributions(
         # Flower Datasets' specific parameters
         partitioner: Partitioner,
@@ -41,6 +45,7 @@ def plot_label_distributions(
         legend: bool = True,
         legend_name: Optional[str] = None,
         verbose_labels: bool = True,
+        **plot_kwargs,
 ):
     """Plot the label distribution of the.
 
@@ -116,16 +121,21 @@ def plot_label_distributions(
 
     cbar_title = _initialize_cbar_title(plot_type, size_unit)
 
+    # figsize = _initialize_figsize()
+
     if plot_type == "bar":
-        fig, ax = plt.subplots(figsize=(6.4, 4.8))
+        # Other good heuristic is log2 (log and log10 seems to produce too narrow plots)
         if partition_id_axis == "x":
             kind = "bar"
+            figsize = (6.4, 4.8)
         elif partition_id_axis == "y":
             kind = "barh"
+            figsize = (6.4, np.sqrt(partitioner.num_partitions))
         else:
             raise ValueError(
                 f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
-        ax = df.plot(kind=kind, stacked=True, ax=ax, title=title, legend=False)
+        fig, ax = plt.subplots(figsize=figsize)
+        ax = df.plot(kind=kind, stacked=True, ax=ax, title=title, legend=False, **plot_kwargs)
         if xlabel:
             ax.set_xlabel(xlabel)
         if ylabel:
@@ -152,9 +162,13 @@ def plot_label_distributions(
             colormap = sns.light_palette("seagreen", as_cmap=True)
         if figsize is None:
             if partition_id_axis == "x":
-                figsize = (10, 8)
+                # The np.sqrt(num_partitions) is too small even for 20 partitions
+                # the numbers start to overlap
+                # 2 is reasonable coef but probably in this case manual adjustement
+                # will be needed
+                figsize = (3*np.sqrt(partitioner.num_partitions), 6.4)
             elif partition_id_axis == "y":
-                figsize = (2, 10)
+                figsize = (6.4, np.sqrt(partitioner.num_partitions))
         fig, ax = plt.subplots(figsize=figsize)
         if size_unit == "absolute":
             fmt = ",d"
@@ -235,5 +249,14 @@ def _initialize_cbar_title(plot_type, size_unit):
                 f"{size_unit}"
             )
     return cbar_title
+
+
+def _initialize_figsize(plot_type, partition_id_axis, num_partitions, num_labels=10):
+    if plot_type == "bar":
+        pass
+    elif plot_type == "heatmap":
+        pass
+    else:
+        raise ValueError("todo:")
 
 
