@@ -300,7 +300,7 @@ class Message:
         message = Message(metadata=self._create_reply_metadata(ttl), error=error)
         return message
 
-    def create_reply(self, content: RecordSet, ttl: float = DEFAULT_TTL) -> Message:
+    def create_reply(self, content: RecordSet, ttl: float | None = None) -> Message:
         """Create a reply to this message with specified content and TTL.
 
         The method generates a new `Message` as a reply to this message.
@@ -311,14 +311,18 @@ class Message:
         ----------
         content : RecordSet
             The content for the reply message.
-        ttl : float
-            Time-to-live for this message in seconds.
+        ttl : Optional[float] (default: None)
+            Time-to-live for this message in seconds. If unset, it will use
+            the `common.DEFAULT_TTL` value.
 
         Returns
         -------
         Message
             A new `Message` instance representing the reply.
         """
+        if ttl is None:
+            ttl = DEFAULT_TTL
+
         return Message(
             metadata=self._create_reply_metadata(ttl),
             content=content,
