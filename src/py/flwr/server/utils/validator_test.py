@@ -15,6 +15,7 @@
 """Validator tests."""
 
 
+import time
 import unittest
 from typing import List, Tuple
 
@@ -98,6 +99,7 @@ def create_task_ins(
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
+            created_at=time.time_ns() / 1e9,
         ),
     )
     return task
@@ -120,6 +122,7 @@ def create_task_res(
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
+            created_at=time.time_ns() / 1e9,
         ),
     )
     return task_res
