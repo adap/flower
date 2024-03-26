@@ -18,6 +18,7 @@
 import os
 import re
 import sqlite3
+import time
 from datetime import datetime
 from logging import DEBUG, ERROR
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
@@ -54,6 +55,7 @@ CREATE TABLE IF NOT EXISTS task_ins(
     consumer_node_id        INTEGER,
     created_at              TEXT,
     delivered_at            TEXT,
+    pushed_at               REAL,
     ttl                     REAL,
     ancestry                TEXT,
     task_type               TEXT,
@@ -74,6 +76,7 @@ CREATE TABLE IF NOT EXISTS task_res(
     consumer_node_id        INTEGER,
     created_at              TEXT,
     delivered_at            TEXT,
+    pushed_at               REAL,
     ttl                     REAL,
     ancestry                TEXT,
     task_type               TEXT,
@@ -188,10 +191,13 @@ class SqliteState(State):
         # Create task_id and created_at
         task_id = uuid4()
         created_at: datetime = now()
+        # Timestamp in seconds with nanosecond resolution
+        pushed_at = time.time_ns() / 1e9
 
         # Store TaskIns
         task_ins.task_id = str(task_id)
         task_ins.task.created_at = created_at.isoformat()
+        task_ins.task.pushed_at = pushed_at
         data = (task_ins_to_dict(task_ins),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
@@ -318,13 +324,16 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Create task_id and created_at
+        # Create task_id
         task_id = uuid4()
         created_at: datetime = now()
+        # Timestamp in seconds with nanosecond resolution
+        pushed_at = time.time_ns() / 1e9
 
         # Store TaskIns
         task_res.task_id = str(task_id)
         task_res.task.created_at = created_at.isoformat()
+        task_res.task.pushed_at = pushed_at
         data = (task_res_to_dict(task_res),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
@@ -540,6 +549,7 @@ def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
         "consumer_node_id": task_msg.task.consumer.node_id,
         "created_at": task_msg.task.created_at,
         "delivered_at": task_msg.task.delivered_at,
+        "pushed_at": task_msg.task.pushed_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
         "task_type": task_msg.task.task_type,
@@ -560,6 +570,7 @@ def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
         "consumer_node_id": task_msg.task.consumer.node_id,
         "created_at": task_msg.task.created_at,
         "delivered_at": task_msg.task.delivered_at,
+        "pushed_at": task_msg.task.pushed_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
         "task_type": task_msg.task.task_type,
@@ -588,6 +599,7 @@ def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
             ),
             created_at=task_dict["created_at"],
             delivered_at=task_dict["delivered_at"],
+            pushed_at=task_dict["pushed_at"],
             ttl=task_dict["ttl"],
             ancestry=task_dict["ancestry"].split(","),
             task_type=task_dict["task_type"],
@@ -617,6 +629,7 @@ def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
             ),
             created_at=task_dict["created_at"],
             delivered_at=task_dict["delivered_at"],
+            pushed_at=task_dict["pushed_at"],
             ttl=task_dict["ttl"],
             ancestry=task_dict["ancestry"].split(","),
             task_type=task_dict["task_type"],

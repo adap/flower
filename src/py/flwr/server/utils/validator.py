@@ -31,13 +31,16 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
     if not tasks_ins_res.HasField("task"):
         validation_errors.append("`task` does not set field `task`")
 
-    # Created/delivered/TTL
+    # Created/delivered/TTL/Pushed
     if tasks_ins_res.task.created_at != "":
         validation_errors.append("`created_at` must be an empty str")
     if tasks_ins_res.task.delivered_at != "":
         validation_errors.append("`delivered_at` must be an empty str")
     if tasks_ins_res.task.ttl <= 0:
         validation_errors.append("`ttl` must be higher than zero")
+    if tasks_ins_res.task.pushed_at != 0.0:
+        # default value of an unset protobuf double is 0.0
+        validation_errors.append("`pushed_at` must be unset")
 
     # TaskIns specific
     if isinstance(tasks_ins_res, TaskIns):
