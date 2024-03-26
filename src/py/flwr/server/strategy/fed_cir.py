@@ -312,21 +312,22 @@ class FedCiR(FedAvg):
                         DEBUG,
                         f"Skipping optimization at step {step} due to negligible loss",
                     )
-            tmp_gen_fig = visualize_plotly_latent_representation(
-                self.gen_model,
-                self.alignment_loader,
-                self.device,
-                use_PCA=False,
-                num_class=self.num_classes,
-            )
-        wandb.log(
-            data={
-                f"final_gen_loss": loss.item(),
-                "client_round": 0,
-                "tmp_gen_latent_space": tmp_gen_fig,
-            },
-            step=0,
-        )
+        #     tmp_gen_fig = visualize_plotly_latent_representation(
+        #         self.gen_model,
+        #         self.alignment_loader,
+        #         self.device,
+        #         use_PCA=False,
+        #         num_class=self.num_classes,
+        #     )
+        # wandb.log(
+        #     data={
+        #         f"final_gen_loss": loss.item(),
+        #         "client_round": 0,
+        #         "tmp_gen_latent_space": tmp_gen_fig,
+        #     },
+        #     step=0,
+        # )
+        print("Pretraining generator")
 
         return ndarrays_to_parameters(
             [val.cpu().numpy() for _, val in self.gen_model.state_dict().items()]
@@ -571,7 +572,7 @@ class FedCiR(FedAvg):
 
         for ep_g in range(self.steps_gen):
             for step, (align_img, _) in enumerate(self.alignment_loader):
-                preds = []
+                loss = []
                 # mu_s = []
                 # logvar_s = []
                 optimizer.zero_grad()
@@ -586,18 +587,21 @@ class FedCiR(FedAvg):
                     )
                     temp_local_models[idx].load_state_dict(state_dict, strict=True)
                     z_g, mu_g, logvar_g = self.gen_model(align_img)
-                    preds.append(temp_local_models[idx].decoder(z_g))
                     # _, mu, logvar = temp_local_models[idx](align_img)
                     # mu_s.append(mu)
                     # logvar_s.append(logvar)
-                loss = vae_loss(
-                    torch.stack(preds).mean(dim=0),
-                    align_img,
-                    mu_g,
-                    logvar_g,
-                    self.lambda_align_g,
-                    False,
-                )
+
+                    loss_ = vae_loss(
+                        temp_local_models[idx].decoder(z_g),
+                        align_img,
+                        mu_g,
+                        logvar_g,
+                        self.lambda_align_g,
+                        False,
+                    )
+                    loss.append(loss_)
+                loss = torch.stack(loss).mean(dim=0)
+
                 # loss = vae_loss_connect(
                 #     torch.stack(preds).mean(dim=0),
                 #     align_img,

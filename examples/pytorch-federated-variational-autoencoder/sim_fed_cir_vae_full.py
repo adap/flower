@@ -128,7 +128,7 @@ class FlowerClient(fl.client.NumPyClient):
         # Return local model and statistics
         return (
             self.get_parameters({}),
-            len(trainloader.dataset),
+            8900,  # len(trainloader.dataset),TODO: change to align_loader
             {
                 "cid": self.cid,
                 "local_loss_term": local_loss_term,
@@ -377,11 +377,11 @@ if __name__ == "__main__":
         "method": "random",
         "metric": {"name": "global_val_loss", "goal": "minimize"},
         "parameters": {
-            "sample_per_class": {"values": [50]},
+            "sample_per_class": {"values": [890]},
             # "lambda_reg": {"min": 0.0, "max": 1.0},
             # "lambda_align_g": {"min": 1e-6, "max": 1e-3},
             "lambda_align_g": {"values": [0.1, 1]},  # kl term for generator
-            "lambda_reg": {"values": [1]},
+            "lambda_reg": {"values": [0.1, 1]},
             "lambda_align": {"values": [0]},
             "lambda_latent_diff": {"values": [0.1, 1]},
             # "lambda_reg_dec": {"values": [0.1, 1, 0]},
@@ -401,4 +401,4 @@ if __name__ == "__main__":
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=1)
+    wandb.agent(sweep_id, function=main, count=2)

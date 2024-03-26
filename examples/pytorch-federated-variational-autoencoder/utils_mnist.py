@@ -137,6 +137,7 @@ def alignment_dataloader(samples_per_class=100, batch_size=8, shuffle=False):
         class_indices = [
             i for i, (img, label) in enumerate(mnist_test) if label == class_label
         ]
+        # print(f"{class_label}:{len(class_indices)}")
         selected_indices = class_indices[:samples_per_class]
         alignment_dataset = Subset(mnist_test, selected_indices)
         alignment_datasets.append(alignment_dataset)
@@ -713,57 +714,55 @@ def train_align_dec_frozen(
     opt2 = torch.optim.Adam(encoder_params, lr=1e-3)
     opt3 = torch.optim.Adam(decorder_params, lr=1e-3)
     for _ in range(epochs):
-        for images, _ in trainloader:
-            for idx, (align_img, y) in enumerate(align_loader):
-                opt1.zero_grad()
-                align_img = align_img.to(device)
-                z_g, mu_g, log_var_g = temp_gen_model(align_img)
-                recon_align_img, mu, log_var = net(align_img)
-                vae_loss1 = vae_loss(recon_align_img, align_img, mu, log_var, beta)
-                loss_ref = vae_loss1
-                vae_loss_g = vae_loss(
-                    net.decoder(z_g), align_img, mu_g, log_var_g, beta
-                )
-                loss_ref += vae_loss_g * lambda_reg
+        # for images, _ in trainloader:
+        for idx, (align_img, _) in enumerate(align_loader):
+            opt1.zero_grad()
+            align_img = align_img.to(device)
+            z_g, mu_g, log_var_g = temp_gen_model(align_img)
+            recon_align_img, mu, log_var = net(align_img)
+            vae_loss1 = vae_loss(recon_align_img, align_img, mu, log_var, beta)
+            loss_ref = vae_loss1
+            vae_loss_g = vae_loss(net.decoder(z_g), align_img, mu_g, log_var_g, beta)
+            loss_ref += vae_loss_g * lambda_reg
 
-                loss_align = 0.5 * (log_var_g - log_var - 1) + (
-                    log_var.exp() + (mu - mu_g).pow(2)
-                ) / (2 * log_var_g.exp())
+            loss_align = 0.5 * (log_var_g - log_var - 1) + (
+                log_var.exp() + (mu - mu_g).pow(2)
+            ) / (2 * log_var_g.exp())
 
-            loss_align_reduced = torch.mean(loss_align.sum(dim=1))
-            print(f"align_step: {idx }")
-            print(f"loss_align_term: {lambda_align * loss_align_reduced}")
+        loss_align_reduced = torch.mean(loss_align.sum(dim=1))
+        print(f"align_step: {idx }")
+        print(f"loss_align_term: {lambda_align * loss_align_reduced}")
 
-            loss_ref += lambda_align * loss_align_reduced
-            loss_ref.backward()
-            opt1.step()
+        loss_ref += lambda_align * loss_align_reduced
+        loss_ref.backward()
+        opt1.step()
 
-            opt2.zero_grad()
-            images = images.to(device)
-            recon_images, mu, logvar = net(images)
-            z = net.sampling(mu, logvar)
-            z_g, _, _ = temp_gen_model(images)
+        # opt2.zero_grad()
+        # images = images.to(device)
+        # recon_images, mu, logvar = net(images)
+        # z = net.sampling(mu, logvar)
+        # z_g, _, _ = temp_gen_model(images)
 
-            vae_loss2 = latent_diff_loss(z, z_g).sum(dim=1).mean()
-            loss_local = vae_loss(recon_images, images, mu, logvar, beta)
-            loss_local += lambda_latent_diff * vae_loss2
+        # vae_loss2 = latent_diff_loss(z, z_g).sum(dim=1).mean()
+        # loss_local = vae_loss(recon_images, images, mu, logvar, beta)
+        # loss_local += lambda_latent_diff * vae_loss2
 
-            loss_local.backward()
-            opt2.step()
+        # loss_local.backward()
+        # opt2.step()
 
-            # opt3.zero_grad()
-            # recon_images, mu, logvar = net(images)
-            # loss_local2 = (
-            #     vae_loss(recon_images, images, mu, logvar, beta) * lambda_reg_dec
-            # )
-            # loss_local2.backward()
-            # opt3.step()
-
+        # opt3.zero_grad()
+        # recon_images, mu, logvar = net(images)
+        # loss_local2 = (
+        #     vae_loss(recon_images, images, mu, logvar, beta) * lambda_reg_dec
+        # )
+        # loss_local2.backward()
+        # opt3.step()
+    #TODO:update for local data
     return (
-        loss_local.item(),
+        0,  # loss_local.item(),
         loss_ref.item(),
         lambda_align * loss_align_reduced.item(),
-        lambda_latent_diff * vae_loss2.item(),
+        0,  # lambda_latent_diff * vae_loss2.item(),
     )
 
 
