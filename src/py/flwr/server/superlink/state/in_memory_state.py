@@ -228,3 +228,7 @@ class InMemoryState(State):
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
+        """Acknowledge a ping received from a node, serving as a heartbeat."""
+        raise NotImplementedError()

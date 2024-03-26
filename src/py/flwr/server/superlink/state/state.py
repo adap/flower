@@ -152,3 +152,26 @@ class State(abc.ABC):
     @abc.abstractmethod
     def create_run(self) -> int:
         """Create one run."""
+
+    @abc.abstractmethod
+    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
+        """Acknowledge a ping received from a node, serving as a heartbeat.
+
+        Parameters
+        ----------
+        server_address : str
+            The IPv4 or IPv6 address of the server. If the Flower
+            server runs on the same machine on port 8080, then `server_address`
+            would be `"[::]:8080"`.
+        node_id : int
+            The `node_id` from which the ping was received.
+        ping_interval : float
+            The interval (in seconds) from the current timestamp within which the next
+            ping from this node must be received. This acts as a hard deadline to ensure
+            an accurate assessment of the node's availability.
+
+        Returns
+        -------
+        is_acknowledged : bool
+            True if the ping is successfully acknowledged; otherwise, False.
+        """

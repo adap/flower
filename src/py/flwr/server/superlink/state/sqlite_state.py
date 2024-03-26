@@ -18,6 +18,7 @@
 import os
 import re
 import sqlite3
+import time
 from datetime import datetime, timedelta
 from logging import DEBUG, ERROR
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
@@ -34,7 +35,12 @@ from .state import State
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
     node_id INTEGER UNIQUE
+    online_until REAL
 );
+"""
+
+SQL_CREATE_INDEX_ONLINE_UNTIL = """
+CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 """
 
 SQL_CREATE_TABLE_RUN = """
@@ -82,7 +88,7 @@ CREATE TABLE IF NOT EXISTS task_res(
 );
 """
 
-DictOrTuple = Union[Tuple[Any], Dict[str, Any]]
+DictOrTuple = Union[Tuple[Any, ...], Dict[str, Any]]
 
 
 class SqliteState(State):
@@ -123,6 +129,7 @@ class SqliteState(State):
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
+        cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
         return res.fetchall()
@@ -499,8 +506,8 @@ class SqliteState(State):
             return set()
 
         # Get nodes
-        query = "SELECT * FROM node;"
-        rows = self.query(query)
+        query = "SELECT node_id FROM node WHERE online_until > ?;"
+        rows = self.query(query, (time.time(),))
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
@@ -518,6 +525,17 @@ class SqliteState(State):
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
+        """Acknowledge a ping received from a node, serving as a heartbeat."""
+        # Update the `online_until` field for the given `node_id`
+        query = "UPDATE node SET online_until = ? WHERE node_id = ?;"
+        try:
+            self.query(query, (time.time() + ping_interval, node_id))
+            return True
+        except sqlite3.IntegrityError:
+            log(ERROR, "`node_id` does not exist.")
+            return False
 
 
 def dict_factory(
