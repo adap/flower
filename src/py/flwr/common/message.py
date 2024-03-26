@@ -293,8 +293,8 @@ class Message:
         ----------
         error : Error
             The error that was encountered.
-        ttl : int
-            Time-to-live for this message.
+        ttl : float
+            Time-to-live for this message in seconds.
         """
         # Create reply with error
         message = Message(metadata=self._create_reply_metadata(ttl), error=error)
@@ -311,8 +311,8 @@ class Message:
         ----------
         content : RecordSet
             The content for the reply message.
-        ttl : int
-            Time-to-live for this message.
+        ttl : float
+            Time-to-live for this message in seconds.
 
         Returns
         -------
