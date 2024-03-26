@@ -18,7 +18,7 @@
 import time
 from typing import Iterable, List, Optional, Tuple
 
-from flwr.common import Message, Metadata, RecordSet
+from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -91,7 +91,7 @@ class Driver:
         message_type: str,
         dst_node_id: int,
         group_id: str,
-        ttl: float,
+        ttl: float = DEFAULT_TTL,
     ) -> Message:
         """Create a new message with specified parameters.
 
@@ -111,7 +111,7 @@ class Driver:
         group_id : str
             The ID of the group to which this message is associated. In some settings,
             this is used as the FL round.
-        ttl : float
+        ttl : float (default: common.DEFAULT_TTL)
             Time-to-live for the round trip of this message, i.e., the time from sending
             this message to receiving a reply. It specifies in seconds the duration for
             which the message and its potential reply are considered valid.
