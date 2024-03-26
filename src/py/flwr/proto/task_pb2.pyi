@@ -30,7 +30,7 @@ class Task(google.protobuf.message.Message):
     def producer(self) -> flwr.proto.node_pb2.Node: ...
     @property
     def consumer(self) -> flwr.proto.node_pb2.Node: ...
-    created_at: typing.Text
+    created_at: builtins.float
     delivered_at: typing.Text
     pushed_at: builtins.float
     ttl: builtins.float
@@ -45,7 +45,7 @@ class Task(google.protobuf.message.Message):
         *,
         producer: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         consumer: typing.Optional[flwr.proto.node_pb2.Node] = ...,
-        created_at: typing.Text = ...,
+        created_at: builtins.float = ...,
         delivered_at: typing.Text = ...,
         pushed_at: builtins.float = ...,
         ttl: builtins.float = ...,

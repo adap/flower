@@ -14,7 +14,7 @@
 # ==============================================================================
 """Message tests."""
 
-
+import time
 from contextlib import ExitStack
 from typing import Any, Callable
 
@@ -62,11 +62,14 @@ def test_message_creation(
         if context:
             stack.enter_context(context)
 
-        _ = Message(
+        message = Message(
             metadata=metadata,
             content=None if content_fn is None else content_fn(maker),
             error=None if error_fn is None else error_fn(0),
         )
+
+        assert message.metadata.created_at > 0
+        assert message.metadata.created_at < time.time_ns() / 1e9
 
 
 def create_message_with_content() -> Message:

@@ -25,7 +25,7 @@ import "flwr/proto/error.proto";
 message Task {
   Node producer = 1;
   Node consumer = 2;
-  string created_at = 3;
+  double created_at = 3;
   string delivered_at = 4;
   double pushed_at = 5;
   double ttl = 6;
