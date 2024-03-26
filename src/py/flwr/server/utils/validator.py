@@ -36,8 +36,8 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         validation_errors.append("`created_at` must be an empty str")
     if tasks_ins_res.task.delivered_at != "":
         validation_errors.append("`delivered_at` must be an empty str")
-    if tasks_ins_res.task.ttl != "":
-        validation_errors.append("`ttl` must be an empty str")
+    if tasks_ins_res.task.ttl <= 0:
+        validation_errors.append("`ttl` must be higher than zero")
 
     # TaskIns specific
     if isinstance(tasks_ins_res, TaskIns):
@@ -66,8 +66,11 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         # Content check
         if tasks_ins_res.task.task_type == "":
             validation_errors.append("`task_type` MUST be set")
-        if not tasks_ins_res.task.HasField("recordset"):
-            validation_errors.append("`recordset` MUST be set")
+        if not (
+            tasks_ins_res.task.HasField("recordset")
+            ^ tasks_ins_res.task.HasField("error")
+        ):
+            validation_errors.append("Either `recordset` or `error` MUST be set")
 
         # Ancestors
         if len(tasks_ins_res.task.ancestry) != 0:
@@ -106,8 +109,11 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         # Content check
         if tasks_ins_res.task.task_type == "":
             validation_errors.append("`task_type` MUST be set")
-        if not tasks_ins_res.task.HasField("recordset"):
-            validation_errors.append("`recordset` MUST be set")
+        if not (
+            tasks_ins_res.task.HasField("recordset")
+            ^ tasks_ins_res.task.HasField("error")
+        ):
+            validation_errors.append("Either `recordset` or `error` MUST be set")
 
         # Ancestors
         if len(tasks_ins_res.task.ancestry) == 0:

@@ -81,7 +81,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
         reason = cast(int, disconnect_msg.disconnect_res.reason)
         recordset = RecordSet()
         recordset.configs_records["config"] = ConfigsRecord({"reason": reason})
-        out_message = message.create_reply(recordset, ttl="")
+        out_message = message.create_reply(recordset)
         # Return TaskRes and sleep duration
         return out_message, sleep_duration
 
@@ -143,7 +143,7 @@ def handle_legacy_message_from_msgtype(
         raise ValueError(f"Invalid message type: {message_type}")
 
     # Return Message
-    return message.create_reply(out_recordset, ttl="")
+    return message.create_reply(out_recordset)
 
 
 def _reconnect(

@@ -31,7 +31,7 @@ class Task(google.protobuf.message.Message):
     def consumer(self) -> flwr.proto.node_pb2.Node: ...
     created_at: typing.Text
     delivered_at: typing.Text
-    ttl: typing.Text
+    ttl: builtins.float
     @property
     def ancestry(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     task_type: typing.Text
@@ -45,7 +45,7 @@ class Task(google.protobuf.message.Message):
         consumer: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         created_at: typing.Text = ...,
         delivered_at: typing.Text = ...,
-        ttl: typing.Text = ...,
+        ttl: builtins.float = ...,
         ancestry: typing.Optional[typing.Iterable[typing.Text]] = ...,
         task_type: typing.Text = ...,
         recordset: typing.Optional[flwr.proto.recordset_pb2.RecordSet] = ...,
