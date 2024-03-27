@@ -18,6 +18,7 @@
 #include <optional>
 #include <string>
 #include <variant>
+#include <vector>
 
 namespace flwr_local {
 /**
