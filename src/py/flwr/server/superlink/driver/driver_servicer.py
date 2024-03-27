@@ -15,6 +15,7 @@
 """Driver API servicer."""
 
 
+import time
 from logging import DEBUG, INFO
 from typing import List, Optional, Set
 from uuid import UUID
@@ -71,6 +72,11 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     ) -> PushTaskInsResponse:
         """Push a set of TaskIns."""
         log(DEBUG, "DriverServicer.PushTaskIns")
+
+        # Set pushed_at (timestamp in seconds)
+        pushed_at = time.time()
+        for task_ins in request.task_ins_list:
+            task_ins.task.pushed_at = pushed_at
 
         # Validate request
         _raise_if(len(request.task_ins_list) == 0, "`task_ins_list` must not be empty")

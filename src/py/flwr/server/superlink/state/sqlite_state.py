@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS task_ins(
     consumer_node_id        INTEGER,
     created_at              TEXT,
     delivered_at            TEXT,
+    pushed_at               REAL,
     ttl                     REAL,
     ancestry                TEXT,
     task_type               TEXT,
@@ -74,6 +75,7 @@ CREATE TABLE IF NOT EXISTS task_res(
     consumer_node_id        INTEGER,
     created_at              TEXT,
     delivered_at            TEXT,
+    pushed_at               REAL,
     ttl                     REAL,
     ancestry                TEXT,
     task_type               TEXT,
@@ -318,7 +320,7 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Create task_id and created_at
+        # Create task_id
         task_id = uuid4()
         created_at: datetime = now()
 
@@ -540,6 +542,7 @@ def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
         "consumer_node_id": task_msg.task.consumer.node_id,
         "created_at": task_msg.task.created_at,
         "delivered_at": task_msg.task.delivered_at,
+        "pushed_at": task_msg.task.pushed_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
         "task_type": task_msg.task.task_type,
@@ -560,6 +563,7 @@ def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
         "consumer_node_id": task_msg.task.consumer.node_id,
         "created_at": task_msg.task.created_at,
         "delivered_at": task_msg.task.delivered_at,
+        "pushed_at": task_msg.task.pushed_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
         "task_type": task_msg.task.task_type,
@@ -588,6 +592,7 @@ def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
             ),
             created_at=task_dict["created_at"],
             delivered_at=task_dict["delivered_at"],
+            pushed_at=task_dict["pushed_at"],
             ttl=task_dict["ttl"],
             ancestry=task_dict["ancestry"].split(","),
             task_type=task_dict["task_type"],
@@ -617,6 +622,7 @@ def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
             ),
             created_at=task_dict["created_at"],
             delivered_at=task_dict["delivered_at"],
+            pushed_at=task_dict["pushed_at"],
             ttl=task_dict["ttl"],
             ancestry=task_dict["ancestry"].split(","),
             task_type=task_dict["task_type"],

@@ -16,6 +16,7 @@
 # pylint: disable=invalid-name, disable=R0904
 
 import tempfile
+import time
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timezone
@@ -420,6 +421,7 @@ def create_task_ins(
             ttl=DEFAULT_TTL,
         ),
     )
+    task.task.pushed_at = time.time()
     return task
 
 
@@ -443,6 +445,7 @@ def create_task_res(
             ttl=DEFAULT_TTL,
         ),
     )
+    task_res.task.pushed_at = time.time()
     return task_res
 
 
