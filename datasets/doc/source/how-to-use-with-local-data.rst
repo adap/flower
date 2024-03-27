@@ -1,8 +1,8 @@
-Use with local data
+Use with Local Data
 ===================
 
-You can partition data from local files and in-memory data by using
-``Flower Datasets`` 's ``Partitioner`` s.
+You can partition data from local files and in-memory data in
+``Flower Datasets`` library using ``Partitioner`` s.
 This guide details how to load and partition your dataset created from:
 
 * local files: CSV, JSON, image, audio data,
@@ -213,3 +213,14 @@ for that, e.g.:
 
   iid_partitioner_for_cifar = IidPartitioner(num_partitions=10)
   iid_partitioner_for_cifar.dataset = cifar_dataset
+
+
+More Resources
+--------------
+If you are looking for more details or you have not found the format you are looking supported please visit the `HuggingFace Datasets docs <https://huggingface.co/docs/datasets/index>`_.
+This guide is based on the following ones:
+
+* `General Information <https://huggingface.co/docs/datasets/en/loading>`_
+* `Tabular Data <https://huggingface.co/docs/datasets/en/tabular_load>`_
+* `Image Data <https://huggingface.co/docs/datasets/en/image_load>`_
+* `Audio Data <https://huggingface.co/docs/datasets/en/audio_load>`_
