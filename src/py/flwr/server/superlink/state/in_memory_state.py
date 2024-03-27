@@ -17,7 +17,6 @@
 
 import os
 import threading
-import time
 from datetime import datetime
 from logging import ERROR
 from typing import Dict, List, Optional, Set
@@ -54,13 +53,10 @@ class InMemoryState(State):
         # Create task_id and created_at
         task_id = uuid4()
         created_at: datetime = now()
-        # Timestamp in seconds with nanosecond resolution
-        pushed_at = time.time_ns() / 1e9
 
         # Store TaskIns
         task_ins.task_id = str(task_id)
         task_ins.task.created_at = created_at.isoformat()
-        task_ins.task.pushed_at = pushed_at
         with self.lock:
             self.task_ins_store[task_id] = task_ins
 
@@ -118,13 +114,10 @@ class InMemoryState(State):
         # Create task_id and created_at
         task_id = uuid4()
         created_at: datetime = now()
-        # Timestamp in seconds with nanosecond resolution
-        pushed_at = time.time_ns() / 1e9
 
         # Store TaskRes
         task_res.task_id = str(task_id)
         task_res.task.created_at = created_at.isoformat()
-        task_res.task.pushed_at = pushed_at
         with self.lock:
             self.task_res_store[task_id] = task_res
 
