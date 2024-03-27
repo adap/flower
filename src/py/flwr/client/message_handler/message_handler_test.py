@@ -15,6 +15,7 @@
 """Client-side message handler tests."""
 
 
+import time
 import unittest
 import uuid
 from copy import copy
@@ -169,7 +170,18 @@ def test_client_without_get_properties() -> None:
     )
 
     assert actual_msg.content == expected_msg.content
-    assert actual_msg.metadata == expected_msg.metadata
+    # metadata.created_at will differ so let's exclude it from checks
+    attrs = actual_msg.metadata.__annotations__
+    attrs_keys = list(attrs.keys())
+    attrs_keys.remove("_created_at")
+    # metadata.created_at will differ so let's exclude it from checks
+    for attr in attrs_keys:
+        assert getattr(actual_msg.metadata, attr) == getattr(
+            expected_msg.metadata, attr
+        )
+
+    # Ensure the message created last has a higher timestamp
+    assert actual_msg.metadata.created_at < expected_msg.metadata.created_at
 
 
 def test_client_with_get_properties() -> None:
@@ -222,7 +234,17 @@ def test_client_with_get_properties() -> None:
     )
 
     assert actual_msg.content == expected_msg.content
-    assert actual_msg.metadata == expected_msg.metadata
+    attrs = actual_msg.metadata.__annotations__
+    attrs_keys = list(attrs.keys())
+    attrs_keys.remove("_created_at")
+    # metadata.created_at will differ so let's exclude it from checks
+    for attr in attrs_keys:
+        assert getattr(actual_msg.metadata, attr) == getattr(
+            expected_msg.metadata, attr
+        )
+
+    # Ensure the message created last has a higher timestamp
+    assert actual_msg.metadata.created_at < expected_msg.metadata.created_at
 
 
 class TestMessageValidation(unittest.TestCase):
@@ -241,6 +263,11 @@ class TestMessageValidation(unittest.TestCase):
             ttl=DEFAULT_TTL,
             message_type="mock",
         )
+        # We need to set created_at in this way
+        # since this `self.in_metadata` is used for tests
+        # without it ever being part of a Message
+        self.in_metadata.created_at = time.time()
+
         self.valid_out_metadata = Metadata(
             run_id=123,
             message_id="",
@@ -281,6 +308,10 @@ class TestMessageValidation(unittest.TestCase):
                 value = 999
             elif isinstance(value, str):
                 value = "999"
+            elif isinstance(value, float):
+                if attr == "_created_at":
+                    # make it be in 1h the past
+                    value = value - 3600
             setattr(invalid_metadata, attr, value)
             # Add to list
             invalid_metadata_list.append(invalid_metadata)

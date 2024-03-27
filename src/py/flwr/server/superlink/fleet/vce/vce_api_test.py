@@ -17,6 +17,7 @@
 
 import asyncio
 import threading
+import time
 from itertools import cycle
 from json import JSONDecodeError
 from math import pi
@@ -113,6 +114,9 @@ def register_messages_into_state(
         )
         # Convert Message to TaskIns
         taskins = message_to_taskins(message)
+        # Normally recorded by the driver servicer
+        # but since we don't have one in this test, we do this manually
+        taskins.task.pushed_at = time.time()
         # Instert in state
         task_id = state.store_task_ins(taskins)
         if task_id:
