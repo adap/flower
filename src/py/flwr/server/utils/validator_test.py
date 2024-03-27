@@ -15,6 +15,7 @@
 """Validator tests."""
 
 
+import time
 import unittest
 from typing import List, Tuple
 
@@ -100,6 +101,8 @@ def create_task_ins(
             ttl=DEFAULT_TTL,
         ),
     )
+
+    task.task.pushed_at = time.time()
     return task
 
 
@@ -122,4 +125,6 @@ def create_task_res(
             ttl=DEFAULT_TTL,
         ),
     )
+
+    task_res.task.pushed_at = time.time()
     return task_res
