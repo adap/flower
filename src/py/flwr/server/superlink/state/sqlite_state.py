@@ -34,8 +34,8 @@ from .state import State
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
-    node_id INTEGER UNIQUE
-    online_until REAL
+    node_id         INTEGER UNIQUE,
+    online_until    REAL
 );
 """
 
@@ -479,9 +479,11 @@ class SqliteState(State):
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-        query = "INSERT INTO node VALUES(:node_id);"
+        query = "INSERT INTO node (node_id, online_until) VALUES (?, ?)"
+
         try:
-            self.query(query, {"node_id": node_id})
+            # Default ping interval is 30s
+            self.query(query, (node_id, 30.0))
         except sqlite3.IntegrityError:
             log(ERROR, "Unexpected node registration failure.")
             return 0
