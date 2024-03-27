@@ -36,7 +36,7 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         tasks_ins_res.task.created_at < 1711497600.0
     ):  # unix timestamp of 27 March 2024 00h:00m:00s UTC
         validation_errors.append(
-            "`created_at` must be float that records the unix timestamp "
+            "`created_at` must be a float that records the unix timestamp "
             "in seconds when the message was created."
         )
     if tasks_ins_res.task.delivered_at != "":
