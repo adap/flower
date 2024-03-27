@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 from typing import List
 from uuid import uuid4
 
+from flwr.common import DEFAULT_TTL
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -73,7 +74,6 @@ class StateTest(unittest.TestCase):
 
         assert task_ins.task.created_at == ""  # pylint: disable=no-member
         assert task_ins.task.delivered_at == ""  # pylint: disable=no-member
-        assert task_ins.task.ttl == ""  # pylint: disable=no-member
 
         # Execute
         state.store_task_ins(task_ins=task_ins)
@@ -91,7 +91,6 @@ class StateTest(unittest.TestCase):
 
         assert actual_task.created_at != ""
         assert actual_task.delivered_at != ""
-        assert actual_task.ttl != ""
 
         assert datetime.fromisoformat(actual_task.created_at) > datetime(
             2020, 1, 1, tzinfo=timezone.utc
@@ -99,9 +98,7 @@ class StateTest(unittest.TestCase):
         assert datetime.fromisoformat(actual_task.delivered_at) > datetime(
             2020, 1, 1, tzinfo=timezone.utc
         )
-        assert datetime.fromisoformat(actual_task.ttl) > datetime(
-            2020, 1, 1, tzinfo=timezone.utc
-        )
+        assert actual_task.ttl > 0
 
     def test_store_and_delete_tasks(self) -> None:
         """Test delete_tasks."""
@@ -420,6 +417,7 @@ def create_task_ins(
             consumer=consumer,
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            ttl=DEFAULT_TTL,
         ),
     )
     return task
@@ -442,6 +440,7 @@ def create_task_res(
             ancestry=ancestry,
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            ttl=DEFAULT_TTL,
         ),
     )
     return task_res

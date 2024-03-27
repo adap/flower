@@ -1,6 +1,6 @@
 # Flower Example using PyTorch
 
-This introductory example to Flower uses PyTorch, but deep knowledge of PyTorch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.dev/docs/datasets/) to download, partition and preprocess the CIFAR-10 dataset.
+This introductory example to Flower uses PyTorch, but deep knowledge of PyTorch is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the CIFAR-10 dataset.
 
 ## Project Setup
 
@@ -55,20 +55,20 @@ Afterwards you are ready to start the Flower server as well as the clients. You 
 python3 server.py
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. We need to specify the node id to
+Now you are ready to start the Flower clients which will participate in the learning. We need to specify the partition id to
 use different partitions of the data on different nodes.  To do so simply open two more terminal windows and run the
 following commands.
 
 Start client 1 in the first terminal:
 
 ```shell
-python3 client.py --node-id 0
+python3 client.py --partition-id 0
 ```
 
 Start client 2 in the second terminal:
 
 ```shell
-python3 client.py --node-id 1
+python3 client.py --partition-id 1
 ```
 
 You will see that PyTorch is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) for a detailed explanation.

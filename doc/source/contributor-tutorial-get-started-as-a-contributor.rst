@@ -11,7 +11,7 @@ Prerequisites
 
 Flower uses :code:`pyproject.toml` to manage dependencies and configure
 development tools (the ones which support it). Poetry is a build tool which
-supports `PEP 517 <https://www.python.org/dev/peps/pep-0517/>`_.
+supports `PEP 517 <https://peps.python.org/pep-0517/>`_.
 
 
 Developer Machine Setup
@@ -27,7 +27,7 @@ For macOS
 * Install `homebrew <https://brew.sh/>`_. Don't forget the post-installation actions to add `brew` to your PATH.
 * Install `xz` (to install different Python versions) and `pandoc` to build the
   docs::
-    
+
   $ brew install xz pandoc
 
 For Ubuntu
@@ -54,7 +54,7 @@ GitHub::
 * If you don't have :code:`pyenv` installed, the following script that will install it, set it up, and create the virtual environment (with :code:`Python 3.8.17` by default)::
 
   $ ./dev/setup-defaults.sh <version> # once completed, run the bootstrap script
-  
+
 * If you already have :code:`pyenv` installed (along with the :code:`pyenv-virtualenv` plugin), you can use the following convenience script (with :code:`Python 3.8.17` by default)::
 
   $ ./dev/venv-create.sh <version> # once completed, run the `bootstrap.sh` script
@@ -70,7 +70,7 @@ Convenience Scripts
 
 The Flower repository contains a number of convenience scripts to make
 recurring development tasks easier and less error-prone. See the :code:`/dev`
-subdirectory for a full list. The following scripts are amonst the most
+subdirectory for a full list. The following scripts are amongst the most
 important ones:
 
 Create/Delete Virtual Environment

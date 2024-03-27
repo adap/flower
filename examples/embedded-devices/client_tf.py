@@ -40,8 +40,8 @@ def prepare_dataset(use_mnist: bool):
         fds = FederatedDataset(dataset="cifar10", partitioners={"train": NUM_CLIENTS})
         img_key = "img"
     partitions = []
-    for node_id in range(NUM_CLIENTS):
-        partition = fds.load_partition(node_id, "train")
+    for partition_id in range(NUM_CLIENTS):
+        partition = fds.load_partition(partition_id, "train")
         partition.set_format("numpy")
         # Divide data on each node: 90% train, 10% test
         partition = partition.train_test_split(test_size=0.1)
@@ -51,7 +51,7 @@ def prepare_dataset(use_mnist: bool):
         )
         x_test, y_test = partition["test"][img_key] / 255.0, partition["test"]["label"]
         partitions.append(((x_train, y_train), (x_test, y_test)))
-    data_centralized = fds.load_full("test")
+    data_centralized = fds.load_split("test")
     data_centralized.set_format("numpy")
     x_centralized = data_centralized[img_key] / 255.0
     y_centralized = data_centralized["label"]

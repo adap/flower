@@ -18,7 +18,7 @@
 import os
 import re
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import datetime
 from logging import DEBUG, ERROR
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS task_ins(
     consumer_node_id        INTEGER,
     created_at              TEXT,
     delivered_at            TEXT,
-    ttl                     TEXT,
+    ttl                     REAL,
     ancestry                TEXT,
     task_type               TEXT,
     recordset               BLOB,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS task_res(
     consumer_node_id        INTEGER,
     created_at              TEXT,
     delivered_at            TEXT,
-    ttl                     TEXT,
+    ttl                     REAL,
     ancestry                TEXT,
     task_type               TEXT,
     recordset               BLOB,
@@ -185,15 +185,13 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Create task_id, created_at and ttl
+        # Create task_id and created_at
         task_id = uuid4()
         created_at: datetime = now()
-        ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskIns
         task_ins.task_id = str(task_id)
         task_ins.task.created_at = created_at.isoformat()
-        task_ins.task.ttl = ttl.isoformat()
         data = (task_ins_to_dict(task_ins),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
@@ -320,15 +318,13 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Create task_id, created_at and ttl
+        # Create task_id and created_at
         task_id = uuid4()
         created_at: datetime = now()
-        ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskIns
         task_res.task_id = str(task_id)
         task_res.task.created_at = created_at.isoformat()
-        task_res.task.ttl = ttl.isoformat()
         data = (task_res_to_dict(task_res),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"

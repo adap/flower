@@ -35,7 +35,7 @@ if centralised_eval:
         dataset="jxie/higgs", partitioners={"train": 20}, resplitter=resplit
     )
     log(INFO, "Loading centralised test set...")
-    test_set = fds.load_full("test")
+    test_set = fds.load_split("test")
     test_set.set_format("numpy")
     test_dmatrix = transform_dataset_to_dmatrix(test_set)
 
@@ -52,9 +52,9 @@ if train_method == "bagging":
         fraction_evaluate=1.0 if not centralised_eval else 0.0,
         on_evaluate_config_fn=eval_config,
         on_fit_config_fn=fit_config,
-        evaluate_metrics_aggregation_fn=evaluate_metrics_aggregation
-        if not centralised_eval
-        else None,
+        evaluate_metrics_aggregation_fn=(
+            evaluate_metrics_aggregation if not centralised_eval else None
+        ),
     )
 else:
     # Cyclic training

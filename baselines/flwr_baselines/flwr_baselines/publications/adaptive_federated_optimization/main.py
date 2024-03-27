@@ -1,6 +1,5 @@
 """Runs AdaptiveFederated Optimization for CIFAR10/100."""
 
-
 from os import chdir
 from pathlib import Path
 
