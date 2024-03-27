@@ -35,7 +35,8 @@ from .state import State
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
     node_id         INTEGER UNIQUE,
-    online_until    REAL
+    online_until    REAL,
+    ping_interval   REAL
 );
 """
 
@@ -475,12 +476,12 @@ class SqliteState(State):
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-        query = "INSERT INTO node (node_id, online_until) VALUES (?, ?)"
+        query = "INSERT INTO node (node_id, online_until, ping_interval) VALUES (?, ?)"
 
         try:
             # Default ping interval is 30s
             # TODO: change 1e9 to 30s  # pylint: disable=W0511
-            self.query(query, (node_id, time.time() + 1e9))
+            self.query(query, (node_id, time.time() + 1e9, 1e9))
         except sqlite3.IntegrityError:
             log(ERROR, "Unexpected node registration failure.")
             return 0
@@ -528,9 +529,9 @@ class SqliteState(State):
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
         # Update the `online_until` field for the given `node_id`
-        query = "UPDATE node SET online_until = ? WHERE node_id = ?;"
+        query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?;"
         try:
-            self.query(query, (time.time() + ping_interval, node_id))
+            self.query(query, (time.time() + ping_interval, ping_interval, node_id))
             return True
         except sqlite3.IntegrityError:
             log(ERROR, "`node_id` does not exist.")
