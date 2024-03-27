@@ -159,10 +159,6 @@ class State(abc.ABC):
 
         Parameters
         ----------
-        server_address : str
-            The IPv4 or IPv6 address of the server. If the Flower
-            server runs on the same machine on port 8080, then `server_address`
-            would be `"[::]:8080"`.
         node_id : int
             The `node_id` from which the ping was received.
         ping_interval : float
