@@ -1,0 +1,6 @@
+---
+name: fedavg
+
+aggregate_fn:
+  function: flwr.server.strategy.aggregate.aggregate
+  parameters: {}
