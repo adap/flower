@@ -194,7 +194,8 @@ class InMemoryState(State):
         with self.lock:
             if node_id not in self.node_ids:
                 # Default ping interval is 30s
-                self.node_ids[node_id] = time.time() + 30
+                # TODO: change 1e9 to 30s  # pylint: disable=W0511
+                self.node_ids[node_id] = time.time() + 1e9
                 return node_id
         log(ERROR, "Unexpected node registration failure.")
         return 0

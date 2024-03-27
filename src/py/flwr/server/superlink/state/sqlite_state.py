@@ -479,7 +479,8 @@ class SqliteState(State):
 
         try:
             # Default ping interval is 30s
-            self.query(query, (node_id, 30.0))
+            # TODO: change 1e9 to 30s  # pylint: disable=W0511
+            self.query(query, (node_id, 1e9))
         except sqlite3.IntegrityError:
             log(ERROR, "Unexpected node registration failure.")
             return 0
