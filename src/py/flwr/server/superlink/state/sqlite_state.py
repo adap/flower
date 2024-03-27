@@ -476,7 +476,9 @@ class SqliteState(State):
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-        query = "INSERT INTO node (node_id, online_until, ping_interval) VALUES (?, ?)"
+        query = (
+            "INSERT INTO node (node_id, online_until, ping_interval) VALUES (?, ?, ?)"
+        )
 
         try:
             # Default ping interval is 30s

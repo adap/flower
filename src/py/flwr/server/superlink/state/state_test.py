@@ -497,7 +497,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 9
+        assert len(result) == 10
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -522,7 +522,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 9
+        assert len(result) == 10
 
 
 if __name__ == "__main__":
