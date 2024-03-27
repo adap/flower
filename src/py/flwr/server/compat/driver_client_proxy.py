@@ -135,7 +135,7 @@ class DriverClientProxy(ClientProxy):
 
         # This would normally be recorded upon common.Message creation
         # but this compatibility stack doesn't create Messages,
-        # so we need to inject `created_at` manually (needed for 
+        # so we need to inject `created_at` manually (needed for
         # taskins validation by server.utils.validator)
         task_ins.task.created_at = time.time()
 
