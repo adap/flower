@@ -15,6 +15,7 @@
 """Driver API servicer."""
 
 
+import time
 from logging import DEBUG, INFO
 from typing import List, Optional, Set
 from uuid import UUID
@@ -84,6 +85,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         # Store each TaskIns
         task_ids: List[Optional[UUID]] = []
         for task_ins in request.task_ins_list:
+            # Set pushed_at (timestamp in seconds)
+            task_ins.task.pushed_at = time.time()
             task_id: Optional[UUID] = state.store_task_ins(task_ins=task_ins)
             task_ids.append(task_id)
 

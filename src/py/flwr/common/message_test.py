@@ -69,7 +69,7 @@ def test_message_creation(
         )
 
         assert message.metadata.created_at > 0
-        assert message.metadata.created_at < time.time_ns() / 1e9
+        assert message.metadata.created_at < time.time()
 
 
 def create_message_with_content() -> Message:

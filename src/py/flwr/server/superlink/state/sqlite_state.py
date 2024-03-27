@@ -18,7 +18,6 @@
 import os
 import re
 import sqlite3
-import time
 from logging import DEBUG, ERROR
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
@@ -189,12 +188,9 @@ class SqliteState(State):
 
         # Create task_id
         task_id = uuid4()
-        # Timestamp in seconds with nanosecond resolution
-        pushed_at = time.time_ns() / 1e9
 
         # Store TaskIns
         task_ins.task_id = str(task_id)
-        task_ins.task.pushed_at = pushed_at
         data = (task_ins_to_dict(task_ins),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
@@ -323,12 +319,9 @@ class SqliteState(State):
 
         # Create task_id
         task_id = uuid4()
-        # Timestamp in seconds with nanosecond resolution
-        pushed_at = time.time_ns() / 1e9
 
         # Store TaskIns
         task_res.task_id = str(task_id)
-        task_res.task.pushed_at = pushed_at
         data = (task_res_to_dict(task_res),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"

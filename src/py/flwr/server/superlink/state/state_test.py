@@ -73,9 +73,7 @@ class StateTest(unittest.TestCase):
             consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
         )
 
-        assert (
-            task_ins.task.created_at < time.time_ns() / 1e9
-        )  # pylint: disable=no-member
+        assert task_ins.task.created_at < time.time()  # pylint: disable=no-member
         assert task_ins.task.delivered_at == ""  # pylint: disable=no-member
 
         # Execute
@@ -418,9 +416,10 @@ def create_task_ins(
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
-            created_at=time.time_ns() / 1e9,
+            created_at=time.time(),
         ),
     )
+    task.task.pushed_at = time.time()
     return task
 
 
@@ -442,9 +441,10 @@ def create_task_res(
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
-            created_at=time.time_ns() / 1e9,
+            created_at=time.time(),
         ),
     )
+    task_res.task.pushed_at = time.time()
     return task_res
 
 

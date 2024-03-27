@@ -266,7 +266,7 @@ class TestMessageValidation(unittest.TestCase):
         # We need to set created_at in this way
         # since this `self.in_metadata` is used for tests
         # without it ever being part of a Message
-        self.in_metadata.created_at = time.time_ns() / 1e9
+        self.in_metadata.created_at = time.time()
 
         self.valid_out_metadata = Metadata(
             run_id=123,

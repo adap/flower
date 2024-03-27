@@ -227,7 +227,7 @@ class Message:
         self._metadata = metadata
 
         # Set message creation timestamp
-        self._metadata.created_at = time.time_ns() / 1e9
+        self._metadata.created_at = time.time()
 
         if not (content is None) ^ (error is None):
             raise ValueError("Either `content` or `error` must be set, but not both.")
