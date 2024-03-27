@@ -23,6 +23,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
+    PingRequest,
+    PingResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -53,6 +55,14 @@ def delete_node(request: DeleteNodeRequest, state: State) -> DeleteNodeResponse:
     # Update state
     state.delete_node(node_id=request.node.node_id)
     return DeleteNodeResponse()
+
+
+def ping(
+    request: PingRequest,  # pylint: disable=unused-argument
+    state: State,  # pylint: disable=unused-argument
+) -> PingResponse:
+    """."""
+    return PingResponse(success=True)
 
 
 def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:

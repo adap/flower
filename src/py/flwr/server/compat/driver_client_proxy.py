@@ -19,7 +19,7 @@ import time
 from typing import List, Optional
 
 from flwr import common
-from flwr.common import MessageType, MessageTypeLegacy, RecordSet
+from flwr.common import DEFAULT_TTL, MessageType, MessageTypeLegacy, RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
 from flwr.proto import driver_pb2, node_pb2, task_pb2  # pylint: disable=E0611
@@ -129,6 +129,7 @@ class DriverClientProxy(ClientProxy):
                 ),
                 task_type=task_type,
                 recordset=serde.recordset_to_proto(recordset),
+                ttl=DEFAULT_TTL,
             ),
         )
         push_task_ins_req = driver_pb2.PushTaskInsRequest(  # pylint: disable=E1101

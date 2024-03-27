@@ -13,6 +13,7 @@ from flwr.common import (
     Message,
     MessageType,
     Metrics,
+    DEFAULT_TTL,
 )
 from flwr.common.recordset_compat import fitins_to_recordset, recordset_to_fitres
 from flwr.server import Driver, History
@@ -89,7 +90,7 @@ def main(driver: Driver, context: Context) -> None:
                 message_type=MessageType.TRAIN,
                 dst_node_id=node_id,
                 group_id=str(server_round),
-                ttl="",
+                ttl=DEFAULT_TTL,
             )
             messages.append(message)
 

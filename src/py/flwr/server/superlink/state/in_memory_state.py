@@ -51,15 +51,13 @@ class InMemoryState(State):
             log(ERROR, "`run_id` is invalid")
             return None
 
-        # Create task_id, created_at and ttl
+        # Create task_id and created_at
         task_id = uuid4()
         created_at: datetime = now()
-        ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskIns
         task_ins.task_id = str(task_id)
         task_ins.task.created_at = created_at.isoformat()
-        task_ins.task.ttl = ttl.isoformat()
         with self.lock:
             self.task_ins_store[task_id] = task_ins
 
@@ -114,15 +112,13 @@ class InMemoryState(State):
             log(ERROR, "`run_id` is invalid")
             return None
 
-        # Create task_id, created_at and ttl
+        # Create task_id and created_at
         task_id = uuid4()
         created_at: datetime = now()
-        ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskRes
         task_res.task_id = str(task_id)
         task_res.task.created_at = created_at.isoformat()
-        task_res.task.ttl = ttl.isoformat()
         with self.lock:
             self.task_res_store[task_id] = task_res
 
