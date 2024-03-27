@@ -669,6 +669,5 @@ def message_from_taskres(taskres: TaskRes) -> Message:
             else None
         ),
     )
-
     message.metadata.created_at = taskres.task.created_at
     return message
