@@ -94,6 +94,7 @@ class StateTest(unittest.TestCase):
 
         assert actual_task.delivered_at != ""
 
+        assert actual_task.created_at < actual_task.pushed_at
         assert datetime.fromisoformat(actual_task.delivered_at) > datetime(
             2020, 1, 1, tzinfo=timezone.utc
         )
