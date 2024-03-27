@@ -20,6 +20,8 @@ from dataclasses import dataclass
 
 from .record import RecordSet
 
+DEFAULT_TTL = 3600
+
 
 @dataclass
 class Metadata:  # pylint: disable=too-many-instance-attributes
@@ -40,8 +42,8 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     group_id : str
         An identifier for grouping messages. In some settings,
         this is used as the FL round.
-    ttl : str
-        Time-to-live for this message.
+    ttl : float
+        Time-to-live for this message in seconds.
     message_type : str
         A string that encodes the action to be executed on
         the receiving end.
@@ -57,7 +59,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     _dst_node_id: int
     _reply_to_message: str
     _group_id: str
-    _ttl: str
+    _ttl: float
     _message_type: str
     _partition_id: int | None
 
@@ -69,7 +71,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         dst_node_id: int,
         reply_to_message: str,
         group_id: str,
-        ttl: str,
+        ttl: float,
         message_type: str,
         partition_id: int | None = None,
     ) -> None:
@@ -124,12 +126,12 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         self._group_id = value
 
     @property
-    def ttl(self) -> str:
+    def ttl(self) -> float:
         """Time-to-live for this message."""
         return self._ttl
 
     @ttl.setter
-    def ttl(self, value: str) -> None:
+    def ttl(self, value: float) -> None:
         """Set ttl."""
         self._ttl = value
 
@@ -266,7 +268,7 @@ class Message:
         """Return True if message has an error, else False."""
         return self._error is not None
 
-    def _create_reply_metadata(self, ttl: str) -> Metadata:
+    def _create_reply_metadata(self, ttl: float) -> Metadata:
         """Construct metadata for a reply message."""
         return Metadata(
             run_id=self.metadata.run_id,
@@ -283,7 +285,7 @@ class Message:
     def create_error_reply(
         self,
         error: Error,
-        ttl: str,
+        ttl: float,
     ) -> Message:
         """Construct a reply message indicating an error happened.
 
@@ -291,14 +293,14 @@ class Message:
         ----------
         error : Error
             The error that was encountered.
-        ttl : str
-            Time-to-live for this message.
+        ttl : float
+            Time-to-live for this message in seconds.
         """
         # Create reply with error
         message = Message(metadata=self._create_reply_metadata(ttl), error=error)
         return message
 
-    def create_reply(self, content: RecordSet, ttl: str) -> Message:
+    def create_reply(self, content: RecordSet, ttl: float | None = None) -> Message:
         """Create a reply to this message with specified content and TTL.
 
         The method generates a new `Message` as a reply to this message.
@@ -309,14 +311,18 @@ class Message:
         ----------
         content : RecordSet
             The content for the reply message.
-        ttl : str
-            Time-to-live for this message.
+        ttl : Optional[float] (default: None)
+            Time-to-live for this message in seconds. If unset, it will use
+            the `common.DEFAULT_TTL` value.
 
         Returns
         -------
         Message
             A new `Message` instance representing the reply.
         """
+        if ttl is None:
+            ttl = DEFAULT_TTL
+
         return Message(
             metadata=self._create_reply_metadata(ttl),
             content=content,
