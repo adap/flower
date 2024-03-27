@@ -18,6 +18,7 @@
 import os
 import re
 import sqlite3
+import time
 from datetime import datetime
 from logging import DEBUG, ERROR
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
@@ -33,8 +34,14 @@ from .state import State
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
-    node_id INTEGER UNIQUE
+    node_id         INTEGER UNIQUE,
+    online_until    REAL,
+    ping_interval   REAL
 );
+"""
+
+SQL_CREATE_INDEX_ONLINE_UNTIL = """
+CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 """
 
 SQL_CREATE_TABLE_RUN = """
@@ -84,7 +91,7 @@ CREATE TABLE IF NOT EXISTS task_res(
 );
 """
 
-DictOrTuple = Union[Tuple[Any], Dict[str, Any]]
+DictOrTuple = Union[Tuple[Any, ...], Dict[str, Any]]
 
 
 class SqliteState(State):
@@ -125,6 +132,7 @@ class SqliteState(State):
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
+        cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
         return res.fetchall()
@@ -470,9 +478,14 @@ class SqliteState(State):
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-        query = "INSERT INTO node VALUES(:node_id);"
+        query = (
+            "INSERT INTO node (node_id, online_until, ping_interval) VALUES (?, ?, ?)"
+        )
+
         try:
-            self.query(query, {"node_id": node_id})
+            # Default ping interval is 30s
+            # TODO: change 1e9 to 30s  # pylint: disable=W0511
+            self.query(query, (node_id, time.time() + 1e9, 1e9))
         except sqlite3.IntegrityError:
             log(ERROR, "Unexpected node registration failure.")
             return 0
@@ -497,8 +510,8 @@ class SqliteState(State):
             return set()
 
         # Get nodes
-        query = "SELECT * FROM node;"
-        rows = self.query(query)
+        query = "SELECT node_id FROM node WHERE online_until > ?;"
+        rows = self.query(query, (time.time(),))
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
@@ -516,6 +529,17 @@ class SqliteState(State):
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
+        """Acknowledge a ping received from a node, serving as a heartbeat."""
+        # Update `online_until` and `ping_interval` for the given `node_id`
+        query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?;"
+        try:
+            self.query(query, (time.time() + ping_interval, ping_interval, node_id))
+            return True
+        except sqlite3.IntegrityError:
+            log(ERROR, "`node_id` does not exist.")
+            return False
 
 
 def dict_factory(

@@ -17,9 +17,10 @@
 
 import os
 import threading
+import time
 from datetime import datetime
 from logging import ERROR
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
@@ -32,7 +33,8 @@ class InMemoryState(State):
     """In-memory State implementation."""
 
     def __init__(self) -> None:
-        self.node_ids: Set[int] = set()
+        # Map node_id to (online_until, ping_interval)
+        self.node_ids: Dict[int, Tuple[float, float]] = {}
         self.run_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
@@ -190,17 +192,21 @@ class InMemoryState(State):
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-        if node_id not in self.node_ids:
-            self.node_ids.add(node_id)
-            return node_id
+        with self.lock:
+            if node_id not in self.node_ids:
+                # Default ping interval is 30s
+                # TODO: change 1e9 to 30s  # pylint: disable=W0511
+                self.node_ids[node_id] = (time.time() + 1e9, 1e9)
+                return node_id
         log(ERROR, "Unexpected node registration failure.")
         return 0
 
     def delete_node(self, node_id: int) -> None:
         """Delete a client node."""
-        if node_id not in self.node_ids:
-            raise ValueError(f"Node {node_id} not found")
-        self.node_ids.remove(node_id)
+        with self.lock:
+            if node_id not in self.node_ids:
+                raise ValueError(f"Node {node_id} not found")
+            del self.node_ids[node_id]
 
     def get_nodes(self, run_id: int) -> Set[int]:
         """Return all available client nodes.
@@ -210,17 +216,32 @@ class InMemoryState(State):
         If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
-        if run_id not in self.run_ids:
-            return set()
-        return self.node_ids
+        with self.lock:
+            if run_id not in self.run_ids:
+                return set()
+            current_time = time.time()
+            return {
+                node_id
+                for node_id, (online_until, _) in self.node_ids.items()
+                if online_until > current_time
+            }
 
     def create_run(self) -> int:
         """Create one run."""
         # Sample a random int64 as run_id
-        run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
+        with self.lock:
+            run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-        if run_id not in self.run_ids:
-            self.run_ids.add(run_id)
-            return run_id
+            if run_id not in self.run_ids:
+                self.run_ids.add(run_id)
+                return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
+        """Acknowledge a ping received from a node, serving as a heartbeat."""
+        with self.lock:
+            if node_id in self.node_ids:
+                self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+                return True
+        return False
