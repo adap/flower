@@ -43,7 +43,7 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         validation_errors.append("`delivered_at` must be an empty str")
     if tasks_ins_res.task.ttl <= 0:
         validation_errors.append("`ttl` must be higher than zero")
-    if tasks_ins_res.task.pushed_at > 1711497600.0:
+    if tasks_ins_res.task.pushed_at < 1711497600.0:
         # unix timestamp of 27 March 2024 00h:00m:00s UTC
         validation_errors.append("`pushed_at` is not a recent timestamp")
 
