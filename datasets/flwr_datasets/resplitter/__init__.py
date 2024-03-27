@@ -15,10 +15,12 @@
 """Resplitter package."""
 
 
+from .divide_resplitter import DivideResplitter
 from .merge_resplitter import MergeResplitter
 from .resplitter import Resplitter
 
 __all__ = [
+    "DivideResplitter",
     "MergeResplitter",
     "Resplitter",
 ]
