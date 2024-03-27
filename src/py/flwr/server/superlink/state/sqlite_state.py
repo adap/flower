@@ -530,7 +530,7 @@ class SqliteState(State):
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
-        # Update the `online_until` field for the given `node_id`
+        # Update `online_until` and `ping_interval` for the given `node_id`
         query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?;"
         try:
             self.query(query, (time.time() + ping_interval, ping_interval, node_id))
