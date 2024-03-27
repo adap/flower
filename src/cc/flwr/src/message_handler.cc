@@ -70,32 +70,6 @@ handle_task(flwr_local::Client *client, const flwr::proto::TaskIns &task_ins) {
   auto conf_records =
       recordset_from_proto(recordset_to_proto(std::get<0>(legacy_res)))
           .getConfigsRecords();
-  for (const auto &[key, value] : conf_records) {
-    std::cout << "initial: " << key << std::endl;
-    for (const auto &[inner_key, inner_value] : conf_records[key]) {
-      std::string print_key = inner_key;
-      std::visit(
-          [&](const auto &v) {
-            using T = std::decay_t<decltype(v)>;
-            if constexpr (std::is_same_v<T, int> || std::is_same_v<T, double> ||
-                          std::is_same_v<T, bool> ||
-                          std::is_same_v<T, std::string>) {
-              std::cout << "Key: " << print_key << ", "
-                        << "value: " << v << std::endl;
-            } else if constexpr (std::is_same_v<T, std::vector<int>> ||
-                                 std::is_same_v<T, std::vector<double>> ||
-                                 std::is_same_v<T, std::vector<bool>> ||
-                                 std::is_same_v<T, std::vector<std::string>>) {
-              std::cout << "Values: ";
-              for (const auto &elem : v) {
-                std::cout << elem << " ";
-              }
-              std::cout << std::endl;
-            }
-          },
-          inner_value);
-    }
-  }
 
   flwr::proto::TaskRes task_res;
   task_res.set_task_id(task_ins.task_id());
