@@ -63,7 +63,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     _ttl: float
     _message_type: str
     _partition_id: int | None
-    _created_at: float  # Unix timestamp (in seconds) to be set upon message creation.
+    _created_at: float  # Unix timestamp (in seconds) to be set upon message creation
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
