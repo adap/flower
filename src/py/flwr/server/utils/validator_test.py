@@ -102,6 +102,8 @@ def create_task_ins(
             created_at=time.time(),
         ),
     )
+
+    task.task.pushed_at = time.time()
     return task
 
 
@@ -125,4 +127,6 @@ def create_task_res(
             created_at=time.time(),
         ),
     )
+
+    task_res.task.pushed_at = time.time()
     return task_res
