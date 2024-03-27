@@ -219,7 +219,7 @@ class RecordMaker:
             src_node_id=self.rng.randint(0, 1 << 63),
             dst_node_id=self.rng.randint(0, 1 << 63),
             reply_to_message=self.get_str(64),
-            ttl=self.get_str(10),
+            ttl=self.rng.randint(1, 1 << 30),
             message_type=self.get_str(10),
         )
 
