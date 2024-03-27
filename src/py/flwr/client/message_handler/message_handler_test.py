@@ -23,6 +23,7 @@ from typing import List
 from flwr.client import Client
 from flwr.client.typing import ClientFn
 from flwr.common import (
+    DEFAULT_TTL,
     Code,
     Context,
     EvaluateIns,
@@ -131,7 +132,7 @@ def test_client_without_get_properties() -> None:
             src_node_id=0,
             dst_node_id=1123,
             reply_to_message="",
-            ttl="",
+            ttl=DEFAULT_TTL,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=recordset,
@@ -161,7 +162,7 @@ def test_client_without_get_properties() -> None:
             src_node_id=1123,
             dst_node_id=0,
             reply_to_message=message.metadata.message_id,
-            ttl="",
+            ttl=DEFAULT_TTL,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=expected_rs,
@@ -184,7 +185,7 @@ def test_client_with_get_properties() -> None:
             src_node_id=0,
             dst_node_id=1123,
             reply_to_message="",
-            ttl="",
+            ttl=DEFAULT_TTL,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=recordset,
@@ -214,7 +215,7 @@ def test_client_with_get_properties() -> None:
             src_node_id=1123,
             dst_node_id=0,
             reply_to_message=message.metadata.message_id,
-            ttl="",
+            ttl=DEFAULT_TTL,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=expected_rs,
@@ -237,7 +238,7 @@ class TestMessageValidation(unittest.TestCase):
             dst_node_id=20,
             reply_to_message="",
             group_id="group1",
-            ttl="60",
+            ttl=DEFAULT_TTL,
             message_type="mock",
         )
         self.valid_out_metadata = Metadata(
@@ -247,7 +248,7 @@ class TestMessageValidation(unittest.TestCase):
             dst_node_id=10,
             reply_to_message="qwerty",
             group_id="group1",
-            ttl="60",
+            ttl=DEFAULT_TTL,
             message_type="mock",
         )
         self.common_content = RecordSet()

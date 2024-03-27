@@ -23,7 +23,7 @@ from flwr import common
 from flwr.client import ClientFn
 from flwr.client.client_app import ClientApp
 from flwr.client.node_state import NodeState
-from flwr.common import Message, Metadata, RecordSet
+from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.logger import log
 from flwr.common.recordset_compat import (
@@ -105,7 +105,7 @@ class RayActorClientProxy(ClientProxy):
                 src_node_id=0,
                 dst_node_id=int(self.cid),
                 reply_to_message="",
-                ttl=str(timeout) if timeout else "",
+                ttl=timeout if timeout else DEFAULT_TTL,
                 message_type=message_type,
                 partition_id=int(self.cid),
             ),

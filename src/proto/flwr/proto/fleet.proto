@@ -23,6 +23,7 @@ import "flwr/proto/task.proto";
 service Fleet {
   rpc CreateNode(CreateNodeRequest) returns (CreateNodeResponse) {}
   rpc DeleteNode(DeleteNodeRequest) returns (DeleteNodeResponse) {}
+  rpc Ping(PingRequest) returns (PingResponse) {}
 
   // Retrieve one or more tasks, if possible
   //
@@ -42,6 +43,10 @@ message CreateNodeResponse { Node node = 1; }
 // DeleteNode messages
 message DeleteNodeRequest { Node node = 1; }
 message DeleteNodeResponse {}
+
+// Ping messages
+message PingRequest { Node node = 1; }
+message PingResponse { bool success = 1; }
 
 // PullTaskIns messages
 message PullTaskInsRequest {

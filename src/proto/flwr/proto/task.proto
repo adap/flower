@@ -27,7 +27,7 @@ message Task {
   Node consumer = 2;
   string created_at = 3;
   string delivered_at = 4;
-  string ttl = 5;
+  double ttl = 5;
   repeated string ancestry = 6;
   string task_type = 7;
   RecordSet recordset = 8;
