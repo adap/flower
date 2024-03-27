@@ -74,7 +74,7 @@ class StateTest(unittest.TestCase):
             consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
         )
 
-        assert task_ins.task.created_at == ""  # pylint: disable=no-member
+        assert task_ins.task.created_at < time.time()  # pylint: disable=no-member
         assert task_ins.task.delivered_at == ""  # pylint: disable=no-member
 
         # Execute
@@ -91,12 +91,9 @@ class StateTest(unittest.TestCase):
 
         actual_task = actual_task_ins.task
 
-        assert actual_task.created_at != ""
         assert actual_task.delivered_at != ""
 
-        assert datetime.fromisoformat(actual_task.created_at) > datetime(
-            2020, 1, 1, tzinfo=timezone.utc
-        )
+        assert actual_task.created_at < actual_task.pushed_at
         assert datetime.fromisoformat(actual_task.delivered_at) > datetime(
             2020, 1, 1, tzinfo=timezone.utc
         )
@@ -439,6 +436,7 @@ def create_task_ins(
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
+            created_at=time.time(),
         ),
     )
     task.task.pushed_at = time.time()
@@ -463,6 +461,7 @@ def create_task_res(
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
+            created_at=time.time(),
         ),
     )
     task_res.task.pushed_at = time.time()

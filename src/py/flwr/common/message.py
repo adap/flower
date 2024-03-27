@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 
 from .record import RecordSet
@@ -62,6 +63,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     _ttl: float
     _message_type: str
     _partition_id: int | None
+    _created_at: float  # Unix timestamp (in seconds) to be set upon message creation
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -124,6 +126,16 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     def group_id(self, value: str) -> None:
         """Set group_id."""
         self._group_id = value
+
+    @property
+    def created_at(self) -> float:
+        """Unix timestamp when the message was created."""
+        return self._created_at
+
+    @created_at.setter
+    def created_at(self, value: float) -> None:
+        """Set creation timestamp for this messages."""
+        self._created_at = value
 
     @property
     def ttl(self) -> float:
@@ -213,6 +225,9 @@ class Message:
         error: Error | None = None,
     ) -> None:
         self._metadata = metadata
+
+        # Set message creation timestamp
+        self._metadata.created_at = time.time()
 
         if not (content is None) ^ (error is None):
             raise ValueError("Either `content` or `error` must be set, but not both.")

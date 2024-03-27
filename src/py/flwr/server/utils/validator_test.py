@@ -99,6 +99,7 @@ def create_task_ins(
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
+            created_at=time.time(),
         ),
     )
 
@@ -123,6 +124,7 @@ def create_task_res(
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
+            created_at=time.time(),
         ),
     )
 
