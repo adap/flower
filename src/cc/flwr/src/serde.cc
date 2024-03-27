@@ -544,8 +544,9 @@ flwr_local::RecordSet recordset_from_fit_res(const flwr_local::FitRes &fitres) {
   if (fitres.getMetrics() != std::nullopt) {
     configs_record["fitres.metrics"] =
         metrics_to_config_record(fitres.getMetrics().value());
+  } else {
+    configs_record["fitres.metrics"] = {};
   }
-
   flwr_local::RecordSet recordset = flwr_local::RecordSet();
 
   recordset.setParametersRecords(parameters_record);
@@ -568,6 +569,8 @@ recordset_from_evaluate_res(const flwr_local::EvaluateRes &evaluate_res) {
   if (evaluate_res.getMetrics() != std::nullopt) {
     configs_record["evaluateres.metrics"] =
         metrics_to_config_record(evaluate_res.getMetrics().value());
+  } else {
+    configs_record["evaluateres.metrics"] = {};
   }
 
   flwr_local::RecordSet recordset = flwr_local::RecordSet();
