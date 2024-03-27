@@ -62,13 +62,14 @@ def test_message_creation(
         if context:
             stack.enter_context(context)
 
+        current_time = time.time()
         message = Message(
             metadata=metadata,
             content=None if content_fn is None else content_fn(maker),
             error=None if error_fn is None else error_fn(0),
         )
 
-        assert message.metadata.created_at > 0
+        assert message.metadata.created_at > current_time
         assert message.metadata.created_at < time.time()
 
 
