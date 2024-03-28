@@ -84,8 +84,6 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         The Driver object to use.
     f_stop : Optional[threading.Event] (default: None)
         A threading event to trigger the stop of the Client Manager thread.
-        If not passed, one will be created and used within the scope of this
-        function.
 
     Returns
     -------
