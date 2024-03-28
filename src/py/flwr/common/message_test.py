@@ -16,7 +16,7 @@
 
 import time
 from contextlib import ExitStack
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 import pytest
 
@@ -73,7 +73,7 @@ def test_message_creation(
         assert message.metadata.created_at < time.time()
 
 
-def create_message_with_content(ttl: float | None = None) -> Message:
+def create_message_with_content(ttl: Optional[float] = None) -> Message:
     """Create a Message with content."""
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
@@ -82,7 +82,7 @@ def create_message_with_content(ttl: float | None = None) -> Message:
     return Message(metadata=metadata, content=RecordSet())
 
 
-def create_message_with_error(ttl: float | None = None) -> Message:
+def create_message_with_error(ttl: Optional[float] = None) -> Message:
     """Create a Message with error."""
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
@@ -132,7 +132,7 @@ def test_create_reply(
         Message,
     ],
     ttl: float,
-    reply_ttl: float | None,
+    reply_ttl: Optional[float],
 ) -> None:
     """Test reply creation from message."""
     message: Message = message_creation_fn(ttl)
