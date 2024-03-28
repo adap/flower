@@ -1,4 +1,4 @@
-PyYAML==5.4
+Cython==0.29.37
 tensorflow==2.14.0
 tensorflow-estimator==2.14.0
 requests[security]
