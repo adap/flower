@@ -502,6 +502,11 @@ def _start_client_internal(
                 except Exception as ex:  # pylint: disable=broad-exception-caught
                     log(ERROR, "ClientApp raised an exception", exc_info=ex)
 
+                    # Legacy grpc-bidi
+                    if transport in ["grpc-bidi", None]:
+                        # Rasie exception, crashes process
+                        raise ex
+
                     # Don't update/change NodeState
 
                     # Create error message
@@ -511,10 +516,9 @@ def _start_client_internal(
                         error=Error(code=0, reason=reason), ttl=message.metadata.ttl
                     )
 
-                finally:
-                    # Send
-                    send(reply_message)
-                    log(INFO, "Sent reply")
+                # Send
+                send(reply_message)
+                log(INFO, "Sent reply")
 
             # Unregister node
             if delete_node is not None:
