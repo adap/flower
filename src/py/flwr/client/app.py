@@ -502,6 +502,11 @@ def _start_client_internal(
                 except Exception as ex:  # pylint: disable=broad-exception-caught
                     log(ERROR, "ClientApp raised an exception", exc_info=ex)
 
+                    # Legacy grpc-bidi
+                    if transport in ["grpc-bidi", None]:
+                        # Raise exception, crash process
+                        raise ex
+
                     # Don't update/change NodeState
 
                     # Create error message
