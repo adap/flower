@@ -64,6 +64,7 @@ class ServerApp:
         self._strategy = strategy
         self._client_manager = client_manager
         self._main: Optional[ServerAppCallable] = None
+        self.f_stop = None
 
     def __call__(self, driver: Driver, context: Context) -> None:
         """Execute `ServerApp`."""
@@ -75,6 +76,7 @@ class ServerApp:
                 strategy=self._strategy,
                 client_manager=self._client_manager,
                 driver=driver,
+                f_stop=self.f_stop,
             )
             return
 

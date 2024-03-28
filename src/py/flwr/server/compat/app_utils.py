@@ -17,7 +17,7 @@
 
 import threading
 import time
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
 
 from ..client_manager import ClientManager
 from ..compat.driver_client_proxy import DriverClientProxy
@@ -27,6 +27,7 @@ from ..driver import Driver
 def start_update_client_manager_thread(
     driver: Driver,
     client_manager: ClientManager,
+    f_stop: Optional[threading.Event] = None,
 ) -> Tuple[threading.Thread, threading.Event]:
     """Periodically update the nodes list in the client manager in a thread.
 
@@ -44,6 +45,10 @@ def start_update_client_manager_thread(
         The Driver object to use.
     client_manager : ClientManager
         The ClientManager object to be updated.
+    f_stop : Optional[threading.Event] (default: None)
+        A threading event to trigger the stop of the Client Manager thread.
+        If not passed, one will be created and used within the scope of this
+        function.
 
     Returns
     -------
@@ -52,7 +57,8 @@ def start_update_client_manager_thread(
     threading.Event
         An event that, when set, signals the thread to stop.
     """
-    f_stop = threading.Event()
+    if f_stop is None:
+        f_stop = threading.Event()
     thread = threading.Thread(
         target=_update_client_manager,
         args=(

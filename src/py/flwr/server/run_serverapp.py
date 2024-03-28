@@ -17,6 +17,7 @@
 
 import argparse
 import sys
+import threading
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Optional
@@ -34,6 +35,7 @@ def run(
     server_app_dir: str,
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
+    f_stop: Optional[threading.Event] = None,
 ) -> None:
     """Run ServerApp with a given Driver."""
     if not (server_app_attr is None) ^ (loaded_server_app is None):
@@ -65,7 +67,11 @@ def run(
     context = Context(state=RecordSet())
 
     # Call ServerApp
-    server_app(driver=driver, context=context)
+    if f_stop and f_stop.is_set():
+        log(INFO, "ServerApp terminated before it launched.")
+    else:
+        server_app.f_stop = f_stop
+        server_app(driver=driver, context=context)
 
     log(DEBUG, "ServerApp finished running.")
 
