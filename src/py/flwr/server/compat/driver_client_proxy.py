@@ -132,6 +132,13 @@ class DriverClientProxy(ClientProxy):
                 ttl=DEFAULT_TTL,
             ),
         )
+
+        # This would normally be recorded upon common.Message creation
+        # but this compatibility stack doesn't create Messages,
+        # so we need to inject `created_at` manually (needed for
+        # taskins validation by server.utils.validator)
+        task_ins.task.created_at = time.time()
+
         push_task_ins_req = driver_pb2.PushTaskInsRequest(  # pylint: disable=E1101
             task_ins_list=[task_ins]
         )
@@ -163,8 +170,24 @@ class DriverClientProxy(ClientProxy):
             )
             if len(task_res_list) == 1:
                 task_res = task_res_list[0]
+
+                # This will raise an Exception if task_res carries an `error`
+                validate_task_res(task_res=task_res)
+
                 return serde.recordset_from_proto(task_res.task.recordset)
 
             if timeout is not None and time.time() > start_time + timeout:
                 raise RuntimeError("Timeout reached")
             time.sleep(SLEEP_TIME)
+
+
+def validate_task_res(
+    task_res: task_pb2.TaskRes,  # pylint: disable=E1101
+) -> None:
+    """Validate if a TaskRes is empty or not."""
+    if not task_res.HasField("task"):
+        raise ValueError("Invalid TaskRes, field `task` missing")
+    if task_res.task.HasField("error"):
+        raise ValueError("Exception during client-side task execution")
+    if not task_res.task.HasField("recordset"):
+        raise ValueError("Invalid TaskRes, both `recordset` and `error` are missing")

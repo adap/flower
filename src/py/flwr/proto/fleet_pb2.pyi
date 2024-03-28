@@ -57,14 +57,17 @@ class PingRequest(google.protobuf.message.Message):
     """Ping messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     NODE_FIELD_NUMBER: builtins.int
+    PING_INTERVAL_FIELD_NUMBER: builtins.int
     @property
     def node(self) -> flwr.proto.node_pb2.Node: ...
+    ping_interval: builtins.float
     def __init__(self,
         *,
         node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
+        ping_interval: builtins.float = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["node",b"node"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node",b"node","ping_interval",b"ping_interval"]) -> None: ...
 global___PingRequest = PingRequest
 
 class PingResponse(google.protobuf.message.Message):

@@ -45,7 +45,10 @@ message DeleteNodeRequest { Node node = 1; }
 message DeleteNodeResponse {}
 
 // Ping messages
-message PingRequest { Node node = 1; }
+message PingRequest {
+  Node node = 1;
+  double ping_interval = 2;
+}
 message PingResponse { bool success = 1; }
 
 // PullTaskIns messages

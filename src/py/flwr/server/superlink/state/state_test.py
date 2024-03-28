@@ -16,10 +16,12 @@
 # pylint: disable=invalid-name, disable=R0904
 
 import tempfile
+import time
 import unittest
 from abc import abstractmethod
 from datetime import datetime, timezone
 from typing import List
+from unittest.mock import patch
 from uuid import uuid4
 
 from flwr.common import DEFAULT_TTL
@@ -72,7 +74,7 @@ class StateTest(unittest.TestCase):
             consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
         )
 
-        assert task_ins.task.created_at == ""  # pylint: disable=no-member
+        assert task_ins.task.created_at < time.time()  # pylint: disable=no-member
         assert task_ins.task.delivered_at == ""  # pylint: disable=no-member
 
         # Execute
@@ -89,12 +91,9 @@ class StateTest(unittest.TestCase):
 
         actual_task = actual_task_ins.task
 
-        assert actual_task.created_at != ""
         assert actual_task.delivered_at != ""
 
-        assert datetime.fromisoformat(actual_task.created_at) > datetime(
-            2020, 1, 1, tzinfo=timezone.utc
-        )
+        assert actual_task.created_at < actual_task.pushed_at
         assert datetime.fromisoformat(actual_task.delivered_at) > datetime(
             2020, 1, 1, tzinfo=timezone.utc
         )
@@ -395,6 +394,25 @@ class StateTest(unittest.TestCase):
         # Assert
         assert num == 2
 
+    def test_acknowledge_ping(self) -> None:
+        """Test if acknowledge_ping works and if get_nodes return online nodes."""
+        # Prepare
+        state: State = self.state_factory()
+        run_id = state.create_run()
+        node_ids = [state.create_node() for _ in range(100)]
+        for node_id in node_ids[:70]:
+            state.acknowledge_ping(node_id, ping_interval=30)
+        for node_id in node_ids[70:]:
+            state.acknowledge_ping(node_id, ping_interval=90)
+
+        # Execute
+        current_time = time.time()
+        with patch("time.time", side_effect=lambda: current_time + 50):
+            actual_node_ids = state.get_nodes(run_id)
+
+        # Assert
+        self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
+
 
 def create_task_ins(
     consumer_node_id: int,
@@ -418,8 +436,10 @@ def create_task_ins(
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
+            created_at=time.time(),
         ),
     )
+    task.task.pushed_at = time.time()
     return task
 
 
@@ -441,8 +461,10 @@ def create_task_res(
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
             ttl=DEFAULT_TTL,
+            created_at=time.time(),
         ),
     )
+    task_res.task.pushed_at = time.time()
     return task_res
 
 
@@ -476,7 +498,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 8
+        assert len(result) == 9
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -501,7 +523,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 8
+        assert len(result) == 9
 
 
 if __name__ == "__main__":
