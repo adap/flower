@@ -119,7 +119,7 @@ There are multiple ways developers can use this:
    - If in a hurry, bypass the hook using ``--no-verify`` with the ``git commit`` command.
      ::
           
-       $ git commit --no-verify -m "My flowery commit"
+       $ git commit --no-verify -m "Add new feature"
     
 2. For developers who prefer not to install the hook permanently, it is possible to execute a one-time check prior to committing changes by using the following command:
    
