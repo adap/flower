@@ -300,7 +300,6 @@ class Message:
     def create_error_reply(
         self,
         error: Error,
-        ttl: float,
     ) -> Message:
         """Construct a reply message indicating an error happened.
 
@@ -311,6 +310,9 @@ class Message:
         ttl : float
             Time-to-live for this message in seconds.
         """
+        # Set TTL equal to the remaining time for the received message to expire
+        ttl = self.metadata.ttl - (time.time() - self.metadata.created_at)
+
         # Create reply with error
         message = Message(metadata=self._create_reply_metadata(ttl), error=error)
         return message
@@ -327,8 +329,11 @@ class Message:
         content : RecordSet
             The content for the reply message.
         ttl : Optional[float] (default: None)
-            Time-to-live for this message in seconds. If unset, it will use
-            the `common.DEFAULT_TTL` value.
+            Time-to-live for this message in seconds. If unset, it will be set based
+            on the remaining time for the received message before it expires. This
+            follows the equation:
+
+            ttl = rec_msg.metadata.ttl - (current_time - rec_msg.metadata.created_at)
 
         Returns
         -------
@@ -336,7 +341,8 @@ class Message:
             A new `Message` instance representing the reply.
         """
         if ttl is None:
-            ttl = DEFAULT_TTL
+            # Set TTL equal to the remaining time for the received message to expire
+            ttl = self.metadata.ttl - (time.time() - self.metadata.created_at)
 
         return Message(
             metadata=self._create_reply_metadata(ttl),

@@ -111,3 +111,40 @@ def test_altering_message(
             message.error = Error(code=123)
         if message.has_error():
             message.content = RecordSet()
+
+
+def test_create_reply() -> None:
+    """Test reply creation from message."""
+    message = create_message_with_content()
+
+    time.sleep(0.1)
+
+    reply_message = message.create_reply(content=RecordSet())
+
+    # Ensure reply has a higher timestamp
+    assert message.metadata.created_at < reply_message.metadata.created_at
+    # Ensure reply ttl is lower (since it uses remaining time left)
+    assert message.metadata.ttl > reply_message.metadata.ttl
+
+    assert message.metadata.src_node_id == reply_message.metadata.dst_node_id
+    assert message.metadata.dst_node_id == reply_message.metadata.src_node_id
+    assert reply_message.metadata.reply_to_message == message.metadata.message_id
+
+
+def test_create_error_reply() -> None:
+    """Test error reply creation from message."""
+    message = create_message_with_content()
+
+    time.sleep(0.1)
+
+    dummy_error = Error(code=0, reason="it crashed")
+    reply_error = message.create_error_reply(dummy_error)
+
+    # Ensure reply has a higher timestamp
+    assert message.metadata.created_at < reply_error.metadata.created_at
+    # Ensure reply ttl is lower (since it uses remaining time left)
+    assert message.metadata.ttl > reply_error.metadata.ttl
+
+    assert message.metadata.src_node_id == reply_error.metadata.dst_node_id
+    assert message.metadata.dst_node_id == reply_error.metadata.src_node_id
+    assert reply_error.metadata.reply_to_message == message.metadata.message_id
