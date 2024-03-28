@@ -2,6 +2,7 @@
 #define COMMUNICATOR_H
 
 #include "flwr/proto/fleet.pb.h"
+#include <chrono>
 #include <optional>
 
 class Communicator {
