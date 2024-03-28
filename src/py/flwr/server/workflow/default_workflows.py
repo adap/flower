@@ -21,7 +21,7 @@ from logging import INFO
 from typing import Optional, cast
 
 import flwr.common.recordset_compat as compat
-from flwr.common import ConfigsRecord, Context, GetParametersIns, log
+from flwr.common import DEFAULT_TTL, ConfigsRecord, Context, GetParametersIns, log
 from flwr.common.constant import MessageType, MessageTypeLegacy
 
 from ..compat.app_utils import start_update_client_manager_thread
@@ -127,7 +127,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
                     message_type=MessageTypeLegacy.GET_PARAMETERS,
                     dst_node_id=random_client.node_id,
                     group_id="0",
-                    ttl="",
+                    ttl=DEFAULT_TTL,
                 )
             ]
         )
@@ -226,7 +226,7 @@ def default_fit_workflow(  # pylint: disable=R0914
             message_type=MessageType.TRAIN,
             dst_node_id=proxy.node_id,
             group_id=str(current_round),
-            ttl="",
+            ttl=DEFAULT_TTL,
         )
         for proxy, fitins in client_instructions
     ]
@@ -306,7 +306,7 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
             message_type=MessageType.EVALUATE,
             dst_node_id=proxy.node_id,
             group_id=str(current_round),
-            ttl="",
+            ttl=DEFAULT_TTL,
         )
         for proxy, evalins in client_instructions
     ]

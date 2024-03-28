@@ -15,9 +15,11 @@
 """Validator tests."""
 
 
+import time
 import unittest
 from typing import List, Tuple
 
+from flwr.common import DEFAULT_TTL
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -96,8 +98,12 @@ def create_task_ins(
             consumer=consumer,
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            ttl=DEFAULT_TTL,
+            created_at=time.time(),
         ),
     )
+
+    task.task.pushed_at = time.time()
     return task
 
 
@@ -117,6 +123,10 @@ def create_task_res(
             ancestry=ancestry,
             task_type="mock",
             recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            ttl=DEFAULT_TTL,
+            created_at=time.time(),
         ),
     )
+
+    task_res.task.pushed_at = time.time()
     return task_res
