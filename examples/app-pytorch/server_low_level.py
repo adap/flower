@@ -3,7 +3,15 @@ import random
 import time
 
 import flwr as fl
-from flwr.common import Context, NDArrays, Message, MessageType, Metrics, RecordSet
+from flwr.common import (
+    Context,
+    NDArrays,
+    Message,
+    MessageType,
+    Metrics,
+    RecordSet,
+    DEFAULT_TTL,
+)
 from flwr.server import Driver
 
 
@@ -30,7 +38,7 @@ def main(driver: Driver, context: Context) -> None:
                 message_type=MessageType.TRAIN,
                 dst_node_id=node_id,
                 group_id=str(server_round),
-                ttl="",
+                ttl=DEFAULT_TTL,
             )
             messages.append(message)
 

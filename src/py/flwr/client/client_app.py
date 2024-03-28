@@ -115,7 +115,7 @@ class ClientApp:
         >>> def train(message: Message, context: Context) -> Message:
         >>>    print("ClientApp training running")
         >>>    # Create and return an echo reply message
-        >>>    return message.create_reply(content=message.content(), ttl="")
+        >>>    return message.create_reply(content=message.content())
         """
 
         def train_decorator(train_fn: ClientAppCallable) -> ClientAppCallable:
@@ -143,7 +143,7 @@ class ClientApp:
         >>> def evaluate(message: Message, context: Context) -> Message:
         >>>    print("ClientApp evaluation running")
         >>>    # Create and return an echo reply message
-        >>>    return message.create_reply(content=message.content(), ttl="")
+        >>>    return message.create_reply(content=message.content())
         """
 
         def evaluate_decorator(evaluate_fn: ClientAppCallable) -> ClientAppCallable:
@@ -171,7 +171,7 @@ class ClientApp:
         >>> def query(message: Message, context: Context) -> Message:
         >>>    print("ClientApp query running")
         >>>    # Create and return an echo reply message
-        >>>    return message.create_reply(content=message.content(), ttl="")
+        >>>    return message.create_reply(content=message.content())
         """
 
         def query_decorator(query_fn: ClientAppCallable) -> ClientAppCallable:
@@ -218,7 +218,7 @@ def _registration_error(fn_name: str) -> ValueError:
         >>>    print("ClientApp {fn_name} running")
         >>>    # Create and return an echo reply message
         >>>    return message.create_reply(
-        >>>        content=message.content(), ttl=""
+        >>>        content=message.content()
         >>>    )
         """,
     )

@@ -23,6 +23,7 @@ from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple, Union, cast
 
 from flwr.common import (
+    DEFAULT_TTL,
     GRPC_MAX_MESSAGE_LENGTH,
     ConfigsRecord,
     Message,
@@ -180,7 +181,7 @@ def grpc_connection(  # pylint: disable=R0915
                 dst_node_id=0,
                 reply_to_message="",
                 group_id="",
-                ttl="",
+                ttl=DEFAULT_TTL,
                 message_type=message_type,
             ),
             content=recordset,
