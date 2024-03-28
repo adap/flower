@@ -62,6 +62,7 @@ PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
 PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
 PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
+PATH_PING: str = "api/v0/fleet/ping"
 
 
 @contextmanager
@@ -157,7 +158,7 @@ def http_request_response(  # pylint: disable=R0914, R0915
 
         # Send the request
         res = requests.post(
-            url=f"{base_url}/{PATH_DELETE_NODE}",
+            url=f"{base_url}/{PATH_PING}",
             headers={
                 "Accept": "application/protobuf",
                 "Content-Type": "application/protobuf",
