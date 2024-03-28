@@ -27,6 +27,7 @@ from typing import Dict, Optional, Set, Tuple
 from unittest import IsolatedAsyncioTestCase
 from uuid import UUID
 
+from flwr.client.client_app import LoadClientAppError
 from flwr.common import (
     DEFAULT_TTL,
     GetPropertiesIns,
@@ -193,7 +194,7 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
         state_factory, nodes_mapping, _ = init_state_factory_nodes_mapping(
             num_nodes=num_nodes, num_messages=num_messages
         )
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(LoadClientAppError):
             start_and_shutdown(
                 client_app_attr="totally_fictitious_app:client",
                 state_factory=state_factory,
