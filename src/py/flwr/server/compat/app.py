@@ -16,6 +16,7 @@
 
 
 import sys
+import threading
 from logging import INFO
 from pathlib import Path
 from typing import Optional, Union
@@ -51,6 +52,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     client_manager: Optional[ClientManager] = None,
     root_certificates: Optional[Union[bytes, str]] = None,
     driver: Optional[Driver] = None,
+    f_stop: Optional[threading.Event] = None,
 ) -> History:
     """Start a Flower Driver API server.
 
@@ -80,6 +82,10 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         established to an SSL-enabled Flower server.
     driver : Optional[Driver] (default: None)
         The Driver object to use.
+    f_stop : Optional[threading.Event] (default: None)
+        A threading event to trigger the stop of the Client Manager thread.
+        If not passed, one will be created and used within the scope of this
+        function.
 
     Returns
     -------
@@ -134,7 +140,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
 
     # Start the thread updating nodes
     thread, f_stop = start_update_client_manager_thread(
-        driver, initialized_server.client_manager()
+        driver, initialized_server.client_manager(), f_stop
     )
 
     # Start training

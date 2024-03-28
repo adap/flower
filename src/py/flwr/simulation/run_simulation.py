@@ -126,7 +126,8 @@ def run_serverapp_th(
     server_app: Optional[ServerApp],
     driver: Driver,
     app_dir: str,
-    f_stop: asyncio.Event,
+    af_stop: asyncio.Event,
+    f_stop: threading.Event,
     enable_tf_gpu_growth: bool,
     delay_launch: int = 3,
 ) -> threading.Thread:
@@ -158,12 +159,13 @@ def run_serverapp_th(
 
     serverapp_th = threading.Thread(
         target=server_th_with_start_checks,
-        args=(enable_tf_gpu_growth, f_stop),
+        args=(enable_tf_gpu_growth, af_stop),
         kwargs={
             "server_app_attr": server_app_attr,
             "loaded_server_app": server_app,
             "driver": driver,
             "server_app_dir": app_dir,
+            "f_stop": f_stop,
         },
     )
     sleep(delay_launch)
@@ -200,7 +202,8 @@ def _main_loop(
         certificates=None,
     )
 
-    f_stop = asyncio.Event()
+    af_stop = asyncio.Event()
+    f_stop = threading.Event()
     serverapp_th = None
     try:
         # Initialize Driver
@@ -216,6 +219,7 @@ def _main_loop(
             driver=driver,
             app_dir=app_dir,
             f_stop=f_stop,
+            af_stop=af_stop,
             enable_tf_gpu_growth=enable_tf_gpu_growth,
         )
 
@@ -229,7 +233,7 @@ def _main_loop(
             backend_config_json_stream=backend_config_stream,
             app_dir=app_dir,
             state_factory=state_factory,
-            f_stop=f_stop,
+            f_stop=af_stop,
         )
 
     except Exception as ex:
@@ -241,7 +245,9 @@ def _main_loop(
         # Stop Driver
         driver_server.stop(grace=0)
         driver.close()
-        # Trigger stop event
+        # Trigger async stop event
+        af_stop.set()
+        # Triggering stop event server thread
         f_stop.set()
 
         event(EventType.RUN_SUPERLINK_LEAVE)
