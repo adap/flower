@@ -102,6 +102,33 @@ Run Linters and Tests
 
   $ ./dev/test.sh
 
+Add a pre-commit hook
+~~~~~~~~~~~~~~~~~~~~~
+
+Developers may integrate a pre-commit hook into their workflow utilizing the `pre-commit <https://pre-commit.com/#install>`_ library. The pre-commit hook is configured to execute two primary operations: ``./dev/format.sh`` and ``./dev/test.sh`` scripts.
+
+There are multiple ways developers can use this:
+
+1. Install the pre-commit hook to your local git directory by simply running:
+
+   ::
+      
+      $ pre-commit install
+
+   - Each ``git commit`` will trigger the execution of formatting and linting/test scripts.
+   - If in a hurry, bypass the hook using ``--no-verify`` with the ``git commit`` command.
+     ::
+          
+       $ git commit --no-verify -m "Add new feature"
+    
+2. For developers who prefer not to install the hook permanently, it is possible to execute a one-time check prior to committing changes by using the following command:
+   
+   ::
+
+      $ pre-commit run --all-files
+   
+   This executes the formatting and linting checks/tests on all the files without modifying the default behavior of ``git commit``.
+
 Run Github Actions (CI) locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
