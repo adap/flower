@@ -18,9 +18,8 @@
 import os
 import threading
 import time
-from datetime import datetime
 from logging import ERROR
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
@@ -33,7 +32,8 @@ class InMemoryState(State):
     """In-memory State implementation."""
 
     def __init__(self) -> None:
-        self.node_ids: Dict[int, float] = {}
+        # Map node_id to (online_until, ping_interval)
+        self.node_ids: Dict[int, Tuple[float, float]] = {}
         self.run_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
@@ -51,13 +51,11 @@ class InMemoryState(State):
             log(ERROR, "`run_id` is invalid")
             return None
 
-        # Create task_id and created_at
+        # Create task_id
         task_id = uuid4()
-        created_at: datetime = now()
 
         # Store TaskIns
         task_ins.task_id = str(task_id)
-        task_ins.task.created_at = created_at.isoformat()
         with self.lock:
             self.task_ins_store[task_id] = task_ins
 
@@ -112,13 +110,11 @@ class InMemoryState(State):
             log(ERROR, "`run_id` is invalid")
             return None
 
-        # Create task_id and created_at
+        # Create task_id
         task_id = uuid4()
-        created_at: datetime = now()
 
         # Store TaskRes
         task_res.task_id = str(task_id)
-        task_res.task.created_at = created_at.isoformat()
         with self.lock:
             self.task_res_store[task_id] = task_res
 
@@ -195,7 +191,7 @@ class InMemoryState(State):
             if node_id not in self.node_ids:
                 # Default ping interval is 30s
                 # TODO: change 1e9 to 30s  # pylint: disable=W0511
-                self.node_ids[node_id] = time.time() + 1e9
+                self.node_ids[node_id] = (time.time() + 1e9, 1e9)
                 return node_id
         log(ERROR, "Unexpected node registration failure.")
         return 0
@@ -221,7 +217,7 @@ class InMemoryState(State):
             current_time = time.time()
             return {
                 node_id
-                for node_id, online_until in self.node_ids.items()
+                for node_id, (online_until, _) in self.node_ids.items()
                 if online_until > current_time
             }
 
@@ -241,6 +237,6 @@ class InMemoryState(State):
         """Acknowledge a ping received from a node, serving as a heartbeat."""
         with self.lock:
             if node_id in self.node_ids:
-                self.node_ids[node_id] = time.time() + ping_interval
+                self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
                 return True
         return False
