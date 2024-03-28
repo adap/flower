@@ -172,6 +172,7 @@ def validate_out_message(out_message: Message, in_message_metadata: Metadata) ->
         and out_meta.reply_to_message == in_meta.message_id
         and out_meta.group_id == in_meta.group_id
         and out_meta.message_type == in_meta.message_type
+        and out_meta.created_at > in_meta.created_at
     ):
         return True
     return False

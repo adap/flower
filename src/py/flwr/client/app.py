@@ -485,7 +485,7 @@ def _start_client_internal(
                 # Create an error reply message that will never be used to prevent
                 # the used-before-assignment linting error
                 reply_message = message.create_error_reply(
-                    error=Error(code=0, reason="Unknown"), ttl=message.metadata.ttl
+                    error=Error(code=0, reason="Unknown")
                 )
 
                 # Handle app loading and task message
@@ -508,13 +508,12 @@ def _start_client_internal(
                     # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
                     reason = str(type(ex)) + ":<'" + str(ex) + "'>"
                     reply_message = message.create_error_reply(
-                        error=Error(code=0, reason=reason), ttl=message.metadata.ttl
+                        error=Error(code=0, reason=reason)
                     )
 
-                finally:
-                    # Send
-                    send(reply_message)
-                    log(INFO, "Sent reply")
+                # Send
+                send(reply_message)
+                log(INFO, "Sent reply")
 
             # Unregister node
             if delete_node is not None:

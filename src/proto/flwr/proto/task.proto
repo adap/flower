@@ -25,13 +25,14 @@ import "flwr/proto/error.proto";
 message Task {
   Node producer = 1;
   Node consumer = 2;
-  string created_at = 3;
+  double created_at = 3;
   string delivered_at = 4;
-  double ttl = 5;
-  repeated string ancestry = 6;
-  string task_type = 7;
-  RecordSet recordset = 8;
-  Error error = 9;
+  double pushed_at = 5;
+  double ttl = 6;
+  repeated string ancestry = 7;
+  string task_type = 8;
+  RecordSet recordset = 9;
+  Error error = 10;
 }
 
 message TaskIns {

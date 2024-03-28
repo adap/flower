@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
 
 from .record import RecordSet
@@ -62,6 +63,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     _ttl: float
     _message_type: str
     _partition_id: int | None
+    _created_at: float  # Unix timestamp (in seconds) to be set upon message creation
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -124,6 +126,16 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     def group_id(self, value: str) -> None:
         """Set group_id."""
         self._group_id = value
+
+    @property
+    def created_at(self) -> float:
+        """Unix timestamp when the message was created."""
+        return self._created_at
+
+    @created_at.setter
+    def created_at(self, value: float) -> None:
+        """Set creation timestamp for this messages."""
+        self._created_at = value
 
     @property
     def ttl(self) -> float:
@@ -214,6 +226,9 @@ class Message:
     ) -> None:
         self._metadata = metadata
 
+        # Set message creation timestamp
+        self._metadata.created_at = time.time()
+
         if not (content is None) ^ (error is None):
             raise ValueError("Either `content` or `error` must be set, but not both.")
 
@@ -282,22 +297,33 @@ class Message:
             partition_id=self.metadata.partition_id,
         )
 
-    def create_error_reply(
-        self,
-        error: Error,
-        ttl: float,
-    ) -> Message:
+    def create_error_reply(self, error: Error, ttl: float | None = None) -> Message:
         """Construct a reply message indicating an error happened.
 
         Parameters
         ----------
         error : Error
             The error that was encountered.
-        ttl : float
-            Time-to-live for this message in seconds.
+        ttl : Optional[float] (default: None)
+            Time-to-live for this message in seconds. If unset, it will be set based
+            on the remaining time for the received message before it expires. This
+            follows the equation:
+
+            ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)
         """
+        # If no TTL passed, use default for message creation (will update after
+        # message creation)
+        ttl_ = DEFAULT_TTL if ttl is None else ttl
         # Create reply with error
-        message = Message(metadata=self._create_reply_metadata(ttl), error=error)
+        message = Message(metadata=self._create_reply_metadata(ttl_), error=error)
+
+        if ttl is None:
+            # Set TTL equal to the remaining time for the received message to expire
+            ttl = self.metadata.ttl - (
+                message.metadata.created_at - self.metadata.created_at
+            )
+            message.metadata.ttl = ttl
+
         return message
 
     def create_reply(self, content: RecordSet, ttl: float | None = None) -> Message:
@@ -312,18 +338,31 @@ class Message:
         content : RecordSet
             The content for the reply message.
         ttl : Optional[float] (default: None)
-            Time-to-live for this message in seconds. If unset, it will use
-            the `common.DEFAULT_TTL` value.
+            Time-to-live for this message in seconds. If unset, it will be set based
+            on the remaining time for the received message before it expires. This
+            follows the equation:
+
+            ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)
 
         Returns
         -------
         Message
             A new `Message` instance representing the reply.
         """
-        if ttl is None:
-            ttl = DEFAULT_TTL
+        # If no TTL passed, use default for message creation (will update after
+        # message creation)
+        ttl_ = DEFAULT_TTL if ttl is None else ttl
 
-        return Message(
-            metadata=self._create_reply_metadata(ttl),
+        message = Message(
+            metadata=self._create_reply_metadata(ttl_),
             content=content,
         )
+
+        if ttl is None:
+            # Set TTL equal to the remaining time for the received message to expire
+            ttl = self.metadata.ttl - (
+                message.metadata.created_at - self.metadata.created_at
+            )
+            message.metadata.ttl = ttl
+
+        return message
