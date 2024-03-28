@@ -307,8 +307,6 @@ class Message:
         ----------
         error : Error
             The error that was encountered.
-        ttl : float
-            Time-to-live for this message in seconds.
         """
         # Set TTL equal to the remaining time for the received message to expire
         ttl = self.metadata.ttl - (time.time() - self.metadata.created_at)
