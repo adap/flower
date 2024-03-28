@@ -11,10 +11,10 @@ This guide details how to load and partition your dataset created from:
 
 General Overview
 ----------------
-FederatedDataset is an abstraction that performs all the steps to prepare the dataset for FL experiments: downloading, preprocessing (including resplitting), and partitioning.
+`FederatedDataset <ref-api/flwr_datasets.FederatedDataset.html>`_ is an abstraction that performs all the steps to prepare the dataset for FL experiments: downloading, preprocessing (including resplitting), and partitioning.
 However, the partitioning happens thanks to the ``partitioners`` of type ``str: Partitioner`` (meaning a dictionary mapping the split name of the dataset to the ``Partitioner``).
 
-You can also use ``Partitioner`` s alone without relying on the FederatedDataset (skipping the data download part). A ``Partitioner`` is also not concerned if the data is downloaded from the Hugging Face Hub or created from another source (e.g., loaded locally). The only crucial point is that the dataset you assign to the ``Partitioner`` has to be of the Dataset type (datasets.Dataset).
+You can also use ``Partitioner`` s alone without relying on the ``FederatedDataset`` (skipping the data download part). A ``Partitioner`` is also not concerned if the data is downloaded from the Hugging Face Hub or created from another source (e.g., loaded locally). The only crucial point is that the dataset you assign to the ``Partitioner`` has to be of type `datasets.Dataset <https://huggingface.co/docs/datasets/en/package_reference/main_classes#datasets.Dataset>`_.
 
 The rest of this guide will explain how to create a Dataset from local files and existing (in memory) Python objects.
 
