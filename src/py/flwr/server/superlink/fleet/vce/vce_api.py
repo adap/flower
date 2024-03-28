@@ -15,6 +15,7 @@
 """Fleet Simulation Engine API."""
 
 
+import time
 import asyncio
 import json
 import traceback
@@ -99,13 +100,14 @@ async def worker(
             log(ERROR, traceback.format_exc())
             reason = str(type(ex)) + ":<'" + str(ex) + "'>"
             error = Error(code=0, reason=reason)
-            out_mssg = message.create_error_reply(error=error, ttl=DEFAULT_TTL)
+            out_mssg = message.create_error_reply(error=error)
 
         finally:
             if out_mssg:
                 # Convert to TaskRes
                 task_res = message_to_taskres(out_mssg)
                 # Store TaskRes in state
+                task_res.task.pushed_at = time.time()
                 state.store_task_res(task_res)
 
 
@@ -324,13 +326,23 @@ def start_vce(
 
     app_fn = _load
 
-    asyncio.run(
-        run(
-            app_fn,
-            backend_fn,
-            nodes_mapping,
-            state_factory,
-            node_states,
-            f_stop,
+    try:
+        # Test if ClientApp can be loaded
+        _ = app_fn()
+
+        # Run main simulation loop
+        asyncio.run(
+            run(
+                app_fn,
+                backend_fn,
+                nodes_mapping,
+                state_factory,
+                node_states,
+                f_stop,
+            )
         )
-    )
+    except LoadClientAppError as loadapp_ex:
+        f_stop.set()  # set termination event
+        raise loadapp_ex
+    except Exception as ex:
+        raise ex
