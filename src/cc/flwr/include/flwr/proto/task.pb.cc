@@ -21,14 +21,15 @@ namespace proto {
 constexpr Task::Task(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : ancestry_()
-  , created_at_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , delivered_at_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , ttl_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , task_type_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , producer_(nullptr)
   , consumer_(nullptr)
   , recordset_(nullptr)
-  , error_(nullptr){}
+  , error_(nullptr)
+  , created_at_(0)
+  , pushed_at_(0)
+  , ttl_(0){}
 struct TaskDefaultTypeInternal {
   constexpr TaskDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -85,6 +86,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_flwr_2fproto_2ftask_2eproto::o
   PROTOBUF_FIELD_OFFSET(::flwr::proto::Task, consumer_),
   PROTOBUF_FIELD_OFFSET(::flwr::proto::Task, created_at_),
   PROTOBUF_FIELD_OFFSET(::flwr::proto::Task, delivered_at_),
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::Task, pushed_at_),
   PROTOBUF_FIELD_OFFSET(::flwr::proto::Task, ttl_),
   PROTOBUF_FIELD_OFFSET(::flwr::proto::Task, ancestry_),
   PROTOBUF_FIELD_OFFSET(::flwr::proto::Task, task_type_),
@@ -113,8 +115,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_flwr_2fproto_2ftask_2eproto::o
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::flwr::proto::Task)},
-  { 15, -1, -1, sizeof(::flwr::proto::TaskIns)},
-  { 25, -1, -1, sizeof(::flwr::proto::TaskRes)},
+  { 16, -1, -1, sizeof(::flwr::proto::TaskIns)},
+  { 26, -1, -1, sizeof(::flwr::proto::TaskRes)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -127,18 +129,19 @@ const char descriptor_table_protodef_flwr_2fproto_2ftask_2eproto[] PROTOBUF_SECT
   "\n\025flwr/proto/task.proto\022\nflwr.proto\032\025flw"
   "r/proto/node.proto\032\032flwr/proto/recordset"
   ".proto\032\032flwr/proto/transport.proto\032\026flwr"
-  "/proto/error.proto\"\366\001\n\004Task\022\"\n\010producer\030"
+  "/proto/error.proto\"\211\002\n\004Task\022\"\n\010producer\030"
   "\001 \001(\0132\020.flwr.proto.Node\022\"\n\010consumer\030\002 \001("
-  "\0132\020.flwr.proto.Node\022\022\n\ncreated_at\030\003 \001(\t\022"
-  "\024\n\014delivered_at\030\004 \001(\t\022\013\n\003ttl\030\005 \001(\t\022\020\n\010an"
-  "cestry\030\006 \003(\t\022\021\n\ttask_type\030\007 \001(\t\022(\n\trecor"
-  "dset\030\010 \001(\0132\025.flwr.proto.RecordSet\022 \n\005err"
-  "or\030\t \001(\0132\021.flwr.proto.Error\"\\\n\007TaskIns\022\017"
-  "\n\007task_id\030\001 \001(\t\022\020\n\010group_id\030\002 \001(\t\022\016\n\006run"
-  "_id\030\003 \001(\022\022\036\n\004task\030\004 \001(\0132\020.flwr.proto.Tas"
-  "k\"\\\n\007TaskRes\022\017\n\007task_id\030\001 \001(\t\022\020\n\010group_i"
-  "d\030\002 \001(\t\022\016\n\006run_id\030\003 \001(\022\022\036\n\004task\030\004 \001(\0132\020."
-  "flwr.proto.Taskb\006proto3"
+  "\0132\020.flwr.proto.Node\022\022\n\ncreated_at\030\003 \001(\001\022"
+  "\024\n\014delivered_at\030\004 \001(\t\022\021\n\tpushed_at\030\005 \001(\001"
+  "\022\013\n\003ttl\030\006 \001(\001\022\020\n\010ancestry\030\007 \003(\t\022\021\n\ttask_"
+  "type\030\010 \001(\t\022(\n\trecordset\030\t \001(\0132\025.flwr.pro"
+  "to.RecordSet\022 \n\005error\030\n \001(\0132\021.flwr.proto"
+  ".Error\"\\\n\007TaskIns\022\017\n\007task_id\030\001 \001(\t\022\020\n\010gr"
+  "oup_id\030\002 \001(\t\022\016\n\006run_id\030\003 \001(\022\022\036\n\004task\030\004 \001"
+  "(\0132\020.flwr.proto.Task\"\\\n\007TaskRes\022\017\n\007task_"
+  "id\030\001 \001(\t\022\020\n\010group_id\030\002 \001(\t\022\016\n\006run_id\030\003 \001"
+  "(\022\022\036\n\004task\030\004 \001(\0132\020.flwr.proto.Taskb\006prot"
+  "o3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_flwr_2fproto_2ftask_2eproto_deps[4] = {
   &::descriptor_table_flwr_2fproto_2ferror_2eproto,
@@ -148,7 +151,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_flwr_2fproto_2ftask_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_flwr_2fproto_2ftask_2eproto = {
-  false, false, 583, descriptor_table_protodef_flwr_2fproto_2ftask_2eproto, "flwr/proto/task.proto", 
+  false, false, 602, descriptor_table_protodef_flwr_2fproto_2ftask_2eproto, "flwr/proto/task.proto", 
   &descriptor_table_flwr_2fproto_2ftask_2eproto_once, descriptor_table_flwr_2fproto_2ftask_2eproto_deps, 4, 3,
   schemas, file_default_instances, TableStruct_flwr_2fproto_2ftask_2eproto::offsets,
   file_level_metadata_flwr_2fproto_2ftask_2eproto, file_level_enum_descriptors_flwr_2fproto_2ftask_2eproto, file_level_service_descriptors_flwr_2fproto_2ftask_2eproto,
@@ -226,19 +229,9 @@ Task::Task(const Task& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       ancestry_(from.ancestry_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  created_at_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_created_at().empty()) {
-    created_at_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_created_at(), 
-      GetArenaForAllocation());
-  }
   delivered_at_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_delivered_at().empty()) {
     delivered_at_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_delivered_at(), 
-      GetArenaForAllocation());
-  }
-  ttl_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_ttl().empty()) {
-    ttl_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_ttl(), 
       GetArenaForAllocation());
   }
   task_type_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -266,18 +259,19 @@ Task::Task(const Task& from)
   } else {
     error_ = nullptr;
   }
+  ::memcpy(&created_at_, &from.created_at_,
+    static_cast<size_t>(reinterpret_cast<char*>(&ttl_) -
+    reinterpret_cast<char*>(&created_at_)) + sizeof(ttl_));
   // @@protoc_insertion_point(copy_constructor:flwr.proto.Task)
 }
 
 void Task::SharedCtor() {
-created_at_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 delivered_at_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-ttl_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 task_type_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&producer_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&error_) -
-    reinterpret_cast<char*>(&producer_)) + sizeof(error_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&ttl_) -
+    reinterpret_cast<char*>(&producer_)) + sizeof(ttl_));
 }
 
 Task::~Task() {
@@ -289,9 +283,7 @@ Task::~Task() {
 
 inline void Task::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  created_at_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   delivered_at_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ttl_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   task_type_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (this != internal_default_instance()) delete producer_;
   if (this != internal_default_instance()) delete consumer_;
@@ -316,9 +308,7 @@ void Task::Clear() {
   (void) cached_has_bits;
 
   ancestry_.Clear();
-  created_at_.ClearToEmpty();
   delivered_at_.ClearToEmpty();
-  ttl_.ClearToEmpty();
   task_type_.ClearToEmpty();
   if (GetArenaForAllocation() == nullptr && producer_ != nullptr) {
     delete producer_;
@@ -336,6 +326,9 @@ void Task::Clear() {
     delete error_;
   }
   error_ = nullptr;
+  ::memset(&created_at_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&ttl_) -
+      reinterpret_cast<char*>(&created_at_)) + sizeof(ttl_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -361,13 +354,11 @@ const char* Task::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::inter
         } else
           goto handle_unusual;
         continue;
-      // string created_at = 3;
+      // double created_at = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
-          auto str = _internal_mutable_created_at();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "flwr.proto.Task.created_at"));
-          CHK_(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 25)) {
+          created_at_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
         } else
           goto handle_unusual;
         continue;
@@ -381,19 +372,25 @@ const char* Task::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::inter
         } else
           goto handle_unusual;
         continue;
-      // string ttl = 5;
+      // double pushed_at = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
-          auto str = _internal_mutable_ttl();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "flwr.proto.Task.ttl"));
-          CHK_(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 41)) {
+          pushed_at_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
         } else
           goto handle_unusual;
         continue;
-      // repeated string ancestry = 6;
+      // double ttl = 6;
       case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 50)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 49)) {
+          ttl_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else
+          goto handle_unusual;
+        continue;
+      // repeated string ancestry = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -402,13 +399,13 @@ const char* Task::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::inter
             CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "flwr.proto.Task.ancestry"));
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<50>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<58>(ptr));
         } else
           goto handle_unusual;
         continue;
-      // string task_type = 7;
-      case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
+      // string task_type = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
           auto str = _internal_mutable_task_type();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "flwr.proto.Task.task_type"));
@@ -416,17 +413,17 @@ const char* Task::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::inter
         } else
           goto handle_unusual;
         continue;
-      // .flwr.proto.RecordSet recordset = 8;
-      case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
+      // .flwr.proto.RecordSet recordset = 9;
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
           ptr = ctx->ParseMessage(_internal_mutable_recordset(), ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
-      // .flwr.proto.Error error = 9;
-      case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
+      // .flwr.proto.Error error = 10;
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 82)) {
           ptr = ctx->ParseMessage(_internal_mutable_error(), ptr);
           CHK_(ptr);
         } else
@@ -477,14 +474,10 @@ failure:
         2, _Internal::consumer(this), target, stream);
   }
 
-  // string created_at = 3;
-  if (!this->_internal_created_at().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_created_at().data(), static_cast<int>(this->_internal_created_at().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "flwr.proto.Task.created_at");
-    target = stream->WriteStringMaybeAliased(
-        3, this->_internal_created_at(), target);
+  // double created_at = 3;
+  if (!(this->_internal_created_at() <= 0 && this->_internal_created_at() >= 0)) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(3, this->_internal_created_at(), target);
   }
 
   // string delivered_at = 4;
@@ -497,50 +490,52 @@ failure:
         4, this->_internal_delivered_at(), target);
   }
 
-  // string ttl = 5;
-  if (!this->_internal_ttl().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_ttl().data(), static_cast<int>(this->_internal_ttl().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "flwr.proto.Task.ttl");
-    target = stream->WriteStringMaybeAliased(
-        5, this->_internal_ttl(), target);
+  // double pushed_at = 5;
+  if (!(this->_internal_pushed_at() <= 0 && this->_internal_pushed_at() >= 0)) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(5, this->_internal_pushed_at(), target);
   }
 
-  // repeated string ancestry = 6;
+  // double ttl = 6;
+  if (!(this->_internal_ttl() <= 0 && this->_internal_ttl() >= 0)) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(6, this->_internal_ttl(), target);
+  }
+
+  // repeated string ancestry = 7;
   for (int i = 0, n = this->_internal_ancestry_size(); i < n; i++) {
     const auto& s = this->_internal_ancestry(i);
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       s.data(), static_cast<int>(s.length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "flwr.proto.Task.ancestry");
-    target = stream->WriteString(6, s, target);
+    target = stream->WriteString(7, s, target);
   }
 
-  // string task_type = 7;
+  // string task_type = 8;
   if (!this->_internal_task_type().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_task_type().data(), static_cast<int>(this->_internal_task_type().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "flwr.proto.Task.task_type");
     target = stream->WriteStringMaybeAliased(
-        7, this->_internal_task_type(), target);
+        8, this->_internal_task_type(), target);
   }
 
-  // .flwr.proto.RecordSet recordset = 8;
+  // .flwr.proto.RecordSet recordset = 9;
   if (this->_internal_has_recordset()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        8, _Internal::recordset(this), target, stream);
+        9, _Internal::recordset(this), target, stream);
   }
 
-  // .flwr.proto.Error error = 9;
+  // .flwr.proto.Error error = 10;
   if (this->_internal_has_error()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        9, _Internal::error(this), target, stream);
+        10, _Internal::error(this), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -559,19 +554,12 @@ size_t Task::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated string ancestry = 6;
+  // repeated string ancestry = 7;
   total_size += 1 *
       ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(ancestry_.size());
   for (int i = 0, n = ancestry_.size(); i < n; i++) {
     total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
       ancestry_.Get(i));
-  }
-
-  // string created_at = 3;
-  if (!this->_internal_created_at().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_created_at());
   }
 
   // string delivered_at = 4;
@@ -581,14 +569,7 @@ size_t Task::ByteSizeLong() const {
         this->_internal_delivered_at());
   }
 
-  // string ttl = 5;
-  if (!this->_internal_ttl().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_ttl());
-  }
-
-  // string task_type = 7;
+  // string task_type = 8;
   if (!this->_internal_task_type().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
@@ -609,18 +590,33 @@ size_t Task::ByteSizeLong() const {
         *consumer_);
   }
 
-  // .flwr.proto.RecordSet recordset = 8;
+  // .flwr.proto.RecordSet recordset = 9;
   if (this->_internal_has_recordset()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *recordset_);
   }
 
-  // .flwr.proto.Error error = 9;
+  // .flwr.proto.Error error = 10;
   if (this->_internal_has_error()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *error_);
+  }
+
+  // double created_at = 3;
+  if (!(this->_internal_created_at() <= 0 && this->_internal_created_at() >= 0)) {
+    total_size += 1 + 8;
+  }
+
+  // double pushed_at = 5;
+  if (!(this->_internal_pushed_at() <= 0 && this->_internal_pushed_at() >= 0)) {
+    total_size += 1 + 8;
+  }
+
+  // double ttl = 6;
+  if (!(this->_internal_ttl() <= 0 && this->_internal_ttl() >= 0)) {
+    total_size += 1 + 8;
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
@@ -646,14 +642,8 @@ void Task::MergeFrom(const Task& from) {
   (void) cached_has_bits;
 
   ancestry_.MergeFrom(from.ancestry_);
-  if (!from._internal_created_at().empty()) {
-    _internal_set_created_at(from._internal_created_at());
-  }
   if (!from._internal_delivered_at().empty()) {
     _internal_set_delivered_at(from._internal_delivered_at());
-  }
-  if (!from._internal_ttl().empty()) {
-    _internal_set_ttl(from._internal_ttl());
   }
   if (!from._internal_task_type().empty()) {
     _internal_set_task_type(from._internal_task_type());
@@ -669,6 +659,15 @@ void Task::MergeFrom(const Task& from) {
   }
   if (from._internal_has_error()) {
     _internal_mutable_error()->::flwr::proto::Error::MergeFrom(from._internal_error());
+  }
+  if (!(from._internal_created_at() <= 0 && from._internal_created_at() >= 0)) {
+    _internal_set_created_at(from._internal_created_at());
+  }
+  if (!(from._internal_pushed_at() <= 0 && from._internal_pushed_at() >= 0)) {
+    _internal_set_pushed_at(from._internal_pushed_at());
+  }
+  if (!(from._internal_ttl() <= 0 && from._internal_ttl() >= 0)) {
+    _internal_set_ttl(from._internal_ttl());
   }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -692,18 +691,8 @@ void Task::InternalSwap(Task* other) {
   ancestry_.InternalSwap(&other->ancestry_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      &created_at_, lhs_arena,
-      &other->created_at_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       &delivered_at_, lhs_arena,
       &other->delivered_at_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      &ttl_, lhs_arena,
-      &other->ttl_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
@@ -711,8 +700,8 @@ void Task::InternalSwap(Task* other) {
       &other->task_type_, rhs_arena
   );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Task, error_)
-      + sizeof(Task::error_)
+      PROTOBUF_FIELD_OFFSET(Task, ttl_)
+      + sizeof(Task::ttl_)
       - PROTOBUF_FIELD_OFFSET(Task, producer_)>(
           reinterpret_cast<char*>(&producer_),
           reinterpret_cast<char*>(&other->producer_));

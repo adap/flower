@@ -199,17 +199,18 @@ class Task final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kAncestryFieldNumber = 6,
-    kCreatedAtFieldNumber = 3,
+    kAncestryFieldNumber = 7,
     kDeliveredAtFieldNumber = 4,
-    kTtlFieldNumber = 5,
-    kTaskTypeFieldNumber = 7,
+    kTaskTypeFieldNumber = 8,
     kProducerFieldNumber = 1,
     kConsumerFieldNumber = 2,
-    kRecordsetFieldNumber = 8,
-    kErrorFieldNumber = 9,
+    kRecordsetFieldNumber = 9,
+    kErrorFieldNumber = 10,
+    kCreatedAtFieldNumber = 3,
+    kPushedAtFieldNumber = 5,
+    kTtlFieldNumber = 6,
   };
-  // repeated string ancestry = 6;
+  // repeated string ancestry = 7;
   int ancestry_size() const;
   private:
   int _internal_ancestry_size() const;
@@ -233,20 +234,6 @@ class Task final :
   std::string* _internal_add_ancestry();
   public:
 
-  // string created_at = 3;
-  void clear_created_at();
-  const std::string& created_at() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_created_at(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_created_at();
-  PROTOBUF_MUST_USE_RESULT std::string* release_created_at();
-  void set_allocated_created_at(std::string* created_at);
-  private:
-  const std::string& _internal_created_at() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_created_at(const std::string& value);
-  std::string* _internal_mutable_created_at();
-  public:
-
   // string delivered_at = 4;
   void clear_delivered_at();
   const std::string& delivered_at() const;
@@ -261,21 +248,7 @@ class Task final :
   std::string* _internal_mutable_delivered_at();
   public:
 
-  // string ttl = 5;
-  void clear_ttl();
-  const std::string& ttl() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_ttl(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_ttl();
-  PROTOBUF_MUST_USE_RESULT std::string* release_ttl();
-  void set_allocated_ttl(std::string* ttl);
-  private:
-  const std::string& _internal_ttl() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_ttl(const std::string& value);
-  std::string* _internal_mutable_ttl();
-  public:
-
-  // string task_type = 7;
+  // string task_type = 8;
   void clear_task_type();
   const std::string& task_type() const;
   template <typename ArgT0 = const std::string&, typename... ArgT>
@@ -325,7 +298,7 @@ class Task final :
       ::flwr::proto::Node* consumer);
   ::flwr::proto::Node* unsafe_arena_release_consumer();
 
-  // .flwr.proto.RecordSet recordset = 8;
+  // .flwr.proto.RecordSet recordset = 9;
   bool has_recordset() const;
   private:
   bool _internal_has_recordset() const;
@@ -343,7 +316,7 @@ class Task final :
       ::flwr::proto::RecordSet* recordset);
   ::flwr::proto::RecordSet* unsafe_arena_release_recordset();
 
-  // .flwr.proto.Error error = 9;
+  // .flwr.proto.Error error = 10;
   bool has_error() const;
   private:
   bool _internal_has_error() const;
@@ -361,6 +334,33 @@ class Task final :
       ::flwr::proto::Error* error);
   ::flwr::proto::Error* unsafe_arena_release_error();
 
+  // double created_at = 3;
+  void clear_created_at();
+  double created_at() const;
+  void set_created_at(double value);
+  private:
+  double _internal_created_at() const;
+  void _internal_set_created_at(double value);
+  public:
+
+  // double pushed_at = 5;
+  void clear_pushed_at();
+  double pushed_at() const;
+  void set_pushed_at(double value);
+  private:
+  double _internal_pushed_at() const;
+  void _internal_set_pushed_at(double value);
+  public:
+
+  // double ttl = 6;
+  void clear_ttl();
+  double ttl() const;
+  void set_ttl(double value);
+  private:
+  double _internal_ttl() const;
+  void _internal_set_ttl(double value);
+  public:
+
   // @@protoc_insertion_point(class_scope:flwr.proto.Task)
  private:
   class _Internal;
@@ -369,14 +369,15 @@ class Task final :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> ancestry_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr created_at_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr delivered_at_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr ttl_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr task_type_;
   ::flwr::proto::Node* producer_;
   ::flwr::proto::Node* consumer_;
   ::flwr::proto::RecordSet* recordset_;
   ::flwr::proto::Error* error_;
+  double created_at_;
+  double pushed_at_;
+  double ttl_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_flwr_2fproto_2ftask_2eproto;
 };
@@ -953,50 +954,24 @@ inline void Task::set_allocated_consumer(::flwr::proto::Node* consumer) {
   // @@protoc_insertion_point(field_set_allocated:flwr.proto.Task.consumer)
 }
 
-// string created_at = 3;
+// double created_at = 3;
 inline void Task::clear_created_at() {
-  created_at_.ClearToEmpty();
+  created_at_ = 0;
 }
-inline const std::string& Task::created_at() const {
+inline double Task::_internal_created_at() const {
+  return created_at_;
+}
+inline double Task::created_at() const {
   // @@protoc_insertion_point(field_get:flwr.proto.Task.created_at)
   return _internal_created_at();
 }
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void Task::set_created_at(ArgT0&& arg0, ArgT... args) {
- 
- created_at_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+inline void Task::_internal_set_created_at(double value) {
+  
+  created_at_ = value;
+}
+inline void Task::set_created_at(double value) {
+  _internal_set_created_at(value);
   // @@protoc_insertion_point(field_set:flwr.proto.Task.created_at)
-}
-inline std::string* Task::mutable_created_at() {
-  std::string* _s = _internal_mutable_created_at();
-  // @@protoc_insertion_point(field_mutable:flwr.proto.Task.created_at)
-  return _s;
-}
-inline const std::string& Task::_internal_created_at() const {
-  return created_at_.Get();
-}
-inline void Task::_internal_set_created_at(const std::string& value) {
-  
-  created_at_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
-}
-inline std::string* Task::_internal_mutable_created_at() {
-  
-  return created_at_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
-}
-inline std::string* Task::release_created_at() {
-  // @@protoc_insertion_point(field_release:flwr.proto.Task.created_at)
-  return created_at_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
-}
-inline void Task::set_allocated_created_at(std::string* created_at) {
-  if (created_at != nullptr) {
-    
-  } else {
-    
-  }
-  created_at_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), created_at,
-      GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set_allocated:flwr.proto.Task.created_at)
 }
 
 // string delivered_at = 4;
@@ -1045,53 +1020,47 @@ inline void Task::set_allocated_delivered_at(std::string* delivered_at) {
   // @@protoc_insertion_point(field_set_allocated:flwr.proto.Task.delivered_at)
 }
 
-// string ttl = 5;
-inline void Task::clear_ttl() {
-  ttl_.ClearToEmpty();
+// double pushed_at = 5;
+inline void Task::clear_pushed_at() {
+  pushed_at_ = 0;
 }
-inline const std::string& Task::ttl() const {
+inline double Task::_internal_pushed_at() const {
+  return pushed_at_;
+}
+inline double Task::pushed_at() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.Task.pushed_at)
+  return _internal_pushed_at();
+}
+inline void Task::_internal_set_pushed_at(double value) {
+  
+  pushed_at_ = value;
+}
+inline void Task::set_pushed_at(double value) {
+  _internal_set_pushed_at(value);
+  // @@protoc_insertion_point(field_set:flwr.proto.Task.pushed_at)
+}
+
+// double ttl = 6;
+inline void Task::clear_ttl() {
+  ttl_ = 0;
+}
+inline double Task::_internal_ttl() const {
+  return ttl_;
+}
+inline double Task::ttl() const {
   // @@protoc_insertion_point(field_get:flwr.proto.Task.ttl)
   return _internal_ttl();
 }
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void Task::set_ttl(ArgT0&& arg0, ArgT... args) {
- 
- ttl_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+inline void Task::_internal_set_ttl(double value) {
+  
+  ttl_ = value;
+}
+inline void Task::set_ttl(double value) {
+  _internal_set_ttl(value);
   // @@protoc_insertion_point(field_set:flwr.proto.Task.ttl)
 }
-inline std::string* Task::mutable_ttl() {
-  std::string* _s = _internal_mutable_ttl();
-  // @@protoc_insertion_point(field_mutable:flwr.proto.Task.ttl)
-  return _s;
-}
-inline const std::string& Task::_internal_ttl() const {
-  return ttl_.Get();
-}
-inline void Task::_internal_set_ttl(const std::string& value) {
-  
-  ttl_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
-}
-inline std::string* Task::_internal_mutable_ttl() {
-  
-  return ttl_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
-}
-inline std::string* Task::release_ttl() {
-  // @@protoc_insertion_point(field_release:flwr.proto.Task.ttl)
-  return ttl_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
-}
-inline void Task::set_allocated_ttl(std::string* ttl) {
-  if (ttl != nullptr) {
-    
-  } else {
-    
-  }
-  ttl_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ttl,
-      GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set_allocated:flwr.proto.Task.ttl)
-}
 
-// repeated string ancestry = 6;
+// repeated string ancestry = 7;
 inline int Task::_internal_ancestry_size() const {
   return ancestry_.size();
 }
@@ -1166,7 +1135,7 @@ Task::mutable_ancestry() {
   return &ancestry_;
 }
 
-// string task_type = 7;
+// string task_type = 8;
 inline void Task::clear_task_type() {
   task_type_.ClearToEmpty();
 }
@@ -1212,7 +1181,7 @@ inline void Task::set_allocated_task_type(std::string* task_type) {
   // @@protoc_insertion_point(field_set_allocated:flwr.proto.Task.task_type)
 }
 
-// .flwr.proto.RecordSet recordset = 8;
+// .flwr.proto.RecordSet recordset = 9;
 inline bool Task::_internal_has_recordset() const {
   return this != internal_default_instance() && recordset_ != nullptr;
 }
@@ -1298,7 +1267,7 @@ inline void Task::set_allocated_recordset(::flwr::proto::RecordSet* recordset) {
   // @@protoc_insertion_point(field_set_allocated:flwr.proto.Task.recordset)
 }
 
-// .flwr.proto.Error error = 9;
+// .flwr.proto.Error error = 10;
 inline bool Task::_internal_has_error() const {
   return this != internal_default_instance() && error_ != nullptr;
 }

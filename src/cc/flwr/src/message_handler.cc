@@ -86,8 +86,10 @@ handle_task(flwr_local::Client *client, const flwr::proto::TaskIns &task_ins) {
 
   task->set_allocated_recordset(proto_recordset_ptr.release());
   task->set_task_type(received_task.task_type());
-  task->set_ttl("");
-  task->set_created_at("");
+  task->set_ttl(3600);
+  task->set_created_at(std::chrono::duration_cast<std::chrono::seconds>(
+                           std::chrono::system_clock::now().time_since_epoch())
+                           .count());
   task->set_allocated_consumer(
       std::make_unique<flwr::proto::Node>(received_task.producer()).release());
   task->set_allocated_producer(
