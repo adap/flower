@@ -20,7 +20,7 @@ from typing import Callable, Dict, List, Tuple, Union
 
 import ray
 
-from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
@@ -151,7 +151,6 @@ class RayBackend(Backend):
             )
 
             await future
-
             # Fetch result
             (
                 out_mssg,
@@ -160,13 +159,15 @@ class RayBackend(Backend):
 
             return out_mssg, updated_context
 
-        except LoadClientAppError as load_ex:
+        except Exception as ex:
             log(
                 ERROR,
                 "An exception was raised when processing a message by %s",
                 self.__class__.__name__,
             )
-            raise load_ex
+            # add actor back into pool
+            await self.pool.add_actor_back_to_pool(future)
+            raise ex
 
     async def terminate(self) -> None:
         """Terminate all actors in actor pool."""

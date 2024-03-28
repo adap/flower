@@ -493,13 +493,17 @@ class BasicActorPool:
         self._future_to_actor[future] = actor
         return future
 
+    async def add_actor_back_to_pool(self, future: Any) -> None:
+        """Ad actor assigned to run future back into the pool."""
+        actor = self._future_to_actor.pop(future)
+        await self.pool.put(actor)
+
     async def fetch_result_and_return_actor_to_pool(
         self, future: Any
     ) -> Tuple[Message, Context]:
         """Pull result given a future and add actor back to pool."""
         # Get actor that ran job
-        actor = self._future_to_actor.pop(future)
-        await self.pool.put(actor)
+        await self.add_actor_back_to_pool(future)
         # Retrieve result for object store
         # Instead of doing ray.get(future) we await it
         _, out_mssg, updated_context = await future
