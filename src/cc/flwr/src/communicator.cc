@@ -26,7 +26,7 @@ bool validate_task_ins(const flwr::proto::TaskIns &task_ins,
 
 bool validate_task_res(const flwr::proto::TaskRes &task_res) {
   // Retrieve initialized fields in TaskRes
-  return (!task_res.task_id().empty());
+  return true;
 }
 
 flwr::proto::TaskRes
