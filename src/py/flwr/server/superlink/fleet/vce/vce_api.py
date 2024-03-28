@@ -14,9 +14,9 @@
 # ==============================================================================
 """Fleet Simulation Engine API."""
 
-
 import asyncio
 import json
+import sys
 import time
 import traceback
 from logging import DEBUG, ERROR, INFO, WARN
@@ -88,11 +88,6 @@ async def worker(
         except asyncio.CancelledError as e:
             log(DEBUG, "Terminating Async worker: %s", e)
             break
-
-        except LoadClientAppError as load_ex:
-            log(ERROR, load_ex)
-            log(ERROR, traceback.format_exc())
-            raise load_ex
 
         # Exceptions aren't raised but reported as an error message
         except Exception as ex:  # pylint: disable=broad-exception-caught
@@ -227,7 +222,7 @@ async def run(
         await backend.terminate()
 
 
-# pylint: disable=too-many-arguments,unused-argument,too-many-locals
+# pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches
 def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
@@ -313,6 +308,10 @@ def start_vce(
     def _load() -> ClientApp:
 
         if client_app_attr:
+
+            if app_dir is not None:
+                sys.path.insert(0, app_dir)
+
             app: ClientApp = load_app(client_app_attr, LoadClientAppError)
 
             if not isinstance(app, ClientApp):
