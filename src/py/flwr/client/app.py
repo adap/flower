@@ -16,8 +16,10 @@
 
 
 import argparse
+import signal
 import sys
 import time
+from dataclasses import dataclass
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Type, Union
@@ -39,7 +41,7 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
 from flwr.common.object_ref import load_app, validate
-from flwr.common.retry_invoker import RetryInvoker, exponential
+from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
@@ -396,6 +398,29 @@ def _start_client_internal(
         transport, server_address
     )
 
+    run_tracker = _RunTracker()
+
+    def _on_sucess(retry_state: RetryState) -> None:
+        run_tracker.connection = True
+        if retry_state.tries > 1:
+            log(
+                INFO,
+                "Connection successful after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+
+    def _on_backoff(retry_state: RetryState) -> None:
+        run_tracker.connection = False
+        if retry_state.tries == 1:
+            log(WARN, "Connection attempt failed, retrying...")
+        else:
+            log(
+                DEBUG,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
+
     retry_invoker = RetryInvoker(
         wait_factory=exponential,
         recoverable_exceptions=connection_error_type,
@@ -411,25 +436,8 @@ def _start_client_internal(
             if retry_state.tries > 1
             else None
         ),
-        on_success=lambda retry_state: (
-            log(
-                INFO,
-                "Connection successful after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-            if retry_state.tries > 1
-            else None
-        ),
-        on_backoff=lambda retry_state: (
-            log(WARN, "Connection attempt failed, retrying...")
-            if retry_state.tries == 1
-            else log(
-                DEBUG,
-                "Connection attempt failed, retrying in %.2f seconds",
-                retry_state.actual_wait,
-            )
-        ),
+        on_success=_on_sucess,
+        on_backoff=_on_backoff,
     )
 
     node_state = NodeState()
@@ -449,73 +457,81 @@ def _start_client_internal(
             if create_node is not None:
                 create_node()  # pylint: disable=not-callable
 
+            run_tracker.register_signal_handler()
             while True:
-                # Receive
-                message = receive()
-                if message is None:
-                    time.sleep(3)  # Wait for 3s before asking again
-                    continue
+                try:
+                    # Receive
+                    message = receive()
+                    if message is None:
+                        time.sleep(3)  # Wait for 3s before asking again
+                        continue
 
-                log(INFO, "")
-                log(
-                    INFO,
-                    "[RUN %s, ROUND %s]",
-                    message.metadata.run_id,
-                    message.metadata.group_id,
-                )
-                log(
-                    INFO,
-                    "Received: %s message %s",
-                    message.metadata.message_type,
-                    message.metadata.message_id,
-                )
+                    log(INFO, "")
+                    log(
+                        INFO,
+                        "[RUN %s, ROUND %s]",
+                        message.metadata.run_id,
+                        message.metadata.group_id,
+                    )
+                    log(
+                        INFO,
+                        "Received: %s message %s",
+                        message.metadata.message_type,
+                        message.metadata.message_id,
+                    )
 
-                # Handle control message
-                out_message, sleep_duration = handle_control_message(message)
-                if out_message:
+                    # Handle control message
+                    out_message, sleep_duration = handle_control_message(message)
+                    if out_message:
+                        send(out_message)
+                        break
+
+                    # Register context for this run
+                    node_state.register_context(run_id=message.metadata.run_id)
+
+                    # Retrieve context for this run
+                    context = node_state.retrieve_context(
+                        run_id=message.metadata.run_id
+                    )
+
+                    # Load ClientApp instance
+                    client_app: ClientApp = load_client_app_fn()
+
+                    # Handle task message
+                    out_message = client_app(message=message, context=context)
+
+                    # Update node state
+                    node_state.update_context(
+                        run_id=message.metadata.run_id,
+                        context=context,
+                    )
+
+                    # Send
                     send(out_message)
+                    log(
+                        INFO,
+                        "[RUN %s, ROUND %s]",
+                        out_message.metadata.run_id,
+                        out_message.metadata.group_id,
+                    )
+                    log(
+                        INFO,
+                        "Sent: %s reply to message %s",
+                        out_message.metadata.message_type,
+                        message.metadata.message_id,
+                    )
+                except StopIteration:
+                    sleep_duration = 0
                     break
 
-                # Register context for this run
-                node_state.register_context(run_id=message.metadata.run_id)
-
-                # Retrieve context for this run
-                context = node_state.retrieve_context(run_id=message.metadata.run_id)
-
-                # Load ClientApp instance
-                client_app: ClientApp = load_client_app_fn()
-
-                # Handle task message
-                out_message = client_app(message=message, context=context)
-
-                # Update node state
-                node_state.update_context(
-                    run_id=message.metadata.run_id,
-                    context=context,
-                )
-
-                # Send
-                send(out_message)
-                log(
-                    INFO,
-                    "[RUN %s, ROUND %s]",
-                    out_message.metadata.run_id,
-                    out_message.metadata.group_id,
-                )
-                log(
-                    INFO,
-                    "Sent: %s reply to message %s",
-                    out_message.metadata.message_type,
-                    message.metadata.message_id,
-                )
-
             # Unregister node
-            if delete_node is not None:
+            if delete_node is not None and run_tracker.connection:
                 delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
             break
+
         # Sleep and reconnect afterwards
         log(
             INFO,
@@ -676,3 +692,18 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         )
 
     return connection, address, error_type
+
+
+@dataclass
+class _RunTracker:
+    connection: bool = True
+
+    def register_signal_handler(self) -> None:
+        """Register handlers for exit signals."""
+
+        def signal_handler(sig, frame):  # type: ignore
+            # pylint: disable=unused-argument
+            raise StopIteration from None
+
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
