@@ -15,23 +15,35 @@
 """Contextmanager for a gRPC request-response channel to the Flower server."""
 
 
+import random
+import time
 from contextlib import contextmanager
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
 from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
 
+import grpc
+
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.constant import (
+    PING_BASE_MULTIPLIER,
+    PING_CALL_TIMEOUT,
+    PING_DEFAULT_INTERVAL,
+    PING_RANDOM_RANGE,
+)
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log, warn_experimental_feature
 from flwr.common.message import Message, Metadata
-from flwr.common.retry_invoker import RetryInvoker
+from flwr.common.retry_invoker import RetryInvoker, constant
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
+    PingRequest,
+    PingResponse,
     PullTaskInsRequest,
     PushTaskResRequest,
 )
@@ -118,6 +130,34 @@ def grpc_request_response(
     ###########################################################################
     # receive/send functions
     ###########################################################################
+
+    def ping_loop() -> None:
+        # Get Node
+        if node_store[KEY_NODE] is None:
+            log(ERROR, "Node instance missing")
+            return
+        node: Node = cast(Node, node_store[KEY_NODE])
+
+        # Simple ping retrier
+        retrier = RetryInvoker(
+            lambda: constant(0), grpc.RpcError, max_tries=None, max_time=None
+        )
+        # Construct the ping request
+        req = PingRequest(node=node, ping_interval=PING_DEFAULT_INTERVAL)
+
+        while True:
+            # Ping the Superlink
+            res = cast(
+                PingResponse, retrier.invoke(stub.Ping, req, timeout=PING_CALL_TIMEOUT)
+            )
+            if not res.success:
+                raise RuntimeError("Ping failed.")
+            # Sleep
+            rd = random.uniform(*PING_RANDOM_RANGE)
+            next_interval = (PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT) * (
+                PING_BASE_MULTIPLIER + rd
+            )
+            time.sleep(next_interval)
 
     def create_node() -> None:
         """Set create_node."""
