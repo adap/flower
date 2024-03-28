@@ -15,6 +15,7 @@
 """Fleet API message handlers."""
 
 
+import time
 from typing import List, Optional
 from uuid import UUID
 
@@ -23,6 +24,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
+    PingRequest,
+    PingResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -55,6 +58,14 @@ def delete_node(request: DeleteNodeRequest, state: State) -> DeleteNodeResponse:
     return DeleteNodeResponse()
 
 
+def ping(
+    request: PingRequest,  # pylint: disable=unused-argument
+    state: State,  # pylint: disable=unused-argument
+) -> PingResponse:
+    """."""
+    return PingResponse(success=True)
+
+
 def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:
     """Pull TaskIns handler."""
     # Get node_id if client node is not anonymous
@@ -76,6 +87,9 @@ def push_task_res(request: PushTaskResRequest, state: State) -> PushTaskResRespo
     # pylint: disable=no-member
     task_res: TaskRes = request.task_res_list[0]
     # pylint: enable=no-member
+
+    # Set pushed_at (timestamp in seconds)
+    task_res.task.pushed_at = time.time()
 
     # Store TaskRes in State
     task_id: Optional[UUID] = state.store_task_res(task_res=task_res)

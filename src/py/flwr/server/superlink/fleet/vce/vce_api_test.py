@@ -17,6 +17,7 @@
 
 import asyncio
 import threading
+import time
 from itertools import cycle
 from json import JSONDecodeError
 from math import pi
@@ -26,7 +27,13 @@ from typing import Dict, Optional, Set, Tuple
 from unittest import IsolatedAsyncioTestCase
 from uuid import UUID
 
-from flwr.common import GetPropertiesIns, Message, MessageTypeLegacy, Metadata
+from flwr.common import (
+    DEFAULT_TTL,
+    GetPropertiesIns,
+    Message,
+    MessageTypeLegacy,
+    Metadata,
+)
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.server.superlink.fleet.vce.vce_api import (
@@ -97,7 +104,7 @@ def register_messages_into_state(
                 src_node_id=0,
                 dst_node_id=dst_node_id,  # indicate destination node
                 reply_to_message="",
-                ttl="",
+                ttl=DEFAULT_TTL,
                 message_type=(
                     "a bad message"
                     if erroneous_message
@@ -107,6 +114,9 @@ def register_messages_into_state(
         )
         # Convert Message to TaskIns
         taskins = message_to_taskins(message)
+        # Normally recorded by the driver servicer
+        # but since we don't have one in this test, we do this manually
+        taskins.task.pushed_at = time.time()
         # Instert in state
         task_id = state.store_task_ins(taskins)
         if task_id:
