@@ -13,9 +13,7 @@
  * ********************************************************************************************************/
 
 #pragma once
-#include "flwr/proto/fleet.grpc.pb.h"
 #include "flwr/proto/fleet.pb.h"
-#include "flwr/proto/transport.grpc.pb.h"
 #include "flwr/proto/transport.pb.h"
 #include "typing.h"
 
@@ -80,3 +78,24 @@ evaluate_ins_from_proto(flwr::proto::ServerMessage_EvaluateIns msg);
  */
 flwr::proto::ClientMessage_EvaluateRes
 evaluate_res_to_proto(flwr_local::EvaluateRes res);
+
+flwr_local::RecordSet
+recordset_from_proto(const flwr::proto::RecordSet &recordset);
+
+flwr_local::FitIns recordset_to_fit_ins(const flwr_local::RecordSet &recordset,
+                                        bool keep_input);
+
+flwr_local::EvaluateIns
+recordset_to_evaluate_ins(const flwr_local::RecordSet &recordset,
+                          bool keep_input);
+
+flwr_local::RecordSet
+recordset_from_evaluate_res(const flwr_local::EvaluateRes &evaluate_res);
+
+flwr_local::RecordSet recordset_from_fit_res(const flwr_local::FitRes &fit_res);
+
+flwr_local::RecordSet recordset_from_get_parameters_res(
+    const flwr_local::ParametersRes &parameters_res);
+
+flwr::proto::RecordSet
+recordset_to_proto(const flwr_local::RecordSet &recordset);
