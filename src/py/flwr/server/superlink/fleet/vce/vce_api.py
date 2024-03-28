@@ -227,7 +227,7 @@ async def run(
         await backend.terminate()
 
 
-# pylint: disable=too-many-arguments,unused-argument,too-many-locals
+# pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches
 def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
