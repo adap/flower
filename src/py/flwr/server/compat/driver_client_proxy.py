@@ -170,8 +170,24 @@ class DriverClientProxy(ClientProxy):
             )
             if len(task_res_list) == 1:
                 task_res = task_res_list[0]
+
+                # This will raise an Exception if task_res carries an `error`
+                validate_task_res(task_res=task_res)
+
                 return serde.recordset_from_proto(task_res.task.recordset)
 
             if timeout is not None and time.time() > start_time + timeout:
                 raise RuntimeError("Timeout reached")
             time.sleep(SLEEP_TIME)
+
+
+def validate_task_res(
+    task_res: task_pb2.TaskRes,  # pylint: disable=E1101
+) -> None:
+    """Validate if a TaskRes is empty or not."""
+    if not task_res.HasField("task"):
+        raise ValueError("Invalid TaskRes, field `task` missing")
+    if task_res.task.HasField("error"):
+        raise ValueError("Exception during client-side task execution")
+    if not task_res.task.HasField("recordset"):
+        raise ValueError("Invalid TaskRes, both `recordset` and `error` are missing")

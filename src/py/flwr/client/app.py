@@ -14,11 +14,10 @@
 # ==============================================================================
 """Flower client app."""
 
-
 import argparse
 import sys
 import time
-from logging import DEBUG, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 
@@ -38,6 +37,7 @@ from flwr.common.constant import (
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
+from flwr.common.message import Error
 from flwr.common.object_ref import load_app, validate
 from flwr.common.retry_invoker import RetryInvoker, exponential
 
@@ -482,32 +482,43 @@ def _start_client_internal(
                 # Retrieve context for this run
                 context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
-                # Load ClientApp instance
-                client_app: ClientApp = load_client_app_fn()
-
-                # Handle task message
-                out_message = client_app(message=message, context=context)
-
-                # Update node state
-                node_state.update_context(
-                    run_id=message.metadata.run_id,
-                    context=context,
+                # Create an error reply message that will never be used to prevent
+                # the used-before-assignment linting error
+                reply_message = message.create_error_reply(
+                    error=Error(code=0, reason="Unknown")
                 )
+
+                # Handle app loading and task message
+                try:
+                    # Load ClientApp instance
+                    client_app: ClientApp = load_client_app_fn()
+
+                    reply_message = client_app(message=message, context=context)
+                    # Update node state
+                    node_state.update_context(
+                        run_id=message.metadata.run_id,
+                        context=context,
+                    )
+                except Exception as ex:  # pylint: disable=broad-exception-caught
+                    log(ERROR, "ClientApp raised an exception", exc_info=ex)
+
+                    # Legacy grpc-bidi
+                    if transport in ["grpc-bidi", None]:
+                        # Raise exception, crash process
+                        raise ex
+
+                    # Don't update/change NodeState
+
+                    # Create error message
+                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                    reply_message = message.create_error_reply(
+                        error=Error(code=0, reason=reason)
+                    )
 
                 # Send
-                send(out_message)
-                log(
-                    INFO,
-                    "[RUN %s, ROUND %s]",
-                    out_message.metadata.run_id,
-                    out_message.metadata.group_id,
-                )
-                log(
-                    INFO,
-                    "Sent: %s reply to message %s",
-                    out_message.metadata.message_type,
-                    message.metadata.message_id,
-                )
+                send(reply_message)
+                log(INFO, "Sent reply")
 
             # Unregister node
             if delete_node is not None:
