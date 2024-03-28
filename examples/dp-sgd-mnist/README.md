@@ -1,5 +1,7 @@
 # Flower Example Using Tensorflow/Keras and Tensorflow Privacy
 
+> This example is deprecated. It will soon be replaced with a Flower-native way of adding DP to FL experiments.
+
 This example of Flower trains a federeated learning system where clients are free to choose
 between non-private and private optimizers. Specifically, clients can choose to train Keras models using the standard SGD optimizer or __Differentially Private__ SGD (DPSGD) from [Tensorflow Privacy](https://github.com/tensorflow/privacy). For this task we use the MNIST dataset which is split artificially among clients. This causes the dataset to be i.i.d. The clients using DPSGD track the amount of privacy spent and display it at the end of the training.
 

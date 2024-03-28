@@ -58,6 +58,8 @@ We would like to give our special thanks to all the contributors who made the ne
 
   Many Flower code examples received substantial updates.
 
+- **Deprecating TF-privacy example** We are bring a Flower-native way of adding DP and other PET to your FL settings. This example will be updated accordintly soon ([#2725](https://github.com/adap/flower/pull/2725))
+
 - **Update Flower Baselines**
 
   - HFedXGBoost ([#2226](https://github.com/adap/flower/pull/2226), [#2771](https://github.com/adap/flower/pull/2771))
