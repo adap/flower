@@ -31,6 +31,7 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    how-to-use-with-pytorch
    how-to-use-with-tensorflow
    how-to-use-with-numpy
+   how-to-use-with-local-data
    how-to-disable-enable-progress-bar
 
 References
