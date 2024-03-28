@@ -86,7 +86,7 @@ async def worker(
             )
 
         except asyncio.CancelledError as e:
-            log(DEBUG, "Terminating Async worker: %s", e)
+            log(DEBUG, "Terminating async worker: %s", e)
             break
 
         # Exceptions aren't raised but reported as an error message
