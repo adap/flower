@@ -154,7 +154,6 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
 
     def create_node() -> None:
         """Set create_node."""
-        # Call FleetAPI
         create_node_request = CreateNodeRequest()
         create_node_response = retry_invoker.invoke(
             stub.CreateNode,
