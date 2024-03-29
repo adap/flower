@@ -30,7 +30,7 @@ def _ping_loop(ping: Callable[[], None], stop_event: threading.Event) -> None:
 
 
 def start_ping_loop(
-    ping: Callable[[], None], stop_event: threading.Event
+    ping_fn: Callable[[], None], stop_event: threading.Event
 ) -> threading.Thread:
     """Start a ping loop in a separate thread.
 
@@ -38,7 +38,7 @@ def start_ping_loop(
     asynchronous ping operations. The loop can be terminated through the provided stop
     event.
     """
-    thread = threading.Thread(target=_ping_loop, args=(ping, stop_event))
+    thread = threading.Thread(target=_ping_loop, args=(ping_fn, stop_event))
     thread.start()
 
     return thread
