@@ -21,10 +21,10 @@ from typing import Callable
 import grpc
 
 
-def _ping_loop(ping: Callable[[], None], stop_event: threading.Event) -> None:
+def _ping_loop(ping_fn: Callable[[], None], stop_event: threading.Event) -> None:
     while not stop_event.is_set():
         try:
-            ping()
+            ping_fn()
         except grpc.RpcError:
             pass
 
