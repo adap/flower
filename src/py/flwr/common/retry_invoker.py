@@ -282,7 +282,7 @@ class RetryInvoker:
                 try_call_event_handler(self.on_backoff)
 
                 # Sleep
-                time.sleep(wait_time)
+                time.sleep(state.actual_wait)
             else:
                 # Trigger success event
                 try_call_event_handler(self.on_success)
