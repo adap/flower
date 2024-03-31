@@ -187,6 +187,8 @@ class RetryInvoker:
         self.on_giveup = on_giveup
         self.jitter = jitter
         self.should_giveup = should_giveup
+        if wait_function is None:
+            wait_function = time.sleep
         self.wait_function = wait_function
 
     # pylint: disable-next=too-many-locals
@@ -241,12 +243,12 @@ class RetryInvoker:
 
         try_cnt = 0
         wait_generator = self.wait_gen_factory()
-        start = time.time()
+        start = time.monotonic()
         ref_state: List[Optional[RetryState]] = [None]
 
         while True:
             try_cnt += 1
-            elapsed_time = time.time() - start
+            elapsed_time = time.monotonic() - start
             state = RetryState(
                 target=target,
                 args=args,
