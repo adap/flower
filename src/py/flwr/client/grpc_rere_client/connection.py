@@ -131,8 +131,6 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
-            if not ping_stop_event.is_set():
-                ping_stop_event.wait(PING_CALL_TIMEOUT)
             return
 
         # Construct the ping request
