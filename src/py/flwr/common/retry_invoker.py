@@ -107,7 +107,7 @@ class RetryInvoker:
 
     Parameters
     ----------
-    wait_factory: Callable[[], Generator[float, None, None]]
+    wait_gen_factory: Callable[[], Generator[float, None, None]]
         A generator yielding successive wait times in seconds. If the generator
         is finite, the giveup event will be triggered when the generator raises
         `StopIteration`.
@@ -129,12 +129,12 @@ class RetryInvoker:
         data class object detailing the invocation.
     on_giveup: Optional[Callable[[RetryState], None]] (default: None)
         A callable to be executed in the event that `max_tries` or `max_time` is
-        exceeded, `should_giveup` returns True, or `wait_factory()` generator raises
+        exceeded, `should_giveup` returns True, or `wait_gen_factory()` generator raises
         `StopInteration`. The parameter is a data class object detailing the
         invocation.
     jitter: Optional[Callable[[float], float]] (default: full_jitter)
-        A function of the value yielded by `wait_factory()` returning the actual time
-        to wait. This function helps distribute wait times stochastically to avoid
+        A function of the value yielded by `wait_gen_factory()` returning the actual
+        time to wait. This function helps distribute wait times stochastically to avoid
         timing collisions across concurrent clients. Wait times are jittered by
         default using the `full_jitter` function. To disable jittering, pass
         `jitter=None`.
@@ -166,7 +166,7 @@ class RetryInvoker:
     # pylint: disable-next=too-many-arguments
     def __init__(
         self,
-        wait_time_gen_factory: Callable[[], Generator[float, None, None]],
+        wait_gen_factory: Callable[[], Generator[float, None, None]],
         recoverable_exceptions: Union[Type[Exception], Tuple[Type[Exception], ...]],
         max_tries: Optional[int],
         max_time: Optional[float],
@@ -178,7 +178,7 @@ class RetryInvoker:
         should_giveup: Optional[Callable[[Exception], bool]] = None,
         wait_function: Optional[Callable[[float], None]] = None,
     ) -> None:
-        self.wait_time_gen_factory = wait_time_gen_factory
+        self.wait_gen_factory = wait_gen_factory
         self.recoverable_exceptions = recoverable_exceptions
         self.max_tries = max_tries
         self.max_time = max_time
@@ -221,13 +221,13 @@ class RetryInvoker:
         Raises
         ------
         Exception
-            If the number of tries exceeds `max_tries`, if the total time
-            exceeds `max_time`, if `wait_factory()` generator raises `StopInteration`,
+            If the number of tries exceeds `max_tries`, if the total time exceeds
+            `max_time`, if `wait_gen_factory()` generator raises `StopInteration`,
             or if the `should_giveup` returns True for a raised exception.
 
         Notes
         -----
-        The time between retries is determined by the provided `wait_factory()`
+        The time between retries is determined by the provided `wait_gen_factory()`
         generator and can optionally be jittered using the `jitter` function.
         The recoverable exceptions that trigger a retry, as well as conditions to
         stop retries, are also determined by the class's initialization parameters.
@@ -240,7 +240,7 @@ class RetryInvoker:
                 handler(cast(RetryState, ref_state[0]))
 
         try_cnt = 0
-        wait_generator = self.wait_time_gen_factory()
+        wait_generator = self.wait_gen_factory()
         start = time.time()
         ref_state: List[Optional[RetryState]] = [None]
 
