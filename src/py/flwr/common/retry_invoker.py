@@ -142,6 +142,13 @@ class RetryInvoker:
         A function accepting an exception instance, returning whether or not
         to give up prematurely before other give-up conditions are evaluated.
         If set to None, the strategy is to never give up prematurely.
+    wait_function: Optional[Callable[[float], None]] (default: None)
+        A function that defines how to wait between retry attempts. It accepts
+        one argument, the wait time in seconds, allowing the use of various waiting
+        mechanisms (e.g., asynchronous waits or event-based synchronization) suitable
+        for different execution environments. If set to `None`, the `wait_function`
+        defaults to `time.sleep`, which is ideal for synchronous operations. Custom
+        functions should manage execution flow to prevent blocking or interference.
 
     Examples
     --------
@@ -159,7 +166,7 @@ class RetryInvoker:
     # pylint: disable-next=too-many-arguments
     def __init__(
         self,
-        wait_factory: Callable[[], Generator[float, None, None]],
+        wait_time_gen_factory: Callable[[], Generator[float, None, None]],
         recoverable_exceptions: Union[Type[Exception], Tuple[Type[Exception], ...]],
         max_tries: Optional[int],
         max_time: Optional[float],
@@ -169,8 +176,9 @@ class RetryInvoker:
         on_giveup: Optional[Callable[[RetryState], None]] = None,
         jitter: Optional[Callable[[float], float]] = full_jitter,
         should_giveup: Optional[Callable[[Exception], bool]] = None,
+        wait_function: Optional[Callable[[float], None]] = None,
     ) -> None:
-        self.wait_factory = wait_factory
+        self.wait_time_gen_factory = wait_time_gen_factory
         self.recoverable_exceptions = recoverable_exceptions
         self.max_tries = max_tries
         self.max_time = max_time
@@ -179,6 +187,7 @@ class RetryInvoker:
         self.on_giveup = on_giveup
         self.jitter = jitter
         self.should_giveup = should_giveup
+        self.wait_function = wait_function
 
     # pylint: disable-next=too-many-locals
     def invoke(
@@ -231,7 +240,7 @@ class RetryInvoker:
                 handler(cast(RetryState, ref_state[0]))
 
         try_cnt = 0
-        wait_generator = self.wait_factory()
+        wait_generator = self.wait_time_gen_factory()
         start = time.time()
         ref_state: List[Optional[RetryState]] = [None]
 
@@ -282,7 +291,7 @@ class RetryInvoker:
                 try_call_event_handler(self.on_backoff)
 
                 # Sleep
-                time.sleep(state.actual_wait)
+                self.wait_function(state.actual_wait)
             else:
                 # Trigger success event
                 try_call_event_handler(self.on_success)
