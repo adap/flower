@@ -18,6 +18,7 @@
 from typing import Callable, Optional
 
 from flwr.common import Context, RecordSet
+from flwr.common.logger import warn_preview_feature
 from flwr.server.strategy import Strategy
 
 from .client_manager import ClientManager
@@ -119,6 +120,8 @@ class ServerApp:
                     >>>    print("ServerApp running")
                     """,
                 )
+
+            warn_preview_feature("ServerApp-register-main-function")
 
             # Register provided function with the ServerApp object
             self._main = main_fn
