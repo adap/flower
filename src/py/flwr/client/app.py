@@ -397,7 +397,7 @@ def _start_client_internal(
     )
 
     retry_invoker = RetryInvoker(
-        wait_factory=exponential,
+        wait_gen_factory=exponential,
         recoverable_exceptions=connection_error_type,
         max_tries=max_retries,
         max_time=max_wait_time,
