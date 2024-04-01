@@ -34,7 +34,7 @@ from flwr.common.constant import (
     PING_RANDOM_RANGE,
 )
 from flwr.common.grpc import create_channel
-from flwr.common.logger import log, warn_experimental_feature
+from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.serde import message_from_taskins, message_to_taskres
@@ -103,8 +103,6 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
     """
-    warn_experimental_feature("`grpc-rere`")
-
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
 
