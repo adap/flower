@@ -174,6 +174,8 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
 
         # Stop the ping-loop thread
         ping_stop_event.set()
+        if ping_thread is not None:
+            ping_thread.join()
 
         # Call FleetAPI
         delete_node_request = DeleteNodeRequest(node=node)
@@ -181,8 +183,6 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
 
         # Cleanup
         node = None
-        if ping_thread is not None:
-            ping_thread.join()
 
     def receive() -> Optional[Message]:
         """Receive next task from server."""

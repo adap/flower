@@ -249,6 +249,13 @@ def http_request_response(  # pylint: disable=R0914, R0915
         if node is None:
             log(ERROR, "Node instance missing")
             return
+
+        # Stop the ping-loop thread
+        ping_stop_event.set()
+        if ping_thread is not None:
+            ping_thread.join()
+
+        # Send DeleteNode request
         delete_node_req_proto = DeleteNodeRequest(node=node)
         delete_node_req_req_bytes: bytes = delete_node_req_proto.SerializeToString()
         res = retry_invoker.invoke(
@@ -280,13 +287,8 @@ def http_request_response(  # pylint: disable=R0914, R0915
                 PATH_PULL_TASK_INS,
             )
 
-        # Stop the ping-loop thread
-        ping_stop_event.set()
-
         # Cleanup
         node = None
-        if ping_thread is not None:
-            ping_thread.join()
 
     def receive() -> Optional[Message]:
         """Receive next task from server."""
