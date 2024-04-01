@@ -1,8 +1,141 @@
 # Changelog
 
+Last PR merged: Remove experimental / add preview feature warnings (#3187)
+
 ## Unreleased
 
 ### What's new?
+
+- **Introduce Flower Next high-level API (stable)** ([#0000](https://github.com/adap/flower/pull/0000)
+  - **Make `ServerApp` shutdown at the end.** ([#3002](https://github.com/adap/flower/pull/3002))
+  - **Load ServerApp** ([#2934](https://github.com/adap/flower/pull/2934))
+  - **Add Flower Client App connection error handling** ([#2969](https://github.com/adap/flower/pull/2969))
+      The `flower-client-app` will now try to reconnect indefinitely to the `flower-superlink` in case of connection error. The arguments `--max-retries` and `--max-wait-time` can now be passed to the `flower-client-app`, `--max-retries` will define the number of tentatives the client should make before it gives up trying to reconnect to the Superlink, and, `--max-wait-time` defines the time before the client gives up trying to reconnect to the Superlink.
+  - **Introduce ServerApp compatibility mode** ([#2958](https://github.com/adap/flower/pull/2958))
+  - **Add `pushed_at` into `Task`** ([#3173](https://github.com/adap/flower/pull/3173))
+  - **Add `created_at` to `Metadata`** ([#3174](https://github.com/adap/flower/pull/3174))
+  - **Add flower-server-app command** ([#2923](https://github.com/adap/flower/pull/2923))
+  - **Add `group_id` to `ClientProxy`** ([#2691](https://github.com/adap/flower/pull/2691))
+  - **Improve ServerApp logging** ([#3079](https://github.com/adap/flower/pull/3079))
+      We made our logging system simpler and clearer to read! You can now see some colours and some nicely formatted results.
+  - **Add new fields to `Metadata` class** ([#2961](https://github.com/adap/flower/pull/2961))
+  - **Move driver/fleet/state into superlink subpackage** ([#2924](https://github.com/adap/flower/pull/2924))
+  - **Make `ttl` a `float`** ([#3166](https://github.com/adap/flower/pull/3166))
+  - **Move `run_driver_api_grpc`** ([#3031](https://github.com/adap/flower/pull/3031))
+  - **Update logging levels** ([#3057](https://github.com/adap/flower/pull/3057))
+  - **Move server functions to `server.py`** ([#3000](https://github.com/adap/flower/pull/3000))
+  - **Make `InMemoryState` thread-safe (again)** ([#3113](https://github.com/adap/flower/pull/3113))
+  - **Create server-side compatibility package** ([#2957](https://github.com/adap/flower/pull/2957))
+  - **Support custom wait functions in `RetryInvoker`** ([#3183](https://github.com/adap/flower/pull/3183))
+  - **Update default `TTL` logic in message replies** ([#3180](https://github.com/adap/flower/pull/3180))
+  - **Make `DriverServicer` log as `DEBUG` most actions.** ([#3035](https://github.com/adap/flower/pull/3035))
+
+- **Introduce Flower Next low-level API (preview)** ([#0000](https://github.com/adap/flower/pull/0000)
+  - **Introduce ClientApp train/evaluate/query** ([#3062](https://github.com/adap/flower/pull/3062))
+  - **Define `Error` structure in `common.Message`.** ([#3034](https://github.com/adap/flower/pull/3034))
+  - **Create ClientApp fn example** ([#3069](https://github.com/adap/flower/pull/3069))
+
+- **Introduce Flower Mods (preview)** ([#0000](https://github.com/adap/flower/pull/0000)
+  - **Add custom Flower Mods example** ([#3054](https://github.com/adap/flower/pull/3054))
+    Added a new example showing how to implement simple Flower Mods for monitoring clients during training (using W&B or Tensorboard).
+  - **Rename middleware layers to mods** ([#2911](https://github.com/adap/flower/pull/2911))
+  - **Add `count_bytes` method to `RecordSets`** ([#3083](https://github.com/adap/flower/pull/3083))
+
+- **[DP]** ([#0000](https://github.com/adap/flower/pull/0000)
+  - **Central DP (server-side fixed clipping)** ([#2798](https://github.com/adap/flower/pull/2798))
+  - **Local DP Modifier** ([#2959](https://github.com/adap/flower/pull/2959))
+  - **Differential Privacy Explainer** ([#3038](https://github.com/adap/flower/pull/3038))
+  - **Fix minor central DP docs** ([#3147](https://github.com/adap/flower/pull/3147))
+  - **Central DP (server-side adaptive clipping)** ([#2909](https://github.com/adap/flower/pull/2909))
+  - **Central DP (client-side fixed clipping)** ([#2893](https://github.com/adap/flower/pull/2893))
+  - **Central DP (client-side adaptive clipping)** ([#2892](https://github.com/adap/flower/pull/2892))
+  - **DP in Flower how-to guide** ([#3039](https://github.com/adap/flower/pull/3039))
+  - **Add an error msg check in central DP mods** ([#3074](https://github.com/adap/flower/pull/3074))
+
+- **[SA]** ([#0000](https://github.com/adap/flower/pull/0000)
+  - **Fix `SecAggPlusWorkflow` and `secaggplus_mod`** ([#3120](https://github.com/adap/flower/pull/3120))
+  - **Add `SecAggWorkflow` and `secagg_mod`** ([#3110](https://github.com/adap/flower/pull/3110))
+  - **Update secaggplus workflow log** ([#3108](https://github.com/adap/flower/pull/3108))
+
+- **Add CLI to Flower** ([#2942](https://github.com/adap/flower/pull/2942))
+  - **Update CLI `new` command templates** ([#3055](https://github.com/adap/flower/pull/3055))
+  - **[feat] Validate the name property in `pyproject.toml` file** ([#3111](https://github.com/adap/flower/pull/3111))
+  - **Improve the CLI  command logs** ([#3130](https://github.com/adap/flower/pull/3130))
+  - **Improve the flower.toml loading module** ([#3136](https://github.com/adap/flower/pull/3136))
+  - **Make the CLI Prompt for project_name when not given** ([#3094](https://github.com/adap/flower/pull/3094))
+  - **Add NumPy template to new command** ([#3059](https://github.com/adap/flower/pull/3059))
+  - **Add `flwr run` to command line interface** ([#3049](https://github.com/adap/flower/pull/3049))
+  - **Not loading config in `flwr run`** ([#3142](https://github.com/adap/flower/pull/3142))
+
+- **[SIMULATION]** ([#0000](https://github.com/adap/flower/pull/0000))
+  - **Make `flower-simulation` accept `ClientApp` and `ServerApp` objects** ([#3024](https://github.com/adap/flower/pull/3024))
+  - **Update `run_simulation`** ([#3061](https://github.com/adap/flower/pull/3061))
+  - **Add `RayBackend` and `SimpleActorPool`** ([#2997](https://github.com/adap/flower/pull/2997))
+  - **Make VCE use `Message` and `Flower` callable** ([#2783](https://github.com/adap/flower/pull/2783))
+  - **Add delay to `Simulation Engine` termination** ([#3184](https://github.com/adap/flower/pull/3184))
+  - **Handle `ClientApp` exception simulation** ([#3075](https://github.com/adap/flower/pull/3075))
+  - **Improve threading in `Simulation Engine`.** ([#3047](https://github.com/adap/flower/pull/3047))
+  - **Complete `VCE Fleet` API loop** ([#2998](https://github.com/adap/flower/pull/2998))
+  - **Introduce `flower-simulation` command and update simulation examples** ([#3009](https://github.com/adap/flower/pull/3009))
+  - **Add `terminate` method to backends and introduce `asyncio` stopping event.** ([#3008](https://github.com/adap/flower/pull/3008))
+
+- **General updates to Flower Baselines** ([#2904](https://github.com/adap/flower/pull/2904))
+  - **FedStar** ([#2482](https://github.com/adap/flower/pull/2482))
+  - **Update models.py** ([#2985](https://github.com/adap/flower/pull/2985))
+  - **Merges dependencies** ([#2968](https://github.com/adap/flower/pull/2968))
+
+- **General updates to Flower Datasets** ([#0000](https://github.com/adap/flower/pull/0000))
+  - **Add InnerDirichletPartitioner** ([#2794](https://github.com/adap/flower/pull/2794))
+  - **Rename `node_id` to `partition_id` in examples** ([#3023](https://github.com/adap/flower/pull/3023))
+  - **Add dirichlet partitioner** ([#2795](https://github.com/adap/flower/pull/2795))
+  - **Add shard partitioner** ([#2792](https://github.com/adap/flower/pull/2792))
+  - **Add partition division** ([#2951](https://github.com/adap/flower/pull/2951))
+
+- **Docs**
+  - **fix(docs): Fix diverse typos** ([#3050](https://github.com/adap/flower/pull/3050))
+      fix(docs): Fix diverse typos
+  - **fix(docs): Fix typos in docs/locals/** ([#3044](https://github.com/adap/flower/pull/3044))
+      fix(docs): Fix typos in docs/locals/*
+  - **fix(docs): Fix typos in baseline/** ([#3043](https://github.com/adap/flower/pull/3043))
+      fix(docs): Fix typos in baseline/*
+  - **Fix small typos** ([#2986](https://github.com/adap/flower/pull/2986))
+  - **Replace dead links, typo fixes and general improvements in framework docs** ([#2989](https://github.com/adap/flower/pull/2989))
+    - Links to internal documents have been replaced by `:doc:` instead of the hardcoded URL. Should make links to internal documents more consistent.
+    - Added a `make` command to check for broken links in the documentation: `make checklinks`
+    - Replaced dead or redirected (external) links with updated working links.
+    - Fixed several small typos in framework docs.
+    - Ensure proper docstring formatting in `driver.py`
+    - flower.dev links have been replaced with flower.ai
+  - **fix(docs): Fix typos in examples/** ([#3041](https://github.com/adap/flower/pull/3041))
+      fix(docs): Fix typos in examples/*
+  - **fix(docs): Fix obsolet links** ([#3046](https://github.com/adap/flower/pull/3046))
+      fix(docs): Fix obsolet links
+  - **fix(docs): Fix typos in src/py src/flwr/ e2e/ dev** ([#3042](https://github.com/adap/flower/pull/3042))
+      fix(docs): Fix typos in src/py* src/flwr/* e2e/* dev
+  - **Translations update from Hosted Weblate** ([#2978](https://github.com/adap/flower/pull/2978))
+  - **Update URL in source code** ([#2952](https://github.com/adap/flower/pull/2952))
+  - **fix(): replaced flower.ai and adap.com on some occasions** ([#3167](https://github.com/adap/flower/pull/3167))
+  - **Update URL in documentation** ([#2953](https://github.com/adap/flower/pull/2953))
+  - **fix(docs): Fix typos in docs/source/** ([#3045](https://github.com/adap/flower/pull/3045))
+      fix(docs): Fix typos in docs/source/*
+  - **Translations update from Hosted Weblate** ([#2654](https://github.com/adap/flower/pull/2654))
+  - **Add footer for iOS docs** ([#3082](https://github.com/adap/flower/pull/3082))
+  - **Update the top level domain in examples** ([#2990](https://github.com/adap/flower/pull/2990))
+
+- **General updates to Flower Examples** ([#3029](https://github.com/adap/flower/pull/3029), [3134](https://github.com/adap/flower/pull/3134), [3114](https://github.com/adap/flower/pull/3114), [3089](https://github.com/adap/flower/pull/3089), [2996](https://github.com/adap/flower/pull/2996), [3092](https://github.com/adap/flower/pull/3092), [3100](https://github.com/adap/flower/pull/3100), [2930](https://github.com/adap/flower/pull/2930), [2967](https://github.com/adap/flower/pull/2967), [2467](https://github.com/adap/flower/pull/2467), [3172](https://github.com/adap/flower/pull/3172), [2910](https://github.com/adap/flower/pull/2910), [3162](https://github.com/adap/flower/pull/3162))
+  - **Merge mt-pytorch examples** ([#2918](https://github.com/adap/flower/pull/2918))
+  - **Add MONAI quickstart example** ([#2773](https://github.com/adap/flower/pull/2773))
+      [MONAI](https://docs.monai.io/en/latest/index.html) (Medical Open Network for AI) is a PyTorch-based, open-source framework for deep learning in healthcare imaging, part of the PyTorch Ecosystem. You can find the example at https://github.com/adap/flower/tree/main/examples/quickstart-monai.
+  - **Add `ViT` example** ([#3063](https://github.com/adap/flower/pull/3063))
+
+- **General improvements** ([#3171](https://github.com/adap/flower/pull/3171), [3099](https://github.com/adap/flower/pull/3099), [3003](https://github.com/adap/flower/pull/3003), [3145](https://github.com/adap/flower/pull/3145), [3017](https://github.com/adap/flower/pull/3017), [3085](https://github.com/adap/flower/pull/3085), [3012](https://github.com/adap/flower/pull/3012), [3119](https://github.com/adap/flower/pull/3119), [2991](https://github.com/adap/flower/pull/2991), [2970](https://github.com/adap/flower/pull/2970), [2980](https://github.com/adap/flower/pull/2980), [3086](https://github.com/adap/flower/pull/3086), [2932](https://github.com/adap/flower/pull/2932), [2928](https://github.com/adap/flower/pull/2928), [2941](https://github.com/adap/flower/pull/2941), [2933](https://github.com/adap/flower/pull/2933), [3181](https://github.com/adap/flower/pull/3181), [2973](https://github.com/adap/flower/pull/2973), [2992](https://github.com/adap/flower/pull/2992), [2915](https://github.com/adap/flower/pull/2915), [3040](https://github.com/adap/flower/pull/3040), [3022](https://github.com/adap/flower/pull/3022), [3032](https://github.com/adap/flower/pull/3032), [2902](https://github.com/adap/flower/pull/2902), [2931](https://github.com/adap/flower/pull/2931), [3005](https://github.com/adap/flower/pull/3005), [3132](https://github.com/adap/flower/pull/3132), [3115](https://github.com/adap/flower/pull/3115), [2944](https://github.com/adap/flower/pull/2944), [3064](https://github.com/adap/flower/pull/3064), [3106](https://github.com/adap/flower/pull/3106), [2974](https://github.com/adap/flower/pull/2974), [3178](https://github.com/adap/flower/pull/3178), [2993](https://github.com/adap/flower/pull/2993), [3186](https://github.com/adap/flower/pull/3186), [3091](https://github.com/adap/flower/pull/3091), [3125](https://github.com/adap/flower/pull/3125), [3093](https://github.com/adap/flower/pull/3093), [3013](https://github.com/adap/flower/pull/3013), [3033](https://github.com/adap/flower/pull/3033), [3133](https://github.com/adap/flower/pull/3133), [3068](https://github.com/adap/flower/pull/3068), [2916](https://github.com/adap/flower/pull/2916), [2975](https://github.com/adap/flower/pull/2975), [2984](https://github.com/adap/flower/pull/2984), [2846](https://github.com/adap/flower/pull/2846), [3077](https://github.com/adap/flower/pull/3077), [3143](https://github.com/adap/flower/pull/3143), [2921](https://github.com/adap/flower/pull/2921), [3101](https://github.com/adap/flower/pull/3101), [2927](https://github.com/adap/flower/pull/2927), [2995](https://github.com/adap/flower/pull/2995), [2972](https://github.com/adap/flower/pull/2972), [2912](https://github.com/adap/flower/pull/2912), [3065](https://github.com/adap/flower/pull/3065), [3028](https://github.com/adap/flower/pull/3028), [2922](https://github.com/adap/flower/pull/2922), [2982](https://github.com/adap/flower/pull/2982), [2914](https://github.com/adap/flower/pull/2914), [3179](https://github.com/adap/flower/pull/3179), [3080](https://github.com/adap/flower/pull/3080), [2994](https://github.com/adap/flower/pull/2994), [3187](https://github.com/adap/flower/pull/3187), [2926](https://github.com/adap/flower/pull/2926), [3018](https://github.com/adap/flower/pull/3018), [3144](https://github.com/adap/flower/pull/3144), [3011](https://github.com/adap/flower/pull/3011))
+  - **Remove legacy `flwr_examples`** ([#3152](https://github.com/adap/flower/pull/3152))
+      Those examples were already deprecated but now they will be entirely removed, as up-to-date equivalents can be found under the `examples/` folder.
+  - **Bump actions/cache from 3 to 4** ([#2836](https://github.com/adap/flower/pull/2836))
+  - **Bump actions/download-artifact from 4.1.1 to 4.1.2** ([#2929](https://github.com/adap/flower/pull/2929))
+  - **Add pytest-watcher instead of unmainted pytest-watch** ([#2943](https://github.com/adap/flower/pull/2943))
+  - **Update docformatter to latest version** ([#2955](https://github.com/adap/flower/pull/2955))
+  - **Update poetry version to latest** ([#2954](https://github.com/adap/flower/pull/2954))
 
 ### Incompatible changes
 
