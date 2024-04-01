@@ -223,6 +223,7 @@ async def run(
 
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches
+# pylint: disable=too-many-statements
 def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
@@ -341,6 +342,13 @@ def start_vce(
             )
         )
     except LoadClientAppError as loadapp_ex:
+        f_stop_delay = 10
+        log(
+            ERROR,
+            "LoadClientAppError exception encountered. Terminating simulation in %is",
+            f_stop_delay,
+        )
+        time.sleep(f_stop_delay)
         f_stop.set()  # set termination event
         raise loadapp_ex
     except Exception as ex:
