@@ -63,7 +63,8 @@ def ping(
     state: State,  # pylint: disable=unused-argument
 ) -> PingResponse:
     """."""
-    return PingResponse(success=True)
+    res = state.acknowledge_ping(request.node.node_id, request.ping_interval)
+    return PingResponse(success=res)
 
 
 def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:
