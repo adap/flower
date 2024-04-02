@@ -37,7 +37,7 @@ service Fleet {
 }
 
 // CreateNode messages
-message CreateNodeRequest {}
+message CreateNodeRequest { double ping_interval = 1; }
 message CreateNodeResponse { Node node = 1; }
 
 // DeleteNode messages

@@ -468,7 +468,7 @@ class SqliteState(State):
 
         return None
 
-    def create_node(self) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
@@ -478,9 +478,7 @@ class SqliteState(State):
         )
 
         try:
-            # Default ping interval is 30s
-            # TODO: change 1e9 to 30s  # pylint: disable=W0511
-            self.query(query, (node_id, time.time() + 1e9, 1e9))
+            self.query(query, (node_id, time.time() + ping_interval, ping_interval))
         except sqlite3.IntegrityError:
             log(ERROR, "Unexpected node registration failure.")
             return 0
