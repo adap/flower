@@ -28,6 +28,15 @@ from flwr.common.logger import warn_preview_feature
 from .typing import ClientAppCallable
 
 
+class ClientAppException(Exception):
+    """Exepction raised when an exception is raised while executing a ClientApp."""
+
+    def __init__(self, message: str):
+        ex_name = self.__class__.__name__
+        self.message = f"\nA {ex_name} occurred." + message
+        super().__init__(self.message)
+
+
 class ClientApp:
     """Flower ClientApp.
 
@@ -84,26 +93,29 @@ class ClientApp:
 
     def __call__(self, message: Message, context: Context) -> Message:
         """Execute `ClientApp`."""
-        # Execute message using `client_fn`
-        if self._call:
-            return self._call(message, context)
+        try:
+            # Execute message using `client_fn`
+            if self._call:
+                return self._call(message, context)
 
-        # Execute message using a new
-        if message.metadata.message_type == MessageType.TRAIN:
-            if self._train:
-                return self._train(message, context)
-            raise ValueError("No `train` function registered")
-        if message.metadata.message_type == MessageType.EVALUATE:
-            if self._evaluate:
-                return self._evaluate(message, context)
-            raise ValueError("No `evaluate` function registered")
-        if message.metadata.message_type == MessageType.QUERY:
-            if self._query:
-                return self._query(message, context)
-            raise ValueError("No `query` function registered")
+            # Execute message using a new
+            if message.metadata.message_type == MessageType.TRAIN:
+                if self._train:
+                    return self._train(message, context)
+                raise ValueError("No `train` function registered")
+            if message.metadata.message_type == MessageType.EVALUATE:
+                if self._evaluate:
+                    return self._evaluate(message, context)
+                raise ValueError("No `evaluate` function registered")
+            if message.metadata.message_type == MessageType.QUERY:
+                if self._query:
+                    return self._query(message, context)
+                raise ValueError("No `query` function registered")
 
-        # Message type did not match one of the known message types abvoe
-        raise ValueError(f"Unknown message_type: {message.metadata.message_type}")
+            # Message type did not match one of the known message types abvoe
+            raise ValueError(f"Unknown message_type: {message.metadata.message_type}")
+        except Exception as ex:
+            raise ClientAppException(str(ex)) from ex
 
     def train(self) -> Callable[[ClientAppCallable], ClientAppCallable]:
         """Return a decorator that registers the train fn with the client app.

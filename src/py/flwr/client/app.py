@@ -24,7 +24,7 @@ from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 from grpc import RpcError
 
 from flwr.client.client import Client
-from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
@@ -34,6 +34,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
+    ErrorCode,
 )
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
@@ -507,11 +508,15 @@ def _start_client_internal(
 
                     # Don't update/change NodeState
 
+                    e_code = ErrorCode.UNKNOWN
+                    if isinstance(ex, ClientAppException):
+                        e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+
                     # Create error message
                     # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
                     reason = str(type(ex)) + ":<'" + str(ex) + "'>"
                     reply_message = message.create_error_reply(
-                        error=Error(code=0, reason=reason)
+                        error=Error(code=e_code, reason=reason)
                     )
 
                 # Send
