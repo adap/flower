@@ -2,11 +2,11 @@
 
 ## Unreleased
 
-Last PR merged: Remove experimental / add preview feature warnings (#3187)
+Last PR merged: Warn once if TTL is set #3195
 
 ### What's new?
 
-- **Introduce Flower Next high-level API (stable)** ([#3002](https://github.com/adap/flower/pull/3002), [#2934](https://github.com/adap/flower/pull/2934), [#2958](https://github.com/adap/flower/pull/2958), [#3173](https://github.com/adap/flower/pull/3173), [#3174](https://github.com/adap/flower/pull/3174), [#2923](https://github.com/adap/flower/pull/2923), [#2691](https://github.com/adap/flower/pull/2691), [#3079](https://github.com/adap/flower/pull/3079), [#2961](https://github.com/adap/flower/pull/2961), [#2924](https://github.com/adap/flower/pull/2924), [#3166](https://github.com/adap/flower/pull/3166), [#3031](https://github.com/adap/flower/pull/3031), [#3057](https://github.com/adap/flower/pull/3057), [#3000](https://github.com/adap/flower/pull/3000), [#3113](https://github.com/adap/flower/pull/3113), [#2957](https://github.com/adap/flower/pull/2957), [#3183](https://github.com/adap/flower/pull/3183), [#3180](https://github.com/adap/flower/pull/3180), [#3035](https://github.com/adap/flower/pull/3035))
+- **Introduce Flower Next high-level API (stable)** ([#3002](https://github.com/adap/flower/pull/3002), [#2934](https://github.com/adap/flower/pull/2934), [#2958](https://github.com/adap/flower/pull/2958), [#3173](https://github.com/adap/flower/pull/3173), [#3174](https://github.com/adap/flower/pull/3174), [#2923](https://github.com/adap/flower/pull/2923), [#2691](https://github.com/adap/flower/pull/2691), [#3079](https://github.com/adap/flower/pull/3079), [#2961](https://github.com/adap/flower/pull/2961), [#2924](https://github.com/adap/flower/pull/2924), [#3166](https://github.com/adap/flower/pull/3166), [#3031](https://github.com/adap/flower/pull/3031), [#3057](https://github.com/adap/flower/pull/3057), [#3000](https://github.com/adap/flower/pull/3000), [#3113](https://github.com/adap/flower/pull/3113), [#2957](https://github.com/adap/flower/pull/2957), [#3183](https://github.com/adap/flower/pull/3183), [#3180](https://github.com/adap/flower/pull/3180), [#3035](https://github.com/adap/flower/pull/3035), [#3189](https://github.com/adap/flower/pull/3189), [#3185](https://github.com/adap/flower/pull/3185), [#3190](https://github.com/adap/flower/pull/3190), [#3191](https://github.com/adap/flower/pull/3191), [#3195](https://github.com/adap/flower/pull/3195))
   <!-- - **Make `ServerApp` shutdown at the end.** ([#3002](https://github.com/adap/flower/pull/3002))
   - **Load ServerApp** ([#2934](https://github.com/adap/flower/pull/2934))
   - **Introduce ServerApp compatibility mode** ([#2958](https://github.com/adap/flower/pull/2958))
@@ -114,7 +114,8 @@ Last PR merged: Remove experimental / add preview feature warnings (#3187)
   - **Rename `node_id` to `partition_id` in examples** ([#3023](https://github.com/adap/flower/pull/3023))
   - **Add dirichlet partitioner** ([#2795](https://github.com/adap/flower/pull/2795))
   - **Add shard partitioner** ([#2792](https://github.com/adap/flower/pull/2792))
-  - **Add partition division** ([#2951](https://github.com/adap/flower/pull/2951)) -->
+  - **Add partition division** ([#2951](https://github.com/adap/flower/pull/2951))
+  - **Bump up datasets version in Flower Datasets** ([#3193](https://github.com/adap/flower/pull/3193)) -->
 
 - **Improve documentation and translations** ([#3050](https://github.com/adap/flower/pull/3050), [#3044](https://github.com/adap/flower/pull/3044), [#3043](https://github.com/adap/flower/pull/3043), [#2986](https://github.com/adap/flower/pull/2986), [#3041](https://github.com/adap/flower/pull/3041), [#3046](https://github.com/adap/flower/pull/3046), [#3042](https://github.com/adap/flower/pull/3042), [#2978](https://github.com/adap/flower/pull/2978), [#2952](https://github.com/adap/flower/pull/2952), [#3167](https://github.com/adap/flower/pull/3167), [#2953](https://github.com/adap/flower/pull/2953), [#3045](https://github.com/adap/flower/pull/3045), [#2654](https://github.com/adap/flower/pull/2654), [#3082](https://github.com/adap/flower/pull/3082), [#2990](https://github.com/adap/flower/pull/2990), [#2989](https://github.com/adap/flower/pull/2989))
   <!-- - **fix(docs): Fix diverse typos** ([#3050](https://github.com/adap/flower/pull/3050))
