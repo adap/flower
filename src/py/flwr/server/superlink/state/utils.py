@@ -44,7 +44,7 @@ def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
         group_id=ref_taskins.group_id,
         run_id=ref_taskins.run_id,
         task=Task(
-            producer=Node(node_id=0, anonymous=True),
+            producer=Node(node_id=ref_taskins.task.consumer.node_id, anonymous=False),
             consumer=Node(node_id=ref_taskins.task.producer.node_id, anonymous=False),
             created_at=current_time,
             ttl=ttl,
