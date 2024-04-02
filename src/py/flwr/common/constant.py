@@ -36,6 +36,12 @@ TRANSPORT_TYPES = [
     TRANSPORT_TYPE_VCE,
 ]
 
+# Constants for ping
+PING_DEFAULT_INTERVAL = 30
+PING_CALL_TIMEOUT = 5
+PING_BASE_MULTIPLIER = 0.8
+PING_RANDOM_RANGE = (-0.1, 0.1)
+
 
 class MessageType:
     """Message type."""

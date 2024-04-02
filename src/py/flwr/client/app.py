@@ -36,7 +36,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
+from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.object_ref import load_app, validate
 from flwr.common.retry_invoker import RetryInvoker, exponential
@@ -385,8 +385,6 @@ def _start_client_internal(
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app
-    else:
-        warn_experimental_feature("`load_client_app_fn`")
 
     # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
