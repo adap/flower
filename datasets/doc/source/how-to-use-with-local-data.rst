@@ -32,7 +32,7 @@ CSV
   # Single file
   data_files = "path-to-my-file.csv"
 
-  # Multitple Files
+  # Multiple Files
   data_files = [ "path-to-my-file-1.csv", "path-to-my-file-2.csv", ...]
   dataset = load_dataset("csv", data_files=data_files)
 
