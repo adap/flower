@@ -1,11 +1,13 @@
 Use with Local Data
 ===================
 
-You can partition data from local files and in-memory data in
-``Flower Datasets`` library using ``Partitioner`` s.
-This guide details how to load and partition your dataset created from:
+You can partition your local files and Python objects in
+``Flower Datasets`` library using any available ``Partitioner``.
 
-* local files: CSV, JSON, image, audio data,
+This guide details how to create a `Hugging Face <https://huggingface.co/>`_ `Dataset <https://huggingface.co/docs/datasets/package_reference/main_classes#datasets.Dataset>`_ which is the required type of input for Partitioners.
+We will cover:
+
+* local files: CSV, JSON, image, audio,
 * in-memory data : dictionary, list, pd.DataFrame, np.ndarray.
 
 
