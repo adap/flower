@@ -24,7 +24,7 @@ from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 from grpc import RpcError
 
 from flwr.client.client import Client
-from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
@@ -491,33 +491,44 @@ def _start_client_internal(
                 try:
                     # Load ClientApp instance
                     client_app: ClientApp = load_client_app_fn()
-
-                    reply_message = client_app(message=message, context=context)
-                    # Update node state
-                    node_state.update_context(
-                        run_id=message.metadata.run_id,
-                        context=context,
-                    )
                 except Exception as ex:  # pylint: disable=broad-exception-caught
-                    log(ERROR, "ClientApp raised an exception", exc_info=ex)
-
-                    # Legacy grpc-bidi
-                    if transport in ["grpc-bidi", None]:
-                        # Raise exception, crash process
-                        raise ex
-
-                    # Don't update/change NodeState
-
                     e_code = ErrorCode.UNKNOWN
-                    if isinstance(ex, ClientAppException):
-                        e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+                    if isinstance(ex, LoadClientAppError):
+                        e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
 
                     # Create error message
-                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
                     reason = str(type(ex)) + ":<'" + str(ex) + "'>"
                     reply_message = message.create_error_reply(
                         error=Error(code=e_code, reason=reason)
                     )
+                else:
+                    try:
+                        reply_message = client_app(message=message, context=context)
+                    except Exception as ex:  # pylint: disable=broad-exception-caught
+                        log(ERROR, "ClientApp raised an exception", exc_info=ex)
+
+                        # Legacy grpc-bidi
+                        if transport in ["grpc-bidi", None]:
+                            # Raise exception, crash process
+                            raise ex
+
+                        # Don't update/change NodeState
+
+                        # Create error message
+                        # Reason ex: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                        reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                        reply_message = message.create_error_reply(
+                            error=Error(
+                                code=ErrorCode.CLIENT_APP_RAISED_EXCEPTION,
+                                reason=reason,
+                            )
+                        )
+                    else:
+                        # Update node state
+                        node_state.update_context(
+                            run_id=message.metadata.run_id,
+                            context=context,
+                        )
 
                 # Send
                 send(reply_message)
