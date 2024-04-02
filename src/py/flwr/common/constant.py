@@ -81,7 +81,8 @@ class ErrorCode:
     """Error codes for Message's Error."""
 
     UNKNOWN = 0
-    CLIENT_APP_RAISED_EXCEPTION = 1
+    LOAD_CLIENT_APP_EXCEPTION = 1
+    CLIENT_APP_RAISED_EXCEPTION = 2
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""

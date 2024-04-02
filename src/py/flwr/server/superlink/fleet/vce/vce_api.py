@@ -22,9 +22,9 @@ import traceback
 from logging import DEBUG, ERROR, INFO, WARN
 from typing import Callable, Dict, List, Optional
 
-from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.node_state import NodeState
-from flwr.common.constant import PING_MAX_INTERVAL
+from flwr.common.constant import PING_MAX_INTERVAL, ErrorCode
 from flwr.common.logger import log
 from flwr.common.message import Error
 from flwr.common.object_ref import load_app
@@ -94,9 +94,18 @@ async def worker(
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, ex)
             log(ERROR, traceback.format_exc())
+
+            if isinstance(ex, ClientAppException):
+                e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+            elif isinstance(ex, LoadClientAppError):
+                e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+            else:
+                e_code = ErrorCode.UNKNOWN
+
             reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-            error = Error(code=0, reason=reason)
-            out_mssg = message.create_error_reply(error=error)
+            out_mssg = message.create_error_reply(
+                error=Error(code=e_code, reason=reason)
+            )
 
         finally:
             if out_mssg:
