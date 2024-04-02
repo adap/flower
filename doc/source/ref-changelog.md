@@ -4,14 +4,6 @@
 
 <!-- Last PR merged: Warn once if TTL is set #3195 -->
 
-<!-- - **General updates to Flower Datasets** ([#0000](https://github.com/adap/flower/pull/0000))
-  - **Add InnerDirichletPartitioner** ([#2794](https://github.com/adap/flower/pull/2794))
-  - **Rename `node_id` to `partition_id` in examples** ([#3023](https://github.com/adap/flower/pull/3023))
-  - **Add dirichlet partitioner** ([#2795](https://github.com/adap/flower/pull/2795))
-  - **Add shard partitioner** ([#2792](https://github.com/adap/flower/pull/2792))
-  - **Add partition division** ([#2951](https://github.com/adap/flower/pull/2951))
-  - **Bump up datasets version in Flower Datasets** ([#3193](https://github.com/adap/flower/pull/3193)) -->
-
 ### What's new?
 
 - **Introduce Flower Next high-level API (stable)** ([#3002](https://github.com/adap/flower/pull/3002), [#2934](https://github.com/adap/flower/pull/2934), [#2958](https://github.com/adap/flower/pull/2958), [#3173](https://github.com/adap/flower/pull/3173), [#3174](https://github.com/adap/flower/pull/3174), [#2923](https://github.com/adap/flower/pull/2923), [#2691](https://github.com/adap/flower/pull/2691), [#3079](https://github.com/adap/flower/pull/3079), [#2961](https://github.com/adap/flower/pull/2961), [#2924](https://github.com/adap/flower/pull/2924), [#3166](https://github.com/adap/flower/pull/3166), [#3031](https://github.com/adap/flower/pull/3031), [#3057](https://github.com/adap/flower/pull/3057), [#3000](https://github.com/adap/flower/pull/3000), [#3113](https://github.com/adap/flower/pull/3113), [#2957](https://github.com/adap/flower/pull/2957), [#3183](https://github.com/adap/flower/pull/3183), [#3180](https://github.com/adap/flower/pull/3180), [#3035](https://github.com/adap/flower/pull/3035), [#3189](https://github.com/adap/flower/pull/3189), [#3185](https://github.com/adap/flower/pull/3185), [#3190](https://github.com/adap/flower/pull/3190), [#3191](https://github.com/adap/flower/pull/3191), [#3195](https://github.com/adap/flower/pull/3195))
@@ -26,19 +18,19 @@
 
   Flower Modifiers (we call them Mods) can intercept messages and analyze, edit or handle them directly. Mods can be used to develop pluggable modules that work across different projects. Flower 1.8 already includes mods to log the size of a message, the number of parameters sent over the network, differential privacy with fixed clipping and adaptive clipping, local differential privacy and secure aggregation protocols SecAgg and SecAgg+. The Flower Mods API is released as a preview, but researchers can already use it to experiment with arbirtrary SMPC protocols.
 
-- **Introduce built-in Differential Privacy** ([#0000](https://github.com/adap/flower/pull/0000)
+- **Introduce built-in Differential Privacy (preview)** ([#2798](https://github.com/adap/flower/pull/2798), [#2959](https://github.com/adap/flower/pull/2959), [#3038](https://github.com/adap/flower/pull/3038), [#3147](https://github.com/adap/flower/pull/3147), [#2909](https://github.com/adap/flower/pull/2909), [#2893](https://github.com/adap/flower/pull/2893), [#2892](https://github.com/adap/flower/pull/2892), [#3039](https://github.com/adap/flower/pull/3039), [#3074](https://github.com/adap/flower/pull/3074))
 
   Built-in Differential Privacy is here! Flower supports both central and local differential privacy (DP). Central DP can be configured with either fixed or adaptive clipping. The clipping can happen either on the server-side or the client-side. Local DP does both clipping and noising on the client-side. A new how-to guide describes [how to use the new Differential Privacy components](https://flower.ai/docs/framework/how-to-use-differential-privacy.html) in Flower.
 
-- **Introduce built-in Secure Aggregation** ([#0000](https://github.com/adap/flower/pull/0000)
+- **Introduce built-in Secure Aggregation (preview)** ([#3120](https://github.com/adap/flower/pull/3120), [#3110](https://github.com/adap/flower/pull/3110), [#3108](https://github.com/adap/flower/pull/3108))
 
   Built-in Secure Aggregation is here! Flower now supports different secure aggregation protocols out-of-the-box. The best part? You can add secure aggregation to your Flower projects with only a few lines of code. In this initial release, we inlcude support for SecAgg and SecAgg+, but more protocols will be implemented shortly. We'll also add detailed docs that explain secure aggregation and how to use it in Flower. Until then, you can already check out the new code examples that shows how to use Flower to easily combine Fedrated Learning, Differential Privacy and Secure Aggregation in the same project.
 
-- **Introduce** `flwr` **CLI** ([#2942](https://github.com/adap/flower/pull/2942))
+- **Introduce** `flwr` **CLI** ([#2942](https://github.com/adap/flower/pull/2942), [#3055](https://github.com/adap/flower/pull/3055), [#3111](https://github.com/adap/flower/pull/3111), [#3130](https://github.com/adap/flower/pull/3130), [#3136](https://github.com/adap/flower/pull/3136), [#3094](https://github.com/adap/flower/pull/3094), [#3059](https://github.com/adap/flower/pull/3059), [#3049](https://github.com/adap/flower/pull/3049), [#3142](https://github.com/adap/flower/pull/3142))
 
   A new `flwr` CLI command allow creating new Flower projects using `flwr new` and then running them using the simulation engine via `flwr run`.
 
-- **Support Flower Next in Simulation Engine** ([#0000](https://github.com/adap/flower/pull/0000))
+- **Support Flower Next in Simulation Engine** ([#3024](https://github.com/adap/flower/pull/3024), [#3061](https://github.com/adap/flower/pull/3061), [#2997](https://github.com/adap/flower/pull/2997), [#2783](https://github.com/adap/flower/pull/2783), [#3184](https://github.com/adap/flower/pull/3184), [#3075](https://github.com/adap/flower/pull/3075), [#3047](https://github.com/adap/flower/pull/3047), [#2998](https://github.com/adap/flower/pull/2998), [#3009](https://github.com/adap/flower/pull/3009), [#3008](https://github.com/adap/flower/pull/3008))
 
   The Flower Simulation Engine can now run Flower Next projects. For notebook environments, there's also a new `run_simulation` function that can run `ServerApp` and `ClientApp`.
 
