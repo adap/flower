@@ -15,7 +15,7 @@
 """Fleet API gRPC request-response servicer."""
 
 
-from logging import INFO
+from logging import DEBUG, INFO
 
 import grpc
 
@@ -26,6 +26,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
+    PingRequest,
+    PingResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -57,6 +59,14 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """."""
         log(INFO, "FleetServicer.DeleteNode")
         return message_handler.delete_node(
+            request=request,
+            state=self.state_factory.state(),
+        )
+
+    def Ping(self, request: PingRequest, context: grpc.ServicerContext) -> PingResponse:
+        """."""
+        log(DEBUG, "FleetServicer.Ping")
+        return message_handler.ping(
             request=request,
             state=self.state_factory.state(),
         )

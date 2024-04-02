@@ -18,7 +18,7 @@
 import os
 import re
 import sqlite3
-from datetime import datetime, timedelta
+import time
 from logging import DEBUG, ERROR
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
@@ -33,8 +33,14 @@ from .state import State
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
-    node_id INTEGER UNIQUE
+    node_id         INTEGER UNIQUE,
+    online_until    REAL,
+    ping_interval   REAL
 );
+"""
+
+SQL_CREATE_INDEX_ONLINE_UNTIL = """
+CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 """
 
 SQL_CREATE_TABLE_RUN = """
@@ -52,9 +58,10 @@ CREATE TABLE IF NOT EXISTS task_ins(
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
     consumer_node_id        INTEGER,
-    created_at              TEXT,
+    created_at              REAL,
     delivered_at            TEXT,
-    ttl                     TEXT,
+    pushed_at               REAL,
+    ttl                     REAL,
     ancestry                TEXT,
     task_type               TEXT,
     recordset               BLOB,
@@ -72,9 +79,10 @@ CREATE TABLE IF NOT EXISTS task_res(
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
     consumer_node_id        INTEGER,
-    created_at              TEXT,
+    created_at              REAL,
     delivered_at            TEXT,
-    ttl                     TEXT,
+    pushed_at               REAL,
+    ttl                     REAL,
     ancestry                TEXT,
     task_type               TEXT,
     recordset               BLOB,
@@ -82,7 +90,7 @@ CREATE TABLE IF NOT EXISTS task_res(
 );
 """
 
-DictOrTuple = Union[Tuple[Any], Dict[str, Any]]
+DictOrTuple = Union[Tuple[Any, ...], Dict[str, Any]]
 
 
 class SqliteState(State):
@@ -123,6 +131,7 @@ class SqliteState(State):
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
+        cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
         return res.fetchall()
@@ -185,15 +194,11 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Create task_id, created_at and ttl
+        # Create task_id
         task_id = uuid4()
-        created_at: datetime = now()
-        ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskIns
         task_ins.task_id = str(task_id)
-        task_ins.task.created_at = created_at.isoformat()
-        task_ins.task.ttl = ttl.isoformat()
         data = (task_ins_to_dict(task_ins),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
@@ -320,15 +325,11 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Create task_id, created_at and ttl
+        # Create task_id
         task_id = uuid4()
-        created_at: datetime = now()
-        ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskIns
         task_res.task_id = str(task_id)
-        task_res.task.created_at = created_at.isoformat()
-        task_res.task.ttl = ttl.isoformat()
         data = (task_res_to_dict(task_res),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
@@ -467,14 +468,17 @@ class SqliteState(State):
 
         return None
 
-    def create_node(self) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-        query = "INSERT INTO node VALUES(:node_id);"
+        query = (
+            "INSERT INTO node (node_id, online_until, ping_interval) VALUES (?, ?, ?)"
+        )
+
         try:
-            self.query(query, {"node_id": node_id})
+            self.query(query, (node_id, time.time() + ping_interval, ping_interval))
         except sqlite3.IntegrityError:
             log(ERROR, "Unexpected node registration failure.")
             return 0
@@ -499,8 +503,8 @@ class SqliteState(State):
             return set()
 
         # Get nodes
-        query = "SELECT * FROM node;"
-        rows = self.query(query)
+        query = "SELECT node_id FROM node WHERE online_until > ?;"
+        rows = self.query(query, (time.time(),))
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
@@ -518,6 +522,17 @@ class SqliteState(State):
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
+        """Acknowledge a ping received from a node, serving as a heartbeat."""
+        # Update `online_until` and `ping_interval` for the given `node_id`
+        query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?;"
+        try:
+            self.query(query, (time.time() + ping_interval, ping_interval, node_id))
+            return True
+        except sqlite3.IntegrityError:
+            log(ERROR, "`node_id` does not exist.")
+            return False
 
 
 def dict_factory(
@@ -544,6 +559,7 @@ def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
         "consumer_node_id": task_msg.task.consumer.node_id,
         "created_at": task_msg.task.created_at,
         "delivered_at": task_msg.task.delivered_at,
+        "pushed_at": task_msg.task.pushed_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
         "task_type": task_msg.task.task_type,
@@ -564,6 +580,7 @@ def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
         "consumer_node_id": task_msg.task.consumer.node_id,
         "created_at": task_msg.task.created_at,
         "delivered_at": task_msg.task.delivered_at,
+        "pushed_at": task_msg.task.pushed_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
         "task_type": task_msg.task.task_type,
@@ -592,6 +609,7 @@ def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
             ),
             created_at=task_dict["created_at"],
             delivered_at=task_dict["delivered_at"],
+            pushed_at=task_dict["pushed_at"],
             ttl=task_dict["ttl"],
             ancestry=task_dict["ancestry"].split(","),
             task_type=task_dict["task_type"],
@@ -621,6 +639,7 @@ def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
             ),
             created_at=task_dict["created_at"],
             delivered_at=task_dict["delivered_at"],
+            pushed_at=task_dict["pushed_at"],
             ttl=task_dict["ttl"],
             ancestry=task_dict["ancestry"].split(","),
             task_type=task_dict["task_type"],
