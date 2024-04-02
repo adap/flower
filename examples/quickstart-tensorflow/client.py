@@ -14,11 +14,11 @@ parser.add_argument(
     "--partition-id",
     type=int,
     choices=[0, 1, 2],
-    required=True,
+    default=0,
     help="Partition of the dataset (0,1 or 2). "
     "The dataset is divided into 3 partitions created artificially.",
 )
-args = parser.parse_args()
+args, _ = parser.parse_known_args()
 
 # Load model and data (MobileNetV2, CIFAR-10)
 model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
@@ -36,7 +36,7 @@ x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
 
 
 # Define Flower client
-class CifarClient(NumPyClient):
+class FlowerClient(NumPyClient):
     def get_parameters(self, config):
         return model.get_weights()
 
