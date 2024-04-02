@@ -256,9 +256,10 @@ class FedCiR(FedAvg):
         # self.ref_mu, self.ref_logvar = self.compute_ref_stats()
         self.ref_mu, self.ref_logvar = None, None
         self.lambda_align_g = lambda_align_g
-        self.initial_generator_params = self.pretrain_generator(
-            initial_generator_params
-        )
+        # self.initial_generator_params = self.pretrain_generator(
+        #     initial_generator_params
+        # )
+        self.initial_generator_params = initial_generator_params
 
     def pretrain_generator(self, initial_generator_params):
 

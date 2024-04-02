@@ -10,7 +10,7 @@ import flwr as fl
 from flwr.common import Metrics, ndarrays_to_parameters
 from flwr.common.logger import configure
 from flwr.common.typing import Scalar
-
+from FedAvgVisualise import VisualiseFedAvg
 from utils_mnist import (
     load_data_mnist,
     train,
@@ -67,6 +67,10 @@ if not os.path.exists(IDENTIFIER):
     os.makedirs(IDENTIFIER)
 
 configure(identifier=IDENTIFIER, filename=f"logs_{IDENTIFIER}.log")
+# TODO:hardcoded
+ALIGNMENT_DATA = alignment_dataloader(
+    samples_per_class=890, batch_size=890 * NUM_CLASSES, only_data=True
+)
 
 
 # Flower client, adapted from Pytorch quickstart example
@@ -93,31 +97,27 @@ class FlowerClient(fl.client.NumPyClient):
         batch, epochs = config["batch_size"], config["epochs"]
 
         # Construct dataloader
-        trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)
+        # trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)
+        g = torch.Generator()
+        g.manual_seed(self.cid)
+        trainloader = DataLoader(
+            ALIGNMENT_DATA, batch_size=890 * NUM_CLASSES, generator=g
+        )
 
         # Define optimizer
         # optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         # Train
-        # loss = train(
-        #     self.model,
-        #     trainloader,
-        #     optimizer,
-        #     config,
-        #     epochs=epochs,
-        #     device=self.device,
-        #     num_classes=NUM_CLASSES,
-        # )
-        vae_loss, align_term = train_align_prox(
+        loss = train(
             self.model,
             trainloader,
-            self.align_loader,
             optimizer,
             config,
-            epochs,
-            self.device,
-            NUM_CLASSES,
+            epochs=epochs,
+            device=self.device,
+            num_classes=NUM_CLASSES,
         )
+   
         true_img, gen_img = visualize_gen_image(
             self.model,
             DataLoader(self.valset, batch_size=64, shuffle=True),
@@ -142,9 +142,9 @@ class FlowerClient(fl.client.NumPyClient):
                 "gen_image": gen_img,
                 "latent_rep": latent_reps,
                 "client_round": config["server_round"],
-                # "train_loss": float(loss),
-                "train_loss": float(vae_loss),
-                "align_term": float(align_term),
+                "train_loss": float(loss),
+                # "train_loss": float(vae_loss),
+                # "align_term": float(align_term),
             },
         )
 
@@ -182,7 +182,7 @@ def get_client_fn(train_partitions, val_partitions, align_loader):
         trainset, valset = train_partitions[int(cid)], val_partitions[int(cid)]
 
         # Create and return client
-        return FlowerClient(trainset, valset, align_loader, cid).to_client()
+        return FlowerClient(trainset, valset, align_loader, int(cid)).to_client()
 
     return client_fn
 
@@ -222,17 +222,17 @@ def main():
     wandb.define_metric("eval_*", step_metric="client_round")
 
     samples_per_class = wandb.config["sample_per_class"]
+    # other_config = {"prior_steps": 3000, "latent_dim": LATENT_DIM}  # TODO
+    # (mu_g, log_var_g), fig = compute_ref_stats(
+    #     ALIGNMENT_DATALOADER,
+    #     other_config,
+    #     DEVICE,
+    # )
+    # wandb.log({"prior_plot": fig})
     ALIGNMENT_DATALOADER = alignment_dataloader(
         samples_per_class=samples_per_class,
         batch_size=samples_per_class * NUM_CLASSES,
     )
-    other_config = {"prior_steps": 3000, "latent_dim": LATENT_DIM}  # TODO
-    (mu_g, log_var_g), fig = compute_ref_stats(
-        ALIGNMENT_DATALOADER,
-        other_config,
-        DEVICE,
-    )
-    wandb.log({"prior_plot": fig})
 
     def fit_config(server_round: int) -> Dict[str, Scalar]:
         """Return a configuration with static batch size and (local) epochs."""
@@ -241,9 +241,9 @@ def main():
             "batch_size": wandb.config["batch_size"],
             "server_round": server_round,
             "beta": wandb.config["beta"],
-            "mu_g": mu_g,
-            "log_var_g": log_var_g,
-            "lambda_align": wandb.config["lambda_align"],
+            # "mu_g": mu_g,
+            # "log_var_g": log_var_g,
+            # "lambda_align": wandb.config["lambda_align"],
         }
         return config
 
@@ -322,7 +322,7 @@ def main():
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)
 
-    strategy = fl.server.strategy.FedAvg(
+    strategy = VisualiseFedAvg(
         initial_parameters=initial_params,
         min_fit_clients=NUM_CLIENTS,
         min_available_clients=NUM_CLIENTS,
@@ -359,11 +359,11 @@ if __name__ == "__main__":
         "metric": {"name": "global_val_loss", "goal": "minimize"},
         "parameters": {
             # "epochs": {"values": [2, 5, 10]},
-            "epochs": {"values": [5]},
+            "epochs": {"values": [10]},
             "batch_size": {"values": [128]},
             "beta": {"values": [0]},
-            "sample_per_class": {"values": [200]},
-            "lambda_align": {"values": [1]},
+            "sample_per_class": {"values": [890]},
+            # "lambda_align": {"values": [1]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)

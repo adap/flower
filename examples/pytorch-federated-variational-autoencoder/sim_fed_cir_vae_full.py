@@ -380,8 +380,8 @@ if __name__ == "__main__":
             "sample_per_class": {"values": [890]},
             # "lambda_reg": {"min": 0.0, "max": 1.0},
             # "lambda_align_g": {"min": 1e-6, "max": 1e-3},
-            "lambda_align_g": {"values": [0.1, 1]},  # kl term for generator
-            "lambda_reg": {"values": [0.1, 1]},
+            "lambda_align_g": {"values": [1]},  # kl term for generator
+            "lambda_reg": {"values": [0]},
             "lambda_align": {"values": [0]},
             "lambda_latent_diff": {"values": [0.1, 1]},
             # "lambda_reg_dec": {"values": [0.1, 1, 0]},
@@ -392,7 +392,7 @@ if __name__ == "__main__":
                     # 1e-5,
                 ]
             },
-            "steps_g": {"values": [2000, 1000]},  # number of epochs for generator
+            "steps_g": {"values": [1]},  # number of epochs for generator
             "epochs": {"values": [5]},
             "batch_size": {"values": [128]},
             "beta": {"values": [0]},  # for local kl loss
@@ -401,4 +401,4 @@ if __name__ == "__main__":
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=2)
+    wandb.agent(sweep_id, function=main, count=1)

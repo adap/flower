@@ -1,32 +1,37 @@
 import argparse
 from collections import OrderedDict
 from typing import Dict, Tuple, List
+import ray
 from torch.utils.data import DataLoader
-from logging import WARNING, DEBUG
+
 import torch
 
 import flwr as fl
-from flwr.common import Metrics, ndarrays_to_parameters
-from flwr.common.logger import configure, log
+from flwr.common import Metrics, ndarrays_to_parameters, parameters_to_ndarrays
+from flwr.common.logger import configure
 from flwr.common.typing import Scalar
-import wandb
-import os
-
-os.environ["WANDB_START_METHOD"] = "thread"
-
+from FedGenVisualise import VisualiseFedGen
 from utils_mnist import (
+    load_data_mnist,
+    train,
     test,
     visualize_gen_image,
     visualize_gmm_latent_representation,
     non_iid_train_iid_test,
+    iid_train_iid_test,
     alignment_dataloader,
-    train_align,
     eval_reconstrution,
+    visualize_plotly_latent_representation,
+    sample_latents,
+    get_fisher_ratio,
+    train_single_loader,
 )
 from utils_mnist import VAE
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+from torchvision.utils import make_grid
+import ray
 
 NUM_CLIENTS = 5
 NUM_CLASSES = 10
@@ -46,24 +51,34 @@ parser.add_argument(
 )
 parser.add_argument("--num_rounds", type=int, default=50, help="Number of FL rounds.")
 parser.add_argument("--identifier", type=str, required=True, help="Name of experiment.")
-args = parser.parse_args()
+parser.add_argument("--latent_dim", type=int, required=True, help="Latent dimension.")
 
+import wandb
+
+args = parser.parse_args()
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+LATENT_DIM = args.latent_dim
 IDENTIFIER = args.identifier
 if not os.path.exists(IDENTIFIER):
     os.makedirs(IDENTIFIER)
+
 configure(identifier=IDENTIFIER, filename=f"logs_{IDENTIFIER}.log")
-import ray
+# TODO:hardcoded
+ALIGNMENT_DATA = alignment_dataloader(
+    samples_per_class=890, batch_size=890 * NUM_CLASSES, only_data=True
+)
 
 
+# Flower client, adapted from Pytorch quickstart example
 class FlowerClient(fl.client.NumPyClient):
-    def __init__(self, trainset, valset, cid):
+    def __init__(self, trainset, valset, align_loader, cid):
         self.trainset = trainset
         self.valset = valset
+        self.align_loader = align_loader
         self.cid = cid
 
         # Instantiate model
-        self.model = VAE()
+        self.model = VAE(z_dim=LATENT_DIM)
 
         # Determine device
         self.device = DEVICE
@@ -73,65 +88,105 @@ class FlowerClient(fl.client.NumPyClient):
         return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def fit(self, parameters, config):
-        set_params(self.model, parameters)
+        if config["local_param_dict"] is not None:
+
+            set_params(
+                self.model,
+                parameters_to_ndarrays(
+                    config["local_param_dict"][f"client_param_{self.cid}"]
+                ),
+            )
         # Read from config
         batch, epochs = config["batch_size"], config["epochs"]
 
         # Construct dataloader
-        trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)
+        # trainloader = DataLoader(self.trainset, batch_size=batch, shuffle=True)
+        g = torch.Generator()
+        g.manual_seed(self.cid)
+        trainloader = DataLoader(
+            ALIGNMENT_DATA, batch_size=890 * NUM_CLASSES, generator=g
+        )
 
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+        # Define optimizer
+        # optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
         # Train
-        vae_loss_term, reg_term, align_term = train_align(
-            self.model,
-            trainloader,
-            optimizer,
-            config,
-            epochs=epochs,
-            device=self.device,
-            num_classes=NUM_CLASSES,
+        # loss = train(
+        #     self.model,
+        #     trainloader,
+        #     optimizer,
+        #     config,
+        #     epochs=epochs,
+        #     device=self.device,
+        #     num_classes=NUM_CLASSES,
+        # )
+        local_loss_term, loss_ref_term, align_term, latent_diff_term = (
+            train_single_loader(
+                self.model,
+                trainloader,
+                self.align_loader,
+                None,
+                config,
+                epochs=epochs,
+                device=self.device,
+                num_classes=NUM_CLASSES,
+            )
         )
 
-        true_img, gen_img = true_img, gen_img = visualize_gen_image(
+        true_img, gen_img = visualize_gen_image(
             self.model,
-            DataLoader(self.valset, batch_size=64),
+            DataLoader(self.valset, batch_size=64, shuffle=True),
             self.device,
             f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
             folder=IDENTIFIER,
         )
-        latent_reps = visualize_gmm_latent_representation(
+        latent_rep = visualize_plotly_latent_representation(
             self.model,
             DataLoader(self.valset, batch_size=64),
             self.device,
-            f'for_client_{self.cid}_train_at_round_{config.get("server_round")}',
-            folder=IDENTIFIER,
+            num_class=NUM_CLASSES,
+            use_PCA=True,
         )
-
         # Return local model and statistics
         return (
             self.get_parameters({}),
-            len(trainloader.dataset),
+            8900,  # len(trainloader.dataset),TODO: change to align_loader
             {
                 "cid": self.cid,
-                "vae_loss_term": vae_loss_term,
-                "reg_term": reg_term,
+                "local_loss_term": local_loss_term,
+                "loss_ref_term": loss_ref_term,
                 "align_term": align_term,
+                "latent_diff_term": latent_diff_term,
                 "true_image": true_img,
                 "gen_image": gen_img,
-                "latent_rep": latent_reps,
+                "latent_rep": latent_rep,
                 "client_round": config["server_round"],
+                "total_loss": local_loss_term + loss_ref_term,
             },
         )
 
     def evaluate(self, parameters, config):
-        set_params(self.model, parameters)
+        if config["local_param_dict"] is not None:
+            client_params = parameters_to_ndarrays(
+                config["local_param_dict"][f"client_param_{self.cid}"]
+            )
+            model_params = [
+                val.cpu().numpy() for _, val in self.model.state_dict().items()
+            ]
+            print(f"client_params{self.cid}: {client_params[7]}")
+            print(f"model_params {self.cid}: {model_params[7]}")
+            print(f"get_params {self.cid}: {self.get_parameters({})[7]}")
+            set_params(
+                self.model,
+                parameters_to_ndarrays(
+                    config["local_param_dict"][f"client_param_{self.cid}"]
+                ),
+            )
 
         # Construct dataloader
         valloader = DataLoader(self.valset, batch_size=64)
 
         # Evaluate
         loss, accuracy = test(self.model, valloader, device=self.device)
-
         # Return statistics
         return (
             float(loss),
@@ -144,7 +199,7 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
-def get_client_fn(train_partitions, val_partitions):
+def get_client_fn(train_partitions, val_partitions, align_loader):
     """Return a function to construct a client.
 
     The VirtualClientEngine will exectue this function whenever a client is sampled by
@@ -158,7 +213,7 @@ def get_client_fn(train_partitions, val_partitions):
         trainset, valset = train_partitions[int(cid)], val_partitions[int(cid)]
 
         # Create and return client
-        return FlowerClient(trainset, valset, cid).to_client()
+        return FlowerClient(trainset, valset, align_loader, int(cid)).to_client()
 
     return client_fn
 
@@ -182,37 +237,52 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 def main():
+    # Parse input arguments
     run = wandb.init(
         entity="mak",
-        group="cir",
+        group="gen50",
         reinit=True,
     )
 
     print(f"running these hparams-> {wandb.config}")
     wandb.define_metric("server_round")
     wandb.define_metric("global_*", step_metric="server_round")
+    wandb.define_metric("generated_*", step_metric="server_round")
     wandb.define_metric("client_round")
     wandb.define_metric("train_*", step_metric="client_round")
     wandb.define_metric("eval_*", step_metric="client_round")
 
-    # Parse input arguments
+    samples_per_class = wandb.config["sample_per_class"]
+
+    ALIGNMENT_DATALOADER = alignment_dataloader(
+        samples_per_class=samples_per_class,
+        batch_size=samples_per_class * NUM_CLASSES,
+    )
+
     def fit_config(server_round: int) -> Dict[str, Scalar]:
         """Return a configuration with static batch size and (local) epochs."""
         config = {
-            "epochs": 2,  # Number of local epochs done by clients
-            "batch_size": 64,  # Batch size to use by clients during fit()
+            "epochs": wandb.config["epochs"],  # Number of local epochs done by clients
+            "batch_size": wandb.config["batch_size"],
             "server_round": server_round,
+            "beta": wandb.config["beta"],
             "sample_per_class": wandb.config["sample_per_class"],
             "lambda_reg": wandb.config["lambda_reg"],
             "lambda_align": wandb.config["lambda_align"],
             "lr_g": wandb.config["lr_g"],
             "steps_g": wandb.config["steps_g"],
+            "latent_dim": LATENT_DIM,
         }
         return config
 
-    def get_evaluate_fn(
-        testset,
-    ):
+    def eval_config(server_round: int) -> Dict[str, Scalar]:
+        """Return a configuration with static batch size and (local) epochs."""
+        config = {
+            "server_round": server_round,
+        }
+        return config
+
+    def get_evaluate_fn(testset):
         """Return an evaluation function for centralized evaluation."""
 
         def evaluate(
@@ -223,17 +293,19 @@ def main():
             # Determine device
             device = DEVICE
 
-            model = VAE()
+            model = VAE(z_dim=LATENT_DIM)
             model.to(device)
             set_params(model, parameters)
+            model.eval()
             if server_round == 0 or server_round == args.num_rounds:
                 with open(
-                    f"{IDENTIFIER}/weights_cir_round_{server_round}.npy", "wb"
+                    f"{IDENTIFIER}/{run.name}-weights_gen_round_{server_round}.npy",
+                    "wb",
                 ) as f:
                     np.save(f, np.array(parameters, dtype=object))
                 wandb.watch(model)
 
-            testloader = DataLoader(testset, batch_size=64)
+            testloader = DataLoader(testset, batch_size=64, shuffle=True)
             true_img, gen_img = visualize_gen_image(
                 model,
                 testloader,
@@ -241,22 +313,38 @@ def main():
                 f"server_eval_{server_round}",
                 folder=IDENTIFIER,
             )
-            latent_reps = visualize_gmm_latent_representation(
+            latent_reps = visualize_plotly_latent_representation(
                 model,
                 testloader,
                 device,
-                f"server_eval_{server_round}",
-                folder=IDENTIFIER,
+                num_class=NUM_CLASSES,
+                use_PCA=True,
             )
             global_val_loss = eval_reconstrution(model, testloader, device)
+            with torch.no_grad():
+                z_sample_np = sample_latents(model, testloader, device, 64)
+                z_sample = torch.tensor(z_sample_np, dtype=torch.float32).to(device)
+                recon = model.decoder(z_sample).cpu()
+                recon = recon.view(-1, 1, 28, 28)
+                fig, ax = plt.subplots(figsize=(10, 10))
+                img = make_grid(recon, nrow=8, normalize=True).permute(1, 2, 0).numpy()
+                ax.imshow(img)
+                ax.axis("off")
+                fisher_score = float(
+                    get_fisher_ratio(model, testloader, LATENT_DIM, device)
+                )
+
             wandb.log(
                 {
                     f"global_true_image": wandb.Image(true_img),
                     f"global_gen_image": wandb.Image(gen_img),
-                    f"global_latent_rep": wandb.Image(latent_reps),
+                    f"global_latent_rep": latent_reps,
                     f"global_val_loss": global_val_loss,
-                    "server_round": server_round,
-                }
+                    f"global_fisher_score": fisher_score,
+                    f"server_round": server_round,
+                    f"generated_gen_round": plt,
+                },
+                step=server_round,
             )
             plt.close("all")
 
@@ -264,30 +352,33 @@ def main():
 
     # Download dataset and partition it
     trainsets, valsets = non_iid_train_iid_test()
-    net = VAE().to(DEVICE)
-    gen_net = VAE(encoder_only=True).to(DEVICE)
+    net = VAE(z_dim=LATENT_DIM).to(DEVICE)
 
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)
+
+    gen_net = VAE(z_dim=LATENT_DIM, encoder_only=True).to(DEVICE)
     n2 = [val.cpu().numpy() for _, val in gen_net.state_dict().items()]
     initial_gen_params = ndarrays_to_parameters(n2)
-    samples_per_class = wandb.config["sample_per_class"]
-    strategy = fl.server.strategy.FedCiR(
+
+    strategy = VisualiseFedGen(
         initial_parameters=initial_params,
         initial_generator_params=initial_gen_params,
-        gen_stats=initial_gen_params,
+        gen_model=gen_net,
         min_fit_clients=NUM_CLIENTS,
         min_available_clients=NUM_CLIENTS,
         min_evaluate_clients=NUM_CLIENTS,
         on_fit_config_fn=fit_config,
+        on_evaluate_config_fn=eval_config,
         evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
         evaluate_fn=get_evaluate_fn(valsets[-1]),  # Global evaluation function
-        alignment_dataloader=alignment_dataloader(
-            samples_per_class=samples_per_class, batch_size=samples_per_class * 10
-        ),
+        alignment_dataloader=ALIGNMENT_DATALOADER,
         lr_g=wandb.config["lr_g"],
         steps_g=wandb.config["steps_g"],
+        lambda_align_g=wandb.config["lambda_align_g"],
         device=DEVICE,
+        num_classes=NUM_CLASSES,
+        latent_dim=LATENT_DIM,
     )
 
     # Resources to be assigned to each virtual client
@@ -298,7 +389,7 @@ def main():
 
     # Start simulation
     fl.simulation.start_simulation(
-        client_fn=get_client_fn(trainsets, valsets),
+        client_fn=get_client_fn(trainsets, valsets, ALIGNMENT_DATALOADER),
         num_clients=NUM_CLIENTS,
         client_resources=client_resources,
         config=fl.server.ServerConfig(num_rounds=args.num_rounds),
@@ -316,13 +407,17 @@ if __name__ == "__main__":
         "method": "random",
         "metric": {"name": "global_val_loss", "goal": "minimize"},
         "parameters": {
-            "sample_per_class": {"values": [50, 100, 150]},
-            "lambda_reg": {"min": 0.0, "max": 1.0},
-            "lambda_align": {"values": [1, 10, 50, 100]},
-            "lr_g": {"values": [1e-3, 1e-2, 1e-4]},
-            "steps_g": {"values": [5, 10, 15, 20]},
+            "epochs": {"values": [10]},
+            "batch_size": {"values": [128]},
+            "beta": {"values": [0]},
+            "sample_per_class": {"values": [890]},
+            "lr_g": {"values": [1e-3]},
+            "steps_g": {"values": [10]},
+            "lambda_reg": {"values": [1]},
+            "lambda_align_g": {"values": [1]},
+            "lambda_align": {"values": [0]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=10)
+    wandb.agent(sweep_id, function=main, count=1)
