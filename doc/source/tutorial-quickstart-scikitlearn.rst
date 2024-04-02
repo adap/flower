@@ -64,8 +64,8 @@ The pre-defined functions are used in the :code:`client.py` and imported. The :c
   import utils
   from flwr_datasets import FederatedDataset
 
-Prior to local training, we need to load the MNIST dataset, a popular image classification dataset of handwritten digits for machine learning, and partition MNIST for FL. This can be conveniently achieved using Flower Datasets.
-The :code:`FederatedDataset.load_partition()` loads the partitioned training set for each partition ID defined in the :code:`--partition-id` argument.
+Prior to local training, we need to load the MNIST dataset, a popular image classification dataset of handwritten digits for machine learning, and partition the dataset for FL. This can be conveniently achieved using Flower Datasets.
+The :code:`FederatedDataset.load_partition()` method loads the partitioned training set for each partition ID defined in the :code:`--partition-id` argument.
 
 .. code-block:: python
 
@@ -184,7 +184,7 @@ First, we import again all required libraries such as Flower and scikit-learn.
 
 The number of federated learning rounds is set in :code:`fit_round()` and the evaluation is defined in :code:`get_evaluate_fn()`.
 The evaluation function is called after each federated learning round and gives you information about loss and accuracy.
-Note that we also make use of Flower Datasets in :code:`server.py` to load the test splits for centralized evaluation.
+Note that we also make use of Flower Datasets here to load the test split of the MNIST dataset for server-side evaluation.
 
 .. code-block:: python
 
