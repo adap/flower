@@ -494,7 +494,6 @@ def _start_client_internal(
 
                     # Execute ClientApp
                     reply_message = client_app(message=message, context=context)
-
                 except Exception as ex:  # pylint: disable=broad-exception-caught
                     log(ERROR, "SuperNode raised an exception", exc_info=ex)
 
