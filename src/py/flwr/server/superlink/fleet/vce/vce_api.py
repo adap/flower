@@ -24,6 +24,7 @@ from typing import Callable, Dict, List, Optional
 
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.node_state import NodeState
+from flwr.common.constant import PING_MAX_INTERVAL
 from flwr.common.logger import log
 from flwr.common.message import Error
 from flwr.common.object_ref import load_app
@@ -43,7 +44,7 @@ def _register_nodes(
     nodes_mapping: NodeToPartitionMapping = {}
     state = state_factory.state()
     for i in range(num_nodes):
-        node_id = state.create_node()
+        node_id = state.create_node(ping_interval=PING_MAX_INTERVAL)
         nodes_mapping[node_id] = i
     log(INFO, "Registered %i nodes", len(nodes_mapping))
     return nodes_mapping
