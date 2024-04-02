@@ -43,7 +43,7 @@ def _register_nodes(
     nodes_mapping: NodeToPartitionMapping = {}
     state = state_factory.state()
     for i in range(num_nodes):
-        node_id = state.create_node()
+        node_id = state.create_node(ping_interval=1e300)
         nodes_mapping[node_id] = i
     log(INFO, "Registered %i nodes", len(nodes_mapping))
     return nodes_mapping

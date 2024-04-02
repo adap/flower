@@ -182,16 +182,14 @@ class InMemoryState(State):
         """
         return len(self.task_res_store)
 
-    def create_node(self) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
         with self.lock:
             if node_id not in self.node_ids:
-                # Default ping interval is 30s
-                # TODO: change 1e9 to 30s  # pylint: disable=W0511
-                self.node_ids[node_id] = (time.time() + 1e9, 1e9)
+                self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
                 return node_id
         log(ERROR, "Unexpected node registration failure.")
         return 0
