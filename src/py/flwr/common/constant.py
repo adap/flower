@@ -74,3 +74,14 @@ class SType:
     def __new__(cls) -> SType:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class ErrorCode:
+    """Error codes for Message's Error."""
+
+    UNKNOWN = 0
+    CLIENT_APP_RAISED_EXCEPTION = 1
+
+    def __new__(cls) -> ErrorCode:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
