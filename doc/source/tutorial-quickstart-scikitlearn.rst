@@ -64,7 +64,7 @@ The pre-defined functions are used in the :code:`client.py` and imported. The :c
   import utils
   from flwr_datasets import FederatedDataset
 
-Prior to local training, we need to load the MNIST dataset, a popular image classification dataset of handwritten digits for machine learning, and partition the dataset for FL. This can be conveniently achieved using Flower Datasets.
+Prior to local training, we need to load the MNIST dataset, a popular image classification dataset of handwritten digits for machine learning, and partition the dataset for FL. This can be conveniently achieved using `Flower Datasets <https://flower.ai/docs/datasets>`_.
 The :code:`FederatedDataset.load_partition()` method loads the partitioned training set for each partition ID defined in the :code:`--partition-id` argument.
 
 .. code-block:: python
