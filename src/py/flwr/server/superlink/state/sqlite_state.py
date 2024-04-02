@@ -30,6 +30,7 @@ from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .state import State
+from .utils import make_node_unavailable_taskres
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
@@ -344,6 +345,7 @@ class SqliteState(State):
 
         return task_id
 
+    # pylint: disable-next=R0914
     def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
         """Get TaskRes for task_ids.
 
@@ -374,7 +376,7 @@ class SqliteState(State):
             AND delivered_at = ""
         """
 
-        data: Dict[str, Union[str, int]] = {}
+        data: Dict[str, Union[str, float, int]] = {}
 
         if limit is not None:
             query += " LIMIT :limit"
@@ -408,6 +410,54 @@ class SqliteState(State):
             rows = self.query(query, data)
 
         result = [dict_to_task_res(row) for row in rows]
+
+        # 1. Query: Fetch consumer_node_id of remaining task_ids
+        # Assume the ancestry field only contains one element
+        data.clear()
+        replied_task_ids: Set[UUID] = {UUID(str(row["ancestry"])) for row in rows}
+        remaining_task_ids = task_ids - replied_task_ids
+        placeholders = ",".join([f":id_{i}" for i in range(len(remaining_task_ids))])
+        query = f"""
+            SELECT consumer_node_id
+            FROM task_ins
+            WHERE task_id IN ({placeholders});
+        """
+        for index, task_id in enumerate(remaining_task_ids):
+            data[f"id_{index}"] = str(task_id)
+        node_ids = [int(row["consumer_node_id"]) for row in self.query(query, data)]
+
+        # 2. Query: Select offline nodes
+        placeholders = ",".join([f":id_{i}" for i in range(len(node_ids))])
+        query = f"""
+            SELECT node_id
+            FROM node
+            WHERE node_id IN ({placeholders})
+            AND online_until < :time;
+        """
+        data = {f"id_{i}": str(node_id) for i, node_id in enumerate(node_ids)}
+        data["time"] = time.time()
+        offline_node_ids = [int(row["node_id"]) for row in self.query(query, data)]
+
+        # 3. Query: Select TaskIns for offline nodes
+        placeholders = ",".join([f":id_{i}" for i in range(len(offline_node_ids))])
+        query = f"""
+            SELECT *
+            FROM task_ins
+            WHERE consumer_node_id IN ({placeholders});
+        """
+        data = {f"id_{i}": str(node_id) for i, node_id in enumerate(offline_node_ids)}
+        task_ins_rows = self.query(query, data)
+
+        # Make TaskRes containing node unavailabe error
+        for row in task_ins_rows:
+            if limit and len(result) == limit:
+                break
+            task_ins = dict_to_task_ins(row)
+            err_taskres = make_node_unavailable_taskres(
+                ref_taskins=task_ins,
+            )
+            result.append(err_taskres)
+
         return result
 
     def num_task_ins(self) -> int:
