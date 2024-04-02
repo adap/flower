@@ -14,11 +14,10 @@
 # ==============================================================================
 """Flower client app."""
 
-
 import argparse
 import sys
 import time
-from logging import DEBUG, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 
@@ -35,9 +34,11 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
+    ErrorCode,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
+from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.message import Error
 from flwr.common.object_ref import load_app, validate
 from flwr.common.retry_invoker import RetryInvoker, exponential
 
@@ -385,8 +386,6 @@ def _start_client_internal(
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app
-    else:
-        warn_experimental_feature("`load_client_app_fn`")
 
     # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
@@ -397,7 +396,7 @@ def _start_client_internal(
     )
 
     retry_invoker = RetryInvoker(
-        wait_factory=exponential,
+        wait_gen_factory=exponential,
         recoverable_exceptions=connection_error_type,
         max_tries=max_retries,
         max_time=max_wait_time,
@@ -482,32 +481,57 @@ def _start_client_internal(
                 # Retrieve context for this run
                 context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
-                # Load ClientApp instance
-                client_app: ClientApp = load_client_app_fn()
-
-                # Handle task message
-                out_message = client_app(message=message, context=context)
-
-                # Update node state
-                node_state.update_context(
-                    run_id=message.metadata.run_id,
-                    context=context,
+                # Create an error reply message that will never be used to prevent
+                # the used-before-assignment linting error
+                reply_message = message.create_error_reply(
+                    error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
                 )
+
+                # Handle app loading and task message
+                try:
+                    # Load ClientApp instance
+                    client_app: ClientApp = load_client_app_fn()
+
+                    # Execute ClientApp
+                    reply_message = client_app(message=message, context=context)
+                except Exception as ex:  # pylint: disable=broad-exception-caught
+
+                    # Legacy grpc-bidi
+                    if transport in ["grpc-bidi", None]:
+                        log(ERROR, "Client raised an exception.", exc_info=ex)
+                        # Raise exception, crash process
+                        raise ex
+
+                    # Don't update/change NodeState
+
+                    e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                    exc_entity = "ClientApp"
+                    if isinstance(ex, LoadClientAppError):
+                        reason = (
+                            "An exception was raised when attempting to load "
+                            "`ClientApp`"
+                        )
+                        e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+                        exc_entity = "SuperNode"
+
+                    log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+
+                    # Create error message
+                    reply_message = message.create_error_reply(
+                        error=Error(code=e_code, reason=reason)
+                    )
+                else:
+                    # No exception, update node state
+                    node_state.update_context(
+                        run_id=message.metadata.run_id,
+                        context=context,
+                    )
 
                 # Send
-                send(out_message)
-                log(
-                    INFO,
-                    "[RUN %s, ROUND %s]",
-                    out_message.metadata.run_id,
-                    out_message.metadata.group_id,
-                )
-                log(
-                    INFO,
-                    "Sent: %s reply to message %s",
-                    out_message.metadata.message_type,
-                    message.metadata.message_id,
-                )
+                send(reply_message)
+                log(INFO, "Sent reply")
 
             # Unregister node
             if delete_node is not None:

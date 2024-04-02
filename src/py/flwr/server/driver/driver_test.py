@@ -19,7 +19,7 @@ import time
 import unittest
 from unittest.mock import Mock, patch
 
-from flwr.common import RecordSet
+from flwr.common import DEFAULT_TTL, RecordSet
 from flwr.common.message import Error
 from flwr.common.serde import error_to_proto, recordset_to_proto
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
@@ -99,7 +99,8 @@ class TestDriver(unittest.TestCase):
         mock_response = Mock(task_ids=["id1", "id2"])
         self.mock_grpc_driver.push_task_ins.return_value = mock_response
         msgs = [
-            self.driver.create_message(RecordSet(), "", 0, "", "") for _ in range(2)
+            self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)
+            for _ in range(2)
         ]
 
         # Execute
@@ -121,7 +122,8 @@ class TestDriver(unittest.TestCase):
         mock_response = Mock(task_ids=["id1", "id2"])
         self.mock_grpc_driver.push_task_ins.return_value = mock_response
         msgs = [
-            self.driver.create_message(RecordSet(), "", 0, "", "") for _ in range(2)
+            self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)
+            for _ in range(2)
         ]
         # Use invalid run_id
         msgs[1].metadata._run_id += 1  # pylint: disable=protected-access
@@ -170,7 +172,7 @@ class TestDriver(unittest.TestCase):
             task_res_list=[TaskRes(task=Task(ancestry=["id1"], error=error_proto))]
         )
         self.mock_grpc_driver.pull_task_res.return_value = mock_response
-        msgs = [self.driver.create_message(RecordSet(), "", 0, "", "")]
+        msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
 
         # Execute
         ret_msgs = list(self.driver.send_and_receive(msgs))
@@ -187,7 +189,7 @@ class TestDriver(unittest.TestCase):
         self.mock_grpc_driver.push_task_ins.return_value = mock_response
         mock_response = Mock(task_res_list=[])
         self.mock_grpc_driver.pull_task_res.return_value = mock_response
-        msgs = [self.driver.create_message(RecordSet(), "", 0, "", "")]
+        msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
 
         # Execute
         with patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01)):
@@ -205,8 +207,7 @@ class TestDriver(unittest.TestCase):
         self.driver._get_grpc_driver_and_run_id()
 
         # Execute
-        # pylint: disable-next=unnecessary-dunder-call
-        self.driver.__del__()
+        self.driver.close()
 
         # Assert
         self.mock_grpc_driver.disconnect.assert_called_once()
@@ -214,8 +215,7 @@ class TestDriver(unittest.TestCase):
     def test_del_with_uninitialized_driver(self) -> None:
         """Test cleanup behavior when Driver is not initialized."""
         # Execute
-        # pylint: disable-next=unnecessary-dunder-call
-        self.driver.__del__()
+        self.driver.close()
 
         # Assert
         self.mock_grpc_driver.disconnect.assert_not_called()
