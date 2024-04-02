@@ -314,8 +314,9 @@ class Message:
         """
         if ttl:
             warnings.warn(
-                "A custom TTL was set, but note that the SuperLink does not enforce the TTL yet."
-                "The SuperLink will start enforcing the TTL in a future version of Flower.",
+                "A custom TTL was set, but note that the SuperLink does not enforce "
+                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
+                "version of Flower.",
                 stacklevel=2,
             )
         # If no TTL passed, use default for message creation (will update after
@@ -358,8 +359,9 @@ class Message:
         """
         if ttl:
             warnings.warn(
-                "A custom TTL was set, but note that the SuperLink does not enforce the TTL yet."
-                "The SuperLink will start enforcing the TTL in a future version of Flower.",
+                "A custom TTL was set, but note that the SuperLink does not enforce "
+                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
+                "version of Flower.",
                 stacklevel=2,
             )
         # If no TTL passed, use default for message creation (will update after

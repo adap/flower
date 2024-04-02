@@ -125,8 +125,9 @@ class Driver:
         _, run_id = self._get_grpc_driver_and_run_id()
         if ttl:
             warnings.warn(
-                "A custom TTL was set, but note that the SuperLink does not enforce the TTL yet."
-                "The SuperLink will start enforcing the TTL in a future version of Flower.",
+                "A custom TTL was set, but note that the SuperLink does not enforce "
+                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
+                "version of Flower.",
                 stacklevel=2,
             )
 
