@@ -29,7 +29,7 @@ from .typing import ClientAppCallable
 
 
 class ClientAppException(Exception):
-    """Exepction raised when an exception is raised while executing a ClientApp."""
+    """Exception raised when an exception is raised while executing a ClientApp."""
 
     def __init__(self, message: str):
         ex_name = self.__class__.__name__
