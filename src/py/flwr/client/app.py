@@ -495,10 +495,10 @@ def _start_client_internal(
                     # Execute ClientApp
                     reply_message = client_app(message=message, context=context)
                 except Exception as ex:  # pylint: disable=broad-exception-caught
-                    log(ERROR, "SuperNode raised an exception", exc_info=ex)
 
                     # Legacy grpc-bidi
                     if transport in ["grpc-bidi", None]:
+                        log(ERROR, "Client raised an exception.", exc_info=ex)
                         # Raise exception, crash process
                         raise ex
 
@@ -507,12 +507,16 @@ def _start_client_internal(
                     e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
                     # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
                     reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                    exc_entity = "ClientApp"
                     if isinstance(ex, LoadClientAppError):
                         reason = (
                             "An exception was raised when attempting to load "
                             "the ClientApp module"
                         )
                         e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+                        exc_entity = "SuperNode"
+
+                    log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
 
                     # Create error message
                     reply_message = message.create_error_reply(
