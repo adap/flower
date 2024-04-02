@@ -34,7 +34,7 @@ from flwr.common.constant import (
     PING_RANDOM_RANGE,
 )
 from flwr.common.grpc import create_channel
-from flwr.common.logger import log, warn_experimental_feature
+from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.serde import message_from_taskins, message_to_taskres
@@ -103,8 +103,6 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
     """
-    warn_experimental_feature("`grpc-rere`")
-
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
 
@@ -127,33 +125,9 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
     # ping/create_node/delete_node/receive/send functions
     ###########################################################################
 
-    def ping() -> None:
-        # Get Node
-        if node is None:
-            log(ERROR, "Node instance missing")
-            if not ping_stop_event.is_set():
-                ping_stop_event.wait(PING_CALL_TIMEOUT)
-            return
-
-        # Construct the ping request
-        req = PingRequest(node=node, ping_interval=PING_DEFAULT_INTERVAL)
-
-        # Call FleetAPI
-        res: PingResponse = stub.Ping(req, timeout=PING_CALL_TIMEOUT)
-
-        # Check if success
-        if not res.success:
-            raise RuntimeError("Ping failed unexpectedly.")
-
-        # Wait
-        rd = random.uniform(*PING_RANDOM_RANGE)
-        next_interval: float = PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT
-        next_interval *= PING_BASE_MULTIPLIER + rd
-        if not ping_stop_event.is_set():
-            ping_stop_event.wait(next_interval)
-
     def create_node() -> None:
         """Set create_node."""
+        # Call FleetAPI
         create_node_request = CreateNodeRequest()
         create_node_response = retry_invoker.invoke(
             stub.CreateNode,
@@ -172,18 +146,12 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
         if node is None:
             log(ERROR, "Node instance missing")
             return
+        node: Node = cast(Node, node_store[KEY_NODE])
 
-        # Stop the ping-loop thread
-        ping_stop_event.set()
-
-        # Call FleetAPI
         delete_node_request = DeleteNodeRequest(node=node)
         retry_invoker.invoke(stub.DeleteNode, request=delete_node_request)
 
-        # Cleanup
-        node = None
-        if ping_thread is not None:
-            ping_thread.join()
+        del node_store[KEY_NODE]
 
     def receive() -> Optional[Message]:
         """Receive next task from server."""

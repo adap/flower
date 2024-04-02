@@ -148,8 +148,6 @@ def http_request_response(  # pylint: disable=R0914, R0915
         # Get Node
         if node is None:
             log(ERROR, "Node instance missing")
-            if not ping_stop_event.is_set():
-                ping_stop_event.wait(PING_CALL_TIMEOUT)
             return
 
         # Construct the ping request
@@ -170,8 +168,6 @@ def http_request_response(  # pylint: disable=R0914, R0915
 
         # Check status code and headers
         if res.status_code != 200:
-            if not ping_stop_event.is_set():
-                ping_stop_event.wait(PING_CALL_TIMEOUT)
             return
         if "content-type" not in res.headers:
             log(
@@ -179,8 +175,6 @@ def http_request_response(  # pylint: disable=R0914, R0915
                 "[Node] POST /%s: missing header `Content-Type`",
                 PATH_PULL_TASK_INS,
             )
-            if not ping_stop_event.is_set():
-                ping_stop_event.wait(PING_CALL_TIMEOUT)
             return
         if res.headers["content-type"] != "application/protobuf":
             log(
@@ -188,8 +182,6 @@ def http_request_response(  # pylint: disable=R0914, R0915
                 "[Node] POST /%s: header `Content-Type` has wrong value",
                 PATH_PULL_TASK_INS,
             )
-            if not ping_stop_event.is_set():
-                ping_stop_event.wait(PING_CALL_TIMEOUT)
             return
 
         # Deserialize ProtoBuf from bytes
@@ -257,6 +249,13 @@ def http_request_response(  # pylint: disable=R0914, R0915
         if node is None:
             log(ERROR, "Node instance missing")
             return
+
+        # Stop the ping-loop thread
+        ping_stop_event.set()
+        if ping_thread is not None:
+            ping_thread.join()
+
+        # Send DeleteNode request
         delete_node_req_proto = DeleteNodeRequest(node=node)
         delete_node_req_req_bytes: bytes = delete_node_req_proto.SerializeToString()
         res = retry_invoker.invoke(
@@ -288,13 +287,8 @@ def http_request_response(  # pylint: disable=R0914, R0915
                 PATH_PULL_TASK_INS,
             )
 
-        # Stop the ping-loop thread
-        ping_stop_event.set()
-
         # Cleanup
         node = None
-        if ping_thread is not None:
-            ping_thread.join()
 
     def receive() -> Optional[Message]:
         """Receive next task from server."""
