@@ -16,21 +16,29 @@
 
 
 import time
+from logging import ERROR
 from uuid import uuid4
 
+from flwr.common import log
 from flwr.common.constant import ErrorCode
 from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
 NODE_UNAVAILABLE_ERROR_REASON = (
-    "Error: Node Unavailable - The destination node is currently unavailable."
+    "Error: Node Unavailable - The destination node is currently unavailable. "
+    "It exceeds the time limit specified in its last ping."
 )
 
 
 def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
     """Create a TaskRes containing the node available error based on the reference
     TaskIns."""
+    current_time = time.time()
+    ttl = ref_taskins.task.ttl - (current_time - ref_taskins.task.created_at)
+    if ttl < 0:
+        log(ERROR, "Creating TaskRes for TaskIns that exceeds its TTL.")
+        ttl = 0
     return TaskRes(
         task_id=str(uuid4()),
         group_id=ref_taskins.group_id,
@@ -38,8 +46,8 @@ def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
         task=Task(
             producer=Node(node_id=0, anonymous=True),
             consumer=Node(node_id=ref_taskins.task.producer.node_id, anonymous=False),
-            created_at=time.time(),
-            ttl=0,
+            created_at=current_time,
+            ttl=ttl,
             ancestry=[ref_taskins.task_id],
             task_type=ref_taskins.task.task_type,
             error=Error(
