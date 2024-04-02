@@ -27,6 +27,8 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
 
+from .utils import make_node_unavailable_taskres
+
 
 class InMemoryState(State):
     """In-memory State implementation."""
@@ -129,14 +131,31 @@ class InMemoryState(State):
         with self.lock:
             # Find TaskRes that were not delivered yet
             task_res_list: List[TaskRes] = []
+            replied_task_ids: Set[UUID] = set()
             for _, task_res in self.task_res_store.items():
-                if (
-                    UUID(task_res.task.ancestry[0]) in task_ids
-                    and task_res.task.delivered_at == ""
-                ):
+                reply_to = UUID(task_res.task.ancestry[0])
+                if reply_to in task_ids and task_res.task.delivered_at == "":
                     task_res_list.append(task_res)
+                    replied_task_ids.add(reply_to)
                 if limit and len(task_res_list) == limit:
                     break
+
+            # Check if the node is offline
+            for task_id in task_ids - replied_task_ids:
+                if limit and len(task_res_list) == limit:
+                    break
+                task_ins = self.task_ins_store.get(task_id)
+                if task_ins is None:
+                    continue
+                node_id = task_ins.task.consumer.node_id
+                online_until, _ = self.node_ids[node_id]
+                # Generate a TaskRes containing an error reply if the node is offline.
+                if online_until < time.time():
+                    err_taskres = make_node_unavailable_taskres(
+                        ref_taskins=task_ins,
+                    )
+                    self.task_res_store[UUID(err_taskres.task_id)] = err_taskres
+                    task_res_list.append(err_taskres)
 
             # Mark all of them as delivered
             delivered_at = now().isoformat()

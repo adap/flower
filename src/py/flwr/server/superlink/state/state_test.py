@@ -412,6 +412,30 @@ class StateTest(unittest.TestCase):
 
         # Assert
         self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
+        
+    def test_node_unavailable_error(self) -> None:
+        """Test if get_task_res return TaskRes containing node unavailable error."""
+        # Prepare
+        state: State = self.state_factory()
+        run_id = state.create_run()
+        node_id_0 = state.create_node() 
+        node_id_1 = state.create_node() 
+        # state.acknowledge_ping(node_ids[0], ping_interval=30)
+        # state.acknowledge_ping(node_ids[1], ping_interval=90)
+        # task_ins_0 = create_task_ins(
+        #     consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+        # )
+        # task_ins_1 = create_task_ins(
+        #     consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+        # )
+
+        # Execute
+        current_time = time.time()
+        with patch("time.time", side_effect=lambda: current_time + 50):
+            actual_node_ids = state.get_nodes(run_id)
+
+        # Assert
+        self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
 
 
 def create_task_ins(
