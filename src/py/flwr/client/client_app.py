@@ -23,6 +23,7 @@ from flwr.client.message_handler.message_handler import (
 from flwr.client.mod.utils import make_ffn
 from flwr.client.typing import ClientFn, Mod
 from flwr.common import Context, Message, MessageType
+from flwr.common.logger import warn_preview_feature
 
 from .typing import ClientAppCallable
 
@@ -123,6 +124,8 @@ class ClientApp:
             if self._call:
                 raise _registration_error(MessageType.TRAIN)
 
+            warn_preview_feature("ClientApp-register-train-function")
+
             # Register provided function with the ClientApp object
             # Wrap mods around the wrapped step function
             self._train = make_ffn(train_fn, self._mods)
@@ -151,6 +154,8 @@ class ClientApp:
             if self._call:
                 raise _registration_error(MessageType.EVALUATE)
 
+            warn_preview_feature("ClientApp-register-evaluate-function")
+
             # Register provided function with the ClientApp object
             # Wrap mods around the wrapped step function
             self._evaluate = make_ffn(evaluate_fn, self._mods)
@@ -178,6 +183,8 @@ class ClientApp:
             """Register the query fn with the ServerApp object."""
             if self._call:
                 raise _registration_error(MessageType.QUERY)
+
+            warn_preview_feature("ClientApp-register-query-function")
 
             # Register provided function with the ClientApp object
             # Wrap mods around the wrapped step function
