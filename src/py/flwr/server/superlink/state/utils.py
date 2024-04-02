@@ -32,8 +32,7 @@ NODE_UNAVAILABLE_ERROR_REASON = (
 
 
 def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
-    """Create a TaskRes containing the node available error based on the reference
-    TaskIns."""
+    """Generate a TaskRes with a node unavailable error from a TaskIns."""
     current_time = time.time()
     ttl = ref_taskins.task.ttl - (current_time - ref_taskins.task.created_at)
     if ttl < 0:
