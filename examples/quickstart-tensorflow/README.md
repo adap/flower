@@ -48,8 +48,6 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
-______________________________________________________________________
-
 ## Run Federated Learning with TensorFlow/Keras and Flower
 
 Afterward, you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
@@ -71,8 +69,6 @@ python3 client.py --partition-id 1
 ```
 
 You will see that Keras is starting a federated training. Have a look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) for a detailed explanation. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).
-
-______________________________________________________________________
 
 ## Run Federated Learning with TensorFlow/Keras and `Flower Next`
 
