@@ -22,7 +22,6 @@ from typing import Dict, List, Optional, Set, Tuple, Union, cast
 
 import flwr.common.recordset_compat as compat
 from flwr.common import (
-    DEFAULT_TTL,
     ConfigsRecord,
     Context,
     FitRes,
@@ -374,7 +373,6 @@ class SecAggPlusWorkflow:
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
                 group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
-                ttl=DEFAULT_TTL,
             )
 
         log(
@@ -422,7 +420,6 @@ class SecAggPlusWorkflow:
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
                 group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
-                ttl=DEFAULT_TTL,
             )
 
         # Broadcast public keys to clients and receive secret key shares
@@ -493,7 +490,6 @@ class SecAggPlusWorkflow:
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
                 group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
-                ttl=DEFAULT_TTL,
             )
 
         log(
@@ -564,7 +560,6 @@ class SecAggPlusWorkflow:
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
                 group_id=str(current_round),
-                ttl=DEFAULT_TTL,
             )
 
         log(
