@@ -8,14 +8,14 @@ This guide details how to create a `Hugging Face <https://huggingface.co/>`_ `Da
 We will cover:
 
 * local files: CSV, JSON, image, audio,
-* in-memory data : dictionary, list, pd.DataFrame, np.ndarray.
+* in-memory data: dictionary, list, pd.DataFrame, np.ndarray.
 
 
 General Overview
 ----------------
 An all-in-one dataset preparation (downloading, preprocessing, partitioning) happens
-using `FederatedDataset <ref-api/flwr_datasets.FederatedDataset.html>`_, however here
-we will use only the `Partitioner` since we use already accessible data.
+using `FederatedDataset <ref-api/flwr_datasets.FederatedDataset.html>`_. However, we
+will use only the `Partitioner` here since we use already accessible data.
 
 The rest of this guide will explain how to create a
 `Dataset <https://huggingface.co/docs/datasets/en/package_reference/main_classes#datasets.Dataset>`_
@@ -81,7 +81,7 @@ Image
 ^^^^^
 You can create an image dataset in tow ways:
 
-1) give a path the the directory
+1) give a path the directory
 
 The directory needs to be structured in the following way: dataset-name/split/class/name. For example:
 
@@ -95,7 +95,7 @@ The directory needs to be structured in the following way: dataset-name/split/cl
   mnist/test/1/unique_name.png
   mnist/test/2/unique_name.png
 
-Then the path you can give is `./mnist`.
+Then, the path you can give is `./mnist`.
 
 .. code-block:: python
 
@@ -124,7 +124,7 @@ Then the path you can give is `./mnist`.
 
 Audio
 ^^^^^
-Analogously to the image datasets there are two methods here:
+Analogously to the image datasets, there are two methods here:
 
 1) give a path the the directory
 
@@ -234,7 +234,7 @@ for that, e.g.:
 
 More Resources
 --------------
-If you are looking for more details or you have not found the format you are looking supported please visit the `HuggingFace Datasets docs <https://huggingface.co/docs/datasets/index>`_.
+If you are looking for more details or you have not found the format you are looking supported, please visit the `HuggingFace Datasets docs <https://huggingface.co/docs/datasets/index>`_.
 This guide is based on the following ones:
 
 * `General Information <https://huggingface.co/docs/datasets/en/loading>`_
