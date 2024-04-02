@@ -1,0 +1,6 @@
+# logs
+wandb
+*.png
+*.npy
+# data
+mnist_data
