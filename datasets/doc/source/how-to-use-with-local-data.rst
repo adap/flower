@@ -83,6 +83,20 @@ You can create an image dataset in tow ways:
 
 1) give a path the the directory
 
+The directory needs to be structured in the following way: dataset-name/split/class/name. For example:
+
+.. code-block::
+
+  mnist/train/1/unique_name.png
+  mnist/train/1/unique_name.png
+  mnist/train/2/unique_name.png
+  ...
+  mnist/test/1/unique_name.png
+  mnist/test/1/unique_name.png
+  mnist/test/2/unique_name.png
+
+Then the path you can give is `./mnist`.
+
 .. code-block:: python
 
   from datasets import load_dataset
