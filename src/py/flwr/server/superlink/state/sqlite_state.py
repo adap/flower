@@ -411,20 +411,20 @@ class SqliteState(State):
 
         result = [dict_to_task_res(row) for row in rows]
 
-        # 1. Query: Fetch producer_node_id of remaining task_ids
+        # 1. Query: Fetch consumer_node_id of remaining task_ids
         # Assume the ancestry field only contains one element
         data.clear()
         replied_task_ids: Set[UUID] = {UUID(str(row["ancestry"])) for row in rows}
         remaining_task_ids = task_ids - replied_task_ids
         placeholders = ",".join([f":id_{i}" for i in range(len(remaining_task_ids))])
         query = f"""
-            SELECT producer_node_id
+            SELECT consumer_node_id
             FROM task_ins
             WHERE task_id IN ({placeholders});
         """
         for index, task_id in enumerate(remaining_task_ids):
             data[f"id_{index}"] = str(task_id)
-        node_ids = [int(row["producer_node_id"]) for row in self.query(query, data)]
+        node_ids = [int(row["consumer_node_id"]) for row in self.query(query, data)]
 
         # 2. Query: Select offline nodes
         placeholders = ",".join([f":id_{i}" for i in range(len(node_ids))])

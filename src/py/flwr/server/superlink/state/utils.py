@@ -18,16 +18,13 @@
 import time
 from uuid import uuid4
 
-# pylint: disable=E0611
-from flwr.proto.error_pb2 import Error
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
-
-# pylint: enable=E0611
-
+from flwr.common.constant import ErrorCode
+from flwr.proto.error_pb2 import Error  # pylint: disable=E0611
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
 NODE_UNAVAILABLE_ERROR_REASON = (
-    "Error: Node Unavailable - The destination node is currently unavailable"
+    "Error: Node Unavailable - The destination node is currently unavailable."
 )
 
 
@@ -45,6 +42,8 @@ def make_node_unavailable_taskres(ref_taskins: TaskIns) -> TaskRes:
             ttl=0,
             ancestry=[ref_taskins.task_id],
             task_type=ref_taskins.task.task_type,
-            error=Error(code=3, reason=NODE_UNAVAILABLE_ERROR_REASON),
+            error=Error(
+                code=ErrorCode.NODE_UNAVAILABLE, reason=NODE_UNAVAILABLE_ERROR_REASON
+            ),
         ),
     )
