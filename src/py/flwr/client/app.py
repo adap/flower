@@ -491,44 +491,40 @@ def _start_client_internal(
                 try:
                     # Load ClientApp instance
                     client_app: ClientApp = load_client_app_fn()
+
+                    # Execute ClientApp
+                    reply_message = client_app(message=message, context=context)
+
                 except Exception as ex:  # pylint: disable=broad-exception-caught
-                    e_code = ErrorCode.UNKNOWN
+                    log(ERROR, "SuperNode raised an exception", exc_info=ex)
+
+                    # Legacy grpc-bidi
+                    if transport in ["grpc-bidi", None]:
+                        # Raise exception, crash process
+                        raise ex
+
+                    # Don't update/change NodeState
+
+                    e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
                     if isinstance(ex, LoadClientAppError):
+                        reason = (
+                            "An exception was raised when attempting to load "
+                            "the ClientApp module"
+                        )
                         e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
 
                     # Create error message
-                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
                     reply_message = message.create_error_reply(
                         error=Error(code=e_code, reason=reason)
                     )
                 else:
-                    try:
-                        reply_message = client_app(message=message, context=context)
-                    except Exception as ex:  # pylint: disable=broad-exception-caught
-                        log(ERROR, "ClientApp raised an exception", exc_info=ex)
-
-                        # Legacy grpc-bidi
-                        if transport in ["grpc-bidi", None]:
-                            # Raise exception, crash process
-                            raise ex
-
-                        # Don't update/change NodeState
-
-                        # Create error message
-                        # Reason ex: "<class 'ZeroDivisionError'>:<'division by zero'>"
-                        reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-                        reply_message = message.create_error_reply(
-                            error=Error(
-                                code=ErrorCode.CLIENT_APP_RAISED_EXCEPTION,
-                                reason=reason,
-                            )
-                        )
-                    else:
-                        # Update node state
-                        node_state.update_context(
-                            run_id=message.metadata.run_id,
-                            context=context,
-                        )
+                    # No exception, update node state
+                    node_state.update_context(
+                        run_id=message.metadata.run_id,
+                        context=context,
+                    )
 
                 # Send
                 send(reply_message)

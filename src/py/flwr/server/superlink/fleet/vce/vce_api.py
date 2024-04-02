@@ -22,7 +22,7 @@ import traceback
 from logging import DEBUG, ERROR, INFO, WARN
 from typing import Callable, Dict, List, Optional
 
-from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.node_state import NodeState
 from flwr.common.constant import ErrorCode
 from flwr.common.logger import log
@@ -64,7 +64,6 @@ async def worker(
     while True:
         out_mssg = None
         try:
-            # Await TaskIns, convert to Message and fetch state
             task_ins: TaskIns = await queue.get()
             node_id = task_ins.task.consumer.node_id
 
@@ -76,41 +75,37 @@ async def worker(
             message = message_from_taskins(task_ins)
             # Set partition_id
             message.metadata.partition_id = nodes_mapping[node_id]
+
+            # Let backend process message
+            out_mssg, updated_context = await backend.process_message(
+                app_fn, message, context
+            )
+
+            # Update Context
+            node_states[node_id].update_context(
+                task_ins.run_id, context=updated_context
+            )
+
         except asyncio.CancelledError as e:
             log(DEBUG, "Terminating async worker: %s", e)
             break
+
+        # Exceptions aren't raised but reported as an error message
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, ex)
             log(ERROR, traceback.format_exc())
-            reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-            out_mssg = message.create_error_reply(
-                error=Error(code=ErrorCode.UNKNOWN, reason=reason)
-            )
-        else:
-            try:
-                # Let backend process message
-                out_mssg, updated_context = await backend.process_message(
-                    app_fn, message, context
-                )
 
-            # Exceptions aren't raised but reported as an error message
-            except Exception as ex:  # pylint: disable=broad-exception-caught
-                log(ERROR, ex)
-                log(ERROR, traceback.format_exc())
-
+            if isinstance(ex, ClientAppException):
+                e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+            elif isinstance(ex, LoadClientAppError):
+                e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+            else:
                 e_code = ErrorCode.UNKNOWN
 
-                # TD: is ClientAppException?
-
-                reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-                out_mssg = message.create_error_reply(
-                    error=Error(code=e_code, reason=reason)
-                )
-            else:
-                # Update Context
-                node_states[node_id].update_context(
-                    task_ins.run_id, context=updated_context
-                )
+            reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+            out_mssg = message.create_error_reply(
+                error=Error(code=e_code, reason=reason)
+            )
 
         finally:
             if out_mssg:

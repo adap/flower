@@ -28,6 +28,15 @@ from flwr.common.logger import warn_preview_feature
 from .typing import ClientAppCallable
 
 
+class ClientAppException(Exception):
+    """Exepction raised when an exception is raised while executing a ClientApp."""
+
+    def __init__(self, message: str):
+        ex_name = self.__class__.__name__
+        self.message = f"\nA {ex_name} occurred." + message
+        super().__init__(self.message)
+
+
 class ClientApp:
     """Flower ClientApp.
 
