@@ -125,6 +125,29 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
     # ping/create_node/delete_node/receive/send functions
     ###########################################################################
 
+    def ping() -> None:
+        # Get Node
+        if node is None:
+            log(ERROR, "Node instance missing")
+            return
+
+        # Construct the ping request
+        req = PingRequest(node=node, ping_interval=PING_DEFAULT_INTERVAL)
+
+        # Call FleetAPI
+        res: PingResponse = stub.Ping(req, timeout=PING_CALL_TIMEOUT)
+
+        # Check if success
+        if not res.success:
+            raise RuntimeError("Ping failed unexpectedly.")
+
+        # Wait
+        rd = random.uniform(*PING_RANDOM_RANGE)
+        next_interval: float = PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT
+        next_interval *= PING_BASE_MULTIPLIER + rd
+        if not ping_stop_event.is_set():
+            ping_stop_event.wait(next_interval)
+
     def create_node() -> None:
         """Set create_node."""
         # Call FleetAPI
@@ -146,12 +169,18 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
         if node is None:
             log(ERROR, "Node instance missing")
             return
-        node: Node = cast(Node, node_store[KEY_NODE])
 
+        # Stop the ping-loop thread
+        ping_stop_event.set()
+        if ping_thread is not None:
+            ping_thread.join()
+
+        # Call FleetAPI
         delete_node_request = DeleteNodeRequest(node=node)
         retry_invoker.invoke(stub.DeleteNode, request=delete_node_request)
 
-        del node_store[KEY_NODE]
+        # Cleanup
+        node = None
 
     def receive() -> Optional[Message]:
         """Receive next task from server."""
