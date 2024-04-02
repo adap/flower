@@ -16,7 +16,6 @@
 
 import asyncio
 import threading
-import traceback
 from abc import ABC
 from logging import DEBUG, ERROR, WARNING
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
@@ -25,20 +24,11 @@ import ray
 from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
-from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.common import Context, Message
 from flwr.common.logger import log
 
 ClientAppFn = Callable[[], ClientApp]
-
-
-class ClientException(Exception):
-    """Raised when client side logic crashes with an exception."""
-
-    def __init__(self, message: str):
-        div = ">" * 7
-        self.message = "\n" + div + "A ClientException occurred." + message
-        super().__init__(self.message)
 
 
 class VirtualClientEngineActor(ABC):
@@ -71,17 +61,7 @@ class VirtualClientEngineActor(ABC):
             raise load_ex
 
         except Exception as ex:
-            client_trace = traceback.format_exc()
-            mssg = (
-                "\n\tSomething went wrong when running your client run."
-                "\n\tClient "
-                + cid
-                + " crashed when the "
-                + self.__class__.__name__
-                + " was running its run."
-                "\n\tException triggered on the client side: " + client_trace,
-            )
-            raise ClientException(str(mssg)) from ex
+            raise ClientAppException(str(ex)) from ex
 
         return cid, out_message, context
 

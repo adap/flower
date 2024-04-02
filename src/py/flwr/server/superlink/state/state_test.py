@@ -319,7 +319,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         for _ in range(10):
-            node_ids.append(state.create_node())
+            node_ids.append(state.create_node(ping_interval=10))
         retrieved_node_ids = state.get_nodes(run_id)
 
         # Assert
@@ -331,7 +331,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         run_id = state.create_run()
-        node_id = state.create_node()
+        node_id = state.create_node(ping_interval=10)
 
         # Execute
         state.delete_node(node_id)
@@ -346,7 +346,7 @@ class StateTest(unittest.TestCase):
         state: State = self.state_factory()
         state.create_run()
         invalid_run_id = 61016
-        state.create_node()
+        state.create_node(ping_interval=10)
 
         # Execute
         retrieved_node_ids = state.get_nodes(invalid_run_id)
@@ -399,7 +399,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         run_id = state.create_run()
-        node_ids = [state.create_node() for _ in range(100)]
+        node_ids = [state.create_node(ping_interval=10) for _ in range(100)]
         for node_id in node_ids[:70]:
             state.acknowledge_ping(node_id, ping_interval=30)
         for node_id in node_ids[70:]:

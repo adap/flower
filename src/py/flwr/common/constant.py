@@ -41,6 +41,7 @@ PING_DEFAULT_INTERVAL = 30
 PING_CALL_TIMEOUT = 5
 PING_BASE_MULTIPLIER = 0.8
 PING_RANDOM_RANGE = (-0.1, 0.1)
+PING_MAX_INTERVAL = 1e300
 
 
 class MessageType:
@@ -80,7 +81,8 @@ class ErrorCode:
     """Error codes for Message's Error."""
 
     UNKNOWN = 0
-    CLIENT_APP_RAISED_EXCEPTION = 1
+    LOAD_CLIENT_APP_EXCEPTION = 1
+    CLIENT_APP_RAISED_EXCEPTION = 2
 
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
