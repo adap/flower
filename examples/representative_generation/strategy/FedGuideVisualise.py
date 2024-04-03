@@ -14,7 +14,12 @@ from flwr.common.logger import log
 import torch
 from flwr.server.strategy import FedAvg
 import wandb
-from utils.utils_mnist import VAE, visualize_plotly_latent_representation, vae_loss
+from utils.utils_mnist import (
+    VAE,
+    visualize_plotly_latent_representation,
+    vae_loss,
+    vae_rec_loss,
+)
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
 from flwr.common import (
     EvaluateIns,
@@ -107,6 +112,8 @@ class VisualiseFedGuide(FedAvg):
         if self.evaluate_fn is None:
             # No evaluation function provided
             return None
+        # TODO: Evaluate client 0 only
+        parameters = self.local_param_dict["client_param_0"]
         parameters_ndarrays = parameters_to_ndarrays(parameters)
         eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {})
         if eval_res is None:
@@ -245,30 +252,40 @@ class VisualiseFedGuide(FedAvg):
                     temp_local_models[idx].load_state_dict(state_dict, strict=True)
                     z_g, mu_g, logvar_g = self.gen_model(align_img)
 
-                    loss_ = vae_loss(
-                        temp_local_models[idx].decoder(z_g),
-                        align_img,
-                        mu_g,
-                        logvar_g,
-                        self.lambda_align_g,
-                    )
+                    # loss_ = vae_loss(
+                    #     temp_local_models[idx].decoder(z_g),
+                    #     align_img,
+                    #     mu_g,
+                    #     logvar_g,
+                    #     self.lambda_align_g,
+                    # )
+                    loss_ = vae_rec_loss(temp_local_models[idx].decoder(z_g), align_img)
+
                     loss.append(loss_)
-                loss = torch.stack(loss).mean(dim=0)
+                recon_loss = torch.stack(loss).min(dim=0)[0].mean()
+                # KL divergence loss
+                kld_loss = -0.5 * torch.sum(
+                    1 + logvar_g - mu_g.pow(2) - logvar_g.exp(), dim=1
+                )
+                # Take the mean along dimension 0 (mean over images in the batch)
+                kld_loss = torch.mean(kld_loss)
+
+                total_loss = recon_loss + kld_loss * self.lambda_align_g
 
                 threshold = 1e-6  # Define a threshold for the negligible loss
-                log(DEBUG, f"generator loss at ep {ep_g} step {step}: {loss}")
+                log(DEBUG, f"guide update loss at ep {ep_g} step {step}: {total_loss}")
 
                 if (
-                    loss.item() > threshold
-                ):  # Check if the loss is greater than the threshold
-                    loss.backward()
+                    total_loss.item() > threshold
+                ):  # Check if the total_loss is greater than the threshold
+                    total_loss.backward()
                     optimizer.step()
                 else:
                     log(
                         DEBUG,
-                        f"Skipping optimization at step {step} due to negligible loss",
+                        f"Skipping optimization at step {step} due to negligible total_loss",
                     )
-        tmp_gen_fig = visualize_plotly_latent_representation(
+        guide_fig = visualize_plotly_latent_representation(
             self.gen_model,
             self.alignment_dataloader,
             self.device,
@@ -277,9 +294,9 @@ class VisualiseFedGuide(FedAvg):
         )
         wandb.log(
             data={
-                f"final_guide_encoder_loss": loss.item(),
+                f"final_guide_encoder_loss": total_loss.item(),
                 "client_round": server_round,
-                "tmp_gen_latent_space": tmp_gen_fig,
+                "guide_latent_space": guide_fig,
             },
             step=server_round,
         )

@@ -120,6 +120,58 @@ class VAE(nn.Module):
         return output, mu, log_var
 
 
+class VAE_CNN(nn.Module):
+    def __init__(self, z_dim=2, encoder_only=False):
+        super(VAE, self).__init__()
+        self.encoder_only = encoder_only
+
+        # Encoder layers
+        self.conv1 = nn.Conv2d(
+            1, 32, kernel_size=3, stride=1, padding=1
+        )  # Assuming input size 28x28
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1)
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1)
+        self.fc_mu = nn.Linear(128 * 7 * 7, z_dim)
+        self.fc_logvar = nn.Linear(128 * 7 * 7, z_dim)
+
+        # Decoder layers
+        self.fc4 = nn.Linear(z_dim, 128 * 7 * 7)
+        self.deconv1 = nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1)
+        self.deconv2 = nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1)
+        self.deconv3 = nn.ConvTranspose2d(32, 1, kernel_size=3, stride=1, padding=1)
+
+    def encoder(self, x):
+        x = F.relu(self.conv1(x))
+        x = F.relu(self.conv2(x))
+        x = F.relu(self.conv3(x))
+        x = x.view(-1, 128 * 7 * 7)
+        mu = self.fc_mu(x)
+        log_var = self.fc_logvar(x)
+        return mu, log_var
+
+    def sampling(self, mu, log_var):
+        std = torch.exp(0.5 * log_var)
+        eps = torch.randn_like(std)
+        return eps.mul(std).add_(mu)  # return z sample
+
+    def decoder(self, z):
+        x = F.relu(self.fc4(z))
+        x = x.view(-1, 128, 7, 7)
+        x = F.relu(self.deconv1(x))
+        x = F.relu(self.deconv2(x))
+        x = torch.sigmoid(self.deconv3(x))
+        return x
+
+    def forward(self, x):
+        mu, log_var = self.encoder(x)
+        z = self.sampling(mu, log_var)
+        if self.encoder_only:
+            output = z
+        else:
+            output = self.decoder(z)
+        return output, mu, log_var
+
+
 def alignment_dataloader(
     samples_per_class=100, batch_size=8, shuffle=False, only_data=False
 ):
@@ -592,6 +644,21 @@ def vae_loss(recon_img, img, mu, logvar, beta=1.0):
     return total_loss
 
 
+def vae_rec_loss(recon_img, img):
+    # Reconstruction loss using binary cross-entropy
+    condition = (recon_img >= 0) & (recon_img <= 1)
+    assert torch.all(condition), "Values should be between 0 and 1"
+    bce_loss_per_pixel = F.binary_cross_entropy(
+        recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="none"
+    )
+    # Sum along dimension 1 (sum over pixels for each image)
+    bce_loss_sum_per_image = torch.sum(
+        bce_loss_per_pixel, dim=1
+    )  # Shape: (batch_size,)
+
+    return bce_loss_sum_per_image
+
+
 def train_align(
     net,
     trainloader,
@@ -818,17 +885,19 @@ def train_alternate_frozen(
                     net.decoder(z_g), align_img, mu_g, log_var_g, beta
                 )
                 loss_ref += vae_loss_g * lambda_reg
-
-                loss_align = 0.5 * (log_var_g - log_var - 1) + (
-                    log_var.exp() + (mu - mu_g).pow(2)
-                ) / (2 * log_var_g.exp())
+                if lambda_align > 0:
+                    loss_align = 0.5 * (log_var_g - log_var - 1) + (
+                        log_var.exp() + (mu - mu_g).pow(2)
+                    ) / (2 * log_var_g.exp())
+                else:
+                    loss_align = torch.zeros_like(log_var_g)
 
             loss_align_reduced = torch.mean(loss_align.sum(dim=1))
             print(f"align_step: {idx }")
             print(f"loss_align_term: {lambda_align * loss_align_reduced}")
 
             loss_ref += lambda_align * loss_align_reduced
-            loss_ref.backward()
+            loss_ref.backward(retain_graph=True)
             opt1.step()
 
             opt2.zero_grad()
@@ -841,16 +910,18 @@ def train_alternate_frozen(
             # vae_loss2 = latent_diff_loss(z, z_g).sum(dim=1).mean()
             # loss_local += lambda_latent_diff * vae_loss2
 
-            loss_local.backward()
+            loss_local.backward(retain_graph=True)
             opt2.step()
+            if lambda_reg_dec > 0:
+                print("dec update")
+                opt3.zero_grad()
+                recon_images, mu, logvar = net(images)
+                loss_local2 = (
+                    vae_loss(recon_images, images, mu, logvar, beta) * lambda_reg_dec
+                )
+                loss_local2.backward()
+                opt3.step()
 
-            opt3.zero_grad()
-            recon_images, mu, logvar = net(images)
-            loss_local2 = (
-                vae_loss(recon_images, images, mu, logvar, beta) * lambda_reg_dec
-            )
-            loss_local2.backward()
-            opt3.step()
     # TODO:update for local data
     return (
         loss_local.item(),

@@ -387,7 +387,7 @@ def main():
         on_fit_config_fn=fit_config,
         on_evaluate_config_fn=eval_config,
         evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
-        evaluate_fn=None,  # Global evaluation function
+        evaluate_fn=get_evaluate_fn(valsets[-1]),  # Global evaluation function
         alignment_dataloader=ALIGNMENT_DATALOADER,
         lr_g=wandb.config["lr_g"],
         steps_g=wandb.config["steps_g"],
@@ -431,10 +431,10 @@ if __name__ == "__main__":
             "steps_g": {"values": [10]},
             "lambda_reg": {"values": [1]},
             "lambda_align_g": {"values": [1]},  # for generator KL lambda
-            "lambda_align": {"values": [0, 0.1]},
-            "lambda_reg_dec": {"values": [0, 0.1]},
+            "lambda_align": {"values": [0]},
+            "lambda_reg_dec": {"values": [0]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=4)
+    wandb.agent(sweep_id, function=main, count=1)
