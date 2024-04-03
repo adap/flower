@@ -16,8 +16,13 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 class CreateNodeRequest(google.protobuf.message.Message):
     """CreateNode messages"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    PING_INTERVAL_FIELD_NUMBER: builtins.int
+    ping_interval: builtins.float
     def __init__(self,
+        *,
+        ping_interval: builtins.float = ...,
         ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ping_interval",b"ping_interval"]) -> None: ...
 global___CreateNodeRequest = CreateNodeRequest
 
 class CreateNodeResponse(google.protobuf.message.Message):
@@ -52,6 +57,34 @@ class DeleteNodeResponse(google.protobuf.message.Message):
     def __init__(self,
         ) -> None: ...
 global___DeleteNodeResponse = DeleteNodeResponse
+
+class PingRequest(google.protobuf.message.Message):
+    """Ping messages"""
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    NODE_FIELD_NUMBER: builtins.int
+    PING_INTERVAL_FIELD_NUMBER: builtins.int
+    @property
+    def node(self) -> flwr.proto.node_pb2.Node: ...
+    ping_interval: builtins.float
+    def __init__(self,
+        *,
+        node: typing.Optional[flwr.proto.node_pb2.Node] = ...,
+        ping_interval: builtins.float = ...,
+        ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["node",b"node"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["node",b"node","ping_interval",b"ping_interval"]) -> None: ...
+global___PingRequest = PingRequest
+
+class PingResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    SUCCESS_FIELD_NUMBER: builtins.int
+    success: builtins.bool
+    def __init__(self,
+        *,
+        success: builtins.bool = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["success",b"success"]) -> None: ...
+global___PingResponse = PingResponse
 
 class PullTaskInsRequest(google.protobuf.message.Message):
     """PullTaskIns messages"""
