@@ -16,14 +16,12 @@
 
 
 from dataclasses import dataclass
-from typing import Dict, Optional, TypeVar, cast
+from typing import Dict, Optional, cast
 
 from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parametersrecord import ParametersRecord
 from .typeddict import TypedDict
-
-T = TypeVar("T")
 
 
 class RecordSetData:
