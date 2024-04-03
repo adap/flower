@@ -10,8 +10,6 @@ import utils
 
 import warnings
 
-from flwr_datasets import FederatedDataset
-
 warnings.filterwarnings("ignore")
 
 
