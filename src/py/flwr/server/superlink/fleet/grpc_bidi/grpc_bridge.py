@@ -30,26 +30,43 @@ from flwr.common import serde
 
 @dataclass
 class InsWrapper:
-    """Instruction wrapper class for a single server message."""
+    """Instruction wrapper class over the raw representation of server message.
+       A chunked message is represented as an iterator"""
 
-    server_message: ServerMessage
+    _packet: ServerMessage | Iterator[ServerMessage]
     timeout: Optional[float]
 
-    @property
-    def is_end(self):
-        return serde.is_server_message_end(self.server_message)
+    def __init__(self, packet: ServerMessage | Iterator[ServerMessage], timeout: Optional[float]):
+        self._packet = packet
+        self.timeout = timeout 
 
+    def is_stream(self) -> bool:
+        return isinstance(self._packet, Iterator) 
+
+    def raw_message_stream(self) -> Iterator[ServerMessage]:
+        if isinstance(self._packet, Iterator):
+            yield from self._packet
+        else:
+            yield self._packet
 
 @dataclass
 class ResWrapper:
     """Result wrapper class for a single client message."""
 
-    client_message: ClientMessage
+    _packet: Iterator[ClientMessage]
 
+    def __init__(self, packet: Iterator[ClientMessage]):
+        self.packet = packet
+
+    def is_stream(self) -> bool:
+        return isinstance(self._packet, Iterator)
     
-    @property
-    def is_end(self):
-        return serde.is_client_message_end(self.client_message)
+    def raw_message_stream(self) -> Iterator[ClientMessage]:
+        yield from self._packet
+        
+
+    def raw_message_singular(self) -> ClientMessage:
+        return next(self._packet)
 
 
 class GrpcBridgeClosed(Exception):
@@ -60,12 +77,10 @@ class Status(Enum):
     """Status through which the bridge can transition."""
 
     AWAITING_INS_WRAPPER = 1
-    INS_WRAPPER_AVAILABLE_NO_TRANSITION = 2
-    INS_WRAPPER_AVAILABLE_TRANSITION = 3
-    AWAITING_RES_WRAPPER = 4
-    RES_WRAPPER_AVAILABLE_NO_TRANSITION = 5
-    RES_WRAPPER_AVAILABLE_TRANSITION = 6
-    CLOSED = 7
+    INS_WRAPPER_AVAILABLE = 2
+    AWAITING_RES_WRAPPER = 3
+    RES_WRAPPER_AVAILABLE = 4
+    CLOSED = 5
 
 
 class GrpcBridge:
@@ -84,7 +99,6 @@ class GrpcBridge:
         self._status = Status.AWAITING_INS_WRAPPER
         self._ins_wrapper: Optional[InsWrapper] = None
         self._res_wrapper: Optional[ResWrapper] = None
-        self.ins_lock = Lock()
 
     def _is_closed(self) -> bool:
         """Return True if closed and False otherwise."""
@@ -99,76 +113,73 @@ class GrpcBridge:
 
         The caller of the transition method will have to aquire conditional variable.
         """
-        self._status = next_status
+        if next_status == Status.CLOSED:
+            self._status = next_status
+        elif (
+            self._status == Status.AWAITING_INS_WRAPPER
+            and next_status == Status.INS_WRAPPER_AVAILABLE
+            and self._ins_wrapper is not None
+            and self._res_wrapper is None
+        ):
+            self._status = next_status
+        elif (
+            self._status == Status.INS_WRAPPER_AVAILABLE
+            and next_status == Status.AWAITING_RES_WRAPPER
+            and self._ins_wrapper is None
+            and self._res_wrapper is None
+        ):
+            self._status = next_status
+        elif (
+            self._status == Status.AWAITING_RES_WRAPPER
+            and next_status == Status.RES_WRAPPER_AVAILABLE
+            and self._ins_wrapper is None
+            and self._res_wrapper is not None
+        ):
+            self._status = next_status
+        elif (
+            self._status == Status.RES_WRAPPER_AVAILABLE
+            and next_status == Status.AWAITING_INS_WRAPPER
+            and self._ins_wrapper is None
+            and self._res_wrapper is None
+        ):
+            self._status = next_status
+        else:
+            raise ValueError(f"Invalid transition: {self._status} to {next_status}")
+
         self._cv.notify_all()
 
     def close(self) -> None:
         """Set bridge status to closed."""
         with self._cv:
             self._transition(Status.CLOSED)
-    
 
-    def read_res_wrapper(self) -> Iterator[ResWrapper]:
-        while True:
-            # Read res_wrapper and transition to AWAITING_INS_WRAPPER
-            with self._cv:
-                self._cv.wait_for(
-                    lambda: self._status in [
-                        Status.CLOSED,
-                        Status.RES_WRAPPER_AVAILABLE_NO_TRANSITION,
-                        Status.RES_WRAPPER_AVAILABLE_TRANSITION
-                        ]
-                )
-
-                self._raise_if_closed()
-                res_wrapper = self._res_wrapper  # Read
-                self._res_wrapper = None  # Reset
-
-                if self._status == Status.RES_WRAPPER_AVAILABLE_NO_TRANSITION:
-                    self._transition(Status.AWAITING_RES_WRAPPER)
-                elif self._status == Status.RES_WRAPPER_AVAILABLE_TRANSITION:
-                    self._transition(Status.AWAITING_INS_WRAPPER) 
-
-            if res_wrapper is None:
-                raise ValueError("ResWrapper can not be None")
-
-            yield res_wrapper
-            if res_wrapper.is_end:
-                break
-
-    def write_ins_wrapper(self, ins_wrapper: InsWrapper, transition: bool):
+    def request(self, ins_wrapper: InsWrapper) -> ResWrapper:
+        """Set ins_wrapper and wait for res_wrapper."""
         # Set ins_wrapper and transition to INS_WRAPPER_AVAILABLE
         with self._cv:
             self._raise_if_closed()
-            
-            self._cv.wait_for(
-                lambda: self._status
-                in [Status.AWAITING_INS_WRAPPER]
-            )
 
+            if self._status != Status.AWAITING_INS_WRAPPER:
+                raise ValueError("This should not happen")
 
             self._ins_wrapper = ins_wrapper  # Write
-            if transition:
-                self._transition(Status.INS_WRAPPER_AVAILABLE_TRANSITION)
-            else:
-                self._transition(Status.INS_WRAPPER_AVAILABLE_NO_TRANSITION)
+            self._transition(Status.INS_WRAPPER_AVAILABLE)
 
+        # Read res_wrapper and transition to AWAITING_INS_WRAPPER
+        with self._cv:
+            self._cv.wait_for(
+                lambda: self._status in [Status.CLOSED, Status.RES_WRAPPER_AVAILABLE]
+            )
 
+            self._raise_if_closed()
+            res_wrapper = self._res_wrapper  # Read
+            self._res_wrapper = None  # Reset
+            self._transition(Status.AWAITING_INS_WRAPPER)
 
-    def request(self, ins_wrapper: InsWrapper | Iterator[InsWrapper]) -> Iterator[ResWrapper]:
-        """Set ins_wrapper and wait for res_wrapper."""
-        self.ins_lock.acquire()
-        if isinstance(ins_wrapper, InsWrapper):
-            self.write_ins_wrapper(ins_wrapper, True)
-        else:
-            wrappers = list(ins_wrapper)
-            for i in range(len(wrappers)):
-                wrapper = wrappers[i]
-                self.write_ins_wrapper(wrapper, i == len(wrappers) - 1)
-        self.ins_lock.release()
+        if res_wrapper is None:
+            raise ValueError("ResWrapper can not be None")
 
-        yield from self.read_res_wrapper()
-
+        return res_wrapper
 
     def ins_wrapper_iterator(self) -> Iterator[InsWrapper]:
         """Return iterator over ins_wrapper objects."""
@@ -176,12 +187,8 @@ class GrpcBridge:
             with self._cv:
                 self._cv.wait_for(
                     lambda: self._status
-                    in [Status.CLOSED,
-                        Status.INS_WRAPPER_AVAILABLE_NO_TRANSITION,
-                        Status.INS_WRAPPER_AVAILABLE_TRANSITION
-                    ]
+                    in [Status.CLOSED, Status.INS_WRAPPER_AVAILABLE]
                 )
-
 
                 self._raise_if_closed()
 
@@ -191,28 +198,20 @@ class GrpcBridge:
                 # Transition before yielding as after the yield the execution of this
                 # function is paused and will resume when next is called again.
                 # Also release condition variable by exiting the context
-                if self._status == Status.INS_WRAPPER_AVAILABLE_NO_TRANSITION:
-                    self._transition(Status.AWAITING_INS_WRAPPER)
-                else:
-                    self._transition(Status.AWAITING_RES_WRAPPER)
+                self._transition(Status.AWAITING_RES_WRAPPER)
 
             if ins_wrapper is None:
                 raise ValueError("InsWrapper can not be None")
 
             yield ins_wrapper
 
-    def set_res_wrapper(self, res_wrapper: ResWrapper, transition: bool) -> None:
+    def set_res_wrapper(self, res_wrapper: ResWrapper) -> None:
         """Set res_wrapper for consumption."""
         with self._cv:
             self._raise_if_closed()
-            self._cv.wait_for(
-                    lambda: self._status
-                    in [Status.AWAITING_RES_WRAPPER]
-                )
 
+            if self._status != Status.AWAITING_RES_WRAPPER:
+                raise ValueError("This should not happen")
 
             self._res_wrapper = res_wrapper  # Write
-            if transition:
-                self._transition(Status.RES_WRAPPER_AVAILABLE_TRANSITION)
-            else:
-                self._transition(Status.RES_WRAPPER_AVAILABLE_NO_TRANSITION)
+            self._transition(Status.RES_WRAPPER_AVAILABLE)

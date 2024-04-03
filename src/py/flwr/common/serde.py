@@ -58,6 +58,13 @@ import itertools
 
 # === Chunked message utility ===
 
+def is_server_message_part_of_stream(msg: ServerMessage):
+    return msg.WhichOneof("msg") in ["evaluate_ins_stream"]
+
+def is_client_message_part_of_stream(msg: ClientMessage):
+    return msg.WhichOneof("msg") in ["fit_res_stream", "get_parameters_res_stream"]
+
+
 def is_server_message_end(msg: ServerMessage):
     if not msg.HasField("is_end") or msg.is_end:
         return True

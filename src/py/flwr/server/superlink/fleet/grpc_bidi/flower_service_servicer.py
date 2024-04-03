@@ -83,22 +83,6 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
         self.client_proxy_factory = grpc_client_proxy_factory
         self.bucket_manager = bucket_manger
 
-    def _consume_client_message(
-        self, client_message_stream: TimeoutIterator
-    ) -> Iterator[ResWrapper]:
-        """
-        Consume consecutive elements of a ClientMessage Timeout Iterator until it hits the end of a chunked message.
-        Raises TimeoutError at timeout.
-        """
-        for client_message in client_message_stream:
-            if client_message is client_message_stream.get_sentinel():
-                raise TimeoutError
-            msg = cast(ClientMessage, client_message)
-            res_wrapper = ResWrapper(msg)
-            yield res_wrapper
-            if res_wrapper.is_end:
-                break
-
     def Join(  # pylint: disable=invalid-name
         self,
         request_iterator: Iterator[ClientMessage],
@@ -126,30 +110,34 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
             # Get iterators
             client_message_iterator = TimeoutIterator(
                 iterator=request_iterator, reset_on_next=True
-            )
+            )       
             ins_wrapper_iterator = bridge.ins_wrapper_iterator()
 
             # All messages will be pushed to client bridge directly
             while True:
                 try:
                     # Get ins_wrapper from bridge and yield server_message
-                    for ins_wrapper in ins_wrapper_iterator:
-                        yield ins_wrapper.server_message
-                        if ins_wrapper.is_end:
-                            break
-                    
+                    ins_wrapper = next(ins_wrapper_iterator)
                     timeout = ins_wrapper.timeout
+
+                    for server_msg in ins_wrapper.raw_message_stream():
+                        yield server_msg
+                    
 
                     # Set current timeout, might be None
                     if timeout is not None:
                         client_message_iterator.set_timeout(timeout)
 
                     try:
-                        # Wait for client message
-                        for res_wrapper in self._consume_client_message(
-                            client_message_iterator
-                        ):
-                            bridge.set_res_wrapper(res_wrapper, res_wrapper.is_end)
+                        def read_until_stream_end():
+                            for client_message in client_message_iterator:
+                                if client_message is client_message_iterator.get_sentinel():
+                                    raise TimeoutError
+                                yield cast(ClientMessage, client_message)
+
+                        res_wrapper = ResWrapper(read_until_stream_end())
+                        bridge.set_res_wrapper(res_wrapper)
+
                     except TimeoutError:
                         # Important: calling `context.abort` in gRPC always
                         # raises an exception so that all code after the call to
