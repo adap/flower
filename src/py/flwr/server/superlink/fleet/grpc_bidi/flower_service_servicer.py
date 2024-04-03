@@ -37,6 +37,7 @@ from flwr.server.superlink.fleet.grpc_bidi.grpc_bridge import (
     ResWrapper,
 )
 from flwr.server.superlink.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
+from py.flwr.common import serde
 
 
 def default_bridge_factory() -> GrpcBridge:
@@ -133,7 +134,10 @@ class FlowerServiceServicer(transport_pb2_grpc.FlowerServiceServicer):
                             for client_message in client_message_iterator:
                                 if client_message is client_message_iterator.get_sentinel():
                                     raise TimeoutError
-                                yield cast(ClientMessage, client_message)
+                                client_message = cast(ClientMessage, client_message)
+                                yield client_message
+                                if serde.is_client_message_end(client_message):
+                                    break
 
                         res_wrapper = ResWrapper(read_until_stream_end())
                         bridge.set_res_wrapper(res_wrapper)
