@@ -87,8 +87,9 @@ class GrpcClientProxy(ClientProxy):
         group_id: Optional[int],
     ) -> common.FitRes:
         """Refine the provided parameters using the locally held dataset."""
-
-        fit_ins_msg = serde.fit_ins_to_proto_stream(ins, self.bucket_manager)
+        if self.bucket_manager is not None:
+            ins.parameters.upload_to_aws(self.bucket_manager)
+        fit_ins_msg = serde.fit_ins_to_proto_stream(ins)
         server_msg = map(
             lambda msg: ServerMessage(fit_ins_stream=msg[0], is_end=msg[1]), fit_ins_msg
         )
@@ -107,8 +108,13 @@ class GrpcClientProxy(ClientProxy):
         group_id: Optional[int],
     ) -> common.EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset."""
-        evaluate_msg = serde.evaluate_ins_to_proto_stream(ins, self.bucket_manager)
-        server_msg = map(lambda msg: ServerMessage(evaluate_ins_stream=msg[0], is_end=msg[1]), evaluate_msg)
+        if self.bucket_manager is not None:
+            ins.parameters.upload_to_aws(self.bucket_manager)
+        evaluate_msg = serde.evaluate_ins_to_proto_stream(ins)
+        server_msg = map(
+            lambda msg: ServerMessage(evaluate_ins_stream=msg[0], is_end=msg[1]),
+            evaluate_msg,
+        )
         ins_wrapper = InsWrapper(server_msg, timeout)
         res_wrapper = self.bridge.request(ins_wrapper)
         client_msg: ClientMessage = res_wrapper.raw_message_singular()
@@ -123,9 +129,7 @@ class GrpcClientProxy(ClientProxy):
     ) -> common.DisconnectRes:
         """Disconnect and (optionally) reconnect later."""
         reconnect_ins_msg = serde.reconnect_ins_to_proto(ins)
-        server_msg = ServerMessage(
-                        reconnect_ins=reconnect_ins_msg, is_end=True
-                    )
+        server_msg = ServerMessage(reconnect_ins=reconnect_ins_msg, is_end=True)
         ins_wrapper = InsWrapper(server_msg, timeout)
         res_wrapper = self.bridge.request(ins_wrapper)
         client_msg = res_wrapper.raw_message_singular()

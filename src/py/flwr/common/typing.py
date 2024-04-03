@@ -18,9 +18,12 @@
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
+import uuid
 
 import numpy as np
 import numpy.typing as npt
+
+from py.flwr.common.aws import BucketManager
 
 NDArray = npt.NDArray[Any]
 NDArrayInt = npt.NDArray[np.int_]
@@ -74,6 +77,7 @@ class Parameters:
 
     tensors: List[bytes]
     tensor_type: str
+    s3_object_key: Optional[uuid.UUID] = None
 
 
     @property
@@ -81,8 +85,13 @@ class Parameters:
         return [len(x) for x in self.tensors]
     
 
+    def upload_to_aws(self, bucket_manager: BucketManager):
+        # One parameter can only be uploaded once
+        if self.s3_object_key is None:
+            self.s3_object_key = bucket_manager.put_parameters(self)
+
     @staticmethod
-    def parse_bytes(
+    def from_bytes(
         tensor_type: str,
         tensors_bytes: bytes,
         dimensions: List[int]

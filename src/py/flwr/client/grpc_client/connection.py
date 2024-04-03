@@ -222,7 +222,7 @@ def grpc_connection(  # pylint: disable=R0915
                 lambda packet: ClientMessage(
                     get_parameters_res_stream=packet[0], is_end=packet[1]
                 ),
-                serde.get_parameters_res_to_proto_stream(getparamres, bucket_manager),
+                serde.get_parameters_res_to_proto_stream(getparamres),
             )
         elif message_type == MessageType.TRAIN:
             fitres = compat.recordset_to_fitres(recordset, False)
@@ -230,22 +230,24 @@ def grpc_connection(  # pylint: disable=R0915
                 lambda packet: ClientMessage(
                     fit_res_stream=packet[0], is_end=packet[1]
                 ),
-                serde.fit_res_to_proto_stream(fitres, bucket_manager),
+                serde.fit_res_to_proto_stream(fitres),
             )
         elif message_type == MessageType.EVALUATE:
             evalres = compat.recordset_to_evaluateres(recordset)
-            msg_proto = ClientMessage(evaluate_res=serde.evaluate_res_to_proto(evalres), is_end=True)
-        elif message_type == "reconnect":
-            reason = cast(Reason.ValueType, recordset.configs_records["config"]["reason"])
             msg_proto = ClientMessage(
-                disconnect_res=ClientMessage.DisconnectRes(reason=reason),
-                is_end=True
+                evaluate_res=serde.evaluate_res_to_proto(evalres), is_end=True
+            )
+        elif message_type == "reconnect":
+            reason = cast(
+                Reason.ValueType, recordset.configs_records["config"]["reason"]
+            )
+            msg_proto = ClientMessage(
+                disconnect_res=ClientMessage.DisconnectRes(reason=reason), is_end=True
             )
         else:
             raise ValueError(f"Invalid message type: {message_type}")
 
         # Send ClientMessage proto
-
         if isinstance(msg_proto, Iterator):
             for msg in msg_proto:
                 queue.put(msg)
