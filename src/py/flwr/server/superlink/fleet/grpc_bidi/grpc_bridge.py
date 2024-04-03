@@ -56,7 +56,7 @@ class ResWrapper:
     _packet: Iterator[ClientMessage]
 
     def __init__(self, packet: Iterator[ClientMessage]):
-        self.packet = packet
+        self._packet = packet
 
     def is_stream(self) -> bool:
         return isinstance(self._packet, Iterator)

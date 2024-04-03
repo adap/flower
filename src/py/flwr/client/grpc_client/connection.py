@@ -218,6 +218,8 @@ def grpc_connection(  # pylint: disable=R0915
             )
         elif message_type == MessageTypeLegacy.GET_PARAMETERS:
             getparamres = compat.recordset_to_getparametersres(recordset, False)
+            if bucket_manager is not None:
+                getparamres.parameters.upload_to_s3(bucket_manager)
             msg_proto = map(
                 lambda packet: ClientMessage(
                     get_parameters_res_stream=packet[0], is_end=packet[1]
@@ -226,6 +228,8 @@ def grpc_connection(  # pylint: disable=R0915
             )
         elif message_type == MessageType.TRAIN:
             fitres = compat.recordset_to_fitres(recordset, False)
+            if bucket_manager is not None:
+                fitres.parameters.upload_to_s3(bucket_manager)
             msg_proto = map(
                 lambda packet: ClientMessage(
                     fit_res_stream=packet[0], is_end=packet[1]

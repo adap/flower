@@ -88,7 +88,7 @@ class GrpcClientProxy(ClientProxy):
     ) -> common.FitRes:
         """Refine the provided parameters using the locally held dataset."""
         if self.bucket_manager is not None:
-            ins.parameters.upload_to_aws(self.bucket_manager)
+            ins.parameters.upload_to_s3(self.bucket_manager)
         fit_ins_msg = serde.fit_ins_to_proto_stream(ins)
         server_msg = map(
             lambda msg: ServerMessage(fit_ins_stream=msg[0], is_end=msg[1]), fit_ins_msg
@@ -109,7 +109,7 @@ class GrpcClientProxy(ClientProxy):
     ) -> common.EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset."""
         if self.bucket_manager is not None:
-            ins.parameters.upload_to_aws(self.bucket_manager)
+            ins.parameters.upload_to_s3(self.bucket_manager)
         evaluate_msg = serde.evaluate_ins_to_proto_stream(ins)
         server_msg = map(
             lambda msg: ServerMessage(evaluate_ins_stream=msg[0], is_end=msg[1]),

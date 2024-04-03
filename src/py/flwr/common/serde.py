@@ -52,6 +52,7 @@ from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, 
 from .message import Error, Message, Metadata
 from .record.typeddict import TypedDict
 
+import uuid
 import itertools
 
 
@@ -120,7 +121,7 @@ def parameters_from_proto_stream(parameters: Iterator[ParametersStreamPacket], b
     header = next(parameters).header
     if header.HasField('s3_object_key'):
         assert bucket_manager is not None
-        return bucket_manager.pull_parameters(header.s3_object_key)
+        return typing.Parameters.pull_from_s3(bucket_manager, uuid.UUID(header.s3_object_key))
         
     tensors_bytes = b''
 

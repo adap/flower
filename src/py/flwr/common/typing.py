@@ -23,7 +23,8 @@ import uuid
 import numpy as np
 import numpy.typing as npt
 
-from py.flwr.common.aws import BucketManager
+from flwr.common.aws import BucketManager
+import json
 
 NDArray = npt.NDArray[Any]
 NDArrayInt = npt.NDArray[np.int_]
@@ -83,12 +84,41 @@ class Parameters:
     @property
     def dimensions(self) -> List[int]:
         return [len(x) for x in self.tensors]
-    
 
-    def upload_to_aws(self, bucket_manager: BucketManager):
-        # One parameter can only be uploaded once
-        if self.s3_object_key is None:
-            self.s3_object_key = bucket_manager.put_parameters(self)
+    def upload_to_s3(self, bucket_manager: BucketManager):
+        # Parameter can only be uploaded once. This saves bandwidth if user attempts try to upload the same parameter object more than oncce
+
+        if self.s3_object_key is not None:
+            return
+
+        self.s3_object_key = uuid.uuid4()
+        body = b''.join(self.tensors)
+        bucket_manager.bucket.put_object(
+            Key=str(self.s3_object_key),
+            Metadata=dict(
+                tensor_type=self.tensor_type,
+                dimensions=json.dumps(self.dimensions)
+            ),
+            Body=body
+        )
+    
+    @staticmethod
+    def pull_from_s3(bucket_manager: BucketManager, id: uuid.UUID):
+        key = str(id)
+        result = bucket_manager.bucket.Object(key).get()
+        tensor_type = result["Metadata"]["tensor_type"]
+        dimensions = json.loads(result["Metadata"]["dimensions"])
+        tensor_bytes = result["Body"].read()
+        
+        params = Parameters.from_bytes(
+            tensor_type,
+            tensor_bytes,
+            dimensions
+        )
+        params.s3_object_key = id
+
+        return params
+
 
     @staticmethod
     def from_bytes(

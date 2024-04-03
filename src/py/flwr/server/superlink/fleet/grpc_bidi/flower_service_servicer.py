@@ -37,7 +37,7 @@ from flwr.server.superlink.fleet.grpc_bidi.grpc_bridge import (
     ResWrapper,
 )
 from flwr.server.superlink.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
-from py.flwr.common import serde
+from flwr.common import serde
 
 
 def default_bridge_factory() -> GrpcBridge:
