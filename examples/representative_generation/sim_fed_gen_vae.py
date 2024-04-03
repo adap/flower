@@ -339,6 +339,8 @@ def main():
             global_val_loss = eval_reconstrution(model, testloader, device)
             with torch.no_grad():
                 z_sample_np = sample_latents(model, testloader, device, 64)
+                if z_sample_np is None:
+                    return
                 z_sample = torch.tensor(z_sample_np, dtype=torch.float32).to(device)
                 recon = model.decoder(z_sample).cpu()
                 recon = recon.view(-1, 1, 28, 28)
@@ -428,7 +430,7 @@ if __name__ == "__main__":
             "beta": {"values": [0]},
             "sample_per_class": {"values": [100]},
             "lr_g": {"values": [1e-3]},
-            "steps_g": {"values": [10]},
+            "steps_g": {"values": [100]}, 
             "lambda_reg": {"values": [1]},
             "lambda_align_g": {"values": [1]},  # for generator KL lambda
             "lambda_align": {"values": [0]},

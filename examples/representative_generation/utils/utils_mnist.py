@@ -659,6 +659,27 @@ def vae_rec_loss(recon_img, img):
     return bce_loss_sum_per_image
 
 
+def vae_loss_cnn(recon_img, img, mu, logvar, beta=1.0):
+    # Reconstruction loss using Mean Squared Error (MSE)
+    mse_loss_per_pixel = F.mse_loss(recon_img, img, reduction="none")
+    # Sum along dimensions except the batch dimension
+    mse_loss_sum_per_image = torch.sum(
+        mse_loss_per_pixel, dim=(1, 2, 3)
+    )  # Shape: (batch_size,)
+
+    # Take the mean along dimension 0 (mean over images in the batch)
+    recon_loss = torch.mean(mse_loss_sum_per_image)  # Shape: scalar
+
+    # KL divergence loss
+    kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(), dim=1)
+    # Take the mean along dimension 0 (mean over images in the batch)
+    kld_loss = torch.mean(kld_loss)
+    # Total VAE loss
+    total_loss = recon_loss + kld_loss * beta
+
+    return total_loss
+
+
 def train_align(
     net,
     trainloader,
@@ -897,7 +918,7 @@ def train_alternate_frozen(
             print(f"loss_align_term: {lambda_align * loss_align_reduced}")
 
             loss_ref += lambda_align * loss_align_reduced
-            loss_ref.backward(retain_graph=True)
+            loss_ref.backward(retain_graph=False)
             opt1.step()
 
             opt2.zero_grad()
@@ -910,7 +931,7 @@ def train_alternate_frozen(
             # vae_loss2 = latent_diff_loss(z, z_g).sum(dim=1).mean()
             # loss_local += lambda_latent_diff * vae_loss2
 
-            loss_local.backward(retain_graph=True)
+            loss_local.backward(retain_graph=False)
             opt2.step()
             if lambda_reg_dec > 0:
                 print("dec update")
