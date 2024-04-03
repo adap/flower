@@ -201,7 +201,7 @@ def http_request_response(  # pylint: disable=R0914, R0915
 
     def create_node() -> None:
         """Set create_node."""
-        create_node_req_proto = CreateNodeRequest()
+        create_node_req_proto = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
         create_node_req_bytes: bytes = create_node_req_proto.SerializeToString()
 
         res = retry_invoker.invoke(

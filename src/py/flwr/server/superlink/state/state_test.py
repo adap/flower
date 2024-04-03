@@ -25,6 +25,7 @@ from unittest.mock import patch
 from uuid import uuid4
 
 from flwr.common import DEFAULT_TTL
+from flwr.common.constant import ErrorCode
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -319,7 +320,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         for _ in range(10):
-            node_ids.append(state.create_node())
+            node_ids.append(state.create_node(ping_interval=10))
         retrieved_node_ids = state.get_nodes(run_id)
 
         # Assert
@@ -331,7 +332,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         run_id = state.create_run()
-        node_id = state.create_node()
+        node_id = state.create_node(ping_interval=10)
 
         # Execute
         state.delete_node(node_id)
@@ -346,7 +347,7 @@ class StateTest(unittest.TestCase):
         state: State = self.state_factory()
         state.create_run()
         invalid_run_id = 61016
-        state.create_node()
+        state.create_node(ping_interval=10)
 
         # Execute
         retrieved_node_ids = state.get_nodes(invalid_run_id)
@@ -399,7 +400,7 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         run_id = state.create_run()
-        node_ids = [state.create_node() for _ in range(100)]
+        node_ids = [state.create_node(ping_interval=10) for _ in range(100)]
         for node_id in node_ids[:70]:
             state.acknowledge_ping(node_id, ping_interval=30)
         for node_id in node_ids[70:]:
@@ -412,6 +413,48 @@ class StateTest(unittest.TestCase):
 
         # Assert
         self.assertSetEqual(actual_node_ids, set(node_ids[70:]))
+
+    def test_node_unavailable_error(self) -> None:
+        """Test if get_task_res return TaskRes containing node unavailable error."""
+        # Prepare
+        state: State = self.state_factory()
+        run_id = state.create_run()
+        node_id_0 = state.create_node(ping_interval=90)
+        node_id_1 = state.create_node(ping_interval=30)
+        # Create and store TaskIns
+        task_ins_0 = create_task_ins(
+            consumer_node_id=node_id_0, anonymous=False, run_id=run_id
+        )
+        task_ins_1 = create_task_ins(
+            consumer_node_id=node_id_1, anonymous=False, run_id=run_id
+        )
+        task_id_0 = state.store_task_ins(task_ins=task_ins_0)
+        task_id_1 = state.store_task_ins(task_ins=task_ins_1)
+        assert task_id_0 is not None and task_id_1 is not None
+
+        # Get TaskIns to mark them delivered
+        state.get_task_ins(node_id=node_id_0, limit=None)
+
+        # Create and store TaskRes
+        task_res_0 = create_task_res(
+            producer_node_id=100,
+            anonymous=False,
+            ancestry=[str(task_id_0)],
+            run_id=run_id,
+        )
+        state.store_task_res(task_res_0)
+
+        # Execute
+        current_time = time.time()
+        task_res_list: List[TaskRes] = []
+        with patch("time.time", side_effect=lambda: current_time + 50):
+            task_res_list = state.get_task_res({task_id_0, task_id_1}, limit=None)
+
+        # Assert
+        assert len(task_res_list) == 2
+        err_taskres = task_res_list[1]
+        assert err_taskres.task.HasField("error")
+        assert err_taskres.task.error.code == ErrorCode.NODE_UNAVAILABLE
 
 
 def create_task_ins(
