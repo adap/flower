@@ -132,7 +132,7 @@ class State(abc.ABC):
         """Delete all delivered TaskIns/TaskRes pairs."""
 
     @abc.abstractmethod
-    def create_node(self) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in state, and return `node_id`."""
 
     @abc.abstractmethod
@@ -178,3 +178,20 @@ class State(abc.ABC):
     @abc.abstractmethod
     def get_client_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `client_public_keys` as a set."""
+    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
+        """Acknowledge a ping received from a node, serving as a heartbeat.
+
+        Parameters
+        ----------
+        node_id : int
+            The `node_id` from which the ping was received.
+        ping_interval : float
+            The interval (in seconds) from the current timestamp within which the next
+            ping from this node must be received. This acts as a hard deadline to ensure
+            an accurate assessment of the node's availability.
+
+        Returns
+        -------
+        is_acknowledged : bool
+            True if the ping is successfully acknowledged; otherwise, False.
+        """

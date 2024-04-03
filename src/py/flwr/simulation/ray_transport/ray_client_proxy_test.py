@@ -24,15 +24,16 @@ import ray
 from flwr.client import Client, NumPyClient
 from flwr.client.client_app import ClientApp
 from flwr.common import (
+    DEFAULT_TTL,
     Config,
     ConfigsRecord,
     Context,
     Message,
+    MessageTypeLegacy,
     Metadata,
     RecordSet,
     Scalar,
 )
-from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
 from flwr.common.recordset_compat import (
     getpropertiesins_to_recordset,
     recordset_to_getpropertiesres,
@@ -112,7 +113,7 @@ def test_cid_consistency_one_at_a_time() -> None:
     for prox in proxies:
         message = prox._wrap_recordset_in_message(  # pylint: disable=protected-access
             recordset,
-            MESSAGE_TYPE_GET_PROPERTIES,
+            MessageTypeLegacy.GET_PROPERTIES,
             timeout=None,
             group_id=0,
         )
@@ -149,7 +150,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
 
         message = prox._wrap_recordset_in_message(  # pylint: disable=protected-access
             recordset,
-            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            message_type=MessageTypeLegacy.GET_PROPERTIES,
             timeout=None,
             group_id=0,
         )
@@ -202,8 +203,8 @@ def test_cid_consistency_without_proxies() -> None:
                 src_node_id=0,
                 dst_node_id=12345,
                 reply_to_message="",
-                ttl="",
-                message_type=MESSAGE_TYPE_GET_PROPERTIES,
+                ttl=DEFAULT_TTL,
+                message_type=MessageTypeLegacy.GET_PROPERTIES,
                 partition_id=int(cid),
             ),
         )

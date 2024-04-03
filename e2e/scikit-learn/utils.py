@@ -10,7 +10,7 @@ XYList = List[XY]
 
 
 def get_model_parameters(model: LogisticRegression) -> LogRegParams:
-    """Returns the paramters of a sklearn LogisticRegression model."""
+    """Returns the parameters of a sklearn LogisticRegression model."""
     if model.fit_intercept:
         params = [
             model.coef_,

@@ -18,7 +18,7 @@ Papers: https://arxiv.org/abs/1712.07557, https://arxiv.org/abs/1710.06963
 """
 
 
-from logging import WARNING
+from logging import INFO, WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
@@ -35,6 +35,7 @@ from flwr.common import (
 from flwr.common.differential_privacy import (
     add_gaussian_noise_to_params,
     compute_clip_model_update,
+    compute_stdv,
 )
 from flwr.common.differential_privacy_constants import (
     CLIENTS_DISCREPANCY_WARNING,
@@ -47,8 +48,7 @@ from flwr.server.strategy.strategy import Strategy
 
 
 class DifferentialPrivacyServerSideFixedClipping(Strategy):
-    """Strategy wrapper for central differential privacy with server-side fixed
-    clipping.
+    """Strategy wrapper for central DP with server-side fixed clipping.
 
     Parameters
     ----------
@@ -156,6 +156,11 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
             compute_clip_model_update(
                 param, self.current_round_params, self.clipping_norm
             )
+            log(
+                INFO,
+                "aggregate_fit: parameters are clipped by value: %s.",
+                self.clipping_norm,
+            )
             # Convert back to parameters
             res.parameters = ndarrays_to_parameters(param)
 
@@ -171,6 +176,14 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
                 self.noise_multiplier,
                 self.clipping_norm,
                 self.num_sampled_clients,
+            )
+
+            log(
+                INFO,
+                "aggregate_fit: central DP noise with standard deviation: %s added to parameters.",
+                compute_stdv(
+                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+                ),
             )
 
         return aggregated_params, metrics
@@ -192,15 +205,14 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
 
 
 class DifferentialPrivacyClientSideFixedClipping(Strategy):
-    """Strategy wrapper for central differential privacy with client-side fixed
-    clipping.
+    """Strategy wrapper for central DP with client-side fixed clipping.
 
     Use `fixedclipping_mod` modifier at the client side.
 
     In comparison to `DifferentialPrivacyServerSideFixedClipping`,
     which performs clipping on the server-side, `DifferentialPrivacyClientSideFixedClipping`
     expects clipping to happen on the client-side, usually by using the built-in
-    `fixedclipping_mod `.
+    `fixedclipping_mod`.
 
     Parameters
     ----------
@@ -220,16 +232,16 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
 
     >>> strategy = fl.server.strategy.FedAvg(...)
 
-    Wrap the strategy with the `DifferentialPrivacyServerSideFixedClipping` wrapper:
+    Wrap the strategy with the `DifferentialPrivacyClientSideFixedClipping` wrapper:
 
-    >>> DifferentialPrivacyClientSideFixedClipping(
+    >>> dp_strategy = DifferentialPrivacyClientSideFixedClipping(
     >>>     strategy, cfg.noise_multiplier, cfg.clipping_norm, cfg.num_sampled_clients
     >>> )
 
     On the client, add the `fixedclipping_mod` to the client-side mods:
 
     >>> app = fl.client.ClientApp(
-    >>>     client_fn=FlowerClient().to_client(), mods=[fixedclipping_mod]
+    >>>     client_fn=client_fn, mods=[fixedclipping_mod]
     >>> )
     """
 
@@ -322,6 +334,13 @@ class DifferentialPrivacyClientSideFixedClipping(Strategy):
                 self.noise_multiplier,
                 self.clipping_norm,
                 self.num_sampled_clients,
+            )
+            log(
+                INFO,
+                "aggregate_fit: central DP noise with standard deviation: %s added to parameters.",
+                compute_stdv(
+                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+                ),
             )
         return aggregated_params, metrics
 
