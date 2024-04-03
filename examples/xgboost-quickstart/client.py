@@ -38,7 +38,7 @@ args = parser.parse_args()
 # Define data partitioning related functions
 def train_test_split(partition: Dataset, test_fraction: float, seed: int):
     """Split the data into train and validation set given split rate."""
-    train_test = partition.train_test_split(test_size=test_fraction, seed=seed)
+    train_test = partition.train_test_split(test_size=test_fraction, seed=seed, shuffle=False)
     partition_train = train_test["train"]
     partition_test = train_test["test"]
 
