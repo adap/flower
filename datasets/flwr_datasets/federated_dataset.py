@@ -40,9 +40,9 @@ class FederatedDataset:
 
     Parameters
     ----------
-    dataset : Union[str, Dataset]
+    dataset : Union[str, DatasetDict]
         The name of the dataset in the Hugging Face Hub as `str` or a pre-loaded
-        dataset in the Hugging Face `Dataset` format.
+        dataset in the Hugging Face `DatasetDict` format.
     subset : str
         Secondary information regarding the dataset, most often subset or version
         (that is passed to the name in datasets.load_dataset).
@@ -77,7 +77,7 @@ class FederatedDataset:
     def __init__(
         self,
         *,
-        dataset: Union[str, Dataset],
+        dataset: Union[str, DatasetDict],
         subset: Optional[str] = None,
         resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]] = None,
         partitioners: Dict[str, Union[Partitioner, int]],
@@ -85,7 +85,7 @@ class FederatedDataset:
         seed: Optional[int] = 42,
     ) -> None:
         _check_if_dataset_tested(dataset)
-        self._dataset_name: Union[str, Dataset] = dataset
+        self._dataset_name: Union[str, DatasetDict] = dataset
         self._subset: Optional[str] = subset
         self._resplitter: Optional[Resplitter] = _instantiate_resplitter_if_needed(
             resplitter
