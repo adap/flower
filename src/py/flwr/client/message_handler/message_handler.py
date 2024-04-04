@@ -27,12 +27,7 @@ from flwr.client.client import (
 from flwr.client.numpy_client import NumPyClient
 from flwr.client.typing import ClientFn
 from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet, log
-from flwr.common.constant import (
-    MESSAGE_TYPE_EVALUATE,
-    MESSAGE_TYPE_FIT,
-    MESSAGE_TYPE_GET_PARAMETERS,
-    MESSAGE_TYPE_GET_PROPERTIES,
-)
+from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.recordset_compat import (
     evaluateres_to_recordset,
     fitres_to_recordset,
@@ -86,7 +81,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
         reason = cast(int, disconnect_msg.disconnect_res.reason)
         recordset = RecordSet()
         recordset.configs_records["config"] = ConfigsRecord({"reason": reason})
-        out_message = message.create_reply(recordset, ttl="")
+        out_message = message.create_reply(recordset)
         # Return TaskRes and sleep duration
         return out_message, sleep_duration
 
@@ -115,14 +110,14 @@ def handle_legacy_message_from_msgtype(
     message_type = message.metadata.message_type
 
     # Handle GetPropertiesIns
-    if message_type == MESSAGE_TYPE_GET_PROPERTIES:
+    if message_type == MessageTypeLegacy.GET_PROPERTIES:
         get_properties_res = maybe_call_get_properties(
             client=client,
             get_properties_ins=recordset_to_getpropertiesins(message.content),
         )
         out_recordset = getpropertiesres_to_recordset(get_properties_res)
     # Handle GetParametersIns
-    elif message_type == MESSAGE_TYPE_GET_PARAMETERS:
+    elif message_type == MessageTypeLegacy.GET_PARAMETERS:
         get_parameters_res = maybe_call_get_parameters(
             client=client,
             get_parameters_ins=recordset_to_getparametersins(message.content),
@@ -131,14 +126,14 @@ def handle_legacy_message_from_msgtype(
             get_parameters_res, keep_input=False
         )
     # Handle FitIns
-    elif message_type == MESSAGE_TYPE_FIT:
+    elif message_type == MessageType.TRAIN:
         fit_res = maybe_call_fit(
             client=client,
             fit_ins=recordset_to_fitins(message.content, keep_input=True),
         )
         out_recordset = fitres_to_recordset(fit_res, keep_input=False)
     # Handle EvaluateIns
-    elif message_type == MESSAGE_TYPE_EVALUATE:
+    elif message_type == MessageType.EVALUATE:
         evaluate_res = maybe_call_evaluate(
             client=client,
             evaluate_ins=recordset_to_evaluateins(message.content, keep_input=True),
@@ -148,7 +143,7 @@ def handle_legacy_message_from_msgtype(
         raise ValueError(f"Invalid message type: {message_type}")
 
     # Return Message
-    return message.create_reply(out_recordset, ttl="")
+    return message.create_reply(out_recordset)
 
 
 def _reconnect(
@@ -177,6 +172,7 @@ def validate_out_message(out_message: Message, in_message_metadata: Metadata) ->
         and out_meta.reply_to_message == in_meta.message_id
         and out_meta.group_id == in_meta.group_id
         and out_meta.message_type == in_meta.message_type
+        and out_meta.created_at > in_meta.created_at
     ):
         return True
     return False

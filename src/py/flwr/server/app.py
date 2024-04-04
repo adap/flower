@@ -391,10 +391,10 @@ def run_superlink() -> None:
         f_stop = asyncio.Event()  # Does nothing
         _run_fleet_api_vce(
             num_supernodes=args.num_supernodes,
-            client_app_module_name=args.client_app,
+            client_app_attr=args.client_app,
             backend_name=args.backend,
             backend_config_json_stream=args.backend_config,
-            working_dir=args.dir,
+            app_dir=args.app_dir,
             state_factory=state_factory,
             f_stop=f_stop,
         )
@@ -429,49 +429,42 @@ def _try_setup_client_authentication(
                 "enabling '--require-client-authentication'."
             )
         client_keys_file_path = Path(args.require_client_authentication[0])
-        if client_keys_file_path.exists():
-            client_public_keys: Set[bytes] = set()
-            public_key = load_ssh_public_key(
-                Path(args.require_client_authentication[1]).read_bytes()
-            )
-            private_key = load_ssh_private_key(
-                Path(args.require_client_authentication[2]).read_bytes(),
-                None,
-            )
-            log(INFO, type(public_key))
-            log(INFO, type(private_key))
-            if not isinstance(public_key, ec.EllipticCurvePublicKey):
-                sys.exit(
-                    "An eliptic curve public and private key pair is required for "
-                    "client authentication. Please provide the file path containing "
-                    "valid public and private key to '--require-client-authentication'."
-                )
-            server_public_key = public_key
-            if not isinstance(private_key, ec.EllipticCurvePrivateKey):
-                sys.exit(
-                    "An eliptic curve public and private key pair is required for "
-                    "client authentication. Please provide the file path containing "
-                    "valid public and private key to '--require-client-authentication'."
-                )
-            server_private_key = private_key
-
-            with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                    for element in row:
-                        public_key = load_ssh_public_key(element.encode())
-                        if isinstance(public_key, ec.EllipticCurvePublicKey):
-                            client_public_keys.add(public_key_to_bytes(public_key))
-                return (
-                    client_public_keys,
-                    server_public_key,
-                    server_private_key,
-                )
-        else:
+        if not client_keys_file_path.exists():
             sys.exit(
                 "Client public keys csv file are required for client authentication. "
                 "Please provide the csv file path containing known client public keys "
                 "to '--require-client-authentication'."
+            )
+        client_public_keys: Set[bytes] = set()
+        public_key = load_ssh_public_key(
+            Path(args.require_client_authentication[1]).read_bytes()
+        )
+        private_key = load_ssh_private_key(
+            Path(args.require_client_authentication[2]).read_bytes(),
+            None,
+        )
+        if not isinstance(public_key, ec.EllipticCurvePublicKey) or not isinstance(
+            private_key, ec.EllipticCurvePrivateKey
+        ):
+            sys.exit(
+                "An eliptic curve public and private key pair is required for "
+                "client authentication. Please provide the file path containing "
+                "valid public and private key to '--require-client-authentication'."
+            )
+        server_public_key = public_key
+        server_private_key = private_key
+
+        with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                for element in row:
+                    public_key = load_ssh_public_key(element.encode())
+                    if isinstance(public_key, ec.EllipticCurvePublicKey):
+                        client_public_keys.add(public_key_to_bytes(public_key))
+            return (
+                client_public_keys,
+                server_public_key,
+                server_private_key,
             )
     else:
         return None
@@ -529,10 +522,10 @@ def _run_fleet_api_grpc_rere(
 # pylint: disable=too-many-arguments
 def _run_fleet_api_vce(
     num_supernodes: int,
-    client_app_module_name: str,
+    client_app_attr: str,
     backend_name: str,
     backend_config_json_stream: str,
-    working_dir: str,
+    app_dir: str,
     state_factory: StateFactory,
     f_stop: asyncio.Event,
 ) -> None:
@@ -540,11 +533,11 @@ def _run_fleet_api_vce(
 
     start_vce(
         num_supernodes=num_supernodes,
-        client_app_module_name=client_app_module_name,
+        client_app_attr=client_app_attr,
         backend_name=backend_name,
         backend_config_json_stream=backend_config_json_stream,
         state_factory=state_factory,
-        working_dir=working_dir,
+        app_dir=app_dir,
         f_stop=f_stop,
     )
 
@@ -804,7 +797,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "`flwr.common.typing.ConfigsRecordValues`. ",
     )
     parser.add_argument(
-        "--dir",
+        "--app-dir",
         default="",
         help="Add specified directory to the PYTHONPATH and load"
         "ClientApp from there."

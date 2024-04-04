@@ -3,27 +3,23 @@ import random
 import time
 
 import flwr as fl
-from flwr.server import Driver
-from flwr.common import Context
-
 from flwr.common import (
-    ServerMessage,
+    Context,
     FitIns,
     ndarrays_to_parameters,
-    serde,
     parameters_to_ndarrays,
-    ClientMessage,
     NDArrays,
     Code,
+    Message,
+    MessageType,
+    Metrics,
+    DEFAULT_TTL,
 )
-from flwr.proto import driver_pb2, task_pb2, node_pb2, transport_pb2
-from flwr.server.strategy.aggregate import aggregate
-from flwr.common import Metrics
-from flwr.server import History
-from flwr.common import serde
-from task import Net, get_parameters, set_parameters
 from flwr.common.recordset_compat import fitins_to_recordset, recordset_to_fitres
-from flwr.common import Message
+from flwr.server import Driver, History
+from flwr.server.strategy.aggregate import aggregate
+
+from task import Net, get_weights
 
 
 # Define metric aggregation function
@@ -56,11 +52,10 @@ def main(driver: Driver, context: Context) -> None:
     """."""
     print("RUNNING!!!!!")
 
-    anonymous_client_nodes = False
     num_client_nodes_per_round = 2
     sleep_time = 1
     num_rounds = 3
-    parameters = ndarrays_to_parameters(get_parameters(net=Net()))
+    parameters = ndarrays_to_parameters(get_weights(net=Net()))
 
     history = History()
     for server_round in range(num_rounds):
@@ -92,10 +87,10 @@ def main(driver: Driver, context: Context) -> None:
         for node_id in sampled_nodes:
             message = driver.create_message(
                 content=recordset,
-                message_type="fit",
+                message_type=MessageType.TRAIN,
                 dst_node_id=node_id,
                 group_id=str(server_round),
-                ttl="",
+                ttl=DEFAULT_TTL,
             )
             messages.append(message)
 
@@ -108,15 +103,19 @@ def main(driver: Driver, context: Context) -> None:
         all_replies: List[Message] = []
         while True:
             replies = driver.pull_messages(message_ids=message_ids)
-            print(f"Got {len(replies)} results")
+            for res in replies:
+                print(f"Got 1 {'result' if res.has_content() else 'error'}")
             all_replies += replies
             if len(all_replies) == len(message_ids):
                 break
+            print("Pulling messages...")
             time.sleep(3)
 
-        # Collect correct results
+        # Filter correct results
         all_fitres = [
-            recordset_to_fitres(msg.content, keep_input=True) for msg in all_replies
+            recordset_to_fitres(msg.content, keep_input=True)
+            for msg in all_replies
+            if msg.has_content()
         ]
         print(f"Received {len(all_fitres)} results")
 
@@ -133,16 +132,21 @@ def main(driver: Driver, context: Context) -> None:
             )
             metrics_results.append((fitres.num_examples, fitres.metrics))
 
-        # Aggregate parameters (FedAvg)
-        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
-        parameters = parameters_aggregated
+        if len(weights_results) > 0:
+            # Aggregate parameters (FedAvg)
+            parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+            parameters = parameters_aggregated
 
-        # Aggregate metrics
-        metrics_aggregated = weighted_average(metrics_results)
-        history.add_metrics_distributed_fit(
-            server_round=server_round, metrics=metrics_aggregated
-        )
-        print("Round ", server_round, " metrics: ", metrics_aggregated)
+            # Aggregate metrics
+            metrics_aggregated = weighted_average(metrics_results)
+            history.add_metrics_distributed_fit(
+                server_round=server_round, metrics=metrics_aggregated
+            )
+            print("Round ", server_round, " metrics: ", metrics_aggregated)
+        else:
+            print(
+                f"Round {server_round} got {len(weights_results)} results. Skipping aggregation..."
+            )
 
         # Slow down the start of the next round
         time.sleep(sleep_time)
