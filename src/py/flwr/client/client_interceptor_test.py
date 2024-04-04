@@ -20,6 +20,7 @@ import threading
 import unittest
 from concurrent import futures
 from typing import Optional, Sequence, Tuple, Union
+from flwr.common.retry_invoker import RetryInvoker, exponential
 
 import grpc
 
@@ -149,9 +150,19 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
 
     def test_client_auth_create_node(self) -> None:
         """Test client authentication during create node."""
+        retry_invoker = RetryInvoker(
+            wait_gen_factory=exponential,
+            recoverable_exceptions=grpc.RpcError,
+            max_tries=None,
+            max_time=None,
+            on_giveup=lambda retry_state: (),
+            on_success=lambda retry_state: (),
+            on_backoff=lambda retry_state: (),
+        )
         with self._connection(
             self._address,
             True,
+            retry_invoker,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
             (self._client_interceptor),
@@ -171,9 +182,19 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
 
     def test_client_auth_delete_node(self) -> None:
         """Test client authentication during delete node."""
+        retry_invoker = RetryInvoker(
+            wait_gen_factory=exponential,
+            recoverable_exceptions=grpc.RpcError,
+            max_tries=None,
+            max_time=None,
+            on_giveup=lambda retry_state: (),
+            on_success=lambda retry_state: (),
+            on_backoff=lambda retry_state: (),
+        )
         with self._connection(
             self._address,
             True,
+            retry_invoker,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
             (self._client_interceptor),
