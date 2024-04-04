@@ -83,6 +83,8 @@ void create_node(Communicator *communicator) {
   flwr::proto::CreateNodeRequest create_node_request;
   flwr::proto::CreateNodeResponse create_node_response;
 
+  create_node_request.set_ping_interval(300.0);
+
   communicator->send_create_node(create_node_request, &create_node_response);
 
   // Validate the response

@@ -119,9 +119,10 @@ namespace proto {
 // ===================================================================
 
 class CreateNodeRequest final :
-    public ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase /* @@protoc_insertion_point(class_definition:flwr.proto.CreateNodeRequest) */ {
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:flwr.proto.CreateNodeRequest) */ {
  public:
   inline CreateNodeRequest() : CreateNodeRequest(nullptr) {}
+  ~CreateNodeRequest() override;
   explicit constexpr CreateNodeRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
   CreateNodeRequest(const CreateNodeRequest& from);
@@ -193,15 +194,27 @@ class CreateNodeRequest final :
   CreateNodeRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
     return CreateMaybeMessage<CreateNodeRequest>(arena);
   }
-  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyFrom;
-  inline void CopyFrom(const CreateNodeRequest& from) {
-    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl(this, from);
-  }
-  using ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeFrom;
-  void MergeFrom(const CreateNodeRequest& from) {
-    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl(this, from);
-  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const CreateNodeRequest& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const CreateNodeRequest& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
   public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(CreateNodeRequest* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
     return "flwr.proto.CreateNodeRequest";
@@ -210,6 +223,8 @@ class CreateNodeRequest final :
   explicit CreateNodeRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                        bool is_message_owned = false);
   private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   public:
 
   static const ClassData _class_data_;
@@ -221,6 +236,18 @@ class CreateNodeRequest final :
 
   // accessors -------------------------------------------------------
 
+  enum : int {
+    kPingIntervalFieldNumber = 1,
+  };
+  // double ping_interval = 1;
+  void clear_ping_interval();
+  double ping_interval() const;
+  void set_ping_interval(double value);
+  private:
+  double _internal_ping_interval() const;
+  void _internal_set_ping_interval(double value);
+  public:
+
   // @@protoc_insertion_point(class_scope:flwr.proto.CreateNodeRequest)
  private:
   class _Internal;
@@ -228,6 +255,7 @@ class CreateNodeRequest final :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  double ping_interval_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_flwr_2fproto_2ffleet_2eproto;
 };
@@ -1812,6 +1840,26 @@ class Reconnect final :
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
 // CreateNodeRequest
+
+// double ping_interval = 1;
+inline void CreateNodeRequest::clear_ping_interval() {
+  ping_interval_ = 0;
+}
+inline double CreateNodeRequest::_internal_ping_interval() const {
+  return ping_interval_;
+}
+inline double CreateNodeRequest::ping_interval() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.CreateNodeRequest.ping_interval)
+  return _internal_ping_interval();
+}
+inline void CreateNodeRequest::_internal_set_ping_interval(double value) {
+  
+  ping_interval_ = value;
+}
+inline void CreateNodeRequest::set_ping_interval(double value) {
+  _internal_set_ping_interval(value);
+  // @@protoc_insertion_point(field_set:flwr.proto.CreateNodeRequest.ping_interval)
+}
 
 // -------------------------------------------------------------------
 
