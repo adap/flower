@@ -86,7 +86,7 @@ def _check_if_dataset_tested(dataset: Union[str, DatasetDict]) -> None:
             f"The currently tested dataset are {tested_datasets}. Given: {dataset}.",
             stacklevel=1,
         )
-    if type(dataset) is not DatasetDict:
+    elif type(dataset) not in [DatasetDict, str]:
         raise TypeError(
             "The provided dataset is not in the DatasetDict format."
         )
