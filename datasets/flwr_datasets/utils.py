@@ -79,11 +79,16 @@ def _instantiate_resplitter_if_needed(
     return cast(Optional[Resplitter], resplitter)
 
 
-def _check_if_dataset_tested(dataset: Union[str, Dataset]):
+def _check_if_dataset_tested(dataset: Union[str, DatasetDict]) -> None:
     """Check if the dataset is in the narrowed down list of the tested datasets."""
     if dataset not in tested_datasets and type(dataset) is str:
         warnings.warn(
             f"The currently tested dataset are {tested_datasets}. Given: {dataset}.",
+            stacklevel=1,
+        )
+    if type(dataset) is not DatasetDict:
+        warnings.warn(
+            f"The provided dataset is not in the DatasetDict format.",
             stacklevel=1,
         )
 
