@@ -16,7 +16,7 @@ echo "---" >> $INDEX
 echo "maxdepth: 1" >> $INDEX
 echo "---" >> $INDEX
 
-rm -f "examples/doc/source/*.md"
+rm -f examples/doc/source/*.md
 
 cd examples/
 for d in $(printf '%s\n' */ | sort -V); do
@@ -26,6 +26,15 @@ for d in $(printf '%s\n' */ | sort -V); do
 
     # For each example, copy the README into the source of the Example docs
     cp $example/README.md $ROOT/examples/doc/source/$example.md 2>&1 >/dev/null
+    cp $example/README.md $ROOT/examples/doc/source/$example.md 2>&1 >/dev/null
+
+    for file in $example/*.md; do
+      if [[ $(basename "$file") = "README.md" ]]; then
+        cp $file $ROOT/examples/doc/source/$example.md 2>&1 >/dev/null
+      else
+        cp $file $ROOT/examples/doc/source/$(basename "$file") 2>&1 >/dev/null
+      fi
+    done
 
     gh_text="[<img src=\"_static/view-gh.png\" alt=\"View on GitHub\" width=\"200\"/>](https://github.com/adap/flower/blob/main/examples/$example)"
     readme_file="$ROOT/examples/doc/source/$example.md"
