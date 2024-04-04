@@ -27,15 +27,18 @@ class TypedDict(Generic[K, V]):
     def __init__(
         self, check_key_fn: Callable[[K], None], check_value_fn: Callable[[V], None]
     ):
+        setattr(self, "_check_key_fn", check_key_fn)  # noqa
+        setattr(self, "_check_value_fn", check_value_fn)  # noqa
         self._data: Dict[K, V] = {}
-        self._check_key_fn = check_key_fn
-        self._check_value_fn = check_value_fn
 
     def __setitem__(self, key: K, value: V) -> None:
         """Set the given key to the given value after type checking."""
+        # Retrieve members
+        check_k = cast(Callable[[K], None], getattr(self, "_check_key_fn"))  # noqa
+        check_v = cast(Callable[[V], None], getattr(self, "_check_value_fn"))  # noqa
         # Check the types of key and value
-        self._check_key_fn(key)
-        self._check_value_fn(value)
+        check_k(key)
+        check_v(value)
         # Set key-value pair
         self._data[key] = value
 
