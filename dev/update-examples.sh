@@ -35,10 +35,9 @@ add_gh_button () {
 }
 
 copy_images () {
-  true
-  # [ -d "$1/_static" ] && {
-  #   cp $1/_static/**.{jpg,png,jpeg} $ROOT/examples/doc/source/_static/ 2>/dev/null || true
-  # }
+  if [ -d "$1/_static" ]; then
+    cp $1/_static/**.{jpg,png,jpeg} $ROOT/examples/doc/source/_static/ 2>/dev/null || true
+  fi
 }
 
 add_to_index () {
