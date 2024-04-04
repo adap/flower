@@ -24,14 +24,12 @@ for d in $(printf '%s\n' */ | sort -V); do
 
   if [[ $example != doc ]]; then
 
-    # For each example, copy the README into the source of the Example docs
-    cp $example/README.md $ROOT/examples/doc/source/$example.md 2>&1 >/dev/null
-    cp $example/README.md $ROOT/examples/doc/source/$example.md 2>&1 >/dev/null
-
     for file in $example/*.md; do
+      # For each example, copy the README into the source of the Example docs
       if [[ $(basename "$file") = "README.md" ]]; then
         cp $file $ROOT/examples/doc/source/$example.md 2>&1 >/dev/null
       else
+        # If the example contains other markdown files, copy them to the source of the Example docs
         cp $file $ROOT/examples/doc/source/$(basename "$file") 2>&1 >/dev/null
       fi
     done
