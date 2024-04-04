@@ -36,6 +36,8 @@ from flwr.common import (
 )
 from flwr.server.client_manager import ClientManager
 from collections import OrderedDict
+from torch.utils.data import DataLoader
+from torchvision.utils import save_image
 
 
 class VisualiseFedGuide(FedAvg):
@@ -71,6 +73,8 @@ class VisualiseFedGuide(FedAvg):
         latent_dim=2,
         initial_generator_params: Optional[Parameters] = None,
         gen_model=None,
+        global_eval_data=None,
+        folder_name=None,
     ) -> None:
 
         super().__init__(
@@ -100,6 +104,8 @@ class VisualiseFedGuide(FedAvg):
             f"client_param_{cid}": self.initial_parameters
             for cid in range(self.min_available_clients)
         }
+        self.global_eval_data = global_eval_data
+        self.folder_name = folder_name
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
@@ -113,10 +119,61 @@ class VisualiseFedGuide(FedAvg):
         if self.evaluate_fn is None:
             # No evaluation function provided
             return None
-        # TODO: Evaluate client 0 only
+        evalloader = DataLoader(self.global_eval_data, batch_size=64, shuffle=True)
+
+        with torch.no_grad():
+            # load generator weights
+            guide_model = VAE_CNN(z_dim=self.latent_dim, encoder_only=True).to(
+                self.device
+            )
+            gen_params_dict = zip(
+                self.gen_model.state_dict().keys(),
+                parameters_to_ndarrays(self.initial_generator_params),
+            )
+            gen_state_dict = OrderedDict(
+                {k: torch.tensor(v) for k, v in gen_params_dict}
+            )
+            guide_model.load_state_dict(gen_state_dict, strict=True)
+
+            # local decorders
+            temp_local_models = [
+                VAE_CNN(z_dim=self.latent_dim).to(self.device)
+                for _ in range(5)  # TODO: change to num_clients
+            ]
+            for eval_img, _ in evalloader:
+                eval_img = eval_img.to(self.device)
+                save_image(
+                    eval_img.view(64, 1, 28, 28),
+                    f"{self.folder_name}/eval_true_img.png",
+                )
+                for idx, temp_local_model in enumerate(temp_local_models):
+                    params_dict = zip(
+                        temp_local_model.state_dict().keys(),
+                        parameters_to_ndarrays(
+                            self.local_param_dict[f"client_param_{idx}"]
+                        ),
+                    )
+                    state_dict = OrderedDict(
+                        {k: torch.tensor(v) for k, v in params_dict}
+                    )
+                    temp_local_model.load_state_dict(state_dict, strict=True)
+                    z_g, mu_g, logvar_g = guide_model(eval_img)
+                    gen_img = temp_local_model.decoder(z_g)
+                    save_image(
+                        gen_img.view(64, 1, 28, 28),
+                        f"{self.folder_name}/eval_gen_img_{idx}.png",
+                    )
+                break
+        decoded_imgs = {
+            f"global_eval_true_img": f"{self.folder_name}/eval_true_img.png",
+            **{
+                f"global_eval_gen_img_{idx}": f"{self.folder_name}/eval_gen_img_{idx}.png"
+                for idx in range(5)
+            },
+        }
         parameters = self.local_param_dict["client_param_0"]
         parameters_ndarrays = parameters_to_ndarrays(parameters)
-        eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {})
+        eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {**decoded_imgs})
         if eval_res is None:
             return None
         loss, metrics = eval_res

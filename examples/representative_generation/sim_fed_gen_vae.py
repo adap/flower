@@ -290,7 +290,7 @@ def main():
             "lr_g": wandb.config["lr_g"],
             "steps_g": wandb.config["steps_g"],
             "latent_dim": LATENT_DIM,
-            "cnn": True,   # for VAE_CNN
+            "cnn": True,  # for VAE_CNN
         }
         return config
 
@@ -354,7 +354,7 @@ def main():
                 fisher_score = float(
                     get_fisher_ratio(model, testloader, LATENT_DIM, device)
                 )
-
+            decouple_config = {k: wandb.Image(v) for k, v in config.items()}
             wandb.log(
                 {
                     f"global_true_image": wandb.Image(true_img),
@@ -364,6 +364,7 @@ def main():
                     f"global_fisher_score": fisher_score,
                     f"server_round": server_round,
                     f"generated_gen_round": plt,
+                    **decouple_config,
                 },
                 step=server_round,
             )
@@ -400,6 +401,8 @@ def main():
         device=DEVICE,
         num_classes=NUM_CLASSES,
         latent_dim=LATENT_DIM,
+        global_eval_data=valsets[-1],
+        folder_name=IDENTIFIER,
     )
 
     # Resources to be assigned to each virtual client
@@ -438,7 +441,7 @@ if __name__ == "__main__":
             "lambda_align_g": {"values": [1]},  # for generator KL lambda
             "lambda_align": {"values": [0]},
             "lambda_reg_dec": {"values": [0]},
-            "lambda_latent_diff": {"values": [0, 0.1]},
+            "lambda_latent_diff": {"values": [1]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
