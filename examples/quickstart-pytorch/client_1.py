@@ -107,7 +107,7 @@ partition_id = parser.parse_known_args()[0].partition_id
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
-trainloader, testloader = load_data(partition_id=0)
+trainloader, testloader = load_data(partition_id=1)
 
 
 # Define Flower client
