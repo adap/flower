@@ -36,6 +36,7 @@ def create_directory(path: str) -> None:
 
 def download(task_args: List[str]) -> None:
     """Task: download.
+
     Input parameters:
         --data_dir
     """
@@ -81,6 +82,7 @@ def download(task_args: List[str]) -> None:
 
 def train(task_args: List[str]) -> None:
     """Task: train.
+
     Input parameters:
         --data_dir, --log_dir, --model_dir, --parameters_file
     """
@@ -175,6 +177,7 @@ def train(task_args: List[str]) -> None:
 
 def evaluate(task_args: List[str]) -> None:
     """Task: train.
+
     Input parameters:
         --data_dir, --log_dir, --model_dir, --parameters_file
     """
