@@ -19,7 +19,7 @@ Paper (Andrew et al.): https://arxiv.org/abs/1905.03871
 
 
 import math
-from logging import WARNING
+from logging import INFO, WARNING
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -39,6 +39,7 @@ from flwr.common.differential_privacy import (
     adaptive_clip_inputs_inplace,
     add_gaussian_noise_to_params,
     compute_adaptive_noise_params,
+    compute_stdv,
 )
 from flwr.common.differential_privacy_constants import (
     CLIENTS_DISCREPANCY_WARNING,
@@ -63,7 +64,7 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
     num_sampled_clients : int
         The number of clients that are sampled on each round.
     initial_clipping_norm : float
-        The initial value of clipping norm. Deafults to 0.1.
+        The initial value of clipping norm. Defaults to 0.1.
         Andrew et al. recommends to set to 0.1.
     target_clipped_quantile : float
         The desired quantile of updates which should be clipped. Defaults to 0.5.
@@ -197,6 +198,12 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
             norm_bit = adaptive_clip_inputs_inplace(model_update, self.clipping_norm)
             norm_bit_set_count += norm_bit
 
+            log(
+                INFO,
+                "aggregate_fit: parameters are clipped by value: %s.",
+                self.clipping_norm,
+            )
+
             for i, _ in enumerate(self.current_round_params):
                 param[i] = self.current_round_params[i] + model_update[i]
             # Convert back to parameters
@@ -224,6 +231,13 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
                 self.noise_multiplier,
                 self.clipping_norm,
                 self.num_sampled_clients,
+            )
+            log(
+                INFO,
+                "aggregate_fit: central DP noise with standard deviation: %s added to parameters.",
+                compute_stdv(
+                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+                ),
             )
 
         return aggregated_params, metrics
@@ -263,7 +277,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
     num_sampled_clients : int
         The number of clients that are sampled on each round.
     initial_clipping_norm : float
-        The initial value of clipping norm. Deafults to 0.1.
+        The initial value of clipping norm. Defaults to 0.1.
         Andrew et al. recommends to set to 0.1.
     target_clipped_quantile : float
         The desired quantile of updates which should be clipped. Defaults to 0.5.
@@ -282,7 +296,7 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
 
     Wrap the strategy with the `DifferentialPrivacyClientSideAdaptiveClipping` wrapper:
 
-    >>> DifferentialPrivacyClientSideAdaptiveClipping(
+    >>> dp_strategy = DifferentialPrivacyClientSideAdaptiveClipping(
     >>>     strategy, cfg.noise_multiplier, cfg.num_sampled_clients
     >>> )
 
@@ -407,6 +421,13 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
                 self.noise_multiplier,
                 self.clipping_norm,
                 self.num_sampled_clients,
+            )
+            log(
+                INFO,
+                "aggregate_fit: central DP noise with standard deviation: %s added to parameters.",
+                compute_stdv(
+                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+                ),
             )
 
         return aggregated_params, metrics

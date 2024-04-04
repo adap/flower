@@ -391,10 +391,10 @@ def run_superlink() -> None:
         f_stop = asyncio.Event()  # Does nothing
         _run_fleet_api_vce(
             num_supernodes=args.num_supernodes,
-            client_app_module_name=args.client_app,
+            client_app_attr=args.client_app,
             backend_name=args.backend,
             backend_config_json_stream=args.backend_config,
-            working_dir=args.dir,
+            app_dir=args.app_dir,
             state_factory=state_factory,
             f_stop=f_stop,
         )
@@ -522,10 +522,10 @@ def _run_fleet_api_grpc_rere(
 # pylint: disable=too-many-arguments
 def _run_fleet_api_vce(
     num_supernodes: int,
-    client_app_module_name: str,
+    client_app_attr: str,
     backend_name: str,
     backend_config_json_stream: str,
-    working_dir: str,
+    app_dir: str,
     state_factory: StateFactory,
     f_stop: asyncio.Event,
 ) -> None:
@@ -533,11 +533,11 @@ def _run_fleet_api_vce(
 
     start_vce(
         num_supernodes=num_supernodes,
-        client_app_module_name=client_app_module_name,
+        client_app_attr=client_app_attr,
         backend_name=backend_name,
         backend_config_json_stream=backend_config_json_stream,
         state_factory=state_factory,
-        working_dir=working_dir,
+        app_dir=app_dir,
         f_stop=f_stop,
     )
 
@@ -797,7 +797,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "`flwr.common.typing.ConfigsRecordValues`. ",
     )
     parser.add_argument(
-        "--dir",
+        "--app-dir",
         default="",
         help="Add specified directory to the PYTHONPATH and load"
         "ClientApp from there."

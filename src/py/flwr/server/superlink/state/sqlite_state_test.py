@@ -38,6 +38,7 @@ class SqliteStateTest(unittest.TestCase):
             "consumer_node_id",
             "created_at",
             "delivered_at",
+            "pushed_at",
             "ttl",
             "ancestry",
             "task_type",
