@@ -178,6 +178,7 @@ class State(abc.ABC):
     @abc.abstractmethod
     def get_client_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `client_public_keys` as a set."""
+
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat.
 

@@ -628,7 +628,7 @@ class SqliteState(State):
         rows = self.query(query)
         result: Set[bytes] = {row["public_key"] for row in rows}
         return result
-    
+
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
         # Update `online_until` and `ping_interval` for the given `node_id`
