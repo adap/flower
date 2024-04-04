@@ -242,7 +242,6 @@ class FederatedDataset:
             )
         else:
             # Use the dataset as provided
-            # TODO: Check for DatasetDict
             self._dataset = self._dataset_name
         
         if self._shuffle:
