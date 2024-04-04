@@ -19,8 +19,7 @@ import sys
 import time
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
-<<<<<<< HEAD
-from typing import Callable, ContextManager, Optional, Sequence, Tuple, Union
+from typing import Callable, ContextManager, Optional, Sequence, Tuple, Type, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -28,11 +27,7 @@ from cryptography.hazmat.primitives.serialization import (
     load_ssh_private_key,
     load_ssh_public_key,
 )
-=======
-from typing import Callable, ContextManager, Optional, Tuple, Type, Union
-
 from grpc import RpcError
->>>>>>> add-server-auth-interceptor
 
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
@@ -53,11 +48,7 @@ from flwr.common.message import Error
 from flwr.common.object_ref import load_app, validate
 from flwr.common.retry_invoker import RetryInvoker, exponential
 
-<<<<<<< HEAD
-from .client_app import load_client_app
 from .client_interceptor import AuthenticateClientInterceptor
-=======
->>>>>>> add-server-auth-interceptor
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
@@ -146,12 +137,9 @@ def run_client_app() -> None:
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
         insecure=args.insecure,
-<<<<<<< HEAD
         interceptors=interceptors,
-=======
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
->>>>>>> add-server-auth-interceptor
     )
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
@@ -285,12 +273,9 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
-<<<<<<< HEAD
     interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
-=======
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
->>>>>>> add-server-auth-interceptor
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -373,12 +358,9 @@ def start_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
-<<<<<<< HEAD
         interceptors=interceptors,
-=======
         max_retries=max_retries,
         max_wait_time=max_wait_time,
->>>>>>> add-server-auth-interceptor
     )
     event(EventType.START_CLIENT_LEAVE)
 
@@ -397,12 +379,9 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
-<<<<<<< HEAD
     interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
-=======
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
->>>>>>> add-server-auth-interceptor
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -737,17 +716,14 @@ def start_numpy_client(
 
 def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     Callable[
-<<<<<<< HEAD
         [
             str,
             bool,
+            RetryInvoker,
             int,
             Union[bytes, str, None],
             Union[Sequence[grpc.UnaryUnaryClientInterceptor], None],
         ],
-=======
-        [str, bool, RetryInvoker, int, Union[bytes, str, None]],
->>>>>>> add-server-auth-interceptor
         ContextManager[
             Tuple[
                 Callable[[], Optional[Message]],
