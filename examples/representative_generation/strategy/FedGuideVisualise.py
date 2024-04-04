@@ -16,6 +16,7 @@ from flwr.server.strategy import FedAvg
 import wandb
 from utils.utils_mnist import (
     VAE,
+    VAE_CNN,
     visualize_plotly_latent_representation,
     vae_loss,
     vae_rec_loss,
@@ -220,7 +221,7 @@ class VisualiseFedGuide(FedAvg):
             for _, fit_res in results
         ]
         temp_local_models = [
-            VAE(z_dim=self.latent_dim).to(self.device)
+            VAE_CNN(z_dim=self.latent_dim).to(self.device)
             for _ in range(len(weights_results))
         ]
         # load generator weights
@@ -259,7 +260,9 @@ class VisualiseFedGuide(FedAvg):
                     #     logvar_g,
                     #     self.lambda_align_g,
                     # )
-                    loss_ = vae_rec_loss(temp_local_models[idx].decoder(z_g), align_img)
+                    loss_ = vae_rec_loss(
+                        temp_local_models[idx].decoder(z_g), align_img, cnn=True
+                    )
 
                     loss.append(loss_)
                 recon_loss = torch.stack(loss).min(dim=0)[0].mean()

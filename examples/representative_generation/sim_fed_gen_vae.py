@@ -27,6 +27,7 @@ from utils.utils_mnist import (
     train_single_loader,
     VAE,
     train_alternate_frozen,
+    VAE_CNN,
 )
 import os
 import numpy as np
@@ -85,7 +86,7 @@ class FlowerClient(fl.client.NumPyClient):
         self.cid = cid
 
         # Instantiate model
-        self.model = VAE(z_dim=LATENT_DIM)
+        self.model = VAE_CNN(z_dim=LATENT_DIM)
 
         # Determine device
         self.device = DEVICE
@@ -191,7 +192,7 @@ class FlowerClient(fl.client.NumPyClient):
         valloader = DataLoader(self.valset, batch_size=64)
 
         # Evaluate
-        loss, accuracy = test(self.model, valloader, device=self.device)
+        loss, accuracy = test(self.model, valloader, device=self.device, cnn=True)
         fisher_score = get_fisher_ratio(self.model, valloader, LATENT_DIM, self.device)
 
         # Return statistics
@@ -285,9 +286,11 @@ def main():
             "lambda_reg": wandb.config["lambda_reg"],
             "lambda_align": wandb.config["lambda_align"],
             "lambda_reg_dec": wandb.config["lambda_reg_dec"],
+            "lambda_latent_diff": wandb.config["lambda_latent_diff"],
             "lr_g": wandb.config["lr_g"],
             "steps_g": wandb.config["steps_g"],
             "latent_dim": LATENT_DIM,
+            "cnn": True,   # for VAE_CNN
         }
         return config
 
@@ -309,7 +312,7 @@ def main():
             # Determine device
             device = DEVICE
 
-            model = VAE(z_dim=LATENT_DIM)
+            model = VAE_CNN(z_dim=LATENT_DIM)
             model.to(device)
             set_params(model, parameters)
             model.eval()
@@ -336,7 +339,7 @@ def main():
                 num_class=NUM_CLASSES,
                 use_PCA=True,
             )
-            global_val_loss = eval_reconstrution(model, testloader, device)
+            global_val_loss = eval_reconstrution(model, testloader, device, cnn=True)
             with torch.no_grad():
                 z_sample_np = sample_latents(model, testloader, device, 64)
                 if z_sample_np is None:
@@ -370,12 +373,12 @@ def main():
 
     # Download dataset and partition it
     trainsets, valsets = non_iid_train_iid_test()
-    net = VAE(z_dim=LATENT_DIM).to(DEVICE)
+    net = VAE_CNN(z_dim=LATENT_DIM).to(DEVICE)
 
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)
 
-    gen_net = VAE(z_dim=LATENT_DIM, encoder_only=True).to(DEVICE)
+    gen_net = VAE_CNN(z_dim=LATENT_DIM, encoder_only=True).to(DEVICE)
     n2 = [val.cpu().numpy() for _, val in gen_net.state_dict().items()]
     initial_gen_params = ndarrays_to_parameters(n2)
 
@@ -430,13 +433,14 @@ if __name__ == "__main__":
             "beta": {"values": [0]},
             "sample_per_class": {"values": [100]},
             "lr_g": {"values": [1e-3]},
-            "steps_g": {"values": [100]}, 
+            "steps_g": {"values": [100]},
             "lambda_reg": {"values": [1]},
             "lambda_align_g": {"values": [1]},  # for generator KL lambda
             "lambda_align": {"values": [0]},
             "lambda_reg_dec": {"values": [0]},
+            "lambda_latent_diff": {"values": [0, 0.1]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=1)
+    wandb.agent(sweep_id, function=main, count=2)
