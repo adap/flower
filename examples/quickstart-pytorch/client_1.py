@@ -1,4 +1,3 @@
-import argparse
 import warnings
 from collections import OrderedDict
 
@@ -93,17 +92,6 @@ def load_data(partition_id):
 # #############################################################################
 # 2. Federation of the pipeline with Flower
 # #############################################################################
-
-# Get partition id
-parser = argparse.ArgumentParser(description="Flower")
-parser.add_argument(
-    "--partition-id",
-    choices=[0, 1, 2],
-    default=0,
-    type=int,
-    help="Partition of the dataset divided into 3 iid partitions created artificially.",
-)
-partition_id = parser.parse_known_args()[0].partition_id
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
