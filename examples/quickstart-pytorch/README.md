@@ -24,25 +24,17 @@ This will create a new directory called `quickstart-pytorch` containing the foll
 
 ### Installing Dependencies
 
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml`. We recommend [venv](https://docs.python.org/3/library/venv.html) to manage your virtual environment ([Creating virtual environments](https://docs.python.org/3/library/venv.html#creating-virtual-environments)) and [pip](https://pip.pypa.io/en/latest/development/) to install those dependencies, but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### `venv` and `pip`
+Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml`. You can install the dependencies by invoking `pip`: 
 
 ```shell
-python -m venv .venv
-source .venv/bin/activate
+# From a new python environment, run:
+pip install .
 ```
 
-Run the command below in your terminal to install the dependencies according to the `pyproject.toml`.
+Then, to verify that everything works correctly you can run the following command:
 
 ```shell
-(.venv) pip install .
-```
-
-`pip` will install all your dependencies in the newly created and activated virtual environment. To verify that everything works correctly you can run the following command:
-
-```shell
-(.venv) python -c "import flwr"
+python -c "import flwr"
 ```
 
 If you don't see any errors you're good to go!
@@ -50,8 +42,6 @@ If you don't see any errors you're good to go!
 ______________________________________________________________________
 
 ## Run Federated Learning with PyTorch and `Flower Next`
-
-Note that all of the following commands should be executed with your `.venv` virtual environment activated.
 
 ### 1. Start the long-running Flower server (SuperLink)
 
