@@ -15,9 +15,10 @@
 """Flower command line interface `new` command."""
 
 import os
+import urllib.request
 from enum import Enum
 from string import Template
-from typing import Dict, Optional
+from typing import Dict, Optional, cast
 
 import typer
 from typing_extensions import Annotated
@@ -37,16 +38,19 @@ class TemplateNotFound(Exception):
     """Raised when template does not exist."""
 
 
+TEMPLATES_BASE_URL = (
+    "https://raw.githubusercontent.com/adap/flower/main/src/py/flwr/cli/new/templates"
+)
+
+
 def load_template(name: str) -> str:
     """Load template from template directory and return as text."""
-    tpl_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "templates"))
-    tpl_file_path = os.path.join(tpl_dir, name)
-
-    if not os.path.isfile(tpl_file_path):
-        raise TemplateNotFound(f"Template '{name}' not found")
-
-    with open(tpl_file_path, encoding="utf-8") as tpl_file:
-        return tpl_file.read()
+    try:
+        with urllib.request.urlopen(f"{TEMPLATES_BASE_URL}/{name}") as res:
+            content = res.read().decode("utf-8")
+            return cast(str, content)
+    except Exception as ex:
+        raise TemplateNotFound(f"Template '{name}' not found") from ex
 
 
 def render_template(template: str, data: Dict[str, str]) -> str:
