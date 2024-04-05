@@ -15,7 +15,7 @@ parser.add_argument(
     type=int,
     choices=[0, 1, 2],
     default=0,
-    help="Partition of the dataset (0,1 or 2). "
+    help="Partition of the dataset (0, 1 or 2). "
     "The dataset is divided into 3 partitions created artificially.",
 )
 args, _ = parser.parse_known_args()
