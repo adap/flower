@@ -680,6 +680,21 @@ def vae_rec_loss(recon_img, img, cnn=False):
         return bce_loss_sum_per_image
 
 
+def compute_gram_matrix(x):
+    return torch.matmul(x, x.t())
+
+
+# Function to compute CKA score
+def compute_cka(matrix1, matrix2):
+    frob_norm1 = torch.norm(matrix1, "fro")
+    frob_norm2 = torch.norm(matrix2, "fro")
+    matrix1 = matrix1 / frob_norm1
+    matrix2 = matrix2 / frob_norm2
+    return torch.trace(torch.matmul(matrix1, matrix2.t())) / (
+        torch.norm(matrix1) * torch.norm(matrix2)
+    )
+
+
 def train_align(
     net,
     trainloader,
@@ -928,17 +943,23 @@ def train_alternate_frozen(
                 )
                 loss_ref += vae_loss_g * lambda_reg
                 if lambda_align > 0:
-                    loss_align = 0.5 * (log_var_g - log_var - 1) + (
-                        log_var.exp() + (mu - mu_g).pow(2)
-                    ) / (2 * log_var_g.exp())
-                else:
-                    loss_align = torch.zeros_like(log_var_g)
+                    # loss_align = 0.5 * (log_var_g - log_var - 1) + (
+                    #     log_var.exp() + (mu - mu_g).pow(2)
+                    # ) / (2 * log_var_g.exp())
+                    gram_matrix1 = compute_gram_matrix(mu)
+                    gram_matrix2 = compute_gram_matrix(mu_g)
+                    cka_score = compute_cka(gram_matrix1, gram_matrix2)
+                    print("CKA Score:", cka_score)
+                    loss_ref += lambda_align * (1 - cka_score)
 
-            loss_align_reduced = torch.mean(loss_align.sum(dim=1))
-            print(f"align_step: {idx }")
-            print(f"loss_align_term: {lambda_align * loss_align_reduced}")
+            #     else:
+            #         loss_align = torch.zeros_like(log_var_g)
 
-            loss_ref += lambda_align * loss_align_reduced
+            # loss_align_reduced = torch.mean(loss_align.sum(dim=1))
+            # print(f"align_step: {idx }")
+            # print(f"loss_align_term: {lambda_align * loss_align_reduced}")
+
+            # loss_ref += lambda_align * loss_align_reduced
             loss_ref.backward(retain_graph=False)
             opt1.step()
 
@@ -974,7 +995,7 @@ def train_alternate_frozen(
     return (
         loss_local.item(),
         loss_ref.item(),
-        lambda_align * loss_align_reduced.item(),
+        lambda_align * (1 - cka_score).item(),
         lambda_latent_diff * vae_loss2.item(),
     )
 
