@@ -22,7 +22,7 @@ This will create a new directory called `quickstart-pytorch` containing the foll
 
 ### Installing Dependencies
 
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml`. You can install the dependencies by invoking `pip`: 
+Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml`. You can install the dependencies by invoking `pip`:
 
 ```shell
 # From a new python environment, run:
