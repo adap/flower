@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import numpy as np
 from flwr_experimental.ops.instance import Instance
 
 # We assume that devices which are older will have at most
-# ~80% of the the Samsung Galaxy Note 5 compute performance.
+# ~80% of the Samsung Galaxy Note 5 compute performance.
 SCORE_MISSING = int(226 * 0.80)
 
 DEVICE_DISTRIBUTION = [

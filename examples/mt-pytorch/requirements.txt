@@ -1,4 +1,0 @@
-flwr-nightly[simulation,rest]
-torch==1.13.1
-torchvision==0.13.0
-tqdm==4.65.0

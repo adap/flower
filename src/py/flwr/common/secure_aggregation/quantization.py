@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,14 +33,16 @@ def quantize(
     parameters: List[NDArrayFloat], clipping_range: float, target_range: int
 ) -> List[NDArrayInt]:
     """Quantize float Numpy arrays to integer Numpy arrays."""
-    quantized_list = []
+    quantized_list: List[NDArrayInt] = []
     quantizer = target_range / (2 * clipping_range)
     for arr in parameters:
         # Stochastic quantization
-        quantized = (
-            np.clip(arr, -clipping_range, clipping_range) + clipping_range
-        ) * quantizer
-        quantized = _stochastic_round(quantized)
+        pre_quantized = cast(
+            NDArrayFloat,
+            (np.clip(arr, -clipping_range, clipping_range) + clipping_range)
+            * quantizer,
+        )
+        quantized = _stochastic_round(pre_quantized)
         quantized_list.append(quantized)
     return quantized_list
 

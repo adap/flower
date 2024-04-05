@@ -1,5 +1,4 @@
-"""CNN model architecutre, training, and testing functions for MNIST."""
-
+"""CNN model architecture, training, and testing functions for MNIST."""
 
 from typing import List, Tuple
 
@@ -55,13 +54,14 @@ class LogisticRegression(nn.Module):
 
     As described in the Li et al., 2020 paper :
 
-    [Federated Optimization in Heterogeneous Networks]
-    (https://arxiv.org/pdf/1812.06127.pdf)
+    [Federated Optimization in Heterogeneous Networks] (
+
+    https://arxiv.org/pdf/1812.06127.pdf)
     """
 
     def __init__(self, num_classes: int) -> None:
         super().__init__()
-        self.fc = nn.Linear(28 * 28, num_classes)
+        self.linear = nn.Linear(28 * 28, num_classes)
 
     def forward(self, input_tensor: torch.Tensor) -> torch.Tensor:
         """Forward pass.
@@ -76,7 +76,7 @@ class LogisticRegression(nn.Module):
         torch.Tensor
             The resulting Tensor after it has passed through the network
         """
-        output_tensor = self.fc(torch.flatten(input_tensor, 1))
+        output_tensor = self.linear(torch.flatten(input_tensor, 1))
         return output_tensor
 
 
@@ -153,7 +153,7 @@ def _train_one_epoch(  # pylint: disable=too-many-arguments
         optimizer.zero_grad()
         proximal_term = 0.0
         for local_weights, global_weights in zip(net.parameters(), global_params):
-            proximal_term += (local_weights - global_weights).norm(2)
+            proximal_term += torch.square((local_weights - global_weights).norm(2))
         loss = criterion(net(images), labels) + (proximal_mu / 2) * proximal_term
         loss.backward()
         optimizer.step()

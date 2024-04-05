@@ -1,3 +1,5 @@
+"""Flower Server."""
+
 from collections import OrderedDict
 from typing import Callable, Dict, Optional, Tuple
 
@@ -17,7 +19,7 @@ def gen_evaluate_fn(
 ) -> Callable[
     [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]
 ]:
-    """Generates the function for centralized evaluation.
+    """Generate the function for centralized evaluation.
 
     Parameters
     ----------
@@ -28,7 +30,8 @@ def gen_evaluate_fn(
 
     Returns
     -------
-    Callable[ [int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]] ]
+    Callable[ [int, NDArrays, Dict[str, Scalar]],
+                Optional[Tuple[float, Dict[str, Scalar]]] ]
         The centralized evaluation function.
     """
 
@@ -37,12 +40,16 @@ def gen_evaluate_fn(
     ) -> Optional[Tuple[float, Dict[str, Scalar]]]:
         # pylint: disable=unused-argument
         """Use the entire CIFAR-10 test set for evaluation."""
-
         net = instantiate(model)
         params_dict = zip(net.state_dict().keys(), parameters_ndarrays)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         net.load_state_dict(state_dict, strict=True)
         net.to(device)
+
+        # We could compile the model here but we are not going to do it because
+        # running test() is so lightweight that the overhead of compiling the model
+        # negate any potential speedup. Please note this is specific to the model and
+        # dataset used in this baseline. In general, compiling the model is worth it
 
         loss, accuracy = test(net, testloader, device=device)
         # return statistics

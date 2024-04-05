@@ -24,14 +24,14 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhisto
     && echo $SNIPPET >> "/home/$USERNAME/.bashrc"
 
 # Install system dependencies
-RUN apt update 
-RUN apt install -y curl wget gnupg python3 python-is-python3 python3-pip git \
+RUN apt-get update
+RUN apt-get install -y curl wget gnupg python3 python-is-python3 python3-pip git \
     build-essential tmux vim
 
 RUN python -m pip install \
-    pip==23.1.2 \
-    setuptools==68.0.0 \
-    poetry==1.5.1
+    pip==23.3.1 \
+    setuptools==68.2.2 \
+    poetry==1.7.1
 
 USER $USERNAME
 ENV PATH="/home/$USERNAME/.local/bin:${PATH}"

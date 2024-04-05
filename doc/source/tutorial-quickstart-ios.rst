@@ -4,14 +4,17 @@
 Quickstart iOS
 ==============
 
-In this tutorial we will learn how to train a Neural Network on MNIST using Flower and CoreML on iOS devices. 
+.. meta::
+   :description: Read this Federated Learning quickstart tutorial for creating an iOS app using Flower to train a neural network on MNIST.
 
-First of all, for running the Flower Python server, it is recommended to create a virtual environment and run everything within a `virtualenv <https://flower.dev/docs/recommended-env-setup.html>`_.
+In this tutorial we will learn how to train a Neural Network on MNIST using Flower and CoreML on iOS devices.
+
+First of all, for running the Flower Python server, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 For the Flower client implementation in iOS, it is recommended to use Xcode as our IDE.
 
-Our example consists of one Python *server* and two iPhone *clients* that all have the same model. 
+Our example consists of one Python *server* and two iPhone *clients* that all have the same model.
 
-*Clients* are responsible for generating individual weight updates for the model based on their local datasets. 
+*Clients* are responsible for generating individual weight updates for the model based on their local datasets.
 These updates are then sent to the *server* which will aggregate them to produce a better model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of weight updates is called a *round*.
 
@@ -41,10 +44,10 @@ For simplicity reasons we will use the complete Flower client with CoreML, that 
   public func getParameters() -> GetParametersRes {
     let parameters = parameters.weightsToParameters()
     let status = Status(code: .ok, message: String())
-        
+
     return GetParametersRes(parameters: parameters, status: status)
   }
-    
+
   /// Calls the routine to fit the local model
   ///
   /// - Returns: The result from the local training, e.g., updated parameters
@@ -52,17 +55,17 @@ For simplicity reasons we will use the complete Flower client with CoreML, that 
     let status = Status(code: .ok, message: String())
     let result = runMLTask(configuration: parameters.parametersToWeights(parameters: ins.parameters), task: .train)
     let parameters = parameters.weightsToParameters()
-        
+
     return FitRes(parameters: parameters, numExamples: result.numSamples, status: status)
     }
-    
+
   /// Calls the routine to evaluate the local model
   ///
   /// - Returns: The result from the evaluation, e.g., loss
   public func evaluate(ins: EvaluateIns) -> EvaluateRes {
     let status = Status(code: .ok, message: String())
     let result = runMLTask(configuration: parameters.parametersToWeights(parameters: ins.parameters), task: .test)
-        
+
     return EvaluateRes(loss: Float(result.loss), numExamples: result.numSamples, status: status)
   }
 
@@ -85,18 +88,18 @@ For the MNIST dataset, we need to preprocess it into :code:`MLBatchProvider` obj
 
   // prepare train dataset
   let trainBatchProvider = DataLoader.trainBatchProvider() { _ in }
-            
+
   // prepare test dataset
   let testBatchProvider = DataLoader.testBatchProvider() { _ in }
-            
+
   // load them together
-  let dataLoader = MLDataLoader(trainBatchProvider: trainBatchProvider, 
+  let dataLoader = MLDataLoader(trainBatchProvider: trainBatchProvider,
                                 testBatchProvider: testBatchProvider)
 
 Since CoreML does not allow the model parameters to be seen before training, and accessing the model parameters during or after the training can only be done by specifying the layer name,
-we need to know this informations beforehand, through looking at the model specification, which are written as proto files. The implementation can be seen in :code:`MLModelInspect`.
+we need to know this information beforehand, through looking at the model specification, which are written as proto files. The implementation can be seen in :code:`MLModelInspect`.
 
-After we have all of the necessary informations, let's create our Flower client.
+After we have all of the necessary information, let's create our Flower client.
 
 .. code-block:: swift
 
@@ -119,7 +122,7 @@ Then start the Flower gRPC client and start communicating to the server by passi
   self.flwrGRPC.startFlwrGRPC(client: self.mlFlwrClient)
 
 That's it for the client. We only have to implement :code:`Client` or call the provided
-:code:`MLFlwrClient` and call :code:`startFlwrGRPC()`. The attribute :code:`hostname` and :code:`port` tells the client which server to connect to. 
+:code:`MLFlwrClient` and call :code:`startFlwrGRPC()`. The attribute :code:`hostname` and :code:`port` tells the client which server to connect to.
 This can be done by entering the hostname and port in the application before clicking the start button to start the federated learning process.
 
 Flower Server

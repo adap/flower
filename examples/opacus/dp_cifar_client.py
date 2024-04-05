@@ -28,6 +28,7 @@ def load_data():
 
 model = Net()
 trainloader, testloader, sample_rate = load_data()
-fl.client.start_numpy_client(
-    server_address="127.0.0.1:8080", client=DPCifarClient(model, trainloader, testloader)
+fl.client.start_client(
+    server_address="127.0.0.1:8080",
+    client=DPCifarClient(model, trainloader, testloader).to_client(),
 )

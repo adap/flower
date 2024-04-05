@@ -2,15 +2,14 @@
 name = "jax_example"
 version = "0.1.0"
 description = "JAX example training a linear regression model with federated learning"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-flwr = "^1.0.0"
-jax = "^0.4.0"
-jaxlib = "^0.4.0"
-scikit-learn = "^1.1.1"
-numpy = "^1.21.4"
+python = ">=3.8,<3.11"
+flwr = "1.0.0"
+jax = "0.4.17"
+jaxlib = "0.4.17"
+scikit-learn = "1.1.1"
 
 [build-system]
 requires = ["poetry-core>=1.4.0"]

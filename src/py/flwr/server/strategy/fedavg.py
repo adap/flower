@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 
-from .aggregate import aggregate, weighted_loss_avg
+from .aggregate import aggregate, aggregate_inplace, weighted_loss_avg
 from .strategy import Strategy
 
 WARNING_MIN_AVAILABLE_CLIENTS_TOO_LOW = """
@@ -48,8 +48,45 @@ than or equal to the values of `min_fit_clients` and `min_evaluate_clients`.
 """
 
 
+# pylint: disable=line-too-long
 class FedAvg(Strategy):
-    """Configurable FedAvg strategy implementation."""
+    """Federated Averaging strategy.
+
+    Implementation based on https://arxiv.org/abs/1602.05629
+
+    Parameters
+    ----------
+    fraction_fit : float, optional
+        Fraction of clients used during training. In case `min_fit_clients`
+        is larger than `fraction_fit * available_clients`, `min_fit_clients`
+        will still be sampled. Defaults to 1.0.
+    fraction_evaluate : float, optional
+        Fraction of clients used during validation. In case `min_evaluate_clients`
+        is larger than `fraction_evaluate * available_clients`,
+        `min_evaluate_clients` will still be sampled. Defaults to 1.0.
+    min_fit_clients : int, optional
+        Minimum number of clients used during training. Defaults to 2.
+    min_evaluate_clients : int, optional
+        Minimum number of clients used during validation. Defaults to 2.
+    min_available_clients : int, optional
+        Minimum number of total clients in the system. Defaults to 2.
+    evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]],Optional[Tuple[float, Dict[str, Scalar]]]]]
+        Optional function used for validation. Defaults to None.
+    on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure training. Defaults to None.
+    on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
+        Function used to configure validation. Defaults to None.
+    accept_failures : bool, optional
+        Whether or not accept rounds containing failures. Defaults to True.
+    initial_parameters : Parameters, optional
+        Initial global model parameters.
+    fit_metrics_aggregation_fn : Optional[MetricsAggregationFn]
+        Metrics aggregation function, optional.
+    evaluate_metrics_aggregation_fn : Optional[MetricsAggregationFn]
+        Metrics aggregation function, optional.
+    inplace : bool (default: True)
+        Enable (True) or disable (False) in-place aggregation of model updates.
+    """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
     def __init__(
@@ -72,42 +109,8 @@ class FedAvg(Strategy):
         initial_parameters: Optional[Parameters] = None,
         fit_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
         evaluate_metrics_aggregation_fn: Optional[MetricsAggregationFn] = None,
+        inplace: bool = True,
     ) -> None:
-        """Federated Averaging strategy.
-
-        Implementation based on https://arxiv.org/abs/1602.05629
-
-        Parameters
-        ----------
-        fraction_fit : float, optional
-            Fraction of clients used during training. In case `min_fit_clients`
-            is larger than `fraction_fit * available_clients`, `min_fit_clients`
-            will still be sampled. Defaults to 1.0.
-        fraction_evaluate : float, optional
-            Fraction of clients used during validation. In case `min_evaluate_clients`
-            is larger than `fraction_evaluate * available_clients`,
-            `min_evaluate_clients` will still be sampled. Defaults to 1.0.
-        min_fit_clients : int, optional
-            Minimum number of clients used during training. Defaults to 2.
-        min_evaluate_clients : int, optional
-            Minimum number of clients used during validation. Defaults to 2.
-        min_available_clients : int, optional
-            Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
-            Optional function used for validation. Defaults to None.
-        on_fit_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure training. Defaults to None.
-        on_evaluate_config_fn : Callable[[int], Dict[str, Scalar]], optional
-            Function used to configure validation. Defaults to None.
-        accept_failures : bool, optional
-            Whether or not accept rounds containing failures. Defaults to True.
-        initial_parameters : Parameters, optional
-            Initial global model parameters.
-        fit_metrics_aggregation_fn : Optional[MetricsAggregationFn]
-            Metrics aggregation function, optional.
-        evaluate_metrics_aggregation_fn : Optional[MetricsAggregationFn]
-            Metrics aggregation function, optional.
-        """
         super().__init__()
 
         if (
@@ -128,6 +131,7 @@ class FedAvg(Strategy):
         self.initial_parameters = initial_parameters
         self.fit_metrics_aggregation_fn = fit_metrics_aggregation_fn
         self.evaluate_metrics_aggregation_fn = evaluate_metrics_aggregation_fn
+        self.inplace = inplace
 
     def __repr__(self) -> str:
         """Compute a string representation of the strategy."""
@@ -226,12 +230,18 @@ class FedAvg(Strategy):
         if not self.accept_failures and failures:
             return None, {}
 
-        # Convert results
-        weights_results = [
-            (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
-            for _, fit_res in results
-        ]
-        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+        if self.inplace:
+            # Does in-place weighted average of results
+            aggregated_ndarrays = aggregate_inplace(results)
+        else:
+            # Convert results
+            weights_results = [
+                (parameters_to_ndarrays(fit_res.parameters), fit_res.num_examples)
+                for _, fit_res in results
+            ]
+            aggregated_ndarrays = aggregate(weights_results)
+
+        parameters_aggregated = ndarrays_to_parameters(aggregated_ndarrays)
 
         # Aggregate custom metrics if aggregation fn was provided
         metrics_aggregated = {}

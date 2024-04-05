@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 # ==============================================================================
 
 
+import datetime
 import os
 import sys
 from git import Repo
@@ -29,45 +30,63 @@ from sphinx.application import ConfigError
 # Fixing path issue for autodoc
 sys.path.insert(0, os.path.abspath("../../src/py"))
 
-html_context = dict()
-if 'current_language' in os.environ:
-    current_language = os.environ['current_language']
-else:
-    current_language = 'en'
-html_context['current_language'] = current_language
-repo = Repo( search_parent_directories=True )
+# -- Versioning switcher -----------------------------------------------------
 
+html_context = dict()
+
+# Make current language accessible for the html templates
+if "current_language" in os.environ:
+    current_language = os.environ["current_language"]
+else:
+    current_language = "en"
+html_context["current_language"] = current_language
+
+# Make current version accessible for the html templates
+repo = Repo(search_parent_directories=True)
 local = False
-if 'current_version' in os.environ:
-    current_version = os.environ['current_version']
+if "current_version" in os.environ:
+    current_version = os.environ["current_version"]
 elif os.getenv("GITHUB_ACTIONS"):
-    current_version = 'main'
+    current_version = "main"
 else:
     local = True
     current_version = repo.active_branch.name
 
-html_context['current_version'] = {}
-html_context['current_version']['url'] = current_version
-html_context['current_version']['full_name'] = "main" if current_version=="main" else f"{'' if local else 'Flower Framework '}{current_version}"
+# Format current version for the html templates
+html_context["current_version"] = {}
+html_context["current_version"]["url"] = current_version
+html_context["current_version"]["full_name"] = (
+    "main"
+    if current_version == "main"
+    else f"{'' if local else 'Flower Framework '}{current_version}"
+)
 
-html_context['versions'] = list()
-versions = [tag.name for tag in repo.tags if int(tag.name[1]) != 0]
-versions.append('main')
+# Make version list accessible for the html templates
+html_context["versions"] = list()
+versions = [
+    tag.name
+    for tag in repo.tags
+    if int(tag.name[1]) > 0 and int(tag.name.split(".")[1]) >= 5
+]
+versions.append("main")
 for version in versions:
-    html_context['versions'].append({"name": version})
+    html_context["versions"].append({"name": version})
 
-# Translation options
-locale_dirs = ['../locales']
+
+# -- Translation options -----------------------------------------------------
+
+locale_dirs = ["../locales"]
 gettext_compact = "framework-docs"
+
 
 # -- Project information -----------------------------------------------------
 
 project = "Flower"
-copyright = "2022 Adap GmbH"
+copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.5.0"
+release = "1.9.0"
 
 # -- General configuration ---------------------------------------------------
 
@@ -77,6 +96,7 @@ release = "1.5.0"
 extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx.ext.graphviz",
@@ -89,6 +109,44 @@ extensions = [
     "sphinx_reredirects",
     "nbsphinx",
 ]
+
+# Generate .rst files
+autosummary_generate = True
+
+# Document ONLY the objects from __all__ (present in __init__ files).
+# It will be done recursively starting from flwr.__init__
+# Starting point is controlled in the index.rst file.
+autosummary_ignore_module_all = False
+
+# Each class and function docs start with the path to it
+# Make the flwr_datasets.federated_dataset.FederatedDataset appear as FederatedDataset
+# The full name is still at the top of the page
+add_module_names = False
+
+
+def find_test_modules(package_path):
+    """Go through the python files and exclude every *_test.py file."""
+    full_path_modules = []
+    for root, dirs, files in os.walk(package_path):
+        for file in files:
+            if file.endswith("_test.py"):
+                # Construct the module path relative to the package directory
+                full_path = os.path.join(root, file)
+                relative_path = os.path.relpath(full_path, package_path)
+                # Convert file path to dotted module path
+                module_path = os.path.splitext(relative_path)[0].replace(os.sep, ".")
+                full_path_modules.append(module_path)
+    modules = []
+    for full_path_module in full_path_modules:
+        parts = full_path_module.split(".")
+        for i in range(len(parts)):
+            modules.append(".".join(parts[i:]))
+    return modules
+
+
+# Stop from documenting the *_test.py files.
+# That's the only way to do that in autosummary (make the modules as mock_imports).
+autodoc_mock_imports = find_test_modules(os.path.abspath("../../src/py/flwr"))
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -104,26 +162,31 @@ redirects = {
     # Renamed pages
     "installation": "how-to-install-flower.html",
     "configuring-clients.html": "how-to-configure-clients.html",
-    "quickstart_mxnet": "quickstart-mxnet.html",
-    "quickstart_pytorch_lightning": "quickstart-pytorch-lightning.html",
-    "quickstart_huggingface": "quickstart-huggingface.html",
-    "quickstart_pytorch": "quickstart-pytorch.html",
-    "quickstart_tensorflow": "quickstart-tensorflow.html",
-    "quickstart_scikitlearn": "quickstart-scikitlearn.html",
-    "quickstart_xgboost": "quickstart-xgboost.html",
+    "quickstart_mxnet": "tutorial-quickstart-mxnet.html",
+    "quickstart_pytorch_lightning": "tutorial-quickstart-pytorch-lightning.html",
+    "quickstart_huggingface": "tutorial-quickstart-huggingface.html",
+    "quickstart_pytorch": "tutorial-quickstart-pytorch.html",
+    "quickstart_tensorflow": "tutorial-quickstart-tensorflow.html",
+    "quickstart_scikitlearn": "tutorial-quickstart-scikitlearn.html",
+    "quickstart_xgboost": "tutorial-quickstart-xgboost.html",
     "example_walkthrough_pytorch_mnist": "example-walkthrough-pytorch-mnist.html",
-    "release_process": "release-process.html",
+    "release_process": "contributor-how-to-release-flower.html",
     "saving-progress": "how-to-save-and-load-model-checkpoints.html",
-    "writing-documentation": "write-documentation.html",
-    "apiref-binaries": "apiref-cli.html",
+    "writing-documentation": "contributor-how-to-write-documentation.html",
+    "apiref-binaries": "ref-api-cli.html",
     "fedbn-example-pytorch-from-centralized-to-federated": "example-fedbn-pytorch-from-centralized-to-federated.html",
-
+    "how-to-use-built-in-middleware-layers": "how-to-use-built-in-mods.html",
     # Restructuring: tutorials
-    "tutorial/Flower-0-What-is-FL": "tutorial-what-is-federated-learning.html",
-    "tutorial/Flower-1-Intro-to-FL-PyTorch": "tutorial-get-started-with-flower-pytorch.html",
-    "tutorial/Flower-2-Strategies-in-FL-PyTorch": "tutorial-use-a-federated-learning-strategy-pytorch.html",
-    "tutorial/Flower-3-Building-a-Strategy-PyTorch": "tutorial-build-a-strategy-from-scratch-pytorch.html",
-    "tutorial/Flower-4-Client-and-NumPyClient-PyTorch": "tutorial-customize-the-client-pytorch.html",
+    "tutorial/Flower-0-What-is-FL": "tutorial-series-what-is-federated-learning.html",
+    "tutorial/Flower-1-Intro-to-FL-PyTorch": "tutorial-series-get-started-with-flower-pytorch.html",
+    "tutorial/Flower-2-Strategies-in-FL-PyTorch": "tutorial-series-use-a-federated-learning-strategy-pytorch.html",
+    "tutorial/Flower-3-Building-a-Strategy-PyTorch": "tutorial-series-build-a-strategy-from-scratch-pytorch.html",
+    "tutorial/Flower-4-Client-and-NumPyClient-PyTorch": "tutorial-series-customize-the-client-pytorch.html",
+    "tutorial-what-is-federated-learning.html": "tutorial-series-what-is-federated-learning.html",
+    "tutorial-get-started-with-flower-pytorch.html": "tutorial-series-get-started-with-flower-pytorch.html",
+    "tutorial-use-a-federated-learning-strategy-pytorch.html": "tutorial-series-use-a-federated-learning-strategy-pytorch.html",
+    "tutorial-build-a-strategy-from-scratch-pytorch.html": "tutorial-series-build-a-strategy-from-scratch-pytorch.html",
+    "tutorial-customize-the-client-pytorch.html": "tutorial-series-customize-the-client-pytorch.html",
     "quickstart-pytorch": "tutorial-quickstart-pytorch.html",
     "quickstart-tensorflow": "tutorial-quickstart-tensorflow.html",
     "quickstart-huggingface": "tutorial-quickstart-huggingface.html",
@@ -136,7 +199,6 @@ redirects = {
     "quickstart-xgboost": "tutorial-quickstart-xgboost.html",
     "quickstart-android": "tutorial-quickstart-android.html",
     "quickstart-ios": "tutorial-quickstart-ios.html",
-
     # Restructuring: how-to guides
     "install-flower": "how-to-install-flower.html",
     "configure-clients": "how-to-configure-clients.html",
@@ -148,23 +210,20 @@ redirects = {
     "logging": "how-to-configure-logging.html",
     "ssl-enabled-connections": "how-to-enable-ssl-connections.html",
     "upgrade-to-flower-1.0": "how-to-upgrade-to-flower-1.0.html",
-
     # Restructuring: explanations
     "evaluation": "explanation-federated-evaluation.html",
     "differential-privacy-wrappers": "explanation-differential-privacy.html",
-
     # Restructuring: references
-    "apiref-flwr": "ref-api-flwr.html",
+    "apiref-flwr": "ref-api/flwr.html",
+    "ref-api-flwr": "ref-api/flwr.html",
     "apiref-cli": "ref-api-cli.html",
     "examples": "ref-example-projects.html",
     "telemetry": "ref-telemetry.html",
     "changelog": "ref-changelog.html",
     "faq": "ref-faq.html",
-
     # Restructuring: contributor tutorials
     "first-time-contributors": "contributor-tutorial-contribute-on-github.html",
     "getting-started-for-contributors": "contributor-tutorial-get-started-as-a-contributor.html",
-
     # Restructuring: contributor how-to guides
     "contributor-setup": "contributor-how-to-install-development-versions.html",
     "recommended-env-setup": "contributor-how-to-set-up-a-virtual-env.html",
@@ -172,14 +231,11 @@ redirects = {
     "creating-new-messages": "contributor-how-to-create-new-messages.html",
     "write-documentation": "contributor-how-to-write-documentation.html",
     "release-process": "contributor-how-to-release-flower.html",
-
     # Restructuring: contributor explanations
     "architecture": "contributor-explanation-architecture.html",
-
     # Restructuring: contributor references
     "good-first-contributions": "contributor-ref-good-first-contributions.html",
     "secagg": "contributor-ref-secure-aggregation-protocols.html",
-
     # Deleted pages
     "people": "index.html",
     "organizations": "index.html",
@@ -195,7 +251,7 @@ html_theme = "furo"
 html_title = f"Flower Framework"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
-html_baseurl = "https://flower.dev/docs/framework/"
+html_baseurl = "https://flower.ai/docs/framework/"
 
 html_theme_options = {
     #
@@ -226,6 +282,7 @@ html_theme_options = {
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 
+# Set modules for custom sidebar
 html_sidebars = {
     "**": [
         "sidebar/brand.html",

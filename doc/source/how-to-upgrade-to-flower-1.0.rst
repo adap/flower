@@ -50,7 +50,7 @@ Strategies / ``start_server`` / ``start_simulation``
 - Replace ``num_rounds=1`` in ``start_simulation`` with the new ``config=ServerConfig(...)`` (see previous item)
 - Remove ``force_final_distributed_eval`` parameter from calls to ``start_server``. Distributed evaluation on all clients can be enabled by configuring the strategy to sample all clients for evaluation after the last round of training.
 - Rename parameter/ndarray conversion functions:
-  
+
   - ``parameters_to_weights`` --> ``parameters_to_ndarrays``
   - ``weights_to_parameters`` --> ``ndarrays_to_parameters``
 
@@ -81,11 +81,11 @@ Optional improvements
 
 Along with the necessary changes above, there are a number of potential improvements that just became possible:
 
-- Remove "placeholder" methods from subclasses of ``Client`` or ``NumPyClient``. If you, for example, use server-side evaluation, then empy placeholder implementations of ``evaluate`` are no longer necessary.
+- Remove "placeholder" methods from subclasses of ``Client`` or ``NumPyClient``. If you, for example, use server-side evaluation, then empty placeholder implementations of ``evaluate`` are no longer necessary.
 - Configure the round timeout via ``start_simulation``: ``start_simulation(..., config=flwr.server.ServerConfig(num_rounds=3, round_timeout=600.0), ...)``
 
 
 Further help
 ------------
 
-Most official `Flower code examples <https://github.com/adap/flower/tree/main/examples>`_ are already updated to Flower 1.0, they can serve as a reference for using the Flower 1.0 API. If there are further questionsm, `join the Flower Slack <https://flower.dev/join-slack/>`_ and use the channgel ``#questions``.
+Most official `Flower code examples <https://github.com/adap/flower/tree/main/examples>`_ are already updated to Flower 1.0, they can serve as a reference for using the Flower 1.0 API. If there are further questions, `join the Flower Slack <https://flower.ai/join-slack/>`_ and use the channel ``#questions``.

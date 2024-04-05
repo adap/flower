@@ -6,13 +6,13 @@ build-backend = "poetry.masonry.api"
 name = "quickstart-ml-cube"
 version = "0.1.0"
 description = "Keras Federated Learning Quickstart with Flower"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"  # For development: { path = "../../", develop = true }
-tensorflow-cpu = {version = ">=2.9.1,<2.11.1 || >2.11.1", markers = "platform_machine == \"x86_64\""}
-tensorflow-macos = {version = ">=2.9.1,<2.11.1 || >2.11.1", markers = "sys_platform == \"darwin\" and platform_machine == \"arm64\""}
-mlcube = "0.0.8"
-mlcube-docker = "0.0.8"
+tensorflow-cpu = { version = ">=2.9.1,<2.11.1 || >2.11.1", markers = "platform_machine == \"x86_64\"" }
+tensorflow-macos = { version = ">=2.9.1,<2.11.1 || >2.11.1", markers = "sys_platform == \"darwin\" and platform_machine == \"arm64\"" }
+mlcube = "0.0.9"
+mlcube-docker = "0.0.9"
 tensorflow-estimator = ">=2.9.1,<2.11.1 || >2.11.1"

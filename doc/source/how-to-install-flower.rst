@@ -5,11 +5,14 @@ Install Flower
 Python version
 --------------
 
-Flower requires at least `Python 3.7 <https://docs.python.org/3.7/>`_, but `Python 3.8 <https://docs.python.org/3.7/>`_ or above is recommended.
+Flower requires at least `Python 3.8 <https://docs.python.org/3.8/>`_, but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is recommended.
 
 
 Install stable release
 ----------------------
+
+Using pip
+~~~~~~~~~
 
 Stable releases are available on `PyPI <https://pypi.org/project/flwr/>`_::
 
@@ -20,10 +23,29 @@ For simulations that use the Virtual Client Engine, ``flwr`` should be installed
   python -m pip install flwr[simulation]
 
 
+Using conda (or mamba)
+~~~~~~~~~~~~~~~~~~~~~~
+
+Flower can also be installed from the ``conda-forge`` channel.
+
+If you have not added ``conda-forge`` to your channels, you will first need to run the following::
+
+  conda config --add channels conda-forge
+  conda config --set channel_priority strict
+
+Once the ``conda-forge`` channel has been enabled, ``flwr`` can be installed with ``conda``::
+
+  conda install flwr
+
+or with ``mamba``::
+
+  mamba install flwr
+
+
 Verify installation
 -------------------
 
-The following command can be used to verfiy if Flower was successfully installed. If everything worked, it should print the version of Flower to the command line::
+The following command can be used to verify if Flower was successfully installed. If everything worked, it should print the version of Flower to the command line::
 
   python -c "import flwr;print(flwr.__version__)"
   1.5.0
@@ -31,6 +53,11 @@ The following command can be used to verfiy if Flower was successfully installed
 
 Advanced installation options
 -----------------------------
+
+Install via Docker
+~~~~~~~~~~~~~~~~~~
+
+:doc:`How to run Flower using Docker <how-to-run-flower-using-docker>`
 
 Install pre-release
 ~~~~~~~~~~~~~~~~~~~

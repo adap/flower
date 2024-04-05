@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -69,9 +69,9 @@ def upload_file(local_filepath: str, s3_key: Optional[str]) -> None:
                 Bucket=CONFIG["s3_bucket"],
                 Key=s3_key,
                 ExtraArgs={
-                    "ContentType": "application/pdf"
-                    if s3_key.endswith(".pdf")
-                    else "text/plain"
+                    "ContentType": (
+                        "application/pdf" if s3_key.endswith(".pdf") else "text/plain"
+                    )
                 },
             )
         # pylint: disable=broad-except

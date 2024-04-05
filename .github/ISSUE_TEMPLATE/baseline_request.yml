@@ -38,35 +38,25 @@ body:
     attributes:
       label: For first time contributors
       value: |
-        - [ ]  Read the [`first contribution` doc](https://flower.dev/docs/first-time-contributors.html)
+        - [ ]  Read the [`first contribution` doc](https://flower.ai/docs/first-time-contributors.html)
         - [ ]  Complete the Flower tutorial
         - [ ]  Read the Flower Baselines docs to get an overview:
-            - [ ]  [https://flower.dev/docs/using-baselines.html](https://flower.dev/docs/using-baselines.html)
-            - [ ]  [https://flower.dev/docs/contributing-baselines.html](https://flower.dev/docs/contributing-baselines.html)
+            - [ ]  [How to use Flower Baselines](https://flower.ai/docs/baselines/how-to-use-baselines.html)
+            - [ ]  [How to contribute a Flower Baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html)
   - type: checkboxes
     attributes:
       label: Prepare - understand the scope
       options:
         - label: Read the paper linked above
-        - label: Create the directory structure in Flower Baselines (just the `__init__.py` files and a `README.md`)
-        - label: Before starting to write code, write down all of the specs of this experiment in a README (dataset, partitioning, model, number of clients, all hyperparameters, …)
-        - label: Open a draft PR
+        - label: Decide which experiments you'd like to reproduce. The more the better!
+        - label: Follow the steps outlined in [Add a new Flower Baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html#add-a-new-flower-baseline).
+        - label: You can use as reference [other baselines](https://github.com/adap/flower/tree/main/baselines) that the community merged following those steps.
   - type: checkboxes
     attributes:
-      label: Implement - make it work
+      label: Verify your implementation
       options:
-        - label: Implement some form of dataset loading and partitioning in a separate `dataset.py` (doesn’t have to match the paper exactly)
-        - label: Implement the model in PyTorch
-        - label: Write a test that shows that the model has the number of parameters mentioned in the paper
-        - label: Implement the federated learning setup outlined in the paper, maybe starting with fewer clients
-        - label: Plot accuracy and loss
-        - label: Run it and check if the model starts to converge
-  - type: checkboxes
-    attributes:
-      label: Align - make it converge
-      options:
-        - label: Implement the exact data partitioning outlined in the paper
-        - label: Use the exact hyperparameters outlined in the paper
-        - label: Make it converge to roughly the same accuracy that the paper states
-        - label: Commit the final hyperparameters and plots
-        - label: Mark the PR as ready
+        - label: Follow the steps indicated in the `EXTENDED_README.md` that was created in your baseline directory
+        - label: Ensure your code reproduces the results for the experiments you chose
+        - label: Ensure your `README.md` is ready to be run by someone that is no familiar with your code. Are all step-by-step instructions clear?
+        - label: Ensure running the formatting and typing tests for your baseline runs without errors.
+        - label: Clone your repo on a new directory, follow the guide on your own `README.md` and verify everything runs.

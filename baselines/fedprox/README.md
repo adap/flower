@@ -1,15 +1,15 @@
 ---
 title: Federated Optimization in Heterogeneous Networks
 url: https://arxiv.org/abs/1812.06127
-labels: [image classification, cross-device, stragglers] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. "system heterogeneity", "image classification", "asynchronous", "weight sharing", "cross-silo")
-dataset: [mnist] # list of datasets you include in your baseline
+labels: [image classification, cross-device, stragglers]
+dataset: [MNIST]
 ---
 
 # FedProx: Federated Optimization in Heterogeneous Networks
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
-**Paper:** https://arxiv.org/abs/1812.06127
+**Paper:** [arxiv.org/abs/1812.06127](https://arxiv.org/abs/1812.06127)
 
 **Authors:** Tian Li, Anit Kumar Sahu, Manzil Zaheer, Maziar Sanjabi, Ameet Talwalkar and Virginia Smith.
 
@@ -34,7 +34,7 @@ dataset: [mnist] # list of datasets you include in your baseline
 * A logistic regression model used in the FedProx paper for MNIST (see `models/LogisticRegression`). This is the model used by default.
 * A two-layer CNN network as used in the FedAvg paper (see `models/Net`)
 
-**Dataset:** This baseline only includes the MNIST dataset. By default it will be partitioned into 1000 clients following a pathological split where each client has examples of two (out of ten) class labels. The number of examples in each client is derived by sampling from a powerlaw distribution. The settings are as follow:
+**Dataset:** This baseline only includes the MNIST dataset. By default, it will be partitioned into 1000 clients following a pathological split where each client has examples of two (out of ten) class labels. The number of examples in each client is derived by sampling from a powerlaw distribution. The settings are as follows:
 
 | Dataset | #classes | #partitions | partitioning method | partition settings |
 | :------ | :---: | :---: | :---: | :---: |
@@ -56,17 +56,17 @@ The following table shows the main hyperparameters for this baseline with their 
 
 ## Environment Setup
 
-To construct the Python environment follow these steps:
+To construct the Python environment, simply run:
 
 ```bash
-# install the base Poetry environment
+# Set directory to use python 3.10 (install with `pyenv install <version>` if you don't have it)
+pyenv local 3.10.12
+
+# Tell poetry to use python3.10
+poetry env use 3.10.12
+
+# Install
 poetry install
-
-# activate the environment
-poetry shell
-
-# install PyTorch with GPU support. Please note this baseline is very lightweight so it can run fine on a CPU.
-pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
 ```
 
 ## Running the Experiments
@@ -91,12 +91,12 @@ To run using FedAvg:
 # This is done so to match the experimental setup in the FedProx paper
 python -m fedprox.main --config-name fedavg
 
-# this config can also be overriden from the CLI
+# this config can also be overridden from the CLI
 ```
 
 ## Expected results
 
-With the following command we run both FedProx and FedAvg configurations while iterating through different values of `mu` and `stragglers_fraction`. We ran each experiment five times (this is achieved by artificially adding an extra element to the config but that it doesn't have an impact on the FL setting `'+repeat_num=range(5)'`)
+With the following command, we run both FedProx and FedAvg configurations while iterating through different values of `mu` and `stragglers_fraction`. We ran each experiment five times (this is achieved by artificially adding an extra element to the config but it doesn't have an impact on the FL setting `'+repeat_num=range(5)'`)
 
 ```bash
 python -m fedprox.main --multirun mu=0.0,2.0 stragglers_fraction=0.0,0.5,0.9 '+repeat_num=range(5)'
@@ -104,6 +104,6 @@ python -m fedprox.main --multirun mu=0.0,2.0 stragglers_fraction=0.0,0.5,0.9 '+r
 python -m fedprox.main --config-name fedavg --multirun stragglers_fraction=0.0,0.5,0.9 '+repeat_num=range(5)'
 ```
 
-The above commands would generate results that you can plot and would look like:
+The above commands would generate results that you can plot and would look like the plot shown below. This plot was generated using the jupyter notebook in the `docs/` directory of this baseline after running the `--multirun` commands above.
 
-![](docs/FedProx_mnist.png)
+![](_static/FedProx_mnist.png)

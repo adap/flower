@@ -1,6 +1,5 @@
 """Defines the MNIST Flower Client and a function to instantiate it."""
 
-
 from collections import OrderedDict
 from typing import Callable, Dict, List, Tuple
 
@@ -12,10 +11,10 @@ from hydra.utils import instantiate
 from omegaconf import DictConfig
 from torch.utils.data import DataLoader
 
-from fedprox.dataset import load_datasets
 from fedprox.models import test, train
 
 
+# pylint: disable=too-many-arguments
 class FlowerClient(
     fl.client.NumPyClient
 ):  # pylint: disable=too-many-instance-attributes
@@ -40,11 +39,11 @@ class FlowerClient(
         self.straggler_schedule = straggler_schedule
 
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-        """Returns the parameters of the current net."""
+        """Return the parameters of the current net."""
         return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def set_parameters(self, parameters: NDArrays) -> None:
-        """Changes the parameters of the model using the given ones."""
+        """Change the parameters of the model using the given ones."""
         params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
         self.net.load_state_dict(state_dict, strict=True)
@@ -52,7 +51,7 @@ class FlowerClient(
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[NDArrays, int, Dict]:
-        """Implements distributed fit function for a given client."""
+        """Implement distributed fit function for a given client."""
         self.set_parameters(parameters)
 
         # At each round check if the client is a straggler,
@@ -88,7 +87,7 @@ class FlowerClient(
             self.device,
             epochs=num_epochs,
             learning_rate=self.learning_rate,
-            proximal_mu=config["proximal_mu"],
+            proximal_mu=float(config["proximal_mu"]),
         )
 
         return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
@@ -96,7 +95,7 @@ class FlowerClient(
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
     ) -> Tuple[float, int, Dict]:
-        """Implements distributed evaluation for a given client."""
+        """Implement distributed evaluation for a given client."""
         self.set_parameters(parameters)
         loss, accuracy = test(self.net, self.valloader, self.device)
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
@@ -111,10 +110,8 @@ def gen_client_fn(
     learning_rate: float,
     stragglers: float,
     model: DictConfig,
-) -> Tuple[
-    Callable[[str], FlowerClient], DataLoader
-]:  # pylint: disable=too-many-arguments
-    """Generates the client function that creates the Flower Clients.
+) -> Callable[[str], FlowerClient]:  # pylint: disable=too-many-arguments
+    """Generate the client function that creates the Flower Clients.
 
     Parameters
     ----------
@@ -139,13 +136,11 @@ def gen_client_fn(
 
     Returns
     -------
-    Tuple[Callable[[str], FlowerClient], DataLoader]
-        A tuple containing the client function that creates Flower Clients and
-        the DataLoader that will be used for testing
+    Callable[[str], FlowerClient]
+        A client function that creates Flower Clients.
     """
-
-    # Defines a staggling schedule for each clients, i.e at which round will they
-    # be a straggler. This is done so at each round the proportion of staggling
+    # Defines a straggling schedule for each clients, i.e at which round will they
+    # be a straggler. This is done so at each round the proportion of straggling
     # clients is respected
     stragglers_mat = np.transpose(
         np.random.choice(
@@ -155,7 +150,6 @@ def gen_client_fn(
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
-
         # Load model
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         net = instantiate(model).to(device)

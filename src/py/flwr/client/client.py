@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,11 +14,14 @@
 # ==============================================================================
 """Flower client (abstract base class)."""
 
+# Needed to `Client` class can return a type of `Client` (not needed in py3.11+)
+from __future__ import annotations
 
 from abc import ABC
 
 from flwr.common import (
     Code,
+    Context,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -34,6 +37,8 @@ from flwr.common import (
 
 class Client(ABC):
     """Abstract base class for Flower clients."""
+
+    context: Context
 
     def get_properties(self, ins: GetPropertiesIns) -> GetPropertiesRes:
         """Return set of client's properties.
@@ -135,6 +140,18 @@ class Client(ABC):
             num_examples=0,
             metrics={},
         )
+
+    def get_context(self) -> Context:
+        """Get the run context from this client."""
+        return self.context
+
+    def set_context(self, context: Context) -> None:
+        """Apply a run context to this client."""
+        self.context = context
+
+    def to_client(self) -> Client:
+        """Return client (itself)."""
+        return self
 
 
 def has_get_properties(client: Client) -> bool:

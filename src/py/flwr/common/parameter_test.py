@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ def test_serialisation_deserialisation() -> None:
     arr_deserialized = bytes_to_ndarray(arr_serialized)
 
     # Assert deserialized array is equal to original
-    np.testing.assert_equal(arr_deserialized, arr)  # type: ignore
+    np.testing.assert_equal(arr_deserialized, arr)
 
     # Test false positive
     with pytest.raises(AssertionError, match="Arrays are not equal"):
-        np.testing.assert_equal(arr_deserialized, np.ones((3, 2)))  # type: ignore
+        np.testing.assert_equal(arr_deserialized, np.ones((3, 2)))

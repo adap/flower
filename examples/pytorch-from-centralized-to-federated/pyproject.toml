@@ -6,10 +6,11 @@ build-backend = "poetry.masonry.api"
 name = "quickstart-pytorch"
 version = "0.1.0"
 description = "PyTorch: From Centralized To Federated with Flower"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"
+flwr-datasets = { extras = ["vision"], version = ">=0.0.2,<1.0.0" }
 torch = "1.13.1"
 torchvision = "0.14.1"

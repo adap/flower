@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ class ClientProxy(ABC):
         self,
         ins: GetPropertiesIns,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> GetPropertiesRes:
         """Return the client's properties."""
 
@@ -55,6 +56,7 @@ class ClientProxy(ABC):
         self,
         ins: GetParametersIns,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> GetParametersRes:
         """Return the current local model parameters."""
 
@@ -63,6 +65,7 @@ class ClientProxy(ABC):
         self,
         ins: FitIns,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> FitRes:
         """Refine the provided parameters using the locally held dataset."""
 
@@ -71,6 +74,7 @@ class ClientProxy(ABC):
         self,
         ins: EvaluateIns,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> EvaluateRes:
         """Evaluate the provided parameters using the locally held dataset."""
 
@@ -79,5 +83,6 @@ class ClientProxy(ABC):
         self,
         ins: ReconnectIns,
         timeout: Optional[float],
+        group_id: Optional[int],
     ) -> DisconnectRes:
         """Disconnect and (optionally) reconnect later."""

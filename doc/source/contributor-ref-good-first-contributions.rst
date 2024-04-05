@@ -14,7 +14,7 @@ Until the Flower core library matures it will be easier to get PR's accepted if
 they only touch non-core areas of the codebase. Good candidates to get started
 are:
 
-- Documentation: What's missing? What could be expressed more clearly? 
+- Documentation: What's missing? What could be expressed more clearly?
 - Baselines: See below.
 - Examples: See below.
 
@@ -22,11 +22,11 @@ are:
 Request for Flower Baselines
 ----------------------------
 
-If you are not familiar with Flower Baselines, you should probably check-out our `contributing guide for baselines <https://flower.dev/docs/contributing-baselines.html>`_.
+If you are not familiar with Flower Baselines, you should probably check-out our `contributing guide for baselines <https://flower.ai/docs/baselines/how-to-contribute-baselines.html>`_.
 
-You should then check out the open 
+You should then check out the open
 `issues <https://github.com/adap/flower/issues?q=is%3Aopen+is%3Aissue+label%3A%22new+baseline%22>`_ for baseline requests.
-If you find a baseline that you'd like to work on and that has no assignes, feel free to assign it to yourself and start working on it!
+If you find a baseline that you'd like to work on and that has no assignees, feel free to assign it to yourself and start working on it!
 
 Otherwise, if you don't find a baseline you'd like to work on, be sure to open a new issue with the baseline request template!
 
