@@ -14,16 +14,15 @@ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/qui
 This will create a new directory called `quickstart-tensorflow` containing the following files:
 
 ```shell
-.
-├── README.md
-├── client.py       # <-- contains `ClientApp`
-├── pyproject.toml  # <-- dependencies
-└── server.py       # <-- contains `ServerApp`
+-- pyproject.toml
+-- client.py
+-- server.py
+-- README.md
 ```
 
 ### Installing Dependencies
 
-Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml`. You can install the dependencies by invoking `pip`: 
+Project dependencies (such as `tensorflow` and `flwr`) are defined in `pyproject.toml`. You can install the dependencies by invoking `pip`:
 
 ```shell
 # From a new python environment, run:
