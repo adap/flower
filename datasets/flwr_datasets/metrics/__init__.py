@@ -12,10 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets Partitioner package."""
+"""Flower Datasets Metrics package."""
 
 
-from .hellinger_distance import HellingerDistance
-from .jensen_shannon_distance import JensenShannonDistance
+from .hellinger_distance_classification import HellingerDistanceClassification
+from .hellinger_distance_regression import HellingerDistanceRegression
+from .jensen_shannon_distance_classification import JensenShannonDistanceClassification
+from .jensen_shannon_distance_regression import JensenShannonDistanceRegression
 
-__all__ = ["HellingerDistance", "JensenShannonDistance"]
+__all__ = [
+    "HellingerDistanceClassification",
+    "HellingerDistanceRegression",
+    "JensenShannonDistanceClassification",
+    "JensenShannonDistanceRegression",
+]
