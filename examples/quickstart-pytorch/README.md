@@ -34,6 +34,7 @@ source .venv/bin/activate
 ```
 
 Run the command below in your terminal to install the dependencies according to the `pyproject.toml`.
+
 ```shell
 (.venv) pip install .
 ```
@@ -65,7 +66,9 @@ Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
 ```bash
 flower-client-app client_0:app --insecure
 ```
+
 and
+
 ```bash
 flower-client-app client_1:app --insecure
 ```
@@ -85,7 +88,6 @@ ______________________________________________________________________
 ## (Legacy) Run Federated Learning with PyTorch and Flower
 
 > Note that the following steps refer to the legacy approach of deploying a Flower server and clients, and is no longer recommended. We recommend migrating to the Flower Next high-level API approach as announced [here](https://flower.ai/blog/2024-04-03-announcing-flower-1.8-release).
-
 
 After installation, you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
