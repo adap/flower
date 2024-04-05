@@ -138,7 +138,7 @@ partition_0 = ClientApp(
 )
 
 partition_1 = ClientApp(
-    client_fn=get_client_fn(0),
+    client_fn=get_client_fn(1),
 )
 
 # Legacy mode
