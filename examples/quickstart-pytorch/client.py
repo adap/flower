@@ -128,10 +128,12 @@ def client_0_fn(cid: str):
     """Create and return an instance of Flower `Client`."""
     return FlowerClient(net, data).to_client()
 
+
 # Flower ClientApp for client holding partition 0
 partition_0 = ClientApp(
     client_fn=client_0_fn,
 )
+
 
 # Flower client_fn for client holding partition 1
 def client_1_fn(cid: str):
@@ -139,6 +141,7 @@ def client_1_fn(cid: str):
     data = load_data(partition_id=1)
     """Create and return an instance of Flower `Client`."""
     return FlowerClient(net, data).to_client()
+
 
 # Flower ClientApp for client holding partition 1
 partition_1 = ClientApp(
