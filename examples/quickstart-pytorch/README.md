@@ -13,11 +13,10 @@ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/qui
 This will create a new directory called `quickstart-pytorch` containing the following files:
 
 ```shell
-.
-├── README.md
-├── client.py       # <-- contains `ClientApp`
-├── pyproject.toml  # <-- dependencies
-└── server.py       # <-- contains `ServerApp`
+-- pyproject.toml
+-- client.py
+-- server.py
+-- README.md
 ```
 
 ### Installing Dependencies
