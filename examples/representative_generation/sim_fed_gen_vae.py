@@ -285,6 +285,7 @@ def main():
             "sample_per_class": wandb.config["sample_per_class"],
             "lambda_reg": wandb.config["lambda_reg"],
             "lambda_align": wandb.config["lambda_align"],
+            "lambda_align2": wandb.config["lambda_align2"],
             "lambda_reg_dec": wandb.config["lambda_reg_dec"],
             "lambda_latent_diff": wandb.config["lambda_latent_diff"],
             "lr_g": wandb.config["lr_g"],
@@ -439,9 +440,10 @@ if __name__ == "__main__":
             "steps_g": {"values": [100]},
             "lambda_reg": {"values": [1]},
             "lambda_align_g": {"values": [1]},  # for generator KL lambda
-            "lambda_align": {"values": [0]},
+            "lambda_align": {"values": [0.01,.1]},
+            "lambda_align2": {"values": [0]},
             "lambda_reg_dec": {"values": [0]},
-            "lambda_latent_diff": {"values": [1]},
+            "lambda_latent_diff": {"values": [0.5]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)

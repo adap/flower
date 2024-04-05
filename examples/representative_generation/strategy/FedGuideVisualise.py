@@ -171,8 +171,10 @@ class VisualiseFedGuide(FedAvg):
                 for idx in range(5)
             },
         }
-        parameters = self.local_param_dict["client_param_0"]
+        # parameters = self.local_param_dict["client_param_0"]
+        # TODO:chk the agg model with params
         parameters_ndarrays = parameters_to_ndarrays(parameters)
+        print(f"to compare with agg model: {parameters_ndarrays[7]}")
         eval_res = self.evaluate_fn(server_round, parameters_ndarrays, {**decoded_imgs})
         if eval_res is None:
             return None

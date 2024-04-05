@@ -876,6 +876,7 @@ def train_alternate_frozen(
     lambda_reg = config["lambda_reg"]
 
     lambda_align = config["lambda_align"]
+    lambda_align2 = config["lambda_align2"]
     lambda_latent_diff = config["lambda_latent_diff"]
     lambda_reg_dec = config["lambda_reg_dec"]
     beta = config["beta"]
@@ -945,11 +946,16 @@ def train_alternate_frozen(
             images = images.to(device)
             recon_images, mu, logvar = net(images)
             z = net.sampling(mu, logvar)
-            z_g, _, _ = temp_gen_model(images)
+            z_g2, mu_g2, log_var_g2 = temp_gen_model(images)
 
             loss_local = vae_loss(recon_images, images, mu, logvar, beta, cnn=True)
-            vae_loss2 = latent_diff_loss(z, z_g).sum(dim=1).mean()
+            vae_loss2 = latent_diff_loss(z, z_g2).sum(dim=1).mean()
             loss_local += lambda_latent_diff * vae_loss2
+            if lambda_align2 > 0:
+                loss_align = 0.5 * (log_var_g2 - logvar - 1) + (
+                    logvar.exp() + (mu - mu_g2).pow(2)
+                ) / (2 * log_var_g2.exp())
+                loss_local += lambda_align2 * loss_align.sum(dim=1).mean()
 
             loss_local.backward(retain_graph=False)
             opt2.step()
