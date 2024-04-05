@@ -13,45 +13,81 @@ git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/qui
 This will create a new directory called `quickstart-pytorch` containing the following files:
 
 ```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- README.md
+.
+├── README.md
+├── client.py       # <-- for backwards compatibility
+├── client_0.py     # <-- contains `ClientApp`
+├── client_1.py     # <-- contains `ClientApp`
+├── pyproject.toml  # <-- dependencies
+└── server.py       # <-- contains `ServerApp`
 ```
 
 ### Installing Dependencies
 
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
+Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml`. We recommend [venv](https://docs.python.org/3/library/venv.html) to manage your virtual environment ([Creating virtual environments](https://docs.python.org/3/library/venv.html#creating-virtual-environments)) and [pip](https://pip.pypa.io/en/latest/development/) to install those dependencies, but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
 
-#### Poetry
+#### `venv` and `pip`
 
 ```shell
-poetry install
-poetry shell
+python -m venv .venv
+source .venv/bin/activate
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+Run the command below in your terminal to install the dependencies according to the `pyproject.toml`.
+```shell
+(.venv) pip install .
+```
+
+`pip` will install all your dependencies in the newly created and activated virtual environment. To verify that everything works correctly you can run the following command:
 
 ```shell
-poetry run python3 -c "import flwr"
+(.venv) python -c "import flwr"
 ```
 
 If you don't see any errors you're good to go!
 
-#### pip
+______________________________________________________________________
 
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+## Run Federated Learning with PyTorch and `Flower Next`
 
-```shell
-pip install -r requirements.txt
+Note that all of the following commands should be executed with your `.venv` virtual environment activated.
+
+### 1. Start the long-running Flower server (SuperLink)
+
+```bash
+flower-superlink --insecure
 ```
+
+### 2. Start the long-running Flower clients (SuperNodes)
+
+Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
+
+```bash
+flower-client-app client_0:app --insecure
+```
+and
+```bash
+flower-client-app client_1:app --insecure
+```
+
+### 3. Run the Flower App
+
+With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
+
+```bash
+flower-server-app server:app --insecure
+```
+
+You will see that PyTorch is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) for a detailed explanation.
 
 ______________________________________________________________________
 
-## Run Federated Learning with PyTorch and Flower
+## (Legacy) Run Federated Learning with PyTorch and Flower
 
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
+> Note that the following steps refer to the legacy approach of deploying a Flower server and clients, and is no longer recommended. We recommend migrating to the Flower Next high-level API approach as announced [here](https://flower.ai/blog/2024-04-03-announcing-flower-1.8-release).
+
+
+After installation, you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
 ```shell
 python3 server.py
@@ -73,30 +109,4 @@ Start client 2 in the second terminal:
 python3 client.py --partition-id 1
 ```
 
-You will see that PyTorch is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) for a detailed explanation.
-
-______________________________________________________________________
-
-## Run Federated Learning with PyTorch and `Flower Next`
-
-### 1. Start the long-running Flower server (SuperLink)
-
-```bash
-flower-superlink --insecure
-```
-
-### 2. Start the long-running Flower clients (SuperNodes)
-
-Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
-
-```bash
-flower-client-app client:app --insecure
-```
-
-### 3. Run the Flower App
-
-With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
-
-```bash
-flower-server-app server:app --insecure
-```
+You will see that PyTorch is starting a federated training.
