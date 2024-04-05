@@ -15,9 +15,7 @@ This will create a new directory called `quickstart-pytorch` containing the foll
 ```shell
 .
 ├── README.md
-├── client.py       # <-- for backwards compatibility
-├── client_0.py     # <-- contains `ClientApp`
-├── client_1.py     # <-- contains `ClientApp`
+├── client.py       # <-- contains `ClientApp`
 ├── pyproject.toml  # <-- dependencies
 └── server.py       # <-- contains `ServerApp`
 ```
@@ -41,45 +39,9 @@ If you don't see any errors you're good to go!
 
 ______________________________________________________________________
 
-## Run Federated Learning with PyTorch and `Flower Next`
+## Run Federated Learning with PyTorch and Flower
 
-### 1. Start the long-running Flower server (SuperLink)
-
-```bash
-flower-superlink --insecure
-```
-
-### 2. Start the long-running Flower clients (SuperNodes)
-
-Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
-
-```bash
-flower-client-app client_0:app --insecure
-```
-
-and
-
-```bash
-flower-client-app client_1:app --insecure
-```
-
-### 3. Run the Flower App
-
-With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
-
-```bash
-flower-server-app server:app --insecure
-```
-
-You will see that PyTorch is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) for a detailed explanation.
-
-______________________________________________________________________
-
-## (Legacy) Run Federated Learning with PyTorch and Flower
-
-> Note that the following steps refer to the legacy approach of deploying a Flower server and clients, and is no longer recommended. We recommend migrating to the Flower Next high-level API approach as announced [here](https://flower.ai/blog/2024-04-03-announcing-flower-1.8-release).
-
-After installation, you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
+Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
 
 ```shell
 python3 server.py
@@ -101,4 +63,30 @@ Start client 2 in the second terminal:
 python3 client.py --partition-id 1
 ```
 
-You will see that PyTorch is starting a federated training.
+You will see that PyTorch is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) for a detailed explanation.
+
+______________________________________________________________________
+
+## Run Federated Learning with PyTorch and `Flower Next`
+
+### 1. Start the long-running Flower server (SuperLink)
+
+```bash
+flower-superlink --insecure
+```
+
+### 2. Start the long-running Flower clients (SuperNodes)
+
+Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
+
+```bash
+flower-client-app client:app --insecure
+```
+
+### 3. Run the Flower App
+
+With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
+
+```bash
+flower-server-app server:app --insecure
+```
