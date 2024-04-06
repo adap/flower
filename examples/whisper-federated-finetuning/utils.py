@@ -107,10 +107,10 @@ def prepare_silences_dataset(train_dataset, ratio_silence: float = 0.1) -> Datas
     """Generate silences for the train set.
 
     One of the classes in the SpeechCommands datatset is `silence`. However, the dataset
-    does not include clips of silence. It does however include 5 long files with different
-    background sounds. The taks of this function is to extract several (defined by `ratio_silence`)
-    one-second long clips from those background audio files. Later, those audio clips will be
-    included into the training set.
+    does not include clips of silence. It does however include 5 long files with
+    different background sounds. The taks of this function is to extract several
+    (defined by `ratio_silence`) one-second long clips from those background audio
+    files. Later, those audio clips will be included into the training set.
     """
     # retrieve original silence audio clips
     silences = [d for d in train_dataset if d["label"] == 35]
@@ -138,9 +138,9 @@ def prepare_silences_dataset(train_dataset, ratio_silence: float = 0.1) -> Datas
 def construct_client_mapping(full_trainset, num_clients: int = 100):
     """Create a mapping to partition the dataset into `num_client` buckets.
 
-    These buckets contain the same number of `spekaer_id` but likely different
-    number of training exampes since each `speaker_id` in SpeechCommands does
-    provide different amounts of data to the dataset.
+    These buckets contain the same number of `spekaer_id` but likely different number of
+    training exampes since each `speaker_id` in SpeechCommands does provide different
+    amounts of data to the dataset.
     """
     client_ids = list(set(full_trainset["speaker_id"]))
     client_ids.remove(
@@ -191,7 +191,7 @@ def set_params(model: torch.nn.ModuleList, params: List[fl.common.NDArrays]):
 
 
 def get_model(device, num_classes, compile: bool = True):
-    """Create model: Whisper-tiny Encoder + classification head"""
+    """Create model: Whisper-tiny Encoder + classification head."""
     encoder = WhisperForConditionalGeneration.from_pretrained(
         "openai/whisper-tiny"
     ).get_encoder()
