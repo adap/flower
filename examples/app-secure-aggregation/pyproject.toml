@@ -11,4 +11,4 @@ authors = ["The Flower Authors <hello@flower.ai>"]
 [tool.poetry.dependencies]
 python = "^3.8"
 # Mandatory dependencies
-flwr = { version = "1.8.0", extras = ["simulation"] }
+flwr = { version = "^1.8.0", extras = ["simulation"] }
