@@ -106,8 +106,6 @@ message ServerMessage {
     FitInsStream fit_ins_stream = 6;
     EvaluateInsStream evaluate_ins_stream = 7;
   }
-
-  optional bool is_end = 10; // Use to determine the last packet of a chunked message
 }
 
 message ClientMessage {
@@ -165,7 +163,6 @@ message ClientMessage {
     FitResStream fit_res_stream = 6;
     GetParametersResStream get_parameters_res_stream = 7;
   }
-  optional bool is_end = 10; // Use to determine the last packet of a chunked message
 }
 
 message Scalar {

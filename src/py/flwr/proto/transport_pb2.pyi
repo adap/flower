@@ -363,7 +363,6 @@ class ServerMessage(google.protobuf.message.Message):
     EVALUATE_INS_FIELD_NUMBER: builtins.int
     FIT_INS_STREAM_FIELD_NUMBER: builtins.int
     EVALUATE_INS_STREAM_FIELD_NUMBER: builtins.int
-    IS_END_FIELD_NUMBER: builtins.int
     @property
     def reconnect_ins(self) -> global___ServerMessage.ReconnectIns: ...
     @property
@@ -378,9 +377,6 @@ class ServerMessage(google.protobuf.message.Message):
     def fit_ins_stream(self) -> global___ServerMessage.FitInsStream: ...
     @property
     def evaluate_ins_stream(self) -> global___ServerMessage.EvaluateInsStream: ...
-    is_end: builtins.bool
-    """Use to determine the last packet of a chunked message"""
-
     def __init__(self,
         *,
         reconnect_ins: typing.Optional[global___ServerMessage.ReconnectIns] = ...,
@@ -390,13 +386,9 @@ class ServerMessage(google.protobuf.message.Message):
         evaluate_ins: typing.Optional[global___ServerMessage.EvaluateIns] = ...,
         fit_ins_stream: typing.Optional[global___ServerMessage.FitInsStream] = ...,
         evaluate_ins_stream: typing.Optional[global___ServerMessage.EvaluateInsStream] = ...,
-        is_end: typing.Optional[builtins.bool] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["_is_end",b"_is_end","evaluate_ins",b"evaluate_ins","evaluate_ins_stream",b"evaluate_ins_stream","fit_ins",b"fit_ins","fit_ins_stream",b"fit_ins_stream","get_parameters_ins",b"get_parameters_ins","get_properties_ins",b"get_properties_ins","is_end",b"is_end","msg",b"msg","reconnect_ins",b"reconnect_ins"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["_is_end",b"_is_end","evaluate_ins",b"evaluate_ins","evaluate_ins_stream",b"evaluate_ins_stream","fit_ins",b"fit_ins","fit_ins_stream",b"fit_ins_stream","get_parameters_ins",b"get_parameters_ins","get_properties_ins",b"get_properties_ins","is_end",b"is_end","msg",b"msg","reconnect_ins",b"reconnect_ins"]) -> None: ...
-    @typing.overload
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["_is_end",b"_is_end"]) -> typing.Optional[typing_extensions.Literal["is_end"]]: ...
-    @typing.overload
+    def HasField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","evaluate_ins_stream",b"evaluate_ins_stream","fit_ins",b"fit_ins","fit_ins_stream",b"fit_ins_stream","get_parameters_ins",b"get_parameters_ins","get_properties_ins",b"get_properties_ins","msg",b"msg","reconnect_ins",b"reconnect_ins"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["evaluate_ins",b"evaluate_ins","evaluate_ins_stream",b"evaluate_ins_stream","fit_ins",b"fit_ins","fit_ins_stream",b"fit_ins_stream","get_parameters_ins",b"get_parameters_ins","get_properties_ins",b"get_properties_ins","msg",b"msg","reconnect_ins",b"reconnect_ins"]) -> None: ...
     def WhichOneof(self, oneof_group: typing_extensions.Literal["msg",b"msg"]) -> typing.Optional[typing_extensions.Literal["reconnect_ins","get_properties_ins","get_parameters_ins","fit_ins","evaluate_ins","fit_ins_stream","evaluate_ins_stream"]]: ...
 global___ServerMessage = ServerMessage
 

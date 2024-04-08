@@ -214,16 +214,13 @@ def grpc_connection(  # pylint: disable=R0915
             getpropres = compat.recordset_to_getpropertiesres(recordset)
             msg_proto = ClientMessage(
                 get_properties_res=serde.get_properties_res_to_proto(getpropres),
-                is_end=True,
             )
         elif message_type == MessageTypeLegacy.GET_PARAMETERS:
             getparamres = compat.recordset_to_getparametersres(recordset, False)
             if bucket_manager is not None:
                 getparamres.parameters.upload_to_s3(bucket_manager)
             msg_proto = map(
-                lambda packet: ClientMessage(
-                    get_parameters_res_stream=packet[0], is_end=packet[1]
-                ),
+                lambda packet: ClientMessage(get_parameters_res_stream=packet),
                 serde.get_parameters_res_to_proto_stream(getparamres),
             )
         elif message_type == MessageType.TRAIN:
@@ -231,22 +228,18 @@ def grpc_connection(  # pylint: disable=R0915
             if bucket_manager is not None:
                 fitres.parameters.upload_to_s3(bucket_manager)
             msg_proto = map(
-                lambda packet: ClientMessage(
-                    fit_res_stream=packet[0], is_end=packet[1]
-                ),
+                lambda packet: ClientMessage(fit_res_stream=packet),
                 serde.fit_res_to_proto_stream(fitres),
             )
         elif message_type == MessageType.EVALUATE:
             evalres = compat.recordset_to_evaluateres(recordset)
-            msg_proto = ClientMessage(
-                evaluate_res=serde.evaluate_res_to_proto(evalres), is_end=True
-            )
+            msg_proto = ClientMessage(evaluate_res=serde.evaluate_res_to_proto(evalres))
         elif message_type == "reconnect":
             reason = cast(
                 Reason.ValueType, recordset.configs_records["config"]["reason"]
             )
             msg_proto = ClientMessage(
-                disconnect_res=ClientMessage.DisconnectRes(reason=reason), is_end=True
+                disconnect_res=ClientMessage.DisconnectRes(reason=reason)
             )
         else:
             raise ValueError(f"Invalid message type: {message_type}")
