@@ -621,20 +621,22 @@ def _train_one_epoch(
 
 def vae_loss(recon_img, img, mu, logvar, beta=1.0, cnn=False):
     # Reconstruction loss using binary cross-entropy
-    # condition = (recon_img >= 0) & (recon_img <= 1)
-    # import pdb; pdb.set_trace()
+    condition = (recon_img >= 0) & (recon_img <= 1)
     # assert torch.all(condition), "Values should be between 0 and 1"
 
     if cnn:
-        # Reconstruction loss using Mean Squared Error (MSE)
-        mse_loss_per_pixel = F.mse_loss(recon_img, img, reduction="none")
-        # Sum along dimensions except the batch dimension
-        mse_loss_sum_per_image = torch.sum(
-            mse_loss_per_pixel, dim=(1, 2, 3)
+        bce_loss_per_pixel = F.binary_cross_entropy(
+            recon_img.view(-1, img.shape[2] * img.shape[3]),
+            img.view(-1, img.shape[2] * img.shape[3]),
+            reduction="none",
+        )
+        # Sum along dimension 1 (sum over pixels for each image)
+        bce_loss_sum_per_image = torch.sum(
+            bce_loss_per_pixel, dim=1
         )  # Shape: (batch_size,)
 
         # Take the mean along dimension 0 (mean over images in the batch)
-        recon_loss = torch.mean(mse_loss_sum_per_image)  # Shape: scalar
+        recon_loss = torch.mean(bce_loss_sum_per_image)  # Shape: scalar
     else:
         bce_loss_per_pixel = F.binary_cross_entropy(
             recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="none"
@@ -662,13 +664,16 @@ def vae_rec_loss(recon_img, img, cnn=False):
     # condition = (recon_img >= 0) & (recon_img <= 1)
     # assert torch.all(condition), "Values should be between 0 and 1"
     if cnn:
-        # Reconstruction loss using Mean Squared Error (MSE)
-        mse_loss_per_pixel = F.mse_loss(recon_img, img, reduction="none")
-        # Sum along dimensions except the batch dimension
-        mse_loss_sum_per_image = torch.sum(
-            mse_loss_per_pixel, dim=(1, 2, 3)
+        bce_loss_per_pixel = F.binary_cross_entropy(
+            recon_img.view(-1, img.shape[2] * img.shape[3]),
+            img.view(-1, img.shape[2] * img.shape[3]),
+            reduction="none",
+        )
+        # Sum along dimension 1 (sum over pixels for each image)
+        bce_loss_sum_per_image = torch.sum(
+            bce_loss_per_pixel, dim=1
         )  # Shape: (batch_size,)
-        return mse_loss_sum_per_image
+        return bce_loss_sum_per_image
     else:
         bce_loss_per_pixel = F.binary_cross_entropy(
             recon_img, img.view(-1, img.shape[2] * img.shape[3]), reduction="none"
@@ -970,8 +975,9 @@ def train_alternate_frozen(
             z_g2, mu_g2, log_var_g2 = temp_gen_model(images)
 
             loss_local = vae_loss(recon_images, images, mu, logvar, beta, cnn=True)
-            vae_loss2 = latent_diff_loss(z, z_g2).sum(dim=1).mean()
-            loss_local += lambda_latent_diff * vae_loss2
+            if lambda_latent_diff > 0:
+                vae_loss2 = latent_diff_loss(z, z_g2).sum(dim=1).mean()
+                loss_local += lambda_latent_diff * vae_loss2
             if lambda_align2 > 0:
                 loss_align = 0.5 * (log_var_g2 - logvar - 1) + (
                     logvar.exp() + (mu - mu_g2).pow(2)
@@ -992,11 +998,14 @@ def train_alternate_frozen(
                 opt3.step()
 
     # TODO:update for local data
+    print(f"loss_local: {loss_local.item()}")
+    print(f"loss_ref: {loss_ref.item()}")
+
     return (
         loss_local.item(),
         loss_ref.item(),
-        lambda_align * (1 - cka_score).item(),
-        lambda_latent_diff * vae_loss2.item(),
+        lambda_align * (1 - cka_score).item() if lambda_align > 0 else 0,
+        lambda_latent_diff * vae_loss2.item() if lambda_latent_diff > 0 else 0,
     )
 
 
@@ -1159,23 +1168,26 @@ def test(net, testloader, device, kl_term=0, cnn=False):
     net.eval()
     with torch.no_grad():
         for idx, data in enumerate(testloader):
-            images = data[0].to(device)
-            recon_images, mu, logvar = net(images)
+            img = data[0].to(device)
+            recon_img, mu, logvar = net(img)
 
             if cnn:
-                # Reconstruction loss using Mean Squared Error (MSE)
-                mse_loss_per_pixel = F.mse_loss(recon_images, images, reduction="none")
-                # Sum along dimensions except the batch dimension
-                mse_loss_sum_per_image = torch.sum(
-                    mse_loss_per_pixel, dim=(1, 2, 3)
+                bce_loss_per_pixel = F.binary_cross_entropy(
+                    recon_img.view(-1, img.shape[2] * img.shape[3]),
+                    img.view(-1, img.shape[2] * img.shape[3]),
+                    reduction="none",
+                )
+                # Sum along dimension 1 (sum over pixels for each image)
+                bce_loss_sum_per_image = torch.sum(
+                    bce_loss_per_pixel, dim=1
                 )  # Shape: (batch_size,)
 
                 # Take the mean along dimension 0 (mean over images in the batch)
-                recon_loss = torch.mean(mse_loss_sum_per_image)  # Shape: scalar
+                recon_loss = torch.mean(bce_loss_sum_per_image)  # Shape: scalar
             else:
                 bce_loss_per_pixel = F.binary_cross_entropy(
-                    recon_images,
-                    images.view(-1, images.shape[2] * images.shape[3]),
+                    recon_img,
+                    img.view(-1, img.shape[2] * img.shape[3]),
                     reduction="none",
                 )
                 # Sum along dimension 1 (sum over pixels for each image)
@@ -1187,7 +1199,7 @@ def test(net, testloader, device, kl_term=0, cnn=False):
                 recon_loss = torch.mean(bce_loss_sum_per_image)  # Shape: scalar
             kld_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
             loss += recon_loss + kld_loss * kl_term
-            total += len(images)
+            total += len(img)
     # TODO: accu=-1*loss
     # return (loss.item() / total), -1 * (loss.item() / total)
     # batch_loss = loss.item()
@@ -1200,22 +1212,12 @@ def eval_reconstrution(net, testloader, device, cnn=False):
     net.eval()
     with torch.no_grad():
         for idx, data in enumerate(testloader):
-            images = data[0].to(device)
-            recon_images, mu, logvar = net(images)
+            img = data[0].to(device)
+            recon_img, mu, logvar = net(img)
             if cnn:
-                # Reconstruction loss using Mean Squared Error (MSE)
-                mse_loss_per_pixel = F.mse_loss(recon_images, images, reduction="none")
-                # Sum along dimensions except the batch dimension
-                mse_loss_sum_per_image = torch.sum(
-                    mse_loss_per_pixel, dim=(1, 2, 3)
-                )  # Shape: (batch_size,)
-
-                # Take the mean along dimension 0 (mean over images in the batch)
-                recon_loss = torch.mean(mse_loss_sum_per_image)  # Shape: scalar
-            else:
                 bce_loss_per_pixel = F.binary_cross_entropy(
-                    recon_images,
-                    images.view(-1, images.shape[2] * images.shape[3]),
+                    recon_img.view(-1, img.shape[2] * img.shape[3]),
+                    img.view(-1, img.shape[2] * img.shape[3]),
                     reduction="none",
                 )
                 # Sum along dimension 1 (sum over pixels for each image)
@@ -1223,11 +1225,24 @@ def eval_reconstrution(net, testloader, device, cnn=False):
                     bce_loss_per_pixel, dim=1
                 )  # Shape: (batch_size,)
 
-                # Take the mean along dimension 0 (mean over images in the batch)
+                # Take the mean along dimension 0 (mean over img in the batch)
+                recon_loss = torch.mean(bce_loss_sum_per_image)  # Shape: scalar
+            else:
+                bce_loss_per_pixel = F.binary_cross_entropy(
+                    recon_img,
+                    img.view(-1, img.shape[2] * img.shape[3]),
+                    reduction="none",
+                )
+                # Sum along dimension 1 (sum over pixels for each image)
+                bce_loss_sum_per_image = torch.sum(
+                    bce_loss_per_pixel, dim=1
+                )  # Shape: (batch_size,)
+
+                # Take the mean along dimension 0 (mean over img in the batch)
                 recon_loss = torch.mean(bce_loss_sum_per_image)  # Shape: scalar
 
             loss += recon_loss
-            # total += len(images)
+            # total += len(img)
     return loss.item() / (idx + 1)
 
 

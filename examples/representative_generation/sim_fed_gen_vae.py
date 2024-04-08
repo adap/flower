@@ -440,12 +440,12 @@ if __name__ == "__main__":
             "steps_g": {"values": [100]},
             "lambda_reg": {"values": [1]},
             "lambda_align_g": {"values": [1]},  # for generator KL lambda
-            "lambda_align": {"values": [10]}, # cka
+            "lambda_align": {"values": [0]},  # cka
             "lambda_align2": {"values": [0]},
-            "lambda_reg_dec": {"values": [0]},
-            "lambda_latent_diff": {"values": [0.5]},
+            "lambda_reg_dec": {"values": [0, 0.1]},
+            "lambda_latent_diff": {"values": [0]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=1)
+    wandb.agent(sweep_id, function=main, count=2)

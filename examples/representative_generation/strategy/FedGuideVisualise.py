@@ -324,7 +324,8 @@ class VisualiseFedGuide(FedAvg):
                     )
 
                     loss.append(loss_)
-                recon_loss = torch.stack(loss).mean(dim=0).mean()
+                # recon_loss = torch.stack(loss).mean(dim=0).mean()
+                recon_loss = torch.stack(loss).min(dim=0).values.mean() # min loss
                 # KL divergence loss
                 kld_loss = -0.5 * torch.sum(
                     1 + logvar_g - mu_g.pow(2) - logvar_g.exp(), dim=1
