@@ -285,7 +285,7 @@ def main():
             "sample_per_class": wandb.config["sample_per_class"],
             "lambda_reg": wandb.config["lambda_reg"],
             "lambda_align": wandb.config["lambda_align"],
-            "lambda_align2": wandb.config["lambda_align2"],
+            "lambda_dec": wandb.config["lambda_dec"],
             "lambda_reg_dec": wandb.config["lambda_reg_dec"],
             "lambda_latent_diff": wandb.config["lambda_latent_diff"],
             "lr_g": wandb.config["lr_g"],
@@ -380,7 +380,7 @@ def main():
     n1 = [val.cpu().numpy() for _, val in net.state_dict().items()]
     initial_params = ndarrays_to_parameters(n1)
 
-    gen_net = VAE_CNN(z_dim=LATENT_DIM, encoder_only=True).to(DEVICE)
+    gen_net = VAE_CNN(z_dim=LATENT_DIM).to(DEVICE)
     n2 = [val.cpu().numpy() for _, val in gen_net.state_dict().items()]
     initial_gen_params = ndarrays_to_parameters(n2)
 
@@ -440,12 +440,12 @@ if __name__ == "__main__":
             "steps_g": {"values": [100]},
             "lambda_reg": {"values": [1]},
             "lambda_align_g": {"values": [1]},  # for generator KL lambda
-            "lambda_align": {"values": [0]},  # cka
-            "lambda_align2": {"values": [0]},
-            "lambda_reg_dec": {"values": [0, 0.1]},
+            "lambda_align": {"values": [0.1, 1]},  # cka
+            "lambda_dec": {"values": [0.1,1]},
+            "lambda_reg_dec": {"values": [1, 0.1]},
             "lambda_latent_diff": {"values": [0]},
         },
     }
     sweep_id = wandb.sweep(sweep=sweep_config, project=IDENTIFIER)
 
-    wandb.agent(sweep_id, function=main, count=2)
+    wandb.agent(sweep_id, function=main, count=5)

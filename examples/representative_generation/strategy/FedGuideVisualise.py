@@ -123,9 +123,7 @@ class VisualiseFedGuide(FedAvg):
 
         with torch.no_grad():
             # load generator weights
-            guide_model = VAE_CNN(z_dim=self.latent_dim, encoder_only=True).to(
-                self.device
-            )
+            guide_model = VAE_CNN(z_dim=self.latent_dim).to(self.device)
             gen_params_dict = zip(
                 self.gen_model.state_dict().keys(),
                 parameters_to_ndarrays(self.initial_generator_params),
@@ -157,17 +155,27 @@ class VisualiseFedGuide(FedAvg):
                         {k: torch.tensor(v) for k, v in params_dict}
                     )
                     temp_local_model.load_state_dict(state_dict, strict=True)
-                    z_g, mu_g, logvar_g = guide_model(eval_img)
-                    gen_img = temp_local_model.decoder(z_g)
+                    _, z_g, mu_g, logvar_g = guide_model(eval_img)
+                    _, z, _, _ = temp_local_model(eval_img)
+                    gen_enc_img = temp_local_model.decoder(z_g)
+                    gen_dec_img = self.gen_model.decoder(z)
                     save_image(
-                        gen_img.view(64, 1, 28, 28),
-                        f"{self.folder_name}/eval_gen_img_{idx}.png",
+                        gen_enc_img.view(64, 1, 28, 28),
+                        f"{self.folder_name}/eval_gen_enc_img_{idx}.png",
+                    )
+                    save_image(
+                        gen_dec_img.view(64, 1, 28, 28),
+                        f"{self.folder_name}/eval_gen_dec_img_{idx}.png",
                     )
                 break
         decoded_imgs = {
             f"global_eval_true_img": f"{self.folder_name}/eval_true_img.png",
             **{
-                f"global_eval_gen_img_{idx}": f"{self.folder_name}/eval_gen_img_{idx}.png"
+                f"global_eval_gen_enc_img_{idx}": f"{self.folder_name}/eval_gen_enc_img_{idx}.png"
+                for idx in range(5)
+            },
+            **{
+                f"global_eval_gen_dec_img_{idx}": f"{self.folder_name}/eval_gen_dec_img_{idx}.png"
                 for idx in range(5)
             },
         }
@@ -290,16 +298,30 @@ class VisualiseFedGuide(FedAvg):
         )
         gen_state_dict = OrderedDict({k: torch.tensor(v) for k, v in gen_params_dict})
         self.gen_model.load_state_dict(gen_state_dict, strict=True)
-        optimizer = torch.optim.Adam(self.gen_model.parameters(), lr=self.lr_g)
+        encoder_params = (
+            list(self.gen_model.conv1.parameters())
+            + list(self.gen_model.conv2.parameters())
+            + list(self.gen_model.conv3.parameters())
+            + list(self.gen_model.fc_mu.parameters())
+            + list(self.gen_model.fc_logvar.parameters())
+        )
+        decorder_params = (
+            list(self.gen_model.fc4.parameters())
+            + list(self.gen_model.deconv1.parameters())
+            + list(self.gen_model.deconv2.parameters())
+            + list(self.gen_model.deconv3.parameters())
+        )
+        opt_enc = torch.optim.Adam(encoder_params, lr=self.lr_g)
+        opt_dec = torch.optim.Adam(decorder_params, lr=self.lr_g)
 
         for temp_local_model in temp_local_models:
             temp_local_model.eval()
 
         for ep_g in range(self.steps_g):
             for step, (align_img, _) in enumerate(self.alignment_dataloader):
-                loss = []
+                loss_enc = []
 
-                optimizer.zero_grad()
+                opt_enc.zero_grad()
                 align_img = align_img.to(self.device)
 
                 for idx, (weights, _) in enumerate(weights_results):
@@ -310,22 +332,15 @@ class VisualiseFedGuide(FedAvg):
                         {k: torch.tensor(v) for k, v in params_dict}
                     )
                     temp_local_models[idx].load_state_dict(state_dict, strict=True)
-                    z_g, mu_g, logvar_g = self.gen_model(align_img)
+                    _, z_g, mu_g, logvar_g = self.gen_model(align_img)
 
-                    # loss_ = vae_loss(
-                    #     temp_local_models[idx].decoder(z_g),
-                    #     align_img,
-                    #     mu_g,
-                    #     logvar_g,
-                    #     self.lambda_align_g,
-                    # )
                     loss_ = vae_rec_loss(
                         temp_local_models[idx].decoder(z_g), align_img, cnn=True
                     )
 
-                    loss.append(loss_)
+                    loss_enc.append(loss_)
                 # recon_loss = torch.stack(loss).mean(dim=0).mean()
-                recon_loss = torch.stack(loss).min(dim=0).values.mean() # min loss
+                recon_loss = torch.stack(loss_enc).min(dim=0).values.mean()  # min loss
                 # KL divergence loss
                 kld_loss = -0.5 * torch.sum(
                     1 + logvar_g - mu_g.pow(2) - logvar_g.exp(), dim=1
@@ -336,13 +351,56 @@ class VisualiseFedGuide(FedAvg):
                 total_loss = recon_loss + kld_loss * self.lambda_align_g
 
                 threshold = 1e-6  # Define a threshold for the negligible loss
-                log(DEBUG, f"guide update loss at ep {ep_g} step {step}: {total_loss}")
+                log(DEBUG, f"guide enc update loss at ep {ep_g} step {step}: {total_loss}")
 
                 if (
                     total_loss.item() > threshold
                 ):  # Check if the total_loss is greater than the threshold
                     total_loss.backward()
-                    optimizer.step()
+                    opt_enc.step()
+                else:
+                    log(
+                        DEBUG,
+                        f"Skipping optimization at step {step} due to negligible total_loss",
+                    )
+                    # ..........guide dec update.............
+                loss_dec = []
+
+                opt_dec.zero_grad()
+
+                for idx, (weights, _) in enumerate(weights_results):
+                    params_dict = zip(
+                        temp_local_models[idx].state_dict().keys(), weights
+                    )
+                    state_dict = OrderedDict(
+                        {k: torch.tensor(v) for k, v in params_dict}
+                    )
+                    temp_local_models[idx].load_state_dict(state_dict, strict=True)
+                    _, z_g, mu_g, logvar_g = self.gen_model(align_img)
+                    _, z, _, _ = temp_local_models[idx](align_img)
+
+                    loss_ = vae_rec_loss(self.gen_model.decoder(z), align_img, cnn=True)
+
+                    loss_dec.append(loss_)
+                # recon_loss = torch.stack(loss).mean(dim=0).mean()
+                recon_loss = torch.stack(loss_dec).min(dim=0).values.mean()  # min loss
+                # KL divergence loss
+                kld_loss = -0.5 * torch.sum(
+                    1 + logvar_g - mu_g.pow(2) - logvar_g.exp(), dim=1
+                )
+                # Take the mean along dimension 0 (mean over images in the batch)
+                kld_loss = torch.mean(kld_loss)
+
+                total_loss = recon_loss + kld_loss * 0  # TODO: check the loss
+
+                threshold = 1e-6  # Define a threshold for the negligible loss
+                log(DEBUG, f"guide dec update loss at ep {ep_g} step {step}: {total_loss}")
+
+                if (
+                    total_loss.item() > threshold
+                ):  # Check if the total_loss is greater than the threshold
+                    total_loss.backward()
+                    opt_dec.step()
                 else:
                     log(
                         DEBUG,

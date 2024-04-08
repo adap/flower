@@ -121,9 +121,17 @@ class VAE(nn.Module):
 
 
 class VAE_CNN(nn.Module):
-    def __init__(self, z_dim=2, encoder_only=False):
+    """VAE with CNN architecture.
+
+    Args:
+        z_dim: latent dimension
+
+    Returns:
+        reconstructed image, z, mu, log_var
+    """
+
+    def __init__(self, z_dim=2):
         super(VAE_CNN, self).__init__()
-        self.encoder_only = encoder_only
 
         # Encoder layers
         self.conv1 = nn.Conv2d(
@@ -165,11 +173,9 @@ class VAE_CNN(nn.Module):
     def forward(self, x):
         mu, log_var = self.encoder(x)
         z = self.sampling(mu, log_var)
-        if self.encoder_only:
-            output = z
-        else:
-            output = self.decoder(z)
-        return output, mu, log_var
+
+        output = self.decoder(z)
+        return output, z, mu, log_var
 
 
 def alignment_dataloader(
@@ -879,11 +885,9 @@ def train_alternate_frozen(
     """Train the network on the training set."""
     net.train()
     if config["cnn"]:
-        temp_gen_model = VAE_CNN(z_dim=config["latent_dim"], encoder_only=True).to(
-            device
-        )
+        temp_gen_model = VAE_CNN(z_dim=config["latent_dim"]).to(device)
     else:
-        temp_gen_model = VAE(z_dim=config["latent_dim"], encoder_only=True).to(device)
+        temp_gen_model = VAE(z_dim=config["latent_dim"]).to(device)
     gen_weights = parameters_to_ndarrays(config["gen_params"])
     params_dict = zip(temp_gen_model.state_dict().keys(), gen_weights)
     state_dict = OrderedDict({k: torch.from_numpy(v) for k, v in params_dict})
@@ -896,7 +900,7 @@ def train_alternate_frozen(
     lambda_reg = config["lambda_reg"]
 
     lambda_align = config["lambda_align"]
-    lambda_align2 = config["lambda_align2"]
+    lambda_dec = config["lambda_dec"]
     lambda_latent_diff = config["lambda_latent_diff"]
     lambda_reg_dec = config["lambda_reg_dec"]
     beta = config["beta"]
@@ -937,8 +941,8 @@ def train_alternate_frozen(
             for idx, (align_img, _) in enumerate(align_loader):
                 opt1.zero_grad()
                 align_img = align_img.to(device)
-                z_g, mu_g, log_var_g = temp_gen_model(align_img)
-                recon_align_img, mu, log_var = net(align_img)
+                recon_g, z_g, mu_g, log_var_g = temp_gen_model(align_img)
+                recon_align_img, z, mu, log_var = net(align_img)
                 vae_loss1 = vae_loss(
                     recon_align_img, align_img, mu, log_var, beta, cnn=True
                 )
@@ -951,11 +955,20 @@ def train_alternate_frozen(
                     # loss_align = 0.5 * (log_var_g - log_var - 1) + (
                     #     log_var.exp() + (mu - mu_g).pow(2)
                     # ) / (2 * log_var_g.exp())
-                    gram_matrix1 = compute_gram_matrix(mu)
-                    gram_matrix2 = compute_gram_matrix(mu_g)
-                    cka_score = compute_cka(gram_matrix1, gram_matrix2)
-                    print("CKA Score:", cka_score)
-                    loss_ref += lambda_align * (1 - cka_score)
+                    # gram_matrix1 = compute_gram_matrix(mu)
+                    # gram_matrix2 = compute_gram_matrix(mu_g)
+                    # cka_score = compute_cka(gram_matrix1, gram_matrix2)
+                    # print("CKA Score:", cka_score)
+                    # loss_ref += lambda_align * (1 - cka_score)
+                    loss_align = vae_loss(
+                        temp_gen_model.decoder(z),
+                        align_img,
+                        mu,
+                        log_var,
+                        beta,
+                        cnn=True,
+                    )
+                    loss_ref += lambda_align * loss_align
 
             #     else:
             #         loss_align = torch.zeros_like(log_var_g)
@@ -970,30 +983,41 @@ def train_alternate_frozen(
 
             opt2.zero_grad()
             images = images.to(device)
-            recon_images, mu, logvar = net(images)
-            z = net.sampling(mu, logvar)
-            z_g2, mu_g2, log_var_g2 = temp_gen_model(images)
+            recon_images, z, mu, logvar = net(images)
+            recon_g2, z_g2, mu_g2, log_var_g2 = temp_gen_model(images)
 
             loss_local = vae_loss(recon_images, images, mu, logvar, beta, cnn=True)
+            loss_local += (
+                vae_loss(
+                    temp_gen_model.decoder(z), images, mu_g2, log_var_g2, beta, cnn=True
+                )
+                * lambda_reg
+            )
             if lambda_latent_diff > 0:
                 vae_loss2 = latent_diff_loss(z, z_g2).sum(dim=1).mean()
                 loss_local += lambda_latent_diff * vae_loss2
-            if lambda_align2 > 0:
-                loss_align = 0.5 * (log_var_g2 - logvar - 1) + (
-                    logvar.exp() + (mu - mu_g2).pow(2)
-                ) / (2 * log_var_g2.exp())
-                loss_local += lambda_align2 * loss_align.sum(dim=1).mean()
+            # if lambda_align2 > 0:
+            #     loss_align = 0.5 * (log_var_g2 - logvar - 1) + (
+            #         logvar.exp() + (mu - mu_g2).pow(2)
+            #     ) / (2 * log_var_g2.exp())
+            #     loss_local += lambda_align2 * loss_align.sum(dim=1).mean()
 
-            loss_local.backward(retain_graph=False)
+            loss_local.backward(retain_graph=True)
             opt2.step()
-            if lambda_reg_dec > 0:
+            if lambda_dec > 0:
                 print("dec update")
                 opt3.zero_grad()
-                recon_images, mu, logvar = net(images)
+                images = images.to(device)
+                recon_images, z, mu, logvar = net(images)
                 loss_local2 = (
                     vae_loss(recon_images, images, mu, logvar, beta, cnn=True)
-                    * lambda_reg_dec
+                    * lambda_dec
                 )
+                if lambda_reg_dec > 0:
+                    loss_local2 += (
+                        vae_loss(net.decoder(z_g2), images, mu, logvar, beta, cnn=True)
+                        * lambda_reg_dec
+                    )
                 loss_local2.backward()
                 opt3.step()
 
@@ -1004,7 +1028,7 @@ def train_alternate_frozen(
     return (
         loss_local.item(),
         loss_ref.item(),
-        lambda_align * (1 - cka_score).item() if lambda_align > 0 else 0,
+        lambda_align * loss_align.item() if lambda_align > 0 else 0,
         lambda_latent_diff * vae_loss2.item() if lambda_latent_diff > 0 else 0,
     )
 
@@ -1169,7 +1193,7 @@ def test(net, testloader, device, kl_term=0, cnn=False):
     with torch.no_grad():
         for idx, data in enumerate(testloader):
             img = data[0].to(device)
-            recon_img, mu, logvar = net(img)
+            recon_img, _, mu, logvar = net(img)
 
             if cnn:
                 bce_loss_per_pixel = F.binary_cross_entropy(
@@ -1213,7 +1237,7 @@ def eval_reconstrution(net, testloader, device, cnn=False):
     with torch.no_grad():
         for idx, data in enumerate(testloader):
             img = data[0].to(device)
-            recon_img, mu, logvar = net(img)
+            recon_img, _, mu, logvar = net(img)
             if cnn:
                 bce_loss_per_pixel = F.binary_cross_entropy(
                     recon_img.view(-1, img.shape[2] * img.shape[3]),
@@ -1380,7 +1404,7 @@ def visualize_plotly_latent_representation(
     with torch.no_grad():
         for data, labels in test_loader:
             data = data.to(device)
-            recon, mu, _ = model(data)
+            recon, _, mu, _ = model(data)
             all_recons.append(recon.cpu().numpy())
             all_means.append(mu.cpu().numpy())
             all_labels.append(labels.numpy())
@@ -1438,7 +1462,7 @@ def sample_latents(model, test_loader, device, num_samples=64):
     with torch.no_grad():
         for data, labels in test_loader:
             data = data.to(device)
-            _, mu, _ = model(data)
+            _, _, mu, _ = model(data)
             all_means.append(mu.cpu().numpy())
 
     all_means = np.concatenate(all_means, axis=0)
@@ -1462,7 +1486,7 @@ def get_fisher_ratio(model, test_loader, latent_dim, DEVICE):
     for inputs, labels in test_loader:
         inputs = inputs.to(DEVICE)
         labels = labels.to(DEVICE)
-        out, mu, _ = model(inputs)
+        out, _, mu, _ = model(inputs)
         latent_points.append(mu)
         labels_list.append(labels)
     latent_points = torch.cat(latent_points, dim=0)
