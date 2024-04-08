@@ -17,7 +17,6 @@
 
 from typing import Any, Callable, Dict, Generic, Iterator, Tuple, TypeVar, cast
 
-
 K = TypeVar("K")  # Key type
 V = TypeVar("V")  # Value type
 

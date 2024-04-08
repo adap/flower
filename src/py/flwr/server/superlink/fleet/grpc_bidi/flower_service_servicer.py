@@ -18,7 +18,6 @@ Relevant knowledge for reading this modules code:
 - https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
 """
 
-import itertools
 import uuid
 from typing import Callable, Iterator, cast, Optional
 

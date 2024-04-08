@@ -17,16 +17,13 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from threading import Condition, Lock
+from threading import Condition
 from typing import Iterator, Optional
 
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     ServerMessage,
 )
-
-from flwr.common import serde
-
 
 @dataclass
 class InsWrapper:
