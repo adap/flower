@@ -261,6 +261,7 @@ class RetryInvoker:
             try:
                 ret = target(*args, **kwargs)
             except self.recoverable_exceptions as err:
+                state.exception = err
                 # Check if giveup event should be triggered
                 max_tries_exceeded = try_cnt == self.max_tries
                 max_time_exceeded = (
