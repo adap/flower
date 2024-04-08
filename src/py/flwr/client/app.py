@@ -456,12 +456,13 @@ def _start_client_internal(
                     continue
 
                 log(INFO, "")
-                log(
-                    INFO,
-                    "[RUN %s, ROUND %s]",
-                    message.metadata.run_id,
-                    message.metadata.group_id,
-                )
+                if len(message.metadata.group_id) > 0:
+                    log(
+                        INFO,
+                        "[RUN %s, ROUND %s]",
+                        message.metadata.run_id,
+                        message.metadata.group_id,
+                    )
                 log(
                     INFO,
                     "Received: %s message %s",
