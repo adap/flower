@@ -941,7 +941,7 @@ def train_alternate_frozen(
             for idx, (align_img, _) in enumerate(align_loader):
                 opt1.zero_grad()
                 align_img = align_img.to(device)
-                recon_g, z_g, mu_g, log_var_g = temp_gen_model(align_img)
+                _, z_g, mu_g, log_var_g = temp_gen_model(align_img)
                 recon_align_img, z, mu, log_var = net(align_img)
                 vae_loss1 = vae_loss(
                     recon_align_img, align_img, mu, log_var, beta, cnn=True
@@ -952,14 +952,7 @@ def train_alternate_frozen(
                 )
                 loss_ref += vae_loss_g * lambda_reg
                 if lambda_align > 0:
-                    # loss_align = 0.5 * (log_var_g - log_var - 1) + (
-                    #     log_var.exp() + (mu - mu_g).pow(2)
-                    # ) / (2 * log_var_g.exp())
-                    # gram_matrix1 = compute_gram_matrix(mu)
-                    # gram_matrix2 = compute_gram_matrix(mu_g)
-                    # cka_score = compute_cka(gram_matrix1, gram_matrix2)
-                    # print("CKA Score:", cka_score)
-                    # loss_ref += lambda_align * (1 - cka_score)
+
                     loss_align = vae_loss(
                         temp_gen_model.decoder(z),
                         align_img,
@@ -970,21 +963,14 @@ def train_alternate_frozen(
                     )
                     loss_ref += lambda_align * loss_align
 
-            #     else:
-            #         loss_align = torch.zeros_like(log_var_g)
 
-            # loss_align_reduced = torch.mean(loss_align.sum(dim=1))
-            # print(f"align_step: {idx }")
-            # print(f"loss_align_term: {lambda_align * loss_align_reduced}")
-
-            # loss_ref += lambda_align * loss_align_reduced
-            loss_ref.backward(retain_graph=False)
+            loss_ref.backward()
             opt1.step()
 
             opt2.zero_grad()
             images = images.to(device)
             recon_images, z, mu, logvar = net(images)
-            recon_g2, z_g2, mu_g2, log_var_g2 = temp_gen_model(images)
+            _, z_g2, mu_g2, log_var_g2 = temp_gen_model(images)
 
             loss_local = vae_loss(recon_images, images, mu, logvar, beta, cnn=True)
             loss_local += (
@@ -996,31 +982,28 @@ def train_alternate_frozen(
             if lambda_latent_diff > 0:
                 vae_loss2 = latent_diff_loss(z, z_g2).sum(dim=1).mean()
                 loss_local += lambda_latent_diff * vae_loss2
-            # if lambda_align2 > 0:
-            #     loss_align = 0.5 * (log_var_g2 - logvar - 1) + (
-            #         logvar.exp() + (mu - mu_g2).pow(2)
-            #     ) / (2 * log_var_g2.exp())
-            #     loss_local += lambda_align2 * loss_align.sum(dim=1).mean()
 
-            loss_local.backward(retain_graph=True)
+
+            loss_local.backward()
             opt2.step()
-            if lambda_dec > 0:
-                print("dec update")
-                opt3.zero_grad()
-                images = images.to(device)
-                recon_images, z, mu, logvar = net(images)
-                loss_local2 = (
-                    vae_loss(recon_images, images, mu, logvar, beta, cnn=True)
-                    * lambda_dec
-                )
-                if lambda_reg_dec > 0:
-                    loss_local2 += (
-                        vae_loss(net.decoder(z_g2), images, mu, logvar, beta, cnn=True)
-                        * lambda_reg_dec
-                    )
-                loss_local2.backward()
-                opt3.step()
 
+            print("dec update")
+            opt3.zero_grad()
+            images = images.to(device)
+            recon_images, z, mu, logvar = net(images)
+            _, z_g2, mu_g2, log_var_g2 = temp_gen_model(images)
+
+            loss_local2 = (
+                vae_loss(recon_images, images, mu, logvar, beta, cnn=True)
+                * lambda_dec
+            )
+            if lambda_reg_dec > 0:
+                loss_local2 += (
+                    vae_loss(net.decoder(z_g2), images, mu, logvar, beta, cnn=True)
+                    * lambda_reg_dec
+                )
+            loss_local2.backward()
+            opt3.step()
     # TODO:update for local data
     print(f"loss_local: {loss_local.item()}")
     print(f"loss_ref: {loss_ref.item()}")
