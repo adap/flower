@@ -124,7 +124,7 @@ def parameters_to_proto_stream(parameters: typing.Parameters) -> Iterator[Parame
     ) 
     yield ParametersStreamPacket(header=header)
     
-    for chunk in _batched(b''.join(parameters.tensors), GRPC_MAX_MESSAGE_LENGTH):
+    for chunk in _batched(parameters.compressed_tensor_bytes(), GRPC_MAX_MESSAGE_LENGTH):
         chunk = ParametersStreamPacket.Chunk(bytes=chunk)
         yield ParametersStreamPacket(chunk=chunk)
 
@@ -147,7 +147,7 @@ def parameters_from_proto_stream(parameters: Iterator[ParametersStreamPacket], b
         if packet.WhichOneof("stream") == "is_end":
             break
 
-    return typing.Parameters.from_bytes(tensor_type=header.tensor_type, dimensions=list(header.dimensions), tensors_bytes=tensors_bytes,)
+    return typing.Parameters.from_bytes(tensor_type=header.tensor_type, dimensions=list(header.dimensions), compressed_tensors_bytes=tensors_bytes,)
      
 def parameters_from_proto(msg: Parameters) -> typing.Parameters:
     """Deserialize `Parameters` from ProtoBuf."""

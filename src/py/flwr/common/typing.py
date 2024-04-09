@@ -26,6 +26,8 @@ import numpy.typing as npt
 from flwr.common.aws import BucketManager
 import json
 
+import zlib
+
 NDArray = npt.NDArray[Any]
 NDArrayInt = npt.NDArray[np.int_]
 NDArrayFloat = npt.NDArray[np.float_]
@@ -95,6 +97,9 @@ class Parameters:
     @property
     def dimensions(self) -> List[int]:
         return [len(x) for x in self.tensors]
+    
+    def compressed_tensor_bytes(self):
+        return zlib.compress(b''.join(self.tensors))
 
     def upload_to_s3(self, bucket_manager: BucketManager):
         # Parameter can only be uploaded once. This saves bandwidth if user attempts try to upload the same parameter object more than oncce
@@ -103,7 +108,7 @@ class Parameters:
             return
 
         s3_object_key = uuid.uuid4()
-        body = b''.join(self.tensors)
+        body = self.compressed_tensor_bytes()
         bucket_manager.bucket.put_object(
             Key=str(s3_object_key),
             Metadata=dict(
@@ -120,24 +125,24 @@ class Parameters:
         result = bucket_manager.bucket.Object(key).get()
         tensor_type = result["Metadata"]["tensor_type"]
         dimensions = json.loads(result["Metadata"]["dimensions"])
-        tensor_bytes = result["Body"].read()
-        
+        compressed_tensors_bytes = result["Body"].read()
+
         params = Parameters.from_bytes(
             tensor_type,
-            tensor_bytes,
+            compressed_tensors_bytes,
             dimensions
         )
         params.s3_object_key = id
 
         return params
 
-
     @staticmethod
     def from_bytes(
         tensor_type: str,
-        tensors_bytes: bytes,
+        compressed_tensors_bytes: bytes,
         dimensions: List[int]
     ):
+        tensors_bytes = zlib.decompress(compressed_tensors_bytes)
         assert len(tensors_bytes) == sum(dimensions)
 
         last_ptr = 0
