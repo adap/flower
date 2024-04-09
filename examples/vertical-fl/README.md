@@ -123,7 +123,7 @@ In `task.py`, you'll find the preprocessing functions we'll apply to our data:
   'Adult' for ages between 11 and 40, and 'Elderly' for those over 40. If the age
   isn't listed, we'll label it as 'Unknown'.
 
-  ```python3
+  ```python
     def _bin_age(age_series):
         bins = [-np.inf, 10, 40, np.inf]
         labels = ["Child", "Adult", "Elderly"]
@@ -138,7 +138,7 @@ In `task.py`, you'll find the preprocessing functions we'll apply to our data:
   understand social status and family roles, simplifying rare titles into a single
   'Rare' category and converting any French titles to their English equivalents.
 
-  ```python3
+  ```python
     def _extract_title(name_series):
         titles = name_series.str.extract(" ([A-Za-z]+)\.", expand=False)
         rare_titles = {
@@ -170,7 +170,7 @@ In `task.py`, you'll find the preprocessing functions we'll apply to our data:
   'Pclass', 'Embarked', 'Title', 'Cabin', and the binned 'Age' into One-Hot
   encodings.
 
-  ```python3
+  ```python
     def _create_features(df):
         # Convert 'Age' to numeric, coercing errors to NaN
         df["Age"] = pd.to_numeric(df["Age"], errors="coerce")
@@ -190,7 +190,7 @@ In `task.py`, you'll find the preprocessing functions we'll apply to our data:
 In `task.py`, we also partition our data for our 3 clients to mirror real-life
 collaborations where different organizations hold different feature sets:
 
-```python3
+```python
 def _partition_data(df, all_keywords):
     partitions = []
     keywords_sets = [{"Parch", "Cabin", "Pclass"}, {"Sex", "Title"}]
@@ -236,7 +236,7 @@ collective intelligence without sharing sensitive information.
 
 Note that our final data processing function looks like that:
 
-```python3
+```python
 def get_partitions_and_label():
     df = pd.read_csv("_static/data/train.csv")
     processed_df = df.dropna(subset=["Embarked", "Fare"]).copy()
@@ -259,7 +259,7 @@ Each client's model is a neural network designed to operate on a distinct subset
 of features held by a client. In this example we will use simple linear
 regression models.
 
-```python3
+```python
 class ClientModel(nn.Module):
     def __init__(self, input_size):
         super(ClientModel, self).__init__()
@@ -281,7 +281,7 @@ The server's model acts as the central aggregator in the VFL system. It's also a
 neural network but with a slightly different architecture tailored to its role
 in aggregating the client models' outputs.
 
-```python3
+```python
 class ServerModel(nn.Module):
     def __init__(self):
         super(ServerModel, self).__init__()
@@ -305,7 +305,7 @@ a probability score indicative of the likelihood of survival.
 The strategy we will write to perform the aggregation will inherit from `FedAvg`
 and set the following additional attributes:
 
-```python3
+```python
 self.model = ServerModel(12)
 self.initial_parameters = ndarrays_to_parameters(
     [val.cpu().numpy() for _, val in self.model.state_dict().items()]
@@ -319,7 +319,7 @@ With `labels` given as an argument to the strategy.
 
 We then redefine the `aggregate_fit` method:
 
-```python3
+```python
 def aggregate_fit(
     self,
     rnd,
@@ -406,7 +406,7 @@ The last thing we have to do is to redefine the `aggregate_evaluate` function to
 disable distributed evaluation (as the clients do not hold any labels to test
 their local models).
 
-```python3
+```python
 def aggregate_evaluate(
     self,
     rnd,
@@ -420,7 +420,7 @@ def aggregate_evaluate(
 
 Our `FlowerClient` class is going to be quite straight forward.
 
-```python3
+```python
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, cid, data):
         self.cid = cid
@@ -487,7 +487,7 @@ the `aggregate_evaluate` function of the strategy.
 Putting everything together, to start our simulation we use the following
 function:
 
-```python3
+```python
 hist = fl.simulation.start_simulation(
     client_fn=client_fn,
     num_clients=3,

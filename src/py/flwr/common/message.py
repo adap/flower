@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import time
+import warnings
 from dataclasses import dataclass
 
 from .record import RecordSet
@@ -311,6 +312,13 @@ class Message:
 
             ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)
         """
+        if ttl:
+            warnings.warn(
+                "A custom TTL was set, but note that the SuperLink does not enforce "
+                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
+                "version of Flower.",
+                stacklevel=2,
+            )
         # If no TTL passed, use default for message creation (will update after
         # message creation)
         ttl_ = DEFAULT_TTL if ttl is None else ttl
@@ -349,6 +357,13 @@ class Message:
         Message
             A new `Message` instance representing the reply.
         """
+        if ttl:
+            warnings.warn(
+                "A custom TTL was set, but note that the SuperLink does not enforce "
+                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
+                "version of Flower.",
+                stacklevel=2,
+            )
         # If no TTL passed, use default for message creation (will update after
         # message creation)
         ttl_ = DEFAULT_TTL if ttl is None else ttl

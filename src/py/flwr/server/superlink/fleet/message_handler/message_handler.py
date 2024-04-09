@@ -43,7 +43,7 @@ def create_node(
 ) -> CreateNodeResponse:
     """."""
     # Create node
-    node_id = state.create_node()
+    node_id = state.create_node(ping_interval=request.ping_interval)
     return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
 
@@ -63,7 +63,8 @@ def ping(
     state: State,  # pylint: disable=unused-argument
 ) -> PingResponse:
     """."""
-    return PingResponse(success=True)
+    res = state.acknowledge_ping(request.node.node_id, request.ping_interval)
+    return PingResponse(success=res)
 
 
 def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:
