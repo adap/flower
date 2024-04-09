@@ -31,13 +31,32 @@ from flwr_datasets.utils import concatenate_divisions, divide_dataset
         "expected_concatenation_size",
     ),
     [
+        # Create 1 division
+        ((1.0,), [40], 0, 40),
+        ({"train": 1.0}, [40], "train", 40),
+        # Create 2 divisions
         ((0.8, 0.2), [32, 8], 1, 8),
-        ([0.8, 0.2], [32, 8], 1, 8),
         ({"train": 0.8, "test": 0.2}, [32, 8], "test", 8),
+        # Create 3 divisions
+        ([0.6, 0.2, 0.2], [24, 8, 8], 1, 8),
+        ({"train": 0.6, "valid": 0.2, "test": 0.2}, [24, 8, 8], "test", 8),
+        # Create 4 divisions
+        ([0.4, 0.2, 0.2, 0.2], [16, 8, 8, 8], 1, 8),
+        ({"0": 0.4, "1": 0.2, "2": 0.2, "3": 0.2}, [16, 8, 8, 8], "1", 8),
         # Not full dataset
+        # Create 1 division
+        ([0.8], [32], 0, 32),
+        ({"train": 0.8}, [32], "train", 32),
+        # Create 2 divisions
         ([0.2, 0.1], [8, 4], 1, 4),
         ((0.2, 0.1), [8, 4], 0, 8),
         ({"train": 0.2, "test": 0.1}, [8, 4], "test", 4),
+        # Create 3 divisions
+        ([0.6, 0.2, 0.1], [24, 8, 4], 2, 4),
+        ({"train": 0.6, "valid": 0.2, "test": 0.1}, [24, 8, 4], "test", 4),
+        # Create 4 divisions
+        ([0.4, 0.2, 0.1, 0.2], [16, 8, 4, 8], 2, 4),
+        ({"0": 0.4, "1": 0.2, "2": 0.1, "3": 0.2}, [16, 8, 4, 8], "2", 4),
     ],
 )
 class UtilsTests(unittest.TestCase):
@@ -60,7 +79,7 @@ class UtilsTests(unittest.TestCase):
         else:
             lengths = [len(split) for split in divided_dataset.values()]
 
-        self.assertEqual(lengths, self.sizes)
+        self.assertEqual(self.sizes, lengths)
 
     def test_correct_return_types(self) -> None:
         """Test correct types of the divided dataset based on the config."""

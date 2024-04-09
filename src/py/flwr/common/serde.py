@@ -795,6 +795,7 @@ def message_to_taskins(message: Message) -> TaskIns:
         task=Task(
             producer=Node(node_id=0, anonymous=True),  # Assume driver node
             consumer=Node(node_id=md.dst_node_id, anonymous=False),
+            created_at=md.created_at,
             ttl=md.ttl,
             ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
             task_type=md.message_type,
@@ -821,7 +822,7 @@ def message_from_taskins(taskins: TaskIns) -> Message:
     )
 
     # Construct Message
-    return Message(
+    message = Message(
         metadata=metadata,
         content=(
             recordset_from_proto(taskins.task.recordset)
@@ -834,6 +835,8 @@ def message_from_taskins(taskins: TaskIns) -> Message:
             else None
         ),
     )
+    message.metadata.created_at = taskins.task.created_at
+    return message
 
 
 def message_to_taskres(message: Message) -> TaskRes:
@@ -846,6 +849,7 @@ def message_to_taskres(message: Message) -> TaskRes:
         task=Task(
             producer=Node(node_id=md.src_node_id, anonymous=False),
             consumer=Node(node_id=0, anonymous=True),  # Assume driver node
+            created_at=md.created_at,
             ttl=md.ttl,
             ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
             task_type=md.message_type,
@@ -872,7 +876,7 @@ def message_from_taskres(taskres: TaskRes) -> Message:
     )
 
     # Construct the Message
-    return Message(
+    message = Message(
         metadata=metadata,
         content=(
             recordset_from_proto(taskres.task.recordset)
@@ -885,3 +889,5 @@ def message_from_taskres(taskres: TaskRes) -> Message:
             else None
         ),
     )
+    message.metadata.created_at = taskres.task.created_at
+    return message

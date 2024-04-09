@@ -373,7 +373,6 @@ class SecAggPlusWorkflow:
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
                 group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
-                ttl="",
             )
 
         log(
@@ -421,7 +420,6 @@ class SecAggPlusWorkflow:
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
                 group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
-                ttl="",
             )
 
         # Broadcast public keys to clients and receive secret key shares
@@ -492,7 +490,6 @@ class SecAggPlusWorkflow:
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
                 group_id=str(cfg[WorkflowKey.CURRENT_ROUND]),
-                ttl="",
             )
 
         log(
@@ -563,7 +560,6 @@ class SecAggPlusWorkflow:
                 message_type=MessageType.TRAIN,
                 dst_node_id=nid,
                 group_id=str(current_round),
-                ttl="",
             )
 
         log(
