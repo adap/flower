@@ -77,7 +77,7 @@ def is_server_message_end(msg: ServerMessage):
             packet = msg.evaluate_ins_stream
             return packet.WhichOneof("field") == "parameters" and _is_param_stream_end(packet.parameters)
         case _:
-            return False
+            return True
 
 def is_client_message_end(msg: ClientMessage):
     match msg.WhichOneof("msg"):
@@ -88,7 +88,7 @@ def is_client_message_end(msg: ClientMessage):
             packet = msg.get_parameters_res_stream
             return packet.WhichOneof("field") == "parameters" and _is_param_stream_end(packet.parameters)
         case _:
-            return False
+            return True
         
 #  === Parameters message ===
 

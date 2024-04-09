@@ -102,16 +102,17 @@ class Parameters:
         if self.s3_object_key is not None:
             return
 
-        self.s3_object_key = uuid.uuid4()
+        s3_object_key = uuid.uuid4()
         body = b''.join(self.tensors)
         bucket_manager.bucket.put_object(
-            Key=str(self.s3_object_key),
+            Key=str(s3_object_key),
             Metadata=dict(
                 tensor_type=self.tensor_type,
                 dimensions=json.dumps(self.dimensions)
             ),
             Body=body
-        )
+        ).wait_until_exists()
+        self.s3_object_key = s3_object_key
     
     @staticmethod
     def pull_from_s3(bucket_manager: BucketManager, id: uuid.UUID):
