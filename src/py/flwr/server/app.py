@@ -570,7 +570,7 @@ def _parse_args_run_fleet_api() -> argparse.ArgumentParser:
 def _parse_args_run_superlink() -> argparse.ArgumentParser:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
-        description="Start a Flower SuperNode",
+        description="Start a Flower SuperLink",
     )
 
     _add_args_common(parser=parser)
