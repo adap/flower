@@ -16,6 +16,6 @@ readme = "README.md"
 python = "^3.9"
 # Mandatory dependencies
 flwr = { version = "^1.8.0", extras = ["simulation"] }
-flwr-datasets = { version = "^0.0.2", extras = ["vision"] }
+flwr-datasets = { version = "0.0.2", extras = ["vision"] }
 torch = "2.2.1"
 torchvision = "0.17.1"

@@ -24,6 +24,7 @@ import ray
 from flwr.client import Client, NumPyClient
 from flwr.client.client_app import ClientApp
 from flwr.common import (
+    DEFAULT_TTL,
     Config,
     ConfigsRecord,
     Context,
@@ -202,7 +203,7 @@ def test_cid_consistency_without_proxies() -> None:
                 src_node_id=0,
                 dst_node_id=12345,
                 reply_to_message="",
-                ttl="",
+                ttl=DEFAULT_TTL,
                 message_type=MessageTypeLegacy.GET_PROPERTIES,
                 partition_id=int(cid),
             ),
