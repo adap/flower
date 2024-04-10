@@ -78,7 +78,6 @@ def is_valid_project_name(name: str) -> bool:
     A valid module name must start with a letter or an underscore, and can only contain
     letters, digits, and underscores.
     """
-
     if not name:
         return False
 
