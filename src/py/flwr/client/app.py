@@ -491,7 +491,9 @@ def _start_client_internal(
                     node_state.register_context(run_id=message.metadata.run_id)
 
                     # Retrieve context for this run
-                    context = node_state.retrieve_context(run_id=message.metadata.run_id)
+                    context = node_state.retrieve_context(
+                        run_id=message.metadata.run_id
+                    )
 
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error
