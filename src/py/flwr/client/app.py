@@ -519,7 +519,8 @@ def _start_client_internal(
                         # Don't update/change NodeState
 
                         e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-                        # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                        # Reason example:
+                        # "<class 'ZeroDivisionError'>:<'division by zero'>"
                         reason = str(type(ex)) + ":<'" + str(ex) + "'>"
                         exc_entity = "ClientApp"
                         if isinstance(ex, LoadClientAppError):
