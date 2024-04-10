@@ -22,7 +22,12 @@ from typing import Dict, Optional
 import typer
 from typing_extensions import Annotated
 
-from ..utils import prompt_options, prompt_text
+from ..utils import (
+    is_valid_project_name,
+    prompt_options,
+    prompt_text,
+    sanitize_project_name,
+)
 
 
 class MlFramework(str, Enum):
@@ -81,6 +86,16 @@ def new(
     ] = None,
 ) -> None:
     """Create new Flower project."""
+    if project_name is None:
+        project_name = prompt_text("Please provide project name")
+    if not is_valid_project_name(project_name):
+        project_name = prompt_text(
+            "Please provide a name that only contains "
+            "characters in {'_', 'a-zA-Z', '0-9'}",
+            predicate=is_valid_project_name,
+            default=sanitize_project_name(project_name),
+        )
+
     print(
         typer.style(
             f"🔨 Creating Flower project {project_name}...",
@@ -88,9 +103,6 @@ def new(
             bold=True,
         )
     )
-
-    if project_name is None:
-        project_name = prompt_text("Please provide project name")
 
     if framework is not None:
         framework_str = str(framework.value)
