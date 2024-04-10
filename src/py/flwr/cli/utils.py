@@ -103,7 +103,7 @@ def sanitize_project_name(name: str) -> str:
     ensures it starts with a valid character.
     """
     # Replace '-' with '_'
-    name_with_underscores = name.replace("-", "_")
+    name_with_underscores = name.replace("-", "_").replace(" ", "_")
 
     # Allowed characters in a module name: letters, digits, underscore
     allowed_chars = set(
