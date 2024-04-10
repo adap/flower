@@ -408,6 +408,8 @@ def _start_client_internal(
                 retry_state.elapsed_time,
                 retry_state.tries,
             )
+            if run_tracker.create_node:
+                run_tracker.create_node()
 
     def _on_backoff(retry_state: RetryState) -> None:
         run_tracker.connection = False
@@ -453,6 +455,7 @@ def _start_client_internal(
             receive, send, create_node, delete_node = conn
 
             # Register node
+            run_tracker.create_node = create_node
             if create_node is not None:
                 create_node()  # pylint: disable=not-callable
 
@@ -725,6 +728,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
 @dataclass
 class _RunTracker:
     connection: bool = True
+    create_node: Optional[Callable[[], None]] = None
 
     def register_signal_handler(self) -> None:
         """Register handlers for exit signals."""
