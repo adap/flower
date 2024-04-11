@@ -35,8 +35,8 @@ def failing_function() -> None:
 
 @pytest.fixture(name="mock_time")
 def fixture_mock_time() -> Generator[MagicMock, None, None]:
-    """Mock time.time for controlled testing."""
-    with patch("time.time") as mock_time:
+    """Mock time.monotonic for controlled testing."""
+    with patch("time.monotonic") as mock_time:
         yield mock_time
 
 

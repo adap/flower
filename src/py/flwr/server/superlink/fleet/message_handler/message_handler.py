@@ -15,6 +15,7 @@
 """Fleet API message handlers."""
 
 
+import time
 from typing import List, Optional
 from uuid import UUID
 
@@ -42,7 +43,7 @@ def create_node(
 ) -> CreateNodeResponse:
     """."""
     # Create node
-    node_id = state.create_node()
+    node_id = state.create_node(ping_interval=request.ping_interval)
     return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
 
@@ -62,7 +63,8 @@ def ping(
     state: State,  # pylint: disable=unused-argument
 ) -> PingResponse:
     """."""
-    return PingResponse(success=True)
+    res = state.acknowledge_ping(request.node.node_id, request.ping_interval)
+    return PingResponse(success=res)
 
 
 def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:
@@ -86,6 +88,9 @@ def push_task_res(request: PushTaskResRequest, state: State) -> PushTaskResRespo
     # pylint: disable=no-member
     task_res: TaskRes = request.task_res_list[0]
     # pylint: enable=no-member
+
+    # Set pushed_at (timestamp in seconds)
+    task_res.task.pushed_at = time.time()
 
     # Store TaskRes in State
     task_id: Optional[UUID] = state.store_task_res(task_res=task_res)

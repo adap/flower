@@ -14,8 +14,8 @@
 # ==============================================================================
 """Flower driver service client."""
 
-
 import time
+import warnings
 from typing import Iterable, List, Optional, Tuple
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
@@ -91,7 +91,7 @@ class Driver:
         message_type: str,
         dst_node_id: int,
         group_id: str,
-        ttl: float = DEFAULT_TTL,
+        ttl: Optional[float] = None,
     ) -> Message:
         """Create a new message with specified parameters.
 
@@ -111,10 +111,11 @@ class Driver:
         group_id : str
             The ID of the group to which this message is associated. In some settings,
             this is used as the FL round.
-        ttl : float (default: common.DEFAULT_TTL)
+        ttl : Optional[float] (default: None)
             Time-to-live for the round trip of this message, i.e., the time from sending
             this message to receiving a reply. It specifies in seconds the duration for
-            which the message and its potential reply are considered valid.
+            which the message and its potential reply are considered valid. If unset,
+            the default TTL (i.e., `common.DEFAULT_TTL`) will be used.
 
         Returns
         -------
@@ -122,6 +123,15 @@ class Driver:
             A new `Message` instance with the specified content and metadata.
         """
         _, run_id = self._get_grpc_driver_and_run_id()
+        if ttl:
+            warnings.warn(
+                "A custom TTL was set, but note that the SuperLink does not enforce "
+                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
+                "version of Flower.",
+                stacklevel=2,
+            )
+
+        ttl_ = DEFAULT_TTL if ttl is None else ttl
         metadata = Metadata(
             run_id=run_id,
             message_id="",  # Will be set by the server
@@ -129,7 +139,7 @@ class Driver:
             dst_node_id=dst_node_id,
             reply_to_message="",
             group_id=group_id,
-            ttl=ttl,
+            ttl=ttl_,
             message_type=message_type,
         )
         return Message(metadata=metadata, content=content)

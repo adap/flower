@@ -37,7 +37,7 @@ service Fleet {
 }
 
 // CreateNode messages
-message CreateNodeRequest {}
+message CreateNodeRequest { double ping_interval = 1; }
 message CreateNodeResponse { Node node = 1; }
 
 // DeleteNode messages
@@ -45,7 +45,10 @@ message DeleteNodeRequest { Node node = 1; }
 message DeleteNodeResponse {}
 
 // Ping messages
-message PingRequest { Node node = 1; }
+message PingRequest {
+  Node node = 1;
+  double ping_interval = 2;
+}
 message PingResponse { bool success = 1; }
 
 // PullTaskIns messages
