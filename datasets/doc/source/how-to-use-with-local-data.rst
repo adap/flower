@@ -173,6 +173,7 @@ From dictionary
 From list
 ^^^^^^^^^
 .. code-block:: python
+
   from datasets import Dataset
   from flwr_datasets.partitioner import ChosenPartitioner
   
@@ -190,6 +191,7 @@ From list
 From pd.DataFrame
 ^^^^^^^^^^^^^^^^^
 .. code-block:: python
+
   from datasets import Dataset
   from flwr_datasets.partitioner import ChosenPartitioner
   
