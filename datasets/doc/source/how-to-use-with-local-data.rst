@@ -79,7 +79,7 @@ JSON
 
 Image
 ^^^^^
-You can create an image dataset in tow ways:
+You can create an image dataset in two ways:
 
 1) give a path the directory
 
@@ -112,10 +112,11 @@ Then, the path you can give is `./mnist`.
 
 .. code-block:: python
 
-  from datasets import Image
+  from datasets import Image, load_dataset
   from flwr_datasets.partitioner import ChosenPartitioner
 
-  dataset = csv_data_with_path_column.cast_column("path", Image())
+  dataset = load_dataset(...)
+  dataset = dataset.cast_column("path", Image())
 
   partitioner = ChosenPartitioner(...)
   partitioner.dataset = dataset
@@ -126,7 +127,7 @@ Audio
 ^^^^^
 Analogously to the image datasets, there are two methods here:
 
-1) give a path the the directory
+1) give a path to the directory
 
 .. code-block:: python
 
@@ -139,14 +140,15 @@ Analogously to the image datasets, there are two methods here:
   partitioner.dataset = dataset
   partition = partitioner.load_partition(partition_id=0)
 
-2) create a dataset from a CSV/JSON file and cast the path column to Image.
+2) create a dataset from a CSV/JSON file and cast the path column to Audio.
 
 .. code-block:: python
 
-  from datasets import Audio
+  from datasets import Audio, load_dataset
   from flwr_datasets.partitioner import ChosenPartitioner
 
-  dataset = csv_data_with_path_column.cast_column("path", Audio())
+  dataset = load_dataset(...)
+  dataset = dataset.cast_column("path", Audio())
 
   partitioner = ChosenPartitioner(...)
   partitioner.dataset = dataset
@@ -160,6 +162,7 @@ From dictionary
 .. code-block:: python
 
   from datasets import Dataset
+  from flwr_datasets.partitioner import ChosenPartitioner
   data = {"features": [1, 2, 3], "labels": [0, 0, 1]}
   dataset = Dataset.from_dict(data)
 
@@ -170,13 +173,15 @@ From dictionary
 From list
 ^^^^^^^^^
 .. code-block:: python
-
-  data = [
+  from datasets import Dataset
+  from flwr_datasets.partitioner import ChosenPartitioner
+  
+  my_list = [
     {"features": 1, "labels": 0},
     {"features": 2, "labels": 0},
     {"features": 3, "labels": 1}
   ]
-  dataset = Dataset.from_dict(my_dict)
+  dataset = Dataset.from_list(my_list)
 
   partitioner = ChosenPartitioner(...)
   partitioner.dataset = dataset
@@ -185,7 +190,9 @@ From list
 From pd.DataFrame
 ^^^^^^^^^^^^^^^^^
 .. code-block:: python
-
+  from datasets import Dataset
+  from flwr_datasets.partitioner import ChosenPartitioner
+  
   data = {"features": [1, 2, 3], "labels": [0, 0, 1]}
   df = pd.DataFrame(data)
   dataset = Dataset.from_pandas(df)
@@ -200,7 +207,10 @@ The np.ndarray will be first transformed to pd.DataFrame
 
 .. code-block:: python
 
-  data = np.array([[1, 2, 3], [0, 0, 1]).T
+  from datasets import Dataset
+  from flwr_datasets.partitioner import ChosenPartitioner
+  
+  data = np.array([[1, 2, 3], [0, 0, 1]]).T
   # You can add the column names by passing columns=["features", "labels"]
   df = pd.DataFrame(data)
   dataset = Dataset.from_pandas(df)
@@ -224,6 +234,8 @@ If you need to do the same partitioning on a different dataset, create a new Par
 for that, e.g.:
 
 .. code-block:: python
+
+  from flwr_datasets.partitioner import IidPartitioner
 
   iid_partitioner_for_mnist = IidPartitioner(num_partitions=10)
   iid_partitioner_for_mnist.dataset = mnist_dataset
