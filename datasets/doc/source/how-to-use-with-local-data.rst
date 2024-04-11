@@ -246,7 +246,7 @@ for that, e.g.:
 
 More Resources
 --------------
-If you are looking for more details or you have not found the format you are looking supported, please visit the `HuggingFace Datasets docs <https://huggingface.co/docs/datasets/index>`_.
+If you are looking for more details or you have not found the format you are looking for, please visit the `HuggingFace Datasets docs <https://huggingface.co/docs/datasets/index>`_.
 This guide is based on the following ones:
 
 * `General Information <https://huggingface.co/docs/datasets/en/loading>`_
