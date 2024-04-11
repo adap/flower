@@ -15,7 +15,7 @@ General Overview
 ----------------
 An all-in-one dataset preparation (downloading, preprocessing, partitioning) happens
 using `FederatedDataset <ref-api/flwr_datasets.FederatedDataset.html>`_. However, we
-will use only the `Partitioner` here since we use already accessible data.
+will use only the `Partitioner` here since we use already downloaded data.
 
 The rest of this guide will explain how to create a
 `Dataset <https://huggingface.co/docs/datasets/en/package_reference/main_classes#datasets.Dataset>`_
