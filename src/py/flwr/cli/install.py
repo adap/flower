@@ -16,121 +16,138 @@
 
 
 import hashlib
-import jwt
 import os
 import shutil
 import tempfile
-import typer
 import zipfile
 from pathlib import Path
 from typing import Optional
-from typing_extensions import Annotated
+
+import jwt
 import tomli
+import typer
+from typing_extensions import Annotated
 
 from .flower_toml import load, validate
 
 
 def install(
-    fab_file: Annotated[
+    source: Annotated[
         Optional[Path],
-        typer.Argument(metavar="project_name", help="The name of the project"),
+        typer.Argument(
+            metavar="source", help="The source FAB file or directory to install"
+        ),
     ] = None,
     flwr_dir: Annotated[
         Optional[Path],
         typer.Option(help="The desired install path"),
     ] = None,
 ) -> None:
-    """Install a Flower project from a FAB file."""
-    if fab_file is None:
-        fab_file = Path(typer.prompt("FAB file to install"))
+    """Install a Flower project from a FAB file or a directory."""
+    if source is None:
+        source = Path(typer.prompt("Enter the source FAB file or directory path"))
 
-    fab_file = fab_file.resolve()
-    if not fab_file.is_file():
-        typer.echo(f"The file {fab_file} does not exist.")
+    source = source.resolve()
+    if not source.exists():
+        typer.echo(f"The source {source} does not exist.")
         raise typer.Exit(code=1)
 
-    # Create a temporary directory to extract the FAB file
+    if source.is_dir():
+        install_from_directory(source, flwr_dir)
+    else:
+        install_from_fab(source, flwr_dir)
+
+
+def install_from_directory(directory: Path, flwr_dir: Optional[Path]):
+    """Install directly from a directory."""
+    validate_and_install(directory, flwr_dir, skip_hashing=True)
+
+
+def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]):
+    """Install from a FAB file after extracting and validating."""
     with tempfile.TemporaryDirectory() as tmpdir:
         with zipfile.ZipFile(fab_file, "r") as zipf:
             zipf.extractall(tmpdir)
-            list_path = Path(tmpdir) / ".info/LIST"
-            jwt_path = Path(tmpdir) / ".info/LIST.jwt"
+            tmpdir_path = Path(tmpdir)
+            list_path = tmpdir_path / ".info/LIST"
+            jwt_path = tmpdir_path / ".info/LIST.jwt"
 
-            # Read the LIST content
-            with open(list_path, "r") as file:
-                list_content = file.read()
-
-            # Verify the LIST file
             if jwt_path.exists():
                 secret_key = typer.prompt(
                     "Enter the public key to verify the LIST file", hide_input=True
                 )
                 if not _verify_jwt_signature(
-                    list_content, jwt_path.read_text(), secret_key
+                    list_path.read_text(), jwt_path.read_text(), secret_key
                 ):
                     typer.echo("Failed to verify the LIST file signature.")
                     raise typer.Exit(code=1)
-            else:
-                if not _verify_hashes(list_content, Path(tmpdir)):
-                    typer.echo("File hashes do not match.")
-                    raise typer.Exit(code=1)
 
-        config = load(str(Path(tmpdir) / "flower.toml"))
-        if config is None:
-            typer.secho(
-                "Project configuration could not be loaded. flower.toml does not exist."
-            )
-            raise typer.Exit(code=1)
-
-        is_valid, _, _ = validate(config)
-
-        if not is_valid:
-            typer.secho("Project configuration is invalid.")
-            raise typer.Exit(code=1)
-
-        if "provider" not in config["flower"]:
-            typer.secho("Project configuration is invalid.")
-            raise typer.Exit(code=1)
-
-        username = config["flower"]["provider"]
-
-        if not (Path(tmpdir) / "pyproject.toml").exists():
-            typer.secho("`pyproject.toml` not found.")
-            raise typer.Exit(code=1)
-
-        with (Path(tmpdir) / "pyproject.toml").open(encoding="utf-8") as toml_file:
-            data = tomli.loads(toml_file.read())
-            if "project" not in data or "version" not in data["project"]:
-                typer.secho("Couldn't find `version` in `pyproject.toml`.")
+            if not _verify_hashes(list_path.read_text(), tmpdir_path):
+                typer.echo("File hashes do not match.")
                 raise typer.Exit(code=1)
 
-            version = data["project"]["version"]
+            validate_and_install(tmpdir_path, flwr_dir, skip_hashing=False)
 
-        # Determine installation directory
-        install_dir = (
-            (
-                Path(
-                    os.getenv(
-                        "FLWR_HOME",
-                        f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
-                    )
-                )
-                if not flwr_dir
-                else flwr_dir
-            )
-            / "apps"
-            / username
-            / fab_file.stem
-            / version
+
+def validate_and_install(
+    project_dir: Path, flwr_dir: Optional[Path], skip_hashing: bool
+):
+    """Validate TOML files and install the project to the desired directory."""
+    config = load(str(project_dir / "flower.toml"))
+    if config is None:
+        typer.secho(
+            "Project configuration could not be loaded. flower.toml does not exist."
         )
-        if not install_dir.exists():
-            install_dir.mkdir(parents=True, exist_ok=True)
+        raise typer.Exit(code=1)
 
-        # Move contents from temporary directory
-        for item in Path(tmpdir).iterdir():
-            shutil.move(str(item), str(install_dir))
+    if not validate(config):
+        typer.secho("Project configuration is invalid.")
+        raise typer.Exit(code=1)
 
-    typer.echo(f"Successfully installed {fab_file.stem} to {install_dir}")
+    if "provider" not in config["flower"]:
+        typer.secho("Project configuration is missing required 'provider' field.")
+        raise typer.Exit(code=1)
+
+    username = config["flower"]["provider"]
+    pyproject_path = project_dir / "pyproject.toml"
+    if not pyproject_path.exists():
+        typer.secho("`pyproject.toml` not found.")
+        raise typer.Exit(code=1)
+
+    with pyproject_path.open(encoding="utf-8") as toml_file:
+        data = tomli.loads(toml_file.read())
+        if "project" not in data or "version" not in data["project"]:
+            typer.secho("Couldn't find `version` in `pyproject.toml`.")
+            raise typer.Exit(code=1)
+
+        version = data["project"]["version"]
+
+    install_dir = (
+        (
+            Path(
+                os.getenv(
+                    "FLWR_HOME",
+                    f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
+                )
+            )
+            if not flwr_dir
+            else flwr_dir
+        )
+        / "apps"
+        / username
+        / project_dir.stem
+        / version
+    )
+    install_dir.mkdir(parents=True, exist_ok=True)
+
+    # Move contents from source directory
+    for item in project_dir.iterdir():
+        if item.is_dir():
+            shutil.copytree(item, install_dir / item.name, dirs_exist_ok=True)
+        else:
+            shutil.copy2(item, install_dir / item.name)
+
+    typer.echo(f"Successfully installed {project_dir.stem} to {install_dir}")
 
 
 def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
