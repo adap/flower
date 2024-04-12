@@ -18,7 +18,7 @@ import hashlib
 import os
 import zipfile
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 import jwt
 import pathspec
@@ -27,11 +27,14 @@ import typer
 
 def build(
     directory: Annotated[
-        Path, typer.Option(help="The to bundle into a FAB")
-    ] = Path.cwd(),
+        Optional[Path], typer.Option(help="The to bundle into a FAB")
+    ] = None,
     signed: Annotated[bool, typer.Option(help="Flag to sign the FAB")] = False,
 ) -> None:
     """Build a Flower project."""
+    if directory is None:
+        directory = Path.cwd()
+
     directory = directory.resolve()
     if not directory.is_dir():
         typer.echo(f"The path {directory} is not a valid directory.")
@@ -44,7 +47,7 @@ def build(
     fab_filename = f"{directory.name}.fab"
     list_file_content = ""
 
-    with zipfile.ZipFile(fab_filename, "w") as fab_file:
+    with zipfile.ZipFile(fab_filename) as fab_file:
         for root, dirs, files in os.walk(directory, topdown=True):
             # Filter directories and files based on .gitignore
             dirs[:] = [d for d in dirs if not ignore_spec.match_file(Path(root) / d)]
