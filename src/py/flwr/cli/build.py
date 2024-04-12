@@ -12,18 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `example` command."""
+"""Flower command line interface `build` command."""
 
 import hashlib
 import os
-import pathspec
-import typer
 import zipfile
 from pathlib import Path
 
+import jwt
+import pathspec
+import typer
+
 
 def build(
-    directory: Path = typer.Option(Path.cwd(), help="The directory to zip")
+    directory: Path = typer.Option(Path.cwd(), help="The directory to zip"),
+    signed: bool = typer.Option(False, help="Flag to sign the LIST file"),
 ) -> None:
     directory = directory.resolve()
     if not directory.is_dir():
@@ -34,33 +37,41 @@ def build(
     ignore_spec = _load_gitignore(directory)
 
     # Set the name of the zip file
-    zip_filename = f"{directory.name}.fab"
+    fab_filename = f"{directory.name}.fab"
     list_file_content = ""
 
-    with zipfile.ZipFile(zip_filename, "w", zipfile.ZIP_DEFLATED) as zipf:
+    with zipfile.ZipFile(fab_filename, "w", zipfile.ZIP_DEFLATED) as fab_file:
         for root, dirs, files in os.walk(directory, topdown=True):
             # Filter directories and files based on .gitignore
             dirs[:] = [d for d in dirs if not ignore_spec.match_file(Path(root) / d)]
             files = [
                 f
                 for f in files
-                if not ignore_spec.match_file(Path(root) / f) and f != zip_filename
+                if not ignore_spec.match_file(Path(root) / f) and f != fab_filename
             ]
 
             for file in files:
                 file_path = Path(root) / file
-                arc_path = file_path.relative_to(directory)
-                zipf.write(file_path, arc_path)
+                archive_path = file_path.relative_to(directory)
+                fab_file.write(file_path, archive_path)
 
                 # Calculate file info
                 sha256_hash = _get_sha256_hash(file_path)
                 file_size_bits = os.path.getsize(file_path) * 8  # size in bits
-                list_file_content += f"{arc_path},{sha256_hash},{file_size_bits}\n"
+                list_file_content += f"{archive_path},{sha256_hash},{file_size_bits}\n"
 
-        # Add .info/LIST to the zip file
-        zipf.writestr(".info/LIST", list_file_content)
+        # Add LIST and LIST.jwt to the zip file
+        fab_file.writestr(".info/LIST", list_file_content)
 
-    typer.secho(f"Bundled FAB into {zip_filename}", fg=typer.colors.GREEN)
+        # Optionally sign the LIST file
+        if signed:
+            secret_key = typer.prompt(
+                "Enter the secret key to sign the LIST file", hide_input=True
+            )
+            signed_token = _sign_content(list_file_content, secret_key)
+            fab_file.writestr(".info/LIST.jwt", signed_token)
+
+    typer.secho(f"Bundled FAB into {fab_filename}", fg=typer.colors.GREEN)
 
 
 def _get_sha256_hash(file_path: Path) -> str:
@@ -83,3 +94,10 @@ def _load_gitignore(directory: Path) -> pathspec.PathSpec:
         with open(gitignore_path, "r") as file:
             patterns.extend(file.readlines())
     return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
+
+
+def _sign_content(content: str, secret_key: str) -> str:
+    """Signs the content using JWT and returns the token."""
+    payload = {"data": content}
+    token = jwt.encode(payload, secret_key, algorithm="HS256")
+    return token
