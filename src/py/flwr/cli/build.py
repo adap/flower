@@ -47,7 +47,7 @@ def build(
     fab_filename = f"{directory.name}.fab"
     list_file_content = ""
 
-    with zipfile.ZipFile(fab_filename) as fab_file:
+    with zipfile.ZipFile(fab_filename, "w", zipfile.ZIP_DEFLATED) as fab_file:
         for root, dirs, files in os.walk(directory, topdown=True):
             # Filter directories and files based on .gitignore
             dirs[:] = [d for d in dirs if not ignore_spec.match_file(Path(root) / d)]
