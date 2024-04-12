@@ -127,7 +127,7 @@ def new(
 
     # List of files to render
     files = {
-        ".gitignore": {"template": "app/.gitignore"},
+        ".gitignore": {"template": "app/.gitignore.tpl"},
         "README.md": {"template": "app/README.md.tpl"},
         "flower.toml": {"template": "app/flower.toml.tpl"},
         "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
