@@ -49,9 +49,8 @@ def build(
     list_file_content = ""
 
     with zipfile.ZipFile(fab_filename, "w", zipfile.ZIP_DEFLATED) as fab_file:
-        for root, dirs, files in os.walk(directory, topdown=True):
+        for root, _, files in os.walk(directory, topdown=True):
             # Filter directories and files based on .gitignore
-            dirs[:] = [d for d in dirs if not ignore_spec.match_file(Path(root) / d)]
             files = [
                 f
                 for f in files
