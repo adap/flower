@@ -66,7 +66,6 @@ def test_new(tmp_path: str) -> None:
     project_name = "FedGPT"
     framework = MlFramework.PYTORCH
     expected_files_top_level = {
-        "requirements.txt",
         "fedgpt",
         "README.md",
         "flower.toml",
