@@ -25,8 +25,8 @@ import typer
 
 
 def build(
-    directory: Path = typer.Option(Path.cwd(), help="The directory to zip"),
-    signed: bool = typer.Option(False, help="Flag to sign the LIST file"),
+    directory: Path = typer.Option(Path.cwd(), help="The to bundle into a FAB"),
+    signed: bool = typer.Option(False, help="Flag to sign the FAB"),
 ) -> None:
     directory = directory.resolve()
     if not directory.is_dir():
