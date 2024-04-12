@@ -58,7 +58,7 @@ def render_template(template: str, data: Dict[str, str]) -> str:
     """Render template."""
     tpl_file = load_template(template)
     tpl = Template(tpl_file)
-    if not ".gitignore" in template:
+    if ".gitignore" not in template:
         return tpl.substitute(data)
     else:
         return tpl.template
