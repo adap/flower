@@ -116,7 +116,9 @@ def _sign_content(content: str, secret_key: str) -> str:
     return token
 
 
-def _validate_required_files(directory: Path) -> bool:
+def _validate_required_files(
+    directory: Path,
+) -> bool:  # pylint: disable=too-many-return-statements
     """Validate the presence of required files with proper content."""
     pyproject_path = directory / "pyproject.toml"
     flower_toml_path = directory / "flower.toml"
@@ -132,12 +134,11 @@ def _validate_required_files(directory: Path) -> bool:
     # Validate pyproject.toml for version
     with open(pyproject_path, "rb") as f:
         pyproject_data = tomli.load(f)
+
     if "project" not in pyproject_data or "version" not in pyproject_data["project"]:
         typer.echo("No `version` found in `pyproject.toml`.")
         return False
 
-    # Here you could add more specific validation for flower.toml
-    # Example:
     config = load(str(flower_toml_path))
     if config is None:
         typer.secho(
