@@ -60,8 +60,7 @@ def render_template(template: str, data: Dict[str, str]) -> str:
     tpl = Template(tpl_file)
     if ".gitignore" not in template:
         return tpl.substitute(data)
-    else:
-        return tpl.template
+    return tpl.template
 
 
 def create_file(file_path: str, content: str) -> None:
