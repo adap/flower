@@ -98,7 +98,7 @@ def _load_gitignore(directory: Path) -> pathspec.PathSpec:
     gitignore_path = directory / ".gitignore"
     patterns = ["__pycache__/"]  # Default pattern
     if gitignore_path.exists():
-        with open(gitignore_path) as file:
+        with open(gitignore_path, encoding="UTF-8") as file:
             patterns.extend(file.readlines())
     return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
 
