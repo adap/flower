@@ -18,11 +18,12 @@ import hashlib
 import os
 import zipfile
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Optional
 
 import jwt
 import pathspec
 import typer
+from typing_extensions import Annotated
 
 
 def build(
