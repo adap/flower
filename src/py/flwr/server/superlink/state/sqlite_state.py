@@ -573,6 +573,10 @@ class SqliteState(State):
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
+    def get_run(self, run_id: int) -> Tuple[str]:
+        """Retrieve information about the run with the specified `run_id`."""
+        # TODO
+
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
         # Update `online_until` and `ping_interval` for the given `node_id`
