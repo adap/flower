@@ -2,8 +2,8 @@
 
 import warnings
 
-import flwr as fl
 import numpy as np
+from flwr.client import NumPyClient, ClientApp
 from flwr_datasets import FederatedDataset
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
@@ -55,7 +55,6 @@ class FlowerClient(NumPyClient):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             self.model.fit(self.X_train, self.y_train)
-        print(f"Training finished for round {config['server_round']}")
 
         return get_model_parameters(self.model), len(self.X_train), {}
 
