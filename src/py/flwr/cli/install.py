@@ -58,12 +58,12 @@ def install(
         install_from_fab(source, flwr_dir)
 
 
-def install_from_directory(directory: Path, flwr_dir: Optional[Path]):
+def install_from_directory(directory: Path, flwr_dir: Optional[Path]) -> None:
     """Install directly from a directory."""
-    validate_and_install(directory, flwr_dir, skip_hashing=True)
+    validate_and_install(directory, flwr_dir)
 
 
-def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]):
+def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]) -> None:
     """Install from a FAB file after extracting and validating."""
     with tempfile.TemporaryDirectory() as tmpdir:
         with zipfile.ZipFile(fab_file, "r") as zipf:
@@ -86,12 +86,10 @@ def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]):
                 typer.echo("File hashes do not match.")
                 raise typer.Exit(code=1)
 
-            validate_and_install(tmpdir_path, flwr_dir, skip_hashing=False)
+            validate_and_install(tmpdir_path, flwr_dir)
 
 
-def validate_and_install(
-    project_dir: Path, flwr_dir: Optional[Path], skip_hashing: bool
-):
+def validate_and_install(project_dir: Path, flwr_dir: Optional[Path]) -> None:
     """Validate TOML files and install the project to the desired directory."""
     config = load(str(project_dir / "flower.toml"))
     if config is None:
@@ -164,7 +162,7 @@ def _verify_jwt_signature(list_content: str, jwt_token: str, public_key: str) ->
     """Verify the JWT signature."""
     try:
         decoded = jwt.decode(jwt_token, public_key, algorithms=["HS256"])
-        return decoded["data"] == list_content
+        return bool(decoded["data"] == list_content)
     except jwt.exceptions.InvalidTokenError:
         return False
 
