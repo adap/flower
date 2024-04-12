@@ -22,8 +22,11 @@ from typing import Optional
 
 import jwt
 import pathspec
+import tomli
 import typer
 from typing_extensions import Annotated
+
+from .flower_toml import load, validate
 
 
 def build(
@@ -39,6 +42,9 @@ def build(
     directory = directory.resolve()
     if not directory.is_dir():
         typer.echo(f"The path {directory} is not a valid directory.")
+        raise typer.Exit(code=1)
+
+    if not _validate_required_files(directory):
         raise typer.Exit(code=1)
 
     # Load .gitignore rules if present
@@ -108,3 +114,43 @@ def _sign_content(content: str, secret_key: str) -> str:
     payload = {"data": content}
     token = jwt.encode(payload, secret_key, algorithm="HS256")
     return token
+
+
+def _validate_required_files(directory: Path) -> bool:
+    """Validate the presence of required files with proper content."""
+    pyproject_path = directory / "pyproject.toml"
+    flower_toml_path = directory / "flower.toml"
+
+    if not pyproject_path.exists():
+        typer.echo("`pyproject.toml` not found.")
+        return False
+
+    if not flower_toml_path.exists():
+        typer.echo("`flower.toml` not found.")
+        return False
+
+    # Validate pyproject.toml for version
+    with open(pyproject_path, "rb") as f:
+        pyproject_data = tomli.load(f)
+    if "project" not in pyproject_data or "version" not in pyproject_data["project"]:
+        typer.echo("No `version` found in `pyproject.toml`.")
+        return False
+
+    # Here you could add more specific validation for flower.toml
+    # Example:
+    config = load(str(flower_toml_path))
+    if config is None:
+        typer.secho(
+            "Project configuration could not be loaded. flower.toml does not exist."
+        )
+        return False
+
+    if not validate(config):
+        typer.secho("Project configuration is invalid.")
+        return False
+
+    if "provider" not in config["flower"]:
+        typer.secho("Project configuration is missing required 'provider' field.")
+        return False
+
+    return True
