@@ -24,6 +24,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
+    GetRunRequest,
+    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -101,3 +103,10 @@ def push_task_res(request: PushTaskResRequest, state: State) -> PushTaskResRespo
         results={str(task_id): 0},
     )
     return response
+
+
+def get_run(
+    request: GetRunRequest, state: State  # pylint: disable=W0613
+) -> GetRunResponse:
+    """Get run information."""
+    return GetRunResponse()
