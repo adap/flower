@@ -116,9 +116,10 @@ def _sign_content(content: str, secret_key: str) -> str:
     return token
 
 
+# pylint: disable=too-many-return-statements
 def _validate_required_files(
     directory: Path,
-) -> bool:  # pylint: disable=too-many-return-statements
+) -> bool:
     """Validate the presence of required files with proper content."""
     pyproject_path = directory / "pyproject.toml"
     flower_toml_path = directory / "flower.toml"
