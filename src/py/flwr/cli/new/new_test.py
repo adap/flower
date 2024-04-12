@@ -70,6 +70,7 @@ def test_new(tmp_path: str) -> None:
         "README.md",
         "flower.toml",
         "pyproject.toml",
+        ".gitignore",
     }
     expected_files_module = {
         "__init__.py",
