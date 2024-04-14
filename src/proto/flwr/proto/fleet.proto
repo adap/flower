@@ -71,10 +71,12 @@ message PushTaskResResponse {
 }
 
 // GetRun messages
-message GetRunRequest { sint64 run_id = 1; }
-message GetRunResponse {
-  string fab_id = 1;
-  string fab_version = 2;
+message Run {
+  sint64 run_id = 1;
+  string fab_id = 2;
+  string fab_version = 3;
 }
+message GetRunRequest { sint64 run_id = 1; }
+message GetRunResponse { Run run = 1; }
 
 message Reconnect { uint64 reconnect = 1; }
