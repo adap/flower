@@ -82,9 +82,11 @@ def load_data(partition):
 
     partition = partition.with_transform(apply_transforms)
     # 20 % for on federated evaluation
-    partition_full = partition.train_test_split(test_size=0.2)
+    partition_full = partition.train_test_split(test_size=0.2, seed=42)
     # 60 % for the federated train and 20 % for the federated validation (both in fit)
-    partition_train_valid = partition_full["train"].train_test_split(train_size=0.75)
+    partition_train_valid = partition_full["train"].train_test_split(
+        train_size=0.75, seed=42
+    )
     trainloader = DataLoader(
         partition_train_valid["train"],
         batch_size=32,
