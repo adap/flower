@@ -16,7 +16,7 @@
 
 
 from logging import DEBUG
-from typing import Optional
+from typing import Optional, Sequence
 
 import grpc
 
@@ -30,6 +30,7 @@ def create_channel(
     insecure: bool,
     root_certificates: Optional[bytes] = None,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
 ) -> grpc.Channel:
     """Create a gRPC channel, either secure or insecure."""
     # Check for conflicting parameters
@@ -56,5 +57,8 @@ def create_channel(
             server_address, ssl_channel_credentials, options=channel_options
         )
         log(DEBUG, "Opened secure gRPC connection using certificates")
+
+    if interceptors is not None:
+        channel = grpc.intercept_channel(channel, interceptors)
 
     return channel

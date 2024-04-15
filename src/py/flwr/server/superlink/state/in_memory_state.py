@@ -30,7 +30,7 @@ from flwr.server.utils import validate_task_ins_or_res
 from .utils import make_node_unavailable_taskres
 
 
-class InMemoryState(State):
+class InMemoryState(State):  # pylint: disable=R0902
     """In-memory State implementation."""
 
     def __init__(self) -> None:
@@ -39,6 +39,9 @@ class InMemoryState(State):
         self.run_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
+        self.client_public_keys: Set[bytes] = set()
+        self.server_public_key: bytes = b""
+        self.server_private_key: bytes = b""
         self.lock = threading.Lock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
@@ -249,6 +252,33 @@ class InMemoryState(State):
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def store_server_public_private_key(
+        self, public_key: bytes, private_key: bytes
+    ) -> None:
+        """Store `server_public_key` and `server_private_key` in state."""
+        self.server_private_key = private_key
+        self.server_public_key = public_key
+
+    def get_server_private_key(self) -> bytes:
+        """Retrieve `server_private_key` in urlsafe bytes."""
+        return self.server_private_key
+
+    def get_server_public_key(self) -> bytes:
+        """Retrieve `server_public_key` in urlsafe bytes."""
+        return self.server_public_key
+
+    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of `client_public_keys` in state."""
+        self.client_public_keys = public_keys
+
+    def store_client_public_key(self, public_key: bytes) -> None:
+        """Store a `client_public_key` in state."""
+        self.client_public_keys.add(public_key)
+
+    def get_client_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored `client_public_keys` as a set."""
+        return self.client_public_keys
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""

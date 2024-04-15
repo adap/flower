@@ -21,7 +21,9 @@ from contextlib import contextmanager
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Callable, Iterator, Optional, Tuple, Union, cast
+from typing import Callable, Iterator, Optional, Sequence, Tuple, Union, cast
+
+import grpc
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
@@ -57,12 +59,13 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_request_response(  # pylint: disable=R0914, R0915
+def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     server_address: str,
     insecure: bool,
     retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
@@ -111,6 +114,7 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
         insecure=insecure,
         root_certificates=root_certificates,
         max_message_length=max_message_length,
+        interceptors=interceptors,
     )
     channel.subscribe(on_channel_state_change)
 
