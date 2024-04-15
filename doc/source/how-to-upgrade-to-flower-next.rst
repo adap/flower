@@ -3,7 +3,7 @@ Upgrade to Flower Next
 
 Welcome to the migration guide for updating Flower to Flower Next! Whether you're a seasoned user
 or just getting started, this guide will help you smoothly transition your existing setup to take
-advantage of the latest features and improvements in Flower Next. Let's dive in!
+advantage of the latest features and improvements in Flower Next, starting from version 1.8. Let's dive in!
 
 Install update
 --------------
@@ -155,3 +155,14 @@ Run the ``SuperLink`` before running ``ServerApp`` and ``SuperNode`` instead of 
     $ flower-server-app server:app --insecure
 
 
+
+Further help
+------------
+
+Some official `Flower code examples <https://github.com/adap/flower/tree/main/examples>`_ are already
+updated to Flower Next so they can serve as a reference for using the Flower Next API. If there are
+further questions, `join the Flower Slack <https://flower.ai/join-slack/>`_ and use the channel ``#questions``.
+You can also `participate in Flower Discuss <https://discuss.flower.ai/>`_ where you can find us
+answering questions, or share and learn from others about migrating to Flower Next.
+
+Happy migrating!
