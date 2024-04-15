@@ -30,7 +30,7 @@ partition = fds.load_partition(args.partition_id, "train")
 partition.set_format("numpy")
 
 # Divide data on each node: 80% train, 20% test
-partition = partition.train_test_split(test_size=0.2)
+partition = partition.train_test_split(test_size=0.2, seed=42)
 x_train, y_train = partition["train"]["img"] / 255.0, partition["train"]["label"]
 x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
 
