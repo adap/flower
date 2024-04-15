@@ -51,10 +51,10 @@ dataset: [CIFAR100, Caltech101] # list of datasets you include in your baseline.
 | number of rounds | 1 |
 | client resources | {'num_cpus': 2.0, 'num_gpus': 0.0 }|
 | data partition | distribution with $\alpha$=0.1 |
-| Number of mixtures | 2 |
+| Number of mixtures | 1 |
 | Covariance type | spherical |
 | tolerance | 1e-12 |
-| maximum GMM iterations | 1e3 |
+| maximum EM iterations | 1e3 |
 
 
 ## Environment Setup
@@ -98,10 +98,13 @@ python -m fedpft.main strategy=FedAvg client=FedAvg
 With the following command, we run both FedPFT and FedAvg configurations. 
 
 ```bash
-python -m fedprox.main --multirun dataset=CIFAR100, Caltech101
+# FedPFT
+python -m fedprox.main dataset=CIFAR100 model=resnet50
+python -m fedprox.main dataset=Caltech101 model=clip
 
-# FedAvg
-python -m fedprox.main --multirun strategy=fedavg client=fedavg dataset=CIFAR100, Caltech101
+# FedAvg with pre-trained, frozen models
+python -m fedpft.main strategy=fedavg client=fedavg dataset=CIFAR100 model=resnet50 num_rounds=20 
+python -m fedpft.main strategy=fedavg client=fedavg dataset=Caltech101 model=clip num_rounds=20 fedavg.num_epochs=10 fedavg.lr=0.01 num_gpus=0.2
 ```
 
 The above commands would generate results that you can plot and would look like the plot shown below. This plot was generated using the jupyter notebook in the `docs/` directory of this baseline after running the `--multirun` commands above.
