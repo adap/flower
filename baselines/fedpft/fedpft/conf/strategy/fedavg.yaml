@@ -6,7 +6,7 @@ accept_failures: False
 on_fit_config_fn:
   _target_: fedpft.server.fedavg_get_on_fit_config_fn
   lr: 0.001
-  num_epochs: 10
+  num_epochs: 1
 evaluate_metrics_aggregation_fn:
   _target_: fedpft.server.weighted_average
   _partial_: true 
