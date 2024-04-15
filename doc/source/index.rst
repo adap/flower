@@ -99,7 +99,6 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    :maxdepth: 1
    :caption: Legacy example guides
 
-   example-walkthrough-pytorch-mnist
    example-pytorch-from-centralized-to-federated
    example-mxnet-walk-through
    example-jax-from-centralized-to-federated

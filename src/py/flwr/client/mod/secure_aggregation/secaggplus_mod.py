@@ -12,19 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Message handler for the SecAgg+ protocol."""
+"""Modifier for the SecAgg+ protocol."""
 
 
 import os
 from dataclasses import dataclass, field
-from logging import INFO, WARNING
-from typing import Any, Callable, Dict, List, Tuple, cast
+from logging import DEBUG, WARNING
+from typing import Any, Dict, List, Tuple, cast
 
 from flwr.client.typing import ClientAppCallable
 from flwr.common import (
     ConfigsRecord,
     Context,
     Message,
+    Parameters,
     RecordSet,
     ndarray_to_bytes,
     parameters_to_ndarrays,
@@ -62,7 +63,7 @@ from flwr.common.secure_aggregation.secaggplus_utils import (
     share_keys_plaintext_concat,
     share_keys_plaintext_separate,
 )
-from flwr.common.typing import ConfigsRecordValues, FitRes
+from flwr.common.typing import ConfigsRecordValues
 
 
 @dataclass
@@ -132,18 +133,6 @@ class SecAggPlusState:
         return ret
 
 
-def _get_fit_fn(
-    msg: Message, ctxt: Context, call_next: ClientAppCallable
-) -> Callable[[], FitRes]:
-    """Get the fit function."""
-
-    def fit() -> FitRes:
-        out_msg = call_next(msg, ctxt)
-        return compat.recordset_to_fitres(out_msg.content, keep_input=False)
-
-    return fit
-
-
 def secaggplus_mod(
     msg: Message,
     ctxt: Context,
@@ -173,25 +162,32 @@ def secaggplus_mod(
     check_configs(state.current_stage, configs)
 
     # Execute
+    out_content = RecordSet()
     if state.current_stage == Stage.SETUP:
         state.nid = msg.metadata.dst_node_id
         res = _setup(state, configs)
     elif state.current_stage == Stage.SHARE_KEYS:
         res = _share_keys(state, configs)
-    elif state.current_stage == Stage.COLLECT_MASKED_INPUT:
-        fit = _get_fit_fn(msg, ctxt, call_next)
-        res = _collect_masked_input(state, configs, fit)
+    elif state.current_stage == Stage.COLLECT_MASKED_VECTORS:
+        out_msg = call_next(msg, ctxt)
+        out_content = out_msg.content
+        fitres = compat.recordset_to_fitres(out_content, keep_input=True)
+        res = _collect_masked_vectors(
+            state, configs, fitres.num_examples, fitres.parameters
+        )
+        for p_record in out_content.parameters_records.values():
+            p_record.clear()
     elif state.current_stage == Stage.UNMASK:
         res = _unmask(state, configs)
     else:
-        raise ValueError(f"Unknown secagg stage: {state.current_stage}")
+        raise ValueError(f"Unknown SecAgg/SecAgg+ stage: {state.current_stage}")
 
     # Save state
     ctxt.state.configs_records[RECORD_KEY_STATE] = ConfigsRecord(state.to_dict())
 
     # Return message
-    content = RecordSet(configs_records={RECORD_KEY_CONFIGS: ConfigsRecord(res, False)})
-    return msg.create_reply(content, ttl="")
+    out_content.configs_records[RECORD_KEY_CONFIGS] = ConfigsRecord(res, False)
+    return msg.create_reply(out_content)
 
 
 def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
@@ -199,7 +195,7 @@ def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
     # Check the existence of Config.STAGE
     if Key.STAGE not in configs:
         raise KeyError(
-            f"The required key '{Key.STAGE}' is missing from the input `named_values`."
+            f"The required key '{Key.STAGE}' is missing from the ConfigsRecord."
         )
 
     # Check the value type of the Config.STAGE
@@ -215,7 +211,7 @@ def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
         if current_stage != Stage.UNMASK:
             log(WARNING, "Restart from the setup stage")
     # If stage is not "setup",
-    # the stage from `named_values` should be the expected next stage
+    # the stage from configs should be the expected next stage
     else:
         stages = Stage.all()
         expected_next_stage = stages[(stages.index(current_stage) + 1) % len(stages)]
@@ -229,7 +225,7 @@ def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
 # pylint: disable-next=too-many-branches
 def check_configs(stage: str, configs: ConfigsRecord) -> None:
     """Check the validity of the configs."""
-    # Check `named_values` for the setup stage
+    # Check configs for the setup stage
     if stage == Stage.SETUP:
         key_type_pairs = [
             (Key.SAMPLE_NUMBER, int),
@@ -243,7 +239,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
             if key not in configs:
                 raise KeyError(
                     f"Stage {Stage.SETUP}: the required key '{key}' is "
-                    "missing from the input `named_values`."
+                    "missing from the ConfigsRecord."
                 )
             # Bool is a subclass of int in Python,
             # so `isinstance(v, int)` will return True even if v is a boolean.
@@ -266,7 +262,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                     f"Stage {Stage.SHARE_KEYS}: "
                     f"the value for the key '{key}' must be a list of two bytes."
                 )
-    elif stage == Stage.COLLECT_MASKED_INPUT:
+    elif stage == Stage.COLLECT_MASKED_VECTORS:
         key_type_pairs = [
             (Key.CIPHERTEXT_LIST, bytes),
             (Key.SOURCE_LIST, int),
@@ -274,9 +270,9 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
         for key, expected_type in key_type_pairs:
             if key not in configs:
                 raise KeyError(
-                    f"Stage {Stage.COLLECT_MASKED_INPUT}: "
+                    f"Stage {Stage.COLLECT_MASKED_VECTORS}: "
                     f"the required key '{key}' is "
-                    "missing from the input `named_values`."
+                    "missing from the ConfigsRecord."
                 )
             if not isinstance(configs[key], list) or any(
                 elm
@@ -285,7 +281,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 if type(elm) is not expected_type
             ):
                 raise TypeError(
-                    f"Stage {Stage.COLLECT_MASKED_INPUT}: "
+                    f"Stage {Stage.COLLECT_MASKED_VECTORS}: "
                     f"the value for the key '{key}' "
                     f"must be of type List[{expected_type.__name__}]"
                 )
@@ -299,7 +295,7 @@ def check_configs(stage: str, configs: ConfigsRecord) -> None:
                 raise KeyError(
                     f"Stage {Stage.UNMASK}: "
                     f"the required key '{key}' is "
-                    "missing from the input `named_values`."
+                    "missing from the ConfigsRecord."
                 )
             if not isinstance(configs[key], list) or any(
                 elm
@@ -322,7 +318,7 @@ def _setup(
     # Assigning parameter values to object fields
     sec_agg_param_dict = configs
     state.sample_num = cast(int, sec_agg_param_dict[Key.SAMPLE_NUMBER])
-    log(INFO, "Node %d: starting stage 0...", state.nid)
+    log(DEBUG, "Node %d: starting stage 0...", state.nid)
 
     state.share_num = cast(int, sec_agg_param_dict[Key.SHARE_NUMBER])
     state.threshold = cast(int, sec_agg_param_dict[Key.THRESHOLD])
@@ -347,7 +343,7 @@ def _setup(
 
     state.sk1, state.pk1 = private_key_to_bytes(sk1), public_key_to_bytes(pk1)
     state.sk2, state.pk2 = private_key_to_bytes(sk2), public_key_to_bytes(pk2)
-    log(INFO, "Node %d: stage 0 completes. uploading public keys...", state.nid)
+    log(DEBUG, "Node %d: stage 0 completes. uploading public keys...", state.nid)
     return {Key.PUBLIC_KEY_1: state.pk1, Key.PUBLIC_KEY_2: state.pk2}
 
 
@@ -357,7 +353,7 @@ def _share_keys(
 ) -> Dict[str, ConfigsRecordValues]:
     named_bytes_tuples = cast(Dict[str, Tuple[bytes, bytes]], configs)
     key_dict = {int(sid): (pk1, pk2) for sid, (pk1, pk2) in named_bytes_tuples.items()}
-    log(INFO, "Node %d: starting stage 1...", state.nid)
+    log(DEBUG, "Node %d: starting stage 1...", state.nid)
     state.public_keys_dict = key_dict
 
     # Check if the size is larger than threshold
@@ -409,17 +405,18 @@ def _share_keys(
             dsts.append(nid)
             ciphertexts.append(ciphertext)
 
-    log(INFO, "Node %d: stage 1 completes. uploading key shares...", state.nid)
+    log(DEBUG, "Node %d: stage 1 completes. uploading key shares...", state.nid)
     return {Key.DESTINATION_LIST: dsts, Key.CIPHERTEXT_LIST: ciphertexts}
 
 
 # pylint: disable-next=too-many-locals
-def _collect_masked_input(
+def _collect_masked_vectors(
     state: SecAggPlusState,
     configs: ConfigsRecord,
-    fit: Callable[[], FitRes],
+    num_examples: int,
+    updated_parameters: Parameters,
 ) -> Dict[str, ConfigsRecordValues]:
-    log(INFO, "Node %d: starting stage 2...", state.nid)
+    log(DEBUG, "Node %d: starting stage 2...", state.nid)
     available_clients: List[int] = []
     ciphertexts = cast(List[bytes], configs[Key.CIPHERTEXT_LIST])
     srcs = cast(List[int], configs[Key.SOURCE_LIST])
@@ -447,26 +444,20 @@ def _collect_masked_input(
         state.rd_seed_share_dict[src] = rd_seed_share
         state.sk1_share_dict[src] = sk1_share
 
-    # Fit client
-    fit_res = fit()
-    if len(fit_res.metrics) > 0:
-        log(
-            WARNING,
-            "The metrics in FitRes will not be preserved or sent to the server.",
-        )
-    ratio = fit_res.num_examples / state.max_weight
+    # Fit
+    ratio = num_examples / state.max_weight
     if ratio > 1:
         log(
             WARNING,
             "Potential overflow warning: the provided weight (%s) exceeds the specified"
             " max_weight (%s). This may lead to overflow issues.",
-            fit_res.num_examples,
+            num_examples,
             state.max_weight,
         )
     q_ratio = round(ratio * state.target_range)
     dq_ratio = q_ratio / state.target_range
 
-    parameters = parameters_to_ndarrays(fit_res.parameters)
+    parameters = parameters_to_ndarrays(updated_parameters)
     parameters = parameters_multiply(parameters, dq_ratio)
 
     # Quantize parameter update (vector)
@@ -500,7 +491,7 @@ def _collect_masked_input(
 
     # Take mod of final weight update vector and return to server
     quantized_parameters = parameters_mod(quantized_parameters, state.mod_range)
-    log(INFO, "Node %d: stage 2 completed, uploading masked parameters...", state.nid)
+    log(DEBUG, "Node %d: stage 2 completed, uploading masked parameters...", state.nid)
     return {
         Key.MASKED_PARAMETERS: [ndarray_to_bytes(arr) for arr in quantized_parameters]
     }
@@ -509,7 +500,7 @@ def _collect_masked_input(
 def _unmask(
     state: SecAggPlusState, configs: ConfigsRecord
 ) -> Dict[str, ConfigsRecordValues]:
-    log(INFO, "Node %d: starting stage 3...", state.nid)
+    log(DEBUG, "Node %d: starting stage 3...", state.nid)
 
     active_nids = cast(List[int], configs[Key.ACTIVE_NODE_ID_LIST])
     dead_nids = cast(List[int], configs[Key.DEAD_NODE_ID_LIST])
@@ -523,5 +514,5 @@ def _unmask(
     shares += [state.rd_seed_share_dict[nid] for nid in active_nids]
     shares += [state.sk1_share_dict[nid] for nid in dead_nids]
 
-    log(INFO, "Node %d: stage 3 completes. uploading key shares...", state.nid)
+    log(DEBUG, "Node %d: stage 3 completes. uploading key shares...", state.nid)
     return {Key.NODE_ID_LIST: all_nids, Key.SHARE_LIST: shares}

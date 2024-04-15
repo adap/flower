@@ -1,16 +1,14 @@
-# Federated Large Language Model (LLM) Fine-tuning with Flower
+# LLM FlowerTune: Federated LLM Fine-tuning with Flower
 
 Large language models (LLMs), which have been trained on vast amounts of publicly accessible data, have shown remarkable effectiveness in a wide range of areas.
 However, despite the fact that more data typically leads to improved performance, there is a concerning prospect that the supply of high-quality public data will deplete within a few years.
 Federated LLM training could unlock access to an endless pool of distributed private data by allowing multiple data owners to collaboratively train a shared model without the need to exchange raw data.
 
 This introductory example conducts federated instruction tuning with pretrained [LLama2](https://huggingface.co/openlm-research) models on [Alpaca-GPT4](https://huggingface.co/datasets/vicgalle/alpaca-gpt4) dataset.
-We use [Flower Datasets](https://flower.dev/docs/datasets/) to download, partition and preprocess the dataset.
-The fine-tuning is done using the [🤗PEFT](https://huggingface.co/docs/peft/en/index) library.
-We use Flower's Simulation Engine to simulate the LLM fine-tuning process in federated way,
+We implement LLM FlowerTune by integrating a bundle of techniques: 1) We use [Flower Datasets](https://flower.dev/docs/datasets/) to download, partition and preprocess the dataset. 2) The fine-tuning is done using the [🤗PEFT](https://huggingface.co/docs/peft/en/index) library. 3) We use Flower's Simulation Engine to simulate the LLM fine-tuning process in federated way,
 which allows users to perform the training on a single GPU.
 
-## Environments Setup
+## Environment Setup
 
 Start by cloning the code example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
@@ -50,11 +48,11 @@ With an activated Python environment, run the example with default config values
 python main.py
 ```
 
-This command will run FL simulations with an 8-bit [OpenLLaMA 3Bv2](https://huggingface.co/openlm-research/open_llama_3b_v2) model involving 2 clients per rounds for 100 FL rounds. You can override configuration parameters directly from the command line. Below are a few settings you might want to test:
+This command will run FL simulations with a 4-bit [OpenLLaMA 7Bv2](https://huggingface.co/openlm-research/open_llama_7b_v2) model involving 2 clients per rounds for 100 FL rounds. You can override configuration parameters directly from the command line. Below are a few settings you might want to test:
 
 ```bash
-# Use OpenLLaMA-7B instead of 3B and 4-bits quantization
-python main.py model.name="openlm-research/open_llama_7b_v2" model.quantization=4
+# Use OpenLLaMA-3B instead of 7B and 8-bits quantization
+python main.py model.name="openlm-research/open_llama_3b_v2" model.quantization=8
 
 # Run for 50 rounds but increasing the fraction of clients that participate per round to 25%
 python main.py num_rounds=50 fraction_fit.fraction_fit=0.25

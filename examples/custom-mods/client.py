@@ -86,7 +86,6 @@ def get_wandb_mod(name: str) -> Mod:
 
         # if the `ClientApp` just processed a "fit" message, let's log some metrics to W&B
         if reply.metadata.message_type == MessageType.TRAIN and reply.has_content():
-
             metrics = reply.content.configs_records
 
             results_to_log = dict(metrics.get("fitres.metrics", ConfigsRecord()))

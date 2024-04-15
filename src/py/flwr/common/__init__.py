@@ -22,6 +22,7 @@ from .date import now as now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
 from .logger import configure as configure
 from .logger import log as log
+from .message import DEFAULT_TTL
 from .message import Error as Error
 from .message import Message as Message
 from .message import Metadata as Metadata
@@ -87,6 +88,7 @@ __all__ = [
     "Message",
     "MessageType",
     "MessageTypeLegacy",
+    "DEFAULT_TTL",
     "Metadata",
     "Metrics",
     "MetricsAggregationFn",

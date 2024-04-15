@@ -15,8 +15,10 @@
 """Secure Aggregation mods."""
 
 
+from .secagg_mod import secagg_mod
 from .secaggplus_mod import secaggplus_mod
 
 __all__ = [
+    "secagg_mod",
     "secaggplus_mod",
 ]

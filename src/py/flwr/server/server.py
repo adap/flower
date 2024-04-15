@@ -492,6 +492,7 @@ def run_fl(
             log(INFO, "%s", line.strip("\n"))
         else:
             log(INFO, "\t%s", line.strip("\n"))
+    log(INFO, "")
 
     # Graceful shutdown
     server.disconnect_all_clients(timeout=config.round_timeout)

@@ -36,7 +36,7 @@ jobs:
           cd datasets
           python -m poetry install
       - name: Build docs
-        run: ./dev/build-docs.sh
+        run: ./dev/build-docs.sh ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
       - name: Deploy docs
         if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         env:
