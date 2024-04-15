@@ -103,7 +103,7 @@ def extract_features(
         2D array containing labels of `features`.
     """
     feature_extractor.to(device)
-    
+
     features, labels = [], []
     for dict in dataloader:
         batch_samples = dict["img"].to(device)
@@ -164,7 +164,7 @@ def test(
         total += samples.shape[0]
         running_loss = nn.CrossEntropyLoss()(output, labels)
         loss += running_loss
-        
+
     return loss.cpu().item(), correct / total
 
 
