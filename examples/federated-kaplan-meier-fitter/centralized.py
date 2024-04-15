@@ -12,5 +12,5 @@ if __name__ == "__main__":
     print(fitter.median_survival_time_)
     fitter.plot_survival_function()
     plt.title("Survival function of fruit flies (Walton's data)", fontsize=16)
-    plt.savefig("./survival_function_centralized.png", dpi=200)
+    plt.savefig("./_static/survival_function_centralized.png", dpi=200)
     print("Centralized survival function saved.")

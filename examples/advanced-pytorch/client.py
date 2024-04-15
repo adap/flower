@@ -46,7 +46,7 @@ class CifarClient(fl.client.NumPyClient):
         batch_size: int = config["batch_size"]
         epochs: int = config["local_epochs"]
 
-        train_valid = self.trainset.train_test_split(self.validation_split)
+        train_valid = self.trainset.train_test_split(self.validation_split, seed=42)
         trainset = train_valid["train"]
         valset = train_valid["test"]
 

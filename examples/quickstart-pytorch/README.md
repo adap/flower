@@ -47,6 +47,8 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
+______________________________________________________________________
+
 ## Run Federated Learning with PyTorch and Flower
 
 Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
@@ -55,20 +57,46 @@ Afterwards you are ready to start the Flower server as well as the clients. You 
 python3 server.py
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. We need to specify the node id to
+Now you are ready to start the Flower clients which will participate in the learning. We need to specify the partition id to
 use different partitions of the data on different nodes.  To do so simply open two more terminal windows and run the
 following commands.
 
 Start client 1 in the first terminal:
 
 ```shell
-python3 client.py --node-id 0
+python3 client.py --partition-id 0
 ```
 
 Start client 2 in the second terminal:
 
 ```shell
-python3 client.py --node-id 1
+python3 client.py --partition-id 1
 ```
 
 You will see that PyTorch is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) for a detailed explanation.
+
+______________________________________________________________________
+
+## Run Federated Learning with PyTorch and `Flower Next`
+
+### 1. Start the long-running Flower server (SuperLink)
+
+```bash
+flower-superlink --insecure
+```
+
+### 2. Start the long-running Flower clients (SuperNodes)
+
+Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
+
+```bash
+flower-client-app client:app --insecure
+```
+
+### 3. Run the Flower App
+
+With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
+
+```bash
+flower-server-app server:app --insecure
+```

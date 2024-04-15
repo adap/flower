@@ -94,12 +94,12 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    how-to-upgrade-to-flower-1.0
    how-to-use-built-in-mods
    how-to-run-flower-using-docker
+   how-to-use-differential-privacy
 
 .. toctree::
    :maxdepth: 1
    :caption: Legacy example guides
 
-   example-walkthrough-pytorch-mnist
    example-pytorch-from-centralized-to-federated
    example-mxnet-walk-through
    example-jax-from-centralized-to-federated

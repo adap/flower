@@ -17,12 +17,12 @@ DEVICE = torch.device("cpu")
 CHECKPOINT = "distilbert-base-uncased"  # transformer model checkpoint
 
 
-def load_data(node_id):
+def load_data(partition_id):
     """Load IMDB data (training and eval)"""
     fds = FederatedDataset(dataset="imdb", partitioners={"train": 1_000})
-    partition = fds.load_partition(node_id)
+    partition = fds.load_partition(partition_id)
     # Divide data: 80% train, 20% test
-    partition_train_test = partition.train_test_split(test_size=0.2)
+    partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
 
     tokenizer = AutoTokenizer.from_pretrained(CHECKPOINT)
 
@@ -78,12 +78,12 @@ def test(net, testloader):
     return loss, accuracy
 
 
-def main(node_id):
+def main(partition_id):
     net = AutoModelForSequenceClassification.from_pretrained(
         CHECKPOINT, num_labels=2
     ).to(DEVICE)
 
-    trainloader, testloader = load_data(node_id)
+    trainloader, testloader = load_data(partition_id)
 
     # Flower client
     class IMDBClient(fl.client.NumPyClient):
@@ -116,12 +116,12 @@ def main(node_id):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--node-id",
+        "--partition-id",
         choices=list(range(1_000)),
         required=True,
         type=int,
         help="Partition of the dataset divided into 1,000 iid partitions created "
         "artificially.",
     )
-    node_id = parser.parse_args().node_id
-    main(node_id)
+    partition_id = parser.parse_args().partition_id
+    main(partition_id)

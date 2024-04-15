@@ -14,12 +14,15 @@
 # ==============================================================================
 """Message."""
 
-
 from __future__ import annotations
 
+import time
+import warnings
 from dataclasses import dataclass
 
 from .record import RecordSet
+
+DEFAULT_TTL = 3600
 
 
 @dataclass
@@ -41,11 +44,15 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     group_id : str
         An identifier for grouping messages. In some settings,
         this is used as the FL round.
-    ttl : str
-        Time-to-live for this message.
+    ttl : float
+        Time-to-live for this message in seconds.
     message_type : str
         A string that encodes the action to be executed on
         the receiving end.
+    partition_id : Optional[int]
+        An identifier that can be used when loading a particular
+        data partition for a ClientApp. Making use of this identifier
+        is more relevant when conducting simulations.
     """
 
     _run_id: int
@@ -54,8 +61,10 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     _dst_node_id: int
     _reply_to_message: str
     _group_id: str
-    _ttl: str
+    _ttl: float
     _message_type: str
+    _partition_id: int | None
+    _created_at: float  # Unix timestamp (in seconds) to be set upon message creation
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -65,8 +74,9 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         dst_node_id: int,
         reply_to_message: str,
         group_id: str,
-        ttl: str,
+        ttl: float,
         message_type: str,
+        partition_id: int | None = None,
     ) -> None:
         self._run_id = run_id
         self._message_id = message_id
@@ -76,6 +86,7 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         self._group_id = group_id
         self._ttl = ttl
         self._message_type = message_type
+        self._partition_id = partition_id
 
     @property
     def run_id(self) -> int:
@@ -118,12 +129,22 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         self._group_id = value
 
     @property
-    def ttl(self) -> str:
+    def created_at(self) -> float:
+        """Unix timestamp when the message was created."""
+        return self._created_at
+
+    @created_at.setter
+    def created_at(self, value: float) -> None:
+        """Set creation timestamp for this messages."""
+        self._created_at = value
+
+    @property
+    def ttl(self) -> float:
         """Time-to-live for this message."""
         return self._ttl
 
     @ttl.setter
-    def ttl(self, value: str) -> None:
+    def ttl(self, value: float) -> None:
         """Set ttl."""
         self._ttl = value
 
@@ -137,6 +158,46 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         """Set message_type."""
         self._message_type = value
 
+    @property
+    def partition_id(self) -> int | None:
+        """An identifier telling which data partition a ClientApp should use."""
+        return self._partition_id
+
+    @partition_id.setter
+    def partition_id(self, value: int) -> None:
+        """Set patition_id."""
+        self._partition_id = value
+
+
+@dataclass
+class Error:
+    """A dataclass that stores information about an error that occurred.
+
+    Parameters
+    ----------
+    code : int
+        An identifier for the error.
+    reason : Optional[str]
+        A reason for why the error arose (e.g. an exception stack-trace)
+    """
+
+    _code: int
+    _reason: str | None = None
+
+    def __init__(self, code: int, reason: str | None = None) -> None:
+        self._code = code
+        self._reason = reason
+
+    @property
+    def code(self) -> int:
+        """Error code."""
+        return self._code
+
+    @property
+    def reason(self) -> str | None:
+        """Reason reported about the error."""
+        return self._reason
+
 
 @dataclass
 class Message:
@@ -146,17 +207,34 @@ class Message:
     ----------
     metadata : Metadata
         A dataclass including information about the message to be executed.
-    content : RecordSet
+    content : Optional[RecordSet]
         Holds records either sent by another entity (e.g. sent by the server-side
         logic to a client, or vice-versa) or that will be sent to it.
+    error : Optional[Error]
+        A dataclass that captures information about an error that took place
+        when processing another message.
     """
 
     _metadata: Metadata
-    _content: RecordSet
+    _content: RecordSet | None = None
+    _error: Error | None = None
 
-    def __init__(self, metadata: Metadata, content: RecordSet) -> None:
+    def __init__(
+        self,
+        metadata: Metadata,
+        content: RecordSet | None = None,
+        error: Error | None = None,
+    ) -> None:
         self._metadata = metadata
+
+        # Set message creation timestamp
+        self._metadata.created_at = time.time()
+
+        if not (content is None) ^ (error is None):
+            raise ValueError("Either `content` or `error` must be set, but not both.")
+
         self._content = content
+        self._error = error
 
     @property
     def metadata(self) -> Metadata:
@@ -166,14 +244,97 @@ class Message:
     @property
     def content(self) -> RecordSet:
         """The content of this message."""
+        if self._content is None:
+            raise ValueError(
+                "Message content is None. Use <message>.has_content() "
+                "to check if a message has content."
+            )
         return self._content
 
     @content.setter
     def content(self, value: RecordSet) -> None:
         """Set content."""
-        self._content = value
+        if self._error is None:
+            self._content = value
+        else:
+            raise ValueError("A message with an error set cannot have content.")
 
-    def create_reply(self, content: RecordSet, ttl: str) -> Message:
+    @property
+    def error(self) -> Error:
+        """Error captured by this message."""
+        if self._error is None:
+            raise ValueError(
+                "Message error is None. Use <message>.has_error() "
+                "to check first if a message carries an error."
+            )
+        return self._error
+
+    @error.setter
+    def error(self, value: Error) -> None:
+        """Set error."""
+        if self.has_content():
+            raise ValueError("A message with content set cannot carry an error.")
+        self._error = value
+
+    def has_content(self) -> bool:
+        """Return True if message has content, else False."""
+        return self._content is not None
+
+    def has_error(self) -> bool:
+        """Return True if message has an error, else False."""
+        return self._error is not None
+
+    def _create_reply_metadata(self, ttl: float) -> Metadata:
+        """Construct metadata for a reply message."""
+        return Metadata(
+            run_id=self.metadata.run_id,
+            message_id="",
+            src_node_id=self.metadata.dst_node_id,
+            dst_node_id=self.metadata.src_node_id,
+            reply_to_message=self.metadata.message_id,
+            group_id=self.metadata.group_id,
+            ttl=ttl,
+            message_type=self.metadata.message_type,
+            partition_id=self.metadata.partition_id,
+        )
+
+    def create_error_reply(self, error: Error, ttl: float | None = None) -> Message:
+        """Construct a reply message indicating an error happened.
+
+        Parameters
+        ----------
+        error : Error
+            The error that was encountered.
+        ttl : Optional[float] (default: None)
+            Time-to-live for this message in seconds. If unset, it will be set based
+            on the remaining time for the received message before it expires. This
+            follows the equation:
+
+            ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)
+        """
+        if ttl:
+            warnings.warn(
+                "A custom TTL was set, but note that the SuperLink does not enforce "
+                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
+                "version of Flower.",
+                stacklevel=2,
+            )
+        # If no TTL passed, use default for message creation (will update after
+        # message creation)
+        ttl_ = DEFAULT_TTL if ttl is None else ttl
+        # Create reply with error
+        message = Message(metadata=self._create_reply_metadata(ttl_), error=error)
+
+        if ttl is None:
+            # Set TTL equal to the remaining time for the received message to expire
+            ttl = self.metadata.ttl - (
+                message.metadata.created_at - self.metadata.created_at
+            )
+            message.metadata.ttl = ttl
+
+        return message
+
+    def create_reply(self, content: RecordSet, ttl: float | None = None) -> Message:
         """Create a reply to this message with specified content and TTL.
 
         The method generates a new `Message` as a reply to this message.
@@ -184,24 +345,39 @@ class Message:
         ----------
         content : RecordSet
             The content for the reply message.
-        ttl : str
-            Time-to-live for this message.
+        ttl : Optional[float] (default: None)
+            Time-to-live for this message in seconds. If unset, it will be set based
+            on the remaining time for the received message before it expires. This
+            follows the equation:
+
+            ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)
 
         Returns
         -------
         Message
             A new `Message` instance representing the reply.
         """
-        return Message(
-            metadata=Metadata(
-                run_id=self.metadata.run_id,
-                message_id="",
-                src_node_id=self.metadata.dst_node_id,
-                dst_node_id=self.metadata.src_node_id,
-                reply_to_message=self.metadata.message_id,
-                group_id=self.metadata.group_id,
-                ttl=ttl,
-                message_type=self.metadata.message_type,
-            ),
+        if ttl:
+            warnings.warn(
+                "A custom TTL was set, but note that the SuperLink does not enforce "
+                "the TTL yet. The SuperLink will start enforcing the TTL in a future "
+                "version of Flower.",
+                stacklevel=2,
+            )
+        # If no TTL passed, use default for message creation (will update after
+        # message creation)
+        ttl_ = DEFAULT_TTL if ttl is None else ttl
+
+        message = Message(
+            metadata=self._create_reply_metadata(ttl_),
             content=content,
         )
+
+        if ttl is None:
+            # Set TTL equal to the remaining time for the received message to expire
+            ttl = self.metadata.ttl - (
+                message.metadata.created_at - self.metadata.created_at
+            )
+            message.metadata.ttl = ttl
+
+        return message

@@ -8,7 +8,7 @@ Standard setup - download the dataset, choose the partitioning::
 
   fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
   partition = fds.load_partition(0, "train")
-  centralized_dataset = fds.load_full("test")
+  centralized_dataset = fds.load_split("test")
 
 Determine the names of the features (you can alternatively do that directly on the Hugging Face website). The name can
 vary e.g. "img" or "image", "label" or "labels"::
@@ -63,7 +63,7 @@ expected by a model with a convolutional layer.
 
 If you want to divide the dataset, you can use (at any point before passing the dataset to the DataLoader)::
 
-  partition_train_test = partition.train_test_split(test_size=0.2)
+  partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
   partition_train = partition_train_test["train"]
   partition_test = partition_train_test["test"]
 

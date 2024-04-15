@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import builtins
+import flwr.proto.error_pb2
 import flwr.proto.node_pb2
 import flwr.proto.recordset_pb2
 import google.protobuf.descriptor
@@ -19,35 +20,42 @@ class Task(google.protobuf.message.Message):
     CONSUMER_FIELD_NUMBER: builtins.int
     CREATED_AT_FIELD_NUMBER: builtins.int
     DELIVERED_AT_FIELD_NUMBER: builtins.int
+    PUSHED_AT_FIELD_NUMBER: builtins.int
     TTL_FIELD_NUMBER: builtins.int
     ANCESTRY_FIELD_NUMBER: builtins.int
     TASK_TYPE_FIELD_NUMBER: builtins.int
     RECORDSET_FIELD_NUMBER: builtins.int
+    ERROR_FIELD_NUMBER: builtins.int
     @property
     def producer(self) -> flwr.proto.node_pb2.Node: ...
     @property
     def consumer(self) -> flwr.proto.node_pb2.Node: ...
-    created_at: typing.Text
+    created_at: builtins.float
     delivered_at: typing.Text
-    ttl: typing.Text
+    pushed_at: builtins.float
+    ttl: builtins.float
     @property
     def ancestry(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
     task_type: typing.Text
     @property
     def recordset(self) -> flwr.proto.recordset_pb2.RecordSet: ...
+    @property
+    def error(self) -> flwr.proto.error_pb2.Error: ...
     def __init__(self,
         *,
         producer: typing.Optional[flwr.proto.node_pb2.Node] = ...,
         consumer: typing.Optional[flwr.proto.node_pb2.Node] = ...,
-        created_at: typing.Text = ...,
+        created_at: builtins.float = ...,
         delivered_at: typing.Text = ...,
-        ttl: typing.Text = ...,
+        pushed_at: builtins.float = ...,
+        ttl: builtins.float = ...,
         ancestry: typing.Optional[typing.Iterable[typing.Text]] = ...,
         task_type: typing.Text = ...,
         recordset: typing.Optional[flwr.proto.recordset_pb2.RecordSet] = ...,
+        error: typing.Optional[flwr.proto.error_pb2.Error] = ...,
         ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["consumer",b"consumer","producer",b"producer","recordset",b"recordset"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["ancestry",b"ancestry","consumer",b"consumer","created_at",b"created_at","delivered_at",b"delivered_at","producer",b"producer","recordset",b"recordset","task_type",b"task_type","ttl",b"ttl"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["consumer",b"consumer","error",b"error","producer",b"producer","recordset",b"recordset"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ancestry",b"ancestry","consumer",b"consumer","created_at",b"created_at","delivered_at",b"delivered_at","error",b"error","producer",b"producer","pushed_at",b"pushed_at","recordset",b"recordset","task_type",b"task_type","ttl",b"ttl"]) -> None: ...
 global___Task = Task
 
 class TaskIns(google.protobuf.message.Message):

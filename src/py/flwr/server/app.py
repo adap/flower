@@ -14,16 +14,14 @@
 # ==============================================================================
 """Flower server app."""
 
-
 import argparse
+import asyncio
 import importlib.util
 import sys
 import threading
 from logging import ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from signal import SIGINT, SIGTERM, signal
-from types import FrameType
 from typing import List, Optional, Tuple
 
 import grpc
@@ -36,10 +34,8 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPE_VCE,
 )
+from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
-from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
-    add_DriverServicer_to_server,
-)
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -49,7 +45,7 @@ from .history import History
 from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
 from .strategy import Strategy
-from .superlink.driver.driver_servicer import DriverServicer
+from .superlink.driver.driver_grpc import run_driver_api_grpc
 from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
@@ -205,17 +201,17 @@ def run_driver_api() -> None:
     state_factory = StateFactory(args.database)
 
     # Start server
-    grpc_server: grpc.Server = _run_driver_api_grpc(
+    grpc_server: grpc.Server = run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
         certificates=certificates,
     )
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_DRIVER_API_LEAVE,
         grpc_servers=[grpc_server],
         bckg_threads=[],
-        event_type=EventType.RUN_DRIVER_API_LEAVE,
     )
 
     # Block
@@ -280,10 +276,10 @@ def run_fleet_api() -> None:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_FLEET_API_LEAVE,
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_FLEET_API_LEAVE,
     )
 
     # Block
@@ -314,7 +310,7 @@ def run_superlink() -> None:
     state_factory = StateFactory(args.database)
 
     # Start Driver API
-    driver_server: grpc.Server = _run_driver_api_grpc(
+    driver_server: grpc.Server = run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
         certificates=certificates,
@@ -363,22 +359,24 @@ def run_superlink() -> None:
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
+        f_stop = asyncio.Event()  # Does nothing
         _run_fleet_api_vce(
             num_supernodes=args.num_supernodes,
-            client_app_module_name=args.client_app,
+            client_app_attr=args.client_app,
             backend_name=args.backend,
             backend_config_json_stream=args.backend_config,
-            working_dir=args.dir,
+            app_dir=args.app_dir,
             state_factory=state_factory,
+            f_stop=f_stop,
         )
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_SUPERLINK_LEAVE,
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_SUPERLINK_LEAVE,
     )
 
     # Block
@@ -413,76 +411,6 @@ def _try_obtain_certificates(
     return certificates
 
 
-def _register_exit_handlers(
-    grpc_servers: List[grpc.Server],
-    bckg_threads: List[threading.Thread],
-    event_type: EventType,
-) -> None:
-    default_handlers = {
-        SIGINT: None,
-        SIGTERM: None,
-    }
-
-    def graceful_exit_handler(  # type: ignore
-        signalnum,
-        frame: FrameType,  # pylint: disable=unused-argument
-    ) -> None:
-        """Exit handler to be registered with signal.signal.
-
-        When called will reset signal handler to original signal handler from
-        default_handlers.
-        """
-        # Reset to default handler
-        signal(signalnum, default_handlers[signalnum])
-
-        event_res = event(event_type=event_type)
-
-        for grpc_server in grpc_servers:
-            grpc_server.stop(grace=1)
-
-        for bckg_thread in bckg_threads:
-            bckg_thread.join()
-
-        # Ensure event has happend
-        event_res.result()
-
-        # Setup things for graceful exit
-        sys.exit(0)
-
-    default_handlers[SIGINT] = signal(  # type: ignore
-        SIGINT,
-        graceful_exit_handler,  # type: ignore
-    )
-    default_handlers[SIGTERM] = signal(  # type: ignore
-        SIGTERM,
-        graceful_exit_handler,  # type: ignore
-    )
-
-
-def _run_driver_api_grpc(
-    address: str,
-    state_factory: StateFactory,
-    certificates: Optional[Tuple[bytes, bytes, bytes]],
-) -> grpc.Server:
-    """Run Driver API (gRPC, request-response)."""
-    # Create Driver API gRPC server
-    driver_servicer: grpc.Server = DriverServicer(
-        state_factory=state_factory,
-    )
-    driver_add_servicer_to_server_fn = add_DriverServicer_to_server
-    driver_grpc_server = generic_create_grpc_server(
-        servicer_and_add_fn=(driver_servicer, driver_add_servicer_to_server_fn),
-        server_address=address,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=certificates,
-    )
-
-    log(INFO, "Flower ECE: Starting Driver API (gRPC-rere) on %s", address)
-    driver_grpc_server.start()
-
-    return driver_grpc_server
-
-
 def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
@@ -510,21 +438,23 @@ def _run_fleet_api_grpc_rere(
 # pylint: disable=too-many-arguments
 def _run_fleet_api_vce(
     num_supernodes: int,
-    client_app_module_name: str,
+    client_app_attr: str,
     backend_name: str,
     backend_config_json_stream: str,
-    working_dir: str,
+    app_dir: str,
     state_factory: StateFactory,
+    f_stop: asyncio.Event,
 ) -> None:
     log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
 
     start_vce(
         num_supernodes=num_supernodes,
-        client_app_module_name=client_app_module_name,
+        client_app_attr=client_app_attr,
         backend_name=backend_name,
         backend_config_json_stream=backend_config_json_stream,
         state_factory=state_factory,
-        working_dir=working_dir,
+        app_dir=app_dir,
+        f_stop=f_stop,
     )
 
 
@@ -775,7 +705,7 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "`flwr.common.typing.ConfigsRecordValues`. ",
     )
     parser.add_argument(
-        "--dir",
+        "--app-dir",
         default="",
         help="Add specified directory to the PYTHONPATH and load"
         "ClientApp from there."

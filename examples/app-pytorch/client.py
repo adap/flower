@@ -1,13 +1,11 @@
-from typing import Dict
-import flwr as fl
-from flwr.common import NDArrays, Scalar
+from flwr.client import ClientApp, NumPyClient
 
 from task import (
     Net,
     DEVICE,
     load_data,
-    get_parameters,
-    set_parameters,
+    get_weights,
+    set_weights,
     train,
     test,
 )
@@ -18,27 +16,35 @@ net = Net().to(DEVICE)
 trainloader, testloader = load_data()
 
 
-# Define Flower client
-class FlowerClient(fl.client.NumPyClient):
-    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-        return get_parameters(net)
-
+# Define FlowerClient and client_fn
+class FlowerClient(NumPyClient):
     def fit(self, parameters, config):
-        set_parameters(net, parameters)
+        set_weights(net, parameters)
         results = train(net, trainloader, testloader, epochs=1, device=DEVICE)
-        return get_parameters(net), len(trainloader.dataset), results
+        return get_weights(net), len(trainloader.dataset), results
 
     def evaluate(self, parameters, config):
-        set_parameters(net, parameters)
+        set_weights(net, parameters)
         loss, accuracy = test(net, testloader)
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
 def client_fn(cid: str):
+    """Create and return an instance of Flower `Client`."""
     return FlowerClient().to_client()
 
 
-# Run via `flower-client-app client:app`
-app = fl.client.ClientApp(
+# Flower ClientApp
+app = ClientApp(
     client_fn=client_fn,
 )
+
+
+# Legacy mode
+if __name__ == "__main__":
+    from flwr.client import start_client
+
+    start_client(
+        server_address="127.0.0.1:8080",
+        client=FlowerClient().to_client(),
+    )

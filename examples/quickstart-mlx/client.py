@@ -89,7 +89,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Train a simple MLP on MNIST with MLX.")
     parser.add_argument("--gpu", action="store_true", help="Use the Metal back-end.")
     parser.add_argument(
-        "--node-id",
+        "--partition-id",
         choices=[0, 1, 2],
         type=int,
         help="Partition of the dataset divided into 3 iid partitions created artificially.",
@@ -106,8 +106,8 @@ if __name__ == "__main__":
     learning_rate = 1e-1
 
     fds = FederatedDataset(dataset="mnist", partitioners={"train": 3})
-    partition = fds.load_partition(node_id=args.node_id)
-    partition_splits = partition.train_test_split(test_size=0.2)
+    partition = fds.load_partition(partition_id=args.partition_id)
+    partition_splits = partition.train_test_split(test_size=0.2, seed=42)
 
     partition_splits["train"].set_format("numpy")
     partition_splits["test"].set_format("numpy")
