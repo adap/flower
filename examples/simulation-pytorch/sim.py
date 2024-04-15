@@ -94,7 +94,7 @@ def get_client_fn(dataset: FederatedDataset):
         client_dataset = dataset.load_partition(int(cid), "train")
 
         # Now let's split it into train (90%) and validation (10%)
-        client_dataset_splits = client_dataset.train_test_split(test_size=0.1)
+        client_dataset_splits = client_dataset.train_test_split(test_size=0.1, seed=42)
 
         trainset = client_dataset_splits["train"]
         valset = client_dataset_splits["test"]
