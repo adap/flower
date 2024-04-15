@@ -16,7 +16,7 @@ Flower requires at least `Python 3.8 <https://docs.python.org/3.8/>`_, but `Pyth
     running Flower simulations.
 
 Virtualenv with Pyenv/Virtualenv
----------------------------------
+--------------------------------
 
 One of the recommended virtual environment is `pyenv <https://github.com/pyenv/pyenv>`_/`virtualenv <https://github.com/pyenv/pyenv-virtualenv>`_. Please see `Flower examples <https://github.com/adap/flower/tree/main/examples/>`_ for details.
 
