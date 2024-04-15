@@ -27,4 +27,6 @@ RUN python -m pip install -U --no-cache-dir \
     # `pyenv init -` in the shell profile, but that doesn't work
     # well in docker
     pyenv rehash
+
+WORKDIR /app
 ENTRYPOINT ["flower-superlink"]
