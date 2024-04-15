@@ -39,11 +39,12 @@ Required changes
 ----------------
 
 In Flower Next, the *infrastructure* and *application layers* have been decoupled.
-Therefore, the main changes are in the execution of federated learning, clients, and
-server. These are the following non-breaking changes that require manual updates.
+Therefore, the main changes are in the setup of the ``SuperNode``, ``ClientApp`,
+``ServerApp`` and execution of federated learning. These are the following non-breaking
+changes that require manual updates.
 
-Client
-~~~~~~
+``SuperNode``/``ClientApp``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Use ``flwr.client.ClientApp(client_fn)`` instead of ``flwr.client.start_client(server_address, client)``.
   Here's an example:
 
@@ -64,8 +65,8 @@ Client
            client=flwr.client.FlowerClient().to_client(),
         )
 
-Server
-~~~~~~
+``ServerApp``
+~~~~~~~~~~~~~
 - Use ``flwr.server.ServerApp(config, strategy)`` instead of ``flwr.server.start_server(server_address, config, strategy)``.
   Here's an example:
 
@@ -84,6 +85,25 @@ Server
             config=config,
             strategy=strategy,
         )
+
+Deployment
+~~~~~~~~~~
+Run the ``SuperLink`` before running ``ServerApp`` and ``SuperNode`` instead of executing `client.py` and
+`server.py` as Python scripts. Here's an example:
+
+.. code-block:: bash
+    
+    # Start a Superlink
+    $ flower-superlink --insecure
+
+    # In a new terminal window, start a long-running SuperNode
+    $ flower-client-app client:app --insecure
+
+    # In another terminal window, start a long-running SuperNode (at least 2 SuperNodes are required)
+    $ flower-client-app client:app --insecure
+
+    # In another terminal window, run the apps
+    $ flower-server-app server:app --insecure
 
 Simulation
 ~~~~~~~~~~
@@ -133,28 +153,6 @@ Simulation
 
     # Flower 1.7
     $ python sim.py --num_cpus=2 --num_gpus=0.25
-
-
-Deployment
-~~~~~~~~~~
-Run the ``SuperLink`` before running ``ServerApp`` and ``SuperNode`` instead of executing `client.py` and
-`server.py` as Python scripts. Here's an example:
-
-.. code-block:: bash
-    
-    # Start a Superlink
-    $ flower-superlink --insecure
-
-    # In a new terminal window, start a long-running SuperNode
-    $ flower-client-app client:app --insecure
-
-    # In another terminal window, start a long-running SuperNode (at least 2 SuperNodes are required)
-    $ flower-client-app client:app --insecure
-
-    # In another terminal window, run the apps
-    $ flower-server-app server:app --insecure
-
-
 
 Further help
 ------------
