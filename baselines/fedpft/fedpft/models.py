@@ -102,6 +102,8 @@ def extract_features(
     labels : np.array
         2D array containing labels of `features`.
     """
+    feature_extractor.to(device)
+    
     features, labels = [], []
     for dict in dataloader:
         batch_samples = dict["img"].to(device)
@@ -109,7 +111,7 @@ def extract_features(
         with torch.no_grad():
             feature = feature_extractor(batch_samples)
         features.append(feature.cpu().detach().numpy())
-        labels.append(batch_label)
+        labels.append(batch_label.cpu().detach().numpy())
 
     # reshape feauturs and labels into a single numpy array
     features = np.concatenate(features, axis=0, dtype=np.float64)
