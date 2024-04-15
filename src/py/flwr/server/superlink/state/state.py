@@ -150,7 +150,7 @@ class State(abc.ABC):
         """
 
     @abc.abstractmethod
-    def create_run(self) -> int:
+    def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create one run."""
 
     @abc.abstractmethod
