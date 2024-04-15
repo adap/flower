@@ -75,19 +75,19 @@ poetry install
 
 ## Running the Experiments
 
-To run this FedProx with CIFAR100 baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
+To run this FedPFT with CIFAR100 baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
 python -m fedpft.main # this will run using the default settings in the `conf/config.yaml`
 
 # you can override settings directly from the command line
-python -m fedprox.main dataset=Caltech101 model=clip # will set dataset to Caltech101 and the pre-trained model to Clip-ViT/B32
+python -m fedpft.main dataset=Caltech101 model=clip # will set dataset to Caltech101 and the pre-trained model to Clip-ViT/B32
 ```
 
 To run using FedAvg:
 ```bash
 # this will use a frozen, pre-trained model and train the classifier head
-python -m fedpft.main strategy=FedAvg client=FedAvg
+python -m fedpft.main strategy=FedAvg client=FedAvg num_rounds=20 dataset=Caltech101 model=clip num_gpus=0.2
 
 ```
 
@@ -99,14 +99,14 @@ With the following command, we run both FedPFT and FedAvg configurations.
 
 ```bash
 # FedPFT
-python -m fedprox.main dataset=CIFAR100 model=resnet50
-python -m fedprox.main dataset=Caltech101 model=clip
+python -m fedpft.main dataset=CIFAR100 model=resnet50
+python -m fedpft.main dataset=Caltech101 model=clip
 
 # FedAvg with pre-trained, frozen models
-python -m fedpft.main strategy=fedavg client=fedavg dataset=CIFAR100 model=resnet50 num_rounds=20 
-python -m fedpft.main strategy=fedavg client=fedavg dataset=Caltech101 model=clip num_rounds=20 fedavg.num_epochs=10 fedavg.lr=0.01 num_gpus=0.2
+python -m fedpft.main strategy=fedavg client=fedavg dataset=CIFAR100 model=resnet50 num_rounds=20 strategy.on_fit_config_fn.num_epochs=1=1 num_gpus=0.5
+python -m fedpft.main strategy=fedavg client=fedavg dataset=Caltech101 model=clip num_rounds=20 num_gpus=0.2
 ```
 
-The above commands would generate results that you can plot and would look like the plot shown below. This plot was generated using the jupyter notebook in the `docs/` directory of this baseline after running the `--multirun` commands above.
+The above commands would generate results that you can plot and would look like the plot shown below. This plot was generated using the jupyter notebook in the `docs/` directory of this baseline after running the commands above.
 
-![](_static/FedProx_mnist.png)
+![](_static/FedPft.png)
