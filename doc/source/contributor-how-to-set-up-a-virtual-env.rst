@@ -10,6 +10,11 @@ Python Version
 
 Flower requires at least `Python 3.8 <https://docs.python.org/3.8/>`_, but `Python 3.10 <https://docs.python.org/3.10/>`_ or above is recommended.
 
+.. note::
+    Due to a known incompatibility with `ray <https://docs.ray.io/en/latest/>`_,
+    we currently recommend utilizing at most `Python 3.11 <https://docs.python.org/3.11/>`_ for
+    running Flower simulations.
+
 Virutualenv with Pyenv/Virtualenv
 ---------------------------------
 
