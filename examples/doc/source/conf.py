@@ -64,7 +64,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # To prevent 404 errors and redirect to the new pages.
 redirects = {
     "quickstart-mxnet": "index.html",
-    "mxnet-from-centralized-to-federated": "index.html"
+    "mxnet-from-centralized-to-federated": "index.html",
 }
 
 
