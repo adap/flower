@@ -136,6 +136,10 @@ class State(abc.ABC):
         """Create, store in state, and return `node_id`."""
 
     @abc.abstractmethod
+    def restore_node(self, node_id: int, ping_interval: float) -> bool:
+        """Restore `node_id` and return True if succeed."""
+
+    @abc.abstractmethod
     def delete_node(self, node_id: int) -> None:
         """Remove `node_id` from state."""
 
@@ -180,8 +184,16 @@ class State(abc.ABC):
         """Retrieve all currently stored `client_public_keys` as a set."""
 
     @abc.abstractmethod
-    def get_node_id(client_public_key: bytes) -> None:
+    def get_node_id(self, client_public_key: bytes) -> int:
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
+
+    @abc.abstractmethod
+    def store_node_id_client_public_key_pair(self, client_public_key: bytes, node_id: int) -> None:
+        """Store `node_id` and `client_public_keys` as pairs."""
+
+    @abc.abstractmethod
+    def delete_node_id_client_public_key_pair(self, client_public_key: bytes) -> None:
+        """Remove `node_id` and `client_public_keys` pairs."""
 
     @abc.abstractmethod
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:

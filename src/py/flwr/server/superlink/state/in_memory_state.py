@@ -215,6 +215,14 @@ class InMemoryState(State):  # pylint: disable=R0902
                 return node_id
         log(ERROR, "Unexpected node registration failure.")
         return 0
+    
+    def restore_node(self, node_id: int, ping_interval: float) -> bool:
+        with self.lock:
+            if node_id not in self.node_ids:
+                self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+                return True
+        log(ERROR, "Unexpected node restore failure.")
+        return False
 
     def delete_node(self, node_id: int) -> None:
         """Delete a client node."""
