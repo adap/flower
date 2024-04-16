@@ -12,6 +12,22 @@ advantage of the latest features and improvements in Flower Next, starting from 
 
 Let's dive in!
 
+..
+    Generate link text as literal. Refs:
+    - https://stackoverflow.com/q/71651598
+    - https://github.com/jgm/pandoc/issues/3973#issuecomment-337087394
+
+.. |clientapp_link| replace:: ``ClientApp()``
+.. |serverapp_link| replace:: ``ServerApp()``
+.. |startclient_link| replace:: ``start_client()``
+.. |startserver_link| replace:: ``start_server()``
+.. |startsim_link| replace:: ``start_simulation()``
+.. _clientapp_link: https://flower.ai/docs/framework/ref-api/flwr.client.ClientApp.html
+.. _serverapp_link: https://flower.ai/docs/framework/ref-api/flwr.server.ServerApp.html
+.. _startclient_link: https://flower.ai/docs/framework/ref-api/flwr.client.start_client.html
+.. _startserver_link: https://flower.ai/docs/framework/ref-api/flwr.server.start_server.html
+.. _startsim_link: https://flower.ai/docs/framework/ref-api/flwr.simulation.start_simulation.html
+
 Install update
 --------------
 
@@ -50,10 +66,10 @@ Therefore, the main changes are in the setup of the ``SuperNode``, ``ClientApp`,
 ``ServerApp`` and execution of federated learning. These are the following non-breaking
 changes that require manual updates.
 
-``SuperNode``/``ClientApp``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-- Use ``flwr.client.ClientApp(client_fn)`` instead of ``flwr.client.start_client(server_address, client)``.
-  Here's an example:
+``SuperNode``/|clientapp_link|_
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Wrap your existing client with |clientapp_link|_ instead of launching it via
+  |startclient_link|_. Here's an example:
 
 .. code-block:: python
 
@@ -72,10 +88,10 @@ changes that require manual updates.
            client=flwr.client.FlowerClient().to_client(),
         )
 
-``ServerApp``
-~~~~~~~~~~~~~
-- Use ``flwr.server.ServerApp(config, strategy)`` instead of ``flwr.server.start_server(server_address, config, strategy)``.
-  Here's an example:
+|serverapp_link|_
+~~~~~~~~~~~~~~~~~
+- Wrap your existing strategy with |serverapp_link|_ instead of starting the server
+  via |startserver_link|_. Here's an example:
 
 .. code-block:: python
 
@@ -114,8 +130,8 @@ Run the ``SuperLink`` before running ``ServerApp`` and ``SuperNode`` instead of 
 
 Simulation
 ~~~~~~~~~~
-- Use ``flwr.client.ClientApp()`` and ``flwr.server.ServerApp()`` instead of ``flwr.simulation.start_simulation()``.
-  Here's an example:
+- Wrap your existing client and strategy with |clientapp_link|_ and |serverapp_link|_,
+  respectively. There is no need to use |startsim_link|_ anymore. Here's an example:
 
 .. code-block:: python
 
