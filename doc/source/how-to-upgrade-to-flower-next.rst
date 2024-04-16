@@ -23,12 +23,18 @@ Let's dive in!
 .. |startserver_link| replace:: ``start_server()``
 .. |startsim_link| replace:: ``start_simulation()``
 .. |runsim_link| replace:: ``flower-simulation``
+.. |flowernext_superlink_link| replace:: ``flower-superlink``
+.. |flowernext_clientapp_link| replace:: ``flower-client-app``
+.. |flowernext_serverapp_link| replace:: ``flower-server-app``
 .. _clientapp_link: https://flower.ai/docs/framework/ref-api/flwr.client.ClientApp.html
 .. _serverapp_link: https://flower.ai/docs/framework/ref-api/flwr.server.ServerApp.html
 .. _startclient_link: https://flower.ai/docs/framework/ref-api/flwr.client.start_client.html
 .. _startserver_link: https://flower.ai/docs/framework/ref-api/flwr.server.start_server.html
 .. _startsim_link: https://flower.ai/docs/framework/ref-api/flwr.simulation.start_simulation.html
 .. _runsim_link: https://flower.ai/docs/framework/ref-api/flwr.simulation.run_simulation_from_cli.html
+.. _flowernext_superlink_link: https://flower.ai/docs/framework/ref-api-cli.html#flower-superlink
+.. _flowernext_clientapp_link: https://flower.ai/docs/framework/ref-api-cli.html#flower-client-app
+.. _flowernext_serverapp_link: https://flower.ai/docs/framework/ref-api-cli.html#flower-server-app
 
 Install update
 --------------
@@ -113,8 +119,10 @@ changes that require manual updates.
 
 Deployment
 ~~~~~~~~~~
-Run the ``SuperLink`` with  before running ``ServerApp`` and ``SuperNode`` instead of executing `client.py` and
-`server.py` as Python scripts. Here's an example:
+Run the ``SuperLink`` with |flowernext_superlink_link|_ before running, in sequence,
+the ``SuperNode`` and ``ServerApp`` with |flowernext_clientapp_link|_ and
+|flowernext_serverapp_link|_, respectively. There is no need to execute `client.py`
+and `server.py` as Python scripts. Here's an example:
 
 .. code-block:: bash
     
