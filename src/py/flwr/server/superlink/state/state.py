@@ -76,6 +76,10 @@ class State(abc.ABC):
         """
 
     @abc.abstractmethod
+    def get_task_ins(self, task_id: int) -> TaskIns:
+        """Get TaskIns filtered by task_id."""
+
+    @abc.abstractmethod
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes.
 
@@ -178,6 +182,10 @@ class State(abc.ABC):
     @abc.abstractmethod
     def get_client_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `client_public_keys` as a set."""
+
+    @abc.abstractmethod
+    def get_node_id(client_public_key: bytes) -> None:
+        """Retrieve stored `node_id` filtered by `client_public_keys`."""
 
     @abc.abstractmethod
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
