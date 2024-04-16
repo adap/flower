@@ -561,7 +561,7 @@ class SqliteState(State):
         return result
 
     def create_run(self, fab_id: str, fab_version: str) -> int:
-        """Create one run and store it in state."""
+        """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
         run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
@@ -575,15 +575,15 @@ class SqliteState(State):
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def get_run(self, run_id: int) -> Tuple[str, str]:
+    def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""
         query = "SELECT * FROM run WHERE run_id = ?;"
         try:
             row = self.query(query, (run_id,))[0]
-            return row["fab_id"], row["fab_version"]
+            return run_id, row["fab_id"], row["fab_version"]
         except sqlite3.IntegrityError:
             log(ERROR, "`run_id` does not exist.")
-            return "", ""
+            return 0, "", ""
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""

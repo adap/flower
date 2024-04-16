@@ -240,7 +240,7 @@ class InMemoryState(State):
             }
 
     def create_run(self, fab_id: str, fab_version: str) -> int:
-        """Create one run."""
+        """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
         with self.lock:
             run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
@@ -256,8 +256,8 @@ class InMemoryState(State):
         with self.lock:
             if run_id not in self.run_ids:
                 log(ERROR, "`run_id` is invalid")
-                return "", ""
-            return self.run_ids[run_id]
+                return 0, "", ""
+            return run_id, *self.run_ids[run_id]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""

@@ -50,7 +50,7 @@ class StateTest(unittest.TestCase):
         run_id = state.create_run("Mock/mock", "v1.0.0")
 
         # Execute
-        fab_id, fab_version = state.get_run(run_id)
+        _, fab_id, fab_version = state.get_run(run_id)
 
         # Assert
         assert fab_id == "Mock/mock"

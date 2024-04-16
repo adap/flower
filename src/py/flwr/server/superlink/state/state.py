@@ -151,10 +151,10 @@ class State(abc.ABC):
 
     @abc.abstractmethod
     def create_run(self, fab_id: str, fab_version: str) -> int:
-        """Create one run."""
+        """Create a new run for the specified `fab_id` and `fab_version`."""
 
     @abc.abstractmethod
-    def get_run(self, run_id: int) -> Tuple[str, str]:
+    def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`.
 
         Parameters
@@ -164,8 +164,9 @@ class State(abc.ABC):
 
         Returns
         -------
-        Tuple[str, str]
-            A tuple containing two strings:
+        Tuple[int, str, str]
+            A tuple containing three elements:
+            - `run_id`: The identifier of the run, same as the specified `run_id`.
             - `fab_id`: The identifier of the Flower Fabric used in the specified run.
             - `fab_version`: The version of the Flower Fabric used in the specified run.
         """
