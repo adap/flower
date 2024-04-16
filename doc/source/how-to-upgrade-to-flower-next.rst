@@ -3,7 +3,14 @@ Upgrade to Flower Next
 
 Welcome to the migration guide for updating Flower to Flower Next! Whether you're a seasoned user
 or just getting started, this guide will help you smoothly transition your existing setup to take
-advantage of the latest features and improvements in Flower Next, starting from version 1.8. Let's dive in!
+advantage of the latest features and improvements in Flower Next, starting from version 1.8.
+
+.. note::
+    This guide shows how to reuse pre-``1.8`` Flower code with minimum code changes by
+    using the *compatibility layer* in Flower Next. In another guide, we will show how
+    to run Flower Next end-to-end with pure Flower Next APIs.
+
+Let's dive in!
 
 Install update
 --------------
