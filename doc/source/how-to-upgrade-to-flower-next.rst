@@ -22,11 +22,13 @@ Let's dive in!
 .. |startclient_link| replace:: ``start_client()``
 .. |startserver_link| replace:: ``start_server()``
 .. |startsim_link| replace:: ``start_simulation()``
+.. |runsim_link| replace:: ``flower-simulation``
 .. _clientapp_link: https://flower.ai/docs/framework/ref-api/flwr.client.ClientApp.html
 .. _serverapp_link: https://flower.ai/docs/framework/ref-api/flwr.server.ServerApp.html
 .. _startclient_link: https://flower.ai/docs/framework/ref-api/flwr.client.start_client.html
 .. _startserver_link: https://flower.ai/docs/framework/ref-api/flwr.server.start_server.html
 .. _startsim_link: https://flower.ai/docs/framework/ref-api/flwr.simulation.start_simulation.html
+.. _runsim_link: https://flower.ai/docs/framework/ref-api/flwr.simulation.run_simulation_from_cli.html
 
 Install update
 --------------
@@ -62,8 +64,8 @@ Required changes
 ----------------
 
 In Flower Next, the *infrastructure* and *application layers* have been decoupled.
-Therefore, the main changes are in the setup of the ``SuperNode``, ``ClientApp`,
-``ServerApp`` and execution of federated learning. These are the following non-breaking
+Therefore, the main changes are in the setup of the ``SuperNode``, |clientapp_link|_,
+|serverapp_link|_ and execution of federated learning. These are the following non-breaking
 changes that require manual updates.
 
 ``SuperNode``/|clientapp_link|_
@@ -111,7 +113,7 @@ changes that require manual updates.
 
 Deployment
 ~~~~~~~~~~
-Run the ``SuperLink`` before running ``ServerApp`` and ``SuperNode`` instead of executing `client.py` and
+Run the ``SuperLink`` with  before running ``ServerApp`` and ``SuperNode`` instead of executing `client.py` and
 `server.py` as Python scripts. Here's an example:
 
 .. code-block:: bash
@@ -154,8 +156,9 @@ Simulation
             ...
         )
 
-- Run ``flower-simulation`` in CLI and point to the ``server``/``client`` object in the code instead of
-  executing the Python script. Here's an example (assuming the ``server`` and ``client`` are in a ``sim.py`` file):
+- Run |runsim_link|_ in CLI and point to the ``server``/``client`` object in the
+  code instead of executing the Python script. Here's an example (assuming the
+  ``server`` and ``client`` are in a ``sim.py`` file):
 
 .. code-block:: bash
 
@@ -163,10 +166,11 @@ Simulation
     $ flower-simulation --client-app=sim:client --server-app=sim:server --num-supernodes=100
 
     # Flower 1.7
-    $ python sim.py
+    $ python <your_script>.py
 
-- Change default resources for each ``ClientApp`` using the ``--backend-config`` argument instead of custom arguments
-  parsed by ``argparse``. Here's an example:
+- Set default resources for each |clientapp_link|_ using the ``--backend-config`` command
+  line argument instead of setting the ``client_resources`` argument in
+  |startsim_link|_. Here's an example:
 
 .. code-block:: bash
 
@@ -174,8 +178,13 @@ Simulation
     $ flower-simulation --client-app=sim:client --server-app=sim:server --num-supernodes=100 \
         --backend-config='{"client_resources": {"num_cpus":2, "num_gpus":0.25}}'
 
-    # Flower 1.7
-    $ python sim.py --num_cpus=2 --num_gpus=0.25
+.. code-block:: python
+
+    # Flower 1.7 (in <your_script>.py)
+    hist = flwr.simulation.start_simulation(
+        ...
+        client_resources = {'num_cpus': 2, "num_gpus": 0.25}
+    )
 
 Further help
 ------------
