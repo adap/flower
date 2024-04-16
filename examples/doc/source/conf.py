@@ -24,7 +24,6 @@
 
 import datetime
 
-
 project = "Flower"
 copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
