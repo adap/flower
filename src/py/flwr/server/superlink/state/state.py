@@ -76,10 +76,6 @@ class State(abc.ABC):
         """
 
     @abc.abstractmethod
-    def get_task_ins(self, task_id: int) -> TaskIns:
-        """Get TaskIns filtered by task_id."""
-
-    @abc.abstractmethod
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes.
 

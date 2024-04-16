@@ -122,6 +122,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
 
                 if isinstance(request, CreateNodeRequest):
+                    existing_node_id = self.state.get_node_id(client_public_key_bytes)
+                    if existing_node_id is not None:
+                        pass
                     context.send_initial_metadata(
                         (
                             (
@@ -149,7 +152,12 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     verify = verify_hmac(
                         shared_secret, request.SerializeToString(True), hmac_value
                     )
-                    if not verify:
+                    node_id_from_client_public_key = self.state.get_node_id(client_public_key_bytes)
+                    if isinstance(request, PushTaskResRequest):
+                        request_node_id = request.task_res_list[0].task.consumer.node_id
+                    else:
+                        request_node_id = request.node.node_id
+                    if not verify and not node_id_from_client_public_key == request_node_id:
                         context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
                 else:
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
