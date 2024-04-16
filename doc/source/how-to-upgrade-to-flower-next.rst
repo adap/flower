@@ -119,10 +119,10 @@ changes that require manual updates.
 
 Deployment
 ~~~~~~~~~~
-Run the ``SuperLink`` with |flowernext_superlink_link|_ before running, in sequence,
-the ``SuperNode`` and ``ServerApp`` with |flowernext_clientapp_link|_ and
-|flowernext_serverapp_link|_, respectively. There is no need to execute `client.py`
-and `server.py` as Python scripts. Here's an example:
+- Run the ``SuperLink`` with |flowernext_superlink_link|_ before running, in sequence,
+  |flowernext_clientapp_link|_ and |flowernext_serverapp_link|_. There is no need to
+  execute `client.py` and `server.py` as Python scripts.
+- Here's an example to start the server without HTTPS:
 
 .. code-block:: bash
     
@@ -137,6 +137,32 @@ and `server.py` as Python scripts. Here's an example:
 
     # In another terminal window, run the apps
     $ flower-server-app server:app --insecure
+
+- Here's another example to start with HTTPS. Use the ``--certificates`` command line
+  argument to pass paths to (CA certificate, server certificate, and server private key).
+
+.. code-block:: bash
+
+    # Start a secure Superlink
+    $ flower-superlink --certificates \
+        <your-ca-cert-filepath> \
+        <your-server-cert-filepath> \
+        <your-privatekey-filepath>
+
+    # In a new terminal window, start a long-running secure SuperNode
+    $ flower-client-app client:app \
+        --root-certificates <your-ca-cert-filepath> \
+        --server 127.0.0.1:9092
+
+    # In another terminal window, start a long-running secure SuperNode (at least 2 SuperNodes are required)
+    $ flower-client-app client:app \
+        --root-certificates <your-ca-cert-filepath> \
+        --server 127.0.0.1:9092
+
+    # In another terminal window, run the apps
+    $ flower-server-app server:app \
+        --root-certificates <your-ca-cert-filepath> \
+        --server 127.0.0.1:9091
 
 Simulation
 ~~~~~~~~~~
