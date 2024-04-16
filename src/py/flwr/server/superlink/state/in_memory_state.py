@@ -251,7 +251,7 @@ class InMemoryState(State):
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def get_run(self, run_id: int) -> Tuple[str, str]:
+    def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""
         with self.lock:
             if run_id not in self.run_ids:
