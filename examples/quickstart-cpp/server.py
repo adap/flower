@@ -14,11 +14,3 @@ app = fl.server.ServerApp(
     config=fl.server.ServerConfig(num_rounds=3),
     strategy=strategy,
 )
-
-# Start Flower server for three rounds of federated learning
-if __name__ == "__main__":
-    fl.server.start_server(
-        server_address="0.0.0.0:8080",
-        config=fl.server.ServerConfig(num_rounds=3),
-        strategy=strategy,
-    )
