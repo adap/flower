@@ -26,15 +26,15 @@ Let's dive in!
 .. |flowernext_superlink_link| replace:: ``flower-superlink``
 .. |flowernext_clientapp_link| replace:: ``flower-client-app``
 .. |flowernext_serverapp_link| replace:: ``flower-server-app``
-.. _clientapp_link: https://flower.ai/docs/framework/ref-api/flwr.client.ClientApp.html
-.. _serverapp_link: https://flower.ai/docs/framework/ref-api/flwr.server.ServerApp.html
-.. _startclient_link: https://flower.ai/docs/framework/ref-api/flwr.client.start_client.html
-.. _startserver_link: https://flower.ai/docs/framework/ref-api/flwr.server.start_server.html
-.. _startsim_link: https://flower.ai/docs/framework/ref-api/flwr.simulation.start_simulation.html
-.. _runsim_link: https://flower.ai/docs/framework/ref-api/flwr.simulation.run_simulation_from_cli.html
-.. _flowernext_superlink_link: https://flower.ai/docs/framework/ref-api-cli.html#flower-superlink
-.. _flowernext_clientapp_link: https://flower.ai/docs/framework/ref-api-cli.html#flower-client-app
-.. _flowernext_serverapp_link: https://flower.ai/docs/framework/ref-api-cli.html#flower-server-app
+.. _clientapp_link: ref-api/flwr.client.ClientApp.html
+.. _serverapp_link: ref-api/flwr.server.ServerApp.html
+.. _startclient_link: ref-api/flwr.client.start_client.html
+.. _startserver_link: ref-api/flwr.server.start_server.html
+.. _startsim_link: ref-api/flwr.simulation.start_simulation.html
+.. _runsim_link: ref-api/flwr.simulation.run_simulation_from_cli.html
+.. _flowernext_superlink_link: ref-api-cli.html#flower-superlink
+.. _flowernext_clientapp_link: ref-api-cli.html#flower-client-app
+.. _flowernext_serverapp_link: ref-api-cli.html#flower-server-app
 
 Install update
 --------------
