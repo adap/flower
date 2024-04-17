@@ -22,7 +22,6 @@ from typing import Optional
 
 import jwt
 import pathspec
-import tomli
 import typer
 from typing_extensions import Annotated
 
@@ -52,8 +51,9 @@ def build(
 
     if not is_valid_project_name(directory.name):
         typer.secho(
-            f"❌ {directory.name} is not a valid project name. "
-            "It should only contain characters in {'_', 'a-zA-Z', '0-9'}",
+            f"❌ The project name {directory.name} is invalid, "
+            "a valid project name must start with a letter or an underscore, "
+            "and can only contain letters, digits, and underscores.",
             fg=typer.colors.RED,
             bold=True,
         )
@@ -147,7 +147,8 @@ def _validate_required_files(
     config = load(str(pyproject_path))
     if config is None:
         typer.secho(
-            "❌ Project configuration could not be loaded. `pyproject.toml` does not exist.",
+            "❌ Project configuration could not be loaded. "
+            "`pyproject.toml` does not exist.",
             fg=typer.colors.RED,
             bold=True,
         )
