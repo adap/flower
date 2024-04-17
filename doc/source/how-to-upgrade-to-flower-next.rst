@@ -229,7 +229,9 @@ further questions, `join the Flower Slack <https://flower.ai/join-slack/>`_ and 
 You can also `participate in Flower Discuss <https://discuss.flower.ai/>`_ where you can find us
 answering questions, or share and learn from others about migrating to Flower Next.
 
-.. tip::
+.. admonition:: Important
+    :class: important
+
     As we continuously enhance Flower Next at a rapid pace, we'll be periodically
     updating this guide. Please feel free to share any feedback with us!
 
