@@ -53,8 +53,14 @@ def test_load_pyproject_toml_load_from_cwd(tmp_path: str) -> None:
         count = 10 # optional
     """
     expected_config = {
+        "build-system": {"build-backend": "hatchling.build", "requires": ["hatchling"]},
         "project": {
             "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "authors": [{"email": "hello@flower.ai", "name": "The Flower Authors"}],
+            "license": {"text": "Apache License (2.0)"},
+            "dependencies": ["flwr[simulation]>=1.8.0,<2.0", "numpy>=1.21.0"],
         },
         "flower": {
             "components": {
@@ -118,8 +124,14 @@ def test_load_pyproject_toml_from_path(tmp_path: str) -> None:
         count = 10 # optional
     """
     expected_config = {
+        "build-system": {"build-backend": "hatchling.build", "requires": ["hatchling"]},
         "project": {
             "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "authors": [{"email": "hello@flower.ai", "name": "The Flower Authors"}],
+            "license": {"text": "Apache License (2.0)"},
+            "dependencies": ["flwr[simulation]>=1.8.0,<2.0", "numpy>=1.21.0"],
         },
         "flower": {
             "components": {
