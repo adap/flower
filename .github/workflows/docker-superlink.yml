@@ -7,16 +7,6 @@ on:
         description: "Version of Flower."
         required: true
         type: string
-      python-version:
-        description: "The Python version of the base image."
-        required: false
-        type: string
-        default: "3.11"
-      ubuntu-version:
-        description: "The Ubuntu version of the base image."
-        required: false
-        type: string
-        default: "ubuntu22.04"
 
 permissions:
   contents: read
@@ -32,10 +22,10 @@ jobs:
       file-dir: src/docker/superlink
       build-args: |
         FLWR_VERSION=${{ github.event.inputs.flwr-version }}
-        PYTHON_VERSION=${{ github.event.inputs.python-version }}
-        UBUNTU_VERSION=${{ github.event.inputs.ubuntu-version }}
+        PYTHON_VERSION=3.11
+        UBUNTU_VERSION=ubuntu22.04
       tags: |
-        ${{ github.event.inputs.flwr-version }}-py${{ github.event.inputs.python-version }}-${{ github.event.inputs.ubuntu-version }}
+        ${{ github.event.inputs.flwr-version }}-py3.11-ubuntu22.04
         ${{ github.event.inputs.flwr-version }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
