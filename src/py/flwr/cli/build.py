@@ -29,6 +29,7 @@ from .flower_toml import load, validate
 from .utils import is_valid_project_name
 
 
+# pylint: disable=too-many-locals
 def build(
     directory: Annotated[
         Optional[Path],
