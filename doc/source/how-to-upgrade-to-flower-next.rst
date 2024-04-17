@@ -22,7 +22,8 @@ Let's dive in!
 .. |startclient_link| replace:: ``start_client()``
 .. |startserver_link| replace:: ``start_server()``
 .. |startsim_link| replace:: ``start_simulation()``
-.. |runsim_link| replace:: ``flower-simulation``
+.. |runsimcli_link| replace:: ``flower-simulation``
+.. |runsim_link| replace:: ``run_simulation()``
 .. |flowernext_superlink_link| replace:: ``flower-superlink``
 .. |flowernext_clientapp_link| replace:: ``flower-client-app``
 .. |flowernext_serverapp_link| replace:: ``flower-server-app``
@@ -31,7 +32,8 @@ Let's dive in!
 .. _startclient_link: ref-api/flwr.client.start_client.html
 .. _startserver_link: ref-api/flwr.server.start_server.html
 .. _startsim_link: ref-api/flwr.simulation.start_simulation.html
-.. _runsim_link: ref-api/flwr.simulation.run_simulation_from_cli.html
+.. _runsimcli_link: ref-api/flwr.simulation.run_simulation_from_cli.html
+.. _runsim_link: ref-api/flwr.simulation.run_simulation.html
 .. _flowernext_superlink_link: ref-api-cli.html#flower-superlink
 .. _flowernext_clientapp_link: ref-api-cli.html#flower-client-app
 .. _flowernext_serverapp_link: ref-api-cli.html#flower-server-app
@@ -164,8 +166,8 @@ Deployment
         --root-certificates <your-ca-cert-filepath> \
         --server 127.0.0.1:9091
 
-Simulation
-~~~~~~~~~~
+Simulation in CLI
+~~~~~~~~~~~~~~~~~
 - Wrap your existing client and strategy with |clientapp_link|_ and |serverapp_link|_,
   respectively. There is no need to use |startsim_link|_ anymore. Here's an example:
 
@@ -190,7 +192,7 @@ Simulation
             ...
         )
 
-- Run |runsim_link|_ in CLI and point to the ``server``/``client`` object in the
+- Run |runsimcli_link|_ in CLI and point to the ``server``/``client`` object in the
   code instead of executing the Python script. Here's an example (assuming the
   ``server`` and ``client`` are in a ``sim.py`` file):
 
@@ -219,6 +221,47 @@ Simulation
         ...
         client_resources = {'num_cpus': 2, "num_gpus": 0.25}
     )
+
+Simulation in a Notebook
+~~~~~~~~~~~~~~~~~~~~~~~~
+- Run |runsim_link|_ in your notebook instead of |startsim_link|_. Here's an example:
+
+.. code-block:: python
+
+    def client_fn(cid: str):
+        return flwr.client.FlowerClient().to_client() 
+    
+    client = flwr.client.ClientApp(
+       client_fn=client_fn,
+    )
+
+    server = flwr.server.ServerApp(
+        config=config,
+        strategy=strategy,
+    )
+
+    backend_config = {"client_resources": {"num_cpus":2, "num_gpus":0.25}}
+
+    # Flower 1.8
+    flwr.simulation.run_simulation(
+        server_app=server, 
+        client_app=client, 
+        backend_config=backend_config,
+    )
+
+    # Flower 1.7
+    def get_client_fn():
+        def client_fn(cid: str):
+            return flwr.client.FlowerClient().to_client() 
+        return client_fn
+
+    history = flwr.simulation.start_simulation(
+        client_fn=get_client_fn(),
+        config=config,
+        strategy=strategy,
+        client_resources=backend_config["client_resources"],
+    )
+
 
 Further help
 ------------
