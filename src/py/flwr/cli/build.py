@@ -25,7 +25,7 @@ import pathspec
 import typer
 from typing_extensions import Annotated
 
-from .flower_toml import load, validate
+from .config_utils import load, validate
 from .utils import is_valid_project_name
 
 
