@@ -43,7 +43,34 @@ def install(
         typer.Option(help="The desired install path."),
     ] = None,
 ) -> None:
-    """Install a Flower project from a FAB file or a directory."""
+    """Install a Flower project from a FAB file or a directory.
+
+    It can be ran without any argument:
+
+        `flwr install`
+
+    This will try to install the current directory if it a valid Flower App,
+    else, it will prompt the user for a valid Flower App directory.
+
+    Else, it can be ran with a directory as first argument:
+
+        `flwr install ./docs/target_dir`
+
+    Or, it can be ran with the path to a FAB file as first argument:
+
+        `flwr install ./docs/target_project.fab`
+
+    Another argument can be added:
+
+        `flwr install ./docs/target_project.fab --flwr_dir ~/docs/flwr`
+
+    To specify where the app should be installed. By default, this value is
+    equal to:
+
+        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+        - `$HOME/.flwr/` in all other cases
+    """
     if source is None:
         if validate_project_dir(Path.cwd()) is None:
             source = Path(typer.prompt("Enter the source FAB file or directory path"))
