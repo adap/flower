@@ -19,7 +19,8 @@ PROTOBUF_PRAGMA_INIT_SEG
 namespace flwr {
 namespace proto {
 constexpr CreateNodeRequest::CreateNodeRequest(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : ping_interval_(0){}
 struct CreateNodeRequestDefaultTypeInternal {
   constexpr CreateNodeRequestDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -64,6 +65,31 @@ struct DeleteNodeResponseDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT DeleteNodeResponseDefaultTypeInternal _DeleteNodeResponse_default_instance_;
+constexpr PingRequest::PingRequest(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : node_(nullptr)
+  , ping_interval_(0){}
+struct PingRequestDefaultTypeInternal {
+  constexpr PingRequestDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~PingRequestDefaultTypeInternal() {}
+  union {
+    PingRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PingRequestDefaultTypeInternal _PingRequest_default_instance_;
+constexpr PingResponse::PingResponse(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : success_(false){}
+struct PingResponseDefaultTypeInternal {
+  constexpr PingResponseDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~PingResponseDefaultTypeInternal() {}
+  union {
+    PingResponse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PingResponseDefaultTypeInternal _PingResponse_default_instance_;
 constexpr PullTaskInsRequest::PullTaskInsRequest(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : task_ids_()
@@ -140,7 +166,7 @@ struct ReconnectDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ReconnectDefaultTypeInternal _Reconnect_default_instance_;
 }  // namespace proto
 }  // namespace flwr
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_flwr_2fproto_2ffleet_2eproto[10];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_flwr_2fproto_2ffleet_2eproto[12];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_flwr_2fproto_2ffleet_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_flwr_2fproto_2ffleet_2eproto = nullptr;
 
@@ -151,6 +177,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_flwr_2fproto_2ffleet_2eproto::
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::CreateNodeRequest, ping_interval_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::flwr::proto::CreateNodeResponse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -171,6 +198,21 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_flwr_2fproto_2ffleet_2eproto::
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::PingRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::PingRequest, node_),
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::PingRequest, ping_interval_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::PingResponse, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::flwr::proto::PingResponse, success_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::flwr::proto::PullTaskInsRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -222,15 +264,17 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_flwr_2fproto_2ffleet_2eproto::
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::flwr::proto::CreateNodeRequest)},
-  { 6, -1, -1, sizeof(::flwr::proto::CreateNodeResponse)},
-  { 13, -1, -1, sizeof(::flwr::proto::DeleteNodeRequest)},
-  { 20, -1, -1, sizeof(::flwr::proto::DeleteNodeResponse)},
-  { 26, -1, -1, sizeof(::flwr::proto::PullTaskInsRequest)},
-  { 34, -1, -1, sizeof(::flwr::proto::PullTaskInsResponse)},
-  { 42, -1, -1, sizeof(::flwr::proto::PushTaskResRequest)},
-  { 49, 57, -1, sizeof(::flwr::proto::PushTaskResResponse_ResultsEntry_DoNotUse)},
-  { 59, -1, -1, sizeof(::flwr::proto::PushTaskResResponse)},
-  { 67, -1, -1, sizeof(::flwr::proto::Reconnect)},
+  { 7, -1, -1, sizeof(::flwr::proto::CreateNodeResponse)},
+  { 14, -1, -1, sizeof(::flwr::proto::DeleteNodeRequest)},
+  { 21, -1, -1, sizeof(::flwr::proto::DeleteNodeResponse)},
+  { 27, -1, -1, sizeof(::flwr::proto::PingRequest)},
+  { 35, -1, -1, sizeof(::flwr::proto::PingResponse)},
+  { 42, -1, -1, sizeof(::flwr::proto::PullTaskInsRequest)},
+  { 50, -1, -1, sizeof(::flwr::proto::PullTaskInsResponse)},
+  { 58, -1, -1, sizeof(::flwr::proto::PushTaskResRequest)},
+  { 65, 73, -1, sizeof(::flwr::proto::PushTaskResResponse_ResultsEntry_DoNotUse)},
+  { 75, -1, -1, sizeof(::flwr::proto::PushTaskResResponse)},
+  { 83, -1, -1, sizeof(::flwr::proto::Reconnect)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -238,6 +282,8 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_CreateNodeResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_DeleteNodeRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_DeleteNodeResponse_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_PingRequest_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_PingResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_PullTaskInsRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_PullTaskInsResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::flwr::proto::_PushTaskResRequest_default_instance_),
@@ -249,30 +295,35 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 const char descriptor_table_protodef_flwr_2fproto_2ffleet_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\026flwr/proto/fleet.proto\022\nflwr.proto\032\025fl"
   "wr/proto/node.proto\032\025flwr/proto/task.pro"
-  "to\"\023\n\021CreateNodeRequest\"4\n\022CreateNodeRes"
-  "ponse\022\036\n\004node\030\001 \001(\0132\020.flwr.proto.Node\"3\n"
-  "\021DeleteNodeRequest\022\036\n\004node\030\001 \001(\0132\020.flwr."
-  "proto.Node\"\024\n\022DeleteNodeResponse\"F\n\022Pull"
-  "TaskInsRequest\022\036\n\004node\030\001 \001(\0132\020.flwr.prot"
-  "o.Node\022\020\n\010task_ids\030\002 \003(\t\"k\n\023PullTaskInsR"
-  "esponse\022(\n\treconnect\030\001 \001(\0132\025.flwr.proto."
-  "Reconnect\022*\n\rtask_ins_list\030\002 \003(\0132\023.flwr."
-  "proto.TaskIns\"@\n\022PushTaskResRequest\022*\n\rt"
-  "ask_res_list\030\001 \003(\0132\023.flwr.proto.TaskRes\""
-  "\256\001\n\023PushTaskResResponse\022(\n\treconnect\030\001 \001"
-  "(\0132\025.flwr.proto.Reconnect\022=\n\007results\030\002 \003"
-  "(\0132,.flwr.proto.PushTaskResResponse.Resu"
-  "ltsEntry\032.\n\014ResultsEntry\022\013\n\003key\030\001 \001(\t\022\r\n"
-  "\005value\030\002 \001(\r:\0028\001\"\036\n\tReconnect\022\021\n\treconne"
-  "ct\030\001 \001(\0042\311\002\n\005Fleet\022M\n\nCreateNode\022\035.flwr."
-  "proto.CreateNodeRequest\032\036.flwr.proto.Cre"
-  "ateNodeResponse\"\000\022M\n\nDeleteNode\022\035.flwr.p"
-  "roto.DeleteNodeRequest\032\036.flwr.proto.Dele"
-  "teNodeResponse\"\000\022P\n\013PullTaskIns\022\036.flwr.p"
-  "roto.PullTaskInsRequest\032\037.flwr.proto.Pul"
-  "lTaskInsResponse\"\000\022P\n\013PushTaskRes\022\036.flwr"
-  ".proto.PushTaskResRequest\032\037.flwr.proto.P"
-  "ushTaskResResponse\"\000b\006proto3"
+  "to\"*\n\021CreateNodeRequest\022\025\n\rping_interval"
+  "\030\001 \001(\001\"4\n\022CreateNodeResponse\022\036\n\004node\030\001 \001"
+  "(\0132\020.flwr.proto.Node\"3\n\021DeleteNodeReques"
+  "t\022\036\n\004node\030\001 \001(\0132\020.flwr.proto.Node\"\024\n\022Del"
+  "eteNodeResponse\"D\n\013PingRequest\022\036\n\004node\030\001"
+  " \001(\0132\020.flwr.proto.Node\022\025\n\rping_interval\030"
+  "\002 \001(\001\"\037\n\014PingResponse\022\017\n\007success\030\001 \001(\010\"F"
+  "\n\022PullTaskInsRequest\022\036\n\004node\030\001 \001(\0132\020.flw"
+  "r.proto.Node\022\020\n\010task_ids\030\002 \003(\t\"k\n\023PullTa"
+  "skInsResponse\022(\n\treconnect\030\001 \001(\0132\025.flwr."
+  "proto.Reconnect\022*\n\rtask_ins_list\030\002 \003(\0132\023"
+  ".flwr.proto.TaskIns\"@\n\022PushTaskResReques"
+  "t\022*\n\rtask_res_list\030\001 \003(\0132\023.flwr.proto.Ta"
+  "skRes\"\256\001\n\023PushTaskResResponse\022(\n\treconne"
+  "ct\030\001 \001(\0132\025.flwr.proto.Reconnect\022=\n\007resul"
+  "ts\030\002 \003(\0132,.flwr.proto.PushTaskResRespons"
+  "e.ResultsEntry\032.\n\014ResultsEntry\022\013\n\003key\030\001 "
+  "\001(\t\022\r\n\005value\030\002 \001(\r:\0028\001\"\036\n\tReconnect\022\021\n\tr"
+  "econnect\030\001 \001(\0042\206\003\n\005Fleet\022M\n\nCreateNode\022\035"
+  ".flwr.proto.CreateNodeRequest\032\036.flwr.pro"
+  "to.CreateNodeResponse\"\000\022M\n\nDeleteNode\022\035."
+  "flwr.proto.DeleteNodeRequest\032\036.flwr.prot"
+  "o.DeleteNodeResponse\"\000\022;\n\004Ping\022\027.flwr.pr"
+  "oto.PingRequest\032\030.flwr.proto.PingRespons"
+  "e\"\000\022P\n\013PullTaskIns\022\036.flwr.proto.PullTask"
+  "InsRequest\032\037.flwr.proto.PullTaskInsRespo"
+  "nse\"\000\022P\n\013PushTaskRes\022\036.flwr.proto.PushTa"
+  "skResRequest\032\037.flwr.proto.PushTaskResRes"
+  "ponse\"\000b\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_flwr_2fproto_2ffleet_2eproto_deps[2] = {
   &::descriptor_table_flwr_2fproto_2fnode_2eproto,
@@ -280,8 +331,8 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_flwr_2fproto_2ffleet_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_flwr_2fproto_2ffleet_2eproto = {
-  false, false, 1028, descriptor_table_protodef_flwr_2fproto_2ffleet_2eproto, "flwr/proto/fleet.proto", 
-  &descriptor_table_flwr_2fproto_2ffleet_2eproto_once, descriptor_table_flwr_2fproto_2ffleet_2eproto_deps, 2, 10,
+  false, false, 1215, descriptor_table_protodef_flwr_2fproto_2ffleet_2eproto, "flwr/proto/fleet.proto", 
+  &descriptor_table_flwr_2fproto_2ffleet_2eproto_once, descriptor_table_flwr_2fproto_2ffleet_2eproto_deps, 2, 12,
   schemas, file_default_instances, TableStruct_flwr_2fproto_2ffleet_2eproto::offsets,
   file_level_metadata_flwr_2fproto_2ffleet_2eproto, file_level_enum_descriptors_flwr_2fproto_2ffleet_2eproto, file_level_service_descriptors_flwr_2fproto_2ffleet_2eproto,
 };
@@ -302,30 +353,169 @@ class CreateNodeRequest::_Internal {
 
 CreateNodeRequest::CreateNodeRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor();
+  if (!is_message_owned) {
+    RegisterArenaDtor(arena);
+  }
   // @@protoc_insertion_point(arena_constructor:flwr.proto.CreateNodeRequest)
 }
 CreateNodeRequest::CreateNodeRequest(const CreateNodeRequest& from)
-  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ping_interval_ = from.ping_interval_;
   // @@protoc_insertion_point(copy_constructor:flwr.proto.CreateNodeRequest)
 }
 
+void CreateNodeRequest::SharedCtor() {
+ping_interval_ = 0;
+}
 
+CreateNodeRequest::~CreateNodeRequest() {
+  // @@protoc_insertion_point(destructor:flwr.proto.CreateNodeRequest)
+  if (GetArenaForAllocation() != nullptr) return;
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
 
+inline void CreateNodeRequest::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+}
 
+void CreateNodeRequest::ArenaDtor(void* object) {
+  CreateNodeRequest* _this = reinterpret_cast< CreateNodeRequest* >(object);
+  (void)_this;
+}
+void CreateNodeRequest::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void CreateNodeRequest::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void CreateNodeRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:flwr.proto.CreateNodeRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ping_interval_ = 0;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* CreateNodeRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // double ping_interval = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 9)) {
+          ping_interval_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* CreateNodeRequest::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:flwr.proto.CreateNodeRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // double ping_interval = 1;
+  if (!(this->_internal_ping_interval() <= 0 && this->_internal_ping_interval() >= 0)) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(1, this->_internal_ping_interval(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:flwr.proto.CreateNodeRequest)
+  return target;
+}
+
+size_t CreateNodeRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:flwr.proto.CreateNodeRequest)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // double ping_interval = 1;
+  if (!(this->_internal_ping_interval() <= 0 && this->_internal_ping_interval() >= 0)) {
+    total_size += 1 + 8;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+}
 
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData CreateNodeRequest::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl,
-    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl,
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    CreateNodeRequest::MergeImpl
 };
 const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*CreateNodeRequest::GetClassData() const { return &_class_data_; }
 
+void CreateNodeRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<CreateNodeRequest *>(to)->MergeFrom(
+      static_cast<const CreateNodeRequest &>(from));
+}
 
 
+void CreateNodeRequest::MergeFrom(const CreateNodeRequest& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:flwr.proto.CreateNodeRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
 
+  if (!(from._internal_ping_interval() <= 0 && from._internal_ping_interval() >= 0)) {
+    _internal_set_ping_interval(from._internal_ping_interval());
+  }
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
 
+void CreateNodeRequest::CopyFrom(const CreateNodeRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:flwr.proto.CreateNodeRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
 
+bool CreateNodeRequest::IsInitialized() const {
+  return true;
+}
+
+void CreateNodeRequest::InternalSwap(CreateNodeRequest* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(ping_interval_, other->ping_interval_);
+}
 
 ::PROTOBUF_NAMESPACE_ID::Metadata CreateNodeRequest::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
@@ -776,6 +966,417 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*DeleteNodeResponse::GetClassDa
 
 // ===================================================================
 
+class PingRequest::_Internal {
+ public:
+  static const ::flwr::proto::Node& node(const PingRequest* msg);
+};
+
+const ::flwr::proto::Node&
+PingRequest::_Internal::node(const PingRequest* msg) {
+  return *msg->node_;
+}
+void PingRequest::clear_node() {
+  if (GetArenaForAllocation() == nullptr && node_ != nullptr) {
+    delete node_;
+  }
+  node_ = nullptr;
+}
+PingRequest::PingRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor();
+  if (!is_message_owned) {
+    RegisterArenaDtor(arena);
+  }
+  // @@protoc_insertion_point(arena_constructor:flwr.proto.PingRequest)
+}
+PingRequest::PingRequest(const PingRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_node()) {
+    node_ = new ::flwr::proto::Node(*from.node_);
+  } else {
+    node_ = nullptr;
+  }
+  ping_interval_ = from.ping_interval_;
+  // @@protoc_insertion_point(copy_constructor:flwr.proto.PingRequest)
+}
+
+void PingRequest::SharedCtor() {
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&node_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&ping_interval_) -
+    reinterpret_cast<char*>(&node_)) + sizeof(ping_interval_));
+}
+
+PingRequest::~PingRequest() {
+  // @@protoc_insertion_point(destructor:flwr.proto.PingRequest)
+  if (GetArenaForAllocation() != nullptr) return;
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+inline void PingRequest::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete node_;
+}
+
+void PingRequest::ArenaDtor(void* object) {
+  PingRequest* _this = reinterpret_cast< PingRequest* >(object);
+  (void)_this;
+}
+void PingRequest::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void PingRequest::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void PingRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:flwr.proto.PingRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArenaForAllocation() == nullptr && node_ != nullptr) {
+    delete node_;
+  }
+  node_ = nullptr;
+  ping_interval_ = 0;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* PingRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // .flwr.proto.Node node = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_node(), ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // double ping_interval = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 17)) {
+          ping_interval_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<double>(ptr);
+          ptr += sizeof(double);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* PingRequest::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:flwr.proto.PingRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .flwr.proto.Node node = 1;
+  if (this->_internal_has_node()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::node(this), target, stream);
+  }
+
+  // double ping_interval = 2;
+  if (!(this->_internal_ping_interval() <= 0 && this->_internal_ping_interval() >= 0)) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteDoubleToArray(2, this->_internal_ping_interval(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:flwr.proto.PingRequest)
+  return target;
+}
+
+size_t PingRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:flwr.proto.PingRequest)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .flwr.proto.Node node = 1;
+  if (this->_internal_has_node()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *node_);
+  }
+
+  // double ping_interval = 2;
+  if (!(this->_internal_ping_interval() <= 0 && this->_internal_ping_interval() >= 0)) {
+    total_size += 1 + 8;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData PingRequest::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    PingRequest::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*PingRequest::GetClassData() const { return &_class_data_; }
+
+void PingRequest::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<PingRequest *>(to)->MergeFrom(
+      static_cast<const PingRequest &>(from));
+}
+
+
+void PingRequest::MergeFrom(const PingRequest& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:flwr.proto.PingRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_has_node()) {
+    _internal_mutable_node()->::flwr::proto::Node::MergeFrom(from._internal_node());
+  }
+  if (!(from._internal_ping_interval() <= 0 && from._internal_ping_interval() >= 0)) {
+    _internal_set_ping_interval(from._internal_ping_interval());
+  }
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void PingRequest::CopyFrom(const PingRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:flwr.proto.PingRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool PingRequest::IsInitialized() const {
+  return true;
+}
+
+void PingRequest::InternalSwap(PingRequest* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(PingRequest, ping_interval_)
+      + sizeof(PingRequest::ping_interval_)
+      - PROTOBUF_FIELD_OFFSET(PingRequest, node_)>(
+          reinterpret_cast<char*>(&node_),
+          reinterpret_cast<char*>(&other->node_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata PingRequest::GetMetadata() const {
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_flwr_2fproto_2ffleet_2eproto_getter, &descriptor_table_flwr_2fproto_2ffleet_2eproto_once,
+      file_level_metadata_flwr_2fproto_2ffleet_2eproto[4]);
+}
+
+// ===================================================================
+
+class PingResponse::_Internal {
+ public:
+};
+
+PingResponse::PingResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor();
+  if (!is_message_owned) {
+    RegisterArenaDtor(arena);
+  }
+  // @@protoc_insertion_point(arena_constructor:flwr.proto.PingResponse)
+}
+PingResponse::PingResponse(const PingResponse& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  success_ = from.success_;
+  // @@protoc_insertion_point(copy_constructor:flwr.proto.PingResponse)
+}
+
+void PingResponse::SharedCtor() {
+success_ = false;
+}
+
+PingResponse::~PingResponse() {
+  // @@protoc_insertion_point(destructor:flwr.proto.PingResponse)
+  if (GetArenaForAllocation() != nullptr) return;
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+inline void PingResponse::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+}
+
+void PingResponse::ArenaDtor(void* object) {
+  PingResponse* _this = reinterpret_cast< PingResponse* >(object);
+  (void)_this;
+}
+void PingResponse::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void PingResponse::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void PingResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:flwr.proto.PingResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  success_ = false;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* PingResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // bool success = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          success_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* PingResponse::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:flwr.proto.PingResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // bool success = 1;
+  if (this->_internal_success() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(1, this->_internal_success(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:flwr.proto.PingResponse)
+  return target;
+}
+
+size_t PingResponse::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:flwr.proto.PingResponse)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // bool success = 1;
+  if (this->_internal_success() != 0) {
+    total_size += 1 + 1;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData PingResponse::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSizeCheck,
+    PingResponse::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*PingResponse::GetClassData() const { return &_class_data_; }
+
+void PingResponse::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to,
+                      const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+  static_cast<PingResponse *>(to)->MergeFrom(
+      static_cast<const PingResponse &>(from));
+}
+
+
+void PingResponse::MergeFrom(const PingResponse& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:flwr.proto.PingResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_success() != 0) {
+    _internal_set_success(from._internal_success());
+  }
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void PingResponse::CopyFrom(const PingResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:flwr.proto.PingResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool PingResponse::IsInitialized() const {
+  return true;
+}
+
+void PingResponse::InternalSwap(PingResponse* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(success_, other->success_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata PingResponse::GetMetadata() const {
+  return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
+      &descriptor_table_flwr_2fproto_2ffleet_2eproto_getter, &descriptor_table_flwr_2fproto_2ffleet_2eproto_once,
+      file_level_metadata_flwr_2fproto_2ffleet_2eproto[5]);
+}
+
+// ===================================================================
+
 class PullTaskInsRequest::_Internal {
  public:
   static const ::flwr::proto::Node& node(const PullTaskInsRequest* msg);
@@ -1010,7 +1611,7 @@ void PullTaskInsRequest::InternalSwap(PullTaskInsRequest* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata PullTaskInsRequest::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2ffleet_2eproto_getter, &descriptor_table_flwr_2fproto_2ffleet_2eproto_once,
-      file_level_metadata_flwr_2fproto_2ffleet_2eproto[4]);
+      file_level_metadata_flwr_2fproto_2ffleet_2eproto[6]);
 }
 
 // ===================================================================
@@ -1241,7 +1842,7 @@ void PullTaskInsResponse::InternalSwap(PullTaskInsResponse* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata PullTaskInsResponse::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2ffleet_2eproto_getter, &descriptor_table_flwr_2fproto_2ffleet_2eproto_once,
-      file_level_metadata_flwr_2fproto_2ffleet_2eproto[5]);
+      file_level_metadata_flwr_2fproto_2ffleet_2eproto[7]);
 }
 
 // ===================================================================
@@ -1429,7 +2030,7 @@ void PushTaskResRequest::InternalSwap(PushTaskResRequest* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata PushTaskResRequest::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2ffleet_2eproto_getter, &descriptor_table_flwr_2fproto_2ffleet_2eproto_once,
-      file_level_metadata_flwr_2fproto_2ffleet_2eproto[6]);
+      file_level_metadata_flwr_2fproto_2ffleet_2eproto[8]);
 }
 
 // ===================================================================
@@ -1443,7 +2044,7 @@ void PushTaskResResponse_ResultsEntry_DoNotUse::MergeFrom(const PushTaskResRespo
 ::PROTOBUF_NAMESPACE_ID::Metadata PushTaskResResponse_ResultsEntry_DoNotUse::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2ffleet_2eproto_getter, &descriptor_table_flwr_2fproto_2ffleet_2eproto_once,
-      file_level_metadata_flwr_2fproto_2ffleet_2eproto[7]);
+      file_level_metadata_flwr_2fproto_2ffleet_2eproto[9]);
 }
 
 // ===================================================================
@@ -1711,7 +2312,7 @@ void PushTaskResResponse::InternalSwap(PushTaskResResponse* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata PushTaskResResponse::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2ffleet_2eproto_getter, &descriptor_table_flwr_2fproto_2ffleet_2eproto_once,
-      file_level_metadata_flwr_2fproto_2ffleet_2eproto[8]);
+      file_level_metadata_flwr_2fproto_2ffleet_2eproto[10]);
 }
 
 // ===================================================================
@@ -1889,7 +2490,7 @@ void Reconnect::InternalSwap(Reconnect* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Reconnect::GetMetadata() const {
   return ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(
       &descriptor_table_flwr_2fproto_2ffleet_2eproto_getter, &descriptor_table_flwr_2fproto_2ffleet_2eproto_once,
-      file_level_metadata_flwr_2fproto_2ffleet_2eproto[9]);
+      file_level_metadata_flwr_2fproto_2ffleet_2eproto[11]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -1907,6 +2508,12 @@ template<> PROTOBUF_NOINLINE ::flwr::proto::DeleteNodeRequest* Arena::CreateMayb
 }
 template<> PROTOBUF_NOINLINE ::flwr::proto::DeleteNodeResponse* Arena::CreateMaybeMessage< ::flwr::proto::DeleteNodeResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::flwr::proto::DeleteNodeResponse >(arena);
+}
+template<> PROTOBUF_NOINLINE ::flwr::proto::PingRequest* Arena::CreateMaybeMessage< ::flwr::proto::PingRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::flwr::proto::PingRequest >(arena);
+}
+template<> PROTOBUF_NOINLINE ::flwr::proto::PingResponse* Arena::CreateMaybeMessage< ::flwr::proto::PingResponse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::flwr::proto::PingResponse >(arena);
 }
 template<> PROTOBUF_NOINLINE ::flwr::proto::PullTaskInsRequest* Arena::CreateMaybeMessage< ::flwr::proto::PullTaskInsRequest >(Arena* arena) {
   return Arena::CreateMessageInternal< ::flwr::proto::PullTaskInsRequest >(arena);
