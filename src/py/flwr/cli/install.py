@@ -27,7 +27,7 @@ import jwt
 import typer
 from typing_extensions import Annotated
 
-from .flower_toml import load, validate
+from .config_utils import load, validate
 from .utils import is_valid_project_name
 
 
@@ -56,25 +56,33 @@ def install(
         )
         raise typer.Exit(code=1)
 
-    if not is_valid_project_name(source.name):
-        typer.secho(
-            f"❌ The project name {source.name} is invalid, "
-            "a valid project name must start with a letter or an underscore, "
-            "and can only contain letters, digits, and underscores.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
     if source.is_dir():
+        if not is_valid_project_name(source.name):
+            typer.secho(
+                f"❌ The project name {source.name} is invalid, "
+                "a valid project name must start with a letter or an underscore, "
+                "and can only contain letters, digits, and underscores.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
         install_from_directory(source, flwr_dir)
     else:
+        if not is_valid_project_name(source.stem):
+            typer.secho(
+                f"❌ The project name {source.stem} is invalid, "
+                "a valid project name must start with a letter or an underscore, "
+                "and can only contain letters, digits, and underscores.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
         install_from_fab(source, flwr_dir)
 
 
 def install_from_directory(directory: Path, flwr_dir: Optional[Path]) -> None:
     """Install directly from a directory."""
-    validate_and_install(directory, flwr_dir)
+    validate_and_install(directory, directory.name, flwr_dir)
 
 
 def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]) -> None:
@@ -121,10 +129,12 @@ def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]) -> None:
 
             shutil.rmtree(info_dir)
 
-            validate_and_install(tmpdir_path, flwr_dir)
+            validate_and_install(tmpdir_path, fab_file.stem, flwr_dir)
 
 
-def validate_and_install(project_dir: Path, flwr_dir: Optional[Path]) -> None:
+def validate_and_install(
+    project_dir: Path, project_name: str, flwr_dir: Optional[Path]
+) -> None:
     """Validate TOML files and install the project to the desired directory."""
     config = load(str(project_dir / "pyproject.toml"))
     if config is None:
@@ -155,7 +165,7 @@ def validate_and_install(project_dir: Path, flwr_dir: Optional[Path]) -> None:
     username = config["flower"]["provider"]
     version = config["project"]["version"]
 
-    install_dir = (
+    install_dir: Path = (
         (
             Path(
                 os.getenv(
@@ -168,9 +178,19 @@ def validate_and_install(project_dir: Path, flwr_dir: Optional[Path]) -> None:
         )
         / "apps"
         / username
-        / project_dir.stem
+        / project_name
         / version
     )
+    if install_dir.exists() and not typer.confirm(
+        typer.style(
+            f"\n💬 {project_name} version {version} is already installed, "
+            "do you want to reinstall it?",
+            fg=typer.colors.MAGENTA,
+            bold=True,
+        )
+    ):
+        return
+
     install_dir.mkdir(parents=True, exist_ok=True)
 
     # Move contents from source directory
@@ -181,7 +201,7 @@ def validate_and_install(project_dir: Path, flwr_dir: Optional[Path]) -> None:
             shutil.copy2(item, install_dir / item.name)
 
     typer.secho(
-        f"🎊 Successfully installed {project_dir.stem} to {install_dir}.",
+        f"🎊 Successfully installed {project_name} to {install_dir}.",
         fg=typer.colors.GREEN,
         bold=True,
     )
