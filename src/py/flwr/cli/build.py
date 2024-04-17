@@ -27,21 +27,36 @@ import typer
 from typing_extensions import Annotated
 
 from .flower_toml import load, validate
+from .utils import is_valid_project_name
 
 
 def build(
     directory: Annotated[
-        Optional[Path], typer.Option(help="The to bundle into a FAB")
+        Optional[Path],
+        typer.Option(help="The Flower project directory to bundle into a FAB"),
     ] = None,
     signed: Annotated[bool, typer.Option(help="Flag to sign the FAB")] = False,
 ) -> None:
-    """Build a Flower project."""
+    """Build a Flower project into a FAB."""
     if directory is None:
         directory = Path.cwd()
 
     directory = directory.resolve()
     if not directory.is_dir():
-        typer.echo(f"The path {directory} is not a valid directory.")
+        typer.secho(
+            f"❌ The path {directory} is not a valid directory.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    if not is_valid_project_name(directory.name):
+        typer.secho(
+            f"❌ {directory.name} is not a valid project name. "
+            "It should only contain characters in {'_', 'a-zA-Z', '0-9'}",
+            fg=typer.colors.RED,
+            bold=True,
+        )
         raise typer.Exit(code=1)
 
     if not _validate_required_files(directory):
@@ -54,13 +69,17 @@ def build(
     fab_filename = f"{directory.name}.fab"
     list_file_content = ""
 
+    allowed_extensions = {".py", ".toml", ".md"}
+
     with zipfile.ZipFile(fab_filename, "w", zipfile.ZIP_DEFLATED) as fab_file:
         for root, _, files in os.walk(directory, topdown=True):
             # Filter directories and files based on .gitignore
             files = [
                 f
                 for f in files
-                if not ignore_spec.match_file(Path(root) / f) and f != fab_filename
+                if not ignore_spec.match_file(Path(root) / f)
+                and f != fab_filename
+                and Path(f).suffix in allowed_extensions
             ]
 
             for file in files:
@@ -84,7 +103,9 @@ def build(
             signed_token = _sign_content(list_file_content, secret_key)
             fab_file.writestr(".info/LIST.jwt", signed_token)
 
-    typer.secho(f"Bundled FAB into {fab_filename}", fg=typer.colors.GREEN)
+    typer.secho(
+        f"🎊 Bundled FAB into {fab_filename}.", fg=typer.colors.GREEN, bold=True
+    )
 
 
 def _get_sha256_hash(file_path: Path) -> str:
@@ -122,37 +143,30 @@ def _validate_required_files(
 ) -> bool:
     """Validate the presence of required files with proper content."""
     pyproject_path = directory / "pyproject.toml"
-    flower_toml_path = directory / "flower.toml"
 
-    if not pyproject_path.exists():
-        typer.echo("`pyproject.toml` not found.")
-        return False
-
-    if not flower_toml_path.exists():
-        typer.echo("`flower.toml` not found.")
-        return False
-
-    # Validate pyproject.toml for version
-    with open(pyproject_path, "rb") as f:
-        pyproject_data = tomli.load(f)
-
-    if "project" not in pyproject_data or "version" not in pyproject_data["project"]:
-        typer.echo("No `version` found in `pyproject.toml`.")
-        return False
-
-    config = load(str(flower_toml_path))
+    config = load(str(pyproject_path))
     if config is None:
         typer.secho(
-            "Project configuration could not be loaded. flower.toml does not exist."
+            "❌ Project configuration could not be loaded. `pyproject.toml` does not exist.",
+            fg=typer.colors.RED,
+            bold=True,
         )
         return False
 
     if not validate(config):
-        typer.secho("Project configuration is invalid.")
+        typer.secho(
+            "❌ Project configuration is invalid.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
         return False
 
     if "provider" not in config["flower"]:
-        typer.secho("Project configuration is missing required 'provider' field.")
+        typer.secho(
+            "❌ Project configuration is missing required `provider` field.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
         return False
 
     return True
