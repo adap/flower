@@ -82,6 +82,7 @@ changes that require manual updates.
   |startclient_link|_. Here's an example:
 
 .. code-block:: python
+    :emphasize-lines: 5,11
 
     # Flower 1.8
     def client_fn(cid: str):
@@ -104,6 +105,7 @@ changes that require manual updates.
   via |startserver_link|_. Here's an example:
 
 .. code-block:: python
+    :emphasize-lines: 2,9
 
     # Flower 1.8
     app = flwr.server.ServerApp(
@@ -172,6 +174,7 @@ Simulation in CLI
   respectively. There is no need to use |startsim_link|_ anymore. Here's an example:
 
 .. code-block:: python
+    :emphasize-lines: 5,9,16
 
     # Flower 1.8
     def client_fn(cid: str):
@@ -227,6 +230,7 @@ Simulation in a Notebook
 - Run |runsim_link|_ in your notebook instead of |startsim_link|_. Here's an example:
 
 .. code-block:: python
+    :emphasize-lines: 16,28
 
     def client_fn(cid: str):
         return flwr.client.FlowerClient().to_client() 
