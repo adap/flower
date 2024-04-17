@@ -29,18 +29,19 @@ import typer
 from typing_extensions import Annotated
 
 from .flower_toml import load, validate
+from .utils import is_valid_project_name
 
 
 def install(
     source: Annotated[
         Optional[Path],
         typer.Argument(
-            metavar="source", help="The source FAB file or directory to install"
+            metavar="source", help="The source FAB file or directory to install."
         ),
     ] = None,
     flwr_dir: Annotated[
         Optional[Path],
-        typer.Option(help="The desired install path"),
+        typer.Option(help="The desired install path."),
     ] = None,
 ) -> None:
     """Install a Flower project from a FAB file or a directory."""
@@ -49,7 +50,21 @@ def install(
 
     source = source.resolve()
     if not source.exists():
-        typer.echo(f"The source {source} does not exist.")
+        typer.secho(
+            f"❌ The source {source} does not exist.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    if not is_valid_project_name(source.name):
+        typer.secho(
+            "❌ The project name is invalid, a valid project name "
+            "must start with a letter or an underscore, "
+            "and can only contain letters, digits, and underscores.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
         raise typer.Exit(code=1)
 
     if source.is_dir():
@@ -69,8 +84,17 @@ def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]) -> None:
         with zipfile.ZipFile(fab_file, "r") as zipf:
             zipf.extractall(tmpdir)
             tmpdir_path = Path(tmpdir)
-            list_path = tmpdir_path / ".info/LIST"
-            jwt_path = tmpdir_path / ".info/LIST.jwt"
+            info_dir = tmpdir_path / ".info"
+            if not info_dir.exists():
+                typer.secho(
+                    "❌ FAB file has incorrect format.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1)
+
+            list_path = info_dir / "LIST"
+            jwt_path = info_dir / "LIST.jwt"
 
             if jwt_path.exists():
                 secret_key = typer.prompt(
@@ -79,46 +103,57 @@ def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]) -> None:
                 if not _verify_jwt_signature(
                     list_path.read_text(), jwt_path.read_text(), secret_key
                 ):
-                    typer.echo("Failed to verify the LIST file signature.")
+                    typer.secho(
+                        "❌ Failed to verify the LIST file signature.",
+                        fg=typer.colors.RED,
+                        bold=True,
+                    )
                     raise typer.Exit(code=1)
 
-            if not _verify_hashes(list_path.read_text(), tmpdir_path):
-                typer.echo("File hashes do not match.")
+            if not list_path.exists() or not _verify_hashes(
+                list_path.read_text(), tmpdir_path
+            ):
+                typer.secho(
+                    "❌ File hashes couldn't be verified.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
                 raise typer.Exit(code=1)
+
+            shutil.rmtree(info_dir)
 
             validate_and_install(tmpdir_path, flwr_dir)
 
 
 def validate_and_install(project_dir: Path, flwr_dir: Optional[Path]) -> None:
     """Validate TOML files and install the project to the desired directory."""
-    config = load(str(project_dir / "flower.toml"))
+    config = load(str(project_dir / "pyproject.toml"))
     if config is None:
         typer.secho(
-            "Project configuration could not be loaded. flower.toml does not exist."
+            "❌ Project configuration could not be loaded. pyproject.toml does not exist.",
+            fg=typer.colors.RED,
+            bold=True,
         )
         raise typer.Exit(code=1)
 
     if not validate(config):
-        typer.secho("Project configuration is invalid.")
+        typer.secho(
+            "❌ Project configuration is invalid.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
         raise typer.Exit(code=1)
 
     if "provider" not in config["flower"]:
-        typer.secho("Project configuration is missing required 'provider' field.")
+        typer.secho(
+            "❌ Project configuration is missing required `provider` field.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
         raise typer.Exit(code=1)
 
     username = config["flower"]["provider"]
-    pyproject_path = project_dir / "pyproject.toml"
-    if not pyproject_path.exists():
-        typer.secho("`pyproject.toml` not found.")
-        raise typer.Exit(code=1)
-
-    with pyproject_path.open(encoding="utf-8") as toml_file:
-        data = tomli.loads(toml_file.read())
-        if "project" not in data or "version" not in data["project"]:
-            typer.secho("Couldn't find `version` in `pyproject.toml`.")
-            raise typer.Exit(code=1)
-
-        version = data["project"]["version"]
+    version = config["project"]["version"]
 
     install_dir = (
         (
@@ -145,7 +180,11 @@ def validate_and_install(project_dir: Path, flwr_dir: Optional[Path]) -> None:
         else:
             shutil.copy2(item, install_dir / item.name)
 
-    typer.echo(f"Successfully installed {project_dir.stem} to {install_dir}")
+    typer.secho(
+        f"🎊 Successfully installed {project_dir.stem} to {install_dir}.",
+        fg=typer.colors.GREEN,
+        bold=True,
+    )
 
 
 def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
