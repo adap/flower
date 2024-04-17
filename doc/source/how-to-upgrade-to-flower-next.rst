@@ -223,7 +223,7 @@ Simulation
 Further help
 ------------
 
-Some official `Flower code examples <https://github.com/adap/flower/tree/main/examples>`_ are already
+Some official `Flower code examples <https://flower.ai/docs/examples/>`_ are already
 updated to Flower Next so they can serve as a reference for using the Flower Next API. If there are
 further questions, `join the Flower Slack <https://flower.ai/join-slack/>`_ and use the channel ``#questions``.
 You can also `participate in Flower Discuss <https://discuss.flower.ai/>`_ where you can find us
