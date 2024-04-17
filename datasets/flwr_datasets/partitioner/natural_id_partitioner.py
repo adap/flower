@@ -14,6 +14,7 @@
 # ==============================================================================
 """Natural id partitioner class that works with Hugging Face Datasets."""
 
+
 from typing import Dict
 
 import numpy as np
