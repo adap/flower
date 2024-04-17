@@ -27,7 +27,7 @@ import jwt
 import typer
 from typing_extensions import Annotated
 
-from .config_utils import load, validate
+from .config_utils import load, validate, validate_project_dir
 from .utils import is_valid_project_name
 
 
@@ -45,7 +45,10 @@ def install(
 ) -> None:
     """Install a Flower project from a FAB file or a directory."""
     if source is None:
-        source = Path(typer.prompt("Enter the source FAB file or directory path"))
+        if validate_project_dir(Path.cwd()) is None:
+            source = Path(typer.prompt("Enter the source FAB file or directory path"))
+        else:
+            source = Path.cwd()
 
     source = source.resolve()
     if not source.exists():
@@ -136,30 +139,9 @@ def validate_and_install(
     project_dir: Path, project_name: str, flwr_dir: Optional[Path]
 ) -> None:
     """Validate TOML files and install the project to the desired directory."""
-    config = load(str(project_dir / "pyproject.toml"))
+    config = validate_project_dir(project_dir)
+
     if config is None:
-        typer.secho(
-            "❌ Project configuration could not be loaded. "
-            "`pyproject.toml` does not exist.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
-    if not validate(config):
-        typer.secho(
-            "❌ Project configuration is invalid.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        raise typer.Exit(code=1)
-
-    if "provider" not in config["flower"]:
-        typer.secho(
-            "❌ Project configuration is missing required `provider` field.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
         raise typer.Exit(code=1)
 
     username = config["flower"]["provider"]
