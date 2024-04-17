@@ -43,8 +43,6 @@ jobs:
       build-args: |
         FLWR_VERSION=${{ needs.release_nightly.outputs.version }}
         FLWR_PACKAGE=${{ needs.release_nightly.outputs.name }}
-        PYTHON_VERSION=3.11
-        UBUNTU_VERSION=ubuntu22.04
       tags: |
         ${{ needs.release_nightly.outputs.version }}
         nightly
