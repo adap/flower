@@ -24,7 +24,6 @@ from pathlib import Path
 from typing import Optional
 
 import jwt
-import tomli
 import typer
 from typing_extensions import Annotated
 
@@ -59,8 +58,8 @@ def install(
 
     if not is_valid_project_name(source.name):
         typer.secho(
-            "❌ The project name is invalid, a valid project name "
-            "must start with a letter or an underscore, "
+            f"❌ The project name {source.name} is invalid, "
+            "a valid project name must start with a letter or an underscore, "
             "and can only contain letters, digits, and underscores.",
             fg=typer.colors.RED,
             bold=True,
@@ -130,7 +129,8 @@ def validate_and_install(project_dir: Path, flwr_dir: Optional[Path]) -> None:
     config = load(str(project_dir / "pyproject.toml"))
     if config is None:
         typer.secho(
-            "❌ Project configuration could not be loaded. pyproject.toml does not exist.",
+            "❌ Project configuration could not be loaded. "
+            "`pyproject.toml` does not exist.",
             fg=typer.colors.RED,
             bold=True,
         )
