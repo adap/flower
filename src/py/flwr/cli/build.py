@@ -37,7 +37,25 @@ def build(
     ] = None,
     signed: Annotated[bool, typer.Option(help="Flag to sign the FAB")] = False,
 ) -> None:
-    """Build a Flower project into a FAB."""
+    """Build a Flower project into a FAB.
+
+    It can be ran without any argument:
+
+        `flwr build`
+
+    In which case, it will try to bundle the current directory if it is a
+    valid Flower App.
+
+    It can also be ran with a directory argument:
+
+        `flwr build --directory ./docs/target_dir`
+
+    And finally, the `--signed` argument can also be used to sign the FAB:
+
+        `flwr build --signed`
+
+    Note that this will prompt the user for its private key.
+    """
     if directory is None:
         directory = Path.cwd()
 
