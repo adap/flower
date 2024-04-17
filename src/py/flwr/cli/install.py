@@ -27,7 +27,7 @@ import jwt
 import typer
 from typing_extensions import Annotated
 
-from .config_utils import load, validate, validate_project_dir
+from .config_utils import validate_project_dir
 from .utils import is_valid_project_name
 
 
