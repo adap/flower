@@ -21,7 +21,7 @@ import threading
 from contextlib import contextmanager
 from copy import copy
 from logging import ERROR, INFO, WARN
-from typing import Callable, Iterator, Optional, Tuple, Union
+from typing import Callable, Iterator, Optional, Tuple, Union, TypeVar, Type
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
@@ -43,6 +43,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     PingRequest,
+    GetRunRequest,
+    GetRunResponse,
     PingResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
@@ -51,6 +53,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
+
+from google.protobuf.message import Message as GrpcMessage
 
 try:
     import requests
@@ -63,6 +67,9 @@ PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
 PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
 PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
 PATH_PING: str = "api/v0/fleet/ping"
+PATH_GET_RUN: str = "/api/v0/fleet/get-run"
+
+T = TypeVar('T', bound=GrpcMessage)
 
 
 @contextmanager
@@ -80,6 +87,7 @@ def http_request_response(  # pylint: disable=R0914, R0915
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
+        Optional[Callable[[int], Tuple[str, str]]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -424,6 +432,96 @@ def http_request_response(  # pylint: disable=R0914, R0915
             PATH_PUSH_TASK_RES,
             push_task_res_response_proto.results,  # pylint: disable=no-member
         )
+        
+    def _request(req: GrpcMessage, res_type: Type[T], api_path: str) -> Optional[T]:
+        # Serialize the request
+        req_bytes = req.SerializeToString()
+        
+        # Send the request
+        res = requests.post(
+            url=f"{base_url}/{api_path}",
+            headers={
+                "Accept": "application/protobuf",
+                "Content-Type": "application/protobuf",
+            },
+            data=req_bytes,
+            verify=verify,
+            timeout=None,
+        )
+
+        # Check status code and headers
+        if res.status_code != 200:
+            return None
+        if "content-type" not in res.headers:
+            log(
+                WARN,
+                "[Node] POST /%s: missing header `Content-Type`",
+                api_path,
+            )
+            return None
+        if res.headers["content-type"] != "application/protobuf":
+            log(
+                WARN,
+                "[Node] POST /%s: header `Content-Type` has wrong value",
+                api_path,
+            )
+            return None
+
+        # Deserialize ProtoBuf from bytes
+        grpc_res = res_type()
+        grpc_res.ParseFromString(res.content)
+        return grpc_res
+        
+
+    def get_run(run_id: int) -> Tuple[str, str]:
+        # Construct the request
+        req = GetRunRequest(run_id=run_id)
+        req_bytes: bytes = req.SerializeToString()
+
+        # Send the request
+        res = requests.post(
+            url=f"{base_url}/{PATH_GET_RUN}",
+            headers={
+                "Accept": "application/protobuf",
+                "Content-Type": "application/protobuf",
+            },
+            data=req_bytes,
+            verify=verify,
+            timeout=None,
+        )
+
+        # Check status code and headers
+        if res.status_code != 200:
+            return
+        if "content-type" not in res.headers:
+            log(
+                WARN,
+                "[Node] POST /%s: missing header `Content-Type`",
+                PATH_GET_RUN,
+            )
+            return
+        if res.headers["content-type"] != "application/protobuf":
+            log(
+                WARN,
+                "[Node] POST /%s: header `Content-Type` has wrong value",
+                PATH_GET_RUN,
+            )
+            return
+
+        # Deserialize ProtoBuf from bytes
+        ping_res = PingResponse()
+        ping_res.ParseFromString(res.content)
+
+        # Check if success
+        if not ping_res.success:
+            raise RuntimeError("Ping failed unexpectedly.")
+
+        # Wait
+        rd = random.uniform(*PING_RANDOM_RANGE)
+        next_interval: float = PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT
+        next_interval *= PING_BASE_MULTIPLIER + rd
+        if not ping_stop_event.is_set():
+            ping_stop_event.wait(next_interval)
 
     try:
         # Yield methods

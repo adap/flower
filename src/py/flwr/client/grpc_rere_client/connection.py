@@ -45,6 +45,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PingResponse,
     PullTaskInsRequest,
     PushTaskResRequest,
+    GetRunRequest,
+    GetRunResponse
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -69,6 +71,7 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
+        Optional[Callable[[int], Tuple[str, str]]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -241,6 +244,19 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
         # Cleanup
         metadata = None
 
+    def get_run(run_id: int) -> Tuple[str, str]:
+        # Call FleetAPI
+        get_run_request = GetRunRequest(run_id=run_id)
+        get_run_response: GetRunResponse = retry_invoker.invoke(
+            stub.GetRun,
+            request=get_run_request,
+        )
+        
+        # Return fab_id and fab_version
+        return get_run_response.run.fab_id, get_run_response.run.fab_version
+        
+        
+        
     try:
         # Yield methods
         yield (receive, send, create_node, delete_node)
