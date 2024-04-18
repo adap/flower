@@ -197,7 +197,7 @@ Simulation in CLI
 
 - Run |runsimcli_link|_ in CLI and point to the ``server``/``client`` object in the
   code instead of executing the Python script. Here's an example (assuming the
-  ``server`` and ``client`` are in a ``sim.py`` file):
+  ``server`` and ``client`` objects are in a ``sim.py`` module):
 
 .. code-block:: bash
 
@@ -230,11 +230,12 @@ Simulation in a Notebook
 - Run |runsim_link|_ in your notebook instead of |startsim_link|_. Here's an example:
 
 .. code-block:: python
-    :emphasize-lines: 16,28
+    :emphasize-lines: 19,27
 
     NUM_CLIENTS = <specify-an-integer>
 
     def client_fn(cid: str):
+        # ...
         return flwr.client.FlowerClient().to_client() 
     
     client = flwr.client.ClientApp(
@@ -257,13 +258,8 @@ Simulation in a Notebook
     )
 
     # Flower 1.7
-    def get_client_fn():
-        def client_fn(cid: str):
-            return flwr.client.FlowerClient().to_client() 
-        return client_fn
-
-    history = flwr.simulation.start_simulation(
-        client_fn=get_client_fn(),
+    flwr.simulation.start_simulation(
+        client_fn=client_fn,
         num_clients=NUM_CLIENTS,
         config=config,
         strategy=strategy,
