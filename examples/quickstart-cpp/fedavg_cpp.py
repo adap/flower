@@ -82,7 +82,6 @@ class FedAvgCpp(FedAvg):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-        print(results[0][1])
         loss_aggregated = weighted_loss_avg(
             [
                 (
