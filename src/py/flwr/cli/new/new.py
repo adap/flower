@@ -136,8 +136,11 @@ def new(
         f"{pnl}/client.py": {"template": f"app/code/client.{framework_str}.py.tpl"},
     }
 
-    # In case framework is MlFramework.PYTORCH generate additionally the task.py file
-    if framework_str == MlFramework.PYTORCH.value.lower():
+    # Depending on the framework, generate task.py file
+    frameworks_with_tasks = [
+        MlFramework.PYTORCH.value.lower(),
+    ]
+    if framework_str in frameworks_with_tasks:
         files[f"{pnl}/task.py"] = {"template": f"app/code/task.{framework_str}.py.tpl"}
 
     context = {"project_name": project_name}
