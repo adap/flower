@@ -66,7 +66,9 @@ def start_ping_loop(
     asynchronous ping operations. The loop can be terminated through the provided stop
     event.
     """
-    thread = threading.Thread(target=_ping_loop, args=(ping_fn, stop_event))
+    thread = threading.Thread(
+        target=_ping_loop, args=(ping_fn, stop_event), daemon=True
+    )
     thread.start()
 
     return thread
