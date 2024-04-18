@@ -53,13 +53,12 @@ A learning-oriented series of federated learning tutorials, the best place to st
    tutorial-quickstart-pandas
    tutorial-quickstart-fastai
    tutorial-quickstart-pytorch-lightning
-   tutorial-quickstart-mxnet
    tutorial-quickstart-scikitlearn
    tutorial-quickstart-xgboost
    tutorial-quickstart-android
    tutorial-quickstart-ios
 
-QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:`TensorFlow <tutorial-quickstart-tensorflow>` | :doc:`🤗 Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart-jax>` | :doc:`Pandas <tutorial-quickstart-pandas>` | :doc:`fastai <tutorial-quickstart-fastai>` | :doc:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :doc:`MXNet <tutorial-quickstart-mxnet>` | :doc:`scikit-learn <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
+QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:`TensorFlow <tutorial-quickstart-tensorflow>` | :doc:`🤗 Transformers <tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart-jax>` | :doc:`Pandas <tutorial-quickstart-pandas>` | :doc:`fastai <tutorial-quickstart-fastai>` | :doc:`PyTorch Lightning <tutorial-quickstart-pytorch-lightning>` | :doc:`scikit-learn <tutorial-quickstart-scikitlearn>` | :doc:`XGBoost <tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-quickstart-android>` | :doc:`iOS <tutorial-quickstart-ios>`
 
 We also made video tutorials for PyTorch:
 
@@ -100,7 +99,6 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    :caption: Legacy example guides
 
    example-pytorch-from-centralized-to-federated
-   example-mxnet-walk-through
    example-jax-from-centralized-to-federated
    example-fedbn-pytorch-from-centralized-to-federated
 
