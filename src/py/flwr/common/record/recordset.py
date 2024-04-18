@@ -25,7 +25,7 @@ from .typeddict import TypedDict
 
 
 class RecordSetData:
-    """Inner data container for theRecordSet class."""
+    """Inner data container for the RecordSet class."""
 
     parameters_records: TypedDict[str, ParametersRecord]
     metrics_records: TypedDict[str, MetricsRecord]
