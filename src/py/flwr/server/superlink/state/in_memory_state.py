@@ -36,8 +36,7 @@ class InMemoryState(State):
     def __init__(self) -> None:
         # Map node_id to (online_until, ping_interval)
         self.node_ids: Dict[int, Tuple[float, float]] = {}
-        # Map run_id to (fab_id, fab_version)
-        self.run_ids: Dict[int, Tuple[str, str]] = {}
+        self.run_ids: Set[int] = set()
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
         self.lock = threading.Lock()
@@ -239,25 +238,17 @@ class InMemoryState(State):
                 if online_until > current_time
             }
 
-    def create_run(self, fab_id: str, fab_version: str) -> int:
-        """Create a new run for the specified `fab_id` and `fab_version`."""
+    def create_run(self) -> int:
+        """Create one run."""
         # Sample a random int64 as run_id
         with self.lock:
             run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
             if run_id not in self.run_ids:
-                self.run_ids[run_id] = (fab_id, fab_version)
+                self.run_ids.add(run_id)
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
-
-    def get_run(self, run_id: int) -> Tuple[int, str, str]:
-        """Retrieve information about the run with the specified `run_id`."""
-        with self.lock:
-            if run_id not in self.run_ids:
-                log(ERROR, "`run_id` is invalid")
-                return 0, "", ""
-            return run_id, *self.run_ids[run_id]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
