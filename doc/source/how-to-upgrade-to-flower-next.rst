@@ -232,6 +232,8 @@ Simulation in a Notebook
 .. code-block:: python
     :emphasize-lines: 16,28
 
+    NUM_CLIENTS = <specify-an-integer>
+
     def client_fn(cid: str):
         return flwr.client.FlowerClient().to_client() 
     
@@ -249,7 +251,8 @@ Simulation in a Notebook
     # Flower 1.8
     flwr.simulation.run_simulation(
         server_app=server, 
-        client_app=client, 
+        client_app=client,
+        num_supernodes=NUM_CLIENTS,
         backend_config=backend_config,
     )
 
@@ -261,6 +264,7 @@ Simulation in a Notebook
 
     history = flwr.simulation.start_simulation(
         client_fn=get_client_fn(),
+        num_clients=NUM_CLIENTS,
         config=config,
         strategy=strategy,
         client_resources=backend_config["client_resources"],
