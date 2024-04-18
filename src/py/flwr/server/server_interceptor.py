@@ -153,6 +153,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     if not verify:
                         print("Wrong hmac")
                         context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
+                    
+                    print("hmac verified: ", verify)
                 else:
                     print("Unauthenticated")
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
