@@ -42,6 +42,7 @@ class InMemoryState(State):  # pylint: disable=R0902
         self.client_public_keys: Set[bytes] = set()
         self.server_public_key: bytes = b""
         self.server_private_key: bytes = b""
+        self.public_key_node_id_pairs: Dict[bytes, int] = {}
         self.lock = threading.Lock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
@@ -287,6 +288,16 @@ class InMemoryState(State):  # pylint: disable=R0902
     def get_client_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `client_public_keys` as a set."""
         return self.client_public_keys
+    
+    def store_node_id_client_public_key_pair(self, client_public_key: bytes, node_id: int) -> None:
+        """Store `node_id` and `client_public_keys` as pairs."""
+        self.public_key_node_id_pairs[client_public_key] = node_id
+
+    def delete_node_id_client_public_key_pair(self, client_public_key: bytes) -> None:
+        """Remove `node_id` and `client_public_keys` pairs."""
+        if client_public_key not in self.public_key_node_id_pairs:
+            raise ValueError(f"Client public key {client_public_key} not found")
+        del self.public_key_node_id_pairs[client_public_key]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""

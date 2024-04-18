@@ -53,6 +53,13 @@ CREATE TABLE IF NOT EXISTS public_key(
 );
 """
 
+SQL_CREATE_TABLE_PUBLIC_KEY_NODE_ID = """
+CREATE TABLE IF NOT EXISTS credential(
+    public_key BLOB PRIMARY KEY,
+    private_key BLOB
+);
+"""
+
 SQL_CREATE_INDEX_ONLINE_UNTIL = """
 CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 """
