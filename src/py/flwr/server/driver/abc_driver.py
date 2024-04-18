@@ -24,10 +24,6 @@ from flwr.common import Message, RecordSet
 class Driver(ABC):
     """Abstract base Driver class for the Driver API."""
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
-        """."""
-        raise NotImplementedError()
-
     @abstractmethod
     def create_message(  # pylint: disable=too-many-arguments
         self,
@@ -142,7 +138,3 @@ class Driver(ABC):
         replies for all sent messages. A message remains valid until its TTL,
         which is not affected by `timeout`.
         """
-
-    @abstractmethod
-    def close(self) -> None:
-        """Disconnect from the SuperLink if connected."""
