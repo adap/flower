@@ -58,8 +58,9 @@ def render_template(template: str, data: Dict[str, str]) -> str:
     """Render template."""
     tpl_file = load_template(template)
     tpl = Template(tpl_file)
-    result = tpl.substitute(data)
-    return result
+    if ".gitignore" not in template:
+        return tpl.substitute(data)
+    return tpl.template
 
 
 def create_file(file_path: str, content: str) -> None:
@@ -127,8 +128,8 @@ def new(
 
     # List of files to render
     files = {
+        ".gitignore": {"template": "app/.gitignore.tpl"},
         "README.md": {"template": "app/README.md.tpl"},
-        "flower.toml": {"template": "app/flower.toml.tpl"},
         "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
         f"{pnl}/__init__.py": {"template": "app/code/__init__.py.tpl"},
         f"{pnl}/server.py": {"template": f"app/code/server.{framework_str}.py.tpl"},
