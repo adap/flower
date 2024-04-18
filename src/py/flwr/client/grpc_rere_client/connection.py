@@ -41,12 +41,12 @@ from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
+    GetRunRequest,
+    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
     PushTaskResRequest,
-    GetRunRequest,
-    GetRunResponse
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
@@ -125,7 +125,7 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
     ping_stop_event = threading.Event()
 
     ###########################################################################
-    # ping/create_node/delete_node/receive/send functions
+    # ping/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
 
     def ping() -> None:
@@ -251,14 +251,12 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
             stub.GetRun,
             request=get_run_request,
         )
-        
+
         # Return fab_id and fab_version
         return get_run_response.run.fab_id, get_run_response.run.fab_version
-        
-        
-        
+
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node)
+        yield (receive, send, create_node, delete_node, get_run)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
