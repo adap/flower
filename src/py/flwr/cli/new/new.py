@@ -36,6 +36,7 @@ class MlFramework(str, Enum):
     NUMPY = "NumPy"
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
+    MLX = "MLX"
 
 
 class TemplateNotFound(Exception):
@@ -139,6 +140,7 @@ def new(
     # Depending on the framework, generate task.py file
     frameworks_with_tasks = [
         MlFramework.PYTORCH.value.lower(),
+        MlFramework.MLX.value.lower(),
     ]
     if framework_str in frameworks_with_tasks:
         files[f"{pnl}/task.py"] = {"template": f"app/code/task.{framework_str}.py.tpl"}
