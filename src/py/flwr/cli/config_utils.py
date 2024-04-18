@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Utility to validate the `flower.toml` file."""
+"""Utility to validate the `pyproject.toml` file."""
 
 import os
 from typing import Any, Dict, List, Optional, Tuple
@@ -25,7 +25,7 @@ from flwr.common import object_ref
 def load_and_validate_with_defaults(
     path: Optional[str] = None,
 ) -> Tuple[Optional[Dict[str, Any]], List[str], List[str]]:
-    """Load and validate flower.toml as dict.
+    """Load and validate pyproject.toml as dict.
 
     Returns
     -------
@@ -37,7 +37,7 @@ def load_and_validate_with_defaults(
 
     if config is None:
         errors = [
-            "Project configuration could not be loaded. flower.toml does not exist."
+            "Project configuration could not be loaded. pyproject.toml does not exist."
         ]
         return (None, errors, [])
 
@@ -58,10 +58,10 @@ def load_and_validate_with_defaults(
 
 
 def load(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    """Load flower.toml and return as dict."""
+    """Load pyproject.toml and return as dict."""
     if path is None:
         cur_dir = os.getcwd()
-        toml_path = os.path.join(cur_dir, "flower.toml")
+        toml_path = os.path.join(cur_dir, "pyproject.toml")
     else:
         toml_path = path
 
@@ -74,7 +74,7 @@ def load(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
 
 
 def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
-    """Validate flower.toml fields."""
+    """Validate pyproject.toml fields."""
     errors = []
     warnings = []
 
@@ -106,7 +106,7 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
 
 
 def validate(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
-    """Validate flower.toml."""
+    """Validate pyproject.toml."""
     is_valid, errors, warnings = validate_fields(config)
 
     if not is_valid:
