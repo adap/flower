@@ -141,6 +141,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                             _AUTH_TOKEN_HEADER, context.invocation_metadata()
                         )
                     )
+                    print("hmac_value: ", hmac_value)
                     client_public_key = bytes_to_public_key(client_public_key_bytes)
                     shared_secret = generate_shared_key(
                         self.server_private_key,
@@ -150,8 +151,10 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                         shared_secret, request.SerializeToString(True), hmac_value
                     )
                     if not verify:
+                        print("Wrong hmac")
                         context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
                 else:
+                    print("Unauthenticated")
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
 
                 return message_handler.unary_unary(request, context)
