@@ -167,8 +167,8 @@ class State(abc.ABC):
         Tuple[int, str, str]
             A tuple containing three elements:
             - `run_id`: The identifier of the run, same as the specified `run_id`.
-            - `fab_id`: The identifier of the Flower Fabric used in the specified run.
-            - `fab_version`: The version of the Flower Fabric used in the specified run.
+            - `fab_id`: The identifier of the Flower App Bundle used in the specified run.
+            - `fab_version`: The version of the Flower App Bundle used in the specified run.
         """
 
     @abc.abstractmethod
