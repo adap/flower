@@ -41,6 +41,9 @@ Let's dive in!
 Install update
 --------------
 
+Using pip
+~~~~~~~~~
+
 Here's how to update an existing installation of Flower to Flower Next with ``pip``:
 
 .. code-block:: bash
@@ -53,31 +56,56 @@ or if you need Flower Next with simulation:
     
     $ python -m pip install -U flwr[simulation]
 
-Dependencies
-------------
+
 Ensure you set the following version constraint in your ``requirements.txt``
 
 .. code-block:: 
 
-    flwr>=1.8.0,<2.0
+    # Without simulation support
+    flwr>=1.8,<2.0
+
+    # With simulation support
+    flwr[simulation]>=1.8, <2.0
 
 or ``pyproject.toml``:
 
 .. code-block:: toml
 
-    dependencies = ["flwr>=1.8.0,2.0"]
+    # Without simulation support
+    dependencies = ["flwr>=1.8,2.0"]
 
+    # With simulation support
+    dependencies = ["flwr[simulation]>=1.8,2.0"]
+
+Using Poetry
+~~~~~~~~~~~~
+
+Update the ``flwr`` dependency in ``pyproject.toml`` and then reinstall (don't forget to delete ``poetry.lock`` via ``rm poetry.lock`` before running ``poetry install``).
+
+Ensure you set the following version constraint in your ``pyproject.toml``:
+
+.. code-block:: toml
+
+    [tool.poetry.dependencies]
+    python = "^3.8"
+
+    # Without simulation support
+    flwr = ">=1.8,<2.0"
+
+    # With simulation support
+    flwr = { version = ">=1.8,<2.0", extras = ["simulation"] }
 
 Required changes
 ----------------
 
 In Flower Next, the *infrastructure* and *application layers* have been decoupled.
-Therefore, the main changes are in the setup of the ``SuperNode``, |clientapp_link|_,
-|serverapp_link|_ and execution of federated learning. These are the following non-breaking
-changes that require manual updates.
+Instead of starting a client in code via ``start_client()``, you create a |clientapp_link|_ and start it via the command line.
+Instead of starting a server in code via ``start_server()``, you create a |serverapp_link|_ and start it via the command line.
+The long-running components of server and client are called SuperLink and SuperNode.
+The following non-breaking changes that require manual updates and allow you to run your project both in the traditional way and in the Flower Next way:
 
-``SuperNode``/|clientapp_link|_
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|clientapp_link|_
+~~~~~~~~~~~~~~~~~
 - Wrap your existing client with |clientapp_link|_ instead of launching it via
   |startclient_link|_. Here's an example:
 
@@ -123,10 +151,10 @@ changes that require manual updates.
 
 Deployment
 ~~~~~~~~~~
-- Run the ``SuperLink`` with |flowernext_superlink_link|_ before running, in sequence,
-  |flowernext_clientapp_link|_ and |flowernext_serverapp_link|_. There is no need to
+- Run the ``SuperLink`` using |flowernext_superlink_link|_ before running, in sequence,
+  |flowernext_clientapp_link|_ (2x) and |flowernext_serverapp_link|_. There is no need to
   execute `client.py` and `server.py` as Python scripts.
-- Here's an example to start the server without HTTPS:
+- Here's an example to start the server without HTTPS (only for prototyping):
 
 .. code-block:: bash
     
@@ -136,10 +164,10 @@ Deployment
     # In a new terminal window, start a long-running SuperNode
     $ flower-client-app client:app --insecure
 
-    # In another terminal window, start a long-running SuperNode (at least 2 SuperNodes are required)
+    # In another terminal window, start another long-running SuperNode (at least 2 SuperNodes are required)
     $ flower-client-app client:app --insecure
 
-    # In another terminal window, run the apps
+    # In yet another terminal window, run the ServerApp (this starts the actual training run)
     $ flower-server-app server:app --insecure
 
 - Here's another example to start with HTTPS. Use the ``--certificates`` command line
@@ -158,12 +186,12 @@ Deployment
         --root-certificates <your-ca-cert-filepath> \
         --server 127.0.0.1:9092
 
-    # In another terminal window, start a long-running secure SuperNode (at least 2 SuperNodes are required)
+    # In another terminal window, start another long-running secure SuperNode (at least 2 SuperNodes are required)
     $ flower-client-app client:app \
         --root-certificates <your-ca-cert-filepath> \
         --server 127.0.0.1:9092
 
-    # In another terminal window, run the apps
+    # In yet another terminal window, run the ServerApp (this starts the actual training run)
     $ flower-server-app server:app \
         --root-certificates <your-ca-cert-filepath> \
         --server 127.0.0.1:9091
@@ -174,56 +202,73 @@ Simulation in CLI
   respectively. There is no need to use |startsim_link|_ anymore. Here's an example:
 
 .. code-block:: python
-    :emphasize-lines: 5,9,16
+    :emphasize-lines: 9,13,20
+
+    # Regular Flower client implementation
+    class FlowerClient(NumPyClient):
+        # ...
 
     # Flower 1.8
     def client_fn(cid: str):
-        return flwr.client.FlowerClient().to_client() 
+        return FlowerClient().to_client() 
     
-    client = flwr.client.ClientApp(
+    client_app = flwr.client.ClientApp(
        client_fn=client_fn,
     )
 
-    server = flwr.server.ServerApp(
+    server_app = flwr.server.ServerApp(
         config=config,
         strategy=strategy,
     )
 
     # Flower 1.7
     if __name__ == "__main__":
-        flwr.simulation.start_simulation(
+        hist = flwr.simulation.start_simulation(
+            num_clients=100,
             ...
         )
 
-- Run |runsimcli_link|_ in CLI and point to the ``server``/``client`` object in the
+- Run |runsimcli_link|_ in CLI and point to the ``server_app`` / ``client_app`` object in the
   code instead of executing the Python script. Here's an example (assuming the
-  ``server`` and ``client`` objects are in a ``sim.py`` module):
+  ``server_app`` and ``client_app`` objects are in a ``sim.py`` module):
 
 .. code-block:: bash
 
     # Flower 1.8
-    $ flower-simulation --client-app=sim:client --server-app=sim:server --num-supernodes=100
+    $ flower-simulation \
+        --server-app=sim:server_app \
+        --client-app=sim:client_app \
+        --num-supernodes=100
+
+.. code-block:: python
 
     # Flower 1.7
-    $ python <your_script>.py
+    $ python sim.py
 
 - Set default resources for each |clientapp_link|_ using the ``--backend-config`` command
   line argument instead of setting the ``client_resources`` argument in
   |startsim_link|_. Here's an example:
 
 .. code-block:: bash
+    :emphasize-lines: 6
 
     # Flower 1.8
-    $ flower-simulation --client-app=sim:client --server-app=sim:server --num-supernodes=100 \
-        --backend-config='{"client_resources": {"num_cpus":2, "num_gpus":0.25}}'
+    $ flower-simulation \
+        --client-app=sim:client_app \
+        --server-app=sim:server_app \
+        --num-supernodes=100 \
+        --backend-config='{"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}'
 
 .. code-block:: python
+    :emphasize-lines: 5
 
-    # Flower 1.7 (in <your_script>.py)
-    hist = flwr.simulation.start_simulation(
-        ...
-        client_resources = {'num_cpus': 2, "num_gpus": 0.25}
-    )
+    # Flower 1.7 (in `sim.py`)
+    if __name__ == "__main__":
+        hist = flwr.simulation.start_simulation(
+            num_clients=100,
+            client_resources = {'num_cpus': 2, "num_gpus": 0.25},
+            ...
+        )
 
 Simulation in a Notebook
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -236,23 +281,23 @@ Simulation in a Notebook
 
     def client_fn(cid: str):
         # ...
-        return flwr.client.FlowerClient().to_client() 
+        return FlowerClient().to_client() 
     
-    client = flwr.client.ClientApp(
+    client_app = flwr.client.ClientApp(
        client_fn=client_fn,
     )
 
-    server = flwr.server.ServerApp(
+    server_app = flwr.server.ServerApp(
         config=config,
         strategy=strategy,
     )
 
-    backend_config = {"client_resources": {"num_cpus":2, "num_gpus":0.25}}
+    backend_config = {"client_resources": {"num_cpus": 2, "num_gpus": 0.25}}
 
     # Flower 1.8
     flwr.simulation.run_simulation(
-        server_app=server, 
-        client_app=client,
+        server_app=server_app, 
+        client_app=client_app,
         num_supernodes=NUM_CLIENTS,
         backend_config=backend_config,
     )
