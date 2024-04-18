@@ -3,8 +3,11 @@
 import mlx.core as mx
 import mlx.nn as nn
 import numpy as np
+from datasets.utils.logging import disable_progress_bar
 from flwr_datasets import FederatedDataset
 
+
+disable_progress_bar()
 
 class MLP(nn.Module):
     """A simple MLP."""
