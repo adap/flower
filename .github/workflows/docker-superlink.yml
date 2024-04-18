@@ -1,50 +1,45 @@
-name: Build docker server image
+name: Build docker SuperLink image
 
 on:
   workflow_dispatch:
     inputs:
       flwr-version:
-        description: "Version of Flower"
+        description: "Version of Flower."
         required: true
         type: string
-      base-image-tag:
-        description: "The tag of the Flower base image."
-        required: false
-        type: string
-        default: "py3.11-ubuntu22.04"
 
 permissions:
   contents: read
 
 jobs:
-  build-server-images:
+  build-superlink-images:
     name: Build images
     uses: ./.github/workflows/_docker-build.yml
     # run only on default branch when using it with workflow_dispatch
     if: github.ref_name == github.event.repository.default_branch
     with:
-      namespace-repository: flwr/server
-      file-dir: src/docker/server
+      namespace-repository: flwr/superlink
+      file-dir: src/docker/superlink
       build-args: |
         FLWR_VERSION=${{ github.event.inputs.flwr-version }}
-        BASE_IMAGE_TAG=${{ github.event.inputs.base-image-tag }}
+        PYTHON_VERSION=3.11
+        UBUNTU_VERSION=ubuntu22.04
       tags: |
-        ${{ github.event.inputs.flwr-version }}-${{ github.event.inputs.base-image-tag }}
+        ${{ github.event.inputs.flwr-version }}-py3.11-ubuntu22.04
         ${{ github.event.inputs.flwr-version }}
-        latest
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
 
   summary:
-    name: Build images
+    name: Summary
     runs-on: ubuntu-22.04
-    needs: build-server-images
+    needs: build-superlink-images
     timeout-minutes: 10
     steps:
       - run: |
           echo "### Images" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          for IMAGE in $(echo ${{ toJson(needs.build-server-images.outputs.metadata) }} | jq -r '.tags[]' ); do
+          for IMAGE in $(echo ${{ toJson(needs.build-superlink-images.outputs.metadata) }} | jq -r '.tags[]' ); do
             echo "- $IMAGE" >> $GITHUB_STEP_SUMMARY
           done
