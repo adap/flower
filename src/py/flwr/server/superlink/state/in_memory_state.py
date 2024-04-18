@@ -257,8 +257,9 @@ class InMemoryState(State):  # pylint: disable=R0902
         self, public_key: bytes, private_key: bytes
     ) -> None:
         """Store `server_public_key` and `server_private_key` in state."""
-        self.server_private_key = private_key
-        self.server_public_key = public_key
+        with self.lock:
+            self.server_private_key = private_key
+            self.server_public_key = public_key
 
     def get_server_private_key(self) -> bytes:
         """Retrieve `server_private_key` in urlsafe bytes."""
@@ -270,11 +271,13 @@ class InMemoryState(State):  # pylint: disable=R0902
 
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
         """Store a set of `client_public_keys` in state."""
-        self.client_public_keys = public_keys
+        with self.lock:
+            self.client_public_keys = public_keys
 
     def store_client_public_key(self, public_key: bytes) -> None:
         """Store a `client_public_key` in state."""
-        self.client_public_keys.add(public_key)
+        with self.lock:
+            self.client_public_keys.add(public_key)
 
     def get_client_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `client_public_keys` as a set."""
