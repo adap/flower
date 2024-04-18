@@ -8,9 +8,9 @@ env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  release_nightly:
+  release-nightly:
     runs-on: ubuntu-22.04
-    name: Nightly
+    name: Relase nightly on PyPI
     if: github.repository == 'adap/flower'
     outputs:
       name: ${{ steps.release.outputs.name }}
@@ -28,11 +28,23 @@ jobs:
           echo "name=$(poetry version | awk {'print $1'})" >> $GITHUB_OUTPUT
           echo "version=$(poetry version -s)" >> $GITHUB_OUTPUT
 
+  wait-on-pypi:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    name: Wait on PyPI
+    needs: release-nightly
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Wait until flwr package is avaiale on PyPI
+        run: until pip install ${{ needs.release-nightly.outputs.name }}==${{ needs.release-nightly.outputs.version }} --dry-run; do echo "Try again"; sleep 10; done
+
   build-docker-images:
     name: Build nightly images
     if: github.repository == 'adap/flower'
     uses: ./.github/workflows/_docker-build.yml
-    needs: release_nightly
+    needs: [release-nightly, wait-on-pypi]
     strategy:
       fail-fast: false
       matrix:
@@ -41,10 +53,10 @@ jobs:
       namespace-repository: ${{ matrix.images.repository }}
       file-dir: ${{ matrix.images.file-dir }}
       build-args: |
-        FLWR_VERSION=${{ needs.release_nightly.outputs.version }}
-        FLWR_PACKAGE=${{ needs.release_nightly.outputs.name }}
+        FLWR_VERSION=${{ needs.release-nightly.outputs.version }}
+        FLWR_PACKAGE=${{ needs.release-nightly.outputs.name }}
       tags: |
-        ${{ needs.release_nightly.outputs.version }}
+        ${{ needs.release-nightly.outputs.version }}
         nightly
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
