@@ -37,7 +37,7 @@ def build(
     ] = None,
     signed: Annotated[bool, typer.Option(help="Flag to sign the FAB")] = False,
 ) -> None:
-    """Build a Flower project into a FAB.
+    """Build a Flower project into a FAB file.
 
     It can be ran without any argument:
 
