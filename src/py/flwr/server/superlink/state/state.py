@@ -16,7 +16,7 @@
 
 
 import abc
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Tuple
 from uuid import UUID
 
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
@@ -150,8 +150,26 @@ class State(abc.ABC):
         """
 
     @abc.abstractmethod
-    def create_run(self) -> int:
-        """Create one run."""
+    def create_run(self, fab_id: str, fab_version: str) -> int:
+        """Create a new run for the specified `fab_id` and `fab_version`."""
+
+    @abc.abstractmethod
+    def get_run(self, run_id: int) -> Tuple[int, str, str]:
+        """Retrieve information about the run with the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run.
+
+        Returns
+        -------
+        Tuple[int, str, str]
+            A tuple containing three elements:
+            - `run_id`: The identifier of the run, same as the specified `run_id`.
+            - `fab_id`: The identifier of the FAB used in the specified run.
+            - `fab_version`: The version of the FAB used in the specified run.
+        """
 
     @abc.abstractmethod
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
