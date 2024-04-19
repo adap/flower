@@ -163,15 +163,6 @@ class NaturalIdPartitioner(Partitioner):
         ):
             raise ValueError(
                 f"The specified column in {self._partition_by} is of type {dtype} "
-                f"however only ints (with None) and strings (with None) are acceptable"
+                f"however only ints (with None) and strings (with None) are acceptable."
             )
 
-if __name__ == "__main__":
-    import datasets
-
-    dataset = datasets.load_dataset("speech_commands", "v0.01")
-    from flwr_datasets.partitioner import NaturalIdPartitioner
-
-    nip = NaturalIdPartitioner("speaker_id")
-    nip.dataset = dataset["train"]
-    ps = [nip.load_partition(i) for i in range(nip.num_partitions)]
