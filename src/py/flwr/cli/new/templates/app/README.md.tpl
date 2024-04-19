@@ -3,11 +3,7 @@
 ## Install dependencies
 
 ```bash
-# Using pip
 pip install .
-
-# Or using Poetry
-poetry install
 ```
 
 ## Run (Simulation Engine)
