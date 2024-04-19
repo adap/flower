@@ -44,9 +44,9 @@ def validate_project_dir(project_dir: Path) -> Optional[Dict[str, Any]]:
         )
         return None
 
-    if "provider" not in config["flower"]:
+    if "publisher" not in config["flower"]:
         typer.secho(
-            "❌ Project configuration is missing required `provider` field.",
+            "❌ Project configuration is missing required `publisher` field.",
             fg=typer.colors.RED,
             bold=True,
         )
