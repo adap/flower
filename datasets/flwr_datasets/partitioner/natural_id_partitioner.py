@@ -15,7 +15,7 @@
 """Natural id partitioner class that works with Hugging Face Datasets."""
 
 
-from typing import Dict
+from typing import Dict, Union
 
 import numpy as np
 
@@ -61,9 +61,44 @@ class NaturalIdPartitioner(Partitioner):
     def _create_partition_id_to_indices(self) -> None:
         """Create an assignment of indices to the partition indices."""
         natural_ids = self.dataset[self._partition_by]
-        unique_natural_ids, inverse = np.unique(natural_ids, return_inverse=True)
+        unique_natural_ids = self.dataset.unique(self._partition_by)
+
+        none_present = False
+        if None in unique_natural_ids:
+            none_present = True
+            dtype = self.dataset.features[self._partition_by].dtype
+            none_replacement: Union[int, str]
+            if dtype == "string":
+                none_replacement = "None"
+                # Ensure the replacement is not in the dataset
+                while True:
+                    if none_replacement not in unique_natural_ids:
+                        break
+                    none_replacement += "1"
+            elif "unit" in dtype:
+                none_replacement = max(natural_ids) + 1
+            elif "int" in dtype:
+                none_replacement = -1
+                if none_replacement in unique_natural_ids:
+                    none_replacement = max(natural_ids) + 1
+            else:
+                raise ValueError(
+                    "The type of values in the `partition_by` column needs "
+                    "to be int or string"
+                )
+
+            # Replace the None by the none_replacement (in order to be able to use the
+            # np.unique(value, return_inverse) that requires no None and same val types
+            is_none = np.vectorize(lambda x: x is None)
+            mask = is_none(natural_ids)
+            natural_ids[mask] = none_replacement
+
+            unique_natural_ids, inverse = np.unique(natural_ids, return_inverse=True)
 
         for i, natural_id in enumerate(unique_natural_ids):
+            if none_present and natural_id == none_replacement:
+                # Use the natural_id that is present in the dataset (not replacement)
+                natural_id = None
             partition_id = self._natural_id_to_partition_id[natural_id]
             self._partition_id_to_indices[partition_id] = np.where(inverse == i)[0]
 
@@ -84,6 +119,7 @@ class NaturalIdPartitioner(Partitioner):
             single dataset partition
         """
         if len(self._partition_id_to_natural_id) == 0:
+            self._check_supported_type_of_value_in_partition_by()
             self._create_int_partition_id_to_natural_id()
             self._create_natural_id_to_int_partition_id()
 
@@ -96,6 +132,7 @@ class NaturalIdPartitioner(Partitioner):
     def num_partitions(self) -> int:
         """Total number of partitions."""
         if len(self._partition_id_to_natural_id) == 0:
+            self._check_supported_type_of_value_in_partition_by()
             self._create_int_partition_id_to_natural_id()
             self._create_natural_id_to_int_partition_id()
         return len(self._partition_id_to_natural_id)
@@ -114,3 +151,17 @@ class NaturalIdPartitioner(Partitioner):
         raise AttributeError(
             "Setting the partition_id_to_natural_id dictionary is not allowed."
         )
+
+    def _check_supported_type_of_value_in_partition_by(self) -> None:
+        values = self.dataset[self._partition_by]
+        values_np = np.array(values)
+        dtype = values_np.dtype
+        if not (
+            np.issubdtype(dtype, np.object_)
+            or np.issubdtype(dtype, np.integer)
+            or np.issubdtype(dtype, np.str_)
+        ):
+            raise ValueError(
+                f"The specified column in {self._partition_by} is of type {dtype} "
+                f"however only ints (with None) and strings (with None) are acceptable"
+            )
