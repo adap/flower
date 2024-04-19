@@ -86,7 +86,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.8.0"
+release = "1.9.0"
 
 # -- General configuration ---------------------------------------------------
 
@@ -162,7 +162,6 @@ redirects = {
     # Renamed pages
     "installation": "how-to-install-flower.html",
     "configuring-clients.html": "how-to-configure-clients.html",
-    "quickstart_mxnet": "tutorial-quickstart-mxnet.html",
     "quickstart_pytorch_lightning": "tutorial-quickstart-pytorch-lightning.html",
     "quickstart_huggingface": "tutorial-quickstart-huggingface.html",
     "quickstart_pytorch": "tutorial-quickstart-pytorch.html",
@@ -194,7 +193,6 @@ redirects = {
     "quickstart-pandas": "tutorial-quickstart-pandas.html",
     "quickstart-fastai": "tutorial-quickstart-fastai.html",
     "quickstart-pytorch-lightning": "tutorial-quickstart-pytorch-lightning.html",
-    "quickstart-mxnet": "tutorial-quickstart-mxnet.html",
     "quickstart-scikitlearn": "tutorial-quickstart-scikitlearn.html",
     "quickstart-xgboost": "tutorial-quickstart-xgboost.html",
     "quickstart-android": "tutorial-quickstart-android.html",
@@ -240,6 +238,10 @@ redirects = {
     "people": "index.html",
     "organizations": "index.html",
     "publications": "index.html",
+    "quickstart_mxnet": "index.html",
+    "quickstart-mxnet": "index.html",
+    "tutorial-quickstart-mxnet": "index.html",
+    "example-mxnet-walk-through": "index.html",
 }
 
 # -- Options for HTML output -------------------------------------------------

@@ -14,9 +14,9 @@
 # ==============================================================================
 """Message tests."""
 
-
+import time
 from contextlib import ExitStack
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 import pytest
 
@@ -62,24 +62,32 @@ def test_message_creation(
         if context:
             stack.enter_context(context)
 
-        _ = Message(
+        current_time = time.time()
+        message = Message(
             metadata=metadata,
             content=None if content_fn is None else content_fn(maker),
             error=None if error_fn is None else error_fn(0),
         )
 
+        assert message.metadata.created_at > current_time
+        assert message.metadata.created_at < time.time()
 
-def create_message_with_content() -> Message:
+
+def create_message_with_content(ttl: Optional[float] = None) -> Message:
     """Create a Message with content."""
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
+    if ttl:
+        metadata.ttl = ttl
     return Message(metadata=metadata, content=RecordSet())
 
 
-def create_message_with_error() -> Message:
+def create_message_with_error(ttl: Optional[float] = None) -> Message:
     """Create a Message with error."""
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
+    if ttl:
+        metadata.ttl = ttl
     return Message(metadata=metadata, error=Error(code=1))
 
 
@@ -107,3 +115,45 @@ def test_altering_message(
             message.error = Error(code=123)
         if message.has_error():
             message.content = RecordSet()
+
+
+@pytest.mark.parametrize(
+    "message_creation_fn,ttl,reply_ttl",
+    [
+        (create_message_with_content, 1e6, None),
+        (create_message_with_error, 1e6, None),
+        (create_message_with_content, 1e6, 3600),
+        (create_message_with_error, 1e6, 3600),
+    ],
+)
+def test_create_reply(
+    message_creation_fn: Callable[
+        [float],
+        Message,
+    ],
+    ttl: float,
+    reply_ttl: Optional[float],
+) -> None:
+    """Test reply creation from message."""
+    message: Message = message_creation_fn(ttl)
+
+    time.sleep(0.1)
+
+    if message.has_error():
+        dummy_error = Error(code=0, reason="it crashed")
+        reply_message = message.create_error_reply(dummy_error, ttl=reply_ttl)
+    else:
+        reply_message = message.create_reply(content=RecordSet(), ttl=reply_ttl)
+
+    # Ensure reply has a higher timestamp
+    assert message.metadata.created_at < reply_message.metadata.created_at
+    if reply_ttl:
+        # Ensure the TTL is the one specify upon reply creation
+        assert reply_message.metadata.ttl == reply_ttl
+    else:
+        # Ensure reply ttl is lower (since it uses remaining time left)
+        assert message.metadata.ttl > reply_message.metadata.ttl
+
+    assert message.metadata.src_node_id == reply_message.metadata.dst_node_id
+    assert message.metadata.dst_node_id == reply_message.metadata.src_node_id
+    assert reply_message.metadata.reply_to_message == message.metadata.message_id
