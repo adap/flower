@@ -25,7 +25,7 @@ import pathspec
 import typer
 from typing_extensions import Annotated
 
-from .config_utils import load, validate
+from .config_utils import validate_project_dir
 from .utils import is_valid_project_name
 
 
@@ -78,7 +78,7 @@ def build(
         )
         raise typer.Exit(code=1)
 
-    if not _validate_required_files(directory):
+    if validate_project_dir(directory) is None:
         raise typer.Exit(code=1)
 
     # Load .gitignore rules if present
@@ -154,39 +154,3 @@ def _sign_content(content: str, secret_key: str) -> str:
     payload = {"data": content}
     token = jwt.encode(payload, secret_key, algorithm="HS256")
     return token
-
-
-# pylint: disable=too-many-return-statements
-def _validate_required_files(
-    directory: Path,
-) -> bool:
-    """Validate the presence of required files with proper content."""
-    pyproject_path = directory / "pyproject.toml"
-
-    config = load(str(pyproject_path))
-    if config is None:
-        typer.secho(
-            "❌ Project configuration could not be loaded. "
-            "`pyproject.toml` does not exist.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        return False
-
-    if not validate(config):
-        typer.secho(
-            "❌ Project configuration is invalid.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        return False
-
-    if "provider" not in config["flower"]:
-        typer.secho(
-            "❌ Project configuration is missing required `provider` field.",
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        return False
-
-    return True
