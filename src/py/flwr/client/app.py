@@ -47,13 +47,14 @@ from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
+from .supernode.app import parse_args_run_client_app
 
 
 def run_client_app() -> None:
     """Run Flower client app."""
-    event(EventType.RUN_CLIENT_APP_ENTER)
-
     log(INFO, "Long-running Flower client starting")
+
+    event(EventType.RUN_CLIENT_APP_ENTER)
 
     args = _parse_args_run_client_app().parse_args()
 
@@ -131,56 +132,7 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         description="Start a Flower client app",
     )
 
-    parser.add_argument(
-        "client-app",
-        help="For example: `client:app` or `project.package.module:wrapper.app`",
-    )
-    parser.add_argument(
-        "--insecure",
-        action="store_true",
-        help="Run the client without HTTPS. By default, the client runs with "
-        "HTTPS enabled. Use this flag only if you understand the risks.",
-    )
-    parser.add_argument(
-        "--rest",
-        action="store_true",
-        help="Use REST as a transport layer for the client.",
-    )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
-        type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
-    )
-    parser.add_argument(
-        "--server",
-        default="0.0.0.0:9092",
-        help="Server address",
-    )
-    parser.add_argument(
-        "--max-retries",
-        type=int,
-        default=None,
-        help="The maximum number of times the client will try to connect to the"
-        "server before giving up in case of a connection error. By default,"
-        "it is set to None, meaning there is no limit to the number of tries.",
-    )
-    parser.add_argument(
-        "--max-wait-time",
-        type=float,
-        default=None,
-        help="The maximum duration before the client stops trying to"
-        "connect to the server in case of connection error. By default, it"
-        "is set to None, meaning there is no limit to the total time.",
-    )
-    parser.add_argument(
-        "--dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load Flower "
-        "app from there."
-        " Default: current working directory.",
-    )
+    parse_args_run_client_app(parser=parser)
 
     return parser
 
