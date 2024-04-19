@@ -165,4 +165,3 @@ class NaturalIdPartitioner(Partitioner):
                 f"The specified column in {self._partition_by} is of type {dtype} "
                 f"however only ints (with None) and strings (with None) are acceptable."
             )
-
