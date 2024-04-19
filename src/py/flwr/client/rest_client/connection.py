@@ -177,14 +177,14 @@ def http_request_response(  # pylint: disable=R0913, R0914, R0915
             log(
                 WARN,
                 "[Node] POST /%s: missing header `Content-Type`",
-                PATH_PULL_TASK_INS,
+                PATH_PING,
             )
             return
         if res.headers["content-type"] != "application/protobuf":
             log(
                 WARN,
                 "[Node] POST /%s: header `Content-Type` has wrong value",
-                PATH_PULL_TASK_INS,
+                PATH_PING,
             )
             return
 
@@ -227,14 +227,14 @@ def http_request_response(  # pylint: disable=R0913, R0914, R0915
             log(
                 WARN,
                 "[Node] POST /%s: missing header `Content-Type`",
-                PATH_PULL_TASK_INS,
+                PATH_CREATE_NODE,
             )
             return
         if res.headers["content-type"] != "application/protobuf":
             log(
                 WARN,
                 "[Node] POST /%s: header `Content-Type` has wrong value",
-                PATH_PULL_TASK_INS,
+                PATH_CREATE_NODE,
             )
             return
 
@@ -281,14 +281,14 @@ def http_request_response(  # pylint: disable=R0913, R0914, R0915
             log(
                 WARN,
                 "[Node] POST /%s: missing header `Content-Type`",
-                PATH_PULL_TASK_INS,
+                PATH_DELETE_NODE,
             )
             return
         if res.headers["content-type"] != "application/protobuf":
             log(
                 WARN,
                 "[Node] POST /%s: header `Content-Type` has wrong value",
-                PATH_PULL_TASK_INS,
+                PATH_DELETE_NODE,
             )
 
         # Cleanup
