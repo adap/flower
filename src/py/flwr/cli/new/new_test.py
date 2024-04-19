@@ -68,8 +68,8 @@ def test_new(tmp_path: str) -> None:
     expected_files_top_level = {
         "fedgpt",
         "README.md",
-        "flower.toml",
         "pyproject.toml",
+        ".gitignore",
     }
     expected_files_module = {
         "__init__.py",
