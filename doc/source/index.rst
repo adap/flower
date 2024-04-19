@@ -6,7 +6,6 @@ Flower Framework Documentation
 
 Welcome to Flower's documentation. `Flower <https://flower.ai>`_ is a friendly federated learning framework.
 
-
 Join the Flower Community
 -------------------------
 
@@ -115,6 +114,7 @@ Understanding-oriented concept guides explain and discuss key topics and underly
 
    explanation-federated-evaluation
    explanation-differential-privacy
+   explanation-flower-next
 
 References
 ~~~~~~~~~~
