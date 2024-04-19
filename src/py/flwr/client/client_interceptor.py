@@ -91,6 +91,7 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
         if client_call_details.metadata is not None:
             metadata = list(client_call_details.metadata)
 
+        print("Client ", self.public_key, ": ", type(request))
         if isinstance(request, CreateNodeRequest):
             metadata.append(
                 (
