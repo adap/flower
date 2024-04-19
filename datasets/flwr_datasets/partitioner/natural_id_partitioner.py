@@ -60,7 +60,7 @@ class NaturalIdPartitioner(Partitioner):
 
     def _create_partition_id_to_indices(self) -> None:
         """Create an assignment of indices to the partition indices."""
-        natural_ids = self.dataset[self._partition_by]
+        natural_ids = np.array(self.dataset[self._partition_by])
         unique_natural_ids = self.dataset.unique(self._partition_by)
 
         none_present = False
@@ -93,7 +93,7 @@ class NaturalIdPartitioner(Partitioner):
             mask = is_none(natural_ids)
             natural_ids[mask] = none_replacement
 
-            unique_natural_ids, inverse = np.unique(natural_ids, return_inverse=True)
+        unique_natural_ids, inverse = np.unique(natural_ids, return_inverse=True)
 
         for i, natural_id in enumerate(unique_natural_ids):
             if none_present and natural_id == none_replacement:
@@ -165,3 +165,13 @@ class NaturalIdPartitioner(Partitioner):
                 f"The specified column in {self._partition_by} is of type {dtype} "
                 f"however only ints (with None) and strings (with None) are acceptable"
             )
+
+if __name__ == "__main__":
+    import datasets
+
+    dataset = datasets.load_dataset("speech_commands", "v0.01")
+    from flwr_datasets.partitioner import NaturalIdPartitioner
+
+    nip = NaturalIdPartitioner("speaker_id")
+    nip.dataset = dataset["train"]
+    ps = [nip.load_partition(i) for i in range(nip.num_partitions)]
