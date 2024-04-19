@@ -1,27 +1,30 @@
 Flower Next
 ===========
 
+This page describes the high level concepts of Flower Next to bring the reader and user of Flower some clarity and context into its workings.
+
 Infrastructure Layer
 --------------------
 [graphic-outlining-infrastructure-layer]
 
-Federated learning relies on a system that relays messages between all involved applications during training. This backbone system handles tasks like sending and receiving messages, syncing with federation nodes, and storing messages temporarily. But how do we ensure this backbone fits different situations? That's where SuperLink and SuperNode step in! We call these the infrastructure layer.
+Federated learning typically relies on a system that relays messages between all involved applications during training. This backbone system handles tasks like sending and receiving messages, syncing with federation nodes, and storing messages temporarily. But how do we ensure this backbone fits different situations with Flower? By proposing a clear distinction of the infrastructure layer - a layer dedicated to tasks such as transmitting data and maintaining connections, separate from the application layer (more on that below) which is the user-interaction layer [#f1]_. 
+
+In Flower Next, the infrastructure layer consists of the SuperLink and SuperNode.
 
 SuperLink
 ~~~~~~~~~
-The SuperLink relays messages in a Flower federated learning system. It's like a hub that receives the model and training instructions from the server, then passes them along to the training nodes.
+The SuperLink relays messages in a Flower federated learning system. It acts like a hub that receives the model and training instructions from the server, then passes them along to the training nodes.
 
 More concretely, the SuperLink relays messages between the SuperNodes and the ServerApp. Let's give an example for a federated learning workflow: a SuperLink receives a model to be federated in a message from the ServerApp. Selected SuperNodes then pull that message from the SuperLink and respectively process their messages by running their ClientApps. In this case, the SuperNodes launch their ClientApps to train a model each on their local data. Once trainings are complete, the ClientApps return their models to the SuperNodes, which in turn relay messages via the SuperLink back to the ServerApp for aggregation.
 
-(Don't worry about the definitions of the ServerApp, ClientApp, and Message for now. We will explain them [below](#application-layer).)
+..
+    TODO: Add section labels where appropriate: https://docs.readthedocs.io/en/stable/guides/cross-referencing-with-sphinx.html#automatically-label-sections
 
-As the main relay hub, the SuperLink is always running in the background, ready to handle any communication needs. 
+Further below in the Application Layer, we will define what we mean by the ServerApp, ClientApp, and Message. For now, it is important to know that as the main relay hub, the SuperLink is always running in the background, ready to handle any communication needs. 
 
 SuperNode
 ~~~~~~~~~
-Just like SuperLink, the SuperNode continuously runs in the background as a lightweight service. It runs where the data is gathered, like on smartphones, IoT devices, or servers belonging to organizations. All connected SuperNodes check in with the SuperLink regularly. They pull messages (that were first pushed by a ServerApp) from the SuperLink, process the messages by launching a ClientApp, and then push the results back to the SuperLink.
-
-As a simple analogy, imagine SuperLink as the main internet router. It gets data packets from a central server and sends them to connected devices. Each SuperNode acts like a device, talking to SuperLink for data, processing it, and sending back results.
+The SuperNode is the next component of the infrastructure layer. Just like SuperLink, the SuperNode continuously runs in the background as a lightweight service. It runs where the data is gathered, like on smartphones, IoT devices, or servers belonging to organizations. All connected SuperNodes check in with the SuperLink regularly. They pull messages (that were first pushed by a ServerApp) from the SuperLink, process the messages by launching a ClientApp, and then push the results back to the SuperLink.
 
 Together, SuperLink and SuperNodes make up the infrastructure layer of a Flower federated learning system.
 
@@ -29,7 +32,7 @@ Application Layer
 -----------------
 [graphic-outlining-application-layer]
 
-On the application layer, we have the ServerApp and ClientApp. These are essentially applications or packaged code that runs, you guessed it, on the server and client, respectively.
+On the application layer, we have the ServerApp and ClientApp. These are essentially applications or packaged code that runs on the server and client, respectively.
 
 ServerApp
 ~~~~~~~~~
@@ -70,3 +73,7 @@ At the infrastructure layer, we've the backbone: the SuperLink and SuperNode, en
     [builtinmods_link]: how-to-use-built-in-mods.rst
     [message_link]: ref-api/flwr.common.Message.rst
     [context_link]: ref-api/flwr.common.Context.rst
+
+.. rubric:: Footnotes
+
+.. [#f1] This concept of layers is inspired by the [Open Systems Interconnection (OSI) model](https://en.wikipedia.org/wiki/OSI_model).
