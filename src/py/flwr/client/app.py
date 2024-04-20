@@ -394,7 +394,8 @@ def _start_client_internal(
             grpc_max_message_length,
             root_certificates,
         ) as conn:
-            receive, send, create_node, delete_node = conn
+            # pylint: disable-next=W0612
+            receive, send, create_node, delete_node, get_run = conn
 
             # Register node
             if create_node is not None:
@@ -612,6 +613,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
                 Callable[[Message], None],
                 Optional[Callable[[], None]],
                 Optional[Callable[[], None]],
+                Optional[Callable[[int], Tuple[str, str]]],
             ]
         ],
     ],
