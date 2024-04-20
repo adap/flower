@@ -27,6 +27,8 @@ from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
 
+from .utils import make_node_unavailable_taskres
+
 
 class InMemoryState(State):
     """In-memory State implementation."""
@@ -34,7 +36,8 @@ class InMemoryState(State):
     def __init__(self) -> None:
         # Map node_id to (online_until, ping_interval)
         self.node_ids: Dict[int, Tuple[float, float]] = {}
-        self.run_ids: Set[int] = set()
+        # Map run_id to (fab_id, fab_version)
+        self.run_ids: Dict[int, Tuple[str, str]] = {}
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
         self.lock = threading.Lock()
@@ -129,14 +132,31 @@ class InMemoryState(State):
         with self.lock:
             # Find TaskRes that were not delivered yet
             task_res_list: List[TaskRes] = []
+            replied_task_ids: Set[UUID] = set()
             for _, task_res in self.task_res_store.items():
-                if (
-                    UUID(task_res.task.ancestry[0]) in task_ids
-                    and task_res.task.delivered_at == ""
-                ):
+                reply_to = UUID(task_res.task.ancestry[0])
+                if reply_to in task_ids and task_res.task.delivered_at == "":
                     task_res_list.append(task_res)
+                    replied_task_ids.add(reply_to)
                 if limit and len(task_res_list) == limit:
                     break
+
+            # Check if the node is offline
+            for task_id in task_ids - replied_task_ids:
+                if limit and len(task_res_list) == limit:
+                    break
+                task_ins = self.task_ins_store.get(task_id)
+                if task_ins is None:
+                    continue
+                node_id = task_ins.task.consumer.node_id
+                online_until, _ = self.node_ids[node_id]
+                # Generate a TaskRes containing an error reply if the node is offline.
+                if online_until < time.time():
+                    err_taskres = make_node_unavailable_taskres(
+                        ref_taskins=task_ins,
+                    )
+                    self.task_res_store[UUID(err_taskres.task_id)] = err_taskres
+                    task_res_list.append(err_taskres)
 
             # Mark all of them as delivered
             delivered_at = now().isoformat()
@@ -219,17 +239,25 @@ class InMemoryState(State):
                 if online_until > current_time
             }
 
-    def create_run(self) -> int:
-        """Create one run."""
+    def create_run(self, fab_id: str, fab_version: str) -> int:
+        """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
         with self.lock:
             run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
             if run_id not in self.run_ids:
-                self.run_ids.add(run_id)
+                self.run_ids[run_id] = (fab_id, fab_version)
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def get_run(self, run_id: int) -> Tuple[int, str, str]:
+        """Retrieve information about the run with the specified `run_id`."""
+        with self.lock:
+            if run_id not in self.run_ids:
+                log(ERROR, "`run_id` is invalid")
+                return 0, "", ""
+            return run_id, *self.run_ids[run_id]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""

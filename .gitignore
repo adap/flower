@@ -3,6 +3,7 @@
 data/
 doc/source/api_documentation
 doc/source/_build
+doc/source/dataset/
 flwr_logs
 .cache
 

@@ -1,1 +1,1 @@
-flwr-nightly[simulation]==1.8.0.dev20240309
+flwr[simulation]>=1.8.0
