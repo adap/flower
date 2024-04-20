@@ -25,7 +25,7 @@ from flwr.common import serde
 from flwr.proto import driver_pb2, node_pb2, task_pb2  # pylint: disable=E0611
 from flwr.server.client_proxy import ClientProxy
 
-from ..driver.grpc_driver import GrpcDriver
+from ..driver.driver import GrpcDriverHelper
 
 SLEEP_TIME = 1
 
@@ -33,7 +33,9 @@ SLEEP_TIME = 1
 class DriverClientProxy(ClientProxy):
     """Flower client proxy which delegates work using the Driver API."""
 
-    def __init__(self, node_id: int, driver: GrpcDriver, anonymous: bool, run_id: int):
+    def __init__(
+        self, node_id: int, driver: GrpcDriverHelper, anonymous: bool, run_id: int
+    ):
         super().__init__(str(node_id))
         self.node_id = node_id
         self.driver = driver
