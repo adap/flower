@@ -32,7 +32,7 @@ pip install .
 Then, to verify that everything works correctly you can run the following command:
 
 ```shell
-python -c "import flwr"
+python3 -c "import flwr"
 ```
 
 If you don't see any errors you're good to go!
