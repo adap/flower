@@ -291,9 +291,11 @@ def run_fleet_api() -> None:
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
 def run_superlink() -> None:
-    """Run Flower server (Driver API and Fleet API)."""
-    log(INFO, "Starting Flower server")
+    """Run Flower SuperLink (Driver API and Fleet API)."""
+    log(INFO, "Starting Flower SuperLink")
+
     event(EventType.RUN_SUPERLINK_ENTER)
+
     args = _parse_args_run_superlink().parse_args()
 
     # Parse IP address
@@ -568,9 +570,7 @@ def _parse_args_run_fleet_api() -> argparse.ArgumentParser:
 def _parse_args_run_superlink() -> argparse.ArgumentParser:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
-        description="This will start a Flower server "
-        "(meaning, a Driver API and a Fleet API), "
-        "that clients will be able to connect to.",
+        description="Start a Flower SuperLink",
     )
 
     _add_args_common(parser=parser)

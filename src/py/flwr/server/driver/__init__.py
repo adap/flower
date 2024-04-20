@@ -16,9 +16,7 @@
 
 
 from .driver import Driver
-from .grpc_driver import GrpcDriver
 
 __all__ = [
     "Driver",
-    "GrpcDriver",
 ]
