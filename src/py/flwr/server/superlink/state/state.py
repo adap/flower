@@ -188,7 +188,9 @@ class State(abc.ABC):
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
 
     @abc.abstractmethod
-    def store_node_id_client_public_key_pair(self, client_public_key: bytes, node_id: int) -> None:
+    def store_node_id_client_public_key_pair(
+        self, client_public_key: bytes, node_id: int
+    ) -> None:
         """Store `node_id` and `client_public_keys` as pairs."""
 
     @abc.abstractmethod

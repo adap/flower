@@ -216,8 +216,9 @@ class InMemoryState(State):  # pylint: disable=R0902
                 return node_id
         log(ERROR, "Unexpected node registration failure.")
         return 0
-    
+
     def restore_node(self, node_id: int, ping_interval: float) -> bool:
+        """Create, store in state, and return `node_id`."""
         with self.lock:
             if node_id not in self.node_ids:
                 self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
@@ -291,8 +292,10 @@ class InMemoryState(State):  # pylint: disable=R0902
     def get_client_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `client_public_keys` as a set."""
         return self.client_public_keys
-    
-    def store_node_id_client_public_key_pair(self, client_public_key: bytes, node_id: int) -> None:
+
+    def store_node_id_client_public_key_pair(
+        self, client_public_key: bytes, node_id: int
+    ) -> None:
         """Store `node_id` and `client_public_keys` as pairs."""
         self.public_key_node_id_pairs[client_public_key] = node_id
 

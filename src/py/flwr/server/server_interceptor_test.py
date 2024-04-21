@@ -17,6 +17,7 @@
 
 import base64
 import unittest
+from typing import cast
 
 import grpc
 
@@ -32,6 +33,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeRequest,
     DeleteNodeResponse,
 )
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 
 from .app import ADDRESS_FLEET_API_GRPC_RERE, _run_fleet_api_grpc_rere
 from .server_interceptor import (
@@ -61,8 +63,6 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             ADDRESS_FLEET_API_GRPC_RERE, state_factory, None, [self._server_interceptor]
         )
-
-        self._client_node_id: int = -1
 
         self._channel = grpc.insecure_channel("localhost:9092")
         self._create_node = self._channel.unary_unary(
@@ -99,11 +99,12 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
         assert call.initial_metadata()[0] == expected_metadata
         assert isinstance(response, CreateNodeResponse)
-        self._client_node_id = response.node.node_id
+        self._node = cast(Node, response.node)
+        self._client_node_id = self._node.node_id
 
     def test_successful_delete_node_with_metadata(self) -> None:
         """Test server interceptor for deleting node."""
-        request = DeleteNodeRequest()
+        request = DeleteNodeRequest(self._node)
         shared_secret = generate_shared_key(
             self._client_private_key, self._server_public_key
         )
@@ -125,3 +126,21 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def test_successful_restore_node(self) -> None:
         """Test server interceptor for restoring node."""
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+        response, call = self._create_node.with_call(
+            request=CreateNodeRequest(),
+            metadata=((_PUBLIC_KEY_HEADER, public_key_bytes),),
+        )
+
+        expected_metadata = (
+            _PUBLIC_KEY_HEADER,
+            base64.urlsafe_b64encode(
+                public_key_to_bytes(self._server_public_key)
+            ).decode(),
+        )
+
+        assert call.initial_metadata()[0] == expected_metadata
+        assert isinstance(response, CreateNodeResponse)
+        assert response.node.node_id == self._client_node_id

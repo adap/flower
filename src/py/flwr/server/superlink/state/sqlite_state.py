@@ -555,7 +555,7 @@ class SqliteState(State):
             log(ERROR, "Unexpected node registration failure.")
             return 0
         return node_id
-    
+
     def restore_node(self, node_id: int, ping_interval: float) -> bool:
         """Restore `node_id` and return True if succeed."""
 
@@ -639,11 +639,13 @@ class SqliteState(State):
         rows = self.query(query)
         result: Set[bytes] = {row["public_key"] for row in rows}
         return result
-    
+
     def get_node_id(self, client_public_key: bytes) -> int:
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
 
-    def store_node_id_client_public_key_pair(self, client_public_key: bytes, node_id: int) -> None:
+    def store_node_id_client_public_key_pair(
+        self, client_public_key: bytes, node_id: int
+    ) -> None:
         """Store `node_id` and `client_public_keys` as pairs."""
 
     def delete_node_id_client_public_key_pair(self, client_public_key: bytes) -> None:
