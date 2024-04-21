@@ -73,6 +73,7 @@ def grpc_connection(  # pylint: disable=R0915,R0913
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
+        Optional[Callable[[int], Tuple[str, str]]],
     ]
 ]:
     """Establish a gRPC connection to a gRPC server.
@@ -229,7 +230,7 @@ def grpc_connection(  # pylint: disable=R0915,R0913
 
     try:
         # Yield methods
-        yield (receive, send, None, None)
+        yield (receive, send, None, None, None)
     finally:
         # Make sure to have a final
         channel.close()

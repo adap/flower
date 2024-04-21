@@ -1,28 +1,3 @@
-# Flower
-.flower_ops
-data/
-doc/source/api_documentation
-doc/source/_build
-doc/source/dataset/
-flwr_logs
-.cache
-
-# Node.js
-node_modules
-
-# Flower Examples
-examples/**/dataset/**
-#examples/**/dev/*.sh
-
-# Flower Baselines
-baselines/datasets/leaf
-
-# macOS
-.DS_Store
-
-# Editor
-.vscode
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -45,13 +20,11 @@ parts/
 sdist/
 var/
 wheels/
-pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
-.srl
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -76,6 +49,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+cover/
 
 # Translations
 *.mo
@@ -98,6 +72,7 @@ instance/
 docs/_build/
 
 # PyBuilder
+.pybuilder/
 target/
 
 # Jupyter Notebook
@@ -110,7 +85,7 @@ ipython_config.py
 # pyenv
 #   For a library or package, you might want to ignore these files since the code is
 #   intended to run in multiple environments; otherwise, check them in:
-.python-version
+# .python-version
 
 # pipenv
 #   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
@@ -119,7 +94,22 @@ ipython_config.py
 #   install all needed dependencies.
 #Pipfile.lock
 
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+# poetry
+#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
+#poetry.lock
+
+# pdm
+#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
+#pdm.lock
+#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
+#   in version control.
+#   https://pdm.fming.dev/#use-with-ide
+.pdm.toml
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/
 
 # Celery stuff
@@ -159,27 +149,12 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
-# Poetry
-poetry.lock
-*.pkl
+# Cython debug symbols
+cython_debug/
 
-# iOS
-xcuserdata/
-
-# Android
-.gradle
-.idea
-local.properties
-app/src/main/assets
-/build
-*.iml
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/captures
-.externalNativeBuild
-.cxx
+# PyCharm
+#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+#  and can be added to the global gitignore or merged into this file.  For a more nuclear
+#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
+#.idea/
