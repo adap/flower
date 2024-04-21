@@ -81,7 +81,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self._server.stop(None)
 
     def test_successful_create_node_with_metadata(self) -> None:
-        """Test server interceptor for create node."""
+        """Test server interceptor for creating node."""
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._client_public_key)
         )
@@ -102,7 +102,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self._client_node_id = response.node.node_id
 
     def test_successful_delete_node_with_metadata(self) -> None:
-        """Test server interceptor for create node."""
+        """Test server interceptor for deleting node."""
         request = DeleteNodeRequest()
         shared_secret = generate_shared_key(
             self._client_private_key, self._server_public_key
@@ -122,3 +122,6 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         )
         assert isinstance(response, DeleteNodeResponse)
         assert grpc.StatusCode.OK == call.code()
+
+    def test_successful_restore_node(self) -> None:
+        """Test server interceptor for restoring node."""

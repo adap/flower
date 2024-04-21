@@ -555,6 +555,9 @@ class SqliteState(State):
             log(ERROR, "Unexpected node registration failure.")
             return 0
         return node_id
+    
+    def restore_node(self, node_id: int, ping_interval: float) -> bool:
+        """Restore `node_id` and return True if succeed."""
 
     def delete_node(self, node_id: int) -> None:
         """Delete a client node."""
