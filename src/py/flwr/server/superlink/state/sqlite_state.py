@@ -54,9 +54,9 @@ CREATE TABLE IF NOT EXISTS public_key(
 """
 
 SQL_CREATE_TABLE_PUBLIC_KEY_NODE_ID = """
-CREATE TABLE IF NOT EXISTS credential(
+CREATE TABLE IF NOT EXISTS public_key_node_id(
     public_key BLOB PRIMARY KEY,
-    private_key BLOB
+    node_id INTEGER
 );
 """
 
@@ -153,6 +153,7 @@ class SqliteState(State):
         cur.execute(SQL_CREATE_TABLE_NODE)
         cur.execute(SQL_CREATE_TABLE_CREDENTIAL)
         cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
+        cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY_NODE_ID)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
@@ -635,6 +636,15 @@ class SqliteState(State):
         rows = self.query(query)
         result: Set[bytes] = {row["public_key"] for row in rows}
         return result
+    
+    def get_node_id(self, client_public_key: bytes) -> int:
+        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+
+    def store_node_id_client_public_key_pair(self, client_public_key: bytes, node_id: int) -> None:
+        """Store `node_id` and `client_public_keys` as pairs."""
+
+    def delete_node_id_client_public_key_pair(self, client_public_key: bytes) -> None:
+        """Remove `node_id` and `client_public_keys` pairs."""
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
