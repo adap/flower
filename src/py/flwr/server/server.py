@@ -170,7 +170,6 @@ class Server:
             parameters=self.parameters,
             client_manager=self._client_manager,
         )
-        print(client_instructions)
         if not client_instructions:
             log(INFO, "configure_evaluate: no clients selected, skipping evaluation")
             return None
@@ -195,7 +194,6 @@ class Server:
             len(failures),
         )
 
-        print(failures)
         # Aggregate the evaluation results
         aggregated_result: Tuple[
             Optional[float],
@@ -244,7 +242,6 @@ class Server:
             len(failures),
         )
 
-        print(failures)
         # Aggregate training results
         aggregated_result: Tuple[
             Optional[Parameters],
