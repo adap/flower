@@ -1,6 +1,6 @@
 # How to configure serialization
 
-This tutorial provides instructions on configuring serialization in the Flower iOS SDK.
+This guide shows you how to configure serialization in the Flower iOS SDK.
 
 ## Overview
 

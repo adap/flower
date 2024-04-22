@@ -1,6 +1,6 @@
-# How to federate CoreML with Flower
+# Federate CoreML with Flower Tutorial
 
-This tutorial offers a comprehensive guide to federating CoreML with Flower and enabling federated learning on iOS devices.
+In this comprehensive tutorial we will learn to federate CoreML with Flower and enable federated learning on iOS devices.
 
 ## Overview
 
@@ -8,7 +8,7 @@ This tutorial is based on https://github.com/adap/flower/tree/main/examples/ios,
 
 ### Layer wrapper
 
-Due to the CoreML black-box approach in running machine learning training, we can't easily federate our training using CoreML. One particular problem is that CoreML needs to give us the ability to get initial weights and their shape. We need to peek inside the CoreML model specification before federating our training to fix this.
+Notice that due to the CoreML black-box approach in running machine learning training, we can't easily federate our training using CoreML. One particular problem is that CoreML needs to give us the ability to get initial weights and their shape. We need to peek inside the CoreML model specification before federating our training to fix this.
 
 ```swift
 private func getLayerWrapper(layer: CoreML_Specification_NeuralNetworkLayer) -> MLLayerWrapper? {
