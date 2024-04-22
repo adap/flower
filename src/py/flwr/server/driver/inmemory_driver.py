@@ -66,7 +66,7 @@ class InMemoryDriver(Driver):
 
     def _get_run_id(self) -> int:
         if self.run_id is None:
-            self.run_id = self.state.create_run() # TODO: how?
+            self.run_id = self.state.create_run()  # TODO: how?
         return self.run_id
 
     def create_message(
