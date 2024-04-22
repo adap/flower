@@ -39,7 +39,7 @@ from flwr.proto.driver_pb2_grpc import DriverStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
-from . import Driver
+from .driver import Driver
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
 

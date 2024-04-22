@@ -16,7 +16,8 @@
 
 
 from .driver import Driver
-from .grpc_driver import GrpcDriver, GrpcDriverHelper
+from .grpc_driver import GrpcDriver
+from .grpc_driver import GrpcDriverHelper
 
 __all__ = [
     "Driver",
