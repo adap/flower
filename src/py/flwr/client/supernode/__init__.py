@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower client."""
+"""Flower SuperNode."""
 
 
-from .app import run_client_app as run_client_app
-from .app import start_client as start_client
-from .app import start_numpy_client as start_numpy_client
-from .client import Client as Client
-from .client_app import ClientApp as ClientApp
-from .numpy_client import NumPyClient as NumPyClient
-from .supernode import run_supernode as run_supernode
-from .typing import ClientFn as ClientFn
+from .app import run_supernode as run_supernode
 
 __all__ = [
-    "Client",
-    "ClientApp",
-    "ClientFn",
-    "NumPyClient",
-    "run_client_app",
     "run_supernode",
-    "start_client",
-    "start_numpy_client",
 ]

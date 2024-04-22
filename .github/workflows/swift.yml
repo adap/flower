@@ -20,7 +20,7 @@ jobs:
     name: Test
     runs-on: macos-latest
     steps:
-      - uses: fwal/setup-swift@cdbe0f7f4c77929b6580e71983e8606e55ffe7e4
+      - uses: fwal/setup-swift@v2
         with:
           swift-version: 5
       - uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
     runs-on: macos-latest
     name: Build docs
     steps:
-      - uses: fwal/setup-swift@cdbe0f7f4c77929b6580e71983e8606e55ffe7e4
+      - uses: fwal/setup-swift@v2
         with:
           swift-version: 5
       - uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
     runs-on: macos-latest
     name: Deploy docs 
     steps:
-      - uses: fwal/setup-swift@cdbe0f7f4c77929b6580e71983e8606e55ffe7e4
+      - uses: fwal/setup-swift@v2
         with:
           swift-version: 5
       - uses: actions/checkout@v4

@@ -15,33 +15,16 @@
 """Driver (abstract base class)."""
 
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Iterable, List, Optional
 
-from flwr.common import Message, Metadata, RecordSet
-
-
-def _get_dummy_message() -> Message:
-    metadata = Metadata(
-        run_id=0,
-        message_id="",
-        group_id="",
-        src_node_id=1,
-        dst_node_id=2,
-        reply_to_message="",
-        ttl=1,
-        message_type="",
-    )
-    return Message(metadata=metadata, content=RecordSet())
+from flwr.common import Message, RecordSet
 
 
 class Driver(ABC):
     """Abstract base Driver class for the Driver API."""
 
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
-        """."""
-        raise NotImplementedError()
-
+    @abstractmethod
     def create_message(  # pylint: disable=too-many-arguments
         self,
         content: RecordSet,
@@ -79,13 +62,12 @@ class Driver(ABC):
         message : Message
             A new `Message` instance with the specified content and metadata.
         """
-        _ = (content, message_type, dst_node_id, group_id, ttl)
-        return _get_dummy_message()
 
+    @abstractmethod
     def get_node_ids(self) -> List[int]:
         """Get node IDs."""
-        return []
 
+    @abstractmethod
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
         """Push messages to specified node IDs.
 
@@ -103,9 +85,8 @@ class Driver(ABC):
             An iterable of IDs for the messages that were sent, which can be used
             to pull replies.
         """
-        _ = messages
-        return iter("")
 
+    @abstractmethod
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
         """Pull messages based on message IDs.
 
@@ -122,10 +103,8 @@ class Driver(ABC):
         messages : Iterable[Message]
             An iterable of messages received.
         """
-        _ = message_ids
 
-        return (_get_dummy_message() for _ in range(2))
-
+    @abstractmethod
     def send_and_receive(
         self,
         messages: Iterable[Message],
@@ -159,9 +138,3 @@ class Driver(ABC):
         replies for all sent messages. A message remains valid until its TTL,
         which is not affected by `timeout`.
         """
-        _ = timeout
-        return (msg.create_reply(content=RecordSet()) for msg in messages)
-
-    def close(self) -> None:
-        """Disconnect from the SuperLink if connected."""
-        raise NotADirectoryError
