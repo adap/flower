@@ -119,6 +119,8 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
 
     def test_load_split(self) -> None:
         """Test if the load_split works with the correct split name."""
+        if self.test_split is None:
+            return
         dataset_fds = FederatedDataset(
             dataset=self.dataset_name, partitioners={"train": 100}
         )
