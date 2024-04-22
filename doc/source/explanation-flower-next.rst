@@ -58,8 +58,7 @@ Now, onto its counterpart, the ClientApp (|clientapp_link|_). Like the ServerApp
 .. note::
     In a future release, we will introduce the concept of multi-app support. This means that multiple ClientApps can be connected to a single SuperNode. This allows multiple users of the same federation to execute different tasks on the same SuperNode, bringing greater freedom for building and using task-specific apps, all while using the same infrastructure.
 
-.. 
-    Seamlessly move between projects simulation and deployment
+The reason for employing the mechanisms for launching apps is to enable code reuseability: In previous versions (<1.8), clients are inherently linked to a server for an FL project and additional code needs to be written to move a simulation-based FL setup to a real-world deployment. This can sometimes prohibitively impede the productizing of federated learning workflows. Instead, with the decoupling of the layers in Flower Next, the same ServerApp and ClientApp code can be easily run in a simulation setup or deployment setup *without any code changes*.
 
 Information exchange
 --------------------
@@ -78,13 +77,6 @@ In this explainer, you've learnt the essential components of federated learning 
 At the infrastructure layer, we've the backbone: the SuperLink and SuperNode, ensuring standardized and persistent communication between nodes. On the application layer, we've seen the ServerApp and ClientApp in action, handling tasks on the server and client sides, respectively.
 
 The benefit of this setup lies in decoupling—data scientists and ML researchers can focus on building and using the apps while making use of pre-existing infrastructure. Importantly, users can seamlessly move projects between simulation and real-world setting without code changes, thereby easily making meaningful progress in production based on the success on simulated problems. Under the hood, Message and Context objects standardize the mechanisms of relaying and persisting information between ServerApp and ClientApps. It's a win-win scenario, enabling smoother development experience and flexibility to experiment and build federated learning systems.
-
-.. 
-    [clientapp_link]: ref-api/flwr.client.ClientApp.rst
-    [serverapp_link]: ref-api/flwr.server.ServerApp.rst
-    [builtinmods_link]: how-to-use-built-in-mods.rst
-    [message_link]: ref-api/flwr.common.Message.rst
-    [context_link]: ref-api/flwr.common.Context.rst
 
 .. admonition:: Important
     :class: important
