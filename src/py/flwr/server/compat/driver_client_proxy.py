@@ -190,7 +190,6 @@ def validate_task_res(
     if not task_res.HasField("task"):
         raise ValueError("Invalid TaskRes, field `task` missing")
     if task_res.task.HasField("error"):
-        print(task_res.task)
         raise ValueError("Exception during client-side task execution")
     if not task_res.task.HasField("recordset"):
         raise ValueError("Invalid TaskRes, both `recordset` and `error` are missing")
