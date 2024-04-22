@@ -64,6 +64,8 @@ jobs:
 
           - directory: bare-https
 
+          - directory: bare-client-auth
+
           - directory: jax
 
           - directory: pytorch
@@ -130,10 +132,13 @@ jobs:
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
+        if: ${{ matrix.directory != 'bare-client-auth' }}
         run: ./../test.sh "${{ matrix.directory }}"
       - name: Run virtual client test
+        if: ${{ matrix.directory != 'bare-client-auth' }}
         run: python simulation.py
       - name: Run driver test
+        if: ${{ matrix.directory != 'bare-client-auth' }}
         run: ./../test_driver.sh "${{ matrix.directory }}"
       - name: Run driver test with REST
         if: ${{ matrix.directory == 'bare' }}
@@ -142,8 +147,8 @@ jobs:
         if: ${{ matrix.directory == 'bare' }}
         run: ./../test_driver.sh bare sqlite
       - name: Run driver test with client authentication
-        if: ${{ matrix.directory == 'pytorch' }}
-        run: ./../test_driver.sh pytorch client-auth
+        if: ${{ matrix.directory == 'bare-client-auth' }}
+        run: ./../test_driver.sh bare client-auth
 
   strategies:
     runs-on: ubuntu-22.04

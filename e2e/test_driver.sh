@@ -31,15 +31,15 @@ case "$2" in
     client_auth_2=""
     ;;
   client-auth)
-    ./../client-auth/generate.sh
+    ./generate.sh
     rest_arg=""
     server_address="127.0.0.1:9092"
     db_arg="--database :flwr-in-memory-state:"
-    server_arg="--certificates ../client-auth/certificates/ca.crt ../client-auth/certificates/server.pem ../client-auth/certificates/server.key"
-    client_arg="--root-certificates ../client-auth/certificates/ca.crt"
-    server_auth="--require-client-authentication ../client-auth/keys/client_public_keys.csv ../client-auth/keys/server_credentials.pub ../client-auth/keys/server_credentials"
-    client_auth_1="--authentication-keys ../client-auth/keys/client_credentials_1.pub ../client-auth/keys/client_credentials_1"
-    client_auth_2="--authentication-keys ../client-auth/keys/client_credentials_2.pub ../client-auth/keys/client_credentials_2"
+    server_arg="--certificates certificates/ca.crt certificates/server.pem certificates/server.key"
+    client_arg="--root-certificates certificates/ca.crt"
+    server_auth="--require-client-authentication keys/client_public_keys.csv keys/server_credentials.pub keys/server_credentials"
+    client_auth_1="--authentication-keys keys/client_credentials_1.pub keys/client_credentials_1"
+    client_auth_2="--authentication-keys keys/client_credentials_2.pub keys/client_credentials_2"
     ;;
   *)
     rest_arg=""
@@ -63,16 +63,8 @@ timeout 2m flower-client-app client:app $client_arg $rest_arg --server $server_a
 cl2_pid=$!
 sleep 3
 
-case "$2" in
-  client-auth)
-    timeout 2m python driver_secure.py &
-    pid=$!
-    ;;
-  *)
-    timeout 2m python driver.py &
-    pid=$!
-    ;;
-esac
+timeout 2m python driver.py &
+pid=$!
 
 wait $pid
 res=$?
