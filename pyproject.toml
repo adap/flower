@@ -171,9 +171,6 @@ ignore_missing_imports = true
 strict = true
 
 [[tool.mypy.overrides]]
-ignore_errors = true
-
-[[tool.mypy.overrides]]
 module = [
     "importlib.metadata.*",
     "importlib_metadata.*",
