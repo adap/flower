@@ -190,7 +190,7 @@ def _generate_random_image_column(
     pil_imgs = []
     for np_image in np_images:
         # Convert the NumPy array to a PIL image
-        pil_img_beg = Image.fromarray(np_image)
+        pil_img_beg = Image.fromarray(np_image)  # type: ignore
 
         # Save the image to an in-memory bytes buffer
         in_memory_file = io.BytesIO()
