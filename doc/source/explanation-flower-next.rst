@@ -1,13 +1,26 @@
-Flower Next
-===========
+Key Concepts of Flower Next
+===========================
 
-This page describes the high level concepts of Flower Next to bring the reader and user of Flower some clarity and context into its workings.
+This page explains the decoupling concept in Flower Next and how it benefits Flower users.
 
-Infrastructure Layer
+.. |clientapp_link| replace:: ``ClientApp()``
+.. |serverapp_link| replace:: ``ServerApp()``
+.. |message_link| replace:: ``Message()``
+.. |context_link| replace:: ``Context()``
+.. _clientapp_link: ref-api/flwr.client.ClientApp.html
+.. _serverapp_link: ref-api/flwr.server.ServerApp.html
+.. _message_link: ref-api/flwr.common.Message.html
+.. _context_link: ref-api/flwr.common.Context.html
+
+Infrastructure layer
 --------------------
+Federated learning typically relies on a system that relays messages during training. Beyond sending and receiving messages, this backbone system may also handle a variety of other tasks that are non-learning related, like syncing with federation nodes or temporarily storing messages. However, as the range and complexity of applications benefiting from federated learning grows, reliability and reproducibility of such a sytem become key challenges. These challenges are especially pertinent to users wanting to deploy their federated learning workflows to production.
+
+With Flower Next, we address this set of challenges by decoupling and standardizing the infrastructure layer for federated learning (see following diagram).
+
 [graphic-outlining-infrastructure-layer]
 
-Federated learning typically relies on a system that relays messages between all involved applications during training. This backbone system handles tasks like sending and receiving messages, syncing with federation nodes, and storing messages temporarily. But how do we ensure this backbone fits different situations with Flower? By proposing a clear distinction of the infrastructure layer - a layer dedicated to tasks such as transmitting data and maintaining connections, separate from the application layer (more on that below) which is the user-interaction layer [#f1]_. 
+This layer is dedicated to tasks such as transmitting data and maintaining connections. It is separate from the application layer (more on that below) which is the user-interaction layer [#f1]_. Because of this decoupling, the Flower federated learning system becomes truly infrastructure agnostic, meaning that Flower users can seamlessly move projects between simulation and deployment without code changes. 
 
 In Flower Next, the infrastructure layer consists of the SuperLink and SuperNode.
 
@@ -20,52 +33,51 @@ More concretely, the SuperLink relays messages between the SuperNodes and the Se
 ..
     TODO: Add section labels where appropriate: https://docs.readthedocs.io/en/stable/guides/cross-referencing-with-sphinx.html#automatically-label-sections
 
-Further below in the Application Layer, we will define what we mean by the ServerApp, ClientApp, and Message. For now, it is important to know that as the main relay hub, the SuperLink is always running in the background, ready to handle any communication needs. 
+In the "Application layer" section, we will define what we mean by the ServerApp, ClientApp, and Message. For now, it is important to know that as the main relay hub, the SuperLink is always running in the background to handle any communication needs. 
 
 SuperNode
 ~~~~~~~~~
-The SuperNode is the next component of the infrastructure layer. Just like SuperLink, the SuperNode continuously runs in the background as a lightweight service. It runs where the data is gathered, like on smartphones, IoT devices, or servers belonging to organizations. All connected SuperNodes check in with the SuperLink regularly. They pull messages (that were first pushed by a ServerApp) from the SuperLink, process the messages by launching a ClientApp, and then push the results back to the SuperLink.
+The SuperNode is the next component of the infrastructure layer. Just like SuperLink, the SuperNode continuously runs in the background. It runs where the data is gathered, like on smartphones, IoT devices, or servers belonging to organizations. All connected SuperNodes check in with the SuperLink regularly. They pull messages (that were first pushed by a ServerApp) from the SuperLink, process the messages by launching a ClientApp, and then push the results back to the SuperLink.
 
 Together, SuperLink and SuperNodes make up the infrastructure layer of a Flower federated learning system.
 
-Application Layer
+Application layer
 -----------------
 [graphic-outlining-application-layer]
 
-On the application layer, we have the ServerApp and ClientApp. These are essentially applications or packaged code that runs on the server and client, respectively.
+On the application layer, we have the ServerApp and ClientApp. These are essentially applications or packaged code that runs on the server and clients, respectively.
 
 ServerApp
 ~~~~~~~~~
-Let's start with the [ServerApp][serverapplink]. Remember from our previous tutorial that only a handful of connected nodes are involved in training? The ServerApp plays a crucial role in this. It's responsible for sampling SuperNodes that are connected to the SuperLink, pushing messages to the SuperLink and pulling messages from it. It would normally process messages that get pulled (e.g. when performing model aggregation). What's neat is that the ServerApp is ephemeral — it's triggered just once for a complete training cycle.
+Let's start with the ServerApp (|serverapp_link|_). Typically, in federated learning, only a handful of connected nodes are involved in training. The ServerApp plays a crucial role in this. It is responsible for sampling SuperNodes that are connected to the SuperLink, pushing messages to the SuperLink, and pulling messages from it. It would normally process messages that get pulled, for example, when performing model aggregation. The ServerApp is also ephemeral, meaning that it is temporarily spun up and executed for a task, for instance one complete federated learning run. This allows server-side resources to be consumed on-demand.
 
 ClientApp
 ~~~~~~~~~
-Now, onto its counterpart, the [ClientApp][clientapplink]. Like the ServerApp, the ClientApp is ephemeral - it is spun up on-demand by the SuperNode to process a message (sent by the ServerApp). When the ClientApp is launched, it receives a message from the SuperNode, executes the instructions in the message, returns results back to the SuperNode, and finally terminates. 
+Now, onto its counterpart, the ClientApp (|clientapp_link|_). Like the ServerApp, the ClientApp is ephemeral - it is spun up on-demand by the SuperNode to process a message (sent by the ServerApp). When the ClientApp is launched, it receives a message from the SuperNode, executes the instructions in the message, returns results back to the SuperNode, and finally terminates.
 
-..
-    <div class="alert alert-info">
+.. note::
+    In a future release, we will introduce the concept of multi-app support. This means that multiple ClientApps can be connected to a single SuperNode. This allows multiple users of the same federation to execute different tasks on the same SuperNode, bringing greater freedom for building and using task-specific apps, all while using the same infrastructure.
 
-    Note
+.. 
+    Seamlessly move between projects simulation and deployment
 
-    In the coming weeks, we will introduce the concept of multi-app support. This means that multiple ClientApps can be connected to a single SuperNode. This allows multiple users of the same federation to execute different tasks on the same SuperNode, bringing greater freedom for building and using task-specific apps, all while using the same infrastructure! 
-
-    </div>
-
-Others
-------
+Information exchange
+--------------------
 Messages
 ~~~~~~~~
-[Message][messagelink]s is a Python dataclass that Flower uses to carry information between ServerApp and ClientApp. This information can be a model the ServerApp wants to federate, metrics the ClientApp is pushing back to the ServerApp via the SuperLink, and anything in between. The design of Messages and how they are handled by Flower ensures that a Message sent by the ServerApp looks exactly the same when received by the ClientApp (and vice versa). This ensures a more unified and smoother developer experience for you!
+Message (|message_link|_) is an object that Flower uses to carry information between ServerApp and ClientApp. This information can be a model the ServerApp wants to federate, metrics the ClientApp is pushing back to the ServerApp via the SuperLink, and anything in between. The design of Messages and how they are handled by Flower ensures that a Message sent by the ServerApp looks exactly the same when received by the ClientApp (and vice versa). This ensures a more unified and smoother developer experience.
 
 Context
 ~~~~~~~
-[Context][contextlink] is another useful Python dataclass that we introduced in Flower Next. At a high level, it carries the record and messages for a specific execution of `ServerApp`, i.e. a run. Each time a SuperNode runs a ClientApp in the same run, the same Context object is exposed to the ClientApp, allowing the ClientApp to persist throughout the duration of the run.
+Context (|context_link|_) is another useful object that we introduced in Flower Next. For every execution of `ServerApp`, i.e. a run, it carries the record and messages that is unique to the run. Each time a SuperNode runs a ClientApp within the run, the same Context object is exposed to the ClientApp, allowing the ClientApp to persist throughout the duration of the run. Context can be used as a temporary buffer for executing additional tasks, like `mods`. 
 
-Conclusion
-----------
-To wrap up, you've learnt the essential components of federated learning with Flower Next, divided neatly into infrastructure and application layers.
+Summary
+-------
+In this explainer, you've learnt the essential components of federated learning with Flower Next, divided neatly into infrastructure and application layers.
 
-At the infrastructure layer, we've the backbone: the SuperLink and SuperNode, ensuring standardized and persistent communication between nodes. On the application layer, we've seen the ServerApp and ClientApp in action, handling tasks on the server and client sides, respectively. The benefit of this setup lies in decoupling—data scientists and ML researchers can focus on building and using the apps while making use of pre-existing infrastructure. Under the hood, Messages and Context standardize the mechanisms of relaying and persisting information between ServerApp and ClientApps. It's a win-win scenario, enabling smoother development experience and flexibility to experiment with federated learning systems.
+At the infrastructure layer, we've the backbone: the SuperLink and SuperNode, ensuring standardized and persistent communication between nodes. On the application layer, we've seen the ServerApp and ClientApp in action, handling tasks on the server and client sides, respectively.
+
+The benefit of this setup lies in decoupling—data scientists and ML researchers can focus on building and using the apps while making use of pre-existing infrastructure. Importantly, users can seamlessly move projects between simulation and real-world setting without code changes, thereby easily making meaningful progress in production based on the success on simulated problems. Under the hood, Message and Context objects standardize the mechanisms of relaying and persisting information between ServerApp and ClientApps. It's a win-win scenario, enabling smoother development experience and flexibility to experiment and build federated learning systems.
 
 .. 
     [clientapp_link]: ref-api/flwr.client.ClientApp.rst
@@ -74,6 +86,11 @@ At the infrastructure layer, we've the backbone: the SuperLink and SuperNode, en
     [message_link]: ref-api/flwr.common.Message.rst
     [context_link]: ref-api/flwr.common.Context.rst
 
+.. admonition:: Important
+    :class: important
+
+    As we continuously enhance Flower Next at a rapid pace, we'll be periodically updating this explainer document. Please feel free to share any feedback with us!
+
 .. rubric:: Footnotes
 
-.. [#f1] This concept of layers is inspired by the [Open Systems Interconnection (OSI) model](https://en.wikipedia.org/wiki/OSI_model).
+.. [#f1] This concept of layers is broadly based on the `Open Systems Interconnection (OSI) model <https://en.wikipedia.org/wiki/OSI_model>`_.
