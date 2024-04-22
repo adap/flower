@@ -35,26 +35,23 @@ def build(
         Optional[Path],
         typer.Option(help="The Flower project directory to bundle into a FAB"),
     ] = None,
-    signed: Annotated[bool, typer.Option(help="Flag to sign the FAB")] = False,
+    sign: Annotated[bool, typer.Option(help="Flag to sign the FAB")] = False,
 ) -> None:
-    """Build a Flower project into a FAB file.
+    """Build a Flower project into a Flower App Bundle (FAB).
 
-    It can be ran without any argument:
+    You can run `flwr build` without any argument to bundle the current directory:
 
         `flwr build`
 
-    In which case, it will try to bundle the current directory if it is a
-    valid Flower App.
+    You can also build a specific directory:
 
-    It can also be ran with a directory argument:
+        `flwr build --directory ./projects/flower-hello-world`
 
-        `flwr build --directory ./docs/target_dir`
+    And finally, to sign the resulting `.fab` file, use the `--sign` argument:
 
-    And finally, the `--signed` argument can also be used to sign the FAB:
+        `flwr build --sign`
 
-        `flwr build --signed`
-
-    Note that this will prompt the user for its private key.
+    Note that this will prompt the you for the private key to use for signing.
     """
     if directory is None:
         directory = Path.cwd()
@@ -78,14 +75,15 @@ def build(
         )
         raise typer.Exit(code=1)
 
-    if validate_project_dir(directory) is None:
+    conf = validate_project_dir(directory)
+    if conf is None:
         raise typer.Exit(code=1)
 
     # Load .gitignore rules if present
     ignore_spec = _load_gitignore(directory)
 
     # Set the name of the zip file
-    fab_filename = f"{directory.name}.fab"
+    fab_filename = f"{directory.name}-{conf['project']['version']}.fab"
     list_file_content = ""
 
     allowed_extensions = {".py", ".toml", ".md"}
@@ -111,19 +109,19 @@ def build(
                 file_size_bits = os.path.getsize(file_path) * 8  # size in bits
                 list_file_content += f"{archive_path},{sha256_hash},{file_size_bits}\n"
 
-        # Add LIST and LIST.jwt to the zip file
-        fab_file.writestr(".info/LIST", list_file_content)
+        # Add CONTENT and CONTENT.jwt to the zip file
+        fab_file.writestr(".info/CONTENT", list_file_content)
 
-        # Optionally sign the LIST file
-        if signed:
+        # Optionally sign the CONTENT file
+        if sign:
             secret_key = typer.prompt(
-                "Enter the secret key to sign the LIST file", hide_input=True
+                "Enter the secret key to sign the CONTENT file", hide_input=True
             )
             signed_token = _sign_content(list_file_content, secret_key)
-            fab_file.writestr(".info/LIST.jwt", signed_token)
+            fab_file.writestr(".info/CONTENT.jwt", signed_token)
 
     typer.secho(
-        f"🎊 Bundled FAB into {fab_filename}.", fg=typer.colors.GREEN, bold=True
+        f"🎊 Successfully built {fab_filename}.", fg=typer.colors.GREEN, bold=True
     )
 
 
