@@ -79,7 +79,7 @@ class InMemoryDriver(Driver):
         message_type: str,
         dst_node_id: int,
         group_id: str,
-        ttl: float | None = None,
+        ttl: Optional[float] = None,
     ) -> Message:
         """Create a new message with specified parameters.
 
@@ -145,3 +145,33 @@ class InMemoryDriver(Driver):
         # Convert TaskRes to Message
         msgs = [message_from_taskres(taskres) for taskres in task_res_list]
         return msgs
+
+    def send_and_receive(
+        self,
+        messages: Iterable[Message],
+        *,
+        timeout: Optional[float] = None,
+    ) -> Iterable[Message]:
+        """Push messages to specified node IDs and pull the reply messages.
+
+        This method sends a list of messages to their destination node IDs and then
+        waits for the replies. It continues to pull replies until either all replies are
+        received or the specified timeout duration is exceeded.
+        """
+        # Push messages
+        msg_ids = set(self.push_messages(messages))
+
+        # Pull messages
+        end_time = time.time() + (timeout if timeout is not None else 0.0)
+        ret: List[Message] = []
+        while timeout is None or time.time() < end_time:
+            res_msgs = self.pull_messages(msg_ids)
+            ret.extend(res_msgs)
+            msg_ids.difference_update(
+                {msg.metadata.reply_to_message for msg in res_msgs}
+            )
+            if len(msg_ids) == 0:
+                break
+            # Sleep
+            time.sleep(3)
+        return ret
