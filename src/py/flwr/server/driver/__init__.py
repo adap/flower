@@ -16,7 +16,10 @@
 
 
 from .driver import Driver
+from .grpc_driver import GrpcDriver, GrpcDriverHelper
 
 __all__ = [
     "Driver",
+    "GrpcDriver",
+    "GrpcDriverHelper",
 ]
