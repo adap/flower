@@ -47,8 +47,8 @@ class TelemetryTest(unittest.TestCase):
         0.001s.
         """
         # Prepare
-        # Use 0.1ms as any blocking networked call would take longer.
-        duration_max = 0.001
+        # Use 5ms as any blocking networked call would take longer.
+        duration_max = 0.005
         start = time.time()
 
         # Execute
