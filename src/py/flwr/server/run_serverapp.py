@@ -134,7 +134,7 @@ def run_server_app() -> None:
         root_certificates=root_certificates,
     )
 
-    # Run the Server App with the Driver
+    # Run the ServerApp with the Driver
     run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
 
     # Clean up
