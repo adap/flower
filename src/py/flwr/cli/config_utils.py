@@ -12,20 +12,53 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Utility to validate the `flower.toml` file."""
+"""Utility to validate the `pyproject.toml` file."""
 
 import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import tomli
+import typer
 
 from flwr.common import object_ref
+
+
+def validate_project_dir(project_dir: Path) -> Optional[Dict[str, Any]]:
+    """Check if a Flower App directory is valid."""
+    config = load(str(project_dir / "pyproject.toml"))
+    if config is None:
+        typer.secho(
+            "❌ Project configuration could not be loaded. "
+            "`pyproject.toml` does not exist.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        return None
+
+    if not validate(config):
+        typer.secho(
+            "❌ Project configuration is invalid.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        return None
+
+    if "publisher" not in config["flower"]:
+        typer.secho(
+            "❌ Project configuration is missing required `publisher` field.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        return None
+
+    return config
 
 
 def load_and_validate_with_defaults(
     path: Optional[str] = None,
 ) -> Tuple[Optional[Dict[str, Any]], List[str], List[str]]:
-    """Load and validate flower.toml as dict.
+    """Load and validate pyproject.toml as dict.
 
     Returns
     -------
@@ -37,7 +70,7 @@ def load_and_validate_with_defaults(
 
     if config is None:
         errors = [
-            "Project configuration could not be loaded. flower.toml does not exist."
+            "Project configuration could not be loaded. pyproject.toml does not exist."
         ]
         return (None, errors, [])
 
@@ -58,10 +91,10 @@ def load_and_validate_with_defaults(
 
 
 def load(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
-    """Load flower.toml and return as dict."""
+    """Load pyproject.toml and return as dict."""
     if path is None:
         cur_dir = os.getcwd()
-        toml_path = os.path.join(cur_dir, "flower.toml")
+        toml_path = os.path.join(cur_dir, "pyproject.toml")
     else:
         toml_path = path
 
@@ -74,7 +107,7 @@ def load(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
 
 
 def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
-    """Validate flower.toml fields."""
+    """Validate pyproject.toml fields."""
     errors = []
     warnings = []
 
@@ -106,7 +139,7 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
 
 
 def validate(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
-    """Validate flower.toml."""
+    """Validate pyproject.toml."""
     is_valid, errors, warnings = validate_fields(config)
 
     if not is_valid:
