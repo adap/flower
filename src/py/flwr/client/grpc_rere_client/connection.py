@@ -41,6 +41,8 @@ from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
+    GetRunRequest,
+    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -69,6 +71,7 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
+        Optional[Callable[[int], Tuple[str, str]]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -122,7 +125,7 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
     ping_stop_event = threading.Event()
 
     ###########################################################################
-    # ping/create_node/delete_node/receive/send functions
+    # ping/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
 
     def ping() -> None:
@@ -241,8 +244,19 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
         # Cleanup
         metadata = None
 
+    def get_run(run_id: int) -> Tuple[str, str]:
+        # Call FleetAPI
+        get_run_request = GetRunRequest(run_id=run_id)
+        get_run_response: GetRunResponse = retry_invoker.invoke(
+            stub.GetRun,
+            request=get_run_request,
+        )
+
+        # Return fab_id and fab_version
+        return get_run_response.run.fab_id, get_run_response.run.fab_version
+
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node)
+        yield (receive, send, create_node, delete_node, get_run)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)
