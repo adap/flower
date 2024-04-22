@@ -65,11 +65,15 @@ class InMemoryDriver(Driver):
             raise ValueError(f"Invalid message: {message}")
 
     def _get_run_id(self) -> int:
+        """Return run_id.
+
+        If unset, create a new run.
+        """
         if self.run_id is None:
-            self.run_id = self.state.create_run()  # TODO: how?
+            self.run_id = self.state.create_run("None/None", "None")
         return self.run_id
 
-    def create_message(
+    def create_message(  # pylint: disable=too-many-arguments
         self,
         content: RecordSet,
         message_type: str,
