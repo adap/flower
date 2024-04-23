@@ -35,7 +35,7 @@ def test_render_template() -> None:
     """Test if a string is correctly substituted."""
     # Prepare
     filename = "app/README.md.tpl"
-    data = {"project_name": "FedGPT"}
+    data = {"project_name": "FedGPT", "module_name": "fedgpt", "import_name": "fedgpt"}
 
     # Execute
     result = render_template(filename, data)
@@ -89,11 +89,11 @@ def test_new(tmp_path: str) -> None:
         new(project_name=project_name, framework=framework)
 
         # Assert
-        file_list = os.listdir(os.path.join(tmp_path, project_name.lower()))
+        file_list = os.listdir(os.path.join(tmp_path, project_name))
         assert set(file_list) == expected_files_top_level
 
         file_list = os.listdir(
-            os.path.join(tmp_path, project_name.lower(), project_name.lower())
+            os.path.join(tmp_path, project_name, project_name.lower())
         )
         assert set(file_list) == expected_files_module
     finally:
