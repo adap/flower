@@ -10,17 +10,14 @@ from task import (
     train,
     test,
 )
-from models import Net, MNISTNet
+from models import CIFARNet, MNISTNet
 from datasets import load_cifar_data, load_mnist_data
 
 
 # Define FlowerClient and client_fn
 class FlowerClient(NumPyClient):
-    def __int__(self):
-        self.support_dict = {
-            "mnist": True,
-            "cifar": True,
-        }
+    def __init__(self, support_dict):
+        self.support_dict = support_dict
 
     def fit(self, parameters, config):
         if config["dataset"] not in self.support_dict.keys():
@@ -38,9 +35,9 @@ class FlowerClient(NumPyClient):
 
     def get_net(self, config):
         net_name = config["net"]
-        if net_name == "cifar":
-            net = Net().to(DEVICE)
-        elif net_name == "mnist":
+        if net_name == "cifar_net":
+            net = CIFARNet().to(DEVICE)
+        elif net_name == "mnist_net":
             net = MNISTNet().to(DEVICE)
         else:
             raise ValueError(
@@ -68,9 +65,15 @@ class FlowerClient(NumPyClient):
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
+support_dict = {
+    "mnist": True,
+    "cifar": True,
+}
+
+
 def client_fn(cid: str):
     """Create and return an instance of Flower `Client`."""
-    return FlowerClient().to_client()
+    return FlowerClient(support_dict).to_client()
 
 
 # Flower ClientApp
@@ -84,5 +87,5 @@ if __name__ == "__main__":
 
     start_client(
         server_address="127.0.0.1:8080",
-        client=FlowerClient().to_client(),
+        client=FlowerClient(support_dict).to_client(),
     )
