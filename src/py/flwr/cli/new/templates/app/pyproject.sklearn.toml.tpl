@@ -18,3 +18,7 @@ dependencies = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
+
+[flower.components]
+serverapp = "$project_name.server:app"
+clientapp = "$project_name.client:app"
