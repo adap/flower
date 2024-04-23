@@ -121,9 +121,29 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
 def _get_load_client_app_fn(
     args: argparse.Namespace, multi_app: bool
 ) -> Callable[[str, str], ClientApp]:
-    """Get the load_client_app_fn."""
-    flwr_dir = args.dir
-    sys.path.insert(0, flwr_dir)
+    """Get the load_client_app_fn function.
+
+    If `multi_app` is True, this function loads the specified ClientApp
+    based on `fab_id` and `fab_version`. If `fab_id` is empty, a default
+    ClientApp will be loaded.
+
+    If `multi_app` is False, it ignores `fab_id` and `fab_version` and
+    loads a default ClientApp.
+    """
+    # Find the Flower directory containing Flower Apps (only for multi-app)
+    flwr_dir = Path("")
+    if "flwr_dir" in args:
+        if args.flwr_dir == "":
+            flwr_dir = Path(
+                os.getenv(
+                    "FLWR_HOME",
+                    f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
+                )
+            )
+        else:
+            flwr_dir = Path(args.flwr_dir)
+
+    sys.path.insert(0, str(flwr_dir))
 
     default_app_ref: str = getattr(args, "client-app")
 
@@ -141,7 +161,7 @@ def _get_load_client_app_fn(
         # If multi-app feature is disabled
         if not multi_app:
             # Set sys.path
-            sys.path[0] = flwr_dir
+            sys.path[0] = args.dir
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -154,7 +174,7 @@ def _get_load_client_app_fn(
 
             log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
             # Set sys.path
-            sys.path[0] = flwr_dir
+            sys.path[0] = args.dir
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -168,22 +188,7 @@ def _get_load_client_app_fn(
             username, project_name = fab_id.split("/")
 
             # Locate the directory
-            project_dir: Path = (
-                (
-                    Path(
-                        os.getenv(
-                            "FLWR_HOME",
-                            f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
-                        )
-                    )
-                    if not flwr_dir
-                    else flwr_dir
-                )
-                / "apps"
-                / username
-                / project_name
-                / fab_version
-            )
+            project_dir = flwr_dir / "apps" / username / project_name / fab_version
 
             # Check if the directory exists
             if not project_dir.exists():
@@ -249,7 +254,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     )
     _parse_args_common(parser)
     parser.add_argument(
-        "--dir",
+        "--flwr-dir",
         default="",
         help="""The path containing installed Flower Apps.
     By default, this value isequal to:
@@ -274,13 +279,6 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         help="For example: `client:app` or `project.package.module:wrapper.app`",
     )
     _parse_args_common(parser=parser)
-    parser.add_argument(
-        "--dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load Flower "
-        "app from there."
-        " Default: current working directory.",
-    )
 
     return parser
 
@@ -324,4 +322,11 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         help="The maximum duration before the client stops trying to"
         "connect to the server in case of connection error. By default, it"
         "is set to None, meaning there is no limit to the total time.",
+    )
+    parser.add_argument(
+        "--dir",
+        default="",
+        help="Add specified directory to the PYTHONPATH and load Flower "
+        "app from there."
+        " Default: current working directory.",
     )
