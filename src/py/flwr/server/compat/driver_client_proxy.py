@@ -44,7 +44,7 @@ class DriverClientProxy(ClientProxy):
     ) -> RecordSet:
         _ = (recordset, task_type, timeout, group_id)
         raise NotImplementedError(
-            f"Use a {self.__class__.__name__} that implements this"
+            f"Use a {self.__class__.__name__} that implements this method."
         )
 
     def get_properties(
