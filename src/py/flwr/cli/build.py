@@ -129,11 +129,11 @@ def build(
                     )
                 )
             try:
-                with open(key_path, "r") as key_file:
+                with open(key_path) as key_file:
                     secret_key = key_file.read().strip()
-            except Exception as e:
-                typer.echo(f"Failed to read the secret key from file: {e}")
-                raise typer.Exit(code=1)
+            except Exception as err:
+                typer.echo(f"Failed to read the secret key from file: {err}")
+                raise typer.Exit(code=1) from err
 
             signed_token = _sign_content(list_file_content, secret_key)
             fab_file.writestr(".info/CONTENT.jwt", signed_token)
