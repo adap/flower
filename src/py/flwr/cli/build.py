@@ -86,7 +86,11 @@ def build(
     ignore_spec = _load_gitignore(directory)
 
     # Set the name of the zip file
-    fab_filename = f"{conf['project']['publisher']}-{directory.name}-{conf['project']['version']}.fab"
+    fab_filename = (
+        f"{conf['project']['publisher']}"
+        f"-{directory.name}"
+        f"-{conf['project']['version']}.fab"
+    )
     list_file_content = ""
 
     allowed_extensions = {".py", ".toml", ".md"}
