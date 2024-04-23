@@ -39,7 +39,7 @@ def run_supernode() -> None:
 
     event(EventType.RUN_SUPERNODE_ENTER)
 
-    args = _parse_args_run_supernode().parse_args()
+    _ = _parse_args_run_supernode().parse_args()
 
     root_certificates = _get_certificates(args)
     load_fn = _get_load_client_app_fn(args, multi_app=True)
