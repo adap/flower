@@ -65,14 +65,29 @@ class FlowerClient(NumPyClient):
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
-support_dict = {
-    "mnist": True,
-    "cifar": True,
-}
-
 
 def client_fn(cid: str):
     """Create and return an instance of Flower `Client`."""
+    support_dict = {
+        "mnist": True,
+        "cifar": True,
+    }
+    return FlowerClient(support_dict).to_client()
+def client_fn_cifar(cid: str):
+    """Create and return an instance of Flower `Client`."""
+    support_dict = {
+        "mnist": False,
+        "cifar": True,
+    }
+    return FlowerClient(support_dict).to_client()
+
+
+def client_fn_mnist(cid: str):
+    """Create and return an instance of Flower `Client`."""
+    support_dict = {
+        "mnist": True,
+        "cifar": False,
+    }
     return FlowerClient(support_dict).to_client()
 
 
@@ -81,10 +96,21 @@ app = ClientApp(
     client_fn=client_fn,
 )
 
+app_cifar = ClientApp(
+    client_fn=client_fn_cifar,
+)
+
+app_mnist = ClientApp(
+    client_fn=client_fn_mnist,
+)
+
 # Legacy mode
 if __name__ == "__main__":
     from flwr.client import start_client
-
+    support_dict = {
+        "mnist": True,
+        "cifar": False,
+    }
     start_client(
         server_address="127.0.0.1:8080",
         client=FlowerClient(support_dict).to_client(),
