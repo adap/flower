@@ -15,6 +15,7 @@
 """Flower command line interface `new` command."""
 
 import os
+import re
 from enum import Enum
 from string import Template
 from typing import Dict, Optional
@@ -93,7 +94,7 @@ def new(
     if not is_valid_project_name(project_name):
         project_name = prompt_text(
             "Please provide a name that only contains "
-            "characters in {'_', '-', 'a-zA-Z', '0-9'}",
+            "characters in {'_', '-', '.', a-zA-Z', '0-9'}",
             predicate=is_valid_project_name,
             default=sanitize_project_name(project_name),
         )
@@ -124,17 +125,21 @@ def new(
 
     # Set project directory path
     cwd = os.getcwd()
-    pnl = project_name.lower()
-    project_dir = os.path.join(cwd, pnl)
+    module_name = re.sub(r"[-_.]+", "-", project_name).lower()
+    project_dir = os.path.join(cwd, module_name)
 
     # List of files to render
     files = {
         ".gitignore": {"template": "app/.gitignore.tpl"},
         "README.md": {"template": "app/README.md.tpl"},
         "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
-        f"{pnl}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-        f"{pnl}/server.py": {"template": f"app/code/server.{framework_str}.py.tpl"},
-        f"{pnl}/client.py": {"template": f"app/code/client.{framework_str}.py.tpl"},
+        f"{module_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
+        f"{module_name}/server.py": {
+            "template": f"app/code/server.{framework_str}.py.tpl"
+        },
+        f"{module_name}/client.py": {
+            "template": f"app/code/client.{framework_str}.py.tpl"
+        },
     }
 
     # Depending on the framework, generate task.py file
@@ -142,9 +147,11 @@ def new(
         MlFramework.PYTORCH.value.lower(),
     ]
     if framework_str in frameworks_with_tasks:
-        files[f"{pnl}/task.py"] = {"template": f"app/code/task.{framework_str}.py.tpl"}
+        files[f"{module_name}/task.py"] = {
+            "template": f"app/code/task.{framework_str}.py.tpl"
+        }
 
-    context = {"project_name": project_name, "module_name": pnl.replace("-", "_")}
+    context = {"project_name": project_name, "module_name": module_name}
 
     for file_path, value in files.items():
         render_and_create(

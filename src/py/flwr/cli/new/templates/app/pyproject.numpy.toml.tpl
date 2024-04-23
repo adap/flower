@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "$project_name"
+name = "$module_name"
 version = "1.0.0"
 description = ""
 authors = [
