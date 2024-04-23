@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS task_res(
 DictOrTuple = Union[Tuple[Any, ...], Dict[str, Any]]
 
 
-class SqliteState(State):
+class SqliteState(State):  # pylint: disable=R0904
     """SQLite-based state implementation."""
 
     def __init__(
@@ -652,6 +652,7 @@ class SqliteState(State):
 
     def delete_node_id_client_public_key_pair(self, client_public_key: bytes) -> None:
         """Remove `node_id` and `client_public_keys` pairs."""
+        
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""
         query = "SELECT * FROM run WHERE run_id = ?;"

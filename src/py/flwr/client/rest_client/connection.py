@@ -22,8 +22,9 @@ from contextlib import contextmanager
 from copy import copy
 from logging import ERROR, INFO, WARN
 from typing import Callable, Iterator, Optional, Sequence, Tuple, Type, TypeVar, Union
-from google.protobuf.message import Message as GrpcMessage
+
 import grpc
+from google.protobuf.message import Message as GrpcMessage
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message

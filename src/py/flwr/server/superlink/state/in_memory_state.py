@@ -305,6 +305,7 @@ class InMemoryState(State):  # pylint: disable=R0902
         if client_public_key not in self.public_key_node_id_pairs:
             raise ValueError(f"Client public key {client_public_key} not found")
         del self.public_key_node_id_pairs[client_public_key]
+        
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""
         with self.lock:

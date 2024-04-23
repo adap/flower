@@ -90,7 +90,6 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
         postprocess = False
         if client_call_details.metadata is not None:
             metadata = list(client_call_details.metadata)
-
         if isinstance(request, CreateNodeRequest):
             metadata.append(
                 (
