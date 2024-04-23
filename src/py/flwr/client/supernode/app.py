@@ -133,7 +133,7 @@ def _get_load_client_app_fn(
     # Find the Flower directory containing Flower Apps (only for multi-app)
     flwr_dir = Path("")
     if "flwr_dir" in args:
-        if args.flwr_dir == "":
+        if args.flwr_dir is None:
             flwr_dir = Path(
                 os.getenv(
                     "FLWR_HOME",
@@ -255,7 +255,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
     _parse_args_common(parser)
     parser.add_argument(
         "--flwr-dir",
-        default="",
+        default=None,
         help="""The path containing installed Flower Apps.
     By default, this value isequal to:
 
