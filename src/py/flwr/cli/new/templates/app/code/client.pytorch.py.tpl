@@ -2,7 +2,7 @@
 
 from flwr.client import NumPyClient, ClientApp
 
-from $project_name.task import (
+from $module_name.task import (
     Net,
     DEVICE,
     load_data,

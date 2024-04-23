@@ -124,7 +124,7 @@ def new(
 
     # Set project directory path
     cwd = os.getcwd()
-    pnl = project_name.lower().replace("-", "_")
+    pnl = project_name.lower()
     project_dir = os.path.join(cwd, pnl)
 
     # List of files to render
@@ -144,7 +144,7 @@ def new(
     if framework_str in frameworks_with_tasks:
         files[f"{pnl}/task.py"] = {"template": f"app/code/task.{framework_str}.py.tpl"}
 
-    context = {"project_name": project_name}
+    context = {"project_name": project_name, "module_name": pnl.replace("-", "_")}
 
     for file_path, value in files.items():
         render_and_create(

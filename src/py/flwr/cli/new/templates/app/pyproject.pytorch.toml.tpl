@@ -21,5 +21,5 @@ dependencies = [
 packages = ["."]
 
 [flower.components]
-serverapp = "$project_name.server:app"
-clientapp = "$project_name.client:app"
+serverapp = "$module_name.server:app"
+clientapp = "$module_name.client:app"

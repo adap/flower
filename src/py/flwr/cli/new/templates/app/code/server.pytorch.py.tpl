@@ -4,7 +4,7 @@ from flwr.common import ndarrays_to_parameters
 from flwr.server import ServerApp, ServerConfig
 from flwr.server.strategy import FedAvg
 
-from $project_name.task import Net, get_weights
+from $module_name.task import Net, get_weights
 
 
 # Initialize model parameters
