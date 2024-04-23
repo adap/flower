@@ -18,7 +18,12 @@ Federated learning typically relies on a system that relays messages during trai
 
 With Flower Next, we address this set of challenges by decoupling and standardizing the infrastructure layer for federated learning (see following diagram).
 
-[graphic-outlining-infrastructure-layer]
+.. figure:: ./_static/flower-infrastructure.png
+    :align: center
+    :width: 800
+    :alt: Flower infrastructure layer
+    
+    Flower infrastructure layer consisting of the SuperLink and SuperNodes.
 
 This layer is dedicated to tasks such as transmitting data and maintaining connections. It is separate from the application layer (more on that below) which is the user-interaction layer [#f1]_. Because of this decoupling, the Flower federated learning system becomes truly infrastructure agnostic, meaning that Flower users can seamlessly move projects between simulation and deployment without code changes. 
 
@@ -43,9 +48,15 @@ Together, SuperLink and SuperNodes make up the infrastructure layer of a Flower 
 
 Application layer
 -----------------
-[graphic-outlining-application-layer]
 
-On the application layer, we have the ServerApp and ClientApp. These are essentially applications or packaged code that runs on the server and clients, respectively.
+On the application layer, we have the ServerApp and ClientApp. These are essentially applications or packaged code that runs on the server and clients, respectively. Flower users only need to interact with the ServerApp to start tasks on federated nodes, such as initiating federated learning. ClientApps will be launched on demand by the long-running SuperNodes. The graphic below illustrates the workflow.
+
+.. figure:: ./_static/flower-infrastructure-applications.png
+    :align: center
+    :width: 600
+    :alt: Flower infrastructure and application layers
+
+    Flower application layer consisting of the ServerApp and ClientApps, interacting with the infrastructure layer.
 
 ServerApp
 ~~~~~~~~~
