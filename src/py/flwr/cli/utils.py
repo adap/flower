@@ -76,7 +76,7 @@ def is_valid_project_name(name: str) -> bool:
     """Check if the given string is a valid Python project name.
 
     A valid project name must start with a letter or an underscore, and can only contain
-    letters, digits, hyphens, dots, and underscores.
+    letters, digits, hyphens, and underscores.
     """
     if not name:
         return False
@@ -87,7 +87,7 @@ def is_valid_project_name(name: str) -> bool:
 
     # Check if the rest of the characters are valid (letter, digit, or underscore)
     for char in name[1:]:
-        if not (char.isalnum() or char in "_-."):
+        if not (char.isalnum() or char in "_-"):
             return False
 
     return True
@@ -101,11 +101,11 @@ def sanitize_project_name(name: str) -> str:
     character.
     """
     # Replace whitespace with '_'
-    name_with_underscores = name.replace(" ", "_")
+    name_with_underscores = name.replace(" ", "_").replace(".", "-")
 
     # Allowed characters in a module name: letters, digits, underscore
     allowed_chars = set(
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-."
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
     )
 
     # Make the string lowercase
