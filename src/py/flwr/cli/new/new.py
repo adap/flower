@@ -37,6 +37,7 @@ class MlFramework(str, Enum):
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
     HUGGINGFACE = "HF"
+    SKLEARN = "sklearn"
 
 
 class TemplateNotFound(Exception):
