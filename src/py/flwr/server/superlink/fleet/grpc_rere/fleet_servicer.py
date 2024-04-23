@@ -26,6 +26,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
+    GetRunRequest,
+    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -87,6 +89,16 @@ class FleetServicer(fleet_pb2_grpc.FleetServicer):
         """Push TaskRes."""
         log(INFO, "FleetServicer.PushTaskRes")
         return message_handler.push_task_res(
+            request=request,
+            state=self.state_factory.state(),
+        )
+
+    def GetRun(
+        self, request: GetRunRequest, context: grpc.ServicerContext
+    ) -> GetRunResponse:
+        """Get run information."""
+        log(INFO, "FleetServicer.GetRun")
+        return message_handler.get_run(
             request=request,
             state=self.state_factory.state(),
         )

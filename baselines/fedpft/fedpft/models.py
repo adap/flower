@@ -126,7 +126,7 @@ def test(
     feature_extractor: torch.nn.Module,
     device: torch.device,
 ) -> Tuple[float, float]:
-    """"Evaluates the `classifier_head` on the dataset.
+    """Evaluates the `classifier_head` on the dataset.
 
     Parameters
     ----------

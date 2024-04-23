@@ -1,19 +1,19 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "$project_name"
 version = "1.0.0"
 description = ""
-license = "Apache-2.0"
 authors = [
-    "The Flower Authors <hello@flower.ai>",
+    { name = "The Flower Authors", email = "hello@flower.ai" },
 ]
-readme = "README.md"
+license = {text = "Apache License (2.0)"}
+dependencies = [
+    "flwr[simulation]>=1.8.0,<2.0",
+    "numpy>=1.21.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-# Mandatory dependencies
-numpy = "^1.21.0"
-flwr = { version = "^1.8.0", extras = ["simulation"] }
+[tool.hatch.build.targets.wheel]
+packages = ["."]

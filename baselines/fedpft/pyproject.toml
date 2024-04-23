@@ -58,6 +58,7 @@ pytest = "==6.2.4"
 pytest-watch = "==4.2.0"
 ruff = "==0.0.272"
 types-requests = "==2.27.7"
+virtualenv = "==20.21.0"
 
 [tool.isort]
 line_length = 88

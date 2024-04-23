@@ -1,8 +1,8 @@
 ---
 title: Parametric Feature Transfer, One-shot Federated Learning with Foundation Models
 url: https://arxiv.org/abs/2402.01862
-labels: [foundation-models, pre-trained, one-shot, one-round] # please add between 4 and 10 single-word (maybe two-words) labels (e.g. system heterogeneity, image classification, asynchronous, weight sharing, cross-silo). Do not use ""
-dataset: [CIFAR100, Caltech101] # list of datasets you include in your baseline. Do not use ""
+labels: [foundation-models, pre-trained, one-shot, one-round]
+dataset: [CIFAR-100, Caltech101]
 ---
 
 # FedPFT: One-shot Federated Learning with Foundation Models
@@ -31,7 +31,7 @@ dataset: [CIFAR100, Caltech101] # list of datasets you include in your baseline.
 
 **Task:** Image classification
 
-**Model:** This directory utilize two pre-trained, frozen models as shown in Table 1 of the paper:
+**Model:** This directory utilizes two pre-trained, frozen models as shown in Table 1 of the paper:
 * ResNet50 pre-trained on ImageNet is used for CIFAR100 dataset(see `models/resnet50`). 
 * CLIP, ViT-B/32 pre-trained on web dataset is used for Caltech101 dataset (see `models/clip_vit`)
 
