@@ -240,7 +240,7 @@ Simulation in CLI
         --client-app=sim:client_app \
         --num-supernodes=100
 
-.. code-block:: python
+.. code-block:: bash
 
     # Flower 1.7
     $ python sim.py
