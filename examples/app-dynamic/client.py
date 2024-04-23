@@ -10,18 +10,17 @@ from task import (
     train,
     test,
 )
-from models import CIFARNet, MNISTNet
+from models import CIFARNet, MNISTNet, BiggerCIFARNet
 from datasets import load_cifar_data, load_mnist_data
 
 
 # Define FlowerClient and client_fn
 class FlowerClient(NumPyClient):
-    def __init__(self, support_dict):
-        self.support_dict = support_dict
+    def __init__(self, dataset_support_dict, model_support_dict):
+        self.dataset_support_dict = dataset_support_dict
+        self.model_support_dict = model_support_dict
 
     def fit(self, parameters, config):
-        if config["dataset"] not in self.support_dict.keys():
-            return [], 0, {}
         net = self.get_net(config)
         trainloader, testloader = self.get_data(config)
         set_weights(net, parameters)
@@ -31,12 +30,14 @@ class FlowerClient(NumPyClient):
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Info that can be fetched by the server."""
-        return self.support_dict
+        return {**self.dataset_support_dict, **self.model_support_dict}
 
     def get_net(self, config):
         net_name = config["net"]
         if net_name == "cifar_net":
             net = CIFARNet().to(DEVICE)
+        elif net_name == "bigger_cifar_net":
+            net = BiggerCIFARNet().to(DEVICE)
         elif net_name == "mnist_net":
             net = MNISTNet().to(DEVICE)
         else:
@@ -68,27 +69,42 @@ class FlowerClient(NumPyClient):
 
 def client_fn(cid: str):
     """Create and return an instance of Flower `Client`."""
-    support_dict = {
+    dataset_support_dict = {
         "mnist": True,
         "cifar": True,
     }
-    return FlowerClient(support_dict).to_client()
+    model_support_dict = {
+        "mnist_net": True,
+        "cifar_net": True,
+        "bigger_cifar_net": True
+    }
+    return FlowerClient(dataset_support_dict, model_support_dict).to_client()
 def client_fn_cifar(cid: str):
     """Create and return an instance of Flower `Client`."""
-    support_dict = {
+    dataset_support_dict = {
         "mnist": False,
         "cifar": True,
     }
-    return FlowerClient(support_dict).to_client()
+    model_support_dict = {
+        "mnist_net": False,
+        "cifar_net": True,
+        "bigger_cifar_net": True
+    }
+    return FlowerClient(dataset_support_dict, model_support_dict).to_client()
 
 
 def client_fn_mnist(cid: str):
     """Create and return an instance of Flower `Client`."""
-    support_dict = {
+    dataset_support_dict = {
         "mnist": True,
         "cifar": False,
     }
-    return FlowerClient(support_dict).to_client()
+    model_support_dict = {
+        "mnist_net": True,
+        "cifar_net": False,
+        "bigger_cifar_net": False
+    }
+    return FlowerClient(dataset_support_dict, model_support_dict).to_client()
 
 
 # Flower ClientApp
@@ -107,11 +123,16 @@ app_mnist = ClientApp(
 # Legacy mode
 if __name__ == "__main__":
     from flwr.client import start_client
-    support_dict = {
+    dataset_support_dict = {
         "mnist": True,
         "cifar": False,
     }
+    model_support_dict = {
+        "mnist_net": False,
+        "cifar_net": True,
+        "bigger_cifar_net": True
+    }
     start_client(
         server_address="127.0.0.1:8080",
-        client=FlowerClient(support_dict).to_client(),
+        client=FlowerClient(dataset_support_dict, model_support_dict).to_client(),
     )

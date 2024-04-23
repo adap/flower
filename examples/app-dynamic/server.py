@@ -12,6 +12,14 @@ strategy_cifar = CustomFedAvg(
     dataset_name="cifar",
     net_name="cifar_net"
 )
+strategy_bigger_cifar = CustomFedAvg(
+    fraction_fit=1.0,  # Select all available clients
+    fraction_evaluate=0.0,  # Disable evaluation
+    min_available_clients=2,
+    fit_metrics_aggregation_fn=weighted_average,
+    dataset_name="cifar",
+    net_name="bigger_cifar_net"
+)
 strategy_mnist = CustomFedAvg(
     fraction_fit=1.0,  # Select all available clients
     fraction_evaluate=0.0,  # Disable evaluation

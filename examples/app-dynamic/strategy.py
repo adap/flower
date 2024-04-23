@@ -13,7 +13,7 @@ from flwr.common import (
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
-from models import MNISTNet, CIFARNet
+from models import MNISTNet, CIFARNet, BiggerCIFARNet
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ CNFG_EVAL = List[Tuple[ClientProxy, EvaluateIns]]
 
 
 def filter_by_task(
-        workload: Union[CNFG_FIT, CNFG_EVAL], keyword: str
+        workload: Union[CNFG_FIT, CNFG_EVAL], dataset_name: str, net_name: str
 ) -> Union[CNFG_FIT, CNFG_EVAL]:
     """This helper function filters the outputs of `configure_fit` and
     `configure_evaluate` and discards sending the instructions to those clients that
@@ -32,11 +32,11 @@ def filter_by_task(
     config_final = []
     for client, fit_or_eval_ins in workload:
         prop = client.get_properties(ins, timeout=30, group_id=None)
-        if prop.properties[keyword]:
+        if prop.properties[dataset_name] and prop.properties[net_name]:
             config_final.append((client, fit_or_eval_ins))
-            log.info(f"Client enrolled in {keyword} federation.")
+            log.info(f"Client enrolled in {dataset_name} and {net_name} federation.")
         else:
-            log.info(f"Client excluded from {keyword} federation.")
+            log.info(f"Client excluded from {dataset_name} and {net_name} federation.")
 
     return config_final
 
@@ -83,6 +83,8 @@ class CustomFedAvg(FedAvg):
             model = MNISTNet()
         elif task == "cifar_net":
             model = CIFARNet()
+        elif task == "bigger_cifar_net":
+            model = BiggerCIFARNet()
         else:
             raise ValueError("The task must be mnist or cifar")
         ndarrays = [val.cpu().numpy() for _, val in model.state_dict().items()]
@@ -115,7 +117,7 @@ class CustomFedAvg(FedAvg):
         fit_config = [(client, fit_ins) for client in clients]
 
         # Now discard based on a task
-        return filter_by_task(fit_config, self.dataset_name)
+        return filter_by_task(fit_config, self.dataset_name, self.net_name)
 
     def configure_evaluate(
             self, server_round: int, parameters: Parameters,
@@ -146,7 +148,7 @@ class CustomFedAvg(FedAvg):
         eval_config = [(client, evaluate_ins) for client in clients]
 
         # Now discard based on client's enrollment status
-        return filter_by_task(eval_config, self.dataset_name)
+        return filter_by_task(eval_config, self.dataset_name, self.net_name)
 
     def evaluate(self, server_round: int, parameters: Parameters):
         # Call evaluate as it would normally be called. We will return
