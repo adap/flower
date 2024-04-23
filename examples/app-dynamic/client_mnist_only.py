@@ -1,8 +1,5 @@
-from typing import Dict
-
-from flwr.client import ClientApp
-
 from client import FlowerClient
+from flwr.client import ClientApp
 
 # SUPPORT_DICT IS DIFFERENT
 support_dict = {

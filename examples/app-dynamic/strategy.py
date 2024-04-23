@@ -1,8 +1,5 @@
 import logging
-from collections import OrderedDict
 from typing import Dict, List, Tuple, Union, Optional, Callable
-from models import MNISTNet, CIFARNet
-import torch
 
 from flwr.common import (
     FitIns,
@@ -11,11 +8,12 @@ from flwr.common import (
     GetPropertiesIns,
     Scalar,
     ndarrays_to_parameters,
-    parameters_to_ndarrays, NDArrays, MetricsAggregationFn,
+    NDArrays, MetricsAggregationFn,
 )
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import FedAvg
+from models import MNISTNet, CIFARNet
 
 log = logging.getLogger(__name__)
 
