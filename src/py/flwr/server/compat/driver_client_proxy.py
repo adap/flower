@@ -43,7 +43,9 @@ class DriverClientProxy(ClientProxy):
         group_id: Optional[int],
     ) -> RecordSet:
         _ = (recordset, task_type, timeout, group_id)
-        raise NotImplementedError()
+        raise NotImplementedError(
+            f"Use a {self.__class__.__name__} that implements this"
+        )
 
     def get_properties(
         self,
@@ -55,7 +57,7 @@ class DriverClientProxy(ClientProxy):
         # Ins to RecordSet
         out_recordset = compat.getpropertiesins_to_recordset(ins)
         # Fetch response
-        in_recordset = self._send_receive_recordset(
+        in_recordset = self._send_receive_recordset(  # pylint: disable=E1111
             out_recordset, MessageTypeLegacy.GET_PROPERTIES, timeout, group_id
         )
         # RecordSet to Res
@@ -71,7 +73,7 @@ class DriverClientProxy(ClientProxy):
         # Ins to RecordSet
         out_recordset = compat.getparametersins_to_recordset(ins)
         # Fetch response
-        in_recordset = self._send_receive_recordset(
+        in_recordset = self._send_receive_recordset(  # pylint: disable=E1111
             out_recordset, MessageTypeLegacy.GET_PARAMETERS, timeout, group_id
         )
         # RecordSet to Res
@@ -84,7 +86,7 @@ class DriverClientProxy(ClientProxy):
         # Ins to RecordSet
         out_recordset = compat.fitins_to_recordset(ins, keep_input=True)
         # Fetch response
-        in_recordset = self._send_receive_recordset(
+        in_recordset = self._send_receive_recordset(  # pylint: disable=E1111
             out_recordset, MessageType.TRAIN, timeout, group_id
         )
         # RecordSet to Res
@@ -97,7 +99,7 @@ class DriverClientProxy(ClientProxy):
         # Ins to RecordSet
         out_recordset = compat.evaluateins_to_recordset(ins, keep_input=True)
         # Fetch response
-        in_recordset = self._send_receive_recordset(
+        in_recordset = self._send_receive_recordset(  # pylint: disable=E1111
             out_recordset, MessageType.EVALUATE, timeout, group_id
         )
         # RecordSet to Res
