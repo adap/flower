@@ -143,8 +143,10 @@ After loading the data set with :code:`load_data()` we define the Flower interfa
 
 The Flower server interacts with clients through an interface called
 :code:`Client`. When the server selects a particular client for training, it
-sends training instructions over the network. The client receives those
-instructions and calls one of the :code:`Client` methods to run your code
+sends training instructions over the network via the :code:`SuperLink`.
+The :code:`SuperNode` pulls the server instructions from the :code:`SuperLink` and
+launches a client with those instructions. The client then calls one of the
+:code:`Client` methods to run your code
 (i.e., to train the neural network we defined earlier).
 
 Flower provides a convenience class called :code:`NumPyClient` which makes it
@@ -186,87 +188,103 @@ which can be implemented in the following way:
             loss, accuracy = test(net, testloader)
             return float(loss), num_examples["testset"], {"accuracy": float(accuracy)}
 
-We can now create an instance of our class :code:`CifarClient` and add one line
-to actually run this client:
+We can now create a client function to return instances of :code:`CifarClient` when called
 
 .. code-block:: python
 
-     fl.client.start_client(server_address="[::]:8080", client=CifarClient().to_client())
+    def client_fn(cid: str):
+        return CifarClient().to_client()
 
-That's it for the client. We only have to implement :code:`Client` or
-:code:`NumPyClient` and call :code:`fl.client.start_client()`. If you implement a client of type :code:`NumPyClient` you'll need to first call its :code:`to_client()` method. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
-:code:`"[::]:8080"`. If we run a truly federated workload with the server and
-clients running on different machines, all that needs to change is the
-:code:`server_address` we point the client at.
+and create a :code:`ClientApp()` object using the client function
+
+.. code-block:: python
+
+    app = ClientApp(client_fn=client_fn)
+
+Now, we can launch the :code:`ClientApp` object in CLI in one line:
+
+.. code-block:: bash
+
+    flower-client-app client:app --insecure
+
+On this line, we launch the :code:`app` object in the :code:`client.py` module using the :code:`flower-client-app` command. Note that the :code:`--insecure` parameter is for prototyping only.
+
+That's it for the client. We only have to implement :code:`Client` or :code:`NumPyClient`, wrap the :code:`ClientApp` around the client function, and call :code:`flower-client-app` in CLI. If you implement a client of type :code:`NumPyClient` you'll need to first call its :code:`to_client()` method.
+
+.. 
+    The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
+    :code:`"[::]:8080"`. If we run a truly federated workload with the server and
+    clients running on different machines, all that needs to change is the
+    :code:`server_address` we point the client at.
 
 Flower Server
 -------------
 
-For simple workloads we can start a Flower server and leave all the
+For simple workloads we can create a Flower :code:`ServerApp` object and leave all the
 configuration possibilities at their default values. In a file named
-:code:`server.py`, import Flower and start the server:
+:code:`server.py`, import Flower and create a :code:`ServerApp`:
 
 .. code-block:: python
 
-    import flwr as fl
+    from flwr.server import ServerApp
 
-    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3))
+    app = ServerApp()
 
 Train the model, federated!
 ---------------------------
 
-With both client and server ready, we can now run everything and see federated
-learning in action. FL systems usually have a server and multiple clients. We
-therefore have to start the server first:
+With both :code:`ClientApp`s and :code:`ServerApp` ready, we can now run everything and see federated
+learning in action. First, we start the infrastructure which consists of the `SuperLink` and `SuperNode`s.
+For further explaination about the infrastructure, refer to XXX.
 
 .. code-block:: shell
 
-    $ python server.py
+    $ flower-superlink --insecure
 
-Once the server is running we can start the clients in different terminals.
-Open a new terminal and start the first client:
-
-.. code-block:: shell
-
-    $ python client.py
-
-Open another terminal and start the second client:
+FL systems usually have a server and multiple clients. We therefore start `SuperNode`s for each of the client. Open a new terminal and start the first `SuperNode`:
 
 .. code-block:: shell
 
-    $ python client.py
+    $ flower-client-app client:app --insecure
+
+Open another terminal and start the second `SuperNode`:
+
+.. code-block:: shell
+
+    $ flower-client-app client:app --insecure
+
+Finally, in another terminal window, run the `ServerApp` (this starts the actual training run):
+
+.. code-block:: shell
+
+    $ flower-server-app server:app --insecure
 
 Each client will have its own dataset.
-You should now see how the training does in the very first terminal (the one that started the server):
+You should now see how the training does in the last terminal (the one that started the :code:`ServerApp`):
 
 .. code-block:: shell
 
-    INFO flower 2021-02-25 14:00:27,227 | app.py:76 | Flower server running (insecure, 3 rounds)
-    INFO flower 2021-02-25 14:00:27,227 | server.py:72 | Getting initial parameters
-    INFO flower 2021-02-25 14:01:15,881 | server.py:74 | Evaluating initial parameters
-    INFO flower 2021-02-25 14:01:15,881 | server.py:87 | [TIME] FL starting
-    DEBUG flower 2021-02-25 14:01:41,310 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-02-25 14:02:00,256 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:02:00,262 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-02-25 14:02:03,047 | server.py:149 | evaluate received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:02:03,049 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-02-25 14:02:23,908 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:02:23,915 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-02-25 14:02:27,120 | server.py:149 | evaluate received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:02:27,122 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-02-25 14:03:04,660 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:03:04,671 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-02-25 14:03:09,273 | server.py:149 | evaluate received 2 results and 0 failures
-    INFO flower 2021-02-25 14:03:09,273 | server.py:122 | [TIME] FL finished in 113.39180790000046
-    INFO flower 2021-02-25 14:03:09,274 | app.py:109 | app_fit: losses_distributed [(1, 650.9747924804688), (2, 526.2535400390625), (3, 473.76959228515625)]
-    INFO flower 2021-02-25 14:03:09,274 | app.py:110 | app_fit: accuracies_distributed []
-    INFO flower 2021-02-25 14:03:09,274 | app.py:111 | app_fit: losses_centralized []
-    INFO flower 2021-02-25 14:03:09,274 | app.py:112 | app_fit: accuracies_centralized []
-    DEBUG flower 2021-02-25 14:03:09,276 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-02-25 14:03:11,852 | server.py:149 | evaluate received 2 results and 0 failures
-    INFO flower 2021-02-25 14:03:11,852 | app.py:121 | app_evaluate: federated loss: 473.76959228515625
-    INFO flower 2021-02-25 14:03:11,852 | app.py:122 | app_evaluate: results [('ipv6:[::1]:36602', EvaluateRes(loss=351.4906005859375, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.6067})), ('ipv6:[::1]:36604', EvaluateRes(loss=353.92742919921875, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.6005}))]
-    INFO flower 2021-02-25 14:03:27,514 | app.py:127 | app_evaluate: failures []
+    WARNING :   Option `--insecure` was set. Starting insecure HTTP client connected to 0.0.0.0:9091.
+    INFO :      Starting Flower ServerApp, config: num_rounds=1, no round_timeout
+    INFO :
+    INFO :      [INIT]
+    INFO :      Requesting initial parameters from one random client
+    INFO :      Received initial parameters from one random client
+    INFO :      Evaluating initial global parameters
+    INFO :
+    INFO :      [ROUND 1]
+    INFO :      configure_fit: strategy sampled 2 clients (out of 2)
+    INFO :      aggregate_fit: received 2 results and 0 failures
+    WARNING :   No fit_metrics_aggregation_fn provided
+    INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
+    INFO :      aggregate_evaluate: received 2 results and 0 failures
+    WARNING :   No evaluate_metrics_aggregation_fn provided
+    INFO :
+    INFO :      [SUMMARY]
+    INFO :      Run finished 1 rounds in 15.08s
+    INFO :      History (loss, distributed):
+    INFO :          '\tround 1: 241.32427430152893\n'
+    INFO :
 
 Congratulations!
 You've successfully built and run your first federated learning system.
