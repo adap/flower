@@ -126,7 +126,7 @@ def new(
     # Set project directory path
     cwd = os.getcwd()
     module_name = re.sub(r"[-_.]+", "-", project_name).lower()
-    project_dir = os.path.join(cwd, module_name)
+    project_dir = os.path.join(cwd, project_name)
 
     # List of files to render
     files = {
@@ -151,7 +151,11 @@ def new(
             "template": f"app/code/task.{framework_str}.py.tpl"
         }
 
-    context = {"project_name": project_name, "module_name": module_name}
+    context = {
+        "project_name": project_name,
+        "module_name": module_name,
+        "import_name": module_name.replace("-", "_"),
+    }
 
     for file_path, value in files.items():
         render_and_create(
