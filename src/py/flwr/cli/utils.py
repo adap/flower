@@ -73,10 +73,10 @@ def prompt_options(text: str, options: List[str]) -> str:
 
 
 def is_valid_project_name(name: str) -> bool:
-    """Check if the given string is a valid Python module name.
+    """Check if the given string is a valid Python project name.
 
-    A valid module name must start with a letter or an underscore, and can only contain
-    letters, digits, and underscores.
+    A valid project name must start with a letter or an underscore, and can only contain
+    letters, digits, hyphens, dots, and underscores.
     """
     if not name:
         return False
@@ -94,11 +94,11 @@ def is_valid_project_name(name: str) -> bool:
 
 
 def sanitize_project_name(name: str) -> str:
-    """Sanitize the given string to make it a valid Python module name.
+    """Sanitize the given string to make it a valid Python project name.
 
-    This version replaces spaces with underscores, removes any characters not allowed
-    in Python module names, makes the string lowercase, and ensures it starts with a
-    valid character.
+    This version replaces spaces with underscores, removes any characters not allowed in
+    Python project names, makes the string lowercase, and ensures it starts with a valid
+    character.
     """
     # Replace whitespace with '_'
     name_with_underscores = name.replace(" ", "_")
