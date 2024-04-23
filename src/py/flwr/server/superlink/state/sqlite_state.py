@@ -560,6 +560,16 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def restore_node(self, node_id: int, ping_interval: float) -> bool:
         """Restore `node_id` and return True if succeed."""
+        query = (
+            "INSERT INTO node (node_id, online_until, ping_interval) VALUES (?, ?, ?)"
+        )
+
+        try:
+            self.query(query, (node_id, time.time() + ping_interval, ping_interval))
+            return True
+        except sqlite3.IntegrityError:
+            log(ERROR, "Unexpected node registration failure.")
+            return False
 
     def delete_node(self, node_id: int) -> None:
         """Delete a client node."""
@@ -644,15 +654,26 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def get_node_id(self, client_public_key: bytes) -> int:
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
+        query = "SELECT node_id FROM public_key_node_id WHERE public_key = :public_key;"
+        row = self.query(query, {"public_key": client_public_key})
+        node_id: int = row[0]["node_id"]
+        return node_id
 
     def store_node_id_client_public_key_pair(
         self, client_public_key: bytes, node_id: int
     ) -> None:
         """Store `node_id` and `client_public_keys` as pairs."""
+        query = (
+            "INSERT OR REPLACE INTO public_key_node_id (public_key, node_id) "
+            "VALUES (:public_key, :node_id)"
+        )
+        self.query(query, {"public_key": client_public_key, "node_id": node_id})
 
     def delete_node_id_client_public_key_pair(self, client_public_key: bytes) -> None:
         """Remove `node_id` and `client_public_keys` pairs."""
-        
+        query = "DELETE FROM node WHERE public_key = :public_key;"
+        self.query(query, {"public_key": client_public_key})
+
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""
         query = "SELECT * FROM run WHERE run_id = ?;"

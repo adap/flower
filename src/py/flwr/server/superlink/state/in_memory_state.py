@@ -30,7 +30,7 @@ from flwr.server.utils import validate_task_ins_or_res
 from .utils import make_node_unavailable_taskres
 
 
-class InMemoryState(State):  # pylint: disable=R0902
+class InMemoryState(State):  # pylint: disable=R0902,R0904
     """In-memory State implementation."""
 
     def __init__(self) -> None:
@@ -294,18 +294,27 @@ class InMemoryState(State):  # pylint: disable=R0902
         """Retrieve all currently stored `client_public_keys` as a set."""
         return self.client_public_keys
 
+    def get_node_id(self, client_public_key: bytes) -> int:
+        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+        print("nodes: ", self.node_ids)
+        print("pairs: ", self.public_key_node_id_pairs)
+        return self.public_key_node_id_pairs[client_public_key]
+
     def store_node_id_client_public_key_pair(
         self, client_public_key: bytes, node_id: int
     ) -> None:
         """Store `node_id` and `client_public_keys` as pairs."""
         self.public_key_node_id_pairs[client_public_key] = node_id
+        print(self.public_key_node_id_pairs)
 
     def delete_node_id_client_public_key_pair(self, client_public_key: bytes) -> None:
         """Remove `node_id` and `client_public_keys` pairs."""
         if client_public_key not in self.public_key_node_id_pairs:
-            raise ValueError(f"Client public key {client_public_key} not found")
+            raise ValueError(
+                f"Client public key {client_public_key.decode('utf-8')} not found"
+            )
         del self.public_key_node_id_pairs[client_public_key]
-        
+
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""
         with self.lock:

@@ -22,7 +22,7 @@ from uuid import UUID
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
-class State(abc.ABC):
+class State(abc.ABC):  # pylint: disable=R0904
     """Abstract State."""
 
     @abc.abstractmethod
