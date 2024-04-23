@@ -26,7 +26,7 @@ import typer
 from typing_extensions import Annotated
 
 from .config_utils import validate_project_dir
-from .utils import is_valid_project_name
+from .utils import is_valid_project_name, prompt_text
 
 
 # pylint: disable=too-many-locals
@@ -36,6 +36,9 @@ def build(
         typer.Option(help="The Flower project directory to bundle into a FAB"),
     ] = None,
     sign: Annotated[bool, typer.Option(help="Flag to sign the FAB")] = False,
+    key_path: Annotated[
+        Optional[Path], typer.Option(help="Path to the secret key file for signing")
+    ] = None,
 ) -> None:
     """Build a Flower project into a Flower App Bundle (FAB).
 
@@ -114,9 +117,20 @@ def build(
 
         # Optionally sign the CONTENT file
         if sign:
-            secret_key = typer.prompt(
-                "Enter the secret key to sign the CONTENT file", hide_input=True
-            )
+            if key_path is None:
+                key_path = Path(
+                    prompt_text(
+                        "Enter the path to the secret key to sign the CONTENT file",
+                        predicate=lambda result: Path(result) is not None,
+                    )
+                )
+            try:
+                with open(key_path, "r") as key_file:
+                    secret_key = key_file.read().strip()
+            except Exception as e:
+                typer.echo(f"Failed to read the secret key from file: {e}")
+                raise typer.Exit(code=1)
+
             signed_token = _sign_content(list_file_content, secret_key)
             fab_file.writestr(".info/CONTENT.jwt", signed_token)
 
