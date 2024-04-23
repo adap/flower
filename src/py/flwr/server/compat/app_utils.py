@@ -19,7 +19,7 @@ import threading
 from typing import Dict, Tuple
 
 from ..client_manager import ClientManager
-from ..compat.driver_client_proxy import DriverClientProxy
+from ..compat.grpc_driver_client_proxy import GrpcDriverClientProxy
 from ..driver import Driver
 
 
@@ -30,7 +30,7 @@ def start_update_client_manager_thread(
     """Periodically update the nodes list in the client manager in a thread.
 
     This function starts a thread that periodically uses the associated driver to
-    get all node_ids. Each node_id is then converted into a `DriverClientProxy`
+    get all node_ids. Each node_id is then converted into a `GrpcDriverClientProxy`
     instance and stored in the `registered_nodes` dictionary with node_id as key.
 
     New nodes will be added to the ClientManager via `client_manager.register()`,
@@ -73,7 +73,7 @@ def _update_client_manager(
 ) -> None:
     """Update the nodes list in the client manager."""
     # Loop until the driver is disconnected
-    registered_nodes: Dict[int, DriverClientProxy] = {}
+    registered_nodes: Dict[int, GrpcDriverClientProxy] = {}
     while not f_stop.is_set():
         all_node_ids = set(driver.get_node_ids())
         dead_nodes = set(registered_nodes).difference(all_node_ids)
@@ -87,7 +87,7 @@ def _update_client_manager(
 
         # Register new nodes
         for node_id in new_nodes:
-            client_proxy = DriverClientProxy(
+            client_proxy = GrpcDriverClientProxy(
                 node_id=node_id,
                 driver=driver.grpc_driver_helper,  # type: ignore
                 anonymous=False,

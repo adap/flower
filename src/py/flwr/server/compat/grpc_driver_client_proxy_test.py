@@ -45,7 +45,8 @@ from flwr.proto import (  # pylint: disable=E0611
     recordset_pb2,
     task_pb2,
 )
-from flwr.server.compat.driver_client_proxy import DriverClientProxy, validate_task_res
+from flwr.server.compat.driver_client_proxy import validate_task_res
+from flwr.server.compat.grpc_driver_client_proxy import GrpcDriverClientProxy
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
 
@@ -114,7 +115,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 ]
             )
         )
-        client = DriverClientProxy(
+        client = GrpcDriverClientProxy(
             node_id=1, driver=self.driver, anonymous=True, run_id=0
         )
         request_properties: Config = {"tensor_type": "str"}
@@ -155,7 +156,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 ]
             )
         )
-        client = DriverClientProxy(
+        client = GrpcDriverClientProxy(
             node_id=1, driver=self.driver, anonymous=True, run_id=0
         )
         get_parameters_ins = GetParametersIns(config={})
@@ -195,7 +196,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 ]
             )
         )
-        client = DriverClientProxy(
+        client = GrpcDriverClientProxy(
             node_id=1, driver=self.driver, anonymous=True, run_id=0
         )
         parameters = flwr.common.ndarrays_to_parameters([np.ones((2, 2))])
@@ -236,7 +237,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
                 ]
             )
         )
-        client = DriverClientProxy(
+        client = GrpcDriverClientProxy(
             node_id=1, driver=self.driver, anonymous=True, run_id=0
         )
         parameters = Parameters(tensors=[], tensor_type="np")
