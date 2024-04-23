@@ -87,7 +87,7 @@ def is_valid_project_name(name: str) -> bool:
 
     # Check if the rest of the characters are valid (letter, digit, or underscore)
     for char in name[1:]:
-        if not (char.isalnum() or char == "_"):
+        if not (char.isalnum() or char in "_-"):
             return False
 
     return True
@@ -96,16 +96,16 @@ def is_valid_project_name(name: str) -> bool:
 def sanitize_project_name(name: str) -> str:
     """Sanitize the given string to make it a valid Python module name.
 
-    This version replaces hyphens with underscores, removes any characters not allowed
+    This version replaces whitespace with underscores, removes any characters not allowed
     in Python module names, makes the string lowercase, and ensures it starts with a
     valid character.
     """
-    # Replace '-' with '_'
-    name_with_underscores = name.replace("-", "_").replace(" ", "_")
+    # Replace whitespace with '_'
+    name_with_underscores = name.replace(" ", "_")
 
     # Allowed characters in a module name: letters, digits, underscore
     allowed_chars = set(
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
     )
 
     # Make the string lowercase

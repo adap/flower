@@ -93,7 +93,7 @@ def new(
     if not is_valid_project_name(project_name):
         project_name = prompt_text(
             "Please provide a name that only contains "
-            "characters in {'_', 'a-zA-Z', '0-9'}",
+            "characters in {'_', '-', 'a-zA-Z', '0-9'}",
             predicate=is_valid_project_name,
             default=sanitize_project_name(project_name),
         )
@@ -124,7 +124,7 @@ def new(
 
     # Set project directory path
     cwd = os.getcwd()
-    pnl = project_name.lower()
+    pnl = project_name.lower().replace("-", "_")
     project_dir = os.path.join(cwd, pnl)
 
     # List of files to render
