@@ -36,6 +36,10 @@ class FleetStub:
     HTTP API path: /api/v1/fleet/push-task-res
     """
 
+    GetRun: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.fleet_pb2.GetRunRequest,
+        flwr.proto.fleet_pb2.GetRunResponse]
+
 
 class FleetServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
@@ -77,6 +81,12 @@ class FleetServicer(metaclass=abc.ABCMeta):
         HTTP API path: /api/v1/fleet/push-task-res
         """
         pass
+
+    @abc.abstractmethod
+    def GetRun(self,
+        request: flwr.proto.fleet_pb2.GetRunRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.fleet_pb2.GetRunResponse: ...
 
 
 def add_FleetServicer_to_server(servicer: FleetServicer, server: grpc.Server) -> None: ...

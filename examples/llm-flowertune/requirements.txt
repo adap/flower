@@ -1,5 +1,5 @@
 flwr[rest,simulation]>=1.8.0, <2.0
-flwr_datasets==0.0.2
+flwr-datasets>=0.0.2
 hydra-core==1.3.2
 trl==0.7.2
 bitsandbytes==0.41.3
