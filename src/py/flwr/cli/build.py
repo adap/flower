@@ -129,7 +129,7 @@ def build(
                     )
                 )
             try:
-                with open(key_path) as key_file:
+                with open(key_path, encoding="UTF-8") as key_file:
                     secret_key = key_file.read().strip()
             except Exception as err:
                 typer.echo(f"Failed to read the secret key from file: {err}")
