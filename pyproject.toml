@@ -136,7 +136,7 @@ multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
-known_first_party = ["flwr", "flwr_experimental", "flwr_tool"]
+known_first_party = ["flwr", "flwr_tool"]
 
 [tool.black]
 line-length = 88
@@ -169,12 +169,6 @@ plugins = [
 ]
 ignore_missing_imports = true
 strict = true
-
-[[tool.mypy.overrides]]
-module = [
-    "flwr_experimental.*",
-]
-ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [

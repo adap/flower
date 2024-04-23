@@ -29,11 +29,11 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
-from .driver import Driver
+from .grpc_driver import GrpcDriver
 
 
-class TestDriver(unittest.TestCase):
-    """Tests for `Driver` class."""
+class TestGrpcDriver(unittest.TestCase):
+    """Tests for `GrpcDriver` class."""
 
     def setUp(self) -> None:
         """Initialize mock GrpcDriverHelper and Driver instance before each test."""
@@ -42,11 +42,11 @@ class TestDriver(unittest.TestCase):
         self.mock_grpc_driver = Mock()
         self.mock_grpc_driver.create_run.return_value = mock_response
         self.patcher = patch(
-            "flwr.server.driver.driver.GrpcDriverHelper",
+            "flwr.server.driver.grpc_driver.GrpcDriverHelper",
             return_value=self.mock_grpc_driver,
         )
         self.patcher.start()
-        self.driver = Driver()
+        self.driver = GrpcDriver()
 
     def tearDown(self) -> None:
         """Cleanup after each test."""
