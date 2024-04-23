@@ -96,7 +96,7 @@ def is_valid_project_name(name: str) -> bool:
 def sanitize_project_name(name: str) -> str:
     """Sanitize the given string to make it a valid Python module name.
 
-    This version replaces whitespace with underscores, removes any characters not allowed
+    This version replaces spaces with underscores, removes any characters not allowed
     in Python module names, makes the string lowercase, and ensures it starts with a
     valid character.
     """
