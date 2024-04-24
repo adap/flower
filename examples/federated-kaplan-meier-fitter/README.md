@@ -35,7 +35,6 @@ This will create a new directory called `federated-kaplan-meier-fitter` containi
 -- client.py
 -- server.py
 -- centralized.py
--- run.sh
 -- README.md
 ```
 
@@ -68,24 +67,32 @@ pip install -r requirements.txt
 
 ## Run Federated Survival Analysis with Flower and lifelines's KaplanMeierFitter
 
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
+### Start the long-running Flower server (SuperLink)
 
-```shell
-$ python3 server.py
+```bash
+flower-superlink --insecure
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the following commands.
+### Start the long-running Flower client (SuperNode)
 
-Start client 1 in the first terminal:
+In a new terminal window, start the first long-running Flower client:
 
-```shell
-$ python3 client.py --node-id 0
+```bash
+flower-client-app client:node_1_app --insecure
 ```
 
-Start client 2 in the second terminal:
+In yet another new terminal window, start the second long-running Flower client:
 
-```shell
-$ python3 client.py --node-id 1
+```bash
+flower-client-app client:node_2_app --insecure
+```
+
+### Run the Flower App
+
+With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
+
+```bash
+flower-server-app server:app --insecure
 ```
 
 You will see that the server is printing survival function, median survival time and saves the plot with the survival function.

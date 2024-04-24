@@ -1,4 +1,5 @@
 """Required imports for utils.py script."""
+
 import collections
 import itertools
 import random
@@ -428,9 +429,13 @@ class DataTools:  # pylint: disable=too-many-instance-attributes
         if overlap:
             dataset_use = dict(sorted(collections.Counter(distribution).items()))
             class_datasets = [
-                class_datasets[c]
-                if dataset_use[c] == 1
-                else DataTools.split_class_samples(class_datasets[c], dataset_use[c])
+                (
+                    class_datasets[c]
+                    if dataset_use[c] == 1
+                    else DataTools.split_class_samples(
+                        class_datasets[c], dataset_use[c]
+                    )
+                )
                 for c in range(num_classes)
             ]
             parts = list(
@@ -440,9 +445,11 @@ class DataTools:  # pylint: disable=too-many-instance-attributes
             )
             _iter_ = iter(parts)
             datasets = [
-                class_datasets[i]
-                if dataset_use[i] == 1
-                else class_datasets[i][next(_iter_)]
+                (
+                    class_datasets[i]
+                    if dataset_use[i] == 1
+                    else class_datasets[i][next(_iter_)]
+                )
                 for i in distribution
             ]
             datasets = [DataTools.shuffle_dataset(dataset) for dataset in datasets]
@@ -542,9 +549,11 @@ class DataTools:  # pylint: disable=too-many-instance-attributes
             for class_number in range(num_classes)
         ]
         class_datasets = [
-            class_datasets[c]
-            if dataset_use[c] == 1
-            else DataTools.split_class_samples(class_datasets[c], dataset_use[c])
+            (
+                class_datasets[c]
+                if dataset_use[c] == 1
+                else DataTools.split_class_samples(class_datasets[c], dataset_use[c])
+            )
             for c in range(num_classes)
         ]
         # Keep track of splitted partitions
@@ -552,9 +561,11 @@ class DataTools:  # pylint: disable=too-many-instance-attributes
         # Fill datasets with examples from class distribution.
         datasets = [
             [
-                class_datasets[j]
-                if (len(parts[j]) == 1 and isinstance(class_datasets[j], tuple))
-                else class_datasets[j][parts[j].pop()]
+                (
+                    class_datasets[j]
+                    if (len(parts[j]) == 1 and isinstance(class_datasets[j], tuple))
+                    else class_datasets[j][parts[j].pop()]
+                )
                 for j in dis
             ]
             for dis in distributions

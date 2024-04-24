@@ -15,10 +15,10 @@
 """Flower ServerApp."""
 
 
-import importlib
-from typing import Callable, Optional, cast
+from typing import Callable, Optional
 
 from flwr.common import Context, RecordSet
+from flwr.common.logger import warn_preview_feature
 from flwr.server.strategy import Strategy
 
 from .client_manager import ClientManager
@@ -121,6 +121,8 @@ class ServerApp:
                     """,
                 )
 
+            warn_preview_feature("ServerApp-register-main-function")
+
             # Register provided function with the ServerApp object
             self._main = main_fn
 
@@ -132,48 +134,3 @@ class ServerApp:
 
 class LoadServerAppError(Exception):
     """Error when trying to load `ServerApp`."""
-
-
-def load_server_app(module_attribute_str: str) -> ServerApp:
-    """Load the `ServerApp` object specified in a module attribute string.
-
-    The module/attribute string should have the form <module>:<attribute>. Valid
-    examples include `server:app` and `project.package.module:wrapper.app`. It
-    must refer to a module on the PYTHONPATH, the module needs to have the specified
-    attribute, and the attribute must be of type `ServerApp`.
-    """
-    module_str, _, attributes_str = module_attribute_str.partition(":")
-    if not module_str:
-        raise LoadServerAppError(
-            f"Missing module in {module_attribute_str}",
-        ) from None
-    if not attributes_str:
-        raise LoadServerAppError(
-            f"Missing attribute in {module_attribute_str}",
-        ) from None
-
-    # Load module
-    try:
-        module = importlib.import_module(module_str)
-    except ModuleNotFoundError:
-        raise LoadServerAppError(
-            f"Unable to load module {module_str}",
-        ) from None
-
-    # Recursively load attribute
-    attribute = module
-    try:
-        for attribute_str in attributes_str.split("."):
-            attribute = getattr(attribute, attribute_str)
-    except AttributeError:
-        raise LoadServerAppError(
-            f"Unable to load attribute {attributes_str} from module {module_str}",
-        ) from None
-
-    # Check type
-    if not isinstance(attribute, ServerApp):
-        raise LoadServerAppError(
-            f"Attribute {attributes_str} is not of type {ServerApp}",
-        ) from None
-
-    return cast(ServerApp, attribute)

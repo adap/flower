@@ -4,7 +4,7 @@ This example demonstrates how to perform EXtreme Gradient Boosting (XGBoost) wit
 We use [HIGGS](https://archive.ics.uci.edu/dataset/280/higgs) dataset for this example to perform a binary classification task.
 Tree-based with bagging method is used for aggregation on the server.
 
-This project provides a minimal code example to enable you to get stated quickly. For a more comprehensive code example, take a look at [xgboost-comprehensive](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive).
+This project provides a minimal code example to enable you to get started quickly. For a more comprehensive code example, take a look at [xgboost-comprehensive](https://github.com/adap/flower/tree/main/examples/xgboost-comprehensive).
 
 ## Project Setup
 
@@ -67,13 +67,13 @@ To do so simply open two more terminal windows and run the following commands.
 Start client 1 in the first terminal:
 
 ```shell
-python3 client.py --node-id=0
+python3 client.py --partition-id=0
 ```
 
 Start client 2 in the second terminal:
 
 ```shell
-python3 client.py --node-id=1
+python3 client.py --partition-id=1
 ```
 
 You will see that XGBoost is starting a federated training.

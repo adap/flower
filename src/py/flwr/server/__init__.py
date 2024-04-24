@@ -16,12 +16,14 @@
 
 
 from . import strategy
+from . import workflow as workflow
 from .app import run_driver_api as run_driver_api
 from .app import run_fleet_api as run_fleet_api
 from .app import run_superlink as run_superlink
 from .app import start_server as start_server
 from .client_manager import ClientManager as ClientManager
 from .client_manager import SimpleClientManager as SimpleClientManager
+from .compat import LegacyContext as LegacyContext
 from .compat import start_driver as start_driver
 from .driver import Driver as Driver
 from .history import History as History
@@ -34,6 +36,7 @@ __all__ = [
     "ClientManager",
     "Driver",
     "History",
+    "LegacyContext",
     "run_driver_api",
     "run_fleet_api",
     "run_server_app",
@@ -45,4 +48,5 @@ __all__ = [
     "start_driver",
     "start_server",
     "strategy",
+    "workflow",
 ]

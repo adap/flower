@@ -1,4 +1,5 @@
 """Required imports for data.py script."""
+
 import itertools
 import time
 

@@ -15,7 +15,8 @@
 """Driver API servicer."""
 
 
-from logging import INFO
+import time
+from logging import DEBUG, INFO
 from typing import List, Optional, Set
 from uuid import UUID
 
@@ -49,7 +50,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: GetNodesRequest, context: grpc.ServicerContext
     ) -> GetNodesResponse:
         """Get available nodes."""
-        log(INFO, "DriverServicer.GetNodes")
+        log(DEBUG, "DriverServicer.GetNodes")
         state: State = self.state_factory.state()
         all_ids: Set[int] = state.get_nodes(request.run_id)
         nodes: List[Node] = [
@@ -63,14 +64,19 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create run ID."""
         log(INFO, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
-        run_id = state.create_run()
+        run_id = state.create_run("None/None", "None")
         return CreateRunResponse(run_id=run_id)
 
     def PushTaskIns(
         self, request: PushTaskInsRequest, context: grpc.ServicerContext
     ) -> PushTaskInsResponse:
         """Push a set of TaskIns."""
-        log(INFO, "DriverServicer.PushTaskIns")
+        log(DEBUG, "DriverServicer.PushTaskIns")
+
+        # Set pushed_at (timestamp in seconds)
+        pushed_at = time.time()
+        for task_ins in request.task_ins_list:
+            task_ins.task.pushed_at = pushed_at
 
         # Validate request
         _raise_if(len(request.task_ins_list) == 0, "`task_ins_list` must not be empty")
@@ -95,7 +101,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: PullTaskResRequest, context: grpc.ServicerContext
     ) -> PullTaskResResponse:
         """Pull a set of TaskRes."""
-        log(INFO, "DriverServicer.PullTaskRes")
+        log(DEBUG, "DriverServicer.PullTaskRes")
 
         # Convert each task_id str to UUID
         task_ids: Set[UUID] = {UUID(task_id) for task_id in request.task_ids}
@@ -105,7 +111,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         # Register callback
         def on_rpc_done() -> None:
-            log(INFO, "DriverServicer.PullTaskRes callback: delete TaskIns/TaskRes")
+            log(DEBUG, "DriverServicer.PullTaskRes callback: delete TaskIns/TaskRes")
 
             if context.is_active():
                 return

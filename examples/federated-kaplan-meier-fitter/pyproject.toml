@@ -11,7 +11,7 @@ maintainers = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
-flwr = ">=1.0,<2.0"
+flwr-nightly = "*"
 flwr-datasets = ">=0.0.2,<1.0.0"
 numpy = ">=1.23.2"
 pandas = ">=2.0.0"

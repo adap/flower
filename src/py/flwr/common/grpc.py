@@ -15,7 +15,7 @@
 """Utility functions for gRPC."""
 
 
-from logging import INFO
+from logging import DEBUG
 from typing import Optional
 
 import grpc
@@ -49,12 +49,12 @@ def create_channel(
 
     if insecure:
         channel = grpc.insecure_channel(server_address, options=channel_options)
-        log(INFO, "Opened insecure gRPC connection (no certificates were passed)")
+        log(DEBUG, "Opened insecure gRPC connection (no certificates were passed)")
     else:
         ssl_channel_credentials = grpc.ssl_channel_credentials(root_certificates)
         channel = grpc.secure_channel(
             server_address, ssl_channel_credentials, options=channel_options
         )
-        log(INFO, "Opened secure gRPC connection using certificates")
+        log(DEBUG, "Opened secure gRPC connection using certificates")
 
     return channel

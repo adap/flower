@@ -15,11 +15,14 @@
 """Flower Datasets Partitioner package."""
 
 
+from .dirichlet_partitioner import DirichletPartitioner
 from .exponential_partitioner import ExponentialPartitioner
 from .iid_partitioner import IidPartitioner
+from .inner_dirichlet_partitioner import InnerDirichletPartitioner
 from .linear_partitioner import LinearPartitioner
 from .natural_id_partitioner import NaturalIdPartitioner
 from .partitioner import Partitioner
+from .shard_partitioner import ShardPartitioner
 from .size_partitioner import SizePartitioner
 from .square_partitioner import SquarePartitioner
 
@@ -27,8 +30,11 @@ __all__ = [
     "IidPartitioner",
     "Partitioner",
     "NaturalIdPartitioner",
+    "DirichletPartitioner",
     "SizePartitioner",
     "LinearPartitioner",
+    "InnerDirichletPartitioner",
     "SquarePartitioner",
+    "ShardPartitioner",
     "ExponentialPartitioner",
 ]

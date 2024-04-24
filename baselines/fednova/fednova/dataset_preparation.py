@@ -3,7 +3,6 @@
 obtained from source: https://github.com/JYWa/FedNova/blob/master/util_v4.py
 """
 
-
 from random import Random
 
 import numpy as np

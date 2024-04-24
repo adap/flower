@@ -17,23 +17,46 @@
 
 import argparse
 import sys
-from logging import DEBUG, WARN
+from logging import DEBUG, INFO, WARN
 from pathlib import Path
+from typing import Optional
 
 from flwr.common import Context, EventType, RecordSet, event
-from flwr.common.logger import log
+from flwr.common.logger import log, update_console_handler
+from flwr.common.object_ref import load_app
 
-from .driver.driver import Driver
-from .server_app import ServerApp, load_server_app
+from .driver import Driver, GrpcDriver
+from .server_app import LoadServerAppError, ServerApp
 
 
-def run(server_app_attr: str, driver: Driver, server_app_dir: str) -> None:
+def run(
+    driver: Driver,
+    server_app_dir: str,
+    server_app_attr: Optional[str] = None,
+    loaded_server_app: Optional[ServerApp] = None,
+) -> None:
     """Run ServerApp with a given Driver."""
+    if not (server_app_attr is None) ^ (loaded_server_app is None):
+        raise ValueError(
+            "Either `server_app_attr` or `loaded_server_app` should be set "
+            "but not both. "
+        )
+
     if server_app_dir is not None:
         sys.path.insert(0, server_app_dir)
 
+    # Load ServerApp if needed
     def _load() -> ServerApp:
-        server_app: ServerApp = load_server_app(server_app_attr)
+        if server_app_attr:
+            server_app: ServerApp = load_app(server_app_attr, LoadServerAppError)
+
+            if not isinstance(server_app, ServerApp):
+                raise LoadServerAppError(
+                    f"Attribute {server_app_attr} is not of type {ServerApp}",
+                ) from None
+
+        if loaded_server_app:
+            server_app = loaded_server_app
         return server_app
 
     server_app = _load()
@@ -44,12 +67,20 @@ def run(server_app_attr: str, driver: Driver, server_app_dir: str) -> None:
     # Call ServerApp
     server_app(driver=driver, context=context)
 
+    log(DEBUG, "ServerApp finished running.")
+
 
 def run_server_app() -> None:
     """Run Flower server app."""
     event(EventType.RUN_SERVER_APP_ENTER)
 
     args = _parse_args_run_server_app().parse_args()
+
+    update_console_handler(
+        level=DEBUG if args.verbose else INFO,
+        timestamps=args.verbose,
+        colored=True,
+    )
 
     # Obtain certificates
     if args.insecure:
@@ -97,17 +128,17 @@ def run_server_app() -> None:
     server_app_dir = args.dir
     server_app_attr = getattr(args, "server-app")
 
-    # Initialize Driver
-    driver = Driver(
+    # Initialize GrpcDriver
+    driver = GrpcDriver(
         driver_service_address=args.server,
         root_certificates=root_certificates,
     )
 
-    # Run the Server App with the Driver
-    run(server_app_attr, driver, server_app_dir)
+    # Run the ServerApp with the Driver
+    run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
 
     # Clean up
-    del driver
+    driver.close()
 
     event(EventType.RUN_SERVER_APP_LEAVE)
 
@@ -127,6 +158,11 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         action="store_true",
         help="Run the server app without HTTPS. By default, the app runs with "
         "HTTPS enabled. Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Set the logging to `DEBUG`.",
     )
     parser.add_argument(
         "--root-certificates",

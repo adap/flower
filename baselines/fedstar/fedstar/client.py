@@ -1,4 +1,5 @@
 """Required imports for client.py script."""
+
 import gc
 import logging
 import os

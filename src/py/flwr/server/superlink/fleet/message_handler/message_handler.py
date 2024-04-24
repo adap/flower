@@ -15,6 +15,7 @@
 """Fleet API message handlers."""
 
 
+import time
 from typing import List, Optional
 from uuid import UUID
 
@@ -23,11 +24,16 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
+    GetRunRequest,
+    GetRunResponse,
+    PingRequest,
+    PingResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
     PushTaskResResponse,
     Reconnect,
+    Run,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
@@ -40,19 +46,28 @@ def create_node(
 ) -> CreateNodeResponse:
     """."""
     # Create node
-    node_id = state.create_node()
+    node_id = state.create_node(ping_interval=request.ping_interval)
     return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
 
 def delete_node(request: DeleteNodeRequest, state: State) -> DeleteNodeResponse:
     """."""
     # Validate node_id
-    if request.node.anonymous or request.node.node_id <= 0:
+    if request.node.anonymous or request.node.node_id == 0:
         return DeleteNodeResponse()
 
     # Update state
     state.delete_node(node_id=request.node.node_id)
     return DeleteNodeResponse()
+
+
+def ping(
+    request: PingRequest,  # pylint: disable=unused-argument
+    state: State,  # pylint: disable=unused-argument
+) -> PingResponse:
+    """."""
+    res = state.acknowledge_ping(request.node.node_id, request.ping_interval)
+    return PingResponse(success=res)
 
 
 def pull_task_ins(request: PullTaskInsRequest, state: State) -> PullTaskInsResponse:
@@ -77,6 +92,9 @@ def push_task_res(request: PushTaskResRequest, state: State) -> PushTaskResRespo
     task_res: TaskRes = request.task_res_list[0]
     # pylint: enable=no-member
 
+    # Set pushed_at (timestamp in seconds)
+    task_res.task.pushed_at = time.time()
+
     # Store TaskRes in State
     task_id: Optional[UUID] = state.store_task_res(task_res=task_res)
 
@@ -86,3 +104,12 @@ def push_task_res(request: PushTaskResRequest, state: State) -> PushTaskResRespo
         results={str(task_id): 0},
     )
     return response
+
+
+def get_run(
+    request: GetRunRequest, state: State  # pylint: disable=W0613
+) -> GetRunResponse:
+    """Get run information."""
+    run_id, fab_id, fab_version = state.get_run(request.run_id)
+    run = Run(run_id=run_id, fab_id=fab_id, fab_version=fab_version)
+    return GetRunResponse(run=run)

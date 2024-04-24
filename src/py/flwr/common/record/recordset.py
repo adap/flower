@@ -15,54 +15,104 @@
 """RecordSet."""
 
 
-from dataclasses import dataclass, field
-from typing import Dict
+from dataclasses import dataclass
+from typing import Dict, Optional, cast
 
 from .configsrecord import ConfigsRecord
 from .metricsrecord import MetricsRecord
 from .parametersrecord import ParametersRecord
+from .typeddict import TypedDict
+
+
+class RecordSetData:
+    """Inner data container for the RecordSet class."""
+
+    parameters_records: TypedDict[str, ParametersRecord]
+    metrics_records: TypedDict[str, MetricsRecord]
+    configs_records: TypedDict[str, ConfigsRecord]
+
+    def __init__(
+        self,
+        parameters_records: Optional[Dict[str, ParametersRecord]] = None,
+        metrics_records: Optional[Dict[str, MetricsRecord]] = None,
+        configs_records: Optional[Dict[str, ConfigsRecord]] = None,
+    ) -> None:
+        self.parameters_records = TypedDict[str, ParametersRecord](
+            self._check_fn_str, self._check_fn_params
+        )
+        self.metrics_records = TypedDict[str, MetricsRecord](
+            self._check_fn_str, self._check_fn_metrics
+        )
+        self.configs_records = TypedDict[str, ConfigsRecord](
+            self._check_fn_str, self._check_fn_configs
+        )
+        if parameters_records is not None:
+            self.parameters_records.update(parameters_records)
+        if metrics_records is not None:
+            self.metrics_records.update(metrics_records)
+        if configs_records is not None:
+            self.configs_records.update(configs_records)
+
+    def _check_fn_str(self, key: str) -> None:
+        if not isinstance(key, str):
+            raise TypeError(
+                f"Expected `{str.__name__}`, but "
+                f"received `{type(key).__name__}` for the key."
+            )
+
+    def _check_fn_params(self, record: ParametersRecord) -> None:
+        if not isinstance(record, ParametersRecord):
+            raise TypeError(
+                f"Expected `{ParametersRecord.__name__}`, but "
+                f"received `{type(record).__name__}` for the value."
+            )
+
+    def _check_fn_metrics(self, record: MetricsRecord) -> None:
+        if not isinstance(record, MetricsRecord):
+            raise TypeError(
+                f"Expected `{MetricsRecord.__name__}`, but "
+                f"received `{type(record).__name__}` for the value."
+            )
+
+    def _check_fn_configs(self, record: ConfigsRecord) -> None:
+        if not isinstance(record, ConfigsRecord):
+            raise TypeError(
+                f"Expected `{ConfigsRecord.__name__}`, but "
+                f"received `{type(record).__name__}` for the value."
+            )
 
 
 @dataclass
 class RecordSet:
-    """Definition of RecordSet."""
+    """RecordSet stores groups of parameters, metrics and configs."""
 
-    parameters: Dict[str, ParametersRecord] = field(default_factory=dict)
-    metrics: Dict[str, MetricsRecord] = field(default_factory=dict)
-    configs: Dict[str, ConfigsRecord] = field(default_factory=dict)
+    def __init__(
+        self,
+        parameters_records: Optional[Dict[str, ParametersRecord]] = None,
+        metrics_records: Optional[Dict[str, MetricsRecord]] = None,
+        configs_records: Optional[Dict[str, ConfigsRecord]] = None,
+    ) -> None:
+        data = RecordSetData(
+            parameters_records=parameters_records,
+            metrics_records=metrics_records,
+            configs_records=configs_records,
+        )
+        setattr(self, "_data", data)  # noqa
 
-    def set_parameters(self, name: str, record: ParametersRecord) -> None:
-        """Add a ParametersRecord."""
-        self.parameters[name] = record
+    @property
+    def parameters_records(self) -> TypedDict[str, ParametersRecord]:
+        """Dictionary holding ParametersRecord instances."""
+        data = cast(RecordSetData, getattr(self, "_data"))  # noqa
+        return data.parameters_records
 
-    def get_parameters(self, name: str) -> ParametersRecord:
-        """Get a ParametesRecord."""
-        return self.parameters[name]
+    @property
+    def metrics_records(self) -> TypedDict[str, MetricsRecord]:
+        """Dictionary holding MetricsRecord instances."""
+        data = cast(RecordSetData, getattr(self, "_data"))  # noqa
+        return data.metrics_records
 
-    def del_parameters(self, name: str) -> None:
-        """Delete a ParametersRecord."""
-        del self.parameters[name]
-
-    def set_metrics(self, name: str, record: MetricsRecord) -> None:
-        """Add a MetricsRecord."""
-        self.metrics[name] = record
-
-    def get_metrics(self, name: str) -> MetricsRecord:
-        """Get a MetricsRecord."""
-        return self.metrics[name]
-
-    def del_metrics(self, name: str) -> None:
-        """Delete a MetricsRecord."""
-        del self.metrics[name]
-
-    def set_configs(self, name: str, record: ConfigsRecord) -> None:
-        """Add a ConfigsRecord."""
-        self.configs[name] = record
-
-    def get_configs(self, name: str) -> ConfigsRecord:
-        """Get a ConfigsRecord."""
-        return self.configs[name]
-
-    def del_configs(self, name: str) -> None:
-        """Delete a ConfigsRecord."""
-        del self.configs[name]
+    @property
+    def configs_records(self) -> TypedDict[str, ConfigsRecord]:
+        """Dictionary holding ConfigsRecord instances."""
+        data = cast(RecordSetData, getattr(self, "_data"))  # noqa
+        return data.configs_records

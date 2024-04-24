@@ -49,9 +49,9 @@ torchvision = "0.14.1"
 wandb = "0.15.12"
 
 [tool.poetry.dev-dependencies]
-isort = "==5.11.5"
-black = "==23.1.0"
-docformatter = "==1.5.1"
+isort = "==5.13.2"
+black = "==24.2.0"
+docformatter = "==1.7.5"
 mypy = "==1.4.1"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"

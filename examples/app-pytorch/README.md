@@ -12,10 +12,12 @@ Let's assume the following project structure:
 ```bash
 $ tree .
 .
-├── client.py         # <-- contains `ClientApp`
-├── server.py         # <-- contains `ServerApp`
-├── task.py           # <-- task-specific code (model, data)
-└── requirements.txt  # <-- dependencies
+├── client.py           # <-- contains `ClientApp`
+├── server.py           # <-- contains `ServerApp`
+├── server_workflow.py  # <-- contains `ServerApp` with workflow
+├── server_custom.py    # <-- contains `ServerApp` with custom main function
+├── task.py             # <-- task-specific code (model, data)
+└── requirements.txt    # <-- dependencies
 ```
 
 ## Install dependencies
@@ -24,13 +26,21 @@ $ tree .
 pip install -r requirements.txt
 ```
 
-## Start the long-running Flower server (SuperLink)
+## Run a simulation
+
+```bash
+flower-simulation --server-app server:app --client-app client:app --num-supernodes 2
+```
+
+## Run a deployment
+
+### Start the long-running Flower server (SuperLink)
 
 ```bash
 flower-superlink --insecure
 ```
 
-## Start the long-running Flower client (SuperNode)
+### Start the long-running Flower client (SuperNode)
 
 In a new terminal window, start the first long-running Flower client:
 
@@ -44,12 +54,18 @@ In yet another new terminal window, start the second long-running Flower client:
 flower-client-app client:app --insecure
 ```
 
-## Run the Flower App
+### Run the Flower App
 
 With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
 
 ```bash
 flower-server-app server:app --insecure
+```
+
+Or, to try the workflow example, run:
+
+```bash
+flower-server-app server_workflow:app --insecure
 ```
 
 Or, to try the custom server function example, run:

@@ -1,6 +1,5 @@
 """Client implementation for federated learning."""
 
-
 from typing import Dict, List, Tuple
 
 import flwr as fl

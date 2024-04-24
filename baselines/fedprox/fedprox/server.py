@@ -1,6 +1,5 @@
 """Flower Server."""
 
-
 from collections import OrderedDict
 from typing import Callable, Dict, Optional, Tuple
 

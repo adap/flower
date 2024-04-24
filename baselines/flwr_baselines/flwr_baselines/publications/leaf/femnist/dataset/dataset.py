@@ -1,6 +1,5 @@
 """FEMNIST dataset creation module."""
 
-
 import pathlib
 from logging import INFO
 from typing import List, Tuple
@@ -69,8 +68,8 @@ def create_dataset(df_info: pd.DataFrame, labels: np.ndarray) -> NISTLikeDataset
 
 
 def create_partition_list(df_info: pd.DataFrame) -> List[List[int]]:
-    """
-    Create list of list with int masks identifying writers.
+    """Create list of list with int masks identifying writers.
+
     Parameters
     ----------
     df_info: pd.DataFrame
@@ -174,8 +173,8 @@ def train_valid_test_partition(
 def transform_datasets_into_dataloaders(
     datasets: List[Dataset], **dataloader_kwargs
 ) -> List[DataLoader]:
-    """
-    Transform datasets into dataloaders.
+    """Transform datasets into dataloaders.
+
     Parameters
     ----------
     datasets: List[Dataset]

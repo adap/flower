@@ -1,6 +1,5 @@
 """Flower strategy."""
 
-
 from typing import List, Tuple, Union
 
 from flwr.common import Metrics

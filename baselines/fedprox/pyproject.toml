@@ -47,9 +47,9 @@ torch = { url = "https://download.pytorch.org/whl/cu117/torch-2.0.1%2Bcu117-cp31
 torchvision = { url = "https://download.pytorch.org/whl/cu117/torchvision-0.15.2%2Bcu117-cp310-cp310-linux_x86_64.whl" }
 
 [tool.poetry.dev-dependencies]
-isort = "==5.11.5"
-black = "==23.1.0"
-docformatter = "==1.5.1"
+isort = "==5.13.2"
+black = "==24.2.0"
+docformatter = "==1.7.5"
 mypy = "==1.4.1"
 pylint = "==2.8.2"
 flake8 = "==3.9.2"

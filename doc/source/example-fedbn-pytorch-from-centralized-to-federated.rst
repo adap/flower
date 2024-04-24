@@ -3,11 +3,11 @@ Example: FedBN in PyTorch - From Centralized To Federated
 
 This tutorial will show you how to use Flower to build a federated version of an existing machine learning workload with `FedBN <https://github.com/med-air/FedBN>`_, a federated training strategy designed for non-iid data.
 We are using PyTorch to train a Convolutional Neural Network(with Batch Normalization layers) on the CIFAR-10 dataset.
-When applying FedBN, only few changes needed compared to `Example: PyTorch - From Centralized To Federated <https://flower.ai/docs/examples/pytorch-from-centralized-to-federated.html>`_.
+When applying FedBN, only few changes needed compared to :doc:`Example: PyTorch - From Centralized To Federated <example-pytorch-from-centralized-to-federated>`.
 
 Centralized Training
 --------------------
-All files are revised based on `Example: PyTorch - From Centralized To Federated <https://flower.ai/docs/examples/pytorch-from-centralized-to-federated.html>`_.
+All files are revised based on :doc:`Example: PyTorch - From Centralized To Federated <example-pytorch-from-centralized-to-federated>`.
 The only thing to do is modifying the file called :code:`cifar.py`, revised part is shown below:
 
 The model architecture defined in class Net() is added with Batch Normalization layers accordingly.
@@ -45,13 +45,13 @@ You can now run your machine learning workload:
     python3 cifar.py
 
 So far this should all look fairly familiar if you've used PyTorch before.
-Let's take the next step and use what we've built to create a federated learning system within FedBN, the sytstem consists of one server and two clients.
+Let's take the next step and use what we've built to create a federated learning system within FedBN, the system consists of one server and two clients.
 
 Federated Training
 ------------------
 
-If you have read `Example: PyTorch - From Centralized To Federated <https://flower.ai/docs/examples/pytorch-from-centralized-to-federated.html>`_, the following parts are easy to follow, onyl :code:`get_parameters` and :code:`set_parameters` function in :code:`client.py` needed to revise.
-If not, please read the `Example: PyTorch - From Centralized To Federated <https://flower.ai/docs/examples/pytorch-from-centralized-to-federated.html>`_. first.
+If you have read :doc:`Example: PyTorch - From Centralized To Federated <example-pytorch-from-centralized-to-federated>`, the following parts are easy to follow, only :code:`get_parameters` and :code:`set_parameters` function in :code:`client.py` needed to revise.
+If not, please read the :doc:`Example: PyTorch - From Centralized To Federated <example-pytorch-from-centralized-to-federated>`. first.
 
 Our example consists of one *server* and two *clients*. In FedBN, :code:`server.py` keeps unchanged, we can start the server directly.
 

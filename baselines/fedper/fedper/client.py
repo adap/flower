@@ -1,4 +1,5 @@
 """Client implementation - can call FedPer and FedAvg clients."""
+
 import pickle
 from collections import OrderedDict, defaultdict
 from pathlib import Path
@@ -322,9 +323,9 @@ def get_client_fn_simulation(
         # Create the test loader
         testloader = DataLoader(testset, config.batch_size)
 
-        manager: Union[
-            Type[MobileNetModelManager], Type[ResNetModelManager]
-        ] = MobileNetModelManager
+        manager: Union[Type[MobileNetModelManager], Type[ResNetModelManager]] = (
+            MobileNetModelManager
+        )
         if config.model_name.lower() == "resnet":
             manager = ResNetModelManager
         elif config.model_name.lower() == "mobile":

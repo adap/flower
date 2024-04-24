@@ -196,9 +196,7 @@ class Conv2d(nn.Module):
         # r3 is floored because we cannot take the ceil as it results a bigger number
         # of parameters than the original problem
 
-        num_target_params = (
-            self.out_channels * self.in_channels * (self.kernel_size**2)
-        )
+        num_target_params = self.out_channels * self.in_channels * (self.kernel_size**2)
         a, b, c = (
             self.kernel_size**2,
             self.out_channels + self.in_channels,

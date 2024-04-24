@@ -20,6 +20,7 @@ import numpy as np
 from .differential_privacy import (
     add_gaussian_noise_inplace,
     clip_inputs_inplace,
+    compute_adaptive_noise_params,
     compute_clip_model_update,
     compute_stdv,
     get_norm,
@@ -133,6 +134,76 @@ def test_compute_clip_model_update() -> None:
     # Execute
     compute_clip_model_update(param1, param2, clipping_norm)
 
-    # Verify
+    # Assert
     for i, param in enumerate(param1):
         np.testing.assert_array_almost_equal(param, expected_result[i])
+
+
+def test_compute_adaptive_noise_params() -> None:
+    """Test compute_adaptive_noise_params function."""
+    # Test valid input with positive noise_multiplier
+    noise_multiplier = 1.0
+    num_sampled_clients = 100.0
+    clipped_count_stddev = None
+    result = compute_adaptive_noise_params(
+        noise_multiplier, num_sampled_clients, clipped_count_stddev
+    )
+
+    # Assert
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+    assert result[0] > 0.0
+    assert result[1] > 0.0
+
+    # Test valid input with zero noise_multiplier
+    noise_multiplier = 0.0
+    num_sampled_clients = 50.0
+    clipped_count_stddev = None
+    result = compute_adaptive_noise_params(
+        noise_multiplier, num_sampled_clients, clipped_count_stddev
+    )
+
+    # Assert
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+    assert result[0] == 0.0
+    assert result[1] == 0.0
+
+    # Test valid input with specified clipped_count_stddev
+    noise_multiplier = 3.0
+    num_sampled_clients = 200.0
+    clipped_count_stddev = 5.0
+    result = compute_adaptive_noise_params(
+        noise_multiplier, num_sampled_clients, clipped_count_stddev
+    )
+
+    # Assert
+    assert isinstance(result, tuple)
+    assert len(result) == 2
+    assert result[0] == clipped_count_stddev
+    assert result[1] > 0.0
+
+    # Test invalid input with noise_multiplier >= 2 * clipped_count_stddev
+    noise_multiplier = 10.0
+    num_sampled_clients = 100.0
+    clipped_count_stddev = None
+    try:
+        compute_adaptive_noise_params(
+            noise_multiplier, num_sampled_clients, clipped_count_stddev
+        )
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("Expected ValueError not raised.")
+
+    # Test intermediate calculation
+    noise_multiplier = 3.0
+    num_sampled_clients = 200.0
+    clipped_count_stddev = 5.0
+    result = compute_adaptive_noise_params(
+        noise_multiplier, num_sampled_clients, clipped_count_stddev
+    )
+    temp_value = (noise_multiplier ** (-2) - (2 * clipped_count_stddev) ** (-2)) ** -0.5
+
+    # Assert
+    assert np.isclose(result[1], temp_value, rtol=1e-6)

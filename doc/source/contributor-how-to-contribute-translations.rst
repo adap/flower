@@ -8,7 +8,7 @@ the translations are often imperfect. If you speak languages other than
 English, you might be able to help us in our effort to make Federated Learning
 accessible to as many people as possible by contributing to those translations!
 This might also be a great opportunity for those wanting to become open source
-contributors with little prerequistes.
+contributors with little prerequisites.
 
 Our translation project is publicly available over on `Weblate
 <https://hosted.weblate.org/projects/flower-docs/framework/>`_, this where most
@@ -44,7 +44,7 @@ This is what the interface looks like:
 
   .. image:: _static/weblate_interface.png
 
-You input your translation in the textbox at the top and then, once you are
+You input your translation in the text box at the top and then, once you are
 happy with it, you either press ``Save and continue`` (to save the translation
 and go to the next untranslated string), ``Save and stay`` (to save the
 translation and stay on the same page), ``Suggest`` (to add your translation to
