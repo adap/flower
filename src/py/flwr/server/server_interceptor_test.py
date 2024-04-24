@@ -116,6 +116,22 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert call.initial_metadata()[0] == expected_metadata
         assert isinstance(response, CreateNodeResponse)
+    
+    def test_unsuccessful_create_node_with_metadata(self) -> None:
+        """Test server interceptor for creating node."""
+        # Prepare
+        _, client_public_key = generate_key_pairs()
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(client_public_key)
+        )
+
+        # Execute
+        # Assert
+        with self.assertRaises(grpc.RpcError):
+            self._create_node.with_call(
+                request=CreateNodeRequest(),
+                metadata=((_PUBLIC_KEY_HEADER, public_key_bytes),),
+            )
 
     def test_successful_delete_node_with_metadata(self) -> None:
         """Test server interceptor for deleting node."""
@@ -160,21 +176,15 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         )
 
         # Execute
-        try:
-            response, call = self._delete_node.with_call(
+        # Assert
+        with self.assertRaises(grpc.RpcError):
+            self._delete_node.with_call(
                 request=request,
                 metadata=(
                     (_PUBLIC_KEY_HEADER, public_key_bytes),
                     (_AUTH_TOKEN_HEADER, hmac_value),
                 ),
             )
-        except grpc.RpcError as e:
-            # Assert
-            
-            print(e)
-
-        # Assert
-        assert False
 
     def test_successful_pull_task_ins_with_metadata(self) -> None:
         """Test server interceptor for deleting node."""
@@ -203,6 +213,32 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert isinstance(response, PullTaskInsResponse)
         assert grpc.StatusCode.OK == call.code()
 
+    def test_unsuccessful_pull_task_ins_with_metadata(self) -> None:
+        """Test server interceptor for deleting node."""
+        # Prepare
+        request = PullTaskInsRequest()
+        client_private_key, _ = generate_key_pairs()
+        shared_secret = generate_shared_key(
+            client_private_key, self._server_public_key
+        )
+        hmac_value = base64.urlsafe_b64encode(
+            compute_hmac(shared_secret, request.SerializeToString(True))
+        )
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+
+        # Execute
+        # Assert
+        with self.assertRaises(grpc.RpcError):
+            self._pull_task_ins.with_call(
+                request=request,
+                metadata=(
+                    (_PUBLIC_KEY_HEADER, public_key_bytes),
+                    (_AUTH_TOKEN_HEADER, hmac_value),
+                ),
+            )
+
     def test_successful_push_task_res_with_metadata(self) -> None:
         """Test server interceptor for deleting node."""
         # Prepare
@@ -229,3 +265,29 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert isinstance(response, PushTaskResResponse)
         assert grpc.StatusCode.OK == call.code()
+
+    def test_successful_push_task_res_with_metadata(self) -> None:
+        """Test server interceptor for deleting node."""
+        # Prepare
+        request = PushTaskResRequest(task_res_list=[TaskRes()])
+        client_private_key, _ = generate_key_pairs()
+        shared_secret = generate_shared_key(
+            client_private_key, self._server_public_key
+        )
+        hmac_value = base64.urlsafe_b64encode(
+            compute_hmac(shared_secret, request.SerializeToString(True))
+        )
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+
+        # Execute
+        # Assert
+        with self.assertRaises(grpc.RpcError):
+            self._push_task_res.with_call(
+                request=request,
+                metadata=(
+                    (_PUBLIC_KEY_HEADER, public_key_bytes),
+                    (_AUTH_TOKEN_HEADER, hmac_value),
+                ),
+            )
