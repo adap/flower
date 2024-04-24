@@ -25,6 +25,8 @@ import numpy as np
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
     Encoding,
+    NoEncryption,
+    PrivateFormat,
     PublicFormat,
     load_ssh_private_key,
     load_ssh_public_key,
@@ -205,23 +207,14 @@ def test_setup_client_auth() -> None:
     """Test setup client authentication."""
     # Generate keys
     _, first_public_key = generate_key_pairs()
-    server_public_key = (
-        b"ecdsa-sha2-nistp384 "
-        b"AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBIqtP/EvrgBYukcjRJT9zVLXE"
-        b"fykvVvT/QcHXuxCNu83SyCwedk3nNZxy5rZ1f8KoU+OSGmum5I9BxnWcLeBC+TGqpifTUSNwa/riV"
-        b"oJGcN/SxF3euqQg58YePORhos/Ug=="
+    private_key, public_key = generate_key_pairs()
+
+    server_public_key = public_key.public_bytes(
+        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
     )
-    server_private_key = b"""-----BEGIN OPENSSH PRIVATE KEY-----
-    b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAiAAAABNlY2RzYS
-    1zaGEyLW5pc3RwMzg0AAAACG5pc3RwMzg0AAAAYQSKrT/xL64AWLpHI0SU/c1S1xH8pL1b
-    0/0HB17sQjbvN0sgsHnZN5zWccua2dX/CqFPjkhprpuSPQcZ1nC3gQvkxqqYn01EjcGv64
-    laCRnDf0sRd3rqkIOfGHjzkYaLP1IAAADw/rbMO/62zDsAAAATZWNkc2Etc2hhMi1uaXN0
-    cDM4NAAAAAhuaXN0cDM4NAAAAGEEiq0/8S+uAFi6RyNElP3NUtcR/KS9W9P9Bwde7EI27z
-    dLILB52Tec1nHLmtnV/wqhT45Iaa6bkj0HGdZwt4EL5MaqmJ9NRI3Br+uJWgkZw39LEXd6
-    6pCDnxh485GGiz9SAAAAMQDQmvP7JeFNBDvo1VXciQF0Wv3/DCcj9x0kUABuX1gxb42Iw3
-    v7FOEco/enMaS4URwAAAAnZGFuaWVsbnVncmFoYUBEYW5pZWxzLU1hY0Jvb2stUHJvLmxv
-    Y2Fs
-    -----END OPENSSH PRIVATE KEY-----"""
+    server_private_key = private_key.private_bytes(
+        Encoding.PEM, PrivateFormat.OpenSSH, NoEncryption()
+    )
     _, second_public_key = generate_key_pairs()
 
     with tempfile.TemporaryDirectory() as temp_dir:
