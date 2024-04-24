@@ -1,4 +1,4 @@
-# Flower Clients in C++
+# Flower Clients in C++ (under development)
 
 In this example you will train a linear model on synthetic data using C++ clients.
 
@@ -12,7 +12,7 @@ Many thanks to the original contributors to this code:
 
 ## Install requirements
 
-You'll need CMake and Python.
+You'll need CMake and Python with `flwr` installed.
 
 ### Building the example
 
@@ -23,16 +23,20 @@ cmake -S . -B build
 cmake --build build
 ```
 
-## Run the server and two clients in separate terminals
+## Run the `Flower SuperLink`, the two clients, and the `Flower ServerApp` in separate terminals
 
 ```bash
-python server.py
+flwr-superlink --insecure
 ```
 
 ```bash
-build/flwr_client 0 127.0.0.1:8080
+build/flwr_client 0 127.0.0.1:9092
 ```
 
 ```bash
-build/flwr_client 1 127.0.0.1:8080
+build/flwr_client 1 127.0.0.1:9092
+```
+
+```bash
+flower-server-app server:app --insecure
 ```

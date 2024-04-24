@@ -14,11 +14,10 @@
 # ==============================================================================
 """Flower client app."""
 
-
 import argparse
 import sys
 import time
-from logging import DEBUG, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 
@@ -35,9 +34,11 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
+    ErrorCode,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
+from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.message import Error
 from flwr.common.object_ref import load_app, validate
 from flwr.common.retry_invoker import RetryInvoker, exponential
 
@@ -46,13 +47,14 @@ from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
+from .supernode.app import parse_args_run_client_app
 
 
 def run_client_app() -> None:
     """Run Flower client app."""
-    event(EventType.RUN_CLIENT_APP_ENTER)
-
     log(INFO, "Long-running Flower client starting")
+
+    event(EventType.RUN_CLIENT_APP_ENTER)
 
     args = _parse_args_run_client_app().parse_args()
 
@@ -130,56 +132,7 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         description="Start a Flower client app",
     )
 
-    parser.add_argument(
-        "client-app",
-        help="For example: `client:app` or `project.package.module:wrapper.app`",
-    )
-    parser.add_argument(
-        "--insecure",
-        action="store_true",
-        help="Run the client without HTTPS. By default, the client runs with "
-        "HTTPS enabled. Use this flag only if you understand the risks.",
-    )
-    parser.add_argument(
-        "--rest",
-        action="store_true",
-        help="Use REST as a transport layer for the client.",
-    )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
-        type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
-    )
-    parser.add_argument(
-        "--server",
-        default="0.0.0.0:9092",
-        help="Server address",
-    )
-    parser.add_argument(
-        "--max-retries",
-        type=int,
-        default=None,
-        help="The maximum number of times the client will try to connect to the"
-        "server before giving up in case of a connection error. By default,"
-        "it is set to None, meaning there is no limit to the number of tries.",
-    )
-    parser.add_argument(
-        "--max-wait-time",
-        type=float,
-        default=None,
-        help="The maximum duration before the client stops trying to"
-        "connect to the server in case of connection error. By default, it"
-        "is set to None, meaning there is no limit to the total time.",
-    )
-    parser.add_argument(
-        "--dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load Flower "
-        "app from there."
-        " Default: current working directory.",
-    )
+    parse_args_run_client_app(parser=parser)
 
     return parser
 
@@ -385,8 +338,6 @@ def _start_client_internal(
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app
-    else:
-        warn_experimental_feature("`load_client_app_fn`")
 
     # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
@@ -397,7 +348,7 @@ def _start_client_internal(
     )
 
     retry_invoker = RetryInvoker(
-        wait_factory=exponential,
+        wait_gen_factory=exponential,
         recoverable_exceptions=connection_error_type,
         max_tries=max_retries,
         max_time=max_wait_time,
@@ -443,7 +394,8 @@ def _start_client_internal(
             grpc_max_message_length,
             root_certificates,
         ) as conn:
-            receive, send, create_node, delete_node = conn
+            # pylint: disable-next=W0612
+            receive, send, create_node, delete_node, get_run = conn
 
             # Register node
             if create_node is not None:
@@ -457,12 +409,13 @@ def _start_client_internal(
                     continue
 
                 log(INFO, "")
-                log(
-                    INFO,
-                    "[RUN %s, ROUND %s]",
-                    message.metadata.run_id,
-                    message.metadata.group_id,
-                )
+                if len(message.metadata.group_id) > 0:
+                    log(
+                        INFO,
+                        "[RUN %s, ROUND %s]",
+                        message.metadata.run_id,
+                        message.metadata.group_id,
+                    )
                 log(
                     INFO,
                     "Received: %s message %s",
@@ -482,32 +435,57 @@ def _start_client_internal(
                 # Retrieve context for this run
                 context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
-                # Load ClientApp instance
-                client_app: ClientApp = load_client_app_fn()
-
-                # Handle task message
-                out_message = client_app(message=message, context=context)
-
-                # Update node state
-                node_state.update_context(
-                    run_id=message.metadata.run_id,
-                    context=context,
+                # Create an error reply message that will never be used to prevent
+                # the used-before-assignment linting error
+                reply_message = message.create_error_reply(
+                    error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
                 )
+
+                # Handle app loading and task message
+                try:
+                    # Load ClientApp instance
+                    client_app: ClientApp = load_client_app_fn()
+
+                    # Execute ClientApp
+                    reply_message = client_app(message=message, context=context)
+                except Exception as ex:  # pylint: disable=broad-exception-caught
+
+                    # Legacy grpc-bidi
+                    if transport in ["grpc-bidi", None]:
+                        log(ERROR, "Client raised an exception.", exc_info=ex)
+                        # Raise exception, crash process
+                        raise ex
+
+                    # Don't update/change NodeState
+
+                    e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                    exc_entity = "ClientApp"
+                    if isinstance(ex, LoadClientAppError):
+                        reason = (
+                            "An exception was raised when attempting to load "
+                            "`ClientApp`"
+                        )
+                        e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+                        exc_entity = "SuperNode"
+
+                    log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+
+                    # Create error message
+                    reply_message = message.create_error_reply(
+                        error=Error(code=e_code, reason=reason)
+                    )
+                else:
+                    # No exception, update node state
+                    node_state.update_context(
+                        run_id=message.metadata.run_id,
+                        context=context,
+                    )
 
                 # Send
-                send(out_message)
-                log(
-                    INFO,
-                    "[RUN %s, ROUND %s]",
-                    out_message.metadata.run_id,
-                    out_message.metadata.group_id,
-                )
-                log(
-                    INFO,
-                    "Sent: %s reply to message %s",
-                    out_message.metadata.message_type,
-                    message.metadata.message_id,
-                )
+                send(reply_message)
+                log(INFO, "Sent reply")
 
             # Unregister node
             if delete_node is not None:
@@ -635,6 +613,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
                 Callable[[Message], None],
                 Optional[Callable[[], None]],
                 Optional[Callable[[], None]],
+                Optional[Callable[[int], Tuple[str, str]]],
             ]
         ],
     ],

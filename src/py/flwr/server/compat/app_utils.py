@@ -16,7 +16,6 @@
 
 
 import threading
-import time
 from typing import Dict, Tuple
 
 from ..client_manager import ClientManager
@@ -60,6 +59,7 @@ def start_update_client_manager_thread(
             client_manager,
             f_stop,
         ),
+        daemon=True,
     )
     thread.start()
 
@@ -89,7 +89,7 @@ def _update_client_manager(
         for node_id in new_nodes:
             client_proxy = DriverClientProxy(
                 node_id=node_id,
-                driver=driver.grpc_driver,  # type: ignore
+                driver=driver.grpc_driver_helper,  # type: ignore
                 anonymous=False,
                 run_id=driver.run_id,  # type: ignore
             )
@@ -99,4 +99,5 @@ def _update_client_manager(
                 raise RuntimeError("Could not register node.")
 
         # Sleep for 3 seconds
-        time.sleep(3)
+        if not f_stop.is_set():
+            f_stop.wait(3)

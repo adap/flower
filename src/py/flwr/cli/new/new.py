@@ -22,7 +22,12 @@ from typing import Dict, Optional
 import typer
 from typing_extensions import Annotated
 
-from ..utils import prompt_options, prompt_text
+from ..utils import (
+    is_valid_project_name,
+    prompt_options,
+    prompt_text,
+    sanitize_project_name,
+)
 
 
 class MlFramework(str, Enum):
@@ -31,6 +36,7 @@ class MlFramework(str, Enum):
     NUMPY = "NumPy"
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
+    SKLEARN = "sklearn"
 
 
 class TemplateNotFound(Exception):
@@ -53,8 +59,9 @@ def render_template(template: str, data: Dict[str, str]) -> str:
     """Render template."""
     tpl_file = load_template(template)
     tpl = Template(tpl_file)
-    result = tpl.substitute(data)
-    return result
+    if ".gitignore" not in template:
+        return tpl.substitute(data)
+    return tpl.template
 
 
 def create_file(file_path: str, content: str) -> None:
@@ -81,6 +88,16 @@ def new(
     ] = None,
 ) -> None:
     """Create new Flower project."""
+    if project_name is None:
+        project_name = prompt_text("Please provide project name")
+    if not is_valid_project_name(project_name):
+        project_name = prompt_text(
+            "Please provide a name that only contains "
+            "characters in {'_', 'a-zA-Z', '0-9'}",
+            predicate=is_valid_project_name,
+            default=sanitize_project_name(project_name),
+        )
+
     print(
         typer.style(
             f"🔨 Creating Flower project {project_name}...",
@@ -88,9 +105,6 @@ def new(
             bold=True,
         )
     )
-
-    if project_name is None:
-        project_name = prompt_text("Please provide project name")
 
     if framework is not None:
         framework_str = str(framework.value)
@@ -115,17 +129,19 @@ def new(
 
     # List of files to render
     files = {
+        ".gitignore": {"template": "app/.gitignore.tpl"},
         "README.md": {"template": "app/README.md.tpl"},
-        "requirements.txt": {"template": f"app/requirements.{framework_str}.txt.tpl"},
-        "flower.toml": {"template": "app/flower.toml.tpl"},
         "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
         f"{pnl}/__init__.py": {"template": "app/code/__init__.py.tpl"},
         f"{pnl}/server.py": {"template": f"app/code/server.{framework_str}.py.tpl"},
         f"{pnl}/client.py": {"template": f"app/code/client.{framework_str}.py.tpl"},
     }
 
-    # In case framework is MlFramework.PYTORCH generate additionally the task.py file
-    if framework_str == MlFramework.PYTORCH.value.lower():
+    # Depending on the framework, generate task.py file
+    frameworks_with_tasks = [
+        MlFramework.PYTORCH.value.lower(),
+    ]
+    if framework_str in frameworks_with_tasks:
         files[f"{pnl}/task.py"] = {"template": f"app/code/task.{framework_str}.py.tpl"}
 
     context = {"project_name": project_name}

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       flwr-version:
-        description: "Version of Flower e.g. (1.7.0)."
+        description: "Version of Flower"
         required: true
         type: string
 

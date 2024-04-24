@@ -107,7 +107,7 @@ if __name__ == "__main__":
 
     fds = FederatedDataset(dataset="mnist", partitioners={"train": 3})
     partition = fds.load_partition(partition_id=args.partition_id)
-    partition_splits = partition.train_test_split(test_size=0.2)
+    partition_splits = partition.train_test_split(test_size=0.2, seed=42)
 
     partition_splits["train"].set_format("numpy")
     partition_splits["test"].set_format("numpy")
