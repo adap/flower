@@ -44,6 +44,7 @@ from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     public_key_to_bytes,
+    ssh_types_to_elliptic_curve,
 )
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
@@ -53,7 +54,6 @@ from .client_manager import ClientManager
 from .history import History
 from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
-from .server_interceptor import AuthenticateServerInterceptor
 from .strategy import Strategy
 from .superlink.driver.driver_grpc import run_driver_api_grpc
 from .superlink.fleet.grpc_bidi.grpc_server import (
@@ -61,6 +61,7 @@ from .superlink.fleet.grpc_bidi.grpc_server import (
     start_grpc_server,
 )
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.fleet.vce import start_vce
 from .superlink.state import StateFactory
 
@@ -436,29 +437,32 @@ def _try_setup_client_authentication(
     client_keys_file_path = Path(args.require_client_authentication[0])
     if not client_keys_file_path.exists():
         sys.exit(
-            "The provided path to the client public keys CSV file does not exist. "
+            "The provided path to the client public keys CSV file does not exist: "
+            f"{client_keys_file_path}. "
             "Please provide the CSV file path containing known client public keys "
             "to '--require-client-authentication'."
         )
 
     client_public_keys: Set[bytes] = set()
-    public_key = load_ssh_public_key(
+    ssh_public_key = load_ssh_public_key(
         Path(args.require_client_authentication[1]).read_bytes()
     )
-    private_key = load_ssh_private_key(
+    ssh_private_key = load_ssh_private_key(
         Path(args.require_client_authentication[2]).read_bytes(),
         None,
     )
-    if not isinstance(public_key, ec.EllipticCurvePublicKey) or not isinstance(
-        private_key, ec.EllipticCurvePrivateKey
-    ):
-        sys.exit(
-            "An eliptic curve public and private key pair is required for "
-            "client authentication. Please provide the file path containing "
-            "valid public and private key to '--require-client-authentication'."
+
+    try:
+        server_private_key, server_public_key = ssh_types_to_elliptic_curve(
+            ssh_private_key, ssh_public_key
         )
-    server_public_key = public_key
-    server_private_key = private_key
+    except TypeError:
+        sys.exit(
+            "The file paths provided do not contain a vaild public and private "
+            "key. Client authentication requires an elliptic curve public and "
+            "private key pair. Please provide the file path containing elliptic "
+            "curve public and private key to '--require-client-authentication'."
+        )
 
     with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile)
@@ -467,6 +471,12 @@ def _try_setup_client_authentication(
                 public_key = load_ssh_public_key(element.encode())
                 if isinstance(public_key, ec.EllipticCurvePublicKey):
                     client_public_keys.add(public_key_to_bytes(public_key))
+                else:
+                    sys.exit(
+                        "Error: Unable to parse the public keys in the .csv "
+                        "file. Please ensure that the .csv file contains valid "
+                        "SSH public keys and try again."
+                    )
         return (
             client_public_keys,
             server_public_key,
@@ -697,8 +707,9 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         nargs=3,
         metavar=("CLIENT_KEYS", "SERVER_PUBLIC_KEY", "SERVER_PRIVATE_KEY"),
         type=str,
-        help="Paths to .csv file containing list of known client public keys for "
-        "authentication, server public key, and server private key, in that order.",
+        help="Provide three file paths: (1) a .csv file containing a list of "
+        "known client public keys for authentication, (2) the server's public "
+        "key file, and (3) the server's private key file.",
     )
 
 

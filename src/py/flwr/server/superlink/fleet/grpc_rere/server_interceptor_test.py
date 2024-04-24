@@ -39,14 +39,14 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
+from flwr.server.app import ADDRESS_FLEET_API_GRPC_RERE, _run_fleet_api_grpc_rere
+from flwr.server.superlink.state.state_factory import StateFactory
 
-from .app import ADDRESS_FLEET_API_GRPC_RERE, _run_fleet_api_grpc_rere
 from .server_interceptor import (
     _AUTH_TOKEN_HEADER,
     _PUBLIC_KEY_HEADER,
     AuthenticateServerInterceptor,
 )
-from .superlink.state.state_factory import StateFactory
 
 
 class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
