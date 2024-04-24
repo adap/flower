@@ -118,7 +118,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert isinstance(response, CreateNodeResponse)
 
     def test_unsuccessful_create_node_with_metadata(self) -> None:
-        """Test server interceptor for creating node."""
+        """Test server interceptor for creating node unsuccessfully."""
         # Prepare
         _, client_public_key = generate_key_pairs()
         public_key_bytes = base64.urlsafe_b64encode(
@@ -161,7 +161,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
     def test_unsuccessful_delete_node_with_metadata(self) -> None:
-        """Test server interceptor for deleting node."""
+        """Test server interceptor for deleting node unsuccessfully."""
         # Prepare
         request = DeleteNodeRequest()
         client_private_key, _ = generate_key_pairs()
@@ -185,7 +185,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             )
 
     def test_successful_pull_task_ins_with_metadata(self) -> None:
-        """Test server interceptor for deleting node."""
+        """Test server interceptor for pull task ins."""
         # Prepare
         request = PullTaskInsRequest()
         shared_secret = generate_shared_key(
@@ -212,7 +212,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
     def test_unsuccessful_pull_task_ins_with_metadata(self) -> None:
-        """Test server interceptor for deleting node."""
+        """Test server interceptor for pull task ins unsuccessfully."""
         # Prepare
         request = PullTaskInsRequest()
         client_private_key, _ = generate_key_pairs()
@@ -236,7 +236,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             )
 
     def test_successful_push_task_res_with_metadata(self) -> None:
-        """Test server interceptor for deleting node."""
+        """Test server interceptor for push task res."""
         # Prepare
         request = PushTaskResRequest(task_res_list=[TaskRes()])
         shared_secret = generate_shared_key(
@@ -263,7 +263,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert grpc.StatusCode.OK == call.code()
 
     def test_unsuccessful_push_task_res_with_metadata(self) -> None:
-        """Test server interceptor for deleting node."""
+        """Test server interceptor for push task res unsuccessfully."""
         # Prepare
         request = PushTaskResRequest(task_res_list=[TaskRes()])
         client_private_key, _ = generate_key_pairs()
