@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """DivideResplitter class for Flower Datasets."""
+
+
 import collections
 import warnings
 from typing import Dict, List, Optional, Union, cast
@@ -31,10 +33,11 @@ class DivideResplitter:
     ----------
     divide_config: Union[Dict[str, int], Dict[str, float], Dict[str, Dict[str,
     int]], Dict[str, Dict[str, float]]]
-        If single level dictionary with keys - the new split names and the values of int
-        = number of samples, float - fraction of the split. The fractions do not have
-        to sum up to 1.0. The order of matter = the first key will get fraction_1
-        starting from the beginning of the dataset.
+        If single level dictionary, keys represent the split names. If values are: int, they
+        represent the number of samples in each split; float, they represent the fraction
+        of the total samples assigned to that split. These fractions do not have
+        to sum up to 1.0. The order of values (either int or float) matter: the first key 
+        will get the first split starting from the beginning of the dataset, and so on.
         If two level dictionary (dictionary of dictionaries) then the first keys are
         the split names that will be divided into different splits. It's an alternative
         to specifying `divide_split` if you need to divide many splits.
@@ -104,7 +107,7 @@ class DivideResplitter:
                     raise ValueError(
                         "When giving the config that is single level and working with "
                         "dataset with more than one split you need to specify the "
-                        "`divide_split` but given None instead."
+                        "`divide_split` but current value is None."
                     )
                 self._divide_split = dataset_splits[0]
             self._multiple_splits_config = cast(
@@ -178,8 +181,7 @@ class DivideResplitter:
         ]
         if duplicates:
             raise ValueError(
-                "The specified values of the new splits in "
-                "`divide_config` are duplicated. Please specify"
+                f"`divide_config` contains duplicates ({duplicates}). Please specify"
                 "unique values for each new split."
             )
 
@@ -212,7 +214,7 @@ class DivideResplitter:
         if duplicates:
             raise ValueError(
                 "The specified values of the new splits in "
-                "`divide_config` are duplicated with the split names of "
+                f"`divide_config` are duplicated ({duplicates}) with the split names of "
                 "the datasets. "
                 "Please specify unique values for each new split."
             )
@@ -241,7 +243,7 @@ class DivideResplitter:
                         f"The sum of the sample numbers in `divide_config` must be "
                         f"smaller than the split size. This is not the case for "
                         f"{split_from} split which is of length {dataset_len} and the "
-                        f"sum in config is {len_from_divide_resplit}."
+                        f"sum in the supplied `divide_config` is {len_from_divide_resplit}."
                     )
             else:
                 raise TypeError(
