@@ -19,7 +19,7 @@ import time
 from typing import Optional
 
 from flwr import common
-from flwr.common import DEFAULT_TTL, Message, MessageType, MessageTypeLegacy, RecordSet
+from flwr.common import Message, MessageType, MessageTypeLegacy, RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.server.client_proxy import ClientProxy
 
@@ -119,7 +119,7 @@ class DriverClientProxy(ClientProxy):
             message_type=task_type,
             dst_node_id=self.node_id,
             group_id=str(group_id) if group_id else "",
-            ttl=DEFAULT_TTL,
+            ttl=timeout,
         )
 
         # Push message

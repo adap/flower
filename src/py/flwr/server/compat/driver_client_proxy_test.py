@@ -92,9 +92,10 @@ def validate_task_res(
 class DriverClientProxyTestCase(unittest.TestCase):
     """Tests for DriverClientProxy."""
 
+    __test__ = False  # disables this generic TestCase
+
     def setUp(self) -> None:
         """Set up mocks for tests."""
-        self.driver = GrpcDriver()
         self.driver.driver_helper = MagicMock()
         self.driver.run_id = 0
         self.driver.driver_helper.get_nodes.return_value = (
@@ -345,3 +346,14 @@ class DriverClientProxyTestCase(unittest.TestCase):
         # Execute & assert
         with self.assertRaises(ValueError):
             validate_task_res(task_res=task_res)
+
+
+class GrpcDriverTests(DriverClientProxyTestCase):
+    """Unit test using GrpcDriver."""
+
+    __test__ = True
+
+    def setUp(self) -> None:
+        """Prepare GrpcDriver."""
+        self.driver = GrpcDriver()
+        super().setUp()
