@@ -16,6 +16,7 @@
 
 
 import unittest
+import unittest.mock
 from typing import Union, cast
 from unittest.mock import MagicMock
 
@@ -46,7 +47,7 @@ from flwr.proto import (  # pylint: disable=E0611
     task_pb2,
 )
 from flwr.server.compat.driver_client_proxy import DriverClientProxy
-from flwr.server.driver import GrpcDriver
+from flwr.server.driver import Driver, GrpcDriver
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
 
@@ -94,6 +95,11 @@ class DriverClientProxyTestCase(unittest.TestCase):
 
     __test__ = False  # disables this generic TestCase
 
+    def __init__(self, driver: Driver, *args, **kwargs) -> None:  # type: ignore
+        """Initialize TestCase with given Driver."""
+        self.driver = driver
+        super().__init__(*args, **kwargs)
+
     def setUp(self) -> None:
         """Set up mocks for tests."""
         self.driver.driver_helper = MagicMock()
@@ -111,12 +117,12 @@ class DriverClientProxyTestCase(unittest.TestCase):
         # Prepare
         if self.driver.driver_helper is None:
             raise ValueError()
-        self.driver.driver_helper.push_task_ins.return_value = (  # type: ignore
+        self.driver.driver_helper.push_task_ins.return_value = (
             driver_pb2.PushTaskInsResponse(  # pylint: disable=E1101
                 task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
             )
         )
-        self.driver.driver_helper.pull_task_res.return_value = (  # type: ignore
+        self.driver.driver_helper.pull_task_res.return_value = (
             driver_pb2.PullTaskResResponse(  # pylint: disable=E1101
                 task_res_list=[
                     task_pb2.TaskRes(  # pylint: disable=E1101
@@ -153,12 +159,12 @@ class DriverClientProxyTestCase(unittest.TestCase):
         # Prepare
         if self.driver.driver_helper is None:
             raise ValueError()
-        self.driver.driver_helper.push_task_ins.return_value = (  # type: ignore
+        self.driver.driver_helper.push_task_ins.return_value = (
             driver_pb2.PushTaskInsResponse(  # pylint: disable=E1101
                 task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
             )
         )
-        self.driver.driver_helper.pull_task_res.return_value = (  # type: ignore
+        self.driver.driver_helper.pull_task_res.return_value = (
             driver_pb2.PullTaskResResponse(  # pylint: disable=E1101
                 task_res_list=[
                     task_pb2.TaskRes(  # pylint: disable=E1101
@@ -193,12 +199,12 @@ class DriverClientProxyTestCase(unittest.TestCase):
         # Prepare
         if self.driver.driver_helper is None:
             raise ValueError()
-        self.driver.driver_helper.push_task_ins.return_value = (  # type: ignore
+        self.driver.driver_helper.push_task_ins.return_value = (
             driver_pb2.PushTaskInsResponse(  # pylint: disable=E1101
                 task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
             )
         )
-        self.driver.driver_helper.pull_task_res.return_value = (  # type: ignore
+        self.driver.driver_helper.pull_task_res.return_value = (
             driver_pb2.PullTaskResResponse(  # pylint: disable=E1101
                 task_res_list=[
                     task_pb2.TaskRes(  # pylint: disable=E1101
@@ -236,12 +242,12 @@ class DriverClientProxyTestCase(unittest.TestCase):
         # Prepare
         if self.driver.driver_helper is None:
             raise ValueError()
-        self.driver.driver_helper.push_task_ins.return_value = (  # type: ignore
+        self.driver.driver_helper.push_task_ins.return_value = (
             driver_pb2.PushTaskInsResponse(  # pylint: disable=E1101
                 task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
             )
         )
-        self.driver.driver_helper.pull_task_res.return_value = (  # type: ignore
+        self.driver.driver_helper.pull_task_res.return_value = (
             driver_pb2.PullTaskResResponse(  # pylint: disable=E1101
                 task_res_list=[
                     task_pb2.TaskRes(  # pylint: disable=E1101
@@ -353,7 +359,6 @@ class TestWithGrpcDriver(DriverClientProxyTestCase):
 
     __test__ = True
 
-    def setUp(self) -> None:
-        """Prepare GrpcDriver."""
-        self.driver = GrpcDriver()
-        super().setUp()
+    def __init__(self, *args, **kwargs) -> None:  # type: ignore
+        """Prepare Tests with GrpcDriver."""
+        super().__init__(GrpcDriver(), *args, **kwargs)
