@@ -436,8 +436,8 @@ def _try_setup_client_authentication(
     client_keys_file_path = Path(args.require_client_authentication[0])
     if not client_keys_file_path.exists():
         sys.exit(
-            "Client public keys csv file are required for client authentication. "
-            "Please provide the csv file path containing known client public keys "
+            "The provided path to the client public keys CSV file does not exist. "
+            "Please provide the CSV file path containing known client public keys "
             "to '--require-client-authentication'."
         )
 
