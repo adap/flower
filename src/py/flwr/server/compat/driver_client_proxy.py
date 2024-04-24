@@ -125,11 +125,11 @@ class DriverClientProxy(ClientProxy):
         # Push message
         message_ids = list(self.driver.push_messages(messages=[message]))
         if len(message_ids) != 1:
-            raise ValueError("Unexpected number of task_ids")
+            raise ValueError("Unexpected number of message_ids")
 
-        task_id = message_ids[0]
-        if task_id == "":
-            raise ValueError(f"Failed to schedule task for node {self.node_id}")
+        message_id = message_ids[0]
+        if message_id == "":
+            raise ValueError(f"Failed to send message to node {self.node_id}")
 
         if timeout:
             start_time = time.time()
