@@ -27,7 +27,8 @@ import grpc
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
-from flwr.common.message import Message, Metadata, RecordSet
+from flwr.common.message import Message, Metadata
+from flwr.common.record import RecordSet
 from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
