@@ -178,11 +178,11 @@ class State(abc.ABC):
         """Store `server_public_key` and `server_private_key` in state."""
 
     @abc.abstractmethod
-    def get_server_private_key(self) -> bytes:
+    def get_server_private_key(self) -> Optional[bytes]:
         """Retrieve `server_private_key` in urlsafe bytes."""
 
     @abc.abstractmethod
-    def get_server_public_key(self) -> bytes:
+    def get_server_public_key(self) -> Optional[bytes]:
         """Retrieve `server_public_key` in urlsafe bytes."""
 
     @abc.abstractmethod

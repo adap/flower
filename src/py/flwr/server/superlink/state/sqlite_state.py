@@ -20,7 +20,7 @@ import re
 import sqlite3
 import time
 from logging import DEBUG, ERROR
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
@@ -156,7 +156,7 @@ class SqliteState(State):  # pylint: disable=R0904
     def query(
         self,
         query: str,
-        data: Optional[Union[List[DictOrTuple], DictOrTuple]] = None,
+        data: Optional[Union[Sequence[DictOrTuple], DictOrTuple]] = None,
     ) -> List[Dict[str, Any]]:
         """Execute a SQL query."""
         if self.conn is None:
@@ -593,31 +593,42 @@ class SqliteState(State):  # pylint: disable=R0904
         self, public_key: bytes, private_key: bytes
     ) -> None:
         """Store `server_public_key` and `server_private_key` in state."""
-        query = (
-            "INSERT OR REPLACE INTO credential (public_key, private_key) "
-            "VALUES (:public_key, :private_key)"
-        )
-        self.query(query, {"public_key": public_key, "private_key": private_key})
+        query = "SELECT COUNT(*) FROM credential"
+        count = self.query(query)[0]["COUNT(*)"]
+        if count < 1:
+            query = (
+                "INSERT OR REPLACE INTO credential (public_key, private_key) "
+                "VALUES (:public_key, :private_key)"
+            )
+            self.query(query, {"public_key": public_key, "private_key": private_key})
+        else:
+            raise RuntimeError("Server public and private key already set")
 
-    def get_server_private_key(self) -> bytes:
+    def get_server_private_key(self) -> Optional[bytes]:
         """Retrieve `server_private_key` in urlsafe bytes."""
         query = "SELECT private_key FROM credential"
         rows = self.query(query)
-        private_key: bytes = rows[0]["private_key"]
+        try:
+            private_key: Optional[bytes] = rows[0]["private_key"]
+        except IndexError:
+            private_key = None
         return private_key
 
-    def get_server_public_key(self) -> bytes:
+    def get_server_public_key(self) -> Optional[bytes]:
         """Retrieve `server_public_key` in urlsafe bytes."""
         query = "SELECT public_key FROM credential"
         rows = self.query(query)
-        public_key: bytes = rows[0]["public_key"]
+        try:
+            public_key: Optional[bytes] = rows[0]["public_key"]
+        except IndexError:
+            public_key = None
         return public_key
 
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
         """Store a set of `client_public_keys` in state."""
-        query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
-        for public_key in public_keys:
-            self.query(query, {"public_key": public_key})
+        query = "INSERT INTO public_key (public_key) VALUES (?)"
+        data = [(key,) for key in public_keys]
+        self.query(query, data)
 
     def store_client_public_key(self, public_key: bytes) -> None:
         """Store a `client_public_key` in state."""
