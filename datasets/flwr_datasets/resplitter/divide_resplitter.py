@@ -23,6 +23,8 @@ import datasets
 from datasets import DatasetDict
 
 
+# flake8: noqa: E501
+# pylint: disable=line-too-long
 class DivideResplitter:
     """Dive existing split(s) of the dataset and assign them custom names.
 
@@ -31,13 +33,13 @@ class DivideResplitter:
 
     Parameters
     ----------
-    divide_config: Union[Dict[str, int], Dict[str, float], Dict[str, Dict[str,
-    int]], Dict[str, Dict[str, float]]]
-        If single level dictionary, keys represent the split names. If values are: int, they
-        represent the number of samples in each split; float, they represent the fraction
-        of the total samples assigned to that split. These fractions do not have
-        to sum up to 1.0. The order of values (either int or float) matter: the first key 
-        will get the first split starting from the beginning of the dataset, and so on.
+    divide_config: Union[Dict[str, int], Dict[str, float], Dict[str, Dict[str, int]], Dict[str, Dict[str, float]]]
+        If single level dictionary, keys represent the split names. If values are: int,
+        they represent the number of samples in each split; float, they represent the
+        fraction of the total samples assigned to that split. These fractions do not
+        have to sum up to 1.0. The order of values (either int or float) matter: the
+        first key will get the first split starting from the beginning of the dataset,
+        and so on.
         If two level dictionary (dictionary of dictionaries) then the first keys are
         the split names that will be divided into different splits. It's an alternative
         to specifying `divide_split` if you need to divide many splits.
@@ -214,9 +216,8 @@ class DivideResplitter:
         if duplicates:
             raise ValueError(
                 "The specified values of the new splits in "
-                f"`divide_config` are duplicated ({duplicates}) with the split names of "
-                "the datasets. "
-                "Please specify unique values for each new split."
+                f"`divide_config` are duplicated ({duplicates}) with the split names of"
+                " the datasets. Please specify unique values for each new split."
             )
 
     def _check_size_values(self, dataset: DatasetDict) -> None:
@@ -243,7 +244,8 @@ class DivideResplitter:
                         f"The sum of the sample numbers in `divide_config` must be "
                         f"smaller than the split size. This is not the case for "
                         f"{split_from} split which is of length {dataset_len} and the "
-                        f"sum in the supplied `divide_config` is {len_from_divide_resplit}."
+                        f"sum in the supplied `divide_config` is "
+                        f"{len_from_divide_resplit}."
                     )
             else:
                 raise TypeError(
