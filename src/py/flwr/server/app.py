@@ -425,7 +425,7 @@ def _try_setup_client_authentication(
 ) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePublicKey, ec.EllipticCurvePrivateKey]]:
     if not args.require_client_authentication:
         return None
-    
+
     if certificates is None:
         sys.exit(
             "Certificates are required to enable client authentication. "
@@ -440,7 +440,7 @@ def _try_setup_client_authentication(
             "Please provide the csv file path containing known client public keys "
             "to '--require-client-authentication'."
         )
-        
+
     client_public_keys: Set[bytes] = set()
     public_key = load_ssh_public_key(
         Path(args.require_client_authentication[1]).read_bytes()
