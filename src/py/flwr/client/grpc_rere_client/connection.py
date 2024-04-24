@@ -70,7 +70,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
     authentication_keys: Optional[
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
 ) -> Iterator[
     Tuple[

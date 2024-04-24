@@ -84,7 +84,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
     authentication_keys: Optional[  # pylint: disable=unused-argument
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
 ) -> Iterator[
     Tuple[

@@ -65,7 +65,7 @@ def grpc_connection(  # pylint: disable=R0913, R0915
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     authentication_keys: Optional[  # pylint: disable=unused-argument
-        tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
 ) -> Iterator[
     Tuple[
