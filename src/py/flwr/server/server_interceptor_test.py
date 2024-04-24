@@ -31,7 +31,12 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
+    PullTaskInsRequest,
+    PullTaskInsResponse,
+    PushTaskResRequest,
+    PushTaskResResponse,
 )
+from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 
 from .app import ADDRESS_FLEET_API_GRPC_RERE, _run_fleet_api_grpc_rere
 from .server_interceptor import (
@@ -62,8 +67,6 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             ADDRESS_FLEET_API_GRPC_RERE, state_factory, None, [self._server_interceptor]
         )
 
-        self._client_node_id: int = -1
-
         self._channel = grpc.insecure_channel("localhost:9092")
         self._create_node = self._channel.unary_unary(
             "/flwr.proto.Fleet/CreateNode",
@@ -75,6 +78,16 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             request_serializer=DeleteNodeRequest.SerializeToString,
             response_deserializer=DeleteNodeResponse.FromString,
         )
+        self._pull_task_ins = self._channel.unary_unary(
+            "/flwr.proto.Fleet/PullTaskIns",
+            request_serializer=PullTaskInsRequest.SerializeToString,
+            response_deserializer=PullTaskInsResponse.FromString,
+        )
+        self._push_task_res = self._channel.unary_unary(
+            "/flwr.proto.Fleet/PushTaskRes",
+            request_serializer=PushTaskResRequest.SerializeToString,
+            response_deserializer=PushTaskResResponse.FromString,
+        )
 
     def tearDown(self) -> None:
         """Clean up grpc server."""
@@ -82,9 +95,12 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
     def test_successful_create_node_with_metadata(self) -> None:
         """Test server interceptor for creating node."""
+        # Prepare
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._client_public_key)
         )
+
+        # Execute
         response, call = self._create_node.with_call(
             request=CreateNodeRequest(),
             metadata=((_PUBLIC_KEY_HEADER, public_key_bytes),),
@@ -97,12 +113,13 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             ).decode(),
         )
 
+        # Assert
         assert call.initial_metadata()[0] == expected_metadata
         assert isinstance(response, CreateNodeResponse)
-        self._client_node_id = response.node.node_id
 
     def test_successful_delete_node_with_metadata(self) -> None:
         """Test server interceptor for deleting node."""
+        # Prepare
         request = DeleteNodeRequest()
         shared_secret = generate_shared_key(
             self._client_private_key, self._server_public_key
@@ -113,6 +130,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         public_key_bytes = base64.urlsafe_b64encode(
             public_key_to_bytes(self._client_public_key)
         )
+
+        # Execute
         response, call = self._delete_node.with_call(
             request=request,
             metadata=(
@@ -120,5 +139,61 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
                 (_AUTH_TOKEN_HEADER, hmac_value),
             ),
         )
+
+        # Assert
         assert isinstance(response, DeleteNodeResponse)
+        assert grpc.StatusCode.OK == call.code()
+
+    def test_successful_pull_task_ins_with_metadata(self) -> None:
+        """Test server interceptor for deleting node."""
+        # Prepare
+        request = PullTaskInsRequest()
+        shared_secret = generate_shared_key(
+            self._client_private_key, self._server_public_key
+        )
+        hmac_value = base64.urlsafe_b64encode(
+            compute_hmac(shared_secret, request.SerializeToString(True))
+        )
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+
+        # Execute
+        response, call = self._pull_task_ins.with_call(
+            request=request,
+            metadata=(
+                (_PUBLIC_KEY_HEADER, public_key_bytes),
+                (_AUTH_TOKEN_HEADER, hmac_value),
+            ),
+        )
+
+        # Assert
+        assert isinstance(response, PullTaskInsResponse)
+        assert grpc.StatusCode.OK == call.code()
+
+    def test_successful_push_task_res_with_metadata(self) -> None:
+        """Test server interceptor for deleting node."""
+        # Prepare
+        request = PushTaskResRequest(task_res_list=[TaskRes()])
+        shared_secret = generate_shared_key(
+            self._client_private_key, self._server_public_key
+        )
+        hmac_value = base64.urlsafe_b64encode(
+            compute_hmac(shared_secret, request.SerializeToString(True))
+        )
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+
+        # Execute
+        response, call = self._push_task_res.with_call(
+            request=request,
+            metadata=(
+                (_PUBLIC_KEY_HEADER, public_key_bytes),
+                (_AUTH_TOKEN_HEADER, hmac_value),
+            ),
+        )
+
+        # Assert
+        assert isinstance(response, PushTaskResResponse)
         assert grpc.StatusCode.OK == call.code()
