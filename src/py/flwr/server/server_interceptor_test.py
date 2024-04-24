@@ -143,6 +143,38 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert isinstance(response, DeleteNodeResponse)
         assert grpc.StatusCode.OK == call.code()
+    
+    def test_unsuccessful_delete_node_with_metadata(self) -> None:
+        """Test server interceptor for deleting node."""
+        # Prepare
+        request = DeleteNodeRequest()
+        client_private_key, _ = generate_key_pairs()
+        shared_secret = generate_shared_key(
+            client_private_key, self._server_public_key
+        )
+        hmac_value = base64.urlsafe_b64encode(
+            compute_hmac(shared_secret, request.SerializeToString(True))
+        )
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+
+        # Execute
+        try:
+            response, call = self._delete_node.with_call(
+                request=request,
+                metadata=(
+                    (_PUBLIC_KEY_HEADER, public_key_bytes),
+                    (_AUTH_TOKEN_HEADER, hmac_value),
+                ),
+            )
+        except grpc.RpcError as e:
+            # Assert
+            
+            print(e)
+
+        # Assert
+        assert False
 
     def test_successful_pull_task_ins_with_metadata(self) -> None:
         """Test server interceptor for deleting node."""
