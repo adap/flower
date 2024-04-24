@@ -181,7 +181,7 @@ class Flanders(FedAvg):
             result.append((client, fit))
         return result
 
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals,too-many-statements
     @typing.no_type_check
     def aggregate_fit(
         self,
