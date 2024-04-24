@@ -52,7 +52,7 @@ struct TableStruct_flwr_2fproto_2ffleet_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[12]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[15]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -73,6 +73,12 @@ extern DeleteNodeRequestDefaultTypeInternal _DeleteNodeRequest_default_instance_
 class DeleteNodeResponse;
 struct DeleteNodeResponseDefaultTypeInternal;
 extern DeleteNodeResponseDefaultTypeInternal _DeleteNodeResponse_default_instance_;
+class GetRunRequest;
+struct GetRunRequestDefaultTypeInternal;
+extern GetRunRequestDefaultTypeInternal _GetRunRequest_default_instance_;
+class GetRunResponse;
+struct GetRunResponseDefaultTypeInternal;
+extern GetRunResponseDefaultTypeInternal _GetRunResponse_default_instance_;
 class PingRequest;
 struct PingRequestDefaultTypeInternal;
 extern PingRequestDefaultTypeInternal _PingRequest_default_instance_;
@@ -97,6 +103,9 @@ extern PushTaskResResponse_ResultsEntry_DoNotUseDefaultTypeInternal _PushTaskRes
 class Reconnect;
 struct ReconnectDefaultTypeInternal;
 extern ReconnectDefaultTypeInternal _Reconnect_default_instance_;
+class Run;
+struct RunDefaultTypeInternal;
+extern RunDefaultTypeInternal _Run_default_instance_;
 }  // namespace proto
 }  // namespace flwr
 PROTOBUF_NAMESPACE_OPEN
@@ -104,6 +113,8 @@ template<> ::flwr::proto::CreateNodeRequest* Arena::CreateMaybeMessage<::flwr::p
 template<> ::flwr::proto::CreateNodeResponse* Arena::CreateMaybeMessage<::flwr::proto::CreateNodeResponse>(Arena*);
 template<> ::flwr::proto::DeleteNodeRequest* Arena::CreateMaybeMessage<::flwr::proto::DeleteNodeRequest>(Arena*);
 template<> ::flwr::proto::DeleteNodeResponse* Arena::CreateMaybeMessage<::flwr::proto::DeleteNodeResponse>(Arena*);
+template<> ::flwr::proto::GetRunRequest* Arena::CreateMaybeMessage<::flwr::proto::GetRunRequest>(Arena*);
+template<> ::flwr::proto::GetRunResponse* Arena::CreateMaybeMessage<::flwr::proto::GetRunResponse>(Arena*);
 template<> ::flwr::proto::PingRequest* Arena::CreateMaybeMessage<::flwr::proto::PingRequest>(Arena*);
 template<> ::flwr::proto::PingResponse* Arena::CreateMaybeMessage<::flwr::proto::PingResponse>(Arena*);
 template<> ::flwr::proto::PullTaskInsRequest* Arena::CreateMaybeMessage<::flwr::proto::PullTaskInsRequest>(Arena*);
@@ -112,6 +123,7 @@ template<> ::flwr::proto::PushTaskResRequest* Arena::CreateMaybeMessage<::flwr::
 template<> ::flwr::proto::PushTaskResResponse* Arena::CreateMaybeMessage<::flwr::proto::PushTaskResResponse>(Arena*);
 template<> ::flwr::proto::PushTaskResResponse_ResultsEntry_DoNotUse* Arena::CreateMaybeMessage<::flwr::proto::PushTaskResResponse_ResultsEntry_DoNotUse>(Arena*);
 template<> ::flwr::proto::Reconnect* Arena::CreateMaybeMessage<::flwr::proto::Reconnect>(Arena*);
+template<> ::flwr::proto::Run* Arena::CreateMaybeMessage<::flwr::proto::Run>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace flwr {
 namespace proto {
@@ -1689,6 +1701,476 @@ class PushTaskResResponse final :
 };
 // -------------------------------------------------------------------
 
+class Run final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:flwr.proto.Run) */ {
+ public:
+  inline Run() : Run(nullptr) {}
+  ~Run() override;
+  explicit constexpr Run(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  Run(const Run& from);
+  Run(Run&& from) noexcept
+    : Run() {
+    *this = ::std::move(from);
+  }
+
+  inline Run& operator=(const Run& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Run& operator=(Run&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const Run& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const Run* internal_default_instance() {
+    return reinterpret_cast<const Run*>(
+               &_Run_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    11;
+
+  friend void swap(Run& a, Run& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Run* other) {
+    if (other == this) return;
+    if (GetOwningArena() == other->GetOwningArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Run* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline Run* New() const final {
+    return new Run();
+  }
+
+  Run* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<Run>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const Run& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const Run& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Run* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "flwr.proto.Run";
+  }
+  protected:
+  explicit Run(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kFabIdFieldNumber = 2,
+    kFabVersionFieldNumber = 3,
+    kRunIdFieldNumber = 1,
+  };
+  // string fab_id = 2;
+  void clear_fab_id();
+  const std::string& fab_id() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_fab_id(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_fab_id();
+  PROTOBUF_MUST_USE_RESULT std::string* release_fab_id();
+  void set_allocated_fab_id(std::string* fab_id);
+  private:
+  const std::string& _internal_fab_id() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_fab_id(const std::string& value);
+  std::string* _internal_mutable_fab_id();
+  public:
+
+  // string fab_version = 3;
+  void clear_fab_version();
+  const std::string& fab_version() const;
+  template <typename ArgT0 = const std::string&, typename... ArgT>
+  void set_fab_version(ArgT0&& arg0, ArgT... args);
+  std::string* mutable_fab_version();
+  PROTOBUF_MUST_USE_RESULT std::string* release_fab_version();
+  void set_allocated_fab_version(std::string* fab_version);
+  private:
+  const std::string& _internal_fab_version() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_fab_version(const std::string& value);
+  std::string* _internal_mutable_fab_version();
+  public:
+
+  // sint64 run_id = 1;
+  void clear_run_id();
+  ::PROTOBUF_NAMESPACE_ID::int64 run_id() const;
+  void set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_run_id() const;
+  void _internal_set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:flwr.proto.Run)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr fab_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr fab_version_;
+  ::PROTOBUF_NAMESPACE_ID::int64 run_id_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_flwr_2fproto_2ffleet_2eproto;
+};
+// -------------------------------------------------------------------
+
+class GetRunRequest final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:flwr.proto.GetRunRequest) */ {
+ public:
+  inline GetRunRequest() : GetRunRequest(nullptr) {}
+  ~GetRunRequest() override;
+  explicit constexpr GetRunRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  GetRunRequest(const GetRunRequest& from);
+  GetRunRequest(GetRunRequest&& from) noexcept
+    : GetRunRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline GetRunRequest& operator=(const GetRunRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline GetRunRequest& operator=(GetRunRequest&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const GetRunRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const GetRunRequest* internal_default_instance() {
+    return reinterpret_cast<const GetRunRequest*>(
+               &_GetRunRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    12;
+
+  friend void swap(GetRunRequest& a, GetRunRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(GetRunRequest* other) {
+    if (other == this) return;
+    if (GetOwningArena() == other->GetOwningArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(GetRunRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline GetRunRequest* New() const final {
+    return new GetRunRequest();
+  }
+
+  GetRunRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<GetRunRequest>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const GetRunRequest& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const GetRunRequest& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(GetRunRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "flwr.proto.GetRunRequest";
+  }
+  protected:
+  explicit GetRunRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kRunIdFieldNumber = 1,
+  };
+  // sint64 run_id = 1;
+  void clear_run_id();
+  ::PROTOBUF_NAMESPACE_ID::int64 run_id() const;
+  void set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int64 _internal_run_id() const;
+  void _internal_set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:flwr.proto.GetRunRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::int64 run_id_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_flwr_2fproto_2ffleet_2eproto;
+};
+// -------------------------------------------------------------------
+
+class GetRunResponse final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:flwr.proto.GetRunResponse) */ {
+ public:
+  inline GetRunResponse() : GetRunResponse(nullptr) {}
+  ~GetRunResponse() override;
+  explicit constexpr GetRunResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  GetRunResponse(const GetRunResponse& from);
+  GetRunResponse(GetRunResponse&& from) noexcept
+    : GetRunResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline GetRunResponse& operator=(const GetRunResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline GetRunResponse& operator=(GetRunResponse&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const GetRunResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const GetRunResponse* internal_default_instance() {
+    return reinterpret_cast<const GetRunResponse*>(
+               &_GetRunResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    13;
+
+  friend void swap(GetRunResponse& a, GetRunResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(GetRunResponse* other) {
+    if (other == this) return;
+    if (GetOwningArena() == other->GetOwningArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(GetRunResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline GetRunResponse* New() const final {
+    return new GetRunResponse();
+  }
+
+  GetRunResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<GetRunResponse>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const GetRunResponse& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom(const GetRunResponse& from);
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message* to, const ::PROTOBUF_NAMESPACE_ID::Message& from);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(GetRunResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "flwr.proto.GetRunResponse";
+  }
+  protected:
+  explicit GetRunResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kRunFieldNumber = 1,
+  };
+  // .flwr.proto.Run run = 1;
+  bool has_run() const;
+  private:
+  bool _internal_has_run() const;
+  public:
+  void clear_run();
+  const ::flwr::proto::Run& run() const;
+  PROTOBUF_MUST_USE_RESULT ::flwr::proto::Run* release_run();
+  ::flwr::proto::Run* mutable_run();
+  void set_allocated_run(::flwr::proto::Run* run);
+  private:
+  const ::flwr::proto::Run& _internal_run() const;
+  ::flwr::proto::Run* _internal_mutable_run();
+  public:
+  void unsafe_arena_set_allocated_run(
+      ::flwr::proto::Run* run);
+  ::flwr::proto::Run* unsafe_arena_release_run();
+
+  // @@protoc_insertion_point(class_scope:flwr.proto.GetRunResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::flwr::proto::Run* run_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_flwr_2fproto_2ffleet_2eproto;
+};
+// -------------------------------------------------------------------
+
 class Reconnect final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:flwr.proto.Reconnect) */ {
  public:
@@ -1737,7 +2219,7 @@ class Reconnect final :
                &_Reconnect_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    14;
 
   friend void swap(Reconnect& a, Reconnect& b) {
     a.Swap(&b);
@@ -2643,6 +3125,240 @@ PushTaskResResponse::mutable_results() {
 
 // -------------------------------------------------------------------
 
+// Run
+
+// sint64 run_id = 1;
+inline void Run::clear_run_id() {
+  run_id_ = int64_t{0};
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 Run::_internal_run_id() const {
+  return run_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 Run::run_id() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.Run.run_id)
+  return _internal_run_id();
+}
+inline void Run::_internal_set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  
+  run_id_ = value;
+}
+inline void Run::set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_run_id(value);
+  // @@protoc_insertion_point(field_set:flwr.proto.Run.run_id)
+}
+
+// string fab_id = 2;
+inline void Run::clear_fab_id() {
+  fab_id_.ClearToEmpty();
+}
+inline const std::string& Run::fab_id() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.Run.fab_id)
+  return _internal_fab_id();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void Run::set_fab_id(ArgT0&& arg0, ArgT... args) {
+ 
+ fab_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:flwr.proto.Run.fab_id)
+}
+inline std::string* Run::mutable_fab_id() {
+  std::string* _s = _internal_mutable_fab_id();
+  // @@protoc_insertion_point(field_mutable:flwr.proto.Run.fab_id)
+  return _s;
+}
+inline const std::string& Run::_internal_fab_id() const {
+  return fab_id_.Get();
+}
+inline void Run::_internal_set_fab_id(const std::string& value) {
+  
+  fab_id_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* Run::_internal_mutable_fab_id() {
+  
+  return fab_id_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* Run::release_fab_id() {
+  // @@protoc_insertion_point(field_release:flwr.proto.Run.fab_id)
+  return fab_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void Run::set_allocated_fab_id(std::string* fab_id) {
+  if (fab_id != nullptr) {
+    
+  } else {
+    
+  }
+  fab_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), fab_id,
+      GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set_allocated:flwr.proto.Run.fab_id)
+}
+
+// string fab_version = 3;
+inline void Run::clear_fab_version() {
+  fab_version_.ClearToEmpty();
+}
+inline const std::string& Run::fab_version() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.Run.fab_version)
+  return _internal_fab_version();
+}
+template <typename ArgT0, typename... ArgT>
+inline PROTOBUF_ALWAYS_INLINE
+void Run::set_fab_version(ArgT0&& arg0, ArgT... args) {
+ 
+ fab_version_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set:flwr.proto.Run.fab_version)
+}
+inline std::string* Run::mutable_fab_version() {
+  std::string* _s = _internal_mutable_fab_version();
+  // @@protoc_insertion_point(field_mutable:flwr.proto.Run.fab_version)
+  return _s;
+}
+inline const std::string& Run::_internal_fab_version() const {
+  return fab_version_.Get();
+}
+inline void Run::_internal_set_fab_version(const std::string& value) {
+  
+  fab_version_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArenaForAllocation());
+}
+inline std::string* Run::_internal_mutable_fab_version() {
+  
+  return fab_version_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArenaForAllocation());
+}
+inline std::string* Run::release_fab_version() {
+  // @@protoc_insertion_point(field_release:flwr.proto.Run.fab_version)
+  return fab_version_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArenaForAllocation());
+}
+inline void Run::set_allocated_fab_version(std::string* fab_version) {
+  if (fab_version != nullptr) {
+    
+  } else {
+    
+  }
+  fab_version_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), fab_version,
+      GetArenaForAllocation());
+  // @@protoc_insertion_point(field_set_allocated:flwr.proto.Run.fab_version)
+}
+
+// -------------------------------------------------------------------
+
+// GetRunRequest
+
+// sint64 run_id = 1;
+inline void GetRunRequest::clear_run_id() {
+  run_id_ = int64_t{0};
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 GetRunRequest::_internal_run_id() const {
+  return run_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int64 GetRunRequest::run_id() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.GetRunRequest.run_id)
+  return _internal_run_id();
+}
+inline void GetRunRequest::_internal_set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  
+  run_id_ = value;
+}
+inline void GetRunRequest::set_run_id(::PROTOBUF_NAMESPACE_ID::int64 value) {
+  _internal_set_run_id(value);
+  // @@protoc_insertion_point(field_set:flwr.proto.GetRunRequest.run_id)
+}
+
+// -------------------------------------------------------------------
+
+// GetRunResponse
+
+// .flwr.proto.Run run = 1;
+inline bool GetRunResponse::_internal_has_run() const {
+  return this != internal_default_instance() && run_ != nullptr;
+}
+inline bool GetRunResponse::has_run() const {
+  return _internal_has_run();
+}
+inline void GetRunResponse::clear_run() {
+  if (GetArenaForAllocation() == nullptr && run_ != nullptr) {
+    delete run_;
+  }
+  run_ = nullptr;
+}
+inline const ::flwr::proto::Run& GetRunResponse::_internal_run() const {
+  const ::flwr::proto::Run* p = run_;
+  return p != nullptr ? *p : reinterpret_cast<const ::flwr::proto::Run&>(
+      ::flwr::proto::_Run_default_instance_);
+}
+inline const ::flwr::proto::Run& GetRunResponse::run() const {
+  // @@protoc_insertion_point(field_get:flwr.proto.GetRunResponse.run)
+  return _internal_run();
+}
+inline void GetRunResponse::unsafe_arena_set_allocated_run(
+    ::flwr::proto::Run* run) {
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(run_);
+  }
+  run_ = run;
+  if (run) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:flwr.proto.GetRunResponse.run)
+}
+inline ::flwr::proto::Run* GetRunResponse::release_run() {
+  
+  ::flwr::proto::Run* temp = run_;
+  run_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return temp;
+}
+inline ::flwr::proto::Run* GetRunResponse::unsafe_arena_release_run() {
+  // @@protoc_insertion_point(field_release:flwr.proto.GetRunResponse.run)
+  
+  ::flwr::proto::Run* temp = run_;
+  run_ = nullptr;
+  return temp;
+}
+inline ::flwr::proto::Run* GetRunResponse::_internal_mutable_run() {
+  
+  if (run_ == nullptr) {
+    auto* p = CreateMaybeMessage<::flwr::proto::Run>(GetArenaForAllocation());
+    run_ = p;
+  }
+  return run_;
+}
+inline ::flwr::proto::Run* GetRunResponse::mutable_run() {
+  ::flwr::proto::Run* _msg = _internal_mutable_run();
+  // @@protoc_insertion_point(field_mutable:flwr.proto.GetRunResponse.run)
+  return _msg;
+}
+inline void GetRunResponse::set_allocated_run(::flwr::proto::Run* run) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  if (message_arena == nullptr) {
+    delete run_;
+  }
+  if (run) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper<::flwr::proto::Run>::GetOwningArena(run);
+    if (message_arena != submessage_arena) {
+      run = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, run, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  run_ = run;
+  // @@protoc_insertion_point(field_set_allocated:flwr.proto.GetRunResponse.run)
+}
+
+// -------------------------------------------------------------------
+
 // Reconnect
 
 // uint64 reconnect = 1;
@@ -2668,6 +3384,12 @@ inline void Reconnect::set_reconnect(::PROTOBUF_NAMESPACE_ID::uint64 value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
