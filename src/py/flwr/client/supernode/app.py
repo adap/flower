@@ -28,12 +28,11 @@ def run_supernode() -> None:
 
     event(EventType.RUN_SUPERNODE_ENTER)
 
-    args = _parse_args_run_supernode().parse_args()
+    _ = _parse_args_run_supernode().parse_args()
 
     log(
         DEBUG,
-        "Flower will load ClientApp `%s`",
-        getattr(args, "client-app"),
+        "Flower SuperNode starting...",
     )
 
     # Graceful shutdown
@@ -48,7 +47,16 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         description="Start a Flower SuperNode",
     )
 
-    parse_args_run_client_app(parser=parser)
+    parser.add_argument(
+        "client-app",
+        nargs="?",
+        default="",
+        help="For example: `client:app` or `project.package.module:wrapper.app`. "
+        "This is optional and serves as the default ClientApp to be loaded when "
+        "the ServerApp does not specify `fab_id` and `fab_version`. "
+        "If not provided, defaults to an empty string.",
+    )
+    _parse_args_common(parser)
 
     return parser
 
@@ -59,6 +67,10 @@ def parse_args_run_client_app(parser: argparse.ArgumentParser) -> None:
         "client-app",
         help="For example: `client:app` or `project.package.module:wrapper.app`",
     )
+    _parse_args_common(parser)
+
+
+def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--insecure",
         action="store_true",
