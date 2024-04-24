@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: fwal/setup-swift@v2
         with:
-          swift-version: 5
+          swift-version: 5.10
       - uses: actions/checkout@v4
       - name: Run tests
         run: arch -x86_64 xcodebuild test -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.2'
@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: fwal/setup-swift@v2
         with:
-          swift-version: 5
+          swift-version: 5.10
       - uses: actions/checkout@v4
       - name: Build docs
         run: ./dev/build-swift-api-ref.sh
@@ -46,7 +46,7 @@ jobs:
     steps:
       - uses: fwal/setup-swift@v2
         with:
-          swift-version: 5
+          swift-version: 5.10
       - uses: actions/checkout@v4
       - name: Build and deploy docs
         env:
