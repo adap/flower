@@ -47,12 +47,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 
-from .client_interceptor import (
-    _AUTH_TOKEN_HEADER,
-    _PUBLIC_KEY_HEADER,
-    AuthenticateClientInterceptor,
-    Request,
-)
+from .client_interceptor import _AUTH_TOKEN_HEADER, _PUBLIC_KEY_HEADER, Request
 
 
 class _MockServicer:
@@ -183,9 +178,6 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
         port = self._server.add_insecure_port("[::]:0")
         self._server.start()
         self._client_private_key, self._client_public_key = generate_key_pairs()
-        self._client_interceptor = AuthenticateClientInterceptor(
-            self._client_private_key, self._client_public_key
-        )
 
         self._connection = grpc_request_response
         self._address = f"localhost:{port}"
@@ -202,7 +194,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             retry_invoker,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
-            (self._client_interceptor),
+            (self._client_private_key, self._client_public_key),
         ) as conn:
             _, _, create_node, _, _ = conn
             assert create_node is not None
@@ -214,10 +206,6 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
 
             # Assert
             assert self._servicer.received_client_metadata() == expected_client_metadata
-            assert (
-                self._client_interceptor.server_public_key
-                == self._servicer.server_public_key
-            )
 
     def test_client_auth_delete_node(self) -> None:
         """Test client authentication during delete node."""
@@ -231,7 +219,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             retry_invoker,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
-            (self._client_interceptor),
+            (self._client_private_key, self._client_public_key),
         ) as conn:
             _, _, _, delete_node, _ = conn
             assert delete_node is not None
@@ -270,7 +258,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             retry_invoker,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
-            (self._client_interceptor),
+            (self._client_private_key, self._client_public_key),
         ) as conn:
             receive, _, _, _, _ = conn
             assert receive is not None
@@ -310,7 +298,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             retry_invoker,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
-            (self._client_interceptor),
+            (self._client_private_key, self._client_public_key),
         ) as conn:
             _, send, _, _, _ = conn
             assert send is not None
