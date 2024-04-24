@@ -29,7 +29,7 @@ import grpc
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.typing import ConfigsRecordValues
-from flwr.server.driver.driver import Driver
+from flwr.server.driver import Driver, GrpcDriver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.driver.driver_grpc import run_driver_api_grpc
@@ -204,7 +204,7 @@ def _main_loop(
     serverapp_th = None
     try:
         # Initialize Driver
-        driver = Driver(
+        driver = GrpcDriver(
             driver_service_address=driver_api_address,
             root_certificates=None,
         )
