@@ -73,6 +73,8 @@ GENERATE_AND_COPY(transport)
 GENERATE_AND_COPY(node)
 GENERATE_AND_COPY(task)
 GENERATE_AND_COPY(fleet)
+GENERATE_AND_COPY(error)
+GENERATE_AND_COPY(recordset)
 
 add_library(flwr_grpc_proto STATIC ${ALL_PROTO_FILES})
 

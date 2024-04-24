@@ -25,7 +25,7 @@ from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.logger import log, update_console_handler
 from flwr.common.object_ref import load_app
 
-from .driver.driver import Driver
+from .driver import Driver, GrpcDriver
 from .server_app import LoadServerAppError, ServerApp
 
 
@@ -128,13 +128,13 @@ def run_server_app() -> None:
     server_app_dir = args.dir
     server_app_attr = getattr(args, "server-app")
 
-    # Initialize Driver
-    driver = Driver(
+    # Initialize GrpcDriver
+    driver = GrpcDriver(
         driver_service_address=args.server,
         root_certificates=root_certificates,
     )
 
-    # Run the Server App with the Driver
+    # Run the ServerApp with the Driver
     run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
 
     # Clean up
