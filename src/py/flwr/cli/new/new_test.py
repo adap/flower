@@ -35,7 +35,11 @@ def test_render_template() -> None:
     """Test if a string is correctly substituted."""
     # Prepare
     filename = "app/README.md.tpl"
-    data = {"project_name": "FedGPT", "module_name": "fedgpt", "import_name": "fedgpt"}
+    data = {
+        "project_name": "FedGPT",
+        "distribution_name": "fedgpt",
+        "import_name": "fedgpt",
+    }
 
     # Execute
     result = render_template(filename, data)
@@ -63,38 +67,43 @@ def test_create_file(tmp_path: str) -> None:
 def test_new(tmp_path: str) -> None:
     """Test if project is created for framework."""
     # Prepare
-    project_name = "FedGPT"
-    framework = MlFramework.PYTORCH
-    expected_files_top_level = {
-        "fedgpt",
-        "README.md",
-        "pyproject.toml",
-        ".gitignore",
-    }
-    expected_files_module = {
-        "__init__.py",
-        "server.py",
-        "client.py",
-        "task.py",
-    }
+    expected_names = [
+        ("FedGPT", "FedGPT", "fedgpt"),
+        ("My_Flower-App", "My_Flower-App", "my-flower-app"),
+    ]
 
-    # Current directory
-    origin = os.getcwd()
+    for project_name, expected_top_level_dir, expected_module_dir in expected_names:
+        framework = MlFramework.PYTORCH
+        expected_files_top_level = {
+            expected_module_dir,
+            "README.md",
+            "pyproject.toml",
+            ".gitignore",
+        }
+        expected_files_module = {
+            "__init__.py",
+            "server.py",
+            "client.py",
+            "task.py",
+        }
 
-    try:
-        # Change into the temprorary directory
-        os.chdir(tmp_path)
+        # Current directory
+        origin = os.getcwd()
 
-        # Execute
-        new(project_name=project_name, framework=framework)
+        try:
+            # Change into the temprorary directory
+            os.chdir(tmp_path)
 
-        # Assert
-        file_list = os.listdir(os.path.join(tmp_path, project_name))
-        assert set(file_list) == expected_files_top_level
+            # Execute
+            new(project_name=project_name, framework=framework)
 
-        file_list = os.listdir(
-            os.path.join(tmp_path, project_name, project_name.lower())
-        )
-        assert set(file_list) == expected_files_module
-    finally:
-        os.chdir(origin)
+            # Assert
+            file_list = os.listdir(os.path.join(tmp_path, expected_top_level_dir))
+            assert set(file_list) == expected_files_top_level
+
+            file_list = os.listdir(
+                os.path.join(tmp_path, expected_top_level_dir, expected_module_dir)
+            )
+            assert set(file_list) == expected_files_module
+        finally:
+            os.chdir(origin)

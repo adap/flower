@@ -125,7 +125,9 @@ def new(
 
     # Set project directory path
     cwd = os.getcwd()
-    module_name = re.sub(r"[-_.]+", "-", project_name).lower()
+    package_name = project_name
+    distribution_name = re.sub(r"[-_.]+", "-", package_name).lower()
+    import_name = package_name.replace("-", "_")
     project_dir = os.path.join(cwd, project_name)
 
     # List of files to render
@@ -133,11 +135,11 @@ def new(
         ".gitignore": {"template": "app/.gitignore.tpl"},
         "README.md": {"template": "app/README.md.tpl"},
         "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
-        f"{module_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-        f"{module_name}/server.py": {
+        f"{distribution_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
+        f"{distribution_name}/server.py": {
             "template": f"app/code/server.{framework_str}.py.tpl"
         },
-        f"{module_name}/client.py": {
+        f"{distribution_name}/client.py": {
             "template": f"app/code/client.{framework_str}.py.tpl"
         },
     }
@@ -147,14 +149,14 @@ def new(
         MlFramework.PYTORCH.value.lower(),
     ]
     if framework_str in frameworks_with_tasks:
-        files[f"{module_name}/task.py"] = {
+        files[f"{distribution_name}/task.py"] = {
             "template": f"app/code/task.{framework_str}.py.tpl"
         }
 
     context = {
         "project_name": project_name,
-        "module_name": module_name,
-        "import_name": module_name.replace("-", "_"),
+        "distribution_name": distribution_name,
+        "import_name": import_name.replace("-", "_"),
     }
 
     for file_path, value in files.items():

@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "$module_name"
+name = "$distribution_name"
 version = "1.0.0"
 description = ""
 authors = [
@@ -21,5 +21,5 @@ dependencies = [
 packages = ["."]
 
 [flower.components]
-serverapp = "$module_name.server:app"
-clientapp = "$module_name.client:app"
+serverapp = "$distribution_name.server:app"
+clientapp = "$distribution_name.client:app"
