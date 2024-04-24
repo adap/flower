@@ -48,7 +48,11 @@ _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
 
 Request = Union[
-    CreateNodeRequest, DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest
+    CreateNodeRequest,
+    DeleteNodeRequest,
+    PullTaskInsRequest,
+    PushTaskResRequest,
+    GetRunRequest,
 ]
 
 Response = Union[
