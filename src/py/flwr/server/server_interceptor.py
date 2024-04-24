@@ -85,6 +85,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         self.server_public_key = public_key
         self.state = state_factory.state()
         self.state.store_client_public_keys(client_public_keys)
+        self.encoded_server_public_key = base64.urlsafe_b64encode(
+            public_key_to_bytes(self.server_public_key)
+        )
         log(
             INFO,
             "Client authentication enabled with %d known public keys",
@@ -129,9 +132,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                         (
                             (
                                 _PUBLIC_KEY_HEADER,
-                                base64.urlsafe_b64encode(
-                                    public_key_to_bytes(self.server_public_key)
-                                ),
+                                self.encoded_server_public_key,
                             ),
                         )
                     )
