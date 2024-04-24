@@ -1,10 +1,8 @@
-"""$project_name: A Flower / TensorFlow app."""
+"""$project_name: A Flower / Scikit-Learn app."""
 
 from flwr.server import ServerApp, ServerConfig
 from flwr.server.strategy import FedAvg
 
-# Define config
-config = ServerConfig(num_rounds=3)
 
 strategy = FedAvg(
     fraction_fit=1.0,
@@ -12,8 +10,8 @@ strategy = FedAvg(
     min_available_clients=2,
 )
 
-# Flower ServerApp
+# Create ServerApp
 app = ServerApp(
-    config=config,
+    config=ServerConfig(num_rounds=3),
     strategy=strategy,
 )

@@ -69,6 +69,7 @@ def test_new(tmp_path: str) -> None:
         "fedgpt",
         "README.md",
         "pyproject.toml",
+        ".gitignore",
     }
     expected_files_module = {
         "__init__.py",
