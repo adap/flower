@@ -125,8 +125,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             public_key_to_bytes(client_public_key)
         )
 
-        # Execute
-        # Assert
+        # Execute & Assert
         with self.assertRaises(grpc.RpcError):
             self._create_node.with_call(
                 request=CreateNodeRequest(),
@@ -173,8 +172,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             public_key_to_bytes(self._client_public_key)
         )
 
-        # Execute
-        # Assert
+        # Execute & Assert
         with self.assertRaises(grpc.RpcError):
             self._delete_node.with_call(
                 request=request,
@@ -224,8 +222,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             public_key_to_bytes(self._client_public_key)
         )
 
-        # Execute
-        # Assert
+        # Execute & Assert
         with self.assertRaises(grpc.RpcError):
             self._pull_task_ins.with_call(
                 request=request,
@@ -275,8 +272,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             public_key_to_bytes(self._client_public_key)
         )
 
-        # Execute
-        # Assert
+        # Execute & Assert
         with self.assertRaises(grpc.RpcError):
             self._push_task_res.with_call(
                 request=request,
