@@ -11,5 +11,5 @@ authors = ["The Flower Authors <hello@flower.ai>"]
 [tool.poetry.dependencies]
 python = "^3.8"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
-pytorch-lightning = "2.1.3"
+pytorch-lightning = "2.2.3"
 torchvision = "0.14.1"
