@@ -15,11 +15,44 @@
 """Utility to validate the `pyproject.toml` file."""
 
 import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import tomli
+import typer
 
 from flwr.common import object_ref
+
+
+def validate_project_dir(project_dir: Path) -> Optional[Dict[str, Any]]:
+    """Check if a Flower App directory is valid."""
+    config = load(str(project_dir / "pyproject.toml"))
+    if config is None:
+        typer.secho(
+            "❌ Project configuration could not be loaded. "
+            "`pyproject.toml` does not exist.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        return None
+
+    if not validate(config):
+        typer.secho(
+            "❌ Project configuration is invalid.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        return None
+
+    if "publisher" not in config["flower"]:
+        typer.secho(
+            "❌ Project configuration is missing required `publisher` field.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        return None
+
+    return config
 
 
 def load_and_validate_with_defaults(

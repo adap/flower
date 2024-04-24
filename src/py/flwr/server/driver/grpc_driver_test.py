@@ -29,46 +29,47 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
-from .driver import Driver
+from .grpc_driver import GrpcDriver
 
 
-class TestDriver(unittest.TestCase):
-    """Tests for `Driver` class."""
+class TestGrpcDriver(unittest.TestCase):
+    """Tests for `GrpcDriver` class."""
 
     def setUp(self) -> None:
-        """Initialize mock GrpcDriver and Driver instance before each test."""
+        """Initialize mock GrpcDriverHelper and Driver instance before each test."""
         mock_response = Mock()
         mock_response.run_id = 61016
         self.mock_grpc_driver = Mock()
         self.mock_grpc_driver.create_run.return_value = mock_response
         self.patcher = patch(
-            "flwr.server.driver.driver.GrpcDriver", return_value=self.mock_grpc_driver
+            "flwr.server.driver.grpc_driver.GrpcDriverHelper",
+            return_value=self.mock_grpc_driver,
         )
         self.patcher.start()
-        self.driver = Driver()
+        self.driver = GrpcDriver()
 
     def tearDown(self) -> None:
         """Cleanup after each test."""
         self.patcher.stop()
 
     def test_check_and_init_grpc_driver_already_initialized(self) -> None:
-        """Test that GrpcDriver doesn't initialize if run is created."""
+        """Test that GrpcDriverHelper doesn't initialize if run is created."""
         # Prepare
-        self.driver.grpc_driver = self.mock_grpc_driver
+        self.driver.grpc_driver_helper = self.mock_grpc_driver
         self.driver.run_id = 61016
 
         # Execute
         # pylint: disable-next=protected-access
-        self.driver._get_grpc_driver_and_run_id()
+        self.driver._get_grpc_driver_helper_and_run_id()
 
         # Assert
         self.mock_grpc_driver.connect.assert_not_called()
 
     def test_check_and_init_grpc_driver_needs_initialization(self) -> None:
-        """Test GrpcDriver initialization when run is not created."""
+        """Test GrpcDriverHelper initialization when run is not created."""
         # Execute
         # pylint: disable-next=protected-access
-        self.driver._get_grpc_driver_and_run_id()
+        self.driver._get_grpc_driver_helper_and_run_id()
 
         # Assert
         self.mock_grpc_driver.connect.assert_called_once()
@@ -204,7 +205,7 @@ class TestDriver(unittest.TestCase):
         """Test cleanup behavior when Driver is initialized."""
         # Prepare
         # pylint: disable-next=protected-access
-        self.driver._get_grpc_driver_and_run_id()
+        self.driver._get_grpc_driver_helper_and_run_id()
 
         # Execute
         self.driver.close()
