@@ -64,7 +64,11 @@ class _ClientCallDetails(
     ),
     grpc.ClientCallDetails,  # type: ignore
 ):
-    pass
+    """Details for each client call.
+
+    The class will be passed on as the first argument in continuation function.
+    In our case, `AuthenticateClientInterceptor` adds new metadata to the construct.
+    """
 
 
 class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
