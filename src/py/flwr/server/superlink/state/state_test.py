@@ -446,6 +446,30 @@ class StateTest(unittest.TestCase):
         assert server_private_key is None
         assert server_public_key is None
 
+    def test_store_server_public_private_key_twice(self) -> None:
+        """Test get_server_private_key and get_server_public_key from state when
+        server_private_key and server_public_key is inserted twice."""
+        # Prepare
+        state: State = self.state_factory()
+        private_key, public_key = generate_key_pairs()
+        private_key_bytes = private_key_to_bytes(private_key)
+        public_key_bytes = public_key_to_bytes(public_key)
+        new_private_key, new_public_key = generate_key_pairs()
+        new_private_key_bytes = private_key_to_bytes(new_private_key)
+        new_public_key_bytes = public_key_to_bytes(new_public_key)
+
+        # Execute
+        state.store_server_public_private_key(public_key_bytes, private_key_bytes)
+        state.store_server_public_private_key(
+            new_public_key_bytes, new_private_key_bytes
+        )
+        server_private_key = state.get_server_private_key()
+        server_public_key = state.get_server_public_key()
+
+        # Assert
+        assert server_private_key == private_key_bytes
+        assert server_public_key == public_key_bytes
+
     def test_client_public_keys(self) -> None:
         """Test store_client_public_keys and get_client_public_keys from state."""
         # Prepare

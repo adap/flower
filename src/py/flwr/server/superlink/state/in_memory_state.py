@@ -259,8 +259,9 @@ class InMemoryState(State):  # pylint: disable=R0902
     ) -> None:
         """Store `server_public_key` and `server_private_key` in state."""
         with self.lock:
-            self.server_private_key = private_key
-            self.server_public_key = public_key
+            if self.server_private_key is None and self.server_public_key is None:
+                self.server_private_key = private_key
+                self.server_public_key = public_key
 
     def get_server_private_key(self) -> Optional[bytes]:
         """Retrieve `server_private_key` in urlsafe bytes."""

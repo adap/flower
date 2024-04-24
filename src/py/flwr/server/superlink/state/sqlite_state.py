@@ -593,11 +593,14 @@ class SqliteState(State):  # pylint: disable=R0904
         self, public_key: bytes, private_key: bytes
     ) -> None:
         """Store `server_public_key` and `server_private_key` in state."""
-        query = (
-            "INSERT OR REPLACE INTO credential (public_key, private_key) "
-            "VALUES (:public_key, :private_key)"
-        )
-        self.query(query, {"public_key": public_key, "private_key": private_key})
+        query = "SELECT COUNT(*) FROM credential"
+        count = self.query(query)[0]["COUNT(*)"]
+        if count < 1:
+            query = (
+                "INSERT OR REPLACE INTO credential (public_key, private_key) "
+                "VALUES (:public_key, :private_key)"
+            )
+            self.query(query, {"public_key": public_key, "private_key": private_key})
 
     def get_server_private_key(self) -> Optional[bytes]:
         """Retrieve `server_private_key` in urlsafe bytes."""
