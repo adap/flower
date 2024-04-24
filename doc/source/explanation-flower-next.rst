@@ -58,7 +58,7 @@ On the application layer, we have the ServerApp and ClientApp. These are essenti
 
 .. figure:: ./_static/flower-infrastructure-applications.png
     :align: center
-    :width: 600
+    :width: 800
     :alt: Flower infrastructure and application layers
 
     Flower application layer consisting of the ServerApp and ClientApps, interacting with the infrastructure layer.
