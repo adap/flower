@@ -45,6 +45,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PullTaskInsResponse,
     PushTaskResRequest,
     PushTaskResResponse,
+    GetRunRequest,
+    GetRunResponse,
 )
 
 from .client_interceptor import _AUTH_TOKEN_HEADER, _PUBLIC_KEY_HEADER, Request
@@ -118,6 +120,11 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
             servicer.unary_unary,
             request_deserializer=PushTaskResRequest.FromString,
             response_serializer=PushTaskResResponse.SerializeToString,
+        ),
+        "GetRun": grpc.unary_unary_rpc_method_handler(
+            servicer.unary_unary,
+            request_deserializer=GetRunRequest.FromString,
+            response_serializer=GetRunResponse.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -303,6 +310,45 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             _, send, _, _, _ = conn
             assert send is not None
             send(message)
+            shared_secret = generate_shared_key(
+                self._servicer.server_private_key, self._client_public_key
+            )
+            expected_hmac = compute_hmac(
+                shared_secret, self._servicer.received_message_bytes()
+            )
+            expected_client_metadata = (
+                (
+                    _PUBLIC_KEY_HEADER,
+                    base64.urlsafe_b64encode(
+                        public_key_to_bytes(self._client_public_key)
+                    ),
+                ),
+                (
+                    _AUTH_TOKEN_HEADER,
+                    base64.urlsafe_b64encode(expected_hmac),
+                ),
+            )
+
+            # Assert
+            assert self._servicer.received_client_metadata() == expected_client_metadata
+
+    def test_client_auth_get_run(self) -> None:
+        """Test client authentication during send node."""
+        # Prepare
+        retry_invoker = _init_retry_invoker()
+
+        # Execute
+        with self._connection(
+            self._address,
+            True,
+            retry_invoker,
+            GRPC_MAX_MESSAGE_LENGTH,
+            None,
+            (self._client_private_key, self._client_public_key),
+        ) as conn:
+            _, _, _, _, get_run = conn
+            assert get_run is not None
+            get_run(0)
             shared_secret = generate_shared_key(
                 self._servicer.server_private_key, self._client_public_key
             )

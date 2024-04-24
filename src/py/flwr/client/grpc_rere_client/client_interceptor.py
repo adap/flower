@@ -33,13 +33,14 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeRequest,
     PullTaskInsRequest,
     PushTaskResRequest,
+    GetRunRequest
 )
 
 _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
 
 Request = Union[
-    CreateNodeRequest, DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest
+    CreateNodeRequest, DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest, GetRunRequest
 ]
 
 
@@ -101,7 +102,7 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
             postprocess = True
 
         elif isinstance(
-            request, (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest)
+            request, (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest, GetRunRequest)
         ):
             metadata.append(
                 (
