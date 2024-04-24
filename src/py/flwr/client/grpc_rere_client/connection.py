@@ -26,7 +26,6 @@ from typing import Callable, Iterator, Optional, Sequence, Tuple, Union, cast
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from .client_interceptor import AuthenticateClientInterceptor
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
@@ -55,6 +54,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
+
+from .client_interceptor import AuthenticateClientInterceptor
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
