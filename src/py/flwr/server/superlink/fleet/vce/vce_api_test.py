@@ -81,7 +81,7 @@ def register_messages_into_state(
 ) -> Dict[UUID, float]:
     """Register `num_messages` into the state factory."""
     state: InMemoryState = state_factory.state()  # type: ignore
-    state.run_ids.add(run_id)
+    state.run_ids[run_id] = ("Mock/mock", "v1.0.0")
     # Artificially add TaskIns to state so they can be processed
     # by the Simulation Engine logic
     nodes_cycle = cycle(nodes_mapping.keys())  # we have more messages than supernodes
