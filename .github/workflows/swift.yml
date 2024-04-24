@@ -28,7 +28,7 @@ jobs:
         run: arch -x86_64 xcodebuild test -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max,OS=17.2'
 
   build_docs:
-    runs-on: macos-latest
+    runs-on: macos-14
     name: Build docs
     steps:
       - uses: fwal/setup-swift@v2
@@ -41,7 +41,7 @@ jobs:
   deploy_docs:
     needs: "build_docs"
     if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
-    runs-on: macos-latest
+    runs-on: macos-14
     name: Deploy docs 
     steps:
       - uses: fwal/setup-swift@v2
