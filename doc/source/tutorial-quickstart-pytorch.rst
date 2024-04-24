@@ -44,6 +44,7 @@ In a file called :code:`client.py`, import Flower and PyTorch related packages:
 
     from collections import OrderedDict
 
+    from flwr_datasets import FederatedDataset
     import torch
     import torch.nn as nn
     import torch.nn.functional as F
@@ -59,21 +60,29 @@ In addition, we define the device allocation in PyTorch with:
 
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-We use PyTorch to load CIFAR10, a popular colored image classification dataset for machine learning. The PyTorch :code:`DataLoader()` downloads the training and test data that are then normalized.
+We use `Flower Datasets <https://flower.ai/docs/datasets/>`_ to load CIFAR10, a popular colored image classification dataset for machine learning. The :code:`FederatedDataset()` module downloads, partitions, and preprocesses the dataset. The :code:`torchvision.transforms` modules are then used to normalize the training and test data.
 
 .. code-block:: python
 
-    def load_data():
+    def load_data(partition_id):
         """Load CIFAR-10 (training and test set)."""
-        transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        fds = FederatedDataset(dataset="cifar10", partitioners={"train": 3})
+        partition = fds.load_partition(partition_id)
+        # Divide data on each node: 80% train, 20% test
+        partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
+        pytorch_transforms = Compose(
+            [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
         )
-        trainset = CIFAR10(".", train=True, download=True, transform=transform)
-        testset = CIFAR10(".", train=False, download=True, transform=transform)
-        trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
-        testloader = DataLoader(testset, batch_size=32)
-        num_examples = {"trainset" : len(trainset), "testset" : len(testset)}
-        return trainloader, testloader, num_examples
+
+        def apply_transforms(batch):
+            """Apply transforms to the partition from FederatedDataset."""
+            batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
+            return batch
+
+        partition_train_test = partition_train_test.with_transform(apply_transforms)
+        trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
+        testloader = DataLoader(partition_train_test["test"], batch_size=32)
+        return trainloader, testloader
 
 Define the loss and optimizer with PyTorch. The training of the dataset is done by looping over the dataset, measure the corresponding loss and optimize it.
 
@@ -84,11 +93,11 @@ Define the loss and optimizer with PyTorch. The training of the dataset is done 
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
         for _ in range(epochs):
-            for images, labels in trainloader:
-                images, labels = images.to(DEVICE), labels.to(DEVICE)
+            for batch in tqdm(trainloader, "Training"):
+                images = batch["img"]
+                labels = batch["label"]
                 optimizer.zero_grad()
-                loss = criterion(net(images), labels)
-                loss.backward()
+                criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
                 optimizer.step()
 
 Define then the validation of the  machine learning network. We loop over the test set and measure the loss and accuracy of the test set.
@@ -98,16 +107,15 @@ Define then the validation of the  machine learning network. We loop over the te
     def test(net, testloader):
         """Validate the network on the entire test set."""
         criterion = torch.nn.CrossEntropyLoss()
-        correct, total, loss = 0, 0, 0.0
+        correct, loss = 0, 0.0
         with torch.no_grad():
-            for data in testloader:
-                images, labels = data[0].to(DEVICE), data[1].to(DEVICE)
+            for batch in tqdm(testloader, "Testing"):
+                images = batch["img"].to(DEVICE)
+                labels = batch["label"].to(DEVICE)
                 outputs = net(images)
                 loss += criterion(outputs, labels).item()
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-        accuracy = correct / total
+                correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
+        accuracy = correct / len(testloader.dataset)
         return loss, accuracy
 
 After defining the training and testing of a PyTorch machine learning model, we use the functions for the Flower clients.
@@ -137,7 +145,7 @@ The Flower clients will use a simple CNN adapted from 'PyTorch: A 60 Minute Blit
 
     # Load model and data
     net = Net().to(DEVICE)
-    trainloader, testloader, num_examples = load_data()
+    trainloader, testloader = load_data(partition_id=partition_id)
 
 After loading the data set with :code:`load_data()` we define the Flower interface.
 
@@ -181,12 +189,12 @@ which can be implemented in the following way:
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             train(net, trainloader, epochs=1)
-            return self.get_parameters(config={}), num_examples["trainset"], {}
+            return self.get_parameters(config={}), len(trainloader.dataset), {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
-            return float(loss), num_examples["testset"], {"accuracy": float(accuracy)}
+            return float(loss), len(testloader.dataset), {"accuracy": float(accuracy)}
 
 We can now create a client function to return instances of :code:`CifarClient` when called
 
@@ -211,11 +219,6 @@ On this line, we launch the :code:`app` object in the :code:`client.py` module u
 
 That's it for the client. We only have to implement :code:`Client` or :code:`NumPyClient`, wrap the :code:`ClientApp` around the client function, and call :code:`flower-client-app` in CLI. If you implement a client of type :code:`NumPyClient` you'll need to first call its :code:`to_client()` method.
 
-.. 
-    The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
-    :code:`"[::]:8080"`. If we run a truly federated workload with the server and
-    clients running on different machines, all that needs to change is the
-    :code:`server_address` we point the client at.
 
 Flower Server
 -------------
@@ -230,18 +233,21 @@ configuration possibilities at their default values. In a file named
 
     app = ServerApp()
 
+
 Train the model, federated!
 ---------------------------
 
 With both :code:`ClientApp`s and :code:`ServerApp` ready, we can now run everything and see federated
 learning in action. First, we start the infrastructure which consists of the `SuperLink` and `SuperNode`s.
-For further explaination about the infrastructure, refer to XXX.
+
+..
+    TODO: Add link to Flower Next explainer documentation.
 
 .. code-block:: shell
 
     $ flower-superlink --insecure
 
-FL systems usually have a server and multiple clients. We therefore start `SuperNode`s for each of the client. Open a new terminal and start the first `SuperNode`:
+FL systems usually have a server and multiple clients. We therefore need to start multiple `SuperNode`s, one for each client, respectively. Open a new terminal and start the first `SuperNode`:
 
 .. code-block:: shell
 
