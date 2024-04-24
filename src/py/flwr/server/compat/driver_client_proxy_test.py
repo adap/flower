@@ -348,7 +348,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
             validate_task_res(task_res=task_res)
 
 
-class GrpcDriverTests(DriverClientProxyTestCase):
+class TestWithGrpcDriver(DriverClientProxyTestCase):
     """Unit test using GrpcDriver."""
 
     __test__ = True
