@@ -124,7 +124,7 @@ class DriverClientProxy(ClientProxy):
         )
 
         # Push message
-        task_id_list = list(self.driver.push_messages(messages=[message]))
+        message_ids = list(self.driver.push_messages(messages=[message]))
         if len(task_id_list) != 1:
             raise ValueError("Unexpected number of task_ids")
 
