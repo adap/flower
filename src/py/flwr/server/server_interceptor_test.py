@@ -116,7 +116,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert call.initial_metadata()[0] == expected_metadata
         assert isinstance(response, CreateNodeResponse)
-    
+
     def test_unsuccessful_create_node_with_metadata(self) -> None:
         """Test server interceptor for creating node."""
         # Prepare
@@ -159,15 +159,13 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Assert
         assert isinstance(response, DeleteNodeResponse)
         assert grpc.StatusCode.OK == call.code()
-    
+
     def test_unsuccessful_delete_node_with_metadata(self) -> None:
         """Test server interceptor for deleting node."""
         # Prepare
         request = DeleteNodeRequest()
         client_private_key, _ = generate_key_pairs()
-        shared_secret = generate_shared_key(
-            client_private_key, self._server_public_key
-        )
+        shared_secret = generate_shared_key(client_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
@@ -218,9 +216,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Prepare
         request = PullTaskInsRequest()
         client_private_key, _ = generate_key_pairs()
-        shared_secret = generate_shared_key(
-            client_private_key, self._server_public_key
-        )
+        shared_secret = generate_shared_key(client_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
@@ -266,14 +262,12 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         assert isinstance(response, PushTaskResResponse)
         assert grpc.StatusCode.OK == call.code()
 
-    def test_successful_push_task_res_with_metadata(self) -> None:
+    def test_unsuccessful_push_task_res_with_metadata(self) -> None:
         """Test server interceptor for deleting node."""
         # Prepare
         request = PushTaskResRequest(task_res_list=[TaskRes()])
         client_private_key, _ = generate_key_pairs()
-        shared_secret = generate_shared_key(
-            client_private_key, self._server_public_key
-        )
+        shared_secret = generate_shared_key(client_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
             compute_hmac(shared_secret, request.SerializeToString(True))
         )
