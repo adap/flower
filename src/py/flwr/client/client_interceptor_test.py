@@ -195,7 +195,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_interceptor),
         ) as conn:
-            _, _, create_node, _ = conn
+            _, _, create_node, _, _ = conn
             assert create_node is not None
             create_node()
             expected_client_metadata = (
@@ -253,7 +253,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             None,
             (self._client_interceptor),
         ) as conn:
-            _, _, _, delete_node = conn
+            _, _, _, delete_node, _ = conn
             assert delete_node is not None
             delete_node()
             shared_secret = generate_shared_key(
