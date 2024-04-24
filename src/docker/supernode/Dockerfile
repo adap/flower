@@ -25,4 +25,4 @@ RUN python -m pip install -U --no-cache-dir \
     pyenv rehash
 
 WORKDIR /app
-ENTRYPOINT ["flower-supernode"]
+ENTRYPOINT ["flower-client-app"]
