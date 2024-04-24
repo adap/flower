@@ -22,7 +22,7 @@ dataset: [CIFAR-100, Caltech101]
 
 **Datasets:** CIFAR-100 and Caltech101 from HuggingFace
 
-**Hardware Setup:** These experiments were run on a desktop machine with 8 CPU threads and Nvidia 4070 with 8 gigs of memory. 
+**Hardware Setup:** These experiments were run on a desktop machine with 8 CPU threads and Nvidia 4070 with 8GB of VRAM. 
 
 **Contributors:** Mahdi Beitollahi (mahdi.beitollahi@queensu.ca).
 
@@ -35,7 +35,7 @@ dataset: [CIFAR-100, Caltech101]
 * ResNet50 pre-trained on ImageNet is used for CIFAR-100 dataset(see `models/resnet50`). 
 * CLIP, ViT-B/32 pre-trained on web dataset is used for Caltech101 dataset (see `models/clip_vit`)
 
-**Dataset:** This baseline includes the CIFAR-100 and Caltech101 datasets. By default, it will be partitioned into 50 clients following a Dirichlet distribution with $\alpha$=0.1.
+**Dataset:** This baseline includes the CIFAR-100 and Caltech101 datasets via [flwr-datasets](https://flower.ai/docs/datasets/). By default, it will be partitioned into 50 clients following a Dirichlet distribution with $\alpha$=0.1.
 
 | Dataset | #classes | #partitions | partitioning method | partition settings |
 | :------ | :---: | :---: | :---: | :---: |
