@@ -630,7 +630,7 @@ class SqliteState(State):
         rows = self.query(query)
         result: Set[bytes] = {row["public_key"] for row in rows}
         return result
-    
+
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""
         query = "SELECT * FROM run WHERE run_id = ?;"
