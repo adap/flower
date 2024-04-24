@@ -94,7 +94,7 @@ def new(
     if not is_valid_project_name(project_name):
         project_name = prompt_text(
             "Please provide a name that only contains "
-            "characters in {'_', '-', a-zA-Z', '0-9'}",
+            "characters in {'-', a-zA-Z', '0-9'}",
             predicate=is_valid_project_name,
             default=sanitize_project_name(project_name),
         )
@@ -125,8 +125,7 @@ def new(
 
     # Set project directory path
     cwd = os.getcwd()
-    package_name = project_name
-    distribution_name = re.sub(r"[-_.]+", "-", package_name).lower()
+    package_name = re.sub(r"[-_.]+", "-", project_name).lower()
     import_name = package_name.replace("-", "_")
     project_dir = os.path.join(cwd, project_name)
 
@@ -135,11 +134,11 @@ def new(
         ".gitignore": {"template": "app/.gitignore.tpl"},
         "README.md": {"template": "app/README.md.tpl"},
         "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
-        f"{distribution_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-        f"{distribution_name}/server.py": {
+        f"{package_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
+        f"{package_name}/server.py": {
             "template": f"app/code/server.{framework_str}.py.tpl"
         },
-        f"{distribution_name}/client.py": {
+        f"{package_name}/client.py": {
             "template": f"app/code/client.{framework_str}.py.tpl"
         },
     }
@@ -149,13 +148,13 @@ def new(
         MlFramework.PYTORCH.value.lower(),
     ]
     if framework_str in frameworks_with_tasks:
-        files[f"{distribution_name}/task.py"] = {
+        files[f"{package_name}/task.py"] = {
             "template": f"app/code/task.{framework_str}.py.tpl"
         }
 
     context = {
         "project_name": project_name,
-        "distribution_name": distribution_name,
+        "package_name": package_name,
         "import_name": import_name.replace("-", "_"),
     }
 

@@ -37,7 +37,7 @@ def test_render_template() -> None:
     filename = "app/README.md.tpl"
     data = {
         "project_name": "FedGPT",
-        "distribution_name": "fedgpt",
+        "package_name": "fedgpt",
         "import_name": "fedgpt",
     }
 
@@ -69,7 +69,7 @@ def test_new(tmp_path: str) -> None:
     # Prepare
     expected_names = [
         ("FedGPT", "FedGPT", "fedgpt"),
-        ("My_Flower-App", "My_Flower-App", "my-flower-app"),
+        ("My_Flower-App", "my-flower-app", "my_flower_app"),
     ]
 
     for project_name, expected_top_level_dir, expected_module_dir in expected_names:
