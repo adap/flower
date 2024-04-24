@@ -160,22 +160,22 @@ class GrpcDriver(Driver):
     ) -> None:
         self.addr = driver_service_address
         self.root_certificates = root_certificates
-        self.grpc_driver_helper: Optional[GrpcDriverHelper] = None
+        self.driver_helper: Optional[GrpcDriverHelper] = None
         self.run_id: Optional[int] = None
         self.node = Node(node_id=0, anonymous=True)
 
     def _get_grpc_driver_helper_and_run_id(self) -> Tuple[GrpcDriverHelper, int]:
         # Check if the GrpcDriverHelper is initialized
-        if self.grpc_driver_helper is None or self.run_id is None:
+        if self.driver_helper is None or self.run_id is None:
             # Connect and create run
-            self.grpc_driver_helper = GrpcDriverHelper(
+            self.driver_helper = GrpcDriverHelper(
                 driver_service_address=self.addr,
                 root_certificates=self.root_certificates,
             )
-            self.grpc_driver_helper.connect()
-            res = self.grpc_driver_helper.create_run(CreateRunRequest())
+            self.driver_helper.connect()
+            res = self.driver_helper.create_run(CreateRunRequest())
             self.run_id = res.run_id
-        return self.grpc_driver_helper, self.run_id
+        return self.driver_helper, self.run_id
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
@@ -300,7 +300,7 @@ class GrpcDriver(Driver):
     def close(self) -> None:
         """Disconnect from the SuperLink if connected."""
         # Check if GrpcDriverHelper is initialized
-        if self.grpc_driver_helper is None:
+        if self.driver_helper is None:
             return
         # Disconnect
-        self.grpc_driver_helper.disconnect()
+        self.driver_helper.disconnect()

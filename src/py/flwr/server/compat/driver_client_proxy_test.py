@@ -46,6 +46,7 @@ from flwr.proto import (  # pylint: disable=E0611
     task_pb2,
 )
 from flwr.server.compat.driver_client_proxy import DriverClientProxy, validate_task_res
+from flwr.server.driver import GrpcDriver
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
 
@@ -81,8 +82,10 @@ class DriverClientProxyTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up mocks for tests."""
-        self.driver = MagicMock()
-        self.driver.get_nodes.return_value = (
+        self.driver = GrpcDriver()
+        self.driver.driver_helper = MagicMock()
+        self.driver.run_id = 0
+        self.driver.driver_helper.get_nodes.return_value = (
             driver_pb2.GetNodesResponse(  # pylint: disable=E1101
                 nodes=[
                     node_pb2.Node(node_id=1, anonymous=False)  # pylint: disable=E1101
@@ -93,12 +96,14 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_get_properties(self) -> None:
         """Test positive case."""
         # Prepare
-        self.driver.push_task_ins.return_value = (
+        if self.driver.driver_helper is None:
+            raise ValueError()
+        self.driver.driver_helper.push_task_ins.return_value = (  # type: ignore
             driver_pb2.PushTaskInsResponse(  # pylint: disable=E1101
                 task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
             )
         )
-        self.driver.pull_task_res.return_value = (
+        self.driver.driver_helper.pull_task_res.return_value = (  # type: ignore
             driver_pb2.PullTaskResResponse(  # pylint: disable=E1101
                 task_res_list=[
                     task_pb2.TaskRes(  # pylint: disable=E1101
@@ -133,12 +138,14 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_get_parameters(self) -> None:
         """Test positive case."""
         # Prepare
-        self.driver.push_task_ins.return_value = (
+        if self.driver.driver_helper is None:
+            raise ValueError()
+        self.driver.driver_helper.push_task_ins.return_value = (  # type: ignore
             driver_pb2.PushTaskInsResponse(  # pylint: disable=E1101
                 task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
             )
         )
-        self.driver.pull_task_res.return_value = (
+        self.driver.driver_helper.pull_task_res.return_value = (  # type: ignore
             driver_pb2.PullTaskResResponse(  # pylint: disable=E1101
                 task_res_list=[
                     task_pb2.TaskRes(  # pylint: disable=E1101
@@ -171,12 +178,14 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_fit(self) -> None:
         """Test positive case."""
         # Prepare
-        self.driver.push_task_ins.return_value = (
+        if self.driver.driver_helper is None:
+            raise ValueError()
+        self.driver.driver_helper.push_task_ins.return_value = (  # type: ignore
             driver_pb2.PushTaskInsResponse(  # pylint: disable=E1101
                 task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
             )
         )
-        self.driver.pull_task_res.return_value = (
+        self.driver.driver_helper.pull_task_res.return_value = (  # type: ignore
             driver_pb2.PullTaskResResponse(  # pylint: disable=E1101
                 task_res_list=[
                     task_pb2.TaskRes(  # pylint: disable=E1101
@@ -212,12 +221,14 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_evaluate(self) -> None:
         """Test positive case."""
         # Prepare
-        self.driver.push_task_ins.return_value = (
+        if self.driver.driver_helper is None:
+            raise ValueError()
+        self.driver.driver_helper.push_task_ins.return_value = (  # type: ignore
             driver_pb2.PushTaskInsResponse(  # pylint: disable=E1101
                 task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
             )
         )
-        self.driver.pull_task_res.return_value = (
+        self.driver.driver_helper.pull_task_res.return_value = (  # type: ignore
             driver_pb2.PullTaskResResponse(  # pylint: disable=E1101
                 task_res_list=[
                     task_pb2.TaskRes(  # pylint: disable=E1101

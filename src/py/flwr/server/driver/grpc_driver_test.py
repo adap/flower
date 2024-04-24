@@ -55,7 +55,7 @@ class TestGrpcDriver(unittest.TestCase):
     def test_check_and_init_grpc_driver_already_initialized(self) -> None:
         """Test that GrpcDriverHelper doesn't initialize if run is created."""
         # Prepare
-        self.driver.grpc_driver_helper = self.mock_grpc_driver
+        self.driver.driver_helper = self.mock_grpc_driver
         self.driver.run_id = 61016
 
         # Execute
