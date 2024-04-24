@@ -99,6 +99,7 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
         if client_call_details.metadata is not None:
             metadata = list(client_call_details.metadata)
 
+        # Always add the public key header
         metadata.append(
             (
                 _PUBLIC_KEY_HEADER,
@@ -108,7 +109,6 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
 
         if isinstance(request, CreateNodeRequest):
             postprocess = True
-
         elif isinstance(
             request,
             (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest, GetRunRequest),
