@@ -8,6 +8,7 @@ import torch
 import torch.utils
 import torchvision.transforms as transforms
 from flwr.common.logger import log
+from numpy.typing import NDArray
 from torch import nn
 from torch.utils.data import DataLoader
 from torchvision import models
@@ -16,17 +17,17 @@ from transformers import CLIPModel
 
 def resnet50() -> torch.nn.modules:
     """Return ResNet-50 model as feature extractor."""
-    resnet50 = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+    resnet50_model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
 
     # Remove last layer and flatten outputs
-    resnet50 = torch.nn.Sequential(
-        *(list(resnet50.children())[:-1]), torch.nn.Flatten()
+    resnet50_model = torch.nn.Sequential(
+        *(list(resnet50_model.children())[:-1]), torch.nn.Flatten()
     )
 
     # Set the hidden_dimension
-    resnet50.hidden_dimension = 2048
+    resnet50_model.hidden_dimension = 2048
 
-    return resnet50
+    return resnet50_model
 
 
 def clip_vit(name: str) -> torch.nn.modules:
@@ -47,9 +48,10 @@ def clip_vit(name: str) -> torch.nn.modules:
             self.vision_model = vision_model
             self.hidden_dimension = vision_model.config.hidden_size
 
-        def forward(self, input):
-            output = self.vision_model(input)
-            return output[1]  # return pooled_output (CLS token)
+        def forward(self, x):
+            """Return pooled output (CLS token)."""
+            output = self.vision_model(x)
+            return output[1]
 
     vision_model = CLIPModel.from_pretrained(name).vision_model
 
@@ -71,18 +73,18 @@ def transform(mean: List, std: List) -> transforms.Compose:
     transforms.Compose
         Transform function for normalizing images
     """
-    tr = transforms.Compose(
+    transform_comp = transforms.Compose(
         [
             transforms.ToTensor(),
             transforms.Normalize(mean, std),
         ]
     )
-    return tr
+    return transform_comp
 
 
 def extract_features(
     dataloader: DataLoader, feature_extractor: torch.nn.Module, device: torch.device
-) -> Tuple[np.array, np.array]:
+) -> Tuple[NDArray, NDArray]:
     """Extract features and labels from images using feature extractor.
 
     Parameters
@@ -97,27 +99,27 @@ def extract_features(
 
     Returns
     -------
-    features : np.array
+    features : NDArray
         2D array containing features extracted from `feature_extractor`.
-    labels : np.array
+    labels : NDArray
         2D array containing labels of `features`.
     """
     feature_extractor.to(device)
 
     features, labels = [], []
-    for dict in dataloader:
-        batch_samples = dict["img"].to(device)
-        batch_label = dict["label"].to(device)
+    for sample in dataloader:
+        batch_samples = sample["img"].to(device)
+        batch_label = sample["label"].to(device)
         with torch.no_grad():
             feature = feature_extractor(batch_samples)
         features.append(feature.cpu().detach().numpy())
         labels.append(batch_label.cpu().detach().numpy())
 
     # reshape feauturs and labels into a single numpy array
-    features = np.concatenate(features, axis=0, dtype=np.float64)
-    labels = np.concatenate(labels, dtype=int)
+    features_np = np.concatenate(features, axis=0).astype("float64")
+    labels_np = np.concatenate(labels)
 
-    return features, labels
+    return features_np, labels_np
 
 
 def test(
@@ -153,9 +155,9 @@ def test(
     feature_extractor.to(device)
 
     correct, total, loss = 0, 0, 0
-    for dict in dataloader:
-        samples = dict["img"].to(device)
-        labels = dict["label"].to(device)
+    for sample in dataloader:
+        samples = sample["img"].to(device)
+        labels = sample["label"].to(device)
         with torch.no_grad():
             feature = feature_extractor(samples)
             output = classifier_head(feature)
@@ -163,11 +165,12 @@ def test(
         correct += (pred == labels).sum().item()
         total += samples.shape[0]
         running_loss = nn.CrossEntropyLoss()(output, labels)
-        loss += running_loss
+        loss += running_loss.cpu().item()
 
-    return loss.cpu().item(), correct / total
+    return loss, correct / total
 
 
+# pylint: disable=too-many-locals, too-many-arguments
 def train(
     classifier_head: torch.nn.Linear,
     dataloader: DataLoader,
@@ -204,10 +207,10 @@ def train(
 
     for epoch in range(num_epochs):
         correct, total, loss = 0, 0, 0
-        for _, dict in enumerate(dataloader):
+        for _, batch in enumerate(dataloader):
             classifier_head.zero_grad()
-            samples = dict["img"].to(device)
-            labels = dict["label"].to(device)
+            samples = batch["img"].to(device)
+            labels = batch["label"].to(device)
             if feature_extractor:
                 with torch.no_grad():
                     samples = feature_extractor(samples)
@@ -220,4 +223,4 @@ def train(
             running_loss.backward()
             opt.step()
         if verbose:
-            log(logging.INFO, f"Epoch:{epoch+1} --- Accuracy: {correct/total}")
+            log(logging.INFO, "Epoch: %s --- Accuracy: %s", epoch + 1, correct / total)

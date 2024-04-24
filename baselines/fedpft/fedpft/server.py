@@ -29,6 +29,7 @@ def fedpft_get_on_fit_config_fn(
         Function to return a config with the `lr` and `num_epochs`
     """
 
+    # pylint: disable=unused-argument
     def fit_config(server_round: int) -> Dict[str, str]:
         """Return a configuration for training Gaussian Mixtures."""
         config = {
@@ -44,14 +45,14 @@ def fedpft_get_on_fit_config_fn(
 
 
 def fedavg_get_on_fit_config_fn(
-    lr: float,
+    learning_rate: float,
     num_epochs: int,
 ) -> Callable[[int], Dict[str, str]]:
     """Return a function which returns FedAvg training configurations.
 
     Parameters
     ----------
-    lr : float
+    learning_rate : float
         Client's learning rate
     num_epochs : int
         Number of epochs for local learning of clients
@@ -59,13 +60,14 @@ def fedavg_get_on_fit_config_fn(
     Returns
     -------
     Callable[[int], Dict[str, str]]
-        Function to return a config with the `lr` and `num_epochs`
+        Function to return a config with the `learning_rate` and `num_epochs`
     """
 
+    # pylint: disable=unused-argument
     def fit_config(server_round: int) -> Dict[str, str]:
         """Return a configuration number of epochs and learning rate."""
         config = {
-            "lr": str(lr),
+            "lr": str(learning_rate),
             "num_epochs": str(num_epochs),
         }
         return config

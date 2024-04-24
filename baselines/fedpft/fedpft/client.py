@@ -22,6 +22,7 @@ from fedpft.utils import gmmparam_to_ndarrays, learn_gmm
 class FedPFTClient(fl.client.NumPyClient):
     """Flower FedPFTClient."""
 
+    # pylint: disable=too-many-arguments
     def __init__(
         self,
         trainloader: DataLoader,
@@ -83,7 +84,7 @@ class FedPFTClient(fl.client.NumPyClient):
             features=features,
             labels=labels,
             n_mixtures=int(config["n_mixtures"]),
-            cov_type=config["cov_type"],
+            cov_type=str(config["cov_type"]),
             seed=int(config["seed"]),
             tol=float(config["tol"]),
             max_iter=int(config["max_iter"]),
@@ -130,6 +131,7 @@ class FedAvgClient(FedPFTClient):
         return self.get_parameters(config={}), len(self.trainloader.dataset), {}
 
 
+# pylint: disable=too-many-arguments
 def generate_client_fn(
     client_cfg: DictConfig,
     trainloaders: List[DataLoader],

@@ -13,6 +13,7 @@ from omegaconf import DictConfig, OmegaConf
 from fedpft.client import generate_client_fn
 
 
+# pylint: disable=too-many-locals
 @hydra.main(config_path="conf", config_name="base", version_base=None)
 def main(cfg: DictConfig) -> None:
     """Run federated learning with frozen, pre-trained models.

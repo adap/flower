@@ -68,6 +68,7 @@ class FedPFT(FedAvg):
         self.num_epochs = num_epochs
         self.device = device
 
+    # pylint: disable=too-many-locals
     def aggregate_fit(
         self,
         server_round: int,
@@ -79,10 +80,11 @@ class FedPFT(FedAvg):
         if not self.accept_failures and failures:
             raise Exception("there are failures and failures are not accepted")
 
+        assert self.on_fit_config_fn is not None
         config = self.on_fit_config_fn(server_round)
 
         # Sample from the GMMs to create synthetic feature dataset
-        synthetic_features_dataset = []
+        synthetic_features_dataset: List[Union[Dict, Tuple]] = []
         for _, fit_res in results:
             # Convert byte parameters into ndarrays and GMMParameters
             ndarray = parameters_to_ndarrays(fit_res.parameters)

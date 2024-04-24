@@ -18,11 +18,11 @@ dataset: [CIFAR-100, Caltech101]
 
 ## About this baseline
 
-**What’s implemented:** The code in this directory replicates the centralized experiments in *Parametric Feature Transfer, One-shot Federated Learning with Foundation Models* (Beitollahi et al., 2024) for CIFAR100 and Caltech101 datasets, which proposed the FedPFT algorithm. Concretely, it replicates the results in Section 5.2.
+**What’s implemented:** The code in this directory replicates the centralized experiments in *Parametric Feature Transfer, One-shot Federated Learning with Foundation Models* (Beitollahi et al., 2024) for CIFAR-100 and Caltech101 datasets, which proposed the FedPFT algorithm. Concretely, it replicates the results in Section 5.2.
 
-**Datasets:** CIFAR100 and Caltech101 from HuggingFace
+**Datasets:** CIFAR-100 and Caltech101 from HuggingFace
 
-**Hardware Setup:** These experiments were run on a desktop machine with 8 CPU threads and Nvidia 4070 with 8Gigs of ram. 
+**Hardware Setup:** These experiments were run on a desktop machine with 8 CPU threads and Nvidia 4070 with 8 gigs of memory. 
 
 **Contributors:** Mahdi Beitollahi
 
@@ -32,14 +32,14 @@ dataset: [CIFAR-100, Caltech101]
 **Task:** Image classification
 
 **Model:** This directory utilizes two pre-trained, frozen models as shown in Table 1 of the paper:
-* ResNet50 pre-trained on ImageNet is used for CIFAR100 dataset(see `models/resnet50`). 
+* ResNet50 pre-trained on ImageNet is used for CIFAR-100 dataset(see `models/resnet50`). 
 * CLIP, ViT-B/32 pre-trained on web dataset is used for Caltech101 dataset (see `models/clip_vit`)
 
-**Dataset:** This baseline includes the CIFAR100 and Caltech101 datasets. By default, it will be partitioned into 50 clients following a Dirichlet distribution with $\alpha$=0.1.
+**Dataset:** This baseline includes the CIFAR-100 and Caltech101 datasets. By default, it will be partitioned into 50 clients following a Dirichlet distribution with $\alpha$=0.1.
 
 | Dataset | #classes | #partitions | partitioning method | partition settings |
 | :------ | :---: | :---: | :---: | :---: |
-| CIFAR100 | 100 | 50 | Dirichlet distribution | $\alpha$=0.1 |
+| CIFAR-100 | 100 | 50 | Dirichlet distribution | $\alpha$=0.1 |
 | Caltech101 | 101 | 50 | Dirichlet distribution | $\alpha$=0.1 |
 
 **Training Hyperparameters:** The following table shows the main hyperparameters for this baseline with their default value (i.e. the value used if you run `python main.py` directly)
@@ -75,7 +75,7 @@ poetry install
 
 ## Running the Experiments
 
-To run this FedPFT with CIFAR100 baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
+To run this FedPFT with CIFAR-100 baseline, first ensure you have activated your Poetry environment (execute `poetry shell` from this directory), then:
 
 ```bash
 python -m fedpft.main # this will run using the default settings in the `conf/config.yaml`

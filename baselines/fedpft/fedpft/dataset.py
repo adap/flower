@@ -8,9 +8,11 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 
 
+# pylint: disable=too-many-instance-attributes
 class Dataset:
     """Dataset class."""
 
+    # pylint: disable=too-many-locals, too-many-arguments
     def __init__(
         self,
         dataset: str,
@@ -30,7 +32,7 @@ class Dataset:
         Parameters
         ----------
         dataset : str
-            Name of dataset to be downloaded from HuggingFace.
+            Name or path of the dataset to be downloaded from HuggingFace.
         num_clients: int
             Number of clients.
         batch_size: int
@@ -60,6 +62,7 @@ class Dataset:
         self.seed = seed
         self.split_size = split_size
         self.image_column_name = image_column_name
+        self.kwargs = kwargs
 
     def get_loaders(self):
         """Partition the datasets and return a list of dataloaders."""
