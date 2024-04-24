@@ -27,6 +27,7 @@ import grpc
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
+from flwr.common.message import Message, Metadata, RecordSet
 from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     compute_hmac,
@@ -129,6 +130,44 @@ def _add_generic_handler(servicer: _MockServicer, server: grpc.Server) -> None:
     server.add_generic_rpc_handlers((generic_handler,))
 
 
+def _init_retry_invoker() -> RetryInvoker:
+    return RetryInvoker(
+        wait_gen_factory=exponential,
+        recoverable_exceptions=grpc.RpcError,
+        max_tries=None,
+        max_time=None,
+        on_giveup=lambda retry_state: (
+            log(
+                WARN,
+                "Giving up reconnection after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+            if retry_state.tries > 1
+            else None
+        ),
+        on_success=lambda retry_state: (
+            log(
+                INFO,
+                "Connection successful after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+            if retry_state.tries > 1
+            else None
+        ),
+        on_backoff=lambda retry_state: (
+            log(WARN, "Connection attempt failed, retrying...")
+            if retry_state.tries == 1
+            else log(
+                DEBUG,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
+        ),
+    )
+
+
 class TestAuthenticateClientInterceptor(unittest.TestCase):
     """Test for client interceptor client authentication."""
 
@@ -152,41 +191,10 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
 
     def test_client_auth_create_node(self) -> None:
         """Test client authentication during create node."""
-        retry_invoker = RetryInvoker(
-            wait_gen_factory=exponential,
-            recoverable_exceptions=grpc.RpcError,
-            max_tries=None,
-            max_time=None,
-            on_giveup=lambda retry_state: (
-                log(
-                    WARN,
-                    "Giving up reconnection after %.2f seconds and %s tries.",
-                    retry_state.elapsed_time,
-                    retry_state.tries,
-                )
-                if retry_state.tries > 1
-                else None
-            ),
-            on_success=lambda retry_state: (
-                log(
-                    INFO,
-                    "Connection successful after %.2f seconds and %s tries.",
-                    retry_state.elapsed_time,
-                    retry_state.tries,
-                )
-                if retry_state.tries > 1
-                else None
-            ),
-            on_backoff=lambda retry_state: (
-                log(WARN, "Connection attempt failed, retrying...")
-                if retry_state.tries == 1
-                else log(
-                    DEBUG,
-                    "Connection attempt failed, retrying in %.2f seconds",
-                    retry_state.actual_wait,
-                )
-            ),
-        )
+        # Prepare
+        retry_invoker = _init_retry_invoker()
+
+        # Execute
         with self._connection(
             self._address,
             True,
@@ -202,6 +210,8 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
                 _PUBLIC_KEY_HEADER,
                 base64.urlsafe_b64encode(public_key_to_bytes(self._client_public_key)),
             )
+
+            # Assert
             assert self._servicer.received_client_metadata() == expected_client_metadata
             assert (
                 self._client_interceptor.server_public_key
@@ -210,41 +220,10 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
 
     def test_client_auth_delete_node(self) -> None:
         """Test client authentication during delete node."""
-        retry_invoker = RetryInvoker(
-            wait_gen_factory=exponential,
-            recoverable_exceptions=grpc.RpcError,
-            max_tries=None,
-            max_time=None,
-            on_giveup=lambda retry_state: (
-                log(
-                    WARN,
-                    "Giving up reconnection after %.2f seconds and %s tries.",
-                    retry_state.elapsed_time,
-                    retry_state.tries,
-                )
-                if retry_state.tries > 1
-                else None
-            ),
-            on_success=lambda retry_state: (
-                log(
-                    INFO,
-                    "Connection successful after %.2f seconds and %s tries.",
-                    retry_state.elapsed_time,
-                    retry_state.tries,
-                )
-                if retry_state.tries > 1
-                else None
-            ),
-            on_backoff=lambda retry_state: (
-                log(WARN, "Connection attempt failed, retrying...")
-                if retry_state.tries == 1
-                else log(
-                    DEBUG,
-                    "Connection attempt failed, retrying in %.2f seconds",
-                    retry_state.actual_wait,
-                )
-            ),
-        )
+        # Prepare
+        retry_invoker = _init_retry_invoker()
+
+        # Execute
         with self._connection(
             self._address,
             True,
@@ -274,6 +253,87 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
                     base64.urlsafe_b64encode(expected_hmac),
                 ),
             )
+
+            # Assert
+            assert self._servicer.received_client_metadata() == expected_client_metadata
+
+    def test_client_auth_receive(self) -> None:
+        """Test client authentication during receive node."""
+        # Prepare
+        retry_invoker = _init_retry_invoker()
+
+        # Execute
+        with self._connection(
+            self._address,
+            True,
+            retry_invoker,
+            GRPC_MAX_MESSAGE_LENGTH,
+            None,
+            (self._client_interceptor),
+        ) as conn:
+            receive, _, _, _, _ = conn
+            assert receive is not None
+            receive()
+            shared_secret = generate_shared_key(
+                self._servicer.server_private_key, self._client_public_key
+            )
+            expected_hmac = compute_hmac(
+                shared_secret, self._servicer.received_message_bytes()
+            )
+            expected_client_metadata = (
+                (
+                    _PUBLIC_KEY_HEADER,
+                    base64.urlsafe_b64encode(
+                        public_key_to_bytes(self._client_public_key)
+                    ),
+                ),
+                (
+                    _AUTH_TOKEN_HEADER,
+                    base64.urlsafe_b64encode(expected_hmac),
+                ),
+            )
+
+            # Assert
+            assert self._servicer.received_client_metadata() == expected_client_metadata
+
+    def test_client_auth_send(self) -> None:
+        """Test client authentication during send node."""
+        # Prepare
+        retry_invoker = _init_retry_invoker()
+        message = Message(Metadata(0, "1", 0, 0, "", "", 0, ""), RecordSet())
+
+        # Execute
+        with self._connection(
+            self._address,
+            True,
+            retry_invoker,
+            GRPC_MAX_MESSAGE_LENGTH,
+            None,
+            (self._client_interceptor),
+        ) as conn:
+            _, send, _, _, _ = conn
+            assert send is not None
+            send(message)
+            shared_secret = generate_shared_key(
+                self._servicer.server_private_key, self._client_public_key
+            )
+            expected_hmac = compute_hmac(
+                shared_secret, self._servicer.received_message_bytes()
+            )
+            expected_client_metadata = (
+                (
+                    _PUBLIC_KEY_HEADER,
+                    base64.urlsafe_b64encode(
+                        public_key_to_bytes(self._client_public_key)
+                    ),
+                ),
+                (
+                    _AUTH_TOKEN_HEADER,
+                    base64.urlsafe_b64encode(expected_hmac),
+                ),
+            )
+
+            # Assert
             assert self._servicer.received_client_metadata() == expected_client_metadata
 
 
