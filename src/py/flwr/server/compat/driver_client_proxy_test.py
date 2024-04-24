@@ -45,7 +45,7 @@ from flwr.proto import (  # pylint: disable=E0611
     recordset_pb2,
     task_pb2,
 )
-from flwr.server.compat.driver_client_proxy import DriverClientProxy, validate_task_res
+from flwr.server.compat.driver_client_proxy import DriverClientProxy
 from flwr.server.driver import GrpcDriver
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
@@ -75,6 +75,18 @@ def _make_task(
         task_type=message_type,
         recordset=serde.recordset_to_proto(recordset),
     )
+
+
+def validate_task_res(
+    task_res: task_pb2.TaskRes,  # pylint: disable=E1101
+) -> None:
+    """Validate if a TaskRes is empty or not."""
+    if not task_res.HasField("task"):
+        raise ValueError("Invalid TaskRes, field `task` missing")
+    if task_res.task.HasField("error"):
+        raise ValueError("Exception during client-side task execution")
+    if not task_res.task.HasField("recordset"):
+        raise ValueError("Invalid TaskRes, both `recordset` and `error` are missing")
 
 
 class DriverClientProxyTestCase(unittest.TestCase):

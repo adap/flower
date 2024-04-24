@@ -21,7 +21,6 @@ from typing import Optional
 from flwr import common
 from flwr.common import DEFAULT_TTL, Message, MessageType, MessageTypeLegacy, RecordSet
 from flwr.common import recordset_compat as compat
-from flwr.proto import task_pb2  # pylint: disable=E0611
 from flwr.server.client_proxy import ClientProxy
 
 from ..driver.driver import Driver
@@ -125,10 +124,10 @@ class DriverClientProxy(ClientProxy):
 
         # Push message
         message_ids = list(self.driver.push_messages(messages=[message]))
-        if len(task_id_list) != 1:
+        if len(message_ids) != 1:
             raise ValueError("Unexpected number of task_ids")
 
-        task_id = task_id_list[0]
+        task_id = message_ids[0]
         if task_id == "":
             raise ValueError(f"Failed to schedule task for node {self.node_id}")
 
@@ -136,7 +135,7 @@ class DriverClientProxy(ClientProxy):
             start_time = time.time()
 
         while True:
-            messages = list(self.driver.pull_messages(task_id_list))
+            messages = list(self.driver.pull_messages(message_ids))
             if len(messages) == 1:
                 msg: Message = messages[0]
                 return msg.content
@@ -144,15 +143,3 @@ class DriverClientProxy(ClientProxy):
             if timeout is not None and time.time() > start_time + timeout:
                 raise RuntimeError("Timeout reached")
             time.sleep(SLEEP_TIME)
-
-
-def validate_task_res(
-    task_res: task_pb2.TaskRes,  # pylint: disable=E1101
-) -> None:
-    """Validate if a TaskRes is empty or not."""
-    if not task_res.HasField("task"):
-        raise ValueError("Invalid TaskRes, field `task` missing")
-    if task_res.task.HasField("error"):
-        raise ValueError("Exception during client-side task execution")
-    if not task_res.task.HasField("recordset"):
-        raise ValueError("Invalid TaskRes, both `recordset` and `error` are missing")
