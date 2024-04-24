@@ -443,8 +443,8 @@ class StateTest(unittest.TestCase):
         server_public_key = state.get_server_public_key()
 
         # Assert
-        assert server_private_key == None
-        assert server_public_key == None
+        assert server_private_key is None
+        assert server_public_key is None
 
     def test_client_public_keys(self) -> None:
         """Test store_client_public_keys and get_client_public_keys from state."""

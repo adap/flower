@@ -20,7 +20,7 @@ import re
 import sqlite3
 import time
 from logging import DEBUG, ERROR
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
@@ -156,7 +156,7 @@ class SqliteState(State):  # pylint: disable=R0904
     def query(
         self,
         query: str,
-        data: Optional[Union[List[DictOrTuple], DictOrTuple]] = None,
+        data: Optional[Union[Sequence[DictOrTuple], DictOrTuple]] = None,
     ) -> List[Dict[str, Any]]:
         """Execute a SQL query."""
         if self.conn is None:
@@ -621,9 +621,9 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
         """Store a set of `client_public_keys` in state."""
-        query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
-        for public_key in public_keys:
-            self.query(query, {"public_key": public_key})
+        query = "INSERT INTO public_key (public_key) VALUES (?)"
+        data = [(key,) for key in public_keys]
+        self.query(query, data)
 
     def store_client_public_key(self, public_key: bytes) -> None:
         """Store a `client_public_key` in state."""
