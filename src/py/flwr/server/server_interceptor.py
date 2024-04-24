@@ -35,6 +35,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
+    GetRunRequest,
+    GetRunResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -54,6 +56,7 @@ Response = Union[
     DeleteNodeResponse,
     PullTaskInsResponse,
     PushTaskResResponse,
+    GetRunResponse,
 ]
 
 
@@ -134,7 +137,12 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     )
                 elif isinstance(
                     request,
-                    (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest),
+                    (
+                        DeleteNodeRequest,
+                        PullTaskInsRequest,
+                        PushTaskResRequest,
+                        GetRunRequest,
+                    ),
                 ):
                     hmac_value = base64.urlsafe_b64decode(
                         _get_value_from_tuples(

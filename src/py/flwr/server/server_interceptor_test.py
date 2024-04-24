@@ -31,6 +31,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
+    GetRunRequest,
+    GetRunResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -87,6 +89,11 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.Fleet/PushTaskRes",
             request_serializer=PushTaskResRequest.SerializeToString,
             response_deserializer=PushTaskResResponse.FromString,
+        )
+        self._get_run = self._channel.unary_unary(
+            "/flwr.proto.Fleet/GetRun",
+            request_serializer=GetRunRequest.SerializeToString,
+            response_deserializer=GetRunResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -275,6 +282,56 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Execute & Assert
         with self.assertRaises(grpc.RpcError):
             self._push_task_res.with_call(
+                request=request,
+                metadata=(
+                    (_PUBLIC_KEY_HEADER, public_key_bytes),
+                    (_AUTH_TOKEN_HEADER, hmac_value),
+                ),
+            )
+
+    def test_successful_get_run_with_metadata(self) -> None:
+        """Test server interceptor for pull task ins."""
+        # Prepare
+        request = GetRunRequest(run_id=0)
+        shared_secret = generate_shared_key(
+            self._client_private_key, self._server_public_key
+        )
+        hmac_value = base64.urlsafe_b64encode(
+            compute_hmac(shared_secret, request.SerializeToString(True))
+        )
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+
+        # Execute
+        response, call = self._get_run.with_call(
+            request=request,
+            metadata=(
+                (_PUBLIC_KEY_HEADER, public_key_bytes),
+                (_AUTH_TOKEN_HEADER, hmac_value),
+            ),
+        )
+
+        # Assert
+        assert isinstance(response, GetRunResponse)
+        assert grpc.StatusCode.OK == call.code()
+
+    def test_unsuccessful_get_run_with_metadata(self) -> None:
+        """Test server interceptor for pull task ins unsuccessfully."""
+        # Prepare
+        request = GetRunRequest(run_id=0)
+        client_private_key, _ = generate_key_pairs()
+        shared_secret = generate_shared_key(client_private_key, self._server_public_key)
+        hmac_value = base64.urlsafe_b64encode(
+            compute_hmac(shared_secret, request.SerializeToString(True))
+        )
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+
+        # Execute & Assert
+        with self.assertRaises(grpc.RpcError):
+            self._get_run.with_call(
                 request=request,
                 metadata=(
                     (_PUBLIC_KEY_HEADER, public_key_bytes),
