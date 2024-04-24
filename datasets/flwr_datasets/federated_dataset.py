@@ -20,7 +20,7 @@ from typing import Dict, Optional, Tuple, Union
 import datasets
 from datasets import Dataset, DatasetDict
 from flwr_datasets.partitioner import Partitioner
-from flwr_datasets.resplitter import DivideResplitter, Resplitter
+from flwr_datasets.resplitter import Resplitter
 from flwr_datasets.utils import (
     _check_if_dataset_tested,
     _instantiate_partitioners,
@@ -45,7 +45,7 @@ class FederatedDataset:
     subset : str
         Secondary information regarding the dataset, most often subset or version
         (that is passed to the name in datasets.load_dataset).
-    resplitter : Optional[Union[Resplitter, DivideResplitter, Dict[str, Tuple[str, ...]]]]
+    resplitter : Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
         `Callable` that transforms `DatasetDict` splits, or configuration dict for
         `MergeResplitter`.
     partitioners : Dict[str, Union[Partitioner, int]]
@@ -78,9 +78,7 @@ class FederatedDataset:
         *,
         dataset: str,
         subset: Optional[str] = None,
-        resplitter: Optional[
-            Union[Resplitter, DivideResplitter, Dict[str, Tuple[str, ...]]]
-        ] = None,
+        resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]] = None,
         partitioners: Dict[str, Union[Partitioner, int]],
         shuffle: bool = True,
         seed: Optional[int] = 42,
