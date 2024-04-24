@@ -428,8 +428,8 @@ def _try_setup_client_authentication(
 
     if certificates is None:
         sys.exit(
-            "Certificates are required to enable client authentication. "
-            "Please provide certificate paths with '--certificates' before "
+            "Client authentication only works over secure connections. "
+            "Please provide certificate paths using '--certificates' when "
             "enabling '--require-client-authentication'."
         )
 
