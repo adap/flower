@@ -115,7 +115,7 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
         ):
             if self.shared_secret is None:
                 raise RuntimeError("Failure to compute hmac")
-            
+
             metadata.append(
                 (
                     _AUTH_TOKEN_HEADER,
