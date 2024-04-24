@@ -415,7 +415,8 @@ class StateTest(unittest.TestCase):
         assert num == 2
 
     def test_server_public_private_key(self) -> None:
-        """Test client public keys store and get from state."""
+        """Test store_server_public_private_key, get_server_private_key and
+        get_server_public_key from state."""
         # Prepare
         state: State = self.state_factory()
         private_key, public_key = generate_key_pairs()
@@ -432,7 +433,8 @@ class StateTest(unittest.TestCase):
         assert server_public_key == public_key_bytes
 
     def test_server_public_private_key_none(self) -> None:
-        """Test client public keys store and get from state."""
+        """Test get_server_private_key and get_server_public_key from state when
+        server_private_key and server_public_key is None."""
         # Prepare
         state: State = self.state_factory()
 
@@ -445,7 +447,7 @@ class StateTest(unittest.TestCase):
         assert server_public_key == b""
 
     def test_client_public_keys(self) -> None:
-        """Test client public keys store and get from state."""
+        """Test store_client_public_keys and get_client_public_keys from state."""
         # Prepare
         state: State = self.state_factory()
         key_pairs = [generate_key_pairs() for _ in range(3)]
@@ -459,7 +461,7 @@ class StateTest(unittest.TestCase):
         assert client_public_keys == public_keys
 
     def test_client_public_key(self) -> None:
-        """Test client public keys store and get from state."""
+        """Test store_client_public_key and get_client_public_keys from state."""
         # Prepare
         state: State = self.state_factory()
         key_pairs = [generate_key_pairs() for _ in range(3)]
