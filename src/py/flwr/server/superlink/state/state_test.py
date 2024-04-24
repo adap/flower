@@ -28,8 +28,8 @@ from flwr.common import DEFAULT_TTL
 from flwr.common.constant import ErrorCode
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
+    private_key_to_bytes,
     public_key_to_bytes,
-    private_key_to_bytes
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
@@ -424,10 +424,25 @@ class StateTest(unittest.TestCase):
 
         # Execute
         state.store_server_public_private_key(public_key_bytes, private_key_bytes)
+        server_private_key = state.get_server_private_key()
+        server_public_key = state.get_server_public_key()
 
         # Assert
-        assert state.get_server_private_key() == private_key_bytes
-        assert state.get_server_public_key() == public_key_bytes
+        assert server_private_key == private_key_bytes
+        assert server_public_key == public_key_bytes
+
+    def test_server_public_private_key_none(self) -> None:
+        """Test client public keys store and get from state."""
+        # Prepare
+        state: State = self.state_factory()
+
+        # Execute
+        server_private_key = state.get_server_private_key()
+        server_public_key = state.get_server_public_key()
+
+        # Assert
+        assert server_private_key == b""
+        assert server_public_key == b""
 
     def test_client_public_keys(self) -> None:
         """Test client public keys store and get from state."""
@@ -438,9 +453,10 @@ class StateTest(unittest.TestCase):
 
         # Execute
         state.store_client_public_keys(public_keys)
+        client_public_keys = state.get_client_public_keys()
 
         # Assert
-        assert state.get_client_public_keys() == public_keys
+        assert client_public_keys == public_keys
 
     def test_client_public_key(self) -> None:
         """Test client public keys store and get from state."""
@@ -452,9 +468,10 @@ class StateTest(unittest.TestCase):
         # Execute
         for public_key in public_keys:
             state.store_client_public_key(public_key)
+        client_public_keys = state.get_client_public_keys()
 
         # Assert
-        assert state.get_client_public_keys() == public_keys
+        assert client_public_keys == public_keys
 
     def test_acknowledge_ping(self) -> None:
         """Test if acknowledge_ping works and if get_nodes return online nodes."""

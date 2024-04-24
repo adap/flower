@@ -41,8 +41,8 @@ class InMemoryState(State):  # pylint: disable=R0902
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
         self.client_public_keys: Set[bytes] = set()
-        self.server_public_key: bytes = b""
-        self.server_private_key: bytes = b""
+        self.server_public_key: Optional[bytes] = None
+        self.server_private_key: Optional[bytes] = None
         self.lock = threading.Lock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
@@ -264,11 +264,11 @@ class InMemoryState(State):  # pylint: disable=R0902
 
     def get_server_private_key(self) -> bytes:
         """Retrieve `server_private_key` in urlsafe bytes."""
-        return self.server_private_key
+        return self.server_private_key if self.server_private_key is not None else b""
 
     def get_server_public_key(self) -> bytes:
         """Retrieve `server_public_key` in urlsafe bytes."""
-        return self.server_public_key
+        return self.server_public_key if self.server_public_key is not None else b""
 
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
         """Store a set of `client_public_keys` in state."""

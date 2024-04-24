@@ -603,14 +603,20 @@ class SqliteState(State):
         """Retrieve `server_private_key` in urlsafe bytes."""
         query = "SELECT private_key FROM credential"
         rows = self.query(query)
-        private_key: bytes = rows[0]["private_key"]
+        try:
+            private_key: bytes = rows[0]["private_key"]
+        except IndexError:
+            private_key: bytes = b""
         return private_key
 
     def get_server_public_key(self) -> bytes:
         """Retrieve `server_public_key` in urlsafe bytes."""
         query = "SELECT public_key FROM credential"
         rows = self.query(query)
-        public_key: bytes = rows[0]["public_key"]
+        try:
+            public_key: bytes = rows[0]["public_key"]
+        except IndexError:
+            public_key: bytes = b""
         return public_key
 
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
