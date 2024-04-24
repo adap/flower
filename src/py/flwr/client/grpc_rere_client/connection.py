@@ -26,7 +26,7 @@ from typing import Callable, Iterator, Optional, Sequence, Tuple, Union, cast
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from flwr.client.client_interceptor import AuthenticateClientInterceptor
+from .client_interceptor import AuthenticateClientInterceptor
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
