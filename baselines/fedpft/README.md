@@ -24,7 +24,7 @@ dataset: [CIFAR-100, Caltech101]
 
 **Hardware Setup:** These experiments were run on a desktop machine with 8 CPU threads and Nvidia 4070 with 8 gigs of memory. 
 
-**Contributors:** Mahdi Beitollahi
+**Contributors:** Mahdi Beitollahi (mahdi.beitollahi@queensu.ca).
 
 
 ## Experimental Setup
