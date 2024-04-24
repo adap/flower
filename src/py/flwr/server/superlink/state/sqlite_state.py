@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS task_res(
 DictOrTuple = Union[Tuple[Any, ...], Dict[str, Any]]
 
 
-class SqliteState(State):
+class SqliteState(State):  # pylint: disable=R0904
     """SQLite-based state implementation."""
 
     def __init__(
@@ -606,7 +606,7 @@ class SqliteState(State):
         try:
             private_key: bytes = rows[0]["private_key"]
         except IndexError:
-            private_key: bytes = b""
+            private_key = b""
         return private_key
 
     def get_server_public_key(self) -> bytes:
@@ -616,7 +616,7 @@ class SqliteState(State):
         try:
             public_key: bytes = rows[0]["public_key"]
         except IndexError:
-            public_key: bytes = b""
+            public_key = b""
         return public_key
 
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
