@@ -29,6 +29,7 @@ from flwr.common.constant import ErrorCode
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     public_key_to_bytes,
+    private_key_to_bytes
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
@@ -413,14 +414,46 @@ class StateTest(unittest.TestCase):
         # Assert
         assert num == 2
 
+    def test_server_public_private_key(self) -> None:
+        """Test client public keys store and get from state."""
+        # Prepare
+        state: State = self.state_factory()
+        private_key, public_key = generate_key_pairs()
+        private_key_bytes = private_key_to_bytes(private_key)
+        public_key_bytes = public_key_to_bytes(public_key)
+
+        # Execute
+        state.store_server_public_private_key(public_key_bytes, private_key_bytes)
+
+        # Assert
+        assert state.get_server_private_key() == private_key_bytes
+        assert state.get_server_public_key() == public_key_bytes
+
     def test_client_public_keys(self) -> None:
         """Test client public keys store and get from state."""
+        # Prepare
         state: State = self.state_factory()
         key_pairs = [generate_key_pairs() for _ in range(3)]
         public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
 
+        # Execute
         state.store_client_public_keys(public_keys)
 
+        # Assert
+        assert state.get_client_public_keys() == public_keys
+
+    def test_client_public_key(self) -> None:
+        """Test client public keys store and get from state."""
+        # Prepare
+        state: State = self.state_factory()
+        key_pairs = [generate_key_pairs() for _ in range(3)]
+        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
+
+        # Execute
+        for public_key in public_keys:
+            state.store_client_public_key(public_key)
+
+        # Assert
         assert state.get_client_public_keys() == public_keys
 
     def test_acknowledge_ping(self) -> None:
