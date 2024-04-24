@@ -599,24 +599,24 @@ class SqliteState(State):  # pylint: disable=R0904
         )
         self.query(query, {"public_key": public_key, "private_key": private_key})
 
-    def get_server_private_key(self) -> bytes:
+    def get_server_private_key(self) -> Optional[bytes]:
         """Retrieve `server_private_key` in urlsafe bytes."""
         query = "SELECT private_key FROM credential"
         rows = self.query(query)
         try:
-            private_key: bytes = rows[0]["private_key"]
+            private_key: Optional[bytes] = rows[0]["private_key"]
         except IndexError:
-            private_key = b""
+            private_key = None
         return private_key
 
-    def get_server_public_key(self) -> bytes:
+    def get_server_public_key(self) -> Optional[bytes]:
         """Retrieve `server_public_key` in urlsafe bytes."""
         query = "SELECT public_key FROM credential"
         rows = self.query(query)
         try:
-            public_key: bytes = rows[0]["public_key"]
+            public_key: Optional[bytes] = rows[0]["public_key"]
         except IndexError:
-            public_key = b""
+            public_key = None
         return public_key
 
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
