@@ -31,7 +31,7 @@ class BiggerCIFARNet(nn.Module):
         self.conv2 = nn.Conv2d(6, 16, 5)
         self.fc1 = nn.Linear(16 * 5 * 5, 240)
         self.fc2 = nn.Linear(240, 240)
-        self.fc2 = nn.Linear(240, 84)
+        self.fc3 = nn.Linear(240, 84)
         self.fc4 = nn.Linear(84, 10)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
