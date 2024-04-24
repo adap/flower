@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS task_res(
 DictOrTuple = Union[Tuple[Any, ...], Dict[str, Any]]
 
 
-class SqliteState(State):
+class SqliteState(State):  # pylint: disable=R0904
     """SQLite-based state implementation."""
 
     def __init__(
