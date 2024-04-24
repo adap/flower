@@ -423,53 +423,55 @@ def _try_setup_client_authentication(
     args: argparse.Namespace,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePublicKey, ec.EllipticCurvePrivateKey]]:
-    if args.require_client_authentication:
-        if certificates is None:
-            sys.exit(
-                "Certificates are required to enable client authentication. "
-                "Please provide certificate paths with '--certificates' before "
-                "enabling '--require-client-authentication'."
-            )
-        client_keys_file_path = Path(args.require_client_authentication[0])
-        if not client_keys_file_path.exists():
-            sys.exit(
-                "Client public keys csv file are required for client authentication. "
-                "Please provide the csv file path containing known client public keys "
-                "to '--require-client-authentication'."
-            )
-        client_public_keys: Set[bytes] = set()
-        public_key = load_ssh_public_key(
-            Path(args.require_client_authentication[1]).read_bytes()
-        )
-        private_key = load_ssh_private_key(
-            Path(args.require_client_authentication[2]).read_bytes(),
-            None,
-        )
-        if not isinstance(public_key, ec.EllipticCurvePublicKey) or not isinstance(
-            private_key, ec.EllipticCurvePrivateKey
-        ):
-            sys.exit(
-                "An eliptic curve public and private key pair is required for "
-                "client authentication. Please provide the file path containing "
-                "valid public and private key to '--require-client-authentication'."
-            )
-        server_public_key = public_key
-        server_private_key = private_key
-
-        with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
-            reader = csv.reader(csvfile)
-            for row in reader:
-                for element in row:
-                    public_key = load_ssh_public_key(element.encode())
-                    if isinstance(public_key, ec.EllipticCurvePublicKey):
-                        client_public_keys.add(public_key_to_bytes(public_key))
-            return (
-                client_public_keys,
-                server_public_key,
-                server_private_key,
-            )
-    else:
+    if not args.require_client_authentication:
         return None
+    
+    if certificates is None:
+        sys.exit(
+            "Certificates are required to enable client authentication. "
+            "Please provide certificate paths with '--certificates' before "
+            "enabling '--require-client-authentication'."
+        )
+
+    client_keys_file_path = Path(args.require_client_authentication[0])
+    if not client_keys_file_path.exists():
+        sys.exit(
+            "Client public keys csv file are required for client authentication. "
+            "Please provide the csv file path containing known client public keys "
+            "to '--require-client-authentication'."
+        )
+        
+    client_public_keys: Set[bytes] = set()
+    public_key = load_ssh_public_key(
+        Path(args.require_client_authentication[1]).read_bytes()
+    )
+    private_key = load_ssh_private_key(
+        Path(args.require_client_authentication[2]).read_bytes(),
+        None,
+    )
+    if not isinstance(public_key, ec.EllipticCurvePublicKey) or not isinstance(
+        private_key, ec.EllipticCurvePrivateKey
+    ):
+        sys.exit(
+            "An eliptic curve public and private key pair is required for "
+            "client authentication. Please provide the file path containing "
+            "valid public and private key to '--require-client-authentication'."
+        )
+    server_public_key = public_key
+    server_private_key = private_key
+
+    with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            for element in row:
+                public_key = load_ssh_public_key(element.encode())
+                if isinstance(public_key, ec.EllipticCurvePublicKey):
+                    client_public_keys.add(public_key_to_bytes(public_key))
+        return (
+            client_public_keys,
+            server_public_key,
+            server_private_key,
+        )
 
 
 def _try_obtain_certificates(
