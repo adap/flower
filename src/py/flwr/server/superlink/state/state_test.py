@@ -415,8 +415,7 @@ class StateTest(unittest.TestCase):
         assert num == 2
 
     def test_server_public_private_key(self) -> None:
-        """Test store_server_public_private_key, get_server_private_key and
-        get_server_public_key from state."""
+        """Test get server public and private key after inserting."""
         # Prepare
         state: State = self.state_factory()
         private_key, public_key = generate_key_pairs()
@@ -433,8 +432,7 @@ class StateTest(unittest.TestCase):
         assert server_public_key == public_key_bytes
 
     def test_server_public_private_key_none(self) -> None:
-        """Test get_server_private_key and get_server_public_key from state when
-        server_private_key and server_public_key is None."""
+        """Test get server public and private key without inserting."""
         # Prepare
         state: State = self.state_factory()
 
@@ -447,8 +445,7 @@ class StateTest(unittest.TestCase):
         assert server_public_key is None
 
     def test_store_server_public_private_key_twice(self) -> None:
-        """Test get_server_private_key and get_server_public_key from state when
-        server_private_key and server_public_key is inserted twice."""
+        """Test inserting public and private key twice."""
         # Prepare
         state: State = self.state_factory()
         private_key, public_key = generate_key_pairs()
@@ -460,15 +457,12 @@ class StateTest(unittest.TestCase):
 
         # Execute
         state.store_server_public_private_key(public_key_bytes, private_key_bytes)
-        state.store_server_public_private_key(
-            new_public_key_bytes, new_private_key_bytes
-        )
-        server_private_key = state.get_server_private_key()
-        server_public_key = state.get_server_public_key()
 
         # Assert
-        assert server_private_key == private_key_bytes
-        assert server_public_key == public_key_bytes
+        with self.assertRaises(RuntimeError):
+            state.store_server_public_private_key(
+                new_public_key_bytes, new_private_key_bytes
+            )
 
     def test_client_public_keys(self) -> None:
         """Test store_client_public_keys and get_client_public_keys from state."""

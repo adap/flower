@@ -601,6 +601,8 @@ class SqliteState(State):  # pylint: disable=R0904
                 "VALUES (:public_key, :private_key)"
             )
             self.query(query, {"public_key": public_key, "private_key": private_key})
+        else:
+            raise RuntimeError("Server public and private key already set")
 
     def get_server_private_key(self) -> Optional[bytes]:
         """Retrieve `server_private_key` in urlsafe bytes."""
