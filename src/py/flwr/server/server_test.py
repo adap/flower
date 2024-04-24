@@ -203,7 +203,7 @@ def test_set_max_workers() -> None:
     assert server.max_workers == 42
 
 
-def test_setup_client_auth() -> None:
+def test_setup_client_auth() -> None:  # pylint: disable=R0914
     """Test setup client authentication."""
     # Generate keys
     _, first_public_key = generate_key_pairs()
