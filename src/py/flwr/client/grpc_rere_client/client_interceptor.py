@@ -77,7 +77,7 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
     ):
         self.private_key = private_key
         self.public_key = public_key
-        self.shared_secret = b""
+        self.shared_secret: Optional[bytes] = None
         self.server_public_key: Optional[ec.EllipticCurvePublicKey] = None
         self.encoded_public_key = base64.urlsafe_b64encode(
             public_key_to_bytes(self.public_key)
@@ -113,16 +113,19 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
             request,
             (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest, GetRunRequest),
         ):
-            metadata.append(
-                (
-                    _AUTH_TOKEN_HEADER,
-                    base64.urlsafe_b64encode(
-                        compute_hmac(
-                            self.shared_secret, request.SerializeToString(True)
-                        )
-                    ),
+            if self.shared_secret is not None:
+                metadata.append(
+                    (
+                        _AUTH_TOKEN_HEADER,
+                        base64.urlsafe_b64encode(
+                            compute_hmac(
+                                self.shared_secret, request.SerializeToString(True)
+                            )
+                        ),
+                    )
                 )
-            )
+            else:
+                raise RuntimeError("Failure to compute hmac")
 
         client_call_details = _ClientCallDetails(
             client_call_details.method,
