@@ -64,7 +64,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create run ID."""
         log(INFO, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
-        run_id = state.create_run("None/None", "None")
+        run_id = state.create_run(request.fab_id, request.fab_version)
         return CreateRunResponse(run_id=run_id)
 
     def PushTaskIns(
