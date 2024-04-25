@@ -88,7 +88,7 @@ We use `Flower Datasets <https://flower.ai/docs/datasets/>`_ to load CIFAR10, a 
         testloader = DataLoader(partition_train_test["test"], batch_size=32)
         return trainloader, testloader
 
-Define the loss and optimizer with PyTorch. The training of the dataset is done by looping over the dataset, measure the corresponding loss and optimize it.
+We define the loss and optimizer with PyTorch. The training of the dataset is done by looping over the dataset, measure the corresponding loss, and optimize it.
 
 .. code-block:: python
 
@@ -96,30 +96,35 @@ Define the loss and optimizer with PyTorch. The training of the dataset is done 
         """Train the network on the training set."""
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+        net.train()
         for _ in range(epochs):
-            for batch in tqdm(trainloader, "Training"):
+            for batch in trainloader:
                 images = batch["img"].to(DEVICE)
                 labels = batch["label"].to(DEVICE)
                 optimizer.zero_grad()
-                criterion(net(images), labels).backward()
+                loss = criterion(net(images), labels)
+                loss.backward()
                 optimizer.step()
 
-Define then the validation of the  machine learning network. We loop over the test set and measure the loss and accuracy of the test set.
+We then define the validation of the  machine learning network. We loop over the test set and measure the loss and accuracy of the test set.
 
 .. code-block:: python
 
     def test(net, testloader):
         """Validate the network on the entire test set."""
         criterion = torch.nn.CrossEntropyLoss()
-        correct, loss = 0, 0.0
+        correct, total, loss = 0, 0, 0.0
+        net.eval()
         with torch.no_grad():
-            for batch in tqdm(testloader, "Testing"):
+            for batch in testloader:
                 images = batch["img"].to(DEVICE)
                 labels = batch["label"].to(DEVICE)
                 outputs = net(images)
                 loss += criterion(outputs, labels).item()
-                correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
-        accuracy = correct / len(testloader.dataset)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+        accuracy = correct / total
         return loss, accuracy
 
 After defining the training and testing of a PyTorch machine learning model, we use the functions for the Flower clients.
@@ -155,8 +160,8 @@ After loading the data set with :code:`load_data()` we define the Flower interfa
 
 The Flower server interacts with clients through an interface called
 :code:`Client`. When the server selects a particular client for training, it
-sends training instructions over the network. The client receives those instructions and calls one of the
-:code:`Client` methods to run your code
+sends training instructions over the network. The client receives those
+instructions and calls one of the :code:`Client` methods to run your code
 (i.e., to train the neural network we defined earlier).
 
 Flower provides a convenience class called :code:`NumPyClient` which makes it
@@ -198,26 +203,26 @@ which can be implemented in the following way:
             loss, accuracy = test(net, testloader)
             return float(loss), len(testloader.dataset), {"accuracy": float(accuracy)}
 
-We can now create a client function to return instances of :code:`CifarClient` when called
+Next, we create a client function that returns instances of :code:`CifarClient` on-demand when called:
 
 .. code-block:: python
 
     def client_fn(cid: str):
         return CifarClient().to_client()
 
-and create a :code:`ClientApp()` object using the client function
+Finally, we create a :code:`ClientApp()` object that uses this client function:
 
 .. code-block:: python
 
     app = ClientApp(client_fn=client_fn)
 
-That's it for the client. We only have to implement :code:`Client` or :code:`NumPyClient`, create a :code:`ClientApp`, and pass the client function to it. If you implement a client of type :code:`NumPyClient` you'll need to first call its :code:`to_client()` method.
+That's it for the client. We only have to implement :code:`Client` or :code:`NumPyClient`, create a :code:`ClientApp`, and pass the client function to it. If we implement a client of type :code:`NumPyClient` we'll need to first call its :code:`to_client()` method.
 
 
 Flower Server
 -------------
 
-For simple workloads we can create a :code:`ServerApp` and leave all the
+For simple workloads, we create a :code:`ServerApp` and leave all the
 configuration possibilities at their default values. In a file named
 :code:`server.py`, import Flower and create a :code:`ServerApp`:
 
@@ -234,16 +239,16 @@ Train the model, federated!
 With both :code:`ClientApps` and :code:`ServerApp` ready, we can now run everything and see federated
 learning in action. First, we run the :code:`flower-superlink` command in one terminal to start the infrastructure. This step only needs to be run once.
 
-.. admonition:: Important
-    :class: important
+.. admonition:: Note
+    :class: note
 
-    In this example, the :code:`--insecure` command line argument starts Flower without HTTPS and is only used for prototyping. To start with HTTPS, use the argument :code:`--certificates` and pass the appropriate certificates.
+    In this example, the :code:`--insecure` command line argument starts Flower without HTTPS and is only used for prototyping. To run with HTTPS, we instead use the argument :code:`--certificates` and pass the paths to the certificates. Please refer to `Flower CLI reference <ref-api-cli.html>`_ for implementation details.
 
 .. code-block:: shell
 
     $ flower-superlink --insecure
 
-FL systems usually have a server and multiple clients. We therefore need to start multiple `SuperNode`s, one for each client, respectively. Open a new terminal and start the first `SuperNode` using the :code:`flower-client-app` command.
+FL systems usually have a server and multiple clients. We therefore need to start multiple `SuperNode`s, one for each client, respectively. First, we open a new terminal and start the first `SuperNode` using the :code:`flower-client-app` command.
 
 .. code-block:: shell
 
@@ -256,13 +261,13 @@ Open another terminal and start the second `SuperNode`:
 
     $ flower-client-app client:app --insecure
 
-Finally, in another terminal window, run the `ServerApp`. This starts the actual training run:
+Finally, in another terminal window, we run the `ServerApp`. This starts the actual training run:
 
 .. code-block:: shell
 
     $ flower-server-app server:app --insecure
 
-You should now see how the training does in the last terminal (the one that started the :code:`ServerApp`):
+We should now see how the training does in the last terminal (the one that started the :code:`ServerApp`):
 
 .. code-block:: shell
 
