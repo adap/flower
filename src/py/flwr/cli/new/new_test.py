@@ -112,7 +112,6 @@ def test_new_correct_name(tmp_path: str) -> None:
 
 def test_new_incorrect_name(tmp_path: str) -> None:
     """Test if project with incorrect name is created for framework."""
-
     for project_name in ["My_Flower_App", "My.Flower App"]:
 
         framework = MlFramework.PYTORCH
