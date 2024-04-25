@@ -35,7 +35,7 @@ def test_render_template() -> None:
     """Test if a string is correctly substituted."""
     # Prepare
     filename = "app/README.md.tpl"
-    data = {"project_name": "FedGPT"}
+    data = {"project_name": "FedGPT", "username": "flwrlabs"}
 
     # Execute
     result = render_template(filename, data)
@@ -65,6 +65,7 @@ def test_new(tmp_path: str) -> None:
     # Prepare
     project_name = "FedGPT"
     framework = MlFramework.PYTORCH
+    username = "flwrlabs"
     expected_files_top_level = {
         "fedgpt",
         "README.md",
@@ -86,7 +87,7 @@ def test_new(tmp_path: str) -> None:
         os.chdir(tmp_path)
 
         # Execute
-        new(project_name=project_name, framework=framework)
+        new(project_name=project_name, framework=framework, username=username)
 
         # Assert
         file_list = os.listdir(os.path.join(tmp_path, project_name.lower()))
