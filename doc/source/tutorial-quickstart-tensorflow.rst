@@ -5,18 +5,25 @@ Quickstart TensorFlow
 =====================
 
 .. meta::
-   :description: Check out this Federated Learning quickstart tutorial for using Flower with TensorFlow to train a MobilNetV2 model on CIFAR-10.
+   :description: Check out this Federated Learning quickstart tutorial for using Flower with TensorFlow to train a MobileNetV2 model on CIFAR-10.
 
 ..  youtube:: FGTc2TQq7VM
    :width: 100%
 
-Let's build a federated learning system in less than 20 lines of code!
+.. admonition:: Disclaimer
+    :class: important
+
+    The Quickstart TensorFlow video uses slightly different Flower commands than this tutorial. Please follow the :doc:`Upgrade to Flower Next <how-to-upgrade-to-flower-next>` guide to convert commands shown in the video.
+
+In this tutorial we will learn how to train a MobileNetV2 model on CIFAR10 using the Flower framework and TensorFlow.
+
+First of all, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
 Before Flower can be imported we have to install it:
 
 .. code-block:: shell
 
-  $ pip install flwr
+  $ pip install flwr flwr-datasets[vision]
 
 Since we want to use the Keras API of TensorFlow (TF), we have to install TF as well: 
 
@@ -28,23 +35,31 @@ Since we want to use the Keras API of TensorFlow (TF), we have to install TF as 
 Flower Client
 -------------
 
-Next, in a file called :code:`client.py`, import Flower and TensorFlow:
+Next, in a file called :code:`client.py`, import Flower, Flower Datasets, and TensorFlow:
 
 .. code-block:: python
 
     import flwr as fl
     import tensorflow as tf
+    from flwr_datasets import FederatedDataset
 
-We use the Keras utilities of TF to load CIFAR10, a popular colored image classification
+We use `Flower Datasets <https://flower.ai/docs/datasets/>`_ to load CIFAR10, a popular colored image classification
 dataset for machine learning. The call to
-:code:`tf.keras.datasets.cifar10.load_data()` downloads CIFAR10, caches it locally,
-and then returns the entire training and test set as NumPy ndarrays.
+:code:`FederatedDataset(dataset="cifar10")` downloads CIFAR10, partitions it, and caches it locally.
+We assign an integer to `partition_id` for each client in our federated learning example, starting from 0.
 
 .. code-block:: python
 
-    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
+    fds = FederatedDataset(dataset="cifar10", partitioners={"train": 3})
+    partition = fds.load_partition(partition_id, "train")
+    partition.set_format("numpy")
 
-Next, we need a model. For the purpose of this tutorial, we use MobilNetV2 with 10 output classes:
+    # Divide data on each node: 80% train, 20% test
+    partition = partition.train_test_split(test_size=0.2, seed=42)
+    x_train, y_train = partition["train"]["img"] / 255.0, partition["train"]["label"]
+    x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
+
+Next, we need a model. For the purpose of this tutorial, we use MobileNetV2 with 10 output classes:
 
 .. code-block:: python
 
@@ -79,93 +94,101 @@ implemented in the following way:
             return loss, len(x_test), {"accuracy": float(accuracy)}
 
 
-We can now create an instance of our class :code:`CifarClient` and add one line
-to actually run this client:
+Next, we create a client function that returns instances of :code:`CifarClient` on-demand when called:
 
 .. code-block:: python
 
-     fl.client.start_client(server_address="[::]:8080", client=CifarClient().to_client())
+    def client_fn(cid: str):
+        return CifarClient().to_client()
+
+Finally, we create a :code:`ClientApp()` object that uses this client function:
+
+.. code-block:: python
+
+    app = ClientApp(client_fn=client_fn)
 
 
 That's it for the client. We only have to implement :code:`Client` or
-:code:`NumPyClient` and call :code:`fl.client.start_client()`. If you implement a client of type :code:`NumPyClient` you'll need to first call its :code:`to_client()` method. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
-:code:`"[::]:8080"`. If we run a truly federated workload with the server and
-clients running on different machines, all that needs to change is the
-:code:`server_address` we point the client at.
+:code:`NumPyClient`, create a :code:`ClientApp`, and pass the client function to it. If we implement a client of type :code:`NumPyClient` we'll need to first call its :code:`to_client()` method.
 
 
 Flower Server
 -------------
 
-For simple workloads we can start a Flower server and leave all the
+For simple workloads, we create a :code:`ServerApp` and leave all the
 configuration possibilities at their default values. In a file named
-:code:`server.py`, import Flower and start the server:
+:code:`server.py`, import Flower and create a :code:`ServerApp`:
 
 .. code-block:: python
 
-    import flwr as fl
+    from flwr.server import ServerApp
 
-    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3))
+    app = ServerApp()
 
 
 Train the model, federated!
 ---------------------------
 
 With both client and server ready, we can now run everything and see federated
-learning in action. FL systems usually have a server and multiple clients. We
-therefore have to start the server first:
+learning in action. First, we run the :code:`flower-superlink` command in one terminal to start the infrastructure. This step only needs to be run once.
+
+.. admonition:: Note
+    :class: note
+
+    In this example, the :code:`--insecure` command line argument starts Flower without HTTPS and is only used for prototyping. To run with HTTPS, we instead use the argument :code:`--certificates` and pass the paths to the certificates. Please refer to `Flower CLI reference <ref-api-cli.html>`_ for implementation details.
 
 .. code-block:: shell
 
-    $ python server.py
+    $ flower-superlink --insecure
 
-Once the server is running we can start the clients in different terminals.
-Open a new terminal and start the first client:
-
-.. code-block:: shell
-
-    $ python client.py
-
-Open another terminal and start the second client:
+FL systems usually have a server and multiple clients. We therefore need to start multiple `SuperNode`s, one for each client, respectively. First, we open a new terminal and start the first `SuperNode` using the :code:`flower-client-app` command.
 
 .. code-block:: shell
 
-    $ python client.py
+    $ flower-client-app client:app --insecure
 
-Each client will have its own dataset. 
-
-You should now see how the training does in the very first terminal (the one
-that started the server):
+In the above, we launch the :code:`app` object in the :code:`client.py` module.
+Open another terminal and start the second `SuperNode`:
 
 .. code-block:: shell
 
-    INFO flower 2021-02-25 14:15:46,741 | app.py:76 | Flower server running (insecure, 3 rounds)
-    INFO flower 2021-02-25 14:15:46,742 | server.py:72 | Getting initial parameters
-    INFO flower 2021-02-25 14:16:01,770 | server.py:74 | Evaluating initial parameters
-    INFO flower 2021-02-25 14:16:01,770 | server.py:87 | [TIME] FL starting
-    DEBUG flower 2021-02-25 14:16:12,341 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-02-25 14:21:17,235 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:21:17,512 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-02-25 14:21:29,628 | server.py:149 | evaluate received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:21:29,696 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-02-25 14:25:59,917 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:26:00,227 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-02-25 14:26:11,457 | server.py:149 | evaluate received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:26:11,530 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-02-25 14:30:43,389 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:30:43,630 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-02-25 14:30:53,384 | server.py:149 | evaluate received 2 results and 0 failures
-    INFO flower 2021-02-25 14:30:53,384 | server.py:122 | [TIME] FL finished in 891.6143046000007
-    INFO flower 2021-02-25 14:30:53,385 | app.py:109 | app_fit: losses_distributed [(1, 2.3196680545806885), (2, 2.3202896118164062), (3, 2.1818180084228516)]
-    INFO flower 2021-02-25 14:30:53,385 | app.py:110 | app_fit: accuracies_distributed []
-    INFO flower 2021-02-25 14:30:53,385 | app.py:111 | app_fit: losses_centralized []
-    INFO flower 2021-02-25 14:30:53,385 | app.py:112 | app_fit: accuracies_centralized []
-    DEBUG flower 2021-02-25 14:30:53,442 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-02-25 14:31:02,848 | server.py:149 | evaluate received 2 results and 0 failures
-    INFO flower 2021-02-25 14:31:02,848 | app.py:121 | app_evaluate: federated loss: 2.1818180084228516
-    INFO flower 2021-02-25 14:31:02,848 | app.py:125 | app_evaluate: results [('ipv4:127.0.0.1:57158', EvaluateRes(loss=2.1818180084228516, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.21610000729560852})), ('ipv4:127.0.0.1:57160', EvaluateRes(loss=2.1818180084228516, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.21610000729560852}))]
-    INFO flower 2021-02-25 14:31:02,848 | app.py:127 | app_evaluate: failures [] flower 2020-07-15 10:07:56,396 | app.py:77 | app_evaluate: failures []
+    $ flower-client-app client:app --insecure
+
+Finally, in another terminal window, we run the `ServerApp`. This starts the actual training run:
+
+.. code-block:: shell
+
+    $ flower-server-app server:app --insecure
+
+We should now see how the training does in the last terminal (the one that started the :code:`ServerApp`):
+
+.. code-block:: shell
+
+    WARNING :   Option `--insecure` was set. Starting insecure HTTP client connected to 0.0.0.0:9091.
+    INFO :      Starting Flower ServerApp, config: num_rounds=1, no round_timeout
+    INFO :
+    INFO :      [INIT]
+    INFO :      Requesting initial parameters from one random client
+    INFO :      Received initial parameters from one random client
+    INFO :      Evaluating initial global parameters
+    INFO :
+    INFO :      [ROUND 1]
+    INFO :      configure_fit: strategy sampled 2 clients (out of 2)
+    INFO :      aggregate_fit: received 2 results and 0 failures
+    WARNING :   No fit_metrics_aggregation_fn provided
+    INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
+    INFO :      aggregate_evaluate: received 2 results and 0 failures
+    WARNING :   No evaluate_metrics_aggregation_fn provided
+    INFO :
+    INFO :      [SUMMARY]
+    INFO :      Run finished 1 rounds in 7.20s
+    INFO :      History (loss, distributed):
+    INFO :          '\tround 1: 2.302561044692993\n'
+    INFO :
 
 Congratulations! You've successfully built and run your first federated
-learning system. The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart-tensorflow/client.py>`_ for this can be found in
-:code:`examples/quickstart-tensorflow/client.py`.
+learning system. The full source code for this can be found in
+|quickstart_tf_link|_.
+
+.. |quickstart_tf_link| replace:: :code:`examples/quickstart-tensorflow/client.py`
+.. _quickstart_tf_link: https://github.com/adap/flower/blob/main/examples/quickstart-tensorflow/client.py
