@@ -216,10 +216,6 @@ class Message:
         when processing another message.
     """
 
-    # _metadata: Metadata
-    # _content: RecordSet | None = None
-    # _error: Error | None = None
-
     def __init__(
         self,
         metadata: Metadata,
@@ -285,20 +281,6 @@ class Message:
         """Return True if message has an error, else False."""
         return self.__dict__["_error"] is not None
 
-    def _create_reply_metadata(self, ttl: float) -> Metadata:
-        """Construct metadata for a reply message."""
-        return Metadata(
-            run_id=self.metadata.run_id,
-            message_id="",
-            src_node_id=self.metadata.dst_node_id,
-            dst_node_id=self.metadata.src_node_id,
-            reply_to_message=self.metadata.message_id,
-            group_id=self.metadata.group_id,
-            ttl=ttl,
-            message_type=self.metadata.message_type,
-            partition_id=self.metadata.partition_id,
-        )
-
     def create_error_reply(self, error: Error, ttl: float | None = None) -> Message:
         """Construct a reply message indicating an error happened.
 
@@ -324,7 +306,7 @@ class Message:
         # message creation)
         ttl_ = DEFAULT_TTL if ttl is None else ttl
         # Create reply with error
-        message = Message(metadata=self._create_reply_metadata(ttl_), error=error)
+        message = Message(metadata=_create_reply_metadata(self, ttl_), error=error)
 
         if ttl is None:
             # Set TTL equal to the remaining time for the received message to expire
@@ -370,7 +352,7 @@ class Message:
         ttl_ = DEFAULT_TTL if ttl is None else ttl
 
         message = Message(
-            metadata=self._create_reply_metadata(ttl_),
+            metadata=_create_reply_metadata(self, ttl_),
             content=content,
         )
 
@@ -382,3 +364,18 @@ class Message:
             message.metadata.ttl = ttl
 
         return message
+
+
+def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
+    """Construct metadata for a reply message."""
+    return Metadata(
+        run_id=msg.metadata.run_id,
+        message_id="",
+        src_node_id=msg.metadata.dst_node_id,
+        dst_node_id=msg.metadata.src_node_id,
+        reply_to_message=msg.metadata.message_id,
+        group_id=msg.metadata.group_id,
+        ttl=ttl,
+        message_type=msg.metadata.message_type,
+        partition_id=msg.metadata.partition_id,
+    )
