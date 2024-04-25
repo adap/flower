@@ -33,6 +33,9 @@ from typing import (
     cast,
 )
 
+from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.telemetry import EventType
+
 
 def exponential(
     base_delay: float = 1,
@@ -245,6 +248,8 @@ class RetryInvoker:
         wait_generator = self.wait_gen_factory()
         start = time.monotonic()
         ref_state: List[Optional[RetryState]] = [None]
+
+        register_exit_handlers(EventType.RUN_CLIENT_APP_LEAVE)
 
         while True:
             try_cnt += 1
