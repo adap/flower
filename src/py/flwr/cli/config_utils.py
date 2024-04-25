@@ -37,7 +37,8 @@ def load_and_validate_with_defaults(
 
     if config is None:
         errors = [
-            "Project configuration could not be loaded. `pyproject.toml` does not exist."
+            "Project configuration could not be loaded. "
+            "`pyproject.toml` does not exist."
         ]
         return (None, errors, [])
 

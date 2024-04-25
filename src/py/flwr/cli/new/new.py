@@ -123,7 +123,7 @@ def new(
 
     print(
         typer.style(
-            f"🔨 Creating Flower project {project_name}...",
+            f"\n🔨 Creating Flower project {project_name}...",
             fg=typer.colors.GREEN,
             bold=True,
         )
