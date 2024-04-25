@@ -15,6 +15,7 @@
 """Test for Flower command line interface `new` command."""
 
 import os
+from unittest.mock import patch
 
 from .new import MlFramework, create_file, load_template, new, render_template
 
@@ -64,12 +65,12 @@ def test_create_file(tmp_path: str) -> None:
     assert text == "Foobar"
 
 
-def test_new(tmp_path: str) -> None:
+def test_new_correct_name(tmp_path: str) -> None:
     """Test if project is created for framework."""
     # Prepare
     expected_names = [
         ("FedGPT", "FedGPT", "fedgpt"),
-        ("My_Flower-App", "my-flower-app", "my_flower_app"),
+        ("My-Flower-App", "my-flower-app", "my_flower_app"),
     ]
 
     for project_name, expected_top_level_dir, expected_module_dir in expected_names:
@@ -96,6 +97,62 @@ def test_new(tmp_path: str) -> None:
 
             # Execute
             new(project_name=project_name, framework=framework)
+
+            # Assert
+            file_list = os.listdir(os.path.join(tmp_path, expected_top_level_dir))
+            assert set(file_list) == expected_files_top_level
+
+            file_list = os.listdir(
+                os.path.join(tmp_path, expected_top_level_dir, expected_module_dir)
+            )
+            assert set(file_list) == expected_files_module
+        finally:
+            os.chdir(origin)
+
+
+def test_new_incorrect_name(tmp_path: str) -> None:
+    """Test if project is created for framework."""
+    # Prepare
+    expected_names = [
+        ("My_Flower_App", "my-flower-app", "my_flower_app"),
+        ("My.Flower App", "my-flower-app", "my_flower_app"),
+    ]
+
+    for project_name, expected_top_level_dir, expected_module_dir in expected_names:
+        framework = MlFramework.PYTORCH
+        expected_files_top_level = {
+            expected_module_dir,
+            "README.md",
+            "pyproject.toml",
+            ".gitignore",
+        }
+        expected_files_module = {
+            "__init__.py",
+            "server.py",
+            "client.py",
+            "task.py",
+        }
+
+        # Current directory
+        origin = os.getcwd()
+
+        try:
+            # Change into the temprorary directory
+            os.chdir(tmp_path)
+
+            with patch(
+                "builtins.input", return_value=expected_top_level_dir
+            ) as mock_input:
+
+                # Execute
+                new(project_name=project_name, framework=framework)
+
+                # Assert that input() was called with the correct prompt
+                mock_input.assert_called_once_with(
+                    "💬 Please provide a name that only "
+                    "contains characters in {'-', a-zA-Z', '0-9'} "
+                    f"[{expected_top_level_dir}]: "
+                )
 
             # Assert
             file_list = os.listdir(os.path.join(tmp_path, expected_top_level_dir))
