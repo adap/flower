@@ -127,18 +127,18 @@ def new(
     cwd = os.getcwd()
     package_name = re.sub(r"[-_.]+", "-", project_name).lower()
     import_name = package_name.replace("-", "_")
-    project_dir = os.path.join(cwd, project_name)
+    project_dir = os.path.join(cwd, package_name)
 
     # List of files to render
     files = {
         ".gitignore": {"template": "app/.gitignore.tpl"},
         "README.md": {"template": "app/README.md.tpl"},
         "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
-        f"{package_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-        f"{package_name}/server.py": {
+        f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
+        f"{import_name}/server.py": {
             "template": f"app/code/server.{framework_str}.py.tpl"
         },
-        f"{package_name}/client.py": {
+        f"{import_name}/client.py": {
             "template": f"app/code/client.{framework_str}.py.tpl"
         },
     }
@@ -148,7 +148,7 @@ def new(
         MlFramework.PYTORCH.value.lower(),
     ]
     if framework_str in frameworks_with_tasks:
-        files[f"{package_name}/task.py"] = {
+        files[f"{import_name}/task.py"] = {
             "template": f"app/code/task.{framework_str}.py.tpl"
         }
 
