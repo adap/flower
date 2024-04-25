@@ -24,15 +24,13 @@ from logging import DEBUG, ERROR, INFO, WARNING
 from time import sleep
 from typing import Dict, Optional
 
-import grpc
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.typing import ConfigsRecordValues
-from flwr.server.driver import Driver, GrpcDriver
+from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
-from flwr.server.superlink.driver.driver_grpc import run_driver_api_grpc
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.state import StateFactory
 from flwr.simulation.ray_transport.utils import (
@@ -193,21 +191,11 @@ def _main_loop(
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
 
-    # Start Driver API
-    driver_server: grpc.Server = run_driver_api_grpc(
-        address=driver_api_address,
-        state_factory=state_factory,
-        certificates=None,
-    )
-
     f_stop = asyncio.Event()
     serverapp_th = None
     try:
         # Initialize Driver
-        driver = GrpcDriver(
-            driver_service_address=driver_api_address,
-            root_certificates=None,
-        )
+        driver = InMemoryDriver(state_factory)
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(
@@ -238,9 +226,6 @@ def _main_loop(
         raise RuntimeError("An error was encountered. Ending simulation.") from ex
 
     finally:
-        # Stop Driver
-        driver_server.stop(grace=0)
-        driver.close()
         # Trigger stop event
         f_stop.set()
 
