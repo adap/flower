@@ -20,6 +20,9 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
+[flower]
+publisher = "$username"
+
 [flower.components]
 serverapp = "$import_name.server:app"
 clientapp = "$import_name.client:app"
