@@ -132,6 +132,8 @@ def run_server_app() -> None:
     driver = GrpcDriver(
         driver_service_address=args.server,
         root_certificates=root_certificates,
+        fab_id=args.fab_id,
+        fab_version=args.fab_version,
     )
 
     # Run the ServerApp with the Driver
@@ -182,6 +184,18 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         help="Add specified directory to the PYTHONPATH and load Flower "
         "app from there."
         " Default: current working directory.",
+    )
+    parser.add_argument(
+        "--fab-id",
+        default=None,
+        type=str,
+        help="The identifier of the FAB used in the run.",
+    )
+    parser.add_argument(
+        "--fab-version",
+        default=None,
+        type=str,
+        help="The version of the FAB used in the run.",
     )
 
     return parser
