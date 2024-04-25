@@ -15,6 +15,7 @@
 """Test for Flower command line interface `new` command."""
 
 import os
+
 import pytest
 
 from .new import MlFramework, create_file, load_template, new, render_template
