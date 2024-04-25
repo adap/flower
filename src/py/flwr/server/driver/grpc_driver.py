@@ -17,7 +17,7 @@
 import time
 import warnings
 from logging import DEBUG, ERROR, WARNING
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Tuple
 
 import grpc
 
@@ -51,7 +51,90 @@ Call `connect()` on the `GrpcDriverHelper` instance before calling any of the ot
 """
 
 
-# pylint: disable-next=too-many-instance-attributes
+class GrpcDriverHelper:
+    """`GrpcDriverHelper` provides access to the gRPC Driver API/service."""
+
+    def __init__(
+        self,
+        driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
+        root_certificates: Optional[bytes] = None,
+    ) -> None:
+        self.driver_service_address = driver_service_address
+        self.root_certificates = root_certificates
+        self.channel: Optional[grpc.Channel] = None
+        self.stub: Optional[DriverStub] = None
+
+    def connect(self) -> None:
+        """Connect to the Driver API."""
+        event(EventType.DRIVER_CONNECT)
+        if self.channel is not None or self.stub is not None:
+            log(WARNING, "Already connected")
+            return
+        self.channel = create_channel(
+            server_address=self.driver_service_address,
+            insecure=(self.root_certificates is None),
+            root_certificates=self.root_certificates,
+        )
+        self.stub = DriverStub(self.channel)
+        log(DEBUG, "[Driver] Connected to %s", self.driver_service_address)
+
+    def disconnect(self) -> None:
+        """Disconnect from the Driver API."""
+        event(EventType.DRIVER_DISCONNECT)
+        if self.channel is None or self.stub is None:
+            log(DEBUG, "Already disconnected")
+            return
+        channel = self.channel
+        self.channel = None
+        self.stub = None
+        channel.close()
+        log(DEBUG, "[Driver] Disconnected")
+
+    def create_run(self, req: CreateRunRequest) -> CreateRunResponse:
+        """Request for run ID."""
+        # Check if channel is open
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise ConnectionError("`GrpcDriverHelper` instance not connected")
+
+        # Call Driver API
+        res: CreateRunResponse = self.stub.CreateRun(request=req)
+        return res
+
+    def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
+        """Get client IDs."""
+        # Check if channel is open
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise ConnectionError("`GrpcDriverHelper` instance not connected")
+
+        # Call gRPC Driver API
+        res: GetNodesResponse = self.stub.GetNodes(request=req)
+        return res
+
+    def push_task_ins(self, req: PushTaskInsRequest) -> PushTaskInsResponse:
+        """Schedule tasks."""
+        # Check if channel is open
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise ConnectionError("`GrpcDriverHelper` instance not connected")
+
+        # Call gRPC Driver API
+        res: PushTaskInsResponse = self.stub.PushTaskIns(request=req)
+        return res
+
+    def pull_task_res(self, req: PullTaskResRequest) -> PullTaskResResponse:
+        """Get task results."""
+        # Check if channel is open
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise ConnectionError("`GrpcDriverHelper` instance not connected")
+
+        # Call Driver API
+        res: PullTaskResResponse = self.stub.PullTaskRes(request=req)
+        return res
+
+
 class GrpcDriver(Driver):
     """`Driver` class provides an interface to the Driver API.
 
@@ -83,92 +166,25 @@ class GrpcDriver(Driver):
     ) -> None:
         self.addr = driver_service_address
         self.root_certificates = root_certificates
-        self.channel: Optional[grpc.Channel] = None
-        self.stub: Optional[DriverStub] = None
+        self.driver_helper: Optional[GrpcDriverHelper] = None
         self.run_id: Optional[int] = None
         self.fab_id = fab_id if fab_id is not None else ""
         self.fab_version = fab_version if fab_version is not None else ""
         self.node = Node(node_id=0, anonymous=True)
 
-    def connect(self) -> None:
-        """Connect to the Driver API."""
-        event(EventType.DRIVER_CONNECT)
-        if self.channel is not None or self.stub is not None:
-            log(WARNING, "Already connected")
-            return
-        self.channel = create_channel(
-            server_address=self.addr,
-            insecure=(self.root_certificates is None),
-            root_certificates=self.root_certificates,
-        )
-        self.stub = DriverStub(self.channel)
-        log(DEBUG, "[Driver] Connected to %s", self.addr)
-
-    def disconnect(self) -> None:
-        """Disconnect from the Driver API."""
-        event(EventType.DRIVER_DISCONNECT)
-        if self.channel is None or self.stub is None:
-            log(DEBUG, "Already disconnected")
-            return
-        channel = self.channel
-        self.channel = None
-        self.stub = None
-        channel.close()
-        log(DEBUG, "[Driver] Disconnected")
-
-    def create_run(self, req: CreateRunRequest) -> CreateRunResponse:
-        """Request for run ID."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise ConnectionError("`GrpcDriver` instance not connected")
-
-        # Call Driver API
-        res: CreateRunResponse = self.stub.CreateRun(request=req)
-        return res
-
-    def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
-        """Get client IDs."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise ConnectionError("`GrpcDriver` instance not connected")
-
-        # Call gRPC Driver API
-        res: GetNodesResponse = self.stub.GetNodes(request=req)
-        return res
-
-    def push_task_ins(self, req: PushTaskInsRequest) -> PushTaskInsResponse:
-        """Schedule tasks."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise ConnectionError("`GrpcDriver` instance not connected")
-
-        # Call gRPC Driver API
-        res: PushTaskInsResponse = self.stub.PushTaskIns(request=req)
-        return res
-
-    def pull_task_res(self, req: PullTaskResRequest) -> PullTaskResResponse:
-        """Get task results."""
-        # Check if channel is open
-        if self.stub is None:
-            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
-            raise ConnectionError("`GrpcDriver` instance not connected")
-
-        # Call Driver API
-        res: PullTaskResResponse = self.stub.PullTaskRes(request=req)
-        return res
-
-    def _setup(self) -> int:
-        # Check if the GrpcDriver connection is initialized
-        if self.stub is None or self.run_id is None:
+    def _get_grpc_driver_helper_and_run_id(self) -> Tuple[GrpcDriverHelper, int]:
+        # Check if the GrpcDriverHelper is initialized
+        if self.driver_helper is None or self.run_id is None:
             # Connect and create run
-            self.connect()
+            self.driver_helper = GrpcDriverHelper(
+                driver_service_address=self.addr,
+                root_certificates=self.root_certificates,
+            )
+            self.driver_helper.connect()
             req = CreateRunRequest(fab_id=self.fab_id, fab_version=self.fab_version)
-            res = self.create_run(req)
+            res = self.driver_helper.create_run(req)
             self.run_id = res.run_id
-        return self.run_id
+        return self.driver_helper, self.run_id
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
@@ -194,7 +210,7 @@ class GrpcDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        run_id = self._setup()
+        _, run_id = self._get_grpc_driver_helper_and_run_id()
         if ttl:
             warnings.warn(
                 "A custom TTL was set, but note that the SuperLink does not enforce "
@@ -218,8 +234,9 @@ class GrpcDriver(Driver):
 
     def get_node_ids(self) -> List[int]:
         """Get node IDs."""
-        run_id = self._setup()
-        res = self.get_nodes(GetNodesRequest(run_id=run_id))
+        grpc_driver_helper, run_id = self._get_grpc_driver_helper_and_run_id()
+        # Call GrpcDriverHelper method
+        res = grpc_driver_helper.get_nodes(GetNodesRequest(run_id=run_id))
         return [node.node_id for node in res.nodes]
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
@@ -228,7 +245,7 @@ class GrpcDriver(Driver):
         This method takes an iterable of messages and sends each message
         to the node specified in `dst_node_id`.
         """
-        self._setup()
+        grpc_driver_helper, _ = self._get_grpc_driver_helper_and_run_id()
         # Construct TaskIns
         task_ins_list: List[TaskIns] = []
         for msg in messages:
@@ -238,8 +255,10 @@ class GrpcDriver(Driver):
             taskins = message_to_taskins(msg)
             # Add to list
             task_ins_list.append(taskins)
-
-        res = self.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
+        # Call GrpcDriverHelper method
+        res = grpc_driver_helper.push_task_ins(
+            PushTaskInsRequest(task_ins_list=task_ins_list)
+        )
         return list(res.task_ids)
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
@@ -248,9 +267,9 @@ class GrpcDriver(Driver):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        self._setup()
+        grpc_driver, _ = self._get_grpc_driver_helper_and_run_id()
         # Pull TaskRes
-        res = self.pull_task_res(
+        res = grpc_driver.pull_task_res(
             PullTaskResRequest(node=self.node, task_ids=message_ids)
         )
         # Convert TaskRes to Message
@@ -289,8 +308,8 @@ class GrpcDriver(Driver):
 
     def close(self) -> None:
         """Disconnect from the SuperLink if connected."""
-        # Check if GrpcDriver connection is initialized
-        if self.stub is None:
+        # Check if GrpcDriverHelper is initialized
+        if self.driver_helper is None:
             return
         # Disconnect
-        self.disconnect()
+        self.driver_helper.disconnect()
