@@ -29,7 +29,7 @@ from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 
-from ..driver import Driver
+from ..driver import Driver, GrpcDriver
 from .app_utils import start_update_client_manager_thread
 
 DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
@@ -114,7 +114,7 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
         # Create the Driver
         if isinstance(root_certificates, str):
             root_certificates = Path(root_certificates).read_bytes()
-        driver = Driver(
+        driver = GrpcDriver(
             driver_service_address=address, root_certificates=root_certificates
         )
 

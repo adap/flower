@@ -29,6 +29,11 @@ tested_datasets = [
     "fashion_mnist",
     "sasha/dog-food",
     "zh-plus/tiny-imagenet",
+    "scikit-learn/adult-census-income",
+    "cifar100",
+    "svhn",
+    "sentiment140",
+    "speech_commands",
 ]
 
 

@@ -30,15 +30,19 @@ from flwr.server.utils import validate_task_ins_or_res
 from .utils import make_node_unavailable_taskres
 
 
-class InMemoryState(State):
+class InMemoryState(State):  # pylint: disable=R0902
     """In-memory State implementation."""
 
     def __init__(self) -> None:
         # Map node_id to (online_until, ping_interval)
         self.node_ids: Dict[int, Tuple[float, float]] = {}
-        self.run_ids: Set[int] = set()
+        # Map run_id to (fab_id, fab_version)
+        self.run_ids: Dict[int, Tuple[str, str]] = {}
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
+        self.client_public_keys: Set[bytes] = set()
+        self.server_public_key: Optional[bytes] = None
+        self.server_private_key: Optional[bytes] = None
         self.lock = threading.Lock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
@@ -238,17 +242,58 @@ class InMemoryState(State):
                 if online_until > current_time
             }
 
-    def create_run(self) -> int:
-        """Create one run."""
+    def create_run(self, fab_id: str, fab_version: str) -> int:
+        """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
         with self.lock:
             run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
             if run_id not in self.run_ids:
-                self.run_ids.add(run_id)
+                self.run_ids[run_id] = (fab_id, fab_version)
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def store_server_public_private_key(
+        self, public_key: bytes, private_key: bytes
+    ) -> None:
+        """Store `server_public_key` and `server_private_key` in state."""
+        with self.lock:
+            if self.server_private_key is None and self.server_public_key is None:
+                self.server_private_key = private_key
+                self.server_public_key = public_key
+            else:
+                raise RuntimeError("Server public and private key already set")
+
+    def get_server_private_key(self) -> Optional[bytes]:
+        """Retrieve `server_private_key` in urlsafe bytes."""
+        return self.server_private_key
+
+    def get_server_public_key(self) -> Optional[bytes]:
+        """Retrieve `server_public_key` in urlsafe bytes."""
+        return self.server_public_key
+
+    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of `client_public_keys` in state."""
+        with self.lock:
+            self.client_public_keys = public_keys
+
+    def store_client_public_key(self, public_key: bytes) -> None:
+        """Store a `client_public_key` in state."""
+        with self.lock:
+            self.client_public_keys.add(public_key)
+
+    def get_client_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored `client_public_keys` as a set."""
+        return self.client_public_keys
+
+    def get_run(self, run_id: int) -> Tuple[int, str, str]:
+        """Retrieve information about the run with the specified `run_id`."""
+        with self.lock:
+            if run_id not in self.run_ids:
+                log(ERROR, "`run_id` is invalid")
+                return 0, "", ""
+            return run_id, *self.run_ids[run_id]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
