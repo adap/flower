@@ -127,7 +127,7 @@ class TestGrpcDriver(unittest.TestCase):
             for _ in range(2)
         ]
         # Use invalid run_id
-        msgs[1].metadata._run_id += 1  # pylint: disable=protected-access
+        msgs[1].metadata.__dict__["_run_id"] += 1  # pylint: disable=protected-access
 
         # Execute and assert
         with self.assertRaises(ValueError):
