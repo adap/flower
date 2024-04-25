@@ -57,7 +57,9 @@ jobs:
           import hashlib
           import os
 
-          hash = hashlib.sha256('''${{ inputs.build-args }}'''.encode())
+          hash = hashlib.sha256('''${{ inputs.namespace-repository }}
+          ${{ inputs.file-dir }}
+          ${{ inputs.build-args }}'''.encode())
           with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
               print(f"id={hash.hexdigest()}", file=fh)
 
