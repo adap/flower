@@ -21,7 +21,10 @@ from contextlib import contextmanager
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Callable, Iterator, Optional, Tuple, Union, cast
+from typing import Callable, Iterator, Optional, Sequence, Tuple, Union, cast
+
+import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
@@ -41,6 +44,8 @@ from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
+    GetRunRequest,
+    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -50,6 +55,8 @@ from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
+from .client_interceptor import AuthenticateClientInterceptor
+
 
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""
@@ -57,18 +64,22 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_request_response(  # pylint: disable=R0914, R0915
+def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     server_address: str,
     insecure: bool,
     retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
+    authentication_keys: Optional[
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
+        Optional[Callable[[int], Tuple[str, str]]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -106,11 +117,18 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
 
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
+    if authentication_keys is not None:
+        interceptors = AuthenticateClientInterceptor(
+            authentication_keys[0], authentication_keys[1]
+        )
+
     channel = create_channel(
         server_address=server_address,
         insecure=insecure,
         root_certificates=root_certificates,
         max_message_length=max_message_length,
+        interceptors=interceptors,
     )
     channel.subscribe(on_channel_state_change)
 
@@ -122,7 +140,7 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
     ping_stop_event = threading.Event()
 
     ###########################################################################
-    # ping/create_node/delete_node/receive/send functions
+    # ping/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
 
     def ping() -> None:
@@ -241,8 +259,19 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
         # Cleanup
         metadata = None
 
+    def get_run(run_id: int) -> Tuple[str, str]:
+        # Call FleetAPI
+        get_run_request = GetRunRequest(run_id=run_id)
+        get_run_response: GetRunResponse = retry_invoker.invoke(
+            stub.GetRun,
+            request=get_run_request,
+        )
+
+        # Return fab_id and fab_version
+        return get_run_response.run.fab_id, get_run_response.run.fab_version
+
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node)
+        yield (receive, send, create_node, delete_node, get_run)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)

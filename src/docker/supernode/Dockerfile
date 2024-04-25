@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,9 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Common client configuration."""
 
+ARG BASE_REPOSITORY=flwr/base
+ARG PYTHON_VERSION=3.11
+ARG UBUNTU_VERSION=ubuntu22.04
+FROM $BASE_REPOSITORY:py${PYTHON_VERSION}-${UBUNTU_VERSION}
 
-from .config import configure_client_instances as configure_client_instances
-from .config import sample_delay_factors as sample_delay_factors
-from .config import sample_real_delay_factors as sample_real_delay_factors
+ARG FLWR_PACKAGE=flwr
+ARG FLWR_VERSION
+RUN python -m pip install -U --no-cache-dir \
+    ${FLWR_PACKAGE}==${FLWR_VERSION} && \
+    pyenv rehash
+
+WORKDIR /app
+ENTRYPOINT ["flower-client-app"]
