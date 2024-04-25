@@ -297,5 +297,5 @@ Congratulations!
 You've successfully built and run your first federated learning system.
 The full source code for this example can be found in |quickstart_pt_link|_.
 
-.. |quickstart_pt_link| replace:: :code:`examples/quickstart-pytorch`
-.. _quickstart_pt_link: https://github.com/adap/flower/blob/main/examples/quickstart-pytorch/
+.. |quickstart_pt_link| replace:: :code:`examples/quickstart-pytorch/client.py`
+.. _quickstart_pt_link: https://github.com/adap/flower/blob/main/examples/quickstart-pytorch/client.py
