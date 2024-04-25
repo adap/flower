@@ -103,7 +103,7 @@ python -m fedpft.main dataset=CIFAR100 model=resnet50
 python -m fedpft.main dataset=Caltech101 model=clip
 
 # FedAvg with pre-trained, frozen models
-python -m fedpft.main strategy=fedavg client=fedavg dataset=CIFAR100 model=resnet50 num_rounds=20 strategy.on_fit_config_fn.num_epochs=1=1 num_gpus=0.5
+python -m fedpft.main strategy=fedavg client=fedavg dataset=CIFAR100 model=resnet50 num_rounds=20 strategy.on_fit_config_fn.num_epochs=1 num_gpus=0.5
 python -m fedpft.main strategy=fedavg client=fedavg dataset=Caltech101 model=clip num_rounds=20 num_gpus=0.2
 ```
 
