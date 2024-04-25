@@ -129,4 +129,6 @@ def ssh_types_to_elliptic_curve(
     ):
         return (private_key, public_key)
 
-    raise TypeError("The provided key is not an EllipticCurvePrivateKey")
+    raise TypeError(
+        "The provided key is not an EllipticCurvePrivateKey or EllipticCurvePublicKey"
+    )
