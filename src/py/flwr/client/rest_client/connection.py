@@ -21,7 +21,7 @@ import threading
 from contextlib import contextmanager
 from copy import copy
 from logging import ERROR, INFO, WARN
-from typing import Callable, Iterator, Optional, Sequence, Tuple, Type, TypeVar, Union
+from typing import Callable, Iterator, Optional, Tuple, Type, TypeVar, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage

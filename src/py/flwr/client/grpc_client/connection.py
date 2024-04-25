@@ -22,8 +22,6 @@ from pathlib import Path
 from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple, Union, cast
 
-import grpc
-
 from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.common import (

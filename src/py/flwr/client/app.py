@@ -31,6 +31,9 @@ from grpc import RpcError
 
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.grpc_rere_client.client_interceptor import (
+    AuthenticateClientInterceptor,
+)
 from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
@@ -47,8 +50,10 @@ from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.object_ref import load_app, validate
 from flwr.common.retry_invoker import RetryInvoker, exponential
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    ssh_types_to_elliptic_curve,
+)
 
-from .client_interceptor import AuthenticateClientInterceptor
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
@@ -148,35 +153,31 @@ def run_client_app() -> None:
 def _try_setup_client_authentication(
     args: argparse.Namespace,
 ) -> Optional[Tuple[ec.EllipticCurvePublicKey, ec.EllipticCurvePrivateKey]]:
-    if args.authentication_keys:
-        public_key = load_ssh_public_key(Path(args.authentication_keys[0]).read_bytes())
-        private_key = load_ssh_private_key(
-            Path(args.authentication_keys[1]).read_bytes(),
-            None,
-        )
-        log(INFO, type(public_key))
-        log(INFO, type(private_key))
-        if not isinstance(public_key, ec.EllipticCurvePublicKey):
-            sys.exit(
-                "An eliptic curve public and private key pair is required for "
-                "client authentication. Please provide the file path containing "
-                "valid public and private key to '--require-client-authentication'."
-            )
-        server_public_key = public_key
-        if not isinstance(private_key, ec.EllipticCurvePrivateKey):
-            sys.exit(
-                "An eliptic curve public and private key pair is required for "
-                "client authentication. Please provide the file path containing "
-                "valid public and private key to '--require-client-authentication'."
-            )
-        server_private_key = private_key
+    if not args.authentication_keys:
+        return None
 
-        return (
-            server_public_key,
-            server_private_key,
+    ssh_public_key = load_ssh_public_key(Path(args.authentication_keys[0]).read_bytes())
+    ssh_private_key = load_ssh_private_key(
+        Path(args.authentication_keys[1]).read_bytes(),
+        None,
+    )
+    
+    try:
+        client_private_key, client_public_key = ssh_types_to_elliptic_curve(
+            ssh_private_key, ssh_public_key
+        )
+    except TypeError:
+        sys.exit(
+            "The file paths provided do not contain a vaild public and private "
+            "key. Client authentication requires an elliptic curve public and "
+            "private key pair. Please provide the file path containing elliptic "
+            "curve public and private key to '--authentication-keys'."
         )
 
-    return None
+    return (
+        client_public_key,
+        client_private_key,
+    )
 
 
 def _parse_args_run_client_app() -> argparse.ArgumentParser:
