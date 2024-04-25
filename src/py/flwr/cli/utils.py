@@ -83,7 +83,7 @@ def is_valid_project_name(name: str) -> bool:
         return False
 
     # Check if the first character is a letter
-    if not (name[0].isalpha()):
+    if not name[0].isalpha():
         return False
 
     # Check if the rest of the characters are valid (letter, digit, or dash)
