@@ -138,6 +138,11 @@ class DriverClientProxy(ClientProxy):
             messages = list(self.driver.pull_messages(message_ids))
             if len(messages) == 1:
                 msg: Message = messages[0]
+                if msg.has_error():
+                    raise ValueError(
+                        f"Message contains an Error (reason: {msg.error.reason}). "
+                        "It originated during client-side execution of a message."
+                    )
                 return msg.content
 
             if timeout is not None and time.time() > start_time + timeout:
