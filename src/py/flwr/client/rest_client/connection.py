@@ -23,7 +23,7 @@ from copy import copy
 from logging import ERROR, INFO, WARN
 from typing import Callable, Iterator, Optional, Sequence, Tuple, Type, TypeVar, Union
 
-import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
 from google.protobuf.message import Message as GrpcMessage
 
 from flwr.client.heartbeat import start_ping_loop
@@ -75,15 +75,16 @@ T = TypeVar("T", bound=GrpcMessage)
 
 
 @contextmanager
-# pylint: disable-next=too-many-statements
-def http_request_response(  # pylint: disable=R0913, R0914, R0915
+def http_request_response(  # pylint: disable=,R0913, R0914, R0915
     server_address: str,
     insecure: bool,  # pylint: disable=unused-argument
     retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
-    root_certificates: Optional[Union[bytes, str]] = None,
-    interceptors: Optional[  # pylint: disable=unused-argument
-        Sequence[grpc.UnaryUnaryClientInterceptor]
+    root_certificates: Optional[
+        Union[bytes, str]
+    ] = None,  # pylint: disable=unused-argument
+    authentication_keys: Optional[  # pylint: disable=unused-argument
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
 ) -> Iterator[
     Tuple[

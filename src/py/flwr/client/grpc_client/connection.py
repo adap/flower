@@ -24,6 +24,8 @@ from typing import Callable, Iterator, Optional, Sequence, Tuple, Union, cast
 
 import grpc
 
+from cryptography.hazmat.primitives.asymmetric import ec
+
 from flwr.common import (
     DEFAULT_TTL,
     GRPC_MAX_MESSAGE_LENGTH,
@@ -58,14 +60,23 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
+<<<<<<< HEAD
 def grpc_connection(  # pylint: disable=R0915,R0913
+=======
+def grpc_connection(  # pylint: disable=R0913, R0915
+>>>>>>> add-client-auth-interceptor
     server_address: str,
     insecure: bool,
     retry_invoker: RetryInvoker,  # pylint: disable=unused-argument
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
+<<<<<<< HEAD
     interceptors: Optional[  # pylint: disable=unused-argument
         Sequence[grpc.UnaryUnaryClientInterceptor]
+=======
+    authentication_keys: Optional[  # pylint: disable=unused-argument
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+>>>>>>> add-client-auth-interceptor
     ] = None,
 ) -> Iterator[
     Tuple[
