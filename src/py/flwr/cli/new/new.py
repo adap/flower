@@ -86,10 +86,14 @@ def new(
         Optional[MlFramework],
         typer.Option(case_sensitive=False, help="The ML framework to use"),
     ] = None,
+    username: Annotated[
+        Optional[str],
+        typer.Option(case_sensitive=False, help="The Flower username of the author"),
+    ] = None,
 ) -> None:
     """Create new Flower project."""
     if project_name is None:
-        project_name = prompt_text("Please provide project name")
+        project_name = prompt_text("Please provide the project name")
     if not is_valid_project_name(project_name):
         project_name = prompt_text(
             "Please provide a name that only contains "
@@ -97,6 +101,9 @@ def new(
             predicate=is_valid_project_name,
             default=sanitize_project_name(project_name),
         )
+
+    if username is None:
+        username = prompt_text("Please provide your Flower username")
 
     print(
         typer.style(
@@ -144,7 +151,7 @@ def new(
     if framework_str in frameworks_with_tasks:
         files[f"{pnl}/task.py"] = {"template": f"app/code/task.{framework_str}.py.tpl"}
 
-    context = {"project_name": project_name}
+    context = {"project_name": project_name, "username": username}
 
     for file_path, value in files.items():
         render_and_create(
