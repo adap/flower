@@ -19,9 +19,8 @@ import sys
 import time
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, ContextManager, Optional, Sequence, Tuple, Type, Union
+from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 
-import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
     load_ssh_private_key,
@@ -31,9 +30,6 @@ from grpc import RpcError
 
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.client.grpc_rere_client.client_interceptor import (
-    AuthenticateClientInterceptor,
-)
 from flwr.client.typing import ClientFn
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
@@ -126,16 +122,7 @@ def run_client_app() -> None:
 
         return client_app
 
-    data = _try_setup_client_authentication(args)
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
-    if data is not None:
-        (
-            client_public_key,
-            client_private_key,
-        ) = data
-        interceptors = AuthenticateClientInterceptor(
-            client_private_key, client_public_key
-        )
+    authentication_keys = _try_setup_client_authentication(args)
 
     _start_client_internal(
         server_address=args.server,
@@ -143,7 +130,7 @@ def run_client_app() -> None:
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
         insecure=args.insecure,
-        interceptors=interceptors,
+        authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
     )
@@ -152,7 +139,7 @@ def run_client_app() -> None:
 
 def _try_setup_client_authentication(
     args: argparse.Namespace,
-) -> Optional[Tuple[ec.EllipticCurvePublicKey, ec.EllipticCurvePrivateKey]]:
+) -> Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
     if not args.authentication_keys:
         return None
 
@@ -161,7 +148,7 @@ def _try_setup_client_authentication(
         Path(args.authentication_keys[1]).read_bytes(),
         None,
     )
-    
+
     try:
         client_private_key, client_public_key = ssh_types_to_elliptic_curve(
             ssh_private_key, ssh_public_key
@@ -175,8 +162,8 @@ def _try_setup_client_authentication(
         )
 
     return (
-        client_public_key,
         client_private_key,
+        client_public_key,
     )
 
 
@@ -219,7 +206,9 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
+    authentication_keys: Optional[
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
@@ -304,7 +293,7 @@ def start_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
-        interceptors=interceptors,
+        authentication_keys=authentication_keys,
         max_retries=max_retries,
         max_wait_time=max_wait_time,
     )
@@ -325,7 +314,9 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
+    authentication_keys: Optional[
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
@@ -450,7 +441,7 @@ def _start_client_internal(
             retry_invoker,
             grpc_max_message_length,
             root_certificates,
-            interceptors,
+            authentication_keys,
         ) as conn:
             # pylint: disable-next=W0612
             receive, send, create_node, delete_node, get_run = conn
@@ -670,7 +661,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
             RetryInvoker,
             int,
             Union[bytes, str, None],
-            Union[Sequence[grpc.UnaryUnaryClientInterceptor], None],
+            Union[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey], None],
         ],
         ContextManager[
             Tuple[
