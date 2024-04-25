@@ -151,17 +151,25 @@ class GrpcDriver(Driver):
             * CA certificate.
             * server certificate.
             * server private key.
+    fab_id : str (default: None)
+        The identifier of the FAB used in the run.
+    fab_version : str (default: None)
+        The version of the FAB used in the run.
     """
 
     def __init__(
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
         root_certificates: Optional[bytes] = None,
+        fab_id: Optional[str] = None,
+        fab_version: Optional[str] = None,
     ) -> None:
         self.addr = driver_service_address
         self.root_certificates = root_certificates
         self.driver_helper: Optional[GrpcDriverHelper] = None
         self.run_id: Optional[int] = None
+        self.fab_id = fab_id if fab_id is not None else ""
+        self.fab_version = fab_version if fab_version is not None else ""
         self.node = Node(node_id=0, anonymous=True)
 
     def _get_grpc_driver_helper_and_run_id(self) -> Tuple[GrpcDriverHelper, int]:
@@ -173,7 +181,8 @@ class GrpcDriver(Driver):
                 root_certificates=self.root_certificates,
             )
             self.driver_helper.connect()
-            res = self.driver_helper.create_run(CreateRunRequest())
+            req = CreateRunRequest(fab_id=self.fab_id, fab_version=self.fab_version)
+            res = self.driver_helper.create_run(req)
             self.run_id = res.run_id
         return self.driver_helper, self.run_id
 
