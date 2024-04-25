@@ -2,8 +2,8 @@ import argparse
 import warnings
 from collections import OrderedDict
 
-import flwr as fl
 from flwr_datasets import FederatedDataset
+from flwr.client import NumPyClient, ClientApp
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -88,7 +88,7 @@ def load_data(partition_id):
     return train_loader, test_loader
 
 
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def __init__(self, model, train_loader, test_loader) -> None:
         super().__init__()
         self.test_loader = test_loader
@@ -169,9 +169,18 @@ max_grad_norm = parser.parse_args().max_grad_norm
 
 net = Net().to(DEVICE)
 train_loader, test_loader = load_data(partition_id=partition_id)
-client = FlowerClient(net, train_loader, test_loader).to_client()
 
-fl.client.start_client(
-    server_address="127.0.0.1:8080",
-    client=client,
+
+def client_fn_parameterized(partition_id, target_delta, noise_multiplier, max_grad_norm):
+   def client_fn(cid: str): <-- has to be like this (we'll get rid of it soon)
+      # load partition
+      partition = ...
+      return FlowerClient(partition, target_delta, etc).to_client()
+
+
+def client_fn(cid: str):
+    return FlowerClient(net, train_loader, test_loader).to_client()
+
+app = ClientApp(
+    client_fn=client_fn,
 )
