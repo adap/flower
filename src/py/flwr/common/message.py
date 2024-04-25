@@ -19,6 +19,7 @@ from __future__ import annotations
 import time
 import warnings
 from dataclasses import dataclass
+from typing import cast
 
 from .record import RecordSet
 
@@ -215,9 +216,9 @@ class Message:
         when processing another message.
     """
 
-    _metadata: Metadata
-    _content: RecordSet | None = None
-    _error: Error | None = None
+    # _metadata: Metadata
+    # _content: RecordSet | None = None
+    # _error: Error | None = None
 
     def __init__(
         self,
@@ -225,64 +226,64 @@ class Message:
         content: RecordSet | None = None,
         error: Error | None = None,
     ) -> None:
-        self._metadata = metadata
-
-        # Set message creation timestamp
-        self._metadata.created_at = time.time()
-
         if not (content is None) ^ (error is None):
             raise ValueError("Either `content` or `error` must be set, but not both.")
 
-        self._content = content
-        self._error = error
+        metadata.created_at = time.time()  # Set the message creation timestamp
+        var_dict = {
+            "_metadata": metadata,
+            "_content": content,
+            "_error": error,
+        }
+        self.__dict__.update(var_dict)
 
     @property
     def metadata(self) -> Metadata:
         """A dataclass including information about the message to be executed."""
-        return self._metadata
+        return cast(Metadata, self.__dict__["_metadata"])
 
     @property
     def content(self) -> RecordSet:
         """The content of this message."""
-        if self._content is None:
+        if self.__dict__["_content"] is None:
             raise ValueError(
                 "Message content is None. Use <message>.has_content() "
                 "to check if a message has content."
             )
-        return self._content
+        return cast(RecordSet, self.__dict__["_content"])
 
     @content.setter
     def content(self, value: RecordSet) -> None:
         """Set content."""
-        if self._error is None:
-            self._content = value
+        if self.__dict__["_error"] is None:
+            self.__dict__["_content"] = value
         else:
             raise ValueError("A message with an error set cannot have content.")
 
     @property
     def error(self) -> Error:
         """Error captured by this message."""
-        if self._error is None:
+        if self.__dict__["_error"] is None:
             raise ValueError(
                 "Message error is None. Use <message>.has_error() "
                 "to check first if a message carries an error."
             )
-        return self._error
+        return cast(Error, self.__dict__["_error"])
 
     @error.setter
     def error(self, value: Error) -> None:
         """Set error."""
         if self.has_content():
             raise ValueError("A message with content set cannot carry an error.")
-        self._error = value
+        self.__dict__["_error"] = value
 
     def has_content(self) -> bool:
         """Return True if message has content, else False."""
-        return self._content is not None
+        return self.__dict__["_content"] is not None
 
     def has_error(self) -> bool:
         """Return True if message has an error, else False."""
-        return self._error is not None
+        return self.__dict__["_error"] is not None
 
     def _create_reply_metadata(self, ttl: float) -> Metadata:
         """Construct metadata for a reply message."""

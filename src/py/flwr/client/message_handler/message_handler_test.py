@@ -318,5 +318,5 @@ class TestMessageValidation(unittest.TestCase):
 
         # Assert
         for invalid_metadata in invalid_metadata_list:
-            msg._metadata = invalid_metadata  # pylint: disable=protected-access
+            msg.__dict__["_metadata"] = invalid_metadata
             self.assertFalse(validate_out_message(msg, self.in_metadata))
