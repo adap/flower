@@ -20,7 +20,7 @@ from contextlib import contextmanager
 from logging import DEBUG
 from pathlib import Path
 from queue import Queue
-from typing import Callable, Iterator, Optional, Sequence, Tuple, Union, cast
+from typing import Callable, Iterator, Optional, Tuple, Union, cast
 
 import grpc
 
