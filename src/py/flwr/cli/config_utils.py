@@ -74,6 +74,7 @@ def load(path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
         return data
 
 
+# pylint: disable=too-many-branches
 def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
     """Validate pyproject.toml fields."""
     errors = []
