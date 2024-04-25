@@ -122,5 +122,6 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         nargs=2,
         metavar=("CLIENT_PUBLIC_KEY", "CLIENT_PRIVATE_KEY"),
         type=str,
-        help="Paths to client public and private key, in that order.",
+        help="Provide two file paths: (1) the client's public "
+        "key file, and (3) the client's private key file.",
     )
