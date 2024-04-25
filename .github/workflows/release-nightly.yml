@@ -46,7 +46,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        images: [{ repository: "flwr/superlink", file-dir: "src/docker/superlink" }]
+        images: [
+          { repository: "flwr/superlink", file-dir: "src/docker/superlink" },
+          { repository: "flwr/supernode", file-dir: "src/docker/supernode" }
+        ]
     with:
       namespace-repository: ${{ matrix.images.repository }}
       file-dir: ${{ matrix.images.file-dir }}
