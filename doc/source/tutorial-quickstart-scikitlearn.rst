@@ -9,7 +9,7 @@ Quickstart scikit-learn
 
 In this tutorial, we will learn how to train a :code:`Logistic Regression` model on MNIST using Flower and scikit-learn.
 
-It is recommended to create a virtual environment and run everything within this :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+First of all, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
 Our example consists of one *server* and two *clients* all having the same model.
 
@@ -17,23 +17,17 @@ Our example consists of one *server* and two *clients* all having the same model
 These updates are then sent to the *server* which will aggregate them to produce an updated global model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of parameters updates is called a *round*.
 
-Now that we have a rough idea of what is going on, let's get started. We first need to install Flower. You can do this by running:
+Now that we have a rough idea of what is going on, let's get started. We first need to install Flower and Flower Datasets:
 
 .. code-block:: shell
 
-  $ pip install flwr
+  $ pip install flwr flwr-datasets
 
 Since we want to use scikit-learn, let's go ahead and install it:
 
 .. code-block:: shell
 
   $ pip install scikit-learn
-
-Or simply install all dependencies using Poetry:
-
-.. code-block:: shell
-
-  $ poetry install
 
 
 Flower Client
@@ -50,11 +44,12 @@ However, before setting up the client and server, we will define all functionali
     * Initializes the model parameters that the Flower server will ask for
 
 Please check out :code:`utils.py` `here <https://github.com/adap/flower/blob/main/examples/sklearn-logreg-mnist/utils.py>`_ for more details.
-The pre-defined functions are used in the :code:`client.py` and imported. The :code:`client.py` also requires to import several packages such as Flower and scikit-learn:
+The pre-defined functions are used in the :code:`client.py` and imported.
+
+Now, in a file called :code:`client.py`, we import several packages such as Flower, Flower Datasets, and scikit-learn:
 
 .. code-block:: python
 
-  import argparse
   import warnings
   
   from sklearn.linear_model import LogisticRegression
@@ -65,34 +60,20 @@ The pre-defined functions are used in the :code:`client.py` and imported. The :c
   from flwr_datasets import FederatedDataset
 
 Prior to local training, we need to load the MNIST dataset, a popular image classification dataset of handwritten digits for machine learning, and partition the dataset for FL. This can be conveniently achieved using `Flower Datasets <https://flower.ai/docs/datasets>`_.
-The :code:`FederatedDataset.load_partition()` method loads the partitioned training set for each partition ID defined in the :code:`--partition-id` argument.
+The :code:`FederatedDataset.load_partition()` method loads the partitioned training set for each partition ID set in the `partition_id` variable. We assign an integer to each `partition_id` for each client in our federated learning example, starting from 0.
 
 .. code-block:: python
 
-    if __name__ == "__main__":
-        N_CLIENTS = 10
+    fds = FederatedDataset(dataset="mnist", partitioners={"train": N_CLIENTS})
     
-        parser = argparse.ArgumentParser(description="Flower")
-        parser.add_argument(
-            "--partition-id",
-            type=int,
-            choices=range(0, N_CLIENTS),
-            required=True,
-            help="Specifies the artificial data partition",
-        )
-        args = parser.parse_args()
-        partition_id = args.partition_id
+    dataset = fds.load_partition(partition_id, "train").with_format("numpy")
+    X, y = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
     
-        fds = FederatedDataset(dataset="mnist", partitioners={"train": N_CLIENTS})
-    
-        dataset = fds.load_partition(partition_id, "train").with_format("numpy")
-        X, y = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
-        
-        X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
-        y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
+    X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
+    y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]
 
 
-Next, the logistic regression model is defined and initialized with :code:`utils.set_initial_params()`.
+Next, we define the logistic regression model and initialize it with :code:`utils.set_initial_params()`.
 
 .. code-block:: python
 
@@ -127,15 +108,15 @@ Implementing :code:`NumPyClient` usually means defining the following methods
 #. :code:`evaluate`
     * test the local model
 
-The methods can be implemented in the following way:
+The :code:`NumPyClient` interface defines the three methods which can be implemented in the following way:
 
 .. code-block:: python
 
     class MnistClient(fl.client.NumPyClient):
-        def get_parameters(self, config):  # type: ignore
+        def get_parameters(self, config):
             return utils.get_model_parameters(model)
 
-        def fit(self, parameters, config):  # type: ignore
+        def fit(self, parameters, config):
             utils.set_model_params(model, parameters)
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
@@ -143,33 +124,35 @@ The methods can be implemented in the following way:
             print(f"Training finished for round {config['server_round']}")
             return utils.get_model_parameters(model), len(X_train), {}
 
-        def evaluate(self, parameters, config):  # type: ignore
+        def evaluate(self, parameters, config):
             utils.set_model_params(model, parameters)
             loss = log_loss(y_test, model.predict_proba(X_test))
             accuracy = model.score(X_test, y_test)
             return loss, len(X_test), {"accuracy": accuracy}
 
 
-We can now create an instance of our class :code:`MnistClient` and add one line
-to actually run this client:
+Next, we create a client function that returns instances of :code:`MnistClient` on-demand when called:
 
 .. code-block:: python
 
-    fl.client.start_client("0.0.0.0:8080", client=MnistClient().to_client())
+    def client_fn(cid: str):
+        return CifarClient().to_client()
+
+Finally, we create a :code:`ClientApp()` object that uses this client function:
+
+.. code-block:: python
+
+    app = ClientApp(client_fn=client_fn)
 
 That's it for the client. We only have to implement :code:`Client` or
-:code:`NumPyClient` and call :code:`fl.client.start_client()`. If you implement a client of type :code:`NumPyClient` you'll need to first call its :code:`to_client()` method. The string :code:`"0.0.0.0:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
-:code:`"0.0.0.0:8080"`. If we run a truly federated workload with the server and
-clients running on different machines, all that needs to change is the
-:code:`server_address` we pass to the client.
+:code:`NumPyClient`, create a :code:`ClientApp`, and pass the client function to it. If we implement a client of type :code:`NumPyClient` we'll need to first call its :code:`to_client()` method.
+
 
 Flower Server
 -------------
 
 The following Flower server is a little bit more advanced and returns an evaluation function for the server-side evaluation.
-First, we import again all required libraries such as Flower and scikit-learn.
-
-:code:`server.py`, import Flower and start the server:
+First, in a file named :code:`server.py`, we import all required libraries such as Flower, Flower Datasets, and scikit-learn:
 
 .. code-block:: python
 
@@ -210,79 +193,114 @@ Note that we also make use of Flower Datasets here to load the test split of the
 
         return evaluate
 
-The :code:`main` contains the server-side parameter initialization :code:`utils.set_initial_params()` as well as the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federated averaging (or FedAvg), with two clients and evaluation after each federated learning round. The server can be started with the command :code:`fl.server.start_server(server_address="0.0.0.0:8080", strategy=strategy, config=fl.server.ServerConfig(num_rounds=3))`.
+We set the `ServerConfig` with `num_rounds=3` to train the `Logistic Regression` model for 3 rounds.
 
 .. code-block:: python
 
-    # Start Flower server for three rounds of federated learning
-    if __name__ == "__main__":
-        model = LogisticRegression()
-        utils.set_initial_params(model)
-        strategy = fl.server.strategy.FedAvg(
-            min_available_clients=2,
-            evaluate_fn=get_evaluate_fn(model),
-            on_fit_config_fn=fit_round,
-        )
-        fl.server.start_server(server_address="0.0.0.0:8080", strategy=strategy, config=fl.server.ServerConfig(num_rounds=3))
+    config = fl.server.ServerConfig(num_rounds=3)
+
+Next, we initialize the server-side parameters for :code:`LogisticRegression()` using :code:`utils.set_initial_params()` and set the aggregation strategy :code:`fl.server.strategy:FedAvg()`. The strategy is the default one, federated averaging (or FedAvg), with two clients and evaluation after each federated learning round. In the last line, we create a `ServerApp` using the config and strategy.
+
+.. code-block:: python
+
+    model = LogisticRegression()
+    utils.set_initial_params(model)
+    strategy = fl.server.strategy.FedAvg(
+        min_available_clients=2,
+        evaluate_fn=get_evaluate_fn(model),
+        on_fit_config_fn=fit_round,
+    )
+    app = ServerApp(
+        config=config,
+        strategy=strategy,
+    )
 
 
 Train the model, federated!
 ---------------------------
 
 With both client and server ready, we can now run everything and see federated
-learning in action. Federated learning systems usually have a server and multiple clients. We, therefore, have to start the server first:
+learning in action. First, we run the :code:`flower-superlink` command in one terminal to start the infrastructure. This step only needs to be run once.
+
+.. admonition:: Note
+    :class: note
+
+    In this example, the :code:`--insecure` command line argument starts Flower without HTTPS and is only used for prototyping. To run with HTTPS, we instead use the argument :code:`--certificates` and pass the paths to the certificates. Please refer to `Flower CLI reference <ref-api-cli.html>`_ for implementation details.
 
 .. code-block:: shell
 
-    $ python3 server.py
+    $ flower-superlink --insecure
 
-Once the server is running we can start the clients in different terminals.
-Open a new terminal and start the first client:
-
-.. code-block:: shell
-
-    $ python3 client.py
-
-Open another terminal and start the second client:
+FL systems usually have a server and multiple clients. We therefore need to start multiple `SuperNodes`, one for each client, respectively. First, we open a new terminal and start the first `SuperNode` using the :code:`flower-client-app` command.
 
 .. code-block:: shell
 
-    $ python3 client.py
+    $ flower-client-app client:app --insecure
 
-Each client will have its own dataset.
-You should now see how the training does in the very first terminal (the one that started the server):
+In the above, we launch the :code:`app` object in the :code:`client.py` module.
+Open another terminal and start the second `SuperNode`:
 
 .. code-block:: shell
 
-    INFO flower 2022-01-13 13:43:14,859 | app.py:73 | Flower server running (insecure, 3 rounds)
-    INFO flower 2022-01-13 13:43:14,859 | server.py:118 | Getting initial parameters
-    INFO flower 2022-01-13 13:43:17,903 | server.py:306 | Received initial parameters from one random client
-    INFO flower 2022-01-13 13:43:17,903 | server.py:120 | Evaluating initial parameters
-    INFO flower 2022-01-13 13:43:17,992 | server.py:123 | initial parameters (loss, other metrics): 2.3025850929940455, {'accuracy': 0.098}
-    INFO flower 2022-01-13 13:43:17,992 | server.py:133 | FL starting
-    DEBUG flower 2022-01-13 13:43:19,814 | server.py:251 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2022-01-13 13:43:20,046 | server.py:260 | fit_round received 2 results and 0 failures
-    INFO flower 2022-01-13 13:43:20,220 | server.py:148 | fit progress: (1, 1.3365667871792377, {'accuracy': 0.6605}, 2.227397900000142)
-    INFO flower 2022-01-13 13:43:20,220 | server.py:199 | evaluate_round: no clients selected, cancel
-    DEBUG flower 2022-01-13 13:43:20,220 | server.py:251 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2022-01-13 13:43:20,456 | server.py:260 | fit_round received 2 results and 0 failures
-    INFO flower 2022-01-13 13:43:20,603 | server.py:148 | fit progress: (2, 0.721620492535375, {'accuracy': 0.7796}, 2.6108531999998377)
-    INFO flower 2022-01-13 13:43:20,603 | server.py:199 | evaluate_round: no clients selected, cancel
-    DEBUG flower 2022-01-13 13:43:20,603 | server.py:251 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2022-01-13 13:43:20,837 | server.py:260 | fit_round received 2 results and 0 failures
-    INFO flower 2022-01-13 13:43:20,967 | server.py:148 | fit progress: (3, 0.5843629244915138, {'accuracy': 0.8217}, 2.9750180000010005)
-    INFO flower 2022-01-13 13:43:20,968 | server.py:199 | evaluate_round: no clients selected, cancel
-    INFO flower 2022-01-13 13:43:20,968 | server.py:172 | FL finished in 2.975252800000817
-    INFO flower 2022-01-13 13:43:20,968 | app.py:109 | app_fit: losses_distributed []
-    INFO flower 2022-01-13 13:43:20,968 | app.py:110 | app_fit: metrics_distributed {}
-    INFO flower 2022-01-13 13:43:20,968 | app.py:111 | app_fit: losses_centralized [(0, 2.3025850929940455), (1, 1.3365667871792377), (2, 0.721620492535375), (3, 0.5843629244915138)]
-    INFO flower 2022-01-13 13:43:20,968 | app.py:112 | app_fit: metrics_centralized {'accuracy': [(0, 0.098), (1, 0.6605), (2, 0.7796), (3, 0.8217)]}
-    DEBUG flower 2022-01-13 13:43:20,968 | server.py:201 | evaluate_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2022-01-13 13:43:21,232 | server.py:210 | evaluate_round received 2 results and 0 failures
-    INFO flower 2022-01-13 13:43:21,232 | app.py:121 | app_evaluate: federated loss: 0.5843629240989685
-    INFO flower 2022-01-13 13:43:21,232 | app.py:122 | app_evaluate: results [('ipv4:127.0.0.1:53980', EvaluateRes(loss=0.5843629240989685, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.8217})), ('ipv4:127.0.0.1:53982', EvaluateRes(loss=0.5843629240989685, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.8217}))]
-    INFO flower 2022-01-13 13:43:21,232 | app.py:127 | app_evaluate: failures []
+    $ flower-client-app client:app --insecure
+
+Finally, in another terminal window, we run the `ServerApp`. This starts the actual training run:
+
+.. code-block:: shell
+
+    $ flower-server-app server:app --insecure
+
+We should now see how the training does in the last terminal (the one that started the :code:`ServerApp`):
+
+.. code-block:: shell
+
+    WARNING :   Option `--insecure` was set. Starting insecure HTTP client connected to 0.0.0.0:9091.
+    INFO :      Starting Flower ServerApp, config: num_rounds=3, no round_timeout
+    INFO :
+    INFO :      [INIT]
+    INFO :      Requesting initial parameters from one random client
+    INFO :      Received initial parameters from one random client
+    INFO :      Evaluating initial global parameters
+    INFO :      initial parameters (loss, other metrics): 2.3025850929940455, {'accuracy': 0.098}
+    INFO :
+    INFO :      [ROUND 1]
+    INFO :      configure_fit: strategy sampled 2 clients (out of 2)
+    INFO :      aggregate_fit: received 2 results and 0 failures
+    WARNING :   No fit_metrics_aggregation_fn provided
+    INFO :      fit progress: (1, 1.4140462685358515, {'accuracy': 0.6752}, 4.125828707939945)
+    INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
+    INFO :      aggregate_evaluate: received 2 results and 0 failures
+    WARNING :   No evaluate_metrics_aggregation_fn provided
+    INFO :
+    INFO :      [ROUND 2]
+    INFO :      configure_fit: strategy sampled 2 clients (out of 2)
+    INFO :      aggregate_fit: received 2 results and 0 failures
+    INFO :      fit progress: (2, 0.7323360226502517, {'accuracy': 0.7706}, 10.23554670799058)
+    INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
+    INFO :      aggregate_evaluate: received 2 results and 0 failures
+    INFO :
+    INFO :      [ROUND 3]
+    INFO :      configure_fit: strategy sampled 2 clients (out of 2)
+    INFO :      aggregate_fit: received 2 results and 0 failures
+    INFO :      fit progress: (3, 0.5672925184955843, {'accuracy': 0.8202}, 16.32356683292892)
+    INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
+    INFO :      aggregate_evaluate: received 2 results and 0 failures
+    INFO :
+    INFO :      [SUMMARY]
+    INFO :      Run finished 3 rounds in 19.34s
+    INFO :      History (loss, distributed):
+    INFO :          ('\tround 1: 1.3345516917477076\n'
+    INFO :           '\tround 2: 0.6896191223254897\n'
+    INFO :           '\tround 3: 0.5527833946909323\n')History (loss, centralized):
+    INFO :          ('\tround 0: 2.3025850929940455\n'
+    INFO :           '\tround 1: 1.4140462685358515\n'
+    INFO :           '\tround 2: 0.7323360226502517\n'
+    INFO :           '\tround 3: 0.5672925184955843\n')History (metrics, centralized):
+    INFO :          {'accuracy': [(0, 0.098), (1, 0.6752), (2, 0.7706), (3, 0.8202)]}
 
 Congratulations!
 You've successfully built and run your first federated learning system.
-The full `source code <https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist>`_ for this example can be found in :code:`examples/sklearn-logreg-mnist`.
+The full source code for this example can be found in |quickstart_sklearn_link|_.
+
+.. |quickstart_sklearn_link| replace:: :code:`examples/sklearn-logreg-mnist` 
+.. _quickstart_sklearn_link: https://github.com/adap/flower/tree/main/examples/sklearn-logreg-mnist
