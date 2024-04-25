@@ -105,14 +105,6 @@ def new(
     if username is None:
         username = prompt_text("Please provide your Flower username")
 
-    print(
-        typer.style(
-            f"🔨 Creating Flower project {project_name}...",
-            fg=typer.colors.GREEN,
-            bold=True,
-        )
-    )
-
     if framework is not None:
         framework_str = str(framework.value)
     else:
@@ -128,6 +120,14 @@ def new(
         framework_str = selected_value[0]
 
     framework_str = framework_str.lower()
+
+    print(
+        typer.style(
+            f"🔨 Creating Flower project {project_name}...",
+            fg=typer.colors.GREEN,
+            bold=True,
+        )
+    )
 
     # Set project directory path
     cwd = os.getcwd()
