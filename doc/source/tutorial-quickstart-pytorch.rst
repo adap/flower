@@ -10,7 +10,12 @@ Quickstart PyTorch
 ..  youtube:: jOmmuzMIQ4c
    :width: 100%
 
-In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using Flower and PyTorch.
+.. admonition:: Disclaimer
+    :class: important
+
+    The Quickstart PyTorch video uses slightly different Flower commands than this tutorial. Please follow the :doc:`Upgrade to Flower Next <how-to-upgrade-to-flower-next>` guide to convert commands shown in the video.
+
+In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using the Flower framework and PyTorch.
 
 First of all, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
@@ -20,11 +25,11 @@ Our example consists of one *server* and two *clients* all having the same model
 These updates are then sent to the *server* which will aggregate them to produce a better model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of weight updates is called a *round*.
 
-Now that we have a rough idea of what is going on, let's get started. We first need to install Flower. You can do this by running :
+Now that we have a rough idea of what is going on, let's get started. We first need to install Flower and Flower Datasets. You can do this by running:
 
 .. code-block:: shell
 
-  $ pip install flwr
+  $ pip install flwr flwr-datasets[vision]
 
 Since we want to use PyTorch to solve a computer vision task, let's go ahead and install PyTorch and the **torchvision** library:
 
@@ -44,15 +49,14 @@ In a file called :code:`client.py`, import Flower and PyTorch related packages:
 
     from collections import OrderedDict
 
-    from flwr_datasets import FederatedDataset
     import torch
     import torch.nn as nn
     import torch.nn.functional as F
     import torchvision.transforms as transforms
     from torch.utils.data import DataLoader
-    from torchvision.datasets import CIFAR10
 
     import flwr as fl
+    from flwr_datasets import FederatedDataset
 
 In addition, we define the device allocation in PyTorch with:
 
@@ -94,10 +98,10 @@ Define the loss and optimizer with PyTorch. The training of the dataset is done 
         optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
         for _ in range(epochs):
             for batch in tqdm(trainloader, "Training"):
-                images = batch["img"]
-                labels = batch["label"]
+                images = batch["img"].to(DEVICE)
+                labels = batch["label"].to(DEVICE)
                 optimizer.zero_grad()
-                criterion(net(images.to(DEVICE)), labels.to(DEVICE)).backward()
+                criterion(net(images), labels).backward()
                 optimizer.step()
 
 Define then the validation of the  machine learning network. We loop over the test set and measure the loss and accuracy of the test set.
@@ -151,9 +155,7 @@ After loading the data set with :code:`load_data()` we define the Flower interfa
 
 The Flower server interacts with clients through an interface called
 :code:`Client`. When the server selects a particular client for training, it
-sends training instructions over the network via the :code:`SuperLink`.
-The :code:`SuperNode` pulls the server instructions from the :code:`SuperLink` and
-launches a client with those instructions. The client then calls one of the
+sends training instructions over the network. The client receives those instructions and calls one of the
 :code:`Client` methods to run your code
 (i.e., to train the neural network we defined earlier).
 
@@ -209,21 +211,13 @@ and create a :code:`ClientApp()` object using the client function
 
     app = ClientApp(client_fn=client_fn)
 
-Now, we can launch the :code:`ClientApp` object in CLI in one line:
-
-.. code-block:: bash
-
-    flower-client-app client:app --insecure
-
-On this line, we launch the :code:`app` object in the :code:`client.py` module using the :code:`flower-client-app` command. Note that the :code:`--insecure` parameter is for prototyping only.
-
-That's it for the client. We only have to implement :code:`Client` or :code:`NumPyClient`, wrap the :code:`ClientApp` around the client function, and call :code:`flower-client-app` in CLI. If you implement a client of type :code:`NumPyClient` you'll need to first call its :code:`to_client()` method.
+That's it for the client. We only have to implement :code:`Client` or :code:`NumPyClient`, create a :code:`ClientApp`, and pass the client function to it. If you implement a client of type :code:`NumPyClient` you'll need to first call its :code:`to_client()` method.
 
 
 Flower Server
 -------------
 
-For simple workloads we can create a Flower :code:`ServerApp` object and leave all the
+For simple workloads we can create a :code:`ServerApp` and leave all the
 configuration possibilities at their default values. In a file named
 :code:`server.py`, import Flower and create a :code:`ServerApp`:
 
@@ -237,35 +231,37 @@ configuration possibilities at their default values. In a file named
 Train the model, federated!
 ---------------------------
 
-With both :code:`ClientApp`s and :code:`ServerApp` ready, we can now run everything and see federated
-learning in action. First, we start the infrastructure which consists of the `SuperLink` and `SuperNode`s.
+With both :code:`ClientApps` and :code:`ServerApp` ready, we can now run everything and see federated
+learning in action. First, we run the :code:`flower-superlink` command in one terminal to start the infrastructure. This step only needs to be run once.
 
-..
-    TODO: Add link to Flower Next explainer documentation.
+.. admonition:: Important
+    :class: important
+
+    In this example, the :code:`--insecure` command line argument starts Flower without HTTPS and is only used for prototyping. To start with HTTPS, use the argument :code:`--certificates` and pass the appropriate certificates.
 
 .. code-block:: shell
 
     $ flower-superlink --insecure
 
-FL systems usually have a server and multiple clients. We therefore need to start multiple `SuperNode`s, one for each client, respectively. Open a new terminal and start the first `SuperNode`:
+FL systems usually have a server and multiple clients. We therefore need to start multiple `SuperNode`s, one for each client, respectively. Open a new terminal and start the first `SuperNode` using the :code:`flower-client-app` command.
 
 .. code-block:: shell
 
     $ flower-client-app client:app --insecure
 
+In the above, we launch the :code:`app` object in the :code:`client.py` module.
 Open another terminal and start the second `SuperNode`:
 
 .. code-block:: shell
 
     $ flower-client-app client:app --insecure
 
-Finally, in another terminal window, run the `ServerApp` (this starts the actual training run):
+Finally, in another terminal window, run the `ServerApp`. This starts the actual training run:
 
 .. code-block:: shell
 
     $ flower-server-app server:app --insecure
 
-Each client will have its own dataset.
 You should now see how the training does in the last terminal (the one that started the :code:`ServerApp`):
 
 .. code-block:: shell
@@ -294,4 +290,7 @@ You should now see how the training does in the last terminal (the one that star
 
 Congratulations!
 You've successfully built and run your first federated learning system.
-The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch/client.py>`_ for this example can be found in :code:`examples/quickstart-pytorch`.
+The full source code for this example can be found in |quickstart_pt_link|_.
+
+.. |quickstart_pt_link| replace:: :code:`examples/quickstart-pytorch`
+.. _quickstart_pt_link: https://github.com/adap/flower/blob/main/examples/quickstart-pytorch/
