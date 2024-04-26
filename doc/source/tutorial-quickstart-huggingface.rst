@@ -18,12 +18,12 @@ Dependencies
 ------------
 
 To follow along this tutorial you will need to install the following packages:
-:code:`datasets`, :code:`evaluate`, :code:`flwr`, :code:`torch`, and :code:`transformers`.
+:code:`evaluate`, :code:`flwr`, :code:`flwr-datasets`, :code:`torch`, and :code:`transformers`.
 This can be done using :code:`pip`:
 
 .. code-block:: shell
 
-    $ pip install datasets evaluate flwr torch transformers
+    $ pip install evaluate flwr flwr-datasets torch transformers
 
 
 Standard Hugging Face workflow
