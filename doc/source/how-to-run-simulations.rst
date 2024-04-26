@@ -29,7 +29,7 @@ Running Flower simulations still require you to define your client class, a stra
     
     def client_fn(cid: str):
         # Return a standard Flower client
-        return MyFlowerClient()
+        return MyFlowerClient().to_client()
 
     # Launch the simulation
     hist = fl.simulation.start_simulation(

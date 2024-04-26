@@ -1,4 +1,5 @@
 """Runs federated learning for given configuration in base.yaml."""
+
 import pickle
 from pathlib import Path
 
@@ -71,9 +72,11 @@ def main(cfg: DictConfig) -> None:
 
     test_model = models.create_model(
         model_config,
-        model_rate=model_split_rate[get_global_model_rate(model_mode)]
-        if model_split_rate is not None
-        else None,
+        model_rate=(
+            model_split_rate[get_global_model_rate(model_mode)]
+            if model_split_rate is not None
+            else None
+        ),
         track=True,
         device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
     )
@@ -122,17 +125,21 @@ def main(cfg: DictConfig) -> None:
         test_model,
         models.create_model(
             model_config,
-            model_rate=model_split_rate[get_global_model_rate(model_mode)]
-            if model_split_rate is not None
-            else None,
+            model_rate=(
+                model_split_rate[get_global_model_rate(model_mode)]
+                if model_split_rate is not None
+                else None
+            ),
             track=False,
             device=torch.device("cuda:0" if torch.cuda.is_available() else "cpu"),
         )
         .state_dict()
         .keys(),
-        enable_train_on_train_data=cfg.enable_train_on_train_data_while_testing
-        if "enable_train_on_train_data_while_testing" in cfg
-        else True,
+        enable_train_on_train_data=(
+            cfg.enable_train_on_train_data_while_testing
+            if "enable_train_on_train_data_while_testing" in cfg
+            else True
+        ),
     )
     client_resources = {
         "num_cpus": cfg.client_resources.num_cpus,
@@ -145,15 +152,19 @@ def main(cfg: DictConfig) -> None:
             model_name=cfg.model.model_name,
             net=models.create_model(
                 model_config,
-                model_rate=model_split_rate[get_global_model_rate(model_mode)]
-                if model_split_rate is not None
-                else None,
+                model_rate=(
+                    model_split_rate[get_global_model_rate(model_mode)]
+                    if model_split_rate is not None
+                    else None
+                ),
                 device="cpu",
             ),
             optim_scheduler_settings=optim_scheduler_settings,
-            global_model_rate=model_split_rate[get_global_model_rate(model_mode)]
-            if model_split_rate is not None
-            else 1.0,
+            global_model_rate=(
+                model_split_rate[get_global_model_rate(model_mode)]
+                if model_split_rate is not None
+                else 1.0
+            ),
             evaluate_fn=evaluate_fn,
             min_available_clients=cfg.num_clients,
         )

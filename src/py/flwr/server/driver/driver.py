@@ -1,4 +1,4 @@
-# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,100 +12,129 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower driver service client."""
+"""Driver (abstract base class)."""
 
 
-from typing import Iterable, List, Optional, Tuple
+from abc import ABC, abstractmethod
+from typing import Iterable, List, Optional
 
-from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
-    CreateRunRequest,
-    GetNodesRequest,
-    PullTaskResRequest,
-    PushTaskInsRequest,
-)
-from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
-from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER, GrpcDriver
+from flwr.common import Message, RecordSet
 
 
-class Driver:
-    """`Driver` class provides an interface to the Driver API.
+class Driver(ABC):
+    """Abstract base Driver class for the Driver API."""
 
-    Parameters
-    ----------
-    driver_service_address : Optional[str]
-        The IPv4 or IPv6 address of the Driver API server.
-        Defaults to `"[::]:9091"`.
-    certificates : bytes (default: None)
-        Tuple containing root certificate, server certificate, and private key
-        to start a secure SSL-enabled server. The tuple is expected to have
-        three bytes elements in the following order:
-
-            * CA certificate.
-            * server certificate.
-            * server private key.
-    """
-
-    def __init__(
+    @abstractmethod
+    def create_message(  # pylint: disable=too-many-arguments
         self,
-        driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        root_certificates: Optional[bytes] = None,
-    ) -> None:
-        self.addr = driver_service_address
-        self.root_certificates = root_certificates
-        self.grpc_driver: Optional[GrpcDriver] = None
-        self.run_id: Optional[int] = None
-        self.node = Node(node_id=0, anonymous=True)
+        content: RecordSet,
+        message_type: str,
+        dst_node_id: int,
+        group_id: str,
+        ttl: Optional[float] = None,
+    ) -> Message:
+        """Create a new message with specified parameters.
 
-    def _get_grpc_driver_and_run_id(self) -> Tuple[GrpcDriver, int]:
-        # Check if the GrpcDriver is initialized
-        if self.grpc_driver is None or self.run_id is None:
-            # Connect and create run
-            self.grpc_driver = GrpcDriver(
-                driver_service_address=self.addr,
-                root_certificates=self.root_certificates,
-            )
-            self.grpc_driver.connect()
-            res = self.grpc_driver.create_run(CreateRunRequest())
-            self.run_id = res.run_id
+        This method constructs a new `Message` with given content and metadata.
+        The `run_id` and `src_node_id` will be set automatically.
 
-        return self.grpc_driver, self.run_id
+        Parameters
+        ----------
+        content : RecordSet
+            The content for the new message. This holds records that are to be sent
+            to the destination node.
+        message_type : str
+            The type of the message, defining the action to be executed on
+            the receiving end.
+        dst_node_id : int
+            The ID of the destination node to which the message is being sent.
+        group_id : str
+            The ID of the group to which this message is associated. In some settings,
+            this is used as the FL round.
+        ttl : Optional[float] (default: None)
+            Time-to-live for the round trip of this message, i.e., the time from sending
+            this message to receiving a reply. It specifies in seconds the duration for
+            which the message and its potential reply are considered valid. If unset,
+            the default TTL (i.e., `common.DEFAULT_TTL`) will be used.
 
-    def get_nodes(self) -> List[Node]:
+        Returns
+        -------
+        message : Message
+            A new `Message` instance with the specified content and metadata.
+        """
+
+    @abstractmethod
+    def get_node_ids(self) -> List[int]:
         """Get node IDs."""
-        grpc_driver, run_id = self._get_grpc_driver_and_run_id()
 
-        # Call GrpcDriver method
-        res = grpc_driver.get_nodes(GetNodesRequest(run_id=run_id))
-        return list(res.nodes)
+    @abstractmethod
+    def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
+        """Push messages to specified node IDs.
 
-    def push_task_ins(self, task_ins_list: List[TaskIns]) -> List[str]:
-        """Schedule tasks."""
-        grpc_driver, run_id = self._get_grpc_driver_and_run_id()
+        This method takes an iterable of messages and sends each message
+        to the node specified in `dst_node_id`.
 
-        # Set run_id
-        for task_ins in task_ins_list:
-            task_ins.run_id = run_id
+        Parameters
+        ----------
+        messages : Iterable[Message]
+            An iterable of messages to be sent.
 
-        # Call GrpcDriver method
-        res = grpc_driver.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
-        return list(res.task_ids)
+        Returns
+        -------
+        message_ids : Iterable[str]
+            An iterable of IDs for the messages that were sent, which can be used
+            to pull replies.
+        """
 
-    def pull_task_res(self, task_ids: Iterable[str]) -> List[TaskRes]:
-        """Get task results."""
-        grpc_driver, _ = self._get_grpc_driver_and_run_id()
+    @abstractmethod
+    def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
+        """Pull messages based on message IDs.
 
-        # Call GrpcDriver method
-        res = grpc_driver.pull_task_res(
-            PullTaskResRequest(node=self.node, task_ids=task_ids)
-        )
-        return list(res.task_res_list)
+        This method is used to collect messages from the SuperLink
+        that correspond to a set of given message IDs.
 
-    def __del__(self) -> None:
-        """Disconnect GrpcDriver if connected."""
-        # Check if GrpcDriver is initialized
-        if self.grpc_driver is None:
-            return
+        Parameters
+        ----------
+        message_ids : Iterable[str]
+            An iterable of message IDs for which reply messages are to be retrieved.
 
-        # Disconnect
-        self.grpc_driver.disconnect()
+        Returns
+        -------
+        messages : Iterable[Message]
+            An iterable of messages received.
+        """
+
+    @abstractmethod
+    def send_and_receive(
+        self,
+        messages: Iterable[Message],
+        *,
+        timeout: Optional[float] = None,
+    ) -> Iterable[Message]:
+        """Push messages to specified node IDs and pull the reply messages.
+
+        This method sends a list of messages to their destination node IDs and then
+        waits for the replies. It continues to pull replies until either all
+        replies are received or the specified timeout duration is exceeded.
+
+        Parameters
+        ----------
+        messages : Iterable[Message]
+            An iterable of messages to be sent.
+        timeout : Optional[float] (default: None)
+            The timeout duration in seconds. If specified, the method will wait for
+            replies for this duration. If `None`, there is no time limit and the method
+            will wait until replies for all messages are received.
+
+        Returns
+        -------
+        replies : Iterable[Message]
+            An iterable of reply messages received from the SuperLink.
+
+        Notes
+        -----
+        This method uses `push_messages` to send the messages and `pull_messages`
+        to collect the replies. If `timeout` is set, the method may not return
+        replies for all sent messages. A message remains valid until its TTL,
+        which is not affected by `timeout`.
+        """

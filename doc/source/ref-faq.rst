@@ -3,7 +3,7 @@ FAQ
 
 This page collects answers to commonly asked questions about Federated Learning with Flower.
 
-.. dropdown:: :fa:`eye,mr-1` Can Flower run on Juptyter Notebooks / Google Colab?
+.. dropdown:: :fa:`eye,mr-1` Can Flower run on Jupyter Notebooks / Google Colab?
 
     Yes, it can! Flower even comes with a few under-the-hood optimizations to make it work even better on Colab. Here's a quickstart example:
 
@@ -27,6 +27,6 @@ This page collects answers to commonly asked questions about Federated Learning 
 
     * `Flower meets Nevermined GitHub Repository <https://github.com/nevermined-io/fl-demo/tree/master/image-classification-flower>`_.
     * `Flower meets Nevermined YouTube video <https://www.youtube.com/watch?v=A0A9hSlPhKI>`_.
-    * `Flower meets KOSMoS <https://www.kosmos-bmbf.de/wp-content/uploads/sites/13/2021/05/Talk-Flower-Summit-2021.pdf>`_.
+    * `Flower meets KOSMoS <https://www.isw-sites.de/kosmos/wp-content/uploads/sites/13/2021/05/Talk-Flower-Summit-2021.pdf>`_.
     * `Flower meets Talan blog post <https://www.linkedin.com/pulse/federated-learning-same-mask-different-faces-imen-ayari/?trackingId=971oIlxLQ9%2BA9RB0IQ73XQ%3D%3D>`_ .
     * `Flower meets Talan GitHub Repository <https://gitlab.com/Talan_Innovation_Factory/food-waste-prevention>`_ .

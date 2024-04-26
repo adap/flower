@@ -48,7 +48,7 @@ Verify installation
 The following command can be used to verify if Flower was successfully installed. If everything worked, it should print the version of Flower to the command line::
 
   python -c "import flwr;print(flwr.__version__)"
-  1.5.0
+  1.8.0
 
 
 Advanced installation options
@@ -57,7 +57,7 @@ Advanced installation options
 Install via Docker
 ~~~~~~~~~~~~~~~~~~
 
-`How to run Flower using Docker <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html>`_
+:doc:`How to run Flower using Docker <how-to-run-flower-using-docker>`
 
 Install pre-release
 ~~~~~~~~~~~~~~~~~~~

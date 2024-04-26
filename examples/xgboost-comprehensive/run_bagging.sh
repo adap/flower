@@ -8,7 +8,7 @@ sleep 30  # Sleep for 30s to give the server enough time to start
 
 for i in `seq 0 4`; do
     echo "Starting client $i"
-    python3 client.py --node-id=$i --num-partitions=5 --partitioner-type=exponential &
+    python3 client.py --partition-id=$i --num-partitions=5 --partitioner-type=exponential &
 done
 
 # Enable CTRL+C to stop all background processes

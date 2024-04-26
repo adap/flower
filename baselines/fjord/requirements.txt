@@ -1,8 +1,7 @@
 coloredlogs==15.0.1
 hydra-core==1.3.2
-flwr==1.5.0
+flwr[simulation]==1.5.0
 omegaconf==2.3.0
-ray==2.6.3
 torch==2.0.1
 torchvision==0.15.2
 tqdm==4.65.0

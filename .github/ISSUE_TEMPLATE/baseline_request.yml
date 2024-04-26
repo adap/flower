@@ -38,18 +38,18 @@ body:
     attributes:
       label: For first time contributors
       value: |
-        - [ ]  Read the [`first contribution` doc](https://flower.dev/docs/first-time-contributors.html)
+        - [ ]  Read the [`first contribution` doc](https://flower.ai/docs/first-time-contributors.html)
         - [ ]  Complete the Flower tutorial
         - [ ]  Read the Flower Baselines docs to get an overview:
-            - [ ]  [How to use Flower Baselines](https://flower.dev/docs/baselines/how-to-use-baselines.html)
-            - [ ]  [How to contribute a Flower Baseline](https://flower.dev/docs/baselines/how-to-contribute-baselines.html)
+            - [ ]  [How to use Flower Baselines](https://flower.ai/docs/baselines/how-to-use-baselines.html)
+            - [ ]  [How to contribute a Flower Baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html)
   - type: checkboxes
     attributes:
       label: Prepare - understand the scope
       options:
         - label: Read the paper linked above
         - label: Decide which experiments you'd like to reproduce. The more the better!
-        - label: Follow the steps outlined in [Add a new Flower Baseline](https://flower.dev/docs/baselines/how-to-contribute-baselines.html#add-a-new-flower-baseline).
+        - label: Follow the steps outlined in [Add a new Flower Baseline](https://flower.ai/docs/baselines/how-to-contribute-baselines.html#add-a-new-flower-baseline).
         - label: You can use as reference [other baselines](https://github.com/adap/flower/tree/main/baselines) that the community merged following those steps.
   - type: checkboxes
     attributes:

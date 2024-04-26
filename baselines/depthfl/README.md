@@ -124,7 +124,7 @@ python -m depthfl.main --multirun exclusive_learning=true model_size=1,2,3,4
 
 **Table 2** 
 
-100% (a), 75%(b), 50%(c), 25% (d) cases are exclusive learning scenario. 100% (a) exclusive learning means, the global model and every local model are equal to the smallest local model, and 100% clients participate in learning. Likewise, 25% (d) exclusive learning means, the global model and every local model are equal to the larget local model, and only 25% clients participate in learning.
+100% (a), 75%(b), 50%(c), 25% (d) cases are exclusive learning scenario. 100% (a) exclusive learning means, the global model and every local model are equal to the smallest local model, and 100% clients participate in learning. Likewise, 25% (d) exclusive learning means, the global model and every local model are equal to the largest local model, and only 25% clients participate in learning.
 
 | Scaling Method | Dataset | Global Model | 100% (a) | 75% (b) | 50% (c) | 25% (d) | 
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | 

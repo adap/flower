@@ -1,6 +1,5 @@
 """Flower server example."""
 
-
 from typing import List, Tuple
 
 import flwr as fl

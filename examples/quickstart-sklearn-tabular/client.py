@@ -13,14 +13,14 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--node-id",
+        "--partition-id",
         type=int,
         choices=range(0, N_CLIENTS),
         required=True,
         help="Specifies the artificial data partition",
     )
     args = parser.parse_args()
-    partition_id = args.node_id
+    partition_id = args.partition_id
 
     # Load the partition data
     fds = FederatedDataset(dataset="hitorilabs/iris", partitioners={"train": N_CLIENTS})
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
     X = dataset[["petal_length", "petal_width", "sepal_length", "sepal_width"]]
     y = dataset["species"]
-    unique_labels = fds.load_full("train").unique("species")
+    unique_labels = fds.load_split("train").unique("species")
     # Split the on edge data: 80% train, 20% test
     X_train, X_test = X[: int(0.8 * len(X))], X[int(0.8 * len(X)) :]
     y_train, y_test = y[: int(0.8 * len(y))], y[int(0.8 * len(y)) :]

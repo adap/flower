@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 
-from .recordset import RecordSet
+from .record import RecordSet
 
 
 @dataclass

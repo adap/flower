@@ -4,14 +4,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr-datasets"
-version = "0.0.2"
+version = "0.1.0"
 description = "Flower Datasets"
 license = "Apache-2.0"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 readme = "README.md"
-homepage = "https://flower.dev"
+homepage = "https://flower.ai"
 repository = "https://github.com/adap/flower"
-documentation = "https://flower.dev/docs/datasets"
+documentation = "https://flower.ai/docs/datasets"
 keywords = [
     "flower",
     "fl",
@@ -22,7 +22,7 @@ keywords = [
     "dataset",
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
@@ -54,15 +54,15 @@ exclude = [
 [tool.poetry.dependencies]
 python = "^3.8"
 numpy = "^1.21.0"
-datasets = "^2.14.3"
+datasets = "^2.14.6"
 pillow = { version = ">=6.2.1", optional = true }
-soundfile = {version = ">=0.12.1", optional = true}
+soundfile = { version = ">=0.12.1", optional = true }
 librosa = { version = ">=0.10.0.post2", optional = true }
 
 [tool.poetry.dev-dependencies]
-isort = "==5.11.5"
-black = { version = "==23.3.0", extras = ["jupyter"] }
-docformatter = "==1.7.1"
+isort = "==5.13.2"
+black = { version = "==24.2.0", extras = ["jupyter"] }
+docformatter = "==1.7.5"
 mypy = "==1.4.0"
 pylint = "==2.13.9"
 flake8 = "==3.9.2"

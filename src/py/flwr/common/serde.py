@@ -20,6 +20,8 @@ from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, 
 from google.protobuf.message import Message as GrpcMessage
 
 # pylint: disable=E0611
+from flwr.proto.error_pb2 import Error as ProtoError
+from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import Array as ProtoArray
 from flwr.proto.recordset_pb2 import BoolList, BytesList
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
@@ -42,12 +44,9 @@ from flwr.proto.transport_pb2 import (
 )
 
 # pylint: enable=E0611
-from . import typing
-from .configsrecord import ConfigsRecord
-from .message import Message, Metadata
-from .metricsrecord import MetricsRecord
-from .parametersrecord import Array, ParametersRecord
-from .recordset import RecordSet
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, typing
+from .message import Error, Message, Metadata
+from .record.typeddict import TypedDict
 
 #  === Parameters message ===
 
@@ -413,7 +412,9 @@ def _record_value_from_proto(value_proto: GrpcMessage) -> Any:
 
 
 def _record_value_dict_to_proto(
-    value_dict: Dict[str, Any], allowed_types: List[type], value_proto_class: Type[T]
+    value_dict: TypedDict[str, Any],
+    allowed_types: List[type],
+    value_proto_class: Type[T],
 ) -> Dict[str, T]:
     """Serialize the record value dict to ProtoBuf.
 
@@ -455,8 +456,8 @@ def array_from_proto(array_proto: ProtoArray) -> Array:
 def parameters_record_to_proto(record: ParametersRecord) -> ProtoParametersRecord:
     """Serialize ParametersRecord to ProtoBuf."""
     return ProtoParametersRecord(
-        data_keys=record.data.keys(),
-        data_values=map(array_to_proto, record.data.values()),
+        data_keys=record.keys(),
+        data_values=map(array_to_proto, record.values()),
     )
 
 
@@ -475,9 +476,7 @@ def parameters_record_from_proto(
 def metrics_record_to_proto(record: MetricsRecord) -> ProtoMetricsRecord:
     """Serialize MetricsRecord to ProtoBuf."""
     return ProtoMetricsRecord(
-        data=_record_value_dict_to_proto(
-            record.data, [float, int], ProtoMetricsRecordValue
-        )
+        data=_record_value_dict_to_proto(record, [float, int], ProtoMetricsRecordValue)
     )
 
 
@@ -496,7 +495,9 @@ def configs_record_to_proto(record: ConfigsRecord) -> ProtoConfigsRecord:
     """Serialize ConfigsRecord to ProtoBuf."""
     return ProtoConfigsRecord(
         data=_record_value_dict_to_proto(
-            record.data, [bool, int, float, str, bytes], ProtoConfigsRecordValue
+            record,
+            [bool, int, float, str, bytes],
+            ProtoConfigsRecordValue,
         )
     )
 
@@ -512,6 +513,21 @@ def configs_record_from_proto(record_proto: ProtoConfigsRecord) -> ConfigsRecord
     )
 
 
+# === Error message ===
+
+
+def error_to_proto(error: Error) -> ProtoError:
+    """Serialize Error to ProtoBuf."""
+    reason = error.reason if error.reason else ""
+    return ProtoError(code=error.code, reason=reason)
+
+
+def error_from_proto(error_proto: ProtoError) -> Error:
+    """Deserialize Error from ProtoBuf."""
+    reason = error_proto.reason if len(error_proto.reason) > 0 else None
+    return Error(code=error_proto.code, reason=reason)
+
+
 # === RecordSet message ===
 
 
@@ -519,24 +535,29 @@ def recordset_to_proto(recordset: RecordSet) -> ProtoRecordSet:
     """Serialize RecordSet to ProtoBuf."""
     return ProtoRecordSet(
         parameters={
-            k: parameters_record_to_proto(v) for k, v in recordset.parameters.items()
+            k: parameters_record_to_proto(v)
+            for k, v in recordset.parameters_records.items()
         },
-        metrics={k: metrics_record_to_proto(v) for k, v in recordset.metrics.items()},
-        configs={k: configs_record_to_proto(v) for k, v in recordset.configs.items()},
+        metrics={
+            k: metrics_record_to_proto(v) for k, v in recordset.metrics_records.items()
+        },
+        configs={
+            k: configs_record_to_proto(v) for k, v in recordset.configs_records.items()
+        },
     )
 
 
 def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordSet:
     """Deserialize RecordSet from ProtoBuf."""
     return RecordSet(
-        parameters={
+        parameters_records={
             k: parameters_record_from_proto(v)
             for k, v in recordset_proto.parameters.items()
         },
-        metrics={
+        metrics_records={
             k: metrics_record_from_proto(v) for k, v in recordset_proto.metrics.items()
         },
-        configs={
+        configs_records={
             k: configs_record_from_proto(v) for k, v in recordset_proto.configs.items()
         },
     )
@@ -547,11 +568,21 @@ def recordset_from_proto(recordset_proto: ProtoRecordSet) -> RecordSet:
 
 def message_to_taskins(message: Message) -> TaskIns:
     """Create a TaskIns from the Message."""
+    md = message.metadata
     return TaskIns(
+        group_id=md.group_id,
+        run_id=md.run_id,
         task=Task(
-            ttl=message.metadata.ttl,
-            task_type=message.metadata.message_type,
-            recordset=recordset_to_proto(message.content),
+            producer=Node(node_id=0, anonymous=True),  # Assume driver node
+            consumer=Node(node_id=md.dst_node_id, anonymous=False),
+            created_at=md.created_at,
+            ttl=md.ttl,
+            ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
+            task_type=md.message_type,
+            recordset=(
+                recordset_to_proto(message.content) if message.has_content() else None
+            ),
+            error=error_to_proto(message.error) if message.has_error() else None,
         ),
     )
 
@@ -562,26 +593,50 @@ def message_from_taskins(taskins: TaskIns) -> Message:
     metadata = Metadata(
         run_id=taskins.run_id,
         message_id=taskins.task_id,
+        src_node_id=taskins.task.producer.node_id,
+        dst_node_id=taskins.task.consumer.node_id,
+        reply_to_message=taskins.task.ancestry[0] if taskins.task.ancestry else "",
         group_id=taskins.group_id,
-        node_id=taskins.task.consumer.node_id,
         ttl=taskins.task.ttl,
         message_type=taskins.task.task_type,
     )
 
-    # Return the Message
-    return Message(
+    # Construct Message
+    message = Message(
         metadata=metadata,
-        content=recordset_from_proto(taskins.task.recordset),
+        content=(
+            recordset_from_proto(taskins.task.recordset)
+            if taskins.task.HasField("recordset")
+            else None
+        ),
+        error=(
+            error_from_proto(taskins.task.error)
+            if taskins.task.HasField("error")
+            else None
+        ),
     )
+    message.metadata.created_at = taskins.task.created_at
+    return message
 
 
 def message_to_taskres(message: Message) -> TaskRes:
     """Create a TaskRes from the Message."""
+    md = message.metadata
     return TaskRes(
+        task_id="",  # This will be generated by the server
+        group_id=md.group_id,
+        run_id=md.run_id,
         task=Task(
-            ttl=message.metadata.ttl,
-            task_type=message.metadata.message_type,
-            recordset=recordset_to_proto(message.content),
+            producer=Node(node_id=md.src_node_id, anonymous=False),
+            consumer=Node(node_id=0, anonymous=True),  # Assume driver node
+            created_at=md.created_at,
+            ttl=md.ttl,
+            ancestry=[md.reply_to_message] if md.reply_to_message != "" else [],
+            task_type=md.message_type,
+            recordset=(
+                recordset_to_proto(message.content) if message.has_content() else None
+            ),
+            error=error_to_proto(message.error) if message.has_error() else None,
         ),
     )
 
@@ -592,14 +647,27 @@ def message_from_taskres(taskres: TaskRes) -> Message:
     metadata = Metadata(
         run_id=taskres.run_id,
         message_id=taskres.task_id,
+        src_node_id=taskres.task.producer.node_id,
+        dst_node_id=taskres.task.consumer.node_id,
+        reply_to_message=taskres.task.ancestry[0] if taskres.task.ancestry else "",
         group_id=taskres.group_id,
-        node_id=taskres.task.consumer.node_id,
         ttl=taskres.task.ttl,
         message_type=taskres.task.task_type,
     )
 
-    # Return the Message
-    return Message(
+    # Construct the Message
+    message = Message(
         metadata=metadata,
-        content=recordset_from_proto(taskres.task.recordset),
+        content=(
+            recordset_from_proto(taskres.task.recordset)
+            if taskres.task.HasField("recordset")
+            else None
+        ),
+        error=(
+            error_from_proto(taskres.task.error)
+            if taskres.task.HasField("error")
+            else None
+        ),
     )
+    message.metadata.created_at = taskres.task.created_at
+    return message

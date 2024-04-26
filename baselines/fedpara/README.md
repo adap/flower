@@ -88,12 +88,12 @@ As for the parameters ratio ($\gamma$) we use the following model sizes. As in t
 
 - The Jacobian correction was not incorporated into our implementation, primarily due to the lack of explicit instructions in the paper regarding the specific implementation of the dual update principle mentioned in the Jacobian correction section.
 
-- It was observed that data generation is crutial for model convergence
+- It was observed that data generation is crucial for model convergence
 
 ## Environment Setup
 To construct the Python environment follow these steps:
 
-It is assumed that `pyenv` is installed, `poetry` is installed and python 3.10.6 is installed using `pyenv`. Refer to this [documentation](https://flower.ai/docs/baselines/how-to-usef-baselines.html#setting-up-your-machine) to ensure that your machine is ready.
+It is assumed that `pyenv` is installed, `poetry` is installed and python 3.10.6 is installed using `pyenv`. Refer to this [documentation](https://flower.ai/docs/baselines/how-to-use-baselines.html#setting-up-your-machine) to ensure that your machine is ready.
 
 ```bash
 # Set Python 3.10
@@ -163,14 +163,15 @@ Communication costs as measured as described in the paper:
 
 |                    IID                     |                      Non-IID                      |
 | :----------------------------------------: | :-----------------------------------------------: |
-| ![Cifar100 iid](_static/Cifar100_iid.jpeg) | ![Cifar100 non-iid](_static/Cifar100_noniid.jpeg) |
+| ![Cifar100 iid](_static/Cifar100_iid.png) | ![Cifar100 non-iid](_static/Cifar100_noniid.png) |
 
 
 ### CIFAR-10 (Accuracy vs Communication Cost)
 
 |                   IID                    |                     Non-IID                     |
 | :--------------------------------------: | :---------------------------------------------: |
-| ![CIFAR10 iid](_static/Cifar10_iid.jpeg) | ![CIFAR10 non-iid](_static/Cifar10_noniid.jpeg) |
+| ![CIFAR10 iid](_static/Cifar10_iid.png) | ![CIFAR10 non-iid](_static/Cifar10_noniid.png) |
+
 
 ### NON-IID MINST (FedAvg vs FedPer vs pFedPara)
 

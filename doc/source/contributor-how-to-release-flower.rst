@@ -22,7 +22,7 @@ Create a pull request which contains the following changes:
 2. Update all files which contain the current version number if necessary.
 3. Add a new ``Unreleased`` section in ``changelog.md``.
 
-Merge the pull request on the same day (i.e., before a new nighly release gets published to PyPI).
+Merge the pull request on the same day (i.e., before a new nightly release gets published to PyPI).
 
 Publishing a pre-release
 ------------------------
@@ -30,11 +30,11 @@ Publishing a pre-release
 Pre-release naming
 ~~~~~~~~~~~~~~~~~~
 
-PyPI supports pre-releases (alpha, beta, release candiate). Pre-releases MUST use one of the following naming patterns:
+PyPI supports pre-releases (alpha, beta, release candidate). Pre-releases MUST use one of the following naming patterns:
 
 - Alpha: ``MAJOR.MINOR.PATCHaN``
 - Beta: ``MAJOR.MINOR.PATCHbN``
-- Release candiate (RC): ``MAJOR.MINOR.PATCHrcN``
+- Release candidate (RC): ``MAJOR.MINOR.PATCHrcN``
 
 Examples include:
 

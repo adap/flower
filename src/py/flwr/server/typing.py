@@ -17,7 +17,9 @@
 
 from typing import Callable
 
-from flwr.common.context import Context
-from flwr.server.driver import Driver
+from flwr.common import Context
+
+from .driver import Driver
 
 ServerAppCallable = Callable[[Driver, Context], None]
+Workflow = Callable[[Driver, Context], None]

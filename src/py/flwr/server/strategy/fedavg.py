@@ -84,6 +84,8 @@ class FedAvg(Strategy):
         Metrics aggregation function, optional.
     evaluate_metrics_aggregation_fn : Optional[MetricsAggregationFn]
         Metrics aggregation function, optional.
+    inplace : bool (default: True)
+        Enable (True) or disable (False) in-place aggregation of model updates.
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long

@@ -62,13 +62,13 @@ Now you are ready to start the Flower clients which will participate in the lear
 Start client 1 in the first terminal:
 
 ```shell
-python3 client.py --node-id 0 # or any integer in {0-9}
+python3 client.py --partition-id 0 # or any integer in {0-9}
 ```
 
 Start client 2 in the second terminal:
 
 ```shell
-python3 client.py --node-id 1 # or any integer in {0-9}
+python3 client.py --partition-id 1 # or any integer in {0-9}
 ```
 
 Alternatively, you can run all of it in one shell as follows:

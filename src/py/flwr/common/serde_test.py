@@ -14,10 +14,11 @@
 # ==============================================================================
 """(De-)serialization tests."""
 
-
 import random
 import string
-from typing import Any, Optional, OrderedDict, Type, TypeVar, Union, cast
+from typing import Any, Callable, Optional, OrderedDict, Type, TypeVar, Union, cast
+
+import pytest
 
 # pylint: disable=E0611
 from flwr.proto import transport_pb2 as pb2
@@ -28,12 +29,8 @@ from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
 
 # pylint: enable=E0611
-from . import typing
-from .configsrecord import ConfigsRecord
-from .message import Message, Metadata
-from .metricsrecord import MetricsRecord
-from .parametersrecord import Array, ParametersRecord
-from .recordset import RecordSet
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, typing
+from .message import Error, Message, Metadata
 from .serde import (
     array_from_proto,
     array_to_proto,
@@ -199,15 +196,15 @@ class RecordMaker:
     ) -> RecordSet:
         """Create a RecordSet."""
         return RecordSet(
-            parameters={
+            parameters_records={
                 self.get_str(): self.parameters_record()
                 for _ in range(num_params_records)
             },
-            metrics={
+            metrics_records={
                 self.get_str(): self.metrics_record()
                 for _ in range(num_metrics_records)
             },
-            configs={
+            configs_records={
                 self.get_str(): self.configs_record()
                 for _ in range(num_configs_records)
             },
@@ -219,8 +216,10 @@ class RecordMaker:
             run_id=self.rng.randint(0, 1 << 30),
             message_id=self.get_str(64),
             group_id=self.get_str(30),
-            node_id=self.rng.randint(0, 1 << 63),
-            ttl=self.get_str(10),
+            src_node_id=self.rng.randint(0, 1 << 63),
+            dst_node_id=self.rng.randint(0, 1 << 63),
+            reply_to_message=self.get_str(64),
+            ttl=self.rng.randint(1, 1 << 30),
             message_type=self.get_str(10),
         )
 
@@ -252,7 +251,7 @@ def test_parameters_record_serialization_deserialization() -> None:
 
     # Assert
     assert isinstance(proto, ProtoParametersRecord)
-    assert original.data == deserialized.data
+    assert original == deserialized
 
 
 def test_metrics_record_serialization_deserialization() -> None:
@@ -267,7 +266,7 @@ def test_metrics_record_serialization_deserialization() -> None:
 
     # Assert
     assert isinstance(proto, ProtoMetricsRecord)
-    assert original.data == deserialized.data
+    assert original == deserialized
 
 
 def test_configs_record_serialization_deserialization() -> None:
@@ -282,7 +281,7 @@ def test_configs_record_serialization_deserialization() -> None:
 
     # Assert
     assert isinstance(proto, ProtoConfigsRecord)
-    assert original.data == deserialized.data
+    assert original == deserialized
 
 
 def test_recordset_serialization_deserialization() -> None:
@@ -300,61 +299,91 @@ def test_recordset_serialization_deserialization() -> None:
     assert original == deserialized
 
 
-def test_message_to_and_from_taskins() -> None:
+@pytest.mark.parametrize(
+    "content_fn, error_fn",
+    [
+        (
+            lambda maker: maker.recordset(1, 1, 1),
+            None,
+        ),  # check when only content is set
+        (None, lambda code: Error(code=code)),  # check when only error is set
+    ],
+)
+def test_message_to_and_from_taskins(
+    content_fn: Callable[
+        [
+            RecordMaker,
+        ],
+        RecordSet,
+    ],
+    error_fn: Callable[[int], Error],
+) -> None:
     """Test Message to and from TaskIns."""
     # Prepare
+
     maker = RecordMaker(state=1)
     metadata = maker.metadata()
+    # pylint: disable-next=protected-access
+    metadata._src_node_id = 0  # Assume driver node
+
     original = Message(
-        metadata=Metadata(
-            run_id=0,
-            message_id="",
-            group_id="",
-            node_id=metadata.node_id,
-            ttl=metadata.ttl,
-            message_type=metadata.message_type,
-        ),
-        content=maker.recordset(1, 1, 1),
+        metadata=metadata,
+        content=None if content_fn is None else content_fn(maker),
+        error=None if error_fn is None else error_fn(0),
     )
 
     # Execute
     taskins = message_to_taskins(original)
-    taskins.run_id = metadata.run_id
     taskins.task_id = metadata.message_id
-    taskins.group_id = metadata.group_id
-    taskins.task.consumer.node_id = metadata.node_id
     deserialized = message_from_taskins(taskins)
 
     # Assert
-    assert original.content == deserialized.content
+    if original.has_content():
+        assert original.content == deserialized.content
+    if original.has_error():
+        assert original.error == deserialized.error
     assert metadata == deserialized.metadata
 
 
-def test_message_to_and_from_taskres() -> None:
+@pytest.mark.parametrize(
+    "content_fn, error_fn",
+    [
+        (
+            lambda maker: maker.recordset(1, 1, 1),
+            None,
+        ),  # check when only content is set
+        (None, lambda code: Error(code=code)),  # check when only error is set
+    ],
+)
+def test_message_to_and_from_taskres(
+    content_fn: Callable[
+        [
+            RecordMaker,
+        ],
+        RecordSet,
+    ],
+    error_fn: Callable[[int], Error],
+) -> None:
     """Test Message to and from TaskRes."""
     # Prepare
     maker = RecordMaker(state=2)
     metadata = maker.metadata()
+    metadata.dst_node_id = 0  # Assume driver node
+
     original = Message(
-        metadata=Metadata(
-            run_id=0,
-            message_id="",
-            group_id="",
-            node_id=metadata.node_id,
-            ttl=metadata.ttl,
-            message_type=metadata.message_type,
-        ),
-        content=maker.recordset(1, 1, 1),
+        metadata=metadata,
+        content=None if content_fn is None else content_fn(maker),
+        error=None if error_fn is None else error_fn(0),
     )
 
     # Execute
     taskres = message_to_taskres(original)
-    taskres.run_id = metadata.run_id
     taskres.task_id = metadata.message_id
-    taskres.group_id = metadata.group_id
-    taskres.task.consumer.node_id = metadata.node_id
     deserialized = message_from_taskres(taskres)
 
     # Assert
-    assert original.content == deserialized.content
+    if original.has_content():
+        assert original.content == deserialized.content
+    if original.has_error():
+        assert original.error == deserialized.error
     assert metadata == deserialized.metadata

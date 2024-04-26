@@ -31,13 +31,21 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
     if not tasks_ins_res.HasField("task"):
         validation_errors.append("`task` does not set field `task`")
 
-    # Created/delivered/TTL
-    if tasks_ins_res.task.created_at != "":
-        validation_errors.append("`created_at` must be an empty str")
+    # Created/delivered/TTL/Pushed
+    if (
+        tasks_ins_res.task.created_at < 1711497600.0
+    ):  # unix timestamp of 27 March 2024 00h:00m:00s UTC
+        validation_errors.append(
+            "`created_at` must be a float that records the unix timestamp "
+            "in seconds when the message was created."
+        )
     if tasks_ins_res.task.delivered_at != "":
         validation_errors.append("`delivered_at` must be an empty str")
-    if tasks_ins_res.task.ttl != "":
-        validation_errors.append("`ttl` must be an empty str")
+    if tasks_ins_res.task.ttl <= 0:
+        validation_errors.append("`ttl` must be higher than zero")
+    if tasks_ins_res.task.pushed_at < 1711497600.0:
+        # unix timestamp of 27 March 2024 00h:00m:00s UTC
+        validation_errors.append("`pushed_at` is not a recent timestamp")
 
     # TaskIns specific
     if isinstance(tasks_ins_res, TaskIns):
@@ -66,8 +74,11 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         # Content check
         if tasks_ins_res.task.task_type == "":
             validation_errors.append("`task_type` MUST be set")
-        if not tasks_ins_res.task.HasField("recordset"):
-            validation_errors.append("`recordset` MUST be set")
+        if not (
+            tasks_ins_res.task.HasField("recordset")
+            ^ tasks_ins_res.task.HasField("error")
+        ):
+            validation_errors.append("Either `recordset` or `error` MUST be set")
 
         # Ancestors
         if len(tasks_ins_res.task.ancestry) != 0:
@@ -106,8 +117,11 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
         # Content check
         if tasks_ins_res.task.task_type == "":
             validation_errors.append("`task_type` MUST be set")
-        if not tasks_ins_res.task.HasField("recordset"):
-            validation_errors.append("`recordset` MUST be set")
+        if not (
+            tasks_ins_res.task.HasField("recordset")
+            ^ tasks_ins_res.task.HasField("error")
+        ):
+            validation_errors.append("Either `recordset` or `error` MUST be set")
 
         # Ancestors
         if len(tasks_ins_res.task.ancestry) == 0:

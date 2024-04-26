@@ -14,18 +14,19 @@
 # ==============================================================================
 """Flower client app."""
 
-
 import argparse
 import sys
 import time
-from logging import DEBUG, INFO, WARN
+from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, ContextManager, Optional, Tuple, Union
+from typing import Callable, ContextManager, Optional, Tuple, Type, Union
+
+from grpc import RpcError
 
 from flwr.client.client import Client
-from flwr.client.clientapp import ClientApp
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFn
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
@@ -33,23 +34,27 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
+    ErrorCode,
 )
-from flwr.common.logger import log, warn_deprecated_feature, warn_experimental_feature
-from flwr.common.message import Message
+from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.message import Error
+from flwr.common.object_ref import load_app, validate
+from flwr.common.retry_invoker import RetryInvoker, exponential
 
-from .clientapp import load_client_app
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
+from .supernode.app import parse_args_run_client_app
 
 
 def run_client_app() -> None:
     """Run Flower client app."""
-    event(EventType.RUN_CLIENT_APP_ENTER)
-
     log(INFO, "Long-running Flower client starting")
+
+    event(EventType.RUN_CLIENT_APP_ENTER)
 
     args = _parse_args_run_client_app().parse_args()
 
@@ -94,8 +99,19 @@ def run_client_app() -> None:
     if client_app_dir is not None:
         sys.path.insert(0, client_app_dir)
 
+    app_ref: str = getattr(args, "client-app")
+    valid, error_msg = validate(app_ref)
+    if not valid and error_msg:
+        raise LoadClientAppError(error_msg) from None
+
     def _load() -> ClientApp:
-        client_app: ClientApp = load_client_app(getattr(args, "client-app"))
+        client_app = load_app(app_ref, LoadClientAppError)
+
+        if not isinstance(client_app, ClientApp):
+            raise LoadClientAppError(
+                f"Attribute {app_ref} is not of type {ClientApp}",
+            ) from None
+
         return client_app
 
     _start_client_internal(
@@ -104,8 +120,10 @@ def run_client_app() -> None:
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
         insecure=args.insecure,
+        max_retries=args.max_retries,
+        max_wait_time=args.max_wait_time,
     )
-    event(EventType.RUN_CLIENT_APP_LEAVE)
+    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
 def _parse_args_run_client_app() -> argparse.ArgumentParser:
@@ -114,40 +132,7 @@ def _parse_args_run_client_app() -> argparse.ArgumentParser:
         description="Start a Flower client app",
     )
 
-    parser.add_argument(
-        "client-app",
-        help="For example: `client:app` or `project.package.module:wrapper.app`",
-    )
-    parser.add_argument(
-        "--insecure",
-        action="store_true",
-        help="Run the client without HTTPS. By default, the client runs with "
-        "HTTPS enabled. Use this flag only if you understand the risks.",
-    )
-    parser.add_argument(
-        "--rest",
-        action="store_true",
-        help="Use REST as a transport layer for the client.",
-    )
-    parser.add_argument(
-        "--root-certificates",
-        metavar="ROOT_CERT",
-        type=str,
-        help="Specifies the path to the PEM-encoded root certificate file for "
-        "establishing secure HTTPS connections.",
-    )
-    parser.add_argument(
-        "--server",
-        default="0.0.0.0:9092",
-        help="Server address",
-    )
-    parser.add_argument(
-        "--dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load Flower "
-        "app from there."
-        " Default: current working directory.",
-    )
+    parse_args_run_client_app(parser=parser)
 
     return parser
 
@@ -180,6 +165,8 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    max_retries: Optional[int] = None,
+    max_wait_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -213,6 +200,14 @@ def start_client(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    max_retries: Optional[int] (default: None)
+        The maximum number of times the client will try to connect to the
+        server before giving up in case of a connection error. If set to None,
+        there is no limit to the number of tries.
+    max_wait_time: Optional[float] (default: None)
+        The maximum duration before the client stops trying to
+        connect to the server in case of connection error.
+        If set to None, there is no limit to the total time.
 
     Examples
     --------
@@ -254,6 +249,8 @@ def start_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
+        max_retries=max_retries,
+        max_wait_time=max_wait_time,
     )
     event(EventType.START_CLIENT_LEAVE)
 
@@ -272,6 +269,8 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    max_retries: Optional[int] = None,
+    max_wait_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -299,7 +298,7 @@ def _start_client_internal(
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
-    insecure : bool (default: True)
+    insecure : Optional[bool] (default: None)
         Starts an insecure gRPC connection when True. Enables HTTPS connection
         when False, using system certificates if `root_certificates` is None.
     transport : Optional[str] (default: None)
@@ -307,6 +306,14 @@ def _start_client_internal(
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    max_retries: Optional[int] (default: None)
+        The maximum number of times the client will try to connect to the
+        server before giving up in case of a connection error. If set to None,
+        there is no limit to the number of tries.
+    max_wait_time: Optional[float] (default: None)
+        The maximum duration before the client stops trying to
+        connect to the server in case of connection error.
+        If set to None, there is no limit to the total time.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -331,14 +338,50 @@ def _start_client_internal(
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app
-    else:
-        warn_experimental_feature("`load_client_app_fn`")
 
     # At this point, only `load_client_app_fn` should be used
     # Both `client` and `client_fn` must not be used directly
 
     # Initialize connection context manager
-    connection, address = _init_connection(transport, server_address)
+    connection, address, connection_error_type = _init_connection(
+        transport, server_address
+    )
+
+    retry_invoker = RetryInvoker(
+        wait_gen_factory=exponential,
+        recoverable_exceptions=connection_error_type,
+        max_tries=max_retries,
+        max_time=max_wait_time,
+        on_giveup=lambda retry_state: (
+            log(
+                WARN,
+                "Giving up reconnection after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+            if retry_state.tries > 1
+            else None
+        ),
+        on_success=lambda retry_state: (
+            log(
+                INFO,
+                "Connection successful after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+            if retry_state.tries > 1
+            else None
+        ),
+        on_backoff=lambda retry_state: (
+            log(WARN, "Connection attempt failed, retrying...")
+            if retry_state.tries == 1
+            else log(
+                DEBUG,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
+        ),
+    )
 
     node_state = NodeState()
 
@@ -347,10 +390,12 @@ def _start_client_internal(
         with connection(
             address,
             insecure,
+            retry_invoker,
             grpc_max_message_length,
             root_certificates,
         ) as conn:
-            receive, send, create_node, delete_node = conn
+            # pylint: disable-next=W0612
+            receive, send, create_node, delete_node, get_run = conn
 
             # Register node
             if create_node is not None:
@@ -362,6 +407,21 @@ def _start_client_internal(
                 if message is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
+
+                log(INFO, "")
+                if len(message.metadata.group_id) > 0:
+                    log(
+                        INFO,
+                        "[RUN %s, ROUND %s]",
+                        message.metadata.run_id,
+                        message.metadata.group_id,
+                    )
+                log(
+                    INFO,
+                    "Received: %s message %s",
+                    message.metadata.message_type,
+                    message.metadata.message_id,
+                )
 
                 # Handle control message
                 out_message, sleep_duration = handle_control_message(message)
@@ -375,20 +435,57 @@ def _start_client_internal(
                 # Retrieve context for this run
                 context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
-                # Load ClientApp instance
-                client_app: ClientApp = load_client_app_fn()
-
-                # Handle task message
-                out_message = client_app(message=message, context=context)
-
-                # Update node state
-                node_state.update_context(
-                    run_id=message.metadata.run_id,
-                    context=context,
+                # Create an error reply message that will never be used to prevent
+                # the used-before-assignment linting error
+                reply_message = message.create_error_reply(
+                    error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
                 )
 
+                # Handle app loading and task message
+                try:
+                    # Load ClientApp instance
+                    client_app: ClientApp = load_client_app_fn()
+
+                    # Execute ClientApp
+                    reply_message = client_app(message=message, context=context)
+                except Exception as ex:  # pylint: disable=broad-exception-caught
+
+                    # Legacy grpc-bidi
+                    if transport in ["grpc-bidi", None]:
+                        log(ERROR, "Client raised an exception.", exc_info=ex)
+                        # Raise exception, crash process
+                        raise ex
+
+                    # Don't update/change NodeState
+
+                    e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                    exc_entity = "ClientApp"
+                    if isinstance(ex, LoadClientAppError):
+                        reason = (
+                            "An exception was raised when attempting to load "
+                            "`ClientApp`"
+                        )
+                        e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+                        exc_entity = "SuperNode"
+
+                    log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+
+                    # Create error message
+                    reply_message = message.create_error_reply(
+                        error=Error(code=e_code, reason=reason)
+                    )
+                else:
+                    # No exception, update node state
+                    node_state.update_context(
+                        run_id=message.metadata.run_id,
+                        context=context,
+                    )
+
                 # Send
-                send(out_message)
+                send(reply_message)
+                log(INFO, "Sent reply")
 
             # Unregister node
             if delete_node is not None:
@@ -507,21 +604,21 @@ def start_numpy_client(
     )
 
 
-def _init_connection(
-    transport: Optional[str], server_address: str
-) -> Tuple[
+def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     Callable[
-        [str, bool, int, Union[bytes, str, None]],
+        [str, bool, RetryInvoker, int, Union[bytes, str, None]],
         ContextManager[
             Tuple[
                 Callable[[], Optional[Message]],
                 Callable[[Message], None],
                 Optional[Callable[[], None]],
                 Optional[Callable[[], None]],
+                Optional[Callable[[int], Tuple[str, str]]],
             ]
         ],
     ],
     str,
+    Type[Exception],
 ]:
     # Parse IP address
     parsed_address = parse_address(server_address)
@@ -537,6 +634,8 @@ def _init_connection(
     # Use either gRPC bidirectional streaming or REST request/response
     if transport == TRANSPORT_TYPE_REST:
         try:
+            from requests.exceptions import ConnectionError as RequestsConnectionError
+
             from .rest_client.connection import http_request_response
         except ModuleNotFoundError:
             sys.exit(MISSING_EXTRA_REST)
@@ -545,14 +644,14 @@ def _init_connection(
                 "When using the REST API, please provide `https://` or "
                 "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
             )
-        connection = http_request_response
+        connection, error_type = http_request_response, RequestsConnectionError
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
-        connection = grpc_request_response
+        connection, error_type = grpc_request_response, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection = grpc_connection
+        connection, error_type = grpc_connection, RpcError
     else:
         raise ValueError(
             f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
         )
 
-    return connection, address
+    return connection, address, error_type
