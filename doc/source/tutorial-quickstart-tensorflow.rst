@@ -141,7 +141,7 @@ learning in action. First, we run the :code:`flower-superlink` command in one te
 
     $ flower-superlink --insecure
 
-FL systems usually have a server and multiple clients. We therefore need to start multiple `SuperNode`s, one for each client, respectively. First, we open a new terminal and start the first `SuperNode` using the :code:`flower-client-app` command.
+FL systems usually have a server and multiple clients. We therefore need to start multiple `SuperNodes`, one for each client, respectively. First, we open a new terminal and start the first `SuperNode` using the :code:`flower-client-app` command.
 
 .. code-block:: shell
 
