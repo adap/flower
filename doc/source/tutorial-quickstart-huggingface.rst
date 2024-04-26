@@ -53,11 +53,13 @@ In a file called :code:`client.py`, import Flower and PyTorch related packages:
 In addition, we define the device allocation in PyTorch with:
 
 .. code-block:: python
+
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 We also specify the model checkpoint:
 
 .. code-block:: python
+
     CHECKPOINT = "distilbert-base-uncased"
 
 Handling the data
@@ -258,7 +260,7 @@ learning in action. First, we run the :code:`flower-superlink` command in one te
 
     $ flower-superlink --insecure
 
-FL systems usually have a server and multiple clients. We therefore need to start multiple `SuperNode`s, one for each client, respectively. First, we open a new terminal and start the first `SuperNode` using the :code:`flower-client-app` command.
+FL systems usually have a server and multiple clients. We therefore need to start multiple `SuperNodes`, one for each client, respectively. First, we open a new terminal and start the first `SuperNode` using the :code:`flower-client-app` command.
 
 .. code-block:: shell
 
