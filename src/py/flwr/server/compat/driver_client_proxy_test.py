@@ -42,7 +42,6 @@ from flwr.common.typing import (
     Status,
 )
 from flwr.proto import (  # pylint: disable=E0611
-    driver_pb2,
     error_pb2,
     recordset_pb2,
     task_pb2,
@@ -174,7 +173,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         ins = GetParametersIns(config={})
 
         # Execute
-        value = self.client.get_parameters(ins=ins, timeout=None, group_id=0)
+        value = self.client.get_parameters(ins, timeout=None, group_id=0)
 
         # Assert
         self.driver.push_messages.assert_called_once()
@@ -197,7 +196,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         ins = FitIns(parameters, {})
 
         # Execute
-        value = self.client.fit(ins=ins, timeout=None, group_id=1)
+        value = self.client.fit(ins=ins, timeout=None, group_id=0)
 
         # Assert
         self.driver.push_messages.assert_called_once()
@@ -208,44 +207,25 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def test_evaluate(self) -> None:
         """Test positive case."""
         # Prepare
-        if self.driver.driver_helper is None:  # type: ignore
-            raise ValueError()
-        self.driver.driver_helper.push_task_ins.return_value = (  # type: ignore
-            driver_pb2.PushTaskInsResponse(  # pylint: disable=E1101
-                task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
-            )
+        expected_res = EvaluateRes(
+            status=CLIENT_STATUS,
+            loss=0.0,
+            num_examples=0,
+            metrics={},
         )
-        self.driver.driver_helper.pull_task_res.return_value = (  # type: ignore
-            driver_pb2.PullTaskResResponse(  # pylint: disable=E1101
-                task_res_list=[
-                    task_pb2.TaskRes(  # pylint: disable=E1101
-                        task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                        group_id=str(1),
-                        run_id=0,
-                        task=_make_message(
-                            EvaluateRes(
-                                status=CLIENT_STATUS,
-                                loss=0.0,
-                                num_examples=0,
-                                metrics={},
-                            )
-                        ),
-                    )
-                ]
-            )
-        )
-        client = DriverClientProxy(
-            node_id=1, driver=self.driver, anonymous=True, run_id=0
-        )
+        reply_msg = _make_reply_message(expected_res)
+        self.driver.pull_messages.return_value = [reply_msg]
         parameters = Parameters(tensors=[], tensor_type="np")
-        evaluate_ins = EvaluateIns(parameters, {})
+        ins = EvaluateIns(parameters, {})
 
         # Execute
-        evaluate_res = client.evaluate(evaluate_ins, timeout=None, group_id=1)
+        value = self.client.evaluate(ins, timeout=None, group_id=0)
 
         # Assert
-        assert 0.0 == evaluate_res.loss
-        assert 0 == evaluate_res.num_examples
+        self.driver.push_messages.assert_called_once()
+        self.driver.pull_messages.assert_called_once()
+        self.driver.pull_messages.assert_called_with([INSTRUCTION_MESSAGE_ID])
+        self.assertEqual(value, expected_res)
 
     def test_validate_task_res_valid(self) -> None:
         """Test valid TaskRes."""
