@@ -366,14 +366,14 @@ def run_superlink() -> None:
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-        data = _try_setup_client_authentication(args, certificates)
+        maybe_keys = _try_setup_client_authentication(args, certificates)
         interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
-        if data is not None:
+        if maybe_keys is not None:
             (
                 client_public_keys,
                 server_public_key,
                 server_private_key,
-            ) = data
+            ) = maybe_keys
             interceptors = [
                 AuthenticateServerInterceptor(
                     state_factory,
