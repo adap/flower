@@ -25,7 +25,7 @@ import pathspec
 import typer
 from typing_extensions import Annotated
 
-from .config_utils import validate_project_dir
+from .config_utils import load_and_validate_with_defaults
 from .utils import is_valid_project_name, prompt_text
 
 
@@ -78,9 +78,25 @@ def build(
         )
         raise typer.Exit(code=1)
 
-    conf = validate_project_dir(directory)
+    conf, errors, warnings = load_and_validate_with_defaults(
+        directory / "pyproject.toml"
+    )
     if conf is None:
+        typer.secho(
+            "Project configuration could not be loaded.\npyproject.toml is invalid:\n"
+            + "\n".join([f"- {line}" for line in errors]),
+            fg=typer.colors.RED,
+            bold=True,
+        )
         raise typer.Exit(code=1)
+
+    if warnings:
+        typer.secho(
+            "Project configuration is missing the following "
+            "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
+            fg=typer.colors.RED,
+            bold=True,
+        )
 
     # Load .gitignore rules if present
     ignore_spec = _load_gitignore(directory)
@@ -88,8 +104,8 @@ def build(
     # Set the name of the zip file
     fab_filename = (
         f"{conf['project']['publisher']}"
-        f"-{directory.name}"
-        f"-{conf['project']['version']}.fab"
+        f".{directory.name}"
+        f".{conf['project']['version'].replace('.', '-')}.fab"
     )
     list_file_content = ""
 
