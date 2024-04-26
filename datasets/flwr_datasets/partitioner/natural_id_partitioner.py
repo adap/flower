@@ -153,7 +153,7 @@ class NaturalIdPartitioner(Partitioner):
         )
 
     def _check_supported_type_of_value_in_partition_by(self) -> None:
-        values = self.dataset[self._partition_by]
+        values = self.dataset[0][self._partition_by]
         values_np = np.array(values)
         dtype = values_np.dtype
         if not (
