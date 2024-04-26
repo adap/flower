@@ -371,8 +371,8 @@ def run_superlink() -> None:
         if maybe_keys is not None:
             (
                 client_public_keys,
-                server_public_key,
                 server_private_key,
+                server_public_key,
             ) = maybe_keys
             interceptors = [
                 AuthenticateServerInterceptor(
@@ -423,7 +423,7 @@ def run_superlink() -> None:
 def _try_setup_client_authentication(
     args: argparse.Namespace,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
-) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePublicKey, ec.EllipticCurvePrivateKey]]:
+) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
     if not args.require_client_authentication:
         return None
 
@@ -444,12 +444,12 @@ def _try_setup_client_authentication(
         )
 
     client_public_keys: Set[bytes] = set()
-    ssh_public_key = load_ssh_public_key(
-        Path(args.require_client_authentication[1]).read_bytes()
-    )
     ssh_private_key = load_ssh_private_key(
-        Path(args.require_client_authentication[2]).read_bytes(),
+        Path(args.require_client_authentication[1]).read_bytes(),
         None,
+    )
+    ssh_public_key = load_ssh_public_key(
+        Path(args.require_client_authentication[2]).read_bytes()
     )
 
     try:
@@ -458,10 +458,10 @@ def _try_setup_client_authentication(
         )
     except TypeError:
         sys.exit(
-            "The file paths provided could not be read as a public and private "
+            "The file paths provided could not be read as a private and public "
             "key pair. Client authentication requires an elliptic curve public and "
             "private key pair. Please provide the file paths containing elliptic "
-            "curve public and private keys to '--require-client-authentication'."
+            "curve private and public keys to '--require-client-authentication'."
         )
 
     with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
@@ -479,8 +479,8 @@ def _try_setup_client_authentication(
                     )
         return (
             client_public_keys,
-            server_public_key,
             server_private_key,
+            server_public_key,
         )
 
 
@@ -705,11 +705,11 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--require-client-authentication",
         nargs=3,
-        metavar=("CLIENT_KEYS", "SERVER_PUBLIC_KEY", "SERVER_PRIVATE_KEY"),
+        metavar=("CLIENT_KEYS", "SERVER_PRIVATE_KEY", "SERVER_PUBLIC_KEY"),
         type=str,
         help="Provide three file paths: (1) a .csv file containing a list of "
-        "known client public keys for authentication, (2) the server's public "
-        "key file, and (3) the server's private key file.",
+        "known client public keys for authentication, (2) the server's private "
+        "key file, and (3) the server's public key file.",
     )
 
 
