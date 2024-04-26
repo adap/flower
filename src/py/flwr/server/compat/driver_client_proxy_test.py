@@ -40,13 +40,7 @@ from flwr.common.typing import (
     Properties,
     Status,
 )
-from flwr.proto import (  # pylint: disable=E0611
-    driver_pb2,
-    error_pb2,
-    node_pb2,
-    recordset_pb2,
-    task_pb2,
-)
+from flwr.proto import error_pb2, recordset_pb2, task_pb2  # pylint: disable=E0611
 from flwr.server.compat.driver_client_proxy import DriverClientProxy
 
 CLIENT_PROPERTIES = cast(Properties, {"tensor_type": "numpy.ndarray"})
@@ -72,14 +66,6 @@ class DriverClientProxyTestCase(unittest.TestCase):
     def setUp(self) -> None:
         """Set up mocks for tests."""
         self.driver = MagicMock()
-        self.driver.run_id = 0
-        self.driver.get_node_ids.return_value = (
-            driver_pb2.GetNodesResponse(  # pylint: disable=E1101
-                nodes=[
-                    node_pb2.Node(node_id=1, anonymous=False)  # pylint: disable=E1101
-                ]
-            )
-        )
 
     def test_get_properties(self) -> None:
         """Test positive case."""
