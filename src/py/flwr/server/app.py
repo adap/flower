@@ -376,7 +376,7 @@ def run_superlink() -> None:
             ) = maybe_keys
             interceptors = [
                 AuthenticateServerInterceptor(
-                    state_factory,
+                    state_factory.state(),
                     client_public_keys,
                     server_private_key,
                     server_public_key,

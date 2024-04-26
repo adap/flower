@@ -42,7 +42,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
 )
-from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.state import State
 
 _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
@@ -79,7 +79,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
     def __init__(
         self,
-        state_factory: StateFactory,
+        state: State,
         client_public_keys: Set[bytes],
         private_key: ec.EllipticCurvePrivateKey,
         public_key: ec.EllipticCurvePublicKey,
@@ -87,7 +87,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         self._lock = threading.Lock()
         self.server_private_key = private_key
         self.server_public_key = public_key
-        self.state = state_factory.state()
+        self.state = state
         self.state.store_client_public_keys(client_public_keys)
         self.encoded_server_public_key = base64.urlsafe_b64encode(
             public_key_to_bytes(self.server_public_key)
@@ -105,9 +105,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     ) -> grpc.RpcMethodHandler:
         """Flower server interceptor authentication logic.
 
-        Intercept unary call from client and do authentication process by validating
-        metadata sent from client. Continue RPC call if client is authenticated, else,
-        terminate RPC call by setting context to abort.
+        Intercept all unary calls from clients and authenticate clients by validating
+        auth metadata sent by the client. Continue RPC call if client is authenticated,
+        else, terminate RPC call by setting context to abort.
         """
         message_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
         return self._generic_auth_unary_method_handler(message_handler)
