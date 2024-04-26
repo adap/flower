@@ -18,15 +18,29 @@ import os
 import textwrap
 from typing import Any, Dict
 
-from .flower_toml import load, validate, validate_fields
+from .config_utils import load, validate, validate_fields
 
 
-def test_load_flower_toml_load_from_cwd(tmp_path: str) -> None:
+def test_load_pyproject_toml_load_from_cwd(tmp_path: str) -> None:
     """Test if load_template returns a string."""
     # Prepare
-    flower_toml_content = """
+    pyproject_toml_content = """
+        [build-system]
+        requires = ["hatchling"]
+        build-backend = "hatchling.build"
+
         [project]
         name = "fedgpt"
+        version = "1.0.0"
+        description = ""
+        authors = [
+            { name = "The Flower Authors", email = "hello@flower.ai" },
+        ]
+        license = {text = "Apache License (2.0)"}
+        dependencies = [
+            "flwr[simulation]>=1.8.0,<2.0",
+            "numpy>=1.21.0",
+        ]
 
         [flower.components]
         serverapp = "fedgpt.server:app"
@@ -39,8 +53,14 @@ def test_load_flower_toml_load_from_cwd(tmp_path: str) -> None:
         count = 10 # optional
     """
     expected_config = {
+        "build-system": {"build-backend": "hatchling.build", "requires": ["hatchling"]},
         "project": {
             "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "authors": [{"email": "hello@flower.ai", "name": "The Flower Authors"}],
+            "license": {"text": "Apache License (2.0)"},
+            "dependencies": ["flwr[simulation]>=1.8.0,<2.0", "numpy>=1.21.0"],
         },
         "flower": {
             "components": {
@@ -60,8 +80,8 @@ def test_load_flower_toml_load_from_cwd(tmp_path: str) -> None:
     try:
         # Change into the temporary directory
         os.chdir(tmp_path)
-        with open("flower.toml", "w", encoding="utf-8") as f:
-            f.write(textwrap.dedent(flower_toml_content))
+        with open("pyproject.toml", "w", encoding="utf-8") as f:
+            f.write(textwrap.dedent(pyproject_toml_content))
 
         # Execute
         config = load()
@@ -72,12 +92,26 @@ def test_load_flower_toml_load_from_cwd(tmp_path: str) -> None:
         os.chdir(origin)
 
 
-def test_load_flower_toml_from_path(tmp_path: str) -> None:
+def test_load_pyproject_toml_from_path(tmp_path: str) -> None:
     """Test if load_template returns a string."""
     # Prepare
-    flower_toml_content = """
+    pyproject_toml_content = """
+        [build-system]
+        requires = ["hatchling"]
+        build-backend = "hatchling.build"
+
         [project]
         name = "fedgpt"
+        version = "1.0.0"
+        description = ""
+        authors = [
+            { name = "The Flower Authors", email = "hello@flower.ai" },
+        ]
+        license = {text = "Apache License (2.0)"}
+        dependencies = [
+            "flwr[simulation]>=1.8.0,<2.0",
+            "numpy>=1.21.0",
+        ]
 
         [flower.components]
         serverapp = "fedgpt.server:app"
@@ -90,8 +124,14 @@ def test_load_flower_toml_from_path(tmp_path: str) -> None:
         count = 10 # optional
     """
     expected_config = {
+        "build-system": {"build-backend": "hatchling.build", "requires": ["hatchling"]},
         "project": {
             "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "authors": [{"email": "hello@flower.ai", "name": "The Flower Authors"}],
+            "license": {"text": "Apache License (2.0)"},
+            "dependencies": ["flwr[simulation]>=1.8.0,<2.0", "numpy>=1.21.0"],
         },
         "flower": {
             "components": {
@@ -111,11 +151,11 @@ def test_load_flower_toml_from_path(tmp_path: str) -> None:
     try:
         # Change into the temporary directory
         os.chdir(tmp_path)
-        with open("flower.toml", "w", encoding="utf-8") as f:
-            f.write(textwrap.dedent(flower_toml_content))
+        with open("pyproject.toml", "w", encoding="utf-8") as f:
+            f.write(textwrap.dedent(pyproject_toml_content))
 
         # Execute
-        config = load(path=os.path.join(tmp_path, "flower.toml"))
+        config = load(path=os.path.join(tmp_path, "pyproject.toml"))
 
         # Assert
         assert config == expected_config
@@ -123,8 +163,8 @@ def test_load_flower_toml_from_path(tmp_path: str) -> None:
         os.chdir(origin)
 
 
-def test_validate_flower_toml_fields_empty() -> None:
-    """Test that validate_flower_toml_fields fails correctly."""
+def test_validate_pyproject_toml_fields_empty() -> None:
+    """Test that validate_pyproject_toml_fields fails correctly."""
     # Prepare
     config: Dict[str, Any] = {}
 
@@ -137,8 +177,8 @@ def test_validate_flower_toml_fields_empty() -> None:
     assert len(warnings) == 0
 
 
-def test_validate_flower_toml_fields_no_flower() -> None:
-    """Test that validate_flower_toml_fields fails correctly."""
+def test_validate_pyproject_toml_fields_no_flower() -> None:
+    """Test that validate_pyproject_toml_fields fails correctly."""
     # Prepare
     config = {
         "project": {
@@ -159,8 +199,8 @@ def test_validate_flower_toml_fields_no_flower() -> None:
     assert len(warnings) == 0
 
 
-def test_validate_flower_toml_fields_no_flower_components() -> None:
-    """Test that validate_flower_toml_fields fails correctly."""
+def test_validate_pyproject_toml_fields_no_flower_components() -> None:
+    """Test that validate_pyproject_toml_fields fails correctly."""
     # Prepare
     config = {
         "project": {
@@ -182,8 +222,8 @@ def test_validate_flower_toml_fields_no_flower_components() -> None:
     assert len(warnings) == 0
 
 
-def test_validate_flower_toml_fields_no_server_and_client_app() -> None:
-    """Test that validate_flower_toml_fields fails correctly."""
+def test_validate_pyproject_toml_fields_no_server_and_client_app() -> None:
+    """Test that validate_pyproject_toml_fields fails correctly."""
     # Prepare
     config = {
         "project": {
@@ -205,8 +245,8 @@ def test_validate_flower_toml_fields_no_server_and_client_app() -> None:
     assert len(warnings) == 0
 
 
-def test_validate_flower_toml_fields() -> None:
-    """Test that validate_flower_toml_fields succeeds correctly."""
+def test_validate_pyproject_toml_fields() -> None:
+    """Test that validate_pyproject_toml_fields succeeds correctly."""
     # Prepare
     config = {
         "project": {
@@ -228,8 +268,8 @@ def test_validate_flower_toml_fields() -> None:
     assert len(warnings) == 0
 
 
-def test_validate_flower_toml() -> None:
-    """Test that validate_flower_toml succeeds correctly."""
+def test_validate_pyproject_toml() -> None:
+    """Test that validate_pyproject_toml succeeds correctly."""
     # Prepare
     config = {
         "project": {
@@ -256,8 +296,8 @@ def test_validate_flower_toml() -> None:
     assert not warnings
 
 
-def test_validate_flower_toml_fail() -> None:
-    """Test that validate_flower_toml fails correctly."""
+def test_validate_pyproject_toml_fail() -> None:
+    """Test that validate_pyproject_toml fails correctly."""
     # Prepare
     config = {
         "project": {
