@@ -185,7 +185,7 @@ class Error:
     def __init__(self, code: int, reason: str | None = None) -> None:
         var_dict = {
             "_code": code,
-            "reason": reason,
+            "_reason": reason,
         }
         self.__dict__.update(var_dict)
 
