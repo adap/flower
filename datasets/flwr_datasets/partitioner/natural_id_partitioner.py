@@ -70,11 +70,15 @@ class NaturalIdPartitioner(Partitioner):
             none_replacement: Union[int, str]
             if dtype == "string":
                 none_replacement = "None"
+                new_term = ""
+                counter = 0
                 # Ensure the replacement is not in the dataset
                 while True:
-                    if none_replacement not in unique_natural_ids:
+                    if none_replacement + new_term not in unique_natural_ids:
+                        none_replacement = none_replacement + new_term
                         break
-                    none_replacement += "1"
+                    counter += 1
+                    new_term = f"{counter}"
             elif "unit" in dtype:
                 none_replacement = max(natural_ids) + 1
             elif "int" in dtype:
