@@ -17,23 +17,25 @@
 
 import unittest
 import unittest.mock
-from typing import Union, cast
-from unittest.mock import MagicMock
+from typing import Optional, Union, cast
+from unittest.mock import Mock
 
 import numpy as np
 
 import flwr
+from flwr.common import Message, Metadata, RecordSet
 from flwr.common import recordset_compat as compat
-from flwr.common import serde
 from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.typing import (
     Code,
     Config,
     EvaluateIns,
     EvaluateRes,
+    FitIns,
     FitRes,
     GetParametersIns,
     GetParametersRes,
+    GetPropertiesIns,
     GetPropertiesRes,
     Parameters,
     Properties,
@@ -42,22 +44,25 @@ from flwr.common.typing import (
 from flwr.proto import (  # pylint: disable=E0611
     driver_pb2,
     error_pb2,
-    node_pb2,
     recordset_pb2,
     task_pb2,
 )
 from flwr.server.compat.driver_client_proxy import DriverClientProxy
-from flwr.server.driver import Driver, GrpcDriver
 
 MESSAGE_PARAMETERS = Parameters(tensors=[b"abc"], tensor_type="np")
 
 CLIENT_PROPERTIES = cast(Properties, {"tensor_type": "numpy.ndarray"})
 CLIENT_STATUS = Status(code=Code.OK, message="OK")
 
+RUN_ID = 61016
+NODE_ID = 1
+INSTRUCTION_MESSAGE_ID = "mock instruction message id"
+REPLY_MESSAGE_ID = "mock reply message id"
 
-def _make_task(
+
+def _make_reply_message(
     res: Union[GetParametersRes, GetPropertiesRes, FitRes, EvaluateRes]
-) -> task_pb2.Task:  # pylint: disable=E1101
+) -> Message:
     if isinstance(res, GetParametersRes):
         message_type = MessageTypeLegacy.GET_PARAMETERS
         recordset = compat.getparametersres_to_recordset(res, True)
@@ -72,10 +77,42 @@ def _make_task(
         recordset = compat.evaluateres_to_recordset(res)
     else:
         raise ValueError(f"Unsupported type: {type(res)}")
-    return task_pb2.Task(  # pylint: disable=E1101
-        task_type=message_type,
-        recordset=serde.recordset_to_proto(recordset),
+    metadata = Metadata(
+        run_id=RUN_ID,
+        message_id=REPLY_MESSAGE_ID,
+        src_node_id=NODE_ID,
+        dst_node_id=0,
+        reply_to_message=INSTRUCTION_MESSAGE_ID,
+        group_id=0,
+        ttl=99,
+        message_type=message_type,
     )
+    return Message(metadata, recordset)
+
+
+def _create_message_dummy(
+    content: RecordSet,
+    message_type: str,
+    dst_node_id: int,
+    group_id: str,
+    ttl: Optional[float] = None,
+) -> Message:
+    """Create a new message.
+
+    This is a method for the Mock object.
+    """
+    ttl_ = 123456 if ttl is None else ttl
+    metadata = Metadata(
+        run_id=RUN_ID,
+        message_id="",  # Will be set by the server
+        src_node_id=0,
+        dst_node_id=dst_node_id,
+        reply_to_message="",
+        group_id=group_id,
+        ttl=ttl_,
+        message_type=message_type,
+    )
+    return Message(metadata=metadata, content=content)
 
 
 def validate_task_res(
@@ -93,149 +130,80 @@ def validate_task_res(
 class DriverClientProxyTestCase(unittest.TestCase):
     """Tests for DriverClientProxy."""
 
-    __test__ = False  # disables this generic TestCase
-
-    def __init__(self, driver: Driver, *args, **kwargs) -> None:  # type: ignore
-        """Initialize TestCase with given Driver."""
-        self.driver = driver
-        super().__init__(*args, **kwargs)
-
     def setUp(self) -> None:
         """Set up mocks for tests."""
-        self.driver.driver_helper = MagicMock()  # type: ignore
-        self.driver.run_id = 0  # type: ignore
-        self.driver.driver_helper.get_nodes.return_value = (  # type: ignore
-            driver_pb2.GetNodesResponse(  # pylint: disable=E1101
-                nodes=[
-                    node_pb2.Node(node_id=1, anonymous=False)  # pylint: disable=E1101
-                ]
-            )
+        driver = Mock()
+        driver.get_node_ids.return_value = [1]
+        driver.create_message = _create_message_dummy
+        driver.push_messages.return_value = [INSTRUCTION_MESSAGE_ID]
+        client = DriverClientProxy(
+            node_id=1, driver=driver, anonymous=False, run_id=61016
         )
+
+        self.driver = driver
+        self.client = client
 
     def test_get_properties(self) -> None:
         """Test positive case."""
         # Prepare
-        if self.driver.driver_helper is None:  # type: ignore
-            raise ValueError()
-        self.driver.driver_helper.push_task_ins.return_value = (  # type: ignore
-            driver_pb2.PushTaskInsResponse(  # pylint: disable=E1101
-                task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
-            )
+        reply_msg = _make_reply_message(
+            GetPropertiesRes(status=CLIENT_STATUS, properties=CLIENT_PROPERTIES)
         )
-        self.driver.driver_helper.pull_task_res.return_value = (  # type: ignore
-            driver_pb2.PullTaskResResponse(  # pylint: disable=E1101
-                task_res_list=[
-                    task_pb2.TaskRes(  # pylint: disable=E1101
-                        task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                        group_id=str(0),
-                        run_id=0,
-                        task=_make_task(
-                            GetPropertiesRes(
-                                status=CLIENT_STATUS, properties=CLIENT_PROPERTIES
-                            )
-                        ),
-                    )
-                ]
-            )
-        )
-        client = DriverClientProxy(
-            node_id=1, driver=self.driver, anonymous=True, run_id=0
-        )
+        self.driver.pull_messages.return_value = [reply_msg]
         request_properties: Config = {"tensor_type": "str"}
-        ins: flwr.common.GetPropertiesIns = flwr.common.GetPropertiesIns(
-            config=request_properties
-        )
+        ins = GetPropertiesIns(config=request_properties)
 
         # Execute
-        value: flwr.common.GetPropertiesRes = client.get_properties(
-            ins, timeout=None, group_id=0
-        )
+        res = self.client.get_properties(ins, timeout=None, group_id=0)
 
         # Assert
-        assert value.properties["tensor_type"] == "numpy.ndarray"
+        self.driver.push_messages.assert_called_once()
+        self.driver.pull_messages.assert_called_once()
+        self.driver.pull_messages.assert_called_with([INSTRUCTION_MESSAGE_ID])
+        self.assertEqual(res.properties["tensor_type"], "numpy.ndarray")
 
     def test_get_parameters(self) -> None:
         """Test positive case."""
         # Prepare
-        if self.driver.driver_helper is None:  # type: ignore
-            raise ValueError()
-        self.driver.driver_helper.push_task_ins.return_value = (  # type: ignore
-            driver_pb2.PushTaskInsResponse(  # pylint: disable=E1101
-                task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
-            )
+        expected_res = GetParametersRes(
+            status=CLIENT_STATUS,
+            parameters=MESSAGE_PARAMETERS,
         )
-        self.driver.driver_helper.pull_task_res.return_value = (  # type: ignore
-            driver_pb2.PullTaskResResponse(  # pylint: disable=E1101
-                task_res_list=[
-                    task_pb2.TaskRes(  # pylint: disable=E1101
-                        task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                        group_id=str(0),
-                        run_id=0,
-                        task=_make_task(
-                            GetParametersRes(
-                                status=CLIENT_STATUS,
-                                parameters=MESSAGE_PARAMETERS,
-                            )
-                        ),
-                    )
-                ]
-            )
-        )
-        client = DriverClientProxy(
-            node_id=1, driver=self.driver, anonymous=True, run_id=0
-        )
-        get_parameters_ins = GetParametersIns(config={})
+        reply_msg = _make_reply_message(expected_res)
+        self.driver.pull_messages.return_value = [reply_msg]
+        ins = GetParametersIns(config={})
 
         # Execute
-        value: flwr.common.GetParametersRes = client.get_parameters(
-            ins=get_parameters_ins, timeout=None, group_id=0
-        )
+        value = self.client.get_parameters(ins=ins, timeout=None, group_id=0)
 
         # Assert
-        assert value.parameters.tensors[0] == b"abc"
+        self.driver.push_messages.assert_called_once()
+        self.driver.pull_messages.assert_called_once()
+        self.driver.pull_messages.assert_called_with([INSTRUCTION_MESSAGE_ID])
+        self.assertEqual(value, expected_res)
 
     def test_fit(self) -> None:
         """Test positive case."""
         # Prepare
-        if self.driver.driver_helper is None:  # type: ignore
-            raise ValueError()
-        self.driver.driver_helper.push_task_ins.return_value = (  # type: ignore
-            driver_pb2.PushTaskInsResponse(  # pylint: disable=E1101
-                task_ids=["19341fd7-62e1-4eb4-beb4-9876d3acda32"]
-            )
+        expected_res = FitRes(
+            status=CLIENT_STATUS,
+            parameters=MESSAGE_PARAMETERS,
+            num_examples=10,
+            metrics={},
         )
-        self.driver.driver_helper.pull_task_res.return_value = (  # type: ignore
-            driver_pb2.PullTaskResResponse(  # pylint: disable=E1101
-                task_res_list=[
-                    task_pb2.TaskRes(  # pylint: disable=E1101
-                        task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
-                        group_id=str(1),
-                        run_id=0,
-                        task=_make_task(
-                            FitRes(
-                                status=CLIENT_STATUS,
-                                parameters=MESSAGE_PARAMETERS,
-                                num_examples=10,
-                                metrics={},
-                            )
-                        ),
-                    )
-                ]
-            )
-        )
-        client = DriverClientProxy(
-            node_id=1, driver=self.driver, anonymous=True, run_id=0
-        )
+        reply_msg = _make_reply_message(expected_res)
+        self.driver.pull_messages.return_value = [reply_msg]
         parameters = flwr.common.ndarrays_to_parameters([np.ones((2, 2))])
-        ins: flwr.common.FitIns = flwr.common.FitIns(parameters, {})
+        ins = FitIns(parameters, {})
 
         # Execute
-        fit_res = client.fit(ins=ins, timeout=None, group_id=1)
+        value = self.client.fit(ins=ins, timeout=None, group_id=1)
 
         # Assert
-        assert fit_res.parameters.tensor_type == "np"
-        assert fit_res.parameters.tensors[0] == b"abc"
-        assert fit_res.num_examples == 10
+        self.driver.push_messages.assert_called_once()
+        self.driver.pull_messages.assert_called_once()
+        self.driver.pull_messages.assert_called_with([INSTRUCTION_MESSAGE_ID])
+        self.assertEqual(value, expected_res)
 
     def test_evaluate(self) -> None:
         """Test positive case."""
@@ -254,7 +222,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
                         task_id="554bd3c8-8474-4b93-a7db-c7bec1bf0012",
                         group_id=str(1),
                         run_id=0,
-                        task=_make_task(
+                        task=_make_message(
                             EvaluateRes(
                                 status=CLIENT_STATUS,
                                 loss=0.0,
@@ -352,13 +320,3 @@ class DriverClientProxyTestCase(unittest.TestCase):
         # Execute & assert
         with self.assertRaises(ValueError):
             validate_task_res(task_res=task_res)
-
-
-class TestWithGrpcDriver(DriverClientProxyTestCase):
-    """Unit test using GrpcDriver."""
-
-    __test__ = True
-
-    def __init__(self, *args, **kwargs) -> None:  # type: ignore
-        """Prepare Tests with GrpcDriver."""
-        super().__init__(GrpcDriver(), *args, **kwargs)
