@@ -54,7 +54,11 @@ def build(
 
         `flwr build --sign`
 
-    Note that this will prompt the you for the private key to use for signing.
+    Note that this will prompt you for the path of the private key to use for
+    signing the FAB file, instead, you can directly provide a `--key_path`
+    argument:
+
+        `flwr build --sign --key_path <PATH_TO_PRIVATE_KEY>`
     """
     if directory is None:
         directory = Path.cwd()
