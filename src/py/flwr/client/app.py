@@ -19,6 +19,7 @@ import time
 from logging import DEBUG, ERROR, INFO, WARN
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
+from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
 from flwr.client.client import Client
@@ -73,6 +74,9 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    authentication_keys: Optional[
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
@@ -157,6 +161,7 @@ def start_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
+        authentication_keys=authentication_keys,
         max_retries=max_retries,
         max_wait_time=max_wait_time,
     )
@@ -177,6 +182,9 @@ def _start_client_internal(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    authentication_keys: Optional[
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
@@ -303,6 +311,7 @@ def _start_client_internal(
             retry_invoker,
             grpc_max_message_length,
             root_certificates,
+            authentication_keys,
         ) as conn:
             receive, send, create_node, delete_node, get_run = conn
 
@@ -524,7 +533,14 @@ def start_numpy_client(
 
 def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     Callable[
-        [str, bool, RetryInvoker, int, Union[bytes, str, None]],
+        [
+            str,
+            bool,
+            RetryInvoker,
+            int,
+            Union[bytes, str, None],
+            Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
+        ],
         ContextManager[
             Tuple[
                 Callable[[], Optional[Message]],
