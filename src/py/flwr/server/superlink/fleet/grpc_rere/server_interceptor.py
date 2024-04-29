@@ -182,7 +182,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     verify_hmac_value = False
 
                 if not verify_hmac_value:
-                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
+                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
                 try:
                     node_id_from_client_public_key = self.state.get_node_id(
@@ -192,7 +192,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     node_id_from_client_public_key = -1
 
                 if not self._verify_node_id(node_id_from_client_public_key, request):
-                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
+                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             else:
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
