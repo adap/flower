@@ -114,7 +114,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         def _generic_method_handler(
             request: Request,
             context: grpc.ServicerContext,
-        ) -> Any:
+        ) -> Response:
             client_public_key_bytes = base64.urlsafe_b64decode(
                 _get_value_from_tuples(
                     _PUBLIC_KEY_HEADER, context.invocation_metadata()
@@ -160,7 +160,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             else:
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
-            return method_handler.unary_unary(request, context)
+            return method_handler.unary_unary(request, context)  # type: ignore
 
         return grpc.unary_unary_rpc_method_handler(
             _generic_method_handler,
