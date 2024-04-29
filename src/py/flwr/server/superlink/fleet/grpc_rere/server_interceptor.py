@@ -76,8 +76,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
     def __init__(self, state: State):
         self.state = state
-        self.server_private_key = bytes_to_private_key(state.get_server_private_key())
         self.client_public_keys = state.get_client_public_keys()
+        self.server_private_key = bytes_to_private_key(state.get_server_private_key())
         self.encoded_server_public_key = base64.urlsafe_b64encode(
             self.state.get_server_public_key()
         )
