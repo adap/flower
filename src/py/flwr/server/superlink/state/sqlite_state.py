@@ -40,19 +40,6 @@ CREATE TABLE IF NOT EXISTS node(
 );
 """
 
-SQL_CREATE_TABLE_CREDENTIAL = """
-CREATE TABLE IF NOT EXISTS credential(
-    public_key BLOB PRIMARY KEY,
-    private_key BLOB
-);
-"""
-
-SQL_CREATE_TABLE_PUBLIC_KEY = """
-CREATE TABLE IF NOT EXISTS public_key(
-    public_key BLOB UNIQUE
-);
-"""
-
 SQL_CREATE_INDEX_ONLINE_UNTIL = """
 CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 """
@@ -146,8 +133,6 @@ class SqliteState(State):  # pylint: disable=R0904
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
-        cur.execute(SQL_CREATE_TABLE_CREDENTIAL)
-        cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
@@ -588,59 +573,6 @@ class SqliteState(State):  # pylint: disable=R0904
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
-
-    def store_server_public_private_key(
-        self, public_key: bytes, private_key: bytes
-    ) -> None:
-        """Store `server_public_key` and `server_private_key` in state."""
-        query = "SELECT COUNT(*) FROM credential"
-        count = self.query(query)[0]["COUNT(*)"]
-        if count < 1:
-            query = (
-                "INSERT OR REPLACE INTO credential (public_key, private_key) "
-                "VALUES (:public_key, :private_key)"
-            )
-            self.query(query, {"public_key": public_key, "private_key": private_key})
-        else:
-            raise RuntimeError("Server public and private key already set")
-
-    def get_server_private_key(self) -> Optional[bytes]:
-        """Retrieve `server_private_key` in urlsafe bytes."""
-        query = "SELECT private_key FROM credential"
-        rows = self.query(query)
-        try:
-            private_key: Optional[bytes] = rows[0]["private_key"]
-        except IndexError:
-            private_key = None
-        return private_key
-
-    def get_server_public_key(self) -> Optional[bytes]:
-        """Retrieve `server_public_key` in urlsafe bytes."""
-        query = "SELECT public_key FROM credential"
-        rows = self.query(query)
-        try:
-            public_key: Optional[bytes] = rows[0]["public_key"]
-        except IndexError:
-            public_key = None
-        return public_key
-
-    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
-        """Store a set of `client_public_keys` in state."""
-        query = "INSERT INTO public_key (public_key) VALUES (?)"
-        data = [(key,) for key in public_keys]
-        self.query(query, data)
-
-    def store_client_public_key(self, public_key: bytes) -> None:
-        """Store a `client_public_key` in state."""
-        query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
-        self.query(query, {"public_key": public_key})
-
-    def get_client_public_keys(self) -> Set[bytes]:
-        """Retrieve all currently stored `client_public_keys` as a set."""
-        query = "SELECT public_key FROM public_key"
-        rows = self.query(query)
-        result: Set[bytes] = {row["public_key"] for row in rows}
-        return result
 
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""

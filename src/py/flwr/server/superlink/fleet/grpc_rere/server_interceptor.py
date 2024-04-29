@@ -16,7 +16,6 @@
 
 
 import base64
-import threading
 from logging import INFO
 from typing import Any, Callable, Sequence, Set, Tuple, Union
 
@@ -42,7 +41,6 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
 )
-from flwr.server.superlink.state import State
 
 _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
@@ -79,18 +77,14 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
     def __init__(
         self,
-        state: State,
         client_public_keys: Set[bytes],
         private_key: ec.EllipticCurvePrivateKey,
         public_key: ec.EllipticCurvePublicKey,
     ):
-        self._lock = threading.Lock()
         self.server_private_key = private_key
-        self.server_public_key = public_key
-        self.state = state
-        self.state.store_client_public_keys(client_public_keys)
+        self.client_public_keys = client_public_keys
         self.encoded_server_public_key = base64.urlsafe_b64encode(
-            public_key_to_bytes(self.server_public_key)
+            public_key_to_bytes(public_key)
         )
         log(
             INFO,
@@ -109,7 +103,6 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         auth metadata sent by the client. Continue RPC call if client is authenticated,
         else, terminate RPC call by setting context to abort.
         """
-        
         # The default message handler in flwr.server.superlink.fleet.message_handler
         message_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
         return self._generic_auth_unary_method_handler(message_handler)
@@ -121,55 +114,52 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             request: Request,
             context: grpc.ServicerContext,
         ) -> Any:
-            with self._lock:
-                client_public_key_bytes = base64.urlsafe_b64decode(
-                    _get_value_from_tuples(
-                        _PUBLIC_KEY_HEADER, context.invocation_metadata()
-                    )
+            client_public_key_bytes = base64.urlsafe_b64decode(
+                _get_value_from_tuples(
+                    _PUBLIC_KEY_HEADER, context.invocation_metadata()
                 )
-                is_public_key_known = (
-                    client_public_key_bytes in self.state.get_client_public_keys()
-                )
-                if not is_public_key_known:
-                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
+            )
+            is_public_key_known = client_public_key_bytes in self.client_public_keys
+            if not is_public_key_known:
+                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
 
-                if isinstance(request, CreateNodeRequest):
-                    context.send_initial_metadata(
-                        (
-                            (
-                                _PUBLIC_KEY_HEADER,
-                                self.encoded_server_public_key,
-                            ),
-                        )
-                    )
-                elif isinstance(
-                    request,
+            if isinstance(request, CreateNodeRequest):
+                context.send_initial_metadata(
                     (
-                        DeleteNodeRequest,
-                        PullTaskInsRequest,
-                        PushTaskResRequest,
-                        GetRunRequest,
-                    ),
-                ):
-                    hmac_value = base64.urlsafe_b64decode(
-                        _get_value_from_tuples(
-                            _AUTH_TOKEN_HEADER, context.invocation_metadata()
-                        )
+                        (
+                            _PUBLIC_KEY_HEADER,
+                            self.encoded_server_public_key,
+                        ),
                     )
-                    client_public_key = bytes_to_public_key(client_public_key_bytes)
-                    shared_secret = generate_shared_key(
-                        self.server_private_key,
-                        client_public_key,
+                )
+            elif isinstance(
+                request,
+                (
+                    DeleteNodeRequest,
+                    PullTaskInsRequest,
+                    PushTaskResRequest,
+                    GetRunRequest,
+                ),
+            ):
+                hmac_value = base64.urlsafe_b64decode(
+                    _get_value_from_tuples(
+                        _AUTH_TOKEN_HEADER, context.invocation_metadata()
                     )
-                    verify = verify_hmac(
-                        shared_secret, request.SerializeToString(True), hmac_value
-                    )
-                    if not verify:
-                        context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
-                else:
+                )
+                client_public_key = bytes_to_public_key(client_public_key_bytes)
+                shared_secret = generate_shared_key(
+                    self.server_private_key,
+                    client_public_key,
+                )
+                verify = verify_hmac(
+                    shared_secret, request.SerializeToString(True), hmac_value
+                )
+                if not verify:
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
+            else:
+                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
 
-                return message_handler.unary_unary(request, context)
+            return message_handler.unary_unary(request, context)
 
         return grpc.unary_unary_rpc_method_handler(
             _generic_method_handler,
