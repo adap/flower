@@ -192,7 +192,7 @@ def warn_deprecated_feature(name: str) -> None:
 def set_logger_propagation(
     child_logger: logging.Logger, value: bool = True
 ) -> logging.Logger:
-    """Sets the logger propagation attribute.
+    """Set the logger propagation attribute.
 
     Parameters
     ----------
