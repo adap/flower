@@ -148,7 +148,7 @@ def _try_setup_client_authentication(
         None,
     )
     ssh_public_key = load_ssh_public_key(Path(args.authentication_keys[1]).read_bytes())
-    
+
     try:
         client_private_key, client_public_key = ssh_types_to_elliptic_curve(
             ssh_private_key, ssh_public_key
