@@ -189,9 +189,27 @@ def warn_deprecated_feature(name: str) -> None:
     )
 
 
-def set_logger_propagation(local_logger: logging.Logger, value: bool) -> logging.Logger:
-    """Sets logger propagation."""
-    local_logger.propagate = value
-    if local_logger.propagate is False:
-        local_logger(logging.INFO, "Logger propagate set to False")
-    return local_logger
+def set_logger_propagation(
+    child_logger: logging.Logger, value: bool = True
+) -> logging.Logger:
+    """Sets logger propagation.
+
+    Parameters
+    ----------
+    child_logger : logging.Logger
+        Child logger object
+    value : bool
+        Boolean setting for propagation. If True, both parent and child logger
+        display messages. Otherwise, only the child logger displays a message.
+        Prevents duplicate logs in Colab notebooks.
+        Reference: https://stackoverflow.com/a/19561320
+
+    Returns
+    -------
+    logging.Logger
+        Child logger object with updated propagation setting
+    """
+    child_logger.propagate = value
+    if not child_logger.propagate:
+        child_logger.log(logging.DEBUG, "Logger propagate set to False")
+    return child_logger

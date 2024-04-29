@@ -365,8 +365,7 @@ def _run_simulation(
     finally:
         if run_in_thread:
             # Set logger propagation to False to prevent duplicated log output in Colab.
-            # If False, only child logger displays messages and parent logger does not.
-            set_logger_propagation(log, False)
+            logger = set_logger_propagation(logger, False)
             log(DEBUG, "Starting Simulation Engine on a new thread.")
             simulation_engine_th = threading.Thread(target=_main_loop, args=args)
             simulation_engine_th.start()
