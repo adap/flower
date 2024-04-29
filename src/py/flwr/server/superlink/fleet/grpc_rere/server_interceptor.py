@@ -121,7 +121,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             )
             is_public_key_known = client_public_key_bytes in self.client_public_keys
             if not is_public_key_known:
-                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
+                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             if isinstance(request, CreateNodeRequest):
                 context.send_initial_metadata(
@@ -155,9 +155,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     shared_secret, request.SerializeToString(True), hmac_value
                 )
                 if not verify:
-                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
+                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
             else:
-                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
+                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             return message_handler.unary_unary(request, context)
 
