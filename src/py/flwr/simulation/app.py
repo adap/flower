@@ -15,6 +15,8 @@
 """Flower simulation app."""
 
 
+import asyncio
+import logging
 import sys
 import threading
 import traceback
@@ -26,7 +28,7 @@ import ray
 from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
 from flwr.client import ClientFn
-from flwr.common import EventType, event
+from flwr.common import EventType, event, set_logger_propagation
 from flwr.common.logger import log
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
@@ -85,6 +87,7 @@ def start_simulation(
     actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
     actor_kwargs: Optional[Dict[str, Any]] = None,
     actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
+    verbose_logging: bool = False,
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -156,16 +159,36 @@ def start_simulation(
         is an advanced feature. For all details, please refer to the Ray documentation:
         https://docs.ray.io/en/latest/ray-core/scheduling/index.html
 
+    verbose_logging : bool (default: False)
+        When disabled, only INFO, WARNING and ERROR log messages will be shown. If
+        enabled, DEBUG-level logs will be displayed.
+
     Returns
     -------
     hist : flwr.server.history.History
         Object containing metrics from training.
     """  # noqa: E501
+    # Set logging level
+    if not verbose_logging:
+        logger = logging.getLogger("flwr")
+        logger.setLevel(INFO)
+
     # pylint: disable-msg=too-many-locals
     event(
         EventType.START_SIMULATION_ENTER,
         {"num_clients": len(clients_ids) if clients_ids is not None else num_clients},
     )
+
+    # Set logger propagation
+    loop: Optional[asyncio.AbstractEventLoop] = None
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+    finally:
+        if loop and loop.is_running():
+            # Set logger propagation to False to prevent duplicated log output in Colab.
+            logger = set_logger_propagation(logger, False)
 
     # Initialize server and server config
     initialized_server, initialized_config = init_defaults(
