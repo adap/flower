@@ -148,17 +148,17 @@ def _try_setup_client_authentication(
         None,
     )
     ssh_public_key = load_ssh_public_key(Path(args.authentication_keys[1]).read_bytes())
-    
+
     try:
         client_private_key, client_public_key = ssh_types_to_elliptic_curve(
             ssh_private_key, ssh_public_key
         )
     except TypeError:
         sys.exit(
-            "The file paths provided do not contain a vaild public and private "
-            "key. Client authentication requires an elliptic curve public and "
-            "private key pair. Please provide the file path containing elliptic "
-            "curve public and private key to '--authentication-keys'."
+            "The file paths provided could not be read as a private and public "
+            "key pair. Client authentication requires an elliptic curve public and "
+            "private key pair. Please provide the file paths containing elliptic "
+            "curve private and public keys to '--authentication-keys'."
         )
 
     return (
@@ -661,7 +661,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
             RetryInvoker,
             int,
             Union[bytes, str, None],
-            Union[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey], None],
+            Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
         ],
         ContextManager[
             Tuple[
