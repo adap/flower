@@ -103,12 +103,13 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         auth metadata sent by the client. Continue RPC call if client is authenticated,
         else, terminate RPC call by setting context to abort.
         """
-        # One of the method handlers in `flwr.server.superlink.fleet.grpc_rere.fleet_server.FleetServicer`
+        # One of the method handlers in
+        # `flwr.server.superlink.fleet.grpc_rere.fleet_server.FleetServicer`
         method_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
-        return self._generic_auth_unary_method_handler(message_handler)
+        return self._generic_auth_unary_method_handler(method_handler)
 
     def _generic_auth_unary_method_handler(
-        self, message_handler: grpc.RpcMethodHandler
+        self, method_handler: grpc.RpcMethodHandler
     ) -> grpc.RpcMethodHandler:
         def _generic_method_handler(
             request: Request,
@@ -159,10 +160,10 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             else:
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
-            return message_handler.unary_unary(request, context)
+            return method_handler.unary_unary(request, context)
 
         return grpc.unary_unary_rpc_method_handler(
             _generic_method_handler,
-            request_deserializer=message_handler.request_deserializer,
-            response_serializer=message_handler.response_serializer,
+            request_deserializer=method_handler.request_deserializer,
+            response_serializer=method_handler.response_serializer,
         )
