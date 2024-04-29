@@ -22,9 +22,9 @@ from sys import argv
 from typing import Dict, Optional, Set, Tuple
 
 from github import Github
-from github.Tag import Tag
-from github.Repository import Repository
 from github.PullRequest import PullRequest
+from github.Repository import Repository
+from github.Tag import Tag
 
 REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "doc/source/ref-changelog.md"
