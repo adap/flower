@@ -68,7 +68,7 @@ timeout 2m flower-client-app client:app $client_arg $rest_arg --server $server_a
 cl2_pid=$!
 sleep 3
 
-timeout 2m flower-server-app server:app $client_arg &
+timeout 2m flower-server-app server:app $client_arg --dir $server_dir &
 pid=$!
 
 wait $pid
