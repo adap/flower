@@ -24,7 +24,7 @@ def load_data(partition_id):
     # Divide data: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
 
-    tokenizer = AutoTokenizer.from_pretrained(CHECKPOINT)
+    tokenizer = AutoTokenizer.from_pretrained(CHECKPOINT, model_max_length=512)
 
     def tokenize_function(examples):
         return tokenizer(examples["text"], truncation=True)
