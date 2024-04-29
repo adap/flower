@@ -16,8 +16,8 @@
 """This module is used to update the changelog."""
 
 
-from datetime import date
 import re
+from datetime import date
 from sys import argv
 
 from github import Github
