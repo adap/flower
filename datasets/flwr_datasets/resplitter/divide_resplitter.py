@@ -112,6 +112,7 @@ class DivideResplitter:
         ]
 
         self._config_type = _determine_config_type(divide_config)
+        self._check_type_correctness(divide_config)
         if self._config_type == "single-split":
             self._single_split_config = cast(
                 Union[Dict[str, float], Dict[str, int]], divide_config
@@ -298,6 +299,61 @@ class DivideResplitter:
                 "ignored.",
                 stacklevel=1,
             )
+
+    def _check_type_correctness(
+        self,
+        divide_config: Union[
+            Dict[str, float],
+            Dict[str, int],
+            Dict[str, Dict[str, float]],
+            Dict[str, Dict[str, int]],
+        ],
+    ) -> None:
+        if not isinstance(divide_config, dict):
+            raise ValueError("Provided input dictionary is not a dictionary")
+        assert self._config_type in [
+            "single-split",
+            "multiple-splits",
+        ], "Incorrect config type"
+        if self._config_type == "single-split":
+            if all(
+                isinstance(key, str) and isinstance(value, float)
+                for key, value in divide_config.items()
+            ):
+                return
+            if all(
+                isinstance(key, str) and isinstance(value, int)
+                for key, value in divide_config.items()
+            ):
+                return
+
+            raise ValueError(
+                "Dictionary for single-split config does not match required type "
+                "Dict[str, float] or Dict[str, int]"
+            )
+
+        # multiple-splits
+        if all(
+            isinstance(key, str)
+            and isinstance(value, dict)
+            and all(
+                isinstance(k, str) and isinstance(v, float) for k, v in value.items()
+            )
+            for key, value in divide_config.items()
+        ):
+            return
+        if all(
+            isinstance(key, str)
+            and isinstance(value, dict)
+            and all(isinstance(k, str) and isinstance(v, int) for k, v in value.items())
+            for key, value in divide_config.items()
+        ):
+            return
+
+        raise ValueError(
+            "Multi-split dictionary does not match required type "
+            "Dict[str, Dict[str, float]] or Dict[str, Dict[str, int]]"
+        )
 
 
 def _determine_config_type(
