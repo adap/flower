@@ -56,11 +56,19 @@ def build(
 
         `flwr build --sign`
 
-    Note that this will prompt you for the path of the private key to use for
+    Note that this will prompt you for the path of the private RSA key to use for
     signing the FAB file, instead, you can directly provide a `--key_path`
     argument:
 
-        `flwr build --sign --key_path <PATH_TO_PRIVATE_KEY>`
+        `flwr build --sign --key_path <PATH_TO_PRIVATE_RSA_KEY>`
+
+    If you wish to generate such a private key, you can use the following
+    command:
+
+        `openssl genrsa -out <KEY_NAME> 4096`
+
+    Note that `openssl rsa -in <KEY_NAME> -pubout > <KEY_NAME>.pub` will generate
+    the associated public key.
     """
     if directory is None:
         directory = Path.cwd()
@@ -154,7 +162,7 @@ def build(
                 with open(key_path, "rb") as key_file:
                     private_key = serialization.load_pem_private_key(
                         key_file.read(),
-                        password=None,  # This won't work for password protected
+                        password=None,  # This won't work with encrypted keys
                         backend=default_backend(),
                     )
                     secret_key = private_key.private_bytes(
