@@ -19,8 +19,12 @@
 import re
 from datetime import date
 from sys import argv
+from typing import Dict, Optional, Set, Tuple
 
 from github import Github
+from github.Tag import Tag
+from github.Repository import Repository
+from github.PullRequest import PullRequest
 
 REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "doc/source/ref-changelog.md"
@@ -29,14 +33,14 @@ TYPES_PATTERN = r"(build|ci|docs|feat|fix|perf|refactor|style|test)"
 SCOPES_PATTERN = r"(framework|datasets|examples|baselines|sdk|skip)"
 
 
-def _get_latest_tag(gh_api):
+def _get_latest_tag(gh_api: Github) -> Tuple[Repository, Optional[Tag]]:
     """Retrieve the latest tag from the GitHub repository."""
     repo = gh_api.get_repo(REPO_NAME)
     tags = repo.get_tags()
     return repo, tags[0] if tags.totalCount > 0 else None
 
 
-def _add_shorlog(new_version, shortlog):
+def _add_shorlog(new_version: str, shortlog: str) -> None:
     """Update the markdown file with the new version information or update existing logs."""
     token = f"<!---TOKEN_{new_version}-->"
     entry = (
@@ -60,7 +64,9 @@ def _add_shorlog(new_version, shortlog):
                 file.write(line)
 
 
-def _get_pull_requests_since_tag(repo, tag):
+def _get_pull_requests_since_tag(
+    repo: Repository, tag: Tag
+) -> Tuple[str, Set[PullRequest]]:
     """Get a list of pull requests merged into the main branch since a given tag."""
     commit_shas = set()
     contributors = set()
@@ -86,12 +92,14 @@ def _get_pull_requests_since_tag(repo, tag):
     return shortlog, prs
 
 
-def _format_pr_reference(title, number, url):
+def _format_pr_reference(title: str, number: int, url: str) -> str:
     """Format a pull request reference as a markdown list item."""
     return f"- **{title.replace('*', '')}** ([#{number}]({url}))"
 
 
-def _extract_changelog_entry(pr_info):
+def _extract_changelog_entry(
+    pr_info: PullRequest,
+) -> Tuple[Optional[str], Dict[str, str]]:
     """Extract the changelog entry from a pull request's body."""
     pattern = (
         rf"^({TYPES_PATTERN})\(({SCOPES_PATTERN})(?::([^:]+))?\): "
@@ -151,7 +159,7 @@ def _extract_changelog_entry(pr_info):
     # Find the token based on the presence of its marker in entry_text
     token = next(
         (token for token, marker in token_markers.items() if marker in entry_text),
-        None,
+        "unknown",
     )
 
     return entry_text, {
@@ -162,7 +170,7 @@ def _extract_changelog_entry(pr_info):
     }
 
 
-def _update_changelog(prs):
+def _update_changelog(prs: Set[PullRequest]) -> None:
     """Update the changelog file with entries from provided pull requests."""
     with open(CHANGELOG_FILE, "r+", encoding="utf-8") as file:
         content = file.read()
@@ -233,7 +241,7 @@ def _update_changelog(prs):
         file.truncate()
 
 
-def _get_category_title(category):
+def _get_category_title(category: str) -> str:
     """Get the title of a changelog section based on its category."""
     headers = {
         "framework": "Framework improvements",
@@ -247,8 +255,12 @@ def _get_category_title(category):
 
 
 def _update_entry(
-    content, category_title, pr_info, unreleased_index, next_header_index
-):
+    content: str,
+    category_title: str,
+    pr_info: PullRequest,
+    unreleased_index: int,
+    next_header_index: int,
+) -> str:
     """Update a specific section in the changelog content."""
     if (
         section_index := content.find(
@@ -272,7 +284,13 @@ def _update_entry(
     return content
 
 
-def _insert_new_entry(content, pr_info, pr_reference, pr_entry_text, unreleased_index):
+def _insert_new_entry(
+    content: str,
+    pr_info: PullRequest,
+    pr_reference: str,
+    pr_entry_text: str,
+    unreleased_index: int,
+) -> str:
     """Insert a new entry into the changelog."""
     if (existing_entry_start := content.find(pr_entry_text)) != -1:
         pr_ref_end = content.rfind("\n", 0, existing_entry_start)
@@ -306,7 +324,9 @@ def _insert_new_entry(content, pr_info, pr_reference, pr_entry_text, unreleased_
     return content
 
 
-def _insert_entry_no_desc(content, pr_reference, unreleased_index):
+def _insert_entry_no_desc(
+    content: str, pr_reference: str, unreleased_index: int
+) -> str:
     """Insert a changelog entry for a pull request with no specific description."""
     insert_index = content.find("\n", unreleased_index) + 1
     content = (
@@ -315,7 +335,7 @@ def _insert_entry_no_desc(content, pr_reference, unreleased_index):
     return content
 
 
-def _bump_minor_version(tag):
+def _bump_minor_version(tag: Tag) -> Optional[str]:
     """Bump the minor version of the tag."""
     match = re.match(r"v(\d+)\.(\d+)\.(\d+)", tag.name)
     if match is None:
@@ -326,7 +346,7 @@ def _bump_minor_version(tag):
     return new_version
 
 
-def main():
+def main() -> None:
     """Update changelog using the descriptions of PRs since the latest tag."""
     # Initialize GitHub Client with provided token (as argument)
     gh_api = Github(argv[1])
