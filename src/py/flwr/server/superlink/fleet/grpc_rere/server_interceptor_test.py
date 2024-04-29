@@ -25,6 +25,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     generate_key_pairs,
     generate_shared_key,
     public_key_to_bytes,
+    private_key_to_bytes
 )
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -59,11 +60,11 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
 
         state_factory = StateFactory(":flwr-in-memory-state:")
         state = state_factory.state()
+        state.store_server_public_private_key(public_key_to_bytes(self._server_public_key), private_key_to_bytes(self._server_private_key))
+        state.store_client_public_keys({public_key_to_bytes(self._client_public_key)})
         
         self._server_interceptor = AuthenticateServerInterceptor(
-            {public_key_to_bytes(self._client_public_key)},
-            self._server_private_key,
-            self._server_public_key,
+            state
         )
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             ADDRESS_FLEET_API_GRPC_RERE, state_factory, None, [self._server_interceptor]
