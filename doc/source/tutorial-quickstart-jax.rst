@@ -13,6 +13,12 @@ We will structure the example similar to our `PyTorch - From Centralized To Fede
 First, we build a centralized training approach based on the `Linear Regression with JAX <https://coax.readthedocs.io/en/latest/examples/linear_regression/jax.html>`_ tutorial`.
 Then, we build upon the centralized training code to run the training in a federated fashion.
 
+
+Dependencies
+------------
+
+First of all, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
+
 Before we start building our JAX example, we need install the packages :code:`jax`, :code:`jaxlib`, :code:`scikit-learn`, and :code:`flwr`:
 
 .. code-block:: shell
@@ -110,7 +116,7 @@ Having defined the data loading, model architecture, training, and evaluation we
 
 You can now run your (centralized) JAX linear regression workload:
 
-.. code-block:: python
+.. code-block:: shell
 
     python3 jax_training.py
 
@@ -126,7 +132,9 @@ The *server* sends model parameters to the clients. The *clients* run the traini
 The updated parameters are sent back to the *server*, which averages all received parameter updates.
 This describes one round of the federated learning process, and we repeat this for multiple rounds.
 
-Our example consists of one *server* and two *clients*. Let's set up :code:`server.py` first. The *server* needs to import the Flower package :code:`flwr`.
+Our example consists of one *server* and two *clients*.
+
+Let's set up :code:`server.py` first. The *server* needs to import the Flower package :code:`flwr`.
 Next, we use the :code:`start_server` function to start a server and tell it to perform three rounds of federated learning.
 
 .. code-block:: python
@@ -141,6 +149,10 @@ We can already start the *server*:
 .. code-block:: python
 
     python3 server.py
+
+
+Flower Client
+-------------
 
 Finally, we will define our *client* logic in :code:`client.py` and build upon the previously defined JAX training in :code:`jax_training.py`.
 Our *client* needs to import :code:`flwr`, but also :code:`jax` and :code:`jaxlib` to update the parameters on our JAX model:
