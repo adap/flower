@@ -15,11 +15,15 @@
 """Flower SuperNode."""
 
 import argparse
+import os
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Callable, Optional
 
+import tomli
+
+from flwr.cli.config_utils import validate_fields
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
 from flwr.common.exit_handlers import register_exit_handlers
@@ -35,11 +39,19 @@ def run_supernode() -> None:
 
     event(EventType.RUN_SUPERNODE_ENTER)
 
-    _ = _parse_args_run_supernode().parse_args()
+    args = _parse_args_run_supernode().parse_args()
 
-    log(
-        DEBUG,
-        "Flower SuperNode starting...",
+    root_certificates = _get_certificates(args)
+    load_fn = _get_load_client_app_fn(args, multi_app=True)
+
+    _start_client_internal(
+        server_address=args.server,
+        load_client_app_fn=load_fn,
+        transport="rest" if args.rest else "grpc-rere",
+        root_certificates=root_certificates,
+        insecure=args.insecure,
+        max_retries=args.max_retries,
+        max_wait_time=args.max_wait_time,
     )
 
     # Graceful shutdown
@@ -57,12 +69,7 @@ def run_client_app() -> None:
     args = _parse_args_run_client_app().parse_args()
 
     root_certificates = _get_certificates(args)
-    log(
-        DEBUG,
-        "Flower will load ClientApp `%s`",
-        getattr(args, "client-app"),
-    )
-    load_fn = _get_load_client_app_fn(args)
+    load_fn = _get_load_client_app_fn(args, multi_app=False)
 
     _start_client_internal(
         server_address=args.server,
@@ -112,24 +119,117 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
 
 
 def _get_load_client_app_fn(
-    args: argparse.Namespace,
-) -> Callable[[], ClientApp]:
-    """Get the load_client_app_fn function."""
-    client_app_dir = args.dir
-    if client_app_dir is not None:
-        sys.path.insert(0, client_app_dir)
+    args: argparse.Namespace, multi_app: bool
+) -> Callable[[str, str], ClientApp]:
+    """Get the load_client_app_fn function.
 
-    app_ref: str = getattr(args, "client-app")
-    valid, error_msg = validate(app_ref)
-    if not valid and error_msg:
-        raise LoadClientAppError(error_msg) from None
+    If `multi_app` is True, this function loads the specified ClientApp
+    based on `fab_id` and `fab_version`. If `fab_id` is empty, a default
+    ClientApp will be loaded.
 
-    def _load() -> ClientApp:
-        client_app = load_app(app_ref, LoadClientAppError)
+    If `multi_app` is False, it ignores `fab_id` and `fab_version` and
+    loads a default ClientApp.
+    """
+    # Find the Flower directory containing Flower Apps (only for multi-app)
+    flwr_dir = Path("")
+    if "flwr_dir" in args:
+        if args.flwr_dir is None:
+            flwr_dir = Path(
+                os.getenv(
+                    "FLWR_HOME",
+                    f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
+                )
+            )
+        else:
+            flwr_dir = Path(args.flwr_dir)
+
+    sys.path.insert(0, str(flwr_dir))
+
+    default_app_ref: str = getattr(args, "client-app")
+
+    if not multi_app:
+        log(
+            DEBUG,
+            "Flower will load ClientApp `%s`",
+            getattr(args, "client-app"),
+        )
+        valid, error_msg = validate(default_app_ref)
+        if not valid and error_msg:
+            raise LoadClientAppError(error_msg) from None
+
+    def _load(fab_id: str, fab_version: str) -> ClientApp:
+        # If multi-app feature is disabled
+        if not multi_app:
+            # Set sys.path
+            sys.path[0] = args.dir
+
+            # Set app reference
+            client_app_ref = default_app_ref
+        # If multi-app feature is enabled but the fab id is not specified
+        elif fab_id == "":
+            if default_app_ref == "":
+                raise LoadClientAppError(
+                    "Invalid FAB ID: The FAB ID is empty.",
+                ) from None
+
+            log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
+            # Set sys.path
+            sys.path[0] = args.dir
+
+            # Set app reference
+            client_app_ref = default_app_ref
+        # If multi-app feature is enabled
+        else:
+            # Check the fab_id
+            if fab_id.count("/") != 1:
+                raise LoadClientAppError(
+                    f"Invalid FAB ID: {fab_id}",
+                ) from None
+            username, project_name = fab_id.split("/")
+
+            # Locate the directory
+            project_dir = flwr_dir / "apps" / username / project_name / fab_version
+
+            # Check if the directory exists
+            if not project_dir.exists():
+                raise LoadClientAppError(
+                    f"Invalid Flower App directory: {project_dir}",
+                ) from None
+
+            # Load pyproject.toml file
+            toml_path = project_dir / "pyproject.toml"
+            if not os.path.isfile(toml_path):
+                raise LoadClientAppError(
+                    f"Cannot find pyproject.toml in {project_dir}",
+                ) from None
+            with open(toml_path, encoding="utf-8") as toml_file:
+                config = tomli.loads(toml_file.read())
+
+            # Validate pyproject.toml fields
+            is_valid, errors, _ = validate_fields(config)
+            if not is_valid:
+                error_msg = "\n".join([f"  - {error}" for error in errors])
+                raise LoadClientAppError(
+                    f"Invalid pyproject.toml:\n{error_msg}",
+                ) from None
+
+            # Set sys.path
+            sys.path[0] = str(project_dir)
+
+            # Set app reference
+            client_app_ref = config["flower"]["components"]["clientapp"]
+
+        # Load ClientApp
+        log(
+            DEBUG,
+            "Loading ClientApp `%s`",
+            client_app_ref,
+        )
+        client_app = load_app(client_app_ref, LoadClientAppError)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
-                f"Attribute {app_ref} is not of type {ClientApp}",
+                f"Attribute {client_app_ref} is not of type {ClientApp}",
             ) from None
 
         return client_app
