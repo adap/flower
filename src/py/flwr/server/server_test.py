@@ -25,6 +25,8 @@ import numpy as np
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
     Encoding,
+    NoEncryption,
+    PrivateFormat,
     PublicFormat,
     load_ssh_private_key,
     load_ssh_public_key,
@@ -201,34 +203,26 @@ def test_set_max_workers() -> None:
     assert server.max_workers == 42
 
 
-def test_setup_client_auth() -> None:
+def test_setup_client_auth() -> None:  # pylint: disable=R0914
     """Test setup client authentication."""
-    # Generate keys
+    # Prepare
     _, first_public_key = generate_key_pairs()
-    server_public_key = (
-        b"ecdsa-sha2-nistp384 "
-        b"AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBIqtP/EvrgBYukcjRJT9zVLXE"
-        b"fykvVvT/QcHXuxCNu83SyCwedk3nNZxy5rZ1f8KoU+OSGmum5I9BxnWcLeBC+TGqpifTUSNwa/riV"
-        b"oJGcN/SxF3euqQg58YePORhos/Ug=="
+    private_key, public_key = generate_key_pairs()
+
+    server_public_key = public_key.public_bytes(
+        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
     )
-    server_private_key = b"""-----BEGIN OPENSSH PRIVATE KEY-----
-    b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAiAAAABNlY2RzYS
-    1zaGEyLW5pc3RwMzg0AAAACG5pc3RwMzg0AAAAYQSKrT/xL64AWLpHI0SU/c1S1xH8pL1b
-    0/0HB17sQjbvN0sgsHnZN5zWccua2dX/CqFPjkhprpuSPQcZ1nC3gQvkxqqYn01EjcGv64
-    laCRnDf0sRd3rqkIOfGHjzkYaLP1IAAADw/rbMO/62zDsAAAATZWNkc2Etc2hhMi1uaXN0
-    cDM4NAAAAAhuaXN0cDM4NAAAAGEEiq0/8S+uAFi6RyNElP3NUtcR/KS9W9P9Bwde7EI27z
-    dLILB52Tec1nHLmtnV/wqhT45Iaa6bkj0HGdZwt4EL5MaqmJ9NRI3Br+uJWgkZw39LEXd6
-    6pCDnxh485GGiz9SAAAAMQDQmvP7JeFNBDvo1VXciQF0Wv3/DCcj9x0kUABuX1gxb42Iw3
-    v7FOEco/enMaS4URwAAAAnZGFuaWVsbnVncmFoYUBEYW5pZWxzLU1hY0Jvb2stUHJvLmxv
-    Y2Fs
-    -----END OPENSSH PRIVATE KEY-----"""
+    server_private_key = private_key.private_bytes(
+        Encoding.PEM, PrivateFormat.OpenSSH, NoEncryption()
+    )
     _, second_public_key = generate_key_pairs()
 
+    # Execute
     with tempfile.TemporaryDirectory() as temp_dir:
         # Initialize temporary files
         client_keys_file_path = Path(temp_dir) / "client_keys.csv"
-        server_public_key_path = Path(temp_dir) / "server_public_key"
         server_private_key_path = Path(temp_dir) / "server_private_key"
+        server_public_key_path = Path(temp_dir) / "server_public_key"
 
         # Fill the files with relevant keys
         with open(client_keys_file_path, "w", newline="", encoding="utf-8") as csvfile:
@@ -250,8 +244,8 @@ def test_setup_client_auth() -> None:
         mock_args = argparse.Namespace(
             require_client_authentication=[
                 str(client_keys_file_path),
-                str(server_public_key_path),
                 str(server_private_key_path),
+                str(server_public_key_path),
             ]
         )
 
@@ -261,20 +255,17 @@ def test_setup_client_auth() -> None:
         expected_private_key = load_ssh_private_key(server_private_key, None)
         expected_public_key = load_ssh_public_key(server_public_key)
 
-        if isinstance(expected_private_key, ec.EllipticCurvePrivateKey) and isinstance(
-            expected_public_key, ec.EllipticCurvePublicKey
-        ):
-            # Assert result with expected values
-            assert result is not None
-            assert result[0] == {
-                public_key_to_bytes(first_public_key),
-                public_key_to_bytes(second_public_key),
-            }
-            assert public_key_to_bytes(result[1]) == public_key_to_bytes(
-                expected_public_key
-            )
-            assert private_key_to_bytes(result[2]) == private_key_to_bytes(
-                expected_private_key
-            )
-        else:
-            raise AssertionError()
+        # Assert
+        assert isinstance(expected_private_key, ec.EllipticCurvePrivateKey)
+        assert isinstance(expected_public_key, ec.EllipticCurvePublicKey)
+        assert result is not None
+        assert result[0] == {
+            public_key_to_bytes(first_public_key),
+            public_key_to_bytes(second_public_key),
+        }
+        assert private_key_to_bytes(result[1]) == private_key_to_bytes(
+            expected_private_key
+        )
+        assert public_key_to_bytes(result[2]) == public_key_to_bytes(
+            expected_public_key
+        )

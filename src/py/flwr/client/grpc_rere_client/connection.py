@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Callable, Iterator, Optional, Sequence, Tuple, Union, cast
 
 import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
@@ -54,6 +55,8 @@ from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
+from .client_interceptor import AuthenticateClientInterceptor
+
 
 def on_channel_state_change(channel_connectivity: str) -> None:
     """Log channel connectivity."""
@@ -67,7 +70,9 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
-    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None,
+    authentication_keys: Optional[
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
@@ -111,6 +116,12 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     """
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
+
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
+    if authentication_keys is not None:
+        interceptors = AuthenticateClientInterceptor(
+            authentication_keys[0], authentication_keys[1]
+        )
 
     channel = create_channel(
         server_address=server_address,

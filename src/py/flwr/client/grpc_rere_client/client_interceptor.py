@@ -31,6 +31,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
+    GetRunRequest,
     PullTaskInsRequest,
     PushTaskResRequest,
 )
@@ -39,7 +40,11 @@ _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
 
 Request = Union[
-    CreateNodeRequest, DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest
+    CreateNodeRequest,
+    DeleteNodeRequest,
+    PullTaskInsRequest,
+    PushTaskResRequest,
+    GetRunRequest,
 ]
 
 
@@ -59,7 +64,11 @@ class _ClientCallDetails(
     ),
     grpc.ClientCallDetails,  # type: ignore
 ):
-    pass
+    """Details for each client call.
+
+    The class will be passed on as the first argument in continuation function.
+    In our case, `AuthenticateClientInterceptor` adds new metadata to the construct.
+    """
 
 
 class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: ignore
@@ -72,8 +81,11 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
     ):
         self.private_key = private_key
         self.public_key = public_key
-        self.shared_secret = b""
+        self.shared_secret: Optional[bytes] = None
         self.server_public_key: Optional[ec.EllipticCurvePublicKey] = None
+        self.encoded_public_key = base64.urlsafe_b64encode(
+            public_key_to_bytes(self.public_key)
+        )
 
     def intercept_unary_unary(
         self,
@@ -90,24 +102,24 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
         postprocess = False
         if client_call_details.metadata is not None:
             metadata = list(client_call_details.metadata)
-        if isinstance(request, CreateNodeRequest):
-            metadata.append(
-                (
-                    _PUBLIC_KEY_HEADER,
-                    base64.urlsafe_b64encode(public_key_to_bytes(self.public_key)),
-                )
-            )
-            postprocess = True
 
-        elif isinstance(
-            request, (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest)
-        ):
-            metadata.append(
-                (
-                    _PUBLIC_KEY_HEADER,
-                    base64.urlsafe_b64encode(public_key_to_bytes(self.public_key)),
-                )
+        # Always add the public key header
+        metadata.append(
+            (
+                _PUBLIC_KEY_HEADER,
+                self.encoded_public_key,
             )
+        )
+
+        if isinstance(request, CreateNodeRequest):
+            postprocess = True
+        elif isinstance(
+            request,
+            (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest, GetRunRequest),
+        ):
+            if self.shared_secret is None:
+                raise RuntimeError("Failure to compute hmac")
+
             metadata.append(
                 (
                     _AUTH_TOKEN_HEADER,

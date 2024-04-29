@@ -10,12 +10,6 @@ CERT_DIR=certificates
 # Generate directories if not exists
 mkdir -p $CERT_DIR
 
-# Uncomment the below block if you want to skip certificate generation if they already exist.
-# if [ -f "$CERT_DIR/ca.crt" ]; then
-#     echo "Skipping certificate generation as they already exist."
-#     exit 0
-# fi
-
 # Clearing any existing files in the certificates directory
 rm -f $CERT_DIR/*
 
