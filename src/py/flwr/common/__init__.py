@@ -22,6 +22,7 @@ from .date import now as now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
 from .logger import configure as configure
 from .logger import log as log
+from .logger import set_logger_propagation as set_logger_propagation
 from .message import DEFAULT_TTL
 from .message import Error as Error
 from .message import Message as Message
