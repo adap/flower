@@ -43,7 +43,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         self.client_public_keys: Set[bytes] = set()
         self.server_public_key: Optional[bytes] = None
         self.server_private_key: Optional[bytes] = None
-        self.public_key_node_id_pairs: Dict[bytes, int] = {}
+        self.public_key_to_node_id: Dict[bytes, int] = {}
         self.lock = threading.Lock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
@@ -299,21 +299,21 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
 
     def get_node_id(self, client_public_key: bytes) -> int:
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
-        return self.public_key_node_id_pairs[client_public_key]
+        return self.public_key_to_node_id[client_public_key]
 
     def store_node_id_client_public_key_pair(
         self, client_public_key: bytes, node_id: int
     ) -> None:
         """Store `node_id` and `client_public_keys` as pairs."""
-        self.public_key_node_id_pairs[client_public_key] = node_id
+        self.public_key_to_node_id[client_public_key] = node_id
 
     def delete_node_id_client_public_key_pair(self, client_public_key: bytes) -> None:
         """Remove `node_id` and `client_public_keys` pairs."""
-        if client_public_key not in self.public_key_node_id_pairs:
+        if client_public_key not in self.public_key_to_node_id:
             raise ValueError(
                 f"Client public key {client_public_key.decode('utf-8')} not found"
             )
-        del self.public_key_node_id_pairs[client_public_key]
+        del self.public_key_to_node_id[client_public_key]
 
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""
