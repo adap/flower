@@ -101,6 +101,7 @@ __all__ = [
     "ndarrays_to_parameters",
     "Parameters",
     "parameters_to_ndarrays",
+    "set_logger_propagation",
     "ParametersRecord",
     "Properties",
     "ReconnectIns",
