@@ -254,6 +254,39 @@ class InMemoryState(State):  # pylint: disable=R0902
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
+    def store_server_public_private_key(
+        self, public_key: bytes, private_key: bytes
+    ) -> None:
+        """Store `server_public_key` and `server_private_key` in state."""
+        with self.lock:
+            if self.server_private_key is None and self.server_public_key is None:
+                self.server_private_key = private_key
+                self.server_public_key = public_key
+            else:
+                raise RuntimeError("Server public and private key already set")
+
+    def get_server_private_key(self) -> Optional[bytes]:
+        """Retrieve `server_private_key` in urlsafe bytes."""
+        return self.server_private_key
+
+    def get_server_public_key(self) -> Optional[bytes]:
+        """Retrieve `server_public_key` in urlsafe bytes."""
+        return self.server_public_key
+
+    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of `client_public_keys` in state."""
+        with self.lock:
+            self.client_public_keys = public_keys
+
+    def store_client_public_key(self, public_key: bytes) -> None:
+        """Store a `client_public_key` in state."""
+        with self.lock:
+            self.client_public_keys.add(public_key)
+
+    def get_client_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored `client_public_keys` as a set."""
+        return self.client_public_keys
+
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""
         with self.lock:
