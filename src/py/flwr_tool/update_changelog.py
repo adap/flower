@@ -39,19 +39,22 @@ def _get_latest_tag(gh_api):
 def _add_shorlog(new_version, shortlog):
     """Update the markdown file with the new version information or update existing logs."""
     token = f"<!---TOKEN_{new_version}-->"
-    entry = f"\n### Thanks to our contributors\n\nWe would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):\n\n{shortlog} {token}"
+    entry = (
+        "\n### Thanks to our contributors\n\n"
+        "We would like to give our special thanks to all the contributors "
+        "who made the new version of Flower possible "
+        f"(in `git shortlog` order):\n\n{shortlog} {token}"
+    )
     current_date = date.today()
 
-    with open(CHANGELOG_FILE, "r") as file:
+    with open(CHANGELOG_FILE, encoding="utf-8") as file:
         content = file.readlines()
 
-    with open(CHANGELOG_FILE, "w") as file:
+    with open(CHANGELOG_FILE, "w", encoding="utf-8") as file:
         for line in content:
             if token in line:
-                print("Updating existing entry in the markdown file.")
                 file.write(f"{shortlog} {token}\n")
             elif "## Unreleased" in line:
-                print("Inserting new version entry in the markdown file.")
                 file.write(f"## {new_version} ({current_date})\n{entry}\n")
             else:
                 file.write(line)
@@ -111,13 +114,52 @@ def _extract_changelog_entry(pr_info):
             "sub_scope": pr_sub_scope,
             "subject": pr_subject,
         }
-    else:
+
+    if not pr_info.body:
         return None, {
             "type": "unknown",
             "scope": "unknown",
             "sub_scope": "unknown",
             "subject": "unknown",
         }
+
+    entry_match = re.search(
+        f"{CHANGELOG_SECTION_HEADER}(.+?)(?=##|$)", pr_info.body, re.DOTALL
+    )
+    if not entry_match:
+        return None, {
+            "type": "unknown",
+            "scope": "unknown",
+            "sub_scope": "unknown",
+            "subject": "unknown",
+        }
+
+    entry_text = entry_match.group(1).strip()
+
+    # Remove markdown comments
+    entry_text = re.sub(r"<!--.*?-->", "", entry_text, flags=re.DOTALL).strip()
+
+    token_markers = {
+        "general": "<general>",
+        "skip": "<skip>",
+        "baselines": "<baselines>",
+        "examples": "<examples>",
+        "sdk": "<sdk>",
+        "simulations": "<simulations>",
+    }
+
+    # Find the token based on the presence of its marker in entry_text
+    token = next(
+        (token for token, marker in token_markers.items() if marker in entry_text),
+        None,
+    )
+
+    return entry_text, {
+        "type": "unknown",
+        "scope": token,
+        "sub_scope": "unknown",
+        "subject": "unknown",
+    }
 
 
 def _update_changelog(prs):
@@ -140,6 +182,9 @@ def _update_changelog(prs):
 
         for pr_info in prs:
             pr_entry_text, parsed_title = _extract_changelog_entry(pr_info)
+
+            if "scope" not in parsed_title:
+                continue
 
             category = parsed_title["scope"]
 
@@ -272,9 +317,11 @@ def _insert_entry_no_desc(content, pr_reference, unreleased_index):
 
 def _bump_minor_version(tag):
     """Bump the minor version of the tag."""
-    major, minor, patch = [
-        int(x) for x in re.match(r"v(\d+)\.(\d+)\.(\d+)", tag.name).groups()
-    ]
+    match = re.match(r"v(\d+)\.(\d+)\.(\d+)", tag.name)
+    if match is None:
+        print("Wrong tag format.")
+        return
+    major, minor, _ = [int(x) for x in match.groups()]
     # Increment the minor version and reset patch version
     new_version = f"v{major}.{minor + 1}.0"
     return new_version
@@ -294,6 +341,8 @@ def main():
 
     new_version = _bump_minor_version(latest_tag)
     _add_shorlog(new_version, shortlog)
+
+    print("Changelog updated succesfully.")
 
 
 if __name__ == "__main__":
