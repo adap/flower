@@ -205,7 +205,7 @@ def test_set_max_workers() -> None:
 
 def test_setup_client_auth() -> None:  # pylint: disable=R0914
     """Test setup client authentication."""
-    # Generate keys
+    # Prepare
     _, first_public_key = generate_key_pairs()
     private_key, public_key = generate_key_pairs()
 
@@ -217,6 +217,7 @@ def test_setup_client_auth() -> None:  # pylint: disable=R0914
     )
     _, second_public_key = generate_key_pairs()
 
+    # Execute
     with tempfile.TemporaryDirectory() as temp_dir:
         # Initialize temporary files
         client_keys_file_path = Path(temp_dir) / "client_keys.csv"
@@ -254,20 +255,17 @@ def test_setup_client_auth() -> None:  # pylint: disable=R0914
         expected_private_key = load_ssh_private_key(server_private_key, None)
         expected_public_key = load_ssh_public_key(server_public_key)
 
-        if isinstance(expected_private_key, ec.EllipticCurvePrivateKey) and isinstance(
-            expected_public_key, ec.EllipticCurvePublicKey
-        ):
-            # Assert result with expected values
-            assert result is not None
-            assert result[0] == {
-                public_key_to_bytes(first_public_key),
-                public_key_to_bytes(second_public_key),
-            }
-            assert private_key_to_bytes(result[1]) == private_key_to_bytes(
-                expected_private_key
-            )
-            assert public_key_to_bytes(result[2]) == public_key_to_bytes(
-                expected_public_key
-            )
-        else:
-            raise AssertionError()
+        # Assert
+        assert isinstance(expected_private_key, ec.EllipticCurvePrivateKey)
+        assert isinstance(expected_public_key, ec.EllipticCurvePublicKey)
+        assert result is not None
+        assert result[0] == {
+            public_key_to_bytes(first_public_key),
+            public_key_to_bytes(second_public_key),
+        }
+        assert private_key_to_bytes(result[1]) == private_key_to_bytes(
+            expected_private_key
+        )
+        assert public_key_to_bytes(result[2]) == public_key_to_bytes(
+            expected_public_key
+        )
