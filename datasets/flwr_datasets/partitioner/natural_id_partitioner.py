@@ -18,6 +18,7 @@
 from typing import Dict, Union
 
 import numpy as np
+from tqdm import tqdm
 
 import datasets
 from flwr_datasets.common.typing import NDArrayInt
@@ -99,7 +100,9 @@ class NaturalIdPartitioner(Partitioner):
 
         unique_natural_ids, inverse = np.unique(natural_ids, return_inverse=True)
 
-        for i, natural_id in enumerate(unique_natural_ids):
+        for i, natural_id in tqdm(
+            enumerate(unique_natural_ids), desc="Generating partition_id_to_indices"
+        ):
             if none_present and natural_id == none_replacement:
                 # Use the natural_id that is present in the dataset (not replacement)
                 natural_id = None
