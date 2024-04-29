@@ -42,7 +42,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.state import State
 
 _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
@@ -79,19 +79,13 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
     def __init__(
         self,
-        client_public_keys: Set[bytes],
-        private_key: ec.EllipticCurvePrivateKey,
-        public_key: ec.EllipticCurvePublicKey,
+        state: State
     ):
-        self.server_private_key = private_key
-        self.client_public_keys = client_public_keys
+        self.state = state
+        self.server_private_key = state.get_server_private_key()
+        self.client_public_keys = state.get_client_public_keys()
         self.encoded_server_public_key = base64.urlsafe_b64encode(
-            public_key_to_bytes(public_key)
-        )
-        log(
-            INFO,
-            "Client authentication enabled with %d known public keys",
-            len(client_public_keys),
+            self.state.get_server_public_key()
         )
 
     def intercept_service(

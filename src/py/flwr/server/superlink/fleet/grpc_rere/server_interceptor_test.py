@@ -58,7 +58,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self._server_private_key, self._server_public_key = generate_key_pairs()
 
         state_factory = StateFactory(":flwr-in-memory-state:")
-
+        state = state_factory.state()
+        
         self._server_interceptor = AuthenticateServerInterceptor(
             {public_key_to_bytes(self._client_public_key)},
             self._server_private_key,
@@ -337,3 +338,66 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
                     (_AUTH_TOKEN_HEADER, hmac_value),
                 ),
             )
+    
+    def test_successful_restore_node(self) -> None:
+        """Test server interceptor for restoring node."""
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+        response, call = self._create_node.with_call(
+            request=CreateNodeRequest(),
+            metadata=((_PUBLIC_KEY_HEADER, public_key_bytes),),
+        )
+
+        expected_metadata = (
+            _PUBLIC_KEY_HEADER,
+            base64.urlsafe_b64encode(
+                public_key_to_bytes(self._server_public_key)
+            ).decode(),
+        )
+
+        node = response.node
+        client_node_id = node.node_id
+
+        assert call.initial_metadata()[0] == expected_metadata
+        assert isinstance(response, CreateNodeResponse)
+
+        request = DeleteNodeRequest(node=node)
+        shared_secret = generate_shared_key(
+            self._client_private_key, self._server_public_key
+        )
+        hmac_value = base64.urlsafe_b64encode(
+            compute_hmac(shared_secret, request.SerializeToString(True))
+        )
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+        response, call = self._delete_node.with_call(
+            request=request,
+            metadata=(
+                (_PUBLIC_KEY_HEADER, public_key_bytes),
+                (_AUTH_TOKEN_HEADER, hmac_value),
+            ),
+        )
+
+        assert isinstance(response, DeleteNodeResponse)
+        assert grpc.StatusCode.OK == call.code()
+
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+        response, call = self._create_node.with_call(
+            request=CreateNodeRequest(),
+            metadata=((_PUBLIC_KEY_HEADER, public_key_bytes),),
+        )
+
+        expected_metadata = (
+            _PUBLIC_KEY_HEADER,
+            base64.urlsafe_b64encode(
+                public_key_to_bytes(self._server_public_key)
+            ).decode(),
+        )
+
+        assert call.initial_metadata()[0] == expected_metadata
+        assert isinstance(response, CreateNodeResponse)
+        assert response.node.node_id == client_node_id

@@ -374,11 +374,17 @@ def run_superlink() -> None:
                 server_private_key,
                 server_public_key,
             ) = maybe_keys
+            state = state_factory.state()
+            state.store_client_public_keys(client_public_keys)
+            state.store_server_public_private_key(server_public_key, server_private_key)
+            log(
+                INFO,
+                "Client authentication enabled with %d known public keys",
+                len(client_public_keys),
+            )
             interceptors = [
                 AuthenticateServerInterceptor(
-                    client_public_keys,
-                    server_private_key,
-                    server_public_key,
+                    state
                 )
             ]
 
