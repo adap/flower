@@ -115,45 +115,13 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     _PUBLIC_KEY_HEADER, context.invocation_metadata()
                 )
             )
-            is_public_key_known = client_public_key_bytes in self.client_public_keys
-            if not is_public_key_known:
+            if client_public_key_bytes not in self.client_public_keys:
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             if isinstance(request, CreateNodeRequest):
-                context.send_initial_metadata(
-                    (
-                        (
-                            _PUBLIC_KEY_HEADER,
-                            self.encoded_server_public_key,
-                        ),
-                    )
+                return self._create_authenticated_node(
+                    client_public_key_bytes, request, context, method_handler
                 )
-                try:
-                    node_id_from_client_public_key = self.state.get_node_id(
-                        client_public_key_bytes
-                    )
-                except KeyError:
-                    node_id_from_client_public_key = None
-
-                if node_id_from_client_public_key is not None:
-                    self.state.restore_node(
-                        node_id_from_client_public_key, request.ping_interval
-                    )
-                    self.state.store_node_id_and_public_key(
-                        node_id_from_client_public_key, client_public_key_bytes
-                    )
-                    return CreateNodeResponse(
-                        node=Node(
-                            node_id=node_id_from_client_public_key, anonymous=False
-                        )
-                    )
-                response: CreateNodeResponse = method_handler.unary_unary(
-                    request, context
-                )
-                self.state.store_node_id_and_public_key(
-                    response.node.node_id, client_public_key_bytes
-                )
-                return response
 
             if isinstance(
                 request,
@@ -164,34 +132,24 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     GetRunRequest,
                 ),
             ):
+                # Verify hmac value
                 hmac_value = base64.urlsafe_b64decode(
                     _get_value_from_tuples(
                         _AUTH_TOKEN_HEADER, context.invocation_metadata()
                     )
                 )
-                client_public_key = bytes_to_public_key(client_public_key_bytes)
-                if self.server_private_key is not None:
-                    shared_secret = generate_shared_key(
-                        self.server_private_key,
-                        client_public_key,
-                    )
-                    verify_hmac_value = verify_hmac(
-                        shared_secret, request.SerializeToString(True), hmac_value
-                    )
-                else:
-                    verify_hmac_value = False
+                public_key = bytes_to_public_key(client_public_key_bytes)
 
-                if not verify_hmac_value:
+                if not self._verify_hmac(public_key, request, hmac_value):
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
+                # Verify node_id
                 try:
-                    node_id_from_client_public_key = self.state.get_node_id(
-                        client_public_key_bytes
-                    )
+                    node_id = self.state.get_node_id(client_public_key_bytes)
                 except KeyError:
-                    node_id_from_client_public_key = -1
+                    node_id = -1
 
-                if not self._verify_node_id(node_id_from_client_public_key, request):
+                if not self._verify_node_id(node_id, request):
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             else:
@@ -212,5 +170,42 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             return request.task_res_list[0].task.consumer.node_id == node_id
         if isinstance(request, GetRunRequest):
             return node_id in self.state.get_nodes(request.run_id)
-
         return request.node.node_id == node_id
+
+    def _verify_hmac(
+        self, public_key: ec.EllipticCurvePublicKey, request: Request, hmac_value: bytes
+    ) -> bool:
+        if self.server_private_key is None:
+            return False
+
+        shared_secret = generate_shared_key(self.server_private_key, public_key)
+        return verify_hmac(shared_secret, request.SerializeToString(True), hmac_value)
+
+    def _create_authenticated_node(
+        self,
+        public_key_bytes: bytes,
+        request: CreateNodeRequest,
+        context: grpc.ServicerContext,
+        method_handler: grpc.RpcMethodHandler,
+    ) -> CreateNodeResponse:
+        context.send_initial_metadata(
+            (
+                (
+                    _PUBLIC_KEY_HEADER,
+                    self.encoded_server_public_key,
+                ),
+            )
+        )
+        try:
+            node_id = self.state.get_node_id(public_key_bytes)
+        except KeyError:
+            node_id = None
+
+        if node_id is not None:
+            self.state.restore_node(node_id, request.ping_interval)
+            self.state.store_node_id_and_public_key(node_id, public_key_bytes)
+            return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
+        
+        response: CreateNodeResponse = method_handler.unary_unary(request, context)
+        self.state.store_node_id_and_public_key(response.node.node_id, public_key_bytes)
+        return response
