@@ -36,6 +36,7 @@ def plot_label_distributions(
         label: str,
         plot_type: str,
         size_unit: str,
+        num_partitions: Optional[int] = None,
         partition_id_axis: str = "x",
         # Plotting specific parameters
         ax: matplotlib.axes.Axes = None,
@@ -62,6 +63,9 @@ def plot_label_distributions(
         to the biggest number. It results in bars of various heights and unbounded max
         value on the heatmap. "percent" - normalizes each value, so they sum up to
         100%. The bars are be of the same height.
+    num_partitions: Optional[int]
+        The number of partitions that will be used. If left None, then all the
+        partitions will be used.
     legend: bool
         Include the legend.
     verbose_labels: bool
@@ -83,7 +87,9 @@ def plot_label_distributions(
 
     # Load all partitions
     partitions = []
-    for partition_id in range(partitioner.num_partitions):
+    if num_partitions is None:
+        num_partitions = partitioner.num_partitions
+    for partition_id in range(num_partitions):
         partitions.append(partitioner.load_partition(partition_id))
 
     # Infer the label information based on any (part) of the dataset
@@ -100,6 +106,7 @@ def plot_label_distributions(
 
     # Adjust the data based on the size_unit
     if size_unit == "absolute":
+        # No operation in case of absolute
         pass
     elif size_unit == "percent":
         # Divide by the total sum of samples per partition
@@ -130,7 +137,7 @@ def plot_label_distributions(
             figsize = (6.4, 4.8)
         elif partition_id_axis == "y":
             kind = "barh"
-            figsize = (6.4, np.sqrt(partitioner.num_partitions))
+            figsize = (6.4, np.sqrt(num_partitions))
         else:
             raise ValueError(
                 f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
@@ -166,10 +173,11 @@ def plot_label_distributions(
                 # the numbers start to overlap
                 # 2 is reasonable coef but probably in this case manual adjustement
                 # will be needed
-                figsize = (3*np.sqrt(partitioner.num_partitions), 6.4)
+                figsize = (3*np.sqrt(num_partitions), 6.4)
             elif partition_id_axis == "y":
-                figsize = (6.4, np.sqrt(partitioner.num_partitions))
+                figsize = (6.4, np.sqrt(num_partitions))
         fig, ax = plt.subplots(figsize=figsize)
+
         if size_unit == "absolute":
             fmt = ",d"
         elif size_unit == "percent":
