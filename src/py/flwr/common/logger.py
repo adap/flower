@@ -32,7 +32,7 @@ loop: Optional[asyncio.AbstractEventLoop] = None
 try:
     loop = asyncio.get_running_loop()
 except RuntimeError:
-    loop = None
+    loop = None  # pylint: disable=invalid-name
 finally:
     if loop and loop.is_running():
         FLOWER_LOGGER.propagate = False
