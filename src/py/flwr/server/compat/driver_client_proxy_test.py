@@ -226,8 +226,6 @@ class DriverClientProxyTestCase(unittest.TestCase):
             message_type=message_type,
         )
         self.created_msg = Message(metadata=metadata, content=content)
-        if message_type == "evaluate":
-            print(compat.recordset_to_evaluateins(self.created_msg.content, True))
         return self.created_msg
 
     def _get_push_messages(
