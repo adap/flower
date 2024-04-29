@@ -139,8 +139,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     self.state.restore_node(
                         node_id_from_client_public_key, request.ping_interval
                     )
-                    self.state.store_node_id_client_public_key_pair(
-                        client_public_key_bytes, node_id_from_client_public_key
+                    self.state.store_node_id_and_public_key(
+                        node_id_from_client_public_key, client_public_key_bytes
                     )
                     return CreateNodeResponse(
                         node=Node(
@@ -150,8 +150,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 response: CreateNodeResponse = method_handler.unary_unary(
                     request, context
                 )
-                self.state.store_node_id_client_public_key_pair(
-                    client_public_key_bytes, response.node.node_id
+                self.state.store_node_id_and_public_key(
+                    response.node.node_id, client_public_key_bytes
                 )
                 return response
 
@@ -210,7 +210,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             return False
         if isinstance(request, PushTaskResRequest):
             return request.task_res_list[0].task.consumer.node_id == node_id
-        elif isinstance(request, GetRunRequest):
+        if isinstance(request, GetRunRequest):
             return node_id in self.state.get_nodes(request.run_id)
-        
+
         return request.node.node_id == node_id

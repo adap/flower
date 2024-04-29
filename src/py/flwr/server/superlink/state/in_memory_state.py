@@ -301,19 +301,9 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
         return self.public_key_to_node_id[client_public_key]
 
-    def store_node_id_client_public_key_pair(
-        self, client_public_key: bytes, node_id: int
-    ) -> None:
-        """Store `node_id` and `client_public_keys` as pairs."""
-        self.public_key_to_node_id[client_public_key] = node_id
-
-    def delete_node_id_client_public_key_pair(self, client_public_key: bytes) -> None:
-        """Remove `node_id` and `client_public_keys` pairs."""
-        if client_public_key not in self.public_key_to_node_id:
-            raise ValueError(
-                f"Client public key {client_public_key.decode('utf-8')} not found"
-            )
-        del self.public_key_to_node_id[client_public_key]
+    def store_node_id_and_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Store `node_id` and the corresponding `public_key`."""
+        self.public_key_to_node_id[public_key] = node_id
 
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""

@@ -61,8 +61,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         state_factory = StateFactory(":flwr-in-memory-state:")
         state = state_factory.state()
         state.store_server_private_public_key(
-            public_key_to_bytes(self._server_public_key),
             private_key_to_bytes(self._server_private_key),
+            public_key_to_bytes(self._server_public_key),
         )
         state.store_client_public_keys({public_key_to_bytes(self._client_public_key)})
 

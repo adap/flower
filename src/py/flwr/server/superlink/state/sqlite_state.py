@@ -670,20 +670,13 @@ class SqliteState(State):  # pylint: disable=R0904
         node_id: int = row[0]["node_id"]
         return node_id
 
-    def store_node_id_client_public_key_pair(
-        self, client_public_key: bytes, node_id: int
-    ) -> None:
-        """Store `node_id` and `client_public_keys` as pairs."""
+    def store_node_id_and_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Store `node_id` and the corresponding `public_key`."""
         query = (
             "INSERT OR REPLACE INTO public_key_node_id (public_key, node_id) "
             "VALUES (:public_key, :node_id)"
         )
-        self.query(query, {"public_key": client_public_key, "node_id": node_id})
-
-    def delete_node_id_client_public_key_pair(self, client_public_key: bytes) -> None:
-        """Remove `node_id` and `client_public_keys` pairs."""
-        query = "DELETE FROM node WHERE public_key = :public_key;"
-        self.query(query, {"public_key": client_public_key})
+        self.query(query, {"public_key": public_key, "node_id": node_id})
 
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""

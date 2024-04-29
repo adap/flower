@@ -206,14 +206,8 @@ class State(abc.ABC):  # pylint: disable=R0904
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
 
     @abc.abstractmethod
-    def store_node_id_client_public_key_pair(
-        self, client_public_key: bytes, node_id: int
-    ) -> None:
-        """Store `node_id` and `client_public_keys` as pairs."""
-
-    @abc.abstractmethod
-    def delete_node_id_client_public_key_pair(self, client_public_key: bytes) -> None:
-        """Remove `node_id` and `client_public_keys` pairs."""
+    def store_node_id_and_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Store `node_id` and the corresponding `public_key`."""
 
     @abc.abstractmethod
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
