@@ -83,8 +83,7 @@ def fixedclipping_mod(
     )
 
     log(
-        INFO,
-        f"fixedclipping_mod: parameters are clipped by value: {clipping_norm:.4f}.",
+        INFO, "fixedclipping_mod: parameters are clipped by value: %.4f.", clipping_norm
     )
 
     fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
@@ -149,7 +148,8 @@ def adaptiveclipping_mod(
     )
     log(
         INFO,
-        f"adaptiveclipping_mod: parameters are clipped by value: {clipping_norm:.4f}.",
+        "adaptiveclipping_mod: parameters are clipped by value: %.4f.",
+        clipping_norm,
     )
 
     fit_res.parameters = ndarrays_to_parameters(client_to_server_params)

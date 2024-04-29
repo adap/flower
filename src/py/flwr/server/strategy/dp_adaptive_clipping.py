@@ -200,7 +200,8 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
 
             log(
                 INFO,
-                f"aggregate_fit: parameters are clipped by value: {self.clipping_norm:.4f}.",
+                "aggregate_fit: parameters are clipped by value: %.4f.",
+                self.clipping_norm,
             )
 
             for i, _ in enumerate(self.current_round_params):
@@ -233,7 +234,10 @@ class DifferentialPrivacyServerSideAdaptiveClipping(Strategy):
             )
             log(
                 INFO,
-                f"aggregate_fit: central DP noise with standard deviation: {compute_stdv(self.noise_multiplier, self.clipping_norm, self.num_sampled_clients):.4f} added to parameters.",
+                "aggregate_fit: central DP noise with standard deviation: %.4f added to parameters.",
+                compute_stdv(
+                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+                ),
             )
 
         return aggregated_params, metrics
@@ -420,7 +424,10 @@ class DifferentialPrivacyClientSideAdaptiveClipping(Strategy):
             )
             log(
                 INFO,
-                f"aggregate_fit: central DP noise with standard deviation: {compute_stdv(self.noise_multiplier, self.clipping_norm, self.num_sampled_clients):.4f} added to parameters.",
+                "aggregate_fit: central DP noise with standard deviation: %.4f added to parameters.",
+                compute_stdv(
+                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
+                ),
             )
 
         return aggregated_params, metrics
