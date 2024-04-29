@@ -169,7 +169,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     self.server_private_key,
                     client_public_key,
                 )
-                verify = verify_hmac(
+                verify_hmac_value = verify_hmac(
                     shared_secret, request.SerializeToString(True), hmac_value
                 )
 
@@ -181,12 +181,20 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     node_id_from_client_public_key = None
 
                 if isinstance(request, PushTaskResRequest):
-                    request_node_id = request.task_res_list[0].task.consumer.node_id
+                    verify_node_id = (
+                        request.task_res_list[0].task.consumer.node_id
+                        == node_id_from_client_public_key
+                    )
                 elif isinstance(request, GetRunRequest):
-                    request_node_id = self.state.get_nodes(request.run_id)
+                    verify_node_id = (
+                        node_id_from_client_public_key
+                        in self.state.get_nodes(request.run_id)
+                    )
                 else:
-                    request_node_id = request.node.node_id
-                if not verify and not node_id_from_client_public_key == request_node_id:
+                    verify_node_id = (
+                        request.node.node_id == node_id_from_client_public_key
+                    )
+                if not verify_hmac_value and not verify_node_id:
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
 
             else:
