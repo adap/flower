@@ -2,14 +2,19 @@
 set -e
 
 case "$1" in
+  pandas)
+    server_dir="./"
+    ;;
   bare-https)
     ./generate.sh
     server_arg="--certificates certificates/ca.crt certificates/server.pem certificates/server.key"
     client_arg="--root-certificates certificates/ca.crt"
+    server_dir="./"
     ;;
   *)
     server_arg="--insecure"
     client_arg="--insecure"
+    server_dir="./.."
     ;;
 esac
 
@@ -63,7 +68,7 @@ timeout 2m flower-client-app client:app $client_arg $rest_arg --server $server_a
 cl2_pid=$!
 sleep 3
 
-timeout 2m python driver.py &
+timeout 2m flower-server-app server:app $client_arg &
 pid=$!
 
 wait $pid
