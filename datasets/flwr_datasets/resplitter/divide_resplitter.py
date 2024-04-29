@@ -56,6 +56,43 @@ class DivideResplitter:
     ------
     ValuesError if the specified name of a new split is already present in the dataset
     and the `drop_remaining_splits` is False.
+
+    Examples
+    --------
+    Create new `DatasetDict` with a divided split "train" into "train" and "valid"
+    splits by using 80% and 20% correspondingly. Keep the "test" split.
+
+    1) Using the `divide_split` parameter and "smaller" divide_config
+
+    >>> # Assuming there is a dataset_dict of type `DatasetDict`
+    >>> # dataset_dict is {"train": train-data, "test": test-data}
+    >>> resplitter = DivideResplitter(
+    >>>     divide_config={
+    >>>         "train": 0.8,
+    >>>         "test": 0.2,
+    >>>     }
+    >>>     divide_split="train",
+    >>> )
+    >>> new_dataset_dict = resplitter(dataset_dict)
+    >>> # new_dataset_dict is
+    >>> # {"train": 80% of train, "valid": 20% of train, "test": test-data}
+
+    1) Using "bigger" version of divide_config and no `divide_split` to accomplish the
+    same (splitting train into train, valid with 80%, 20% correspondingly.
+
+    >>> # Assuming there is a dataset_dict of type `DatasetDict`
+    >>> # dataset_dict is {"train": train-data, "test": test-data}
+    >>> resplitter = DivideResplitter(
+    >>>     divide_config={
+    >>>         "train": {
+    >>>             "train": 0.8,
+    >>>             "test": 0.2,
+    >>>         }
+    >>>     }
+    >>> )
+    >>> new_dataset_dict = resplitter(dataset_dict)
+    >>> # new_dataset_dict is
+    >>> # {"train": 80% of train, "valid": 20% of train, "test": test-data}
     """
 
     def __init__(
