@@ -27,6 +27,8 @@ FLOWER_LOGGER.setLevel(logging.DEBUG)
 # Detect if there is an Asyncio event loop already running.
 # If yes, set logger.propagate to False so that only the child logger
 # displays a message and the parent logger does not duplicate the message.
+# This prevents duplicated log outputs in Colab notebooks.
+loop: Optional[asyncio.AbstractEventLoop] = None
 try:
     loop = asyncio.get_running_loop()
 except RuntimeError:
@@ -172,6 +174,9 @@ def configure(
 
 logger = logging.getLogger(LOGGER_NAME)  # pylint: disable=invalid-name
 log = logger.log  # pylint: disable=invalid-name
+
+if FLOWER_LOGGER.propagate is False:
+    log(logging.DEBUG, "Logger propagate set to False")
 
 
 def warn_preview_feature(name: str) -> None:
