@@ -16,6 +16,7 @@
 """This module is used to update the changelog."""
 
 
+from datetime import date
 import re
 from sys import argv
 
@@ -24,28 +25,62 @@ from github import Github
 REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "doc/source/ref-changelog.md"
 CHANGELOG_SECTION_HEADER = "### Changelog entry"
+TYPES_PATTERN = r"(build|ci|docs|feat|fix|perf|refactor|style|test)"
+SCOPES_PATTERN = r"(framework|datasets|examples|baselines|sdk|skip)"
 
 
 def _get_latest_tag(gh_api):
     """Retrieve the latest tag from the GitHub repository."""
     repo = gh_api.get_repo(REPO_NAME)
     tags = repo.get_tags()
-    return tags[0] if tags.totalCount > 0 else None
+    return repo, tags[0] if tags.totalCount > 0 else None
 
 
-def _get_pull_requests_since_tag(gh_api, tag):
+def _add_shorlog(new_version, shortlog):
+    """Update the markdown file with the new version information or update existing logs."""
+    token = f"<!---TOKEN_{new_version}-->"
+    entry = f"\n### Thanks to our contributors\n\nWe would like to give our special thanks to all the contributors who made the new version of Flower possible (in `git shortlog` order):\n\n{shortlog} {token}"
+    current_date = date.today()
+
+    with open(CHANGELOG_FILE, "r") as file:
+        content = file.readlines()
+
+    with open(CHANGELOG_FILE, "w") as file:
+        for line in content:
+            if token in line:
+                print("Updating existing entry in the markdown file.")
+                file.write(f"{shortlog} {token}\n")
+            elif "## Unreleased" in line:
+                print("Inserting new version entry in the markdown file.")
+                file.write(f"## {new_version} ({current_date})\n{entry}\n")
+            else:
+                file.write(line)
+
+
+def _get_pull_requests_since_tag(repo, tag):
     """Get a list of pull requests merged into the main branch since a given tag."""
-    repo = gh_api.get_repo(REPO_NAME)
-    commits = {commit.sha for commit in repo.compare(tag.commit.sha, "main").commits}
+    commit_shas = set()
+    contributors = set()
     prs = set()
+
+    for commit in repo.compare(tag.commit.sha, "main").commits:
+        commit_shas.add(commit.sha)
+        if commit.author.name is None:
+            continue
+        if "[bot]" in commit.author.name:
+            continue
+        contributors.add(commit.author.name)
+
     for pr_info in repo.get_pulls(
         state="closed", sort="created", direction="desc", base="main"
     ):
-        if pr_info.merge_commit_sha in commits:
+        if pr_info.merge_commit_sha in commit_shas:
             prs.add(pr_info)
-        if len(prs) == len(commits):
+        if len(prs) == len(commit_shas):
             break
-    return prs
+
+    shortlog = ", ".join([f"`{name}`" for name in sorted(contributors)])
+    return shortlog, prs
 
 
 def _format_pr_reference(title, number, url):
@@ -55,35 +90,34 @@ def _format_pr_reference(title, number, url):
 
 def _extract_changelog_entry(pr_info):
     """Extract the changelog entry from a pull request's body."""
-    if not pr_info.body:
-        return None, "general"
-
-    entry_match = re.search(
-        f"{CHANGELOG_SECTION_HEADER}(.+?)(?=##|$)", pr_info.body, re.DOTALL
-    )
-    if not entry_match:
-        return None, None
-
-    entry_text = entry_match.group(1).strip()
-
-    # Remove markdown comments
-    entry_text = re.sub(r"<!--.*?-->", "", entry_text, flags=re.DOTALL).strip()
-
-    token_markers = {
-        "general": "<general>",
-        "skip": "<skip>",
-        "baselines": "<baselines>",
-        "examples": "<examples>",
-        "sdk": "<sdk>",
-        "simulations": "<simulations>",
-    }
-
-    # Find the token based on the presence of its marker in entry_text
-    token = next(
-        (token for token, marker in token_markers.items() if marker in entry_text), None
+    pattern = (
+        rf"^({TYPES_PATTERN})\(({SCOPES_PATTERN})(?::([^:]+))?\): "
+        r"([A-Z][^\.\n]*(?:\.(?=[^\.\n]))*[^\.\n]*)$"
     )
 
-    return entry_text, token
+    # Use regex search to find matches
+    match = re.search(pattern, pr_info.title)
+    if match:
+        # Extract components from the regex groups
+        pr_type = match.group(1)
+        pr_scope = match.group(3)
+        pr_sub_scope = match.group(5)  # Correctly capture optional sub-scope
+        pr_subject = match.group(
+            6
+        )  # Capture subject starting with uppercase and no terminal period
+        return None, {
+            "type": pr_type,
+            "scope": pr_scope,
+            "sub_scope": pr_sub_scope,
+            "subject": pr_subject,
+        }
+    else:
+        return None, {
+            "type": "unknown",
+            "scope": "unknown",
+            "sub_scope": "unknown",
+            "subject": "unknown",
+        }
 
 
 def _update_changelog(prs):
@@ -97,13 +131,17 @@ def _update_changelog(prs):
             return
 
         # Find the end of the Unreleased section
-        next_header_index = content.find("##", unreleased_index + 1)
+        next_header_index = content.find("## ", unreleased_index + 1)
         next_header_index = (
             next_header_index if next_header_index != -1 else len(content)
         )
 
+        content_index = content.find("### What", unreleased_index + 1)
+
         for pr_info in prs:
-            pr_entry_text, category = _extract_changelog_entry(pr_info)
+            pr_entry_text, parsed_title = _extract_changelog_entry(pr_info)
+
+            category = parsed_title["scope"]
 
             # Skip if PR should be skipped or already in changelog
             if category == "skip" or f"#{pr_info.number}]" in content:
@@ -114,25 +152,32 @@ def _update_changelog(prs):
             )
 
             # Process based on category
-            if category in ["general", "baselines", "examples", "sdk", "simulations"]:
+            if category in [
+                "framework",
+                "general",
+                "baselines",
+                "examples",
+                "sdk",
+                "simulations",
+            ]:
                 entry_title = _get_category_title(category)
                 content = _update_entry(
                     content,
                     entry_title,
                     pr_info,
-                    unreleased_index,
+                    content_index,
                     next_header_index,
                 )
 
             elif pr_entry_text:
                 content = _insert_new_entry(
-                    content, pr_info, pr_reference, pr_entry_text, unreleased_index
+                    content, pr_info, pr_reference, pr_entry_text, content_index
                 )
 
             else:
-                content = _insert_entry_no_desc(content, pr_reference, unreleased_index)
+                content = _insert_entry_no_desc(content, pr_reference, content_index)
 
-            next_header_index = content.find("##", unreleased_index + 1)
+            next_header_index = content.find("## ", unreleased_index + 1)
             next_header_index = (
                 next_header_index if next_header_index != -1 else len(content)
             )
@@ -142,12 +187,11 @@ def _update_changelog(prs):
         file.write(content)
         file.truncate()
 
-    print("Changelog updated.")
-
 
 def _get_category_title(category):
     """Get the title of a changelog section based on its category."""
     headers = {
+        "framework": "Framework improvements",
         "general": "General improvements",
         "baselines": "General updates to Flower Baselines",
         "examples": "General updates to Flower Examples",
@@ -226,17 +270,30 @@ def _insert_entry_no_desc(content, pr_reference, unreleased_index):
     return content
 
 
+def _bump_minor_version(tag):
+    """Bump the minor version of the tag."""
+    major, minor, patch = [
+        int(x) for x in re.match(r"v(\d+)\.(\d+)\.(\d+)", tag.name).groups()
+    ]
+    # Increment the minor version and reset patch version
+    new_version = f"v{major}.{minor + 1}.0"
+    return new_version
+
+
 def main():
     """Update changelog using the descriptions of PRs since the latest tag."""
     # Initialize GitHub Client with provided token (as argument)
     gh_api = Github(argv[1])
-    latest_tag = _get_latest_tag(gh_api)
+    repo, latest_tag = _get_latest_tag(gh_api)
     if not latest_tag:
         print("No tags found in the repository.")
         return
 
-    prs = _get_pull_requests_since_tag(gh_api, latest_tag)
+    shortlog, prs = _get_pull_requests_since_tag(repo, latest_tag)
     _update_changelog(prs)
+
+    new_version = _bump_minor_version(latest_tag)
+    _add_shorlog(new_version, shortlog)
 
 
 if __name__ == "__main__":
