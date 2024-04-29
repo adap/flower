@@ -319,8 +319,7 @@ def _bump_minor_version(tag):
     """Bump the minor version of the tag."""
     match = re.match(r"v(\d+)\.(\d+)\.(\d+)", tag.name)
     if match is None:
-        print("Wrong tag format.")
-        return
+        return None
     major, minor, _ = [int(x) for x in match.groups()]
     # Increment the minor version and reset patch version
     new_version = f"v{major}.{minor + 1}.0"
@@ -340,6 +339,10 @@ def main():
     _update_changelog(prs)
 
     new_version = _bump_minor_version(latest_tag)
+    if not new_version:
+        print("Wrong tag format.")
+        return
+
     _add_shorlog(new_version, shortlog)
 
     print("Changelog updated succesfully.")
