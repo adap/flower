@@ -120,8 +120,8 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--authentication-keys",
         nargs=2,
-        metavar=("CLIENT_PUBLIC_KEY", "CLIENT_PRIVATE_KEY"),
+        metavar=("CLIENT_PRIVATE_KEY", "CLIENT_PUBLIC_KEY"),
         type=str,
-        help="Provide two file paths: (1) the client's public "
-        "key file, and (3) the client's private key file.",
+        help="Provide two file paths: (1) the client's private "
+        "key file, and (3) the client's public key file.",
     )

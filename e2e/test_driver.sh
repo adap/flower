@@ -37,9 +37,9 @@ case "$2" in
     db_arg="--database :flwr-in-memory-state:"
     server_arg="--certificates certificates/ca.crt certificates/server.pem certificates/server.key"
     client_arg="--root-certificates certificates/ca.crt"
-    server_auth="--require-client-authentication keys/client_public_keys.csv keys/server_credentials.pub keys/server_credentials"
-    client_auth_1="--authentication-keys keys/client_credentials_1.pub keys/client_credentials_1"
-    client_auth_2="--authentication-keys keys/client_credentials_2.pub keys/client_credentials_2"
+    server_auth="--require-client-authentication keys/client_public_keys.csv keys/server_credentials keys/server_credentials.pub"
+    client_auth_1="--authentication-keys keys/client_credentials_1 keys/client_credentials_1.pub"
+    client_auth_2="--authentication-keys keys/client_credentials_2 keys/client_credentials_2.pub"
     ;;
   *)
     rest_arg=""
