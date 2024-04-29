@@ -661,7 +661,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
             RetryInvoker,
             int,
             Union[bytes, str, None],
-            Union[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey], None],
+            Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
         ],
         ContextManager[
             Tuple[
