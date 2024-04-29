@@ -18,13 +18,22 @@ import argparse
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
+
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
 from flwr.common.object_ref import load_app, validate
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    ssh_types_to_elliptic_curve,
+)
 
 from ..app import _start_client_internal
 
@@ -63,6 +72,7 @@ def run_client_app() -> None:
         getattr(args, "client-app"),
     )
     load_fn = _get_load_client_app_fn(args)
+    authentication_keys = _try_setup_client_authentication(args)
 
     _start_client_internal(
         server_address=args.server,
@@ -70,6 +80,7 @@ def run_client_app() -> None:
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
         insecure=args.insecure,
+        authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
     )
@@ -237,4 +248,34 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         type=str,
         help="Provide two file paths: (1) the client's private "
         "key file, and (2) the client's public key file.",
+    )
+
+
+def _try_setup_client_authentication(
+    args: argparse.Namespace,
+) -> Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+    if not args.authentication_keys:
+        return None
+
+    ssh_private_key = load_ssh_private_key(
+        Path(args.authentication_keys[0]).read_bytes(),
+        None,
+    )
+    ssh_public_key = load_ssh_public_key(Path(args.authentication_keys[1]).read_bytes())
+
+    try:
+        client_private_key, client_public_key = ssh_types_to_elliptic_curve(
+            ssh_private_key, ssh_public_key
+        )
+    except TypeError:
+        sys.exit(
+            "The file paths provided could not be read as a private and public "
+            "key pair. Client authentication requires an elliptic curve public and "
+            "private key pair. Please provide the file paths containing elliptic "
+            "curve private and public keys to '--authentication-keys'."
+        )
+
+    return (
+        client_private_key,
+        client_public_key,
     )
