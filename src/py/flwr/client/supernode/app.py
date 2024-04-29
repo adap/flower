@@ -19,9 +19,14 @@ import os
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 
 import tomli
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.cli.config_utils import validate_fields
 from flwr.client.client_app import ClientApp, LoadClientAppError
