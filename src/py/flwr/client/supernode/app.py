@@ -125,4 +125,3 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         help="Provide two file paths: (1) the client's private "
         "key file, and (2) the client's public key file.",
     )
-    
