@@ -25,17 +25,61 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class NaturalIdPartitioner(Partitioner):
-    """Partitioner for dataset that can be divided by a reference to id in dataset."""
+    """Partitioner for dataset that can be divided by a reference to id in dataset.
+
+    Parameters
+    ----------
+    partition_by: str
+        The name of the column that contains the unique values of partitions.
+    creation_mode: str
+        "full" or "lazy". "full" to create the whole mapping of natural id to indices
+        during the first call to the `load_partition` or to lazily filter the dataset
+        once the request for a specific partition id happens. It is recommended to use
+        "full" mode in case of the dataset < 10,000,000 samples and < 10,000 unique
+        values in `partition_by` column
+
+    Examples
+    --------
+    "flwrlabs/shakespeare" dataset should be used with "full" mode (4226158 samples and
+    1129 unique values in the "character_id" column
+
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import NaturalIdPartitioner
+    >>>
+    >>> partitioner = NaturalIdPartitioner(partition_by="character_id")
+    >>> fds = FederatedDataset(dataset="flwrlabs/shakespeare",
+    >>>                        partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(0)
+    >>> # Note that no additional computation happens when the call for the new
+    >>> # partition is triggered
+    >>> partition1 = fds.load_partition(1)
+
+    "sentiment140" (aka Twitter) dataset should be used with "lazy" mode because of the
+     huge value of the unique samples in the (1,600,000
+    samples BUT 659,775 unique values in the "user" column
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import NaturalIdPartitioner
+    >>>
+    >>> partitioner = NaturalIdPartitioner(partition_by="character_id")
+    >>> fds = FederatedDataset(dataset="sentiment140",
+    >>>                        partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(0)
+    >>> # Note that the dataset will need to be filtered for a new (not asked for
+    >>> # before) partition
+    >>> partition1 = fds.load_partition(1)
+    """
 
     def __init__(
         self,
         partition_by: str,
+        creation_mode: str = "full",
     ):
         super().__init__()
         self._partition_id_to_natural_id: Dict[int, str] = {}
         self._natural_id_to_partition_id: Dict[str, int] = {}
         self._partition_id_to_indices: Dict[int, NDArrayInt] = {}
         self._partition_by = partition_by
+        self._creation_mode = creation_mode
 
     def _create_int_partition_id_to_natural_id(self) -> None:
         """Create a mapping from int indices to unique client ids from dataset.
@@ -127,10 +171,21 @@ class NaturalIdPartitioner(Partitioner):
             self._create_int_partition_id_to_natural_id()
             self._create_natural_id_to_int_partition_id()
 
-        if len(self._partition_id_to_indices) == 0:
-            self._create_partition_id_to_indices()
+        if self._creation_mode == "full":
+            if len(self._partition_id_to_indices) == 0:
+                self._create_partition_id_to_indices()
 
-        return self.dataset.select(self._partition_id_to_indices[partition_id])
+            return self.dataset.select(self._partition_id_to_indices[partition_id])
+        elif self._creation_mode == "lazy":
+            return self.dataset.filter(
+                lambda x: x == self._partition_id_to_natural_id[partition_id],
+                input_columns=self._partition_by,
+            )
+        else:
+            raise ValueError(
+                f"The `creation_mode` can be only 'full` or 'lazy'."
+                f"Instead given: {self._creation_mode}"
+            )
 
     @property
     def num_partitions(self) -> int:
