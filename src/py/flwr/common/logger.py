@@ -14,7 +14,7 @@
 # ==============================================================================
 """Flower Logger."""
 
-
+import asyncio
 import logging
 from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
@@ -24,6 +24,16 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, TextIO, Tuple
 LOGGER_NAME = "flwr"
 FLOWER_LOGGER = logging.getLogger(LOGGER_NAME)
 FLOWER_LOGGER.setLevel(logging.DEBUG)
+# Detect if there is an Asyncio event loop already running.
+# If yes, set logger.propagate to False so that only the child logger
+# displays a message and the parent logger does not duplicate the message.
+try:
+    loop = asyncio.get_running_loop()
+except RuntimeError:
+    loop = None
+finally:
+    if loop and loop.is_running():
+        FLOWER_LOGGER.propagate = False
 
 LOG_COLORS = {
     "DEBUG": "\033[94m",  # Blue
