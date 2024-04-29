@@ -230,7 +230,7 @@ func scalarToProto(scalar: Scalar) throws -> Flwr_Proto_Scalar {
     } else if let str = scalar.str {
         ret.string = str
     } else {
-        throw FlowerException.ValueError("Accepted Types : Bool, Data, Float, Int, Str")
+        throw FlowerException.TypeError("Accepted Types : Bool, Data, Float, Int, Str")
     }
     return ret
 }
@@ -249,7 +249,7 @@ func scalarFromProto(scalarMsg: Flwr_Proto_Scalar) throws -> Scalar {
     case.string:
         ret.str = scalarMsg.string
     default:
-        throw FlowerException.ValueError("Accepted Types : Bool, Data, Float, Int, Str")
+        throw FlowerException.TypeError("Accepted Types : Bool, Data, Float, Int, Str")
     }
     return ret
 }
