@@ -155,10 +155,10 @@ def _try_setup_client_authentication(
         )
     except TypeError:
         sys.exit(
-            "The file paths provided do not contain a vaild public and private "
-            "key. Client authentication requires an elliptic curve public and "
-            "private key pair. Please provide the file path containing elliptic "
-            "curve public and private key to '--authentication-keys'."
+            "The file paths provided could not be read as a private and public "
+            "key pair. Client authentication requires an elliptic curve public and "
+            "private key pair. Please provide the file paths containing elliptic "
+            "curve private and public keys to '--authentication-keys'."
         )
 
     return (
