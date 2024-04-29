@@ -82,7 +82,10 @@ def fixedclipping_mod(
         clipping_norm,
     )
 
-    log(INFO, "fixedclipping_mod: parameters are clipped by value: %s.", clipping_norm)
+    log(
+        INFO,
+        f"fixedclipping_mod: parameters are clipped by value: {clipping_norm:.4f}.",
+    )
 
     fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
     out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)
@@ -146,8 +149,7 @@ def adaptiveclipping_mod(
     )
     log(
         INFO,
-        "adaptiveclipping_mod: parameters are clipped by value: %s.",
-        clipping_norm,
+        f"adaptiveclipping_mod: parameters are clipped by value: {clipping_norm:.4f}.",
     )
 
     fit_res.parameters = ndarrays_to_parameters(client_to_server_params)

@@ -128,7 +128,8 @@ class LocalDpMod:
             self.clipping_norm,
         )
         log(
-            INFO, "LocalDpMod: parameters are clipped by value: %s.", self.clipping_norm
+            INFO,
+            f"LocalDpMod: parameters are clipped by value: {self.clipping_norm:.4f}.",
         )
 
         fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
@@ -137,11 +138,14 @@ class LocalDpMod:
         add_localdp_gaussian_noise_to_params(
             fit_res.parameters, self.sensitivity, self.epsilon, self.delta
         )
+
+        noise_value_sd = (
+            self.sensitivity * np.sqrt(2 * np.log(1.25 / self.delta)) / self.epsilon
+        )
         log(
             INFO,
-            "LocalDpMod: local DP noise with "
-            "standard deviation: %s added to parameters.",
-            self.sensitivity * np.sqrt(2 * np.log(1.25 / self.delta)) / self.epsilon,
+            f"LocalDpMod: local DP noise with standard deviation:"
+            f" {noise_value_sd:.4f} added to parameters.",
         )
 
         out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)

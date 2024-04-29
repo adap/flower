@@ -158,8 +158,7 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
             )
             log(
                 INFO,
-                "aggregate_fit: parameters are clipped by value: %s.",
-                self.clipping_norm,
+                f"aggregate_fit: parameters are clipped by value: {self.clipping_norm:.4f}.",
             )
             # Convert back to parameters
             res.parameters = ndarrays_to_parameters(param)
@@ -180,10 +179,7 @@ class DifferentialPrivacyServerSideFixedClipping(Strategy):
 
             log(
                 INFO,
-                "aggregate_fit: central DP noise with standard deviation: %s added to parameters.",
-                compute_stdv(
-                    self.noise_multiplier, self.clipping_norm, self.num_sampled_clients
-                ),
+                f"aggregate_fit: central DP noise with standard deviation: {compute_stdv(self.noise_multiplier, self.clipping_norm, self.num_sampled_clients):.4f} added to parameters.",
             )
 
         return aggregated_params, metrics
