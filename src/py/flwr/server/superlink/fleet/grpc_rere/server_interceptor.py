@@ -109,6 +109,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         auth metadata sent by the client. Continue RPC call if client is authenticated,
         else, terminate RPC call by setting context to abort.
         """
+        
+        # The default message handler in flwr.server.superlink.fleet.message_handler
         message_handler: grpc.RpcMethodHandler = continuation(handler_call_details)
         return self._generic_auth_unary_method_handler(message_handler)
 
