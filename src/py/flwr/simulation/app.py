@@ -87,7 +87,6 @@ def start_simulation(
     actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
     actor_kwargs: Optional[Dict[str, Any]] = None,
     actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
-    verbose_logging: bool = False,
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -159,20 +158,12 @@ def start_simulation(
         is an advanced feature. For all details, please refer to the Ray documentation:
         https://docs.ray.io/en/latest/ray-core/scheduling/index.html
 
-    verbose_logging : bool (default: False)
-        When disabled, only INFO, WARNING and ERROR log messages will be shown. If
-        enabled, DEBUG-level logs will be displayed.
 
     Returns
     -------
     hist : flwr.server.history.History
         Object containing metrics from training.
     """  # noqa: E501
-    # Set logging level
-    if not verbose_logging:
-        logger = logging.getLogger("flwr")
-        logger.setLevel(INFO)
-
     # pylint: disable-msg=too-many-locals
     event(
         EventType.START_SIMULATION_ENTER,
@@ -188,7 +179,8 @@ def start_simulation(
     finally:
         if loop and loop.is_running():
             # Set logger propagation to False to prevent duplicated log output in Colab.
-            logger = set_logger_propagation(logger, False)
+            logger = logging.getLogger("flwr")
+            _ = set_logger_propagation(logger, False)
 
     # Initialize server and server config
     initialized_server, initialized_config = init_defaults(
