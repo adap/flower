@@ -192,7 +192,7 @@ def warn_deprecated_feature(name: str) -> None:
 def set_logger_propagation(
     child_logger: logging.Logger, value: bool = True
 ) -> logging.Logger:
-    """Sets logger propagation.
+    """Sets the logger propagation attribute.
 
     Parameters
     ----------
@@ -201,7 +201,7 @@ def set_logger_propagation(
     value : bool
         Boolean setting for propagation. If True, both parent and child logger
         display messages. Otherwise, only the child logger displays a message.
-        Prevents duplicate logs in Colab notebooks.
+        This False setting prevents duplicate logs in Colab notebooks.
         Reference: https://stackoverflow.com/a/19561320
 
     Returns
