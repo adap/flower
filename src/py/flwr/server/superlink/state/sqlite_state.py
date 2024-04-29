@@ -610,10 +610,10 @@ class SqliteState(State):  # pylint: disable=R0904
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def store_server_public_private_key(
-        self, public_key: bytes, private_key: bytes
+    def store_server_private_public_key(
+        self, private_key: bytes, public_key: bytes
     ) -> None:
-        """Store `server_public_key` and `server_private_key` in state."""
+        """Store `server_private_key` and `server_public_key` in state."""
         query = "SELECT COUNT(*) FROM credential"
         count = self.query(query)[0]["COUNT(*)"]
         if count < 1:

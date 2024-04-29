@@ -176,10 +176,10 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def store_server_public_private_key(
-        self, public_key: bytes, private_key: bytes
+    def store_server_private_public_key(
+        self, private_key: bytes, public_key: bytes
     ) -> None:
-        """Store `server_public_key` and `server_private_key` in state."""
+        """Store `server_private_key` and `server_public_key` in state."""
 
     @abc.abstractmethod
     def get_server_private_key(self) -> Optional[bytes]:

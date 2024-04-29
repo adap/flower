@@ -423,7 +423,7 @@ class StateTest(unittest.TestCase):
         public_key_bytes = public_key_to_bytes(public_key)
 
         # Execute
-        state.store_server_public_private_key(public_key_bytes, private_key_bytes)
+        state.store_server_private_public_key(public_key_bytes, private_key_bytes)
         server_private_key = state.get_server_private_key()
         server_public_key = state.get_server_public_key()
 
@@ -456,11 +456,11 @@ class StateTest(unittest.TestCase):
         new_public_key_bytes = public_key_to_bytes(new_public_key)
 
         # Execute
-        state.store_server_public_private_key(public_key_bytes, private_key_bytes)
+        state.store_server_private_public_key(public_key_bytes, private_key_bytes)
 
         # Assert
         with self.assertRaises(RuntimeError):
-            state.store_server_public_private_key(
+            state.store_server_private_public_key(
                 new_public_key_bytes, new_private_key_bytes
             )
 

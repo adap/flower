@@ -16,9 +16,10 @@
 
 
 import base64
-from typing import Any, Callable, Sequence, Tuple, Union
+from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_private_key,
@@ -76,11 +77,15 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
     def __init__(self, state: State):
         self.state = state
-        self.server_private_key = bytes_to_private_key(state.get_server_private_key())
+        self.server_private_key: Optional[ec.EllipticCurvePrivateKey] = None
+        private_key = self.state.get_server_private_key()
+        public_key = self.state.get_server_public_key()
+        if private_key is not None:
+            self.server_private_key = bytes_to_private_key(private_key)
         self.client_public_keys = state.get_client_public_keys()
-        self.encoded_server_public_key = base64.urlsafe_b64encode(
-            self.state.get_server_public_key()
-        )
+        self.encoded_server_public_key: Optional[bytes] = None
+        if public_key is not None:
+            self.encoded_server_public_key = base64.urlsafe_b64encode(public_key)
 
     def intercept_service(
         self,
@@ -150,7 +155,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 )
                 return response
 
-            elif isinstance(
+            if isinstance(
                 request,
                 (
                     DeleteNodeRequest,
@@ -165,36 +170,28 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     )
                 )
                 client_public_key = bytes_to_public_key(client_public_key_bytes)
-                shared_secret = generate_shared_key(
-                    self.server_private_key,
-                    client_public_key,
-                )
-                verify_hmac_value = verify_hmac(
-                    shared_secret, request.SerializeToString(True), hmac_value
-                )
+                if self.server_private_key is not None:
+                    shared_secret = generate_shared_key(
+                        self.server_private_key,
+                        client_public_key,
+                    )
+                    verify_hmac_value = verify_hmac(
+                        shared_secret, request.SerializeToString(True), hmac_value
+                    )
+                else:
+                    verify_hmac_value = False
+
+                if not verify_hmac_value:
+                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
 
                 try:
                     node_id_from_client_public_key = self.state.get_node_id(
                         client_public_key_bytes
                     )
                 except KeyError:
-                    node_id_from_client_public_key = None
+                    node_id_from_client_public_key = -1
 
-                if isinstance(request, PushTaskResRequest):
-                    verify_node_id = (
-                        request.task_res_list[0].task.consumer.node_id
-                        == node_id_from_client_public_key
-                    )
-                elif isinstance(request, GetRunRequest):
-                    verify_node_id = (
-                        node_id_from_client_public_key
-                        in self.state.get_nodes(request.run_id)
-                    )
-                else:
-                    verify_node_id = (
-                        request.node.node_id == node_id_from_client_public_key
-                    )
-                if not verify_hmac_value and not verify_node_id:
+                if not self._verify_node_id(node_id_from_client_public_key, request):
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
 
             else:
@@ -207,3 +204,13 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             request_deserializer=method_handler.request_deserializer,
             response_serializer=method_handler.response_serializer,
         )
+
+    def _verify_node_id(self, node_id: int, request: Request) -> bool:
+        if isinstance(request, CreateNodeRequest):
+            return False
+        if isinstance(request, PushTaskResRequest):
+            return request.task_res_list[0].task.consumer.node_id == node_id
+        elif isinstance(request, GetRunRequest):
+            return node_id in self.state.get_nodes(request.run_id)
+        
+        return request.node.node_id == node_id

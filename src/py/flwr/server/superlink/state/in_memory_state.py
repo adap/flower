@@ -264,10 +264,10 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def store_server_public_private_key(
-        self, public_key: bytes, private_key: bytes
+    def store_server_private_public_key(
+        self, private_key: bytes, public_key: bytes
     ) -> None:
-        """Store `server_public_key` and `server_private_key` in state."""
+        """Store `server_private_key` and `server_public_key` in state."""
         with self.lock:
             if self.server_private_key is None and self.server_public_key is None:
                 self.server_private_key = private_key
@@ -299,8 +299,6 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
 
     def get_node_id(self, client_public_key: bytes) -> int:
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
-        print("nodes: ", self.node_ids)
-        print("pairs: ", self.public_key_node_id_pairs)
         return self.public_key_node_id_pairs[client_public_key]
 
     def store_node_id_client_public_key_pair(
@@ -308,7 +306,6 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
     ) -> None:
         """Store `node_id` and `client_public_keys` as pairs."""
         self.public_key_node_id_pairs[client_public_key] = node_id
-        print(self.public_key_node_id_pairs)
 
     def delete_node_id_client_public_key_pair(self, client_public_key: bytes) -> None:
         """Remove `node_id` and `client_public_keys` pairs."""
