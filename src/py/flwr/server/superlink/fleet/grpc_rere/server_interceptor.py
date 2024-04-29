@@ -16,17 +16,14 @@
 
 
 import base64
-from logging import INFO
-from typing import Any, Callable, Sequence, Set, Tuple, Union
+from typing import Any, Callable, Sequence, Tuple, Union
 
 import grpc
-from cryptography.hazmat.primitives.asymmetric import ec
 
-from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    bytes_to_private_key,
     bytes_to_public_key,
     generate_shared_key,
-    public_key_to_bytes,
     verify_hmac,
 )
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -77,12 +74,9 @@ def _get_value_from_tuples(
 class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Server interceptor for client authentication."""
 
-    def __init__(
-        self,
-        state: State
-    ):
+    def __init__(self, state: State):
         self.state = state
-        self.server_private_key = state.get_server_private_key()
+        self.server_private_key = bytes_to_private_key(state.get_server_private_key())
         self.client_public_keys = state.get_client_public_keys()
         self.encoded_server_public_key = base64.urlsafe_b64encode(
             self.state.get_server_public_key()
@@ -158,7 +152,12 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
             elif isinstance(
                 request,
-                (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest, GetRunRequest),
+                (
+                    DeleteNodeRequest,
+                    PullTaskInsRequest,
+                    PushTaskResRequest,
+                    GetRunRequest,
+                ),
             ):
                 hmac_value = base64.urlsafe_b64decode(
                     _get_value_from_tuples(
@@ -183,12 +182,11 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
                 if isinstance(request, PushTaskResRequest):
                     request_node_id = request.task_res_list[0].task.consumer.node_id
+                elif isinstance(request, GetRunRequest):
+                    request_node_id = self.state.get_nodes(request.run_id)
                 else:
                     request_node_id = request.node.node_id
-                if (
-                    not verify
-                    and not node_id_from_client_public_key == request_node_id
-                ):
+                if not verify and not node_id_from_client_public_key == request_node_id:
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied!")
 
             else:
