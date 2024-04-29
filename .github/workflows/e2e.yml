@@ -186,5 +186,3 @@ jobs:
       - name: Test strategies
         run: |
           python test.py "${{ matrix.strat }}"
-
-  
