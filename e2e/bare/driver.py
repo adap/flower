@@ -1,10 +1,21 @@
 import flwr as fl
+from flwr.server import LegacyContext
+
+app = fl.server.ServerApp()
 
 
-# Start Flower server
-hist = fl.server.start_driver(
-    server_address="0.0.0.0:9091",
-    config=fl.server.ServerConfig(num_rounds=3),
-)
+@app.main()
+def main(driver, context) -> None:
+    # Construct the LegacyContext
+    context = LegacyContext(
+        state=context.state,
+        config=fl.server.ServerConfig(num_rounds=3),
+    )
 
-assert hist.losses_distributed[-1][1] == 0
+    # Create the workflow
+    workflow = fl.server.workflow.DefaultWorkflow()
+
+    # Execute
+    workflow(driver, context)
+
+    assert context.history.losses_distributed[-1][1] == 0
