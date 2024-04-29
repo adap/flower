@@ -23,6 +23,8 @@ from typing import Optional
 import jwt
 import pathspec
 import typer
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 from typing_extensions import Annotated
 
 from .config_utils import load_and_validate_with_defaults
@@ -149,8 +151,17 @@ def build(
                     )
                 )
             try:
-                with open(key_path, encoding="UTF-8") as key_file:
-                    secret_key = key_file.read().strip()
+                with open(key_path, "rb") as key_file:
+                    private_key = serialization.load_pem_private_key(
+                        key_file.read(),
+                        password=None,  # This won't work for password protected
+                        backend=default_backend(),
+                    )
+                    secret_key = private_key.private_bytes(
+                        encoding=serialization.Encoding.PEM,
+                        format=serialization.PrivateFormat.TraditionalOpenSSL,
+                        encryption_algorithm=serialization.NoEncryption(),
+                    )
             except Exception as err:
                 typer.echo(f"Failed to read the secret key from file: {err}")
                 raise typer.Exit(code=1) from err
@@ -185,8 +196,8 @@ def _load_gitignore(directory: Path) -> pathspec.PathSpec:
     return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
 
 
-def _sign_content(content: str, secret_key: str) -> str:
+def _sign_content(content: str, secret_key: bytes) -> str:
     """Signs the content using JWT and returns the token."""
     payload = {"data": content}
-    token = jwt.encode(payload, secret_key, algorithm="HS256")
+    token = jwt.encode(payload, secret_key, algorithm="RS256")
     return token
