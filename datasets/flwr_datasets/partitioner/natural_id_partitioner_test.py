@@ -95,7 +95,7 @@ class TestNaturalIdPartitioner(unittest.TestCase):
         dataset = _create_dataset(10, 2)
         partitioner = NaturalIdPartitioner(partition_by="not-existing")
         partitioner.dataset = dataset
-        with self.assertRaises(KeyError):
+        with self.assertRaises(ValueError):
             partitioner.load_partition(0)
 
     @parameterized.expand(  # type: ignore
