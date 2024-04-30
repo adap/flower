@@ -62,7 +62,9 @@ def run_client_app() -> None:
     log(INFO, "Long-running Flower client starting")
 
     event(EventType.RUN_CLIENT_APP_ENTER)
+
     args = _parse_args_run_client_app().parse_args()
+    
     root_certificates = _get_certificates(args)
     log(
         DEBUG,
