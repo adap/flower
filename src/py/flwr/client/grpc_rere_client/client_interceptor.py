@@ -46,6 +46,7 @@ Request = Union[
     PullTaskInsRequest,
     PushTaskResRequest,
     GetRunRequest,
+    PingRequest,
 ]
 
 
