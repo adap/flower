@@ -83,16 +83,18 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     def __init__(self, state: State):
         self.state = state
         self._lock = threading.Lock()
-        self.server_private_key: Optional[ec.EllipticCurvePrivateKey] = None
+
+        self.client_public_keys = state.get_client_public_keys()
+
         private_key = self.state.get_server_private_key()
         public_key = self.state.get_server_public_key()
-        if private_key is not None:
-            self.server_private_key = bytes_to_private_key(private_key)
-        self.client_public_keys = state.get_client_public_keys()
-        self.encoded_server_public_key: Optional[bytes] = None
-        if public_key is not None:
-            self.encoded_server_public_key = base64.urlsafe_b64encode(public_key)
 
+        if private_key is None or public_key is None:
+            raise ValueError("Error loading authentication keys")
+        
+        self.server_private_key = bytes_to_private_key(private_key)
+        self.encoded_server_public_key = base64.urlsafe_b64encode(public_key)
+        
     def intercept_service(
         self,
         continuation: Callable[[Any], Any],
