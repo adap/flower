@@ -88,7 +88,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
         self.client_public_keys = state.get_client_public_keys()
         if len(self.client_public_keys) == 0:
-            log(WARNING, "No known client public keys in state.")
+            log(WARNING, "Authentication enabled, but no known public keys configured")
 
         private_key = self.state.get_server_private_key()
         public_key = self.state.get_server_public_key()
