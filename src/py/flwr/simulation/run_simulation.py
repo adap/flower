@@ -25,7 +25,6 @@ from time import sleep
 from typing import Dict, Optional
 
 import grpc
-import ray
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
@@ -318,14 +317,14 @@ def _run_simulation(
         When diabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
+    if backend_config is None:
+        backend_config = {}
+
     # Set logging level
     if not verbose_logging:
         logger = logging.getLogger("flwr")
         logger.setLevel(INFO)
-        ray.init(logging_level=WARNING, log_to_driver=False)
-
-    if backend_config is None:
-        backend_config = {}
+        backend_config["silent"] = True
 
     if enable_tf_gpu_growth:
         # Check that Backend config has also enabled using GPU growth

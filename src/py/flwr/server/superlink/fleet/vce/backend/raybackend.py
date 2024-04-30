@@ -15,7 +15,7 @@
 """Ray backend for the Fleet API using the Simulation Engine."""
 
 import pathlib
-from logging import ERROR, INFO
+from logging import ERROR, INFO, WARNING
 from typing import Callable, Dict, List, Tuple, Union
 
 import ray
@@ -55,7 +55,12 @@ class RayBackend(Backend):
         runtime_env = (
             self._configure_runtime_env(work_dir=work_dir) if work_dir else None
         )
-        init_ray(runtime_env=runtime_env)
+        if "silent" in backend_config and backend_config["silent"]:
+            init_ray(
+                logging_level=WARNING, log_to_driver=False, runtime_env=runtime_env
+            )
+        else:
+            init_ray(runtime_env=runtime_env)
 
         # Validate client resources
         self.client_resources_key = "client_resources"
