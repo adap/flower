@@ -56,17 +56,6 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         is more relevant when conducting simulations.
     """
 
-    _run_id: int
-    _message_id: str
-    _src_node_id: int
-    _dst_node_id: int
-    _reply_to_message: str
-    _group_id: str
-    _ttl: float
-    _message_type: str
-    _partition_id: int | None
-    _created_at: float  # Unix timestamp (in seconds) to be set upon message creation
-
     def __init__(  # pylint: disable=too-many-arguments
         self,
         run_id: int,
@@ -79,95 +68,98 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         message_type: str,
         partition_id: int | None = None,
     ) -> None:
-        self._run_id = run_id
-        self._message_id = message_id
-        self._src_node_id = src_node_id
-        self._dst_node_id = dst_node_id
-        self._reply_to_message = reply_to_message
-        self._group_id = group_id
-        self._ttl = ttl
-        self._message_type = message_type
-        self._partition_id = partition_id
+        var_dict = {
+            "_run_id": run_id,
+            "_message_id": message_id,
+            "_src_node_id": src_node_id,
+            "_dst_node_id": dst_node_id,
+            "_reply_to_message": reply_to_message,
+            "_group_id": group_id,
+            "_ttl": ttl,
+            "_message_type": message_type,
+            "_partition_id": partition_id,
+        }
+        self.__dict__.update(var_dict)
 
     @property
     def run_id(self) -> int:
         """An identifier for the current run."""
-        return self._run_id
+        return cast(int, self.__dict__["_run_id"])
 
     @property
     def message_id(self) -> str:
         """An identifier for the current message."""
-        return self._message_id
+        return cast(str, self.__dict__["_message_id"])
 
     @property
     def src_node_id(self) -> int:
         """An identifier for the node sending this message."""
-        return self._src_node_id
+        return cast(int, self.__dict__["_src_node_id"])
 
     @property
     def reply_to_message(self) -> str:
         """An identifier for the message this message replies to."""
-        return self._reply_to_message
+        return cast(str, self.__dict__["_reply_to_message"])
 
     @property
     def dst_node_id(self) -> int:
         """An identifier for the node receiving this message."""
-        return self._dst_node_id
+        return cast(int, self.__dict__["_dst_node_id"])
 
     @dst_node_id.setter
     def dst_node_id(self, value: int) -> None:
         """Set dst_node_id."""
-        self._dst_node_id = value
+        self.__dict__["_dst_node_id"] = value
 
     @property
     def group_id(self) -> str:
         """An identifier for grouping messages."""
-        return self._group_id
+        return cast(str, self.__dict__["_group_id"])
 
     @group_id.setter
     def group_id(self, value: str) -> None:
         """Set group_id."""
-        self._group_id = value
+        self.__dict__["_group_id"] = value
 
     @property
     def created_at(self) -> float:
         """Unix timestamp when the message was created."""
-        return self._created_at
+        return cast(float, self.__dict__["_created_at"])
 
     @created_at.setter
     def created_at(self, value: float) -> None:
-        """Set creation timestamp for this messages."""
-        self._created_at = value
+        """Set creation timestamp for this message."""
+        self.__dict__["_created_at"] = value
 
     @property
     def ttl(self) -> float:
         """Time-to-live for this message."""
-        return self._ttl
+        return cast(float, self.__dict__["_ttl"])
 
     @ttl.setter
     def ttl(self, value: float) -> None:
         """Set ttl."""
-        self._ttl = value
+        self.__dict__["_ttl"] = value
 
     @property
     def message_type(self) -> str:
         """A string that encodes the action to be executed on the receiving end."""
-        return self._message_type
+        return cast(str, self.__dict__["_message_type"])
 
     @message_type.setter
     def message_type(self, value: str) -> None:
         """Set message_type."""
-        self._message_type = value
+        self.__dict__["_message_type"] = value
 
     @property
     def partition_id(self) -> int | None:
         """An identifier telling which data partition a ClientApp should use."""
-        return self._partition_id
+        return cast(int, self.__dict__["_partition_id"])
 
     @partition_id.setter
     def partition_id(self, value: int) -> None:
-        """Set patition_id."""
-        self._partition_id = value
+        """Set partition_id."""
+        self.__dict__["_partition_id"] = value
 
 
 @dataclass
