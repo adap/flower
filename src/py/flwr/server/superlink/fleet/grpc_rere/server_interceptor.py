@@ -145,7 +145,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     GetRunRequest,
                     PingRequest,
                 ),
-            ):  
+            ):
                 if isinstance(request, PingRequest):
                     print("Ping, ", request)
                 # Verify hmac value
