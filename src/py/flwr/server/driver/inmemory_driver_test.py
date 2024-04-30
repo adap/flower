@@ -15,14 +15,17 @@
 """Tests for in-memory driver."""
 
 
-import unittest
+import os
 import time
+import unittest
+from unittest.mock import MagicMock, patch
+from uuid import uuid4
 
-from unittest.mock import MagicMock
-from flwr.common import DEFAULT_TTL, RecordSet
-from flwr.common.constant import PING_MAX_INTERVAL
+from flwr.common import RecordSet
+from flwr.common.message import Error
+from flwr.common.serde import error_to_proto, recordset_to_proto
+from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import StateFactory
-from flwr.common.serde import message_to_taskres, message_from_taskins
 
 from .inmemory_driver import InMemoryDriver
 
@@ -32,16 +35,16 @@ class TestInMemoryDriver(unittest.TestCase):
 
     def setUp(self) -> None:
         """Initialize State and Driver instance before each test."""
-        state_factory = StateFactory(":flwr-in-memory-state:")
-
-        # Register a few nodes
-        self.num_nodes = 42
-        state = state_factory.state()
-        for _ in range(self.num_nodes):
-            state.create_node(ping_interval=PING_MAX_INTERVAL)
-
         # Create driver
+        state_factory = StateFactory(":flwr-in-memory-state:")
         self.driver = InMemoryDriver(state_factory)
+
+        self.num_nodes = 42
+        self.driver.state = MagicMock()
+        self.driver.state.get_nodes.return_value = [
+            int.from_bytes(os.urandom(8), "little", signed=True)
+            for _ in range(self.num_nodes)
+        ]
 
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
@@ -54,16 +57,21 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_push_messages_valid(self) -> None:
         """Test pushing valid messages."""
         # Prepare
+        num_messages = 2
         msgs = [
             self.driver.create_message(RecordSet(), "message_type", 1, "")
-            for _ in range(2)
+            for _ in range(num_messages)
         ]
 
+        taskins_ids = [uuid4() for _ in range(num_messages)]
+        self.driver.state.store_task_ins.side_effect = taskins_ids  # type: ignore
+
         # Execute
-        msg_ids = self.driver.push_messages(msgs)
+        msg_ids = list(self.driver.push_messages(msgs))
 
         # Assert
         self.assertEqual(len(msg_ids), 2)
+        self.assertEqual(msg_ids, [str(ids) for ids in taskins_ids])
 
     def test_push_messages_invalid(self) -> None:
         """Test pushing invalid messages."""
@@ -73,7 +81,7 @@ class TestInMemoryDriver(unittest.TestCase):
             for _ in range(2)
         ]
         # Use invalid run_id
-        msgs[1].metadata._run_id += 1  # pylint: disable=protected-access
+        msgs[1].metadata._run_id += 1  # type: ignore
 
         # Execute and assert
         with self.assertRaises(ValueError):
@@ -81,68 +89,78 @@ class TestInMemoryDriver(unittest.TestCase):
 
     def test_pull_messages_with_given_message_ids(self) -> None:
         """Test pulling messages with specific message IDs."""
-        # Prepare: push messages
-        num_messages = 3
-        node_id = 1
-        msgs = [
-            self.driver.create_message(RecordSet(), "message_type", node_id, "")
-            for _ in range(num_messages)
+        # Prepare
+        msg_ids = [str(uuid4()) for _ in range(2)]
+        task_res_list = [
+            TaskRes(
+                task=Task(
+                    ancestry=[msg_ids[0]], recordset=recordset_to_proto(RecordSet())
+                )
+            ),
+            TaskRes(
+                task=Task(ancestry=[msg_ids[1]], error=error_to_proto(Error(code=0)))
+            ),
         ]
-        msg_ids = self.driver.push_messages(msgs)
-        
-        # Prepare: create replies
-        taskins = self.driver.state.get_task_ins(node_id, limit = num_messages)
-        for taskin in taskins:
-            msg = message_from_taskins(taskin)
-            reply_msg = msg.create_reply(RecordSet())
-            task_res = message_to_taskres(reply_msg)
-            task_res.task.pushed_at = time.time()
-            self.driver.state.store_task_res(task_res=task_res)
+        self.driver.state.get_task_res.return_value = task_res_list  # type: ignore
 
         # Execute
-        pulled_msgs = self.driver.pull_messages(msg_ids)
+        pulled_msgs = list(self.driver.pull_messages(msg_ids))
         reply_tos = [msg.metadata.reply_to_message for msg in pulled_msgs]
 
-        # # Assert
-        self.assertEqual(len(msgs), num_messages)
+        # Assert
+        self.assertEqual(len(pulled_msgs), 2)
         self.assertEqual(reply_tos, msg_ids)
 
-    # def test_send_and_receive_messages_complete(self) -> None:
-    #     """Test send and receive all messages successfully."""
-    #     # Prepare
-    #     mock_response = Mock(task_ids=["id1"])
-    #     self.mock_grpc_driver_helper.push_task_ins.return_value = mock_response
-    #     # The response message must include either `content` (i.e. a recordset) or
-    #     # an `Error`. We choose the latter in this case
-    #     error_proto = error_to_proto(Error(code=0))
-    #     mock_response = Mock(
-    #         task_res_list=[TaskRes(task=Task(ancestry=["id1"], error=error_proto))]
-    #     )
-    #     self.mock_grpc_driver_helper.pull_task_res.return_value = mock_response
-    #     msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
+    def test_send_and_receive_messages_complete(self) -> None:
+        """Test send and receive all messages successfully."""
+        # Prepare
+        msgs = [self.driver.create_message(RecordSet(), "", 0, "")]
+        # Prepare
+        msg_ids = [str(uuid4()) for _ in range(2)]
+        task_res_list = [
+            TaskRes(
+                task=Task(
+                    ancestry=[msg_ids[0]], recordset=recordset_to_proto(RecordSet())
+                )
+            ),
+            TaskRes(
+                task=Task(ancestry=[msg_ids[1]], error=error_to_proto(Error(code=0)))
+            ),
+        ]
+        self.driver.state.store_task_ins.side_effect = msg_ids  # type: ignore
+        self.driver.state.get_task_res.return_value = task_res_list  # type: ignore
 
-    #     # Execute
-    #     ret_msgs = list(self.driver.send_and_receive(msgs))
+        # Execute
+        ret_msgs = list(self.driver.send_and_receive(msgs))
+        reply_tos = [msg.metadata.reply_to_message for msg in ret_msgs]
+        # Assert
+        self.assertEqual(len(ret_msgs), 2)
+        self.assertEqual(reply_tos, msg_ids)
 
-    #     # Assert
-    #     self.assertEqual(len(ret_msgs), 1)
-    #     self.assertEqual(ret_msgs[0].metadata.reply_to_message, "id1")
+    def test_send_and_receive_messages_timeout(self) -> None:
+        """Test send and receive messages but time out."""
+        # Prepare
+        msgs = [self.driver.create_message(RecordSet(), "", 0, "")]
+        # Prepare
+        msg_ids = [str(uuid4()) for _ in range(2)]
+        task_res_list = [
+            TaskRes(
+                task=Task(
+                    ancestry=[msg_ids[0]], recordset=recordset_to_proto(RecordSet())
+                )
+            ),
+            TaskRes(
+                task=Task(ancestry=[msg_ids[1]], error=error_to_proto(Error(code=0)))
+            ),
+        ]
+        self.driver.state.store_task_ins.side_effect = msg_ids  # type: ignore
+        self.driver.state.get_task_res.return_value = task_res_list  # type: ignore
 
-    # def test_send_and_receive_messages_timeout(self) -> None:
-    #     """Test send and receive messages but time out."""
-    #     # Prepare
-    #     sleep_fn = time.sleep
-    #     mock_response = Mock(task_ids=["id1"])
-    #     self.mock_grpc_driver_helper.push_task_ins.return_value = mock_response
-    #     mock_response = Mock(task_res_list=[])
-    #     self.mock_grpc_driver_helper.pull_task_res.return_value = mock_response
-    #     msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
+        # Execute
+        with patch("time.sleep", side_effect=lambda t: time.sleep(t * 0.01)):
+            start_time = time.time()
+            ret_msgs = list(self.driver.send_and_receive(msgs, timeout=-1))
 
-    #     # Execute
-    #     with patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01)):
-    #         start_time = time.time()
-    #         ret_msgs = list(self.driver.send_and_receive(msgs, timeout=0.15))
-
-    #     # Assert
-    #     self.assertLess(time.time() - start_time, 0.2)
-    #     self.assertEqual(len(ret_msgs), 0)
+        # Assert
+        self.assertLess(time.time() - start_time, 0.2)
+        self.assertEqual(len(ret_msgs), 0)
