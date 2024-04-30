@@ -210,7 +210,9 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         """
         return len(self.task_res_store)
 
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(
+        self, ping_interval: float, public_key: Optional[bytes] = None
+    ) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
@@ -218,25 +220,29 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         with self.lock:
             if node_id not in self.node_ids:
                 self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+                if (
+                    public_key is not None
+                    and public_key not in self.public_key_to_node_id
+                    and self.public_key_to_node_id.get(public_key) != node_id
+                ):
+                    self.public_key_to_node_id[public_key] = node_id
                 return node_id
         log(ERROR, "Unexpected node registration failure.")
         return 0
 
-    def restore_node(self, node_id: int, ping_interval: float) -> bool:
-        """Create, store in state, and return `node_id`."""
-        with self.lock:
-            if node_id not in self.node_ids:
-                self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
-                return True
-        log(ERROR, "Unexpected node restore failure.")
-        return False
-
-    def delete_node(self, node_id: int) -> None:
+    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Delete a client node."""
         with self.lock:
             if node_id not in self.node_ids:
                 raise ValueError(f"Node {node_id} not found")
             del self.node_ids[node_id]
+            if public_key is not None:
+                if (
+                    public_key not in self.public_key_to_node_id
+                    and self.public_key_to_node_id.get(public_key) != node_id
+                ):
+                    raise ValueError("Public key or node_id not found")
+                del self.public_key_to_node_id[public_key]
 
     def get_nodes(self, run_id: int) -> Set[int]:
         """Return all available client nodes.
@@ -256,13 +262,9 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 if online_until > current_time
             }
 
-    def get_node_id(self, client_public_key: bytes) -> int:
+    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
-        return self.public_key_to_node_id[client_public_key]
-
-    def store_node_id_and_public_key(self, node_id: int, public_key: bytes) -> None:
-        """Store `node_id` and the corresponding `public_key`."""
-        self.public_key_to_node_id[public_key] = node_id
+        return self.public_key_to_node_id.get(client_public_key)
 
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""

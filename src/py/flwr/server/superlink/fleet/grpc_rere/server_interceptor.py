@@ -84,7 +84,6 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
     def __init__(self, state: State):
         self.state = state
-        self._lock = threading.Lock()
 
         self.client_public_keys = state.get_client_public_keys()
         if len(self.client_public_keys) == 0:
@@ -132,7 +131,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
             if isinstance(request, CreateNodeRequest):
                 return self._create_authenticated_node(
-                    client_public_key_bytes, request, context, method_handler
+                    client_public_key_bytes, request, context
                 )
 
             # Verify hmac value
@@ -195,7 +194,6 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         public_key_bytes: bytes,
         request: CreateNodeRequest,
         context: grpc.ServicerContext,
-        method_handler: grpc.RpcMethodHandler,
     ) -> CreateNodeResponse:
         context.send_initial_metadata(
             (
@@ -205,21 +203,14 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 ),
             )
         )
-        try:
-            node_id = self.state.get_node_id(public_key_bytes)
-        except KeyError:
-            node_id = None
 
+        node_id = self.state.get_node_id(public_key_bytes)
+
+        # Handle RPC here instead of passing to default method_handler
         if node_id is not None:
-            with self._lock:
-                # Handle RPC here instead of passing to default method_handler
-                self.state.restore_node(node_id, request.ping_interval)
-                return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
+            # State has lock already this execution is serialized
+            self.state.acknowledge_ping(node_id, request.ping_interval)
+            return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
-        response: CreateNodeResponse = method_handler.unary_unary(request, context)
-
-        with self._lock:
-            self.state.store_node_id_and_public_key(
-                response.node.node_id, public_key_bytes
-            )
-            return response
+        node_id = self.state.create_node(request.ping_interval, public_key_bytes)
+        return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))

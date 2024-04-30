@@ -132,15 +132,13 @@ class State(abc.ABC):  # pylint: disable=R0904
         """Delete all delivered TaskIns/TaskRes pairs."""
 
     @abc.abstractmethod
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(
+        self, ping_interval: float, public_key: Optional[bytes] = None
+    ) -> int:
         """Create, store in state, and return `node_id`."""
 
     @abc.abstractmethod
-    def restore_node(self, node_id: int, ping_interval: float) -> bool:
-        """Restore `node_id` and return True if succeed."""
-
-    @abc.abstractmethod
-    def delete_node(self, node_id: int) -> None:
+    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Remove `node_id` from state."""
 
     @abc.abstractmethod
@@ -154,12 +152,8 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
-    def get_node_id(self, client_public_key: bytes) -> int:
+    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
-
-    @abc.abstractmethod
-    def store_node_id_and_public_key(self, node_id: int, public_key: bytes) -> None:
-        """Store `node_id` and the corresponding `public_key`."""
 
     @abc.abstractmethod
     def create_run(self, fab_id: str, fab_version: str) -> int:

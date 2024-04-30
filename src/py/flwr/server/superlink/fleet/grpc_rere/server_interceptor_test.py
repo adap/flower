@@ -154,10 +154,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_delete_node_with_metadata(self) -> None:
         """Test server interceptor for deleting node."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        self.state.store_node_id_and_public_key(
-            node_id, public_key_to_bytes(self._client_public_key)
-        )
+        node_id = self.state.create_node(ping_interval=30, public_key=public_key_to_bytes(self._client_public_key))
         request = DeleteNodeRequest(node=Node(node_id=node_id))
         shared_secret = generate_shared_key(
             self._client_private_key, self._server_public_key
@@ -185,10 +182,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_unsuccessful_delete_node_with_metadata(self) -> None:
         """Test server interceptor for deleting node unsuccessfully."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        self.state.store_node_id_and_public_key(
-            node_id, public_key_to_bytes(self._client_public_key)
-        )
+        node_id = self.state.create_node(ping_interval=30, public_key=public_key_to_bytes(self._client_public_key))
         request = DeleteNodeRequest(node=Node(node_id=node_id))
         client_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(client_private_key, self._server_public_key)
@@ -212,10 +206,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_pull_task_ins_with_metadata(self) -> None:
         """Test server interceptor for pull task ins."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        self.state.store_node_id_and_public_key(
-            node_id, public_key_to_bytes(self._client_public_key)
-        )
+        node_id = self.state.create_node(ping_interval=30, public_key=public_key_to_bytes(self._client_public_key))
         request = PullTaskInsRequest(node=Node(node_id=node_id))
         shared_secret = generate_shared_key(
             self._client_private_key, self._server_public_key
@@ -243,10 +234,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_unsuccessful_pull_task_ins_with_metadata(self) -> None:
         """Test server interceptor for pull task ins unsuccessfully."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        self.state.store_node_id_and_public_key(
-            node_id, public_key_to_bytes(self._client_public_key)
-        )
+        node_id = self.state.create_node(ping_interval=30, public_key=public_key_to_bytes(self._client_public_key))
         request = PullTaskInsRequest(node=Node(node_id=node_id))
         client_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(client_private_key, self._server_public_key)
@@ -270,10 +258,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_push_task_res_with_metadata(self) -> None:
         """Test server interceptor for push task res."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        self.state.store_node_id_and_public_key(
-            node_id, public_key_to_bytes(self._client_public_key)
-        )
+        node_id = self.state.create_node(ping_interval=30, public_key=public_key_to_bytes(self._client_public_key))
         request = PushTaskResRequest(
             task_res_list=[TaskRes(task=Task(producer=Node(node_id=node_id)))]
         )
@@ -303,10 +288,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_unsuccessful_push_task_res_with_metadata(self) -> None:
         """Test server interceptor for push task res unsuccessfully."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        self.state.store_node_id_and_public_key(
-            node_id, public_key_to_bytes(self._client_public_key)
-        )
+        node_id = self.state.create_node(ping_interval=30, public_key=public_key_to_bytes(self._client_public_key))
         request = PushTaskResRequest(
             task_res_list=[TaskRes(task=Task(producer=Node(node_id=node_id)))]
         )
@@ -332,10 +314,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_get_run_with_metadata(self) -> None:
         """Test server interceptor for pull task ins."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        self.state.store_node_id_and_public_key(
-            node_id, public_key_to_bytes(self._client_public_key)
-        )
+        node_id = self.state.create_node(ping_interval=30, public_key=public_key_to_bytes(self._client_public_key))
         run_id = self.state.create_run("", "")
         request = GetRunRequest(run_id=run_id)
         shared_secret = generate_shared_key(
@@ -364,10 +343,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_unsuccessful_get_run_with_metadata(self) -> None:
         """Test server interceptor for pull task ins unsuccessfully."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        self.state.store_node_id_and_public_key(
-            node_id, public_key_to_bytes(self._client_public_key)
-        )
+        node_id = self.state.create_node(ping_interval=30, public_key=public_key_to_bytes(self._client_public_key))
         run_id = self.state.create_run("", "")
         request = GetRunRequest(run_id=run_id)
         client_private_key, _ = generate_key_pairs()
@@ -392,10 +368,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_ping_with_metadata(self) -> None:
         """Test server interceptor for pull task ins."""
         # Prepare
-        node_id = self.state.create_node(ping_interval=30)
-        self.state.store_node_id_and_public_key(
-            node_id, public_key_to_bytes(self._client_public_key)
-        )
+        node_id = self.state.create_node(ping_interval=30, public_key=public_key_to_bytes(self._client_public_key))
         request = PingRequest(node=Node(node_id=node_id))
         shared_secret = generate_shared_key(
             self._client_private_key, self._server_public_key
@@ -423,7 +396,8 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_unsuccessful_ping_with_metadata(self) -> None:
         """Test server interceptor for pull task ins unsuccessfully."""
         # Prepare
-        request = PingRequest()
+        node_id = self.state.create_node(ping_interval=30, public_key=public_key_to_bytes(self._client_public_key))
+        request = PingRequest(node=Node(node_id=node_id))
         client_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(client_private_key, self._server_public_key)
         hmac_value = base64.urlsafe_b64encode(
