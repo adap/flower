@@ -564,7 +564,7 @@ class SqliteState(State):  # pylint: disable=R0904
             self.query(query, (node_id,))
         else:
             query = "DELETE FROM node WHERE node_id = ? AND public_key = ?;"
-            self.query(query, (node_id,public_key))
+            self.query(query, (node_id, public_key))
 
     def get_nodes(self, run_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
