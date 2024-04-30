@@ -15,10 +15,9 @@
 """Natural id partitioner class that works with Hugging Face Datasets."""
 
 
-from typing import Dict, Union
+from typing import Dict
 
 import numpy as np
-from tqdm import tqdm
 
 import datasets
 from flwr_datasets.common.typing import NDArrayInt
@@ -60,7 +59,7 @@ class NaturalIdPartitioner(Partitioner):
         }
 
     def _create_partition_id_to_indices(self) -> None:
-        natural_id_to_indices = {}
+        natural_id_to_indices = {}  # type: ignore
         natural_ids = np.array(self.dataset[self._partition_by])
 
         for index, natural_id in enumerate(natural_ids):
@@ -72,56 +71,6 @@ class NaturalIdPartitioner(Partitioner):
             self._natural_id_to_partition_id[natural_id]: indices
             for natural_id, indices in natural_id_to_indices.items()
         }
-
-    def _create_partition_id_to_indices_2(self) -> None:
-        """Create an assignment of indices to the partition indices."""
-        natural_ids = np.array(self.dataset[self._partition_by])
-        unique_natural_ids = self.dataset.unique(self._partition_by)
-
-        none_present = False
-        if None in unique_natural_ids:
-            none_present = True
-            dtype = self.dataset.features[self._partition_by].dtype
-            none_replacement: Union[int, str]
-            if dtype == "string":
-                none_replacement = "None"
-                new_term = ""
-                counter = 0
-                # Ensure the replacement is not in the dataset
-                while True:
-                    if none_replacement + new_term not in unique_natural_ids:
-                        none_replacement = none_replacement + new_term
-                        break
-                    counter += 1
-                    new_term = f"{counter}"
-            elif "unit" in dtype:
-                none_replacement = max(natural_ids) + 1
-            elif "int" in dtype:
-                none_replacement = -1
-                if none_replacement in unique_natural_ids:
-                    none_replacement = max(natural_ids) + 1
-            else:
-                raise ValueError(
-                    "The type of values in the `partition_by` column needs "
-                    "to be int or string"
-                )
-
-            # Replace the None by the none_replacement (in order to be able to use the
-            # np.unique(value, return_inverse) that requires no None and same val types
-            is_none = np.vectorize(lambda x: x is None)
-            mask = is_none(natural_ids)
-            natural_ids[mask] = none_replacement
-
-        unique_natural_ids, inverse = np.unique(natural_ids, return_inverse=True)
-
-        for i, natural_id in tqdm(
-            enumerate(unique_natural_ids), desc="Generating partition_id_to_indices"
-        ):
-            if none_present and natural_id == none_replacement:
-                # Use the natural_id that is present in the dataset (not replacement)
-                natural_id = None
-            partition_id = self._natural_id_to_partition_id[natural_id]
-            self._partition_id_to_indices[partition_id] = np.where(inverse == i)[0]
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
         """Load a single partition corresponding to a single `partition_id`.
