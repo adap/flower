@@ -25,6 +25,7 @@ from time import sleep
 from typing import Dict, Optional
 
 import grpc
+import ray
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
@@ -321,6 +322,7 @@ def _run_simulation(
     if not verbose_logging:
         logger = logging.getLogger("flwr")
         logger.setLevel(INFO)
+        ray.init(logging_level=WARNING, log_to_driver=False)
 
     if backend_config is None:
         backend_config = {}
