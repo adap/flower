@@ -34,6 +34,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     GetRunRequest,
     GetRunResponse,
+    PingRequest,
+    PingResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -99,6 +101,11 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             "/flwr.proto.Fleet/GetRun",
             request_serializer=GetRunRequest.SerializeToString,
             response_deserializer=GetRunResponse.FromString,
+        )
+        self._ping = self._channel.unary_unary(
+            "/flwr.proto.Fleet/Ping",
+            request_serializer=PingRequest.SerializeToString,
+            response_deserializer=PingResponse.FromString,
         )
 
     def tearDown(self) -> None:
@@ -375,6 +382,56 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         # Execute & Assert
         with self.assertRaises(grpc.RpcError):
             self._get_run.with_call(
+                request=request,
+                metadata=(
+                    (_PUBLIC_KEY_HEADER, public_key_bytes),
+                    (_AUTH_TOKEN_HEADER, hmac_value),
+                ),
+            )
+
+    def test_successful_ping_with_metadata(self) -> None:
+        """Test server interceptor for pull task ins."""
+        # Prepare
+        request = PingRequest()
+        shared_secret = generate_shared_key(
+            self._client_private_key, self._server_public_key
+        )
+        hmac_value = base64.urlsafe_b64encode(
+            compute_hmac(shared_secret, request.SerializeToString(True))
+        )
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+
+        # Execute
+        response, call = self._ping.with_call(
+            request=request,
+            metadata=(
+                (_PUBLIC_KEY_HEADER, public_key_bytes),
+                (_AUTH_TOKEN_HEADER, hmac_value),
+            ),
+        )
+
+        # Assert
+        assert isinstance(response, PingResponse)
+        assert grpc.StatusCode.OK == call.code()
+
+    def test_unsuccessful_ping_with_metadata(self) -> None:
+        """Test server interceptor for pull task ins unsuccessfully."""
+        # Prepare
+        request = PingRequest()
+        client_private_key, _ = generate_key_pairs()
+        shared_secret = generate_shared_key(client_private_key, self._server_public_key)
+        hmac_value = base64.urlsafe_b64encode(
+            compute_hmac(shared_secret, request.SerializeToString(True))
+        )
+        public_key_bytes = base64.urlsafe_b64encode(
+            public_key_to_bytes(self._client_public_key)
+        )
+
+        # Execute & Assert
+        with self.assertRaises(grpc.RpcError):
+            self._ping.with_call(
                 request=request,
                 metadata=(
                     (_PUBLIC_KEY_HEADER, public_key_bytes),

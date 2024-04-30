@@ -34,6 +34,8 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     DeleteNodeResponse,
     GetRunRequest,
     GetRunResponse,
+    PingRequest,
+    PingResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -51,6 +53,7 @@ Request = Union[
     PullTaskInsRequest,
     PushTaskResRequest,
     GetRunRequest,
+    PingRequest,
 ]
 
 Response = Union[
@@ -59,6 +62,7 @@ Response = Union[
     PullTaskInsResponse,
     PushTaskResResponse,
     GetRunResponse,
+    PingResponse,
 ]
 
 
@@ -130,6 +134,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     PullTaskInsRequest,
                     PushTaskResRequest,
                     GetRunRequest,
+                    PingRequest,
                 ),
             ):
                 # Verify hmac value
