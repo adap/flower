@@ -14,18 +14,12 @@
 # ==============================================================================
 """Flower client app."""
 
-import argparse
 import sys
 import time
 from logging import DEBUG, ERROR, INFO, WARN
-from pathlib import Path
 from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.serialization import (
-    load_ssh_private_key,
-    load_ssh_public_key,
-)
 from grpc import RpcError
 
 from flwr.client.client import Client
@@ -41,141 +35,15 @@ from flwr.common.constant import (
     TRANSPORT_TYPES,
     ErrorCode,
 )
-from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
-from flwr.common.object_ref import load_app, validate
 from flwr.common.retry_invoker import RetryInvoker, exponential
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    ssh_types_to_elliptic_curve,
-)
 
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
-from .supernode.app import parse_args_run_client_app
-
-
-def run_client_app() -> None:
-    """Run Flower client app."""
-    log(INFO, "Long-running Flower client starting")
-
-    event(EventType.RUN_CLIENT_APP_ENTER)
-
-    args = _parse_args_run_client_app().parse_args()
-
-    # Obtain certificates
-    if args.insecure:
-        if args.root_certificates is not None:
-            sys.exit(
-                "Conflicting options: The '--insecure' flag disables HTTPS, "
-                "but '--root-certificates' was also specified. Please remove "
-                "the '--root-certificates' option when running in insecure mode, "
-                "or omit '--insecure' to use HTTPS."
-            )
-        log(
-            WARN,
-            "Option `--insecure` was set. "
-            "Starting insecure HTTP client connected to %s.",
-            args.server,
-        )
-        root_certificates = None
-    else:
-        # Load the certificates if provided, or load the system certificates
-        cert_path = args.root_certificates
-        if cert_path is None:
-            root_certificates = None
-        else:
-            root_certificates = Path(cert_path).read_bytes()
-        log(
-            DEBUG,
-            "Starting secure HTTPS client connected to %s "
-            "with the following certificates: %s.",
-            args.server,
-            cert_path,
-        )
-
-    log(
-        DEBUG,
-        "Flower will load ClientApp `%s`",
-        getattr(args, "client-app"),
-    )
-
-    client_app_dir = args.dir
-    if client_app_dir is not None:
-        sys.path.insert(0, client_app_dir)
-
-    app_ref: str = getattr(args, "client-app")
-    valid, error_msg = validate(app_ref)
-    if not valid and error_msg:
-        raise LoadClientAppError(error_msg) from None
-
-    def _load() -> ClientApp:
-        client_app = load_app(app_ref, LoadClientAppError)
-
-        if not isinstance(client_app, ClientApp):
-            raise LoadClientAppError(
-                f"Attribute {app_ref} is not of type {ClientApp}",
-            ) from None
-
-        return client_app
-
-    authentication_keys = _try_setup_client_authentication(args)
-
-    _start_client_internal(
-        server_address=args.server,
-        load_client_app_fn=_load,
-        transport="rest" if args.rest else "grpc-rere",
-        root_certificates=root_certificates,
-        insecure=args.insecure,
-        authentication_keys=authentication_keys,
-        max_retries=args.max_retries,
-        max_wait_time=args.max_wait_time,
-    )
-    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
-
-
-def _try_setup_client_authentication(
-    args: argparse.Namespace,
-) -> Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
-    if not args.authentication_keys:
-        return None
-
-    ssh_private_key = load_ssh_private_key(
-        Path(args.authentication_keys[0]).read_bytes(),
-        None,
-    )
-    ssh_public_key = load_ssh_public_key(Path(args.authentication_keys[1]).read_bytes())
-
-    try:
-        client_private_key, client_public_key = ssh_types_to_elliptic_curve(
-            ssh_private_key, ssh_public_key
-        )
-    except TypeError:
-        sys.exit(
-            "The file paths provided could not be read as a private and public "
-            "key pair. Client authentication requires an elliptic curve public and "
-            "private key pair. Please provide the file paths containing elliptic "
-            "curve private and public keys to '--authentication-keys'."
-        )
-
-    return (
-        client_private_key,
-        client_public_key,
-    )
-
-
-def _parse_args_run_client_app() -> argparse.ArgumentParser:
-    """Parse flower-client-app command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Start a Flower client app",
-    )
-
-    parse_args_run_client_app(parser=parser)
-
-    return parser
 
 
 def _check_actionable_client(
