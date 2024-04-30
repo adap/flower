@@ -60,6 +60,20 @@ class NaturalIdPartitioner(Partitioner):
         }
 
     def _create_partition_id_to_indices(self) -> None:
+        natural_id_to_indices = {}
+        natural_ids = np.array(self.dataset[self._partition_by])
+
+        for index, natural_id in enumerate(natural_ids):
+            if natural_id not in natural_id_to_indices:
+                natural_id_to_indices[natural_id] = []
+            natural_id_to_indices[natural_id].append(index)
+
+        self._partition_id_to_indices = {
+            self._natural_id_to_partition_id[natural_id]: indices
+            for natural_id, indices in natural_id_to_indices.items()
+        }
+
+    def _create_partition_id_to_indices_2(self) -> None:
         """Create an assignment of indices to the partition indices."""
         natural_ids = np.array(self.dataset[self._partition_by])
         unique_natural_ids = self.dataset.unique(self._partition_by)
