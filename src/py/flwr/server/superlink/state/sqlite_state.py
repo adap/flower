@@ -561,12 +561,10 @@ class SqliteState(State):  # pylint: disable=R0904
         """Delete a client node."""
         if public_key is None:
             query = "DELETE FROM node WHERE node_id = ?;"
-            parameters = (node_id,)
+            self.query(query, (node_id,))
         else:
             query = "DELETE FROM node WHERE node_id = ? AND public_key = ?;"
-            parameters = (node_id, public_key)
-
-        self.query(query, parameters)
+            self.query(query, (node_id,public_key))
 
     def get_nodes(self, run_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
