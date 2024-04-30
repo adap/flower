@@ -135,9 +135,6 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     client_public_key_bytes, request, context, method_handler
                 )
 
-            if isinstance(request, PingRequest):
-                print("Ping, ", request)
-
             # Verify hmac value
             hmac_value = base64.urlsafe_b64decode(
                 _get_value_from_tuples(
