@@ -128,45 +128,33 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             if client_public_key_bytes not in self.client_public_keys:
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
-            if not isinstance(request, Request):
-                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
-
             if isinstance(request, CreateNodeRequest):
                 return self._create_authenticated_node(
                     client_public_key_bytes, request, context, method_handler
                 )
 
-            if isinstance(
-                request,
-                (
-                    DeleteNodeRequest,
-                    PullTaskInsRequest,
-                    PushTaskResRequest,
-                    GetRunRequest,
-                    PingRequest,
-                ),
-            ):
-                if isinstance(request, PingRequest):
-                    print("Ping, ", request)
-                # Verify hmac value
-                hmac_value = base64.urlsafe_b64decode(
-                    _get_value_from_tuples(
-                        _AUTH_TOKEN_HEADER, context.invocation_metadata()
-                    )
+            if isinstance(request, PingRequest):
+                print("Ping, ", request)
+                
+            # Verify hmac value
+            hmac_value = base64.urlsafe_b64decode(
+                _get_value_from_tuples(
+                    _AUTH_TOKEN_HEADER, context.invocation_metadata()
                 )
-                public_key = bytes_to_public_key(client_public_key_bytes)
+            )
+            public_key = bytes_to_public_key(client_public_key_bytes)
 
-                if not self._verify_hmac(public_key, request, hmac_value):
-                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
+            if not self._verify_hmac(public_key, request, hmac_value):
+                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
-                # Verify node_id
-                try:
-                    node_id = self.state.get_node_id(client_public_key_bytes)
-                except KeyError:
-                    node_id = None
+            # Verify node_id
+            try:
+                node_id = self.state.get_node_id(client_public_key_bytes)
+            except KeyError:
+                node_id = None
 
-                if not self._verify_node_id(node_id, request):
-                    context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
+            if not self._verify_node_id(node_id, request):
+                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             return method_handler.unary_unary(request, context)  # type: ignore
 
