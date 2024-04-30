@@ -18,6 +18,7 @@
 from typing import Dict
 
 import numpy as np
+from tqdm import tqdm
 
 import datasets
 from flwr_datasets.common.typing import NDArrayInt
@@ -25,7 +26,34 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class NaturalIdPartitioner(Partitioner):
-    """Partitioner for dataset that can be divided by a reference to id in dataset."""
+    """Partitioner for dataset that can be divided by a reference to id in dataset.
+
+    Parameters
+    ----------
+    partition_by: str
+        The name of the column that contains the unique values of partitions.
+
+
+    Examples
+    --------
+    "flwrlabs/shakespeare" dataset
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import NaturalIdPartitioner
+    >>>
+    >>> partitioner = NaturalIdPartitioner(partition_by="character_id")
+    >>> fds = FederatedDataset(dataset="flwrlabs/shakespeare",
+    >>>                        partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(0)
+
+    "sentiment140" (aka Twitter) dataset
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import NaturalIdPartitioner
+    >>>
+    >>> partitioner = NaturalIdPartitioner(partition_by="character_id")
+    >>> fds = FederatedDataset(dataset="sentiment140",
+    >>>                        partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(0)
+    """
 
     def __init__(
         self,
@@ -62,7 +90,9 @@ class NaturalIdPartitioner(Partitioner):
         natural_id_to_indices = {}  # type: ignore
         natural_ids = np.array(self.dataset[self._partition_by])
 
-        for index, natural_id in enumerate(natural_ids):
+        for index, natural_id in tqdm(
+            enumerate(natural_ids), desc="Generating partition_id_to_indices"
+        ):
             if natural_id not in natural_id_to_indices:
                 natural_id_to_indices[natural_id] = []
             natural_id_to_indices[natural_id].append(index)
@@ -89,7 +119,6 @@ class NaturalIdPartitioner(Partitioner):
             single dataset partition
         """
         if len(self._partition_id_to_natural_id) == 0:
-            self._check_supported_type_of_value_in_partition_by()
             self._create_int_partition_id_to_natural_id()
             self._create_natural_id_to_int_partition_id()
 
@@ -102,7 +131,6 @@ class NaturalIdPartitioner(Partitioner):
     def num_partitions(self) -> int:
         """Total number of partitions."""
         if len(self._partition_id_to_natural_id) == 0:
-            self._check_supported_type_of_value_in_partition_by()
             self._create_int_partition_id_to_natural_id()
             self._create_natural_id_to_int_partition_id()
         return len(self._partition_id_to_natural_id)
@@ -121,17 +149,3 @@ class NaturalIdPartitioner(Partitioner):
         raise AttributeError(
             "Setting the partition_id_to_natural_id dictionary is not allowed."
         )
-
-    def _check_supported_type_of_value_in_partition_by(self) -> None:
-        values = self.dataset[0][self._partition_by]
-        values_np = np.array(values)
-        dtype = values_np.dtype
-        if not (
-            np.issubdtype(dtype, np.object_)
-            or np.issubdtype(dtype, np.integer)
-            or np.issubdtype(dtype, np.str_)
-        ):
-            raise ValueError(
-                f"The specified column in {self._partition_by} is of type {dtype} "
-                f"however only ints (with None) and strings (with None) are acceptable."
-            )
