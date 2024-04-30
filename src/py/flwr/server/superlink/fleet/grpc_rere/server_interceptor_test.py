@@ -275,7 +275,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             node_id, public_key_to_bytes(self._client_public_key)
         )
         request = PushTaskResRequest(
-            task_res_list=[TaskRes(task=Task(consumer=Node(node_id=node_id)))]
+            task_res_list=[TaskRes(task=Task(producer=Node(node_id=node_id)))]
         )
         shared_secret = generate_shared_key(
             self._client_private_key, self._server_public_key
@@ -308,7 +308,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             node_id, public_key_to_bytes(self._client_public_key)
         )
         request = PushTaskResRequest(
-            task_res_list=[TaskRes(task=Task(consumer=Node(node_id=node_id)))]
+            task_res_list=[TaskRes(task=Task(producer=Node(node_id=node_id)))]
         )
         client_private_key, _ = generate_key_pairs()
         shared_secret = generate_shared_key(client_private_key, self._server_public_key)
@@ -461,7 +461,6 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         )
 
         node = response.node
-        print(node)
         client_node_id = node.node_id
 
         assert call.initial_metadata()[0] == expected_metadata

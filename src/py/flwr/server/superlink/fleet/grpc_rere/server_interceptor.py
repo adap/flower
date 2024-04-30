@@ -179,7 +179,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         if isinstance(request, PushTaskResRequest):
             if len(request.task_res_list) == 0:
                 return False
-            return request.task_res_list[0].task.consumer.node_id == node_id
+            return request.task_res_list[0].task.producer.node_id == node_id
         if isinstance(request, GetRunRequest):
             return node_id in self.state.get_nodes(request.run_id)
         return request.node.node_id == node_id
