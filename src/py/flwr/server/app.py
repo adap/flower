@@ -378,8 +378,8 @@ def run_superlink() -> None:
             state = state_factory.state()
             state.store_client_public_keys(client_public_keys)
             state.store_server_private_public_key(
-                public_key_to_bytes(server_public_key),
                 private_key_to_bytes(server_private_key),
+                public_key_to_bytes(server_public_key),
             )
             log(
                 INFO,
