@@ -38,7 +38,7 @@ class Net(nn.Module):
 
 
 def load_data(partition_id):
-    """Load partition CIFAR10 data."""
+    """Load partition MNIST data."""
     fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
     partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
