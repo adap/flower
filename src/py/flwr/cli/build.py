@@ -57,7 +57,7 @@ def build(
         `flwr build --sign`
 
     Note that this will prompt you for the path of the private RSA key to use for
-    signing the FAB file, instead, you can directly provide a `--key_path`
+    signing the FAB file. Alternatively, you can directly provide a `--key_path`
     argument:
 
         `flwr build --sign --key_path <PATH_TO_PRIVATE_RSA_KEY>`
