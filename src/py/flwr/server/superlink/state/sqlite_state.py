@@ -595,6 +595,21 @@ class SqliteState(State):  # pylint: disable=R0904
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
+    def get_node_id(self, client_public_key: bytes) -> int:
+        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+        query = "SELECT node_id FROM public_key_node_id WHERE public_key = :public_key;"
+        row = self.query(query, {"public_key": client_public_key})
+        node_id: int = row[0]["node_id"]
+        return node_id
+
+    def store_node_id_and_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Store `node_id` and the corresponding `public_key`."""
+        query = (
+            "INSERT OR REPLACE INTO public_key_node_id (public_key, node_id) "
+            "VALUES (:public_key, :node_id)"
+        )
+        self.query(query, {"public_key": public_key, "node_id": node_id})
+
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
@@ -662,21 +677,6 @@ class SqliteState(State):  # pylint: disable=R0904
         rows = self.query(query)
         result: Set[bytes] = {row["public_key"] for row in rows}
         return result
-
-    def get_node_id(self, client_public_key: bytes) -> int:
-        """Retrieve stored `node_id` filtered by `client_public_keys`."""
-        query = "SELECT node_id FROM public_key_node_id WHERE public_key = :public_key;"
-        row = self.query(query, {"public_key": client_public_key})
-        node_id: int = row[0]["node_id"]
-        return node_id
-
-    def store_node_id_and_public_key(self, node_id: int, public_key: bytes) -> None:
-        """Store `node_id` and the corresponding `public_key`."""
-        query = (
-            "INSERT OR REPLACE INTO public_key_node_id (public_key, node_id) "
-            "VALUES (:public_key, :node_id)"
-        )
-        self.query(query, {"public_key": public_key, "node_id": node_id})
 
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""

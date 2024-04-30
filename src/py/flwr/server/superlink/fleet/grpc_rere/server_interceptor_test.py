@@ -392,7 +392,11 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
     def test_successful_ping_with_metadata(self) -> None:
         """Test server interceptor for pull task ins."""
         # Prepare
-        request = PingRequest()
+        node_id = self.state.create_node(ping_interval=30)
+        self.state.store_node_id_and_public_key(
+            node_id, public_key_to_bytes(self._client_public_key)
+        )
+        request = PingRequest(node=Node(node_id=node_id))
         shared_secret = generate_shared_key(
             self._client_private_key, self._server_public_key
         )
@@ -457,6 +461,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         )
 
         node = response.node
+        print(node)
         client_node_id = node.node_id
 
         assert call.initial_metadata()[0] == expected_metadata

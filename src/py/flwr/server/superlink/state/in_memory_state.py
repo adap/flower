@@ -34,16 +34,20 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
     """In-memory State implementation."""
 
     def __init__(self) -> None:
+
         # Map node_id to (online_until, ping_interval)
         self.node_ids: Dict[int, Tuple[float, float]] = {}
+        self.public_key_to_node_id: Dict[bytes, int] = {}
+
         # Map run_id to (fab_id, fab_version)
         self.run_ids: Dict[int, Tuple[str, str]] = {}
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
+
         self.client_public_keys: Set[bytes] = set()
         self.server_public_key: Optional[bytes] = None
         self.server_private_key: Optional[bytes] = None
-        self.public_key_to_node_id: Dict[bytes, int] = {}
+
         self.lock = threading.Lock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
@@ -252,6 +256,14 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 if online_until > current_time
             }
 
+    def get_node_id(self, client_public_key: bytes) -> int:
+        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+        return self.public_key_to_node_id[client_public_key]
+
+    def store_node_id_and_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Store `node_id` and the corresponding `public_key`."""
+        self.public_key_to_node_id[public_key] = node_id
+
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
@@ -296,14 +308,6 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
     def get_client_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `client_public_keys` as a set."""
         return self.client_public_keys
-
-    def get_node_id(self, client_public_key: bytes) -> int:
-        """Retrieve stored `node_id` filtered by `client_public_keys`."""
-        return self.public_key_to_node_id[client_public_key]
-
-    def store_node_id_and_public_key(self, node_id: int, public_key: bytes) -> None:
-        """Store `node_id` and the corresponding `public_key`."""
-        self.public_key_to_node_id[public_key] = node_id
 
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""

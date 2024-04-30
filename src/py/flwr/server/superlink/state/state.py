@@ -154,6 +154,14 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def get_node_id(self, client_public_key: bytes) -> int:
+        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+
+    @abc.abstractmethod
+    def store_node_id_and_public_key(self, node_id: int, public_key: bytes) -> None:
+        """Store `node_id` and the corresponding `public_key`."""
+
+    @abc.abstractmethod
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
 
@@ -200,14 +208,6 @@ class State(abc.ABC):  # pylint: disable=R0904
     @abc.abstractmethod
     def get_client_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `client_public_keys` as a set."""
-
-    @abc.abstractmethod
-    def get_node_id(self, client_public_key: bytes) -> int:
-        """Retrieve stored `node_id` filtered by `client_public_keys`."""
-
-    @abc.abstractmethod
-    def store_node_id_and_public_key(self, node_id: int, public_key: bytes) -> None:
-        """Store `node_id` and the corresponding `public_key`."""
 
     @abc.abstractmethod
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:

@@ -16,6 +16,7 @@
 
 
 import base64
+import threading
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import grpc
@@ -81,6 +82,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
     def __init__(self, state: State):
         self.state = state
+        self._lock = threading.Lock()
         self.server_private_key: Optional[ec.EllipticCurvePrivateKey] = None
         private_key = self.state.get_server_private_key()
         public_key = self.state.get_server_public_key()
@@ -207,9 +209,10 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             node_id = None
 
         if node_id is not None:
-            self.state.restore_node(node_id, request.ping_interval)
-            self.state.store_node_id_and_public_key(node_id, public_key_bytes)
-            return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
+            with self._lock:
+                # Handle RPC here instead of passing to default method_handler
+                self.state.restore_node(node_id, request.ping_interval)
+                return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
         response: CreateNodeResponse = method_handler.unary_unary(request, context)
         self.state.store_node_id_and_public_key(response.node.node_id, public_key_bytes)
