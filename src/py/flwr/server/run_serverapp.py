@@ -175,7 +175,7 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--server",
-        default="0.0.0.0:9091",
+        default="127.0.0.1:9091",
         help="Server address",
     )
     parser.add_argument(
