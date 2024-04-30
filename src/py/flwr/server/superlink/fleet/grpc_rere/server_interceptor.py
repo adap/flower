@@ -17,13 +17,11 @@
 
 import base64
 import threading
-from logging import WARNING
-from typing import Any, Callable, Sequence, Tuple, Union
+from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_private_key,
     bytes_to_public_key,
@@ -88,7 +86,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
         self.client_public_keys = state.get_client_public_keys()
         if len(self.client_public_keys) == 0:
-            log(WARNING, "No known client public keys in state")
+            raise ValueError("Known client public keys must be at least 1")
 
         private_key = self.state.get_server_private_key()
         public_key = self.state.get_server_public_key()
@@ -130,6 +128,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             if client_public_key_bytes not in self.client_public_keys:
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
+            if not isinstance(request, Request):
+                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
+
             if isinstance(request, CreateNodeRequest):
                 return self._create_authenticated_node(
                     client_public_key_bytes, request, context, method_handler
@@ -144,7 +145,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     GetRunRequest,
                     PingRequest,
                 ),
-            ):
+            ):  
+                if isinstance(request, PingRequest):
+                    print("Ping, ", request)
                 # Verify hmac value
                 hmac_value = base64.urlsafe_b64decode(
                     _get_value_from_tuples(
@@ -160,13 +163,10 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 try:
                     node_id = self.state.get_node_id(client_public_key_bytes)
                 except KeyError:
-                    node_id = -1
+                    node_id = None
 
                 if not self._verify_node_id(node_id, request):
                     context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
-
-            else:
-                context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             return method_handler.unary_unary(request, context)  # type: ignore
 
@@ -176,10 +176,22 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             response_serializer=method_handler.response_serializer,
         )
 
-    def _verify_node_id(self, node_id: int, request: Request) -> bool:
-        if isinstance(request, CreateNodeRequest):
+    def _verify_node_id(
+        self,
+        node_id: Optional[int],
+        request: Union[
+            DeleteNodeRequest,
+            PullTaskInsRequest,
+            PushTaskResRequest,
+            GetRunRequest,
+            PingRequest,
+        ],
+    ) -> bool:
+        if node_id is None:
             return False
         if isinstance(request, PushTaskResRequest):
+            if len(request.task_res_list) == 0:
+                return False
             return request.task_res_list[0].task.consumer.node_id == node_id
         if isinstance(request, GetRunRequest):
             return node_id in self.state.get_nodes(request.run_id)
@@ -188,9 +200,6 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     def _verify_hmac(
         self, public_key: ec.EllipticCurvePublicKey, request: Request, hmac_value: bytes
     ) -> bool:
-        if self.server_private_key is None:
-            return False
-
         shared_secret = generate_shared_key(self.server_private_key, public_key)
         return verify_hmac(shared_secret, request.SerializeToString(True), hmac_value)
 
