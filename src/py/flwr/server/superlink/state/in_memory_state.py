@@ -43,7 +43,11 @@ class InMemoryState(State):  # pylint: disable=R0902
         self.client_public_keys: Set[bytes] = set()
         self.server_public_key: Optional[bytes] = None
         self.server_private_key: Optional[bytes] = None
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
+
+        # For simulation only
+        self.new_task_ins = False
+        self.new_task_res = False
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
@@ -64,6 +68,7 @@ class InMemoryState(State):  # pylint: disable=R0902
         task_ins.task_id = str(task_id)
         with self.lock:
             self.task_ins_store[task_id] = task_ins
+            self.new_task_ins = True
 
         # Return the new task_id
         return task_id
@@ -94,6 +99,7 @@ class InMemoryState(State):  # pylint: disable=R0902
                     task_ins_list.append(task_ins)
                 if limit and len(task_ins_list) == limit:
                     break
+            self.new_task_ins = False
 
         # Mark all of them as delivered
         delivered_at = now().isoformat()
@@ -123,6 +129,7 @@ class InMemoryState(State):  # pylint: disable=R0902
         task_res.task_id = str(task_id)
         with self.lock:
             self.task_res_store[task_id] = task_res
+            self.new_task_res = True
 
         # Return the new task_id
         return task_id
@@ -165,6 +172,7 @@ class InMemoryState(State):  # pylint: disable=R0902
             delivered_at = now().isoformat()
             for task_res in task_res_list:
                 task_res.task.delivered_at = delivered_at
+            self.new_task_res = False
 
             # Return TaskRes
             return task_res_list
