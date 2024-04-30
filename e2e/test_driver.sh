@@ -63,6 +63,8 @@ timeout 2m flower-client-app client:app $client_arg $rest_arg --server $server_a
 cl2_pid=$!
 sleep 3
 
+timeout 2m flower-client-app client:app --help &
+
 timeout 2m python driver.py &
 pid=$!
 

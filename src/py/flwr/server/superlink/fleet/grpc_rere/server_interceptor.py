@@ -17,11 +17,13 @@
 
 import base64
 import threading
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from logging import WARNING
+from typing import Any, Callable, Sequence, Tuple, Union
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_private_key,
     bytes_to_public_key,
@@ -85,16 +87,18 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         self._lock = threading.Lock()
 
         self.client_public_keys = state.get_client_public_keys()
+        if len(self.client_public_keys) == 0:
+            log(WARNING, "No known client public keys in state")
 
         private_key = self.state.get_server_private_key()
         public_key = self.state.get_server_public_key()
 
         if private_key is None or public_key is None:
             raise ValueError("Error loading authentication keys")
-        
+
         self.server_private_key = bytes_to_private_key(private_key)
         self.encoded_server_public_key = base64.urlsafe_b64encode(public_key)
-        
+
     def intercept_service(
         self,
         continuation: Callable[[Any], Any],
