@@ -103,6 +103,142 @@ to the SuperLink with the ``--certificates`` flag.
     -p 9091:9091 -p 9092:9092 -v ./certificates/:/app/ flwr/superlink:1.8.0 \
     --certificates ca.crt server.pem server.key
 
+Flower SuperNode
+----------------
+
+The SuperNode Docker image comes with a pre-installed version of Flower and serves as a base for
+building your own SuperNode image.
+
+We will use the ``app-pytorch`` example, which you can find in
+the Flower repository, to illustrate how you can dockerize your client-app.
+
+Prerequisites
+~~~~~~~~~~~~~
+
+Before we can start, we need to meet a few prerequisites in our local development environment.
+You can skip the first part if you want to run your client-app instead of the ``app-pytorch``
+example.
+
+#. Clone the flower repository.
+
+    .. code-block:: bash
+
+      $ git clone https://github.com/adap/flower.git && cd flower/examples/app-pytorch
+
+#. Verify the Docker daemon is running.
+
+    Please follow the first section on
+    :doc:`Run Flower using Docker <how-to-run-flower-using-docker>`
+    which covers this step in more detail.
+
+
+Creating a SuperNode Dockerfile
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Let's assume the following project layout:
+
+.. code-block:: bash
+
+  $ tree .
+  .
+  ├── client.py
+  ├── requirements.txt
+  └── <other files>
+
+First, we need to create a Dockerfile in the directory where the client-app code is located.
+If you use the ``app-pytorch`` example, create a new file called ``Dockerfile`` in
+``examples/app-pytorch``.
+
+The ``Dockerfile`` contains the instructions that assemble the SuperNode image.
+
+.. code-block:: dockerfile
+
+  FROM flwr/supernode:nightly
+
+  COPY requirements.txt .
+  RUN python -m pip install -U --no-cache-dir -r requirements.txt && pyenv rehash
+
+  ENTRYPOINT ["flower-client-app"]
+
+In the first line, we instruct Docker to use the SuperNode image tagged ``nightly`` as a base image.
+Next, we install the client-app dependencies by copying the ``requirements.txt`` file into the image
+and run ``pip install``. Lastly, we set the image's entry point to ``flower-client-app``.
+
+Building the SuperNode Docker image
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Next, we build the SuperNode Docker image by running the following command in the directory where
+Dockerfile and client-app code are located.
+
+.. code-block:: bash
+
+  $ docker build -t flwr_supernode:0.0.1 .
+
+We gave the image the name ``flwr_supernode``, and the tag ``0.0.1``. Remember that the here chosen
+values only serve as an example. You can change them to your needs.
+
+
+Running the SuperNode Docker image
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now that we have built the SuperNode image, we can finally run it.
+
+.. code-block:: bash
+
+  $ docker run --rm -v ./:/app flwr_supernode:0.0.1 client:app \
+    --insecure \
+    --server 192.168.1.100:9092
+
+Let's break down each part of this command:
+
+* ``docker run``: This is the command to run a new Docker container.
+* ``--rm``: This option specifies that the container should be automatically removed when it stops.
+* | ``-v ./:/app``: This option mounts the directory of the current folder inside the Docker
+  | container, in the ``/app`` directory. This allows the container to access the local code
+  | of the client-app.
+* | ``flwr_supernode:0.0.1``: The name the tag of the Docker image to use.
+
+.. note::
+  Any argument that comes after the tag is passed to the Flower SuperNode binary.
+  To see all available flags that the SuperNode supports, run:
+
+  .. code-block:: bash
+
+    $ docker run --rm flwr/supernode:nightly --help
+
+* | ``client:app``: The object reference of the client-app (``<module>:<attribute>``).
+  | It points to the application that will be run inside the SuperNode container.
+* ``--insecure``: This option enables insecure communication.
+
+.. attention::
+
+  The ``--insecure`` flag enables insecure communication (using HTTP, not HTTPS) and should only be
+  used for testing purposes. We strongly recommend enabling
+  `SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`_
+  when deploying to a production environment.
+
+* | ``--server 192.168.1.100:9092``: This option specifies the address of the SuperLinks Fleet
+  | API to connect to. Remember to update it with your SuperLink IP.
+
+Enabling SSL for secure connections
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To enable SSL, we will need to mount a PEM-encoded root certificate into your SuperNode container.
+
+Assuming the certificate already exists locally, we can use the flag ``-v`` to mount the local
+certificate into the container's ``/app/`` directory. This allows the SuperNode to access the
+certificate within the container. Use the ``--certificates`` flag when starting the container.
+
+.. code-block:: bash
+
+  $ docker run --rm -v ./ca.crt:/app/ca.crt flwr_supernode:0.0.1 client:app \
+    --insecure \
+    --server 192.168.1.100:9092 \
+    --certificates ca.crt
+
+Advanced Docker options
+-----------------------
+
 Using a different Flower version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
