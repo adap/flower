@@ -215,5 +215,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
         response: CreateNodeResponse = method_handler.unary_unary(request, context)
-        self.state.store_node_id_and_public_key(response.node.node_id, public_key_bytes)
-        return response
+
+        with self._lock:
+            self.state.store_node_id_and_public_key(response.node.node_id, public_key_bytes)
+            return response
