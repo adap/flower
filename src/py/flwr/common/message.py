@@ -19,6 +19,7 @@ from __future__ import annotations
 import time
 import warnings
 from dataclasses import dataclass
+from typing import Optional, cast
 
 from .record import RecordSet
 
@@ -181,22 +182,22 @@ class Error:
         A reason for why the error arose (e.g. an exception stack-trace)
     """
 
-    _code: int
-    _reason: str | None = None
-
     def __init__(self, code: int, reason: str | None = None) -> None:
-        self._code = code
-        self._reason = reason
+        var_dict = {
+            "_code": code,
+            "_reason": reason,
+        }
+        self.__dict__.update(var_dict)
 
     @property
     def code(self) -> int:
         """Error code."""
-        return self._code
+        return cast(int, self.__dict__["_code"])
 
     @property
     def reason(self) -> str | None:
         """Reason reported about the error."""
-        return self._reason
+        return cast(Optional[str], self.__dict__["_reason"])
 
 
 @dataclass
