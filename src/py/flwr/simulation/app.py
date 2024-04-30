@@ -15,6 +15,8 @@
 """Flower simulation app."""
 
 
+import asyncio
+import logging
 import sys
 import threading
 import traceback
@@ -27,7 +29,7 @@ from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
 from flwr.client import ClientFn
 from flwr.common import EventType, event
-from flwr.common.logger import log
+from flwr.common.logger import log, set_logger_propagation
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server, init_defaults, run_fl
@@ -156,6 +158,7 @@ def start_simulation(
         is an advanced feature. For all details, please refer to the Ray documentation:
         https://docs.ray.io/en/latest/ray-core/scheduling/index.html
 
+
     Returns
     -------
     hist : flwr.server.history.History
@@ -166,6 +169,18 @@ def start_simulation(
         EventType.START_SIMULATION_ENTER,
         {"num_clients": len(clients_ids) if clients_ids is not None else num_clients},
     )
+
+    # Set logger propagation
+    loop: Optional[asyncio.AbstractEventLoop] = None
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+    finally:
+        if loop and loop.is_running():
+            # Set logger propagation to False to prevent duplicated log output in Colab.
+            logger = logging.getLogger("flwr")
+            _ = set_logger_propagation(logger, False)
 
     # Initialize server and server config
     initialized_server, initialized_config = init_defaults(
