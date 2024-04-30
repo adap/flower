@@ -17,6 +17,8 @@
 
 import base64
 import threading
+from logging import WARNING
+from flwr.common.logger import log
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import grpc
@@ -86,7 +88,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
         self.client_public_keys = state.get_client_public_keys()
         if len(self.client_public_keys) == 0:
-            raise ValueError("Known client public keys must be at least 1")
+            log(WARNING, "No known client public keys in state.")
 
         private_key = self.state.get_server_private_key()
         public_key = self.state.get_server_public_key()
