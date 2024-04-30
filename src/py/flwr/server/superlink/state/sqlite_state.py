@@ -598,7 +598,7 @@ class SqliteState(State):  # pylint: disable=R0904
             node_id: int = row[0]["node_id"]
             return node_id
         return None
-        
+
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id

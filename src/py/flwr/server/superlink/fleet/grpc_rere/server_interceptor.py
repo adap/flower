@@ -16,7 +16,6 @@
 
 
 import base64
-import threading
 from logging import WARNING
 from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
