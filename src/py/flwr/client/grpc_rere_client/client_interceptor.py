@@ -32,6 +32,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
     GetRunRequest,
+    PingRequest,
     PullTaskInsRequest,
     PushTaskResRequest,
 )
@@ -45,6 +46,7 @@ Request = Union[
     PullTaskInsRequest,
     PushTaskResRequest,
     GetRunRequest,
+    PingRequest,
 ]
 
 
@@ -115,7 +117,13 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
             postprocess = True
         elif isinstance(
             request,
-            (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest, GetRunRequest),
+            (
+                DeleteNodeRequest,
+                PullTaskInsRequest,
+                PushTaskResRequest,
+                GetRunRequest,
+                PingRequest,
+            ),
         ):
             if self.shared_secret is None:
                 raise RuntimeError("Failure to compute hmac")
