@@ -179,16 +179,16 @@ class NaturalIdPartitioner(Partitioner):
                 self._create_partition_id_to_indices()
 
             return self.dataset.select(self._partition_id_to_indices[partition_id])
-        elif self._creation_mode == "lazy":
+        if self._creation_mode == "lazy":
             return self.dataset.filter(
                 lambda x: x == self._partition_id_to_natural_id[partition_id],
                 input_columns=self._partition_by,
             )
-        else:
-            raise ValueError(
-                f"The `creation_mode` can be only 'full` or 'lazy'."
-                f"Instead given: {self._creation_mode}"
-            )
+
+        raise ValueError(
+            f"The `creation_mode` can be only 'full` or 'lazy'."
+            f"Instead given: {self._creation_mode}"
+        )
 
     @property
     def num_partitions(self) -> int:
