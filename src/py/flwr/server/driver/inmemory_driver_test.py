@@ -121,11 +121,9 @@ class TestInMemoryDriver(unittest.TestCase):
         """Test tasks are deleted once messages are pulled."""
         # Prepare
         state_factory = StateFactory(":flwr-in-memory-state:")
-        self.num_nodes = 42
-        state = state_factory.state()
+        self.driver = InMemoryDriver(state_factory)
         for _ in range(self.num_nodes):
-            state.create_node(ping_interval=PING_MAX_INTERVAL)
-        self.driver.state = state
+            self.driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
         num_messages = 3
         node_id = 1
         msgs = [
