@@ -26,7 +26,7 @@ from typing import Optional
 import typer
 from typing_extensions import Annotated
 
-from .config_utils import validate_project_dir
+from .config_utils import load_and_validate_with_defaults, validate_project_dir
 
 
 def install(
@@ -115,7 +115,7 @@ def validate_and_install(
     project_dir: Path, project_name: str, flwr_dir: Optional[Path]
 ) -> None:
     """Validate TOML files and install the project to the desired directory."""
-    config = validate_project_dir(project_dir)
+    config, _, _ = load_and_validate_with_defaults(project_dir / "pyproject.toml")
 
     if config is None:
         raise typer.Exit(code=1)
