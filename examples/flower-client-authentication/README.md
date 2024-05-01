@@ -12,17 +12,28 @@ Let's assume the following project structure:
 ```bash
 $ tree .
 .
+├── pyproject.toml    # <-- project dependencies
 ├── client.py         # <-- contains `ClientApp`
 ├── server.py         # <-- contains `ServerApp`
-├── task.py           # <-- task-specific code (model, data)
-└── requirements.txt  # <-- dependencies
+└── task.py           # <-- task-specific code (model, data)
 ```
 
 ## Install dependencies
 
-```bash
-pip install -r requirements.txt
+Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml`. You can install the dependencies by invoking `pip`:
+
+```shell
+# From a new python environment, run:
+pip install .
 ```
+
+Then, to verify that everything works correctly you can run the following command:
+
+```shell
+python3 -c "import flwr"
+```
+
+If you don't see any errors you're good to go!
 
 ## Generate public and private keys
 
