@@ -17,10 +17,10 @@
 import typer
 from typer.main import get_command
 
-from .build import build
-from .example import example
-from .new import new
-from .run import run
+from .build import build as build_cli
+from .example import example as example_cli
+from .new import new as new_cli
+from .run import run as run_cli
 
 app = typer.Typer(
     help=typer.style(
@@ -31,10 +31,10 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
-app.command()(new)
-app.command()(example)
-app.command()(run)
-app.command()(build)
+app.command()(new_cli)
+app.command()(example_cli)
+app.command()(run_cli)
+app.command()(build_cli)
 
 typer_click_object = get_command(app)
 
