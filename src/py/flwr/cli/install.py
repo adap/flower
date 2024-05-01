@@ -26,7 +26,7 @@ from typing import Optional
 import typer
 from typing_extensions import Annotated
 
-from .config_utils import load_and_validate_with_defaults, validate_project_dir
+from .config_utils import load_and_validate_with_defaults
 
 
 def install(
