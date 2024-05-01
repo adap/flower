@@ -23,48 +23,33 @@ import zipfile
 from pathlib import Path
 from typing import Optional
 
-import jwt
 import typer
 from typing_extensions import Annotated
 
 from .config_utils import validate_project_dir
-from .utils import is_valid_project_name
 
 
 def install(
     source: Annotated[
         Optional[Path],
-        typer.Argument(
-            metavar="source", help="The source FAB file or directory to install."
-        ),
+        typer.Argument(metavar="source", help="The source FAB file to install."),
     ] = None,
     flwr_dir: Annotated[
         Optional[Path],
         typer.Option(help="The desired install path."),
     ] = None,
 ) -> None:
-    """Install a Flower project from a FAB file or a directory.
+    """Install a Flower project from a FAB file.
 
-    It can be ran without any argument:
-
-        `flwr install`
-
-    This will try to install the current directory if it a valid Flower App,
-    else, it will prompt the user for a valid Flower App directory.
-
-    Else, it can be ran with a directory as first argument:
-
-        `flwr install ./docs/target_dir`
-
-    Or, it can be ran with the path to a FAB file as first argument:
+    It can be ran with a single FAB file argument:
 
         `flwr install ./docs/target_project.fab`
 
-    Another argument can be added:
+    The target install directory can be specified with `--flwr-dir`:
 
-        `flwr install ./docs/target_project.fab --flwr_dir ~/docs/flwr`
+        `flwr install ./docs/target_project.fab --flwr-dir ./docs/flwr`
 
-    To specify where the app should be installed. By default, this value is
+    This will install `target_project` to `./docs/flwr/`. By default, `flwr-dir` is
     equal to:
 
         - `$FLWR_HOME/` if `$FLWR_HOME` is defined
@@ -72,47 +57,26 @@ def install(
         - `$HOME/.flwr/` in all other cases
     """
     if source is None:
-        if validate_project_dir(Path.cwd()) is None:
-            source = Path(typer.prompt("Enter the source FAB file or directory path"))
-        else:
-            source = Path.cwd()
+        source = Path(typer.prompt("Enter the source FAB file"))
 
     source = source.resolve()
-    if not source.exists():
+    if not source.exists() or not source.is_file():
         typer.secho(
-            f"❌ The source {source} does not exist.",
+            f"❌ The source {source} does not exist or is not a file.",
             fg=typer.colors.RED,
             bold=True,
         )
         raise typer.Exit(code=1)
 
-    if source.is_dir():
-        if not is_valid_project_name(source.name):
-            typer.secho(
-                f"❌ The project name {source.name} is invalid, "
-                "a valid project name must start with a letter or an underscore, "
-                "and can only contain letters, digits, and underscores.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-        install_from_directory(source, flwr_dir)
-    else:
-        if not is_valid_project_name(source.stem):
-            typer.secho(
-                f"❌ The project name {source.stem} is invalid, "
-                "a valid project name must start with a letter or an underscore, "
-                "and can only contain letters, digits, and underscores.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1)
-        install_from_fab(source, flwr_dir)
+    if not source.suffix == ".fab":
+        typer.secho(
+            f"❌ The source {source} is not a `.fab` file.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
 
-
-def install_from_directory(directory: Path, flwr_dir: Optional[Path]) -> None:
-    """Install directly from a directory."""
-    validate_and_install(directory, directory.name, flwr_dir)
+    install_from_fab(source, flwr_dir)
 
 
 def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]) -> None:
@@ -130,25 +94,10 @@ def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]) -> None:
                 )
                 raise typer.Exit(code=1)
 
-            list_path = info_dir / "LIST"
-            jwt_path = info_dir / "LIST.jwt"
+            content_file = info_dir / "CONTENT"
 
-            if jwt_path.exists():
-                secret_key = typer.prompt(
-                    "Enter the public key to verify the LIST file", hide_input=True
-                )
-                if not _verify_jwt_signature(
-                    list_path.read_text(), jwt_path.read_text(), secret_key
-                ):
-                    typer.secho(
-                        "❌ Failed to verify the LIST file signature.",
-                        fg=typer.colors.RED,
-                        bold=True,
-                    )
-                    raise typer.Exit(code=1)
-
-            if not list_path.exists() or not _verify_hashes(
-                list_path.read_text(), tmpdir_path
+            if not content_file.exists() or not _verify_hashes(
+                content_file.read_text(), tmpdir_path
             ):
                 typer.secho(
                     "❌ File hashes couldn't be verified.",
@@ -224,15 +173,6 @@ def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
         if not file_path.exists() or _get_sha256_hash(file_path) != hash_expected:
             return False
     return True
-
-
-def _verify_jwt_signature(list_content: str, jwt_token: str, public_key: str) -> bool:
-    """Verify the JWT signature."""
-    try:
-        decoded = jwt.decode(jwt_token, public_key, algorithms=["HS256"])
-        return bool(decoded["data"] == list_content)
-    except jwt.exceptions.InvalidTokenError:
-        return False
 
 
 def _get_sha256_hash(file_path: Path) -> str:
