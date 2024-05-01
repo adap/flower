@@ -68,7 +68,7 @@ def install(
         )
         raise typer.Exit(code=1)
 
-    if not source.suffix == ".fab":
+    if source.suffix != ".fab":
         typer.secho(
             f"❌ The source {source} is not a `.fab` file.",
             fg=typer.colors.RED,
@@ -129,7 +129,7 @@ def validate_and_install(
     project_name = config["project"]["name"]
     version = config["project"]["version"]
 
-    if not fab_name == f"{username}.{project_name}.{version.replace('.', '-')}":
+    if fab_name != f"{username}.{project_name}.{version.replace('.', '-')}":
         typer.secho(
             "❌ FAB file has incorrect name, it should be "
             "`<username>.<project_name>.<version>.fab`.",
