@@ -42,4 +42,4 @@ jobs:
         curl $wheel_url --output dist/$wheel_name
         curl $tar_url --output dist/$tar_name
 
-        python -m poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}
+        python -m poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN_RELEASE_FLWR }}

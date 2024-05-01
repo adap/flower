@@ -35,7 +35,10 @@ service Driver {
 }
 
 // CreateRun
-message CreateRunRequest {}
+message CreateRunRequest {
+  string fab_id = 1;
+  string fab_version = 2;
+}
 message CreateRunResponse { sint64 run_id = 1; }
 
 // GetNodes messages

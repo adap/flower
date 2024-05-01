@@ -23,7 +23,7 @@ from unittest.mock import patch
 
 import grpc
 
-from flwr.common import ConfigsRecord, Message, Metadata, RecordSet
+from flwr.common import DEFAULT_TTL, ConfigsRecord, Message, Metadata, RecordSet
 from flwr.common import recordset_compat as compat
 from flwr.common.constant import MessageTypeLegacy
 from flwr.common.retry_invoker import RetryInvoker, exponential
@@ -50,7 +50,7 @@ MESSAGE_GET_PROPERTIES = Message(
         dst_node_id=0,
         reply_to_message="",
         group_id="",
-        ttl="",
+        ttl=DEFAULT_TTL,
         message_type=MessageTypeLegacy.GET_PROPERTIES,
     ),
     content=compat.getpropertiesres_to_recordset(
@@ -65,7 +65,7 @@ MESSAGE_DISCONNECT = Message(
         dst_node_id=0,
         reply_to_message="",
         group_id="",
-        ttl="",
+        ttl=DEFAULT_TTL,
         message_type="reconnect",
     ),
     content=RecordSet(configs_records={"config": ConfigsRecord({"reason": 0})}),
@@ -132,13 +132,13 @@ def test_integration_connection() -> None:
             server_address=f"[::]:{port}",
             insecure=True,
             retry_invoker=RetryInvoker(
-                wait_factory=exponential,
+                wait_gen_factory=exponential,
                 recoverable_exceptions=grpc.RpcError,
                 max_tries=1,
                 max_time=None,
             ),
         ) as conn:
-            receive, send, _, _ = conn
+            receive, send, _, _, _ = conn
 
             # Setup processing loop
             while True:

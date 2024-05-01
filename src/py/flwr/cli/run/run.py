@@ -18,7 +18,7 @@ import sys
 
 import typer
 
-from flwr.cli import flower_toml
+from flwr.cli import config_utils
 from flwr.simulation.run_simulation import _run_simulation
 
 
@@ -26,11 +26,11 @@ def run() -> None:
     """Run Flower project."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    config, errors, warnings = flower_toml.load_and_validate_with_defaults()
+    config, errors, warnings = config_utils.load_and_validate_with_defaults()
 
     if config is None:
         typer.secho(
-            "Project configuration could not be loaded.\nflower.toml is invalid:\n"
+            "Project configuration could not be loaded.\npyproject.toml is invalid:\n"
             + "\n".join([f"- {line}" for line in errors]),
             fg=typer.colors.RED,
             bold=True,

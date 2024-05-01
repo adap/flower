@@ -51,6 +51,7 @@ wget = "^3.2"
 virtualenv = "^20.24.6"
 pandas = "^1.5.3"
 pyhamcrest = "^2.0.4"
+pillow = "==10.2.0"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.13.2"

@@ -16,7 +16,7 @@
 
 
 import abc
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Tuple
 from uuid import UUID
 
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
@@ -132,7 +132,7 @@ class State(abc.ABC):
         """Delete all delivered TaskIns/TaskRes pairs."""
 
     @abc.abstractmethod
-    def create_node(self) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in state, and return `node_id`."""
 
     @abc.abstractmethod
@@ -150,5 +150,68 @@ class State(abc.ABC):
         """
 
     @abc.abstractmethod
-    def create_run(self) -> int:
-        """Create one run."""
+    def create_run(self, fab_id: str, fab_version: str) -> int:
+        """Create a new run for the specified `fab_id` and `fab_version`."""
+
+    @abc.abstractmethod
+    def get_run(self, run_id: int) -> Tuple[int, str, str]:
+        """Retrieve information about the run with the specified `run_id`.
+
+        Parameters
+        ----------
+        run_id : int
+            The identifier of the run.
+
+        Returns
+        -------
+        Tuple[int, str, str]
+            A tuple containing three elements:
+            - `run_id`: The identifier of the run, same as the specified `run_id`.
+            - `fab_id`: The identifier of the FAB used in the specified run.
+            - `fab_version`: The version of the FAB used in the specified run.
+        """
+
+    @abc.abstractmethod
+    def store_server_public_private_key(
+        self, public_key: bytes, private_key: bytes
+    ) -> None:
+        """Store `server_public_key` and `server_private_key` in state."""
+
+    @abc.abstractmethod
+    def get_server_private_key(self) -> Optional[bytes]:
+        """Retrieve `server_private_key` in urlsafe bytes."""
+
+    @abc.abstractmethod
+    def get_server_public_key(self) -> Optional[bytes]:
+        """Retrieve `server_public_key` in urlsafe bytes."""
+
+    @abc.abstractmethod
+    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of `client_public_keys` in state."""
+
+    @abc.abstractmethod
+    def store_client_public_key(self, public_key: bytes) -> None:
+        """Store a `client_public_key` in state."""
+
+    @abc.abstractmethod
+    def get_client_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored `client_public_keys` as a set."""
+
+    @abc.abstractmethod
+    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
+        """Acknowledge a ping received from a node, serving as a heartbeat.
+
+        Parameters
+        ----------
+        node_id : int
+            The `node_id` from which the ping was received.
+        ping_interval : float
+            The interval (in seconds) from the current timestamp within which the next
+            ping from this node must be received. This acts as a hard deadline to ensure
+            an accurate assessment of the node's availability.
+
+        Returns
+        -------
+        is_acknowledged : bool
+            True if the ping is successfully acknowledged; otherwise, False.
+        """

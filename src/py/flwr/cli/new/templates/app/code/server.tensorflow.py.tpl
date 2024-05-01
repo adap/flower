@@ -22,4 +22,3 @@ app = ServerApp(
     config=ServerConfig(num_rounds=3),
     strategy=strategy,
 )
-

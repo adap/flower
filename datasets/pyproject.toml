@@ -54,7 +54,7 @@ exclude = [
 [tool.poetry.dependencies]
 python = "^3.8"
 numpy = "^1.21.0"
-datasets = "^2.14.3"
+datasets = "^2.14.6"
 pillow = { version = ">=6.2.1", optional = true }
 soundfile = { version = ">=0.12.1", optional = true }
 librosa = { version = ">=0.10.0.post2", optional = true }
