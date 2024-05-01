@@ -1,14 +1,9 @@
 """$project_name: A Flower / TensorFlow app."""
 
-import os
-
 from flwr.client import NumPyClient, ClientApp
 
-from $project_name.task import load_data, load_model
+from $import_name.task import load_data, load_model
 
-
-# Make TensorFlow log less verbose
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
@@ -43,4 +38,6 @@ def client_fn(cid):
 
 
 # Flower ClientApp
-app = ClientApp(client_fn)
+app = ClientApp(
+    client_fn=client_fn,
+)
