@@ -22,8 +22,14 @@ from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 from flwr.common import RecordSet
+from flwr.common.constant import PING_MAX_INTERVAL
 from flwr.common.message import Error
-from flwr.common.serde import error_to_proto, recordset_to_proto
+from flwr.common.serde import (
+    error_to_proto,
+    message_from_taskins,
+    message_to_taskres,
+    recordset_to_proto,
+)
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import StateFactory
 
@@ -110,6 +116,45 @@ class TestInMemoryDriver(unittest.TestCase):
         # Assert
         self.assertEqual(len(pulled_msgs), 2)
         self.assertEqual(reply_tos, msg_ids)
+
+    def test_task_store_consistency_after_push_pull(self) -> None:
+        """Test tasks are deleted once messages are pulled."""
+        # Prepare
+        state_factory = StateFactory(":flwr-in-memory-state:")
+        self.driver = InMemoryDriver(state_factory)
+        for _ in range(self.num_nodes):
+            self.driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
+        num_messages = 3
+        node_id = 1
+        msgs = [
+            self.driver.create_message(RecordSet(), "message_type", node_id, "")
+            for _ in range(num_messages)
+        ]
+
+        # Execute: push messages
+        msg_ids = self.driver.push_messages(msgs)
+
+        # Check recorded
+        self.assertEqual(len(self.driver.state.task_ins_store), num_messages)
+
+        # Prepare: create replies
+        taskins = self.driver.state.get_task_ins(node_id, limit=num_messages)
+        for taskin in taskins:
+            msg = message_from_taskins(taskin)
+            reply_msg = msg.create_reply(RecordSet())
+            task_res = message_to_taskres(reply_msg)
+            task_res.task.pushed_at = time.time()
+            self.driver.state.store_task_res(task_res=task_res)
+
+        # Execute: Pull messages
+        pulled_msgs = self.driver.pull_messages(msg_ids)
+        reply_tos = [msg.metadata.reply_to_message for msg in pulled_msgs]
+
+        # Assert
+        self.assertEqual(len(msgs), num_messages)
+        self.assertEqual(reply_tos, msg_ids)
+        self.assertEqual(len(self.driver.state.task_res_store), 0)
+        self.assertEqual(len(self.driver.state.task_ins_store), 0)
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
