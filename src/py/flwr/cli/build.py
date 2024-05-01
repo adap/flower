@@ -39,11 +39,15 @@ def build(
 
     You can run `flwr build` without any argument to bundle the current directory:
 
-        `flwr build`
+    .. code:: shell
+
+        flwr build
 
     You can also build a specific directory:
 
-        `flwr build --directory ./projects/flower-hello-world`
+    .. code:: shell
+
+        flwr build --directory ./projects/flower-hello-world
     """
     if directory is None:
         directory = Path.cwd()
