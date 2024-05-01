@@ -35,13 +35,21 @@ class InMemoryDriver(Driver):
     ----------
     state_factory : StateFactory
         A StateFactory embedding a state designed for in-memory communication.
+    fab_id : str (default: None)
+        The identifier of the FAB used in the run.
+    fab_version : str (default: None)
+        The version of the FAB used in the run.
     """
 
     def __init__(
         self,
         state_factory: StateFactory,
+        fab_id: Optional[str] = None,
+        fab_version: Optional[str] = None,
     ) -> None:
         self.run_id: Optional[int] = None
+        self.fab_id = fab_id if fab_id is not None else ""
+        self.fab_version = fab_version if fab_version is not None else ""
         self.node = Node(node_id=0, anonymous=True)
         state = state_factory.state()
 
@@ -70,7 +78,9 @@ class InMemoryDriver(Driver):
         If unset, create a new run.
         """
         if self.run_id is None:
-            self.run_id = self.state.create_run("None/None", "None")
+            self.run_id = self.state.create_run(
+                fab_id=self.fab_id, fab_version=self.fab_version
+            )
         return self.run_id
 
     def create_message(  # pylint: disable=too-many-arguments
@@ -141,7 +151,7 @@ class InMemoryDriver(Driver):
         """
         msg_ids = {UUID(msg_id) for msg_id in message_ids}
         # Pull TaskRes
-        task_res_list = self.state.get_task_res(task_ids=msg_ids, limit=1)
+        task_res_list = self.state.get_task_res(task_ids=msg_ids, limit=len(msg_ids))
         # Convert TaskRes to Message
         msgs = [message_from_taskres(taskres) for taskres in task_res_list]
         return msgs

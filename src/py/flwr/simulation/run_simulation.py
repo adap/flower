@@ -26,6 +26,7 @@ from typing import Dict, Optional
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
+from flwr.common.logger import set_logger_propagation
 from flwr.common.typing import ConfigsRecordValues
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run
@@ -341,6 +342,8 @@ def _run_simulation(
 
     finally:
         if run_in_thread:
+            # Set logger propagation to False to prevent duplicated log output in Colab.
+            logger = set_logger_propagation(logger, False)
             log(DEBUG, "Starting Simulation Engine on a new thread.")
             simulation_engine_th = threading.Thread(target=_main_loop, args=args)
             simulation_engine_th.start()

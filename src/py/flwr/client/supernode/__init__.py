@@ -15,8 +15,10 @@
 """Flower SuperNode."""
 
 
+from .app import run_client_app as run_client_app
 from .app import run_supernode as run_supernode
 
 __all__ = [
+    "run_client_app",
     "run_supernode",
 ]
