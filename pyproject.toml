@@ -59,7 +59,7 @@ flower-superlink = "flwr.server:run_superlink"
 flower-supernode = "flwr.client:run_supernode"
 flower-client-app = "flwr.client:run_client_app"
 flower-server-app = "flwr.server:run_server_app"
-flower-simulation = "flwr.simulation:run_simulation_from_cli"
+flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
 
 [tool.poetry.dependencies]
 python = "^3.8"
