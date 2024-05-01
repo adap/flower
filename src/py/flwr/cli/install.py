@@ -120,7 +120,7 @@ def validate_and_install(
     if config is None:
         raise typer.Exit(code=1)
 
-    username = config["flower"]["provider"]
+    username = config["flower"]["publisher"]
     version = config["project"]["version"]
 
     install_dir: Path = (
