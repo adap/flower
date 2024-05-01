@@ -108,19 +108,35 @@ def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]) -> None:
 
             shutil.rmtree(info_dir)
 
-            validate_and_install(tmpdir_path, flwr_dir)
+            validate_and_install(tmpdir_path, fab_file.stem, flwr_dir)
 
 
-def validate_and_install(project_dir: Path, flwr_dir: Optional[Path]) -> None:
+def validate_and_install(
+    project_dir: Path, fab_name: str, flwr_dir: Optional[Path]
+) -> None:
     """Validate TOML files and install the project to the desired directory."""
     config, _, _ = load_and_validate_with_defaults(project_dir / "pyproject.toml")
 
     if config is None:
+        typer.secho(
+            "❌ Invalid config inside FAB file.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
         raise typer.Exit(code=1)
 
     username = config["flower"]["publisher"]
     project_name = config["project"]["name"]
     version = config["project"]["version"]
+
+    if not fab_name == f"{username}.{project_name}.{version.replace('.', '-')}":
+        typer.secho(
+            "❌ FAB file has incorrect name, it should be "
+            "`<username>.<project_name>.<version>.fab`.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
 
     install_dir: Path = (
         (
