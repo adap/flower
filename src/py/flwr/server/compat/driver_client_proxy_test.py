@@ -64,7 +64,7 @@ class DriverClientProxyTestCase(unittest.TestCase):
         driver.get_node_ids.return_value = [1]
         driver.create_message.side_effect = self._create_message_dummy
         client = DriverClientProxy(
-            node_id=1, driver=driver, anonymous=False, run_id=61016
+            node_id=NODE_ID, driver=driver, anonymous=False, run_id=61016
         )
 
         self.driver = driver
