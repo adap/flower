@@ -20,15 +20,12 @@ import zipfile
 from pathlib import Path
 from typing import Optional
 
-import jwt
 import pathspec
 import typer
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
 from typing_extensions import Annotated
 
 from .config_utils import load_and_validate_with_defaults
-from .utils import is_valid_project_name, prompt_text
+from .utils import is_valid_project_name
 
 
 # pylint: disable=too-many-locals
@@ -36,10 +33,6 @@ def build(
     directory: Annotated[
         Optional[Path],
         typer.Option(help="The Flower project directory to bundle into a FAB"),
-    ] = None,
-    sign: Annotated[bool, typer.Option(help="Flag to sign the FAB")] = False,
-    key_path: Annotated[
-        Optional[Path], typer.Option(help="Path to the secret key file for signing")
     ] = None,
 ) -> None:
     """Build a Flower project into a Flower App Bundle (FAB).
@@ -51,24 +44,6 @@ def build(
     You can also build a specific directory:
 
         `flwr build --directory ./projects/flower-hello-world`
-
-    And finally, to sign the resulting `.fab` file, use the `--sign` argument:
-
-        `flwr build --sign`
-
-    Note that this will prompt you for the path of the private RSA key to use for
-    signing the FAB file. Alternatively, you can directly provide a `--key_path`
-    argument:
-
-        `flwr build --sign --key_path <PATH_TO_PRIVATE_RSA_KEY>`
-
-    If you wish to generate such a private key, you can use the following
-    command:
-
-        `openssl genrsa -out <KEY_NAME> 4096`
-
-    Note that `openssl rsa -in <KEY_NAME> -pubout > <KEY_NAME>.pub` will generate
-    the associated public key.
     """
     if directory is None:
         directory = Path.cwd()
@@ -149,34 +124,6 @@ def build(
         # Add CONTENT and CONTENT.jwt to the zip file
         fab_file.writestr(".info/CONTENT", list_file_content)
 
-        # Optionally sign the CONTENT file
-        if sign:
-            if key_path is None:
-                key_path = Path(
-                    prompt_text(
-                        "Enter the path to the secret key to sign the CONTENT file",
-                        predicate=lambda result: Path(result) is not None,
-                    )
-                )
-            try:
-                with open(key_path, "rb") as key_file:
-                    private_key = serialization.load_pem_private_key(
-                        key_file.read(),
-                        password=None,  # This won't work with encrypted keys
-                        backend=default_backend(),
-                    )
-                    secret_key = private_key.private_bytes(
-                        encoding=serialization.Encoding.PEM,
-                        format=serialization.PrivateFormat.TraditionalOpenSSL,
-                        encryption_algorithm=serialization.NoEncryption(),
-                    )
-            except Exception as err:
-                typer.echo(f"Failed to read the secret key from file: {err}")
-                raise typer.Exit(code=1) from err
-
-            signed_token = _sign_content(list_file_content, secret_key)
-            fab_file.writestr(".info/CONTENT.jwt", signed_token)
-
     typer.secho(
         f"🎊 Successfully built {fab_filename}.", fg=typer.colors.GREEN, bold=True
     )
@@ -202,10 +149,3 @@ def _load_gitignore(directory: Path) -> pathspec.PathSpec:
         with open(gitignore_path, encoding="UTF-8") as file:
             patterns.extend(file.readlines())
     return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
-
-
-def _sign_content(content: str, secret_key: bytes) -> str:
-    """Signs the content using JWT and returns the token."""
-    payload = {"data": content}
-    token = jwt.encode(payload, secret_key, algorithm="RS256")
-    return token
