@@ -28,7 +28,7 @@ import grpc
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
-from flwr.common.logger import set_logger_propagation, update_console_handler
+from flwr.common.logger import set_logger_propagation
 from flwr.common.typing import ConfigsRecordValues
 from flwr.server.driver import Driver, GrpcDriver
 from flwr.server.run_serverapp import run
@@ -318,9 +318,9 @@ def _run_simulation(
         enabled, DEBUG-level logs will be displayed.
     """
     # Set logging level
-    logger = logging.getLogger("flwr")
-    if verbose_logging:
-        update_console_handler(level=DEBUG, timestamps=True, colored=True)
+    if not verbose_logging:
+        logger = logging.getLogger("flwr")
+        logger.setLevel(INFO)
 
     if backend_config is None:
         backend_config = {}
