@@ -156,6 +156,7 @@ class TestInMemoryDriver(unittest.TestCase):
         self.assertEqual(len(msgs), num_messages)
         self.assertEqual(reply_tos, msg_ids)
         self.assertEqual(len(self.driver.state.task_res_store), 0)
+        self.assertEqual(len(self.driver.state.task_ins_store), 0)
 
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
