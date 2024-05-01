@@ -171,7 +171,7 @@ def test_client_without_get_properties() -> None:
 
     assert actual_msg.content == expected_msg.content
     # metadata.created_at will differ so let's exclude it from checks
-    attrs = actual_msg.metadata.__annotations__
+    attrs = vars(actual_msg.metadata)
     attrs_keys = list(attrs.keys())
     attrs_keys.remove("_created_at")
     # metadata.created_at will differ so let's exclude it from checks
@@ -234,7 +234,7 @@ def test_client_with_get_properties() -> None:
     )
 
     assert actual_msg.content == expected_msg.content
-    attrs = actual_msg.metadata.__annotations__
+    attrs = vars(actual_msg.metadata)
     attrs_keys = list(attrs.keys())
     attrs_keys.remove("_created_at")
     # metadata.created_at will differ so let's exclude it from checks
@@ -318,5 +318,5 @@ class TestMessageValidation(unittest.TestCase):
 
         # Assert
         for invalid_metadata in invalid_metadata_list:
-            msg._metadata = invalid_metadata  # pylint: disable=protected-access
+            msg.__dict__["_metadata"] = invalid_metadata
             self.assertFalse(validate_out_message(msg, self.in_metadata))
