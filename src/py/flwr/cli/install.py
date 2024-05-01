@@ -108,12 +108,10 @@ def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]) -> None:
 
             shutil.rmtree(info_dir)
 
-            validate_and_install(tmpdir_path, fab_file.stem, flwr_dir)
+            validate_and_install(tmpdir_path, flwr_dir)
 
 
-def validate_and_install(
-    project_dir: Path, project_name: str, flwr_dir: Optional[Path]
-) -> None:
+def validate_and_install(project_dir: Path, flwr_dir: Optional[Path]) -> None:
     """Validate TOML files and install the project to the desired directory."""
     config, _, _ = load_and_validate_with_defaults(project_dir / "pyproject.toml")
 
@@ -121,6 +119,7 @@ def validate_and_install(
         raise typer.Exit(code=1)
 
     username = config["flower"]["publisher"]
+    project_name = config["project"]["name"]
     version = config["project"]["version"]
 
     install_dir: Path = (
