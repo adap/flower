@@ -16,6 +16,7 @@
 
 import typer
 
+from .build import build
 from .example import example
 from .install import install
 from .new import new
@@ -33,6 +34,7 @@ app = typer.Typer(
 app.command()(new)
 app.command()(example)
 app.command()(run)
+app.command()(build)
 app.command()(install)
 
 if __name__ == "__main__":

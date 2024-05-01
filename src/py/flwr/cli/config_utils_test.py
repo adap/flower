@@ -16,12 +16,13 @@
 
 import os
 import textwrap
+from pathlib import Path
 from typing import Any, Dict
 
 from .config_utils import load, validate, validate_fields
 
 
-def test_load_pyproject_toml_load_from_cwd(tmp_path: str) -> None:
+def test_load_pyproject_toml_load_from_cwd(tmp_path: Path) -> None:
     """Test if load_template returns a string."""
     # Prepare
     pyproject_toml_content = """
@@ -41,6 +42,9 @@ def test_load_pyproject_toml_load_from_cwd(tmp_path: str) -> None:
             "flwr[simulation]>=1.8.0,<2.0",
             "numpy>=1.21.0",
         ]
+
+        [flower]
+        publisher = "flwrlabs"
 
         [flower.components]
         serverapp = "fedgpt.server:app"
@@ -63,6 +67,7 @@ def test_load_pyproject_toml_load_from_cwd(tmp_path: str) -> None:
             "dependencies": ["flwr[simulation]>=1.8.0,<2.0", "numpy>=1.21.0"],
         },
         "flower": {
+            "publisher": "flwrlabs",
             "components": {
                 "serverapp": "fedgpt.server:app",
                 "clientapp": "fedgpt.client:app",
@@ -75,7 +80,7 @@ def test_load_pyproject_toml_load_from_cwd(tmp_path: str) -> None:
     }
 
     # Current directory
-    origin = os.getcwd()
+    origin = Path.cwd()
 
     try:
         # Change into the temporary directory
@@ -92,7 +97,7 @@ def test_load_pyproject_toml_load_from_cwd(tmp_path: str) -> None:
         os.chdir(origin)
 
 
-def test_load_pyproject_toml_from_path(tmp_path: str) -> None:
+def test_load_pyproject_toml_from_path(tmp_path: Path) -> None:
     """Test if load_template returns a string."""
     # Prepare
     pyproject_toml_content = """
@@ -112,6 +117,9 @@ def test_load_pyproject_toml_from_path(tmp_path: str) -> None:
             "flwr[simulation]>=1.8.0,<2.0",
             "numpy>=1.21.0",
         ]
+
+        [flower]
+        publisher = "flwrlabs"
 
         [flower.components]
         serverapp = "fedgpt.server:app"
@@ -134,6 +142,7 @@ def test_load_pyproject_toml_from_path(tmp_path: str) -> None:
             "dependencies": ["flwr[simulation]>=1.8.0,<2.0", "numpy>=1.21.0"],
         },
         "flower": {
+            "publisher": "flwrlabs",
             "components": {
                 "serverapp": "fedgpt.server:app",
                 "clientapp": "fedgpt.client:app",
@@ -155,7 +164,7 @@ def test_load_pyproject_toml_from_path(tmp_path: str) -> None:
             f.write(textwrap.dedent(pyproject_toml_content))
 
         # Execute
-        config = load(path=os.path.join(tmp_path, "pyproject.toml"))
+        config = load(path=tmp_path / "pyproject.toml")
 
         # Assert
         assert config == expected_config
@@ -218,7 +227,7 @@ def test_validate_pyproject_toml_fields_no_flower_components() -> None:
 
     # Assert
     assert not is_valid
-    assert len(errors) == 1
+    assert len(errors) == 2
     assert len(warnings) == 0
 
 
@@ -241,7 +250,7 @@ def test_validate_pyproject_toml_fields_no_server_and_client_app() -> None:
 
     # Assert
     assert not is_valid
-    assert len(errors) == 2
+    assert len(errors) == 3
     assert len(warnings) == 0
 
 
@@ -256,7 +265,10 @@ def test_validate_pyproject_toml_fields() -> None:
             "license": "",
             "authors": [],
         },
-        "flower": {"components": {"serverapp": "", "clientapp": ""}},
+        "flower": {
+            "publisher": "flwrlabs",
+            "components": {"serverapp": "", "clientapp": ""},
+        },
     }
 
     # Execute
@@ -280,10 +292,11 @@ def test_validate_pyproject_toml() -> None:
             "authors": [],
         },
         "flower": {
+            "publisher": "flwrlabs",
             "components": {
                 "serverapp": "flwr.cli.run:run",
                 "clientapp": "flwr.cli.run:run",
-            }
+            },
         },
     }
 
@@ -308,10 +321,11 @@ def test_validate_pyproject_toml_fail() -> None:
             "authors": [],
         },
         "flower": {
+            "publisher": "flwrlabs",
             "components": {
                 "serverapp": "flwr.cli.run:run",
                 "clientapp": "flwr.cli.run:runa",
-            }
+            },
         },
     }
 
