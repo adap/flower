@@ -178,9 +178,18 @@ def client_fn_parameterized(partition_id, target_delta, noise_multiplier, max_gr
       return FlowerClient(partition, target_delta, etc).to_client()
 
 
+
+
+
 def client_fn(cid: str):
     return FlowerClient(net, train_loader, test_loader).to_client()
 
-app = ClientApp(
-    client_fn=client_fn,
+appA = ClientApp(
+    client_fn=client_fn_parameterized(a,b,c),
+)
+appC = ClientApp(
+    client_fn=client_fn_parameterized(aa,bb,cc),
+)
+appD = ClientApp(
+    client_fn=client_fn_parameterized(aaa,bbb,ccc),
 )
