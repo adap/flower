@@ -4,7 +4,10 @@ from flwr.common import ndarrays_to_parameters
 from flwr.server import ServerApp, ServerConfig
 from flwr.server.strategy import FedAvg
 
-from $project_name.task import load_model
+from $import_name.task import load_model
+
+# Define config
+config = ServerConfig(num_rounds=3)
 
 parameters = ndarrays_to_parameters(load_model().get_weights())
 
@@ -19,6 +22,6 @@ strategy = FedAvg(
 
 # Create ServerApp
 app = ServerApp(
-    config=ServerConfig(num_rounds=3),
+    config=config,
     strategy=strategy,
 )
