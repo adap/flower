@@ -30,7 +30,7 @@ def run() -> None:
 
     if config is None:
         typer.secho(
-            "Project configuration could not be loaded.\nflower.toml is invalid:\n"
+            "Project configuration could not be loaded.\npyproject.toml is invalid:\n"
             + "\n".join([f"- {line}" for line in errors]),
             fg=typer.colors.RED,
             bold=True,

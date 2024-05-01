@@ -59,7 +59,7 @@ flower-superlink = "flwr.server:run_superlink"
 flower-supernode = "flwr.client:run_supernode"
 flower-client-app = "flwr.client:run_client_app"
 flower-server-app = "flwr.server:run_server_app"
-flower-simulation = "flwr.simulation:run_simulation_from_cli"
+flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -72,6 +72,7 @@ pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
 typer = { version = "^0.9.0", extras=["all"] }
 tomli = "^2.0.1"
+pathspec = "^0.12.1"
 # Optional dependencies (Simulation Engine)
 ray = { version = "==2.6.3", optional = true, python = ">=3.8,<3.12" }
 # Optional dependencies (REST transport layer)
@@ -136,7 +137,7 @@ multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
-known_first_party = ["flwr", "flwr_experimental", "flwr_tool"]
+known_first_party = ["flwr", "flwr_tool"]
 
 [tool.black]
 line-length = 88
@@ -169,12 +170,6 @@ plugins = [
 ]
 ignore_missing_imports = true
 strict = true
-
-[[tool.mypy.overrides]]
-module = [
-    "flwr_experimental.*",
-]
-ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [

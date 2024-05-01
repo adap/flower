@@ -16,6 +16,7 @@
 
 import typer
 
+from .build import build
 from .example import example
 from .new import new
 from .run import run
@@ -32,6 +33,7 @@ app = typer.Typer(
 app.command()(new)
 app.command()(example)
 app.command()(run)
+app.command()(build)
 
 typer_click_object = typer.main.get_command(app)
 
