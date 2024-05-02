@@ -589,7 +589,7 @@ class SqliteState(State):  # pylint: disable=R0904
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
         query = "SELECT node_id FROM node WHERE public_key = :public_key;"
         row = self.query(query, {"public_key": client_public_key})
-        if row is not None:
+        if len(row) > 0:
             node_id: int = row[0]["node_id"]
             return node_id
         return None

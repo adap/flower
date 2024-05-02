@@ -218,31 +218,39 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
         with self.lock:
-            if node_id not in self.node_ids:
-                self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+            if node_id in self.node_ids:
+                log(ERROR, "Unexpected node registration failure.")
+                return 0
+
+            if public_key is not None:
                 if (
-                    public_key is not None
-                    and public_key not in self.public_key_to_node_id
-                    and self.public_key_to_node_id.get(public_key) != node_id
+                    public_key in self.public_key_to_node_id
+                    or self.public_key_to_node_id.get(public_key) == node_id
                 ):
-                    self.public_key_to_node_id[public_key] = node_id
-                return node_id
-        log(ERROR, "Unexpected node registration failure.")
-        return 0
+                    log(ERROR, "Unexpected node registration failure.")
+                    return 0
+
+                self.public_key_to_node_id[public_key] = node_id
+
+            self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+            return node_id
 
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Delete a client node."""
         with self.lock:
             if node_id not in self.node_ids:
                 raise ValueError(f"Node {node_id} not found")
-            del self.node_ids[node_id]
+
             if public_key is not None:
                 if (
                     public_key not in self.public_key_to_node_id
                     and self.public_key_to_node_id.get(public_key) != node_id
                 ):
                     raise ValueError("Public key or node_id not found")
+
                 del self.public_key_to_node_id[public_key]
+
+            del self.node_ids[node_id]
 
     def get_nodes(self, run_id: int) -> Set[int]:
         """Return all available client nodes.
