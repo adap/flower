@@ -37,17 +37,9 @@ def build(
 ) -> None:
     """Build a Flower project into a Flower App Bundle (FAB).
 
-    You can run `flwr build` without any argument to bundle the current directory:
-
-    .. code:: shell
-
-        flwr build
-
-    You can also build a specific directory:
-
-    .. code:: shell
-
-        flwr build --directory ./projects/flower-hello-world
+    You can run ``flwr build`` without any argument to bundle the current directory,
+    or you can use ``--directory`` to build a specific directory:
+    ``flwr build --directory ./projects/flower-hello-world``.
     """
     if directory is None:
         directory = Path.cwd()
