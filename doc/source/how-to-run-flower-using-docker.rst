@@ -141,8 +141,9 @@ Let's assume the following project layout:
 
   $ tree .
   .
-  ├── client.py
-  ├── requirements.txt
+  ├── client.py        # client-app code
+  ├── task.py          # client-app code
+  ├── requirements.txt # client-app dependencies
   └── <other files>
 
 First, we need to create a Dockerfile in the directory where the client-app code is located.
@@ -155,14 +156,19 @@ The ``Dockerfile`` contains the instructions that assemble the SuperNode image.
 
   FROM flwr/supernode:nightly
 
+  WORKDIR /app
   COPY requirements.txt .
   RUN python -m pip install -U --no-cache-dir -r requirements.txt && pyenv rehash
 
+  COPY client.py task.py ./
   ENTRYPOINT ["flower-client-app"]
 
-In the first line, we instruct Docker to use the SuperNode image tagged ``nightly`` as a base image.
-Next, we install the client-app dependencies by copying the ``requirements.txt`` file into the image
-and run ``pip install``. Lastly, we set the image's entry point to ``flower-client-app``.
+In the first two lines, we instruct Docker to use the SuperNode image tagged ``nightly`` as a base
+image and set our working directory to ``/app``. The following instructions will now be
+executed in the ``/app`` directory. Next, we install the client-app dependencies by copying the
+``requirements.txt`` file into the image and run ``pip install``. In the last two lines,
+we copy the client-app code (``client.py`` and ``task.py``) into the image and set the entry
+point to ``flower-client-app``.
 
 Building the SuperNode Docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -185,7 +191,7 @@ Now that we have built the SuperNode image, we can finally run it.
 
 .. code-block:: bash
 
-  $ docker run --rm -v ./:/app flwr_supernode:0.0.1 client:app \
+  $ docker run --rm flwr_supernode:0.0.1 client:app \
     --insecure \
     --server 192.168.1.100:9092
 
@@ -193,21 +199,9 @@ Let's break down each part of this command:
 
 * ``docker run``: This is the command to run a new Docker container.
 * ``--rm``: This option specifies that the container should be automatically removed when it stops.
-* | ``-v ./:/app``: This option mounts the directory of the current folder inside the Docker
-  | container, in the ``/app`` directory. This allows the container to access the local code
-  | of the client-app.
 * | ``flwr_supernode:0.0.1``: The name the tag of the Docker image to use.
-
-.. note::
-  Any argument that comes after the tag is passed to the Flower SuperNode binary.
-  To see all available flags that the SuperNode supports, run:
-
-  .. code-block:: bash
-
-    $ docker run --rm flwr/supernode:nightly --help
-
 * | ``client:app``: The object reference of the client-app (``<module>:<attribute>``).
-  | It points to the application that will be run inside the SuperNode container.
+  | It points to the client-app that will be run inside the SuperNode container.
 * ``--insecure``: This option enables insecure communication.
 
 .. attention::
@@ -219,6 +213,14 @@ Let's break down each part of this command:
 
 * | ``--server 192.168.1.100:9092``: This option specifies the address of the SuperLinks Fleet
   | API to connect to. Remember to update it with your SuperLink IP.
+
+.. note::
+  Any argument that comes after the tag is passed to the Flower SuperNode binary.
+  To see all available flags that the SuperNode supports, run:
+
+  .. code-block:: bash
+
+    $ docker run --rm flwr/supernode:nightly --help
 
 Enabling SSL for secure connections
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
