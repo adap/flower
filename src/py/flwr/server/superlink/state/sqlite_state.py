@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS node(
 
 SQL_CREATE_TABLE_CREDENTIAL = """
 CREATE TABLE IF NOT EXISTS credential(
-    public_key BLOB PRIMARY KEY,
-    private_key BLOB
+    private_key BLOB PRIMARY KEY,
+    public_key BLOB
 );
 """
 
@@ -617,12 +617,12 @@ class SqliteState(State):  # pylint: disable=R0904
         count = self.query(query)[0]["COUNT(*)"]
         if count < 1:
             query = (
-                "INSERT OR REPLACE INTO credential (public_key, private_key) "
-                "VALUES (:public_key, :private_key)"
+                "INSERT OR REPLACE INTO credential (private_key, public_key) "
+                "VALUES (:private_key, :public_key)"
             )
-            self.query(query, {"public_key": public_key, "private_key": private_key})
+            self.query(query, {"private_key": private_key, "public_key": public_key})
         else:
-            raise RuntimeError("Server public and private key already set")
+            raise RuntimeError("Server private and public key already set")
 
     def get_server_private_key(self) -> Optional[bytes]:
         """Retrieve `server_private_key` in urlsafe bytes."""

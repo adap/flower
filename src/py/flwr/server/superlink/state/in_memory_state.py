@@ -295,7 +295,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 self.server_private_key = private_key
                 self.server_public_key = public_key
             else:
-                raise RuntimeError("Server public and private key already set")
+                raise RuntimeError("Server private and public key already set")
 
     def get_server_private_key(self) -> Optional[bytes]:
         """Retrieve `server_private_key` in urlsafe bytes."""
