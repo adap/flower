@@ -43,18 +43,18 @@ def install(
 
     It can be ran with a single FAB file argument:
 
-        `flwr install ./docs/target_project.fab`
+        ``flwr install ./docs/target_project.fab``
 
-    The target install directory can be specified with `--flwr-dir`:
+    The target install directory can be specified with ``--flwr-dir``:
 
-        `flwr install ./docs/target_project.fab --flwr-dir ./docs/flwr`
+        ``flwr install ./docs/target_project.fab --flwr-dir ./docs/flwr``
 
-    This will install `target_project` to `./docs/flwr/`. By default, `flwr-dir` is
-    equal to:
+    This will install ``target_project`` to ``./docs/flwr/``. By default,
+    ``flwr-dir`` is equal to:
 
-        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-        - `$HOME/.flwr/` in all other cases
+        - ``$FLWR_HOME/`` if ``$FLWR_HOME`` is defined
+        - ``$XDG_DATA_HOME/.flwr/`` if ``$XDG_DATA_HOME`` is defined
+        - ``$HOME/.flwr/`` in all other cases
     """
     if source is None:
         source = Path(typer.prompt("Enter the source FAB file"))
