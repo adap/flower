@@ -16,6 +16,7 @@ import Foundation
 /// - ``TypeException(_:)``
 /// - ``UnknownServerMessage``
 public enum FlowerException: Error {
-    case TypeException(String)
+    case TypeError(String)
+    case ValueError(String)
     case UnknownServerMessage
 }
