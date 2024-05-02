@@ -414,8 +414,8 @@ class StateTest(unittest.TestCase):
         # Assert
         assert num == 2
 
-    def test_server_public_private_key(self) -> None:
-        """Test get server public and private key after inserting."""
+    def test_server_private_public_key(self) -> None:
+        """Test get server private and public key after inserting."""
         # Prepare
         state: State = self.state_factory()
         private_key, public_key = generate_key_pairs()
@@ -423,7 +423,7 @@ class StateTest(unittest.TestCase):
         public_key_bytes = public_key_to_bytes(public_key)
 
         # Execute
-        state.store_server_public_private_key(public_key_bytes, private_key_bytes)
+        state.store_server_private_public_key(private_key_bytes, public_key_bytes)
         server_private_key = state.get_server_private_key()
         server_public_key = state.get_server_public_key()
 
@@ -431,8 +431,8 @@ class StateTest(unittest.TestCase):
         assert server_private_key == private_key_bytes
         assert server_public_key == public_key_bytes
 
-    def test_server_public_private_key_none(self) -> None:
-        """Test get server public and private key without inserting."""
+    def test_server_private_public_key_none(self) -> None:
+        """Test get server private and public key without inserting."""
         # Prepare
         state: State = self.state_factory()
 
@@ -444,8 +444,8 @@ class StateTest(unittest.TestCase):
         assert server_private_key is None
         assert server_public_key is None
 
-    def test_store_server_public_private_key_twice(self) -> None:
-        """Test inserting public and private key twice."""
+    def test_store_server_private_public_key_twice(self) -> None:
+        """Test inserting private and public key twice."""
         # Prepare
         state: State = self.state_factory()
         private_key, public_key = generate_key_pairs()
@@ -456,12 +456,12 @@ class StateTest(unittest.TestCase):
         new_public_key_bytes = public_key_to_bytes(new_public_key)
 
         # Execute
-        state.store_server_public_private_key(public_key_bytes, private_key_bytes)
+        state.store_server_private_public_key(private_key_bytes, public_key_bytes)
 
         # Assert
         with self.assertRaises(RuntimeError):
-            state.store_server_public_private_key(
-                new_public_key_bytes, new_private_key_bytes
+            state.store_server_private_public_key(
+                new_private_key_bytes, new_public_key_bytes
             )
 
     def test_client_public_keys(self) -> None:
