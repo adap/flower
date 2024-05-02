@@ -109,6 +109,13 @@ Flower SuperNode
 The SuperNode Docker image comes with a pre-installed version of Flower and serves as a base for
 building your own SuperNode image.
 
+.. important::
+
+  The SuperNode Docker image currently works only with the 1.9.0-nightly release. A stable version
+  will be available in 1.9.0. Furthermore, the SuperNode image must be paired with the corresponding
+  SuperLink image released on the same day. To ensure the versions are in sync, using the concrete
+  tag, e.g., ``1.9.0.dev20240501`` instead of ``nightly`` is recommended.
+
 We will use the ``app-pytorch`` example, which you can find in
 the Flower repository, to illustrate how you can dockerize your client-app.
 
@@ -215,6 +222,7 @@ Let's break down each part of this command:
   | API to connect to. Remember to update it with your SuperLink IP.
 
 .. note::
+
   Any argument that comes after the tag is passed to the Flower SuperNode binary.
   To see all available flags that the SuperNode supports, run:
 
