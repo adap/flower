@@ -151,8 +151,7 @@ def client_fn_parameterized(
         net = Net().to(DEVICE)
         train_loader, test_loader = load_data(partition_id=partition_id)
         return FlowerClient(
-            partition_id,
-            target_delta,
+            net,
             train_loader,
             test_loader,
             target_delta,
@@ -161,6 +160,10 @@ def client_fn_parameterized(
         ).to_client()
 
 
-app = ClientApp(
-    client_fn=client_fn_parameterized(1, 1.1),
+app1 = ClientApp(
+    client_fn=client_fn_parameterized(1, noise_multiplier=1.1),
+)
+
+app2 = ClientApp(
+    client_fn=client_fn_parameterized(2, noise_multiplier=1),
 )
