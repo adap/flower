@@ -112,8 +112,8 @@ building your own SuperNode image.
 .. important::
 
   The SuperNode Docker image currently works only with the 1.9.0-nightly release. A stable version
-  will be available in 1.9.0. Furthermore, the SuperNode image must be paired with the corresponding
-  SuperLink image released on the same day. To ensure the versions are in sync, using the concrete
+  will be available when Flower 1.9.0 (stable) gets released (ETA: May). A SuperNode nightly image must be paired with the corresponding
+  SuperLink nightly image released on the same day. To ensure the versions are in sync, using the concrete
   tag, e.g., ``1.9.0.dev20240501`` instead of ``nightly`` is recommended.
 
 We will use the ``app-pytorch`` example, which you can find in
