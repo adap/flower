@@ -1,3 +1,6 @@
 flwr>=1.0, <2.0
-opacus==1.4.0
-torchvision==0.15.2
+flwr-datasets[vision]>=0.0.2, <1.0.0
+torch==2.1.1
+torchvision==0.16.1
+tqdm==4.65.0
+opacus==1.4.1

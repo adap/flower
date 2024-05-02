@@ -1,28 +1,54 @@
-# Differentially Private Federated Learning using Opacus, PyTorch and Flower
+# Training with Sample-Level Differential Privacy using Opacus Privacy Engine
 
-This example contains code demonstrating how to include the Opacus library for training a model using DP-SGD. The code is adapted from multiple other examples:
+In this example, we demonstrate how to train a model with differential privacy (DP) using Flower. We employ PyTorch and integrate the Opacus Privacy Engine to achieve sample-level differential privacy. This setup ensures robust privacy guarantees during the client training phase. The code is adapted from the [PyTorch Quickstart example](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch).
 
-- PyTorch Quickstart
-- Simulation Quickstart
-- Simulation Extended Example
+For more information about DP in Flower please refer to the [tutorial](https://flower.ai/docs/framework/how-to-use-differential-privacy.html). For additional information about Opacus, visit the official \[website\] (https://opacus.ai/).
 
-## Requirements
+## Environments Setup
 
-- **Flower** nightly release (or development version from `main` branch) for the simulation, otherwise normal Flower for the client
-- **PyTorch** 1.7.1 (but most likely will work with older versions)
-- **Ray** 1.4.1 (just for the simulation)
-- **Opacus** 0.14.0
+Start by cloning the example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
-## Privacy Parameters
+```shell
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/sample-level-dp-opacus . && rm -rf flower && cd sample-level-dp-opacus
+```
 
-The parameters can be set in `dp_cifar_main.py`.
+This will create a new directory called `sample-level-dp-opacus` containing the following files:
 
-## Running the client
+```shell
+-- requirements.txt
+-- client.py
+-- server.py
+-- README.md
+```
 
-Run the server with `python server.py`. Then open two (or more) new terminals to start two (or more) clients with `python dp_cifar_client.py`.
+### Installing dependencies
 
-## Running the simulation
+Project dependencies are defined in `requirements.txt`. Install them with:
 
-Note: It is not possible to see the total privacy budget used with this example since the simulation creates clients from scratch every round.
+```shell
+pip install -r requirements.txt
+```
 
-Run the simulation with `python dp_cifar_simulation.py`.
+## Run Flower with Opacus and Pytorch
+
+You can simply start the server in a terminal as follows:
+
+```shell
+python3 server.py
+```
+
+Now, you're ready to start the Flower clients that will participate in the learning process. We need to specify the partition id to utilize different partitions of the data across various nodes. Additionally, you can specify the DP hyperparameters (in this example, they are `target-delta`, `noise-multiplier`, and `max-grad-norm` with default values of 1e-5, 1.3, and 1.0) for each client. To do so, simply open two more terminal windows and execute the following commands.
+
+Start client 1 in the first terminal:
+
+```shell
+python3 client.py --partition-id 0 --noise-multiplier 1.5
+```
+
+Start client 2 in the second terminal:
+
+```shell
+python3 client.py --partition-id 1 --noise-multiplier 1.1
+```
+
+You can observe the computed privacy budget for each client on every round.
