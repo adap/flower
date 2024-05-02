@@ -448,11 +448,7 @@ class StateTest(unittest.TestCase):
         assert num == 2
 
     def test_server_private_public_key(self) -> None:
-<<<<<<< HEAD
-        """Test get server public and private key after inserting."""
-=======
         """Test get server private and public key after inserting."""
->>>>>>> origin
         # Prepare
         state: State = self.state_factory()
         private_key, public_key = generate_key_pairs()
@@ -469,11 +465,7 @@ class StateTest(unittest.TestCase):
         assert server_public_key == public_key_bytes
 
     def test_server_private_public_key_none(self) -> None:
-<<<<<<< HEAD
-        """Test get server public and private key without inserting."""
-=======
         """Test get server private and public key without inserting."""
->>>>>>> origin
         # Prepare
         state: State = self.state_factory()
 
@@ -486,11 +478,7 @@ class StateTest(unittest.TestCase):
         assert server_public_key is None
 
     def test_store_server_private_public_key_twice(self) -> None:
-<<<<<<< HEAD
-        """Test inserting public and private key twice."""
-=======
         """Test inserting private and public key twice."""
->>>>>>> origin
         # Prepare
         state: State = self.state_factory()
         private_key, public_key = generate_key_pairs()
