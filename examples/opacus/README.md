@@ -31,24 +31,24 @@ pip install -r requirements.txt
 
 ## Run Flower with Opacus and Pytorch
 
-You can simply start the server in a terminal as follows:
+### 1. Start the long-running Flower server (SuperLink)
 
-```shell
-python3 server.py
+```bash
+flower-superlink --insecure
 ```
 
-Now, you're ready to start the Flower clients that will participate in the learning process. We need to specify the partition id to utilize different partitions of the data across various nodes. Additionally, you can specify the DP hyperparameters (in this example, they are `target-delta`, `noise-multiplier`, and `max-grad-norm` with default values of 1e-5, 1.3, and 1.0) for each client. To do so, simply open two more terminal windows and execute the following commands.
+### 2. Start the long-running Flower clients (SuperNodes)
 
-Start client 1 in the first terminal:
+Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
 
-```shell
-python3 client.py --partition-id 0 --noise-multiplier 1.5
+```bash
+flower-client-app client:app1 --insecure
 ```
 
-Start client 2 in the second terminal:
+### 3. Run the Flower App
 
-```shell
-python3 client.py --partition-id 1 --noise-multiplier 1.1
+With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
+
+```bash
+flower-server-app server:app2 --insecure
 ```
-
-You can observe the computed privacy budget for each client on every round.
