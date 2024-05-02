@@ -161,10 +161,6 @@ def client_fn_parameterized(
         ).to_client()
 
 
-print("_________")
-# appA = ClientApp(
-#     client_fn=client_fn_parameterized(0, 1.5),
-# )
-# appC = ClientApp(
-#     client_fn=client_fn_parameterized(1, 1.1),
-# )
+app = ClientApp(
+    client_fn=client_fn_parameterized(1, 1.1),
+)
