@@ -146,7 +146,7 @@ Let's assume the following project layout:
   ├── requirements.txt # client-app dependencies
   └── <other files>
 
-First, we need to create a Dockerfile in the directory where the client-app code is located.
+First, we need to create a Dockerfile in the directory where the ``ClientApp`` code is located.
 If you use the ``app-pytorch`` example, create a new file called ``Dockerfile`` in
 ``examples/app-pytorch``.
 
@@ -165,9 +165,9 @@ The ``Dockerfile`` contains the instructions that assemble the SuperNode image.
 
 In the first two lines, we instruct Docker to use the SuperNode image tagged ``nightly`` as a base
 image and set our working directory to ``/app``. The following instructions will now be
-executed in the ``/app`` directory. Next, we install the client-app dependencies by copying the
+executed in the ``/app`` directory. Next, we install the ``ClientApp`` dependencies by copying the
 ``requirements.txt`` file into the image and run ``pip install``. In the last two lines,
-we copy the client-app code (``client.py`` and ``task.py``) into the image and set the entry
+we copy the ``ClientApp`` code (``client.py`` and ``task.py``) into the image and set the entry
 point to ``flower-client-app``.
 
 Building the SuperNode Docker image
@@ -200,8 +200,8 @@ Let's break down each part of this command:
 * ``docker run``: This is the command to run a new Docker container.
 * ``--rm``: This option specifies that the container should be automatically removed when it stops.
 * | ``flwr_supernode:0.0.1``: The name the tag of the Docker image to use.
-* | ``client:app``: The object reference of the client-app (``<module>:<attribute>``).
-  | It points to the client-app that will be run inside the SuperNode container.
+* | ``client:app``: The object reference of the ``ClientApp`` (``<module>:<attribute>``).
+  | It points to the ``ClientApp`` that will be run inside the SuperNode container.
 * ``--insecure``: This option enables insecure communication.
 
 .. attention::
