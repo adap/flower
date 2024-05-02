@@ -68,7 +68,7 @@ def test(net, test_loader):
 
 
 def load_data(partition_id):
-    fds = FederatedDataset(dataset="cifar10", partitioners={"train": 3})
+    fds = FederatedDataset(dataset="cifar10", partitioners={"train": 2})
     partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2)
@@ -89,11 +89,20 @@ def load_data(partition_id):
 
 
 class FlowerClient(NumPyClient):
-    def __init__(self, model, train_loader, test_loader) -> None:
+    def __init__(
+        self,
+        model,
+        train_loader,
+        test_loader,
+        target_delta,
+        noise_multiplier,
+        max_grad_norm,
+    ) -> None:
         super().__init__()
         self.test_loader = test_loader
         self.optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
         self.privacy_engine = PrivacyEngine(secure_mode=False)
+        self.target_detla = target_delta
         (
             self.model,
             self.optimizer,
@@ -107,12 +116,12 @@ class FlowerClient(NumPyClient):
         )
 
     def get_parameters(self, config):
-        return [val.cpu().numpy() for _, val in net.state_dict().items()]
+        return [val.cpu().numpy() for _, val in self.model.state_dict().items()]
 
     def set_parameters(self, parameters):
-        params_dict = zip(net.state_dict().keys(), parameters)
+        params_dict = zip(self.model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        net.load_state_dict(state_dict, strict=True)
+        self.model.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
@@ -124,7 +133,7 @@ class FlowerClient(NumPyClient):
         )
 
         if epsilon is not None:
-            print(f"Epsilon value for delta={target_delta} is {epsilon:.2f}")
+            print(f"Epsilon value for delta={self.target_delta} is {epsilon:.2f}")
         else:
             print("Epsilon value not available.")
         return (self.get_parameters(config={}), len(self.train_loader), {})
@@ -132,64 +141,30 @@ class FlowerClient(NumPyClient):
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
         loss, accuracy = test(self.model, self.test_loader)
-        return loss, len(test_loader.dataset), {"accuracy": accuracy}
+        return loss, len(self.test_loader.dataset), {"accuracy": accuracy}
 
 
-parser = argparse.ArgumentParser(description="Flower")
-parser.add_argument(
-    "--partition-id",
-    choices=[0, 1, 2],
-    required=True,
-    type=int,
-    help="Partition of the dataset divided into 3 iid partitions created artificially.",
-)
-parser.add_argument(
-    "--target-delta",
-    default=1e-5,
-    required=False,
-    type=float,
-)
-parser.add_argument(
-    "--noise-multiplier",
-    default=1.3,
-    required=False,
-    type=float,
-)
-parser.add_argument(
-    "--max-grad-norm",
-    default=1.0,
-    required=False,
-    type=float,
-)
-
-partition_id = parser.parse_args().partition_id
-target_delta = parser.parse_args().target_delta
-noise_multiplier = parser.parse_args().noise_multiplier
-max_grad_norm = parser.parse_args().max_grad_norm
-
-net = Net().to(DEVICE)
-train_loader, test_loader = load_data(partition_id=partition_id)
+def client_fn_parameterized(
+    partition_id, target_delta=1e-5, noise_multiplier=1.3, max_grad_norm=1.0
+):
+    def client_fn(cid: str):
+        net = Net().to(DEVICE)
+        train_loader, test_loader = load_data(partition_id=partition_id)
+        return FlowerClient(
+            partition_id,
+            target_delta,
+            train_loader,
+            test_loader,
+            target_delta,
+            noise_multiplier,
+            max_grad_norm,
+        ).to_client()
 
 
-def client_fn_parameterized(partition_id, target_delta, noise_multiplier, max_grad_norm):
-   def client_fn(cid: str): <-- has to be like this (we'll get rid of it soon)
-      # load partition
-      partition = ...
-      return FlowerClient(partition, target_delta, etc).to_client()
-
-
-
-
-
-def client_fn(cid: str):
-    return FlowerClient(net, train_loader, test_loader).to_client()
-
-appA = ClientApp(
-    client_fn=client_fn_parameterized(a,b,c),
-)
-appC = ClientApp(
-    client_fn=client_fn_parameterized(aa,bb,cc),
-)
-appD = ClientApp(
-    client_fn=client_fn_parameterized(aaa,bbb,ccc),
-)
+print("_________")
+# appA = ClientApp(
+#     client_fn=client_fn_parameterized(0, 1.5),
+# )
+# appC = ClientApp(
+#     client_fn=client_fn_parameterized(1, 1.1),
+# )
