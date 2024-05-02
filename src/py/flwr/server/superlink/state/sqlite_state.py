@@ -36,7 +36,8 @@ SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
     node_id         INTEGER UNIQUE,
     online_until    REAL,
-    ping_interval   REAL
+    ping_interval   REAL,
+    public_key      BLOB
 );
 """
 
@@ -534,26 +535,36 @@ class SqliteState(State):  # pylint: disable=R0904
 
         return None
 
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(
+        self, ping_interval: float, public_key: Optional[bytes] = None
+    ) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
         query = (
-            "INSERT INTO node (node_id, online_until, ping_interval) VALUES (?, ?, ?)"
+            "INSERT INTO node "
+            "(node_id, online_until, ping_interval, public_key) "
+            "VALUES (?, ?, ?, ?)"
         )
 
         try:
-            self.query(query, (node_id, time.time() + ping_interval, ping_interval))
+            self.query(
+                query, (node_id, time.time() + ping_interval, ping_interval, public_key)
+            )
         except sqlite3.IntegrityError:
             log(ERROR, "Unexpected node registration failure.")
             return 0
         return node_id
 
-    def delete_node(self, node_id: int) -> None:
+    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Delete a client node."""
-        query = "DELETE FROM node WHERE node_id = :node_id;"
-        self.query(query, {"node_id": node_id})
+        if public_key is None:
+            query = "DELETE FROM node WHERE node_id = ?;"
+            self.query(query, (node_id,))
+        else:
+            query = "DELETE FROM node WHERE node_id = ? AND public_key = ?;"
+            self.query(query, (node_id, public_key))
 
     def get_nodes(self, run_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
@@ -573,6 +584,15 @@ class SqliteState(State):  # pylint: disable=R0904
         rows = self.query(query, (time.time(),))
         result: Set[int] = {row["node_id"] for row in rows}
         return result
+
+    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+        query = "SELECT node_id FROM node WHERE public_key = :public_key;"
+        row = self.query(query, {"public_key": client_public_key})
+        if len(row) > 0:
+            node_id: int = row[0]["node_id"]
+            return node_id
+        return None
 
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
