@@ -234,7 +234,6 @@ certificate within the container. Use the ``--certificates`` flag when starting 
 .. code-block:: bash
 
   $ docker run --rm -v ./ca.crt:/app/ca.crt flwr_supernode:0.0.1 client:app \
-    --insecure \
     --server 192.168.1.100:9092 \
     --certificates ca.crt
 
