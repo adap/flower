@@ -254,16 +254,16 @@ class InMemoryState(State):  # pylint: disable=R0902
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def store_server_public_private_key(
-        self, public_key: bytes, private_key: bytes
+    def store_server_private_public_key(
+        self, private_key: bytes, public_key: bytes
     ) -> None:
-        """Store `server_public_key` and `server_private_key` in state."""
+        """Store `server_private_key` and `server_public_key` in state."""
         with self.lock:
             if self.server_private_key is None and self.server_public_key is None:
                 self.server_private_key = private_key
                 self.server_public_key = public_key
             else:
-                raise RuntimeError("Server public and private key already set")
+                raise RuntimeError("Server private and public key already set")
 
     def get_server_private_key(self) -> Optional[bytes]:
         """Retrieve `server_private_key` in urlsafe bytes."""

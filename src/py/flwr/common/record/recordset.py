@@ -24,6 +24,7 @@ from .parametersrecord import ParametersRecord
 from .typeddict import TypedDict
 
 
+@dataclass
 class RecordSetData:
     """Inner data container for the RecordSet class."""
 
@@ -97,22 +98,22 @@ class RecordSet:
             metrics_records=metrics_records,
             configs_records=configs_records,
         )
-        setattr(self, "_data", data)  # noqa
+        self.__dict__["_data"] = data
 
     @property
     def parameters_records(self) -> TypedDict[str, ParametersRecord]:
         """Dictionary holding ParametersRecord instances."""
-        data = cast(RecordSetData, getattr(self, "_data"))  # noqa
+        data = cast(RecordSetData, self.__dict__["_data"])
         return data.parameters_records
 
     @property
     def metrics_records(self) -> TypedDict[str, MetricsRecord]:
         """Dictionary holding MetricsRecord instances."""
-        data = cast(RecordSetData, getattr(self, "_data"))  # noqa
+        data = cast(RecordSetData, self.__dict__["_data"])
         return data.metrics_records
 
     @property
     def configs_records(self) -> TypedDict[str, ConfigsRecord]:
         """Dictionary holding ConfigsRecord instances."""
-        data = cast(RecordSetData, getattr(self, "_data"))  # noqa
+        data = cast(RecordSetData, self.__dict__["_data"])
         return data.configs_records
