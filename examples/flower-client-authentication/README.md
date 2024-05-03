@@ -42,7 +42,7 @@ If you don't see any errors you're good to go!
 ./generate.sh
 ```
 
-`generate.sh` is a script that (by default) generates certificates for creating a secure TLS connection 
+`generate.sh` is a script that (by default) generates certificates for creating a secure TLS connection
 and three private and public key pairs for one server and two clients.
 You can generate more keys by specifying the number of client credentials that you wish to generate.
 The script also generates a CSV file that includes each of the generated (client) public keys.
@@ -60,8 +60,8 @@ flower-superlink --certificates certificates/ca.crt certificates/server.pem cert
 ```
 
 To start a long-running Flower server and enable client authentication is very easy; all you need to do is type
-`--require-client-authentication` followed by the path to the known `client_public_keys.csv`, server's private key 
-`server_credentials`, and server's public key `server_credentials.pub`. Notice that you can only enable client 
+`--require-client-authentication` followed by the path to the known `client_public_keys.csv`, server's private key
+`server_credentials`, and server's public key `server_credentials.pub`. Notice that you can only enable client
 authentication with a secure TLS connection.
 
 ## Start the long-running Flower client (SuperNode)
