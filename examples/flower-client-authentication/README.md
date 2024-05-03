@@ -69,8 +69,8 @@ authentication with a secure TLS connection.
 
 ```bash
 flower-superlink \
-  --certificates certificates/ca.crt certificates/server.pem certificates/server.key \
-  --require-client-authentication keys/client_public_keys.csv keys/server_credentials keys/server_credentials.pub
+    --certificates certificates/ca.crt certificates/server.pem certificates/server.key \
+    --require-client-authentication keys/client_public_keys.csv keys/server_credentials keys/server_credentials.pub
 ```
 
 ## Start the long-running Flower client (SuperNode)
@@ -79,18 +79,18 @@ In a new terminal window, start the first long-running Flower client:
 
 ```bash
 flower-client-app client:app \
-  --root-certificates certificates/ca.crt \
-  --server 127.0.0.1:9092 \
-  --authentication-keys keys/client_credentials_1 keys/client_credentials_1.pub
+    --root-certificates certificates/ca.crt \
+    --server 127.0.0.1:9092 \
+    --authentication-keys keys/client_credentials_1 keys/client_credentials_1.pub
 ```
 
 In yet another new terminal window, start the second long-running Flower client:
 
 ```bash
 flower-client-app client:app \
-  --root-certificates certificates/ca.crt \
-  --server 127.0.0.1:9092 \
-  --authentication-keys keys/client_credentials_2 keys/client_credentials_2.pub
+    --root-certificates certificates/ca.crt \
+    --server 127.0.0.1:9092 \
+    --authentication-keys keys/client_credentials_2 keys/client_credentials_2.pub
 ```
 
 If you generated more than 2 client credentials, you can add more clients by opening new terminal windows and running the command
