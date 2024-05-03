@@ -3,7 +3,7 @@
 > 🧪 = This example covers experimental features that might change in future versions of Flower
 > Please consult the regular PyTorch code examples ([quickstart](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch), [advanced](https://github.com/adap/flower/tree/main/examples/advanced-pytorch)) to learn how to use Flower with PyTorch.
 
-The following steps describe how to start a long-running Flower server (SuperLink) and then run a Flower App (consisting of a `ClientApp` and a `ServerApp`) with client authentication enabled.
+The following steps describe how to start a long-running Flower server (SuperLink) and a long-running Flower client (SuperNode) with client authentication enabled.
 
 ## Preconditions
 
