@@ -3,7 +3,7 @@
 import flwr as fl
 from transformers import AutoModelForSequenceClassification
 
-from $project_name.task import (
+from $import_name.task import (
     get_weights,
     load_data,
     set_weights,
