@@ -3,7 +3,7 @@
 import jax
 from flwr.client import NumPyClient, ClientApp
 
-from $project_name.task import (
+from $import_name.task import (
     evaluation,
     get_params,
     load_data,
