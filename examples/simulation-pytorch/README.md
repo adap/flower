@@ -1,6 +1,6 @@
 # Flower Simulation example using PyTorch
 
-This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on a single machine. Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for a deep dive into how Flower simulation works. This example uses [Flower Datasets](https://flower.dev/docs/datasets/) to download, partition and preprocess the MNIST dataset. This examples uses 100 clients by default.
+This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on a single machine. Take a look at the [Documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) for a deep dive into how Flower simulation works. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the MNIST dataset. This examples uses 100 clients by default.
 
 ## Running the example (via Jupyter Notebook)
 
@@ -54,17 +54,13 @@ Write the command below in your terminal to install the dependencies according t
 pip install -r requirements.txt
 ```
 
-### Run Federated Learning Example
+### Run with `start_simulation()`
+
+Ensure you have activated your environment then:
 
 ```bash
-# You can run the example without activating your environemnt
-poetry run python sim.py
-
-# Or by first activating it
-poetry shell
 # and then run the example
 python sim.py
-# you can exit your environment by typing "exit"
 ```
 
 You can adjust the CPU/GPU resources you assign to each of your virtual clients. By default, your clients will only use 1xCPU core. For example:
@@ -73,10 +69,29 @@ You can adjust the CPU/GPU resources you assign to each of your virtual clients.
 # Will assign 2xCPUs to each client
 python sim.py --num_cpus=2
 
-# Will assign 2xCPUs and 20% of the GPU's VRAM to each client
-# This means that you can have 5 concurrent clients on each GPU
+# Will assign 2xCPUs and 25% of the GPU's VRAM to each client
+# This means that you can have 4 concurrent clients on each GPU
 # (assuming you have enough CPUs)
-python sim.py --num_cpus=2 --num_gpus=0.2
+python sim.py --num_cpus=2 --num_gpus=0.25
 ```
 
-Take a look at the [Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) for more details on how you can customise your simulation.
+### Run with Flower Next (preview)
+
+Ensure you have activated your environment, then execute the command below. All `ClientApp` instances will run on CPU but the `ServerApp` will run on the GPU if one is available. Note that this is the case because the `Simulation Engine` only exposes certain resources to the `ClientApp` (based on the `client_resources` in `--backend-config`).
+
+```bash
+# Run with the default backend-config.
+# `--server-app` points to the `server` object in the sim.py file in this example.
+# `--client-app` points to the `client` object in the sim.py file in this example.
+flower-simulation --client-app=sim:client --server-app=sim:server --num-supernodes=100
+```
+
+You can change the default resources assigned to each `ClientApp` by means of the `--backend-config` argument:
+
+```bash
+# Tells the VCE to reserve 2x CPUs and 25% of available VRAM for each ClientApp
+flower-simulation --client-app=sim:client --server-app=sim:server --num-supernodes=100 \
+    --backend-config='{"client_resources": {"num_cpus":2, "num_gpus":0.25}}'
+```
+
+Take a look at the [Documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) for more details on how you can customise your simulation.

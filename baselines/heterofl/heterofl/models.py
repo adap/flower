@@ -2,6 +2,7 @@
 
 Classes Conv, Block, Resnet18 are adopted from authors implementation.
 """
+
 import copy
 from typing import List, OrderedDict
 
@@ -62,7 +63,7 @@ class Conv(nn.Module):
         self.blocks = nn.Sequential(*blocks)
 
     def _get_norm(self, j: int):
-        """Return the relavant norm."""
+        """Return the relevant norm."""
         if self.model_config["norm"] == "bn":
             norm = nn.BatchNorm2d(
                 self.model_config["hidden_size"][j],
@@ -85,7 +86,7 @@ class Conv(nn.Module):
         return norm
 
     def _get_scale(self):
-        """Return the relavant scaler."""
+        """Return the relevant scaler."""
         if self.model_config["scale"]:
             scaler = _Scaler(self.model_config["rate"])
         else:

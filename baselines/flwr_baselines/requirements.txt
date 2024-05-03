@@ -1,9 +1,9 @@
 ##### Flower Baseline Dependencies
 # Under Apache-2.0 license
-# Authors: The Flower Authors <hello@flower.dev>
-# Website: https://flower.dev
+# Authors: The Flower Authors <hello@flower.ai>
+# Website: https://flower.ai
 # Repository: https://github.com/adap/flower
-# Documentation: https://flower.dev
+# Documentation: https://flower.ai
 
 ##### dependencies
 flwr >= 0.18.0
@@ -18,9 +18,9 @@ wget >= 3.2
 virtualenv >= 20.24.6
 
 ##### dev-dependencies
-isort == 5.11.5
-black == 23.1.0
-docformatter == 1.5.1
+isort == 5.13.2
+black == 24.2.0
+docformatter == 1.7.5
 mypy == 0.961
 pylint == 2.8.2
 flake8 == 3.9.2

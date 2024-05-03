@@ -1,4 +1,5 @@
 """Defines the MNIST Flower Client and a function to instantiate it."""
+
 # pylint: disable=too-many-instance-attributes,too-many-arguments
 import copy
 import os

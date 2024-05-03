@@ -3,7 +3,6 @@
 Should be removed when first real code has tests.
 """
 
-
 import unittest
 
 

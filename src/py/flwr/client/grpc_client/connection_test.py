@@ -23,18 +23,17 @@ from unittest.mock import patch
 
 import grpc
 
+from flwr.common import DEFAULT_TTL, ConfigsRecord, Message, Metadata, RecordSet
 from flwr.common import recordset_compat as compat
-from flwr.common.configsrecord import ConfigsRecord
-from flwr.common.constant import TASK_TYPE_GET_PROPERTIES
-from flwr.common.message import Message, Metadata
-from flwr.common.recordset import RecordSet
+from flwr.common.constant import MessageTypeLegacy
+from flwr.common.retry_invoker import RetryInvoker, exponential
 from flwr.common.typing import Code, GetPropertiesRes, Status
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     ServerMessage,
 )
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.fleet.grpc_bidi.grpc_server import start_grpc_server
+from flwr.server.superlink.fleet.grpc_bidi.grpc_server import start_grpc_server
 
 from .connection import grpc_connection
 
@@ -46,24 +45,30 @@ SERVER_MESSAGE_RECONNECT = ServerMessage(reconnect_ins=ServerMessage.ReconnectIn
 MESSAGE_GET_PROPERTIES = Message(
     metadata=Metadata(
         run_id=0,
-        task_id="",
+        message_id="",
+        src_node_id=0,
+        dst_node_id=0,
+        reply_to_message="",
         group_id="",
-        ttl="",
-        task_type=TASK_TYPE_GET_PROPERTIES,
+        ttl=DEFAULT_TTL,
+        message_type=MessageTypeLegacy.GET_PROPERTIES,
     ),
-    message=compat.getpropertiesres_to_recordset(
+    content=compat.getpropertiesres_to_recordset(
         GetPropertiesRes(Status(Code.OK, ""), {})
     ),
 )
 MESSAGE_DISCONNECT = Message(
     metadata=Metadata(
         run_id=0,
-        task_id="",
+        message_id="",
+        src_node_id=0,
+        dst_node_id=0,
+        reply_to_message="",
         group_id="",
-        ttl="",
-        task_type="reconnect",
+        ttl=DEFAULT_TTL,
+        message_type="reconnect",
     ),
-    message=RecordSet(configs={"config": ConfigsRecord({"reason": 0})}),
+    content=RecordSet(configs_records={"config": ConfigsRecord({"reason": 0})}),
 )
 
 
@@ -100,7 +105,9 @@ def mock_join(  # type: ignore # pylint: disable=invalid-name
 
 
 @patch(
-    "flwr.server.fleet.grpc_bidi.flower_service_servicer.FlowerServiceServicer.Join",
+    # pylint: disable=line-too-long
+    "flwr.server.superlink.fleet.grpc_bidi.flower_service_servicer.FlowerServiceServicer.Join",  # noqa: E501
+    # pylint: enable=line-too-long
     mock_join,
 )
 def test_integration_connection() -> None:
@@ -121,8 +128,17 @@ def test_integration_connection() -> None:
     def run_client() -> int:
         messages_received: int = 0
 
-        with grpc_connection(server_address=f"[::]:{port}", insecure=True) as conn:
-            receive, send, _, _ = conn
+        with grpc_connection(
+            server_address=f"[::]:{port}",
+            insecure=True,
+            retry_invoker=RetryInvoker(
+                wait_gen_factory=exponential,
+                recoverable_exceptions=grpc.RpcError,
+                max_tries=1,
+                max_time=None,
+            ),
+        ) as conn:
+            receive, send, _, _, _ = conn
 
             # Setup processing loop
             while True:
@@ -130,7 +146,7 @@ def test_integration_connection() -> None:
                 message = receive()
 
                 messages_received += 1
-                if message.metadata.task_type == "reconnect":  # type: ignore
+                if message.metadata.message_type == "reconnect":  # type: ignore
                     send(MESSAGE_DISCONNECT)
                     break
 

@@ -21,7 +21,7 @@ from flwr_datasets.partitioner.size_partitioner import SizePartitioner
 
 
 class SquarePartitioner(SizePartitioner):
-    """Partitioner creates partitions of size that are correlated with squared node_id.
+    """Partitioner creates partitions of size that are correlated with squared id.
 
     The amount of data each client gets is correlated with the squared partition ID.
     For instance, if the IDs range from 1 to M, client with ID 1 gets 1 unit of data,
@@ -34,6 +34,8 @@ class SquarePartitioner(SizePartitioner):
     """
 
     def __init__(self, num_partitions: int) -> None:
-        super().__init__(num_partitions=num_partitions, node_id_to_size_fn=np.square)
+        super().__init__(
+            num_partitions=num_partitions, partition_id_to_size_fn=np.square
+        )
         if num_partitions <= 0:
             raise ValueError("The number of partitions must be greater than zero.")

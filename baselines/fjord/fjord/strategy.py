@@ -1,4 +1,5 @@
 """FjORD strategy."""
+
 from copy import deepcopy
 from functools import reduce
 from typing import Dict, List, Optional, Tuple, Union

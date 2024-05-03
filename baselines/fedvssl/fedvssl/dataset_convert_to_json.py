@@ -1,4 +1,5 @@
 """Dataset pre-processing: convert .txt files to .json files."""
+
 import json
 
 # We use the .json files for the annotations.

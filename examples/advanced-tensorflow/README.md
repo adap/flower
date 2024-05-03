@@ -1,6 +1,6 @@
 # Advanced Flower Example (TensorFlow/Keras)
 
-This example demonstrates an advanced federated learning setup using Flower with TensorFlow/Keras. This example uses [Flower Datasets](https://flower.dev/docs/datasets/) and it differs from the quickstart example in the following ways:
+This example demonstrates an advanced federated learning setup using Flower with TensorFlow/Keras. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) and it differs from the quickstart example in the following ways:
 
 - 10 clients (instead of just 2)
 - Each client holds a local dataset of 1/10 of the train datasets and 80% is training examples and 20% as test examples (note that by default only a small subset of this data is used when running the `run.sh` script)
@@ -57,7 +57,7 @@ pip install -r requirements.txt
 
 ## Run Federated Learning with TensorFlow/Keras and Flower
 
-The included `run.sh` will call a script to generate certificates (which will be used by server and clients), start the Flower server (using `server.py`), sleep for 10 seconds to ensure the the server is up, and then start 10 Flower clients (using `client.py`). You can simply start everything in a terminal as follows:
+The included `run.sh` will call a script to generate certificates (which will be used by server and clients), start the Flower server (using `server.py`), sleep for 10 seconds to ensure the server is up, and then start 10 Flower clients (using `client.py`). You can simply start everything in a terminal as follows:
 
 ```shell
 # Once you have activated your environment

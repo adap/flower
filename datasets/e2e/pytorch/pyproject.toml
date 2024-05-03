@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 name = "fds-e2e-pytorch"
 version = "0.1.0"
 description = "Flower Datasets with PyTorch"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"

@@ -86,7 +86,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.8.0"
+release = "1.9.0"
 
 # -- General configuration ---------------------------------------------------
 
@@ -123,24 +123,26 @@ autosummary_ignore_module_all = False
 # The full name is still at the top of the page
 add_module_names = False
 
+
 def find_test_modules(package_path):
     """Go through the python files and exclude every *_test.py file."""
     full_path_modules = []
     for root, dirs, files in os.walk(package_path):
         for file in files:
-            if file.endswith('_test.py'):
+            if file.endswith("_test.py"):
                 # Construct the module path relative to the package directory
                 full_path = os.path.join(root, file)
                 relative_path = os.path.relpath(full_path, package_path)
                 # Convert file path to dotted module path
-                module_path = os.path.splitext(relative_path)[0].replace(os.sep, '.')
+                module_path = os.path.splitext(relative_path)[0].replace(os.sep, ".")
                 full_path_modules.append(module_path)
     modules = []
     for full_path_module in full_path_modules:
-        parts = full_path_module.split('.')
+        parts = full_path_module.split(".")
         for i in range(len(parts)):
-            modules.append('.'.join(parts[i:]))
+            modules.append(".".join(parts[i:]))
     return modules
+
 
 # Stop from documenting the *_test.py files.
 # That's the only way to do that in autosummary (make the modules as mock_imports).
@@ -160,7 +162,6 @@ redirects = {
     # Renamed pages
     "installation": "how-to-install-flower.html",
     "configuring-clients.html": "how-to-configure-clients.html",
-    "quickstart_mxnet": "tutorial-quickstart-mxnet.html",
     "quickstart_pytorch_lightning": "tutorial-quickstart-pytorch-lightning.html",
     "quickstart_huggingface": "tutorial-quickstart-huggingface.html",
     "quickstart_pytorch": "tutorial-quickstart-pytorch.html",
@@ -192,7 +193,6 @@ redirects = {
     "quickstart-pandas": "tutorial-quickstart-pandas.html",
     "quickstart-fastai": "tutorial-quickstart-fastai.html",
     "quickstart-pytorch-lightning": "tutorial-quickstart-pytorch-lightning.html",
-    "quickstart-mxnet": "tutorial-quickstart-mxnet.html",
     "quickstart-scikitlearn": "tutorial-quickstart-scikitlearn.html",
     "quickstart-xgboost": "tutorial-quickstart-xgboost.html",
     "quickstart-android": "tutorial-quickstart-android.html",
@@ -238,6 +238,10 @@ redirects = {
     "people": "index.html",
     "organizations": "index.html",
     "publications": "index.html",
+    "quickstart_mxnet": "index.html",
+    "quickstart-mxnet": "index.html",
+    "tutorial-quickstart-mxnet": "index.html",
+    "example-mxnet-walk-through": "index.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
@@ -249,7 +253,7 @@ html_theme = "furo"
 html_title = f"Flower Framework"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
-html_baseurl = "https://flower.dev/docs/framework/"
+html_baseurl = "https://flower.ai/docs/framework/"
 
 html_theme_options = {
     #

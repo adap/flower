@@ -1,4 +1,5 @@
 """NIST sampler test."""
+
 # pylint: disable=no-self-use, protected-access
 import unittest
 

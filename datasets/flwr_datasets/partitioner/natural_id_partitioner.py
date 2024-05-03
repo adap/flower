@@ -29,28 +29,28 @@ class NaturalIdPartitioner(Partitioner):
         partition_by: str,
     ):
         super().__init__()
-        self._node_id_to_natural_id: Dict[int, str] = {}
+        self._partition_id_to_natural_id: Dict[int, str] = {}
         self._partition_by = partition_by
 
-    def _create_int_node_id_to_natural_id(self) -> None:
+    def _create_int_partition_id_to_natural_id(self) -> None:
         """Create a mapping from int indices to unique client ids from dataset.
 
         Natural ids come from the column specified in `partition_by`.
         """
         unique_natural_ids = self.dataset.unique(self._partition_by)
-        self._node_id_to_natural_id = dict(
+        self._partition_id_to_natural_id = dict(
             zip(range(len(unique_natural_ids)), unique_natural_ids)
         )
 
-    def load_partition(self, node_id: int) -> datasets.Dataset:
-        """Load a single partition corresponding to a single `node_id`.
+    def load_partition(self, partition_id: int) -> datasets.Dataset:
+        """Load a single partition corresponding to a single `partition_id`.
 
         The choice of the partition is based on unique integers assigned to each
         natural id present in the dataset in the `partition_by` column.
 
         Parameters
         ----------
-        node_id : int
+        partition_id : int
             the index that corresponds to the requested partition
 
         Returns
@@ -58,24 +58,32 @@ class NaturalIdPartitioner(Partitioner):
         dataset_partition : Dataset
             single dataset partition
         """
-        if len(self._node_id_to_natural_id) == 0:
-            self._create_int_node_id_to_natural_id()
+        if len(self._partition_id_to_natural_id) == 0:
+            self._create_int_partition_id_to_natural_id()
 
         return self.dataset.filter(
-            lambda row: row[self._partition_by] == self._node_id_to_natural_id[node_id]
+            lambda row: row[self._partition_by]
+            == self._partition_id_to_natural_id[partition_id]
         )
 
     @property
-    def node_id_to_natural_id(self) -> Dict[int, str]:
+    def num_partitions(self) -> int:
+        """Total number of partitions."""
+        if len(self._partition_id_to_natural_id) == 0:
+            self._create_int_partition_id_to_natural_id()
+        return len(self._partition_id_to_natural_id)
+
+    @property
+    def partition_id_to_natural_id(self) -> Dict[int, str]:
         """Node id to corresponding natural id present.
 
         Natural ids are the unique values in `partition_by` column in dataset.
         """
-        return self._node_id_to_natural_id
+        return self._partition_id_to_natural_id
 
     # pylint: disable=R0201
-    @node_id_to_natural_id.setter
-    def node_id_to_natural_id(self, value: Dict[int, str]) -> None:
+    @partition_id_to_natural_id.setter
+    def partition_id_to_natural_id(self, value: Dict[int, str]) -> None:
         raise AttributeError(
-            "Setting the node_id_to_natural_id dictionary is not allowed."
+            "Setting the partition_id_to_natural_id dictionary is not allowed."
         )

@@ -7,8 +7,8 @@ name = "advanced-pytorch"
 version = "0.1.0"
 description = "Advanced Flower/PyTorch Example"
 authors = [
-    "The Flower Authors <hello@flower.dev>",
-    "Kaushik Amar Das <kaushik.das@iiitg.ac.in>"
+    "The Flower Authors <hello@flower.ai>",
+    "Kaushik Amar Das <kaushik.das@iiitg.ac.in>",
 ]
 
 [tool.poetry.dependencies]

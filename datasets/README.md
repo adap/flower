@@ -4,9 +4,9 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/adap/flower/blob/main/CONTRIBUTING.md)
 ![Build](https://github.com/adap/flower/actions/workflows/framework.yml/badge.svg)
 ![Downloads](https://pepy.tech/badge/flwr-datasets)
-[![Slack](https://img.shields.io/badge/Chat-Slack-red)](https://flower.dev/join-slack)
+[![Slack](https://img.shields.io/badge/Chat-Slack-red)](https://flower.ai/join-slack)
 
-Flower Datasets (`flwr-datasets`) is a library to quickly and easily create datasets for federated learning, federated evaluation, and federated analytics. It was created by the `Flower Labs` team that also created Flower: A Friendly Federated Learning Framework. 
+Flower Datasets (`flwr-datasets`) is a library to quickly and easily create datasets for federated learning, federated evaluation, and federated analytics. It was created by the `Flower Labs` team that also created Flower: A Friendly Federated Learning Framework.
 Flower Datasets library supports:
 * **downloading datasets** - choose the dataset from Hugging Face's `datasets`,
 * **partitioning datasets** - customize the partitioning scheme,
@@ -14,10 +14,10 @@ Flower Datasets library supports:
 
 Thanks to using Hugging Face's `datasets` used under the hood, Flower Datasets integrates with the following popular formats/frameworks:
 * Hugging Face,
-* PyTorch, 
-* TensorFlow, 
-* Numpy, 
-* Pandas, 
+* PyTorch,
+* TensorFlow,
+* Numpy,
+* Pandas,
 * Jax,
 * Arrow.
 
@@ -25,7 +25,7 @@ Create **custom partitioning schemes** or choose from the **implemented partitio
 * Partitioner (the abstract base class) `Partitioner`
 * IID partitioning `IidPartitioner(num_partitions)`
 * Natural ID partitioner `NaturalIdPartitioner`
-* Size partitioner (the abstract base class for the partitioners dictating the division based the number of samples) `SizePartitioner` 
+* Size partitioner (the abstract base class for the partitioners dictating the division based the number of samples) `SizePartitioner`
 * Linear partitioner `LinearPartitioner`
 * Square partitioner `SquarePartitioner`
 * Exponential partitioner `ExponentialPartitioner`
@@ -59,7 +59,7 @@ If you plan to change the type of the dataset to run the code with your ML frame
 
 # Usage
 
-Flower Datasets exposes the `FederatedDataset` abstraction to represent the dataset needed for federated learning/evaluation/analytics. It has two powerful methods that let you handle the dataset preprocessing: `load_partition(node_id, split)` and `load_full(split)`.
+Flower Datasets exposes the `FederatedDataset` abstraction to represent the dataset needed for federated learning/evaluation/analytics. It has two powerful methods that let you handle the dataset preprocessing: `load_partition(partition_id, split)` and `load_split(split)`.
 
 Here's a basic quickstart example of how to partition the MNIST dataset:
 
@@ -71,7 +71,7 @@ mnist_fds = FederatedDataset("mnist", partitioners={"train": 100}
 
 mnist_partition_0 = mnist_fds.load_partition(0, "train")
 
-centralized_data = mnist_fds.load_full("test")
+centralized_data = mnist_fds.load_split("test")
 ```
 
 For more details, please refer to the specific how-to guides or tutorial. They showcase customization and more advanced features.
@@ -83,7 +83,7 @@ Here are a few of the things that we will work on in future releases:
 * ✅ Support for more datasets (especially the ones that have user id present).
 * ✅ Creation of custom `Partitioner`s.
 * ✅ More out-of-the-box `Partitioner`s.
-* ✅ Passing `Partitioner`s via `FederatedDataset`'s `partitioners` argument. 
+* ✅ Passing `Partitioner`s via `FederatedDataset`'s `partitioners` argument.
 * ✅ Customization of the dataset splitting before the partitioning.
 * Simplification of the dataset transformation to the popular frameworks/types.
 * Creation of the synthetic data,

@@ -9,8 +9,15 @@ README.md @jafermarq @tanertopal @danieljanes
 # Flower Baselines
 /baselines @jafermarq @tanertopal @danieljanes
 
+# Flower Datasets
+/datasets @jafermarq @tanertopal @danieljanes
+
 # Flower Examples
 /examples @jafermarq @tanertopal @danieljanes
 
 # Changelog
 /doc/source/ref-changelog.md @jafermarq @tanertopal @danieljanes
+
+# GitHub Actions and Workflows
+/.github/workflows @Robert-Steiner @tanertopal @danieljanes
+/.github/actions @Robert-Steiner @tanertopal @danieljanes

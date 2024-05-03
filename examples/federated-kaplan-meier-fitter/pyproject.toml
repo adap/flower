@@ -1,0 +1,18 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "federated-kaplan-meier-fitter"
+version = "0.1.0"
+description = "Federated Kaplan Meier Fitter with Flower"
+authors = ["The Flower Authors <hello@flower.ai>"]
+maintainers = ["The Flower Authors <hello@flower.ai>"]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.11"
+flwr-nightly = "*"
+flwr-datasets = ">=0.0.2,<1.0.0"
+numpy = ">=1.23.2"
+pandas = ">=2.0.0"
+lifelines = ">=0.28.0"

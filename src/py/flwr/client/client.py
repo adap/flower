@@ -21,6 +21,7 @@ from abc import ABC
 
 from flwr.common import (
     Code,
+    Context,
     EvaluateIns,
     EvaluateRes,
     FitIns,
@@ -32,7 +33,6 @@ from flwr.common import (
     Parameters,
     Status,
 )
-from flwr.common.context import Context
 
 
 class Client(ABC):

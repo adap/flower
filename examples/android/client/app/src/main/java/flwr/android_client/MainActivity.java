@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 if (workInfos.size() > 0) {
                     WorkInfo info = workInfos.get(0);
                     int progress = info.getProgress().getInt("progress", -1);
-                    // You can recieve any message from the Worker Thread
+                    // You can receive any message from the Worker Thread
                     refreshRecyclerView();
                 }
             }

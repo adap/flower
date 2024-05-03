@@ -5,7 +5,7 @@ labels: [image classification, personalization, low-rank training, tensor decomp
 dataset: [CIFAR-10, CIFAR-100, MNIST]
 ---
 
-# FedPara: Low-rank Hadamard Product for Communication-Efficient Federated Learning 
+# FedPara: Low-rank Hadamard Product for Communication-Efficient Federated Learning
 
 > Note: If you use this baseline in your work, please remember to cite the original authors of the paper as well as the Flower paper.
 
@@ -43,7 +43,7 @@ Specifically, it replicates the results for CIFAR-10  and CIFAR-100  in Figure 3
 On a machine with RTX 3090Ti (24GB VRAM) it takes approximately 1h to run each CIFAR-10/100 experiment while using < 12GB of VRAM. You can lower the VRAM footprint my reducing the number of clients allowed to run in parallel in your GPU (do this by raising `client_resources.num_gpus`).
 
 
-**Contributors:** Yahia Salaheldin Shaaban, Omar Mokhtar and Roeia Amr 
+**Contributors:** Yahia Salaheldin Shaaban, Omar Mokhtar and Roeia Amr
 
 
 ## Experimental Setup
@@ -52,48 +52,48 @@ On a machine with RTX 3090Ti (24GB VRAM) it takes approximately 1h to run each C
 
 **Model:**  This baseline implements VGG16 with group normalization.
 
-**Dataset:** 
+**Dataset:**
 
-| Dataset  | #classes | #partitions |  partitioning method IID  | partitioning method non-IID  |
-|:---------|:--------:|:-----------:|:----------------------:| :----------------------:|
-| CIFAR-10  |    10    |     100     | random split | Dirichlet distribution ($\alpha=0.5$)|
-| CIFAR-100  |   100    |     50     | random split| Dirichlet distribution ($\alpha=0.5$)|
+| Dataset   | #classes | #partitions | partitioning method IID |      partitioning method non-IID      |
+| :-------- | :------: | :---------: | :---------------------: | :-----------------------------------: |
+| CIFAR-10  |    10    |     100     |      random split       | Dirichlet distribution ($\alpha=0.5$) |
+| CIFAR-100 |   100    |     50      |      random split       | Dirichlet distribution ($\alpha=0.5$) |
 
 
 **Training Hyperparameters:**
 
-|   |   Cifar10 IID   | Cifar10 Non-IID      | Cifar100 IID     | Cifar100 Non-IID      | MNIST        |
-|---|-------|-------|------|-------|----------|
-| Fraction of client (K) | 16    | 16    | 8    | 8     | 10       |
-| Total rounds (T) | 200   | 200   | 400  | 400   | 100      |
-| Number of SGD epochs (E) | 10    | 5     | 10   | 5     | 5       |
-| Batch size (B) | 64    | 64    | 64   | 64    | 10       |
-| Initial learning rate (η) | 0.1   | 0.1   | 0.1  | 0.1   | 0.1-0.01      |
-| Learning rate decay (τ) | 0.992 | 0.992 | 0.992| 0.992 | 0.999    |
-| Regularization coefficient (λ) | 1     | 1     | 1    | 1     | 0        |
+|                                | Cifar10 IID | Cifar10 Non-IID | Cifar100 IID | Cifar100 Non-IID | MNIST    |
+| ------------------------------ | ----------- | --------------- | ------------ | ---------------- | -------- |
+| Fraction of client (K)         | 16          | 16              | 8            | 8                | 10       |
+| Total rounds (T)               | 200         | 200             | 400          | 400              | 100      |
+| Number of SGD epochs (E)       | 10          | 5               | 10           | 5                | 5        |
+| Batch size (B)                 | 64          | 64              | 64           | 64               | 10       |
+| Initial learning rate (η)      | 0.1         | 0.1             | 0.1          | 0.1              | 0.1-0.01 |
+| Learning rate decay (τ)        | 0.992       | 0.992           | 0.992        | 0.992            | 0.999    |
+| Regularization coefficient (λ) | 1           | 1               | 1            | 1                | 0        |
 
 As for the parameters ratio ($\gamma$) we use the following model sizes. As in the paper, $\gamma=0.1$ is used for CIFAR-10 and $\gamma=0.4$ for CIFAR-100:
 
 | Parameters ratio ($\gamma$) | CIFAR-10 | CIFAR-100 |
-|----------|--------|--------|
-| 1.0 (original) | 15.25M | 15.30M |
-| 0.1      | 1.55M  | - |
-| 0.4      | - | 4.53M  |
+| --------------------------- | -------- | --------- |
+| 1.0 (original)              | 15.25M   | 15.30M    |
+| 0.1                         | 1.55M    | -         |
+| 0.4                         | -        | 4.53M     |
 
 
-### Notes: 
+### Notes:
 - Notably, Fedpara's low-rank training technique heavily relies on initialization, with our experiments revealing that employing a 'Fan-in' He initialization (or Kaiming) renders the model incapable of convergence, resulting in a performance akin to that of a random classifier. We found that only Fan-out initialization yielded the anticipated results, and we postulated that this is attributed to the variance conservation during backward propagation.
 
 - The paper lacks explicit guidance on calculating the rank, aside from the "Rank_min - Rank_max" equation. To address this, we devised an equation aligning with the literature's explanation and constraint, solving a quadratic equation to determine max_rank and utilizing proposition 2 from the paper to establish min_rank.
 
 - The Jacobian correction was not incorporated into our implementation, primarily due to the lack of explicit instructions in the paper regarding the specific implementation of the dual update principle mentioned in the Jacobian correction section.
 
-- It was observed that data generation is crutial for model convergence 
+- It was observed that data generation is crucial for model convergence
 
 ## Environment Setup
 To construct the Python environment follow these steps:
 
-It is assumed that `pyenv` is installed, `poetry` is installed and python 3.10.6 is installed using `pyenv`. Refer to this [documentation](https://flower.dev/docs/baselines/how-to-usef-baselines.html#setting-up-your-machine) to ensure that your machine is ready.
+It is assumed that `pyenv` is installed, `poetry` is installed and python 3.10.6 is installed using `pyenv`. Refer to this [documentation](https://flower.ai/docs/baselines/how-to-use-baselines.html#setting-up-your-machine) to ensure that your machine is ready.
 
 ```bash
 # Set Python 3.10
@@ -112,7 +112,7 @@ poetry shell
 
 Running `FedPara` is easy. You can run it with default parameters directly or by tweaking them directly on the command line. Some command examples are shown below.
 
-```bash  
+```bash
 # To run fedpara with default parameters
 python -m fedpara.main
 
@@ -138,45 +138,46 @@ To reproduce the curves shown below (which correspond to those in Figure 3 in th
 
 ```bash
 # To run fedpara for non-iid CIFAR-10 on vgg16 for lowrank and original schemes
-python -m fedpara.main --multirun model.param_type=standard,lowrank 
+python -m fedpara.main --multirun model.param_type=standard,lowrank
 # To run fedpara for non-iid CIFAR-100 on vgg16 for lowrank and original schemes
-python -m fedpara.main --config-name cifar100 --multirun model.param_type=standard,lowrank 
+python -m fedpara.main --config-name cifar100 --multirun model.param_type=standard,lowrank
 # To run fedpara for iid CIFAR-10 on vgg16 for lowrank and original schemes
-python -m fedpara.main --multirun model.param_type=standard,lowrank num_epochs=10 dataset_config.partition=iid 
+python -m fedpara.main --multirun model.param_type=standard,lowrank num_epochs=10 dataset_config.partition=iid
 # To run fedpara for iid CIFAR-100 on vgg16 for lowrank and original schemes
 python -m fedpara.main --config-name cifar100 --multirun model.param_type=standard,lowrank num_epochs=10 dataset_config.partition=iid
-# To run fedavg for non-iid MINST on FC 
-python -m fedpara.main --config-name mnist_fedavg 
-# To run fedper for non-iid MINST on FC 
-python -m fedpara.main --config-name mnist_fedper 
-# To run pfedpara for non-iid MINST on FC 
-python -m fedpara.main --config-name mnist_pfedpara 
+# To run fedavg for non-iid MINST on FC
+python -m fedpara.main --config-name mnist_fedavg
+# To run fedper for non-iid MINST on FC
+python -m fedpara.main --config-name mnist_fedper
+# To run pfedpara for non-iid MINST on FC
+python -m fedpara.main --config-name mnist_pfedpara
 ```
 
-#### Communication Cost: 
-Communication costs as measured as described in the paper: 
+#### Communication Cost:
+Communication costs as measured as described in the paper:
 *"FL evaluation typically measures the required rounds to achieve the target accuracy as communication costs, but we instead assess total transferred bit sizes, 2 ×
 (#participants)×(model size)×(#rounds)"*
 
 
 ### CIFAR-100 (Accuracy vs Communication Cost)
 
-| IID | Non-IID |
-|:----:|:----:|
-|![Cifar100 iid](_static/Cifar100_iid.jpeg) | ![Cifar100 non-iid](_static/Cifar100_noniid.jpeg) |
+|                    IID                     |                      Non-IID                      |
+| :----------------------------------------: | :-----------------------------------------------: |
+| ![Cifar100 iid](_static/Cifar100_iid.png) | ![Cifar100 non-iid](_static/Cifar100_noniid.png) |
 
 
 ### CIFAR-10 (Accuracy vs Communication Cost)
 
-| IID | Non-IID |
-|:----:|:----:|
-|![CIFAR10 iid](_static/Cifar10_iid.jpeg) | ![CIFAR10 non-iid](_static/Cifar10_noniid.jpeg) |
+|                   IID                    |                     Non-IID                     |
+| :--------------------------------------: | :---------------------------------------------: |
+| ![CIFAR10 iid](_static/Cifar10_iid.png) | ![CIFAR10 non-iid](_static/Cifar10_noniid.png) |
+
 
 ### NON-IID MINST (FedAvg vs FedPer vs pFedPara)
 
 The only federated averaging (FedAvg) implementation replicates the results outlined in the paper. However, challenges with convergence were encountered when applying `pFedPara` and `FedPer` methods.
 
-![Personalization algorithms](_static/non-iid_mnist_personalization.png) 
+![Personalization algorithms](_static/non-iid_mnist_personalization.png)
 
 ## Code Acknowledgments
 Our code is inspired from these repos:

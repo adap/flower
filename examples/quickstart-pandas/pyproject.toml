@@ -7,7 +7,7 @@ name = "quickstart-pandas"
 version = "0.1.0"
 description = "Pandas Federated Analytics Quickstart with Flower"
 authors = ["Ragy Haddad <ragy202@gmail.com>"]
-maintainers = ["The Flower Authors <hello@flower.dev>"]
+maintainers = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"

@@ -37,10 +37,10 @@ def client_args_parser():
         help="Partitioner types.",
     )
     parser.add_argument(
-        "--node-id",
+        "--partition-id",
         default=0,
         type=int,
-        help="Node ID used for the current client.",
+        help="Partition ID used for the current client.",
     )
     parser.add_argument(
         "--seed", default=42, type=int, help="Seed used for train/test splitting."

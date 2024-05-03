@@ -3,5 +3,4 @@ tokenizers==0.13.3
 datasets==2.14.6
 soundfile==0.12.1
 librosa==0.10.1
-flwr==1.5.0
-ray==2.6.3
+flwr[simulation]>=1.0, <2.0

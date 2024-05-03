@@ -9,7 +9,7 @@ The main takeaways of this implementation are:
 - the use of the `output_dict` on the client side - inside `evaluate` method on `client.py`
 - the use of the `evaluate_metrics_aggregation_fn` - to aggregate the metrics on the server side, part of the `strategy` on `server.py`
 
-This example is based on the `quickstart-tensorflow` with CIFAR-10, source [here](https://flower.dev/docs/quickstart-tensorflow.html), with the addition of [Flower Datasets](https://flower.dev/docs/datasets/index.html) to retrieve the CIFAR-10.
+This example is based on the `quickstart-tensorflow` with CIFAR-10, source [here](https://flower.ai/docs/quickstart-tensorflow.html), with the addition of [Flower Datasets](https://flower.ai/docs/datasets/index.html) to retrieve the CIFAR-10.
 
 Using the CIFAR-10 dataset for classification, this is a multi-class classification problem, thus some changes on how to calculate the metrics using `average='micro'` and `np.argmax` is required. For binary classification, this is not required. Also, for unsupervised learning tasks, such as using a deep autoencoder, a custom metric based on reconstruction error could be implemented on client side.
 
@@ -91,16 +91,16 @@ chmod +x run.sh
 ./run.sh
 ```
 
-You will see that Keras is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart-tensorflow.html) for a detailed explanation. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).
+You will see that Keras is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.ai/docs/quickstart-tensorflow.html) for a detailed explanation. You can add `steps_per_epoch=3` to `model.fit()` if you just want to evaluate that everything works without having to wait for the client-side training to finish (this will save you a lot of time during development).
 
 Running `run.sh` will result in the following output (after 3 rounds):
 
 ```shell
 INFO flwr 2024-01-17 17:45:23,794 | app.py:228 | app_fit: metrics_distributed {
-    'accuracy': [(1, 0.10000000149011612), (2, 0.10000000149011612), (3, 0.3393000066280365)], 
-    'acc': [(1, 0.1), (2, 0.1), (3, 0.3393)], 
-    'rec': [(1, 0.1), (2, 0.1), (3, 0.3393)], 
-    'prec': [(1, 0.1), (2, 0.1), (3, 0.3393)], 
+    'accuracy': [(1, 0.10000000149011612), (2, 0.10000000149011612), (3, 0.3393000066280365)],
+    'acc': [(1, 0.1), (2, 0.1), (3, 0.3393)],
+    'rec': [(1, 0.1), (2, 0.1), (3, 0.3393)],
+    'prec': [(1, 0.1), (2, 0.1), (3, 0.3393)],
     'f1': [(1, 0.10000000000000002), (2, 0.10000000000000002), (3, 0.3393)]
 }
 ```

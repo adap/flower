@@ -1,4 +1,5 @@
 """Digits dataset."""
+
 import os
 from random import shuffle
 from typing import List, Optional, Tuple

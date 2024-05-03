@@ -21,12 +21,12 @@ from typing import Callable, Dict, Tuple
 from flwr.client.client import Client
 from flwr.common import (
     Config,
+    Context,
     NDArrays,
     Scalar,
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
-from flwr.common.context import Context
 from flwr.common.typing import (
     Code,
     EvaluateIns,

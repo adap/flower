@@ -151,8 +151,8 @@ def get_client_fn(
     return client_fn
 
 
-def run_client():
-    """Run clinet."""
+def main():
+    """Run client."""
 
     # Parse input arguments
     args = parser.parse_args()
@@ -175,9 +175,10 @@ def run_client():
     )
 
     fl.client.start_client(
-        server_address=f"{args.server_address}:8080", client=client_fn(args.cid)
+        server_address=f"{args.server_address}:8080",
+        client=client_fn(args.cid),
     )
 
 
 if __name__ == "__main__":
-    run_client()
+    main()
