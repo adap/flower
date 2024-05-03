@@ -41,9 +41,11 @@ If you don't see any errors you're good to go!
 bash ./generate.sh
 ```
 
-`generate.sh` is a script that generates per default three private and public keys, for server and two clients.
-You can generate more keys by specifying number of client credentials that you wish.
-Also, the script generates a csv file that includes each of the generated client credentials public keys.
+`generate.sh` is a script that (by default) generates three private and public key pairs for one server and two clients.
+You can generate more keys by specifying the number of client credentials that you wish to generate.
+The script also generates a CSV file that includes each of the generated (client) public keys.
+
+Note that this script should only be used for development purposes and not for creating production key pairs.
 
 ```bash
 bash ./generate.sh {your_number_here}
