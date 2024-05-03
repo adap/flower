@@ -82,13 +82,20 @@ class ConsoleHandler(StreamHandler):
         return formatter.format(record)
 
 
-def update_console_handler(level: int, timestamps: bool, colored: bool) -> None:
+def update_console_handler(
+    level: Optional[int] = None,
+    timestamps: Optional[bool] = None,
+    colored: Optional[bool] = None,
+) -> None:
     """Update the logging handler."""
     for handler in logging.getLogger(LOGGER_NAME).handlers:
         if isinstance(handler, ConsoleHandler):
-            handler.setLevel(level)
-            handler.timestamps = timestamps
-            handler.colored = colored
+            if level is not None:
+                handler.setLevel(level)
+            if timestamps is not None:
+                handler.timestamps = timestamps
+            if colored is not None:
+                handler.colored = colored
 
 
 # Configure console logger
