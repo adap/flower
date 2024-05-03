@@ -112,7 +112,7 @@ def new(
     else:
         framework_value = prompt_options(
             "Please select ML framework by typing in the number",
-            [mlf.value for mlf in MlFramework],
+            sorted([mlf.value for mlf in MlFramework]),
         )
         selected_value = [
             name
