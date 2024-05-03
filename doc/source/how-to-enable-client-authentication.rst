@@ -2,7 +2,6 @@ Enable client authentication
 ============================
 
 Flower has a built-in client authentication process that you can use to verify each client who participates in a federated learning routine. 
-It is crucial for the security of your federated learning training process so that
 
 The client authentication process is similar to how Github SSH authentication works without the encryption:
 
