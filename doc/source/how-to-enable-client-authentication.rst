@@ -58,7 +58,7 @@ The client authentication mechanism also involves human interaction, so please e
 Conclusion
 ----------
 
-You should now have learned how to start a long-running server and client app with client authentication enabled. You should also know the significance of the private key and store it safely to minimize security risks.
+You should now have learned how to start a long-running server `Superlink` and `ClientApp` with client authentication enabled. You should also know the significance of the private key and store it safely to minimize security risks.
 
 
 Extending client authentication
