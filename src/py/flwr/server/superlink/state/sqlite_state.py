@@ -546,6 +546,7 @@ class SqliteState(State):  # pylint: disable=R0904
         row = self.query(query, {"public_key": public_key})
 
         if len(row) > 0:
+            log(ERROR, "Unexpected node registration failure.")
             return 0
 
         query = (
