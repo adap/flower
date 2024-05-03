@@ -43,11 +43,11 @@ def install(
 
     It can be ran with a single FAB file argument:
 
-        ``flwr install ./docs/target_project.fab``
+        ``flwr install ./target_project.fab``
 
     The target install directory can be specified with ``--flwr-dir``:
 
-        ``flwr install ./docs/target_project.fab --flwr-dir ./docs/flwr``
+        ``flwr install ./target_project.fab --flwr-dir ./docs/flwr``
 
     This will install ``target_project`` to ``./docs/flwr/``. By default,
     ``flwr-dir`` is equal to:
