@@ -362,6 +362,29 @@ class StateTest(unittest.TestCase):
         assert len(retrieved_node_ids) == 1
         assert retrieved_node_id == node_id
 
+    def test_create_node_public_key_twice(self) -> None:
+        """Test creating a client node with same public key twice."""
+        # Prepare
+        state: State = self.state_factory()
+        public_key = b"mock"
+        run_id = state.create_run("mock/mock", "v1.0.0")
+        node_id = state.create_node(ping_interval=10, public_key=public_key)
+
+        # Execute
+        new_node_id = state.create_node(ping_interval=10, public_key=public_key)
+        retrieved_node_ids = state.get_nodes(run_id)
+        retrieved_node_id = state.get_node_id(public_key)
+
+        # Assert
+        assert new_node_id == 0
+        assert len(retrieved_node_ids) == 1
+        assert retrieved_node_id == node_id
+
+        # Assert node_ids and public_key_to_node_id are synced
+        if isinstance(state, InMemoryState):
+            assert len(state.node_ids) == 1
+            assert len(state.public_key_to_node_id) == 1
+
     def test_delete_node(self) -> None:
         """Test deleting a client node."""
         # Prepare
@@ -391,6 +414,60 @@ class StateTest(unittest.TestCase):
 
         # Assert
         assert len(retrieved_node_ids) == 0
+        assert retrieved_node_id is None
+
+    def test_delete_node_public_key_none(self) -> None:
+        """Test deleting a client node with public key."""
+        # Prepare
+        state: State = self.state_factory()
+        public_key = b"mock"
+        run_id = state.create_run("mock/mock", "v1.0.0")
+        node_id = 0
+
+        # Execute & Assert
+        with self.assertRaises(ValueError):
+            state.delete_node(node_id, public_key=public_key)
+
+        retrieved_node_ids = state.get_nodes(run_id)
+        retrieved_node_id = state.get_node_id(public_key)
+
+        assert len(retrieved_node_ids) == 0
+        assert retrieved_node_id is None
+
+    def test_delete_node_wrong_public_key(self) -> None:
+        """Test deleting a client node with wrong public key."""
+        # Prepare
+        state: State = self.state_factory()
+        public_key = b"mock"
+        wrong_public_key = b"mock_mock"
+        run_id = state.create_run("mock/mock", "v1.0.0")
+        node_id = state.create_node(ping_interval=10, public_key=public_key)
+
+        # Execute & Assert
+        with self.assertRaises(ValueError):
+            state.delete_node(node_id, public_key=wrong_public_key)
+
+        retrieved_node_ids = state.get_nodes(run_id)
+        retrieved_node_id = state.get_node_id(public_key)
+
+        assert len(retrieved_node_ids) == 1
+        assert retrieved_node_id == node_id
+
+    def test_get_node_id_wrong_public_key(self) -> None:
+        """Test retrieving a client node with wrong public key."""
+        # Prepare
+        state: State = self.state_factory()
+        public_key = b"mock"
+        wrong_public_key = b"mock_mock"
+        run_id = state.create_run("mock/mock", "v1.0.0")
+
+        # Execute
+        state.create_node(ping_interval=10, public_key=public_key)
+        retrieved_node_ids = state.get_nodes(run_id)
+        retrieved_node_id = state.get_node_id(wrong_public_key)
+
+        # Assert
+        assert len(retrieved_node_ids) == 1
         assert retrieved_node_id is None
 
     def test_get_nodes_invalid_run_id(self) -> None:
