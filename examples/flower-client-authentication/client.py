@@ -18,7 +18,7 @@ net = Net().to(DEVICE)
 trainloader, testloader = load_data()
 
 
-# Define Flower client
+# Define Flower client and client_fn
 class FlowerClient(fl.client.NumPyClient):
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         return get_parameters(net)
