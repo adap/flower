@@ -63,7 +63,7 @@ expected by a model with a convolutional layer.
 
 If you want to divide the dataset, you can use (at any point before passing the dataset to the DataLoader)::
 
-  partition_train_test = partition.train_test_split(test_size=0.2)
+  partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
   partition_train = partition_train_test["train"]
   partition_test = partition_train_test["test"]
 

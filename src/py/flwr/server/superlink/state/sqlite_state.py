@@ -18,9 +18,9 @@
 import os
 import re
 import sqlite3
-from datetime import datetime, timedelta
+import time
 from logging import DEBUG, ERROR
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
@@ -30,16 +30,38 @@ from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .state import State
+from .utils import make_node_unavailable_taskres
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
-    node_id INTEGER UNIQUE
+    node_id         INTEGER UNIQUE,
+    online_until    REAL,
+    ping_interval   REAL
 );
+"""
+
+SQL_CREATE_TABLE_CREDENTIAL = """
+CREATE TABLE IF NOT EXISTS credential(
+    private_key BLOB PRIMARY KEY,
+    public_key BLOB
+);
+"""
+
+SQL_CREATE_TABLE_PUBLIC_KEY = """
+CREATE TABLE IF NOT EXISTS public_key(
+    public_key BLOB UNIQUE
+);
+"""
+
+SQL_CREATE_INDEX_ONLINE_UNTIL = """
+CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 """
 
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
-    run_id INTEGER UNIQUE
+    run_id          INTEGER UNIQUE,
+    fab_id          TEXT,
+    fab_version     TEXT
 );
 """
 
@@ -52,16 +74,16 @@ CREATE TABLE IF NOT EXISTS task_ins(
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
     consumer_node_id        INTEGER,
-    created_at              TEXT,
+    created_at              REAL,
     delivered_at            TEXT,
-    ttl                     TEXT,
+    pushed_at               REAL,
+    ttl                     REAL,
     ancestry                TEXT,
     task_type               TEXT,
     recordset               BLOB,
     FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
-
 
 SQL_CREATE_TABLE_TASK_RES = """
 CREATE TABLE IF NOT EXISTS task_res(
@@ -72,9 +94,10 @@ CREATE TABLE IF NOT EXISTS task_res(
     producer_node_id        INTEGER,
     consumer_anonymous      BOOLEAN,
     consumer_node_id        INTEGER,
-    created_at              TEXT,
+    created_at              REAL,
     delivered_at            TEXT,
-    ttl                     TEXT,
+    pushed_at               REAL,
+    ttl                     REAL,
     ancestry                TEXT,
     task_type               TEXT,
     recordset               BLOB,
@@ -82,10 +105,10 @@ CREATE TABLE IF NOT EXISTS task_res(
 );
 """
 
-DictOrTuple = Union[Tuple[Any], Dict[str, Any]]
+DictOrTuple = Union[Tuple[Any, ...], Dict[str, Any]]
 
 
-class SqliteState(State):
+class SqliteState(State):  # pylint: disable=R0904
     """SQLite-based state implementation."""
 
     def __init__(
@@ -123,6 +146,9 @@ class SqliteState(State):
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
+        cur.execute(SQL_CREATE_TABLE_CREDENTIAL)
+        cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
+        cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
         return res.fetchall()
@@ -130,7 +156,7 @@ class SqliteState(State):
     def query(
         self,
         query: str,
-        data: Optional[Union[List[DictOrTuple], DictOrTuple]] = None,
+        data: Optional[Union[Sequence[DictOrTuple], DictOrTuple]] = None,
     ) -> List[Dict[str, Any]]:
         """Execute a SQL query."""
         if self.conn is None:
@@ -185,15 +211,11 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Create task_id, created_at and ttl
+        # Create task_id
         task_id = uuid4()
-        created_at: datetime = now()
-        ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskIns
         task_ins.task_id = str(task_id)
-        task_ins.task.created_at = created_at.isoformat()
-        task_ins.task.ttl = ttl.isoformat()
         data = (task_ins_to_dict(task_ins),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
@@ -320,15 +342,11 @@ class SqliteState(State):
             log(ERROR, errors)
             return None
 
-        # Create task_id, created_at and ttl
+        # Create task_id
         task_id = uuid4()
-        created_at: datetime = now()
-        ttl: datetime = created_at + timedelta(hours=24)
 
         # Store TaskIns
         task_res.task_id = str(task_id)
-        task_res.task.created_at = created_at.isoformat()
-        task_res.task.ttl = ttl.isoformat()
         data = (task_res_to_dict(task_res),)
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
@@ -343,6 +361,7 @@ class SqliteState(State):
 
         return task_id
 
+    # pylint: disable-next=R0914
     def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
         """Get TaskRes for task_ids.
 
@@ -373,7 +392,7 @@ class SqliteState(State):
             AND delivered_at = ""
         """
 
-        data: Dict[str, Union[str, int]] = {}
+        data: Dict[str, Union[str, float, int]] = {}
 
         if limit is not None:
             query += " LIMIT :limit"
@@ -407,6 +426,54 @@ class SqliteState(State):
             rows = self.query(query, data)
 
         result = [dict_to_task_res(row) for row in rows]
+
+        # 1. Query: Fetch consumer_node_id of remaining task_ids
+        # Assume the ancestry field only contains one element
+        data.clear()
+        replied_task_ids: Set[UUID] = {UUID(str(row["ancestry"])) for row in rows}
+        remaining_task_ids = task_ids - replied_task_ids
+        placeholders = ",".join([f":id_{i}" for i in range(len(remaining_task_ids))])
+        query = f"""
+            SELECT consumer_node_id
+            FROM task_ins
+            WHERE task_id IN ({placeholders});
+        """
+        for index, task_id in enumerate(remaining_task_ids):
+            data[f"id_{index}"] = str(task_id)
+        node_ids = [int(row["consumer_node_id"]) for row in self.query(query, data)]
+
+        # 2. Query: Select offline nodes
+        placeholders = ",".join([f":id_{i}" for i in range(len(node_ids))])
+        query = f"""
+            SELECT node_id
+            FROM node
+            WHERE node_id IN ({placeholders})
+            AND online_until < :time;
+        """
+        data = {f"id_{i}": str(node_id) for i, node_id in enumerate(node_ids)}
+        data["time"] = time.time()
+        offline_node_ids = [int(row["node_id"]) for row in self.query(query, data)]
+
+        # 3. Query: Select TaskIns for offline nodes
+        placeholders = ",".join([f":id_{i}" for i in range(len(offline_node_ids))])
+        query = f"""
+            SELECT *
+            FROM task_ins
+            WHERE consumer_node_id IN ({placeholders});
+        """
+        data = {f"id_{i}": str(node_id) for i, node_id in enumerate(offline_node_ids)}
+        task_ins_rows = self.query(query, data)
+
+        # Make TaskRes containing node unavailabe error
+        for row in task_ins_rows:
+            if limit and len(result) == limit:
+                break
+            task_ins = dict_to_task_ins(row)
+            err_taskres = make_node_unavailable_taskres(
+                ref_taskins=task_ins,
+            )
+            result.append(err_taskres)
+
         return result
 
     def num_task_ins(self) -> int:
@@ -467,14 +534,17 @@ class SqliteState(State):
 
         return None
 
-    def create_node(self) -> int:
+    def create_node(self, ping_interval: float) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
-        query = "INSERT INTO node VALUES(:node_id);"
+        query = (
+            "INSERT INTO node (node_id, online_until, ping_interval) VALUES (?, ?, ?)"
+        )
+
         try:
-            self.query(query, {"node_id": node_id})
+            self.query(query, (node_id, time.time() + ping_interval, ping_interval))
         except sqlite3.IntegrityError:
             log(ERROR, "Unexpected node registration failure.")
             return 0
@@ -499,13 +569,13 @@ class SqliteState(State):
             return set()
 
         # Get nodes
-        query = "SELECT * FROM node;"
-        rows = self.query(query)
+        query = "SELECT node_id FROM node WHERE online_until > ?;"
+        rows = self.query(query, (time.time(),))
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
-    def create_run(self) -> int:
-        """Create one run and store it in state."""
+    def create_run(self, fab_id: str, fab_version: str) -> int:
+        """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
         run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
@@ -513,11 +583,85 @@ class SqliteState(State):
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
         # If run_id does not exist
         if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
-            query = "INSERT INTO run VALUES(:run_id);"
-            self.query(query, {"run_id": run_id})
+            query = "INSERT INTO run (run_id, fab_id, fab_version) VALUES (?, ?, ?);"
+            self.query(query, (run_id, fab_id, fab_version))
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def store_server_private_public_key(
+        self, private_key: bytes, public_key: bytes
+    ) -> None:
+        """Store `server_private_key` and `server_public_key` in state."""
+        query = "SELECT COUNT(*) FROM credential"
+        count = self.query(query)[0]["COUNT(*)"]
+        if count < 1:
+            query = (
+                "INSERT OR REPLACE INTO credential (private_key, public_key) "
+                "VALUES (:private_key, :public_key)"
+            )
+            self.query(query, {"private_key": private_key, "public_key": public_key})
+        else:
+            raise RuntimeError("Server private and public key already set")
+
+    def get_server_private_key(self) -> Optional[bytes]:
+        """Retrieve `server_private_key` in urlsafe bytes."""
+        query = "SELECT private_key FROM credential"
+        rows = self.query(query)
+        try:
+            private_key: Optional[bytes] = rows[0]["private_key"]
+        except IndexError:
+            private_key = None
+        return private_key
+
+    def get_server_public_key(self) -> Optional[bytes]:
+        """Retrieve `server_public_key` in urlsafe bytes."""
+        query = "SELECT public_key FROM credential"
+        rows = self.query(query)
+        try:
+            public_key: Optional[bytes] = rows[0]["public_key"]
+        except IndexError:
+            public_key = None
+        return public_key
+
+    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of `client_public_keys` in state."""
+        query = "INSERT INTO public_key (public_key) VALUES (?)"
+        data = [(key,) for key in public_keys]
+        self.query(query, data)
+
+    def store_client_public_key(self, public_key: bytes) -> None:
+        """Store a `client_public_key` in state."""
+        query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
+        self.query(query, {"public_key": public_key})
+
+    def get_client_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored `client_public_keys` as a set."""
+        query = "SELECT public_key FROM public_key"
+        rows = self.query(query)
+        result: Set[bytes] = {row["public_key"] for row in rows}
+        return result
+
+    def get_run(self, run_id: int) -> Tuple[int, str, str]:
+        """Retrieve information about the run with the specified `run_id`."""
+        query = "SELECT * FROM run WHERE run_id = ?;"
+        try:
+            row = self.query(query, (run_id,))[0]
+            return run_id, row["fab_id"], row["fab_version"]
+        except sqlite3.IntegrityError:
+            log(ERROR, "`run_id` does not exist.")
+            return 0, "", ""
+
+    def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
+        """Acknowledge a ping received from a node, serving as a heartbeat."""
+        # Update `online_until` and `ping_interval` for the given `node_id`
+        query = "UPDATE node SET online_until = ?, ping_interval = ? WHERE node_id = ?;"
+        try:
+            self.query(query, (time.time() + ping_interval, ping_interval, node_id))
+            return True
+        except sqlite3.IntegrityError:
+            log(ERROR, "`node_id` does not exist.")
+            return False
 
 
 def dict_factory(
@@ -544,6 +688,7 @@ def task_ins_to_dict(task_msg: TaskIns) -> Dict[str, Any]:
         "consumer_node_id": task_msg.task.consumer.node_id,
         "created_at": task_msg.task.created_at,
         "delivered_at": task_msg.task.delivered_at,
+        "pushed_at": task_msg.task.pushed_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
         "task_type": task_msg.task.task_type,
@@ -564,6 +709,7 @@ def task_res_to_dict(task_msg: TaskRes) -> Dict[str, Any]:
         "consumer_node_id": task_msg.task.consumer.node_id,
         "created_at": task_msg.task.created_at,
         "delivered_at": task_msg.task.delivered_at,
+        "pushed_at": task_msg.task.pushed_at,
         "ttl": task_msg.task.ttl,
         "ancestry": ",".join(task_msg.task.ancestry),
         "task_type": task_msg.task.task_type,
@@ -592,6 +738,7 @@ def dict_to_task_ins(task_dict: Dict[str, Any]) -> TaskIns:
             ),
             created_at=task_dict["created_at"],
             delivered_at=task_dict["delivered_at"],
+            pushed_at=task_dict["pushed_at"],
             ttl=task_dict["ttl"],
             ancestry=task_dict["ancestry"].split(","),
             task_type=task_dict["task_type"],
@@ -621,6 +768,7 @@ def dict_to_task_res(task_dict: Dict[str, Any]) -> TaskRes:
             ),
             created_at=task_dict["created_at"],
             delivered_at=task_dict["delivered_at"],
+            pushed_at=task_dict["pushed_at"],
             ttl=task_dict["ttl"],
             ancestry=task_dict["ancestry"].split(","),
             task_type=task_dict["task_type"],

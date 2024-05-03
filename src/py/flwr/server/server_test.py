@@ -15,9 +15,22 @@
 """Flower server tests."""
 
 
+import argparse
+import csv
+import tempfile
+from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    NoEncryption,
+    PrivateFormat,
+    PublicFormat,
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.common import (
     Code,
@@ -35,8 +48,14 @@ from flwr.common import (
     Status,
     ndarray_to_bytes,
 )
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    generate_key_pairs,
+    private_key_to_bytes,
+    public_key_to_bytes,
+)
 from flwr.server.client_manager import SimpleClientManager
 
+from .app import _try_setup_client_authentication
 from .client_proxy import ClientProxy
 from .server import Server, evaluate_clients, fit_clients
 
@@ -182,3 +201,71 @@ def test_set_max_workers() -> None:
 
     # Assert
     assert server.max_workers == 42
+
+
+def test_setup_client_auth() -> None:  # pylint: disable=R0914
+    """Test setup client authentication."""
+    # Prepare
+    _, first_public_key = generate_key_pairs()
+    private_key, public_key = generate_key_pairs()
+
+    server_public_key = public_key.public_bytes(
+        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+    )
+    server_private_key = private_key.private_bytes(
+        Encoding.PEM, PrivateFormat.OpenSSH, NoEncryption()
+    )
+    _, second_public_key = generate_key_pairs()
+
+    # Execute
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Initialize temporary files
+        client_keys_file_path = Path(temp_dir) / "client_keys.csv"
+        server_private_key_path = Path(temp_dir) / "server_private_key"
+        server_public_key_path = Path(temp_dir) / "server_public_key"
+
+        # Fill the files with relevant keys
+        with open(client_keys_file_path, "w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(
+                [
+                    first_public_key.public_bytes(
+                        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+                    ).decode(),
+                    second_public_key.public_bytes(
+                        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+                    ).decode(),
+                ]
+            )
+        server_public_key_path.write_bytes(server_public_key)
+        server_private_key_path.write_bytes(server_private_key)
+
+        # Mock argparse with `require-client-authentication`` flag
+        mock_args = argparse.Namespace(
+            require_client_authentication=[
+                str(client_keys_file_path),
+                str(server_private_key_path),
+                str(server_public_key_path),
+            ]
+        )
+
+        # Run _try_setup_client_authentication
+        result = _try_setup_client_authentication(mock_args, (b"", b"", b""))
+
+        expected_private_key = load_ssh_private_key(server_private_key, None)
+        expected_public_key = load_ssh_public_key(server_public_key)
+
+        # Assert
+        assert isinstance(expected_private_key, ec.EllipticCurvePrivateKey)
+        assert isinstance(expected_public_key, ec.EllipticCurvePublicKey)
+        assert result is not None
+        assert result[0] == {
+            public_key_to_bytes(first_public_key),
+            public_key_to_bytes(second_public_key),
+        }
+        assert private_key_to_bytes(result[1]) == private_key_to_bytes(
+            expected_private_key
+        )
+        assert public_key_to_bytes(result[2]) == public_key_to_bytes(
+            expected_public_key
+        )

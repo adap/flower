@@ -15,6 +15,7 @@
 """Client-side message handler tests."""
 
 
+import time
 import unittest
 import uuid
 from copy import copy
@@ -23,6 +24,7 @@ from typing import List
 from flwr.client import Client
 from flwr.client.typing import ClientFn
 from flwr.common import (
+    DEFAULT_TTL,
     Code,
     Context,
     EvaluateIns,
@@ -131,7 +133,7 @@ def test_client_without_get_properties() -> None:
             src_node_id=0,
             dst_node_id=1123,
             reply_to_message="",
-            ttl="",
+            ttl=DEFAULT_TTL,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=recordset,
@@ -161,14 +163,25 @@ def test_client_without_get_properties() -> None:
             src_node_id=1123,
             dst_node_id=0,
             reply_to_message=message.metadata.message_id,
-            ttl="",
+            ttl=actual_msg.metadata.ttl,  # computed based on [message].create_reply()
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=expected_rs,
     )
 
     assert actual_msg.content == expected_msg.content
-    assert actual_msg.metadata == expected_msg.metadata
+    # metadata.created_at will differ so let's exclude it from checks
+    attrs = vars(actual_msg.metadata)
+    attrs_keys = list(attrs.keys())
+    attrs_keys.remove("_created_at")
+    # metadata.created_at will differ so let's exclude it from checks
+    for attr in attrs_keys:
+        assert getattr(actual_msg.metadata, attr) == getattr(
+            expected_msg.metadata, attr
+        )
+
+    # Ensure the message created last has a higher timestamp
+    assert actual_msg.metadata.created_at < expected_msg.metadata.created_at
 
 
 def test_client_with_get_properties() -> None:
@@ -184,7 +197,7 @@ def test_client_with_get_properties() -> None:
             src_node_id=0,
             dst_node_id=1123,
             reply_to_message="",
-            ttl="",
+            ttl=DEFAULT_TTL,
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=recordset,
@@ -214,14 +227,24 @@ def test_client_with_get_properties() -> None:
             src_node_id=1123,
             dst_node_id=0,
             reply_to_message=message.metadata.message_id,
-            ttl="",
+            ttl=actual_msg.metadata.ttl,  # computed based on [message].create_reply()
             message_type=MessageTypeLegacy.GET_PROPERTIES,
         ),
         content=expected_rs,
     )
 
     assert actual_msg.content == expected_msg.content
-    assert actual_msg.metadata == expected_msg.metadata
+    attrs = vars(actual_msg.metadata)
+    attrs_keys = list(attrs.keys())
+    attrs_keys.remove("_created_at")
+    # metadata.created_at will differ so let's exclude it from checks
+    for attr in attrs_keys:
+        assert getattr(actual_msg.metadata, attr) == getattr(
+            expected_msg.metadata, attr
+        )
+
+    # Ensure the message created last has a higher timestamp
+    assert actual_msg.metadata.created_at < expected_msg.metadata.created_at
 
 
 class TestMessageValidation(unittest.TestCase):
@@ -237,9 +260,14 @@ class TestMessageValidation(unittest.TestCase):
             dst_node_id=20,
             reply_to_message="",
             group_id="group1",
-            ttl="60",
+            ttl=DEFAULT_TTL,
             message_type="mock",
         )
+        # We need to set created_at in this way
+        # since this `self.in_metadata` is used for tests
+        # without it ever being part of a Message
+        self.in_metadata.created_at = time.time()
+
         self.valid_out_metadata = Metadata(
             run_id=123,
             message_id="",
@@ -247,7 +275,7 @@ class TestMessageValidation(unittest.TestCase):
             dst_node_id=10,
             reply_to_message="qwerty",
             group_id="group1",
-            ttl="60",
+            ttl=DEFAULT_TTL,
             message_type="mock",
         )
         self.common_content = RecordSet()
@@ -280,11 +308,15 @@ class TestMessageValidation(unittest.TestCase):
                 value = 999
             elif isinstance(value, str):
                 value = "999"
+            elif isinstance(value, float):
+                if attr == "_created_at":
+                    # make it be in 1h the past
+                    value = value - 3600
             setattr(invalid_metadata, attr, value)
             # Add to list
             invalid_metadata_list.append(invalid_metadata)
 
         # Assert
         for invalid_metadata in invalid_metadata_list:
-            msg._metadata = invalid_metadata  # pylint: disable=protected-access
+            msg.__dict__["_metadata"] = invalid_metadata
             self.assertFalse(validate_out_message(msg, self.in_metadata))
