@@ -565,12 +565,21 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Delete a client node."""
-        if public_key is None:
-            query = "DELETE FROM node WHERE node_id = ?;"
-            self.query(query, (node_id,))
-        else:
-            query = "DELETE FROM node WHERE node_id = ? AND public_key = ?;"
-            self.query(query, (node_id, public_key))
+        query = "SELECT node_id FROM node WHERE node_id = :node_id;"
+        row = self.query(query, {"node_id": node_id})
+
+        if len(row) == 0:
+            raise ValueError(f"Node {node_id} not found")
+
+        if public_key is not None:
+            query = "SELECT node_id FROM node WHERE public_key = :public_key;"
+            row = self.query(query, {"public_key": public_key})
+
+            if len(row) < 1 or row[0]["node_id"] != node_id:
+                raise ValueError("Public key or node_id not found")
+
+        query = "DELETE FROM node WHERE node_id = ?;"
+        self.query(query, (node_id,))
 
     def get_nodes(self, run_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
