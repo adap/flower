@@ -225,7 +225,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             if public_key is not None:
                 if (
                     public_key in self.public_key_to_node_id
-                    or self.public_key_to_node_id.get(public_key) == node_id
+                    or node_id in self.public_key_to_node_id.values()
                 ):
                     log(ERROR, "Unexpected node registration failure.")
                     return 0
@@ -244,7 +244,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             if public_key is not None:
                 if (
                     public_key not in self.public_key_to_node_id
-                    and self.public_key_to_node_id.get(public_key) != node_id
+                    and node_id not in self.public_key_to_node_id.values()
                 ):
                     raise ValueError("Public key or node_id not found")
 
