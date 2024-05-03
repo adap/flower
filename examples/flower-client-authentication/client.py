@@ -38,7 +38,6 @@ def client_fn(cid: str):
     return FlowerClient().to_client()
 
 
-# Run via `flower-client-app client:app`
 app = ClientApp(
     client_fn=client_fn,
 )

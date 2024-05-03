@@ -5,13 +5,20 @@
 
 The following steps describe how to start a long-running Flower server (SuperLink) and a long-running Flower client (SuperNode) with client authentication enabled.
 
-## Preconditions
+## Project Setup
 
-Let's assume the following project structure:
+Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
+
+```shell
+git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/flower-client-authentication . && rm -rf _tmp && cd flower-client-authentication
+```
+
+This will create a new directory called `flower-client-authentication` with the following project structure:
 
 ```bash
 $ tree .
 .
+├── certificate.conf  # <-- configuration for OpenSSL
 ├── generate.sh       # <-- generate certificates and keys
 ├── pyproject.toml    # <-- project dependencies
 ├── client.py         # <-- contains `ClientApp`
@@ -47,35 +54,43 @@ and three private and public key pairs for one server and two clients.
 You can generate more keys by specifying the number of client credentials that you wish to generate.
 The script also generates a CSV file that includes each of the generated (client) public keys.
 
-Note that this script should only be used for development purposes and not for creating production key pairs.
+⚠️ Note that this script should only be used for development purposes and not for creating production key pairs.
 
 ```bash
-./generate.sh {your_number_here}
+./generate.sh {your_number_of_clients}
 ```
 
 ## Start the long-running Flower server (SuperLink)
-
-```bash
-flower-superlink --certificates certificates/ca.crt certificates/server.pem certificates/server.key --require-client-authentication ./keys/client_public_keys.csv ./keys/server_credentials ./keys/server_credentials.pub
-```
 
 To start a long-running Flower server and enable client authentication is very easy; all you need to do is type
 `--require-client-authentication` followed by the path to the known `client_public_keys.csv`, server's private key
 `server_credentials`, and server's public key `server_credentials.pub`. Notice that you can only enable client
 authentication with a secure TLS connection.
 
+```bash
+flower-superlink \
+  --certificates certificates/ca.crt certificates/server.pem certificates/server.key \
+  --require-client-authentication keys/client_public_keys.csv keys/server_credentials keys/server_credentials.pub
+```
+
 ## Start the long-running Flower client (SuperNode)
 
 In a new terminal window, start the first long-running Flower client:
 
 ```bash
-flower-client-app client:app --root-certificates certificates/ca.crt --server 127.0.0.1:9092 --authentication-keys ./keys/client_credentials_1 ./keys/client_credentials_1.pub
+flower-client-app client:app \
+  --root-certificates certificates/ca.crt \
+  --server 127.0.0.1:9092 \
+  --authentication-keys keys/client_credentials_1 keys/client_credentials_1.pub
 ```
 
 In yet another new terminal window, start the second long-running Flower client:
 
 ```bash
-flower-client-app client:app --root-certificates certificates/ca.crt --server 127.0.0.1:9092 --authentication-keys ./keys/client_credentials_2 ./keys/client_credentials_2.pub
+flower-client-app client:app \
+  --root-certificates certificates/ca.crt \
+  --server 127.0.0.1:9092 \
+  --authentication-keys keys/client_credentials_2 keys/client_credentials_2.pub
 ```
 
 If you generated more than 2 client credentials, you can add more clients by opening new terminal windows and running the command
