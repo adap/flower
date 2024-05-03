@@ -361,6 +361,28 @@ class StateTest(unittest.TestCase):
         # Assert
         assert len(retrieved_node_ids) == 1
         assert retrieved_node_id == node_id
+    
+    def test_create_node_public_key_twice(self) -> None:
+        """Test creating a client node with public key."""
+        # Prepare
+        state: State = self.state_factory()
+        public_key = b"mock"
+        run_id = state.create_run("mock/mock", "v1.0.0")
+        node_id = state.create_node(ping_interval=10, public_key=public_key)
+
+        # Execute
+        new_node_id = state.create_node(ping_interval=10, public_key=public_key)
+        retrieved_node_ids = state.get_nodes(run_id)
+        retrieved_node_id = state.get_node_id(public_key)
+        
+        # Assert
+        assert new_node_id == 0
+        assert len(retrieved_node_ids) == 1
+        assert retrieved_node_id == node_id
+        
+        if isinstance(state, InMemoryState):
+            assert len(state.node_ids) == 1
+            assert len(state.public_key_to_node_id) == 1
 
     def test_delete_node(self) -> None:
         """Test deleting a client node."""

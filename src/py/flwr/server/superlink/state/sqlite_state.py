@@ -542,6 +542,12 @@ class SqliteState(State):  # pylint: disable=R0904
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
+        query = "SELECT node_id FROM node WHERE public_key = :public_key;"
+        row = self.query(query, {"public_key": public_key})
+
+        if len(row) > 0:
+            return 0
+
         query = (
             "INSERT INTO node "
             "(node_id, online_until, ping_interval, public_key) "
