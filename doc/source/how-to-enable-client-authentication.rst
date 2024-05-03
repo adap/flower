@@ -17,12 +17,12 @@ You can find the complete code example demonstrating a secure connection
     This guide covers experimental features that might change in future versions of Flower, and client authentication is only available in the gRPC-rere stack with SSL connection enabled.
 
 
-Enable client authentication in Flower `Superlink`
---------------------------------------------------
+Enable client authentication in Flower :code:`Superlink`
+--------------------------------------------------------
 
 To enable client authentication, first you need to establish SSL connection so that the server-client communication is secure. You can find the complete guide
 `here <https://flower.ai/docs/framework/how-to-enable-ssl-connections.html>`_.
-After establishing secure connection, you can now enable client authentication in a long-running Flower server `Superlink` easily by typing the following code in a terminal:
+After establishing secure connection, you can now enable client authentication in a long-running Flower server :code:`Superlink` easily by typing the following code in a terminal:
 
 .. code-block:: bash
 
@@ -36,10 +36,10 @@ Let's break down the :code:`--require-client-authentication` flag:
 Currently, there is no support to dynamically remove, edit, or add known client public keys to the server, so you need to shutdown the server, manually change the csv file, and restart the server again.
 
 
-Enable client authentication in Flower `ClientApp`
---------------------------------------------------
+Enable client authentication in Flower :code:`ClientApp`
+--------------------------------------------------------
 
-Similar to the long-running Flower server `Superlink`, you can easily enable client authentication in the `ClientApp` by typing the following code in a terminal:
+Similar to the long-running Flower server :code:`Superlink`, you can easily enable client authentication in the :code:`ClientApp` by typing the following code in a terminal:
 
 .. code-block:: bash
     
@@ -58,7 +58,7 @@ The client authentication mechanism also involves human interaction, so please e
 Conclusion
 ----------
 
-You should now have learned how to start a long-running server `Superlink` and `ClientApp` with client authentication enabled. You should also know the significance of the private key and store it safely to minimize security risks.
+You should now have learned how to start a long-running server :code:`Superlink` and :code:`ClientApp` with client authentication enabled. You should also know the significance of the private key and store it safely to minimize security risks.
 
 
 Extending client authentication
