@@ -5,7 +5,7 @@ import mlx.nn as nn
 import mlx.optimizers as optim
 from flwr.client import NumPyClient, ClientApp
 
-from $project_name.task import (
+from $import_name.task import (
     batch_iterate,
     eval_fn,
     get_params,
