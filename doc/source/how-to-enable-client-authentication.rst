@@ -1,7 +1,7 @@
 Enable client authentication
 ============================
 
-Flower has a built-in client authentication process that you can use to verify each client who participates in a federated learning routine. 
+Flower has a built-in client authentication process that you can use to verify the identities of each client that participates in a federated learning routine. 
 
 The client authentication process is similar to how Github SSH authentication works without the encryption:
 
@@ -14,7 +14,7 @@ You can find the complete code example demonstrating a secure connection
 `here <https://github.com/adap/flower/tree/main/examples/flower-client-authentication>`_.
 
 .. note::
-    This guide covers experimental features that might change in future versions of Flower, and client authentication is only available in the gRPC-rere stack.
+    This guide covers experimental features that might change in future versions of Flower, and client authentication is only available in the gRPC-rere stack with SSL connection enabled.
 
 
 Enable client authentication in Flower `Superlink`
@@ -22,7 +22,7 @@ Enable client authentication in Flower `Superlink`
 
 To enable client authentication, first you need to establish SSL connection so that the server-client communication is secure. You can find the complete guide
 `here <https://flower.ai/docs/framework/how-to-enable-ssl-connections.html>`_.
-After establishing secure connection, you can enable client authentication in a long-running Flower server `Superlink`` easily by typing the following code in a terminal:
+After establishing secure connection, you can now enable client authentication in a long-running Flower server `Superlink`` easily by typing the following code in a terminal:
 
 .. code-block:: bash
 
@@ -30,8 +30,8 @@ After establishing secure connection, you can enable client authentication in a 
     
 Let's break down the :code:`--require-client-authentication` flag:
 
-1. The first argument is a path to a csv file storing all known client public keys. The storing process requires human interaction and manual work to communicate client public keys to the server and store them in a CSV file.
-2. The second and third arguments are paths to the server's public and private keys. You can generate a public and private key pair using :code:`ssh-keygen -t ecdsa -b 384`.
+1. The first argument is a path to a CSV file storing all known client public keys. You need to store all known client public keys that are allowed to participate in a federated learning routine in a CSV file.
+2. The second and third arguments are paths to the server's private and public keys. You can generate a private and public key pair using :code:`ssh-keygen -t ecdsa -b 384`.
 
 Currently, there is no support to dynamically remove, edit, or add known client public keys to the server, so you need to shutdown the server, manually change the csv file, and restart the server again.
 
