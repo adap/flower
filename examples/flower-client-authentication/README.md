@@ -80,7 +80,7 @@ above. Don't forget to specify the correct client private and public keys for ea
 
 ## Run the Flower App
 
-With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
+With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower ServerApp:
 
 ```bash
 flower-server-app server:app --insecure
