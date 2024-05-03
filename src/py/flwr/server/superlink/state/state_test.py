@@ -26,6 +26,11 @@ from uuid import uuid4
 
 from flwr.common import DEFAULT_TTL
 from flwr.common.constant import ErrorCode
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    generate_key_pairs,
+    private_key_to_bytes,
+    public_key_to_bytes,
+)
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -409,6 +414,85 @@ class StateTest(unittest.TestCase):
         # Assert
         assert num == 2
 
+    def test_server_private_public_key(self) -> None:
+        """Test get server private and public key after inserting."""
+        # Prepare
+        state: State = self.state_factory()
+        private_key, public_key = generate_key_pairs()
+        private_key_bytes = private_key_to_bytes(private_key)
+        public_key_bytes = public_key_to_bytes(public_key)
+
+        # Execute
+        state.store_server_private_public_key(private_key_bytes, public_key_bytes)
+        server_private_key = state.get_server_private_key()
+        server_public_key = state.get_server_public_key()
+
+        # Assert
+        assert server_private_key == private_key_bytes
+        assert server_public_key == public_key_bytes
+
+    def test_server_private_public_key_none(self) -> None:
+        """Test get server private and public key without inserting."""
+        # Prepare
+        state: State = self.state_factory()
+
+        # Execute
+        server_private_key = state.get_server_private_key()
+        server_public_key = state.get_server_public_key()
+
+        # Assert
+        assert server_private_key is None
+        assert server_public_key is None
+
+    def test_store_server_private_public_key_twice(self) -> None:
+        """Test inserting private and public key twice."""
+        # Prepare
+        state: State = self.state_factory()
+        private_key, public_key = generate_key_pairs()
+        private_key_bytes = private_key_to_bytes(private_key)
+        public_key_bytes = public_key_to_bytes(public_key)
+        new_private_key, new_public_key = generate_key_pairs()
+        new_private_key_bytes = private_key_to_bytes(new_private_key)
+        new_public_key_bytes = public_key_to_bytes(new_public_key)
+
+        # Execute
+        state.store_server_private_public_key(private_key_bytes, public_key_bytes)
+
+        # Assert
+        with self.assertRaises(RuntimeError):
+            state.store_server_private_public_key(
+                new_private_key_bytes, new_public_key_bytes
+            )
+
+    def test_client_public_keys(self) -> None:
+        """Test store_client_public_keys and get_client_public_keys from state."""
+        # Prepare
+        state: State = self.state_factory()
+        key_pairs = [generate_key_pairs() for _ in range(3)]
+        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
+
+        # Execute
+        state.store_client_public_keys(public_keys)
+        client_public_keys = state.get_client_public_keys()
+
+        # Assert
+        assert client_public_keys == public_keys
+
+    def test_client_public_key(self) -> None:
+        """Test store_client_public_key and get_client_public_keys from state."""
+        # Prepare
+        state: State = self.state_factory()
+        key_pairs = [generate_key_pairs() for _ in range(3)]
+        public_keys = {public_key_to_bytes(pair[1]) for pair in key_pairs}
+
+        # Execute
+        for public_key in public_keys:
+            state.store_client_public_key(public_key)
+        client_public_keys = state.get_client_public_keys()
+
+        # Assert
+        assert client_public_keys == public_keys
+
     def test_acknowledge_ping(self) -> None:
         """Test if acknowledge_ping works and if get_nodes return online nodes."""
         # Prepare
@@ -555,7 +639,7 @@ class SqliteInMemoryStateTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 9
+        assert len(result) == 13
 
 
 class SqliteFileBasedTest(StateTest, unittest.TestCase):
@@ -580,7 +664,7 @@ class SqliteFileBasedTest(StateTest, unittest.TestCase):
         result = state.query("SELECT name FROM sqlite_schema;")
 
         # Assert
-        assert len(result) == 9
+        assert len(result) == 13
 
 
 if __name__ == "__main__":
