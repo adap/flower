@@ -1,21 +1,19 @@
 """$project_name: A Flower / TensorFlow app."""
 
-import os
+from flwr.client import NumPyClient, ClientApp
 
-import tensorflow as tf
-from flwr.client import ClientApp, NumPyClient
-from flwr_datasets import FederatedDataset
+from $import_name.task import load_data, load_model
 
 
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-
-# Define Flower client
+# Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
-    def __init__(self, model, train_data, test_data):
+    def __init__(self, model, x_train, y_train, x_test, y_test):
         self.model = model
-        self.x_train, self.y_train = train_data
-        self.x_test, self.y_test = test_data
-        
+        self.x_train = x_train
+        self.y_train = y_train
+        self.x_test = x_test
+        self.y_test = y_test
+
     def get_parameters(self, config):
         return self.model.get_weights()
 
@@ -30,25 +28,13 @@ class FlowerClient(NumPyClient):
         return loss, len(self.x_test), {"accuracy": accuracy}
 
 
-fds = FederatedDataset(dataset="cifar10", partitioners={"train": 2})
+def client_fn(cid):
+    # Load model and data
+    net = load_model()
+    x_train, y_train, x_test, y_test = load_data(int(cid), 2)
 
-def client_fn(cid: str):
-    """Create and return an instance of Flower `Client`."""
-
-    # Load model and data (MobileNetV2, CIFAR-10)
-    model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
-    model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
-
-    # Download and partition dataset
-    partition = fds.load_partition(int(cid), "train")
-    partition.set_format("numpy")
-
-    # Divide data on each node: 80% train, 20% test
-    partition = partition.train_test_split(test_size=0.2, seed=42)
-    train_data = partition["train"]["img"] / 255.0, partition["train"]["label"]
-    test_data = partition["test"]["img"] / 255.0, partition["test"]["label"]
-
-    return FlowerClient(model, train_data, test_data).to_client()
+    # Return Client instance
+    return FlowerClient(net, x_train, y_train, x_test, y_test).to_client()
 
 
 # Flower ClientApp
