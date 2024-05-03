@@ -48,7 +48,7 @@ The script also generates a CSV file that includes each of the generated (client
 Note that this script should only be used for development purposes and not for creating production key pairs.
 
 ```bash
-bash ./generate.sh {your_number_here}
+./generate.sh {your_number_here}
 ```
 
 ## Start the long-running Flower server (SuperLink)
