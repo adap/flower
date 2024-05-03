@@ -22,7 +22,7 @@ Enable client authentication in Flower `Superlink`
 
 To enable client authentication, first you need to establish SSL connection so that the server-client communication is secure. You can find the complete guide
 `here <https://flower.ai/docs/framework/how-to-enable-ssl-connections.html>`_.
-After establishing secure connection, you can now enable client authentication in a long-running Flower server `Superlink`` easily by typing the following code in a terminal:
+After establishing secure connection, you can now enable client authentication in a long-running Flower server `Superlink` easily by typing the following code in a terminal:
 
 .. code-block:: bash
 
