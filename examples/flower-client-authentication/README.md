@@ -75,8 +75,8 @@ In yet another new terminal window, start the second long-running Flower client:
 flower-client-app client:app --insecure --authentication-keys ./keys/client_credentials_2.pub ./keys/client_credentials_2
 ```
 
-If you generated more than 2 client credentials, you can add more clients by opening new terminal window and run the command
-above, don't forget to specify the correct client public and private keys for each client instance you created.
+If you generated more than 2 client credentials, you can add more clients by opening new terminal windows and running the command
+above. Don't forget to specify the correct client private and public keys for each client instance you created.
 
 ## Run the Flower App
 
