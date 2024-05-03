@@ -12,6 +12,7 @@ Let's assume the following project structure:
 ```bash
 $ tree .
 .
+├── generate.sh       # <-- generate certificates and keys
 ├── pyproject.toml    # <-- project dependencies
 ├── client.py         # <-- contains `ClientApp`
 ├── server.py         # <-- contains `ServerApp`
@@ -41,7 +42,8 @@ If you don't see any errors you're good to go!
 ./generate.sh
 ```
 
-`generate.sh` is a script that (by default) generates three private and public key pairs for one server and two clients.
+`generate.sh` is a script that (by default) generates certificates for creating a secure TLS connection 
+and three private and public key pairs for one server and two clients.
 You can generate more keys by specifying the number of client credentials that you wish to generate.
 The script also generates a CSV file that includes each of the generated (client) public keys.
 
@@ -57,9 +59,10 @@ Note that this script should only be used for development purposes and not for c
 flower-superlink --certificates certificates/ca.crt certificates/server.pem certificates/server.key --require-client-authentication ./keys/client_public_keys.csv ./keys/server_credentials ./keys/server_credentials.pub
 ```
 
-To start a long-running Flower server and enable client authentication is very easy, all you need to do is to type
-`--require-client-authentication` followed by the path to the known `client_public_keys.csv`, server's public key
-`server_credentials.pub`, and server's private key `server_credentials`.
+To start a long-running Flower server and enable client authentication is very easy; all you need to do is type
+`--require-client-authentication` followed by the path to the known `client_public_keys.csv`, server's private key 
+`server_credentials`, and server's public key `server_credentials.pub`. Notice that you can only enable client 
+authentication with a secure TLS connection.
 
 ## Start the long-running Flower client (SuperNode)
 
