@@ -1,6 +1,6 @@
 from typing import Dict
-import flwr as fl
 from flwr.common import NDArrays, Scalar
+from flwr.client import ClientApp, NumPyClient
 
 from task import (
     Net,
@@ -19,7 +19,7 @@ trainloader, testloader = load_data()
 
 
 # Define Flower client and client_fn
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
         return get_parameters(net)
 

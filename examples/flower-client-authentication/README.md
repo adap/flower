@@ -38,7 +38,7 @@ If you don't see any errors you're good to go!
 ## Generate public and private keys
 
 ```bash
-bash ./generate.sh
+./generate.sh
 ```
 
 `generate.sh` is a script that (by default) generates three private and public key pairs for one server and two clients.
@@ -54,7 +54,7 @@ Note that this script should only be used for development purposes and not for c
 ## Start the long-running Flower server (SuperLink)
 
 ```bash
-flower-superlink --insecure --require-client-authentication ./keys/client_public_keys.csv ./keys/server_credentials.pub ./keys/server_credentials
+flower-superlink --certificates certificates/ca.crt certificates/server.pem certificates/server.key --require-client-authentication ./keys/client_public_keys.csv ./keys/server_credentials ./keys/server_credentials.pub
 ```
 
 To start a long-running Flower server and enable client authentication is very easy, all you need to do is to type
@@ -66,13 +66,13 @@ To start a long-running Flower server and enable client authentication is very e
 In a new terminal window, start the first long-running Flower client:
 
 ```bash
-flower-client-app client:app --insecure --authentication-keys ./keys/client_credentials_1.pub ./keys/client_credentials_1
+flower-client-app client:app --root-certificates certificates/ca.crt --server 127.0.0.1:9092 --authentication-keys ./keys/client_credentials_1 ./keys/client_credentials_1.pub
 ```
 
 In yet another new terminal window, start the second long-running Flower client:
 
 ```bash
-flower-client-app client:app --insecure --authentication-keys ./keys/client_credentials_2.pub ./keys/client_credentials_2
+flower-client-app client:app --root-certificates certificates/ca.crt --server 127.0.0.1:9092 --authentication-keys ./keys/client_credentials_2 ./keys/client_credentials_2.pub
 ```
 
 If you generated more than 2 client credentials, you can add more clients by opening new terminal windows and running the command
@@ -83,11 +83,5 @@ above. Don't forget to specify the correct client private and public keys for ea
 With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower ServerApp:
 
 ```bash
-flower-server-app server:app --insecure
-```
-
-Or, to try the custom server function example, run:
-
-```bash
-flower-server-app server_custom:app --insecure
+flower-server-app server:app --root-certificates certificates/ca.crt --dir ./ --server 127.0.0.1:9091
 ```

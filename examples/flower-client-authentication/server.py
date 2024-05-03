@@ -2,6 +2,8 @@ from typing import List, Tuple
 
 import flwr as fl
 from flwr.common import Metrics
+from flwr.server.strategy.fedavg import FedAvg
+from flwr.server import ServerApp
 
 
 # Define metric aggregation function
