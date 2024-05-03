@@ -30,16 +30,11 @@ parser.add_argument(
     default=2,
     help="Minimum number of available clients required for sampling (default: 2)",
 )
-parser.add_argument(
-    "--mnist",
-    action="store_true",
-    help="If you use Raspberry Pi Zero clients (which just have 512MB or RAM) use MNIST",
-)
 
 
 # Define metric aggregation function
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
-    """Thist function averages teh `accuracy` metric sent by the clients in a `evaluate`
+    """This function averages teh `accuracy` metric sent by the clients in a `evaluate`
     stage (i.e. clients received the global model and evaluate it on their local
     validation sets)."""
     # Multiply accuracy of each client by number of examples used

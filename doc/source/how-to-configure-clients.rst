@@ -13,7 +13,7 @@ Configuration values are represented as a dictionary with ``str`` keys and value
     config_dict = {
         "dropout": True,        # str key, bool value
         "learning_rate": 0.01,  # str key, float value
-        "batch_size": 32,       # str key, int value 
+        "batch_size": 32,       # str key, int value
         "optimizer": "sgd",     # str key, str value
     }
 
@@ -56,7 +56,7 @@ To make the built-in strategies use this function, we can pass it to ``FedAvg`` 
 One the client side, we receive the configuration dictionary in ``fit``:
 
 .. code-block:: python
-    
+
     class FlowerClient(flwr.client.NumPyClient):
         def fit(parameters, config):
             print(config["batch_size"])  # Prints `32`
@@ -86,7 +86,7 @@ Configuring individual clients
 
 In some cases, it is necessary to send different configuration values to different clients.
 
-This can be achieved by customizing an existing strategy or by `implementing a custom strategy from scratch <https://flower.dev/docs/framework/how-to-implement-strategies.html>`_. Here's a nonsensical example that customizes :code:`FedAvg` by adding a custom ``"hello": "world"`` configuration key/value pair to the config dict of a *single client* (only the first client in the list, the other clients in this round to not receive this "special" config value):
+This can be achieved by customizing an existing strategy or by :doc:`implementing a custom strategy from scratch <how-to-implement-strategies>`. Here's a nonsensical example that customizes :code:`FedAvg` by adding a custom ``"hello": "world"`` configuration key/value pair to the config dict of a *single client* (only the first client in the list, the other clients in this round to not receive this "special" config value):
 
 .. code-block:: python
 

@@ -18,19 +18,21 @@ syntax = "proto3";
 package flwr.proto;
 
 import "flwr/proto/node.proto";
+import "flwr/proto/recordset.proto";
 import "flwr/proto/transport.proto";
+import "flwr/proto/error.proto";
 
 message Task {
   Node producer = 1;
   Node consumer = 2;
-  string created_at = 3;
+  double created_at = 3;
   string delivered_at = 4;
-  string ttl = 5;
-  repeated string ancestry = 6;
-  SecureAggregation sa = 7;
-
-  ServerMessage legacy_server_message = 101 [ deprecated = true ];
-  ClientMessage legacy_client_message = 102 [ deprecated = true ];
+  double pushed_at = 5;
+  double ttl = 6;
+  repeated string ancestry = 7;
+  string task_type = 8;
+  RecordSet recordset = 9;
+  Error error = 10;
 }
 
 message TaskIns {
@@ -46,29 +48,3 @@ message TaskRes {
   sint64 run_id = 3;
   Task task = 4;
 }
-
-message Value {
-  message DoubleList { repeated double vals = 1; }
-  message Sint64List { repeated sint64 vals = 1; }
-  message BoolList { repeated bool vals = 1; }
-  message StringList { repeated string vals = 1; }
-  message BytesList { repeated bytes vals = 1; }
-
-  oneof value {
-    // Single element
-    double double = 1;
-    sint64 sint64 = 2;
-    bool bool = 3;
-    string string = 4;
-    bytes bytes = 5;
-
-    // List types
-    DoubleList double_list = 21;
-    Sint64List sint64_list = 22;
-    BoolList bool_list = 23;
-    StringList string_list = 24;
-    BytesList bytes_list = 25;
-  }
-}
-
-message SecureAggregation { map<string, Value> named_values = 1; }

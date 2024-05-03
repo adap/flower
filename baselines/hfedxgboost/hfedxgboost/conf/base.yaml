@@ -37,7 +37,7 @@ client_resources:
     num_gpus: 0.0
 
 strategy:
-  _target_: flwr.server.strategy.FedXgbNnAvg 
+  _target_: hfedxgboost.strategy.FedXgbNnAvg
   _recursive_: true #everything to be instantiated
   fraction_fit: 1.0 
   fraction_evaluate: 0.0 # no clients will be sampled for federated evaluation (we will still perform global evaluation)

@@ -1,21 +1,9 @@
 import warnings
 from logging import INFO
-import xgboost as xgb
 
 import flwr as fl
 from flwr_datasets import FederatedDataset
 from flwr.common.logger import log
-from flwr.common import (
-    Code,
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    GetParametersIns,
-    GetParametersRes,
-    Parameters,
-    Status,
-)
 
 from dataset import (
     instantiate_partitioner,
@@ -23,7 +11,8 @@ from dataset import (
     transform_dataset_to_dmatrix,
     resplit,
 )
-from utils import client_args_parser, BST_PARAMS
+from utils import client_args_parser, BST_PARAMS, NUM_LOCAL_ROUND
+from client_utils import XgbClient
 
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -32,15 +21,13 @@ warnings.filterwarnings("ignore", category=UserWarning)
 # Parse arguments for experimental settings
 args = client_args_parser()
 
+# Train method (bagging or cyclic)
+train_method = args.train_method
+
 # Load (HIGGS) dataset and conduct partitioning
-num_partitions = args.num_partitions
-
-# Partitioner type is chosen from ["uniform", "linear", "square", "exponential"]
-partitioner_type = args.partitioner_type
-
-# Instantiate partitioner
+# Instantiate partitioner from ["uniform", "linear", "square", "exponential"]
 partitioner = instantiate_partitioner(
-    partitioner_type=partitioner_type, num_partitions=num_partitions
+    partitioner_type=args.partitioner_type, num_partitions=args.num_partitions
 )
 fds = FederatedDataset(
     dataset="jxie/higgs",
@@ -48,25 +35,22 @@ fds = FederatedDataset(
     resplitter=resplit,
 )
 
-# Load the partition for this `node_id`
+# Load the partition for this `partition_id`
 log(INFO, "Loading partition...")
-node_id = args.node_id
-partition = fds.load_partition(node_id=node_id, split="train")
+partition = fds.load_partition(partition_id=args.partition_id, split="train")
 partition.set_format("numpy")
 
 if args.centralised_eval:
     # Use centralised test set for evaluation
     train_data = partition
-    valid_data = fds.load_full("test")
+    valid_data = fds.load_split("test")
     valid_data.set_format("numpy")
     num_train = train_data.shape[0]
     num_val = valid_data.shape[0]
 else:
     # Train/test splitting
-    SEED = args.seed
-    test_fraction = args.test_fraction
     train_data, valid_data, num_train, num_val = train_test_split(
-        partition, test_fraction=test_fraction, seed=SEED
+        partition, test_fraction=args.test_fraction, seed=args.seed
     )
 
 # Reformat data to DMatrix for xgboost
@@ -74,101 +58,25 @@ log(INFO, "Reformatting data...")
 train_dmatrix = transform_dataset_to_dmatrix(train_data)
 valid_dmatrix = transform_dataset_to_dmatrix(valid_data)
 
-
 # Hyper-parameters for xgboost training
-num_local_round = 1
+num_local_round = NUM_LOCAL_ROUND
 params = BST_PARAMS
 
-
-# Define Flower client
-class XgbClient(fl.client.Client):
-    def __init__(self):
-        self.bst = None
-        self.config = None
-
-    def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
-        _ = (self, ins)
-        return GetParametersRes(
-            status=Status(
-                code=Code.OK,
-                message="OK",
-            ),
-            parameters=Parameters(tensor_type="", tensors=[]),
-        )
-
-    def _local_boost(self):
-        # Update trees based on local training data.
-        for i in range(num_local_round):
-            self.bst.update(train_dmatrix, self.bst.num_boosted_rounds())
-
-        # Bagging: extract the last N=num_local_round trees for sever aggregation
-        # Cyclic: return the entire model
-        bst = (
-            self.bst[
-                self.bst.num_boosted_rounds()
-                - num_local_round : self.bst.num_boosted_rounds()
-            ]
-            if args.train_method == "bagging"
-            else self.bst
-        )
-
-        return bst
-
-    def fit(self, ins: FitIns) -> FitRes:
-        if not self.bst:
-            # First round local training
-            log(INFO, "Start training at round 1")
-            bst = xgb.train(
-                params,
-                train_dmatrix,
-                num_boost_round=num_local_round,
-                evals=[(valid_dmatrix, "validate"), (train_dmatrix, "train")],
-            )
-            self.config = bst.save_config()
-            self.bst = bst
-        else:
-            for item in ins.parameters.tensors:
-                global_model = bytearray(item)
-
-            # Load global model into booster
-            self.bst.load_model(global_model)
-            self.bst.load_config(self.config)
-
-            bst = self._local_boost()
-
-        local_model = bst.save_raw("json")
-        local_model_bytes = bytes(local_model)
-
-        return FitRes(
-            status=Status(
-                code=Code.OK,
-                message="OK",
-            ),
-            parameters=Parameters(tensor_type="", tensors=[local_model_bytes]),
-            num_examples=num_train,
-            metrics={},
-        )
-
-    def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        eval_results = self.bst.eval_set(
-            evals=[(valid_dmatrix, "valid")],
-            iteration=self.bst.num_boosted_rounds() - 1,
-        )
-        auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
-
-        global_round = ins.config["global_round"]
-        log(INFO, f"AUC = {auc} at round {global_round}")
-
-        return EvaluateRes(
-            status=Status(
-                code=Code.OK,
-                message="OK",
-            ),
-            loss=0.0,
-            num_examples=num_val,
-            metrics={"AUC": auc},
-        )
-
+# Setup learning rate
+if args.train_method == "bagging" and args.scaled_lr:
+    new_lr = params["eta"] / args.num_partitions
+    params.update({"eta": new_lr})
 
 # Start Flower client
-fl.client.start_client(server_address="127.0.0.1:8080", client=XgbClient())
+fl.client.start_client(
+    server_address="127.0.0.1:8080",
+    client=XgbClient(
+        train_dmatrix,
+        valid_dmatrix,
+        num_train,
+        num_val,
+        num_local_round,
+        params,
+        train_method,
+    ),
+)

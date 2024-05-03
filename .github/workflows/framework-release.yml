@@ -3,11 +3,14 @@ name: Publish `flwr` release on PyPI
 on:
   release:
     types: [released]
-    
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-  
+
+env:
+  ARTIFACT_BUCKET: artifact.flower.ai
+
 jobs:
   publish:
     if: ${{ github.repository == 'adap/flower' }}
@@ -28,13 +31,15 @@ jobs:
       run: |
         TAG_NAME=$(echo "${GITHUB_REF_NAME}" | cut -c2-)
 
-        wheel_name="flwr-${TAG_NAME}-py3-none-any.whl"        
+        wheel_name="flwr-${TAG_NAME}-py3-none-any.whl"
         tar_name="flwr-${TAG_NAME}.tar.gz"
 
-        wheel_url="https://artifact.flower.dev/py/release/v${TAG_NAME}/${wheel_name}"
-        tar_url="https://artifact.flower.dev/py/release/v${TAG_NAME}/${tar_name}"
+        wheel_url="https://${{ env.ARTIFACT_BUCKET }}/py/release/v${TAG_NAME}/${wheel_name}"
+        tar_url="https://${{ env.ARTIFACT_BUCKET }}/py/release/v${TAG_NAME}/${tar_name}"
 
-        curl $wheel_url --output $wheel_name
-        curl $tar_url --output $tar_name
+        mkdir -p dist
 
-        python -m poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}
+        curl $wheel_url --output dist/$wheel_name
+        curl $tar_url --output dist/$tar_name
+
+        python -m poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN_RELEASE_FLWR }}

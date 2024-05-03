@@ -1,4 +1,5 @@
 """NIST preprocessor test."""
+
 # pylint: disable=no-self-use
 import unittest
 

@@ -38,7 +38,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "0.0.2"
+release = "0.1.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -123,7 +123,7 @@ html_theme = "furo"
 html_title = f"Flower Datasets {release}"
 html_logo = "_static/flower-datasets-logo.png"
 html_favicon = "_static/favicon.ico"
-html_baseurl = "https://flower.dev/docs/datasets/"
+html_baseurl = "https://flower.ai/docs/datasets/"
 
 html_theme_options = {
     #

@@ -104,7 +104,7 @@ poetry shell
 ```
 
 ### Google Colab
-If you want to setup the environemnt on Google Colab, please executed the script `conf-colab.sh`, just use the Colab terminal and the following:
+If you want to setup the environment on Google Colab, please executed the script `conf-colab.sh`, just use the Colab terminal and the following:
 
 ```bash
 chmod +x conf-colab.sh

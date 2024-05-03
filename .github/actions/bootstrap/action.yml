@@ -12,7 +12,7 @@ inputs:
     default: 68.2.2
   poetry-version:
     description: "Version of poetry to be installed using pip"
-    default: 1.5.1
+    default: 1.7.1
 outputs:
   python-version:
     description: "Version range or exact version of Python or PyPy"
@@ -30,7 +30,7 @@ runs:
   using: "composite"
   steps:
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
     - name: Install build tools

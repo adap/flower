@@ -1,5 +1,4 @@
 import os
-import math
 import argparse
 from typing import Dict, List, Tuple
 
@@ -29,9 +28,9 @@ parser.add_argument(
     default=0.0,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
 
 NUM_CLIENTS = 100
+NUM_ROUNDS = 10
 VERBOSE = 0
 
 
@@ -84,7 +83,7 @@ def get_client_fn(dataset: FederatedDataset):
         client_dataset = dataset.load_partition(int(cid), "train")
 
         # Now let's split it into train (90%) and validation (10%)
-        client_dataset_splits = client_dataset.train_test_split(test_size=0.1)
+        client_dataset_splits = client_dataset.train_test_split(test_size=0.1, seed=42)
 
         trainset = client_dataset_splits["train"].to_tf_dataset(
             columns="image", label_cols="label", batch_size=32
@@ -94,7 +93,7 @@ def get_client_fn(dataset: FederatedDataset):
         )
 
         # Create and return client
-        return FlowerClient(trainset, valset)
+        return FlowerClient(trainset, valset).to_client()
 
     return client_fn
 
@@ -129,29 +128,38 @@ def get_evaluate_fn(testset: Dataset):
     return evaluate
 
 
+# Download MNIST dataset and partition it
+mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
+# Get the whole test set for centralised evaluation
+centralized_testset = mnist_fds.load_split("test").to_tf_dataset(
+    columns="image", label_cols="label", batch_size=64
+)
+
+# Create FedAvg strategy
+strategy = fl.server.strategy.FedAvg(
+    fraction_fit=0.1,  # Sample 10% of available clients for training
+    fraction_evaluate=0.05,  # Sample 5% of available clients for evaluation
+    min_fit_clients=10,  # Never sample less than 10 clients for training
+    evaluate_metrics_aggregation_fn=weighted_average,  # aggregates federated metrics
+    evaluate_fn=get_evaluate_fn(centralized_testset),  # global evaluation function
+)
+
+
+# ClientApp for Flower-Next
+client = fl.client.ClientApp(
+    client_fn=get_client_fn(mnist_fds),
+)
+
+# ServerApp for Flower-Next
+server = fl.server.ServerApp(
+    config=fl.server.ServerConfig(num_rounds=NUM_ROUNDS),
+    strategy=strategy,
+)
+
+
 def main() -> None:
     # Parse input arguments
     args = parser.parse_args()
-
-    # Download MNIST dataset and partition it
-    mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
-    # Get the whole test set for centralised evaluation
-    centralized_testset = mnist_fds.load_full("test").to_tf_dataset(
-        columns="image", label_cols="label", batch_size=64
-    )
-
-    # Create FedAvg strategy
-    strategy = fl.server.strategy.FedAvg(
-        fraction_fit=0.1,  # Sample 10% of available clients for training
-        fraction_evaluate=0.05,  # Sample 5% of available clients for evaluation
-        min_fit_clients=10,  # Never sample less than 10 clients for training
-        min_evaluate_clients=5,  # Never sample less than 5 clients for evaluation
-        min_available_clients=int(
-            NUM_CLIENTS * 0.75
-        ),  # Wait until at least 75 clients are available
-        evaluate_metrics_aggregation_fn=weighted_average,  # aggregates federated metrics
-        evaluate_fn=get_evaluate_fn(centralized_testset),  # global evaluation function
-    )
 
     # With a dictionary, you tell Flower's VirtualClientEngine that each
     # client needs exclusive access to these many resources in order to run
@@ -164,7 +172,7 @@ def main() -> None:
     fl.simulation.start_simulation(
         client_fn=get_client_fn(mnist_fds),
         num_clients=NUM_CLIENTS,
-        config=fl.server.ServerConfig(num_rounds=args.num_rounds),
+        config=fl.server.ServerConfig(NUM_ROUNDS),
         strategy=strategy,
         client_resources=client_resources,
         actor_kwargs={

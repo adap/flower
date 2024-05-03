@@ -37,7 +37,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.7.0"
+release = "1.8.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -85,7 +85,7 @@ html_theme = "furo"
 html_title = f"Flower Baselines {release}"
 html_logo = "_static/flower-logo.png"
 html_favicon = "_static/favicon.ico"
-html_baseurl = "https://flower.dev/docs/baselines/"
+html_baseurl = "https://flower.ai/docs/baselines/"
 
 html_theme_options = {
     #

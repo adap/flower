@@ -146,13 +146,13 @@ def get_client_fn(
 
         return WhisperFlowerClient(
             full_train_dataset, num_classes, disable_tqdm, compile
-        )
+        ).to_client()
 
     return client_fn
 
 
-def run_client():
-    """Run clinet."""
+def main():
+    """Run client."""
 
     # Parse input arguments
     args = parser.parse_args()
@@ -174,10 +174,11 @@ def run_client():
         client_data_path=CLIENT_DATA,
     )
 
-    fl.client.start_numpy_client(
-        server_address=f"{args.server_address}:8080", client=client_fn(args.cid)
+    fl.client.start_client(
+        server_address=f"{args.server_address}:8080",
+        client=client_fn(args.cid),
     )
 
 
 if __name__ == "__main__":
-    run_client()
+    main()

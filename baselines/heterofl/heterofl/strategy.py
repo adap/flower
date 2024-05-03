@@ -1,4 +1,5 @@
 """Flower strategy for HeteroFL."""
+
 import copy
 from collections import OrderedDict
 from typing import Dict, List, Optional, Tuple, Union

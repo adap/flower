@@ -6,6 +6,8 @@ import flwr as fl
 import tensorflow as tf
 from tensorflow import keras as keras
 
+from flwr_datasets import FederatedDataset
+
 parser = argparse.ArgumentParser(description="Flower Embedded devices")
 parser.add_argument(
     "--server_address",
@@ -32,30 +34,28 @@ NUM_CLIENTS = 50
 def prepare_dataset(use_mnist: bool):
     """Download and partitions the CIFAR-10/MNIST dataset."""
     if use_mnist:
-        (x_train, y_train), testset = tf.keras.datasets.mnist.load_data()
+        fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
+        img_key = "image"
     else:
-        (x_train, y_train), testset = tf.keras.datasets.cifar10.load_data()
+        fds = FederatedDataset(dataset="cifar10", partitioners={"train": NUM_CLIENTS})
+        img_key = "img"
     partitions = []
-    # We keep all partitions equal-sized in this example
-    partition_size = math.floor(len(x_train) / NUM_CLIENTS)
-    for cid in range(NUM_CLIENTS):
-        # Split dataset into non-overlapping NUM_CLIENT partitions
-        idx_from, idx_to = int(cid) * partition_size, (int(cid) + 1) * partition_size
-
-        x_train_cid, y_train_cid = (
-            x_train[idx_from:idx_to] / 255.0,
-            y_train[idx_from:idx_to],
+    for partition_id in range(NUM_CLIENTS):
+        partition = fds.load_partition(partition_id, "train")
+        partition.set_format("numpy")
+        # Divide data on each node: 90% train, 10% test
+        partition = partition.train_test_split(test_size=0.1, seed=42)
+        x_train, y_train = (
+            partition["train"][img_key] / 255.0,
+            partition["train"]["label"],
         )
-
-        # now partition into train/validation
-        # Use 10% of the client's training data for validation
-        split_idx = math.floor(len(x_train_cid) * 0.9)
-
-        client_train = (x_train_cid[:split_idx], y_train_cid[:split_idx])
-        client_val = (x_train_cid[split_idx:], y_train_cid[split_idx:])
-        partitions.append((client_train, client_val))
-
-    return partitions, testset
+        x_test, y_test = partition["test"][img_key] / 255.0, partition["test"]["label"]
+        partitions.append(((x_train, y_train), (x_test, y_test)))
+    data_centralized = fds.load_split("test")
+    data_centralized.set_format("numpy")
+    x_centralized = data_centralized[img_key] / 255.0
+    y_centralized = data_centralized["label"]
+    return partitions, (x_centralized, y_centralized)
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -68,7 +68,7 @@ class FlowerClient(fl.client.NumPyClient):
         # Instantiate model
         if use_mnist:
             # small model for MNIST
-            self.model = model = keras.Sequential(
+            self.model = keras.Sequential(
                 [
                     keras.Input(shape=(28, 28, 1)),
                     keras.layers.Conv2D(32, kernel_size=(5, 5), activation="relu"),
@@ -118,14 +118,16 @@ def main():
     assert args.cid < NUM_CLIENTS
 
     use_mnist = args.mnist
-    # Download CIFAR-10 dataset and partition it
+    # Download dataset and partition it
     partitions, _ = prepare_dataset(use_mnist)
     trainset, valset = partitions[args.cid]
 
     # Start Flower client setting its associated data partition
-    fl.client.start_numpy_client(
+    fl.client.start_client(
         server_address=args.server_address,
-        client=FlowerClient(trainset=trainset, valset=valset, use_mnist=use_mnist),
+        client=FlowerClient(
+            trainset=trainset, valset=valset, use_mnist=use_mnist
+        ).to_client(),
     )
 
 

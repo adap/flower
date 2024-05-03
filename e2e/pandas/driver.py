@@ -3,7 +3,7 @@ import flwr as fl
 from strategy import FedAnalytics
 
 # Start Flower server
-hist = fl.driver.start_driver(
+hist = fl.server.start_driver(
     server_address="0.0.0.0:9091",
     config=fl.server.ServerConfig(num_rounds=1),
     strategy=FedAnalytics(),

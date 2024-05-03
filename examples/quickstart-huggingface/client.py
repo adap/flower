@@ -1,58 +1,48 @@
-from collections import OrderedDict
+import argparse
 import warnings
+from collections import OrderedDict
 
 import flwr as fl
 import torch
-import numpy as np
-
-import random
-from torch.utils.data import DataLoader
-
-from datasets import load_dataset
 from evaluate import load as load_metric
-
-from transformers import AutoTokenizer, DataCollatorWithPadding
+from torch.optim import AdamW
+from torch.utils.data import DataLoader
 from transformers import AutoModelForSequenceClassification
-from transformers import AdamW
+from transformers import AutoTokenizer, DataCollatorWithPadding
+
+from flwr_datasets import FederatedDataset
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cpu")
 CHECKPOINT = "distilbert-base-uncased"  # transformer model checkpoint
 
 
-def load_data():
+def load_data(partition_id):
     """Load IMDB data (training and eval)"""
-    raw_datasets = load_dataset("imdb")
-    raw_datasets = raw_datasets.shuffle(seed=42)
+    fds = FederatedDataset(dataset="imdb", partitioners={"train": 1_000})
+    partition = fds.load_partition(partition_id)
+    # Divide data: 80% train, 20% test
+    partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
 
-    # remove unnecessary data split
-    del raw_datasets["unsupervised"]
-
-    tokenizer = AutoTokenizer.from_pretrained(CHECKPOINT)
+    tokenizer = AutoTokenizer.from_pretrained(CHECKPOINT, model_max_length=512)
 
     def tokenize_function(examples):
         return tokenizer(examples["text"], truncation=True)
 
-    # random 100 samples
-    population = random.sample(range(len(raw_datasets["train"])), 100)
-
-    tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)
-    tokenized_datasets["train"] = tokenized_datasets["train"].select(population)
-    tokenized_datasets["test"] = tokenized_datasets["test"].select(population)
-
-    tokenized_datasets = tokenized_datasets.remove_columns("text")
-    tokenized_datasets = tokenized_datasets.rename_column("label", "labels")
+    partition_train_test = partition_train_test.map(tokenize_function, batched=True)
+    partition_train_test = partition_train_test.remove_columns("text")
+    partition_train_test = partition_train_test.rename_column("label", "labels")
 
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
     trainloader = DataLoader(
-        tokenized_datasets["train"],
+        partition_train_test["train"],
         shuffle=True,
         batch_size=32,
         collate_fn=data_collator,
     )
 
     testloader = DataLoader(
-        tokenized_datasets["test"], batch_size=32, collate_fn=data_collator
+        partition_train_test["test"], batch_size=32, collate_fn=data_collator
     )
 
     return trainloader, testloader
@@ -88,12 +78,12 @@ def test(net, testloader):
     return loss, accuracy
 
 
-def main():
+def main(partition_id):
     net = AutoModelForSequenceClassification.from_pretrained(
         CHECKPOINT, num_labels=2
     ).to(DEVICE)
 
-    trainloader, testloader = load_data()
+    trainloader, testloader = load_data(partition_id)
 
     # Flower client
     class IMDBClient(fl.client.NumPyClient):
@@ -118,8 +108,20 @@ def main():
             return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
     # Start client
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=IMDBClient())
+    fl.client.start_client(
+        server_address="127.0.0.1:8080", client=IMDBClient().to_client()
+    )
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Flower")
+    parser.add_argument(
+        "--partition-id",
+        choices=list(range(1_000)),
+        required=True,
+        type=int,
+        help="Partition of the dataset divided into 1,000 iid partitions created "
+        "artificially.",
+    )
+    partition_id = parser.parse_args().partition_id
+    main(partition_id)

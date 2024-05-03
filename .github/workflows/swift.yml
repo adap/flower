@@ -18,22 +18,22 @@ jobs:
         run:
             working-directory: src/swift/flwr
     name: Test
-    runs-on: macos-latest
+    runs-on: macos-14
     steps:
-      - uses: fwal/setup-swift@f51889efb55dccf13be0ee727e3d6c89a096fb4c
+      - uses: fwal/setup-swift@v2
         with:
-          swift-version: 5
+          swift-version: 5.10
       - uses: actions/checkout@v4
       - name: Run tests
-        run: arch -x86_64 xcodebuild test -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 14 Pro Max,OS=16.2'
+        run: arch -x86_64 xcodebuild test -scheme flwr -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max,OS=17.2'
 
   build_docs:
-    runs-on: macos-latest
+    runs-on: macos-14
     name: Build docs
     steps:
-      - uses: fwal/setup-swift@f51889efb55dccf13be0ee727e3d6c89a096fb4c
+      - uses: fwal/setup-swift@v2
         with:
-          swift-version: 5
+          swift-version: 5.10
       - uses: actions/checkout@v4
       - name: Build docs
         run: ./dev/build-swift-api-ref.sh
@@ -41,12 +41,12 @@ jobs:
   deploy_docs:
     needs: "build_docs"
     if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
-    runs-on: macos-latest
+    runs-on: macos-14
     name: Deploy docs 
     steps:
-      - uses: fwal/setup-swift@f51889efb55dccf13be0ee727e3d6c89a096fb4c
+      - uses: fwal/setup-swift@v2
         with:
-          swift-version: 5
+          swift-version: 5.10
       - uses: actions/checkout@v4
       - name: Build and deploy docs
         env:

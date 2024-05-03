@@ -50,7 +50,7 @@ def _get_pull_requests_since_tag(gh_api, tag):
 
 def _format_pr_reference(title, number, url):
     """Format a pull request reference as a markdown list item."""
-    return f"- **{title}** ([#{number}]({url}))"
+    return f"- **{title.replace('*', '')}** ([#{number}]({url}))"
 
 
 def _extract_changelog_entry(pr_info):
@@ -62,7 +62,7 @@ def _extract_changelog_entry(pr_info):
         f"{CHANGELOG_SECTION_HEADER}(.+?)(?=##|$)", pr_info.body, re.DOTALL
     )
     if not entry_match:
-        return None, "general"
+        return None, None
 
     entry_text = entry_match.group(1).strip()
 
@@ -193,11 +193,24 @@ def _insert_new_entry(content, pr_info, pr_reference, pr_entry_text, unreleased_
         content = content[:pr_ref_end] + updated_entry + content[existing_entry_start:]
     else:
         insert_index = content.find("\n", unreleased_index) + 1
+
+        # Split the pr_entry_text into paragraphs
+        paragraphs = pr_entry_text.split("\n")
+
+        # Indent each paragraph
+        indented_paragraphs = [
+            "    " + paragraph if paragraph else paragraph for paragraph in paragraphs
+        ]
+
+        # Join the paragraphs back together, ensuring each is separated by a newline
+        indented_pr_entry_text = "\n".join(indented_paragraphs)
+
         content = (
             content[:insert_index]
+            + "\n"
             + pr_reference
-            + "\n  "
-            + pr_entry_text
+            + "\n\n"
+            + indented_pr_entry_text
             + "\n"
             + content[insert_index:]
         )

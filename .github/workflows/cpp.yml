@@ -19,13 +19,13 @@ jobs:
       uses: ./.github/actions/bootstrap
 
     - name: Cache restore SDK build
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: build/
         key: ${{ runner.os }}-sdk-build
 
     - name: Cache restore example build
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: examples/quickstart-cpp/build/
         key: ${{ runner.os }}-example-build
@@ -68,28 +68,30 @@ jobs:
         cmake -DUSE_LOCAL_FLWR=ON -S . -B build
         cmake --build build
         pip install ../..
-        timeout 2m python server.py &
+        timeout 3m flower-superlink --insecure &
+        sleep 10
+        timeout 2m build/flwr_client 0 127.0.0.1:9092 &
+        sleep 3
+        timeout 2m build/flwr_client 1 127.0.0.1:9092 &
+        sleep 3
+        flower-server-app server:app --insecure &
         pid=$!
-        sleep 3
-        build/flwr_client 0 127.0.0.1:8080 &
-        sleep 3
-        build/flwr_client 1 127.0.0.1:8080 &
         wait $pid
         res=$?
         if [[ "$res" = "0" ]];
-          then echo "Training worked correctly";
+          then echo "Training worked correctly" && exit 0;
           else echo "Training had an issue" && exit 1;
         fi
 
     - name: Cache save SDK build
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       if: github.ref_name == 'main'
       with:
         path: build/
         key: ${{ runner.os }}-sdk-build
 
     - name: Cache save example build
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       if: github.ref_name == 'main'
       with:
         path: examples/quickstart-cpp/build/

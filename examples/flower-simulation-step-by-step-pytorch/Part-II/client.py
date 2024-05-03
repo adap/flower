@@ -75,6 +75,6 @@ def generate_client_fn(trainloaders, valloaders, model_cfg):
             trainloader=trainloaders[int(cid)],
             vallodaer=valloaders[int(cid)],
             model_cfg=model_cfg,
-        )
+        ).to_client()
 
     return client_fn

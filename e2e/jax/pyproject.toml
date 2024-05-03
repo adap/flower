@@ -2,7 +2,7 @@
 name = "jax_example"
 version = "0.1.0"
 description = "JAX example training a linear regression model with federated learning"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"

@@ -2,7 +2,7 @@ import argparse
 import warnings
 from collections import OrderedDict
 
-import flwr as fl
+from flwr.client import NumPyClient, ClientApp
 from flwr_datasets import FederatedDataset
 import torch
 import torch.nn as nn
@@ -69,12 +69,12 @@ def test(net, testloader):
     return loss, accuracy
 
 
-def load_data(node_id):
+def load_data(partition_id):
     """Load partition CIFAR10 data."""
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": 3})
-    partition = fds.load_partition(node_id)
+    partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
-    partition_train_test = partition.train_test_split(test_size=0.2)
+    partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
     pytorch_transforms = Compose(
         [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
@@ -94,24 +94,24 @@ def load_data(node_id):
 # 2. Federation of the pipeline with Flower
 # #############################################################################
 
-# Get node id
+# Get partition id
 parser = argparse.ArgumentParser(description="Flower")
 parser.add_argument(
-    "--node-id",
+    "--partition-id",
     choices=[0, 1, 2],
-    required=True,
+    default=0,
     type=int,
     help="Partition of the dataset divided into 3 iid partitions created artificially.",
 )
-node_id = parser.parse_args().node_id
+partition_id = parser.parse_known_args()[0].partition_id
 
 # Load model and data (simple CNN, CIFAR-10)
 net = Net().to(DEVICE)
-trainloader, testloader = load_data(node_id=node_id)
+trainloader, testloader = load_data(partition_id=partition_id)
 
 
 # Define Flower client
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -131,8 +131,22 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
-# Start Flower client
-fl.client.start_numpy_client(
-    server_address="127.0.0.1:8080",
-    client=FlowerClient(),
+def client_fn(cid: str):
+    """Create and return an instance of Flower `Client`."""
+    return FlowerClient().to_client()
+
+
+# Flower ClientApp
+app = ClientApp(
+    client_fn=client_fn,
 )
+
+
+# Legacy mode
+if __name__ == "__main__":
+    from flwr.client import start_client
+
+    start_client(
+        server_address="127.0.0.1:8080",
+        client=FlowerClient().to_client(),
+    )

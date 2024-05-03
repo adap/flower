@@ -17,7 +17,7 @@
 
 from typing import List, Union
 
-from flwr.proto.task_pb2 import TaskIns, TaskRes
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
 # pylint: disable-next=too-many-branches,too-many-statements
@@ -31,13 +31,21 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
     if not tasks_ins_res.HasField("task"):
         validation_errors.append("`task` does not set field `task`")
 
-    # Created/delivered/TTL
-    if tasks_ins_res.task.created_at != "":
-        validation_errors.append("`created_at` must be an empty str")
+    # Created/delivered/TTL/Pushed
+    if (
+        tasks_ins_res.task.created_at < 1711497600.0
+    ):  # unix timestamp of 27 March 2024 00h:00m:00s UTC
+        validation_errors.append(
+            "`created_at` must be a float that records the unix timestamp "
+            "in seconds when the message was created."
+        )
     if tasks_ins_res.task.delivered_at != "":
         validation_errors.append("`delivered_at` must be an empty str")
-    if tasks_ins_res.task.ttl != "":
-        validation_errors.append("`ttl` must be an empty str")
+    if tasks_ins_res.task.ttl <= 0:
+        validation_errors.append("`ttl` must be higher than zero")
+    if tasks_ins_res.task.pushed_at < 1711497600.0:
+        # unix timestamp of 27 March 2024 00h:00m:00s UTC
+        validation_errors.append("`pushed_at` is not a recent timestamp")
 
     # TaskIns specific
     if isinstance(tasks_ins_res, TaskIns):
@@ -64,21 +72,13 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
             validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
 
         # Content check
-        has_fields = {
-            "sa": tasks_ins_res.task.HasField("sa"),
-            "legacy_server_message": tasks_ins_res.task.HasField(
-                "legacy_server_message"
-            ),
-        }
-        if not (has_fields["sa"] or has_fields["legacy_server_message"]):
-            err_msg = ", ".join([f"`{field}`" for field in has_fields])
-            validation_errors.append(
-                f"`task` in `TaskIns` must set at least one of fields {{{err_msg}}}"
-            )
-        if has_fields[
-            "legacy_server_message"
-        ] and not tasks_ins_res.task.legacy_server_message.HasField("msg"):
-            validation_errors.append("`legacy_server_message` does not set field `msg`")
+        if tasks_ins_res.task.task_type == "":
+            validation_errors.append("`task_type` MUST be set")
+        if not (
+            tasks_ins_res.task.HasField("recordset")
+            ^ tasks_ins_res.task.HasField("error")
+        ):
+            validation_errors.append("Either `recordset` or `error` MUST be set")
 
         # Ancestors
         if len(tasks_ins_res.task.ancestry) != 0:
@@ -115,21 +115,13 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
             validation_errors.append("non-anonymous consumer MUST provide a `node_id`")
 
         # Content check
-        has_fields = {
-            "sa": tasks_ins_res.task.HasField("sa"),
-            "legacy_client_message": tasks_ins_res.task.HasField(
-                "legacy_client_message"
-            ),
-        }
-        if not (has_fields["sa"] or has_fields["legacy_client_message"]):
-            err_msg = ", ".join([f"`{field}`" for field in has_fields])
-            validation_errors.append(
-                f"`task` in `TaskRes` must set at least one of fields {{{err_msg}}}"
-            )
-        if has_fields[
-            "legacy_client_message"
-        ] and not tasks_ins_res.task.legacy_client_message.HasField("msg"):
-            validation_errors.append("`legacy_client_message` does not set field `msg`")
+        if tasks_ins_res.task.task_type == "":
+            validation_errors.append("`task_type` MUST be set")
+        if not (
+            tasks_ins_res.task.HasField("recordset")
+            ^ tasks_ins_res.task.HasField("error")
+        ):
+            validation_errors.append("Either `recordset` or `error` MUST be set")
 
         # Ancestors
         if len(tasks_ins_res.task.ancestry) == 0:

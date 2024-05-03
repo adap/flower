@@ -75,9 +75,9 @@ We are now going to show how to write a client which uses the previously generat
   client = MyFlowerClient()
 
   # Start client
-  fl.client.start_numpy_client(
+  fl.client.start_client(
       "localhost:8080",
-      client=client,
+      client=client.to_client(),
       root_certificates=Path(".cache/certificates/ca.crt").read_bytes(),
   )
 

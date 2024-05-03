@@ -6,18 +6,19 @@ import flwr as fl
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import DataLoader, random_split
-from torchvision.datasets import CIFAR10, MNIST
+from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize, ToTensor
 from torchvision.models import mobilenet_v3_small
 from tqdm import tqdm
+
+from flwr_datasets import FederatedDataset
 
 parser = argparse.ArgumentParser(description="Flower Embedded devices")
 parser.add_argument(
     "--server_address",
     type=str,
     default="0.0.0.0:8080",
-    help=f"gRPC server address (deafault '0.0.0.0:8080')",
+    help=f"gRPC server address (default '0.0.0.0:8080')",
 )
 parser.add_argument(
     "--cid",
@@ -28,24 +29,12 @@ parser.add_argument(
 parser.add_argument(
     "--mnist",
     action="store_true",
-    help="If you use Raspberry Pi Zero clients (which just have 512MB or RAM) use MNIST",
+    help="If you use Raspberry Pi Zero clients (which just have 512MB or RAM) use "
+    "MNIST",
 )
-
 
 warnings.filterwarnings("ignore", category=UserWarning)
 NUM_CLIENTS = 50
-
-# a config for mobilenetv2 that works for
-# small input sizes (i.e. 32x32 as in CIFAR)
-mb2_cfg = [
-    (1, 16, 1, 1),
-    (6, 24, 2, 1),
-    (6, 32, 3, 2),
-    (6, 64, 4, 2),
-    (6, 96, 3, 1),
-    (6, 160, 3, 2),
-    (6, 320, 1, 1),
-]
 
 
 class Net(nn.Module):
@@ -73,7 +62,9 @@ def train(net, trainloader, optimizer, epochs, device):
     """Train the model on the training set."""
     criterion = torch.nn.CrossEntropyLoss()
     for _ in range(epochs):
-        for images, labels in tqdm(trainloader):
+        for batch in tqdm(trainloader):
+            batch = list(batch.values())
+            images, labels = batch[0], batch[1]
             optimizer.zero_grad()
             criterion(net(images.to(device)), labels.to(device)).backward()
             optimizer.step()
@@ -84,7 +75,9 @@ def test(net, testloader, device):
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
-        for images, labels in tqdm(testloader):
+        for batch in tqdm(testloader):
+            batch = list(batch.values())
+            images, labels = batch[0], batch[1]
             outputs = net(images.to(device))
             labels = labels.to(device)
             loss += criterion(outputs, labels).item()
@@ -95,44 +88,33 @@ def test(net, testloader, device):
 
 def prepare_dataset(use_mnist: bool):
     """Get MNIST/CIFAR-10 and return client partitions and global testset."""
-    dataset = MNIST if use_mnist else CIFAR10
     if use_mnist:
+        fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
+        img_key = "image"
         norm = Normalize((0.1307,), (0.3081,))
     else:
+        fds = FederatedDataset(dataset="cifar10", partitioners={"train": NUM_CLIENTS})
+        img_key = "img"
         norm = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    pytorch_transforms = Compose([ToTensor(), norm])
 
-    trf = Compose([ToTensor(), norm])
-    trainset = dataset("./data", train=True, download=True, transform=trf)
-    testset = dataset("./data", train=False, download=True, transform=trf)
+    def apply_transforms(batch):
+        """Apply transforms to the partition from FederatedDataset."""
+        batch[img_key] = [pytorch_transforms(img) for img in batch[img_key]]
+        return batch
 
-    print("Partitioning dataset (IID)...")
-
-    # Split trainset into `num_partitions` trainsets
-    num_images = len(trainset) // NUM_CLIENTS
-    partition_len = [num_images] * NUM_CLIENTS
-
-    trainsets = random_split(
-        trainset, partition_len, torch.Generator().manual_seed(2023)
-    )
-
-    val_ratio = 0.1
-
-    # Create dataloaders with train+val support
-    train_partitions = []
-    val_partitions = []
-    for trainset_ in trainsets:
-        num_total = len(trainset_)
-        num_val = int(val_ratio * num_total)
-        num_train = num_total - num_val
-
-        for_train, for_val = random_split(
-            trainset_, [num_train, num_val], torch.Generator().manual_seed(2023)
-        )
-
-        train_partitions.append(for_train)
-        val_partitions.append(for_val)
-
-    return train_partitions, val_partitions, testset
+    trainsets = []
+    validsets = []
+    for partition_id in range(NUM_CLIENTS):
+        partition = fds.load_partition(partition_id, "train")
+        # Divide data on each node: 90% train, 10% test
+        partition = partition.train_test_split(test_size=0.1, seed=42)
+        partition = partition.with_transform(apply_transforms)
+        trainsets.append(partition["train"])
+        validsets.append(partition["test"])
+    testset = fds.load_split("test")
+    testset = testset.with_transform(apply_transforms)
+    return trainsets, validsets, testset
 
 
 # Flower client, adapted from Pytorch quickstart/simulation example
@@ -148,8 +130,6 @@ class FlowerClient(fl.client.NumPyClient):
             self.model = Net()
         else:
             self.model = mobilenet_v3_small(num_classes=10)
-            # let's not reduce spatial resolution too early
-            self.model.features[0][0].stride = (1, 1)
         # Determine device
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)  # send model to device
@@ -200,15 +180,15 @@ def main():
     assert args.cid < NUM_CLIENTS
 
     use_mnist = args.mnist
-    # Download CIFAR-10 dataset and partition it
+    # Download dataset and partition it
     trainsets, valsets, _ = prepare_dataset(use_mnist)
 
     # Start Flower client setting its associated data partition
-    fl.client.start_numpy_client(
+    fl.client.start_client(
         server_address=args.server_address,
         client=FlowerClient(
             trainset=trainsets[args.cid], valset=valsets[args.cid], use_mnist=use_mnist
-        ),
+        ).to_client(),
     )
 
 

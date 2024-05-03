@@ -34,37 +34,37 @@ dataset: [MNIST, MNIST-M, SVHN, USPS, SynthDigits]
 
 **Model:** A six-layer CNN with 14,219,210 parameters following the structure described in appendix D.2.
 
-**Dataset:**  This baseline makes use of the pre-processed partitions created and open source by the authors of the FedBN paper. You can read more about how those were created [here](https://github.com/med-air/FedBN). Follow the steps below in the `Environment Setup` section to download them. 
+**Dataset:**  This baseline makes use of the pre-processed partitions created and open source by the authors of the FedBN paper. You can read more about how those were created [here](https://github.com/med-air/FedBN). Follow the steps below in the `Environment Setup` section to download them.
 
 
 A more detailed explanation of the datasets is given in the following table.
 
-|     | MNIST     | MNIST-M   | SVHN  |  USPS    | SynthDigits |
-|--- |---        |---        |---    |---            |---    |
-| data type| handwritten digits| MNIST modification randomly colored with colored patches| Street view house numbers | handwritten digits from envelopes by the U.S. Postal Service | Syntehtic digits Windows TM font varying the orientation, blur and stroke colors |
-| color | greyscale | RGB | RGB | greyscale | RGB |
-| pixelsize | 28x28 | 28 x 28 | 32 x32 | 16 x16 | 32 x32 |
-| labels | 0-9 | 0-9 | 1-10 | 0-9 | 1-10 |
-| number of trainset | 60.000 | 60.000 | 73.257 | 9,298 | 50.000 |
-| number of testset| 10.000 | 10.000 | 26.032 | - | - |
-| image shape | (28,28) | (28,28,3) | (32,32,3) | (16,16) | (32,32,3) |
+|                    | MNIST              | MNIST-M                                                  | SVHN                      | USPS                                                         | SynthDigits                                                                      |
+| ------------------ | ------------------ | -------------------------------------------------------- | ------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| data type          | handwritten digits | MNIST modification randomly colored with colored patches | Street view house numbers | handwritten digits from envelopes by the U.S. Postal Service | Synthetic digits Windows TM font varying the orientation, blur and stroke colors |
+| color              | greyscale          | RGB                                                      | RGB                       | greyscale                                                    | RGB                                                                              |
+| pixelsize          | 28x28              | 28 x 28                                                  | 32 x32                    | 16 x16                                                       | 32 x32                                                                           |
+| labels             | 0-9                | 0-9                                                      | 1-10                      | 0-9                                                          | 1-10                                                                             |
+| number of trainset | 60.000             | 60.000                                                   | 73.257                    | 9,298                                                        | 50.000                                                                           |
+| number of testset  | 10.000             | 10.000                                                   | 26.032                    | -                                                            | -                                                                                |
+| image shape        | (28,28)            | (28,28,3)                                                | (32,32,3)                 | (16,16)                                                      | (32,32,3)                                                                        |
 
 
 **Training Hyperparameters:** By default (i.e. if you don't override anything in the config) these main hyperparameters used are shown in the table below. For a complete list of hyperparameters, please refer to the config files in `fedbn/conf`.
 
-| Description | Value |
-| ----------- | ----- |
-| rounds | 10 |
-| num_clients | 5 |
-| strategy_fraction_fit | 1.0 |
-| strategy.fraction_evaluate | 0.0 |
-| training samples per client| 743 |
-| client.l_r | 10E-2 |
-| local epochs | 1 |
-| loss | cross entropy loss |
-| optimizer | SGD |
-| client_resources.num_cpu | 2 |
-| client_resources.num_gpus | 0.0 |
+| Description                 | Value              |
+| --------------------------- | ------------------ |
+| rounds                      | 10                 |
+| num_clients                 | 5                  |
+| strategy_fraction_fit       | 1.0                |
+| strategy.fraction_evaluate  | 0.0                |
+| training samples per client | 743                |
+| client.l_r                  | 10E-2              |
+| local epochs                | 1                  |
+| loss                        | cross entropy loss |
+| optimizer                   | SGD                |
+| client_resources.num_cpu    | 2                  |
+| client_resources.num_gpus   | 0.0                |
 
 ## Environment Setup
 
@@ -93,7 +93,7 @@ cd data ..
 
 ## Running the Experiments
 
-First, activate your environment via `poetry shell`. The commands below show how to run the experiments and modify some of its key hyperparameters via the cli. Each time you run an experiment, the log and results will be stored inside `outputs/<date>/<time>`. Please refer to [the Documentation](https://flower.dev/docs/framework/how-to-run-simulations.html) to learn more about Flower Simulation.
+First, activate your environment via `poetry shell`. The commands below show how to run the experiments and modify some of its key hyperparameters via the cli. Each time you run an experiment, the log and results will be stored inside `outputs/<date>/<time>`. Please refer to [the Documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) to learn more about Flower Simulation.
 
 ```bash
 # run with default arguments
@@ -111,7 +111,7 @@ python -m fedbn.main strategy.fraction_evaluate=1 # your code will run slower
 # adjust hyperparameters like the number of rounds or batch size like this
 python -m fedbn.main num_rounds=100 dataset.batch_size
 
-# increase the number of clients like this (note this should be a multiple 
+# increase the number of clients like this (note this should be a multiple
 # of the number of dataset you involve in the experiment -- 5 by default)
 # this means that without changing other hyperparameters, you can only have
 # either 5,10,15,20,25,30,35,40,45 or 50 clients
@@ -132,7 +132,7 @@ python -m fedbn.main client=fedavg
 
 ## Limitations
 
-The pre-processing of the five datasets provided by the authors, imposes some limitations on the number of clients that can be spawned for the experiment. Naturally, this limitation can be circumvented if you edit the code, and in particular the `dataset.DigitsDataset` constructor. The aforementioned limitation happens because each dataset is partitioned into 10 disjoint sets and a 'DigitsDataset' can only be constructed by concatenating any set of such partitions (at least one, at most all 10). _How does the limitation manifest?_ Given that we have 5 datasets, if a client just takes one partition, a FL setup can accommodate 50 clients, one using a different partition. But, if you want for instance each client have 3 partitions of the same dataset (yes, clients can only hold data of one dataset) then the maximum number of clients gets reduced to 20. Following this logic you can see that if a client wants to use all 10 partitions of a given dataset, then only 5 clients can participate in the experiment. 
+The pre-processing of the five datasets provided by the authors, imposes some limitations on the number of clients that can be spawned for the experiment. Naturally, this limitation can be circumvented if you edit the code, and in particular the `dataset.DigitsDataset` constructor. The aforementioned limitation happens because each dataset is partitioned into 10 disjoint sets and a 'DigitsDataset' can only be constructed by concatenating any set of such partitions (at least one, at most all 10). _How does the limitation manifest?_ Given that we have 5 datasets, if a client just takes one partition, a FL setup can accommodate 50 clients, one using a different partition. But, if you want for instance each client have 3 partitions of the same dataset (yes, clients can only hold data of one dataset) then the maximum number of clients gets reduced to 20. Following this logic you can see that if a client wants to use all 10 partitions of a given dataset, then only 5 clients can participate in the experiment.
 
 Another limitation in the current implementation is that there should be the same number of clients for each dataset. Also, all clients should contain the same number of partitions of their respective datasets. You can remove these constrain my editing `dataset.get_data()`.
 

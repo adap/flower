@@ -15,18 +15,22 @@
 """Node state tests."""
 
 
+from typing import cast
+
 from flwr.client.node_state import NodeState
-from flwr.client.run_state import RunState
-from flwr.proto.task_pb2 import TaskIns
+from flwr.common import ConfigsRecord, Context
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 
-def _run_dummy_task(state: RunState) -> RunState:
-    if "counter" in state.state:
-        state.state["counter"] += "1"
-    else:
-        state.state["counter"] = "1"
+def _run_dummy_task(context: Context) -> Context:
+    counter_value: str = "1"
+    if "counter" in context.state.configs_records.keys():
+        counter_value = cast(str, context.state.configs_records["counter"]["count"])
+        counter_value += "1"
 
-    return state
+    context.state.configs_records["counter"] = ConfigsRecord({"count": counter_value})
+
+    return context
 
 
 def test_multirun_in_node_state() -> None:
@@ -43,17 +47,19 @@ def test_multirun_in_node_state() -> None:
         run_id = task.run_id
 
         # Register
-        node_state.register_runstate(run_id=run_id)
+        node_state.register_context(run_id=run_id)
 
         # Get run state
-        state = node_state.retrieve_runstate(run_id=run_id)
+        context = node_state.retrieve_context(run_id=run_id)
 
         # Run "task"
-        updated_state = _run_dummy_task(state)
+        updated_state = _run_dummy_task(context)
 
         # Update run state
-        node_state.update_runstate(run_id=run_id, run_state=updated_state)
+        node_state.update_context(run_id=run_id, context=updated_state)
 
     # Verify values
-    for run_id, state in node_state.run_states.items():
-        assert state.state["counter"] == expected_values[run_id]
+    for run_id, context in node_state.run_contexts.items():
+        assert (
+            context.state.configs_records["counter"]["count"] == expected_values[run_id]
+        )

@@ -1,11 +1,11 @@
 import utils
 from torch.utils.data import DataLoader
-import torchvision.datasets
 import torch
 import flwr as fl
 import argparse
 from collections import OrderedDict
 import warnings
+import datasets
 
 warnings.filterwarnings("ignore")
 
@@ -13,47 +13,49 @@ warnings.filterwarnings("ignore")
 class CifarClient(fl.client.NumPyClient):
     def __init__(
         self,
-        trainset: torchvision.datasets,
-        testset: torchvision.datasets,
-        device: str,
+        trainset: datasets.Dataset,
+        testset: datasets.Dataset,
+        device: torch.device,
+        model_str: str,
         validation_split: int = 0.1,
     ):
         self.device = device
         self.trainset = trainset
         self.testset = testset
         self.validation_split = validation_split
+        if model_str == "alexnet":
+            self.model = utils.load_alexnet(classes=10)
+        else:
+            self.model = utils.load_efficientnet(classes=10)
 
     def set_parameters(self, parameters):
-        """Loads a efficientnet model and replaces it parameters with the ones given."""
-        model = utils.load_efficientnet(classes=10)
-        params_dict = zip(model.state_dict().keys(), parameters)
+        """Loads a alexnet or efficientnet model and replaces it parameters with the
+        ones given."""
+
+        params_dict = zip(self.model.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        model.load_state_dict(state_dict, strict=True)
-        return model
+        self.model.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
         """Train parameters on the locally held training set."""
 
         # Update local model parameters
-        model = self.set_parameters(parameters)
+        self.set_parameters(parameters)
 
         # Get hyperparameters for this round
         batch_size: int = config["batch_size"]
         epochs: int = config["local_epochs"]
 
-        n_valset = int(len(self.trainset) * self.validation_split)
+        train_valid = self.trainset.train_test_split(self.validation_split, seed=42)
+        trainset = train_valid["train"]
+        valset = train_valid["test"]
 
-        valset = torch.utils.data.Subset(self.trainset, range(0, n_valset))
-        trainset = torch.utils.data.Subset(
-            self.trainset, range(n_valset, len(self.trainset))
-        )
+        train_loader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
+        val_loader = DataLoader(valset, batch_size=batch_size)
 
-        trainLoader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-        valLoader = DataLoader(valset, batch_size=batch_size)
+        results = utils.train(self.model, train_loader, val_loader, epochs, self.device)
 
-        results = utils.train(model, trainLoader, valLoader, epochs, self.device)
-
-        parameters_prime = utils.get_model_params(model)
+        parameters_prime = utils.get_model_params(self.model)
         num_examples_train = len(trainset)
 
         return parameters_prime, num_examples_train, results
@@ -61,7 +63,7 @@ class CifarClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         """Evaluate parameters on the locally held test set."""
         # Update local model parameters
-        model = self.set_parameters(parameters)
+        self.set_parameters(parameters)
 
         # Get config values
         steps: int = config["val_steps"]
@@ -69,17 +71,17 @@ class CifarClient(fl.client.NumPyClient):
         # Evaluate global model parameters on the local test data and return results
         testloader = DataLoader(self.testset, batch_size=16)
 
-        loss, accuracy = utils.test(model, testloader, steps, self.device)
+        loss, accuracy = utils.test(self.model, testloader, steps, self.device)
         return float(loss), len(self.testset), {"accuracy": float(accuracy)}
 
 
-def client_dry_run(device: str = "cpu"):
+def client_dry_run(device: torch.device = "cpu"):
     """Weak tests to check whether all client methods are working as expected."""
 
     model = utils.load_efficientnet(classes=10)
     trainset, testset = utils.load_partition(0)
-    trainset = torch.utils.data.Subset(trainset, range(10))
-    testset = torch.utils.data.Subset(testset, range(10))
+    trainset = trainset.select(range(10))
+    testset = testset.select(range(10))
     client = CifarClient(trainset, testset, device)
     client.fit(
         utils.get_model_params(model),
@@ -102,7 +104,7 @@ def main() -> None:
         help="Do a dry-run to check the client",
     )
     parser.add_argument(
-        "--partition",
+        "--client-id",
         type=int,
         default=0,
         choices=range(0, 10),
@@ -112,9 +114,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--toy",
-        type=bool,
-        default=False,
-        required=False,
+        action="store_true",
         help="Set to true to quicky run the client using only 10 datasamples. \
         Useful for testing purposes. Default: False",
     )
@@ -124,6 +124,14 @@ def main() -> None:
         default=False,
         required=False,
         help="Set to true to use GPU. Default: False",
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="efficientnet",
+        choices=["efficientnet", "alexnet"],
+        help="Use either Efficientnet or Alexnet models. \
+             If you want to achieve differential privacy, please use the Alexnet model",
     )
 
     args = parser.parse_args()
@@ -136,16 +144,14 @@ def main() -> None:
         client_dry_run(device)
     else:
         # Load a subset of CIFAR-10 to simulate the local data partition
-        trainset, testset = utils.load_partition(args.partition)
+        trainset, testset = utils.load_partition(args.client_id)
 
         if args.toy:
-            trainset = torch.utils.data.Subset(trainset, range(10))
-            testset = torch.utils.data.Subset(testset, range(10))
-
+            trainset = trainset.select(range(10))
+            testset = testset.select(range(10))
         # Start Flower client
-        client = CifarClient(trainset, testset, device)
-
-        fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
+        client = CifarClient(trainset, testset, device, args.model).to_client()
+        fl.client.start_client(server_address="127.0.0.1:8080", client=client)
 
 
 if __name__ == "__main__":

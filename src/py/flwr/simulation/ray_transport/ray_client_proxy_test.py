@@ -17,17 +17,30 @@
 
 from math import pi
 from random import shuffle
-from typing import List, Tuple, Type, cast
+from typing import Dict, List, Tuple, Type
 
 import ray
 
 from flwr.client import Client, NumPyClient
-from flwr.client.run_state import RunState
-from flwr.common import Code, GetPropertiesRes, Status
+from flwr.client.client_app import ClientApp
+from flwr.common import (
+    DEFAULT_TTL,
+    Config,
+    ConfigsRecord,
+    Context,
+    Message,
+    MessageTypeLegacy,
+    Metadata,
+    RecordSet,
+    Scalar,
+)
+from flwr.common.recordset_compat import (
+    getpropertiesins_to_recordset,
+    recordset_to_getpropertiesres,
+)
+from flwr.common.recordset_compat_test import _get_valid_getpropertiesins
 from flwr.simulation.ray_transport.ray_actor import (
-    ClientRes,
-    DefaultActor,
-    JobFn,
+    ClientAppActor,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
 )
@@ -40,32 +53,24 @@ class DummyClient(NumPyClient):
     def __init__(self, cid: str) -> None:
         self.cid = int(cid)
 
+    def get_properties(self, config: Config) -> Dict[str, Scalar]:
+        """Return properties by doing a simple calculation."""
+        result = int(self.cid) * pi
+
+        # store something in context
+        self.context.state.configs_records["result"] = ConfigsRecord(
+            {"result": str(result)}
+        )
+        return {"result": result}
+
 
 def get_dummy_client(cid: str) -> Client:
     """Return a DummyClient converted to Client type."""
     return DummyClient(cid).to_client()
 
 
-# A dummy run
-def job_fn(cid: str) -> JobFn:  # pragma: no cover
-    """Construct a simple job with cid dependency."""
-
-    def cid_times_pi(client: Client) -> ClientRes:  # pylint: disable=unused-argument
-        result = int(cid) * pi
-
-        # store something in state
-        client.numpy_client.state.state["result"] = str(result)  # type: ignore
-
-        # now let's convert it to a GetPropertiesRes response
-        return GetPropertiesRes(
-            status=Status(Code(0), message="test"), properties={"result": result}
-        )
-
-    return cid_times_pi
-
-
 def prep(
-    actor_type: Type[VirtualClientEngineActor] = DefaultActor,
+    actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
 ) -> Tuple[List[RayActorClientProxy], VirtualClientEngineActorPool]:  # pragma: no cover
     """Prepare ClientProxies and pool for tests."""
     client_resources = {"num_cpus": 1, "num_gpus": 0.0}
@@ -100,13 +105,24 @@ def test_cid_consistency_one_at_a_time() -> None:
     Submit one job and waits for completion. Then submits the next and so on
     """
     proxies, _ = prep()
+
+    getproperties_ins = _get_valid_getpropertiesins()
+    recordset = getpropertiesins_to_recordset(getproperties_ins)
+
     # submit jobs one at a time
     for prox in proxies:
-        res = prox._submit_job(  # pylint: disable=protected-access
-            job_fn=job_fn(prox.cid), timeout=None
+        message = prox._wrap_recordset_in_message(  # pylint: disable=protected-access
+            recordset,
+            MessageTypeLegacy.GET_PROPERTIES,
+            timeout=None,
+            group_id=0,
+        )
+        message_out = prox._submit_job(  # pylint: disable=protected-access
+            message=message, timeout=None
         )
 
-        res = cast(GetPropertiesRes, res)
+        res = recordset_to_getpropertiesres(message_out.content)
+
         assert int(prox.cid) * pi == res.properties["result"]
 
     ray.shutdown()
@@ -121,30 +137,43 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
     proxies, _ = prep()
     run_id = 0
 
+    getproperties_ins = _get_valid_getpropertiesins()
+    recordset = getpropertiesins_to_recordset(getproperties_ins)
+
     # submit all jobs (collect later)
     shuffle(proxies)
     for prox in proxies:
         # Register state
-        prox.proxy_state.register_runstate(run_id=run_id)
+        prox.proxy_state.register_context(run_id=run_id)
         # Retrieve state
-        state = prox.proxy_state.retrieve_runstate(run_id=run_id)
+        state = prox.proxy_state.retrieve_context(run_id=run_id)
 
-        job = job_fn(prox.cid)
+        message = prox._wrap_recordset_in_message(  # pylint: disable=protected-access
+            recordset,
+            message_type=MessageTypeLegacy.GET_PROPERTIES,
+            timeout=None,
+            group_id=0,
+        )
         prox.actor_pool.submit_client_job(
-            lambda a, c_fn, j_fn, cid, state: a.run.remote(c_fn, j_fn, cid, state),
-            (prox.client_fn, job, prox.cid, state),
+            lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
+            (prox.app_fn, message, prox.cid, state),
         )
 
     # fetch results one at a time
     shuffle(proxies)
     for prox in proxies:
-        res, updated_state = prox.actor_pool.get_client_result(prox.cid, timeout=None)
-        prox.proxy_state.update_runstate(run_id, run_state=updated_state)
-        res = cast(GetPropertiesRes, res)
+        message_out, updated_context = prox.actor_pool.get_client_result(
+            prox.cid, timeout=None
+        )
+        prox.proxy_state.update_context(run_id, context=updated_context)
+        res = recordset_to_getpropertiesres(message_out.content)
+
         assert int(prox.cid) * pi == res.properties["result"]
         assert (
             str(int(prox.cid) * pi)
-            == prox.proxy_state.retrieve_runstate(run_id).state["result"]
+            == prox.proxy_state.retrieve_context(run_id).state.configs_records[
+                "result"
+            ]["result"]
         )
 
     ray.shutdown()
@@ -156,20 +185,39 @@ def test_cid_consistency_without_proxies() -> None:
     num_clients = len(proxies)
     cids = [str(cid) for cid in range(num_clients)]
 
+    getproperties_ins = _get_valid_getpropertiesins()
+    recordset = getpropertiesins_to_recordset(getproperties_ins)
+
+    def _load_app() -> ClientApp:
+        return ClientApp(client_fn=get_dummy_client)
+
     # submit all jobs (collect later)
     shuffle(cids)
     for cid in cids:
-        job = job_fn(cid)
+        message = Message(
+            content=recordset,
+            metadata=Metadata(
+                run_id=0,
+                message_id="",
+                group_id=str(0),
+                src_node_id=0,
+                dst_node_id=12345,
+                reply_to_message="",
+                ttl=DEFAULT_TTL,
+                message_type=MessageTypeLegacy.GET_PROPERTIES,
+                partition_id=int(cid),
+            ),
+        )
         pool.submit_client_job(
             lambda a, c_fn, j_fn, cid_, state: a.run.remote(c_fn, j_fn, cid_, state),
-            (get_dummy_client, job, cid, RunState(state={})),
+            (_load_app, message, cid, Context(state=RecordSet())),
         )
 
     # fetch results one at a time
     shuffle(cids)
     for cid in cids:
-        res, _ = pool.get_client_result(cid, timeout=None)
-        res = cast(GetPropertiesRes, res)
+        message_out, _ = pool.get_client_result(cid, timeout=None)
+        res = recordset_to_getpropertiesres(message_out.content)
         assert int(cid) * pi == res.properties["result"]
 
     ray.shutdown()
