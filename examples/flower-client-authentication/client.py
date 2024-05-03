@@ -39,6 +39,6 @@ def client_fn(cid: str):
 
 
 # Run via `flower-client-app client:app`
-app = fl.client.ClientApp(
+app = ClientApp(
     client_fn=client_fn,
 )
