@@ -172,6 +172,32 @@ class State(abc.ABC):
         """
 
     @abc.abstractmethod
+    def store_server_private_public_key(
+        self, private_key: bytes, public_key: bytes
+    ) -> None:
+        """Store `server_private_key` and `server_public_key` in state."""
+
+    @abc.abstractmethod
+    def get_server_private_key(self) -> Optional[bytes]:
+        """Retrieve `server_private_key` in urlsafe bytes."""
+
+    @abc.abstractmethod
+    def get_server_public_key(self) -> Optional[bytes]:
+        """Retrieve `server_public_key` in urlsafe bytes."""
+
+    @abc.abstractmethod
+    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of `client_public_keys` in state."""
+
+    @abc.abstractmethod
+    def store_client_public_key(self, public_key: bytes) -> None:
+        """Store a `client_public_key` in state."""
+
+    @abc.abstractmethod
+    def get_client_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored `client_public_keys` as a set."""
+
+    @abc.abstractmethod
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat.
 

@@ -1,0 +1,13 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "bare_client_auth_test"
+version = "0.1.0"
+description = "Client-auth-enabled bare Federated Learning test with Flower"
+authors = ["The Flower Authors <hello@flower.ai>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+flwr = { path = "../../", develop = true }
