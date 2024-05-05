@@ -1,6 +1,6 @@
 """$project_name: A Flower / HuggingFace Transformers app."""
 
-import flwr as fl
+from flwr.client import ClientApp, NumPyClient
 from transformers import AutoModelForSequenceClassification
 
 from $import_name.task import (
@@ -15,7 +15,7 @@ from $import_name.task import (
 
 
 # Flower client
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def __init__(self, net, trainloader, testloader):
         self.net = net
         self.trainloader = trainloader
@@ -50,6 +50,6 @@ def client_fn(cid):
 
 
 # Flower ClientApp
-app = fl.client.ClientApp(
+app = ClientApp(
     client_fn,
 )
