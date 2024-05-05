@@ -145,10 +145,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
             # Verify node_id
-            try:
-                node_id = self.state.get_node_id(client_public_key_bytes)
-            except KeyError:
-                node_id = None
+            node_id = self.state.get_node_id(client_public_key_bytes)
 
             if not self._verify_node_id(node_id, request):
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
