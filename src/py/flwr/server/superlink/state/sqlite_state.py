@@ -546,6 +546,7 @@ class SqliteState(State):  # pylint: disable=R0904
         row = self.query(query, {"public_key": public_key})
 
         if len(row) > 0:
+            log(ERROR, "Unexpected node registration failure.")
             return 0
 
         query = (
@@ -565,21 +566,23 @@ class SqliteState(State):  # pylint: disable=R0904
 
     def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Delete a client node."""
-        query = "SELECT node_id FROM node WHERE node_id = :node_id;"
-        row = self.query(query, {"node_id": node_id})
-
-        if len(row) == 0:
-            raise ValueError(f"Node {node_id} not found")
+        query = "DELETE FROM node WHERE node_id = ?"
+        params = (node_id,)
 
         if public_key is not None:
-            query = "SELECT node_id FROM node WHERE public_key = :public_key;"
-            row = self.query(query, {"public_key": public_key})
+            query += " AND public_key = ?"
+            params += (public_key,)  # type: ignore
 
-            if len(row) < 1 or row[0]["node_id"] != node_id:
-                raise ValueError("Public key or node_id not found")
+        if self.conn is None:
+            raise AttributeError("State is not initialized.")
 
-        query = "DELETE FROM node WHERE node_id = ?;"
-        self.query(query, (node_id,))
+        try:
+            with self.conn:
+                rows = self.conn.execute(query, params)
+                if rows.rowcount < 1:
+                    raise ValueError("Public key or node_id not found")
+        except KeyError as exc:
+            log(ERROR, {"query": query, "data": params, "exception": exc})
 
     def get_nodes(self, run_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
