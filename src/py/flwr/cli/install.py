@@ -39,7 +39,7 @@ def install(
         typer.Option(help="The desired install path."),
     ] = None,
 ) -> None:
-    """Install a Flower project from a FAB file.
+    """Install a Flower App Bundle.
 
     It can be ran with a single FAB file argument:
 
