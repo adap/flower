@@ -37,7 +37,7 @@ flower-client-app
 ~~~~~~~~~~~~~~~~~
 
 .. argparse::
-   :module: flwr.client.app
+   :module: flwr.client.supernode.app
    :func: _parse_args_run_client_app
    :prog: flower-client-app
 
