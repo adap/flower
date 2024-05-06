@@ -205,7 +205,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
             request=delete_node_request,
             timeout=timeout,
         )
-  
+
         # Cleanup
         node = None
 
