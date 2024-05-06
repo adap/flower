@@ -10,7 +10,7 @@ The client authentication process is similar to how Github SSH authentication wo
 * Shared secret is used to compute the hmac value of the message sent from client to server as a token
 * Server verifies the token sent from the client
 
-You can find the complete code example demonstrating a secure connection
+You can find the complete code example demonstrating federated learning with Flower in an authenticated setting
 `here <https://github.com/adap/flower/tree/main/examples/flower-client-authentication>`_.
 
 .. note::
@@ -26,8 +26,8 @@ After establishing secure connection, you can now enable client authentication i
 
 .. code-block:: bash
 
-    flower-superlink \
-        --certificates certificates/ca.crt certificates/server.pem certificates/server.key \
+    flower-superlink
+        --certificates certificates/ca.crt certificates/server.pem certificates/server.key
         --require-client-authentication ./keys/client_public_keys.csv ./keys/server_credentials ./keys/server_credentials.pub
     
 Let's break down the :code:`--require-client-authentication` flag:
@@ -45,9 +45,9 @@ Similar to the long-running Flower server :code:`Superlink`, you can easily enab
 
 .. code-block:: bash
     
-    flower-client-app client:app \
-        --root-certificates certificates/ca.crt \
-        --server 127.0.0.1:9092 \
+    flower-client-app client:app
+        --root-certificates certificates/ca.crt
+        --server 127.0.0.1:9092
         --authentication-keys ./keys/client_credentials ./keys/client_credentials.pub
 
 The :code:`--authentication-keys` flag expects two arguments: a path to the client's private and public key file. You can generate a private and public key pair using :code:`ssh-keygen -t ecdsa -b 384`.
