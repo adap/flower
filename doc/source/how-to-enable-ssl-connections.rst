@@ -1,14 +1,14 @@
 Enable SSL connections
 ======================
 
-This guide describes how to a SSL-enabled secure Flower server can be started and
-how a Flower client can establish a secure connections to it.
+This guide describes how to a SSL-enabled secure Flower server (:code:`SuperLink`) can be started and
+how a Flower client (:code:`SuperNode`) can establish a secure connections to it.
 
 A complete code example demonstrating a secure connection can be found 
 `here <https://github.com/adap/flower/tree/main/examples/advanced-tensorflow>`_.
 
-The code example comes with a README.md file which will explain how to start it. Although it is
-already SSL-enabled, it might be less descriptive on how. Stick to this guide for a deeper
+The code example comes with a :code:`README.md` file which explains how to start it. Although it is
+already SSL-enabled, it might be less descriptive on how it does so. Stick to this guide for a deeper
 introduction to the topic.
 
 
@@ -19,7 +19,6 @@ Using SSL-enabled connections requires certificates to be passed to the server a
 the purpose of this guide we are going to generate self-signed certificates. As this can become
 quite complex we are going to ask you to run the script in
 :code:`examples/advanced-tensorflow/certificates/generate.sh`
-
 with the following command sequence:
 
 .. code-block:: bash
@@ -29,30 +28,29 @@ with the following command sequence:
 
 This will generate the certificates in :code:`examples/advanced-tensorflow/.cache/certificates`.
 
-The approach how the SSL certificates are generated in this example can serve as an inspiration and
-starting point but should not be taken as complete for production environments. Please refer to other
+The approach for generating SSL certificates in the context of this example can serve as an inspiration and
+starting point, but it should not be used as a reference for production environments. Please refer to other
 sources regarding the issue of correctly generating certificates for production environments.
+For non-critical prototyping or research projects, it might be sufficient to use the self-signed certificates generated using
+the scripts mentioned in this guide.
 
-In case you are a researcher you might be just fine using the self-signed certificates generated using
-the scripts which are part of this guide.
 
+Server (SuperLink)
+------------------
 
-Server
-------
-
-We are now going to show how to write a sever which uses the previously generated scripts.
+Use the following terminal command to start a sever (SuperLink) that uses the previously generated certificates:
 
 .. code-block:: bash
 
     flower-superlink --certificates certificates/ca.crt certificates/server.pem certificates/server.key
 
-When providing certificates, the server expects a tuple of three certificates paths: CA certificate, server certificate, and server private key.
+When providing certificates, the server expects a tuple of three certificates paths: CA certificate, server certificate and server private key.
 
 
-Client
-------
+Client (SuperNode)
+------------------
 
-We are now going to show how to write a client which uses the previously generated scripts:
+Use the following terminal command to start a client (SuperNode) that uses the previously generated certificates:
 
 .. code-block:: bash
 
@@ -60,14 +58,14 @@ We are now going to show how to write a client which uses the previously generat
         --root-certificates certificates/ca.crt
         --server 127.0.0.1:9092
 
-When setting :code:`root_certificates`, the client expects a file path to a PEM-encoded root certificates.
+When setting :code:`root_certificates`, the client expects a file path to PEM-encoded root certificates.
 
 
 Conclusion
 ----------
 
-You should now have learned how to generate self-signed certificates using the given script, start a
-SSL-enabled server, and have a client establish a secure connection to it.
+You should now have learned how to generate self-signed certificates using the given script, start an
+SSL-enabled server and have a client establish a secure connection to it.
 
 
 Additional resources
