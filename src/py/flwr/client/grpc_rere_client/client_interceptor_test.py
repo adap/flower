@@ -26,6 +26,7 @@ import grpc
 
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.constant import TRANSPORT_TIMEOUT_DEFAULT
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.record import RecordSet
@@ -201,6 +202,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             retry_invoker,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
+            TRANSPORT_TIMEOUT_DEFAULT,
             (self._client_private_key, self._client_public_key),
         ) as conn:
             _, _, create_node, _, _ = conn
@@ -226,6 +228,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             retry_invoker,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
+            TRANSPORT_TIMEOUT_DEFAULT,
             (self._client_private_key, self._client_public_key),
         ) as conn:
             _, _, _, delete_node, _ = conn
@@ -265,6 +268,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             retry_invoker,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
+            TRANSPORT_TIMEOUT_DEFAULT,
             (self._client_private_key, self._client_public_key),
         ) as conn:
             receive, _, _, _, _ = conn
@@ -305,6 +309,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             retry_invoker,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
+            TRANSPORT_TIMEOUT_DEFAULT,
             (self._client_private_key, self._client_public_key),
         ) as conn:
             _, send, _, _, _ = conn
@@ -344,6 +349,7 @@ class TestAuthenticateClientInterceptor(unittest.TestCase):
             retry_invoker,
             GRPC_MAX_MESSAGE_LENGTH,
             None,
+            TRANSPORT_TIMEOUT_DEFAULT,
             (self._client_private_key, self._client_public_key),
         ) as conn:
             _, _, _, _, get_run = conn
