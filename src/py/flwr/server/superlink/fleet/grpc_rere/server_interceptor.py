@@ -16,17 +16,16 @@
 
 
 import base64
-from logging import INFO
-from typing import Any, Callable, Sequence, Set, Tuple, Union
+from logging import WARNING
+from typing import Any, Callable, Sequence, Tuple, Union
 
 import grpc
-from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    bytes_to_private_key,
     bytes_to_public_key,
     generate_shared_key,
-    public_key_to_bytes,
     verify_hmac,
 )
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -43,6 +42,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
 )
+from flwr.server.superlink.state import State
 
 _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
@@ -79,22 +79,21 @@ def _get_value_from_tuples(
 class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
     """Server interceptor for client authentication."""
 
-    def __init__(
-        self,
-        client_public_keys: Set[bytes],
-        private_key: ec.EllipticCurvePrivateKey,
-        public_key: ec.EllipticCurvePublicKey,
-    ):
-        self.server_private_key = private_key
-        self.client_public_keys = client_public_keys
-        self.encoded_server_public_key = base64.urlsafe_b64encode(
-            public_key_to_bytes(public_key)
-        )
-        log(
-            INFO,
-            "Client authentication enabled with %d known public keys",
-            len(client_public_keys),
-        )
+    def __init__(self, state: State):
+        self.state = state
+
+        self.client_public_keys = state.get_client_public_keys()
+        if len(self.client_public_keys) == 0:
+            log(WARNING, "Authentication enabled, but no known public keys configured")
+
+        private_key = self.state.get_server_private_key()
+        public_key = self.state.get_server_public_key()
+
+        if private_key is None or public_key is None:
+            raise ValueError("Error loading authentication keys")
+
+        self.server_private_key = bytes_to_private_key(private_key)
+        self.encoded_server_public_key = base64.urlsafe_b64encode(public_key)
 
     def intercept_service(
         self,
