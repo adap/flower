@@ -42,23 +42,11 @@ Server
 
 We are now going to show how to write a sever which uses the previously generated scripts.
 
-.. code-block:: python
+.. code-block:: bash
 
-  from pathlib import Path
-  import flwr as fl
+    flower-superlink --certificates certificates/ca.crt certificates/server.pem certificates/server.key
 
-  # Start server
-  fl.server.start_server(
-      server_address="0.0.0.0:8080",
-      config=fl.server.ServerConfig(num_rounds=4),
-      certificates=(
-          Path(".cache/certificates/ca.crt").read_bytes(),
-          Path(".cache/certificates/server.pem").read_bytes(),
-          Path(".cache/certificates/server.key").read_bytes(),
-      )
-  )
-
-When providing certificates, the server expects a tuple of three certificates. :code:`Path` can be used to easily read the contents of those files into byte strings, which is the data type :code:`start_server` expects.
+When providing certificates, the server expects a tuple of three certificates paths.
 
 
 Client
@@ -66,23 +54,13 @@ Client
 
 We are now going to show how to write a client which uses the previously generated scripts:
 
-.. code-block:: python
+.. code-block:: bash
 
-  from pathlib import Path
-  import flwr as fl
+    flower-client-app client:app
+        --root-certificates certificates/ca.crt
+        --server 127.0.0.1:9092
 
-  # Define client somewhere
-  client = MyFlowerClient()
-
-  # Start client
-  fl.client.start_client(
-      "localhost:8080",
-      client=client.to_client(),
-      root_certificates=Path(".cache/certificates/ca.crt").read_bytes(),
-  )
-
-When setting :code:`root_certificates`, the client expects the PEM-encoded root certificates as a byte string.
-We are again using :code:`Path` to simplify reading those as byte strings.
+When setting :code:`root_certificates`, the client expects the file path to a PEM-encoded root certificates.
 
 
 Conclusion
