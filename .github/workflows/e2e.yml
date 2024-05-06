@@ -149,6 +149,9 @@ jobs:
       - name: Run driver test with client authentication
         if: ${{ matrix.directory == 'bare-client-auth' }}
         run: ./../test_driver.sh bare client-auth
+      - name: Run reconnection test with SQLite database
+        if: ${{ matrix.directory == 'bare' }}
+        run: ./../test_reconnection.sh sqlite
 
   strategies:
     runs-on: ubuntu-22.04
