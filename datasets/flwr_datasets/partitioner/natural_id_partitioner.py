@@ -49,7 +49,7 @@ class NaturalIdPartitioner(Partitioner):
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import NaturalIdPartitioner
     >>>
-    >>> partitioner = NaturalIdPartitioner(partition_by="character_id")
+    >>> partitioner = NaturalIdPartitioner(partition_by="user")
     >>> fds = FederatedDataset(dataset="sentiment140",
     >>>                        partitioners={"train": partitioner})
     >>> partition = fds.load_partition(0)
