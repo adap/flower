@@ -9,8 +9,8 @@ Flower node authentication works similar to how GitHub SSH authentication works:
 * Shared secret is used to compute the HMAC value of the message sent from SuperNode to SuperLink as a token
 * SuperLink verifies the token
 
-You can find the complete code example demonstrating federated learning with Flower in an authenticated setting
-`here <https://github.com/adap/flower/tree/main/examples/flower-client-authentication>`_.
+We recommend you to check out the complete `code example <https://github.com/adap/flower/tree/main/examples/flower-client-authentication>`_ demonstrating federated learning with Flower in an authenticated setting.
+
 
 .. note::
     This guide covers a preview feature that might change in future versions of Flower.
@@ -35,6 +35,9 @@ Use the following terminal command to start a Flower :code:`SuperNode` that has 
 Let's break down the :code:`--require-client-authentication` flag:
 
 1. The first argument is a path to a CSV file storing all known node public keys. You need to store all known node public keys that are allowed to participate in a federation in one CSV file (:code:`.csv`).
+
+    A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas and without any comments. For an example, refer to our code sample, which contains a CSV file with two known node public keys.
+
 2. The second and third arguments are paths to the server's private and public keys. For development purposes, you can generate a private and public key pair using :code:`ssh-keygen -t ecdsa -b 384`.
 
 .. note::
