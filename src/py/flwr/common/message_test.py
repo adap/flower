@@ -194,7 +194,7 @@ def test_create_reply(
         ),
     ],
 )
-def test_repr(cls: type[Any], kwargs: Dict[str, Any]) -> None:
+def test_repr(cls: type, kwargs: Dict[str, Any]) -> None:
     """Test string representations of Metadata/Message/Error."""
     # Prepare
     anon_cls = namedtuple(cls.__qualname__, kwargs.keys())  # type: ignore
