@@ -26,7 +26,7 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class NaturalIdPartitioner(Partitioner):
-    """Partitioner for dataset that can be divided by a reference to id in dataset.
+    """Partitioner for a dataset that can be divided by a column with partition ids.
 
     Parameters
     ----------
