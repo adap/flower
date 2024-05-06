@@ -46,7 +46,7 @@ We are now going to show how to write a sever which uses the previously generate
 
     flower-superlink --certificates certificates/ca.crt certificates/server.pem certificates/server.key
 
-When providing certificates, the server expects a tuple of three certificates paths.
+When providing certificates, the server expects a tuple of three certificates paths: CA certificate, server certificate, and server private key.
 
 
 Client
