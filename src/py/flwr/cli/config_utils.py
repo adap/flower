@@ -14,7 +14,7 @@
 # ==============================================================================
 """Utility to validate the `pyproject.toml` file."""
 
-import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import tomli
@@ -23,7 +23,7 @@ from flwr.common import object_ref
 
 
 def load_and_validate_with_defaults(
-    path: Optional[str] = None,
+    path: Optional[Path] = None,
 ) -> Tuple[Optional[Dict[str, Any]], List[str], List[str]]:
     """Load and validate pyproject.toml as dict.
 
@@ -37,7 +37,8 @@ def load_and_validate_with_defaults(
 
     if config is None:
         errors = [
-            "Project configuration could not be loaded. pyproject.toml does not exist."
+            "Project configuration could not be loaded. "
+            "`pyproject.toml` does not exist."
         ]
         return (None, errors, [])
 
@@ -57,22 +58,23 @@ def load_and_validate_with_defaults(
     return (config, errors, warnings)
 
 
-def load(path: Optional[str] = None) -> Optional[Dict[str, Any]]:
+def load(path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
     """Load pyproject.toml and return as dict."""
     if path is None:
-        cur_dir = os.getcwd()
-        toml_path = os.path.join(cur_dir, "pyproject.toml")
+        cur_dir = Path.cwd()
+        toml_path = cur_dir / "pyproject.toml"
     else:
         toml_path = path
 
-    if not os.path.isfile(toml_path):
+    if not toml_path.is_file():
         return None
 
-    with open(toml_path, encoding="utf-8") as toml_file:
+    with toml_path.open(encoding="utf-8") as toml_file:
         data = tomli.loads(toml_file.read())
         return data
 
 
+# pylint: disable=too-many-branches
 def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
     """Validate pyproject.toml fields."""
     errors = []
@@ -94,13 +96,16 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
 
     if "flower" not in config:
         errors.append("Missing [flower] section")
-    elif "components" not in config["flower"]:
-        errors.append("Missing [flower.components] section")
     else:
-        if "serverapp" not in config["flower"]["components"]:
-            errors.append('Property "serverapp" missing in [flower.components]')
-        if "clientapp" not in config["flower"]["components"]:
-            errors.append('Property "clientapp" missing in [flower.components]')
+        if "publisher" not in config["flower"]:
+            errors.append('Property "publisher" missing in [flower]')
+        if "components" not in config["flower"]:
+            errors.append("Missing [flower.components] section")
+        else:
+            if "serverapp" not in config["flower"]["components"]:
+                errors.append('Property "serverapp" missing in [flower.components]')
+            if "clientapp" not in config["flower"]["components"]:
+                errors.append('Property "clientapp" missing in [flower.components]')
 
     return len(errors) == 0, errors, warnings
 

@@ -324,7 +324,7 @@ def test_message_to_and_from_taskins(
     maker = RecordMaker(state=1)
     metadata = maker.metadata()
     # pylint: disable-next=protected-access
-    metadata._src_node_id = 0  # Assume driver node
+    metadata.__dict__["_src_node_id"] = 0  # Assume driver node
 
     original = Message(
         metadata=metadata,
