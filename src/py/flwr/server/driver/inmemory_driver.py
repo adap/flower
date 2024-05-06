@@ -23,7 +23,7 @@ from uuid import UUID
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.server.superlink.state import InMemoryState, StateFactory
+from flwr.server.superlink.state import StateFactory
 
 from .driver import Driver
 
@@ -51,15 +51,7 @@ class InMemoryDriver(Driver):
         self.fab_id = fab_id if fab_id is not None else ""
         self.fab_version = fab_version if fab_version is not None else ""
         self.node = Node(node_id=0, anonymous=True)
-        state = state_factory.state()
-
-        if not isinstance(state, InMemoryState):
-            raise NotImplementedError(
-                f"{self.__class__.__name__} is only compatible with an `InMemoryState` "
-                f"state. You used {type(state)}"
-            )
-
-        self.state = state
+        self.state = state_factory.state()
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
@@ -137,9 +129,9 @@ class InMemoryDriver(Driver):
             taskins = message_to_taskins(msg)
             # Store in state
             taskins.task.pushed_at = time.time()
-            res = self.state.store_task_ins(taskins)
-            if res:
-                task_ids.append(str(res))
+            task_id = self.state.store_task_ins(taskins)
+            if task_id:
+                task_ids.append(str(task_id))
 
         return task_ids
 

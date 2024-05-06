@@ -18,6 +18,7 @@
 import os
 import time
 import unittest
+from typing import Iterable, List, Tuple
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
@@ -36,16 +37,49 @@ from flwr.server.superlink.state import StateFactory
 from .inmemory_driver import InMemoryDriver
 
 
+def push_messages(driver: InMemoryDriver, num_nodes: int) -> Tuple[Iterable[str], int]:
+    """Help push messages to state."""
+    for _ in range(num_nodes):
+        driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
+    num_messages = 3
+    node_id = 1
+    msgs = [
+        driver.create_message(RecordSet(), "message_type", node_id, "")
+        for _ in range(num_messages)
+    ]
+
+    # Execute: push messages
+    return driver.push_messages(msgs), node_id
+
+
+def get_replies(
+    driver: InMemoryDriver, msg_ids: Iterable[str], node_id: int
+) -> List[str]:
+    """Help create message replies and pull taskres from state."""
+    taskins = driver.state.get_task_ins(node_id, limit=len(list(msg_ids)))
+    for taskin in taskins:
+        msg = message_from_taskins(taskin)
+        reply_msg = msg.create_reply(RecordSet())
+        task_res = message_to_taskres(reply_msg)
+        task_res.task.pushed_at = time.time()
+        driver.state.store_task_res(task_res=task_res)
+
+    # Execute: Pull messages
+    pulled_msgs = driver.pull_messages(msg_ids)
+    return [msg.metadata.reply_to_message for msg in pulled_msgs]
+
+
 class TestInMemoryDriver(unittest.TestCase):
     """Tests for `InMemoryDriver` class."""
 
     def setUp(self) -> None:
-        """Initialize State and Driver instance before each test."""
-        # Create driver
-        state_factory = StateFactory(":flwr-in-memory-state:")
-        self.driver = InMemoryDriver(state_factory)
+        """Initialize State and Driver instance before each test.
 
+        Driver uses the default StateFactory (i.e. SQLite)
+        """
+        # Create driver
         self.num_nodes = 42
+        self.driver = InMemoryDriver(StateFactory(""))
         self.driver.state = MagicMock()
         self.driver.state.get_nodes.return_value = [
             int.from_bytes(os.urandom(8), "little", signed=True)
@@ -117,45 +151,6 @@ class TestInMemoryDriver(unittest.TestCase):
         self.assertEqual(len(pulled_msgs), 2)
         self.assertEqual(reply_tos, msg_ids)
 
-    def test_task_store_consistency_after_push_pull(self) -> None:
-        """Test tasks are deleted once messages are pulled."""
-        # Prepare
-        state_factory = StateFactory(":flwr-in-memory-state:")
-        self.driver = InMemoryDriver(state_factory)
-        for _ in range(self.num_nodes):
-            self.driver.state.create_node(ping_interval=PING_MAX_INTERVAL)
-        num_messages = 3
-        node_id = 1
-        msgs = [
-            self.driver.create_message(RecordSet(), "message_type", node_id, "")
-            for _ in range(num_messages)
-        ]
-
-        # Execute: push messages
-        msg_ids = self.driver.push_messages(msgs)
-
-        # Check recorded
-        self.assertEqual(len(self.driver.state.task_ins_store), num_messages)
-
-        # Prepare: create replies
-        taskins = self.driver.state.get_task_ins(node_id, limit=num_messages)
-        for taskin in taskins:
-            msg = message_from_taskins(taskin)
-            reply_msg = msg.create_reply(RecordSet())
-            task_res = message_to_taskres(reply_msg)
-            task_res.task.pushed_at = time.time()
-            self.driver.state.store_task_res(task_res=task_res)
-
-        # Execute: Pull messages
-        pulled_msgs = self.driver.pull_messages(msg_ids)
-        reply_tos = [msg.metadata.reply_to_message for msg in pulled_msgs]
-
-        # Assert
-        self.assertEqual(len(msgs), num_messages)
-        self.assertEqual(reply_tos, msg_ids)
-        self.assertEqual(len(self.driver.state.task_res_store), 0)
-        self.assertEqual(len(self.driver.state.task_ins_store), 0)
-
     def test_send_and_receive_messages_complete(self) -> None:
         """Test send and receive all messages successfully."""
         # Prepare
@@ -209,3 +204,44 @@ class TestInMemoryDriver(unittest.TestCase):
         # Assert
         self.assertLess(time.time() - start_time, 0.2)
         self.assertEqual(len(ret_msgs), 0)
+
+    def test_task_store_consistency_after_push_pull_sqlitestate(self) -> None:
+        """Test tasks are deleted in sqlite state once messages are pulled."""
+        # Prepare
+        self.driver = InMemoryDriver(StateFactory(""))
+        msg_ids, node_id = push_messages(self.driver, self.num_nodes)
+
+        # Check recorded
+        task_ins = self.driver.state.query("SELECT * FROM task_ins;")  # type: ignore
+        self.assertEqual(len(task_ins), len(list(msg_ids)))
+
+        # Prepare: create replies
+        reply_tos = get_replies(self.driver, msg_ids, node_id)
+
+        # Query number of task_ins and task_res in State
+        task_res = self.driver.state.query("SELECT * FROM task_res;")  # type: ignore
+        task_ins = self.driver.state.query("SELECT * FROM task_ins;")  # type: ignore
+
+        # Assert
+        self.assertEqual(reply_tos, msg_ids)
+        self.assertEqual(len(task_res), 0)
+        self.assertEqual(len(task_ins), 0)
+
+    def test_task_store_consistency_after_push_pull_inmemory_state(self) -> None:
+        """Test tasks are deleted in in-memory state once messages are pulled."""
+        # Prepare
+        self.driver = InMemoryDriver(StateFactory(":flwr-in-memory-state:"))
+        msg_ids, node_id = push_messages(self.driver, self.num_nodes)
+
+        # Check recorded
+        self.assertEqual(
+            len(self.driver.state.task_ins_store), len(list(msg_ids))  # type: ignore
+        )
+
+        # Prepare: create replies
+        reply_tos = get_replies(self.driver, msg_ids, node_id)
+
+        # Assert
+        self.assertEqual(reply_tos, msg_ids)
+        self.assertEqual(len(self.driver.state.task_res_store), 0)  # type: ignore
+        self.assertEqual(len(self.driver.state.task_ins_store), 0)  # type: ignore
