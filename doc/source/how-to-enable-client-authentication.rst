@@ -17,8 +17,8 @@ You can find the complete code example demonstrating federated learning with Flo
     This guide covers experimental features that might change in future versions of Flower, and client authentication is only available in the gRPC-rere stack with SSL connection enabled.
 
 
-Enable client authentication in Flower :code:`Superlink`
---------------------------------------------------------
+Enable client authentication in :code:`Superlink`
+-------------------------------------------------
 
 To enable client authentication, first you need to establish SSL connection so that the server-client communication is secure. You can find the complete guide
 `here <https://flower.ai/docs/framework/how-to-enable-ssl-connections.html>`_.
@@ -38,8 +38,8 @@ Let's break down the :code:`--require-client-authentication` flag:
 Currently, there is no support to dynamically remove, edit, or add known client public keys to the server, so you need to shutdown the server, manually change the csv file, and restart the server again.
 
 
-Enable client authentication in Flower :code:`ClientApp`
---------------------------------------------------------
+Enable client authentication in :code:`ClientApp`
+-------------------------------------------------
 
 Similar to the long-running Flower server :code:`Superlink`, you can easily enable client authentication in the :code:`ClientApp` by typing the following code in a terminal:
 
