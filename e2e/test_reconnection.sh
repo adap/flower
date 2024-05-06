@@ -19,20 +19,46 @@ case "$1" in
     ;;
 esac
 
-timeout 2m flower-superlink $db_arg $rest_arg &
+dir_arg="--dir ./.."
+
+timeout 2m flower-superlink --insecure $db_arg $rest_arg &
 sl_pid=$!
 sleep 3
 
-timeout 2m flower-client-app client:app $rest_arg --server $server_address &
+timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
 cl1_pid=$!
 sleep 3
 
-timeout 2m flower-client-app client:app $rest_arg --server $server_address &
+timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
 cl2_pid=$!
 sleep 3
 
-timeout 2m flower-server-app server:app $rest_arg --server $server_address &
+# Kill superlink
+kill $sl_pid
+sleep 5
+
+# Restart superlink
+timeout 2m flower-superlink --insecure $db_arg $rest_arg &
+sl_pid=$!
+sleep 3
+
+# Kill first client
+kill $cl1_pid
+sleep 5
+
+timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
+cl1_pid=$!
+sleep 3
+
+timeout 2m flower-server-app server:app --insecure $dir_arg $rest_arg --server $server_address &
 pid=$!
+sleep 1
+
+kill $cl1_pid
+sleep 1
+
+timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
+cl1_pid=$!
 
 wait $pid
 res=$?
