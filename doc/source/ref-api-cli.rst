@@ -50,3 +50,13 @@ flower-server-app
    :module: flwr.server.run_serverapp
    :func: _parse_args_run_server_app
    :prog: flower-server-app
+
+.. _flower-simulation-apiref:
+
+flower-simulation
+~~~~~~~~~~~~~~~~~
+
+.. argparse::
+   :module: flwr.simulation.run_simulation
+   :func: _parse_args_run_simulation
+   :prog: flower-simulation
