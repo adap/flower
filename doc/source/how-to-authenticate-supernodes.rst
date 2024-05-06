@@ -11,7 +11,6 @@ Flower node authentication works similar to how GitHub SSH authentication works:
 
 We recommend you to check out the complete `code example <https://github.com/adap/flower/tree/main/examples/flower-client-authentication>`_ demonstrating federated learning with Flower in an authenticated setting.
 
-
 .. note::
     This guide covers a preview feature that might change in future versions of Flower.
 
