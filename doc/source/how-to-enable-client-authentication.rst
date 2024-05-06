@@ -26,7 +26,9 @@ After establishing secure connection, you can now enable client authentication i
 
 .. code-block:: bash
 
-    flower-superlink --certificates certificates/ca.crt certificates/server.pem certificates/server.key --require-client-authentication ./keys/client_public_keys.csv ./keys/server_credentials ./keys/server_credentials.pub
+    flower-superlink \
+        --certificates certificates/ca.crt certificates/server.pem certificates/server.key \
+        --require-client-authentication ./keys/client_public_keys.csv ./keys/server_credentials ./keys/server_credentials.pub
     
 Let's break down the :code:`--require-client-authentication` flag:
 
@@ -43,7 +45,10 @@ Similar to the long-running Flower server :code:`Superlink`, you can easily enab
 
 .. code-block:: bash
     
-    flower-client-app client:app --insecure --authentication-keys ./keys/client_credentials ./keys/client_credentials.pub
+    flower-client-app client:app \
+        --root-certificates certificates/ca.crt \
+        --server 127.0.0.1:9092 \
+        --authentication-keys ./keys/client_credentials ./keys/client_credentials.pub
 
 The :code:`--authentication-keys` flag expects two arguments: a path to the client's private and public key file. You can generate a private and public key pair using :code:`ssh-keygen -t ecdsa -b 384`.
 
