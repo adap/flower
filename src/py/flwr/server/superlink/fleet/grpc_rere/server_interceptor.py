@@ -204,7 +204,6 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
         # Handle RPC here instead of passing to default method_handler
         if node_id is not None:
-            # State has lock already this execution is serialized
             self.state.acknowledge_ping(node_id, request.ping_interval)
             return CreateNodeResponse(node=Node(node_id=node_id, anonymous=False))
 
