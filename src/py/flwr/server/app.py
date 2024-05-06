@@ -43,6 +43,7 @@ from flwr.common.constant import (
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    private_key_to_bytes,
     public_key_to_bytes,
     ssh_types_to_elliptic_curve,
 )
@@ -374,13 +375,18 @@ def run_superlink() -> None:
                 server_private_key,
                 server_public_key,
             ) = maybe_keys
-            interceptors = [
-                AuthenticateServerInterceptor(
-                    client_public_keys,
-                    server_private_key,
-                    server_public_key,
-                )
-            ]
+            state = state_factory.state()
+            state.store_client_public_keys(client_public_keys)
+            state.store_server_private_public_key(
+                private_key_to_bytes(server_private_key),
+                public_key_to_bytes(server_public_key),
+            )
+            log(
+                INFO,
+                "Client authentication enabled with %d known public keys",
+                len(client_public_keys),
+            )
+            interceptors = [AuthenticateServerInterceptor(state)]
 
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
