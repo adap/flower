@@ -34,7 +34,7 @@ class InMemoryDriver(Driver):
     Parameters
     ----------
     state_factory : StateFactory
-        A StateFactory embedding a state designed for in-memory communication.
+        A StateFactory embedding a state that this driver can interface with.
     fab_id : str (default: None)
         The identifier of the FAB used in the run.
     fab_version : str (default: None)
