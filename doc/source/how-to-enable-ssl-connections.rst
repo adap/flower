@@ -60,7 +60,7 @@ We are now going to show how to write a client which uses the previously generat
         --root-certificates certificates/ca.crt
         --server 127.0.0.1:9092
 
-When setting :code:`root_certificates`, the client expects the file path to a PEM-encoded root certificates.
+When setting :code:`root_certificates`, the client expects a file path to a PEM-encoded root certificates.
 
 
 Conclusion
