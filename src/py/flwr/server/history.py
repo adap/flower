@@ -94,7 +94,7 @@ class History:
             rep += "History (loss, distributed):\n" + reduce(
                 lambda a, b: a + b,
                 [
-                    f"round {server_round}: {loss}\n"
+                    f"\tround {server_round}: {loss}\n"
                     for server_round, loss in self.losses_distributed
                 ],
             )
@@ -102,20 +102,20 @@ class History:
             rep += "History (loss, centralized):\n" + reduce(
                 lambda a, b: a + b,
                 [
-                    f"round {server_round}: {loss}\n"
+                    f"\tround {server_round}: {loss}\n"
                     for server_round, loss in self.losses_centralized
                 ],
             )
         if self.metrics_distributed_fit:
             rep += "History (metrics, distributed, fit):\n" + pprint.pformat(
-                self.metrics_distributed_fit
+                self.metrics_distributed_fit, indent=8
             )
         if self.metrics_distributed:
             rep += "History (metrics, distributed, evaluate):\n" + pprint.pformat(
-                self.metrics_distributed
+                self.metrics_distributed, indent=8
             )
         if self.metrics_centralized:
             rep += "History (metrics, centralized):\n" + pprint.pformat(
-                self.metrics_centralized
+                self.metrics_centralized, indent=8
             )
         return rep
