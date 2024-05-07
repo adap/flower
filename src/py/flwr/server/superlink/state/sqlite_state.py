@@ -18,6 +18,7 @@
 import os
 import re
 import sqlite3
+import threading
 import time
 from logging import DEBUG, ERROR
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
@@ -127,6 +128,12 @@ class SqliteState(State):  # pylint: disable=R0904
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
 
+        # Count undelivered task_ins/task_res
+        self._undelivered_task_ins_cnt = 0
+        self._undelivered_task_res_cnt = 0
+
+        self.lock = threading.RLock()
+
     def initialize(self, log_queries: bool = False) -> List[Tuple[str]]:
         """Create tables if they don't exist yet.
 
@@ -229,6 +236,10 @@ class SqliteState(State):  # pylint: disable=R0904
             log(ERROR, "`run` is invalid")
             return None
 
+        # Update the number of undelivered task_ins
+        with self.lock:
+            self._undelivered_task_ins_cnt += 1
+
         return task_id
 
     def get_task_ins(
@@ -319,6 +330,10 @@ class SqliteState(State):  # pylint: disable=R0904
 
         result = [dict_to_task_ins(row) for row in rows]
 
+        # Update the number of undelivered task_ins
+        with self.lock:
+            self._undelivered_task_ins_cnt -= len(result)
+
         return result
 
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
@@ -359,6 +374,10 @@ class SqliteState(State):  # pylint: disable=R0904
         except sqlite3.IntegrityError:
             log(ERROR, "`run` is invalid")
             return None
+
+        # Update the number of undelivered task_res
+        with self.lock:
+            self._undelivered_task_res_cnt += 1
 
         return task_id
 
@@ -427,6 +446,10 @@ class SqliteState(State):  # pylint: disable=R0904
             rows = self.query(query, data)
 
         result = [dict_to_task_res(row) for row in rows]
+
+        # Update the number of undelivered task_res
+        with self.lock:
+            self._undelivered_task_res_cnt -= len(result)
 
         # 1. Query: Fetch consumer_node_id of remaining task_ids
         # Assume the ancestry field only contains one element
@@ -497,6 +520,16 @@ class SqliteState(State):  # pylint: disable=R0904
         rows = self.query(query)
         result: Dict[str, int] = rows[0]
         return result["num"]
+
+    def num_undelivered_task_ins(self) -> int:
+        """Calculate the number of undelivered task_ins in store."""
+        with self.lock:
+            return self._undelivered_task_ins_cnt
+
+    def num_undelivered_task_res(self) -> int:
+        """Calculate the number of undelivered task_res in store."""
+        with self.lock:
+            return self._undelivered_task_res_cnt
 
     def delete_tasks(self, task_ids: Set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
