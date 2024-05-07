@@ -38,6 +38,7 @@ class MlFramework(str, Enum):
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
     JAX = "JAX"
+    MLX = "MLX"
     SKLEARN = "sklearn"
 
 
@@ -112,7 +113,7 @@ def new(
     else:
         framework_value = prompt_options(
             "Please select ML framework by typing in the number",
-            [mlf.value for mlf in MlFramework],
+            sorted([mlf.value for mlf in MlFramework]),
         )
         selected_value = [
             name
@@ -155,6 +156,7 @@ def new(
     frameworks_with_tasks = [
         MlFramework.PYTORCH.value.lower(),
         MlFramework.JAX.value.lower(),
+        MlFramework.MLX.value.lower(),
         MlFramework.TENSORFLOW.value.lower(),
     ]
     if framework_str in frameworks_with_tasks:
