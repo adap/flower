@@ -108,14 +108,14 @@ class History:
             )
         if self.metrics_distributed_fit:
             rep += "History (metrics, distributed, fit):\n" + pprint.pformat(
-                self.metrics_distributed_fit, indent=8
+                self.metrics_distributed_fit
             )
         if self.metrics_distributed:
             rep += "History (metrics, distributed, evaluate):\n" + pprint.pformat(
-                self.metrics_distributed, indent=8
+                self.metrics_distributed
             )
         if self.metrics_centralized:
             rep += "History (metrics, centralized):\n" + pprint.pformat(
-                self.metrics_centralized, indent=8
+                self.metrics_centralized
             )
         return rep
