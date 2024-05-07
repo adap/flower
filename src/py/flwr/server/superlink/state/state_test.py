@@ -22,7 +22,7 @@ from abc import abstractmethod
 from datetime import datetime, timezone
 from typing import List
 from unittest.mock import patch
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from flwr.common import DEFAULT_TTL
 from flwr.common.constant import ErrorCode
@@ -512,10 +512,16 @@ class StateTest(unittest.TestCase):
         run_id = state.create_run("mock/mock", "v1.0.0")
         task_id0, task_id1 = uuid4(), uuid4()
         task_0 = create_task_res(
-            producer_node_id=123, anonymous=False, ancestry=[str(task_id0)], run_id=run_id
+            producer_node_id=123,
+            anonymous=False,
+            ancestry=[str(task_id0)],
+            run_id=run_id,
         )
         task_1 = create_task_res(
-            producer_node_id=456, anonymous=False, ancestry=[str(task_id1)], run_id=run_id
+            producer_node_id=456,
+            anonymous=False,
+            ancestry=[str(task_id1)],
+            run_id=run_id,
         )
 
         # Store two tasks
