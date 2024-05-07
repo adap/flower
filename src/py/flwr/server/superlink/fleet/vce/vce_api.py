@@ -293,7 +293,7 @@ def start_vce(
         node_states[node_id] = NodeState()
 
     # Load backend config
-    log(INFO, "Supported backends: %s", list(supported_backends.keys()))
+    log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
     backend_config = json.loads(backend_config_json_stream)
 
     try:
