@@ -22,7 +22,7 @@ from uuid import UUID
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 
 
-class State(abc.ABC):
+class State(abc.ABC):  # pylint: disable=R0904
     """Abstract State."""
 
     @abc.abstractmethod
@@ -132,11 +132,13 @@ class State(abc.ABC):
         """Delete all delivered TaskIns/TaskRes pairs."""
 
     @abc.abstractmethod
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(
+        self, ping_interval: float, public_key: Optional[bytes] = None
+    ) -> int:
         """Create, store in state, and return `node_id`."""
 
     @abc.abstractmethod
-    def delete_node(self, node_id: int) -> None:
+    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Remove `node_id` from state."""
 
     @abc.abstractmethod
@@ -148,6 +150,10 @@ class State(abc.ABC):
         If the provided `run_id` does not exist or has no matching nodes,
         an empty `Set` MUST be returned.
         """
+
+    @abc.abstractmethod
+    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `client_public_keys`."""
 
     @abc.abstractmethod
     def create_run(self, fab_id: str, fab_version: str) -> int:
@@ -172,10 +178,10 @@ class State(abc.ABC):
         """
 
     @abc.abstractmethod
-    def store_server_public_private_key(
-        self, public_key: bytes, private_key: bytes
+    def store_server_private_public_key(
+        self, private_key: bytes, public_key: bytes
     ) -> None:
-        """Store `server_public_key` and `server_private_key` in state."""
+        """Store `server_private_key` and `server_public_key` in state."""
 
     @abc.abstractmethod
     def get_server_private_key(self) -> Optional[bytes]:

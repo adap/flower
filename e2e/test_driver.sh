@@ -2,14 +2,21 @@
 set -e
 
 case "$1" in
+  pandas)
+    server_arg="--insecure"
+    client_arg="--insecure"
+    server_dir="./"
+    ;;
   bare-https)
     ./generate.sh
     server_arg="--certificates certificates/ca.crt certificates/server.pem certificates/server.key"
     client_arg="--root-certificates certificates/ca.crt"
+    server_dir="./"
     ;;
   *)
     server_arg="--insecure"
     client_arg="--insecure"
+    server_dir="./.."
     ;;
 esac
 
@@ -17,6 +24,7 @@ case "$2" in
   rest)
     rest_arg="--rest"
     server_address="http://localhost:9093"
+    server_app_address="127.0.0.1:9091"
     db_arg="--database :flwr-in-memory-state:"
     server_auth=""
     client_auth_1=""
@@ -25,6 +33,7 @@ case "$2" in
   sqlite)
     rest_arg=""
     server_address="127.0.0.1:9092"
+    server_app_address="127.0.0.1:9091"
     db_arg="--database $(date +%s).db"
     server_auth=""
     client_auth_1=""
@@ -34,6 +43,7 @@ case "$2" in
     ./generate.sh
     rest_arg=""
     server_address="127.0.0.1:9092"
+    server_app_address="127.0.0.1:9091"
     db_arg="--database :flwr-in-memory-state:"
     server_arg="--certificates certificates/ca.crt certificates/server.pem certificates/server.key"
     client_arg="--root-certificates certificates/ca.crt"
@@ -44,6 +54,7 @@ case "$2" in
   *)
     rest_arg=""
     server_address="127.0.0.1:9092"
+    server_app_address="127.0.0.1:9091"
     db_arg="--database :flwr-in-memory-state:"
     server_auth=""
     client_auth_1=""
@@ -63,7 +74,7 @@ timeout 2m flower-client-app client:app $client_arg $rest_arg --server $server_a
 cl2_pid=$!
 sleep 3
 
-timeout 2m python driver.py &
+timeout 2m flower-server-app server:app $client_arg --dir $server_dir --server $server_app_address &
 pid=$!
 
 wait $pid
