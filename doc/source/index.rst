@@ -89,7 +89,6 @@ Problem-oriented how-to guides show step-by-step how to achieve a specific goal.
    how-to-monitor-simulation
    how-to-configure-logging
    how-to-enable-ssl-connections
-   how-to-enable-client-authentication
    how-to-use-built-in-mods
    how-to-use-differential-privacy
    how-to-authenticate-supernodes
