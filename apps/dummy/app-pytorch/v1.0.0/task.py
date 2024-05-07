@@ -47,7 +47,7 @@ def train(net, trainloader, valloader, epochs, device):
     log(INFO, "Starting training...")
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
-    optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+    optimizer = torch.optim.Adam(net.parameters(), lr=1e-3)
     net.train()
     for _ in range(epochs):
         for images, labels in trainloader:
