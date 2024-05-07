@@ -155,7 +155,7 @@ def run_serverapp_th(
             # Upon completion, trigger stop event if one was passed
             if stop_event is not None:
                 stop_event.set()
-                log(WARNING, "Triggered stop event for Simulation Engine.")
+                log(DEBUG, "Triggered stop event for Simulation Engine.")
 
     serverapp_th = threading.Thread(
         target=server_th_with_start_checks,
@@ -249,7 +249,7 @@ def _main_loop(
         if serverapp_th:
             serverapp_th.join()
 
-    log(INFO, "Stopping Simulation Engine now.")
+    log(DEBUG, "Stopping Simulation Engine now.")
 
 
 # pylint: disable=too-many-arguments,too-many-locals
