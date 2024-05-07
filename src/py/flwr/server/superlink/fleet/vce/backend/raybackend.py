@@ -15,7 +15,7 @@
 """Ray backend for the Fleet API using the Simulation Engine."""
 
 import pathlib
-from logging import DEBUG, ERROR, INFO
+from logging import DEBUG, ERROR, INFO, WARNING
 from typing import Callable, Dict, List, Tuple, Union
 
 import ray
