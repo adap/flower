@@ -487,11 +487,8 @@ def run_fl(
     log(INFO, "")
     log(INFO, "[SUMMARY]")
     log(INFO, "Run finished %s rounds in %.2fs", config.num_rounds, elapsed_time)
-    for idx, line in enumerate(io.StringIO(str(hist))):
-        if idx == 0:
-            log(INFO, "%s", line.strip("\n"))
-        else:
-            log(INFO, "\t%s", line.strip("\n"))
+    for line in io.StringIO(str(hist)):
+        log(INFO, "\t%s", line.strip("\n"))
     log(INFO, "")
 
     # Graceful shutdown
