@@ -17,8 +17,6 @@
 
 from . import strategy
 from . import workflow as workflow
-from .app import run_driver_api as run_driver_api
-from .app import run_fleet_api as run_fleet_api
 from .app import run_superlink as run_superlink
 from .app import start_server as start_server
 from .client_manager import ClientManager as ClientManager
