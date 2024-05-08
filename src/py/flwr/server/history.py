@@ -92,43 +92,45 @@ class History:
         """
         rep = "\n"
         if self.losses_distributed:
-            rep += "\tHistory (loss, distributed):\n" + reduce(
+            rep += "\t\tHistory (loss, distributed):\n" + reduce(
                 lambda a, b: a + b,
                 [
-                    f"\t\tround {server_round}: {loss}\n"
+                    f"\t\t\tround {server_round}: {loss}\n"
                     for server_round, loss in self.losses_distributed
                 ],
             )
         if self.losses_centralized:
-            rep += "\tHistory (loss, centralized):\n" + reduce(
+            rep += "\t\tHistory (loss, centralized):\n" + reduce(
                 lambda a, b: a + b,
                 [
-                    f"\t\tround {server_round}: {loss}\n"
+                    f"\t\t\tround {server_round}: {loss}\n"
                     for server_round, loss in self.losses_centralized
                 ],
             )
         if self.metrics_distributed_fit:
             dist_fit_metrics_str = ""
             for line in io.StringIO(pprint.pformat(self.metrics_distributed_fit)):
-                dist_fit_metrics_str += f"\t\t{line}"
+                dist_fit_metrics_str += f"\t\t\t{line}"
 
             rep += (
-                "\tHistory (metrics, distributed, fit):\n" + dist_fit_metrics_str + "\n"
+                "\t\tHistory (metrics, distributed, fit):\n"
+                + dist_fit_metrics_str
+                + "\n"
             )
         if self.metrics_distributed:
             dist_metrics_str = ""
             for line in io.StringIO(pprint.pformat(self.metrics_distributed)):
-                dist_metrics_str += f"\t\t{line}"
+                dist_metrics_str += f"\t\t\t{line}"
 
             rep += (
-                "\tHistory (metrics, distributed, evaluate):\n"
+                "\t\tHistory (metrics, distributed, evaluate):\n"
                 + dist_metrics_str
                 + "\n"
             )
         if self.metrics_centralized:
             cen_metrics_str = ""
             for line in io.StringIO(pprint.pformat(self.metrics_centralized)):
-                cen_metrics_str += f"\t\t{line}"
+                cen_metrics_str += f"\t\t\t{line}"
 
-            rep += "\tHistory (metrics, centralized):\n" + cen_metrics_str
+            rep += "\t\tHistory (metrics, centralized):\n" + cen_metrics_str
         return rep
