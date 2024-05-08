@@ -15,6 +15,7 @@
 """Training history."""
 
 
+import io
 import pprint
 from functools import reduce
 from typing import Dict, List, Tuple
@@ -89,37 +90,45 @@ class History:
         representation : str
             The string representation of the history object.
         """
-        rep = ""
+        rep = "\n"
         if self.losses_distributed:
-            rep += "History (loss, distributed):\n" + reduce(
+            rep += "\tHistory (loss, distributed):\n" + reduce(
                 lambda a, b: a + b,
                 [
-                    f"\tround {server_round}: {loss}\n"
+                    f"\t\tround {server_round}: {loss}\n"
                     for server_round, loss in self.losses_distributed
                 ],
             )
         if self.losses_centralized:
-            rep += "History (loss, centralized):\n" + reduce(
+            rep += "\tHistory (loss, centralized):\n" + reduce(
                 lambda a, b: a + b,
                 [
-                    f"\tround {server_round}: {loss}\n"
+                    f"\t\tround {server_round}: {loss}\n"
                     for server_round, loss in self.losses_centralized
                 ],
             )
         if self.metrics_distributed_fit:
+            dist_fit_metrics_str = ""
+            for line in io.StringIO(pprint.pformat(self.metrics_distributed_fit)):
+                dist_fit_metrics_str += f"\t\t{line}"
+
             rep += (
-                "History (metrics, distributed, fit):\n"
-                + pprint.pformat(self.metrics_distributed_fit)
-                + "\n"
+                "\tHistory (metrics, distributed, fit):\n" + dist_fit_metrics_str + "\n"
             )
         if self.metrics_distributed:
+            dist_metrics_str = ""
+            for line in io.StringIO(pprint.pformat(self.metrics_distributed)):
+                dist_metrics_str += f"\t\t{line}"
+
             rep += (
-                "History (metrics, distributed, evaluate):\n"
-                + pprint.pformat(self.metrics_distributed)
+                "\tHistory (metrics, distributed, evaluate):\n"
+                + dist_metrics_str
                 + "\n"
             )
         if self.metrics_centralized:
-            rep += "History (metrics, centralized):\n" + pprint.pformat(
-                self.metrics_centralized
-            )
+            cen_metrics_str = ""
+            for line in io.StringIO(pprint.pformat(self.metrics_centralized)):
+                cen_metrics_str += f"\t\t{line}"
+
+            rep += "\tHistory (metrics, centralized):\n" + cen_metrics_str
         return rep
