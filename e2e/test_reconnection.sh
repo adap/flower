@@ -49,6 +49,7 @@ sleep 20
 # kill $cl1_pid
 # sleep 3
 
+# # Restart first client
 # timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
 # cl1_pid=$!
 # sleep 5
