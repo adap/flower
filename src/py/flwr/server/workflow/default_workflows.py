@@ -116,9 +116,10 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
             parameters, keep_input=True
         )
     else:
+        # Get initial parameters from one of the clients
+        log(INFO, "Requesting initial parameters from one random client")
+
         while True:
-            # Get initial parameters from one of the clients
-            log(INFO, "Requesting initial parameters from one random client")
             random_client = context.client_manager.sample(1)[0]
             # Send GetParametersIns and get the response
             content = compat.getparametersins_to_recordset(GetParametersIns({}))
@@ -132,10 +133,10 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
                     )
                 ]
             )
-            log(INFO, "Received initial parameters from one random client")
             msg = list(messages)[0]
 
             if msg.has_content():
+                log(INFO, "Received initial parameters from one random client")
                 paramsrecord = next(iter(msg.content.parameters_records.values()))
                 break
 
