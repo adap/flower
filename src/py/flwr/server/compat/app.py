@@ -29,15 +29,6 @@ from flwr.server.strategy import Strategy
 from ..driver import Driver
 from .app_utils import start_update_client_manager_thread
 
-DEFAULT_SERVER_ADDRESS_DRIVER = "[::]:9091"
-
-ERROR_MESSAGE_DRIVER_NOT_CONNECTED = """
-[Driver] Error: Not connected.
-
-Call `connect()` on the `Driver` instance before calling any of the other `Driver`
-methods.
-"""
-
 
 def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     *,
