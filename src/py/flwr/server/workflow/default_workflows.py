@@ -106,6 +106,7 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
+    paramsrecord = None
     parameters = context.strategy.initialize_parameters(
         client_manager=context.client_manager
     )
@@ -115,40 +116,47 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
             parameters, keep_input=True
         )
     else:
-        # Get initial parameters from one of the clients
-        log(INFO, "Requesting initial parameters from one random client")
-        random_client = context.client_manager.sample(1)[0]
-        # Send GetParametersIns and get the response
-        content = compat.getparametersins_to_recordset(GetParametersIns({}))
-        messages = driver.send_and_receive(
-            [
-                driver.create_message(
-                    content=content,
-                    message_type=MessageTypeLegacy.GET_PARAMETERS,
-                    dst_node_id=random_client.node_id,
-                    group_id="0",
-                )
-            ]
-        )
-        log(INFO, "Received initial parameters from one random client")
-        msg = list(messages)[0]
-        paramsrecord = next(iter(msg.content.parameters_records.values()))
+        while True:
+            # Get initial parameters from one of the clients
+            log(INFO, "Requesting initial parameters from one random client")
+            random_client = context.client_manager.sample(1)[0]
+            # Send GetParametersIns and get the response
+            content = compat.getparametersins_to_recordset(GetParametersIns({}))
+            messages = driver.send_and_receive(
+                [
+                    driver.create_message(
+                        content=content,
+                        message_type=MessageTypeLegacy.GET_PARAMETERS,
+                        dst_node_id=random_client.node_id,
+                        group_id="0",
+                    )
+                ]
+            )
+            log(INFO, "Received initial parameters from one random client")
+            msg = list(messages)[0]
 
-    context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
+            if msg.has_content():
+                paramsrecord = next(iter(msg.content.parameters_records.values()))
+                break
 
-    # Evaluate initial parameters
-    log(INFO, "Evaluating initial global parameters")
-    parameters = compat.parametersrecord_to_parameters(paramsrecord, keep_input=True)
-    res = context.strategy.evaluate(0, parameters=parameters)
-    if res is not None:
-        log(
-            INFO,
-            "initial parameters (loss, other metrics): %s, %s",
-            res[0],
-            res[1],
+    if paramsrecord is not None:
+        context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
+
+        # Evaluate initial parameters
+        log(INFO, "Evaluating initial global parameters")
+        parameters = compat.parametersrecord_to_parameters(
+            paramsrecord, keep_input=True
         )
-        context.history.add_loss_centralized(server_round=0, loss=res[0])
-        context.history.add_metrics_centralized(server_round=0, metrics=res[1])
+        res = context.strategy.evaluate(0, parameters=parameters)
+        if res is not None:
+            log(
+                INFO,
+                "initial parameters (loss, other metrics): %s, %s",
+                res[0],
+                res[1],
+            )
+            context.history.add_loss_centralized(server_round=0, loss=res[0])
+            context.history.add_metrics_centralized(server_round=0, metrics=res[1])
 
 
 def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None:
