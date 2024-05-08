@@ -184,6 +184,7 @@ def new(
             ["pip", "install", "-e", project_dir],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            check=False,
         ).returncode
         != 0
     ):
