@@ -295,13 +295,15 @@ def _run_simulation(
         When diabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
+    if backend_config is None:
+        backend_config = {}
+
     # Set logging level
     logger = logging.getLogger("flwr")
     if verbose_logging:
         update_console_handler(level=DEBUG, timestamps=True, colored=True)
-
-    if backend_config is None:
-        backend_config = {}
+    else:
+        backend_config["silent"] = True
 
     if enable_tf_gpu_growth:
         # Check that Backend config has also enabled using GPU growth
