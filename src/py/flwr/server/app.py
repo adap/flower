@@ -526,40 +526,6 @@ def _validate_ssl_files(
     return validation_exceptions
 
 
-def _parse_args_run_driver_api() -> argparse.ArgumentParser:
-    """Parse command line arguments for Driver API."""
-    parser = argparse.ArgumentParser(
-        description="Start a Flower Driver API server. "
-        "This server will be responsible for "
-        "receiving TaskIns from the Driver script and "
-        "sending them to the Fleet API. Once the client nodes "
-        "are done, they will send the TaskRes back to this Driver API server (through"
-        " the Fleet API) which will then send them back to the Driver script.",
-    )
-
-    _add_args_common(parser=parser)
-    _add_args_driver_api(parser=parser)
-
-    return parser
-
-
-def _parse_args_run_fleet_api() -> argparse.ArgumentParser:
-    """Parse command line arguments for Fleet API."""
-    parser = argparse.ArgumentParser(
-        description="Start a Flower Fleet API server."
-        "This server will be responsible for "
-        "sending TaskIns (received from the Driver API) to the client nodes "
-        "and of receiving TaskRes sent back from those same client nodes once "
-        "they are done. Then, this Fleet API server can send those "
-        "TaskRes back to the Driver API.",
-    )
-
-    _add_args_common(parser=parser)
-    _add_args_fleet_api(parser=parser)
-
-    return parser
-
-
 def _parse_args_run_superlink() -> argparse.ArgumentParser:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
