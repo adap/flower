@@ -45,23 +45,25 @@ timeout 2m flower-superlink --insecure $db_arg $rest_arg &
 sl_pid=$!
 sleep 20
 
-# # Kill first client
-# kill $cl1_pid
-# sleep 3
+# Kill first client
+kill $cl1_pid
+sleep 3
 
-# # Restart first client
-# timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
-# cl1_pid=$!
-# sleep 5
+# Restart first client
+timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
+cl1_pid=$!
+sleep 5
 
 timeout 2m flower-server-app server:app --insecure $dir_arg $rest_arg --server $server_app_address &
 pid=$!
 
-# kill $cl1_pid
-# sleep 1
+# Kill first client
+kill $cl1_pid
+sleep 1
 
-# timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
-# cl1_pid=$!
+# Restart first client
+timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
+cl1_pid=$!
 
 wait $pid
 res=$?
