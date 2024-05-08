@@ -38,6 +38,7 @@ class MlFramework(str, Enum):
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
     JAX = "JAX"
+    HUGGINGFACE = "HF"
     MLX = "MLX"
     SKLEARN = "sklearn"
 
@@ -156,6 +157,7 @@ def new(
     frameworks_with_tasks = [
         MlFramework.PYTORCH.value.lower(),
         MlFramework.JAX.value.lower(),
+        MlFramework.HUGGINGFACE.value.lower(),
         MlFramework.MLX.value.lower(),
         MlFramework.TENSORFLOW.value.lower(),
     ]
