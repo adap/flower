@@ -64,18 +64,6 @@ def start_driver(  # pylint: disable=too-many-arguments, too-many-locals
     -------
     hist : flwr.server.history.History
         Object containing training and evaluation metrics.
-
-    Examples
-    --------
-    Starting a driver that connects to an insecure server:
-
-    >>> start_driver()
-
-    Starting a driver that connects to an SSL-enabled server:
-
-    >>> start_driver(
-    >>>     root_certificates=Path("/crts/root.pem").read_bytes()
-    >>> )
     """
     event(EventType.START_DRIVER_ENTER)
 
