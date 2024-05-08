@@ -250,6 +250,7 @@ def default_fit_workflow(  # pylint: disable=R0914
             compat.recordset_to_fitres(msg.content, False),
         )
         for msg in messages
+        if msg.has_content()
     ]
     aggregated_result = context.strategy.aggregate_fit(current_round, results, [])
     parameters_aggregated, metrics_aggregated = aggregated_result
@@ -329,6 +330,7 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
             compat.recordset_to_evaluateres(msg.content),
         )
         for msg in messages
+        if msg.has_content()
     ]
     aggregated_result = context.strategy.aggregate_evaluate(current_round, results, [])
 
