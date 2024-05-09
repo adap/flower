@@ -7,18 +7,20 @@ This page explains the decoupling concept in Flower Next and how it benefits Flo
 .. |serverapp_link| replace:: ``ServerApp()``
 .. |message_link| replace:: ``Message()``
 .. |context_link| replace:: ``Context()``
+.. |mods_link| replace:: ``mods``
 .. _clientapp_link: ref-api/flwr.client.ClientApp.html
 .. _serverapp_link: ref-api/flwr.server.ServerApp.html
 .. _message_link: ref-api/flwr.common.Message.html
 .. _context_link: ref-api/flwr.common.Context.html
+.. _mods_link: how-to-use-built-in-mods.html
 
 
 Infrastructure layer
 --------------------
 
-Federated learning typically relies on a system that relays messages during training. Beyond sending and receiving messages, this backbone system may also handle a variety of other tasks that are non-learning related, like syncing with federation nodes or temporarily storing messages. However, as the range and complexity of applications benefiting from federated learning grows, reliability and reproducibility of such a sytem become key challenges. These challenges are especially pertinent to users wanting to deploy their federated learning workflows to production.
+Federated learning typically relies on a system that relays messages during training. Beyond sending and receiving messages, this backbone system may also handle a variety of other tasks that are non-learning related, like syncing with federation nodes or temporarily storing messages. However, as the range and complexity of applications benefiting from federated learning grows, reliability and reproducibility of such a system become key challenges. These challenges are especially pertinent to users wanting to deploy their federated learning workflows to production.
 
-With Flower Next, we address this set of challenges by decoupling and standardizing the infrastructure layer for federated learning (see following diagram).
+With Flower Next, we address this set of challenges by decoupling and standardizing the infrastructure layer for federated learning (see the following diagram).
 
 .. figure:: ./_static/flower-infrastructure.png
     :align: center
@@ -76,7 +78,7 @@ Now, onto its counterpart, the ClientApp (|clientapp_link|_). Like the ServerApp
 .. note::
     In a future release, we will introduce the concept of multi-app support. This means that multiple ClientApps can be connected to a single SuperNode. This allows multiple users of the same federation to execute different tasks on the same SuperNode, bringing greater freedom for building and using task-specific apps, all while using the same infrastructure.
 
-The reason for employing the mechanisms for launching apps is to enable code reuseability: In previous versions (<1.8), clients are inherently linked to a server for an FL project and additional code needs to be written to move a simulation-based FL setup to a real-world deployment. This can sometimes prohibitively impede the productizing of federated learning workflows. Instead, with the decoupling of the layers in Flower Next, the same ServerApp and ClientApp code can be easily run in a simulation setup or deployment setup *without any code changes*.
+The reason for employing the mechanisms for launching apps is to enable code reusability: In previous versions (<1.8), clients are inherently linked to a server for an FL project and additional code needs to be written to move a simulation-based FL setup to a real-world deployment. This can sometimes prohibitively impede the productizing of federated learning workflows. Instead, with the decoupling of the layers in Flower Next, the same ServerApp and ClientApp code can be easily run in a simulation setup or deployment setup *without any code changes*.
 
 
 Information exchange
@@ -90,7 +92,7 @@ Message (|message_link|_) is an object that Flower uses to carry information bet
 Context
 ~~~~~~~
 
-Context (|context_link|_) is another useful object that we introduced in Flower Next. For every execution of `ServerApp`, i.e. a run, it carries the record and messages that is unique to the run. Each time a SuperNode runs a ClientApp within the run, the same Context object is exposed to the ClientApp, allowing the ClientApp to persist throughout the duration of the run. Context can be used as a temporary buffer for executing additional tasks, like `mods`. 
+Context (|context_link|_) is another useful object that we introduced in Flower Next. For every execution of `ServerApp`, i.e. a run, it carries the record and messages that is unique to the run. Each time a SuperNode runs a ClientApp within the run, the same Context object is exposed to the ClientApp, allowing the ClientApp to persist throughout the duration of the run. Context can be used as a temporary buffer for executing additional tasks, like |mods_link|_. 
 
 
 Summary
