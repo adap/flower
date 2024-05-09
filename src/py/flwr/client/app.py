@@ -431,6 +431,7 @@ def _start_client_internal(
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
+            del run_tracker
             break
 
         # Sleep and reconnect afterwards
