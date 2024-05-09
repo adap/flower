@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-03-15 14:23+0000\n"
-"PO-Revision-Date: 2024-05-01 05:07+0000\n"
+"PO-Revision-Date: 2024-05-10 06:59+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
 "Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
 "flower-docs/framework/zh_Hans/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 5.5.3-dev\n"
+"X-Generator: Weblate 5.5.4-rc\n"
 "Generated-By: Babel 2.14.0\n"
 
 #: ../../source/contributor-explanation-architecture.rst:2
@@ -10325,82 +10325,99 @@ msgid ""
 msgstr "新信息的内容。其中包含要发送到目的节点的记录。"
 
 #: flwr.server.driver.driver.Driver.create_message:9 of
+#, fuzzy
 msgid ""
 "The type of the message, defining the action to be executed on the "
 "receiving end."
-msgstr ""
+msgstr "信息类型，定义接收端要执行的操作。"
 
 #: flwr.server.driver.driver.Driver.create_message:12 of
+#, fuzzy
 msgid "The ID of the destination node to which the message is being sent."
-msgstr ""
+msgstr "信息发送目的地节点的 ID。"
 
 #: flwr.server.driver.driver.Driver.create_message:14 of
+#, fuzzy
 msgid ""
 "The ID of the group to which this message is associated. In some "
 "settings, this is used as the FL round."
-msgstr ""
+msgstr "与该信息相关联的组的 ID。在某些设置中，它被用作 FL 轮。"
 
 #: flwr.server.driver.driver.Driver.create_message:17 of
+#, fuzzy
 msgid ""
 "Time-to-live for the round trip of this message, i.e., the time from "
 "sending this message to receiving a reply. It specifies the duration for "
 "which the message and its potential reply are considered valid."
-msgstr ""
+msgstr "此报文往返的有效时间，即从发送此报文到收到回复的时间。它规定了信息及其潜在回"
+"复被视为有效的持续时间。"
 
 #: flwr.server.driver.driver.Driver.create_message:22 of
+#, fuzzy
 msgid ""
 "**message** -- A new `Message` instance with the specified content and "
 "metadata."
-msgstr ""
+msgstr "**message** -- 具有指定内容和元数据的新 \"信息 \"实例。"
 
 #: flwr.server.driver.driver.Driver.pull_messages:3 of
+#, fuzzy
 msgid ""
 "This method is used to collect messages from the SuperLink that "
 "correspond to a set of given message IDs."
-msgstr ""
+msgstr "该方法用于从超级链接中收集与一组给定消息 ID 相对应的消息。"
 
 #: flwr.server.driver.driver.Driver.pull_messages:6 of
+#, fuzzy
 msgid "An iterable of message IDs for which reply messages are to be retrieved."
-msgstr ""
+msgstr "要检索回复信息的信息 ID 的可迭代项。"
 
 #: flwr.server.driver.driver.Driver.pull_messages:9 of
+#, fuzzy
 msgid "**messages** -- An iterable of messages received."
-msgstr ""
+msgstr "**messages** -- 收到的信息迭代。"
 
 #: flwr.server.driver.driver.Driver.push_messages:3 of
+#, fuzzy
 msgid ""
 "This method takes an iterable of messages and sends each message to the "
 "node specified in `dst_node_id`."
-msgstr ""
+msgstr "该方法接收一个可迭代的消息，并将每条消息发送到 `dst_node_id` 中指定的节点。"
 
 #: flwr.server.driver.driver.Driver.push_messages:6
 #: flwr.server.driver.driver.Driver.send_and_receive:7 of
+#, fuzzy
 msgid "An iterable of messages to be sent."
-msgstr ""
+msgstr "要发送的信息迭代。"
 
 #: flwr.server.driver.driver.Driver.push_messages:9 of
+#, fuzzy
 msgid ""
 "**message_ids** -- An iterable of IDs for the messages that were sent, "
 "which can be used to pull replies."
-msgstr ""
+msgstr "**message_ids** -- 已发送信息的可迭代 ID，可用于提取回复信息。"
 
 #: flwr.server.driver.driver.Driver.send_and_receive:3 of
+#, fuzzy
 msgid ""
 "This method sends a list of messages to their destination node IDs and "
 "then waits for the replies. It continues to pull replies until either all"
 " replies are received or the specified timeout duration is exceeded."
-msgstr ""
+msgstr "该方法会向目标节点 ID 发送信息列表，然后等待回复。它会继续提取回复，直到收到"
+"所有回复或超过指定的超时时间。"
 
 #: flwr.server.driver.driver.Driver.send_and_receive:9 of
+#, fuzzy
 msgid ""
 "The timeout duration in seconds. If specified, the method will wait for "
 "replies for this duration. If `None`, there is no time limit and the "
 "method will wait until replies for all messages are received."
-msgstr ""
+msgstr "超时时间（秒）。如果指定，该方法将在此期限内等待回复。如果指定为 \"无\""
+"，则没有时间限制，该方法将等待直到收到所有信息的回复。"
 
 #: flwr.server.driver.driver.Driver.send_and_receive:14 of
+#, fuzzy
 msgid "**replies** -- An iterable of reply messages received from the SuperLink."
-msgstr ""
+msgstr "**replies** -- 从超级链接收到的回复信息的迭代。"
 
 #: flwr.server.driver.driver.Driver.send_and_receive:18
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:53
@@ -10411,23 +10428,31 @@ msgid "Notes"
 msgstr "无"
 
 #: flwr.server.driver.driver.Driver.send_and_receive:19 of
+#, fuzzy
 msgid ""
 "This method uses `push_messages` to send the messages and `pull_messages`"
 " to collect the replies. If `timeout` is set, the method may not return "
 "replies for all sent messages. A message remains valid until its TTL, "
 "which is not affected by `timeout`."
 msgstr ""
+"该方法使用 `push_messages` 发送信息，并使用 `pull_messages` 收集回复。"
+"如果设置了 `timeout`，该方法可能不会返回所有已发送消息的回复。消息在其 TTL "
+"之前一直有效，不受 `timeout` 影响。"
 
 #: ../../source/ref-api/flwr.server.History.rst:2
+#, fuzzy
 msgid "History"
-msgstr ""
+msgstr "历史"
 
 #: flwr.server.history.History.add_loss_centralized:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`add_loss_centralized "
 "<flwr.server.History.add_loss_centralized>`\\ \\(server\\_round\\, "
 "loss\\)"
 msgstr ""
+":py:obj:`add_loss_centralized <flwr.server.History.add_loss_centralized>`\\ "
+"\\(server\\_round\\, loss\\)"
 
 #: flwr.server.history.History.add_loss_centralized:1
 #: flwr.server.history.History.add_loss_centralized:1:<autosummary>:1 of
@@ -10436,23 +10461,30 @@ msgid "Add one loss entry (from centralized evaluation)."
 msgstr "集中评估"
 
 #: flwr.server.history.History.add_loss_centralized:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`add_loss_distributed "
 "<flwr.server.History.add_loss_distributed>`\\ \\(server\\_round\\, "
 "loss\\)"
 msgstr ""
+":py:obj:`add_loss_distributed <flwr.server.History.add_loss_distributed>`\\ "
+"\\(server\\_round\\, loss\\)"
 
 #: flwr.server.history.History.add_loss_centralized:1:<autosummary>:1
 #: flwr.server.history.History.add_loss_distributed:1 of
+#, fuzzy
 msgid "Add one loss entry (from distributed evaluation)."
-msgstr ""
+msgstr "增加一个损失条目（来自分布式评估）。"
 
 #: flwr.server.history.History.add_loss_centralized:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`add_metrics_centralized "
 "<flwr.server.History.add_metrics_centralized>`\\ \\(server\\_round\\, "
 "metrics\\)"
 msgstr ""
+":py:obj:`add_metrics_centralized <flwr.server.History."
+"add_metrics_centralized>`\\ \\(server\\_round\\, metrics\\)"
 
 #: flwr.server.history.History.add_loss_centralized:1:<autosummary>:1
 #: flwr.server.history.History.add_metrics_centralized:1 of
@@ -10461,11 +10493,14 @@ msgid "Add metrics entries (from centralized evaluation)."
 msgstr "集中评估"
 
 #: flwr.server.history.History.add_loss_centralized:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`add_metrics_distributed "
 "<flwr.server.History.add_metrics_distributed>`\\ \\(server\\_round\\, "
 "metrics\\)"
 msgstr ""
+":py:obj:`add_metrics_distributed <flwr.server.History."
+"add_metrics_distributed>`\\ \\(server\\_round\\, metrics\\)"
 
 #: flwr.server.history.History.add_loss_centralized:1:<autosummary>:1
 #: flwr.server.history.History.add_metrics_distributed:1 of
@@ -10474,24 +10509,30 @@ msgid "Add metrics entries (from distributed evaluation)."
 msgstr "定制的集中/分布式评估"
 
 #: flwr.server.history.History.add_loss_centralized:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`add_metrics_distributed_fit "
 "<flwr.server.History.add_metrics_distributed_fit>`\\ \\(server\\_round\\,"
 " ...\\)"
 msgstr ""
+":py:obj:`add_metrics_distributed_fit <flwr.server.History."
+"add_metrics_distributed_fit>`\\ \\(server\\_round\\, ...\\)"
 
 #: flwr.server.history.History.add_loss_centralized:1:<autosummary>:1
 #: flwr.server.history.History.add_metrics_distributed_fit:1 of
+#, fuzzy
 msgid "Add metrics entries (from distributed fit)."
-msgstr ""
+msgstr "添加度量条目（来自分布式拟合）。"
 
 #: ../../source/ref-api/flwr.server.LegacyContext.rst:2
+#, fuzzy
 msgid "LegacyContext"
-msgstr ""
+msgstr "遗留上下文"
 
 #: flwr.server.compat.legacy_context.LegacyContext:1 of
+#, fuzzy
 msgid "Bases: :py:class:`~flwr.common.context.Context`"
-msgstr ""
+msgstr "Bases: :py:class:`~flwr.common.context.Context`"
 
 #: ../../source/ref-api/flwr.server.LegacyContext.rst:32:<autosummary>:1
 #, fuzzy
@@ -10504,8 +10545,9 @@ msgid ":py:obj:`strategy <flwr.server.LegacyContext.strategy>`\\"
 msgstr "server.strategy.Strategy"
 
 #: ../../source/ref-api/flwr.server.LegacyContext.rst:32:<autosummary>:1
+#, fuzzy
 msgid ":py:obj:`client_manager <flwr.server.LegacyContext.client_manager>`\\"
-msgstr ""
+msgstr ":py:obj:`client_manager <flwr.server.LegacyContext.client_manager>`\\"
 
 #: ../../source/ref-api/flwr.server.LegacyContext.rst:32:<autosummary>:1
 #, fuzzy
@@ -10518,8 +10560,9 @@ msgid ":py:obj:`state <flwr.server.LegacyContext.state>`\\"
 msgstr "server.strategy.Strategy"
 
 #: flwr.server.server.Server.client_manager:1:<autosummary>:1 of
+#, fuzzy
 msgid ":py:obj:`client_manager <flwr.server.Server.client_manager>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`client_manager <flwr.server.Server.client_manager>`\\ \\(\\)"
 
 #: flwr.server.server.Server.client_manager:1
 #: flwr.server.server.Server.client_manager:1:<autosummary>:1 of
@@ -10528,21 +10571,28 @@ msgid "Return ClientManager."
 msgstr "返回客户端（本身）。"
 
 #: flwr.server.server.Server.client_manager:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`disconnect_all_clients "
 "<flwr.server.Server.disconnect_all_clients>`\\ \\(timeout\\)"
 msgstr ""
+":py:obj:`disconnect_all_clients <flwr.server.Server.disconnect_all_clients>`"
+"\\ \\(timeout\\)"
 
 #: flwr.server.server.Server.client_manager:1:<autosummary>:1
 #: flwr.server.server.Server.disconnect_all_clients:1 of
+#, fuzzy
 msgid "Send shutdown signal to all clients."
-msgstr ""
+msgstr "向所有客户端发送关闭信号。"
 
 #: flwr.server.server.Server.client_manager:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`evaluate_round <flwr.server.Server.evaluate_round>`\\ "
 "\\(server\\_round\\, timeout\\)"
 msgstr ""
+":py:obj:`evaluate_round <flwr.server.Server.evaluate_round>`\\ \\("
+"server\\_round\\, timeout\\)"
 
 #: flwr.server.server.Server.client_manager:1:<autosummary>:1
 #: flwr.server.server.Server.evaluate_round:1 of
@@ -10551,8 +10601,9 @@ msgid "Validate current global model on a number of clients."
 msgstr "当前（全局）模型参数。"
 
 #: flwr.server.server.Server.client_manager:1:<autosummary>:1 of
+#, fuzzy
 msgid ":py:obj:`fit <flwr.server.Server.fit>`\\ \\(num\\_rounds\\, timeout\\)"
-msgstr ""
+msgstr ":py:obj:`fit <flwr.server.Server.fit>`\\ \\(num\\_rounds\\, timeout\\)"
 
 #: flwr.server.server.Server.client_manager:1:<autosummary>:1
 #: flwr.server.server.Server.fit:1 of
@@ -10561,10 +10612,13 @@ msgid "Run federated averaging for a number of rounds."
 msgstr "联邦平均动量策略。"
 
 #: flwr.server.server.Server.client_manager:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`fit_round <flwr.server.Server.fit_round>`\\ \\(server\\_round\\,"
 " timeout\\)"
 msgstr ""
+":py:obj:`fit_round <flwr.server.Server.fit_round>`\\ \\(server\\_round\\, "
+"timeout\\)"
 
 #: flwr.server.server.Server.client_manager:1:<autosummary>:1
 #: flwr.server.server.Server.fit_round:1 of
@@ -13209,8 +13263,9 @@ msgstr ""
 "num\\_available\\_clients\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.FedProx.rst:2
+#, fuzzy
 msgid "FedProx"
-msgstr ""
+msgstr "FedProx"
 
 #: flwr.server.strategy.fedprox.FedProx:3 of
 msgid "Implementation based on https://arxiv.org/abs/1812.06127"
@@ -13262,57 +13317,81 @@ msgstr ""
 "FedAvg，系数越大，使用的正则化就越多（也就是说，在训练过程中，客户端参数需要更接近服务器参数）。"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_evaluate "
 "<flwr.server.strategy.FedProx.aggregate_evaluate>`\\ \\(server\\_round\\,"
 " results\\, ...\\)"
 msgstr ""
+":py:obj:`aggregate_evaluate <flwr.server.strategy.FedProx."
+"aggregate_evaluate>`\\ \\(server\\_round\\, results\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_fit <flwr.server.strategy.FedProx.aggregate_fit>`\\ "
 "\\(server\\_round\\, results\\, failures\\)"
 msgstr ""
+":py:obj:`aggregate_fit <flwr.server.strategy.FedProx.aggregate_fit>`\\ \\("
+"server\\_round\\, results\\, failures\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_evaluate "
 "<flwr.server.strategy.FedProx.configure_evaluate>`\\ \\(server\\_round\\,"
 " parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_evaluate <flwr.server.strategy.FedProx."
+"configure_evaluate>`\\ \\(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_fit <flwr.server.strategy.FedProx.configure_fit>`\\ "
 "\\(server\\_round\\, parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_fit <flwr.server.strategy.FedProx.configure_fit>`\\ \\("
+"server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.server.strategy.FedProx.evaluate>`\\ "
 "\\(server\\_round\\, parameters\\)"
 msgstr ""
+":py:obj:`evaluate <flwr.server.strategy.FedProx.evaluate>`\\ \\("
+"server\\_round\\, parameters\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`initialize_parameters "
 "<flwr.server.strategy.FedProx.initialize_parameters>`\\ "
 "\\(client\\_manager\\)"
 msgstr ""
+":py:obj:`initialize_parameters <flwr.server.strategy.FedProx."
+"initialize_parameters>`\\ \\(client\\_manager\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`num_evaluation_clients "
 "<flwr.server.strategy.FedProx.num_evaluation_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_evaluation_clients <flwr.server.strategy.FedProx."
+"num_evaluation_clients>`\\ \\(num\\_available\\_clients\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`num_fit_clients "
 "<flwr.server.strategy.FedProx.num_fit_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_fit_clients <flwr.server.strategy.FedProx.num_fit_clients>`\\ \\"
+"(num\\_available\\_clients\\)"
 
 #: flwr.server.strategy.fedprox.FedProx.configure_fit:3 of
 msgid "Sends the proximal factor mu to the clients"
@@ -13333,18 +13412,24 @@ msgid "Fraction to cut off of both tails of the distribution. Defaults to 0.2."
 msgstr "截取分布两个尾部的分数。默认为 0.2。"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_evaluate "
 "<flwr.server.strategy.FedTrimmedAvg.aggregate_evaluate>`\\ "
 "\\(server\\_round\\, results\\, ...\\)"
 msgstr ""
+":py:obj:`aggregate_evaluate <flwr.server.strategy.FedTrimmedAvg."
+"aggregate_evaluate>`\\ \\(server\\_round\\, results\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_fit "
 "<flwr.server.strategy.FedTrimmedAvg.aggregate_fit>`\\ "
 "\\(server\\_round\\, results\\, failures\\)"
 msgstr ""
+":py:obj:`aggregate_fit <flwr.server.strategy.FedTrimmedAvg.aggregate_fit>`\\ "
+"\\(server\\_round\\, results\\, failures\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
 #: flwr.server.strategy.fedtrimmedavg.FedTrimmedAvg.aggregate_fit:1 of
@@ -13352,57 +13437,79 @@ msgid "Aggregate fit results using trimmed average."
 msgstr "使用修剪平均值汇总拟合结果。"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_evaluate "
 "<flwr.server.strategy.FedTrimmedAvg.configure_evaluate>`\\ "
 "\\(server\\_round\\, parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_evaluate <flwr.server.strategy.FedTrimmedAvg."
+"configure_evaluate>`\\ \\(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_fit "
 "<flwr.server.strategy.FedTrimmedAvg.configure_fit>`\\ "
 "\\(server\\_round\\, parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_fit <flwr.server.strategy.FedTrimmedAvg.configure_fit>`\\ "
+"\\(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.server.strategy.FedTrimmedAvg.evaluate>`\\ "
 "\\(server\\_round\\, parameters\\)"
 msgstr ""
+":py:obj:`evaluate <flwr.server.strategy.FedTrimmedAvg.evaluate>`\\ \\("
+"server\\_round\\, parameters\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`initialize_parameters "
 "<flwr.server.strategy.FedTrimmedAvg.initialize_parameters>`\\ "
 "\\(client\\_manager\\)"
 msgstr ""
+":py:obj:`initialize_parameters <flwr.server.strategy.FedTrimmedAvg."
+"initialize_parameters>`\\ \\(client\\_manager\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`num_evaluation_clients "
 "<flwr.server.strategy.FedTrimmedAvg.num_evaluation_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_evaluation_clients <flwr.server.strategy.FedTrimmedAvg."
+"num_evaluation_clients>`\\ \\(num\\_available\\_clients\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`num_fit_clients "
 "<flwr.server.strategy.FedTrimmedAvg.num_fit_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_fit_clients <flwr.server.strategy.FedTrimmedAvg."
+"num_fit_clients>`\\ \\(num\\_available\\_clients\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.FedXgbBagging.rst:2
+#, fuzzy
 msgid "FedXgbBagging"
-msgstr ""
+msgstr "FedXgbBagging"
 
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_evaluate "
 "<flwr.server.strategy.FedXgbBagging.aggregate_evaluate>`\\ "
 "\\(server\\_round\\, results\\, ...\\)"
 msgstr ""
+":py:obj:`aggregate_evaluate <flwr.server.strategy.FedXgbBagging."
+"aggregate_evaluate>`\\ \\(server\\_round\\, results\\, ...\\)"
 
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging.aggregate_evaluate:1
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging.aggregate_evaluate:1:<autosummary>:1
@@ -13415,11 +13522,14 @@ msgstr "采用加权平均法计算评估损失总额。"
 
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_fit "
 "<flwr.server.strategy.FedXgbBagging.aggregate_fit>`\\ "
 "\\(server\\_round\\, results\\, failures\\)"
 msgstr ""
+":py:obj:`aggregate_fit <flwr.server.strategy.FedXgbBagging.aggregate_fit>`\\ "
+"\\(server\\_round\\, results\\, failures\\)"
 
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging.aggregate_evaluate:1:<autosummary>:1
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging.aggregate_fit:1
@@ -13431,117 +13541,160 @@ msgstr "使用 Bulyan 技术汇总拟合结果。"
 
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_evaluate "
 "<flwr.server.strategy.FedXgbBagging.configure_evaluate>`\\ "
 "\\(server\\_round\\, parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_evaluate <flwr.server.strategy.FedXgbBagging."
+"configure_evaluate>`\\ \\(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_fit "
 "<flwr.server.strategy.FedXgbBagging.configure_fit>`\\ "
 "\\(server\\_round\\, parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_fit <flwr.server.strategy.FedXgbBagging.configure_fit>`\\ "
+"\\(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.server.strategy.FedXgbBagging.evaluate>`\\ "
 "\\(server\\_round\\, parameters\\)"
 msgstr ""
+":py:obj:`evaluate <flwr.server.strategy.FedXgbBagging.evaluate>`\\ \\("
+"server\\_round\\, parameters\\)"
 
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`initialize_parameters "
 "<flwr.server.strategy.FedXgbBagging.initialize_parameters>`\\ "
 "\\(client\\_manager\\)"
 msgstr ""
+":py:obj:`initialize_parameters <flwr.server.strategy.FedXgbBagging."
+"initialize_parameters>`\\ \\(client\\_manager\\)"
 
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`num_evaluation_clients "
 "<flwr.server.strategy.FedXgbBagging.num_evaluation_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_evaluation_clients <flwr.server.strategy.FedXgbBagging."
+"num_evaluation_clients>`\\ \\(num\\_available\\_clients\\)"
 
 #: flwr.server.strategy.fedxgb_bagging.FedXgbBagging.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`num_fit_clients "
 "<flwr.server.strategy.FedXgbBagging.num_fit_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_fit_clients <flwr.server.strategy.FedXgbBagging."
+"num_fit_clients>`\\ \\(num\\_available\\_clients\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.FedXgbCyclic.rst:2
+#, fuzzy
 msgid "FedXgbCyclic"
-msgstr ""
+msgstr "FedXgbCyclic"
 
 #: flwr.server.strategy.fedxgb_cyclic.FedXgbCyclic.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_evaluate "
 "<flwr.server.strategy.FedXgbCyclic.aggregate_evaluate>`\\ "
 "\\(server\\_round\\, results\\, ...\\)"
 msgstr ""
+":py:obj:`aggregate_evaluate <flwr.server.strategy.FedXgbCyclic."
+"aggregate_evaluate>`\\ \\(server\\_round\\, results\\, ...\\)"
 
 #: flwr.server.strategy.fedxgb_cyclic.FedXgbCyclic.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_fit "
 "<flwr.server.strategy.FedXgbCyclic.aggregate_fit>`\\ \\(server\\_round\\,"
 " results\\, failures\\)"
 msgstr ""
+":py:obj:`aggregate_fit <flwr.server.strategy.FedXgbCyclic.aggregate_fit>`\\ "
+"\\(server\\_round\\, results\\, failures\\)"
 
 #: flwr.server.strategy.fedxgb_cyclic.FedXgbCyclic.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_evaluate "
 "<flwr.server.strategy.FedXgbCyclic.configure_evaluate>`\\ "
 "\\(server\\_round\\, parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_evaluate <flwr.server.strategy.FedXgbCyclic."
+"configure_evaluate>`\\ \\(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedxgb_cyclic.FedXgbCyclic.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_fit "
 "<flwr.server.strategy.FedXgbCyclic.configure_fit>`\\ \\(server\\_round\\,"
 " parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_fit <flwr.server.strategy.FedXgbCyclic.configure_fit>`\\ "
+"\\(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedxgb_cyclic.FedXgbCyclic.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.server.strategy.FedXgbCyclic.evaluate>`\\ "
 "\\(server\\_round\\, parameters\\)"
 msgstr ""
+":py:obj:`evaluate <flwr.server.strategy.FedXgbCyclic.evaluate>`\\ \\("
+"server\\_round\\, parameters\\)"
 
 #: flwr.server.strategy.fedxgb_cyclic.FedXgbCyclic.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`initialize_parameters "
 "<flwr.server.strategy.FedXgbCyclic.initialize_parameters>`\\ "
 "\\(client\\_manager\\)"
 msgstr ""
+":py:obj:`initialize_parameters <flwr.server.strategy.FedXgbCyclic."
+"initialize_parameters>`\\ \\(client\\_manager\\)"
 
 #: flwr.server.strategy.fedxgb_cyclic.FedXgbCyclic.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`num_evaluation_clients "
 "<flwr.server.strategy.FedXgbCyclic.num_evaluation_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_evaluation_clients <flwr.server.strategy.FedXgbCyclic."
+"num_evaluation_clients>`\\ \\(num\\_available\\_clients\\)"
 
 #: flwr.server.strategy.fedxgb_cyclic.FedXgbCyclic.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`num_fit_clients "
 "<flwr.server.strategy.FedXgbCyclic.num_fit_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_fit_clients <flwr.server.strategy.FedXgbCyclic.num_fit_clients>`"
+"\\ \\(num\\_available\\_clients\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.FedXgbNnAvg.rst:2
 #, fuzzy
@@ -13549,70 +13702,98 @@ msgid "FedXgbNnAvg"
 msgstr "DP-FedAvg"
 
 #: flwr.server.strategy.fedxgb_nn_avg.FedXgbNnAvg:5 of
+#, fuzzy
 msgid ""
 "This strategy is deprecated, but a copy of it is available in Flower "
 "Baselines: "
 "https://github.com/adap/flower/tree/main/baselines/hfedxgboost."
 msgstr ""
+"该策略已被弃用，但在 Flower Baselines: https://github.com/adap/flower/tree/"
+"main/baselines/hfedxgboost 中有其副本。"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_evaluate "
 "<flwr.server.strategy.FedXgbNnAvg.aggregate_evaluate>`\\ "
 "\\(server\\_round\\, results\\, ...\\)"
 msgstr ""
+":py:obj:`aggregate_evaluate <flwr.server.strategy.FedXgbNnAvg."
+"aggregate_evaluate>`\\ \\(server\\_round\\, results\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_fit "
 "<flwr.server.strategy.FedXgbNnAvg.aggregate_fit>`\\ \\(server\\_round\\, "
 "results\\, failures\\)"
 msgstr ""
+":py:obj:`aggregate_fit <flwr.server.strategy.FedXgbNnAvg.aggregate_fit>`\\ \\"
+"(server\\_round\\, results\\, failures\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_evaluate "
 "<flwr.server.strategy.FedXgbNnAvg.configure_evaluate>`\\ "
 "\\(server\\_round\\, parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_evaluate <flwr.server.strategy.FedXgbNnAvg."
+"configure_evaluate>`\\ \\(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_fit "
 "<flwr.server.strategy.FedXgbNnAvg.configure_fit>`\\ \\(server\\_round\\, "
 "parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_fit <flwr.server.strategy.FedXgbNnAvg.configure_fit>`\\ \\"
+"(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.server.strategy.FedXgbNnAvg.evaluate>`\\ "
 "\\(server\\_round\\, parameters\\)"
 msgstr ""
+":py:obj:`evaluate <flwr.server.strategy.FedXgbNnAvg.evaluate>`\\ \\("
+"server\\_round\\, parameters\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`initialize_parameters "
 "<flwr.server.strategy.FedXgbNnAvg.initialize_parameters>`\\ "
 "\\(client\\_manager\\)"
 msgstr ""
+":py:obj:`initialize_parameters <flwr.server.strategy.FedXgbNnAvg."
+"initialize_parameters>`\\ \\(client\\_manager\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`num_evaluation_clients "
 "<flwr.server.strategy.FedXgbNnAvg.num_evaluation_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_evaluation_clients <flwr.server.strategy.FedXgbNnAvg."
+"num_evaluation_clients>`\\ \\(num\\_available\\_clients\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`num_fit_clients "
 "<flwr.server.strategy.FedXgbNnAvg.num_fit_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_fit_clients <flwr.server.strategy.FedXgbNnAvg.num_fit_clients>`"
+"\\ \\(num\\_available\\_clients\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.FedYogi.rst:2
+#, fuzzy
 msgid "FedYogi"
-msgstr ""
+msgstr "FedYogi"
 
 #: flwr.server.strategy.fedyogi.FedYogi:32 of
 #, fuzzy
@@ -13630,61 +13811,86 @@ msgid "Controls the algorithm's degree of adaptability. Defaults to 1e-3."
 msgstr "控制算法的适应度。默认为 1e-9。"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_evaluate "
 "<flwr.server.strategy.FedYogi.aggregate_evaluate>`\\ \\(server\\_round\\,"
 " results\\, ...\\)"
 msgstr ""
+":py:obj:`aggregate_evaluate <flwr.server.strategy.FedYogi."
+"aggregate_evaluate>`\\ \\(server\\_round\\, results\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_fit <flwr.server.strategy.FedYogi.aggregate_fit>`\\ "
 "\\(server\\_round\\, results\\, failures\\)"
 msgstr ""
+":py:obj:`aggregate_fit <flwr.server.strategy.FedYogi.aggregate_fit>`\\ \\("
+"server\\_round\\, results\\, failures\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_evaluate "
 "<flwr.server.strategy.FedYogi.configure_evaluate>`\\ \\(server\\_round\\,"
 " parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_evaluate <flwr.server.strategy.FedYogi."
+"configure_evaluate>`\\ \\(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_fit <flwr.server.strategy.FedYogi.configure_fit>`\\ "
 "\\(server\\_round\\, parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_fit <flwr.server.strategy.FedYogi.configure_fit>`\\ \\("
+"server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.server.strategy.FedYogi.evaluate>`\\ "
 "\\(server\\_round\\, parameters\\)"
 msgstr ""
+":py:obj:`evaluate <flwr.server.strategy.FedYogi.evaluate>`\\ \\("
+"server\\_round\\, parameters\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`initialize_parameters "
 "<flwr.server.strategy.FedYogi.initialize_parameters>`\\ "
 "\\(client\\_manager\\)"
 msgstr ""
+":py:obj:`initialize_parameters <flwr.server.strategy.FedYogi."
+"initialize_parameters>`\\ \\(client\\_manager\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`num_evaluation_clients "
 "<flwr.server.strategy.FedYogi.num_evaluation_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_evaluation_clients <flwr.server.strategy.FedYogi."
+"num_evaluation_clients>`\\ \\(num\\_available\\_clients\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`num_fit_clients "
 "<flwr.server.strategy.FedYogi.num_fit_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_fit_clients <flwr.server.strategy.FedYogi.num_fit_clients>`\\ \\"
+"(num\\_available\\_clients\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.Krum.rst:2
+#, fuzzy
 msgid "Krum"
-msgstr ""
+msgstr "Krum"
 
 #: flwr.server.strategy.krum.Krum:3 of
 #, fuzzy
@@ -13698,17 +13904,23 @@ msgid ""
 msgstr "求平均值前保留的客户端数量（MultiKrum）。默认值为 0，在这种情况下会应用经典 Krum。"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_evaluate "
 "<flwr.server.strategy.Krum.aggregate_evaluate>`\\ \\(server\\_round\\, "
 "results\\, ...\\)"
 msgstr ""
+":py:obj:`aggregate_evaluate <flwr.server.strategy.Krum.aggregate_evaluate>`\\"
+" \\(server\\_round\\, results\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_fit <flwr.server.strategy.Krum.aggregate_fit>`\\ "
 "\\(server\\_round\\, results\\, failures\\)"
 msgstr ""
+":py:obj:`aggregate_fit <flwr.server.strategy.Krum.aggregate_fit>`\\ \\("
+"server\\_round\\, results\\, failures\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1
 #: flwr.server.strategy.krum.Krum.aggregate_fit:1 of
@@ -13716,43 +13928,61 @@ msgid "Aggregate fit results using Krum."
 msgstr "使用 Krum 汇总拟合结果。"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_evaluate "
 "<flwr.server.strategy.Krum.configure_evaluate>`\\ \\(server\\_round\\, "
 "parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_evaluate <flwr.server.strategy.Krum.configure_evaluate>`\\"
+" \\(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_fit <flwr.server.strategy.Krum.configure_fit>`\\ "
 "\\(server\\_round\\, parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_fit <flwr.server.strategy.Krum.configure_fit>`\\ \\("
+"server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.server.strategy.Krum.evaluate>`\\ "
 "\\(server\\_round\\, parameters\\)"
 msgstr ""
+":py:obj:`evaluate <flwr.server.strategy.Krum.evaluate>`\\ \\(server\\_round\\"
+", parameters\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`initialize_parameters "
 "<flwr.server.strategy.Krum.initialize_parameters>`\\ "
 "\\(client\\_manager\\)"
 msgstr ""
+":py:obj:`initialize_parameters <flwr.server.strategy.Krum."
+"initialize_parameters>`\\ \\(client\\_manager\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`num_evaluation_clients "
 "<flwr.server.strategy.Krum.num_evaluation_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_evaluation_clients <flwr.server.strategy.Krum."
+"num_evaluation_clients>`\\ \\(num\\_available\\_clients\\)"
 
 #: flwr.server.strategy.fedavg.FedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`num_fit_clients <flwr.server.strategy.Krum.num_fit_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_fit_clients <flwr.server.strategy.Krum.num_fit_clients>`\\ \\("
+"num\\_available\\_clients\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.QFedAvg.rst:2
 #, fuzzy
@@ -13760,57 +13990,81 @@ msgid "QFedAvg"
 msgstr "DP-FedAvg"
 
 #: flwr.server.strategy.qfedavg.QFedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_evaluate "
 "<flwr.server.strategy.QFedAvg.aggregate_evaluate>`\\ \\(server\\_round\\,"
 " results\\, ...\\)"
 msgstr ""
+":py:obj:`aggregate_evaluate <flwr.server.strategy.QFedAvg."
+"aggregate_evaluate>`\\ \\(server\\_round\\, results\\, ...\\)"
 
 #: flwr.server.strategy.qfedavg.QFedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_fit <flwr.server.strategy.QFedAvg.aggregate_fit>`\\ "
 "\\(server\\_round\\, results\\, failures\\)"
 msgstr ""
+":py:obj:`aggregate_fit <flwr.server.strategy.QFedAvg.aggregate_fit>`\\ \\("
+"server\\_round\\, results\\, failures\\)"
 
 #: flwr.server.strategy.qfedavg.QFedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_evaluate "
 "<flwr.server.strategy.QFedAvg.configure_evaluate>`\\ \\(server\\_round\\,"
 " parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_evaluate <flwr.server.strategy.QFedAvg."
+"configure_evaluate>`\\ \\(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.qfedavg.QFedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_fit <flwr.server.strategy.QFedAvg.configure_fit>`\\ "
 "\\(server\\_round\\, parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_fit <flwr.server.strategy.QFedAvg.configure_fit>`\\ \\("
+"server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.qfedavg.QFedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.server.strategy.QFedAvg.evaluate>`\\ "
 "\\(server\\_round\\, parameters\\)"
 msgstr ""
+":py:obj:`evaluate <flwr.server.strategy.QFedAvg.evaluate>`\\ \\("
+"server\\_round\\, parameters\\)"
 
 #: flwr.server.strategy.qfedavg.QFedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`initialize_parameters "
 "<flwr.server.strategy.QFedAvg.initialize_parameters>`\\ "
 "\\(client\\_manager\\)"
 msgstr ""
+":py:obj:`initialize_parameters <flwr.server.strategy.QFedAvg."
+"initialize_parameters>`\\ \\(client\\_manager\\)"
 
 #: flwr.server.strategy.qfedavg.QFedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`num_evaluation_clients "
 "<flwr.server.strategy.QFedAvg.num_evaluation_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_evaluation_clients <flwr.server.strategy.QFedAvg."
+"num_evaluation_clients>`\\ \\(num\\_available\\_clients\\)"
 
 #: flwr.server.strategy.qfedavg.QFedAvg.aggregate_evaluate:1:<autosummary>:1 of
+#, fuzzy
 msgid ""
 ":py:obj:`num_fit_clients "
 "<flwr.server.strategy.QFedAvg.num_fit_clients>`\\ "
 "\\(num\\_available\\_clients\\)"
 msgstr ""
+":py:obj:`num_fit_clients <flwr.server.strategy.QFedAvg.num_fit_clients>`\\ \\"
+"(num\\_available\\_clients\\)"
 
 #: ../../source/ref-api/flwr.server.strategy.Strategy.rst:2
 #, fuzzy
@@ -13819,11 +14073,14 @@ msgstr "Krum 策略。"
 
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_evaluate "
 "<flwr.server.strategy.Strategy.aggregate_evaluate>`\\ "
 "\\(server\\_round\\, results\\, ...\\)"
 msgstr ""
+":py:obj:`aggregate_evaluate <flwr.server.strategy.Strategy."
+"aggregate_evaluate>`\\ \\(server\\_round\\, results\\, ...\\)"
 
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
@@ -13833,10 +14090,13 @@ msgstr "聚合评估结果。"
 
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`aggregate_fit <flwr.server.strategy.Strategy.aggregate_fit>`\\ "
 "\\(server\\_round\\, results\\, failures\\)"
 msgstr ""
+":py:obj:`aggregate_fit <flwr.server.strategy.Strategy.aggregate_fit>`\\ \\("
+"server\\_round\\, results\\, failures\\)"
 
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: flwr.server.strategy.strategy.Strategy.aggregate_fit:1 of
@@ -13845,25 +14105,34 @@ msgstr "汇总训练结果。"
 
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_evaluate "
 "<flwr.server.strategy.Strategy.configure_evaluate>`\\ "
 "\\(server\\_round\\, parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_evaluate <flwr.server.strategy.Strategy."
+"configure_evaluate>`\\ \\(server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`configure_fit <flwr.server.strategy.Strategy.configure_fit>`\\ "
 "\\(server\\_round\\, parameters\\, ...\\)"
 msgstr ""
+":py:obj:`configure_fit <flwr.server.strategy.Strategy.configure_fit>`\\ \\("
+"server\\_round\\, parameters\\, ...\\)"
 
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`evaluate <flwr.server.strategy.Strategy.evaluate>`\\ "
 "\\(server\\_round\\, parameters\\)"
 msgstr ""
+":py:obj:`evaluate <flwr.server.strategy.Strategy.evaluate>`\\ \\("
+"server\\_round\\, parameters\\)"
 
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: flwr.server.strategy.strategy.Strategy.evaluate:1 of
@@ -13872,11 +14141,14 @@ msgstr "评估当前的模型参数。"
 
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`initialize_parameters "
 "<flwr.server.strategy.Strategy.initialize_parameters>`\\ "
 "\\(client\\_manager\\)"
 msgstr ""
+":py:obj:`initialize_parameters <flwr.server.strategy.Strategy."
+"initialize_parameters>`\\ \\(client\\_manager\\)"
 
 #: flwr.server.strategy.strategy.Strategy.aggregate_evaluate:1:<autosummary>:1
 #: flwr.server.strategy.strategy.Strategy.initialize_parameters:1 of
@@ -13957,38 +14229,50 @@ msgid "workflow"
 msgstr "工作流程"
 
 #: ../../source/ref-api/flwr.server.workflow.rst:24:<autosummary>:1
+#, fuzzy
 msgid ""
 ":py:obj:`DefaultWorkflow <flwr.server.workflow.DefaultWorkflow>`\\ "
 "\\(\\[fit\\_workflow\\, ...\\]\\)"
 msgstr ""
+":py:obj:`DefaultWorkflow <flwr.server.workflow.DefaultWorkflow>`\\ \\(\\["
+"fit\\_workflow\\, ...\\]\\)"
 
 #: ../../source/ref-api/flwr.server.workflow.rst:24:<autosummary>:1
 #: flwr.server.workflow.default_workflows.DefaultWorkflow:1 of
+#, fuzzy
 msgid "Default workflow in Flower."
-msgstr ""
+msgstr "Flower 中的默认工作流程。"
 
 #: ../../source/ref-api/flwr.server.workflow.rst:24:<autosummary>:1
+#, fuzzy
 msgid ""
 ":py:obj:`SecAggPlusWorkflow <flwr.server.workflow.SecAggPlusWorkflow>`\\ "
 "\\(num\\_shares\\, ...\\[\\, ...\\]\\)"
 msgstr ""
+":py:obj:`SecAggPlusWorkflow <flwr.server.workflow.SecAggPlusWorkflow>`\\ \\("
+"num\\_shares\\, ...\\[\\, ...\\]\\)"
 
 #: ../../source/ref-api/flwr.server.workflow.rst:24:<autosummary>:1
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:1
 #: of
+#, fuzzy
 msgid "The workflow for the SecAgg+ protocol."
-msgstr ""
+msgstr "SecAgg+ 协议的工作流程。"
 
 #: ../../source/ref-api/flwr.server.workflow.rst:24:<autosummary>:1
+#, fuzzy
 msgid ""
 ":py:obj:`SecAggWorkflow <flwr.server.workflow.SecAggWorkflow>`\\ "
 "\\(reconstruction\\_threshold\\, \\*\\)"
 msgstr ""
+":py:obj:`SecAggWorkflow <flwr.server.workflow.SecAggWorkflow>`\\ \\("
+"reconstruction\\_threshold\\, \\*\\)"
 
 #: ../../source/ref-api/flwr.server.workflow.rst:24:<autosummary>:1
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:1 of
+#, fuzzy
 msgid "The workflow for the SecAgg protocol."
-msgstr ""
+msgstr "SecAgg 协议的工作流程。"
 
 #: ../../source/ref-api/flwr.server.workflow.DefaultWorkflow.rst:2
 #, fuzzy
@@ -14002,6 +14286,7 @@ msgstr "工作流程"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:3
 #: of
+#, fuzzy
 msgid ""
 "The SecAgg+ protocol ensures the secure summation of integer vectors "
 "owned by multiple parties, without accessing any individual integer "
@@ -14015,47 +14300,63 @@ msgid ""
 "('parameters') from the client's `FitRes`. The server then aggregates "
 "these contributions to compute the weighted average of model parameters."
 msgstr ""
+"SecAgg+ 协议可确保对多方拥有的整数向量进行安全求和，而不会访问任何单个整数向"
+"量。该工作流程允许服务器计算所有客户端模型参数的加权平均值，确保个人贡献保持"
+"私密。这可以通过客户端同时发送加权因子和本地更新参数的加权版本来实现，为了保"
+"护隐私，两者都会被屏蔽。具体来说，每个客户端都会上传带掩码的\"[w, w * params]"
+"\"，其中加权因子 \"w \"是示例数（\"num_examples\"），\"params \"代表客户端 "
+"\"FitRes \"中的模型参数（\"parameters\""
+"）。然后，服务器会汇总这些贡献，计算模型参数的加权平均值。"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:14
 #: of
+#, fuzzy
 msgid ""
 "The protocol involves four main stages: - 'setup': Send SecAgg+ "
 "configuration to clients and collect their public keys. - 'share keys': "
 "Broadcast public keys among clients and collect encrypted secret"
 msgstr ""
+"协议包括四个主要阶段： - 设置\"： 向客户端发送 SecAgg+ 配置并收集其公钥。- "
+"共享密钥\"： 在客户端之间广播公钥，并收集加密密钥。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:17
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:17
 #: of
+#, fuzzy
 msgid "key shares."
-msgstr ""
+msgstr "关键股份。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:18
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:18
 #: of
+#, fuzzy
 msgid ""
 "'collect masked vectors': Forward encrypted secret key shares to target "
 "clients and collect masked model parameters."
-msgstr ""
+msgstr "收集屏蔽向量\"： 向目标客户端转发加密密钥共享，并收集屏蔽模型参数。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:20
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:20
 #: of
+#, fuzzy
 msgid ""
 "'unmask': Collect secret key shares to decrypt and aggregate the model "
 "parameters."
-msgstr ""
+msgstr "解密\"： 收集密钥共享，解密并汇总模型参数。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:22
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:22
 #: of
+#, fuzzy
 msgid ""
 "Only the aggregated model parameters are exposed and passed to "
 "`Strategy.aggregate_fit`, ensuring individual data privacy."
-msgstr ""
+msgstr "只有聚合模型参数才会公开并传递给 `Strategy."
+"aggregate_fit`，从而确保个人数据隐私。"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:25
 #: of
+#, fuzzy
 msgid ""
 "The number of shares into which each client's private key is split under "
 "the SecAgg+ protocol. If specified as a float, it represents the "
@@ -14064,10 +14365,14 @@ msgid ""
 "these shares, allowing for the secure aggregation of model updates. Each "
 "client sends one share to each of its neighbors while retaining one."
 msgstr ""
+"在 SecAgg+ 协议下，每个客户的私钥被分成的份数。如果指定为浮点数，则代表所有选"
+"定客户的比例，份额数将在运行时动态设置。私钥可以从这些份额中重建，从而实现模"
+"型更新的安全聚合。每个客户端向其每个邻居发送一份，同时保留一份。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:25
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:32
 #: of
+#, fuzzy
 msgid ""
 "The minimum number of shares required to reconstruct a client's private "
 "key, or, if specified as a float, it represents the proportion of the "
@@ -14075,149 +14380,194 @@ msgid ""
 "privacy by allowing for the recovery of contributions from dropped "
 "clients during aggregation, without compromising individual client data."
 msgstr ""
+"重建客户私钥所需的最小份数，如果指定为浮动，则表示重建所需的份数占总份数的比"
+"例。这个阈值允许在聚合过程中恢复掉线客户的贡献，从而确保隐私，而不会泄露单个"
+"客户的数据。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:31
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:38
 #: of
+#, fuzzy
 msgid ""
 "The maximum value of the weight that can be assigned to any single "
 "client's update during the weighted average calculation on the server "
 "side, e.g., in the FedAvg algorithm."
-msgstr ""
+msgstr "在服务器端进行加权平均计算（如 FedAvg "
+"算法）时，可分配给任何单个客户端更新的权重的最大值。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:35
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:42
 #: of
+#, fuzzy
 msgid ""
 "The range within which model parameters are clipped before quantization. "
 "This parameter ensures each model parameter is bounded within "
 "[-clipping_range, clipping_range], facilitating quantization."
-msgstr ""
+msgstr "量化前模型参数的裁剪范围。该参数可确保每个模型参数都在 [-clipping_range, "
+"clipping_range] 范围内，便于量化。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:39
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:46
 #: of
+#, fuzzy
 msgid ""
 "The size of the range into which floating-point model parameters are "
 "quantized, mapping each parameter to an integer in [0, "
 "quantization_range-1]. This facilitates cryptographic operations on the "
 "model updates."
-msgstr ""
+msgstr "浮点模型参数量化范围的大小，将每个参数映射为 [0, quantization_range-1] "
+"中的整数。这有助于对模型更新进行加密操作。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:43
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:50
 #: of
+#, fuzzy
 msgid ""
 "The range of values from which random mask entries are uniformly sampled "
 "([0, modulus_range-1]). `modulus_range` must be less than 4294967296. "
 "Please use 2**n values for `modulus_range` to prevent overflow issues."
 msgstr ""
+"对随机掩码条目进行均匀采样的数值范围（[0, modulus_range-1]）。modulus_range "
+"\"必须小于 4294967296。为防止出现溢出问题，请为 `modulus_range` 使用 2**n "
+"的值。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:47
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:54
 #: of
+#, fuzzy
 msgid ""
 "The timeout duration in seconds. If specified, the workflow will wait for"
 " replies for this duration each time. If `None`, there is no time limit "
 "and the workflow will wait until replies for all messages are received."
 msgstr ""
+"超时时间（秒）。如果指定，工作流将在每次等待回复的时间内等待回复。如果指定为 "
+"\"无\"，则没有时间限制，工作流程将一直等待到收到所有信息的回复。"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:61
 #: of
+#, fuzzy
 msgid ""
 "Generally, higher `num_shares` means more robust to dropouts while "
 "increasing the computational costs; higher `reconstruction_threshold` "
 "means better privacy guarantees but less tolerance to dropouts."
 msgstr ""
+"一般来说，\"份额数 \"越高，意味着对丢弃的鲁棒性越强，同时计算成本也会增加；"
+"\"重构阈值 \"越高，意味着隐私保证越好，但对丢弃的容忍度越低。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:58
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:64
 #: of
+#, fuzzy
 msgid "Too large `max_weight` may compromise the precision of the quantization."
-msgstr ""
+msgstr "过大的 `max_weight` 可能会影响量化的精度。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:59
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:65
 #: of
+#, fuzzy
 msgid "`modulus_range` must be 2**n and larger than `quantization_range`."
-msgstr ""
+msgstr "modulus_range \"必须为 2**n，且大于 \"quantization_range\"。"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:66
 #: of
+#, fuzzy
 msgid ""
 "When `num_shares` is a float, it is interpreted as the proportion of all "
 "selected clients, and hence the number of shares will be determined in "
 "the runtime. This allows for dynamic adjustment based on the total number"
 " of participating clients."
 msgstr ""
+"当 `num_shares` 为浮点数时，它被解释为所有选定客户端的比例，因此份额数将在运"
+"行时确定。这样就可以根据参与客户端的总数进行动态调整。"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:69
 #: of
+#, fuzzy
 msgid ""
 "Similarly, when `reconstruction_threshold` is a float, it is interpreted "
 "as the proportion of the number of shares needed for the reconstruction "
 "of a private key. This feature enables flexibility in setting the "
 "security threshold relative to the number of distributed shares."
 msgstr ""
+"同样，当 `reconstruction_threshold` 为浮点数时，它被解释为重建私钥所需的份额"
+"数比例。这一功能使我们可以根据分发的份额数灵活设置安全阈值。"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:73
 #: of
+#, fuzzy
 msgid ""
 "`num_shares`, `reconstruction_threshold`, and the quantization parameters"
 " (`clipping_range`, `quantization_range`, `modulus_range`) play critical "
 "roles in balancing privacy, robustness, and efficiency within the SecAgg+"
 " protocol."
 msgstr ""
+"份额数\"、\"重建阈值 \"和量化参数（\"裁剪范围\"、\"量化范围\"、\"模数范围\"）"
+"在平衡 SecAgg+ 协议的隐私性、稳健性和效率方面发挥着关键作用。"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`collect_masked_vectors_stage "
 "<flwr.server.workflow.SecAggPlusWorkflow.collect_masked_vectors_stage>`\\"
 " \\(driver\\, ...\\)"
 msgstr ""
+":py:obj:`collect_masked_vectors_stage <flwr.server.workflow."
+"SecAggPlusWorkflow.collect_masked_vectors_stage>`\\ \\(driver\\, ...\\)"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid "Execute the 'collect masked vectors' stage."
-msgstr ""
+msgstr "执行 \"收集屏蔽向量 \"阶段。"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`setup_stage "
 "<flwr.server.workflow.SecAggPlusWorkflow.setup_stage>`\\ \\(driver\\, "
 "context\\, state\\)"
 msgstr ""
+":py:obj:`setup_stage <flwr.server.workflow.SecAggPlusWorkflow.setup_stage>`\\"
+" \\(driver\\, context\\, state\\)"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.setup_stage:1
 #: of
+#, fuzzy
 msgid "Execute the 'setup' stage."
-msgstr ""
+msgstr "执行 \"设置 \"阶段。"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`share_keys_stage "
 "<flwr.server.workflow.SecAggPlusWorkflow.share_keys_stage>`\\ "
 "\\(driver\\, context\\, state\\)"
 msgstr ""
+":py:obj:`share_keys_stage <flwr.server.workflow.SecAggPlusWorkflow."
+"share_keys_stage>`\\ \\(driver\\, context\\, state\\)"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.share_keys_stage:1
 #: of
+#, fuzzy
 msgid "Execute the 'share keys' stage."
-msgstr ""
+msgstr "执行 \"共享密钥 \"阶段。"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`unmask_stage "
 "<flwr.server.workflow.SecAggPlusWorkflow.unmask_stage>`\\ \\(driver\\, "
 "context\\, state\\)"
 msgstr ""
+":py:obj:`unmask_stage <flwr.server.workflow.SecAggPlusWorkflow.unmask_stage>`"
+"\\ \\(driver\\, context\\, state\\)"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.unmask_stage:1
