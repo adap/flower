@@ -52,7 +52,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         self.server_public_key: Optional[bytes] = None
         self.server_private_key: Optional[bytes] = None
 
-        self.lock = threading.RLock()
+        self.lock = threading.Lock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
