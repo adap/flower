@@ -124,12 +124,10 @@ class XgbClient(fl.client.Client):
             bst_input.update(self.train_dmatrix, bst_input.num_boosted_rounds())
 
         # Bagging: extract the last N=num_local_round trees for sever aggregation
-        bst = (
-            bst_input[
-                bst_input.num_boosted_rounds()
-                - self.num_local_round : bst_input.num_boosted_rounds()
-            ]
-        )
+        bst = bst_input[
+            bst_input.num_boosted_rounds()
+            - self.num_local_round : bst_input.num_boosted_rounds()
+        ]
 
         return bst
 
@@ -197,13 +195,14 @@ class XgbClient(fl.client.Client):
 
 
 # Start Flower client
-fl.client.start_client(server_address="127.0.0.1:8080",
-                       client=XgbClient(
-                           train_dmatrix,
-                           valid_dmatrix,
-                           num_train,
-                           num_val,
-                           num_local_round,
-                           params,
-                       ).to_client(),
+fl.client.start_client(
+    server_address="127.0.0.1:8080",
+    client=XgbClient(
+        train_dmatrix,
+        valid_dmatrix,
+        num_train,
+        num_val,
+        num_local_round,
+        params,
+    ).to_client(),
 )
