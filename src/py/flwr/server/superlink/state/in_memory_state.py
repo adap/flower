@@ -43,7 +43,7 @@ class InMemoryState(State):  # pylint: disable=R0902
         self.client_public_keys: Set[bytes] = set()
         self.server_public_key: Optional[bytes] = None
         self.server_private_key: Optional[bytes] = None
-        self.lock = threading.RLock()
+        self.lock = threading.Lock()
 
         # For simulation only
         self.new_task_ins = False
