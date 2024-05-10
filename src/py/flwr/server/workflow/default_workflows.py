@@ -252,7 +252,8 @@ def default_fit_workflow(  # pylint: disable=R0914
         for msg in messages
         if msg.has_content()
     ]
-    aggregated_result = context.strategy.aggregate_fit(current_round, results, [])
+    failures = [Exception(msg.error) for msg in messages if msg.has_error()]
+    aggregated_result = context.strategy.aggregate_fit(current_round, results, failures)
     parameters_aggregated, metrics_aggregated = aggregated_result
 
     # Update the parameters and write history
@@ -332,7 +333,10 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
         for msg in messages
         if msg.has_content()
     ]
-    aggregated_result = context.strategy.aggregate_evaluate(current_round, results, [])
+    failures = [Exception(msg.error) for msg in messages if msg.has_error()]
+    aggregated_result = context.strategy.aggregate_evaluate(
+        current_round, results, failures
+    )
 
     loss_aggregated, metrics_aggregated = aggregated_result
 
