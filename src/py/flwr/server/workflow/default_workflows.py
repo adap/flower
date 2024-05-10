@@ -253,7 +253,9 @@ def default_fit_workflow(  # pylint: disable=R0914
         if msg.has_content()
     ]
     failures = [Exception(msg.error) for msg in messages if msg.has_error()]
-    aggregated_result = context.strategy.aggregate_fit(current_round, results, failures)
+    aggregated_result = context.strategy.aggregate_fit(
+        current_round, results, failures  # type: ignore
+    )
     parameters_aggregated, metrics_aggregated = aggregated_result
 
     # Update the parameters and write history
@@ -267,6 +269,7 @@ def default_fit_workflow(  # pylint: disable=R0914
         )
 
 
+# pylint: disable-next=R0914
 def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     """Execute the default workflow for a single evaluate round."""
     if not isinstance(context, LegacyContext):
@@ -335,7 +338,7 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     ]
     failures = [Exception(msg.error) for msg in messages if msg.has_error()]
     aggregated_result = context.strategy.aggregate_evaluate(
-        current_round, results, failures
+        current_round, results, failures  # type: ignore
     )
 
     loss_aggregated, metrics_aggregated = aggregated_result
