@@ -26,7 +26,7 @@ class FedAnalytics(Strategy):
     def initialize_parameters(
         self, client_manager: Optional[ClientManager] = None
     ) -> Optional[Parameters]:
-        return None
+        return Parameters([], "")
 
     def configure_fit(
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
