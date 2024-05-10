@@ -140,48 +140,18 @@ def test_client_without_get_properties() -> None:
     )
 
     # Execute
-    actual_msg = handle_legacy_message_from_msgtype(
-        client_fn=_get_client_fn(client),
-        message=message,
-        context=Context(state=RecordSet()),
-    )
-
-    # Assert
-    expected_get_properties_res = GetPropertiesRes(
-        status=Status(
-            code=Code.GET_PROPERTIES_NOT_IMPLEMENTED,
-            message="Client does not implement `get_properties`",
-        ),
-        properties={},
-    )
-    expected_rs = compat.getpropertiesres_to_recordset(expected_get_properties_res)
-    expected_msg = Message(
-        metadata=Metadata(
-            run_id=123,
-            message_id="",
-            group_id="some group ID",
-            src_node_id=1123,
-            dst_node_id=0,
-            reply_to_message=message.metadata.message_id,
-            ttl=actual_msg.metadata.ttl,  # computed based on [message].create_reply()
-            message_type=MessageTypeLegacy.GET_PROPERTIES,
-        ),
-        content=expected_rs,
-    )
-
-    assert actual_msg.content == expected_msg.content
-    # metadata.created_at will differ so let's exclude it from checks
-    attrs = vars(actual_msg.metadata)
-    attrs_keys = list(attrs.keys())
-    attrs_keys.remove("_created_at")
-    # metadata.created_at will differ so let's exclude it from checks
-    for attr in attrs_keys:
-        assert getattr(actual_msg.metadata, attr) == getattr(
-            expected_msg.metadata, attr
+    try:
+        handle_legacy_message_from_msgtype(
+            client_fn=_get_client_fn(client),
+            message=message,
+            context=Context(state=RecordSet()),
         )
-
-    # Ensure the message created last has a higher timestamp
-    assert actual_msg.metadata.created_at < expected_msg.metadata.created_at
+        raise AssertionError()
+    # Assert
+    except NotImplementedError as e:
+        assert str(e) == "Client does not implement `get_properties`"
+    except Exception:
+        raise AssertionError() from None
 
 
 def test_client_with_get_properties() -> None:

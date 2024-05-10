@@ -26,7 +26,7 @@ from flwr.client.client import (
 )
 from flwr.client.numpy_client import NumPyClient
 from flwr.client.typing import ClientFn
-from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet, log
+from flwr.common import Code, ConfigsRecord, Context, Message, Metadata, RecordSet, log
 from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.recordset_compat import (
     evaluateres_to_recordset,
@@ -89,7 +89,7 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
     return None, 0
 
 
-def handle_legacy_message_from_msgtype(
+def handle_legacy_message_from_msgtype(  # pylint: disable=R0912
     client_fn: ClientFn, message: Message, context: Context
 ) -> Message:
     """Handle legacy message in the inner most mod."""
@@ -108,39 +108,56 @@ def handle_legacy_message_from_msgtype(
     client.set_context(context)
 
     message_type = message.metadata.message_type
-
+    out_recordset = None
+    error_msg = ""
     # Handle GetPropertiesIns
     if message_type == MessageTypeLegacy.GET_PROPERTIES:
         get_properties_res = maybe_call_get_properties(
             client=client,
             get_properties_ins=recordset_to_getpropertiesins(message.content),
         )
-        out_recordset = getpropertiesres_to_recordset(get_properties_res)
+        if get_properties_res.status.code == Code.OK:
+            out_recordset = getpropertiesres_to_recordset(get_properties_res)
+        else:
+            error_msg = get_properties_res.status.message
     # Handle GetParametersIns
     elif message_type == MessageTypeLegacy.GET_PARAMETERS:
         get_parameters_res = maybe_call_get_parameters(
             client=client,
             get_parameters_ins=recordset_to_getparametersins(message.content),
         )
-        out_recordset = getparametersres_to_recordset(
-            get_parameters_res, keep_input=False
-        )
+        if get_parameters_res.status.code == Code.OK:
+            out_recordset = getparametersres_to_recordset(
+                get_parameters_res, keep_input=False
+            )
+        else:
+            error_msg = get_parameters_res.status.message
     # Handle FitIns
     elif message_type == MessageType.TRAIN:
         fit_res = maybe_call_fit(
             client=client,
             fit_ins=recordset_to_fitins(message.content, keep_input=True),
         )
-        out_recordset = fitres_to_recordset(fit_res, keep_input=False)
+        if fit_res.status.code == Code.OK:
+            out_recordset = fitres_to_recordset(fit_res, keep_input=False)
+        else:
+            error_msg = fit_res.status.message
     # Handle EvaluateIns
     elif message_type == MessageType.EVALUATE:
         evaluate_res = maybe_call_evaluate(
             client=client,
             evaluate_ins=recordset_to_evaluateins(message.content, keep_input=True),
         )
-        out_recordset = evaluateres_to_recordset(evaluate_res)
+        if evaluate_res.status.code == Code.OK:
+            out_recordset = evaluateres_to_recordset(evaluate_res)
+        else:
+            error_msg = evaluate_res.status.message
     else:
         raise ValueError(f"Invalid message type: {message_type}")
+
+    # Raise NotImplementedError if the status code is not Code.OK
+    if out_recordset is None:
+        raise NotImplementedError(error_msg)
 
     # Return Message
     return message.create_reply(out_recordset)
