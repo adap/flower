@@ -88,7 +88,12 @@ class DefaultWorkflow:
         hist = context.history
         log(INFO, "")
         log(INFO, "[SUMMARY]")
-        log(INFO, "Run finished %s rounds in %.2fs", context.config.num_rounds, elapsed)
+        log(
+            INFO,
+            "Run finished %s round(s) in %.2fs",
+            context.config.num_rounds,
+            elapsed,
+        )
         for idx, line in enumerate(io.StringIO(str(hist))):
             if idx == 0:
                 log(INFO, "%s", line.strip("\n"))
