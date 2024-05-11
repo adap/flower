@@ -75,13 +75,9 @@ END
     sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 
     # Restore branch as it was to avoid conflicts
-    git restore source/_templates
-    git restore source/_templates/autosummary || rm -rf source/_templates/autosummary
-    rm source/ref-api/*.rst
-
-    if [ "$current_version" = "v1.5.0" ]; then
-      git restore source/conf.py
-    fi
+    git checkout source
+    git clean -f -d source
+    
     if [ changed ]; then
       git restore locales/${current_language} || rm -rf locales/${current_language}
     fi
