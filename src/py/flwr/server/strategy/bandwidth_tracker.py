@@ -39,7 +39,7 @@ class BandwidthTracker(Strategy):
     Parameters
     ----------
     strategy : Strategy
-        The strategy to which track its incoming and outgoing bandwidth.
+        The strategy to which to track its incoming and outgoing bandwidth.
     """
 
     # pylint: disable=too-many-arguments,too-many-instance-attributes
