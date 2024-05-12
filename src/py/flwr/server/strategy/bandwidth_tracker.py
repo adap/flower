@@ -68,7 +68,7 @@ class BandwidthTracker(Strategy):
         """Configure the next round of training."""
         params = parameters_to_ndarrays(parameters)
         size_in_bytes = (array.nbytes for array in params)
-        log(INFO, f"Broadcasting model size: {size_in_bytes} Bytes")
+        log(INFO, "Broadcasting model size: %i Bytes.", size_in_bytes)
 
         return self.strategy.configure_fit(server_round, parameters, client_manager)
 
@@ -93,7 +93,7 @@ class BandwidthTracker(Strategy):
         for _, res in results:
             params = parameters_to_ndarrays(res.parameters)
             size_in_bytes = (array.nbytes for array in params)
-            log(INFO, f"Receiving model size: {size_in_bytes} Bytes")
+            log(INFO, "Receiving model size: %i Bytes.", size_in_bytes)
 
         parameters_aggregated, metrics_aggregated = self.aggregate_fit(
             server_round, results, failures
