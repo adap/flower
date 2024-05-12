@@ -15,6 +15,7 @@
 """Contains the strategy abstraction and different implementations."""
 
 
+from .bandwidth_tracker import BandwidthTracker
 from .bulyan import Bulyan as Bulyan
 from .dp_adaptive_clipping import (
     DifferentialPrivacyClientSideAdaptiveClipping as DifferentialPrivacyClientSideAdaptiveClipping,
@@ -73,4 +74,5 @@ __all__ = [
     "Krum",
     "QFedAvg",
     "Strategy",
+    "BandwidthTracker",
 ]
