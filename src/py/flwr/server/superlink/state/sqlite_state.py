@@ -36,14 +36,15 @@ SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
     node_id         INTEGER UNIQUE,
     online_until    REAL,
-    ping_interval   REAL
+    ping_interval   REAL,
+    public_key      BLOB
 );
 """
 
 SQL_CREATE_TABLE_CREDENTIAL = """
 CREATE TABLE IF NOT EXISTS credential(
-    public_key BLOB PRIMARY KEY,
-    private_key BLOB
+    private_key BLOB PRIMARY KEY,
+    public_key BLOB
 );
 """
 
@@ -534,26 +535,54 @@ class SqliteState(State):  # pylint: disable=R0904
 
         return None
 
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(
+        self, ping_interval: float, public_key: Optional[bytes] = None
+    ) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
+        query = "SELECT node_id FROM node WHERE public_key = :public_key;"
+        row = self.query(query, {"public_key": public_key})
+
+        if len(row) > 0:
+            log(ERROR, "Unexpected node registration failure.")
+            return 0
+
         query = (
-            "INSERT INTO node (node_id, online_until, ping_interval) VALUES (?, ?, ?)"
+            "INSERT INTO node "
+            "(node_id, online_until, ping_interval, public_key) "
+            "VALUES (?, ?, ?, ?)"
         )
 
         try:
-            self.query(query, (node_id, time.time() + ping_interval, ping_interval))
+            self.query(
+                query, (node_id, time.time() + ping_interval, ping_interval, public_key)
+            )
         except sqlite3.IntegrityError:
             log(ERROR, "Unexpected node registration failure.")
             return 0
         return node_id
 
-    def delete_node(self, node_id: int) -> None:
+    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Delete a client node."""
-        query = "DELETE FROM node WHERE node_id = :node_id;"
-        self.query(query, {"node_id": node_id})
+        query = "DELETE FROM node WHERE node_id = ?"
+        params = (node_id,)
+
+        if public_key is not None:
+            query += " AND public_key = ?"
+            params += (public_key,)  # type: ignore
+
+        if self.conn is None:
+            raise AttributeError("State is not initialized.")
+
+        try:
+            with self.conn:
+                rows = self.conn.execute(query, params)
+                if rows.rowcount < 1:
+                    raise ValueError("Public key or node_id not found")
+        except KeyError as exc:
+            log(ERROR, {"query": query, "data": params, "exception": exc})
 
     def get_nodes(self, run_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
@@ -574,6 +603,15 @@ class SqliteState(State):  # pylint: disable=R0904
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
+    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+        query = "SELECT node_id FROM node WHERE public_key = :public_key;"
+        row = self.query(query, {"public_key": client_public_key})
+        if len(row) > 0:
+            node_id: int = row[0]["node_id"]
+            return node_id
+        return None
+
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
@@ -589,20 +627,20 @@ class SqliteState(State):  # pylint: disable=R0904
         log(ERROR, "Unexpected run creation failure.")
         return 0
 
-    def store_server_public_private_key(
-        self, public_key: bytes, private_key: bytes
+    def store_server_private_public_key(
+        self, private_key: bytes, public_key: bytes
     ) -> None:
-        """Store `server_public_key` and `server_private_key` in state."""
+        """Store `server_private_key` and `server_public_key` in state."""
         query = "SELECT COUNT(*) FROM credential"
         count = self.query(query)[0]["COUNT(*)"]
         if count < 1:
             query = (
-                "INSERT OR REPLACE INTO credential (public_key, private_key) "
-                "VALUES (:public_key, :private_key)"
+                "INSERT OR REPLACE INTO credential (private_key, public_key) "
+                "VALUES (:private_key, :public_key)"
             )
-            self.query(query, {"public_key": public_key, "private_key": private_key})
+            self.query(query, {"private_key": private_key, "public_key": public_key})
         else:
-            raise RuntimeError("Server public and private key already set")
+            raise RuntimeError("Server private and public key already set")
 
     def get_server_private_key(self) -> Optional[bytes]:
         """Retrieve `server_private_key` in urlsafe bytes."""
