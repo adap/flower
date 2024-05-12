@@ -83,7 +83,6 @@ class RecordSetData:
             )
 
 
-@dataclass
 class RecordSet:
     """RecordSet stores groups of parameters, metrics and configs."""
 
@@ -117,3 +116,15 @@ class RecordSet:
         """Dictionary holding ConfigsRecord instances."""
         data = cast(RecordSetData, self.__dict__["_data"])
         return data.configs_records
+
+    def __repr__(self) -> str:
+        """Return a string representation of this instance."""
+        flds = ("parameters_records", "metrics_records", "configs_records")
+        view = ", ".join([f"{fld}={getattr(self, fld)!r}" for fld in flds])
+        return f"{self.__class__.__qualname__}({view})"
+
+    def __eq__(self, other: object) -> bool:
+        """Compare two instances of the class."""
+        if not isinstance(other, self.__class__):
+            raise NotImplementedError
+        return self.__dict__ == other.__dict__
