@@ -18,14 +18,13 @@ from __future__ import annotations
 
 import time
 import warnings
-from dataclasses import dataclass
+from typing import Optional, cast
 
 from .record import RecordSet
 
 DEFAULT_TTL = 3600
 
 
-@dataclass
 class Metadata:  # pylint: disable=too-many-instance-attributes
     """A dataclass holding metadata associated with the current message.
 
@@ -55,17 +54,6 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         is more relevant when conducting simulations.
     """
 
-    _run_id: int
-    _message_id: str
-    _src_node_id: int
-    _dst_node_id: int
-    _reply_to_message: str
-    _group_id: str
-    _ttl: float
-    _message_type: str
-    _partition_id: int | None
-    _created_at: float  # Unix timestamp (in seconds) to be set upon message creation
-
     def __init__(  # pylint: disable=too-many-arguments
         self,
         run_id: int,
@@ -78,98 +66,111 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         message_type: str,
         partition_id: int | None = None,
     ) -> None:
-        self._run_id = run_id
-        self._message_id = message_id
-        self._src_node_id = src_node_id
-        self._dst_node_id = dst_node_id
-        self._reply_to_message = reply_to_message
-        self._group_id = group_id
-        self._ttl = ttl
-        self._message_type = message_type
-        self._partition_id = partition_id
+        var_dict = {
+            "_run_id": run_id,
+            "_message_id": message_id,
+            "_src_node_id": src_node_id,
+            "_dst_node_id": dst_node_id,
+            "_reply_to_message": reply_to_message,
+            "_group_id": group_id,
+            "_ttl": ttl,
+            "_message_type": message_type,
+            "_partition_id": partition_id,
+        }
+        self.__dict__.update(var_dict)
 
     @property
     def run_id(self) -> int:
         """An identifier for the current run."""
-        return self._run_id
+        return cast(int, self.__dict__["_run_id"])
 
     @property
     def message_id(self) -> str:
         """An identifier for the current message."""
-        return self._message_id
+        return cast(str, self.__dict__["_message_id"])
 
     @property
     def src_node_id(self) -> int:
         """An identifier for the node sending this message."""
-        return self._src_node_id
+        return cast(int, self.__dict__["_src_node_id"])
 
     @property
     def reply_to_message(self) -> str:
         """An identifier for the message this message replies to."""
-        return self._reply_to_message
+        return cast(str, self.__dict__["_reply_to_message"])
 
     @property
     def dst_node_id(self) -> int:
         """An identifier for the node receiving this message."""
-        return self._dst_node_id
+        return cast(int, self.__dict__["_dst_node_id"])
 
     @dst_node_id.setter
     def dst_node_id(self, value: int) -> None:
         """Set dst_node_id."""
-        self._dst_node_id = value
+        self.__dict__["_dst_node_id"] = value
 
     @property
     def group_id(self) -> str:
         """An identifier for grouping messages."""
-        return self._group_id
+        return cast(str, self.__dict__["_group_id"])
 
     @group_id.setter
     def group_id(self, value: str) -> None:
         """Set group_id."""
-        self._group_id = value
+        self.__dict__["_group_id"] = value
 
     @property
     def created_at(self) -> float:
         """Unix timestamp when the message was created."""
-        return self._created_at
+        return cast(float, self.__dict__["_created_at"])
 
     @created_at.setter
     def created_at(self, value: float) -> None:
-        """Set creation timestamp for this messages."""
-        self._created_at = value
+        """Set creation timestamp for this message."""
+        self.__dict__["_created_at"] = value
 
     @property
     def ttl(self) -> float:
         """Time-to-live for this message."""
-        return self._ttl
+        return cast(float, self.__dict__["_ttl"])
 
     @ttl.setter
     def ttl(self, value: float) -> None:
         """Set ttl."""
-        self._ttl = value
+        self.__dict__["_ttl"] = value
 
     @property
     def message_type(self) -> str:
         """A string that encodes the action to be executed on the receiving end."""
-        return self._message_type
+        return cast(str, self.__dict__["_message_type"])
 
     @message_type.setter
     def message_type(self, value: str) -> None:
         """Set message_type."""
-        self._message_type = value
+        self.__dict__["_message_type"] = value
 
     @property
     def partition_id(self) -> int | None:
         """An identifier telling which data partition a ClientApp should use."""
-        return self._partition_id
+        return cast(int, self.__dict__["_partition_id"])
 
     @partition_id.setter
     def partition_id(self, value: int) -> None:
-        """Set patition_id."""
-        self._partition_id = value
+        """Set partition_id."""
+        self.__dict__["_partition_id"] = value
+
+    def __repr__(self) -> str:
+        """Return a string representation of this instance."""
+        view = ", ".join([f"{k.lstrip('_')}={v!r}" for k, v in self.__dict__.items()])
+        return f"{self.__class__.__qualname__}({view})"
+
+    def __eq__(self, other: object) -> bool:
+        """Compare two instances of the class."""
+        if not isinstance(other, self.__class__):
+            raise NotImplementedError
+        return self.__dict__ == other.__dict__
 
 
-@dataclass
 class Error:
     """A dataclass that stores information about an error that occurred.
 
@@ -181,25 +182,35 @@ class Error:
         A reason for why the error arose (e.g. an exception stack-trace)
     """
 
-    _code: int
-    _reason: str | None = None
-
     def __init__(self, code: int, reason: str | None = None) -> None:
-        self._code = code
-        self._reason = reason
+        var_dict = {
+            "_code": code,
+            "_reason": reason,
+        }
+        self.__dict__.update(var_dict)
 
     @property
     def code(self) -> int:
         """Error code."""
-        return self._code
+        return cast(int, self.__dict__["_code"])
 
     @property
     def reason(self) -> str | None:
         """Reason reported about the error."""
-        return self._reason
+        return cast(Optional[str], self.__dict__["_reason"])
+
+    def __repr__(self) -> str:
+        """Return a string representation of this instance."""
+        view = ", ".join([f"{k.lstrip('_')}={v!r}" for k, v in self.__dict__.items()])
+        return f"{self.__class__.__qualname__}({view})"
+
+    def __eq__(self, other: object) -> bool:
+        """Compare two instances of the class."""
+        if not isinstance(other, self.__class__):
+            raise NotImplementedError
+        return self.__dict__ == other.__dict__
 
 
-@dataclass
 class Message:
     """State of your application from the viewpoint of the entity using it.
 
@@ -215,88 +226,70 @@ class Message:
         when processing another message.
     """
 
-    _metadata: Metadata
-    _content: RecordSet | None = None
-    _error: Error | None = None
-
     def __init__(
         self,
         metadata: Metadata,
         content: RecordSet | None = None,
         error: Error | None = None,
     ) -> None:
-        self._metadata = metadata
-
-        # Set message creation timestamp
-        self._metadata.created_at = time.time()
-
         if not (content is None) ^ (error is None):
             raise ValueError("Either `content` or `error` must be set, but not both.")
 
-        self._content = content
-        self._error = error
+        metadata.created_at = time.time()  # Set the message creation timestamp
+        var_dict = {
+            "_metadata": metadata,
+            "_content": content,
+            "_error": error,
+        }
+        self.__dict__.update(var_dict)
 
     @property
     def metadata(self) -> Metadata:
         """A dataclass including information about the message to be executed."""
-        return self._metadata
+        return cast(Metadata, self.__dict__["_metadata"])
 
     @property
     def content(self) -> RecordSet:
         """The content of this message."""
-        if self._content is None:
+        if self.__dict__["_content"] is None:
             raise ValueError(
                 "Message content is None. Use <message>.has_content() "
                 "to check if a message has content."
             )
-        return self._content
+        return cast(RecordSet, self.__dict__["_content"])
 
     @content.setter
     def content(self, value: RecordSet) -> None:
         """Set content."""
-        if self._error is None:
-            self._content = value
+        if self.__dict__["_error"] is None:
+            self.__dict__["_content"] = value
         else:
             raise ValueError("A message with an error set cannot have content.")
 
     @property
     def error(self) -> Error:
         """Error captured by this message."""
-        if self._error is None:
+        if self.__dict__["_error"] is None:
             raise ValueError(
                 "Message error is None. Use <message>.has_error() "
                 "to check first if a message carries an error."
             )
-        return self._error
+        return cast(Error, self.__dict__["_error"])
 
     @error.setter
     def error(self, value: Error) -> None:
         """Set error."""
         if self.has_content():
             raise ValueError("A message with content set cannot carry an error.")
-        self._error = value
+        self.__dict__["_error"] = value
 
     def has_content(self) -> bool:
         """Return True if message has content, else False."""
-        return self._content is not None
+        return self.__dict__["_content"] is not None
 
     def has_error(self) -> bool:
         """Return True if message has an error, else False."""
-        return self._error is not None
-
-    def _create_reply_metadata(self, ttl: float) -> Metadata:
-        """Construct metadata for a reply message."""
-        return Metadata(
-            run_id=self.metadata.run_id,
-            message_id="",
-            src_node_id=self.metadata.dst_node_id,
-            dst_node_id=self.metadata.src_node_id,
-            reply_to_message=self.metadata.message_id,
-            group_id=self.metadata.group_id,
-            ttl=ttl,
-            message_type=self.metadata.message_type,
-            partition_id=self.metadata.partition_id,
-        )
+        return self.__dict__["_error"] is not None
 
     def create_error_reply(self, error: Error, ttl: float | None = None) -> Message:
         """Construct a reply message indicating an error happened.
@@ -323,7 +316,7 @@ class Message:
         # message creation)
         ttl_ = DEFAULT_TTL if ttl is None else ttl
         # Create reply with error
-        message = Message(metadata=self._create_reply_metadata(ttl_), error=error)
+        message = Message(metadata=_create_reply_metadata(self, ttl_), error=error)
 
         if ttl is None:
             # Set TTL equal to the remaining time for the received message to expire
@@ -369,7 +362,7 @@ class Message:
         ttl_ = DEFAULT_TTL if ttl is None else ttl
 
         message = Message(
-            metadata=self._create_reply_metadata(ttl_),
+            metadata=_create_reply_metadata(self, ttl_),
             content=content,
         )
 
@@ -381,3 +374,29 @@ class Message:
             message.metadata.ttl = ttl
 
         return message
+
+    def __repr__(self) -> str:
+        """Return a string representation of this instance."""
+        view = ", ".join(
+            [
+                f"{k.lstrip('_')}={v!r}"
+                for k, v in self.__dict__.items()
+                if v is not None
+            ]
+        )
+        return f"{self.__class__.__qualname__}({view})"
+
+
+def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
+    """Construct metadata for a reply message."""
+    return Metadata(
+        run_id=msg.metadata.run_id,
+        message_id="",
+        src_node_id=msg.metadata.dst_node_id,
+        dst_node_id=msg.metadata.src_node_id,
+        reply_to_message=msg.metadata.message_id,
+        group_id=msg.metadata.group_id,
+        ttl=ttl,
+        message_type=msg.metadata.message_type,
+        partition_id=msg.metadata.partition_id,
+    )
