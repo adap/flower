@@ -56,7 +56,7 @@ class RayBackend(Backend):
             self._configure_runtime_env(work_dir=work_dir) if work_dir else None
         )
 
-        if backend_config.get("mute", False):
+        if backend_config.get("mute_logging", False):
             init_ray(
                 logging_level=WARNING, log_to_driver=False, runtime_env=runtime_env
             )
