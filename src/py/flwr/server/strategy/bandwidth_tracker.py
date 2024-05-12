@@ -15,7 +15,7 @@
 """Bandwidth Tracker Strategy."""
 
 
-from logging import INFO, WARNING
+from logging import INFO
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
@@ -66,7 +66,6 @@ class BandwidthTracker(Strategy):
         self, server_round: int, parameters: Parameters, client_manager: ClientManager
     ) -> List[Tuple[ClientProxy, FitIns]]:
         """Configure the next round of training."""
-
         params = parameters_to_ndarrays(parameters)
         size_in_bytes = (array.nbytes for array in params)
         log(INFO, f"Broadcasting model size: {size_in_bytes} Bytes")
@@ -88,14 +87,13 @@ class BandwidthTracker(Strategy):
         failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]],
     ) -> Tuple[Optional[Parameters], Dict[str, Scalar]]:
         """Track the receving bandwidth."""
-
         if failures:
             return None, {}
 
         for _, res in results:
             params = parameters_to_ndarrays(res.parameters)
             size_in_bytes = (array.nbytes for array in params)
-            log(INFO, "Receiving model size: {} Bytes".format(size_in_bytes))
+            log(INFO, f"Receiving model size: {size_in_bytes} Bytes")
 
         parameters_aggregated, metrics_aggregated = self.aggregate_fit(
             server_round, results, failures
