@@ -57,6 +57,10 @@ class RayBackend(Backend):
         )
         if backend_config.get("silent", False):
             init_ray(logging_level=WARNING, log_to_driver=True, runtime_env=runtime_env)
+        if backend_config.get("mute", False):
+            init_ray(
+                logging_level=WARNING, log_to_driver=False, runtime_env=runtime_env
+            )
         else:
             init_ray(runtime_env=runtime_env)
 
