@@ -26,7 +26,7 @@ for current_version in ${versions}; do
  
   # Make the current language available to conf.py
   export current_version
-  git switch --discard-changes ${current_version}
+  git switch --discard-changes ${current_version} --detach
   echo "INFO: Building sites for ${current_version}"
  
   for current_language in ${languages}; do
