@@ -44,7 +44,7 @@ def plot_label_distributions(
         title: str = "Per Partition Label Distribution",
         colormap=None,
         legend: bool = True,
-        legend_name: Optional[str] = None,
+        legend_name: str = "Labels",
         verbose_labels: bool = True,
         **plot_kwargs,
 ):
@@ -147,7 +147,7 @@ def plot_label_distributions(
             _ = fig.legend(
                 handles[::-1],
                 legend_names[::-1],
-                title="Labels",
+                title=legend_name,
                 loc="outside center right",
                 bbox_to_anchor=(1.3, 0.5),
             )
