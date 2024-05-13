@@ -20,7 +20,7 @@ import re
 import sqlite3
 import time
 from logging import DEBUG, ERROR
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
@@ -36,7 +36,21 @@ SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
     node_id         INTEGER UNIQUE,
     online_until    REAL,
-    ping_interval   REAL
+    ping_interval   REAL,
+    public_key      BLOB
+);
+"""
+
+SQL_CREATE_TABLE_CREDENTIAL = """
+CREATE TABLE IF NOT EXISTS credential(
+    private_key BLOB PRIMARY KEY,
+    public_key BLOB
+);
+"""
+
+SQL_CREATE_TABLE_PUBLIC_KEY = """
+CREATE TABLE IF NOT EXISTS public_key(
+    public_key BLOB UNIQUE
 );
 """
 
@@ -72,7 +86,6 @@ CREATE TABLE IF NOT EXISTS task_ins(
 );
 """
 
-
 SQL_CREATE_TABLE_TASK_RES = """
 CREATE TABLE IF NOT EXISTS task_res(
     task_id                 TEXT UNIQUE,
@@ -96,7 +109,7 @@ CREATE TABLE IF NOT EXISTS task_res(
 DictOrTuple = Union[Tuple[Any, ...], Dict[str, Any]]
 
 
-class SqliteState(State):
+class SqliteState(State):  # pylint: disable=R0904
     """SQLite-based state implementation."""
 
     def __init__(
@@ -134,6 +147,8 @@ class SqliteState(State):
         cur.execute(SQL_CREATE_TABLE_TASK_INS)
         cur.execute(SQL_CREATE_TABLE_TASK_RES)
         cur.execute(SQL_CREATE_TABLE_NODE)
+        cur.execute(SQL_CREATE_TABLE_CREDENTIAL)
+        cur.execute(SQL_CREATE_TABLE_PUBLIC_KEY)
         cur.execute(SQL_CREATE_INDEX_ONLINE_UNTIL)
         res = cur.execute("SELECT name FROM sqlite_schema;")
 
@@ -142,7 +157,7 @@ class SqliteState(State):
     def query(
         self,
         query: str,
-        data: Optional[Union[List[DictOrTuple], DictOrTuple]] = None,
+        data: Optional[Union[Sequence[DictOrTuple], DictOrTuple]] = None,
     ) -> List[Dict[str, Any]]:
         """Execute a SQL query."""
         if self.conn is None:
@@ -520,26 +535,54 @@ class SqliteState(State):
 
         return None
 
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(
+        self, ping_interval: float, public_key: Optional[bytes] = None
+    ) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
+        query = "SELECT node_id FROM node WHERE public_key = :public_key;"
+        row = self.query(query, {"public_key": public_key})
+
+        if len(row) > 0:
+            log(ERROR, "Unexpected node registration failure.")
+            return 0
+
         query = (
-            "INSERT INTO node (node_id, online_until, ping_interval) VALUES (?, ?, ?)"
+            "INSERT INTO node "
+            "(node_id, online_until, ping_interval, public_key) "
+            "VALUES (?, ?, ?, ?)"
         )
 
         try:
-            self.query(query, (node_id, time.time() + ping_interval, ping_interval))
+            self.query(
+                query, (node_id, time.time() + ping_interval, ping_interval, public_key)
+            )
         except sqlite3.IntegrityError:
             log(ERROR, "Unexpected node registration failure.")
             return 0
         return node_id
 
-    def delete_node(self, node_id: int) -> None:
+    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Delete a client node."""
-        query = "DELETE FROM node WHERE node_id = :node_id;"
-        self.query(query, {"node_id": node_id})
+        query = "DELETE FROM node WHERE node_id = ?"
+        params = (node_id,)
+
+        if public_key is not None:
+            query += " AND public_key = ?"
+            params += (public_key,)  # type: ignore
+
+        if self.conn is None:
+            raise AttributeError("State is not initialized.")
+
+        try:
+            with self.conn:
+                rows = self.conn.execute(query, params)
+                if rows.rowcount < 1:
+                    raise ValueError("Public key or node_id not found")
+        except KeyError as exc:
+            log(ERROR, {"query": query, "data": params, "exception": exc})
 
     def get_nodes(self, run_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
@@ -560,6 +603,15 @@ class SqliteState(State):
         result: Set[int] = {row["node_id"] for row in rows}
         return result
 
+    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+        query = "SELECT node_id FROM node WHERE public_key = :public_key;"
+        row = self.query(query, {"public_key": client_public_key})
+        if len(row) > 0:
+            node_id: int = row[0]["node_id"]
+            return node_id
+        return None
+
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
@@ -574,6 +626,59 @@ class SqliteState(State):
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def store_server_private_public_key(
+        self, private_key: bytes, public_key: bytes
+    ) -> None:
+        """Store `server_private_key` and `server_public_key` in state."""
+        query = "SELECT COUNT(*) FROM credential"
+        count = self.query(query)[0]["COUNT(*)"]
+        if count < 1:
+            query = (
+                "INSERT OR REPLACE INTO credential (private_key, public_key) "
+                "VALUES (:private_key, :public_key)"
+            )
+            self.query(query, {"private_key": private_key, "public_key": public_key})
+        else:
+            raise RuntimeError("Server private and public key already set")
+
+    def get_server_private_key(self) -> Optional[bytes]:
+        """Retrieve `server_private_key` in urlsafe bytes."""
+        query = "SELECT private_key FROM credential"
+        rows = self.query(query)
+        try:
+            private_key: Optional[bytes] = rows[0]["private_key"]
+        except IndexError:
+            private_key = None
+        return private_key
+
+    def get_server_public_key(self) -> Optional[bytes]:
+        """Retrieve `server_public_key` in urlsafe bytes."""
+        query = "SELECT public_key FROM credential"
+        rows = self.query(query)
+        try:
+            public_key: Optional[bytes] = rows[0]["public_key"]
+        except IndexError:
+            public_key = None
+        return public_key
+
+    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of `client_public_keys` in state."""
+        query = "INSERT INTO public_key (public_key) VALUES (?)"
+        data = [(key,) for key in public_keys]
+        self.query(query, data)
+
+    def store_client_public_key(self, public_key: bytes) -> None:
+        """Store a `client_public_key` in state."""
+        query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
+        self.query(query, {"public_key": public_key})
+
+    def get_client_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored `client_public_keys` as a set."""
+        query = "SELECT public_key FROM public_key"
+        rows = self.query(query)
+        result: Set[bytes] = {row["public_key"] for row in rows}
+        return result
 
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""

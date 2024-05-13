@@ -15,6 +15,7 @@
 """Flower command line interface `new` command."""
 
 import os
+import re
 from enum import Enum
 from string import Template
 from typing import Dict, Optional
@@ -36,6 +37,9 @@ class MlFramework(str, Enum):
     NUMPY = "NumPy"
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
+    HUGGINGFACE = "HF"
+    MLX = "MLX"
+    SKLEARN = "sklearn"
 
 
 class TemplateNotFound(Exception):
@@ -85,32 +89,31 @@ def new(
         Optional[MlFramework],
         typer.Option(case_sensitive=False, help="The ML framework to use"),
     ] = None,
+    username: Annotated[
+        Optional[str],
+        typer.Option(case_sensitive=False, help="The Flower username of the author"),
+    ] = None,
 ) -> None:
     """Create new Flower project."""
     if project_name is None:
-        project_name = prompt_text("Please provide project name")
+        project_name = prompt_text("Please provide the project name")
     if not is_valid_project_name(project_name):
         project_name = prompt_text(
             "Please provide a name that only contains "
-            "characters in {'_', 'a-zA-Z', '0-9'}",
+            "characters in {'-', a-zA-Z', '0-9'}",
             predicate=is_valid_project_name,
             default=sanitize_project_name(project_name),
         )
 
-    print(
-        typer.style(
-            f"🔨 Creating Flower project {project_name}...",
-            fg=typer.colors.GREEN,
-            bold=True,
-        )
-    )
+    if username is None:
+        username = prompt_text("Please provide your Flower username")
 
     if framework is not None:
         framework_str = str(framework.value)
     else:
         framework_value = prompt_options(
             "Please select ML framework by typing in the number",
-            [mlf.value for mlf in MlFramework],
+            sorted([mlf.value for mlf in MlFramework]),
         )
         selected_value = [
             name
@@ -121,29 +124,52 @@ def new(
 
     framework_str = framework_str.lower()
 
+    print(
+        typer.style(
+            f"\n🔨 Creating Flower project {project_name}...",
+            fg=typer.colors.GREEN,
+            bold=True,
+        )
+    )
+
     # Set project directory path
     cwd = os.getcwd()
-    pnl = project_name.lower()
-    project_dir = os.path.join(cwd, pnl)
+    package_name = re.sub(r"[-_.]+", "-", project_name).lower()
+    import_name = package_name.replace("-", "_")
+    project_dir = os.path.join(cwd, package_name)
 
     # List of files to render
     files = {
         ".gitignore": {"template": "app/.gitignore.tpl"},
         "README.md": {"template": "app/README.md.tpl"},
         "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
-        f"{pnl}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-        f"{pnl}/server.py": {"template": f"app/code/server.{framework_str}.py.tpl"},
-        f"{pnl}/client.py": {"template": f"app/code/client.{framework_str}.py.tpl"},
+        f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
+        f"{import_name}/server.py": {
+            "template": f"app/code/server.{framework_str}.py.tpl"
+        },
+        f"{import_name}/client.py": {
+            "template": f"app/code/client.{framework_str}.py.tpl"
+        },
     }
 
     # Depending on the framework, generate task.py file
     frameworks_with_tasks = [
         MlFramework.PYTORCH.value.lower(),
+        MlFramework.HUGGINGFACE.value.lower(),
+        MlFramework.MLX.value.lower(),
+        MlFramework.TENSORFLOW.value.lower(),
     ]
     if framework_str in frameworks_with_tasks:
-        files[f"{pnl}/task.py"] = {"template": f"app/code/task.{framework_str}.py.tpl"}
+        files[f"{import_name}/task.py"] = {
+            "template": f"app/code/task.{framework_str}.py.tpl"
+        }
 
-    context = {"project_name": project_name}
+    context = {
+        "project_name": project_name,
+        "package_name": package_name,
+        "import_name": import_name.replace("-", "_"),
+        "username": username,
+    }
 
     for file_path, value in files.items():
         render_and_create(
