@@ -142,6 +142,7 @@ def plot_label_distributions(
             raise ValueError(
                 f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
         fig, ax = plt.subplots(figsize=figsize)
+        kind = "bar" if partition_id_axis == "x" else "barh"
         ax = df.plot(kind=kind, stacked=True, ax=ax, title=title, legend=False, **plot_kwargs)
         if xlabel:
             ax.set_xlabel(xlabel)
@@ -259,12 +260,31 @@ def _initialize_cbar_title(plot_type, size_unit):
     return cbar_title
 
 
-def _initialize_figsize(plot_type, partition_id_axis, num_partitions, num_labels=10):
+def _initialize_figsize(figsize, plot_type, partition_id_axis, num_partitions, num_labels=10):
+    if figsize is not None:
+        return figsize
     if plot_type == "bar":
-        pass
+        # Other good heuristic is log2 (log and log10 seems to produce too narrow plots)
+        if partition_id_axis == "x":
+            figsize = (6.4, 4.8)
+        elif partition_id_axis == "y":
+            figsize = (6.4, np.sqrt(num_partitions))
+        else:
+            raise ValueError(
+                f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
     elif plot_type == "heatmap":
-        pass
+        if partition_id_axis == "x":
+            # The np.sqrt(num_partitions) is too small even for 20 partitions
+            # the numbers start to overlap
+            # 2 is reasonable coef but probably in this case manual adjustment
+            # will be needed
+            figsize = (3 * np.sqrt(num_partitions), 6.4)
+        elif partition_id_axis == "y":
+            figsize = (6.4, np.sqrt(num_partitions))
+        raise ValueError(
+            f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
     else:
-        raise ValueError("todo:")
+        raise ValueError("Plot type can be only bar and heatmap.")
+    return figsize
 
 
