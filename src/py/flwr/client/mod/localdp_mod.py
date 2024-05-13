@@ -15,6 +15,10 @@
 """Local DP modifier."""
 
 
+from logging import INFO
+
+import numpy as np
+
 from flwr.client.typing import ClientAppCallable
 from flwr.common import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common import recordset_compat as compat
@@ -24,6 +28,7 @@ from flwr.common.differential_privacy import (
     add_localdp_gaussian_noise_to_params,
     compute_clip_model_update,
 )
+from flwr.common.logger import log
 from flwr.common.message import Message
 
 
@@ -122,12 +127,26 @@ class LocalDpMod:
             server_to_client_params,
             self.clipping_norm,
         )
+        log(
+            INFO,
+            "LocalDpMod: parameters are clipped by value: %.4f.",
+            self.clipping_norm,
+        )
 
         fit_res.parameters = ndarrays_to_parameters(client_to_server_params)
 
         # Add noise to model params
         add_localdp_gaussian_noise_to_params(
             fit_res.parameters, self.sensitivity, self.epsilon, self.delta
+        )
+
+        noise_value_sd = (
+            self.sensitivity * np.sqrt(2 * np.log(1.25 / self.delta)) / self.epsilon
+        )
+        log(
+            INFO,
+            "LocalDpMod: local DP noise with %.4f stedv added to parameters",
+            noise_value_sd,
         )
 
         out_msg.content = compat.fitres_to_recordset(fit_res, keep_input=True)

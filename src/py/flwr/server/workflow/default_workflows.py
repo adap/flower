@@ -88,7 +88,12 @@ class DefaultWorkflow:
         hist = context.history
         log(INFO, "")
         log(INFO, "[SUMMARY]")
-        log(INFO, "Run finished %s rounds in %.2fs", context.config.num_rounds, elapsed)
+        log(
+            INFO,
+            "Run finished %s round(s) in %.2fs",
+            context.config.num_rounds,
+            elapsed,
+        )
         for idx, line in enumerate(io.StringIO(str(hist))):
             if idx == 0:
                 log(INFO, "%s", line.strip("\n"))
@@ -127,7 +132,6 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
                     message_type=MessageTypeLegacy.GET_PARAMETERS,
                     dst_node_id=random_client.node_id,
                     group_id="0",
-                    ttl="",
                 )
             ]
         )
@@ -226,7 +230,6 @@ def default_fit_workflow(  # pylint: disable=R0914
             message_type=MessageType.TRAIN,
             dst_node_id=proxy.node_id,
             group_id=str(current_round),
-            ttl="",
         )
         for proxy, fitins in client_instructions
     ]
@@ -252,8 +255,12 @@ def default_fit_workflow(  # pylint: disable=R0914
             compat.recordset_to_fitres(msg.content, False),
         )
         for msg in messages
+        if msg.has_content()
     ]
-    aggregated_result = context.strategy.aggregate_fit(current_round, results, [])
+    failures = [Exception(msg.error) for msg in messages if msg.has_error()]
+    aggregated_result = context.strategy.aggregate_fit(
+        current_round, results, failures  # type: ignore
+    )
     parameters_aggregated, metrics_aggregated = aggregated_result
 
     # Update the parameters and write history
@@ -267,6 +274,7 @@ def default_fit_workflow(  # pylint: disable=R0914
         )
 
 
+# pylint: disable-next=R0914
 def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     """Execute the default workflow for a single evaluate round."""
     if not isinstance(context, LegacyContext):
@@ -306,7 +314,6 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
             message_type=MessageType.EVALUATE,
             dst_node_id=proxy.node_id,
             group_id=str(current_round),
-            ttl="",
         )
         for proxy, evalins in client_instructions
     ]
@@ -332,8 +339,12 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
             compat.recordset_to_evaluateres(msg.content),
         )
         for msg in messages
+        if msg.has_content()
     ]
-    aggregated_result = context.strategy.aggregate_evaluate(current_round, results, [])
+    failures = [Exception(msg.error) for msg in messages if msg.has_error()]
+    aggregated_result = context.strategy.aggregate_evaluate(
+        current_round, results, failures  # type: ignore
+    )
 
     loss_aggregated, metrics_aggregated = aggregated_result
 

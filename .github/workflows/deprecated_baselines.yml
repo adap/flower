@@ -2,12 +2,12 @@ name: Deprecated-Baselines
 
 on:
   push:
-    branches:
-      - main
+    branches: ['main']
+    paths: ['baselines/flwr_baselines/**']
   pull_request:
-    branches:
-      - main
-
+    branches: ['main']
+    paths: ['baselines/flwr_baselines/**']
+    
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true

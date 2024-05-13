@@ -1,17 +1,21 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "quickstart-pytorch"
 version = "0.1.0"
 description = "PyTorch Federated Learning Quickstart with Flower"
-authors = ["The Flower Authors <hello@flower.ai>"]
+authors = [
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+]
+dependencies = [
+    "flwr>=1.8.0,<2.0",
+    "flwr-datasets[vision]>=0.0.2,<1.0.0",
+    "torch==2.1.1",
+    "torchvision==0.16.1",
+    "tqdm==4.66.3"
+]
 
-[tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-flwr = ">=1.0,<2.0"
-flwr-datasets = { extras = ["vision"], version = ">=0.0.2,<1.0.0" }
-torch = "2.1.1"
-torchvision = "0.16.1"
-tqdm = "4.65.0"
+[tool.hatch.build.targets.wheel]
+packages = ["."]

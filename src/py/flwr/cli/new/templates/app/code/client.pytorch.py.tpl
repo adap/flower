@@ -2,7 +2,7 @@
 
 from flwr.client import NumPyClient, ClientApp
 
-from $project_name.task import (
+from $import_name.task import (
     Net,
     DEVICE,
     load_data,
@@ -15,7 +15,7 @@ from $project_name.task import (
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
-    def __init__(self, net, trainloader, valloader) -> None:
+    def __init__(self, net, trainloader, valloader):
         self.net = net
         self.trainloader = trainloader
         self.valloader = valloader
@@ -31,14 +31,16 @@ class FlowerClient(NumPyClient):
         return loss, len(self.valloader.dataset), {"accuracy": accuracy}
 
 
-def client_fn(cid: str):
+def client_fn(cid):
     # Load model and data
     net = Net().to(DEVICE)
-    trainloader, valloader = load_data()
+    trainloader, valloader = load_data(int(cid), 2)
 
     # Return Client instance
     return FlowerClient(net, trainloader, valloader).to_client()
 
 
 # Flower ClientApp
-app = ClientApp(client_fn)
+app = ClientApp(
+    client_fn,
+)

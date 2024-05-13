@@ -58,7 +58,7 @@ class TestInnerDirichletPartitionerSuccess(unittest.TestCase):
         _, partitioner = _dummy_setup(num_rows, partition_by, partition_sizes, alpha)
         _ = partitioner.load_partition(0)
         self.assertEqual(
-            len(partitioner._node_id_to_indices.keys()), len(partition_sizes)
+            len(partitioner._partition_id_to_indices.keys()), len(partition_sizes)
         )
 
     def test_correct_partition_sizes(self) -> None:
@@ -71,7 +71,7 @@ class TestInnerDirichletPartitionerSuccess(unittest.TestCase):
         _, partitioner = _dummy_setup(num_rows, partition_by, partition_sizes, alpha)
         _ = partitioner.load_partition(0)
         sizes_created = [
-            len(indices) for indices in partitioner._node_id_to_indices.values()
+            len(indices) for indices in partitioner._partition_id_to_indices.values()
         ]
         self.assertEqual(sorted(sizes_created), partition_sizes)
 

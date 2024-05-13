@@ -6,13 +6,13 @@ build-backend = "poetry.core.masonry.api"
 name = "quickstart-monai"
 version = "0.1.0"
 description = "MONAI Federated Learning Quickstart with Flower"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"
 torch = "1.13.1"
-tqdm = "4.65.0"
+tqdm = "4.66.3"
 scikit-learn = "1.3.1"
 monai = { version = "1.3.0", extras=["gdown", "nibabel", "tqdm", "itk"] }
 numpy = "1.24.4"

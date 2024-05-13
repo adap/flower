@@ -187,7 +187,7 @@ def secaggplus_mod(
 
     # Return message
     out_content.configs_records[RECORD_KEY_CONFIGS] = ConfigsRecord(res, False)
-    return msg.create_reply(out_content, ttl="")
+    return msg.create_reply(out_content)
 
 
 def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
