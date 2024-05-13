@@ -29,8 +29,6 @@ for current_version in ${versions}; do
   git switch --discard-changes ${current_version}
   echo "INFO: Building sites for ${current_version}"
  
-  changed=false
- 
   for current_language in ${languages}; do
 
     # Make the current language available to conf.py
@@ -49,7 +47,7 @@ for current_version in ${versions}; do
 
       # Copy updated version of locales
       cp -r ${tmp_dir}/locales/$current_language locales/
-      changed=true
+
     fi
 
     # Only for v1.5.0, update the versions listed in the switcher
