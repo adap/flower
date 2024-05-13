@@ -15,6 +15,7 @@
 """RecordSet tests."""
 
 import pickle
+from collections import namedtuple
 from copy import deepcopy
 from typing import Callable, Dict, List, OrderedDict, Type, Union
 
@@ -414,3 +415,18 @@ def test_record_is_picklable() -> None:
 
     # Execute
     pickle.dumps((p_record, m_record, c_record, rs))
+
+
+def test_recordset_repr() -> None:
+    """Test the string representation of RecordSet."""
+    # Prepare
+    kwargs = {
+        "parameters_records": {"params": ParametersRecord()},
+        "metrics_records": {"metrics": MetricsRecord({"aa": 123})},
+        "configs_records": {"configs": ConfigsRecord({"cc": bytes(9)})},
+    }
+    rs = RecordSet(**kwargs)  # type: ignore
+    expected = namedtuple("RecordSet", kwargs.keys())(**kwargs)
+
+    # Assert
+    assert str(rs) == str(expected)
