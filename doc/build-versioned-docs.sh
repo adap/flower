@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # Store the current branch in a variable
 current_branch=$(git rev-parse --abbrev-ref HEAD)
@@ -25,7 +26,7 @@ for current_version in ${versions}; do
  
   # Make the current language available to conf.py
   export current_version
-  git checkout ${current_version}
+  git switch --discard-changes ${current_version}
   echo "INFO: Building sites for ${current_version}"
  
   changed=false
@@ -73,18 +74,6 @@ END
  
     # Actually building the docs for a given language and version
     sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
-
-    # Restore branch as it was to avoid conflicts
-    git restore source/_templates
-    git restore source/_templates/autosummary || rm -rf source/_templates/autosummary
-    rm source/ref-api/*.rst
-
-    if [ "$current_version" = "v1.5.0" ]; then
-      git restore source/conf.py
-    fi
-    if [ changed ]; then
-      git restore locales/${current_language} || rm -rf locales/${current_language}
-    fi
 
   done
 done
