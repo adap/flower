@@ -39,7 +39,7 @@ def plot_label_distributions(
         num_partitions: Optional[int] = None,
         partition_id_axis: str = "x",
         # Plotting specific parameters
-        ax: matplotlib.axes.Axes = None,
+        ax: Optional[matplotlib.axes.Axes] = None,
         figsize: Optional[Tuple[int, int]] = None,
         title: str = "Per Partition Label Distribution",
         colormap=None,
@@ -131,7 +131,8 @@ def plot_label_distributions(
     figsize = _initialize_figsize(figsize, plot_type, partition_id_axis, num_partitions)
 
     if plot_type == "bar":
-        fig, ax = plt.subplots(figsize=figsize)
+        if ax is None:
+            fig, ax = plt.subplots(figsize=figsize)
         kind = "bar" if partition_id_axis == "x" else "barh"
         ax = df.plot(kind=kind, stacked=True, ax=ax, title=title, legend=False, **plot_kwargs)
         if xlabel:
@@ -158,7 +159,8 @@ def plot_label_distributions(
     elif plot_type == "heatmap":
         if colormap is None:
             colormap = sns.light_palette("seagreen", as_cmap=True)
-        fig, ax = plt.subplots(figsize=figsize)
+        if ax is None:
+            fig, ax = plt.subplots(figsize=figsize)
 
         if size_unit == "absolute":
             fmt = ",d"
