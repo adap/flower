@@ -128,19 +128,9 @@ def plot_label_distributions(
 
     cbar_title = _initialize_cbar_title(plot_type, size_unit)
 
-    # figsize = _initialize_figsize()
+    figsize = _initialize_figsize(figsize, plot_type, partition_id_axis, num_partitions)
 
     if plot_type == "bar":
-        # Other good heuristic is log2 (log and log10 seems to produce too narrow plots)
-        if partition_id_axis == "x":
-            kind = "bar"
-            figsize = (6.4, 4.8)
-        elif partition_id_axis == "y":
-            kind = "barh"
-            figsize = (6.4, np.sqrt(num_partitions))
-        else:
-            raise ValueError(
-                f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
         fig, ax = plt.subplots(figsize=figsize)
         kind = "bar" if partition_id_axis == "x" else "barh"
         ax = df.plot(kind=kind, stacked=True, ax=ax, title=title, legend=False, **plot_kwargs)
@@ -168,15 +158,6 @@ def plot_label_distributions(
     elif plot_type == "heatmap":
         if colormap is None:
             colormap = sns.light_palette("seagreen", as_cmap=True)
-        if figsize is None:
-            if partition_id_axis == "x":
-                # The np.sqrt(num_partitions) is too small even for 20 partitions
-                # the numbers start to overlap
-                # 2 is reasonable coef but probably in this case manual adjustement
-                # will be needed
-                figsize = (3*np.sqrt(num_partitions), 6.4)
-            elif partition_id_axis == "y":
-                figsize = (6.4, np.sqrt(num_partitions))
         fig, ax = plt.subplots(figsize=figsize)
 
         if size_unit == "absolute":
@@ -260,7 +241,8 @@ def _initialize_cbar_title(plot_type, size_unit):
     return cbar_title
 
 
-def _initialize_figsize(figsize, plot_type, partition_id_axis, num_partitions, num_labels=10):
+def _initialize_figsize(figsize: Tuple[float, float], plot_type: str, partition_id_axis: str, num_partitions: int, num_labels=10) -> Tuple[float, float]:
+    # todo: num_labels is something that will need to be incorporated
     if figsize is not None:
         return figsize
     if plot_type == "bar":
