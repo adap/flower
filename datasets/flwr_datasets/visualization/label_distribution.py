@@ -265,8 +265,9 @@ def _initialize_figsize(figsize: Tuple[float, float], plot_type: str, partition_
             figsize = (3 * np.sqrt(num_partitions), 6.4)
         elif partition_id_axis == "y":
             figsize = (6.4, np.sqrt(num_partitions))
-        raise ValueError(
-            f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
+        else:
+            raise ValueError(
+                f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
     else:
         raise ValueError("Plot type can be only bar and heatmap.")
     return figsize
