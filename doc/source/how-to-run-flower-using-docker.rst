@@ -2,7 +2,7 @@ Run Flower using Docker
 =======================
 
 The simplest way to get started with Flower is by using the pre-made Docker images, which you can
-find on `Docker Hub <https://hub.docker.com/u/flwr>`_.
+find on `Docker Hub <https://hub.docker.com/u/flwr>`__.
 
 Before you start, make sure that the Docker daemon is running:
 
@@ -112,12 +112,15 @@ building your own SuperNode image.
 .. important::
 
   The SuperNode Docker image currently works only with the 1.9.0-nightly release. A stable version
-  will be available when Flower 1.9.0 (stable) gets released (ETA: May). A SuperNode nightly image must be paired with the corresponding
-  SuperLink nightly image released on the same day. To ensure the versions are in sync, using the concrete
-  tag, e.g., ``1.9.0.dev20240501`` instead of ``nightly`` is recommended.
+  will be available when Flower 1.9.0 (stable) gets released (ETA: May). A SuperNode nightly image
+  must be paired with the corresponding SuperLink and ServerApp nightly images released on the same
+  day. To ensure the versions are in sync, using the concrete tag, e.g., ``1.9.0.dev20240501``
+  instead of ``nightly`` is recommended.
 
 We will use the ``app-pytorch`` example, which you can find in
 the Flower repository, to illustrate how you can dockerize your client-app.
+
+.. _SuperNode Prerequisites:
 
 Prerequisites
 ~~~~~~~~~~~~~
@@ -148,16 +151,16 @@ Let's assume the following project layout:
 
   $ tree .
   .
-  ├── client.py        # client-app code
-  ├── task.py          # client-app code
-  ├── requirements.txt # client-app dependencies
+  ├── client.py        # ClientApp code
+  ├── task.py          # ClientApp code
+  ├── requirements.txt # ClientApp dependencies
   └── <other files>
 
 First, we need to create a Dockerfile in the directory where the ``ClientApp`` code is located.
-If you use the ``app-pytorch`` example, create a new file called ``Dockerfile`` in
+If you use the ``app-pytorch`` example, create a new file called ``Dockerfile.supernode`` in
 ``examples/app-pytorch``.
 
-The ``Dockerfile`` contains the instructions that assemble the SuperNode image.
+The ``Dockerfile.supernode`` contains the instructions that assemble the SuperNode image.
 
 .. code-block:: dockerfile
 
@@ -172,20 +175,36 @@ The ``Dockerfile`` contains the instructions that assemble the SuperNode image.
 
 In the first two lines, we instruct Docker to use the SuperNode image tagged ``nightly`` as a base
 image and set our working directory to ``/app``. The following instructions will now be
-executed in the ``/app`` directory. Next, we install the ``ClientApp`` dependencies by copying the
+executed in the ``/app`` directory. Next, we install the ClientApp dependencies by copying the
 ``requirements.txt`` file into the image and run ``pip install``. In the last two lines,
-we copy the ``ClientApp`` code (``client.py`` and ``task.py``) into the image and set the entry
+we copy the ClientApp code (``client.py`` and ``task.py``) into the image and set the entry
 point to ``flower-client-app``.
+
+.. important::
+
+  If the requirement.txt contains the `flwr <https://pypi.org/project/flwr/>`__ or
+  `flwr-nightly <https://pypi.org/project/flwr-nightly/>`_ package, please ensure the version in
+  requirement.txt matches the docker image version.
+
+  Stable:
+
+  - Docker image: ``supernode:1.9.0``
+  - requirement.txt: ``flwr[simulation]==1.9.0``
+
+  Nightly:
+
+  - Docker image: ``supernode:1.9.0.dev20240501``
+  - requirement.txt: ``flwr-nightly[simulation]==1.9.0.dev20240501``
 
 Building the SuperNode Docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Next, we build the SuperNode Docker image by running the following command in the directory where
-Dockerfile and client-app code are located.
+Dockerfile and ClientApp code are located.
 
 .. code-block:: bash
 
-  $ docker build -t flwr_supernode:0.0.1 .
+  $ docker build -f Dockerfile.supernode -t flwr_supernode:0.0.1 .
 
 We gave the image the name ``flwr_supernode``, and the tag ``0.0.1``. Remember that the here chosen
 values only serve as an example. You can change them to your needs.
@@ -206,7 +225,7 @@ Let's break down each part of this command:
 
 * ``docker run``: This is the command to run a new Docker container.
 * ``--rm``: This option specifies that the container should be automatically removed when it stops.
-* | ``flwr_supernode:0.0.1``: The name the tag of the Docker image to use.
+* ``flwr_supernode:0.0.1``: The name the tag of the Docker image to use.
 * | ``client:app``: The object reference of the ``ClientApp`` (``<module>:<attribute>``).
   | It points to the ``ClientApp`` that will be run inside the SuperNode container.
 * ``--insecure``: This option enables insecure communication.
@@ -245,6 +264,142 @@ certificate within the container. Use the ``--certificates`` flag when starting 
     --server 192.168.1.100:9092 \
     --certificates ca.crt
 
+Flower ServerApp
+----------------
+
+The procedure for building and running a ServerApp image is almost identical to the SuperNode image.
+A key difference is the additional argument in the ``ENTRYPOINT`` command of the ServerApp
+Dockerfile.
+
+Similar to the SuperNode image, the ServerApp Docker image comes with a pre-installed version of
+Flower and serves as a base for building your own ServerApp image.
+
+We will use the same ``app-pytorch`` example as we do in the Flower SuperNode section.
+If you have not already done so, please follow the `SuperNode Prerequisites`_ before proceeding.
+
+
+Creating a ServerApp Dockerfile
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Let's assume the following project layout:
+
+.. code-block:: bash
+
+  $ tree .
+  .
+  ├── server.py        # ServerApp code
+  ├── task.py          # ServerApp code
+  ├── requirements.txt # ServerApp dependencies
+  └── <other files>
+
+First, we need to create a Dockerfile in the directory where the ``ServerApp`` code is located.
+If you use the ``app-pytorch`` example, create a new file called ``Dockerfile.serverapp`` in
+``examples/app-pytorch``.
+
+The ``Dockerfile.serverapp`` contains the instructions that assemble the ServerApp image.
+
+.. code-block:: dockerfile
+
+  FROM flwr/serverapp:1.8.0
+
+  WORKDIR /app
+  COPY requirements.txt .
+  RUN python -m pip install -U --no-cache-dir -r requirements.txt && pyenv rehash
+
+  COPY server.py task.py ./
+  ENTRYPOINT ["flower-server-app", "server:app"]
+
+In the first two lines, we instruct Docker to use the ServerApp image tagged ``1.8.0`` as a base
+image and set our working directory to ``/app``. The following instructions will now be
+executed in the ``/app`` directory. Next, we install the ServerApp dependencies by copying the
+``requirements.txt`` file into the image and run ``pip install``. In the last two lines,
+we copy the ServerApp code (``server.py`` and ``task.py``) into the image and set the entry
+point to ``flower-server-app`` with the argument ``server:app``. The argument is the object
+reference of the ServerApp (``<module>:<attribute>``) that will be run inside the ServerApp
+container.
+
+.. important::
+
+  If the requirement.txt contains the `flwr <https://pypi.org/project/flwr/>`__ or
+  `flwr-nightly <https://pypi.org/project/flwr-nightly/>`_ package, please ensure the version in
+  requirement.txt matches the docker image version.
+
+  Stable:
+
+  - Docker image: ``serverapp:1.8.0``
+  - requirement.txt: ``flwr[simulation]==1.8.0``
+
+  Nightly:
+
+  - Docker image: ``serverapp:1.9.0.dev20240501``
+  - requirement.txt: ``flwr-nightly[simulation]==1.9.0.dev20240501``
+
+Building the ServerApp Docker image
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Next, we build the ServerApp Docker image by running the following command in the directory where
+Dockerfile and ServerApp code are located.
+
+.. code-block:: bash
+
+  $ docker build -f Dockerfile.serverapp -t flwr_serverapp:0.0.1 .
+
+We gave the image the name ``flwr_serverapp``, and the tag ``0.0.1``. Remember that the here chosen
+values only serve as an example. You can change them to your needs.
+
+
+Running the ServerApp Docker image
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now that we have built the ServerApp image, we can finally run it.
+
+.. code-block:: bash
+
+  $ docker run --rm flwr_serverapp:0.0.1 \
+    --insecure \
+    --server 192.168.1.100:9091
+
+Let's break down each part of this command:
+
+* ``docker run``: This is the command to run a new Docker container.
+* ``--rm``: This option specifies that the container should be automatically removed when it stops.
+* ``flwr_serverapp:0.0.1``: The name the tag of the Docker image to use.
+* ``--insecure``: This option enables insecure communication.
+
+.. attention::
+
+  The ``--insecure`` flag enables insecure communication (using HTTP, not HTTPS) and should only be
+  used for testing purposes. We strongly recommend enabling
+  `SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`_
+  when deploying to a production environment.
+
+* | ``--server 192.168.1.100:9091``: This option specifies the address of the SuperLinks Driver
+  | API to connect to. Remember to update it with your SuperLink IP.
+
+.. note::
+
+  Any argument that comes after the tag is passed to the Flower ServerApp binary.
+  To see all available flags that the ServerApp supports, run:
+
+  .. code-block:: bash
+
+    $ docker run --rm flwr/serverapp:1.8.0 --help
+
+Enabling SSL for secure connections
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To enable SSL, we will need to mount a PEM-encoded root certificate into your ServerApp container.
+
+Assuming the certificate already exists locally, we can use the flag ``-v`` to mount the local
+certificate into the container's ``/app/`` directory. This allows the ServerApp to access the
+certificate within the container. Use the ``--certificates`` flag when starting the container.
+
+.. code-block:: bash
+
+  $ docker run --rm -v ./ca.crt:/app/ca.crt flwr_serverapp:0.0.1 client:app \
+    --server 192.168.1.100:9091 \
+    --certificates ca.crt
+
 Advanced Docker options
 -----------------------
 
@@ -253,7 +408,7 @@ Using a different Flower version
 
 If you want to use a different version of Flower, for example Flower nightly, you can do so by
 changing the tag. All available versions are on
-`Docker Hub <https://hub.docker.com/r/flwr/superlink/tags>`_.
+`Docker Hub <https://hub.docker.com/r/flwr/superlink/tags>`__.
 
 Pinning a Docker image to a specific version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
