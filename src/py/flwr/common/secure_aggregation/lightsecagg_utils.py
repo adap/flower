@@ -24,16 +24,20 @@ from ..typing import NDArrayInt
 
 
 def LCC_encode_with_points(
-    X: NDArrayInt, alphas: List[int], betas: List[int], GF: FieldArray
+    arr: NDArrayInt, alphas: List[int], betas: List[int], GF: FieldArray
 ) -> NDArrayInt:
-    U = generate_Lagrange_coeffs_galois(alphas, betas, GF)
-    X_LCC = U.dot(X)
-    return X_LCC
+    """Encode the input array."""
+    U_enc = generate_Lagrange_coeffs_galois(alphas, betas, GF)
+    encoded_arr = U_enc.dot(arr)
+    return encoded_arr
 
 
-def LCC_decoding_with_points(f_eval, alpha_s_eval, beta_s, GF):
-    U_dec = generate_Lagrange_coeffs_galois(beta_s, alpha_s_eval, GF)
-    f_recon = U_dec.dot(f_eval.view(GF))
+def LCC_decode_with_points(
+    f_eval: NDArrayInt, alphas_eval: NDArrayInt, betas: NDArrayInt, GF: FieldArray
+) -> NDArrayInt:
+    """Decode the input array."""
+    U_dec = generate_Lagrange_coeffs_galois(betas, alphas_eval, GF)
+    f_recon: NDArrayInt = U_dec.dot(f_eval.view(GF))
 
     return f_recon.view(np.ndarray)
 
@@ -66,7 +70,9 @@ def generate_Lagrange_coeffs_galois(
     return coeffs
 
 
-def mask_weights(weights: List[NDArrayInt], local_mask: NDArrayInt, GF: FieldArray) -> List[NDArrayInt]:
+def mask_weights(
+    weights: List[NDArrayInt], local_mask: NDArrayInt, GF: FieldArray
+) -> List[NDArrayInt]:
     """Mask the model weights in place."""
     pos = 0
     msk = local_mask.view(GF)
@@ -76,15 +82,17 @@ def mask_weights(weights: List[NDArrayInt], local_mask: NDArrayInt, GF: FieldArr
         d = w.size
         cur_mask = msk[pos : pos + d]
         cur_mask = cur_mask.reshape(w.shape)
-        
+
         w += cur_mask
-        
+
         weights[i] = w
         pos += d
     return weights
 
 
-def unmask_aggregated_weights(aggregated_weights: List[NDArrayInt], aggregated_mask: NDArrayInt, GF: FieldArray) -> List[NDArrayInt]:
+def unmask_aggregated_weights(
+    aggregated_weights: List[NDArrayInt], aggregated_mask: NDArrayInt, GF: FieldArray
+) -> List[NDArrayInt]:
     """Unmask the aggregated model weights in place."""
     pos = 0
     msk = aggregated_mask.view(GF)
@@ -93,9 +101,9 @@ def unmask_aggregated_weights(aggregated_weights: List[NDArrayInt], aggregated_m
         d = w.size
         cur_mask = msk[pos : pos + d]
         cur_mask = cur_mask.reshape(w.shape)
-        
+
         w -= cur_mask
-        
+
         aggregated_weights[i] = w.view(np.ndarray)
         pos += d
     return aggregated_weights
@@ -131,7 +139,7 @@ def encode_mask(
     return encoded_mask_set
 
 
-def compute_aggregate_encoded_mask(encoded_mask_dict, GF, active_clients):
+def compute_aggregated_encoded_mask(encoded_mask_dict, GF, active_clients):
     aggregate_encoded_mask = np.zeros_like(encoded_mask_dict[active_clients[0]]).view(
         GF
     )
