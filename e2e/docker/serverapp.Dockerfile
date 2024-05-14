@@ -1,4 +1,4 @@
-FROM flwr/serverapp:1.9.0.dev20240513
+FROM flwr/serverapp:nightly
 
 WORKDIR /app
 

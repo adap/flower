@@ -1,4 +1,4 @@
-FROM flwr/supernode:1.9.0.dev20240513
+FROM flwr/supernode:nightly
 
 WORKDIR /app
 RUN python -m pip install -U --no-cache-dir\
