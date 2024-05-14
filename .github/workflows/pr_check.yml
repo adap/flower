@@ -13,15 +13,15 @@ jobs:
     steps:
       - name: Check PR title format 
         run: |
-          pattern="^((ci|docs|feat|fix|refactor|break))\((framework|baselines|datasets|examples)(?::(skip))?\) ([A-Z][^\.\n]*(?:\.(?=[^\.\n]))*[^\.\n]*)$"
+          pattern="^((ci|docs|feat|fix|refactor|break))\((framework|baselines|datasets|examples|\*)(?::(skip))?\) ([A-Z][^\.\n]*(?:\.(?=[^\.\n]))*[^\.\n]*)$"
           if echo "${{ github.event.pull_request.title }}" | perl -e '$_ = <>; exit(($_ =~ /'"$pattern"'/) ? 0 : 1)'; then
             echo "PR title is valid"
             exit 0
           else
             echo "PR title format is invalid, it should be of the form: PR_TYPE(PR_SCOPE) PR_SUBJECT"
             echo "with PR_TYPE in (ci, docs, feat, fix, refactor, or break), and"
-            echo "PR_SCOPE in (framework, baselines, datasets, or examples), and PR_SUBJECT starting"
-            echo "with a capitalized verb in the imperative mood and without a dot at the end"
+            echo "PR_SCOPE in (framework, baselines, datasets, examples, or * when modifying multiple projects),"
+            echo "and PR_SUBJECT starting with a capitalized verb in the imperative mood and without a dot at the end"
             echo "A valid example is: feat(framework) Add flwr build CLI command"
             exit 1
           fi
