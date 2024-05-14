@@ -48,7 +48,7 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
     with:
       namespace-repository: flwr/base
-      file-dir: src/docker/base
+      file-dir: src/docker/base/ubuntu
       build-args: |
         PYTHON_VERSION=${{ matrix.python-version }}
         PIP_VERSION=${{ needs.parameters.outputs.pip-version }}

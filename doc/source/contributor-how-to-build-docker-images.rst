@@ -66,7 +66,7 @@ The following example creates a base image with Python 3.11.0, pip 23.0.1 and se
 
 .. code-block:: bash
 
-  $ cd src/docker/base/
+  $ cd src/docker/base/ubuntu
   $ docker build \
     --build-arg PYTHON_VERSION=3.11.0 \
     --build-arg PIP_VERSION=23.0.1 \
