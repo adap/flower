@@ -191,7 +191,7 @@ Creating and merging a pull request (PR)
     In this example you can see that the request is to merge the branch ``doc-fixes`` from my forked repository to branch ``main`` from the Flower repository.
 
     The title should be changed to adhere to the :ref:`pr_title_format` guidelines, otherwise it won't be possible to merge the PR. So in this case,
-    a correct title might be ``docs(framework) Fix typos``.
+    a correct title might be ``docs(framework:skip) Fix typos``.
 
     The input box in the middle is there for you to describe what your PR does and to link it to existing issues.
     We have placed comments (that won't be rendered once the PR is opened) to guide you through the process.
@@ -354,5 +354,27 @@ Appendix
 PR title format
 ***************
 
-When opening a new PR, inside its description, there should be a ``Changelog entry`` header.
+We enforce the following PR title format:
 
+.. code-block::
+
+    <type>(<project>) <subject>
+
+(or ``<type>(<project>:skip) <subject>`` to ignore the PR in the changelog)
+
+Where ``<type>`` needs to be in ``{ci, fix, feat, docs, refactor, break, '*'}``, ``<project>`` 
+should be in ``{framework, baselines, datasets, examples}``, and <subject> starts with a capitalised verb in the imperative mood.
+
+Valid examples:
+
+- ``feat(framework) Add flwr build CLI command``
+- ``refactor(examples:skip) Improve quickstart-pytorch logging``
+- ``ci(*:skip) Enforce PR title format``
+
+Invalid examples:
+
+- ``feat(framework): Add flwr build CLI command`` (extra ``:``)
+- ``feat(skip) Add flwr build CLI command`` (missing ``<project>``)
+- ``feat(framework) add flwr build CLI command`` (non capitalised verb)
+- ``feat(framework) Add flwr build CLI command.`` (dot at the end)
+- ``Add flwr build CLI command.`` (missing ``<type>(<project>)``)
