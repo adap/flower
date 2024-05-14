@@ -15,7 +15,7 @@
 """Utility functions for the LightSecAgg protocol."""
 
 
-from typing import List, cast
+from typing import Dict, List, cast
 
 import numpy as np
 from galois import FieldArray
@@ -139,10 +139,11 @@ def encode_mask(
     return encoded_mask_set
 
 
-def compute_aggregated_encoded_mask(encoded_mask_dict, GF, active_clients):
-    aggregate_encoded_mask = np.zeros_like(encoded_mask_dict[active_clients[0]]).view(
-        GF
-    )
+def compute_aggregated_encoded_mask(
+    encoded_mask_dict: Dict[int, NDArrayInt], active_clients, GF: FieldArray
+) -> NDArrayInt:
+    """Compute the aggregated encoded mask."""
+    ret = np.zeros_like(encoded_mask_dict[active_clients[0]]).view(GF)
     for client_id in active_clients:
-        aggregate_encoded_mask += encoded_mask_dict[client_id].view(GF)
-    return aggregate_encoded_mask
+        ret += encoded_mask_dict[client_id].view(GF)
+    return ret
