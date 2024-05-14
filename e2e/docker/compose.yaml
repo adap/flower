@@ -9,7 +9,6 @@ services:
       - "9092:9092"
     networks:
       - flwr-net
-    hostname: flwr-superlink
     command: [ "--insecure" ]
 
   # create a SuperNode service
@@ -18,12 +17,11 @@ services:
       dockerfile: supernode.Dockerfile
     deploy:
       # specify 2 containers with 2xCPUs (for 2 clients)
-      mode: replicated
       replicas: 2
       resources:
         limits:
           cpus: '2'
-    command: [ "client:app", "--insecure", "--server", "flwr-superlink:9092" ]
+    command: [ "client:app", "--insecure", "--server", "superlink:9092" ]
     networks:
       - flwr-net
     depends_on:
@@ -33,7 +31,7 @@ services:
   serverapp:
     build:
       dockerfile: serverapp.Dockerfile
-    command: [ "server:app", "--insecure", "--server", "flwr-superlink:9091" ]
+    command: [ "server:app", "--insecure", "--server", "superlink:9091" ]
     networks:
       - flwr-net
     # enforce dependency for graceful execution

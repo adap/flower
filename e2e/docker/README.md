@@ -4,7 +4,7 @@ This directory is used to test Flower containers in a minimum scenario, that is,
 
 For local testing, run the following in CLI:
 ``` shell
-$ docker compose up -d --remove-orphans --force-recreate
+$ docker compose up -d --remove-orphans --force-recreate --build
 ```
 
 To stop the containers, run:
