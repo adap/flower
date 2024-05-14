@@ -89,7 +89,7 @@ def unmask_aggregated_weights(aggregated_weights: List[NDArrayInt], aggregated_m
     pos = 0
     msk = aggregated_mask.view(GF)
     for i in range(len(aggregated_weights)):
-        w = aggregated_weights[i]
+        w = aggregated_weights[i].view(GF)
         d = w.size
         cur_mask = msk[pos : pos + d]
         cur_mask = cur_mask.reshape(w.shape)
