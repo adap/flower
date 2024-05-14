@@ -73,6 +73,8 @@ END
     # Actually building the docs for a given language and version
     sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 
+    git clean -fd
+
   done
 done
   
