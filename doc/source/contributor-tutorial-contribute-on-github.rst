@@ -190,12 +190,13 @@ Creating and merging a pull request (PR)
 
     In this example you can see that the request is to merge the branch ``doc-fixes`` from my forked repository to branch ``main`` from the Flower repository.
 
+    The title should be changed to adhere to the :ref:`pr_title_format` guidelines, otherwise it won't be possible to merge the PR. So in this case,
+    a correct title might be ``docs(framework) Fix typos``.
+
     The input box in the middle is there for you to describe what your PR does and to link it to existing issues.
     We have placed comments (that won't be rendered once the PR is opened) to guide you through the process.
 
-    It is important to follow the instructions described in comments. For instance, in order to not break how our changelog system works,
-    you should read the information above the ``Changelog entry`` section carefully.
-    You can also checkout some examples and details in the :ref:`changelogentry` appendix.
+    It is important to follow the instructions described in comments.
 
     At the bottom you will find the button to open the PR. This will notify reviewers that a new PR has been opened and
     that they should look over it to merge or to request changes.
@@ -348,71 +349,10 @@ Once you have made your first PR, and want to contribute more, be sure to check 
 Appendix
 --------
 
-.. _changelogentry:
+.. _pr_title_format:
 
-Changelog entry
+PR title format
 ***************
 
 When opening a new PR, inside its description, there should be a ``Changelog entry`` header.
 
-Above this header you should see the following comment that explains how to write your changelog entry:
-
-    Inside the following 'Changelog entry' section,
-    you should put the description of your changes that will be added to the changelog alongside your PR title.
-
-    If the section is completely empty (without any token) or non-existent,
-    the changelog will just contain the title of the PR for the changelog entry, without any description.
-
-    If the section contains some text other than tokens, it will use it to add a description to the change.
-
-    If the section contains one of the following tokens it will ignore any other text and put the PR under the corresponding section of the changelog:
-
-    <general> is for classifying a PR as a general improvement.
-
-    <skip> is to not add the PR to the changelog
-
-    <baselines> is to add a general baselines change to the PR
-
-    <examples> is to add a general examples change to the PR
-
-    <sdk> is to add a general sdk change to the PR
-
-    <simulations> is to add a general simulations change to the PR
-
-    Note that only one token should be used.
-
-Its content must have a specific format. We will break down what each possibility does:
-
-- If the ``### Changelog entry`` section contains nothing or doesn't exist, the following text will be added to the changelog::
-
-    - **PR TITLE** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-- If the ``### Changelog entry`` section contains a description (and no token), the following text will be added to the changelog::
-
-    - **PR TITLE** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-        DESCRIPTION FROM THE CHANGELOG ENTRY
-
-- If the ``### Changelog entry`` section contains ``<skip>``, nothing will change in the changelog.
-
-- If the ``### Changelog entry`` section contains ``<general>``, the following text will be added to the changelog::
-
-    - **General improvements** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-- If the ``### Changelog entry`` section contains ``<baselines>``, the following text will be added to the changelog::
-
-    - **General updates to Flower Baselines** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-- If the ``### Changelog entry`` section contains ``<examples>``, the following text will be added to the changelog::
-
-    - **General updates to Flower Examples** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-- If the ``### Changelog entry`` section contains ``<sdk>``, the following text will be added to the changelog::
-
-    - **General updates to Flower SDKs** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-- If the ``### Changelog entry`` section contains ``<simulations>``, the following text will be added to the changelog::
-
-    - **General updates to Flower Simulations** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-Note that only one token must be provided, otherwise, only the first action (in the order listed above), will be performed.
