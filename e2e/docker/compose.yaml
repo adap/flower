@@ -3,7 +3,7 @@ name: flwr-containers-e2e-test
 services:
   # create a SuperLink service
   superlink:
-    image: docker.io/flwr/superlink:1.9.0.dev20240513
+    image: docker.io/flwr/superlink:nightly
     ports:
       - "9091:9091"
       - "9092:9092"
