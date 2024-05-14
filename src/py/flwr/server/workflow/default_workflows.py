@@ -17,11 +17,11 @@
 
 import io
 import timeit
-from logging import INFO
+from logging import INFO, WARN
 from typing import Optional, cast
 
 import flwr.common.recordset_compat as compat
-from flwr.common import ConfigsRecord, Context, GetParametersIns, log
+from flwr.common import ConfigsRecord, Context, GetParametersIns, ParametersRecord, log
 from flwr.common.constant import MessageType, MessageTypeLegacy
 
 from ..compat.app_utils import start_update_client_manager_thread
@@ -135,9 +135,17 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
                 )
             ]
         )
-        log(INFO, "Received initial parameters from one random client")
         msg = list(messages)[0]
-        paramsrecord = next(iter(msg.content.parameters_records.values()))
+        if msg.has_content():
+            log(INFO, "Received initial parameters from one random client")
+            paramsrecord = next(iter(msg.content.parameters_records.values()))
+        else:
+            log(
+                WARN,
+                "Failed to receive initial parameters from the client."
+                " Empty initial parameters will be used.",
+            )
+            paramsrecord = ParametersRecord()
 
     context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
 
