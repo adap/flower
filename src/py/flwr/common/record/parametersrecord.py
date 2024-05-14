@@ -82,7 +82,6 @@ def _check_value(value: Array) -> None:
         )
 
 
-@dataclass
 class ParametersRecord(TypedDict[str, Array]):
     """Parameters record.
 
