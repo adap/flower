@@ -21,6 +21,12 @@ was not found, you will need to install Docker first. You can find installation 
   you can follow the `Post-installation steps <https://docs.docker.com/engine/install/linux-postinstall/>`_
   on the official Docker website.
 
+.. important::
+
+  To ensure optimal performance and compatibility, the SuperLink, SuperNode and ServerApp image
+  must have the same version when running together. This guarantees seamless integration and
+  avoids potential conflicts or issues that may arise from using different versions.
+
 Flower SuperLink
 ----------------
 
@@ -66,14 +72,14 @@ Mounting a volume to store the state on the host system
 
 If you want to persist the state of the SuperLink on your host system, all you need to do is specify
 a path where you want to save the file on your host system and a name for the database file. In the
-example below, we tell Docker via the flag ``-v`` to mount the user's home directory
+example below, we tell Docker via the flag ``--volume`` to mount the user's home directory
 (``~/`` on your host) into the ``/app/`` directory of the container. Furthermore, we use the
 flag ``--database`` to specify the name of the database file.
 
 .. code-block:: bash
 
   $ docker run --rm \
-    -p 9091:9091 -p 9092:9092 -v ~/:/app/ flwr/superlink:1.8.0 \
+    -p 9091:9091 -p 9092:9092 --volume ~/:/app/ flwr/superlink:1.8.0 \
     --insecure \
     --database state.db
 
@@ -93,14 +99,14 @@ PEM-encoded certificate chain.
   page contains a section that will guide you through the process.
 
 Assuming all files we need are in the local ``certificates`` directory, we can use the flag
-``-v`` to mount the local directory into the ``/app/`` directory of the container. This allows the
-SuperLink to access the files within the container. Finally, we pass the names of the certificates
-to the SuperLink with the ``--certificates`` flag.
+``--volume`` to mount the local directory into the ``/app/`` directory of the container. This allows
+the SuperLink to access the files within the container. Finally, we pass the names of the
+certificates to the SuperLink with the ``--certificates`` flag.
 
 .. code-block:: bash
 
   $ docker run --rm \
-    -p 9091:9091 -p 9092:9092 -v ./certificates/:/app/ flwr/superlink:1.8.0 \
+    -p 9091:9091 -p 9092:9092 --volume ./certificates/:/app/ flwr/superlink:1.8.0 \
     --certificates ca.crt server.pem server.key
 
 Flower SuperNode
@@ -171,30 +177,21 @@ The ``Dockerfile.supernode`` contains the instructions that assemble the SuperNo
   RUN python -m pip install -U --no-cache-dir -r requirements.txt && pyenv rehash
 
   COPY client.py task.py ./
-  ENTRYPOINT ["flower-client-app"]
+  ENTRYPOINT ["flower-client-app", "client:app"]
 
 In the first two lines, we instruct Docker to use the SuperNode image tagged ``nightly`` as a base
 image and set our working directory to ``/app``. The following instructions will now be
 executed in the ``/app`` directory. Next, we install the ClientApp dependencies by copying the
 ``requirements.txt`` file into the image and run ``pip install``. In the last two lines,
 we copy the ClientApp code (``client.py`` and ``task.py``) into the image and set the entry
-point to ``flower-client-app``.
+point to ``flower-client-app`` with the argument ``client:app``. The argument is the object
+reference of the ClientApp (``<module>:<attribute>``) that will be run inside the ClientApp.
 
 .. important::
 
-  If the requirement.txt contains the `flwr <https://pypi.org/project/flwr/>`__ or
-  `flwr-nightly <https://pypi.org/project/flwr-nightly/>`_ package, please ensure the version in
-  requirement.txt matches the docker image version.
-
-  Stable:
-
-  - Docker image: ``supernode:1.9.0``
-  - requirement.txt: ``flwr[simulation]==1.9.0``
-
-  Nightly:
-
-  - Docker image: ``supernode:1.9.0.dev20240501``
-  - requirement.txt: ``flwr-nightly[simulation]==1.9.0.dev20240501``
+  Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the flwr/supernode
+  base image, so you only need to include other package dependencies in your requirements.txt,
+  such as torch, tensorflow, etc.
 
 Building the SuperNode Docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -226,8 +223,6 @@ Let's break down each part of this command:
 * ``docker run``: This is the command to run a new Docker container.
 * ``--rm``: This option specifies that the container should be automatically removed when it stops.
 * ``flwr_supernode:0.0.1``: The name the tag of the Docker image to use.
-* | ``client:app``: The object reference of the ``ClientApp`` (``<module>:<attribute>``).
-  | It points to the ``ClientApp`` that will be run inside the SuperNode container.
 * ``--insecure``: This option enables insecure communication.
 
 .. attention::
@@ -254,13 +249,13 @@ Enabling SSL for secure connections
 
 To enable SSL, we will need to mount a PEM-encoded root certificate into your SuperNode container.
 
-Assuming the certificate already exists locally, we can use the flag ``-v`` to mount the local
+Assuming the certificate already exists locally, we can use the flag ``--volume`` to mount the local
 certificate into the container's ``/app/`` directory. This allows the SuperNode to access the
 certificate within the container. Use the ``--certificates`` flag when starting the container.
 
 .. code-block:: bash
 
-  $ docker run --rm -v ./ca.crt:/app/ca.crt flwr_supernode:0.0.1 client:app \
+  $ docker run --rm --volume ./ca.crt:/app/ca.crt flwr_supernode:0.0.1 client:app \
     --server 192.168.1.100:9092 \
     --certificates ca.crt
 
@@ -268,8 +263,6 @@ Flower ServerApp
 ----------------
 
 The procedure for building and running a ServerApp image is almost identical to the SuperNode image.
-A key difference is the additional argument in the ``ENTRYPOINT`` command of the ServerApp
-Dockerfile.
 
 Similar to the SuperNode image, the ServerApp Docker image comes with a pre-installed version of
 Flower and serves as a base for building your own ServerApp image.
@@ -320,19 +313,10 @@ container.
 
 .. important::
 
-  If the requirement.txt contains the `flwr <https://pypi.org/project/flwr/>`__ or
-  `flwr-nightly <https://pypi.org/project/flwr-nightly/>`_ package, please ensure the version in
-  requirement.txt matches the docker image version.
+  Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the flwr/serverapp
+  base image, so you only need to include other package dependencies in your requirements.txt,
+  such as torch, tensorflow, etc.
 
-  Stable:
-
-  - Docker image: ``serverapp:1.8.0``
-  - requirement.txt: ``flwr[simulation]==1.8.0``
-
-  Nightly:
-
-  - Docker image: ``serverapp:1.9.0.dev20240501``
-  - requirement.txt: ``flwr-nightly[simulation]==1.9.0.dev20240501``
 
 Building the ServerApp Docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -390,13 +374,13 @@ Enabling SSL for secure connections
 
 To enable SSL, we will need to mount a PEM-encoded root certificate into your ServerApp container.
 
-Assuming the certificate already exists locally, we can use the flag ``-v`` to mount the local
+Assuming the certificate already exists locally, we can use the flag ``--volume`` to mount the local
 certificate into the container's ``/app/`` directory. This allows the ServerApp to access the
 certificate within the container. Use the ``--certificates`` flag when starting the container.
 
 .. code-block:: bash
 
-  $ docker run --rm -v ./ca.crt:/app/ca.crt flwr_serverapp:0.0.1 client:app \
+  $ docker run --rm --volume ./ca.crt:/app/ca.crt flwr_serverapp:0.0.1 client:app \
     --server 192.168.1.100:9091 \
     --certificates ca.crt
 
