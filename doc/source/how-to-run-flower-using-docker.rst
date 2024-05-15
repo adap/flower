@@ -58,7 +58,7 @@ to the Flower SuperLink. Here, we are passing the flag ``--insecure``.
 
   The ``--insecure`` flag enables insecure communication (using HTTP, not HTTPS) and should only be
   used for testing purposes. We strongly recommend enabling
-  `SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`_
+  `SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`__
   when deploying to a production environment.
 
 You can use ``--help`` to view all available flags that the SuperLink supports:
@@ -95,7 +95,7 @@ PEM-encoded certificate chain.
 
 .. note::
   For testing purposes, you can generate your own self-signed certificates. The
-  `Enable SSL connections <https://flower.ai/docs/framework/how-to-enable-ssl-connections.html#certificates>`_
+  `Enable SSL connections <https://flower.ai/docs/framework/how-to-enable-ssl-connections.html#certificates>`__
   page contains a section that will guide you through the process.
 
 Assuming all files we need are in the local ``certificates`` directory, we can use the flag
@@ -123,7 +123,7 @@ building your own SuperNode image.
   day. To ensure the versions are in sync, using the concrete tag, e.g., ``1.9.0.dev20240501``
   instead of ``nightly`` is recommended.
 
-We will use the ``app-pytorch`` example, which you can find in
+We will use the ``quickstart-pytorch`` example, which you can find in
 the Flower repository, to illustrate how you can dockerize your client-app.
 
 .. _SuperNode Prerequisites:
@@ -132,14 +132,14 @@ Prerequisites
 ~~~~~~~~~~~~~
 
 Before we can start, we need to meet a few prerequisites in our local development environment.
-You can skip the first part if you want to run your client-app instead of the ``app-pytorch``
+You can skip the first part if you want to run your client-app instead of the ``quickstart-pytorch``
 example.
 
 #. Clone the flower repository.
 
     .. code-block:: bash
 
-      $ git clone https://github.com/adap/flower.git && cd flower/examples/app-pytorch
+      $ git clone https://github.com/adap/flower.git && cd flower/examples/quickstart-pytorch
 
 #. Verify the Docker daemon is running.
 
@@ -158,13 +158,26 @@ Let's assume the following project layout:
   $ tree .
   .
   ├── client.py        # ClientApp code
-  ├── task.py          # ClientApp code
-  ├── requirements.txt # ClientApp dependencies
   └── <other files>
 
-First, we need to create a Dockerfile in the directory where the ``ClientApp`` code is located.
-If you use the ``app-pytorch`` example, create a new file called ``Dockerfile.supernode`` in
-``examples/app-pytorch``.
+First, we need to create a ``requirements.txt`` file in the directory where the ``ClientApp`` code
+is located. In the file, we list all the dependencies that the ClientApp requires.
+
+.. code-block::
+
+  flwr-datasets[vision]>=0.0.2,<1.0.0
+  torch==2.1.1
+  torchvision==0.16.1
+  tqdm==4.66.3
+
+.. important::
+
+  Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the ``flwr/supernode``
+  base image, so you only need to include other package dependencies in your requirements.txt,
+  such as torch, tensorflow, etc.
+
+Next, we create a Dockerfile. If you use the ``quickstart-pytorch`` example, create a new
+file called ``Dockerfile.supernode`` in ``examples/quickstart-pytorch``.
 
 The ``Dockerfile.supernode`` contains the instructions that assemble the SuperNode image.
 
@@ -173,25 +186,20 @@ The ``Dockerfile.supernode`` contains the instructions that assemble the SuperNo
   FROM flwr/supernode:nightly
 
   WORKDIR /app
+
   COPY requirements.txt .
   RUN python -m pip install -U --no-cache-dir -r requirements.txt && pyenv rehash
 
-  COPY client.py task.py ./
+  COPY client.py ./
   ENTRYPOINT ["flower-client-app", "client:app"]
 
 In the first two lines, we instruct Docker to use the SuperNode image tagged ``nightly`` as a base
 image and set our working directory to ``/app``. The following instructions will now be
 executed in the ``/app`` directory. Next, we install the ClientApp dependencies by copying the
 ``requirements.txt`` file into the image and run ``pip install``. In the last two lines,
-we copy the ClientApp code (``client.py`` and ``task.py``) into the image and set the entry
-point to ``flower-client-app`` with the argument ``client:app``. The argument is the object
-reference of the ClientApp (``<module>:<attribute>``) that will be run inside the ClientApp.
-
-.. important::
-
-  Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the flwr/supernode
-  base image, so you only need to include other package dependencies in your requirements.txt,
-  such as torch, tensorflow, etc.
+we copy the ClientApp code into the image and set the entry point to ``flower-client-app`` with
+the argument ``client:app``. The argument is the object reference of the ClientApp
+(``<module>:<attribute>``) that will be run inside the ClientApp.
 
 Building the SuperNode Docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -229,7 +237,7 @@ Let's break down each part of this command:
 
   The ``--insecure`` flag enables insecure communication (using HTTP, not HTTPS) and should only be
   used for testing purposes. We strongly recommend enabling
-  `SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`_
+  `SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`__
   when deploying to a production environment.
 
 * | ``--server 192.168.1.100:9092``: This option specifies the address of the SuperLinks Fleet
@@ -237,12 +245,16 @@ Let's break down each part of this command:
 
 .. note::
 
-  Any argument that comes after the tag is passed to the Flower SuperNode binary.
-  To see all available flags that the SuperNode supports, run:
+  To test running Flower locally, you can create a
+  `bridge network <https://docs.docker.com/network/network-tutorial-standalone/#use-user-defined-bridge-networks>`__,
+  use the ``--network`` argument and pass the name of the Docker network to run your SuperNodes.
 
-  .. code-block:: bash
+Any argument that comes after the tag is passed to the Flower SuperNode binary.
+To see all available flags that the SuperNode supports, run:
 
-    $ docker run --rm flwr/supernode:nightly --help
+.. code-block:: bash
+
+  $ docker run --rm flwr/supernode:nightly --help
 
 Enabling SSL for secure connections
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -267,7 +279,7 @@ The procedure for building and running a ServerApp image is almost identical to 
 Similar to the SuperNode image, the ServerApp Docker image comes with a pre-installed version of
 Flower and serves as a base for building your own ServerApp image.
 
-We will use the same ``app-pytorch`` example as we do in the Flower SuperNode section.
+We will use the same ``quickstart-pytorch`` example as we do in the Flower SuperNode section.
 If you have not already done so, please follow the `SuperNode Prerequisites`_ before proceeding.
 
 
@@ -281,13 +293,11 @@ Let's assume the following project layout:
   $ tree .
   .
   ├── server.py        # ServerApp code
-  ├── task.py          # ServerApp code
-  ├── requirements.txt # ServerApp dependencies
   └── <other files>
 
 First, we need to create a Dockerfile in the directory where the ``ServerApp`` code is located.
-If you use the ``app-pytorch`` example, create a new file called ``Dockerfile.serverapp`` in
-``examples/app-pytorch``.
+If you use the ``quickstart-pytorch`` example, create a new file called ``Dockerfile.serverapp`` in
+``examples/quickstart-pytorch``.
 
 The ``Dockerfile.serverapp`` contains the instructions that assemble the ServerApp image.
 
@@ -296,27 +306,16 @@ The ``Dockerfile.serverapp`` contains the instructions that assemble the ServerA
   FROM flwr/serverapp:1.8.0
 
   WORKDIR /app
-  COPY requirements.txt .
-  RUN python -m pip install -U --no-cache-dir -r requirements.txt && pyenv rehash
 
-  COPY server.py task.py ./
+  COPY server.py ./
   ENTRYPOINT ["flower-server-app", "server:app"]
 
 In the first two lines, we instruct Docker to use the ServerApp image tagged ``1.8.0`` as a base
 image and set our working directory to ``/app``. The following instructions will now be
-executed in the ``/app`` directory. Next, we install the ServerApp dependencies by copying the
-``requirements.txt`` file into the image and run ``pip install``. In the last two lines,
-we copy the ServerApp code (``server.py`` and ``task.py``) into the image and set the entry
-point to ``flower-server-app`` with the argument ``server:app``. The argument is the object
-reference of the ServerApp (``<module>:<attribute>``) that will be run inside the ServerApp
-container.
-
-.. important::
-
-  Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the flwr/serverapp
-  base image, so you only need to include other package dependencies in your requirements.txt,
-  such as torch, tensorflow, etc.
-
+executed in the ``/app`` directory. In the last two lines, we copy the ServerApp code into the
+image and set the entry point to ``flower-server-app`` with the argument ``server:app``.
+The argument is the object reference of the ServerApp (``<module>:<attribute>``) that will be run
+inside the ServerApp container.
 
 Building the ServerApp Docker image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -354,20 +353,23 @@ Let's break down each part of this command:
 
   The ``--insecure`` flag enables insecure communication (using HTTP, not HTTPS) and should only be
   used for testing purposes. We strongly recommend enabling
-  `SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`_
+  `SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`__
   when deploying to a production environment.
 
 * | ``--server 192.168.1.100:9091``: This option specifies the address of the SuperLinks Driver
   | API to connect to. Remember to update it with your SuperLink IP.
 
 .. note::
+  To test running Flower locally, you can create a
+  `bridge network <https://docs.docker.com/network/network-tutorial-standalone/#use-user-defined-bridge-networks>`__,
+  use the ``--network`` argument and pass the name of the Docker network to run your ServerApps.
 
-  Any argument that comes after the tag is passed to the Flower ServerApp binary.
-  To see all available flags that the ServerApp supports, run:
+Any argument that comes after the tag is passed to the Flower ServerApp binary.
+To see all available flags that the ServerApp supports, run:
 
-  .. code-block:: bash
+.. code-block:: bash
 
-    $ docker run --rm flwr/serverapp:1.8.0 --help
+  $ docker run --rm flwr/serverapp:1.8.0 --help
 
 Enabling SSL for secure connections
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
