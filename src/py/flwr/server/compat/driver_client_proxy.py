@@ -15,6 +15,7 @@
 """Flower ClientProxy implementation for Driver API."""
 
 
+import json
 import time
 from typing import Optional
 
@@ -139,6 +140,10 @@ class DriverClientProxy(ClientProxy):
             if len(messages) == 1:
                 msg: Message = messages[0]
                 if msg.has_error():
+                    if msg.error.reason is not None:
+                        reason_data = json.loads(msg.error.reason)
+                        if reason_data["type"] == "NotImplementedError":
+                            raise NotImplementedError(reason_data["message"])
                     raise ValueError(
                         f"Message contains an Error (reason: {msg.error.reason}). "
                         "It originated during client-side execution of a message."

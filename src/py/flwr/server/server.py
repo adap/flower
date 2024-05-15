@@ -279,11 +279,24 @@ class Server:
         log(INFO, "Requesting initial parameters from one random client")
         random_client = self._client_manager.sample(1)[0]
         ins = GetParametersIns(config={})
-        get_parameters_res = random_client.get_parameters(
-            ins=ins, timeout=timeout, group_id=server_round
-        )
-        log(INFO, "Received initial parameters from one random client")
-        return get_parameters_res.parameters
+        try:
+            get_parameters_res = random_client.get_parameters(
+                ins=ins, timeout=timeout, group_id=server_round
+            )
+            # Raise NotImplementedError if the method does not exist.
+            if get_parameters_res.status.code != Code.OK:
+                raise NotImplementedError("Client does not implement `get_parameters`")
+            # Set the initial parameters
+            log(INFO, "Received initial parameters from one random client")
+            parameters = get_parameters_res.parameters
+        except NotImplementedError:
+            log(
+                WARN,
+                "Failed to receive initial parameters from the client."
+                " Empty initial parameters will be used.",
+            )
+            parameters = Parameters([], "")
+        return parameters
 
 
 def reconnect_clients(

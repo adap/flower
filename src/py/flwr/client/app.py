@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower client app."""
 
+import json
 import sys
 import time
 from logging import DEBUG, ERROR, INFO, WARN
@@ -376,8 +377,14 @@ def _start_client_internal(
                     # Don't update/change NodeState
 
                     e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
-                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                    # Reason example:
+                    # '{"type": "ZeroDivisionError", "messsage": "division by zero"}'
+                    reason = json.dumps(
+                        {
+                            "type": ex.__class__.__qualname__,
+                            "messsage": str(ex),
+                        }
+                    )
                     exc_entity = "ClientApp"
                     if isinstance(ex, LoadClientAppError):
                         reason = (
