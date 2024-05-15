@@ -32,3 +32,6 @@ name = "simulation"
 
 [flower.engine.simulation.supernode]
 num = 2
+
+[flower.engine.deployment.superlink]
+address = "127.0.0.1:9091"

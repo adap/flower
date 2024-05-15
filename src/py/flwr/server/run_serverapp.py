@@ -70,21 +70,29 @@ def run(
     log(DEBUG, "ServerApp finished running.")
 
 
-def run_server_app() -> None:
+def _run_server_app(
+    server_address: str,
+    server_app_attr: str,
+    server_app_dir: str = "",
+    verbose: bool = False,
+    insecure: bool = False,
+    cert_path: Optional[str] = None,
+    fab_id: Optional[str] = None,
+    fab_version: Optional[str] = None,
+) -> None:
     """Run Flower server app."""
+
     event(EventType.RUN_SERVER_APP_ENTER)
 
-    args = _parse_args_run_server_app().parse_args()
-
     update_console_handler(
-        level=DEBUG if args.verbose else INFO,
-        timestamps=args.verbose,
+        level=DEBUG if verbose else INFO,
+        timestamps=verbose,
         colored=True,
     )
 
     # Obtain certificates
-    if args.insecure:
-        if args.root_certificates is not None:
+    if insecure:
+        if cert_path is not None:
             sys.exit(
                 "Conflicting options: The '--insecure' flag disables HTTPS, "
                 "but '--root-certificates' was also specified. Please remove "
@@ -95,12 +103,11 @@ def run_server_app() -> None:
             WARN,
             "Option `--insecure` was set. "
             "Starting insecure HTTP client connected to %s.",
-            args.server,
+            server_address,
         )
         root_certificates = None
     else:
         # Load the certificates if provided, or load the system certificates
-        cert_path = args.root_certificates
         if cert_path is None:
             root_certificates = None
         else:
@@ -109,14 +116,14 @@ def run_server_app() -> None:
             DEBUG,
             "Starting secure HTTPS client connected to %s "
             "with the following certificates: %s.",
-            args.server,
+            server_address,
             cert_path,
         )
 
     log(
         DEBUG,
         "Flower will load ServerApp `%s`",
-        getattr(args, "server-app"),
+        server_app_attr,
     )
 
     log(
@@ -125,15 +132,12 @@ def run_server_app() -> None:
         root_certificates,
     )
 
-    server_app_dir = args.dir
-    server_app_attr = getattr(args, "server-app")
-
     # Initialize GrpcDriver
     driver = GrpcDriver(
-        driver_service_address=args.server,
+        driver_service_address=server_address,
         root_certificates=root_certificates,
-        fab_id=args.fab_id,
-        fab_version=args.fab_version,
+        fab_id=fab_id,
+        fab_version=fab_version,
     )
 
     # Run the ServerApp with the Driver
@@ -143,6 +147,23 @@ def run_server_app() -> None:
     driver.close()
 
     event(EventType.RUN_SERVER_APP_LEAVE)
+
+
+def run_server_app() -> None:
+    """Run Flower server app."""
+
+    args = _parse_args_run_server_app().parse_args()
+
+    _run_server_app(
+        args.server,
+        getattr(args, "server-app"),
+        args.dir,
+        args.verbose,
+        args.insecure,
+        args.root_certificates,
+        args.fab_id,
+        args.fab_version,
+    )
 
 
 def _parse_args_run_server_app() -> argparse.ArgumentParser:

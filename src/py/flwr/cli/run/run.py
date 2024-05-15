@@ -21,12 +21,14 @@ from typing import Optional
 import typer
 from flwr.cli import config_utils
 from flwr.simulation.run_simulation import _run_simulation
+from flwr.server.run_serverapp import _run_server_app
 
 from typing_extensions import Annotated
 
 
 class Engine(str, Enum):
     simulation = "simulation"
+    deployment = "deployment"
 
 
 def run(
@@ -74,6 +76,18 @@ def run(
             client_app_attr=client_app_ref,
             num_supernodes=num_supernodes,
         )
+    elif engine == Engine.deployment:
+        server_address = config["flower"]["engine"]["deployment"]["superlink"][
+            "address"
+        ]
+
+        typer.secho("Starting run... ", fg=typer.colors.BLUE)
+        _run_server_app(
+            server_address,
+            server_app_ref,
+            insecure=True,
+        )
+
     else:
         typer.secho(
             f"Engine '{engine}' is not yet supported in `flwr run`",
