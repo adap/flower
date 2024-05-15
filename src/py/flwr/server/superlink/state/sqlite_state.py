@@ -18,7 +18,6 @@
 import os
 import re
 import sqlite3
-import threading
 import time
 from logging import DEBUG, ERROR
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
@@ -83,6 +82,7 @@ CREATE TABLE IF NOT EXISTS task_ins(
     ancestry                TEXT,
     task_type               TEXT,
     recordset               BLOB,
+    is_delivered            BOOLEAN,
     FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS task_res(
     ancestry                TEXT,
     task_type               TEXT,
     recordset               BLOB,
+    is_delivered            BOOLEAN,
     FOREIGN KEY(run_id) REFERENCES run(run_id)
 );
 """
@@ -127,12 +128,6 @@ class SqliteState(State):  # pylint: disable=R0904
         """
         self.database_path = database_path
         self.conn: Optional[sqlite3.Connection] = None
-
-        # Count undelivered task_ins/task_res
-        self._undelivered_task_ins_cnt = 0
-        self._undelivered_task_res_cnt = 0
-
-        self.lock = threading.RLock()
 
     def initialize(self, log_queries: bool = False) -> List[Tuple[str]]:
         """Create tables if they don't exist yet.
@@ -222,9 +217,12 @@ class SqliteState(State):  # pylint: disable=R0904
         # Create task_id
         task_id = uuid4()
 
-        # Store TaskIns
+        # Convert TaskIns to dict
         task_ins.task_id = str(task_id)
         data = (task_ins_to_dict(task_ins),)
+        # Mark as undelivered
+        data[0]["is_delivered"] = False
+        # Store TaskIns
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_ins VALUES({columns});"
 
@@ -235,10 +233,6 @@ class SqliteState(State):  # pylint: disable=R0904
         except sqlite3.IntegrityError:
             log(ERROR, "`run` is invalid")
             return None
-
-        # Update the number of undelivered task_ins
-        with self.lock:
-            self._undelivered_task_ins_cnt += 1
 
         return task_id
 
@@ -314,14 +308,15 @@ class SqliteState(State):  # pylint: disable=R0904
             placeholders: str = ",".join([f":id_{i}" for i in range(len(task_ids))])
             query = f"""
                 UPDATE task_ins
-                SET delivered_at = :delivered_at
+                SET delivered_at = :delivered_at,
+                    is_delivered = :is_delivered
                 WHERE task_id IN ({placeholders})
                 RETURNING *;
             """
 
             # Prepare data for query
             delivered_at = now().isoformat()
-            data = {"delivered_at": delivered_at}
+            data = {"delivered_at": delivered_at, "is_delivered": True}
             for index, task_id in enumerate(task_ids):
                 data[f"id_{index}"] = str(task_id)
 
@@ -329,10 +324,6 @@ class SqliteState(State):  # pylint: disable=R0904
             rows = self.query(query, data)
 
         result = [dict_to_task_ins(row) for row in rows]
-
-        # Update the number of undelivered task_ins
-        with self.lock:
-            self._undelivered_task_ins_cnt -= len(result)
 
         return result
 
@@ -361,9 +352,12 @@ class SqliteState(State):  # pylint: disable=R0904
         # Create task_id
         task_id = uuid4()
 
-        # Store TaskIns
+        # Convert TaskRes to dict
         task_res.task_id = str(task_id)
         data = (task_res_to_dict(task_res),)
+        # Mark as undelivered
+        data[0]["is_delivered"] = False
+        # Store TaskRes
         columns = ", ".join([f":{key}" for key in data[0]])
         query = f"INSERT INTO task_res VALUES({columns});"
 
@@ -374,10 +368,6 @@ class SqliteState(State):  # pylint: disable=R0904
         except sqlite3.IntegrityError:
             log(ERROR, "`run` is invalid")
             return None
-
-        # Update the number of undelivered task_res
-        with self.lock:
-            self._undelivered_task_res_cnt += 1
 
         return task_id
 
@@ -431,14 +421,15 @@ class SqliteState(State):  # pylint: disable=R0904
             placeholders = ",".join([f":id_{i}" for i in range(len(found_task_ids))])
             query = f"""
                 UPDATE task_res
-                SET delivered_at = :delivered_at
+                SET delivered_at = :delivered_at,
+                    is_delivered = :is_delivered
                 WHERE task_id IN ({placeholders})
                 RETURNING *;
             """
 
             # Prepare data for query
             delivered_at = now().isoformat()
-            data = {"delivered_at": delivered_at}
+            data = {"delivered_at": delivered_at, "is_delivered": True}
             for index, task_id in enumerate(found_task_ids):
                 data[f"id_{index}"] = str(task_id)
 
@@ -446,10 +437,6 @@ class SqliteState(State):  # pylint: disable=R0904
             rows = self.query(query, data)
 
         result = [dict_to_task_res(row) for row in rows]
-
-        # Update the number of undelivered task_res
-        with self.lock:
-            self._undelivered_task_res_cnt -= len(result)
 
         # 1. Query: Fetch consumer_node_id of remaining task_ids
         # Assume the ancestry field only contains one element
@@ -520,16 +507,6 @@ class SqliteState(State):  # pylint: disable=R0904
         rows = self.query(query)
         result: Dict[str, int] = rows[0]
         return result["num"]
-
-    def num_undelivered_task_ins(self) -> int:
-        """Calculate the number of undelivered task_ins in store."""
-        with self.lock:
-            return self._undelivered_task_ins_cnt
-
-    def num_undelivered_task_res(self) -> int:
-        """Calculate the number of undelivered task_res in store."""
-        with self.lock:
-            return self._undelivered_task_res_cnt
 
     def delete_tasks(self, task_ids: Set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
@@ -616,6 +593,20 @@ class SqliteState(State):  # pylint: disable=R0904
                     raise ValueError("Public key or node_id not found")
         except KeyError as exc:
             log(ERROR, {"query": query, "data": params, "exception": exc})
+
+    def num_undelivered_task_ins(self) -> int:
+        """Calculate the number of undelivered task_ins in store."""
+        query = "SELECT count(*) AS num FROM task_ins WHERE is_delivered = 0;"
+        rows = self.query(query)
+        result: Dict[str, int] = rows[0]
+        return result["num"]
+
+    def num_undelivered_task_res(self) -> int:
+        """Calculate the number of undelivered task_res in store."""
+        query = "SELECT count(*) AS num FROM task_res WHERE is_delivered = 0;"
+        rows = self.query(query)
+        result: Dict[str, int] = rows[0]
+        return result["num"]
 
     def get_nodes(self, run_id: int) -> Set[int]:
         """Retrieve all currently stored node IDs as a set.
