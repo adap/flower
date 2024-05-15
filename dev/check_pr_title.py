@@ -50,7 +50,7 @@ if __name__ == "__main__":
             f"<PR_SUBJECT> with <PR_TYPE> in {types}, and "
             f"<PR_SCOPE> in {project} where '*' is used when modifying multiple projects),"
             "and <PR_SUBJECT> starting with "
-            "a capitalized verb in the imperative mood and without a dot at the end.\n"
+            "a capitalized verb in the imperative mood and without any punctuation at the end.\n"
             "A valid example is: `feat(framework) Add flwr build CLI command`"
         )
         sys.exit(1)
