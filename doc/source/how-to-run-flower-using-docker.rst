@@ -135,11 +135,11 @@ Before we can start, we need to meet a few prerequisites in our local developmen
 You can skip the first part if you want to run your ClientApp instead of the ``quickstart-pytorch``
 example.
 
-#. Clone the flower repository.
+#. Clone the Flower repository.
 
     .. code-block:: bash
 
-      $ git clone https://github.com/adap/flower.git && cd flower/examples/quickstart-pytorch
+      $ git clone --depth=1 https://github.com/adap/flower.git && cd flower/examples/quickstart-pytorch
 
 #. Verify the Docker daemon is running.
 
@@ -173,8 +173,8 @@ is located. In the file, we list all the dependencies that the ClientApp require
 .. important::
 
   Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed in the ``flwr/supernode``
-  base image, so you only need to include other package dependencies in your requirements.txt,
-  such as torch, tensorflow, etc.
+  base image, so you only need to include other package dependencies in your ``requirements.txt``,
+  such as ``torch``, ``tensorflow``, etc.
 
 Next, we create a Dockerfile. If you use the ``quickstart-pytorch`` example, create a new
 file called ``Dockerfile.supernode`` in ``examples/quickstart-pytorch``.
@@ -197,7 +197,7 @@ In the first two lines, we instruct Docker to use the SuperNode image tagged ``n
 image and set our working directory to ``/app``. The following instructions will now be
 executed in the ``/app`` directory. Next, we install the ClientApp dependencies by copying the
 ``requirements.txt`` file into the image and run ``pip install``. In the last two lines,
-we copy the ClientApp code into the image and set the entry point to ``flower-client-app`` with
+we copy the ``client.py`` module into the image and set the entry point to ``flower-client-app`` with
 the argument ``client:app``. The argument is the object reference of the ClientApp
 (``<module>:<attribute>``) that will be run inside the ClientApp.
 
@@ -312,7 +312,7 @@ The ``Dockerfile.serverapp`` contains the instructions that assemble the ServerA
 
 In the first two lines, we instruct Docker to use the ServerApp image tagged ``1.8.0`` as a base
 image and set our working directory to ``/app``. The following instructions will now be
-executed in the ``/app`` directory. In the last two lines, we copy the ServerApp code into the
+executed in the ``/app`` directory. In the last two lines, we copy the ``server.py`` module into the
 image and set the entry point to ``flower-server-app`` with the argument ``server:app``.
 The argument is the object reference of the ServerApp (``<module>:<attribute>``) that will be run
 inside the ServerApp container.
