@@ -35,13 +35,15 @@ if __name__ == "__main__":
     types = "|".join(config["type"])
     projects = "|".join(config["project"]) + "|\\*"
     scope = config["scope"]
+    allowed_verbs = config["allowed_verbs"]
 
     # Construct the pattern
     pattern_template = config["pattern_template"]
     pattern = pattern_template.format(types=types, projects=projects, scope=scope)
 
     # Check for the pattern in the first argument given to the script
-    if re.search(pattern, pr_title):
+    match = re.search(pattern, pr_title)
+    if match and match.group(4).split()[0] in allowed_verbs:
         print("PR title is valid")
         sys.exit(0)
     else:
