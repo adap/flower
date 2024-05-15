@@ -124,7 +124,7 @@ building your own SuperNode image.
   instead of ``nightly`` is recommended.
 
 We will use the ``quickstart-pytorch`` example, which you can find in
-the Flower repository, to illustrate how you can dockerize your client-app.
+the Flower repository, to illustrate how you can dockerize your ClientApp.
 
 .. _SuperNode Prerequisites:
 
@@ -132,7 +132,7 @@ Prerequisites
 ~~~~~~~~~~~~~
 
 Before we can start, we need to meet a few prerequisites in our local development environment.
-You can skip the first part if you want to run your client-app instead of the ``quickstart-pytorch``
+You can skip the first part if you want to run your ClientApp instead of the ``quickstart-pytorch``
 example.
 
 #. Clone the flower repository.
