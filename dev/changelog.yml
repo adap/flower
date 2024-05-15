@@ -1,0 +1,15 @@
+types:
+  - ci
+  - docs
+  - feat
+  - fix
+  - refactor
+  - break
+project:
+  - framework
+  - baselines
+  - datasets
+  - examples
+scope: "skip"
+pattern_template: "^({types})\\(({project})(?::({scope}))?\\) ([A-Z][^\\.\\n]*(?:\\.(?=[^\\.\\n]))*[^\\.\\n]*)$"
+
