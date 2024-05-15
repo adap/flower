@@ -16,7 +16,7 @@
 
 import sys
 from enum import Enum
-from typing import Optional
+from typing import Any, Dict, Optional, Tuple, List
 
 import typer
 from typing_extensions import Annotated
@@ -29,10 +29,36 @@ class Engine(str, Enum):
     simulation = "simulation"
 
 
+def _parse_config_overrides(config_overrides: List[str]) -> Dict[str, Any]:
+    """
+    Parse the -c arguments and update the context with the overrides.
+    """
+    overrides = {}
+    for conf_override in config_overrides:
+        key, value = conf_override.split("=")
+        keys = key.split(".")
+
+        # Update nested dictionary
+        d = overrides
+        for key in keys[:-1]:
+            d = d.setdefault(key, {})
+        d[keys[-1]] = value
+
+    return overrides
+
+
 def run(
     engine: Annotated[
         Optional[Engine],
         typer.Option(case_sensitive=False, help="The ML framework to use"),
+    ] = None,
+    config_overrides: Annotated[
+        Optional[List[str]],
+        typer.Option(
+            "--config",
+            "-c",
+            help="Override configuration key-value pairs",
+        ),
     ] = None,
 ) -> None:
     """Run Flower project."""
@@ -57,6 +83,14 @@ def run(
             bold=True,
         )
 
+    if config_overrides:
+        overrides = _parse_config_overrides(config_overrides)
+        for key, value in overrides.items():
+            keys = key.split(".")
+            for part in keys[:-1]:
+                config = config["flower"].setdefault(part, {})
+            config["flower"][keys[-1]] = value
+
     typer.secho("Success", fg=typer.colors.GREEN)
 
     server_app_ref = config["flower"]["components"]["serverapp"]
@@ -66,7 +100,9 @@ def run(
         engine = config["flower"]["engine"]["name"]
 
     if engine == Engine.simulation:
-        num_supernodes = config["flower"]["engine"]["simulation"]["supernode"]["num"]
+        num_supernodes = int(
+            config["flower"]["engine"]["simulation"]["supernode"]["num"]
+        )
 
         typer.secho("Starting run... ", fg=typer.colors.BLUE)
         _run_simulation(
