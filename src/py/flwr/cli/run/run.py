@@ -19,11 +19,11 @@ from enum import Enum
 from typing import Optional
 
 import typer
-from flwr.cli import config_utils
-from flwr.simulation.run_simulation import _run_simulation
-from flwr.server.run_serverapp import _run_server_app
-
 from typing_extensions import Annotated
+
+from flwr.cli import config_utils
+from flwr.server.run_serverapp import _run_server_app
+from flwr.simulation.run_simulation import _run_simulation
 
 
 class Engine(str, Enum):
