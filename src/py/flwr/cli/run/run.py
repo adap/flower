@@ -15,14 +15,26 @@
 """Flower command line interface `run` command."""
 
 import sys
+from enum import Enum
+from typing import Optional
 
 import typer
-
 from flwr.cli import config_utils
 from flwr.simulation.run_simulation import _run_simulation
 
+from typing_extensions import Annotated
 
-def run() -> None:
+
+class Engine(str, Enum):
+    simulation = "simulation"
+
+
+def run(
+    engine: Annotated[
+        Optional[Engine],
+        typer.Option(case_sensitive=False, help="The ML framework to use"),
+    ] = None,
+) -> None:
     """Run Flower project."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
@@ -49,9 +61,11 @@ def run() -> None:
 
     server_app_ref = config["flower"]["components"]["serverapp"]
     client_app_ref = config["flower"]["components"]["clientapp"]
-    engine = config["flower"]["engine"]["name"]
 
-    if engine == "simulation":
+    if engine is None:
+        engine = config["flower"]["engine"]["name"]
+
+    if engine == Engine.simulation:
         num_supernodes = config["flower"]["engine"]["simulation"]["supernode"]["num"]
 
         typer.secho("Starting run... ", fg=typer.colors.BLUE)
