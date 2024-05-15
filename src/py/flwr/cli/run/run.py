@@ -16,7 +16,7 @@
 
 import sys
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import typer
 from typing_extensions import Annotated
@@ -30,9 +30,7 @@ class Engine(str, Enum):
 
 
 def _parse_config_overrides(config_overrides: List[str]) -> Dict[str, Any]:
-    """
-    Parse the -c arguments and update the context with the overrides.
-    """
+    """Parse the -c arguments and return the overrides as a dict."""
     overrides = {}
     for conf_override in config_overrides:
         key, value = conf_override.split("=")
