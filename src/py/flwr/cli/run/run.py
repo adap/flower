@@ -16,7 +16,7 @@
 
 import sys
 from enum import Enum
-from typing import Any, Dict, Optional, Tuple, List
+from typing import Any, Dict, List, Optional, Tuple
 
 import typer
 from typing_extensions import Annotated
