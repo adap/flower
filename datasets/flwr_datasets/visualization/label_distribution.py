@@ -13,263 +13,228 @@
 # limitations under the License.
 # ==============================================================================
 """Label distribution plotting."""
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Union
 
-import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import pandas as pd
-
+import seaborn as sns
+import numpy as np
+from matplotlib.axes import Axes
 from metrics import compute_counts
 from partitioner import Partitioner
-import seaborn as sns
 
-# sns.set_theme()
-import numpy as np
-
-sns.reset_orig()
-
+# Constants for plot types and size units
+PLOT_TYPES = ("bar", "heatmap")
+SIZE_UNITS = ("absolute", "percent")
+AXIS_TYPES = ("x", "y")
 
 
 def plot_label_distributions(
-        # Flower Datasets' specific parameters
         partitioner: Partitioner,
-        label: str,
+        label_name: str,
         plot_type: str,
         size_unit: str,
         num_partitions: Optional[int] = None,
         partition_id_axis: str = "x",
-        # Plotting specific parameters
-        ax: Optional[matplotlib.axes.Axes] = None,
-        figsize: Optional[Tuple[int, int]] = None,
+        ax: Optional[Axes] = None,
+        figsize: Optional[Tuple[float, float]] = None,
         title: str = "Per Partition Label Distribution",
-        colormap=None,
+        colormap: Optional[Union[str, mcolors.Colormap]] = None,
         legend: bool = True,
-        legend_name: str = "Labels",
+        legend_title: str = "Labels",
         verbose_labels: bool = True,
         **plot_kwargs,
 ):
-    """Plot the label distribution of the.
+    """
+    Plot the label distribution of the partitions.
 
     Parameters
     ----------
-    partitioner: Partitioner
+    partitioner : Partitioner
         Partitioner with an assigned dataset.
-    label: str
-        Label based on which the plot will be created.
-    plot_type: str
+    label_name : str
+        Column name identifying label based on which the plot will be created.
+    plot_type : str
         Type of plot, either "bar" or "heatmap".
-    size_unit: str
-         "absolute" or "percent". "absolute" - (number of samples) there is no limit
-        to the biggest number. It results in bars of various heights and unbounded max
-        value on the heatmap. "percent" - normalizes each value, so they sum up to
-        100%. The bars are be of the same height.
-    num_partitions: Optional[int]
-        The number of partitions that will be used. If left None, then all the
-        partitions will be used.
-    legend: bool
+    size_unit : str
+        "absolute" or "percent". "absolute" - (number of samples). "percent" - normalizes each value, so they sum up to 100%.
+    num_partitions : Optional[int]
+        The number of partitions that will be used. If left None, then all partitions will be used.
+    partition_id_axis : str
+        "x" or "y". The axis on which the partition_id will be marked.
+    ax : Optional[Axes]
+        Matplotlib Axes object to plot on.
+    figsize : Optional[Tuple[float, float]]
+        Size of the figure.
+    title : str
+        Title of the plot.
+    colormap : Optional[Union[str, mcolors.Colormap]]
+        Colormap for the heatmap.
+    legend : bool
         Include the legend.
-    verbose_labels: bool
-        Whether to use the verbose versions of the labels or keep indices representing
-        them. E.g. in CIFAR10 the verbose labels are airplane, automobile, ...).
-    partition_id_axis: str
-        "x" or "y". The axis on which the partition_id (also known as clients or
-        nodes) will be marked. The values are marked on the other axis.
+    legend_title : str
+        Name for the legend.
+    verbose_labels : bool
+        Whether to use verbose versions of the labels.
 
     Returns
     -------
-
-    Examples
-    --------
+    ax : Axes
+        The Axes object with the plot.
+    df : pd.DataFrame
+        The DataFrame used for plotting.
     """
-    if label not in partitioner.dataset.column_names:
+
+    _validate_parameters(plot_type, size_unit, partition_id_axis)
+
+    if label_name not in partitioner.dataset.column_names:
         raise ValueError(
-            f"The specified label: '{label}' is not present in the dataset.")
+            f"The specified 'label_name': '{label_name}' is not present in the dataset.")
 
-    # Load all partitions
-    partitions = []
-    if num_partitions is None:
-        num_partitions = partitioner.num_partitions
-    for partition_id in range(num_partitions):
-        partitions.append(partitioner.load_partition(partition_id))
+    num_partitions = num_partitions or partitioner.num_partitions
+    partitions = [partitioner.load_partition(i) for i in range(num_partitions)]
 
-    # Infer the label information based on any (part) of the dataset
     partition = partitions[0]
-    unique_labels = partition.features[label].str2int(partition.features[label].names)
+    unique_labels = partition.features[label_name].str2int(
+        partition.features[label_name].names)
 
-    pid_to_label_absolute_size = {}
-    for pid, partition in enumerate(partitions):
-        pid_to_label_absolute_size[pid] = compute_counts(partition[label],
-                                                         unique_labels)
+    partition_id_to_label_absolute_size = {
+        pid: compute_counts(partition[label_name], unique_labels)
+        for pid, partition in enumerate(partitions)
+    }
 
-    df = pd.DataFrame.from_dict(pid_to_label_absolute_size, orient="index")
+    df = pd.DataFrame.from_dict(partition_id_to_label_absolute_size, orient="index")
     df.index.name = "Partition ID"
 
-    # Adjust the data based on the size_unit
-    if size_unit == "absolute":
-        # No operation in case of absolute
-        pass
-    elif size_unit == "percent":
-        # Divide by the total sum of samples per partition
-        # Multiply by 100 (to get percentages)
-        sums = df.sum(axis=1)
-        df = df.div(sums, axis=0) * 100.0
-    else:
-        raise ValueError(
-            f"The size_unit can be only 'absolute' and 'percentage' but given: "
-            f"{size_unit}"
-        )
+    if size_unit == "percent":
+        df = df.div(df.sum(axis=1), axis=0) * 100.0
 
-    # Transpose the data if the partition_id_axis == "y"
     if partition_id_axis == "x" and plot_type == "heatmap":
         df = df.T
 
-    # Figure out label naming
     xlabel, ylabel = _initialize_xy_labels(plot_type, size_unit, partition_id_axis)
-
     cbar_title = _initialize_cbar_title(plot_type, size_unit)
-
     figsize = _initialize_figsize(figsize, plot_type, partition_id_axis, num_partitions)
 
-    if plot_type == "bar":
-        if ax is None:
-            fig, ax = plt.subplots(figsize=figsize)
-        kind = "bar" if partition_id_axis == "x" else "barh"
-        ax = df.plot(kind=kind, stacked=True, ax=ax, title=title, legend=False, **plot_kwargs)
-        if xlabel:
-            ax.set_xlabel(xlabel)
-        if ylabel:
-            ax.set_ylabel(ylabel)
-        if legend:
-            handles, legend = ax.get_legend_handles_labels()
-            if verbose_labels:
-                legend_names = partition.features[label].int2str([int(v) for v in legend])
-            else:
-                legend_names = legend
-            _ = fig.legend(
-                handles[::-1],
-                legend_names[::-1],
-                title=legend_name,
-                loc="outside center right",
-                bbox_to_anchor=(1.3, 0.5),
-            )
-        # fig.tight_layout()
-        # fig.subplots_adjust()
+    ax = _plot_data(df, plot_type, ax, figsize, title, colormap, xlabel, ylabel,
+                    cbar_title, legend, verbose_labels, legend_title, partition,
+                    label_name, **plot_kwargs)
 
-
-    elif plot_type == "heatmap":
-        if colormap is None:
-            colormap = sns.light_palette("seagreen", as_cmap=True)
-        if ax is None:
-            fig, ax = plt.subplots(figsize=figsize)
-
-        if size_unit == "absolute":
-            fmt = ",d"
-        elif size_unit == "percent":
-            fmt = "0.2f"
-        else:
-            raise ValueError(
-                f"The size_unit can be only 'absolute' and 'percentage' but given: "
-                f"{size_unit}"
-            )
-        sns.heatmap(
-            df,
-            ax=ax,
-            cmap=colormap,
-            annot=True,
-            fmt=fmt,
-            cbar=legend,
-            cbar_kws={'label': cbar_title}
-        )
-        # ax.set_xlabel needs to be below the sns.heatmap
-        if xlabel:
-            ax.set_xlabel(xlabel)
-        if ylabel:
-            ax.set_ylabel(ylabel)
-
-        ax.set_title(title)
-    else:
-        raise ValueError(
-            f"The plot_type must be 'bar' or 'heatmap' but given: {plot_type}"
-        )
     return ax, df
 
 
-def _initialize_xy_labels(plot_type, size_unit, partition_id_axis):
-    xlabel = None
-    ylabel = None
+def _initialize_xy_labels(plot_type: str, size_unit: str, partition_id_axis: str) -> \
+        Tuple[str, str]:
     if plot_type == "bar":
         xlabel = "Partition ID"
-        if size_unit == "absolute":
-            ylabel = "Count"
-        elif size_unit == "percent":
-            ylabel = "Percent %"
-        else:
-            raise ValueError(
-                f"The size_unit can be only 'absolute' and 'percentage' but given: "
-                f"{size_unit}"
-            )
+        ylabel = "Count" if size_unit == "absolute" else "Percent %"
     elif plot_type == "heatmap":
         xlabel = "Partition ID"
         ylabel = "Label"
     else:
-        raise ValueError(
-            f"The plot_type must be 'bar' or 'heatmap' but given: {plot_type}"
-        )
-    # Flip the labels if partition_id_axis == "y"
-    if partition_id_axis == "x":
-        pass
-    elif partition_id_axis == "y":
-        temp = xlabel
-        xlabel = ylabel
-        ylabel = temp
-    else:
-        raise ValueError(
-            f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
+        raise ValueError(f"Invalid plot_type: {plot_type}. Must be 'bar' or 'heatmap'.")
+
+    if partition_id_axis == "y":
+        xlabel, ylabel = ylabel, xlabel
+
     return xlabel, ylabel
 
 
-def _initialize_cbar_title(plot_type, size_unit):
-    cbar_title = None
+def _validate_parameters(plot_type: str, size_unit: str, partition_id_axis: str):
+    if plot_type not in PLOT_TYPES:
+        raise ValueError(
+            f"Invalid plot_type: {plot_type}. Must be one of {PLOT_TYPES}.")
+    if size_unit not in SIZE_UNITS:
+        raise ValueError(
+            f"Invalid size_unit: {size_unit}. Must be one of {SIZE_UNITS}.")
+    if partition_id_axis not in AXIS_TYPES:
+        raise ValueError(
+            f"Invalid partition_id_axis: {partition_id_axis}. Must be 'x' or 'y'.")
+
+
+def _initialize_cbar_title(plot_type: str, size_unit: str) -> Optional[str]:
     if plot_type == "heatmap":
-        if size_unit == "absolute":
-            cbar_title = "Count"
-        elif size_unit == "percent":
-            cbar_title = "Percent %"
-        else:
-            raise ValueError(
-                f"The size_unit can be only 'absolute' and 'percentage' but given: "
-                f"{size_unit}"
-            )
-    return cbar_title
+        return "Count" if size_unit == "absolute" else "Percent %"
+    return None
 
 
-def _initialize_figsize(figsize: Tuple[float, float], plot_type: str, partition_id_axis: str, num_partitions: int, num_labels=10) -> Tuple[float, float]:
-    # todo: num_labels is something that will need to be incorporated
+def _initialize_figsize(figsize: Optional[Tuple[int, int]], plot_type: str,
+                        partition_id_axis: str, num_partitions: int) -> Tuple[
+    float, float]:
     if figsize is not None:
         return figsize
+
     if plot_type == "bar":
-        # Other good heuristic is log2 (log and log10 seems to produce too narrow plots)
         if partition_id_axis == "x":
             figsize = (6.4, 4.8)
         elif partition_id_axis == "y":
             figsize = (6.4, np.sqrt(num_partitions))
-        else:
-            raise ValueError(
-                f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
     elif plot_type == "heatmap":
         if partition_id_axis == "x":
-            # The np.sqrt(num_partitions) is too small even for 20 partitions
-            # the numbers start to overlap
-            # 2 is reasonable coef but probably in this case manual adjustment
-            # will be needed
             figsize = (3 * np.sqrt(num_partitions), 6.4)
         elif partition_id_axis == "y":
             figsize = (6.4, np.sqrt(num_partitions))
-        else:
-            raise ValueError(
-                f"The partition_id_axis needs to be 'x' or 'y' but '{partition_id_axis}' was given.")
-    else:
-        raise ValueError("Plot type can be only bar and heatmap.")
+
     return figsize
 
 
+def _plot_data(df: pd.DataFrame, plot_type: str, ax: Optional[Axes],
+               figsize: Tuple[float, float], title: str, colormap, xlabel: str,
+               ylabel: str, cbar_title: str, legend: bool, verbose_labels: bool,
+               legend_title: str, partition, label_name: str, **plot_kwargs) -> Axes:
+    if plot_type == "bar":
+        return _plot_bar(df, ax, figsize, title, colormap, xlabel, ylabel, legend,
+                         legend_title, verbose_labels, partition, label_name,
+                         **plot_kwargs)
+    elif plot_type == "heatmap":
+        return _plot_heatmap(df, ax, figsize, title, colormap, xlabel, ylabel,
+                             cbar_title, legend, **plot_kwargs)
+
+
+def _plot_bar(df: pd.DataFrame, ax: Optional[Axes], figsize: Tuple[float, float],
+              title: str, colormap, xlabel: str, ylabel: str, legend: bool,
+              legend_title: str, verbose_labels: bool, partition, label_name: str,
+              **plot_kwargs) -> Axes:
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+
+    kind = "bar" if xlabel == "Partition ID" else "barh"
+    ax = df.plot(kind=kind, stacked=True, ax=ax, title=title, legend=False,
+                 colormap=colormap,
+                 **plot_kwargs)
+
+    if xlabel:
+        ax.set_xlabel(xlabel)
+    if ylabel:
+        ax.set_ylabel(ylabel)
+
+    if legend:
+        handles, legend_labels = ax.get_legend_handles_labels()
+        legend_names = partition.features[label_name].int2str(
+            [int(v) for v in legend_labels]) if verbose_labels else legend_labels
+        _ = ax.figure.legend(handles[::-1], legend_names[::-1], title=legend_title,
+                             loc="outside center right", bbox_to_anchor=(1.3, 0.5))
+
+    return ax
+
+
+def _plot_heatmap(df: pd.DataFrame, ax: Optional[Axes], figsize: Tuple[float, float],
+                  title: str, colormap, xlabel: str, ylabel: str, cbar_title: str,
+                  legend: bool, **plot_kwargs) -> Axes:
+    if colormap is None:
+        colormap = sns.light_palette("seagreen", as_cmap=True)
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+
+    fmt = ",d" if "absolute" in df.columns else "0.2f"
+    sns.heatmap(df, ax=ax, cmap=colormap, annot=True, fmt=fmt, cbar=legend,
+                cbar_kws={'label': cbar_title}, **plot_kwargs)
+
+    if xlabel:
+        ax.set_xlabel(xlabel)
+    if ylabel:
+        ax.set_ylabel(ylabel)
+
+    ax.set_title(title)
+    return ax
