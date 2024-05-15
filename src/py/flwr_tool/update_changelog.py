@@ -134,6 +134,7 @@ def _extract_changelog_entry(
 def _update_changelog(prs: Set[PullRequest]) -> None:
     """Update the changelog file with entries from provided pull requests."""
     breaking_changes = False
+    unknown_changes = False
 
     with open(CHANGELOG_FILE, "r+", encoding="utf-8") as file:
         content = file.read()
@@ -171,6 +172,7 @@ def _update_changelog(prs: Set[PullRequest]) -> None:
                         "### Documentation improvements", unreleased_index + 1
                     )
                 case _:
+                    unknown_changes = True
                     insert_content_index = unreleased_index
 
             # Skip if PR should be skipped or already in changelog
@@ -193,6 +195,13 @@ def _update_changelog(prs: Set[PullRequest]) -> None:
             next_header_index = content.find("## ", unreleased_index + 1)
             next_header_index = (
                 next_header_index if next_header_index != -1 else len(content)
+            )
+
+        if unknown_changes:
+            content = _insert_entry_no_desc(
+                content,
+                "### Unknown changes",
+                unreleased_index,
             )
 
         if not breaking_changes:
