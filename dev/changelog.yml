@@ -1,4 +1,7 @@
-types:
+# Defines the PR title format to be used in the `check_pr_title.py` script
+# and in the `update_changelog.py` script
+
+type:
   - ci
   - docs
   - feat
@@ -11,5 +14,5 @@ project:
   - datasets
   - examples
 scope: "skip"
-pattern_template: "^({types})\\(({project})(?::({scope}))?\\) ([A-Z][^\\.\\n]*(?:\\.(?=[^\\.\\n]))*[^\\.\\n]*)$"
+pattern_template: "^({types})\\(({projects})(?::({scope}))?\\) ([A-Z][^\\.\\n]*(?:\\.(?=[^\\.\\n]))*[^\\.\\n]*)$"
 
