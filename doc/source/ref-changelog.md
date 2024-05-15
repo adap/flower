@@ -4,9 +4,11 @@
 
 ### What's new?
 
-### Incompatible changes
+### Other changes
 
-None
+### Documentation improvements
+
+### Incompatible changes
 
 ## v1.8.0 (2024-04-03)
 
