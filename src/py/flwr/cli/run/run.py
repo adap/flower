@@ -29,8 +29,8 @@ from flwr.simulation.run_simulation import _run_simulation
 class Engine(str, Enum):
     """Enum defining the engine to run on."""
 
-    simulation = "simulation"
-    deployment = "deployment"
+    SIMULATION = "simulation"
+    DEPLOYMENT = "deployment"
 
 
 def run(
@@ -69,7 +69,7 @@ def run(
     if engine is None:
         engine = config["flower"]["engine"]["name"]
 
-    if engine == Engine.simulation:
+    if engine == Engine.SIMULATION:
         num_supernodes = config["flower"]["engine"]["simulation"]["supernode"]["num"]
 
         typer.secho("Starting run... ", fg=typer.colors.BLUE)
@@ -78,7 +78,7 @@ def run(
             client_app_attr=client_app_ref,
             num_supernodes=num_supernodes,
         )
-    elif engine == Engine.deployment:
+    elif engine == Engine.DEPLOYMENT:
         server_address = config["flower"]["engine"]["deployment"]["superlink"][
             "address"
         ]
