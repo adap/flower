@@ -22,11 +22,10 @@ import traceback
 from logging import DEBUG, ERROR, INFO, WARN
 from typing import Callable, Dict, List, Optional
 
-from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.node_state import NodeState
-from flwr.common.constant import PING_MAX_INTERVAL, ErrorCode
+from flwr.common.constant import PING_MAX_INTERVAL
 from flwr.common.logger import log
-from flwr.common.message import Error
 from flwr.common.object_ref import load_app
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
@@ -90,22 +89,13 @@ async def worker(
             log(DEBUG, "Terminating async worker: %s", e)
             break
 
-        # Exceptions aren't raised but reported as an error message
+        # Exceptions aren't raised, just logged. If an exception was
+        # raised when running a ClientApp, an message carrying an error
+        # should have been returned by the backend processing the original
+        # message.
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, ex)
             log(ERROR, traceback.format_exc())
-
-            if isinstance(ex, ClientAppException):
-                e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-            elif isinstance(ex, LoadClientAppError):
-                e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
-            else:
-                e_code = ErrorCode.UNKNOWN
-
-            reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-            out_mssg = message.create_error_reply(
-                error=Error(code=e_code, reason=reason)
-            )
 
         finally:
             if out_mssg:
