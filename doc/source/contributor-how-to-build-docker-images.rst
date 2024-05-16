@@ -124,6 +124,7 @@ well as the name and tag can be adapted to your needs. These values serve as exa
 
 If you want to use your own base image instead of the official Flower base image, all you need to do
 is set the ``BASE_REPOSITORY``, ``PYTHON_VERSION`` and ``UBUNTU_VERSION`` build arguments.
+
 .. code-block:: bash
 
   $ cd src/docker/superlink/
