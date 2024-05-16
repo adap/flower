@@ -24,9 +24,9 @@ import ray
 from ray import ObjectRef
 from ray.util.actor_pool import ActorPool
 
-from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.common import Context, Error, Message
-from flwr.common.constant import ErrorCode
+from flwr.client.app import handle_app_loading_and_message
+from flwr.client.client_app import ClientApp
+from flwr.common import Context, Message
 from flwr.common.logger import log
 
 ClientAppFn = Callable[[], ClientApp]
@@ -52,32 +52,9 @@ class VirtualClientEngineActor(ABC):
         # return also cid which is needed to ensure results
         # from the pool are correctly assigned to each ClientProxy
 
-        out_message = message.create_error_reply(
-            error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
+        out_message, context = handle_app_loading_and_message(
+            client_app_fn, message, context
         )
-        try:
-            # Load app
-            app: ClientApp = client_app_fn()
-
-            # Handle task message
-            out_message = app(message=message, context=context)
-
-        except Exception as ex:  # pylint: disable=broad-exception-caught
-            e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-            # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
-            reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-            exc_entity = "ClientApp"
-            if isinstance(ex, LoadClientAppError):
-                reason = "An exception was raised when attempting to load `ClientApp`"
-                e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
-                exc_entity = "SuperNode"
-
-            log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
-
-            # Create error message
-            out_message = message.create_error_reply(
-                error=Error(code=e_code, reason=reason)
-            )
 
         return cid, out_message, context
 
