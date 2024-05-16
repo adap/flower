@@ -26,6 +26,8 @@ from flwr.simulation.run_simulation import _run_simulation
 
 
 class Engine(str, Enum):
+    """Enum defining the engine to run on."""
+
     simulation = "simulation"
 
 
