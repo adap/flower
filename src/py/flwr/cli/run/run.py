@@ -33,7 +33,7 @@ class Engine(str, Enum):
     SIMULATION = "simulation"
 
 
-def _parse_config_overrides(config_overrides: List[str]) -> Dict[str, Any]:
+def _parse_config_overrides(config_overrides: List[str]) -> OverrideDict:
     """Parse the -c arguments and return the overrides as a dict."""
     overrides = {}
     for conf_override in config_overrides:
