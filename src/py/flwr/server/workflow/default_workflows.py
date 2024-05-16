@@ -143,17 +143,17 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
             ]
         )
         msg = list(messages)[0]
-        paramsrecord = None
 
-        if msg.has_content():
-            status = compat._extract_status_from_recordset(
+        if (
+            msg.has_content()
+            and compat._extract_status_from_recordset(  # pylint: disable=W0212
                 "getparametersres", msg.content
-            )
-            if status.code == Code.OK:
-                log(INFO, "Received initial parameters from one random client")
-                paramsrecord = next(iter(msg.content.parameters_records.values()))
-
-        if paramsrecord is None:
+            ).code
+            == Code.OK
+        ):
+            log(INFO, "Received initial parameters from one random client")
+            paramsrecord = next(iter(msg.content.parameters_records.values()))
+        else:
             log(
                 WARN,
                 "Failed to receive initial parameters from the client."
