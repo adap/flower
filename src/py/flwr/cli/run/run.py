@@ -35,7 +35,7 @@ class Engine(str, Enum):
 
 def _parse_config_overrides(config_overrides: List[str]) -> OverrideDict:
     """Parse the -c arguments and return the overrides as a dict."""
-    overrides = {}
+    overrides: OverrideDict = {}
     for conf_override in config_overrides:
         key, value = conf_override.split("=")
         keys = key.split(".")
@@ -43,7 +43,8 @@ def _parse_config_overrides(config_overrides: List[str]) -> OverrideDict:
         # Update nested dictionary
         d = overrides
         for key in keys[:-1]:
-            d = d.setdefault(key, {})
+            if key not in d:
+                d[key] = {}
         d[keys[-1]] = value
 
     return overrides
@@ -90,7 +91,8 @@ def run(
         for key, value in overrides.items():
             keys = key.split(".")
             for part in keys[:-1]:
-                config = config["flower"].setdefault(part, {})
+                if part not in config["flower"]:
+                    config["flower"][key] = {}
             config["flower"][keys[-1]] = value
 
     typer.secho("Success", fg=typer.colors.GREEN)
