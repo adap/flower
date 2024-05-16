@@ -153,27 +153,26 @@ def _update_changelog(prs: Set[PullRequest]) -> None:
         for pr_info in prs:
 
             parsed_title = _extract_changelog_entry(pr_info)
-            match parsed_title.get("type", "unknown"):
-                case "feat":
-                    insert_content_index = content.find(
-                        "### What", unreleased_index + 1
-                    )
-                case "docs":
-                    insert_content_index = content.find(
-                        "### Other changes", unreleased_index + 1
-                    )
-                case "break":
-                    breaking_changes = True
-                    insert_content_index = content.find(
-                        "### Incompatible changes", unreleased_index + 1
-                    )
-                case "ci" | "fix" | "refactor":
-                    insert_content_index = content.find(
-                        "### Documentation improvements", unreleased_index + 1
-                    )
-                case _:
-                    unknown_changes = True
-                    insert_content_index = unreleased_index
+            pr_type = parsed_title.get("type", "unknown")
+
+            if pr_type == "feat":
+                insert_content_index = content.find("### What", unreleased_index + 1)
+            elif pr_type == "docs":
+                insert_content_index = content.find(
+                    "### Other changes", unreleased_index + 1
+                )
+            elif pr_type == "break":
+                breaking_changes = True
+                insert_content_index = content.find(
+                    "### Incompatible changes", unreleased_index + 1
+                )
+            elif pr_type in {"ci", "fix", "refactor"}:
+                insert_content_index = content.find(
+                    "### Documentation improvements", unreleased_index + 1
+                )
+            else:
+                unknown_changes = True
+                insert_content_index = unreleased_index
 
             # Skip if PR should be skipped or already in changelog
             if (
