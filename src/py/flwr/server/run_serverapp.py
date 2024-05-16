@@ -81,7 +81,6 @@ def _run_server_app(
     fab_version: Optional[str] = None,
 ) -> None:
     """Run Flower server app."""
-
     event(EventType.RUN_SERVER_APP_ENTER)
 
     update_console_handler(
@@ -151,7 +150,6 @@ def _run_server_app(
 
 def run_server_app() -> None:
     """Run Flower server app."""
-
     args = _parse_args_run_server_app().parse_args()
 
     _run_server_app(
