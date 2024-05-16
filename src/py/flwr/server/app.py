@@ -41,7 +41,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_VCE,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
@@ -196,6 +196,9 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
 def run_driver_api() -> None:
     """Run Flower server (Driver API)."""
     log(INFO, "Starting Flower server (Driver API)")
+    # Running `flower-driver-api` is deprecated
+    warn_deprecated_feature("flower-driver-api")
+    log(WARN, "Use `flower-superlink` instead")
     event(EventType.RUN_DRIVER_API_ENTER)
     args = _parse_args_run_driver_api().parse_args()
 
@@ -233,6 +236,9 @@ def run_driver_api() -> None:
 def run_fleet_api() -> None:
     """Run Flower server (Fleet API)."""
     log(INFO, "Starting Flower server (Fleet API)")
+    # Running `flower-fleet-api` is deprecated
+    warn_deprecated_feature("flower-fleet-api")
+    log(WARN, "Use `flower-superlink` instead")
     event(EventType.RUN_FLEET_API_ENTER)
     args = _parse_args_run_fleet_api().parse_args()
 
