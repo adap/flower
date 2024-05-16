@@ -22,6 +22,7 @@
 # virtual environment to keep all files in a single isolated directory as described here:
 # https://pythonspeed.com/articles/multi-stage-docker-python/
 
+# hadolint global ignore=DL3018
 ARG PYTHON_VERSION=3.11
 ARG DISTRO_VERSION=alpine3.19
 FROM python:${PYTHON_VERSION}-${DISTRO_VERSION} as compile
@@ -29,8 +30,8 @@ FROM python:${PYTHON_VERSION}-${DISTRO_VERSION} as compile
 # Install system dependencies
 RUN apk add --no-cache \
     # require for compiling grpcio on ARM64
-    g++=13.2.1_git20231014-r0 \
-    libffi-dev=3.4.4-r3 \
+    g++ \
+    libffi-dev \
     # create virtual env
     && python -m venv /opt/venv
 
@@ -51,7 +52,7 @@ FROM python:${PYTHON_VERSION}-${DISTRO_VERSION} as base
 
 # required by the grpc package
 RUN apk add --no-cache \
-    libstdc++=13.2.1_git20231014-r0
+    libstdc++
 
 COPY --from=compile /opt/venv /opt/venv
 
