@@ -13,8 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 
-ARG OS_VERSION=22.04
-FROM ubuntu:$OS_VERSION as base
+ARG DISTRO_VERSION=22.04
+FROM ubuntu:$DISTRO_VERSION as base
 
 ENV DEBIAN_FRONTEND noninteractive
 # Send stdout and stderr stream directly to the terminal. Ensures that no

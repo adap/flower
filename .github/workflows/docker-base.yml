@@ -41,19 +41,19 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
-        os:
+        distro:
           - tag: ubuntu22.04
             version: 22.04
             file-dir: src/docker/base/ubuntu
     with:
       namespace-repository: flwr/base
-      file-dir: ${{ matrix.os.file-dir }}
+      file-dir: ${{ matrix.distro.file-dir }}
       build-args: |
         PYTHON_VERSION=${{ matrix.python-version }}
         PIP_VERSION=${{ needs.parameters.outputs.pip-version }}
         SETUPTOOLS_VERSION=${{ needs.parameters.outputs.setuptools-version }}
-        OS_VERSION=${{ matrix.os.version }}
-      tags: py${{ matrix.python-version }}-${{ matrix.os.tag }}
+        DISTRO_VERSION=${{ matrix.distro.version }}
+      tags: py${{ matrix.python-version }}-${{ matrix.distro.tag }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
