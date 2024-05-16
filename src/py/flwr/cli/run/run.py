@@ -28,7 +28,7 @@ from flwr.simulation.run_simulation import _run_simulation
 class Engine(str, Enum):
     """Enum defining the engine to run on."""
 
-    simulation = "simulation"
+    SIMULATION = "simulation"
 
 
 def _parse_config_overrides(config_overrides: List[str]) -> Dict[str, Any]:
@@ -99,7 +99,7 @@ def run(
     if engine is None:
         engine = config["flower"]["engine"]["name"]
 
-    if engine == Engine.simulation:
+    if engine == Engine.SIMULATION:
         num_supernodes = int(
             config["flower"]["engine"]["simulation"]["supernode"]["num"]
         )
