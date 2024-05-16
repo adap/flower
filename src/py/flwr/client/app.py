@@ -25,7 +25,7 @@ from grpc import RpcError
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFn
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
@@ -352,49 +352,13 @@ def _start_client_internal(
                 # Retrieve context for this run
                 context = node_state.retrieve_context(run_id=message.metadata.run_id)
 
-                # Create an error reply message that will never be used to prevent
-                # the used-before-assignment linting error
-                reply_message = message.create_error_reply(
-                    error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
+                # Process
+                reply_message, context = handle_app_loading_and_message(
+                    load_client_app_fn, message, context, transport=transport
                 )
 
-                # Handle app loading and task message
-                try:
-                    # Load ClientApp instance
-                    client_app: ClientApp = load_client_app_fn()
-
-                    # Execute ClientApp
-                    reply_message = client_app(message=message, context=context)
-                except Exception as ex:  # pylint: disable=broad-exception-caught
-
-                    # Legacy grpc-bidi
-                    if transport in ["grpc-bidi", None]:
-                        log(ERROR, "Client raised an exception.", exc_info=ex)
-                        # Raise exception, crash process
-                        raise ex
-
-                    # Don't update/change NodeState
-
-                    e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
-                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-                    exc_entity = "ClientApp"
-                    if isinstance(ex, LoadClientAppError):
-                        reason = (
-                            "An exception was raised when attempting to load "
-                            "`ClientApp`"
-                        )
-                        e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
-                        exc_entity = "SuperNode"
-
-                    log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
-
-                    # Create error message
-                    reply_message = message.create_error_reply(
-                        error=Error(code=e_code, reason=reason)
-                    )
-                else:
-                    # No exception, update node state
+                if message.has_content():
+                    # No error in the message, update node state
                     node_state.update_context(
                         run_id=message.metadata.run_id,
                         context=context,
@@ -418,6 +382,55 @@ def _start_client_internal(
             sleep_duration,
         )
         time.sleep(sleep_duration)
+
+
+def handle_app_loading_and_message(
+    client_app_fn: Callable[[], ClientApp],
+    message: Message,
+    context: Context,
+    transport: Optional[str] = "",
+) -> Tuple[Message, Context]:
+    """Handle loading of ClientApp and its execution."""
+    # Create an error reply message that will never be used to prevent
+    # the used-before-assignment linting error
+    reply_message = message.create_error_reply(
+        error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
+    )
+
+    # Handle app loading and task message
+    try:
+        # Load ClientApp instance
+        client_app: ClientApp = client_app_fn()
+
+        # Execute ClientApp
+        reply_message = client_app(message=message, context=context)
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+
+        # Legacy grpc-bidi
+        if transport and transport in ["grpc-bidi", None]:
+            log(ERROR, "Client raised an exception.", exc_info=ex)
+            # Raise exception, crash process
+            raise ex
+
+        # Don't update/change NodeState
+
+        e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+        # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
+        reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+        exc_entity = "ClientApp"
+        if isinstance(ex, LoadClientAppError):
+            reason = "An exception was raised when attempting to load `ClientApp`"
+            e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+            exc_entity = "SuperNode"
+
+        log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+
+        # Create error message
+        reply_message = message.create_error_reply(
+            error=Error(code=e_code, reason=reason)
+        )
+
+    return reply_message, context
 
 
 def start_numpy_client(
