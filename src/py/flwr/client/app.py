@@ -382,7 +382,7 @@ def _start_client_internal(
                     reason = json.dumps(
                         {
                             "type": ex.__class__.__qualname__,
-                            "messsage": str(ex),
+                            "message": str(ex),
                         }
                     )
                     exc_entity = "ClientApp"
