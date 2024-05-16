@@ -13,8 +13,9 @@
 # limitations under the License.
 # ==============================================================================
 
+ARG DISTRO=ubuntu
 ARG DISTRO_VERSION=22.04
-FROM ubuntu:$DISTRO_VERSION as base
+FROM $DISTRO:$DISTRO_VERSION as base
 
 ENV DEBIAN_FRONTEND noninteractive
 # Send stdout and stderr stream directly to the terminal. Ensures that no

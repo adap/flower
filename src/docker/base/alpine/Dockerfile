@@ -24,8 +24,9 @@
 
 # hadolint global ignore=DL3018
 ARG PYTHON_VERSION=3.11
-ARG DISTRO_VERSION=alpine3.19
-FROM python:${PYTHON_VERSION}-${DISTRO_VERSION} as compile
+ARG DISTRO=alpine
+ARG DISTRO_VERSION=3.19
+FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} as compile
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -48,7 +49,7 @@ RUN pip install -U --no-cache-dir \
     setuptools==${SETUPTOOLS_VERSION} \
     ${FLWR_PACKAGE}==${FLWR_VERSION}
 
-FROM python:${PYTHON_VERSION}-${DISTRO_VERSION} as base
+FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} as base
 
 # required by the grpc package
 RUN apk add --no-cache \
