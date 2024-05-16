@@ -16,13 +16,15 @@
 
 import sys
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import typer
 from typing_extensions import Annotated
 
 from flwr.cli import config_utils
 from flwr.simulation.run_simulation import _run_simulation
+
+OverrideDict = Dict[str, Union[str, "OverrideDict"]]
 
 
 class Engine(str, Enum):
