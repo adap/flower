@@ -70,6 +70,7 @@ def run(
     log(DEBUG, "ServerApp finished running.")
 
 
+# pylint: disable=too-many-arguments
 def _run_server_app(
     server_address: str,
     server_app_attr: str,
