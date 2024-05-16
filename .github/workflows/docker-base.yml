@@ -13,9 +13,6 @@ on:
 permissions:
   contents: read
 
-env:
-  DEFAULT_UBUNTU: 22.04
-
 jobs:
   parameters:
     name: Collect build parameters
@@ -24,7 +21,6 @@ jobs:
     outputs:
       pip-version: ${{ steps.versions.outputs.pip-version }}
       setuptools-version: ${{ steps.versions.outputs.setuptools-version }}
-      ubuntu-version: ${{ steps.versions.outputs.ubuntu-version }}
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -36,7 +32,6 @@ jobs:
         run: |
           echo "pip-version=${{ steps.bootstrap.outputs.pip-version }}" >> "$GITHUB_OUTPUT"
           echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
-          echo "ubuntu-version=${{ env.DEFAULT_UBUNTU }}" >> "$GITHUB_OUTPUT"
 
   build-base-images:
     name: Build base images
@@ -46,15 +41,19 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
+        os:
+          - tag: ubuntu22.04
+            version: 22.04
+            file-dir: src/docker/base/ubuntu
     with:
       namespace-repository: flwr/base
-      file-dir: src/docker/base/ubuntu
+      file-dir: ${{ matrix.os.file-dir }}
       build-args: |
         PYTHON_VERSION=${{ matrix.python-version }}
         PIP_VERSION=${{ needs.parameters.outputs.pip-version }}
         SETUPTOOLS_VERSION=${{ needs.parameters.outputs.setuptools-version }}
-        UBUNTU_VERSION=${{ needs.parameters.outputs.ubuntu-version }}
-      tags: py${{ matrix.python-version }}-ubuntu${{ needs.parameters.outputs.ubuntu-version }}
+        OS_VERSION=${{ matrix.os.version }}
+      tags: py${{ matrix.python-version }}-${{ matrix.os.tag }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}

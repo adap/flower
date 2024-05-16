@@ -10,8 +10,8 @@
 # https://pythonspeed.com/articles/multi-stage-docker-python/
 
 ARG PYTHON_VERSION=3.11
-ARG ALPINE_VERSION=alpine3.19
-FROM python:${PYTHON_VERSION}-${ALPINE_VERSION} as compile
+ARG OS_VERSION=alpine3.19
+FROM python:${PYTHON_VERSION}-${OS_VERSION} as compile
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -34,7 +34,7 @@ RUN pip install -U --no-cache-dir \
     setuptools==${SETUPTOOLS_VERSION} \
     ${FLWR_PACKAGE}==${FLWR_VERSION}
 
-FROM python:${PYTHON_VERSION}-${ALPINE_VERSION} as base
+FROM python:${PYTHON_VERSION}-${OS_VERSION} as base
 
 # required by the grpc package
 RUN apk add --no-cache \

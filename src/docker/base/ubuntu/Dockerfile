@@ -1,7 +1,7 @@
 # Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 
-ARG UBUNTU_VERSION=22.04
-FROM ubuntu:$UBUNTU_VERSION as base
+ARG OS_VERSION=22.04
+FROM ubuntu:$OS_VERSION as base
 
 ENV DEBIAN_FRONTEND noninteractive
 # Send stdout and stderr stream directly to the terminal. Ensures that no
