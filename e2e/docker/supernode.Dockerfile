@@ -1,10 +1,8 @@
 FROM flwr/supernode:nightly
 
 WORKDIR /app
-RUN python -m pip install -U --no-cache-dir\
-    "flwr-datasets["vision"]>=0.1.0,<1.0.0" \
-    torch==2.2.1 \
-    torchvision==0.17.1 \
+COPY pyproject.toml ./
+RUN python -m pip install -U --no-cache-dir . \
     && pyenv rehash
 
 COPY client.py ./
