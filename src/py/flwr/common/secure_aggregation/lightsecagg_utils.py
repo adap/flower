@@ -20,7 +20,11 @@ from typing import Dict, List, cast
 import numpy as np
 from galois import FieldArray
 
+from flwr.common import Array, array_from_numpy
+from flwr.common.constant import SType
+
 from ..typing import NDArrayInt
+from .crypto.symmetric_encryption import decrypt, encrypt
 
 
 def LCC_encode_with_points(
@@ -147,3 +151,25 @@ def compute_aggregated_encoded_mask(
     for client_id in active_clients:
         ret += encoded_mask_dict[client_id].view(GF)
     return ret
+
+
+def padding(d: int, U: int, T: int) -> int:
+    """Return the length of the vector after padding."""
+    remainder = d % (U - T)
+    if remainder != 0:
+        remainder = U - T - remainder
+    return d + remainder
+
+
+def encrypt_sub_mask(key: bytes, sub_mask: np.ndarray) -> bytes:
+    """Encrypt the sub-mask."""
+    arr = array_from_numpy(sub_mask)
+    plaintext = arr.data
+    return encrypt(key, plaintext)
+
+
+def decrypt_sub_mask(key: bytes, ciphertext: bytes) -> np.ndarray:
+    """Decrypt the sub-mask."""
+    plaintext = decrypt(key, ciphertext)
+    arr = Array(dtype="", shape=[], stype=SType.NUMPY, data=plaintext)
+    return arr.numpy()
