@@ -49,6 +49,8 @@ flower-client-app client:appA --insecure
 flower-client-app client:appB --insecure
 ```
 
+Opacus hyperparameters can be passed for each client in ClientApp instantiation (in `client.py`). In this example, `noise_multiplier=1.5` and `noise_multiplier=1` are used for the first and second client respectively. 
+
 ### 3. Run the Flower App
 
 With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
