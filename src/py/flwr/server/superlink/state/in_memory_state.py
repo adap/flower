@@ -86,15 +86,21 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             for _, task_ins in self.task_ins_store.items():
                 # pylint: disable=too-many-boolean-expressions
                 if (
-                    node_id is not None  # Not anonymous
-                    and task_ins.task.consumer.anonymous is False
-                    and task_ins.task.consumer.node_id == node_id
-                    and task_ins.task.delivered_at == ""
-                ) or (
-                    node_id is None  # Anonymous
-                    and task_ins.task.consumer.anonymous is True
-                    and task_ins.task.consumer.node_id == 0
-                    and task_ins.task.delivered_at == ""
+                    (
+                        node_id is not None  # Not anonymous
+                        and task_ins.task.consumer.anonymous is False
+                        and task_ins.task.consumer.node_id == node_id
+                        and task_ins.task.delivered_at == ""
+                    )
+                    or (
+                        node_id is None  # Anonymous
+                        and task_ins.task.consumer.anonymous is True
+                        and task_ins.task.consumer.node_id == 0
+                        and task_ins.task.delivered_at == ""
+                    )
+                    or (  # Return first undelivered task
+                        node_id is None and task_ins.task.delivered_at == ""
+                    )
                 ):
                     task_ins_list.append(task_ins)
                 if limit and len(task_ins_list) == limit:

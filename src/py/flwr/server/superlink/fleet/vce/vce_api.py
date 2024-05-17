@@ -53,18 +53,23 @@ def _register_nodes(
 # pylint: disable=too-many-arguments,too-many-locals
 async def worker(
     app_fn: Callable[[], ClientApp],
-    queue: "asyncio.Queue[TaskIns]",
     node_states: Dict[int, NodeState],
     state_factory: StateFactory,
     nodes_mapping: NodeToPartitionMapping,
     backend: Backend,
 ) -> None:
-    """Get TaskIns from queue and pass it to an actor in the pool to execute it."""
+    """Get TaskIns from the state and pass it to backend to execute it."""
     state = state_factory.state()
     while True:
         out_mssg = None
         try:
-            task_ins: TaskIns = await queue.get()
+            task_ins_list: List[TaskIns] = state.get_task_ins(node_id=None, limit=1)
+            if len(task_ins_list) == 0:
+                log(DEBUG, "no tasks ... sleep for 0.1s")
+                await asyncio.sleep(0.1)
+                continue
+
+            task_ins = task_ins_list[0]
             node_id = task_ins.task.consumer.node_id
 
             # Register and retrieve runstate
@@ -116,23 +121,14 @@ async def worker(
                 state.store_task_res(task_res)
 
 
-async def add_taskins_to_queue(
-    queue: "asyncio.Queue[TaskIns]",
-    state_factory: StateFactory,
-    nodes_mapping: NodeToPartitionMapping,
+async def manager_coroutine(
     backend: Backend,
     consumers: List["asyncio.Task[None]"],
     f_stop: asyncio.Event,
 ) -> None:
-    """Retrieve TaskIns and add it to the queue."""
-    state = state_factory.state()
+    """Log stats."""
     num_initial_consumers = len(consumers)
     while not f_stop.is_set():
-        for node_id in nodes_mapping.keys():
-            task_ins = state.get_task_ins(node_id=node_id, limit=1)
-            if task_ins:
-                await queue.put(task_ins[0])
-
         # Count consumers that are running
         num_active = sum(not (cc.done()) for cc in consumers)
 
@@ -152,15 +148,13 @@ async def add_taskins_to_queue(
         # Log some stats
         log(
             DEBUG,
-            "Simulation Engine stats: "
-            "Active workers: (%i/%i) | %s (%i workers) | Tasks in queue: %i)",
+            "Simulation Engine stats: Active workers: (%i/%i) | %s (%i workers))",
             num_active,
             num_initial_consumers,
             backend.__class__.__name__,
             backend.num_workers,
-            queue.qsize(),
         )
-        await asyncio.sleep(1.0)
+        await asyncio.sleep(0.1)
     log(DEBUG, "Async producer: Stopped pulling from StateFactory.")
 
 
@@ -173,8 +167,6 @@ async def run(
     f_stop: asyncio.Event,
 ) -> None:
     """Run the VCE async."""
-    queue: "asyncio.Queue[TaskIns]" = asyncio.Queue(128)
-
     try:
 
         # Instantiate backend
@@ -186,24 +178,16 @@ async def run(
         # Add workers (they submit Messages to Backend)
         worker_tasks = [
             asyncio.create_task(
-                worker(
-                    app_fn, queue, node_states, state_factory, nodes_mapping, backend
-                )
+                worker(app_fn, node_states, state_factory, nodes_mapping, backend)
             )
             for _ in range(backend.num_workers)
         ]
-        # Create producer (adds TaskIns into Queue)
-        producer = asyncio.create_task(
-            add_taskins_to_queue(
-                queue, state_factory, nodes_mapping, backend, worker_tasks, f_stop
-            )
-        )
-
-        # Wait for producer to finish
-        # The producer runs forever until f_stop is set or until
+        # Create Manager
+        manager = asyncio.create_task(manager_coroutine(backend, worker_tasks, f_stop))
+        # The manager runs forever until f_stop is set or until
         # all worker (consumer) coroutines are completed. Workers
         # also run forever and only end if an exception is raised.
-        await asyncio.gather(producer)
+        await asyncio.gather(manager)
 
     except Exception as ex:
 
