@@ -26,7 +26,7 @@ This will create a new directory called `sample-level-dp-opacus` containing the 
 Project dependencies are defined in `requirements.txt`. Install them with:
 
 ```shell
-pip install -r requirements.txt
+pip install .
 ```
 
 ## Run Flower with Opacus and Pytorch
@@ -45,10 +45,14 @@ Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
 flower-client-app client:app1 --insecure
 ```
 
+```bash
+flower-client-app client:app2 --insecure
+```
+
 ### 3. Run the Flower App
 
 With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
 
 ```bash
-flower-server-app server:app2 --insecure
+flower-server-app server:app --insecure
 ```

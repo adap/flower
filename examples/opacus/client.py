@@ -159,9 +159,11 @@ def client_fn_parameterized(
             max_grad_norm,
         ).to_client()
 
+    return client_fn
+
 
 app1 = ClientApp(
-    client_fn=client_fn_parameterized(1, noise_multiplier=1.1),
+    client_fn=client_fn_parameterized(1, noise_multiplier=1.5),
 )
 
 app2 = ClientApp(
