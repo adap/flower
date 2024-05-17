@@ -25,7 +25,7 @@ if __name__ == "__main__":
     pr_title = sys.argv[1]
 
     # Load the YAML configuration
-    with (pathlib.Path(__file__).parent.resolve() / "changelog.toml").open(
+    with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
         "rb"
     ) as file:
         config = tomllib.load(file)
