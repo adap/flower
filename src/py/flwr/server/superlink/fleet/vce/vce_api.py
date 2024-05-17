@@ -82,7 +82,7 @@ async def worker(
             message.metadata.partition_id = nodes_mapping[node_id]
 
             # Let backend process message
-            out_mssg, updated_context = await backend.process_message(
+            out_mssg, updated_context = backend.process_message(
                 app_fn, message, context
             )
 
@@ -137,7 +137,7 @@ async def run(
         backend = backend_fn()
 
         # Build backend
-        await backend.build()
+        backend.build()
 
         # Add workers (they submit Messages to Backend)
         worker_tasks = [
@@ -174,7 +174,7 @@ async def run(
         await asyncio.gather(*[w_t for w_t in worker_tasks if not w_t.done()])
 
         # Terminate backend
-        await backend.terminate()
+        backend.terminate()
 
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches

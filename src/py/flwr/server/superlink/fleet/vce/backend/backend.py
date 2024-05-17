@@ -33,7 +33,7 @@ class Backend(ABC):
         """Construct a backend."""
 
     @abstractmethod
-    async def build(self) -> None:
+    def build(self) -> None:
         """Build backend asynchronously.
 
         Different components need to be in place before workers in a backend are ready
@@ -54,11 +54,11 @@ class Backend(ABC):
         """Report whether a backend worker is idle and can therefore run a ClientApp."""
 
     @abstractmethod
-    async def terminate(self) -> None:
+    def terminate(self) -> None:
         """Terminate backend."""
 
     @abstractmethod
-    async def process_message(
+    def process_message(
         self,
         app: Callable[[], ClientApp],
         message: Message,
