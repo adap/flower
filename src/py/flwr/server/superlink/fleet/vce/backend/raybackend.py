@@ -153,7 +153,6 @@ class RayBackend(Backend):
                 (app, message, str(partition_id), context),
             )
 
-            # await future
             # Fetch result
             (
                 out_mssg,

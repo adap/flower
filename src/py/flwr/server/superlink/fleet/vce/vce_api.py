@@ -32,7 +32,7 @@ from flwr.common.message import Error
 from flwr.common.object_ref import load_app
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
-from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.state import State, StateFactory
 
 from .backend import Backend, error_messages_backends, supported_backends
 
@@ -56,13 +56,12 @@ def _register_nodes(
 def worker(
     app_fn: Callable[[], ClientApp],
     node_states: Dict[int, NodeState],
-    state_factory: StateFactory,
+    state: State,
     nodes_mapping: NodeToPartitionMapping,
     backend: Backend,
     event: threading.Event,
 ) -> None:
     """Get TaskIns from the state and pass it to backend to execute it."""
-    state = state_factory.state()
     while True:
 
         if event.is_set():
@@ -142,22 +141,20 @@ def run(
         backend.build()
 
         # Add workers (they submit Messages to Backend)
-        with ThreadPoolExecutor(2 * backend.num_workers) as executor:
+        state = state_factory.state()
+        with ThreadPoolExecutor(8) as executor:
             _ = [
                 executor.submit(
                     worker,
                     app_fn,
                     node_states,
-                    state_factory,
+                    state,
                     nodes_mapping,
                     backend,
                     f_stop,
                 )
-                for _ in range(backend.num_workers)
+                for _ in range(4 * backend.num_workers)
             ]
-
-        while not f_stop.is_set():
-            sleep(0.1)
 
     except Exception as ex:
 
