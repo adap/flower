@@ -40,9 +40,22 @@ RUN apt-get update \
     libxmlsec1-dev libffi-dev liblzma-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# add non-root user
+RUN adduser \
+    --no-create-home \
+    --disabled-password \
+    --gecos "" \
+    --uid 49999 app \
+    && mkdir -p /app \
+    && chown -R app:app /app
+
+WORKDIR /app
+USER app
+ENV HOME=/app
+
 # Install PyEnv and Python
 ARG PYTHON_VERSION=3.11
-ENV PYENV_ROOT /root/.pyenv
+ENV PYENV_ROOT /app/.pyenv
 ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
 # https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -59,16 +72,3 @@ RUN pip install -U --no-cache-dir \
     pip==${PIP_VERSION} \
     setuptools==${SETUPTOOLS_VERSION} \
     ${FLWR_PACKAGE}==${FLWR_VERSION}
-
-# add non-root user
-RUN adduser \
-    --no-create-home \
-    --disabled-password \
-    --gecos "" \
-    --uid 49999 app \
-    && mkdir -p /app \
-    && chown -R app:app /app
-
-WORKDIR /app
-USER app
-ENV HOME=/app
