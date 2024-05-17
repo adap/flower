@@ -6,7 +6,10 @@ It uses a subset of size 1000 for the training data and 10 data points for the t
 
 To execute locally, run the following in CLI:
 ``` shell
-$ docker compose up -d --remove-orphans --force-recreate --build
+# pulls the latest supernode and serverapp nightly
+docker compose build --pull 
+# pulls the latest superlink nightly
+docker compose up -d --remove-orphans --force-recreate --pull always 
 ```
 
 To stop the containers, run:
