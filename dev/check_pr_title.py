@@ -17,8 +17,7 @@
 import pathlib
 import re
 import sys
-
-import yaml
+import tomllib
 
 
 if __name__ == "__main__":
@@ -26,10 +25,10 @@ if __name__ == "__main__":
     pr_title = sys.argv[1]
 
     # Load the YAML configuration
-    with (pathlib.Path(__file__).parent.resolve() / "changelog.yml").open(
-        encoding="utf-8"
+    with (pathlib.Path(__file__).parent.resolve() / "changelog.toml").open(
+        "rb"
     ) as file:
-        config = yaml.safe_load(file)
+        config = tomllib.load(file)
 
     # Extract types, project, and scope from the config
     types = "|".join(config["type"])
