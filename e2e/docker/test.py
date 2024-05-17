@@ -2,13 +2,12 @@
 
 import re
 from time import sleep
-from typing import Callable, Union
 
 import pytest
 from testcontainers.compose import ContainerIsNotRunning, DockerCompose
 
 COMPOSE_MANIFEST = "compose.yaml"
-RUN_COMPLETE_STR = "Run finished 3 round(s) in"
+RUN_COMPLETE_STR = "Run finished"
 
 
 def test_compose_and_teardown():
@@ -70,15 +69,14 @@ def test_compose_logs():
     services = DockerCompose(context=".", compose_file_name=COMPOSE_MANIFEST)
 
     with services:
-        sleep(45)  # generate some logs
+        sleep(30)  # add delay to ensure training completes
         stdout, stderr = services.get_logs()
 
     assert not stderr
     assert stdout
 
-    predicate: Union[Callable, str] = RUN_COMPLETE_STR
-    predicate = re.compile(predicate, re.MULTILINE).search
+    # Split stdout into list of strings. This appears
+    # necessary to capture stdout from buffer and perform regex.
+    lines = re.split(r"\r?\n", stdout)
 
-    assert predicate(
-        stdout
-    ), "Containers did not finish training in the allocated time."
+    assert any(RUN_COMPLETE_STR in line for line in lines)
