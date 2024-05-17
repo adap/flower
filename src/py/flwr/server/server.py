@@ -486,7 +486,7 @@ def run_fl(
 
     log(INFO, "")
     log(INFO, "[SUMMARY]")
-    log(INFO, "Run finished %s rounds in %.2fs", config.num_rounds, elapsed_time)
+    log(INFO, "Run finished %s round(s) in %.2fs", config.num_rounds, elapsed_time)
     for line in io.StringIO(str(hist)):
         log(INFO, "\t%s", line.strip("\n"))
     log(INFO, "")
