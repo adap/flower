@@ -44,11 +44,15 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
 
+        # Count undelivered task_ins/task_res
+        self._undelivered_task_ins_cnt = 0
+        self._undelivered_task_res_cnt = 0
+
         self.client_public_keys: Set[bytes] = set()
         self.server_public_key: Optional[bytes] = None
         self.server_private_key: Optional[bytes] = None
 
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
         """Store one TaskIns."""
@@ -69,6 +73,8 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         task_ins.task_id = str(task_id)
         with self.lock:
             self.task_ins_store[task_id] = task_ins
+            # Update the number of undelivered task_ins
+            self._undelivered_task_ins_cnt += 1
 
         # Return the new task_id
         return task_id
@@ -106,13 +112,16 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 if limit and len(task_ins_list) == limit:
                     break
 
-        # Mark all of them as delivered
-        delivered_at = now().isoformat()
-        for task_ins in task_ins_list:
-            task_ins.task.delivered_at = delivered_at
+            # Mark all of them as delivered
+            delivered_at = now().isoformat()
+            for task_ins in task_ins_list:
+                task_ins.task.delivered_at = delivered_at
 
-        # Return TaskIns
-        return task_ins_list
+            # Update the number of undelivered task_ins
+            self._undelivered_task_ins_cnt -= len(task_ins_list)
+
+            # Return TaskIns
+            return task_ins_list
 
     def store_task_res(self, task_res: TaskRes) -> Optional[UUID]:
         """Store one TaskRes."""
@@ -134,6 +143,8 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         task_res.task_id = str(task_id)
         with self.lock:
             self.task_res_store[task_id] = task_res
+            # Update the number of undelivered task_res
+            self._undelivered_task_res_cnt += 1
 
         # Return the new task_id
         return task_id
@@ -176,6 +187,9 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             delivered_at = now().isoformat()
             for task_res in task_res_list:
                 task_res.task.delivered_at = delivered_at
+
+            # Update the number of undelivered task_res
+            self._undelivered_task_res_cnt -= len(task_res_list)
 
             # Return TaskRes
             return task_res_list
@@ -257,6 +271,16 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 del self.public_key_to_node_id[public_key]
 
             del self.node_ids[node_id]
+
+    def num_undelivered_task_ins(self) -> int:
+        """Calculate the number of undelivered task_ins in store."""
+        with self.lock:
+            return self._undelivered_task_ins_cnt
+
+    def num_undelivered_task_res(self) -> int:
+        """Calculate the number of undelivered task_res in store."""
+        with self.lock:
+            return self._undelivered_task_res_cnt
 
     def get_nodes(self, run_id: int) -> Set[int]:
         """Return all available client nodes.

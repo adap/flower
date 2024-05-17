@@ -128,6 +128,14 @@ class State(abc.ABC):  # pylint: disable=R0904
         """
 
     @abc.abstractmethod
+    def num_undelivered_task_ins(self) -> int:
+        """Calculate the number of undelivered task_ins in store."""
+
+    @abc.abstractmethod
+    def num_undelivered_task_res(self) -> int:
+        """Calculate the number of undelivered task_res in store."""
+
+    @abc.abstractmethod
     def delete_tasks(self, task_ids: Set[UUID]) -> None:
         """Delete all delivered TaskIns/TaskRes pairs."""
 

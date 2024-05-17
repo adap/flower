@@ -484,8 +484,61 @@ class StateTest(unittest.TestCase):
         # Assert
         assert len(retrieved_node_ids) == 0
 
+    def test_num_undelivered_task_ins(self) -> None:
+        """Test if it returns correct number of undelivered task_ins."""
+        # Prepare
+        state: State = self.state_factory()
+        run_id = state.create_run("mock/mock", "v1.0.0")
+        task_0 = create_task_ins(consumer_node_id=123, anonymous=False, run_id=run_id)
+        task_1 = create_task_ins(consumer_node_id=456, anonymous=False, run_id=run_id)
+
+        # Store two tasks
+        state.store_task_ins(task_0)
+        state.store_task_ins(task_1)
+
+        # Retrieve one task
+        state.get_task_ins(123, limit=None)
+
+        # Execute
+        num = state.num_undelivered_task_ins()
+
+        # Assert
+        assert num == 1
+
+    def test_num_undelivered_task_res(self) -> None:
+        """Test if it returns correct number of not delivered task_res."""
+        # Prepare
+        state: State = self.state_factory()
+        run_id = state.create_run("mock/mock", "v1.0.0")
+        task_id0, task_id1 = uuid4(), uuid4()
+        task_0 = create_task_res(
+            producer_node_id=123,
+            anonymous=False,
+            ancestry=[str(task_id0)],
+            run_id=run_id,
+        )
+        task_1 = create_task_res(
+            producer_node_id=456,
+            anonymous=False,
+            ancestry=[str(task_id1)],
+            run_id=run_id,
+        )
+
+        # Store two tasks
+        state.store_task_res(task_0)
+        state.store_task_res(task_1)
+
+        # Retrieve one task
+        state.get_task_res({task_id0}, limit=None)
+
+        # Execute
+        num = state.num_undelivered_task_res()
+
+        # Assert
+        assert num == 1
+
     def test_num_task_ins(self) -> None:
-        """Test if num_tasks returns correct number of not delivered task_ins."""
+        """Test if num_task_ins returns correct number of all task_ins."""
         # Prepare
         state: State = self.state_factory()
         run_id = state.create_run("mock/mock", "v1.0.0")
@@ -503,7 +556,7 @@ class StateTest(unittest.TestCase):
         assert num == 2
 
     def test_num_task_res(self) -> None:
-        """Test if num_tasks returns correct number of not delivered task_res."""
+        """Test if num_task_res returns correct number of all task_res."""
         # Prepare
         state: State = self.state_factory()
         run_id = state.create_run("mock/mock", "v1.0.0")
