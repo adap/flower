@@ -121,43 +121,6 @@ async def worker(
                 state.store_task_res(task_res)
 
 
-async def manager_coroutine(
-    backend: Backend,
-    consumers: List["asyncio.Task[None]"],
-    f_stop: asyncio.Event,
-) -> None:
-    """Log stats."""
-    num_initial_consumers = len(consumers)
-    while not f_stop.is_set():
-        # Count consumers that are running
-        num_active = sum(not (cc.done()) for cc in consumers)
-
-        # Alert if number of consumers decreased by half
-        if num_active < num_initial_consumers // 2:
-            log(
-                WARN,
-                "Number of active workers has more than halved: (%i/%i active)",
-                num_active,
-                num_initial_consumers,
-            )
-
-        # Break if consumers died
-        if num_active == 0:
-            raise RuntimeError("All workers have died. Ending Simulation.")
-
-        # Log some stats
-        log(
-            DEBUG,
-            "Simulation Engine stats: Active workers: (%i/%i) | %s (%i workers))",
-            num_active,
-            num_initial_consumers,
-            backend.__class__.__name__,
-            backend.num_workers,
-        )
-        await asyncio.sleep(0.1)
-    log(DEBUG, "Async producer: Stopped pulling from StateFactory.")
-
-
 async def run(
     app_fn: Callable[[], ClientApp],
     backend_fn: Callable[[], Backend],
@@ -167,6 +130,7 @@ async def run(
     f_stop: asyncio.Event,
 ) -> None:
     """Run the VCE async."""
+    worker_tasks = []
     try:
 
         # Instantiate backend
@@ -182,12 +146,9 @@ async def run(
             )
             for _ in range(backend.num_workers)
         ]
-        # Create Manager
-        manager = asyncio.create_task(manager_coroutine(backend, worker_tasks, f_stop))
-        # The manager runs forever until f_stop is set or until
-        # all worker (consumer) coroutines are completed. Workers
-        # also run forever and only end if an exception is raised.
-        await asyncio.gather(manager)
+
+        while not f_stop.is_set():
+            await asyncio.sleep(0.1)
 
     except Exception as ex:
 
