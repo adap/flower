@@ -58,7 +58,7 @@ RUN apk add --no-cache \
 COPY --from=compile /opt/venv /opt/venv
 
 # Make sure we use the virtualenv
-ENV ENV PATH="/opt/venv/bin:$PATH" \
+ENV PATH="/opt/venv/bin:$PATH" \
     # Send stdout and stderr stream directly to the terminal. Ensures that no
     # output is retained in a buffer if the application crashes.
     PYTHONUNBUFFERED=1 \
