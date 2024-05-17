@@ -42,11 +42,11 @@ flower-superlink --insecure
 Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
 
 ```bash
-flower-client-app client:app1 --insecure
+flower-client-app client:appA --insecure
 ```
 
 ```bash
-flower-client-app client:app2 --insecure
+flower-client-app client:appB --insecure
 ```
 
 ### 3. Run the Flower App

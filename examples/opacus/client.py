@@ -39,7 +39,7 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
-def train(net, train_loader, privacy_engine, optimizer, epochs=1):
+def train(net, train_loader, privacy_engine, optimizer, target_delta, epochs=1):
     criterion = torch.nn.CrossEntropyLoss()
     for _ in range(epochs):
         for batch in tqdm(train_loader, "Training"):
@@ -102,7 +102,7 @@ class FlowerClient(NumPyClient):
         self.test_loader = test_loader
         self.optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
         self.privacy_engine = PrivacyEngine(secure_mode=False)
-        self.target_detla = target_delta
+        self.target_delta = target_delta
         (
             self.model,
             self.optimizer,
@@ -130,6 +130,7 @@ class FlowerClient(NumPyClient):
             self.train_loader,
             self.privacy_engine,
             self.optimizer,
+            self.target_delta,
         )
 
         if epsilon is not None:
@@ -162,10 +163,10 @@ def client_fn_parameterized(
     return client_fn
 
 
-app1 = ClientApp(
-    client_fn=client_fn_parameterized(1, noise_multiplier=1.5),
+appA = ClientApp(
+    client_fn=client_fn_parameterized(partition_id=0, noise_multiplier=1.5),
 )
 
-app2 = ClientApp(
-    client_fn=client_fn_parameterized(2, noise_multiplier=1),
+appB = ClientApp(
+    client_fn=client_fn_parameterized(partition_id=1, noise_multiplier=1),
 )
