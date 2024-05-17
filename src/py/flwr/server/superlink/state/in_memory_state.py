@@ -89,6 +89,9 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         # Find TaskIns for node_id that were not delivered yet
         task_ins_list: List[TaskIns] = []
         with self.lock:
+            if self._undelivered_task_ins_cnt == 0:
+                return []
+
             for _, task_ins in self.task_ins_store.items():
                 # pylint: disable=too-many-boolean-expressions
                 if (
@@ -149,6 +152,9 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             raise AssertionError("`limit` must be >= 1")
 
         with self.lock:
+            if self._undelivered_task_res_cnt == 0:
+                return []
+
             # Find TaskRes that were not delivered yet
             task_res_list: List[TaskRes] = []
             replied_task_ids: Set[UUID] = set()
