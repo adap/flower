@@ -207,7 +207,7 @@ def _plot_bar(df: pd.DataFrame, ax: Optional[Axes], figsize: Tuple[float, float]
 
     kind = "bar" if xlabel == "Partition ID" else "barh"
     ax = df.plot(kind=kind, stacked=True, ax=ax, title=title, legend=False,
-                 colormap=colormap,
+                 colormap=colormap, rot=0,
                  **plot_kwargs)
 
     if xlabel:
