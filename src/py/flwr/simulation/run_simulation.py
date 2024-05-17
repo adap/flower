@@ -127,14 +127,14 @@ def run_serverapp_th(
     server_app: Optional[ServerApp],
     driver: Driver,
     app_dir: str,
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
     enable_tf_gpu_growth: bool,
     delay_launch: int = 3,
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
 
     def server_th_with_start_checks(  # type: ignore
-        tf_gpu_growth: bool, stop_event: asyncio.Event, **kwargs
+        tf_gpu_growth: bool, stop_event: threading.Event, **kwargs
     ) -> None:
         """Run SeverApp, after check if GPU memory grouwth has to be set.
 
@@ -185,12 +185,7 @@ def _main_loop(
     server_app: Optional[ServerApp] = None,
     server_app_attr: Optional[str] = None,
 ) -> None:
-    """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread.
-
-    Everything runs on the main thread or a separate one, depening on whether the main
-    thread already contains a running Asyncio event loop. This is the case if running
-    the Simulation Engine on a Jupyter/Colab notebook.
-    """
+    """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread."""
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
 
@@ -201,7 +196,7 @@ def _main_loop(
         certificates=None,
     )
 
-    f_stop = asyncio.Event()
+    f_stop = threading.Event()
     serverapp_th = None
     try:
         # Initialize Driver
@@ -337,7 +332,6 @@ def _run_simulation(
     # Convert config to original JSON-stream format
     backend_config_stream = json.dumps(backend_config)
 
-    simulation_engine_th = None
     args = (
         num_supernodes,
         backend_name,
@@ -351,7 +345,7 @@ def _run_simulation(
         server_app_attr,
     )
     # Detect if there is an Asyncio event loop already running.
-    # If yes, run everything on a separate thread. In environmnets
+    # If yes, adjust logging. In environmnets
     # like Jupyter/Colab notebooks, there is an event loop present.
     run_in_thread = False
     try:
@@ -369,13 +363,8 @@ def _run_simulation(
         if run_in_thread:
             # Set logger propagation to False to prevent duplicated log output in Colab.
             logger = set_logger_propagation(logger, False)
-            log(DEBUG, "Starting Simulation Engine on a new thread.")
-            simulation_engine_th = threading.Thread(target=_main_loop, args=args)
-            simulation_engine_th.start()
-            simulation_engine_th.join()
-        else:
-            log(DEBUG, "Starting Simulation Engine on the main thread.")
-            _main_loop(*args)
+        log(DEBUG, "Starting Simulation Engine on the main thread.")
+        _main_loop(*args)
 
 
 def _parse_args_run_simulation() -> argparse.ArgumentParser:

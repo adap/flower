@@ -14,12 +14,14 @@
 # ==============================================================================
 """Fleet Simulation Engine API."""
 
-import asyncio
 import json
 import sys
+import threading
 import time
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from logging import DEBUG, ERROR, INFO, WARN
+from time import sleep
 from typing import Callable, Dict, List, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
@@ -51,22 +53,27 @@ def _register_nodes(
 
 
 # pylint: disable=too-many-arguments,too-many-locals
-async def worker(
+def worker(
     app_fn: Callable[[], ClientApp],
     node_states: Dict[int, NodeState],
     state_factory: StateFactory,
     nodes_mapping: NodeToPartitionMapping,
     backend: Backend,
+    event: threading.Event,
 ) -> None:
     """Get TaskIns from the state and pass it to backend to execute it."""
     state = state_factory.state()
     while True:
+
+        if event.is_set():
+            return
+
         out_mssg = None
         try:
             task_ins_list: List[TaskIns] = state.get_task_ins(node_id=None, limit=1)
             if len(task_ins_list) == 0:
                 log(DEBUG, "no tasks ... sleep for 0.1s")
-                await asyncio.sleep(0.1)
+                sleep(0.1)
                 continue
 
             task_ins = task_ins_list[0]
@@ -90,10 +97,6 @@ async def worker(
             node_states[node_id].update_context(
                 task_ins.run_id, context=updated_context
             )
-
-        except asyncio.CancelledError as e:
-            log(DEBUG, "Terminating async worker: %s", e)
-            break
 
         # Exceptions aren't raised but reported as an error message
         except Exception as ex:  # pylint: disable=broad-exception-caught
@@ -121,16 +124,15 @@ async def worker(
                 state.store_task_res(task_res)
 
 
-async def run(
+def run(
     app_fn: Callable[[], ClientApp],
     backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
     node_states: Dict[int, NodeState],
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
 ) -> None:
-    """Run the VCE async."""
-    worker_tasks = []
+    """Run the VCE."""
     try:
 
         # Instantiate backend
@@ -140,15 +142,22 @@ async def run(
         backend.build()
 
         # Add workers (they submit Messages to Backend)
-        worker_tasks = [
-            asyncio.create_task(
-                worker(app_fn, node_states, state_factory, nodes_mapping, backend)
-            )
-            for _ in range(backend.num_workers)
-        ]
+        with ThreadPoolExecutor(2 * backend.num_workers) as executor:
+            _ = [
+                executor.submit(
+                    worker,
+                    app_fn,
+                    node_states,
+                    state_factory,
+                    nodes_mapping,
+                    backend,
+                    f_stop,
+                )
+                for _ in range(backend.num_workers)
+            ]
 
         while not f_stop.is_set():
-            await asyncio.sleep(0.1)
+            sleep(0.1)
 
     except Exception as ex:
 
@@ -163,16 +172,6 @@ async def run(
         raise RuntimeError("Simulation Engine crashed.") from ex
 
     finally:
-        # Produced task terminated, now cancel worker tasks
-        for w_t in worker_tasks:
-            _ = w_t.cancel()
-
-        while not all(w_t.done() for w_t in worker_tasks):
-            log(DEBUG, "Terminating async workers...")
-            await asyncio.sleep(0.5)
-
-        await asyncio.gather(*[w_t for w_t in worker_tasks if not w_t.done()])
-
         # Terminate backend
         backend.terminate()
 
@@ -183,7 +182,7 @@ def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
     app_dir: str,
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     num_supernodes: Optional[int] = None,
@@ -286,15 +285,13 @@ def start_vce(
         _ = app_fn()
 
         # Run main simulation loop
-        asyncio.run(
-            run(
-                app_fn,
-                backend_fn,
-                nodes_mapping,
-                state_factory,
-                node_states,
-                f_stop,
-            )
+        run(
+            app_fn,
+            backend_fn,
+            nodes_mapping,
+            state_factory,
+            node_states,
+            f_stop,
         )
     except LoadClientAppError as loadapp_ex:
         f_stop_delay = 10
