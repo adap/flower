@@ -264,3 +264,87 @@ def _plot_heatmap(df: pd.DataFrame, ax: Optional[Axes], figsize: Tuple[float, fl
 
     ax.set_title(title)
     return ax
+
+def _initialize_comparison_figsize(figsize: Optional[Tuple[float, float]], num_partitioners: int) -> Tuple[
+    float, float]:
+    if figsize is not None:
+        return figsize
+    x = 4 + (num_partitioners - 1) * 2
+    y = 4.8
+    figsize = (x, y)
+    return figsize
+
+
+def compare_label_distribution(
+        partitioner_list: List[Partitioner],
+        label_name: Union[str, List[str]],
+        plot_type: str = "bar",
+        size_unit: str = "percent",
+        max_num_partitions: Optional[Union[int]] = 30,
+        partition_id_axis: str = "y",
+        figsize: Optional[Tuple[float, float]] = None,
+        subtitle: str = "Comparison of Per Partition Label Distribution",
+        titles: Optional[List[str]] = None,
+        cmap: Optional[Union[str, mcolors.Colormap]] = None,
+        legend: bool = False,
+        legend_title: str = "Labels",
+        verbose_labels: bool = True,
+) -> Tuple[List[Axes], List[pd.DataFrame]]:
+    num_partitioners = len(partitioner_list)
+    if isinstance(label_name, str):
+        label_name = [label_name] * num_partitioners
+    elif isinstance(label_name, List):
+        pass
+    else:
+        raise TypeError(
+            f"Label name has to be of type List[str] or str but given {type(label_name)}")
+    figsize = _initialize_comparison_figsize(figsize, num_partitioners)
+    fig, axes = plt.subplots(1, num_partitioners, layout='constrained', figsize=figsize)
+
+    if titles is None:
+        titles = ["" for _ in range(num_partitioners)]
+    df_list = []
+    ax_list = []
+    for idx, (partitioner, label_name) in enumerate(zip(partitioner_list, label_name)):
+        if idx == (num_partitioners - 1):
+            ax, df = plot_label_distributions(
+                partitioner,
+                label_name=label_name,
+                plot_type=plot_type,
+                size_unit=size_unit,
+                partition_id_axis=partition_id_axis,
+                ax=axes[idx],
+                max_num_partitions=max_num_partitions,
+                cmap=cmap,
+                legend=legend,
+                legend_title=legend_title,
+                verbose_labels=verbose_labels,
+
+            )
+            df_list.append(df)
+        else:
+            ax, df = plot_label_distributions(
+                partitioner,
+                label_name=label_name,
+                plot_type=plot_type,
+                size_unit=size_unit,
+                partition_id_axis=partition_id_axis,
+                ax=axes[idx],
+                max_num_partitions=max_num_partitions,
+                cmap=cmap,
+                legend=False,
+            )
+            df_list.append(df)
+
+    for idx, ax in enumerate(axes):
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+        ax.set_title(titles[idx])
+    for ax in axes[1:]:
+        ax.set_yticks([])
+    fig.supylabel("Partition ID")
+    fig.supxlabel("Class distribution")
+    fig.suptitle(subtitle)
+
+    fig.tight_layout()
+    return fig
