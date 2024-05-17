@@ -9,10 +9,10 @@ For more information about DP in Flower please refer to the [tutorial](https://f
 Start by cloning the example. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/sample-level-dp-opacus . && rm -rf flower && cd sample-level-dp-opacus
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/opacus . && rm -rf flower && cd opacus
 ```
 
-This will create a new directory called `sample-level-dp-opacus` containing the following files:
+This will create a new directory called `opacus` containing the following files:
 
 ```shell
 -- pyproject.toml
