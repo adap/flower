@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Label distribution plotting."""
-from typing import Tuple, Optional, Union
+from typing import Tuple, Optional, Union, List
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -58,9 +58,11 @@ def plot_label_distributions(
     plot_type : str
         Type of plot, either "bar" or "heatmap".
     size_unit : str
-        "absolute" or "percent". "absolute" - (number of samples). "percent" - normalizes each value, so they sum up to 100%.
+        "absolute" or "percent". "absolute" - (number of samples). "percent" -
+        normalizes each value, so they sum up to 100%.
     num_partitions : Optional[int]
-        The number of partitions that will be used. If left None, then all partitions will be used.
+        The number of partitions that will be used. If left None, then all partitions
+        will be used.
     partition_id_axis : str
         "x" or "y". The axis on which the partition_id will be marked.
     ax : Optional[Axes]
@@ -90,14 +92,18 @@ def plot_label_distributions(
 
     if label_name not in partitioner.dataset.column_names:
         raise ValueError(
-            f"The specified 'label_name': '{label_name}' is not present in the dataset.")
+            f"The specified 'label_name': '{label_name}' is not present in the "
+            f"dataset.")
 
     num_partitions = num_partitions or partitioner.num_partitions
     partitions = [partitioner.load_partition(i) for i in range(num_partitions)]
 
     partition = partitions[0]
-    unique_labels = partition.features[label_name].str2int(
-        partition.features[label_name].names)
+    try:
+        unique_labels = partition.features[label_name].str2int(
+            partition.features[label_name].names)
+    except AttributeError: # If the label_name is not formally a Label
+        unique_labels = partitioner.dataset.unique(label_name)
 
     partition_id_to_label_absolute_size = {
         pid: compute_counts(partition[label_name], unique_labels)
@@ -211,8 +217,15 @@ def _plot_bar(df: pd.DataFrame, ax: Optional[Axes], figsize: Tuple[float, float]
 
     if legend:
         handles, legend_labels = ax.get_legend_handles_labels()
-        legend_names = partition.features[label_name].int2str(
-            [int(v) for v in legend_labels]) if verbose_labels else legend_labels
+        if verbose_labels:
+            try:
+                legend_names = partition.features[label_name].int2str(
+                    [int(v) for v in legend_labels])
+            except AttributeError:
+                legend_names = legend_labels
+        else:
+            legend_names = legend_labels
+
         _ = ax.figure.legend(handles[::-1], legend_names[::-1], title=legend_title,
                              loc="outside center right", bbox_to_anchor=(1.3, 0.5))
 
