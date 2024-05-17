@@ -35,12 +35,12 @@ def plot_label_distributions(
         label_name: str,
         plot_type: str,
         size_unit: str,
-        num_partitions: Optional[int] = None,
+        max_num_partitions: Optional[int] = None,
         partition_id_axis: str = "x",
         ax: Optional[Axes] = None,
         figsize: Optional[Tuple[float, float]] = None,
         title: str = "Per Partition Label Distribution",
-        colormap: Optional[Union[str, mcolors.Colormap]] = None,
+        cmap: Optional[Union[str, mcolors.Colormap]] = None,
         legend: bool = True,
         legend_title: str = "Labels",
         verbose_labels: bool = True,
@@ -60,7 +60,7 @@ def plot_label_distributions(
     size_unit : str
         "absolute" or "percent". "absolute" - (number of samples). "percent" -
         normalizes each value, so they sum up to 100%.
-    num_partitions : Optional[int]
+    max_num_partitions : Optional[int]
         The number of partitions that will be used. If left None, then all partitions
         will be used.
     partition_id_axis : str
@@ -95,8 +95,11 @@ def plot_label_distributions(
             f"The specified 'label_name': '{label_name}' is not present in the "
             f"dataset.")
 
-    num_partitions = num_partitions or partitioner.num_partitions
-    partitions = [partitioner.load_partition(i) for i in range(num_partitions)]
+    if max_num_partitions is None:
+        max_num_partitions = partitioner.num_partitions
+    else:
+        max_num_partitions = min(max_num_partitions, partitioner.num_partitions)
+    partitions = [partitioner.load_partition(i) for i in range(max_num_partitions)]
 
     partition = partitions[0]
     try:
@@ -104,6 +107,7 @@ def plot_label_distributions(
             partition.features[label_name].names)
     except AttributeError: # If the label_name is not formally a Label
         unique_labels = partitioner.dataset.unique(label_name)
+    num_labels = len(unique_labels)
 
     partition_id_to_label_absolute_size = {
         pid: compute_counts(partition[label_name], unique_labels)
@@ -121,9 +125,9 @@ def plot_label_distributions(
 
     xlabel, ylabel = _initialize_xy_labels(plot_type, size_unit, partition_id_axis)
     cbar_title = _initialize_cbar_title(plot_type, size_unit)
-    figsize = _initialize_figsize(figsize, plot_type, partition_id_axis, num_partitions)
+    figsize = _initialize_figsize(figsize, plot_type, partition_id_axis, max_num_partitions, num_labels)
 
-    ax = _plot_data(df, plot_type, ax, figsize, title, colormap, xlabel, ylabel,
+    ax = _plot_data(df, plot_type, ax, figsize, title, cmap, xlabel, ylabel,
                     cbar_title, legend, verbose_labels, legend_title, partition,
                     label_name, **plot_kwargs)
 
@@ -166,7 +170,7 @@ def _initialize_cbar_title(plot_type: str, size_unit: str) -> Optional[str]:
 
 
 def _initialize_figsize(figsize: Optional[Tuple[int, int]], plot_type: str,
-                        partition_id_axis: str, num_partitions: int) -> Tuple[
+                        partition_id_axis: str, num_partitions: int, num_labels: int) -> Tuple[
     float, float]:
     if figsize is not None:
         return figsize
@@ -178,9 +182,9 @@ def _initialize_figsize(figsize: Optional[Tuple[int, int]], plot_type: str,
             figsize = (6.4, np.sqrt(num_partitions))
     elif plot_type == "heatmap":
         if partition_id_axis == "x":
-            figsize = (3 * np.sqrt(num_partitions), 6.4)
+            figsize = (3 * np.sqrt(num_partitions), np.sqrt(num_labels))
         elif partition_id_axis == "y":
-            figsize = (6.4, np.sqrt(num_partitions))
+            figsize = (3 * np.sqrt(num_labels), np.sqrt(num_partitions))
 
     return figsize
 
@@ -202,6 +206,8 @@ def _plot_bar(df: pd.DataFrame, ax: Optional[Axes], figsize: Tuple[float, float]
               title: str, colormap, xlabel: str, ylabel: str, legend: bool,
               legend_title: str, verbose_labels: bool, partition, label_name: str,
               **plot_kwargs) -> Axes:
+    if colormap is None:
+        colormap = "RdYlGn"
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
 
@@ -214,6 +220,13 @@ def _plot_bar(df: pd.DataFrame, ax: Optional[Axes], figsize: Tuple[float, float]
         ax.set_xlabel(xlabel)
     if ylabel:
         ax.set_ylabel(ylabel)
+
+    xticklabels = ax.get_xticklabels()
+    if len(xticklabels) > 20:
+        # Make every other xtick label not visible
+        for i, label in enumerate(xticklabels):
+            if i % 2 == 1:
+                label.set_visible(False)
 
     if legend:
         handles, legend_labels = ax.get_legend_handles_labels()
@@ -241,7 +254,7 @@ def _plot_heatmap(df: pd.DataFrame, ax: Optional[Axes], figsize: Tuple[float, fl
         fig, ax = plt.subplots(figsize=figsize)
 
     fmt = ",d" if "absolute" in df.columns else "0.2f"
-    sns.heatmap(df, ax=ax, cmap=colormap, annot=True, fmt=fmt, cbar=legend,
+    sns.heatmap(df, ax=ax, cmap=colormap, fmt=fmt, cbar=legend,
                 cbar_kws={'label': cbar_title}, **plot_kwargs)
 
     if xlabel:
