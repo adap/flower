@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "opacus"
+name = "opacus-fl"
 version = "0.1.0"
 description = "Sample Differential Privacy with Opacus in Flower"
 authors = [
