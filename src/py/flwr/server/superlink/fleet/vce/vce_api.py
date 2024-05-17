@@ -21,8 +21,9 @@ import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from logging import DEBUG, ERROR, INFO, WARN
+from queue import Empty, Queue
 from time import sleep
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.node_state import NodeState
@@ -31,7 +32,7 @@ from flwr.common.logger import log
 from flwr.common.message import Error
 from flwr.common.object_ref import load_app
 from flwr.common.serde import message_from_taskins, message_to_taskres
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State, StateFactory
 
 from .backend import Backend, error_messages_backends, supported_backends
@@ -56,26 +57,18 @@ def _register_nodes(
 def worker(
     app_fn: Callable[[], ClientApp],
     node_states: Dict[int, NodeState],
-    state: State,
+    taskins_queue: Queue[TaskIns],
+    taskres_queue: Queue[TaskRes],
     nodes_mapping: NodeToPartitionMapping,
     backend: Backend,
     event: threading.Event,
 ) -> None:
     """Get TaskIns from the state and pass it to backend to execute it."""
-    while True:
-
-        if event.is_set():
-            return
+    while not event.is_set():
 
         out_mssg = None
         try:
-            task_ins_list: List[TaskIns] = state.get_task_ins(node_id=None, limit=1)
-            if len(task_ins_list) == 0:
-                log(DEBUG, "no tasks ... sleep for 0.1s")
-                sleep(0.1)
-                continue
-
-            task_ins = task_ins_list[0]
+            task_ins: TaskIns = taskins_queue.get(timeout=1.0)
             node_id = task_ins.task.consumer.node_id
 
             # Register and retrieve runstate
@@ -96,6 +89,10 @@ def worker(
             node_states[node_id].update_context(
                 task_ins.run_id, context=updated_context
             )
+
+        except Empty:
+            # An exception raised if queue.get times out
+            pass
 
         # Exceptions aren't raised but reported as an error message
         except Exception as ex:  # pylint: disable=broad-exception-caught
@@ -120,7 +117,32 @@ def worker(
                 task_res = message_to_taskres(out_mssg)
                 # Store TaskRes in state
                 task_res.task.pushed_at = time.time()
-                state.store_task_res(task_res)
+                taskres_queue.put(task_res)
+
+
+def taskins_extractor(
+    state: State, queue: Queue[TaskIns], f_stop: threading.Event
+) -> None:
+    """Put TaskIns in a queue from State."""
+    limit = 32  # TODO: hyperparameter to set
+    while not f_stop.is_set():
+        task_ins_list = state.get_task_ins(node_id=None, limit=limit)
+        for task_ins in task_ins_list:
+            queue.put(task_ins)
+        sleep(0.1)
+
+
+def taskres_injector(
+    state: State, queue: Queue[TaskRes], f_stop: threading.Event
+) -> None:
+    """Put TaskRes into State from a queue."""
+    while not f_stop.is_set():
+        try:
+            taskres = queue.get(timeout=1.0)
+            state.store_task_res(taskres)
+        except Empty:
+            # queue is empty when timeout was triggered
+            pass
 
 
 def run(
@@ -132,8 +154,10 @@ def run(
     f_stop: threading.Event,
 ) -> None:
     """Run the VCE."""
-    try:
+    taskins_queue: "Queue[TaskIns]" = Queue()
+    taskres_queue: "Queue[TaskRes]" = Queue()
 
+    try:
         # Instantiate backend
         backend = backend_fn()
 
@@ -142,19 +166,44 @@ def run(
 
         # Add workers (they submit Messages to Backend)
         state = state_factory.state()
-        with ThreadPoolExecutor(8) as executor:
+
+        extractor_th = threading.Thread(
+            target=taskins_extractor,
+            args=(
+                state,
+                taskins_queue,
+                f_stop,
+            ),
+        )
+        extractor_th.start()
+
+        injector_th = threading.Thread(
+            target=taskres_injector,
+            args=(
+                state,
+                taskres_queue,
+                f_stop,
+            ),
+        )
+        injector_th.start()
+
+        with ThreadPoolExecutor() as executor:
             _ = [
                 executor.submit(
                     worker,
                     app_fn,
                     node_states,
-                    state,
+                    taskins_queue,
+                    taskres_queue,
                     nodes_mapping,
                     backend,
                     f_stop,
                 )
-                for _ in range(4 * backend.num_workers)
+                for _ in range(backend.num_workers)
             ]
+
+        extractor_th.join()
+        injector_th.join()
 
     except Exception as ex:
 
