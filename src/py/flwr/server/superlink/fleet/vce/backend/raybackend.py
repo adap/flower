@@ -14,6 +14,7 @@
 # ==============================================================================
 """Ray backend for the Fleet API using the Simulation Engine."""
 
+
 import pathlib
 from logging import DEBUG, ERROR, WARNING
 from typing import Callable, Dict, List, Tuple, Union
@@ -25,8 +26,8 @@ from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
 from flwr.simulation.ray_transport.ray_actor import (
-    BasicActorPool,
     ClientAppActor,
+    VirtualClientEngineActorPool,
     init_ray,
 )
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
@@ -68,10 +69,21 @@ class RayBackend(Backend):
         actor_kwargs = {"on_actor_init_fn": enable_tf_gpu_growth} if use_tf else {}
 
         client_resources = self._validate_client_resources(config=backend_config)
-        self.pool = BasicActorPool(
-            actor_type=ClientAppActor,
+
+        def create_actor_fn() -> ClientAppActor:
+            return ClientAppActor.options(  # type: ignore
+                **client_resources,
+            ).remote(**actor_kwargs)
+
+        # Instantiate ActorPool
+        self.pool = VirtualClientEngineActorPool(
+            create_actor_fn=create_actor_fn,
             client_resources=client_resources,
-            actor_kwargs=actor_kwargs,
+        )
+        log(
+            DEBUG,
+            f"Innitialised {self.pool.__class__.__name__}"
+            f" with {self.pool.num_actors} actors",
         )
 
     def _configure_runtime_env(self, work_dir: str) -> Dict[str, Union[str, List[str]]]:
@@ -131,8 +143,7 @@ class RayBackend(Backend):
 
     def build(self) -> None:
         """Build pool of Ray actors that this backend will submit jobs to."""
-        self.pool.add_actors_to_pool(self.pool.actors_capacity)
-        log(DEBUG, "Constructed ActorPool with: %i actors", self.pool.num_actors)
+        pass
 
     def process_message(
         self,
@@ -144,20 +155,18 @@ class RayBackend(Backend):
 
         Return output message and updated context.
         """
-        partition_id = message.metadata.partition_id
-
+        partition_id = str(message.metadata.partition_id)
         try:
             # Submite a task to the pool
-            future = self.pool.submit(
+            self.pool.submit_client_job(
                 lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-                (app, message, str(partition_id), context),
+                (app, message, partition_id, context),
             )
 
-            # Fetch result
-            (
-                out_mssg,
-                updated_context,
-            ) = self.pool.fetch_result_and_return_actor_to_pool(future)
+            # Fetch next result
+            out_mssg, updated_context = self.pool.get_client_result(
+                partition_id, timeout=3600
+            )
 
             return out_mssg, updated_context
 
@@ -167,12 +176,9 @@ class RayBackend(Backend):
                 "An exception was raised when processing a message by %s",
                 self.__class__.__name__,
             )
-            # add actor back into pool
-            self.pool.add_actor_back_to_pool(future)
             raise ex
 
     def terminate(self) -> None:
         """Terminate all actors in actor pool."""
-        self.pool.terminate_all_actors()
         ray.shutdown()
         log(DEBUG, "Terminated %s", self.__class__.__name__)
