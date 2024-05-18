@@ -13,7 +13,7 @@ dependencies = [
     "flwr-nightly[rest,simulation]",
     "torch==1.13.1",
     "torchvision==0.14.1",
-    "tqdm==4.65.0"
+    "tqdm==4.66.3"
 ]
 
 [tool.hatch.build.targets.wheel]
