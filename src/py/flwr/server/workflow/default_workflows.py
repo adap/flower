@@ -17,11 +17,11 @@
 
 import io
 import timeit
-from logging import INFO
+from logging import INFO, WARN
 from typing import Optional, cast
 
 import flwr.common.recordset_compat as compat
-from flwr.common import ConfigsRecord, Context, GetParametersIns, log
+from flwr.common import ConfigsRecord, Context, GetParametersIns, ParametersRecord, log
 from flwr.common.constant import MessageType, MessageTypeLegacy
 
 from ..compat.app_utils import start_update_client_manager_thread
@@ -88,7 +88,12 @@ class DefaultWorkflow:
         hist = context.history
         log(INFO, "")
         log(INFO, "[SUMMARY]")
-        log(INFO, "Run finished %s rounds in %.2fs", context.config.num_rounds, elapsed)
+        log(
+            INFO,
+            "Run finished %s round(s) in %.2fs",
+            context.config.num_rounds,
+            elapsed,
+        )
         for idx, line in enumerate(io.StringIO(str(hist))):
             if idx == 0:
                 log(INFO, "%s", line.strip("\n"))
@@ -130,9 +135,17 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
                 )
             ]
         )
-        log(INFO, "Received initial parameters from one random client")
         msg = list(messages)[0]
-        paramsrecord = next(iter(msg.content.parameters_records.values()))
+        if msg.has_content():
+            log(INFO, "Received initial parameters from one random client")
+            paramsrecord = next(iter(msg.content.parameters_records.values()))
+        else:
+            log(
+                WARN,
+                "Failed to receive initial parameters from the client."
+                " Empty initial parameters will be used.",
+            )
+            paramsrecord = ParametersRecord()
 
     context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
 
@@ -250,8 +263,12 @@ def default_fit_workflow(  # pylint: disable=R0914
             compat.recordset_to_fitres(msg.content, False),
         )
         for msg in messages
+        if msg.has_content()
     ]
-    aggregated_result = context.strategy.aggregate_fit(current_round, results, [])
+    failures = [Exception(msg.error) for msg in messages if msg.has_error()]
+    aggregated_result = context.strategy.aggregate_fit(
+        current_round, results, failures  # type: ignore
+    )
     parameters_aggregated, metrics_aggregated = aggregated_result
 
     # Update the parameters and write history
@@ -265,6 +282,7 @@ def default_fit_workflow(  # pylint: disable=R0914
         )
 
 
+# pylint: disable-next=R0914
 def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     """Execute the default workflow for a single evaluate round."""
     if not isinstance(context, LegacyContext):
@@ -329,8 +347,12 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
             compat.recordset_to_evaluateres(msg.content),
         )
         for msg in messages
+        if msg.has_content()
     ]
-    aggregated_result = context.strategy.aggregate_evaluate(current_round, results, [])
+    failures = [Exception(msg.error) for msg in messages if msg.has_error()]
+    aggregated_result = context.strategy.aggregate_evaluate(
+        current_round, results, failures  # type: ignore
+    )
 
     loss_aggregated, metrics_aggregated = aggregated_result
 

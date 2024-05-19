@@ -66,7 +66,7 @@ The following example creates a base image with Python 3.11.0, pip 23.0.1 and se
 
 .. code-block:: bash
 
-  $ cd src/docker/base/
+  $ cd src/docker/base/ubuntu
   $ docker build \
     --build-arg PYTHON_VERSION=3.11.0 \
     --build-arg PIP_VERSION=23.0.1 \
@@ -124,6 +124,7 @@ well as the name and tag can be adapted to your needs. These values serve as exa
 
 If you want to use your own base image instead of the official Flower base image, all you need to do
 is set the ``BASE_REPOSITORY``, ``PYTHON_VERSION`` and ``UBUNTU_VERSION`` build arguments.
+
 .. code-block:: bash
 
   $ cd src/docker/superlink/
