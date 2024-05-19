@@ -123,14 +123,14 @@ def run_serverapp_th(
     server_app: Optional[ServerApp],
     driver: Driver,
     app_dir: str,
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
     enable_tf_gpu_growth: bool,
     delay_launch: int = 3,
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
 
     def server_th_with_start_checks(  # type: ignore
-        tf_gpu_growth: bool, stop_event: asyncio.Event, **kwargs
+        tf_gpu_growth: bool, stop_event: threading.Event, **kwargs
     ) -> None:
         """Run SeverApp, after check if GPU memory grouwth has to be set.
 
@@ -189,7 +189,7 @@ def _main_loop(
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
 
-    f_stop = asyncio.Event()
+    f_stop = threading.Event()
     serverapp_th = None
     try:
         # Initialize Driver

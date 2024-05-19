@@ -15,7 +15,6 @@
 """Fleet Simulation Engine API."""
 
 
-import asyncio
 import json
 import sys
 import threading
@@ -63,7 +62,7 @@ def worker(
     node_states: Dict[int, NodeState],
     nodes_mapping: NodeToPartitionMapping,
     backend: Backend,
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
 ) -> None:
     """Get TaskIns from queue and pass it to an actor in the pool to execute it."""
     while not f_stop.is_set():
@@ -125,7 +124,7 @@ def add_taskins_to_queue(
     state: State,
     queue: Queue[TaskIns],
     nodes_mapping: NodeToPartitionMapping,
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
 ) -> None:
     """Put TaskIns in a queue from State."""
     while not f_stop.is_set():
@@ -155,7 +154,7 @@ def run(
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
     node_states: Dict[int, NodeState],
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
 ) -> None:
     """Run the VCE."""
     taskins_queue: "Queue[TaskIns]" = Queue()
@@ -235,7 +234,7 @@ def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
     app_dir: str,
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     num_supernodes: Optional[int] = None,
