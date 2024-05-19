@@ -24,7 +24,7 @@ from math import pi
 from pathlib import Path
 from time import sleep
 from typing import Dict, Optional, Set, Tuple
-from unittest import IsolatedAsyncioTestCase
+from unittest import TestCase
 from uuid import UUID
 
 from flwr.client.client_app import LoadClientAppError
@@ -146,7 +146,7 @@ def start_and_shutdown(
     """Start Simulation Engine and terminate after specified number of seconds.
 
     Some tests need to be terminated by triggering externally an asyncio.Event. This
-    is enabled whtn passing `duration`>0.
+    is enabled when passing `duration`>0.
     """
     f_stop = asyncio.Event()
 
@@ -178,8 +178,8 @@ def start_and_shutdown(
         termination_th.join()
 
 
-class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
-    """A basic class that enables testing asyncio functionalities."""
+class TestFleetSimulationEngineRayBackend(TestCase):
+    """A basic class that enables testing functionalities."""
 
     def test_erroneous_no_supernodes_client_mapping(self) -> None:
         """Test with unset arguments."""
