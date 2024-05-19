@@ -1,7 +1,8 @@
-from typing import Tuple, Union, List
+from typing import List, Tuple, Union
+
 import numpy as np
-from sklearn.linear_model import LogisticRegression
 import openml
+from sklearn.linear_model import LogisticRegression
 
 XY = Tuple[np.ndarray, np.ndarray]
 Dataset = Tuple[XY, XY]

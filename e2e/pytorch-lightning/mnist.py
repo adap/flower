@@ -3,14 +3,13 @@
 Source: pytorchlightning.ai (2021/02/04)
 """
 
-
+import pytorch_lightning as pl
 import torch
 from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, Subset, random_split
 from torchvision import transforms
 from torchvision.datasets import MNIST
-import pytorch_lightning as pl
 
 
 class LitAutoEncoder(pl.LightningModule):
@@ -62,14 +61,18 @@ class LitAutoEncoder(pl.LightningModule):
 
 def load_data():
     # Training / validation set
-    trainset = MNIST("./data", train=True, download=True, transform=transforms.ToTensor())
+    trainset = MNIST(
+        "./data", train=True, download=True, transform=transforms.ToTensor()
+    )
     trainset = Subset(trainset, range(1000))
     mnist_train, mnist_val = random_split(trainset, [800, 200])
     train_loader = DataLoader(mnist_train, batch_size=32, shuffle=True, num_workers=0)
     val_loader = DataLoader(mnist_val, batch_size=32, shuffle=False, num_workers=0)
 
     # Test set
-    testset = MNIST("./data", train=False, download=True, transform=transforms.ToTensor())
+    testset = MNIST(
+        "./data", train=False, download=True, transform=transforms.ToTensor()
+    )
     testset = Subset(testset, range(10))
     test_loader = DataLoader(testset, batch_size=32, shuffle=False, num_workers=0)
 

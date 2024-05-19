@@ -1,6 +1,5 @@
 import numpy as np
 
-
 import flwr as fl
 
 STATE_VAR = "timestamp"

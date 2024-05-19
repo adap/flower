@@ -1,6 +1,6 @@
-import flwr as fl
-
 from strategy import FedAnalytics
+
+import flwr as fl
 
 app = fl.server.ServerApp()
 
