@@ -190,12 +190,13 @@ Creating and merging a pull request (PR)
 
     In this example you can see that the request is to merge the branch ``doc-fixes`` from my forked repository to branch ``main`` from the Flower repository.
 
+    The title should be changed to adhere to the :ref:`pr_title_format` guidelines, otherwise it won't be possible to merge the PR. So in this case,
+    a correct title might be ``docs(framework:skip) Fix typos``.
+
     The input box in the middle is there for you to describe what your PR does and to link it to existing issues.
     We have placed comments (that won't be rendered once the PR is opened) to guide you through the process.
 
-    It is important to follow the instructions described in comments. For instance, in order to not break how our changelog system works,
-    you should read the information above the ``Changelog entry`` section carefully.
-    You can also checkout some examples and details in the :ref:`changelogentry` appendix.
+    It is important to follow the instructions described in comments.
 
     At the bottom you will find the button to open the PR. This will notify reviewers that a new PR has been opened and
     that they should look over it to merge or to request changes.
@@ -304,37 +305,9 @@ Open PR
 
 - Commit the changes (commit messages are always imperative: "Do something", in this case "Change …")
 - Push the changes to your fork
-- Open a PR (as shown above)
+- Open a PR (as shown above) with title ``docs(framework) Update how-to guide title``
 - Wait for it to be approved!
 - Congrats! 🥳 You're now officially a Flower contributor!
-
-
-How to write a good PR title
-----------------------------
-
-A well-crafted PR title helps team members quickly understand the purpose and scope of the changes being proposed. Here's a guide to help you write a good GitHub PR title:
-
-1. Be Clear and Concise: Provide a clear summary of the changes in a concise manner.
-1. Use Actionable Verbs: Start with verbs like "Add," "Update," or "Fix" to indicate the purpose.
-1. Include Relevant Information: Mention the affected feature or module for context.
-1. Keep it Short: Avoid lengthy titles for easy readability.
-1. Use Proper Capitalization and Punctuation: Follow grammar rules for clarity.
-
-Let's start with a few examples for titles that should be avoided because they do not provide meaningful information:
-
-* Implement Algorithm
-* Database
-* Add my_new_file.py to codebase
-* Improve code in module
-* Change SomeModule
-
-Here are a few positive examples which provide helpful information without repeating how they do it, as that is already visible in the "Files changed" section of the PR:
-
-* Update docs banner to mention Flower Summit 2023
-* Remove unnecessary XGBoost dependency
-* Remove redundant attributes in strategies subclassing FedAvg
-* Add CI job to deploy the staging system when the ``main`` branch changes
-* Add new amazing library which will be used to improve the simulation engine
 
 
 Next steps
@@ -348,71 +321,32 @@ Once you have made your first PR, and want to contribute more, be sure to check 
 Appendix
 --------
 
-.. _changelogentry:
+.. _pr_title_format:
 
-Changelog entry
+PR title format
 ***************
 
-When opening a new PR, inside its description, there should be a ``Changelog entry`` header.
+We enforce the following PR title format:
 
-Above this header you should see the following comment that explains how to write your changelog entry:
+.. code-block::
 
-    Inside the following 'Changelog entry' section,
-    you should put the description of your changes that will be added to the changelog alongside your PR title.
+    <type>(<project>) <subject>
 
-    If the section is completely empty (without any token) or non-existent,
-    the changelog will just contain the title of the PR for the changelog entry, without any description.
+(or ``<type>(<project>:skip) <subject>`` to ignore the PR in the changelog)
 
-    If the section contains some text other than tokens, it will use it to add a description to the change.
+Where ``<type>`` needs to be in ``{ci, fix, feat, docs, refactor, break}``, ``<project>`` 
+should be in ``{framework, baselines, datasets, examples, or '*' when modifying multiple projects}``, and ``<subject>`` starts with a capitalised verb in the imperative mood.
 
-    If the section contains one of the following tokens it will ignore any other text and put the PR under the corresponding section of the changelog:
+Valid examples:
 
-    <general> is for classifying a PR as a general improvement.
+- ``feat(framework) Add flwr build CLI command``
+- ``refactor(examples:skip) Improve quickstart-pytorch logging``
+- ``ci(*:skip) Enforce PR title format``
 
-    <skip> is to not add the PR to the changelog
+Invalid examples:
 
-    <baselines> is to add a general baselines change to the PR
-
-    <examples> is to add a general examples change to the PR
-
-    <sdk> is to add a general sdk change to the PR
-
-    <simulations> is to add a general simulations change to the PR
-
-    Note that only one token should be used.
-
-Its content must have a specific format. We will break down what each possibility does:
-
-- If the ``### Changelog entry`` section contains nothing or doesn't exist, the following text will be added to the changelog::
-
-    - **PR TITLE** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-- If the ``### Changelog entry`` section contains a description (and no token), the following text will be added to the changelog::
-
-    - **PR TITLE** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-        DESCRIPTION FROM THE CHANGELOG ENTRY
-
-- If the ``### Changelog entry`` section contains ``<skip>``, nothing will change in the changelog.
-
-- If the ``### Changelog entry`` section contains ``<general>``, the following text will be added to the changelog::
-
-    - **General improvements** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-- If the ``### Changelog entry`` section contains ``<baselines>``, the following text will be added to the changelog::
-
-    - **General updates to Flower Baselines** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-- If the ``### Changelog entry`` section contains ``<examples>``, the following text will be added to the changelog::
-
-    - **General updates to Flower Examples** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-- If the ``### Changelog entry`` section contains ``<sdk>``, the following text will be added to the changelog::
-
-    - **General updates to Flower SDKs** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-- If the ``### Changelog entry`` section contains ``<simulations>``, the following text will be added to the changelog::
-
-    - **General updates to Flower Simulations** ([#PR_NUMBER](https://github.com/adap/flower/pull/PR_NUMBER))
-
-Note that only one token must be provided, otherwise, only the first action (in the order listed above), will be performed.
+- ``feat(framework): Add flwr build CLI command`` (extra ``:``)
+- ``feat(skip) Add flwr build CLI command`` (missing ``<project>``)
+- ``feat(framework) add flwr build CLI command`` (non capitalised verb)
+- ``feat(framework) Add flwr build CLI command.`` (dot at the end)
+- ``Add flwr build CLI command.`` (missing ``<type>(<project>)``)
