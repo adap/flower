@@ -14,7 +14,6 @@
 # ==============================================================================
 """Ray-based Flower Actor and ActorPool implementation."""
 
-import asyncio
 import threading
 from abc import ABC
 from logging import DEBUG, ERROR, WARNING
@@ -417,9 +416,7 @@ class BasicActorPool:
         self.client_resources = client_resources
 
         # Queue of idle actors
-        self.pool: "asyncio.Queue[Type[VirtualClientEngineActor]]" = asyncio.Queue(
-            maxsize=1024
-        )
+        self.pool: List[VirtualClientEngineActor] = []
         self.num_actors = 0
 
         # Resolve arguments to pass during actor init
@@ -433,38 +430,37 @@ class BasicActorPool:
         # Figure out how many actors can be created given the cluster resources
         # and the resources the user indicates each VirtualClient will need
         self.actors_capacity = pool_size_from_resources(client_resources)
-        self._future_to_actor: Dict[Any, Type[VirtualClientEngineActor]] = {}
+        self._future_to_actor: Dict[Any, VirtualClientEngineActor] = {}
 
     def is_actor_available(self) -> bool:
         """Return true if there is an idle actor."""
-        return self.pool.qsize() > 0
+        return len(self.pool) > 0
 
-    async def add_actors_to_pool(self, num_actors: int) -> None:
+    def add_actors_to_pool(self, num_actors: int) -> None:
         """Add actors to the pool.
 
         This method may be executed also if new resources are added to your Ray cluster
         (e.g. you add a new node).
         """
         for _ in range(num_actors):
-            await self.pool.put(self.create_actor_fn())  # type: ignore
+            self.pool.append(self.create_actor_fn())  # type: ignore
         self.num_actors += num_actors
 
-    async def terminate_all_actors(self) -> None:
+    def terminate_all_actors(self) -> None:
         """Terminate actors in pool."""
         num_terminated = 0
-        while self.pool.qsize():
-            actor = await self.pool.get()
+        for actor in self.pool:
             actor.terminate.remote()  # type: ignore
             num_terminated += 1
 
         log(DEBUG, "Terminated %i actors", num_terminated)
 
-    async def submit(
+    def submit(
         self, actor_fn: Any, job: Tuple[ClientAppFn, Message, str, Context]
     ) -> Any:
         """On idle actor, submit job and return future."""
         # Remove idle actor from pool
-        actor = await self.pool.get()
+        actor = self.pool.pop()
         # Submit job to actor
         app_fn, mssg, cid, context = job
         future = actor_fn(actor, app_fn, mssg, cid, context)
@@ -473,18 +469,18 @@ class BasicActorPool:
         self._future_to_actor[future] = actor
         return future
 
-    async def add_actor_back_to_pool(self, future: Any) -> None:
+    def add_actor_back_to_pool(self, future: Any) -> None:
         """Ad actor assigned to run future back into the pool."""
         actor = self._future_to_actor.pop(future)
-        await self.pool.put(actor)
+        self.pool.append(actor)
 
-    async def fetch_result_and_return_actor_to_pool(
+    def fetch_result_and_return_actor_to_pool(
         self, future: Any
     ) -> Tuple[Message, Context]:
         """Pull result given a future and add actor back to pool."""
-        # Get actor that ran job
-        await self.add_actor_back_to_pool(future)
         # Retrieve result for object store
         # Instead of doing ray.get(future) we await it
-        _, out_mssg, updated_context = await future
+        _, out_mssg, updated_context = ray.get(future)
+        # Get actor that ran job
+        self.add_actor_back_to_pool(future)
         return out_mssg, updated_context
