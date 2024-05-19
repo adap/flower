@@ -2,11 +2,13 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
+import CompilerPluginSupport
 
 let package = Package(
     name: "flwr",
     platforms: [
-        .iOS(.v16),
+        .macOS(.v10_15),
+        .iOS(.v17),
         ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -21,17 +23,26 @@ let package = Package(
         .package(url: "https://github.com/kewlbear/NumPy-iOS.git", branch: "main"),
         .package(url: "https://github.com/grpc/grpc-swift.git", from: "1.22.0"),
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.26.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "510.0.2"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
+        .macro(
+            name: "ClientAppMacros",
+            dependencies: [
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
+            ]
+        ),
         .target(
             name: "flwr",
             dependencies: [
                 .product(name: "GRPC", package: "grpc-swift"),
                 .product(name: "NumPy-iOS", package: "NumPy-iOS"),
                 .product(name: "PythonKit", package: "PythonKit"),
-                .product(name: "SwiftProtobuf", package: "swift-protobuf")],
+                .product(name: "SwiftProtobuf", package: "swift-protobuf"),
+                "ClientAppMacros"],
             path: "Sources/Flower"),
         .testTarget(
             name: "FlowerTests",
