@@ -1,0 +1,34 @@
+name: flwr-containers-e2e-test
+
+services:
+  # create a SuperLink service
+  superlink:
+    image: docker.io/flwr/superlink:nightly
+    ports:
+      - "9091:9091"
+      - "9092:9092"
+    command: [ "--insecure" ]
+
+  # create a SuperNode service
+  supernode:
+    build:
+      dockerfile: supernode.Dockerfile
+    deploy:
+      # specify 2 containers with 2xCPUs (for 2 clients)
+      replicas: 2
+      resources:
+        limits:
+          cpus: '2'
+    command: [ "--insecure", "--server", "superlink:9092" ]
+    depends_on:
+      - superlink
+
+  # create a ServerApp service
+  serverapp:
+    build:
+      dockerfile: serverapp.Dockerfile
+    command: [ "--insecure", "--server", "superlink:9091" ]
+    # enforce dependency for graceful execution
+    depends_on:
+      - superlink
+      - supernode
