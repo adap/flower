@@ -20,7 +20,7 @@ from typing import Dict, List, cast
 import numpy as np
 from galois import FieldArray
 
-from flwr.common import Array, array_from_numpy
+from flwr.common import Array, array_from_numpy, ndarray_to_bytes
 from flwr.common.constant import SType
 
 from ..typing import NDArrayInt
@@ -163,13 +163,21 @@ def padding(d: int, U: int, T: int) -> int:
 
 def encrypt_sub_mask(key: bytes, sub_mask: np.ndarray) -> bytes:
     """Encrypt the sub-mask."""
-    arr = array_from_numpy(sub_mask)
-    plaintext = arr.data
+    plaintext = ndarray_to_bytes(sub_mask)
     return encrypt(key, plaintext)
 
 
 def decrypt_sub_mask(key: bytes, ciphertext: bytes) -> np.ndarray:
     """Decrypt the sub-mask."""
     plaintext = decrypt(key, ciphertext)
-    arr = Array(dtype="", shape=[], stype=SType.NUMPY, data=plaintext)
-    return arr.numpy()
+    return ndarray_from_bytes(plaintext)
+
+
+def ndarray_to_bytes(arr: np.ndarray) -> bytes:
+    """Serialize NumPy ndarray to bytes."""
+    return array_from_numpy(arr).data
+
+
+def ndarray_from_bytes(arr_bytes: bytes) -> np.ndarray:
+    """Deserialize NumPy ndarray from bytes."""
+    return Array(dtype="", shape=[], stype=SType.NUMPY, data=arr_bytes).numpy()
