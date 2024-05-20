@@ -58,6 +58,7 @@ datasets = "^2.14.3"
 pillow = { version = ">=6.2.1", optional = true }
 soundfile = { version = ">=0.12.1", optional = true }
 librosa = { version = ">=0.10.0.post2", optional = true }
+matplotlib = "^3.7.5"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.13.2"
