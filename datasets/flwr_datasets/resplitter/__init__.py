@@ -12,13 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Resplitter package."""
+"""Preprocessor package."""
 
 
 from .merge_resplitter import MergeResplitter
-from .resplitter import Resplitter
 
 __all__ = [
     "MergeResplitter",
-    "Resplitter",
 ]

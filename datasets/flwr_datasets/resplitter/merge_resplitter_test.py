@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Resplitter tests."""
+"""Preprocessor tests."""
 
 
 import unittest
@@ -25,7 +25,7 @@ from flwr_datasets.resplitter.merge_resplitter import MergeResplitter
 
 
 class TestResplitter(unittest.TestCase):
-    """Resplitter tests."""
+    """Preprocessor tests."""
 
     def setUp(self) -> None:
         """Set up the dataset with 3 splits for tests."""
