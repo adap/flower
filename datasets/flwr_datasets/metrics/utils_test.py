@@ -69,6 +69,20 @@ class TestMetricsUtils(unittest.TestCase):
         result = compute_distribution(labels, unique_labels)
         self.assertAlmostEqual(result.sum(), 1.0)
 
+    def test_compute_counts_non_unique_labels(self) -> None:
+        """Test if not having the unique labels raises ValueError."""
+        labels = [1, 2, 3]
+        unique_labels = [1, 2, 2, 3]
+        with self.assertRaises(ValueError):
+            compute_counts(labels, unique_labels)
+
+    def test_compute_distribution_non_unique_labels(self) -> None:
+        """Test if not having the unique labels raises ValueError."""
+        labels = [1, 1, 2, 3]
+        unique_labels = [1, 1, 2, 3]
+        with self.assertRaises(ValueError):
+            compute_distribution(labels, unique_labels)
+
 
 if __name__ == "__main__":
     unittest.main()

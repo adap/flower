@@ -40,6 +40,8 @@ def compute_counts(
     label_counts: pd.Series
         The pd.Series with label as indices and counts as values.
     """
+    if len(unique_labels) != len(set(unique_labels)):
+        raise ValueError("unique_labels must contain unique elements only.")
     labels_series = pd.Series(labels)
     label_counts = labels_series.value_counts()
     label_counts_with_zeros = pd.Series(index=unique_labels, data=0)
