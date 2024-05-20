@@ -134,8 +134,7 @@ def plot_label_distributions(
     return ax, df
 
 
-def _initialize_xy_labels(plot_type: str, size_unit: str, partition_id_axis: str) -> \
-        Tuple[str, str]:
+def _initialize_xy_labels(plot_type: str, size_unit: str, partition_id_axis: str) -> Tuple[str, str]:
     if plot_type == "bar":
         xlabel = "Partition ID"
         ylabel = "Count" if size_unit == "absolute" else "Percent %"
@@ -274,6 +273,21 @@ def _initialize_comparison_figsize(figsize: Optional[Tuple[float, float]], num_p
     figsize = (x, y)
     return figsize
 
+def _initialize_comparison_xy_labels(plot_type: str, partition_id_axis: str) -> Tuple[str, str]:
+    if plot_type == "bar":
+        xlabel = "Partition ID"
+        ylabel = "Class distribution"
+    elif plot_type == "heatmap":
+        xlabel = "Partition ID"
+        ylabel = "Label"
+    else:
+        raise ValueError(f"Invalid plot_type: {plot_type}. Must be 'bar' or 'heatmap'.")
+
+    if partition_id_axis == "y":
+        xlabel, ylabel = ylabel, xlabel
+
+    return xlabel, ylabel
+
 
 def compare_label_distribution(
         partitioner_list: List[Partitioner],
@@ -342,9 +356,11 @@ def compare_label_distribution(
         ax.set_title(titles[idx])
     for ax in axes[1:]:
         ax.set_yticks([])
-    fig.supylabel("Partition ID")
-    fig.supxlabel("Class distribution")
+
+    xlabel, ylabel = _initialize_comparison_xy_labels(plot_type, partition_id_axis)
+    fig.supxlabel(xlabel)
+    fig.supylabel(ylabel)
     fig.suptitle(subtitle)
 
     fig.tight_layout()
-    return fig
+    return fig, ax_list, df_list
