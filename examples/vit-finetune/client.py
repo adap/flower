@@ -8,9 +8,7 @@ from model import get_model, set_parameters, train
 
 
 class FedViTClient(NumPyClient):
-
     def __init__(self, trainset):
-
         self.trainset = trainset
         self.model = get_model()
 

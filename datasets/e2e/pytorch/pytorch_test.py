@@ -65,7 +65,7 @@ class FdsToPyTorch(unittest.TestCase):
         partition_id = 0
         fds = FederatedDataset(dataset=self.dataset_name, partitioners={"train": 100})
         partition = fds.load_partition(partition_id, "train")
-        partition_train_test = partition.train_test_split(test_size=0.2)
+        partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
         partition_train_test = partition_train_test.map(
             lambda img: {"img": self.transforms(img)}, input_columns="img"
         )

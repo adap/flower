@@ -59,7 +59,8 @@ class FederatedDataset:
         argument. Defaults to True.
     seed : Optional[int]
         Seed used for dataset shuffling. It has no effect if `shuffle` is False. The
-        seed cannot be set in the later stages.
+        seed cannot be set in the later stages. If `None`, then fresh, unpredictable entropy
+        will be pulled from the OS. Defaults to 42.
 
     Examples
     --------

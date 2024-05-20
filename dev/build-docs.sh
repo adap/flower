@@ -17,4 +17,9 @@ cd $ROOT
 
 cd $ROOT
 cd doc
-./build-versioned-docs.sh
+
+if [ "$1" = true ]; then
+    ./build-versioned-docs.sh
+else
+    make html
+fi

@@ -16,15 +16,21 @@
 
 import argparse
 import asyncio
+import csv
 import importlib.util
 import sys
 import threading
 from logging import ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Sequence, Set, Tuple
 
 import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
@@ -35,7 +41,12 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_VCE,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    private_key_to_bytes,
+    public_key_to_bytes,
+    ssh_types_to_elliptic_curve,
+)
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
@@ -51,6 +62,7 @@ from .superlink.fleet.grpc_bidi.grpc_server import (
     start_grpc_server,
 )
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
 from .superlink.fleet.vce import start_vce
 from .superlink.state import StateFactory
 
@@ -184,6 +196,9 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
 def run_driver_api() -> None:
     """Run Flower server (Driver API)."""
     log(INFO, "Starting Flower server (Driver API)")
+    # Running `flower-driver-api` is deprecated
+    warn_deprecated_feature("flower-driver-api")
+    log(WARN, "Use `flower-superlink` instead")
     event(EventType.RUN_DRIVER_API_ENTER)
     args = _parse_args_run_driver_api().parse_args()
 
@@ -221,6 +236,9 @@ def run_driver_api() -> None:
 def run_fleet_api() -> None:
     """Run Flower server (Fleet API)."""
     log(INFO, "Starting Flower server (Fleet API)")
+    # Running `flower-fleet-api` is deprecated
+    warn_deprecated_feature("flower-fleet-api")
+    log(WARN, "Use `flower-superlink` instead")
     event(EventType.RUN_FLEET_API_ENTER)
     args = _parse_args_run_fleet_api().parse_args()
 
@@ -291,9 +309,11 @@ def run_fleet_api() -> None:
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
 def run_superlink() -> None:
-    """Run Flower server (Driver API and Fleet API)."""
-    log(INFO, "Starting Flower server")
+    """Run Flower SuperLink (Driver API and Fleet API)."""
+    log(INFO, "Starting Flower SuperLink")
+
     event(EventType.RUN_SUPERLINK_ENTER)
+
     args = _parse_args_run_superlink().parse_args()
 
     # Parse IP address
@@ -352,10 +372,33 @@ def run_superlink() -> None:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
+        maybe_keys = _try_setup_client_authentication(args, certificates)
+        interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
+        if maybe_keys is not None:
+            (
+                client_public_keys,
+                server_private_key,
+                server_public_key,
+            ) = maybe_keys
+            state = state_factory.state()
+            state.store_client_public_keys(client_public_keys)
+            state.store_server_private_public_key(
+                private_key_to_bytes(server_private_key),
+                public_key_to_bytes(server_public_key),
+            )
+            log(
+                INFO,
+                "Client authentication enabled with %d known public keys",
+                len(client_public_keys),
+            )
+            interceptors = [AuthenticateServerInterceptor(state)]
+
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
             state_factory=state_factory,
             certificates=certificates,
+            interceptors=interceptors,
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
@@ -388,6 +431,70 @@ def run_superlink() -> None:
         driver_server.wait_for_termination(timeout=1)
 
 
+def _try_setup_client_authentication(
+    args: argparse.Namespace,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
+) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+    if not args.require_client_authentication:
+        return None
+
+    if certificates is None:
+        sys.exit(
+            "Client authentication only works over secure connections. "
+            "Please provide certificate paths using '--certificates' when "
+            "enabling '--require-client-authentication'."
+        )
+
+    client_keys_file_path = Path(args.require_client_authentication[0])
+    if not client_keys_file_path.exists():
+        sys.exit(
+            "The provided path to the client public keys CSV file does not exist: "
+            f"{client_keys_file_path}. "
+            "Please provide the CSV file path containing known client public keys "
+            "to '--require-client-authentication'."
+        )
+
+    client_public_keys: Set[bytes] = set()
+    ssh_private_key = load_ssh_private_key(
+        Path(args.require_client_authentication[1]).read_bytes(),
+        None,
+    )
+    ssh_public_key = load_ssh_public_key(
+        Path(args.require_client_authentication[2]).read_bytes()
+    )
+
+    try:
+        server_private_key, server_public_key = ssh_types_to_elliptic_curve(
+            ssh_private_key, ssh_public_key
+        )
+    except TypeError:
+        sys.exit(
+            "The file paths provided could not be read as a private and public "
+            "key pair. Client authentication requires an elliptic curve public and "
+            "private key pair. Please provide the file paths containing elliptic "
+            "curve private and public keys to '--require-client-authentication'."
+        )
+
+    with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            for element in row:
+                public_key = load_ssh_public_key(element.encode())
+                if isinstance(public_key, ec.EllipticCurvePublicKey):
+                    client_public_keys.add(public_key_to_bytes(public_key))
+                else:
+                    sys.exit(
+                        "Error: Unable to parse the public keys in the .csv "
+                        "file. Please ensure that the .csv file contains valid "
+                        "SSH public keys and try again."
+                    )
+        return (
+            client_public_keys,
+            server_private_key,
+            server_public_key,
+        )
+
+
 def _try_obtain_certificates(
     args: argparse.Namespace,
 ) -> Optional[Tuple[bytes, bytes, bytes]]:
@@ -415,6 +522,7 @@ def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
+    interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
     # Create Fleet API gRPC server
@@ -427,6 +535,7 @@ def _run_fleet_api_grpc_rere(
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         certificates=certificates,
+        interceptors=interceptors,
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
@@ -568,9 +677,7 @@ def _parse_args_run_fleet_api() -> argparse.ArgumentParser:
 def _parse_args_run_superlink() -> argparse.ArgumentParser:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
-        description="This will start a Flower server "
-        "(meaning, a Driver API and a Fleet API), "
-        "that clients will be able to connect to.",
+        description="Start a Flower SuperLink",
     )
 
     _add_args_common(parser=parser)
@@ -605,6 +712,15 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "instead of on disk. If nothing is provided, "
         "Flower will just create a state in memory.",
         default=DATABASE,
+    )
+    parser.add_argument(
+        "--require-client-authentication",
+        nargs=3,
+        metavar=("CLIENT_KEYS", "SERVER_PRIVATE_KEY", "SERVER_PUBLIC_KEY"),
+        type=str,
+        help="Provide three file paths: (1) a .csv file containing a list of "
+        "known client public keys for authentication, (2) the server's private "
+        "key file, and (3) the server's public key file.",
     )
 
 

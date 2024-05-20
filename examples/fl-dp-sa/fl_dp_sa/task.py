@@ -38,11 +38,11 @@ class Net(nn.Module):
 
 
 def load_data(partition_id):
-    """Load partition CIFAR10 data."""
+    """Load partition MNIST data."""
     fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
     partition = fds.load_partition(partition_id)
     # Divide data on each node: 80% train, 20% test
-    partition_train_test = partition.train_test_split(test_size=0.2)
+    partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
     pytorch_transforms = Compose([ToTensor(), Normalize((0.5,), (0.5,))])
 
     def apply_transforms(batch):

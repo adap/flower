@@ -15,12 +15,12 @@
 """Ray backend for the Fleet API using the Simulation Engine."""
 
 import pathlib
-from logging import ERROR, INFO
+from logging import DEBUG, ERROR, WARNING
 from typing import Callable, Dict, List, Tuple, Union
 
 import ray
 
-from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
@@ -45,8 +45,8 @@ class RayBackend(Backend):
         work_dir: str,
     ) -> None:
         """Prepare RayBackend by initialising Ray and creating the ActorPool."""
-        log(INFO, "Initialising: %s", self.__class__.__name__)
-        log(INFO, "Backend config: %s", backend_config)
+        log(DEBUG, "Initialising: %s", self.__class__.__name__)
+        log(DEBUG, "Backend config: %s", backend_config)
 
         if not pathlib.Path(work_dir).exists():
             raise ValueError(f"Specified work_dir {work_dir} does not exist.")
@@ -55,7 +55,15 @@ class RayBackend(Backend):
         runtime_env = (
             self._configure_runtime_env(work_dir=work_dir) if work_dir else None
         )
-        init_ray(runtime_env=runtime_env)
+
+        if backend_config.get("mute_logging", False):
+            init_ray(
+                logging_level=WARNING, log_to_driver=False, runtime_env=runtime_env
+            )
+        elif backend_config.get("silent", False):
+            init_ray(logging_level=WARNING, log_to_driver=True, runtime_env=runtime_env)
+        else:
+            init_ray(runtime_env=runtime_env)
 
         # Validate client resources
         self.client_resources_key = "client_resources"
@@ -109,7 +117,7 @@ class RayBackend(Backend):
         else:
             client_resources = {"num_cpus": 2, "num_gpus": 0.0}
             log(
-                INFO,
+                DEBUG,
                 "`%s` not specified in backend config. Applying default setting: %s",
                 self.client_resources_key,
                 client_resources,
@@ -129,7 +137,7 @@ class RayBackend(Backend):
     async def build(self) -> None:
         """Build pool of Ray actors that this backend will submit jobs to."""
         await self.pool.add_actors_to_pool(self.pool.actors_capacity)
-        log(INFO, "Constructed ActorPool with: %i actors", self.pool.num_actors)
+        log(DEBUG, "Constructed ActorPool with: %i actors", self.pool.num_actors)
 
     async def process_message(
         self,
@@ -151,7 +159,6 @@ class RayBackend(Backend):
             )
 
             await future
-
             # Fetch result
             (
                 out_mssg,
@@ -160,16 +167,18 @@ class RayBackend(Backend):
 
             return out_mssg, updated_context
 
-        except LoadClientAppError as load_ex:
+        except Exception as ex:
             log(
                 ERROR,
                 "An exception was raised when processing a message by %s",
                 self.__class__.__name__,
             )
-            raise load_ex
+            # add actor back into pool
+            await self.pool.add_actor_back_to_pool(future)
+            raise ex
 
     async def terminate(self) -> None:
         """Terminate all actors in actor pool."""
         await self.pool.terminate_all_actors()
         ray.shutdown()
-        log(INFO, "Terminated %s", self.__class__.__name__)
+        log(DEBUG, "Terminated %s", self.__class__.__name__)

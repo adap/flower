@@ -22,7 +22,10 @@ from pathlib import Path
 from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple, Union, cast
 
+from cryptography.hazmat.primitives.asymmetric import ec
+
 from flwr.common import (
+    DEFAULT_TTL,
     GRPC_MAX_MESSAGE_LENGTH,
     ConfigsRecord,
     Message,
@@ -55,18 +58,22 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_connection(  # pylint: disable=R0915
+def grpc_connection(  # pylint: disable=R0913, R0915
     server_address: str,
     insecure: bool,
     retry_invoker: RetryInvoker,  # pylint: disable=unused-argument
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
+    authentication_keys: Optional[  # pylint: disable=unused-argument
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
+        Optional[Callable[[int], Tuple[str, str]]],
     ]
 ]:
     """Establish a gRPC connection to a gRPC server.
@@ -180,7 +187,7 @@ def grpc_connection(  # pylint: disable=R0915
                 dst_node_id=0,
                 reply_to_message="",
                 group_id="",
-                ttl="",
+                ttl=DEFAULT_TTL,
                 message_type=message_type,
             ),
             content=recordset,
@@ -223,7 +230,7 @@ def grpc_connection(  # pylint: disable=R0915
 
     try:
         # Yield methods
-        yield (receive, send, None, None)
+        yield (receive, send, None, None, None)
     finally:
         # Make sure to have a final
         channel.close()

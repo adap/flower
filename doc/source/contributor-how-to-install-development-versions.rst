@@ -48,13 +48,13 @@ Install ``flwr`` from a specific GitHub branch (``branch-name``):
 Open Jupyter Notebooks on Google Colab
 --------------------------------------
 
-Open the notebook ``doc/source/tutorial-get-started-with-flower-pytorch.ipynb``:
+Open the notebook ``doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb``:
 
-- https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-get-started-with-flower-pytorch.ipynb
+- https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb
 
 Open a development version of the same notebook from branch `branch-name` by changing ``main`` to ``branch-name`` (right after ``blob``):
 
-- https://colab.research.google.com/github/adap/flower/blob/branch-name/doc/source/tutorial-get-started-with-flower-pytorch.ipynb
+- https://colab.research.google.com/github/adap/flower/blob/branch-name/doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb
 
 Install a `whl` on Google Colab:
 
