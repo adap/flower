@@ -17,8 +17,8 @@ python -m black -q examples
 python -m docformatter -i -r examples
 
 # E2E
-python -m black -q e2e
 python -m isort e2e
+python -m black -q e2e
 
 # Notebooks
 python -m black --ipynb -q doc/source/*.ipynb
