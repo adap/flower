@@ -15,17 +15,16 @@
 """Utils for metrics computation."""
 
 
-from typing import Union, List
+from typing import List, Union
 
 import pandas as pd
 
 
 def compute_counts(
-        labels: Union[List[int], List[str]],
-        unique_labels: Union[List[int], List[str]]
+    labels: Union[List[int], List[str]], unique_labels: Union[List[int], List[str]]
 ) -> pd.Series:
-    """
-    Compute the count of labels when taking into account all possible labels.
+    """Compute the count of labels when taking into account all possible labels.
+
     Also known as absolute frequency.
 
     Parameters
@@ -44,17 +43,17 @@ def compute_counts(
     labels_series = pd.Series(labels)
     label_counts = labels_series.value_counts()
     label_counts_with_zeros = pd.Series(index=unique_labels, data=0)
-    label_counts_with_zeros = label_counts_with_zeros.add(label_counts,
-                                                          fill_value=0).astype(int)
+    label_counts_with_zeros = label_counts_with_zeros.add(
+        label_counts, fill_value=0
+    ).astype(int)
     return label_counts_with_zeros
 
 
 def compute_distribution(
-        labels: Union[List[int], List[str]],
-        unique_labels: Union[List[int], List[str]]
+    labels: Union[List[int], List[str]], unique_labels: Union[List[int], List[str]]
 ) -> pd.Series:
-    """
-    Compute the distribution of labels when taking into account all possible labels.
+    """Compute the distribution of labels when taking into account all possible labels.
+
     Also known as relative frequency.
 
     Parameters
@@ -72,8 +71,6 @@ def compute_distribution(
     counts = compute_counts(labels, unique_labels)
     if len(labels) == 0:
         counts = counts.astype(float)
-        print(counts)
         return counts
     counts = counts.divide(len(labels))
     return counts
-

@@ -15,41 +15,59 @@
 """Tests for metrics utils."""
 
 import unittest
-from parameterized import parameterized
+
 import pandas as pd
+from parameterized import parameterized
+
 from flwr_datasets.metrics.utils import compute_counts, compute_distribution
 
 
 class TestMetricsUtils(unittest.TestCase):
+    """Test metrics utils."""
 
-    @parameterized.expand([
-        ([1, 2, 2, 3], [1, 2, 3, 4], pd.Series([1, 2, 1, 0], index=[1, 2, 3, 4])),
-        ([], [1, 2, 3], pd.Series([0, 0, 0], index=[1, 2, 3])),
-        ([1, 1, 2], [1, 2, 3, 4], pd.Series([2, 1, 0, 0], index=[1, 2, 3, 4])),
-    ])
+    @parameterized.expand(
+        [
+            ([1, 2, 2, 3], [1, 2, 3, 4], pd.Series([1, 2, 1, 0], index=[1, 2, 3, 4])),
+            ([], [1, 2, 3], pd.Series([0, 0, 0], index=[1, 2, 3])),
+            ([1, 1, 2], [1, 2, 3, 4], pd.Series([2, 1, 0, 0], index=[1, 2, 3, 4])),
+        ]
+    )
     def test_compute_counts(self, labels, unique_labels, expected):
+        """Test if the counts are computed correctly."""
         result = compute_counts(labels, unique_labels)
         pd.testing.assert_series_equal(result, expected)
 
-    @parameterized.expand([
-        ([1, 1, 2, 2, 2, 3], [1, 2, 3, 4],
-         pd.Series([0.3333, 0.5, 0.1667, 0.0], index=[1, 2, 3, 4])),
-        ([], [1, 2, 3], pd.Series([0.0, 0.0, 0.0], index=[1, 2, 3])),
-        (['a', 'b', 'b', 'c'], ['a', 'b', 'c', 'd'],
-         pd.Series([0.25, 0.50, 0.25, 0.0], index=['a', 'b', 'c', 'd'])),
-    ])
+    @parameterized.expand(
+        [
+            (
+                [1, 1, 2, 2, 2, 3],
+                [1, 2, 3, 4],
+                pd.Series([0.3333, 0.5, 0.1667, 0.0], index=[1, 2, 3, 4]),
+            ),
+            ([], [1, 2, 3], pd.Series([0.0, 0.0, 0.0], index=[1, 2, 3])),
+            (
+                ["a", "b", "b", "c"],
+                ["a", "b", "c", "d"],
+                pd.Series([0.25, 0.50, 0.25, 0.0], index=["a", "b", "c", "d"]),
+            ),
+        ]
+    )
     def test_compute_distribution(self, labels, unique_labels, expected):
+        """Test if the distributions are computed correctly."""
         result = compute_distribution(labels, unique_labels)
         pd.testing.assert_series_equal(result, expected, atol=0.001)
 
-    @parameterized.expand([
-        (['a', 'b', 'b', 'c'], ['a', 'b', 'c']),
-        ([1, 2, 2, 3, 3, 3, 4], [1, 2, 3, 4]),
-    ])
+    @parameterized.expand(
+        [
+            (["a", "b", "b", "c"], ["a", "b", "c"]),
+            ([1, 2, 2, 3, 3, 3, 4], [1, 2, 3, 4]),
+        ]
+    )
     def test_distribution_sum_to_one(self, labels, unique_labels):
+        """Test if distributions sum up to one."""
         result = compute_distribution(labels, unique_labels)
         self.assertAlmostEqual(result.sum(), 1.0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
