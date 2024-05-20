@@ -89,7 +89,7 @@ class FederatedDataset:
         _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
         self._subset: Optional[str] = subset
-        self._resplitter: Optional[Preprocessor] = _instantiate_resplitter_if_needed(
+        self._preprocessor: Optional[Preprocessor] = _instantiate_resplitter_if_needed(
             preprocessor
         )
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
@@ -244,8 +244,8 @@ class FederatedDataset:
             # Note it shuffles all the splits. The self._dataset is DatasetDict
             # so e.g. {"train": train_data, "test": test_data}. All splits get shuffled.
             self._dataset = self._dataset.shuffle(seed=self._seed)
-        if self._resplitter:
-            self._dataset = self._resplitter(self._dataset)
+        if self._preprocessor:
+            self._dataset = self._preprocessor(self._dataset)
         self._dataset_prepared = True
 
     def _check_if_no_split_keyword_possible(self) -> None:
