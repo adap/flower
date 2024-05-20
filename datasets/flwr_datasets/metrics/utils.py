@@ -15,12 +15,9 @@
 """Utils for metrics computation."""
 
 
-from typing import Union, List, overload
+from typing import Union, List
 
 import pandas as pd
-from functools import singledispatch
-
-from flwr_datasets.partitioner import Partitioner
 
 
 def compute_counts(
@@ -73,6 +70,10 @@ def compute_distribution(
         The pd.Series with label as indices and probabilities as values.
     """
     counts = compute_counts(labels, unique_labels)
+    if len(labels) == 0:
+        counts = counts.astype(float)
+        print(counts)
+        return counts
     counts = counts.divide(len(labels))
     return counts
 
