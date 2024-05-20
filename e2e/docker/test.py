@@ -69,7 +69,7 @@ def test_compose_logs():
     services = DockerCompose(context=".", compose_file_name=COMPOSE_MANIFEST)
 
     with services:
-        sleep(30)  # add delay to ensure training completes
+        sleep(35)  # add delay to ensure training completes
         stdout, stderr = services.get_logs()
 
     assert not stderr
