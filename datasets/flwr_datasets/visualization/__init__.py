@@ -15,7 +15,7 @@
 """Visualization package."""
 
 
-from .label_distribution import plot_label_distributions, compare_label_distribution
+from .label_distribution import compare_label_distribution, plot_label_distributions
 
 __all__ = [
     "plot_label_distributions",
