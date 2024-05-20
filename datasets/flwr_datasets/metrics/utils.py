@@ -51,7 +51,7 @@ def compute_counts(
     return label_counts_with_zeros
 
 
-def compute_distribution(
+def compute_frequency(
     labels: Union[List[int], List[str]], unique_labels: Union[List[int], List[str]]
 ) -> pd.Series:
     """Compute the distribution of labels when taking into account all possible labels.

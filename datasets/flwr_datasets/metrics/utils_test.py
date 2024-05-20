@@ -20,7 +20,7 @@ import unittest
 import pandas as pd
 from parameterized import parameterized
 
-from flwr_datasets.metrics.utils import compute_counts, compute_distribution
+from flwr_datasets.metrics.utils import compute_counts, compute_frequency
 
 
 class TestMetricsUtils(unittest.TestCase):
@@ -55,7 +55,7 @@ class TestMetricsUtils(unittest.TestCase):
     )
     def test_compute_distribution(self, labels, unique_labels, expected) -> None:
         """Test if the distributions are computed correctly."""
-        result = compute_distribution(labels, unique_labels)
+        result = compute_frequency(labels, unique_labels)
         pd.testing.assert_series_equal(result, expected, atol=0.001)
 
     @parameterized.expand(  # type: ignore
@@ -66,7 +66,7 @@ class TestMetricsUtils(unittest.TestCase):
     )
     def test_distribution_sum_to_one(self, labels, unique_labels) -> None:
         """Test if distributions sum up to one."""
-        result = compute_distribution(labels, unique_labels)
+        result = compute_frequency(labels, unique_labels)
         self.assertAlmostEqual(result.sum(), 1.0)
 
     def test_compute_counts_non_unique_labels(self) -> None:
@@ -81,7 +81,7 @@ class TestMetricsUtils(unittest.TestCase):
         labels = [1, 1, 2, 3]
         unique_labels = [1, 1, 2, 3]
         with self.assertRaises(ValueError):
-            compute_distribution(labels, unique_labels)
+            compute_frequency(labels, unique_labels)
 
 
 if __name__ == "__main__":

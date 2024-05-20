@@ -14,9 +14,9 @@
 # ==============================================================================
 """Metrics package."""
 
-from flwr_datasets.metrics.utils import compute_counts, compute_distribution
+from flwr_datasets.metrics.utils import compute_counts, compute_frequency
 
 __all__ = [
     "compute_counts",
-    "compute_distribution",
+    "compute_frequency",
 ]
