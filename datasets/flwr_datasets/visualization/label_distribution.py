@@ -21,6 +21,7 @@ import pandas as pd
 import seaborn as sns
 import numpy as np
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from metrics import compute_counts
 from partitioner import Partitioner
 
@@ -303,7 +304,78 @@ def compare_label_distribution(
         legend: bool = False,
         legend_title: str = "Labels",
         verbose_labels: bool = True,
-) -> Tuple[List[Axes], List[pd.DataFrame]]:
+) -> Tuple[Figure, List[Axes], List[pd.DataFrame]]:
+    """
+    Compare the label distribution across multiple partitioners.
+
+    Parameters
+    ----------
+    partitioner_list : List[Partitioner]
+        List of partitioners to be compared.
+    label_name : Union[str, List[str]]
+        Column name or list of column names identifying labels for each partitioner.
+    plot_type : str, default "bar"
+        Type of plot, either "bar" or "heatmap".
+    size_unit : str, default "percent"
+        "absolute" for raw counts, or "percent" to normalize values to 100%.
+    max_num_partitions : Optional[int], default 30
+        Maximum number of partitions to include in the plot. If None, all partitions are included.
+    partition_id_axis : str, default "y"
+        Axis on which the partition IDs will be marked, either "x" or "y".
+    figsize : Optional[Tuple[float, float]], default None
+        Size of the figure. If None, a default size is calculated.
+    subtitle : str, default "Comparison of Per Partition Label Distribution"
+        Subtitle for the figure.
+    titles : Optional[List[str]], default None
+        Titles for each subplot. If None, no titles are set.
+    cmap : Optional[Union[str, mcolors.Colormap]], default None
+        Colormap for the heatmap.
+    legend : bool, default False
+        Whether to include a legend.
+    legend_title : str, default "Labels"
+        Title for the legend.
+    verbose_labels : bool, default True
+        Whether to use verbose versions of the labels.
+
+    Returns
+    -------
+    fig : Figure
+        The figure object containing the plots.
+    ax_list : List[Axes]
+        List of Axes objects for the plots.
+    df_list : List[pd.DataFrame]
+        List of DataFrames used for each plot.
+
+    Examples
+    --------
+    Compare the difference of using different alpha (concentration) parameters in
+    DirichletPartitioner.
+
+    >> from flwr_datasets import FederatedDataset
+    >> from flwr_datasets.partitioner import DirichletPartitioner
+    >> from flwr_datasets.visualization import compare_label_distribution
+    >>
+    >> partitioner_list = []
+    >> alpha_list = [10_000.0, 100.0, 1.0, 0.1, 0.01, 0.00001]
+    >> for alpha in alpha_list:
+    >>     fds = FederatedDataset(
+    >>         dataset="cifar10",
+    >>         partitioners={
+    >>             "train": DirichletPartitioner(
+    >>                 num_partitions=20,
+    >>                 partition_by="label",
+    >>                 alpha=alpha,
+    >>                 min_partition_size=0,
+    >>             ),
+    >>         },
+    >>     )
+    >>     partitioner_list.append(fds.partitioners["train"])
+    >> fig, axes, df_list = compare_label_distribution(
+    >>     partitioner_list=partitioner_list,
+    >>     label_name="label",
+    >>     titles=[f"Concentration = {alpha}" for alpha in alpha_list],
+    >> )
+    """
     num_partitioners = len(partitioner_list)
     if isinstance(label_name, str):
         label_name = [label_name] * num_partitioners
