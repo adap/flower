@@ -25,19 +25,19 @@ from flwr_datasets.metrics.utils import compute_counts, compute_distribution
 class TestMetricsUtils(unittest.TestCase):
     """Test metrics utils."""
 
-    @parameterized.expand(
+    @parameterized.expand(  # type: ignore
         [
             ([1, 2, 2, 3], [1, 2, 3, 4], pd.Series([1, 2, 1, 0], index=[1, 2, 3, 4])),
             ([], [1, 2, 3], pd.Series([0, 0, 0], index=[1, 2, 3])),
             ([1, 1, 2], [1, 2, 3, 4], pd.Series([2, 1, 0, 0], index=[1, 2, 3, 4])),
         ]
     )
-    def test_compute_counts(self, labels, unique_labels, expected):
+    def test_compute_counts(self, labels, unique_labels, expected) -> None:
         """Test if the counts are computed correctly."""
         result = compute_counts(labels, unique_labels)
         pd.testing.assert_series_equal(result, expected)
 
-    @parameterized.expand(
+    @parameterized.expand(  # type: ignore
         [
             (
                 [1, 1, 2, 2, 2, 3],
@@ -52,18 +52,18 @@ class TestMetricsUtils(unittest.TestCase):
             ),
         ]
     )
-    def test_compute_distribution(self, labels, unique_labels, expected):
+    def test_compute_distribution(self, labels, unique_labels, expected) -> None:
         """Test if the distributions are computed correctly."""
         result = compute_distribution(labels, unique_labels)
         pd.testing.assert_series_equal(result, expected, atol=0.001)
 
-    @parameterized.expand(
+    @parameterized.expand(  # type: ignore
         [
             (["a", "b", "b", "c"], ["a", "b", "c"]),
             ([1, 2, 2, 3, 3, 3, 4], [1, 2, 3, 4]),
         ]
     )
-    def test_distribution_sum_to_one(self, labels, unique_labels):
+    def test_distribution_sum_to_one(self, labels, unique_labels) -> None:
         """Test if distributions sum up to one."""
         result = compute_distribution(labels, unique_labels)
         self.assertAlmostEqual(result.sum(), 1.0)

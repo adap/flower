@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Label distribution plotting."""
-from typing import List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
@@ -24,6 +24,8 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from metrics import compute_counts
 from partitioner import Partitioner
+
+import datasets
 
 # Constants for plot types and size units
 PLOT_TYPES = ("bar", "heatmap")
@@ -45,8 +47,8 @@ def plot_label_distributions(
     legend: bool = False,
     legend_title: str = "Labels",
     verbose_labels: bool = True,
-    **plot_kwargs,
-):
+    **plot_kwargs: Dict[str, Any],
+) -> Tuple[Axes, pd.DataFrame]:
     """Plot the label distribution of the partitions.
 
     Parameters
@@ -71,7 +73,7 @@ def plot_label_distributions(
         Size of the figure.
     title : str
         Title of the plot.
-    colormap : Optional[Union[str, mcolors.Colormap]]
+    cmap : Optional[Union[str, mcolors.Colormap]]
         Colormap for the heatmap.
     legend : bool
         Include the legend.
@@ -180,6 +182,7 @@ def plot_label_distributions(
         max_num_partitions = partitioner.num_partitions
     else:
         max_num_partitions = min(max_num_partitions, partitioner.num_partitions)
+    assert isinstance(max_num_partitions, int)
     partitions = [partitioner.load_partition(i) for i in range(max_num_partitions)]
 
     partition = partitions[0]
@@ -250,7 +253,9 @@ def _initialize_xy_labels(
     return xlabel, ylabel
 
 
-def _validate_parameters(plot_type: str, size_unit: str, partition_id_axis: str):
+def _validate_parameters(
+    plot_type: str, size_unit: str, partition_id_axis: str
+) -> None:
     if plot_type not in PLOT_TYPES:
         raise ValueError(
             f"Invalid plot_type: {plot_type}. Must be one of {PLOT_TYPES}."
@@ -272,13 +277,17 @@ def _initialize_cbar_title(plot_type: str, size_unit: str) -> Optional[str]:
 
 
 def _initialize_figsize(
-    figsize: Optional[Tuple[int, int]],
+    figsize: Optional[Tuple[float, float]],
     plot_type: str,
     partition_id_axis: str,
     num_partitions: int,
     num_labels: int,
 ) -> Tuple[float, float]:
     if figsize is not None:
+        if not isinstance(figsize, tuple):
+            raise TypeError(
+                f"'figsize' should of type 'tuple' but given: {type(figsize)}"
+            )
         return figsize
 
     if plot_type == "bar":
@@ -291,7 +300,11 @@ def _initialize_figsize(
             figsize = (3 * np.sqrt(num_partitions), np.sqrt(num_labels))
         elif partition_id_axis == "y":
             figsize = (3 * np.sqrt(num_labels), np.sqrt(num_partitions))
-
+    else:
+        raise ValueError(
+            f"The type of plot must be 'bar' or 'heatmap' but given: {plot_type}"
+        )
+    assert figsize is not None
     return figsize
 
 
@@ -301,16 +314,16 @@ def _plot_data(
     ax: Optional[Axes],
     figsize: Tuple[float, float],
     title: str,
-    colormap,
+    colormap: Optional[Union[str, mcolors.Colormap]],
     xlabel: str,
     ylabel: str,
-    cbar_title: str,
+    cbar_title: Optional[str],
     legend: bool,
     verbose_labels: bool,
     legend_title: str,
-    partition,
+    partition: datasets.Dataset,
     label_name: str,
-    **plot_kwargs,
+    **plot_kwargs: Dict[str, Any],
 ) -> Axes:
     if plot_type == "bar":
         return _plot_bar(
@@ -348,15 +361,15 @@ def _plot_bar(
     ax: Optional[Axes],
     figsize: Tuple[float, float],
     title: str,
-    colormap,
+    colormap: Optional[Union[str, mcolors.Colormap]],
     xlabel: str,
     ylabel: str,
     legend: bool,
     legend_title: str,
     verbose_labels: bool,
-    partition,
+    partition: datasets.Dataset,
     label_name: str,
-    **plot_kwargs,
+    **plot_kwargs: Dict[str, Any],
 ) -> Axes:
     if colormap is None:
         colormap = "RdYlGn"
@@ -415,12 +428,12 @@ def _plot_heatmap(
     ax: Optional[Axes],
     figsize: Tuple[float, float],
     title: str,
-    colormap,
+    colormap: Optional[Union[str, mcolors.Colormap]],
     xlabel: str,
     ylabel: str,
-    cbar_title: str,
+    cbar_title: Optional[str],
     legend: bool,
-    **plot_kwargs,
+    **plot_kwargs: Dict[str, Any],
 ) -> Axes:
     if colormap is None:
         colormap = sns.light_palette("seagreen", as_cmap=True)
@@ -578,7 +591,7 @@ def compare_label_distribution(
     if titles is None:
         titles = ["" for _ in range(num_partitioners)]
     df_list = []
-    ax_list = []
+    ax_list: List[Axes] = []
     for idx, (partitioner, single_label_name) in enumerate(
         zip(partitioner_list, label_name)
     ):
