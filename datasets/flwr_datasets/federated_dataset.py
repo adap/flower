@@ -46,8 +46,10 @@ class FederatedDataset:
         Secondary information regarding the dataset, most often subset or version
         (that is passed to the name in datasets.load_dataset).
     preprocessor : Optional[Union[Preprocessor, Dict[str, Tuple[str, ...]]]]
-        `Callable` that transforms `DatasetDict` splits, or configuration dict for
-        `MergeResplitter`.
+        `Callable` that transforms `DatasetDict` by resplitting, removing
+        features, creating new features, performing any other preprocessing operation,
+        or configuration dict for `MergeResplitter`. Applied after shuffling. If None,
+        no operation is applied.
     partitioners : Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
         (representing the number of IID partitions that this split should be partitioned
