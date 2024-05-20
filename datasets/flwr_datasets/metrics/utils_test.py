@@ -13,6 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 """Tests for metrics utils."""
+# pylint: disable=no-self-use
 
 import unittest
 

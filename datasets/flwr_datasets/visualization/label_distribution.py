@@ -22,11 +22,12 @@ import pandas as pd
 import seaborn as sns
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from metrics import compute_counts
-from partitioner import Partitioner
 
 import datasets
+from flwr_datasets.metrics import compute_counts
+from flwr_datasets.partitioner import Partitioner
 
+# pylint: disable=too-many-arguments,too-many-locals
 # Constants for plot types and size units
 PLOT_TYPES = ("bar", "heatmap")
 SIZE_UNITS = ("absolute", "percent")
@@ -40,7 +41,7 @@ def plot_label_distributions(
     size_unit: str = "absolute",
     max_num_partitions: Optional[int] = None,
     partition_id_axis: str = "x",
-    ax: Optional[Axes] = None,
+    axis: Optional[Axes] = None,
     figsize: Optional[Tuple[float, float]] = None,
     title: str = "Per Partition Label Distribution",
     cmap: Optional[Union[str, mcolors.Colormap]] = None,
@@ -67,7 +68,7 @@ def plot_label_distributions(
         will be used.
     partition_id_axis : str
         "x" or "y". The axis on which the partition_id will be marked.
-    ax : Optional[Axes]
+    axis : Optional[Axes]
         Matplotlib Axes object to plot on.
     figsize : Optional[Tuple[float, float]]
         Size of the figure.
@@ -84,9 +85,9 @@ def plot_label_distributions(
 
     Returns
     -------
-    ax : Axes
+    axis : Axes
         The Axes object with the plot.
-    df : pd.DataFrame
+    dataframe : pd.DataFrame
         The DataFrame used for plotting.
 
     Examples
@@ -109,7 +110,7 @@ def plot_label_distributions(
     >>     },
     >> )
     >> partitioner = fds.partitioners["train"]
-    >> ax, df = plot_label_distributions(
+    >> axis, dataframe = plot_label_distributions(
     >>     partitioner=partitioner,
     >>     label_name="label"
     >> )
@@ -133,7 +134,7 @@ def plot_label_distributions(
     >>     },
     >> )
     >> partitioner = fds.partitioners["train"]
-    >> ax, df = plot_label_distributions(
+    >> axis, dataframe = plot_label_distributions(
     >>     partitioner=partitioner,
     >>     label_name="label"
     >>     size_unit="percent",
@@ -159,7 +160,7 @@ def plot_label_distributions(
     >>     },
     >> )
     >> partitioner = fds.partitioners["train"]
-    >> ax, df = plot_label_distributions(
+    >> axis, dataframe = plot_label_distributions(
     >>     partitioner=partitioner,
     >>     label_name="label"
     >>     size_unit="percent",
@@ -199,14 +200,16 @@ def plot_label_distributions(
         for pid, partition in enumerate(partitions)
     }
 
-    df = pd.DataFrame.from_dict(partition_id_to_label_absolute_size, orient="index")
-    df.index.name = "Partition ID"
+    dataframe = pd.DataFrame.from_dict(
+        partition_id_to_label_absolute_size, orient="index"
+    )
+    dataframe.index.name = "Partition ID"
 
     if size_unit == "percent":
-        df = df.div(df.sum(axis=1), axis=0) * 100.0
+        dataframe = dataframe.div(dataframe.sum(axis=1), axis=0) * 100.0
 
     if partition_id_axis == "x" and plot_type == "heatmap":
-        df = df.T
+        dataframe = dataframe.T
 
     xlabel, ylabel = _initialize_xy_labels(plot_type, size_unit, partition_id_axis)
     cbar_title = _initialize_cbar_title(plot_type, size_unit)
@@ -214,10 +217,10 @@ def plot_label_distributions(
         figsize, plot_type, partition_id_axis, max_num_partitions, num_labels
     )
 
-    ax = _plot_data(
-        df,
+    axis = _plot_data(
+        dataframe,
         plot_type,
-        ax,
+        axis,
         figsize,
         title,
         cmap,
@@ -232,7 +235,7 @@ def plot_label_distributions(
         **plot_kwargs,
     )
 
-    return ax, df
+    return axis, dataframe
 
 
 def _initialize_xy_labels(
@@ -309,9 +312,9 @@ def _initialize_figsize(
 
 
 def _plot_data(
-    df: pd.DataFrame,
+    dataframe: pd.DataFrame,
     plot_type: str,
-    ax: Optional[Axes],
+    axis: Optional[Axes],
     figsize: Tuple[float, float],
     title: str,
     colormap: Optional[Union[str, mcolors.Colormap]],
@@ -327,8 +330,8 @@ def _plot_data(
 ) -> Axes:
     if plot_type == "bar":
         return _plot_bar(
-            df,
-            ax,
+            dataframe,
+            axis,
             figsize,
             title,
             colormap,
@@ -341,10 +344,10 @@ def _plot_data(
             label_name,
             **plot_kwargs,
         )
-    elif plot_type == "heatmap":
+    if plot_type == "heatmap":
         return _plot_heatmap(
-            df,
-            ax,
+            dataframe,
+            axis,
             figsize,
             title,
             colormap,
@@ -354,11 +357,12 @@ def _plot_data(
             legend,
             **plot_kwargs,
         )
+    raise ValueError(f"Invalid plot_type: {plot_type}. Must be 'bar' or 'heatmap'.")
 
 
 def _plot_bar(
-    df: pd.DataFrame,
-    ax: Optional[Axes],
+    dataframe: pd.DataFrame,
+    axis: Optional[Axes],
     figsize: Tuple[float, float],
     title: str,
     colormap: Optional[Union[str, mcolors.Colormap]],
@@ -373,14 +377,14 @@ def _plot_bar(
 ) -> Axes:
     if colormap is None:
         colormap = "RdYlGn"
-    if ax is None:
-        fig, ax = plt.subplots(figsize=figsize)
+    if axis is None:
+        _, axis = plt.subplots(figsize=figsize)
 
     kind = "bar" if xlabel == "Partition ID" else "barh"
-    ax = df.plot(
+    axis = dataframe.plot(
         kind=kind,
         stacked=True,
-        ax=ax,
+        ax=axis,
         title=title,
         legend=False,
         colormap=colormap,
@@ -389,11 +393,11 @@ def _plot_bar(
     )
 
     if xlabel:
-        ax.set_xlabel(xlabel)
+        axis.set_xlabel(xlabel)
     if ylabel:
-        ax.set_ylabel(ylabel)
+        axis.set_ylabel(ylabel)
 
-    xticklabels = ax.get_xticklabels()
+    xticklabels = axis.get_xticklabels()
     if len(xticklabels) > 20:
         # Make every other xtick label not visible
         for i, label in enumerate(xticklabels):
@@ -401,7 +405,7 @@ def _plot_bar(
                 label.set_visible(False)
 
     if legend:
-        handles, legend_labels = ax.get_legend_handles_labels()
+        handles, legend_labels = axis.get_legend_handles_labels()
         if verbose_labels:
             try:
                 legend_names = partition.features[label_name].int2str(
@@ -412,7 +416,7 @@ def _plot_bar(
         else:
             legend_names = legend_labels
 
-        _ = ax.figure.legend(
+        _ = axis.figure.legend(
             handles[::-1],
             legend_names[::-1],
             title=legend_title,
@@ -420,12 +424,12 @@ def _plot_bar(
             bbox_to_anchor=(1.3, 0.5),
         )
 
-    return ax
+    return axis
 
 
 def _plot_heatmap(
-    df: pd.DataFrame,
-    ax: Optional[Axes],
+    dataframe: pd.DataFrame,
+    axis: Optional[Axes],
     figsize: Tuple[float, float],
     title: str,
     colormap: Optional[Union[str, mcolors.Colormap]],
@@ -437,13 +441,13 @@ def _plot_heatmap(
 ) -> Axes:
     if colormap is None:
         colormap = sns.light_palette("seagreen", as_cmap=True)
-    if ax is None:
-        fig, ax = plt.subplots(figsize=figsize)
+    if axis is None:
+        _, axis = plt.subplots(figsize=figsize)
 
-    fmt = ",d" if "absolute" in df.columns else "0.2f"
+    fmt = ",d" if "absolute" in dataframe.columns else "0.2f"
     sns.heatmap(
-        df,
-        ax=ax,
+        dataframe,
+        ax=axis,
         cmap=colormap,
         fmt=fmt,
         cbar=legend,
@@ -452,12 +456,12 @@ def _plot_heatmap(
     )
 
     if xlabel:
-        ax.set_xlabel(xlabel)
+        axis.set_xlabel(xlabel)
     if ylabel:
-        ax.set_ylabel(ylabel)
+        axis.set_ylabel(ylabel)
 
-    ax.set_title(title)
-    return ax
+    axis.set_title(title)
+    return axis
 
 
 def _initialize_comparison_figsize(
@@ -465,9 +469,9 @@ def _initialize_comparison_figsize(
 ) -> Tuple[float, float]:
     if figsize is not None:
         return figsize
-    x = 4 + (num_partitioners - 1) * 2
-    y = 4.8
-    figsize = (x, y)
+    x_value = 4 + (num_partitioners - 1) * 2
+    y_value = 4.8
+    figsize = (x_value, y_value)
     return figsize
 
 
@@ -542,7 +546,7 @@ def compare_label_distribution(
         The figure object containing the plots.
     ax_list : List[Axes]
         List of Axes objects for the plots.
-    df_list : List[pd.DataFrame]
+    dataframe_list : List[pd.DataFrame]
         List of DataFrames used for each plot.
 
     Examples
@@ -569,7 +573,7 @@ def compare_label_distribution(
     >>         },
     >>     )
     >>     partitioner_list.append(fds.partitioners["train"])
-    >> fig, axes, df_list = compare_label_distribution(
+    >> fig, axes, dataframe_list = compare_label_distribution(
     >>     partitioner_list=partitioner_list,
     >>     label_name="label",
     >>     titles=[f"Concentration = {alpha}" for alpha in alpha_list],
@@ -590,46 +594,45 @@ def compare_label_distribution(
 
     if titles is None:
         titles = ["" for _ in range(num_partitioners)]
-    df_list = []
-    ax_list: List[Axes] = []
+    dataframe_list = []
     for idx, (partitioner, single_label_name) in enumerate(
         zip(partitioner_list, label_name)
     ):
         if idx == (num_partitioners - 1):
-            ax, df = plot_label_distributions(
+            _, dataframe = plot_label_distributions(
                 partitioner,
                 label_name=single_label_name,
                 plot_type=plot_type,
                 size_unit=size_unit,
                 partition_id_axis=partition_id_axis,
-                ax=axes[idx],
+                axis=axes[idx],
                 max_num_partitions=max_num_partitions,
                 cmap=cmap,
                 legend=legend,
                 legend_title=legend_title,
                 verbose_labels=verbose_labels,
             )
-            df_list.append(df)
+            dataframe_list.append(dataframe)
         else:
-            ax, df = plot_label_distributions(
+            _, dataframe = plot_label_distributions(
                 partitioner,
                 label_name=single_label_name,
                 plot_type=plot_type,
                 size_unit=size_unit,
                 partition_id_axis=partition_id_axis,
-                ax=axes[idx],
+                axis=axes[idx],
                 max_num_partitions=max_num_partitions,
                 cmap=cmap,
                 legend=False,
             )
-            df_list.append(df)
+            dataframe_list.append(dataframe)
 
-    for idx, ax in enumerate(axes):
-        ax.set_xlabel("")
-        ax.set_ylabel("")
-        ax.set_title(titles[idx])
-    for ax in axes[1:]:
-        ax.set_yticks([])
+    for idx, axis in enumerate(axes):
+        axis.set_xlabel("")
+        axis.set_ylabel("")
+        axis.set_title(titles[idx])
+    for axis in axes[1:]:
+        axis.set_yticks([])
 
     xlabel, ylabel = _initialize_comparison_xy_labels(plot_type, partition_id_axis)
     fig.supxlabel(xlabel)
@@ -637,4 +640,4 @@ def compare_label_distribution(
     fig.suptitle(subtitle)
 
     fig.tight_layout()
-    return fig, ax_list, df_list
+    return fig, axes, dataframe_list
