@@ -1,0 +1,79 @@
+name: PR Management
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  ensure-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure PR is draft
+        if: github.event.pull_request.draft == false
+        run: gh pr ready-for-review ${{ github.event.pull_request.number }} --draft
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  assign-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Assign PR to the user
+        uses: peter-evans/assign-on-label@v3
+        with:
+          configuration: |
+            - label: ''
+              assignee: ${{ github.actor }}
+
+  check-merge-conflicts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check for merge conflicts
+        id: check_conflicts
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          conflicts=$(git ls-files -u | wc -l)
+          echo "::set-output name=conflicts::$conflicts"
+
+      - name: Move PR to draft if there are conflicts
+        if: steps.check_conflicts.outputs.conflicts != '0'
+        run: |
+          gh pr ready-for-review ${{ github.event.pull_request.number }} --draft
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  check-ci-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check CI status
+        id: check_status
+        run: |
+          pr_number=${{ github.event.pull_request.number }}
+          owner=${{ github.repository_owner }}
+          repo=${{ github.event.repository.name }}
+          token=${{ secrets.GITHUB_TOKEN }}
+          
+          # Fetch the status of all workflows for the pull request
+          response=$(curl -s -H "Authorization: token $token" \
+          "https://api.github.com/repos/$owner/$repo/actions/runs?event=pull_request&per_page=100")
+          
+          # Check for any failed workflow runs
+          failed_runs=$(echo "$response" | jq -r \
+          '.workflow_runs | map(select(.pull_requests[].number == '$pr_number' and .conclusion == "failure")) | length')
+          
+          echo "Failed runs: $failed_runs"
+          echo "::set-output name=failed_runs::$failed_runs"
+
+      - name: Move PR to draft if any CI job failed
+        if: steps.check_status.outputs.failed_runs != '0'
+        run: gh pr ready-for-review ${{ github.event.pull_request.number }} --draft
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
