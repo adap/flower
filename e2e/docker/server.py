@@ -20,7 +20,7 @@ strategy = FedAvg(evaluate_metrics_aggregation_fn=weighted_average)
 
 
 # Define config
-config = ServerConfig(num_rounds=1)
+config = ServerConfig(num_rounds=3)
 
 
 # Flower ServerApp

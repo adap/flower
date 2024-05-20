@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "quickstart-pytorch"
+name = "e2e-docker"
 version = "0.1.0"
-description = "PyTorch Federated Learning Quickstart with Flower"
+description = "TOML used to define dependencies in a E2E test"
 authors = [
     { name = "The Flower Authors", email = "hello@flower.ai" },
 ]
