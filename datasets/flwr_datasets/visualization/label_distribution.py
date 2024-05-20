@@ -34,15 +34,15 @@ AXIS_TYPES = ("x", "y")
 def plot_label_distributions(
         partitioner: Partitioner,
         label_name: str,
-        plot_type: str,
-        size_unit: str,
+        plot_type: str = "bar",
+        size_unit: str = "absolute",
         max_num_partitions: Optional[int] = None,
         partition_id_axis: str = "x",
         ax: Optional[Axes] = None,
         figsize: Optional[Tuple[float, float]] = None,
         title: str = "Per Partition Label Distribution",
         cmap: Optional[Union[str, mcolors.Colormap]] = None,
-        legend: bool = True,
+        legend: bool = False,
         legend_title: str = "Labels",
         verbose_labels: bool = True,
         **plot_kwargs,
@@ -87,6 +87,87 @@ def plot_label_distributions(
         The Axes object with the plot.
     df : pd.DataFrame
         The DataFrame used for plotting.
+
+    Examples
+    --------
+    Visualize the label distribution resulting from DirichletPartitioner.
+
+    >> from flwr_datasets import FederatedDataset
+    >> from flwr_datasets.partitioner import DirichletPartitioner
+    >> from flwr_datasets.visualization import compare_label_distribution
+    >>
+    >> fds = FederatedDataset(
+    >>     dataset="cifar10",
+    >>     partitioners={
+    >>         "train": DirichletPartitioner(
+    >>             num_partitions=20,
+    >>             partition_by="label",
+    >>             alpha=0.3,
+    >>             min_partition_size=0,
+    >>         ),
+    >>     },
+    >> )
+    >> partitioner = fds.partitioners["train"]
+    >> ax, df = plot_label_distributions(
+    >>     partitioner=partitioner,
+    >>     label_name="label"
+    >> )
+
+    Alternatively you can visualize each partition in terms of fraction of the data
+    available on that partition instead of the absolute count
+
+    >> from flwr_datasets import FederatedDataset
+    >> from flwr_datasets.partitioner import DirichletPartitioner
+    >> from flwr_datasets.visualization import compare_label_distribution
+    >>
+    >> fds = FederatedDataset(
+    >>     dataset="cifar10",
+    >>     partitioners={
+    >>         "train": DirichletPartitioner(
+    >>             num_partitions=20,
+    >>             partition_by="label",
+    >>             alpha=0.3,
+    >>             min_partition_size=0,
+    >>         ),
+    >>     },
+    >> )
+    >> partitioner = fds.partitioners["train"]
+    >> ax, df = plot_label_distributions(
+    >>     partitioner=partitioner,
+    >>     label_name="label"
+    >>     size_unit="percent",
+    >> )
+    >>
+
+    You can also visualize the data as a heatmap by changing the `plot_type` from
+    default "bar" to "heatmap"
+
+    >> from flwr_datasets import FederatedDataset
+    >> from flwr_datasets.partitioner import DirichletPartitioner
+    >> from flwr_datasets.visualization import compare_label_distribution
+    >>
+    >> fds = FederatedDataset(
+    >>     dataset="cifar10",
+    >>     partitioners={
+    >>         "train": DirichletPartitioner(
+    >>             num_partitions=20,
+    >>             partition_by="label",
+    >>             alpha=0.3,
+    >>             min_partition_size=0,
+    >>         ),
+    >>     },
+    >> )
+    >> partitioner = fds.partitioners["train"]
+    >> ax, df = plot_label_distributions(
+    >>     partitioner=partitioner,
+    >>     label_name="label"
+    >>     size_unit="percent",
+    >>     plot_type="heatmap",
+    >>     annot=True,
+    >> )
+
+    You can also visualize the returned DataFrame in Jupyter Notebook
+    >> df.style.background_gradient(axis=None)
     """
 
     _validate_parameters(plot_type, size_unit, partition_id_axis)
