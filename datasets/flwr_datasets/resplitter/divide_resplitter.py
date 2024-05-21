@@ -306,8 +306,6 @@ class DivideResplitter:
             Dict[str, Dict[str, int]],
         ],
     ) -> None:
-        if not isinstance(divide_config, dict):
-            raise ValueError("Provided input dictionary is not a dictionary")
         assert self._config_type in [
             "single-split",
             "multiple-splits",
@@ -372,6 +370,8 @@ def _determine_config_type(
     config_type: str
         "single-split" or "multiple-splits"
     """
+    if not isinstance(config, dict):
+        raise ValueError("Provided input dictionary is not a dictionary")
     for value in config.values():
         # Check if the value is a dictionary
         if isinstance(value, dict):
