@@ -40,6 +40,13 @@ from flwr_datasets.resplitter import DivideResplitter
             True,
             {"train_1": 10, "train_2": 30},
         ),
+        # Split without ratios
+        (
+            {"train_1": 15, "train_2": 25},
+            "train",
+            False,
+            {"train_1": 15, "train_2": 25, "valid": 20, "test": 40},
+        ),
         # Split does not sum to 1.0
         (
             {"a": 0.2, "b": 0.4},
