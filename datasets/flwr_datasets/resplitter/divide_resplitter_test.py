@@ -68,7 +68,16 @@ from flwr_datasets.resplitter import DivideResplitter
             False,
             {"train_1": 10, "train_2": 30, "valid": 20, "test": 40},
         ),
-        #
+        # Resplitting multiple splits
+        (
+            {
+                "train": {"train_1": 0.25, "train_2": 0.75},
+                "valid": {"valid_1": 0.4, "valid_2": 0.6},
+            },
+            None,
+            False,
+            {"train_1": 10, "train_2": 30, "valid_1": 8, "valid_2": 12, "test": 40},
+        ),
     ],
 )
 class TestDivideResplitter(unittest.TestCase):
