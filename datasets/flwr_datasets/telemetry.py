@@ -29,8 +29,8 @@ from typing import Any, Dict, List, Optional, Union, cast
 
 from flwr.common.version import package_name, package_version
 
-FLWR_DATASETS_TELEMETRY_ENABLED = os.getenv("FLWR_DATASETS_TELEMETRY_ENABLED", "1")
-FLWR_DATASETS_TELEMETRY_LOGGING = os.getenv("FLWR_DATASETS_TELEMETRY_LOGGING", "0")
+FLWR_TELEMETRY_ENABLED = os.getenv("FLWR_TELEMETRY_ENABLED", "1")
+FLWR_TELEMETRY_LOGGING = os.getenv("FLWR_TELEMETRY_LOGGING", "0")
 
 TELEMETRY_EVENTS_URL = "https://telemetry.flower.ai/api/v1/event"
 
@@ -193,12 +193,12 @@ def create_event(event_type: EventType, event_details: Optional[Dict[str, Any]])
         "context": context,
     }
     payload_json = json.dumps(payload)
-    if FLWR_DATASETS_TELEMETRY_LOGGING == "1":
+    if FLWR_TELEMETRY_LOGGING == "1":
         log(" - ".join([date, "POST", payload_json]))
 
-    # If telemetry is not disabled with setting FLWR_DATASETS_TELEMETRY_ENABLED=0
+    # If telemetry is not disabled with setting FLWR_TELEMETRY_ENABLED=0
     # create a request and send it to the telemetry backend
-    if FLWR_DATASETS_TELEMETRY_ENABLED == "1":
+    if FLWR_TELEMETRY_ENABLED == "1":
         request = urllib.request.Request(
             url=TELEMETRY_EVENTS_URL,
             data=payload_json.encode("utf-8"),
@@ -216,7 +216,7 @@ def create_event(event_type: EventType, event_details: Optional[Dict[str, Any]])
 
             return response_json
         except urllib.error.URLError as ex:
-            if FLWR_DATASETS_TELEMETRY_LOGGING == "1":
+            if FLWR_TELEMETRY_LOGGING == "1":
                 log(ex)
 
     return "disabled"
