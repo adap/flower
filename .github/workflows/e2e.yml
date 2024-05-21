@@ -83,10 +83,10 @@ jobs:
               import tensorflow_datasets as tfds
               tfds.load(name='iris', split=tfds.Split.TRAIN)
 
-          # - directory: opacus
-          #   dataset: |
-          #     from torchvision.datasets import CIFAR10
-          #     CIFAR10('./data', download=True)
+          - directory: opacus
+            dataset: |
+              from torchvision.datasets import CIFAR10
+              CIFAR10('./data', download=True)
 
           - directory: pytorch-lightning
             dataset: |
@@ -122,6 +122,20 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8
+      # virtualenv cache should depends on OS, Python version and `poetry.lock` (and optionally workflow files).
+      - name: Cache Packages
+        id: cache-packages
+        uses: actions/cache@v4
+        with:
+          # Cache directory used by Poetry for Unix, described here:
+          # https://python-poetry.org/docs/configuration/#cache-dir
+          path: ~/.config/pypoetry
+          key: poetry-local-${{ runner.os }}-3.8-${{ hashFiles('**/poetry.lock') }}-${{ hashFiles('.github/workflows/*.yml') }}
+          restore-keys: |
+            poetry-local-${{ runner.os }}-3.8-
+      - name: Check cache hits
+        if: ${{ steps.cache-packages.outputs.cache-hit != 'true' }}
+        run: echo "No cache hit, installing from scratch"
       - name: Install dependencies
         run: python -m poetry install
       - name: Install Flower wheel from artifact store
