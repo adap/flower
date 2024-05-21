@@ -132,8 +132,6 @@ jobs:
             ~/.config/pypoetry
             ~/.local
           key: poetry-local-${{ runner.os }}-3.8-${{ matrix.directory }}-${{ hashFiles('.github/workflows/*.yml') }}
-          restore-keys: |
-            poetry-local-${{ runner.os }}-3.8-
       - name: Install dependencies
         run: python -m poetry install
       - name: Install Flower wheel from artifact store
@@ -148,10 +146,8 @@ jobs:
             ~/.fastai
             ./data
           key: datasets-${{ runner.os }}-${{ matrix.directory }}-${{ hashFiles('.github/workflows/*.yml') }}
-          restore-keys: |
-            datasets-
       - name: Download dataset
-        if: ${{ (matrix.dataset) && (steps.cache-datasets.outputs.cache-hit != 'true') }}
+        if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
         if: ${{ matrix.directory != 'bare-client-auth' }}
