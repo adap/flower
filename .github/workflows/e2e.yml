@@ -122,7 +122,6 @@ jobs:
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8
-      # virtualenv cache should depends on OS, Python version and `poetry.lock` (and optionally workflow files).
       - name: Cache Packages
         id: cache-packages
         uses: actions/cache@v4
@@ -136,9 +135,7 @@ jobs:
           restore-keys: |
             poetry-local-${{ runner.os }}-3.8-
       - name: Install dependencies
-        run: |
-          python -m pip install 'setuptools==69.5.1'
-          python -m poetry install
+        run: python -m poetry install
       - name: Install Flower wheel from artifact store
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
