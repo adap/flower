@@ -8,10 +8,10 @@ import grpc
 
 class DriverStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
-    CreateWorkload: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.driver_pb2.CreateWorkloadRequest,
-        flwr.proto.driver_pb2.CreateWorkloadResponse]
-    """Request workload_id"""
+    CreateRun: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.driver_pb2.CreateRunRequest,
+        flwr.proto.driver_pb2.CreateRunResponse]
+    """Request run_id"""
 
     GetNodes: grpc.UnaryUnaryMultiCallable[
         flwr.proto.driver_pb2.GetNodesRequest,
@@ -31,11 +31,11 @@ class DriverStub:
 
 class DriverServicer(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def CreateWorkload(self,
-        request: flwr.proto.driver_pb2.CreateWorkloadRequest,
+    def CreateRun(self,
+        request: flwr.proto.driver_pb2.CreateRunRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.driver_pb2.CreateWorkloadResponse:
-        """Request workload_id"""
+    ) -> flwr.proto.driver_pb2.CreateRunResponse:
+        """Request run_id"""
         pass
 
     @abc.abstractmethod

@@ -12,16 +12,16 @@ from flwr.server.history import History
 
 def plot_metric_from_history(
     hist: History,
-    save_plot_path: Path,
+    save_plot_path: str,
     suffix: Optional[str] = "",
 ) -> None:
-    """Function to plot from Flower server History.
+    """Plot from Flower server History.
 
     Parameters
     ----------
     hist : History
         Object containing evaluation for all rounds.
-    save_plot_path : Path
+    save_plot_path : str
         Folder to save the plot to.
     suffix: Optional[str]
         Optional string to add at the end of the filename for the plot.
@@ -32,12 +32,12 @@ def plot_metric_from_history(
         if metric_type == "centralized"
         else hist.metrics_distributed
     )
-    rounds, values = zip(*metric_dict["accuracy"])
+    _, values = zip(*metric_dict["accuracy"])
 
     # let's extract centralised loss (main metric reported in FedProx paper)
     rounds_loss, values_loss = zip(*hist.losses_centralized)
 
-    fig, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
+    _, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
     axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))
     axs[1].plot(np.asarray(rounds_loss), np.asarray(values))
 
@@ -55,10 +55,10 @@ def plot_metric_from_history(
 def save_results_as_pickle(
     history: History,
     file_path: Union[str, Path],
-    extra_results: Optional[Dict] = {},
-    default_filename: Optional[str] = "results.pkl",
+    extra_results: Optional[Dict] = None,
+    default_filename: str = "results.pkl",
 ) -> None:
-    """Saves results from simulation to pickle.
+    """Save results from simulation to pickle.
 
     Parameters
     ----------
@@ -77,22 +77,23 @@ def save_results_as_pickle(
         File used by default if file_path points to a directory instead
         to a file. Default: "results.pkl"
     """
-
     path = Path(file_path)
 
     # ensure path exists
     path.mkdir(exist_ok=True, parents=True)
 
     def _add_random_suffix(path_: Path):
-        """Adds a randomly generated suffix to the file name (so it doesn't
-        overwrite the file)."""
+        """Add a randomly generated suffix to the file name (so it doesn't.
+
+        overwrite the file).
+        """
         print(f"File `{path_}` exists! ")
         suffix = token_hex(4)
         print(f"New results to be saved with suffix: {suffix}")
         return path_.parent / (path_.stem + "_" + suffix + ".pkl")
 
     def _complete_path_with_default_name(path_: Path):
-        """Appends the default file name to the path."""
+        """Append the default file name to the path."""
         print("Using default filename")
         return path_ / default_filename
 
@@ -105,7 +106,9 @@ def save_results_as_pickle(
 
     print(f"Results will be saved into: {path}")
 
-    data = {"history": history, **extra_results}
+    data = {"history": history}
+    if extra_results is not None:
+        data = {**data, **extra_results}
 
     # save results to pickle
     with open(str(path), "wb") as handle:

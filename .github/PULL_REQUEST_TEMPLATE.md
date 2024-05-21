@@ -1,6 +1,7 @@
 <!--
 Thank you for opening a pull request (PR)!
 
+Please rename your PRs following this [format](https://flower.ai/docs/framework/contributor-tutorial-contribute-on-github.html#pr-title-format).
 Contribution guidelines: https://github.com/adap/flower/blob/main/CONTRIBUTING.md
 -->
 
@@ -36,10 +37,9 @@ Example: The variable `rnd` was renamed to `server_round` to improve readability
 
 - [ ] Implement proposed change
 - [ ] Write tests
-- [ ] Update [documentation](https://flower.dev/docs/writing-documentation.html)
-- [ ] Update [changelog](https://github.com/adap/flower/blob/main/doc/source/changelog.rst)
+- [ ] Update [documentation](https://flower.ai/docs/writing-documentation.html)
 - [ ] Make CI checks pass
-- [ ] Ping maintainers on [Slack](https://flower.dev/join-slack/) (channel `#contributions`)
+- [ ] Ping maintainers on [Slack](https://flower.ai/join-slack/) (channel `#contributions`)
 
 ### Any other comments?
 
@@ -49,7 +49,7 @@ Smaller PRs with good descriptions can be considered much more easily.
 
 If you have an urgent request or question, please use the Flower Slack:
 
-    https://flower.dev/join-slack/ (channel: #contributions)
+    https://flower.ai/join-slack/ (channel: #contributions)
 
 Thank you for contributing to Flower!
 -->

@@ -1,4 +1,4 @@
-# Copyright 2023 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ from flwr.common.version import package_name, package_version
 FLWR_TELEMETRY_ENABLED = os.getenv("FLWR_TELEMETRY_ENABLED", "1")
 FLWR_TELEMETRY_LOGGING = os.getenv("FLWR_TELEMETRY_LOGGING", "0")
 
-TELEMETRY_EVENTS_URL = "https://telemetry.flower.dev/api/v1/event"
+TELEMETRY_EVENTS_URL = "https://telemetry.flower.ai/api/v1/event"
 
 LOGGER_NAME = "flwr-telemetry"
 LOGGER_LEVEL = logging.DEBUG
@@ -137,8 +137,8 @@ class EventType(str, Enum):
     RUN_FLEET_API_LEAVE = auto()
 
     # Driver API and Fleet API
-    RUN_SERVER_ENTER = auto()
-    RUN_SERVER_LEAVE = auto()
+    RUN_SUPERLINK_ENTER = auto()
+    RUN_SUPERLINK_LEAVE = auto()
 
     # Simulation
     START_SIMULATION_ENTER = auto()
@@ -152,6 +152,18 @@ class EventType(str, Enum):
     START_DRIVER_ENTER = auto()
     START_DRIVER_LEAVE = auto()
 
+    # flower-client-app
+    RUN_CLIENT_APP_ENTER = auto()
+    RUN_CLIENT_APP_LEAVE = auto()
+
+    # flower-server-app
+    RUN_SERVER_APP_ENTER = auto()
+    RUN_SERVER_APP_LEAVE = auto()
+
+    # SuperNode
+    RUN_SUPERNODE_ENTER = auto()
+    RUN_SUPERNODE_LEAVE = auto()
+
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
 # and also ensure that telemetry calls are not blocking.
@@ -164,11 +176,6 @@ state: Dict[str, Union[Optional[str], Optional[ThreadPoolExecutor]]] = {
 }
 
 
-# In Python 3.7 pylint will throw an error stating that
-# "Value 'Future' is unsubscriptable".
-# This pylint disable line can be remove when dropping support
-# for Python 3.7
-# pylint: disable-next=unsubscriptable-object
 def event(
     event_type: EventType,
     event_details: Optional[Dict[str, Any]] = None,

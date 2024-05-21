@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,21 @@
 """Contains the strategy abstraction and different implementations."""
 
 
+from .bulyan import Bulyan as Bulyan
+from .dp_adaptive_clipping import (
+    DifferentialPrivacyClientSideAdaptiveClipping as DifferentialPrivacyClientSideAdaptiveClipping,
+)
+from .dp_adaptive_clipping import (
+    DifferentialPrivacyServerSideAdaptiveClipping as DifferentialPrivacyServerSideAdaptiveClipping,
+)
+from .dp_fixed_clipping import (
+    DifferentialPrivacyClientSideFixedClipping as DifferentialPrivacyClientSideFixedClipping,
+)
+from .dp_fixed_clipping import (
+    DifferentialPrivacyServerSideFixedClipping as DifferentialPrivacyServerSideFixedClipping,
+)
+from .dpfedavg_adaptive import DPFedAvgAdaptive as DPFedAvgAdaptive
+from .dpfedavg_fixed import DPFedAvgFixed as DPFedAvgFixed
 from .fault_tolerant_fedavg import FaultTolerantFedAvg as FaultTolerantFedAvg
 from .fedadagrad import FedAdagrad as FedAdagrad
 from .fedadam import FedAdam as FedAdam
@@ -25,24 +40,37 @@ from .fedmedian import FedMedian as FedMedian
 from .fedopt import FedOpt as FedOpt
 from .fedprox import FedProx as FedProx
 from .fedtrimmedavg import FedTrimmedAvg as FedTrimmedAvg
+from .fedxgb_bagging import FedXgbBagging as FedXgbBagging
+from .fedxgb_cyclic import FedXgbCyclic as FedXgbCyclic
 from .fedxgb_nn_avg import FedXgbNnAvg as FedXgbNnAvg
 from .fedyogi import FedYogi as FedYogi
+from .krum import Krum as Krum
 from .qfedavg import QFedAvg as QFedAvg
 from .strategy import Strategy as Strategy
 
 __all__ = [
-    "FaultTolerantFedAvg",
+    "Bulyan",
+    "DPFedAvgAdaptive",
+    "DPFedAvgFixed",
+    "DifferentialPrivacyClientSideAdaptiveClipping",
+    "DifferentialPrivacyServerSideAdaptiveClipping",
+    "DifferentialPrivacyClientSideFixedClipping",
+    "DifferentialPrivacyServerSideFixedClipping",
     "FedAdagrad",
     "FedAdam",
     "FedAvg",
-    "FedXgbNnAvg",
     "FedAvgAndroid",
     "FedAvgM",
+    "FedMedian",
     "FedOpt",
     "FedProx",
-    "FedYogi",
-    "QFedAvg",
-    "FedMedian",
     "FedTrimmedAvg",
+    "FedXgbBagging",
+    "FedXgbCyclic",
+    "FedXgbNnAvg",
+    "FedYogi",
+    "FaultTolerantFedAvg",
+    "Krum",
+    "QFedAvg",
     "Strategy",
 ]

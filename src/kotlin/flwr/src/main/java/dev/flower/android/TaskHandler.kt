@@ -38,7 +38,7 @@ internal fun wrapClientMessageInTaskRes(clientMessage: ClientMessage): TaskRes {
     return TaskRes.newBuilder()
         .setTaskId("")
         .setGroupId("")
-        .setWorkloadId("")
+        .setWorkloadId(0)
         .setTask(Task.newBuilder().addAllAncestry(emptyList()).setLegacyClientMessage(clientMessage))
         .build()
 }

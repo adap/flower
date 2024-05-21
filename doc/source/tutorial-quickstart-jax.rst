@@ -4,6 +4,9 @@
 Quickstart JAX
 ==============
 
+.. meta::
+   :description: Check out this Federated Learning quickstart tutorial for using Flower with Jax to train a linear regression model on a scikit-learn dataset.
+
 This tutorial will show you how to use Flower to build a federated version of an existing JAX workload.
 We are using JAX to train a linear regression model on a scikit-learn dataset.
 We will structure the example similar to our `PyTorch - From Centralized To Federated <https://github.com/adap/flower/blob/main/examples/pytorch-from-centralized-to-federated>`_ walkthrough.
@@ -262,7 +265,7 @@ Having defined the federation process, we can run it.
 
         # Start Flower client
         client = FlowerClient(params, grad_fn, train_x, train_y, test_x, test_y)
-        fl.client.start_numpy_client(server_address="0.0.0.0:8080", client)
+        fl.client.start_client(server_address="0.0.0.0:8080", client=client.to_client())
 
     if __name__ == "__main__":
         main()

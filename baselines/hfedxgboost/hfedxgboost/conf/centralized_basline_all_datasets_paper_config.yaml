@@ -1,0 +1,46 @@
+centralized: True
+learning_rate: 0.1
+max_depth: 8
+n_estimators: 500
+subsample: 0.8
+colsample_bylevel: 1
+colsample_bynode: 1
+colsample_bytree: 1
+alpha: 5
+gamma: 5
+num_parallel_tree: 1
+min_child_weight: 1
+
+dataset:
+  dataset_name: "all"
+  train_ratio: .75
+
+XGBoost:
+  classifier:
+    _target_:  xgboost.XGBClassifier
+    objective: "binary:logistic"
+    learning_rate: ${learning_rate}
+    max_depth: ${max_depth}
+    n_estimators: ${n_estimators}
+    subsample: ${subsample}
+    colsample_bylevel: ${colsample_bylevel}
+    colsample_bynode: ${colsample_bynode}
+    colsample_bytree: ${colsample_bytree}
+    alpha: ${alpha}
+    gamma: ${gamma}
+    num_parallel_tree: ${num_parallel_tree}
+    min_child_weight: ${min_child_weight}
+  regressor: 
+    _target_:  xgboost.XGBRegressor
+    objective: "reg:squarederror"
+    learning_rate: ${learning_rate}
+    max_depth: ${max_depth}
+    n_estimators: ${n_estimators}
+    subsample: ${subsample}
+    colsample_bylevel: ${colsample_bylevel}
+    colsample_bynode: ${colsample_bynode}
+    colsample_bytree: ${colsample_bytree}
+    alpha: ${alpha}
+    gamma: ${gamma}
+    num_parallel_tree: ${num_parallel_tree}
+    min_child_weight: ${min_child_weight}

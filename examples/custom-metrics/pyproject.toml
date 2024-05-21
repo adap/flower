@@ -1,0 +1,19 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "custom-metrics"
+version = "0.1.0"
+description = "Federated Learning with Flower and Custom Metrics"
+authors = [
+	"The Flower Authors <hello@flower.ai>",
+	"Gustavo Bertoli <gubertoli -at- gmail.com>",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+flwr = ">=1.0,<2.0"
+flwr-datasets = { version = "*", extras = ["vision"] }
+scikit-learn = "^1.2.2"
+tensorflow = "==2.12.0"

@@ -1,0 +1,66 @@
+name: Draft release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  ARTIFACT_BUCKET: artifact.flower.ai
+
+jobs:
+  publish:
+    if: ${{ github.repository == 'adap/flower' }}
+    name: Publish draft
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Wait for wheel to be built
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.ref }}
+          check-name: 'Build, test and upload wheel'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
+      - name: Download wheel
+        run: |
+          tag_name=$(echo "${GITHUB_REF_NAME}" | cut -c2-)
+          echo "TAG_NAME=$tag_name" >> "$GITHUB_ENV"
+
+          wheel_name="flwr-${tag_name}-py3-none-any.whl"
+          echo "WHEEL_NAME=$wheel_name" >> "$GITHUB_ENV"
+
+          tar_name="flwr-${tag_name}.tar.gz"
+          echo "TAR_NAME=$tar_name" >> "$GITHUB_ENV"
+
+          wheel_url="https://${{ env.ARTIFACT_BUCKET }}/py/main/${GITHUB_SHA::7}/${wheel_name}"
+          tar_url="https://${{ env.ARTIFACT_BUCKET }}/py/main/${GITHUB_SHA::7}/${tar_name}"
+
+          curl $wheel_url --output $wheel_name
+          curl $tar_url --output $tar_name
+      - name: Upload wheel
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./${{ env.WHEEL_NAME }} s3://${{ env.ARTIFACT_BUCKET }}/py/release/v${{ env.TAG_NAME }}/${{ env.WHEEL_NAME }}
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./${{ env.TAR_NAME }} s3://${{ env.ARTIFACT_BUCKET }}/py/release/v${{ env.TAG_NAME }}/${{ env.TAR_NAME }}
+
+      - name: Generate body
+        run: |
+          ./dev/get-latest-changelog.sh > body.md
+          cat body.md
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: ./body.md
+          draft: true
+          name: Flower ${{ env.TAG_NAME }}
+          files: |
+            ${{ env.WHEEL_NAME }}
+            ${{ env.TAR_NAME }}

@@ -4,6 +4,8 @@ from sklearn.metrics import log_loss
 from sklearn.linear_model import LogisticRegression
 from typing import Dict
 
+from flwr_datasets import FederatedDataset
+
 
 def fit_round(server_round: int) -> Dict:
     """Send round number to client."""
@@ -14,7 +16,9 @@ def get_evaluate_fn(model: LogisticRegression):
     """Return an evaluation function for server-side evaluation."""
 
     # Load test data here to avoid the overhead of doing it in `evaluate` itself
-    _, (X_test, y_test) = utils.load_mnist()
+    fds = FederatedDataset(dataset="mnist", partitioners={"train": 10})
+    dataset = fds.load_split("test").with_format("numpy")
+    X_test, y_test = dataset["image"].reshape((len(dataset), -1)), dataset["label"]
 
     # The `evaluate` function will be called after every round
     def evaluate(server_round, parameters: fl.common.NDArrays, config):

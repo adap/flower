@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,13 +16,61 @@
 
 
 from abc import ABC
-from typing import Dict, Tuple
+from typing import Callable, Dict, Tuple
 
-from flwr.common import Config, NDArrays, Scalar
+from flwr.client.client import Client
+from flwr.common import (
+    Config,
+    Context,
+    NDArrays,
+    Scalar,
+    ndarrays_to_parameters,
+    parameters_to_ndarrays,
+)
+from flwr.common.typing import (
+    Code,
+    EvaluateIns,
+    EvaluateRes,
+    FitIns,
+    FitRes,
+    GetParametersIns,
+    GetParametersRes,
+    GetPropertiesIns,
+    GetPropertiesRes,
+    Status,
+)
+
+EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT = """
+NumPyClient.fit did not return a tuple with 3 elements.
+The returned values should have the following type signature:
+
+    Tuple[NDArrays, int, Dict[str, Scalar]]
+
+Example
+-------
+
+    model.get_weights(), 10, {"accuracy": 0.95}
+
+"""
+
+EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE = """
+NumPyClient.evaluate did not return a tuple with 3 elements.
+The returned values should have the following type signature:
+
+    Tuple[float, int, Dict[str, Scalar]]
+
+Example
+-------
+
+    0.5, 10, {"accuracy": 0.95}
+
+"""
 
 
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
+
+    context: Context
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return a client's set of properties.
@@ -126,6 +174,18 @@ class NumPyClient(ABC):
         _ = (self, parameters, config)
         return 0.0, 0, {}
 
+    def get_context(self) -> Context:
+        """Get the run context from this client."""
+        return self.context
+
+    def set_context(self, context: Context) -> None:
+        """Apply a run context to this client."""
+        self.context = context
+
+    def to_client(self) -> Client:
+        """Convert to object to Client type and return it."""
+        return _wrap_numpy_client(client=self)
+
 
 def has_get_properties(client: NumPyClient) -> bool:
     """Check if NumPyClient implements get_properties."""
@@ -145,3 +205,112 @@ def has_fit(client: NumPyClient) -> bool:
 def has_evaluate(client: NumPyClient) -> bool:
     """Check if NumPyClient implements evaluate."""
     return type(client).evaluate != NumPyClient.evaluate
+
+
+def _constructor(self: Client, numpy_client: NumPyClient) -> None:
+    self.numpy_client = numpy_client  # type: ignore
+
+
+def _get_properties(self: Client, ins: GetPropertiesIns) -> GetPropertiesRes:
+    """Return the current client properties."""
+    properties = self.numpy_client.get_properties(config=ins.config)  # type: ignore
+    return GetPropertiesRes(
+        status=Status(code=Code.OK, message="Success"),
+        properties=properties,
+    )
+
+
+def _get_parameters(self: Client, ins: GetParametersIns) -> GetParametersRes:
+    """Return the current local model parameters."""
+    parameters = self.numpy_client.get_parameters(config=ins.config)  # type: ignore
+    parameters_proto = ndarrays_to_parameters(parameters)
+    return GetParametersRes(
+        status=Status(code=Code.OK, message="Success"), parameters=parameters_proto
+    )
+
+
+def _fit(self: Client, ins: FitIns) -> FitRes:
+    """Refine the provided parameters using the locally held dataset."""
+    # Deconstruct FitIns
+    parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
+
+    # Train
+    results = self.numpy_client.fit(parameters, ins.config)  # type: ignore
+    if not (
+        len(results) == 3
+        and isinstance(results[0], list)
+        and isinstance(results[1], int)
+        and isinstance(results[2], dict)
+    ):
+        raise TypeError(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
+
+    # Return FitRes
+    parameters_prime, num_examples, metrics = results
+    parameters_prime_proto = ndarrays_to_parameters(parameters_prime)
+    return FitRes(
+        status=Status(code=Code.OK, message="Success"),
+        parameters=parameters_prime_proto,
+        num_examples=num_examples,
+        metrics=metrics,
+    )
+
+
+def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
+    """Evaluate the provided parameters using the locally held dataset."""
+    parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
+
+    results = self.numpy_client.evaluate(parameters, ins.config)  # type: ignore
+    if not (
+        len(results) == 3
+        and isinstance(results[0], float)
+        and isinstance(results[1], int)
+        and isinstance(results[2], dict)
+    ):
+        raise TypeError(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE)
+
+    # Return EvaluateRes
+    loss, num_examples, metrics = results
+    return EvaluateRes(
+        status=Status(code=Code.OK, message="Success"),
+        loss=loss,
+        num_examples=num_examples,
+        metrics=metrics,
+    )
+
+
+def _get_context(self: Client) -> Context:
+    """Return context of underlying NumPyClient."""
+    return self.numpy_client.get_context()  # type: ignore
+
+
+def _set_context(self: Client, context: Context) -> None:
+    """Apply context to underlying NumPyClient."""
+    self.numpy_client.set_context(context)  # type: ignore
+
+
+def _wrap_numpy_client(client: NumPyClient) -> Client:
+    member_dict: Dict[str, Callable] = {  # type: ignore
+        "__init__": _constructor,
+        "get_context": _get_context,
+        "set_context": _set_context,
+    }
+
+    # Add wrapper type methods (if overridden)
+
+    if has_get_properties(client=client):
+        member_dict["get_properties"] = _get_properties
+
+    if has_get_parameters(client=client):
+        member_dict["get_parameters"] = _get_parameters
+
+    if has_fit(client=client):
+        member_dict["fit"] = _fit
+
+    if has_evaluate(client=client):
+        member_dict["evaluate"] = _evaluate
+
+    # Create wrapper class
+    wrapper_class = type("NumPyClientWrapper", (Client,), member_dict)
+
+    # Create and return an instance of the newly created class
+    return wrapper_class(numpy_client=client)  # type: ignore

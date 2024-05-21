@@ -4,6 +4,8 @@ from pathlib import Path
 import flwr as fl
 import tensorflow as tf
 
+from flwr_datasets import FederatedDataset
+
 
 def main() -> None:
     # Load and compile model for
@@ -43,11 +45,11 @@ def main() -> None:
 def get_evaluate_fn(model):
     """Return an evaluation function for server-side evaluation."""
 
-    # Load data and model here to avoid the overhead of doing it in `evaluate` itself
-    (x_train, y_train), _ = tf.keras.datasets.cifar10.load_data()
-
-    # Use the last 5k training examples as a validation set
-    x_val, y_val = x_train[45000:50000], y_train[45000:50000]
+    # Load data here to avoid the overhead of doing it in `evaluate` itself
+    fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
+    test = fds.load_split("test")
+    test.set_format("numpy")
+    x_test, y_test = test["img"] / 255.0, test["label"]
 
     # The `evaluate` function will be called after every round
     def evaluate(
@@ -56,7 +58,7 @@ def get_evaluate_fn(model):
         config: Dict[str, fl.common.Scalar],
     ) -> Optional[Tuple[float, Dict[str, fl.common.Scalar]]]:
         model.set_weights(parameters)  # Update model with the latest parameters
-        loss, accuracy = model.evaluate(x_val, y_val)
+        loss, accuracy = model.evaluate(x_test, y_test)
         return loss, {"accuracy": accuracy}
 
     return evaluate

@@ -1,4 +1,5 @@
 """FEMNIST model test."""
+
 # pylint: disable=no-self-use
 import unittest
 

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,10 +39,38 @@ from .aggregate import aggregate, weighted_loss_avg
 from .strategy import Strategy
 
 
+# pylint: disable=line-too-long
 class FedAvgAndroid(Strategy):
-    """Configurable FedAvg strategy implementation."""
+    """Federated Averaging strategy.
 
-    # pylint: disable=too-many-arguments,too-many-instance-attributes, line-too-long
+    Implementation based on https://arxiv.org/abs/1602.05629
+
+    Parameters
+    ----------
+    fraction_fit : Optional[float]
+        Fraction of clients used during training. Defaults to 1.0.
+    fraction_evaluate : Optional[float]
+        Fraction of clients used during validation. Defaults to 1.0.
+    min_fit_clients : Optional[int]
+        Minimum number of clients used during training. Defaults to 2.
+    min_evaluate_clients : Optional[int]
+        Minimum number of clients used during validation. Defaults to 2.
+    min_available_clients : Optional[int]
+        Minimum number of total clients in the system. Defaults to 2.
+    evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
+        Optional function used for validation. Defaults to None.
+    on_fit_config_fn : Optional[Callable[[int], Dict[str, Scalar]]]
+        Function used to configure training. Defaults to None.
+    on_evaluate_config_fn : Optional[Callable[[int], Dict[str, Scalar]]]
+        Function used to configure validation. Defaults to None.
+    accept_failures : Optional[bool]
+        Whether or not accept rounds
+        containing failures. Defaults to True.
+    initial_parameters : Optional[Parameters]
+        Initial global model parameters.
+    """
+
+    # pylint: disable=too-many-arguments,too-many-instance-attributes
     def __init__(
         self,
         *,
@@ -62,34 +90,6 @@ class FedAvgAndroid(Strategy):
         accept_failures: bool = True,
         initial_parameters: Optional[Parameters] = None,
     ) -> None:
-        """Federated Averaging strategy.
-
-        Implementation based on https://arxiv.org/abs/1602.05629
-
-        Parameters
-        ----------
-        fraction_fit : Optional[float]
-            Fraction of clients used during training. Defaults to 0.1.
-        fraction_evaluate : Optional[float]
-            Fraction of clients used during validation. Defaults to 0.1.
-        min_fit_clients : Optional[int]
-            Minimum number of clients used during training. Defaults to 2.
-        min_evaluate_clients : Optional[int]
-            Minimum number of clients used during validation. Defaults to 2.
-        min_available_clients : Optional[int]
-            Minimum number of total clients in the system. Defaults to 2.
-        evaluate_fn : Optional[Callable[[int, NDArrays, Dict[str, Scalar]], Optional[Tuple[float, Dict[str, Scalar]]]]]
-            Optional function used for validation. Defaults to None.
-        on_fit_config_fn : Optional[Callable[[int], Dict[str, Scalar]]]
-            Function used to configure training. Defaults to None.
-        on_evaluate_config_fn : Optional[Callable[[int], Dict[str, Scalar]]]
-            Function used to configure validation. Defaults to None.
-        accept_failures : Optional[bool]
-            Whether or not accept rounds
-            containing failures. Defaults to True.
-        initial_parameters : Optional[Parameters]
-            Initial global model parameters.
-        """
         super().__init__()
         self.min_fit_clients = min_fit_clients
         self.min_evaluate_clients = min_evaluate_clients
@@ -234,12 +234,10 @@ class FedAvgAndroid(Strategy):
         """Convert parameters object to NumPy weights."""
         return [self.bytes_to_ndarray(tensor) for tensor in parameters.tensors]
 
-    # pylint: disable=R0201
     def ndarray_to_bytes(self, ndarray: NDArray) -> bytes:
         """Serialize NumPy array to bytes."""
         return ndarray.tobytes()
 
-    # pylint: disable=R0201
     def bytes_to_ndarray(self, tensor: bytes) -> NDArray:
         """Deserialize NumPy array from bytes."""
         ndarray_deserialized = np.frombuffer(tensor, dtype=np.float32)

@@ -53,7 +53,11 @@ def client_fn(cid):
     train_loader, val_loader, test_loader = mnist.load_data()
 
     # Flower client
-    return FlowerClient(model, train_loader, val_loader, test_loader)
+    return FlowerClient(model, train_loader, val_loader, test_loader).to_client()
+
+app = fl.client.ClientApp(
+    client_fn=client_fn,
+)
 
 def main() -> None:
     # Model and data
@@ -61,8 +65,8 @@ def main() -> None:
     train_loader, val_loader, test_loader = mnist.load_data()
 
     # Flower client
-    client = FlowerClient(model, train_loader, val_loader, test_loader)
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
+    client = FlowerClient(model, train_loader, val_loader, test_loader).to_client()
+    fl.client.start_client(server_address="127.0.0.1:8080", client=client)
 
 
 if __name__ == "__main__":

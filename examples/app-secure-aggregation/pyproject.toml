@@ -1,0 +1,14 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "app-secure-aggregation"
+version = "0.1.0"
+description = "Flower Secure Aggregation example."
+authors = ["The Flower Authors <hello@flower.ai>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+# Mandatory dependencies
+flwr = { version = "^1.8.0", extras = ["simulation"] }

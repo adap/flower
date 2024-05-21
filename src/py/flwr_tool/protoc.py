@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ def compile_all() -> None:
     exit_code = protoc.main(command)
 
     if exit_code != 0:
-        raise Exception(f"Error: {command} failed")
+        raise Exception(f"Error: {command} failed")  # pylint: disable=W0719
 
 
 if __name__ == "__main__":

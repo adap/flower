@@ -1,4 +1,4 @@
-// Copyright 2022 Adap GmbH. All Rights Reserved.
+// Copyright 2022 Flower Labs GmbH. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
 
 service Driver {
-  // Request workload_id
-  rpc CreateWorkload(CreateWorkloadRequest) returns (CreateWorkloadResponse) {}
+  // Request run_id
+  rpc CreateRun(CreateRunRequest) returns (CreateRunResponse) {}
 
   // Return a set of nodes
   rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {}
@@ -34,13 +34,16 @@ service Driver {
   rpc PullTaskRes(PullTaskResRequest) returns (PullTaskResResponse) {}
 }
 
-// CreateWorkload
-message CreateWorkloadRequest {}
-message CreateWorkloadResponse { string workload_id = 1; }
+// CreateRun
+message CreateRunRequest {
+  string fab_id = 1;
+  string fab_version = 2;
+}
+message CreateRunResponse { sint64 run_id = 1; }
 
 // GetNodes messages
-message GetNodesRequest { string workload_id = 1; }
-message GetNodesResponse { repeated uint64 node_ids = 1; }
+message GetNodesRequest { sint64 run_id = 1; }
+message GetNodesResponse { repeated Node nodes = 1; }
 
 // PushTaskIns messages
 message PushTaskInsRequest { repeated TaskIns task_ins_list = 1; }

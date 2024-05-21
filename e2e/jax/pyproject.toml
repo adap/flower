@@ -2,13 +2,13 @@
 name = "jax_example"
 version = "0.1.0"
 description = "JAX example training a linear regression model with federated learning"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
-jax = "^0.4.0"
-jaxlib = "^0.4.0"
+jax = "==0.4.13"
+jaxlib = "==0.4.13"
 scikit-learn = "^1.1.1"
 numpy = "^1.21.4"
 

@@ -8,19 +8,63 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   FLWR_TELEMETRY_ENABLED: 0
+  ARTIFACT_BUCKET: artifact.flower.ai
 
 jobs:
+  wheel:
+    runs-on: ubuntu-22.04
+    name: Build, test and upload wheel
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+      - name: Install dependencies (mandatory only)
+        run: python -m poetry install
+      - name: Build wheel
+        run: ./dev/build.sh
+      - name: Test wheel
+        run: ./dev/test-wheel.sh
+      - name: Upload wheel
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        id: upload
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          cd ./dist
+          echo "WHL_PATH=$(ls *.whl)" >> "$GITHUB_OUTPUT"
+          sha_short=$(git rev-parse --short HEAD)
+          echo "SHORT_SHA=$sha_short" >> "$GITHUB_OUTPUT"
+          [ -z "${{ github.head_ref }}" ] && dir="${{ github.ref_name }}" || dir="pr/${{ github.head_ref }}"
+          echo "DIR=$dir" >> "$GITHUB_OUTPUT"
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://${{ env.ARTIFACT_BUCKET }}/py/$dir/$sha_short --recursive
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://${{ env.ARTIFACT_BUCKET }}/py/$dir/latest --recursive
+    outputs:
+      whl_path: ${{ steps.upload.outputs.WHL_PATH }}
+      short_sha: ${{ steps.upload.outputs.SHORT_SHA }}
+      dir: ${{ steps.upload.outputs.DIR }}
+
   frameworks:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
+    needs: wheel
     # Using approach described here:
     # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
     strategy:
       matrix:
         include:
           - directory: bare
+
+          - directory: bare-https
+
+          - directory: bare-client-auth
 
           - directory: jax
 
@@ -33,7 +77,7 @@ jobs:
             dataset: |
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
-              
+
           - directory: tabnet
             dataset: |
               import tensorflow_datasets as tfds
@@ -43,16 +87,11 @@ jobs:
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
-              
+
           - directory: pytorch-lightning
             dataset: |
               from torchvision.datasets import MNIST
               MNIST('./data', download=True)
-
-          - directory: mxnet
-            dataset: |
-              import mxnet as mx
-              mx.test_utils.get_mnist()
 
           - directory: scikit-learn
             dataset: |
@@ -62,7 +101,7 @@ jobs:
           - directory: fastai
             dataset: |
               from fastai.vision.all import untar_data, URLs
-              untar_data(URLs.MNIST) 
+              untar_data(URLs.MNIST)
 
           - directory: pandas
             dataset: |
@@ -78,26 +117,43 @@ jobs:
         working-directory: e2e/${{ matrix.directory }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
           python-version: 3.8
       - name: Install dependencies
         run: python -m poetry install
+      - name: Install Flower wheel from artifact store
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        run: |
+          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
+        if: ${{ matrix.directory != 'bare-client-auth' }}
         run: ./../test.sh "${{ matrix.directory }}"
       - name: Run virtual client test
+        if: ${{ matrix.directory != 'bare-client-auth' }}
         run: python simulation.py
       - name: Run driver test
-        run: ./../test_driver.sh
+        if: ${{ matrix.directory != 'bare-client-auth' }}
+        run: ./../test_driver.sh "${{ matrix.directory }}"
+      - name: Run driver test with REST
+        if: ${{ matrix.directory == 'bare' }}
+        run: ./../test_driver.sh bare rest
+      - name: Run driver test with SQLite database
+        if: ${{ matrix.directory == 'bare' }}
+        run: ./../test_driver.sh bare sqlite
+      - name: Run driver test with client authentication
+        if: ${{ matrix.directory == 'bare-client-auth' }}
+        run: ./../test_driver.sh bare client-auth
 
   strategies:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
+    needs: wheel
     strategy:
       matrix:
         strat: ["FedMedian", "FedTrimmedAvg", "QFedAvg", "FaultTolerantFedAvg", "FedAvgM", "FedAdam", "FedAdagrad", "FedYogi"]
@@ -109,14 +165,18 @@ jobs:
         working-directory: e2e/strategies
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install dependencies
         run: |
           python -m poetry install
+      - name: Install Flower wheel from artifact store
+        if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        run: |
+          python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Cache Datasets
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: "~/.keras"
           key: keras-datasets

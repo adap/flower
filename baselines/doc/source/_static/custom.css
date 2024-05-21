@@ -5,3 +5,15 @@ html, body{
 .mermaid {
     background: #f8f8f8
 }
+
+h1 {
+    font-size: 40px;
+}
+
+h2 {
+    font-size: 30px;
+}
+
+p {
+    font-size: 16px;
+}

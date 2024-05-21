@@ -6,22 +6,20 @@ explanations are given in the official PyTorch tutorial:
 https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 """
 
-
 # mypy: ignore-errors
 # pylint: disable=W0223
 
 
-from typing import Tuple, Dict
+from typing import Tuple
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision
-import torchvision.transforms as transforms
 from torch import Tensor
-from torchvision.datasets import CIFAR10
+from torch.utils.data import DataLoader
+from torchvision.transforms import Compose, ToTensor, Normalize
 
-DATA_ROOT = "./dataset"
+from flwr_datasets import FederatedDataset
 
 
 # pylint: disable=unsubscriptable-object
@@ -53,19 +51,25 @@ class Net(nn.Module):
         return x
 
 
-def load_data() -> (
-    Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader, Dict]
-):
-    """Load CIFAR-10 (training and test set)."""
-    transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+def load_data(partition_id: int):
+    """Load partition CIFAR10 data."""
+    fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
+    partition = fds.load_partition(partition_id)
+    # Divide data on each node: 80% train, 20% test
+    partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
+    pytorch_transforms = Compose(
+        [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
-    trainset = CIFAR10(DATA_ROOT, train=True, download=True, transform=transform)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True)
-    testset = CIFAR10(DATA_ROOT, train=False, download=True, transform=transform)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=32, shuffle=False)
-    num_examples = {"trainset": len(trainset), "testset": len(testset)}
-    return trainloader, testloader, num_examples
+
+    def apply_transforms(batch):
+        """Apply transforms to the partition from FederatedDataset."""
+        batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
+        return batch
+
+    partition_train_test = partition_train_test.with_transform(apply_transforms)
+    trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
+    testloader = DataLoader(partition_train_test["test"], batch_size=32)
+    return trainloader, testloader
 
 
 def train(
@@ -87,7 +91,7 @@ def train(
     for epoch in range(epochs):  # loop over the dataset multiple times
         running_loss = 0.0
         for i, data in enumerate(trainloader, 0):
-            images, labels = data[0].to(device), data[1].to(device)
+            images, labels = data["img"].to(device), data["label"].to(device)
 
             # zero the parameter gradients
             optimizer.zero_grad()
@@ -120,7 +124,7 @@ def test(
     net.eval()
     with torch.no_grad():
         for data in testloader:
-            images, labels = data[0].to(device), data[1].to(device)
+            images, labels = data["img"].to(device), data["label"].to(device)
             outputs = net(images)
             loss += criterion(outputs, labels).item()
             _, predicted = torch.max(outputs.data, 1)  # pylint: disable=no-member
@@ -133,7 +137,7 @@ def main():
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Centralized PyTorch training")
     print("Load data")
-    trainloader, testloader, _ = load_data()
+    trainloader, testloader = load_data(0)
     net = Net().to(DEVICE)
     net.eval()
     print("Start training")

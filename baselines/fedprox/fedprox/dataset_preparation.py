@@ -1,3 +1,5 @@
+"""Functions for dataset download and processing."""
+
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -8,7 +10,7 @@ from torchvision.datasets import MNIST
 
 
 def _download_data() -> Tuple[Dataset, Dataset]:
-    """Downloads (if necessary) and returns the MNIST dataset.
+    """Download (if necessary) and returns the MNIST dataset.
 
     Returns
     -------
@@ -23,6 +25,7 @@ def _download_data() -> Tuple[Dataset, Dataset]:
     return trainset, testset
 
 
+# pylint: disable=too-many-locals
 def _partition_data(
     num_clients,
     iid: Optional[bool] = False,
@@ -30,8 +33,9 @@ def _partition_data(
     balance: Optional[bool] = False,
     seed: Optional[int] = 42,
 ) -> Tuple[List[Dataset], Dataset]:
-    """Split training set into iid or non iid partitions to simulate the
-    federated setting.
+    """Split training set into iid or non iid partitions to simulate the federated.
+
+    setting.
 
     Parameters
     ----------
@@ -39,8 +43,9 @@ def _partition_data(
         The number of clients that hold a part of the data
     iid : bool, optional
         Whether the data should be independent and identically distributed between
-        the clients or if the data should first be sorted by labels and distributed by chunks
-        to each client (used to test the convergence in a worst case scenario), by default False
+        the clients or if the data should first be sorted by labels and distributed
+        by chunks to each client (used to test the convergence in a worst case scenario)
+        , by default False
     power_law: bool, optional
         Whether to follow a power-law distribution when assigning number of samples
         for each client, defaults to True
@@ -53,13 +58,14 @@ def _partition_data(
     Returns
     -------
     Tuple[List[Dataset], Dataset]
-        A list of dataset for each client and a single dataset to be use for testing the model.
+        A list of dataset for each client and a single dataset to be use for testing
+        the model.
     """
     trainset, testset = _download_data()
 
     if balance:
         trainset = _balance_classes(trainset, seed)
-        
+
     partition_size = int(len(trainset) / num_clients)
     lengths = [partition_size] * num_clients
 
@@ -171,6 +177,7 @@ def _sort_by_class(
     return sorted_dataset
 
 
+# pylint: disable=too-many-locals, too-many-arguments
 def _power_law_split(
     sorted_trainset: Dataset,
     num_partitions: int,
@@ -179,9 +186,10 @@ def _power_law_split(
     mean: float = 0.0,
     sigma: float = 2.0,
 ) -> Dataset:
-    """Partitions the dataset following a power-law distribution. It follows
-    the implementation of Li et al 2020: https://arxiv.org/abs/1812.06127 with
-    default values set accordingly.
+    """Partition the dataset following a power-law distribution. It follows the.
+
+    implementation of Li et al 2020: https://arxiv.org/abs/1812.06127 with default
+    values set accordingly.
 
     Parameters
     ----------
@@ -205,15 +213,14 @@ def _power_law_split(
     Dataset
         The partitioned training dataset.
     """
-
     targets = sorted_trainset.targets
-    full_idx = range(len(targets))
+    full_idx = list(range(len(targets)))
 
     class_counts = np.bincount(sorted_trainset.targets)
     labels_cs = np.cumsum(class_counts)
     labels_cs = [0] + labels_cs[:-1].tolist()
 
-    partitions_idx = []
+    partitions_idx: List[List[int]] = []
     num_classes = len(np.bincount(targets))
     hist = np.zeros(num_classes, dtype=np.int32)
 
@@ -243,7 +250,9 @@ def _power_law_split(
         (num_classes, int(num_partitions / num_classes), num_labels_per_partition),
     )
     remaining_per_class = class_counts - hist
-    # obtain how many samples each partition should be assigned for each of the labels it contains
+    # obtain how many samples each partition should be assigned for each of the
+    # labels it contains
+    # pylint: disable=too-many-function-args
     probs = (
         remaining_per_class.reshape(-1, 1, 1)
         * probs

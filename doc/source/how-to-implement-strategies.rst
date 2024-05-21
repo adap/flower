@@ -233,7 +233,7 @@ The return value is a list of tuples, each representing the instructions that wi
 * Use the :code:`client_manager` to randomly sample all (or a subset of) available clients (each represented as a :code:`ClientProxy` object)
 * Pair each :code:`ClientProxy` with the same :code:`FitIns` holding the current global model :code:`parameters` and :code:`config` dict
 
-More sophisticated implementations can use :code:`configure_fit` to implement custom client selection logic. A client will only participate in a round if the corresponding :code:`ClientProxy` is included in the the list returned from :code:`configure_fit`.
+More sophisticated implementations can use :code:`configure_fit` to implement custom client selection logic. A client will only participate in a round if the corresponding :code:`ClientProxy` is included in the list returned from :code:`configure_fit`.
 
 .. note::
 
@@ -280,7 +280,7 @@ The return value is a list of tuples, each representing the instructions that wi
 * Use the :code:`client_manager` to randomly sample all (or a subset of) available clients (each represented as a :code:`ClientProxy` object)
 * Pair each :code:`ClientProxy` with the same :code:`EvaluateIns` holding the current global model :code:`parameters` and :code:`config` dict
 
-More sophisticated implementations can use :code:`configure_evaluate` to implement custom client selection logic. A client will only participate in a round if the corresponding :code:`ClientProxy` is included in the the list returned from :code:`configure_evaluate`.
+More sophisticated implementations can use :code:`configure_evaluate` to implement custom client selection logic. A client will only participate in a round if the corresponding :code:`ClientProxy` is included in the list returned from :code:`configure_evaluate`.
 
 .. note::
 

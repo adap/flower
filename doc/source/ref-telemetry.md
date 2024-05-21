@@ -41,7 +41,7 @@ Flower telemetry collects the following metrics:
 
 **Source.** Flower telemetry tries to store a random source ID in `~/.flwr/source` the first time a telemetry event is generated. The source ID is important to identify whether an issue is recurring or whether an issue is triggered by multiple clusters running concurrently (which often happens in simulation). For example, if a device runs multiple workloads at the same time, and this results in an issue, then, in order to reproduce the issue, multiple workloads must be started at the same time.
 
-You may delete the source ID at any time. If you wish for all events logged under a specific source ID to be deleted, you can send a deletion request mentioning the source ID to `telemetry@flower.dev`. All events related to that source ID will then be permanently deleted.
+You may delete the source ID at any time. If you wish for all events logged under a specific source ID to be deleted, you can send a deletion request mentioning the source ID to `telemetry@flower.ai`. All events related to that source ID will then be permanently deleted.
 
 We will not collect any personally identifiable information. If you think any of the metrics collected could be misused in any way, please [get in touch with us](#how-to-contact-us). We will update this page to reflect any changes to the metrics collected and publish changes in the changelog.
 
@@ -63,4 +63,4 @@ FLWR_TELEMETRY_ENABLED=0 FLWR_TELEMETRY_LOGGING=1 python server.py # or client.p
 
 ## How to contact us
 
-We want to hear from you. If you have any feedback or ideas on how to improve the way we handle anonymous usage metrics, reach out to us via [Slack](https://flower.dev/join-slack/) (channel `#telemetry`) or email (`telemetry@flower.dev`).
+We want to hear from you. If you have any feedback or ideas on how to improve the way we handle anonymous usage metrics, reach out to us via [Slack](https://flower.ai/join-slack/) (channel `#telemetry`) or email (`telemetry@flower.ai`).

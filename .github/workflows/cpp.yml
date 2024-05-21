@@ -1,0 +1,98 @@
+name: C++ SDK
+
+on:
+  push:
+    branches: ['main']
+    paths: ['src/cc/flwr/**']
+  pull_request:
+    branches: ['main']
+    paths: ['src/cc/flwr/**']
+
+jobs:
+  build_and_test:
+    name: Build and test
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Bootstrap
+      uses: ./.github/actions/bootstrap
+
+    - name: Cache restore SDK build
+      uses: actions/cache/restore@v4
+      with:
+        path: build/
+        key: ${{ runner.os }}-sdk-build
+
+    - name: Cache restore example build
+      uses: actions/cache/restore@v4
+      with:
+        path: examples/quickstart-cpp/build/
+        key: ${{ runner.os }}-example-build
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format cmake g++ clang-tidy cppcheck
+
+    - name: Check source Formatting
+      run: |
+        find src/cc/flwr/src -name '*.cc' | xargs clang-format -i
+        git diff --exit-code
+
+    - name: Check header Formatting
+      run: |
+        find src/cc/flwr/include -name '*.h' -not -path "src/cc/flwr/include/flwr/*" | xargs clang-format -i
+        git diff --exit-code
+
+    - name: Build
+      run: |
+        mkdir -p build
+        cd build
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../src/cc/flwr
+        make
+
+    - name: Run clang-tidy
+      run: |
+        cd build
+        find ../src/cc/flwr/src -name '*.cc' | xargs clang-tidy
+
+    - name: Run cppcheck
+      run: |
+        cd build
+        cppcheck --enable=all -I../src/cc/flwr/include ../src/cc/flwr/src
+
+    - name: End-to-end test
+      run: |
+        cd examples/quickstart-cpp
+        cmake -DUSE_LOCAL_FLWR=ON -S . -B build
+        cmake --build build
+        pip install ../..
+        timeout 3m flower-superlink --insecure &
+        sleep 10
+        timeout 2m build/flwr_client 0 127.0.0.1:9092 &
+        sleep 3
+        timeout 2m build/flwr_client 1 127.0.0.1:9092 &
+        sleep 3
+        flower-server-app server:app --insecure &
+        pid=$!
+        wait $pid
+        res=$?
+        if [[ "$res" = "0" ]];
+          then echo "Training worked correctly" && exit 0;
+          else echo "Training had an issue" && exit 1;
+        fi
+
+    - name: Cache save SDK build
+      uses: actions/cache/save@v4
+      if: github.ref_name == 'main'
+      with:
+        path: build/
+        key: ${{ runner.os }}-sdk-build
+
+    - name: Cache save example build
+      uses: actions/cache/save@v4
+      if: github.ref_name == 'main'
+      with:
+        path: examples/quickstart-cpp/build/
+        key: ${{ runner.os }}-example-build

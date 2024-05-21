@@ -1,3 +1,7 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "flower-android-kotlin"
 version = "0.1.0"
@@ -7,7 +11,3 @@ authors = ["Steven Hé (Sīchàng) <sichang.he@dukekunshan.edu.cn>"]
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 flwr = ">=1.0,<2.0"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

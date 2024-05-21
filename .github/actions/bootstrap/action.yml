@@ -4,26 +4,52 @@ inputs:
   python-version:
     description: "Version range or exact version of Python or PyPy to use, using SemVer's version range syntax."
     default: 3.8
-  pip-version: 
+  pip-version:
     description: "Version of pip to be installed using pip"
-    default: 23.1.2
+    default: 23.3.1
   setuptools-version:
     description: "Version of setuptools to be installed using pip"
-    default: 68.0.0
+    default: 68.2.2
   poetry-version:
     description: "Version of poetry to be installed using pip"
-    default: 1.5.1
+    default: 1.7.1
+  poetry-skip:
+    description: "Option to skip the poetry installation"
+    required: false
+    default: 'false'
+outputs:
+  python-version:
+    description: "Version range or exact version of Python or PyPy"
+    value: ${{ steps.versions.outputs.python-version }}
+  pip-version:
+    description: "Installed version of pip"
+    value: ${{ steps.versions.outputs.pip-version }}
+  setuptools-version:
+    description: "Installed version of setuptools"
+    value: ${{ steps.versions.outputs.setuptools-version }}
+  poetry-version:
+    description: "Installed version of poetry"
+    value: ${{ steps.versions.outputs.poetry-version }}
 runs:
   using: "composite"
   steps:
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
     - name: Install build tools
       run: |
-        python -m pip install -U pip==${{ inputs.pip-version }}
-        python -m pip install -U setuptools==${{ inputs.setuptools-version }}
-        python -m pip install -U poetry==${{ inputs.poetry-version }}
-        python -m poetry config virtualenvs.create false
+        if ${{ inputs.poetry-skip == 'false' }}; then
+          python -m pip install -U pip==${{ inputs.pip-version }}
+          python -m pip install -U setuptools==${{ inputs.setuptools-version }}
+          python -m pip install -U poetry==${{ inputs.poetry-version }}
+          python -m poetry config virtualenvs.create false
+        fi
       shell: bash
+    - id: versions
+      shell: bash
+      run: |
+        echo "python-version=$(echo ${{ inputs.python-version }})" >> $GITHUB_OUTPUT
+        echo "pip-version=$(echo ${{ inputs.pip-version }})" >> $GITHUB_OUTPUT
+        echo "setuptools-version=$(echo ${{ inputs.setuptools-version }})" >> $GITHUB_OUTPUT
+        echo "poetry-version=$(echo ${{ inputs.poetry-version }})" >> $GITHUB_OUTPUT

@@ -1,0 +1,2 @@
+_target_: dasha.models.LinearNetWithNonConvexLoss
+init_with_zeros: True

@@ -1,4 +1,4 @@
-# Copyright 2023 Adap GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
 """Validator tests."""
 
 
+import time
 import unittest
 from typing import List, Tuple
 
-from flwr.proto.node_pb2 import Node
-from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, ServerMessage
+from flwr.common import DEFAULT_TTL
+from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
+from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 
 from .validator import validate_task_ins_or_res
 
@@ -37,16 +39,12 @@ class ValidatorTest(unittest.TestCase):
 
         # Execute & Assert
         for consumer_node_id, anonymous in valid_ins:
-            msg = create_task_ins(
-                consumer_node_id, anonymous, has_legacy_server_message=True
-            )
+            msg = create_task_ins(consumer_node_id, anonymous)
             val_errors = validate_task_ins_or_res(msg)
             self.assertFalse(val_errors)
 
         for consumer_node_id, anonymous in invalid_ins:
-            msg = create_task_ins(
-                consumer_node_id, anonymous, has_legacy_server_message=True
-            )
+            msg = create_task_ins(consumer_node_id, anonymous)
             val_errors = validate_task_ins_or_res(msg)
             self.assertTrue(val_errors)
 
@@ -70,61 +68,19 @@ class ValidatorTest(unittest.TestCase):
 
         # Execute & Assert
         for producer_node_id, anonymous, ancestry in valid_res:
-            msg = create_task_res(
-                producer_node_id, anonymous, ancestry, has_legacy_client_message=True
-            )
+            msg = create_task_res(producer_node_id, anonymous, ancestry)
             val_errors = validate_task_ins_or_res(msg)
             self.assertFalse(val_errors)
 
         for producer_node_id, anonymous, ancestry in invalid_res:
-            msg = create_task_res(
-                producer_node_id, anonymous, ancestry, has_legacy_client_message=True
-            )
+            msg = create_task_res(producer_node_id, anonymous, ancestry)
             val_errors = validate_task_ins_or_res(msg)
             self.assertTrue(val_errors, (producer_node_id, anonymous, ancestry))
-
-    def test_task_ins_secure_aggregation(self) -> None:
-        """Test is_valid task_ins for Secure Aggregation."""
-        # Prepare
-        # (has_legacy_server_message, has_sa)
-        valid_ins = [(True, True), (False, True)]
-        invalid_ins = [(False, False)]
-
-        # Execute & Assert
-        for has_legacy_server_message, has_sa in valid_ins:
-            msg = create_task_ins(1, False, has_legacy_server_message, has_sa)
-            val_errors = validate_task_ins_or_res(msg)
-            self.assertFalse(val_errors)
-
-        for has_legacy_server_message, has_sa in invalid_ins:
-            msg = create_task_ins(1, False, has_legacy_server_message, has_sa)
-            val_errors = validate_task_ins_or_res(msg)
-            self.assertTrue(val_errors)
-
-    def test_task_res_secure_aggregation(self) -> None:
-        """Test is_valid task_res for Secure Aggregation."""
-        # Prepare
-        # (has_legacy_server_message, has_sa)
-        valid_res = [(True, True), (False, True)]
-        invalid_res = [(False, False)]
-
-        # Execute & Assert
-        for has_legacy_client_message, has_sa in valid_res:
-            msg = create_task_res(0, True, ["1"], has_legacy_client_message, has_sa)
-            val_errors = validate_task_ins_or_res(msg)
-            self.assertFalse(val_errors)
-
-        for has_legacy_client_message, has_sa in invalid_res:
-            msg = create_task_res(0, True, ["1"], has_legacy_client_message, has_sa)
-            val_errors = validate_task_ins_or_res(msg)
-            self.assertTrue(val_errors)
 
 
 def create_task_ins(
     consumer_node_id: int,
     anonymous: bool,
-    has_legacy_server_message: bool = False,
-    has_sa: bool = False,
     delivered_at: str = "",
 ) -> TaskIns:
     """Create a TaskIns for testing."""
@@ -135,19 +91,19 @@ def create_task_ins(
     task = TaskIns(
         task_id="",
         group_id="",
-        workload_id="",
+        run_id=0,
         task=Task(
             delivered_at=delivered_at,
             producer=Node(node_id=0, anonymous=True),
             consumer=consumer,
-            legacy_server_message=ServerMessage(
-                reconnect_ins=ServerMessage.ReconnectIns()
-            )
-            if has_legacy_server_message
-            else None,
-            sa=SecureAggregation(named_values={}) if has_sa else None,
+            task_type="mock",
+            recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            ttl=DEFAULT_TTL,
+            created_at=time.time(),
         ),
     )
+
+    task.task.pushed_at = time.time()
     return task
 
 
@@ -155,24 +111,22 @@ def create_task_res(
     producer_node_id: int,
     anonymous: bool,
     ancestry: List[str],
-    has_legacy_client_message: bool = False,
-    has_sa: bool = False,
 ) -> TaskRes:
     """Create a TaskRes for testing."""
     task_res = TaskRes(
         task_id="",
         group_id="",
-        workload_id="",
+        run_id=0,
         task=Task(
             producer=Node(node_id=producer_node_id, anonymous=anonymous),
             consumer=Node(node_id=0, anonymous=True),
             ancestry=ancestry,
-            legacy_client_message=ClientMessage(
-                disconnect_res=ClientMessage.DisconnectRes()
-            )
-            if has_legacy_client_message
-            else None,
-            sa=SecureAggregation(named_values={}) if has_sa else None,
+            task_type="mock",
+            recordset=RecordSet(parameters={}, metrics={}, configs={}),
+            ttl=DEFAULT_TTL,
+            created_at=time.time(),
         ),
     )
+
+    task_res.task.pushed_at = time.time()
     return task_res

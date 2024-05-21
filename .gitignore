@@ -3,6 +3,7 @@
 data/
 doc/source/api_documentation
 doc/source/_build
+doc/source/dataset/
 flwr_logs
 .cache
 
@@ -11,7 +12,7 @@ node_modules
 
 # Flower Examples
 examples/**/dataset/**
-examples/**/dev/*.sh
+#examples/**/dev/*.sh
 
 # Flower Baselines
 baselines/datasets/leaf

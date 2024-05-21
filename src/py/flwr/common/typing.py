@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,6 +44,15 @@ Value = Union[
     List[int],
     List[str],
 ]
+
+# Value types for common.MetricsRecord
+MetricsScalar = Union[int, float]
+MetricsScalarList = Union[List[int], List[float]]
+MetricsRecordValues = Union[MetricsScalar, MetricsScalarList]
+# Value types for common.ConfigsRecord
+ConfigsScalar = Union[MetricsScalar, str, bytes, bool]
+ConfigsScalarList = Union[MetricsScalarList, List[str], List[bytes], List[bool]]
+ConfigsRecordValues = Union[ConfigsScalar, ConfigsScalarList]
 
 Metrics = Dict[str, Scalar]
 MetricsAggregationFn = Callable[[List[Tuple[int, Metrics]]], Metrics]

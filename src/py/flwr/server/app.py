@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,45 +14,57 @@
 # ==============================================================================
 """Flower server app."""
 
-
 import argparse
+import asyncio
+import csv
 import importlib.util
 import sys
 import threading
-from dataclasses import dataclass
 from logging import ERROR, INFO, WARN
 from os.path import isfile
-from signal import SIGINT, SIGTERM, signal
-from types import FrameType
-from typing import List, Optional, Tuple
+from pathlib import Path
+from typing import List, Optional, Sequence, Set, Tuple
 
 import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
-    TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
+    TRANSPORT_TYPE_VCE,
 )
-from flwr.common.logger import log
-from flwr.proto.driver_pb2_grpc import add_DriverServicer_to_server
-from flwr.proto.fleet_pb2_grpc import add_FleetServicer_to_server
-from flwr.proto.transport_pb2_grpc import add_FlowerServiceServicer_to_server
-from flwr.server.client_manager import ClientManager, SimpleClientManager
-from flwr.server.driver.driver_servicer import DriverServicer
-from flwr.server.fleet.grpc_bidi.driver_client_manager import DriverClientManager
-from flwr.server.fleet.grpc_bidi.flower_service_servicer import FlowerServiceServicer
-from flwr.server.fleet.grpc_bidi.grpc_server import (
+from flwr.common.exit_handlers import register_exit_handlers
+from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    private_key_to_bytes,
+    public_key_to_bytes,
+    ssh_types_to_elliptic_curve,
+)
+from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
+    add_FleetServicer_to_server,
+)
+
+from .client_manager import ClientManager
+from .history import History
+from .server import Server, init_defaults, run_fl
+from .server_config import ServerConfig
+from .strategy import Strategy
+from .superlink.driver.driver_grpc import run_driver_api_grpc
+from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
 )
-from flwr.server.fleet.grpc_rere.fleet_servicer import FleetServicer
-from flwr.server.history import History
-from flwr.server.server import Server
-from flwr.server.state import StateFactory
-from flwr.server.strategy import FedAvg, Strategy
+from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
+from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
+from .superlink.fleet.vce import start_vce
+from .superlink.state import StateFactory
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
@@ -60,18 +72,6 @@ ADDRESS_FLEET_API_GRPC_BIDI = "[::]:8080"  # IPv6 to keep start_server compatibl
 ADDRESS_FLEET_API_REST = "0.0.0.0:9093"
 
 DATABASE = ":flwr-in-memory-state:"
-
-
-@dataclass
-class ServerConfig:
-    """Flower server config.
-
-    All attributes have default values which allows users to configure just the ones
-    they care about.
-    """
-
-    num_rounds: int = 1
-    round_timeout: Optional[float] = None
 
 
 def start_server(  # pylint: disable=too-many-arguments,too-many-locals
@@ -193,52 +193,14 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     return hist
 
 
-def init_defaults(
-    server: Optional[Server],
-    config: Optional[ServerConfig],
-    strategy: Optional[Strategy],
-    client_manager: Optional[ClientManager],
-) -> Tuple[Server, ServerConfig]:
-    """Create server instance if none was given."""
-    if server is None:
-        if client_manager is None:
-            client_manager = SimpleClientManager()
-        if strategy is None:
-            strategy = FedAvg()
-        server = Server(client_manager=client_manager, strategy=strategy)
-    elif strategy is not None:
-        log(WARN, "Both server and strategy were provided, ignoring strategy")
-
-    # Set default config values
-    if config is None:
-        config = ServerConfig()
-
-    return server, config
-
-
-def run_fl(
-    server: Server,
-    config: ServerConfig,
-) -> History:
-    """Train a model on the given server and return the History object."""
-    hist = server.fit(num_rounds=config.num_rounds, timeout=config.round_timeout)
-    log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
-    log(INFO, "app_fit: metrics_distributed_fit %s", str(hist.metrics_distributed_fit))
-    log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
-    log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
-    log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
-
-    # Graceful shutdown
-    server.disconnect_all_clients(timeout=config.round_timeout)
-
-    return hist
-
-
 def run_driver_api() -> None:
     """Run Flower server (Driver API)."""
     log(INFO, "Starting Flower server (Driver API)")
+    # Running `flower-driver-api` is deprecated
+    warn_deprecated_feature("flower-driver-api")
+    log(WARN, "Use `flower-superlink` instead")
     event(EventType.RUN_DRIVER_API_ENTER)
-    args = _parse_args_driver().parse_args()
+    args = _parse_args_run_driver_api().parse_args()
 
     # Parse IP address
     parsed_address = parse_address(args.driver_api_address)
@@ -247,20 +209,24 @@ def run_driver_api() -> None:
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
+    # Obtain certificates
+    certificates = _try_obtain_certificates(args)
+
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
 
     # Start server
-    grpc_server: grpc.Server = _run_driver_api_grpc(
+    grpc_server: grpc.Server = run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
+        certificates=certificates,
     )
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_DRIVER_API_LEAVE,
         grpc_servers=[grpc_server],
         bckg_threads=[],
-        event_type=EventType.RUN_DRIVER_API_LEAVE,
     )
 
     # Block
@@ -270,8 +236,14 @@ def run_driver_api() -> None:
 def run_fleet_api() -> None:
     """Run Flower server (Fleet API)."""
     log(INFO, "Starting Flower server (Fleet API)")
+    # Running `flower-fleet-api` is deprecated
+    warn_deprecated_feature("flower-fleet-api")
+    log(WARN, "Use `flower-superlink` instead")
     event(EventType.RUN_FLEET_API_ENTER)
-    args = _parse_args_fleet().parse_args()
+    args = _parse_args_run_fleet_api().parse_args()
+
+    # Obtain certificates
+    certificates = _try_obtain_certificates(args)
 
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
@@ -305,18 +277,6 @@ def run_fleet_api() -> None:
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
-    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_BIDI:
-        address_arg = args.grpc_fleet_api_address
-        parsed_address = parse_address(address_arg)
-        if not parsed_address:
-            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, is_v6 = parsed_address
-        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-        fleet_server = _run_fleet_api_grpc_bidi(
-            address=address,
-            state_factory=state_factory,
-        )
-        grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
         address_arg = args.grpc_rere_fleet_api_address
         parsed_address = parse_address(address_arg)
@@ -327,16 +287,17 @@ def run_fleet_api() -> None:
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
             state_factory=state_factory,
+            certificates=certificates,
         )
         grpc_servers.append(fleet_server)
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_FLEET_API_LEAVE,
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_FLEET_API_LEAVE,
     )
 
     # Block
@@ -346,12 +307,14 @@ def run_fleet_api() -> None:
         bckg_threads[0].join()
 
 
-# pylint: disable=too-many-branches
-def run_server() -> None:
-    """Run Flower server (Driver API and Fleet API)."""
-    log(INFO, "Starting Flower server")
-    event(EventType.RUN_SERVER_ENTER)
-    args = _parse_args_server().parse_args()
+# pylint: disable=too-many-branches, too-many-locals, too-many-statements
+def run_superlink() -> None:
+    """Run Flower SuperLink (Driver API and Fleet API)."""
+    log(INFO, "Starting Flower SuperLink")
+
+    event(EventType.RUN_SUPERLINK_ENTER)
+
+    args = _parse_args_run_superlink().parse_args()
 
     # Parse IP address
     parsed_address = parse_address(args.driver_api_address)
@@ -360,13 +323,17 @@ def run_server() -> None:
     host, port, is_v6 = parsed_address
     address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
+    # Obtain certificates
+    certificates = _try_obtain_certificates(args)
+
     # Initialize StateFactory
     state_factory = StateFactory(args.database)
 
     # Start Driver API
-    driver_server: grpc.Server = _run_driver_api_grpc(
+    driver_server: grpc.Server = run_driver_api_grpc(
         address=address,
         state_factory=state_factory,
+        certificates=certificates,
     )
 
     grpc_servers = [driver_server]
@@ -398,18 +365,6 @@ def run_server() -> None:
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
-    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_BIDI:
-        address_arg = args.grpc_bidi_fleet_api_address
-        parsed_address = parse_address(address_arg)
-        if not parsed_address:
-            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, is_v6 = parsed_address
-        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-        fleet_server = _run_fleet_api_grpc_bidi(
-            address=address,
-            state_factory=state_factory,
-        )
-        grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
         address_arg = args.grpc_rere_fleet_api_address
         parsed_address = parse_address(address_arg)
@@ -417,19 +372,54 @@ def run_server() -> None:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
         host, port, is_v6 = parsed_address
         address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
+        maybe_keys = _try_setup_client_authentication(args, certificates)
+        interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
+        if maybe_keys is not None:
+            (
+                client_public_keys,
+                server_private_key,
+                server_public_key,
+            ) = maybe_keys
+            state = state_factory.state()
+            state.store_client_public_keys(client_public_keys)
+            state.store_server_private_public_key(
+                private_key_to_bytes(server_private_key),
+                public_key_to_bytes(server_public_key),
+            )
+            log(
+                INFO,
+                "Client authentication enabled with %d known public keys",
+                len(client_public_keys),
+            )
+            interceptors = [AuthenticateServerInterceptor(state)]
+
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
             state_factory=state_factory,
+            certificates=certificates,
+            interceptors=interceptors,
         )
         grpc_servers.append(fleet_server)
+    elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
+        f_stop = asyncio.Event()  # Does nothing
+        _run_fleet_api_vce(
+            num_supernodes=args.num_supernodes,
+            client_app_attr=args.client_app,
+            backend_name=args.backend,
+            backend_config_json_stream=args.backend_config,
+            app_dir=args.app_dir,
+            state_factory=state_factory,
+            f_stop=f_stop,
+        )
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
     # Graceful shutdown
-    _register_exit_handlers(
+    register_exit_handlers(
+        event_type=EventType.RUN_SUPERLINK_LEAVE,
         grpc_servers=grpc_servers,
         bckg_threads=bckg_threads,
-        event_type=EventType.RUN_SERVER_LEAVE,
     )
 
     # Block
@@ -441,124 +431,140 @@ def run_server() -> None:
         driver_server.wait_for_termination(timeout=1)
 
 
-def _register_exit_handlers(
-    grpc_servers: List[grpc.Server],
-    bckg_threads: List[threading.Thread],
-    event_type: EventType,
-) -> None:
-    default_handlers = {
-        SIGINT: None,
-        SIGTERM: None,
-    }
+def _try_setup_client_authentication(
+    args: argparse.Namespace,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
+) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+    if not args.require_client_authentication:
+        return None
 
-    def graceful_exit_handler(  # type: ignore
-        signalnum,
-        frame: FrameType,  # pylint: disable=unused-argument
-    ) -> None:
-        """Exit handler to be registered with signal.signal.
+    if certificates is None:
+        sys.exit(
+            "Client authentication only works over secure connections. "
+            "Please provide certificate paths using '--certificates' when "
+            "enabling '--require-client-authentication'."
+        )
 
-        When called will reset signal handler to original signal handler from
-        default_handlers.
-        """
-        # Reset to default handler
-        signal(signalnum, default_handlers[signalnum])
+    client_keys_file_path = Path(args.require_client_authentication[0])
+    if not client_keys_file_path.exists():
+        sys.exit(
+            "The provided path to the client public keys CSV file does not exist: "
+            f"{client_keys_file_path}. "
+            "Please provide the CSV file path containing known client public keys "
+            "to '--require-client-authentication'."
+        )
 
-        event_res = event(event_type=event_type)
-
-        for grpc_server in grpc_servers:
-            grpc_server.stop(grace=1)
-
-        for bckg_thread in bckg_threads:
-            bckg_thread.join()
-
-        # Ensure event has happend
-        event_res.result()
-
-        # Setup things for graceful exit
-        sys.exit(0)
-
-    default_handlers[SIGINT] = signal(  # type: ignore
-        SIGINT,
-        graceful_exit_handler,  # type: ignore
+    client_public_keys: Set[bytes] = set()
+    ssh_private_key = load_ssh_private_key(
+        Path(args.require_client_authentication[1]).read_bytes(),
+        None,
     )
-    default_handlers[SIGTERM] = signal(  # type: ignore
-        SIGTERM,
-        graceful_exit_handler,  # type: ignore
+    ssh_public_key = load_ssh_public_key(
+        Path(args.require_client_authentication[2]).read_bytes()
     )
 
+    try:
+        server_private_key, server_public_key = ssh_types_to_elliptic_curve(
+            ssh_private_key, ssh_public_key
+        )
+    except TypeError:
+        sys.exit(
+            "The file paths provided could not be read as a private and public "
+            "key pair. Client authentication requires an elliptic curve public and "
+            "private key pair. Please provide the file paths containing elliptic "
+            "curve private and public keys to '--require-client-authentication'."
+        )
 
-def _run_driver_api_grpc(
-    address: str,
-    state_factory: StateFactory,
-) -> grpc.Server:
-    """Run Driver API (gRPC, request-response)."""
-    # Create Driver API gRPC server
-    driver_servicer: grpc.Server = DriverServicer(
-        state_factory=state_factory,
-    )
-    driver_add_servicer_to_server_fn = add_DriverServicer_to_server
-    driver_grpc_server = generic_create_grpc_server(
-        servicer_and_add_fn=(driver_servicer, driver_add_servicer_to_server_fn),
-        server_address=address,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=None,
-    )
-
-    log(INFO, "Flower ECE: Starting Driver API (gRPC-rere) on %s", address)
-    driver_grpc_server.start()
-
-    return driver_grpc_server
+    with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            for element in row:
+                public_key = load_ssh_public_key(element.encode())
+                if isinstance(public_key, ec.EllipticCurvePublicKey):
+                    client_public_keys.add(public_key_to_bytes(public_key))
+                else:
+                    sys.exit(
+                        "Error: Unable to parse the public keys in the .csv "
+                        "file. Please ensure that the .csv file contains valid "
+                        "SSH public keys and try again."
+                    )
+        return (
+            client_public_keys,
+            server_private_key,
+            server_public_key,
+        )
 
 
-def _run_fleet_api_grpc_bidi(
-    address: str,
-    state_factory: StateFactory,
-) -> grpc.Server:
-    """Run Fleet API (gRPC, bidirectional streaming)."""
-    # DriverClientManager
-    driver_client_manager = DriverClientManager(
-        state_factory=state_factory,
-    )
-
-    # Create (legacy) Fleet API gRPC server
-    fleet_servicer = FlowerServiceServicer(
-        client_manager=driver_client_manager,
-    )
-    fleet_add_servicer_to_server_fn = add_FlowerServiceServicer_to_server
-    fleet_grpc_server = generic_create_grpc_server(
-        servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
-        server_address=address,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=None,
-    )
-
-    log(INFO, "Flower ECE: Starting Fleet API (gRPC-bidi) on %s", address)
-    fleet_grpc_server.start()
-
-    return fleet_grpc_server
+def _try_obtain_certificates(
+    args: argparse.Namespace,
+) -> Optional[Tuple[bytes, bytes, bytes]]:
+    # Obtain certificates
+    if args.insecure:
+        log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
+        certificates = None
+    # Check if certificates are provided
+    elif args.certificates:
+        certificates = (
+            Path(args.certificates[0]).read_bytes(),  # CA certificate
+            Path(args.certificates[1]).read_bytes(),  # server certificate
+            Path(args.certificates[2]).read_bytes(),  # server private key
+        )
+    else:
+        sys.exit(
+            "Certificates are required unless running in insecure mode. "
+            "Please provide certificate paths with '--certificates' or run the server "
+            "in insecure mode using '--insecure' if you understand the risks."
+        )
+    return certificates
 
 
 def _run_fleet_api_grpc_rere(
     address: str,
     state_factory: StateFactory,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
+    interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
     # Create Fleet API gRPC server
     fleet_servicer = FleetServicer(
-        state=state_factory.state(),
+        state_factory=state_factory,
     )
     fleet_add_servicer_to_server_fn = add_FleetServicer_to_server
     fleet_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
         server_address=address,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        certificates=None,
+        certificates=certificates,
+        interceptors=interceptors,
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
     fleet_grpc_server.start()
 
     return fleet_grpc_server
+
+
+# pylint: disable=too-many-arguments
+def _run_fleet_api_vce(
+    num_supernodes: int,
+    client_app_attr: str,
+    backend_name: str,
+    backend_config_json_stream: str,
+    app_dir: str,
+    state_factory: StateFactory,
+    f_stop: asyncio.Event,
+) -> None:
+    log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
+
+    start_vce(
+        num_supernodes=num_supernodes,
+        client_app_attr=client_app_attr,
+        backend_name=backend_name,
+        backend_config_json_stream=backend_config_json_stream,
+        state_factory=state_factory,
+        app_dir=app_dir,
+        f_stop=f_stop,
+    )
 
 
 # pylint: disable=import-outside-toplevel,too-many-arguments
@@ -574,7 +580,7 @@ def _run_fleet_api_rest(
     try:
         import uvicorn
 
-        from flwr.server.fleet.rest_rere.rest_api import app as fast_api_app
+        from flwr.server.superlink.fleet.rest_rere.rest_api import app as fast_api_app
     except ModuleNotFoundError:
         sys.exit(MISSING_EXTRA_REST)
     if workers != 1:
@@ -597,7 +603,7 @@ def _run_fleet_api_rest(
         raise ValueError(validation_exceptions)
 
     uvicorn.run(
-        app="flwr.server.fleet.rest_rere.rest_api:app",
+        app="flwr.server.superlink.fleet.rest_rere.rest_api:app",
         port=port,
         host=host,
         reload=False,
@@ -634,7 +640,7 @@ def _validate_ssl_files(
     return validation_exceptions
 
 
-def _parse_args_driver() -> argparse.ArgumentParser:
+def _parse_args_run_driver_api() -> argparse.ArgumentParser:
     """Parse command line arguments for Driver API."""
     parser = argparse.ArgumentParser(
         description="Start a Flower Driver API server. "
@@ -651,7 +657,7 @@ def _parse_args_driver() -> argparse.ArgumentParser:
     return parser
 
 
-def _parse_args_fleet() -> argparse.ArgumentParser:
+def _parse_args_run_fleet_api() -> argparse.ArgumentParser:
     """Parse command line arguments for Fleet API."""
     parser = argparse.ArgumentParser(
         description="Start a Flower Fleet API server."
@@ -668,12 +674,10 @@ def _parse_args_fleet() -> argparse.ArgumentParser:
     return parser
 
 
-def _parse_args_server() -> argparse.ArgumentParser:
+def _parse_args_run_superlink() -> argparse.ArgumentParser:
     """Parse command line arguments for both Driver API and Fleet API."""
     parser = argparse.ArgumentParser(
-        description="This will start a Flower server "
-        "(meaning, a Driver API and a Fleet API), "
-        "that clients will be able to connect to.",
+        description="Start a Flower SuperLink",
     )
 
     _add_args_common(parser=parser)
@@ -685,6 +689,22 @@ def _parse_args_server() -> argparse.ArgumentParser:
 
 def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Run the server without HTTPS, regardless of whether certificate "
+        "paths are provided. By default, the server runs with HTTPS enabled. "
+        "Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--certificates",
+        nargs=3,
+        metavar=("CA_CERT", "SERVER_CERT", "PRIVATE_KEY"),
+        type=str,
+        help="Paths to the CA certificate, server certificate, and server private "
+        "key, in that order. Note: The server can only be started without "
+        "certificates by enabling the `--insecure` flag.",
+    )
+    parser.add_argument(
         "--database",
         help="A string representing the path to the database "
         "file that will be opened. Note that passing ':memory:' "
@@ -692,6 +712,15 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "instead of on disk. If nothing is provided, "
         "Flower will just create a state in memory.",
         default=DATABASE,
+    )
+    parser.add_argument(
+        "--require-client-authentication",
+        nargs=3,
+        metavar=("CLIENT_KEYS", "SERVER_PRIVATE_KEY", "SERVER_PUBLIC_KEY"),
+        type=str,
+        help="Provide three file paths: (1) a .csv file containing a list of "
+        "known client public keys for authentication, (2) the server's private "
+        "key file, and (3) the server's public key file.",
     )
 
 
@@ -707,18 +736,11 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     # Fleet API transport layer type
     ex_group = parser.add_mutually_exclusive_group()
     ex_group.add_argument(
-        "--grpc-bidi",
-        action="store_const",
-        dest="fleet_api_type",
-        const=TRANSPORT_TYPE_GRPC_BIDI,
-        default=TRANSPORT_TYPE_GRPC_BIDI,
-        help="Start a Fleet API server (gRPC-bidi)",
-    )
-    ex_group.add_argument(
         "--grpc-rere",
         action="store_const",
         dest="fleet_api_type",
         const=TRANSPORT_TYPE_GRPC_RERE,
+        default=TRANSPORT_TYPE_GRPC_RERE,
         help="Start a Fleet API server (gRPC-rere)",
     )
     ex_group.add_argument(
@@ -729,14 +751,12 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="Start a Fleet API server (REST, experimental)",
     )
 
-    # Fleet API gRPC-bidi options
-    grpc_bidi_group = parser.add_argument_group(
-        "Fleet API (gRPC-bidi) server options", ""
-    )
-    grpc_bidi_group.add_argument(
-        "--grpc-bidi-fleet-api-address",
-        help="Fleet API (gRPC-bidi) server address (IPv4, IPv6, or a domain name)",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
+    ex_group.add_argument(
+        "--vce",
+        action="store_const",
+        dest="fleet_api_type",
+        const=TRANSPORT_TYPE_VCE,
+        help="Start a Fleet API server (VirtualClientEngine)",
     )
 
     # Fleet API gRPC-rere options
@@ -773,4 +793,37 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="Set the number of concurrent workers for the Fleet API REST server.",
         type=int,
         default=1,
+    )
+
+    # Fleet API VCE options
+    vce_group = parser.add_argument_group("Fleet API (VCE) server options", "")
+    vce_group.add_argument(
+        "--client-app",
+        help="For example: `client:app` or `project.package.module:wrapper.app`.",
+    )
+    vce_group.add_argument(
+        "--num-supernodes",
+        type=int,
+        help="Number of simulated SuperNodes.",
+    )
+    vce_group.add_argument(
+        "--backend",
+        default="ray",
+        type=str,
+        help="Simulation backend that executes the ClientApp.",
+    )
+    vce_group.add_argument(
+        "--backend-config",
+        type=str,
+        default='{"client_resources": {"num_cpus":1, "num_gpus":0.0}, "tensorflow": 0}',
+        help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
+        "configure a backend. Values supported in <value> are those included by "
+        "`flwr.common.typing.ConfigsRecordValues`. ",
+    )
+    parser.add_argument(
+        "--app-dir",
+        default="",
+        help="Add specified directory to the PYTHONPATH and load"
+        "ClientApp from there."
+        " Default: current working directory.",
     )

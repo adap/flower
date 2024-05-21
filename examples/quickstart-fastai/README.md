@@ -71,4 +71,4 @@ Start client 2 in the second terminal:
 python3 client.py
 ```
 
-You will see that fastai is starting a federated training. Have a look to the [Flower Quickstarter documentation](https://flower.dev/docs/quickstart-fastai.html) for a detailed explanation.
+You will see that fastai is starting a federated training. For a more in-depth look, be sure to check out the code on our [repo](https://github.com/adap/flower/tree/main/examples/quickstart-fastai).

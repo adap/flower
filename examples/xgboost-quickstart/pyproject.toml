@@ -1,0 +1,15 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "xgboost-quickstart"
+version = "0.1.0"
+description = "Federated XGBoost with Flower (quickstart)"
+authors = ["The Flower Authors <hello@flower.ai>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+flwr = ">=1.7.0,<2.0"
+flwr-datasets = ">=0.0.1,<1.0.0"
+xgboost = ">=2.0.0,<3.0.0"

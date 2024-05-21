@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 
 import concurrent.futures
+import io
 import timeit
-from logging import DEBUG, INFO
+from logging import INFO, WARN
 from typing import Dict, List, Optional, Tuple, Union
 
 from flwr.common import (
@@ -33,10 +34,12 @@ from flwr.common import (
 )
 from flwr.common.logger import log
 from flwr.common.typing import GetParametersIns
-from flwr.server.client_manager import ClientManager
+from flwr.server.client_manager import ClientManager, SimpleClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.history import History
 from flwr.server.strategy import FedAvg, Strategy
+
+from .server_config import ServerConfig
 
 FitResultsAndFailures = Tuple[
     List[Tuple[ClientProxy, FitRes]],
@@ -81,14 +84,14 @@ class Server:
         return self._client_manager
 
     # pylint: disable=too-many-locals
-    def fit(self, num_rounds: int, timeout: Optional[float]) -> History:
+    def fit(self, num_rounds: int, timeout: Optional[float]) -> Tuple[History, float]:
         """Run federated averaging for a number of rounds."""
         history = History()
 
         # Initialize parameters
-        log(INFO, "Initializing global parameters")
-        self.parameters = self._get_initial_parameters(timeout=timeout)
-        log(INFO, "Evaluating initial parameters")
+        log(INFO, "[INIT]")
+        self.parameters = self._get_initial_parameters(server_round=0, timeout=timeout)
+        log(INFO, "Evaluating initial global parameters")
         res = self.strategy.evaluate(0, parameters=self.parameters)
         if res is not None:
             log(
@@ -101,10 +104,11 @@ class Server:
             history.add_metrics_centralized(server_round=0, metrics=res[1])
 
         # Run federated learning for num_rounds
-        log(INFO, "FL starting")
         start_time = timeit.default_timer()
 
         for current_round in range(1, num_rounds + 1):
+            log(INFO, "")
+            log(INFO, "[ROUND %s]", current_round)
             # Train model and replace previous global model
             res_fit = self.fit_round(
                 server_round=current_round,
@@ -150,8 +154,7 @@ class Server:
         # Bookkeeping
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
-        log(INFO, "FL finished in %s", elapsed)
-        return history
+        return history, elapsed
 
     def evaluate_round(
         self,
@@ -168,12 +171,11 @@ class Server:
             client_manager=self._client_manager,
         )
         if not client_instructions:
-            log(INFO, "evaluate_round %s: no clients selected, cancel", server_round)
+            log(INFO, "configure_evaluate: no clients selected, skipping evaluation")
             return None
         log(
-            DEBUG,
-            "evaluate_round %s: strategy sampled %s clients (out of %s)",
-            server_round,
+            INFO,
+            "configure_evaluate: strategy sampled %s clients (out of %s)",
             len(client_instructions),
             self._client_manager.num_available(),
         )
@@ -183,11 +185,11 @@ class Server:
             client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
+            group_id=server_round,
         )
         log(
-            DEBUG,
-            "evaluate_round %s received %s results and %s failures",
-            server_round,
+            INFO,
+            "aggregate_evaluate: received %s results and %s failures",
             len(results),
             len(failures),
         )
@@ -217,12 +219,11 @@ class Server:
         )
 
         if not client_instructions:
-            log(INFO, "fit_round %s: no clients selected, cancel", server_round)
+            log(INFO, "configure_fit: no clients selected, cancel")
             return None
         log(
-            DEBUG,
-            "fit_round %s: strategy sampled %s clients (out of %s)",
-            server_round,
+            INFO,
+            "configure_fit: strategy sampled %s clients (out of %s)",
             len(client_instructions),
             self._client_manager.num_available(),
         )
@@ -232,11 +233,11 @@ class Server:
             client_instructions=client_instructions,
             max_workers=self.max_workers,
             timeout=timeout,
+            group_id=server_round,
         )
         log(
-            DEBUG,
-            "fit_round %s received %s results and %s failures",
-            server_round,
+            INFO,
+            "aggregate_fit: received %s results and %s failures",
             len(results),
             len(failures),
         )
@@ -262,22 +263,33 @@ class Server:
             timeout=timeout,
         )
 
-    def _get_initial_parameters(self, timeout: Optional[float]) -> Parameters:
+    def _get_initial_parameters(
+        self, server_round: int, timeout: Optional[float]
+    ) -> Parameters:
         """Get initial parameters from one of the available clients."""
         # Server-side parameter initialization
         parameters: Optional[Parameters] = self.strategy.initialize_parameters(
             client_manager=self._client_manager
         )
         if parameters is not None:
-            log(INFO, "Using initial parameters provided by strategy")
+            log(INFO, "Using initial global parameters provided by strategy")
             return parameters
 
         # Get initial parameters from one of the clients
         log(INFO, "Requesting initial parameters from one random client")
         random_client = self._client_manager.sample(1)[0]
         ins = GetParametersIns(config={})
-        get_parameters_res = random_client.get_parameters(ins=ins, timeout=timeout)
-        log(INFO, "Received initial parameters from one random client")
+        get_parameters_res = random_client.get_parameters(
+            ins=ins, timeout=timeout, group_id=server_round
+        )
+        if get_parameters_res.status.code == Code.OK:
+            log(INFO, "Received initial parameters from one random client")
+        else:
+            log(
+                WARN,
+                "Failed to receive initial parameters from the client."
+                " Empty initial parameters will be used.",
+            )
         return get_parameters_res.parameters
 
 
@@ -319,6 +331,7 @@ def reconnect_client(
     disconnect = client.reconnect(
         reconnect,
         timeout=timeout,
+        group_id=None,
     )
     return client, disconnect
 
@@ -327,11 +340,12 @@ def fit_clients(
     client_instructions: List[Tuple[ClientProxy, FitIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
+    group_id: int,
 ) -> FitResultsAndFailures:
     """Refine parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         submitted_fs = {
-            executor.submit(fit_client, client_proxy, ins, timeout)
+            executor.submit(fit_client, client_proxy, ins, timeout, group_id)
             for client_proxy, ins in client_instructions
         }
         finished_fs, _ = concurrent.futures.wait(
@@ -350,10 +364,10 @@ def fit_clients(
 
 
 def fit_client(
-    client: ClientProxy, ins: FitIns, timeout: Optional[float]
+    client: ClientProxy, ins: FitIns, timeout: Optional[float], group_id: int
 ) -> Tuple[ClientProxy, FitRes]:
     """Refine parameters on a single client."""
-    fit_res = client.fit(ins, timeout=timeout)
+    fit_res = client.fit(ins, timeout=timeout, group_id=group_id)
     return client, fit_res
 
 
@@ -386,11 +400,12 @@ def evaluate_clients(
     client_instructions: List[Tuple[ClientProxy, EvaluateIns]],
     max_workers: Optional[int],
     timeout: Optional[float],
+    group_id: int,
 ) -> EvaluateResultsAndFailures:
     """Evaluate parameters concurrently on all selected clients."""
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
         submitted_fs = {
-            executor.submit(evaluate_client, client_proxy, ins, timeout)
+            executor.submit(evaluate_client, client_proxy, ins, timeout, group_id)
             for client_proxy, ins in client_instructions
         }
         finished_fs, _ = concurrent.futures.wait(
@@ -412,9 +427,10 @@ def evaluate_client(
     client: ClientProxy,
     ins: EvaluateIns,
     timeout: Optional[float],
+    group_id: int,
 ) -> Tuple[ClientProxy, EvaluateRes]:
     """Evaluate parameters on a single client."""
-    evaluate_res = client.evaluate(ins, timeout=timeout)
+    evaluate_res = client.evaluate(ins, timeout=timeout, group_id=group_id)
     return client, evaluate_res
 
 
@@ -441,3 +457,48 @@ def _handle_finished_future_after_evaluate(
 
     # Not successful, client returned a result where the status code is not OK
     failures.append(result)
+
+
+def init_defaults(
+    server: Optional[Server],
+    config: Optional[ServerConfig],
+    strategy: Optional[Strategy],
+    client_manager: Optional[ClientManager],
+) -> Tuple[Server, ServerConfig]:
+    """Create server instance if none was given."""
+    if server is None:
+        if client_manager is None:
+            client_manager = SimpleClientManager()
+        if strategy is None:
+            strategy = FedAvg()
+        server = Server(client_manager=client_manager, strategy=strategy)
+    elif strategy is not None:
+        log(WARN, "Both server and strategy were provided, ignoring strategy")
+
+    # Set default config values
+    if config is None:
+        config = ServerConfig()
+
+    return server, config
+
+
+def run_fl(
+    server: Server,
+    config: ServerConfig,
+) -> History:
+    """Train a model on the given server and return the History object."""
+    hist, elapsed_time = server.fit(
+        num_rounds=config.num_rounds, timeout=config.round_timeout
+    )
+
+    log(INFO, "")
+    log(INFO, "[SUMMARY]")
+    log(INFO, "Run finished %s round(s) in %.2fs", config.num_rounds, elapsed_time)
+    for line in io.StringIO(str(hist)):
+        log(INFO, "\t%s", line.strip("\n"))
+    log(INFO, "")
+
+    # Graceful shutdown
+    server.disconnect_all_clients(timeout=config.round_timeout)
+
+    return hist

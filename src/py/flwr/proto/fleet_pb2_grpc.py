@@ -24,6 +24,11 @@ class FleetStub(object):
                 request_serializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeResponse.FromString,
                 )
+        self.Ping = channel.unary_unary(
+                '/flwr.proto.Fleet/Ping',
+                request_serializer=flwr_dot_proto_dot_fleet__pb2.PingRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_fleet__pb2.PingResponse.FromString,
+                )
         self.PullTaskIns = channel.unary_unary(
                 '/flwr.proto.Fleet/PullTaskIns',
                 request_serializer=flwr_dot_proto_dot_fleet__pb2.PullTaskInsRequest.SerializeToString,
@@ -33,6 +38,11 @@ class FleetStub(object):
                 '/flwr.proto.Fleet/PushTaskRes',
                 request_serializer=flwr_dot_proto_dot_fleet__pb2.PushTaskResRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_fleet__pb2.PushTaskResResponse.FromString,
+                )
+        self.GetRun = channel.unary_unary(
+                '/flwr.proto.Fleet/GetRun',
+                request_serializer=flwr_dot_proto_dot_fleet__pb2.GetRunRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_fleet__pb2.GetRunResponse.FromString,
                 )
 
 
@@ -46,6 +56,12 @@ class FleetServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def DeleteNode(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Ping(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -69,6 +85,12 @@ class FleetServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetRun(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_FleetServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -82,6 +104,11 @@ def add_FleetServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_fleet__pb2.DeleteNodeResponse.SerializeToString,
             ),
+            'Ping': grpc.unary_unary_rpc_method_handler(
+                    servicer.Ping,
+                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.PingRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_fleet__pb2.PingResponse.SerializeToString,
+            ),
             'PullTaskIns': grpc.unary_unary_rpc_method_handler(
                     servicer.PullTaskIns,
                     request_deserializer=flwr_dot_proto_dot_fleet__pb2.PullTaskInsRequest.FromString,
@@ -91,6 +118,11 @@ def add_FleetServicer_to_server(servicer, server):
                     servicer.PushTaskRes,
                     request_deserializer=flwr_dot_proto_dot_fleet__pb2.PushTaskResRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_fleet__pb2.PushTaskResResponse.SerializeToString,
+            ),
+            'GetRun': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetRun,
+                    request_deserializer=flwr_dot_proto_dot_fleet__pb2.GetRunRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_fleet__pb2.GetRunResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -137,6 +169,23 @@ class Fleet(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
+    def Ping(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/Ping',
+            flwr_dot_proto_dot_fleet__pb2.PingRequest.SerializeToString,
+            flwr_dot_proto_dot_fleet__pb2.PingResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
     def PullTaskIns(request,
             target,
             options=(),
@@ -167,5 +216,22 @@ class Fleet(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/PushTaskRes',
             flwr_dot_proto_dot_fleet__pb2.PushTaskResRequest.SerializeToString,
             flwr_dot_proto_dot_fleet__pb2.PushTaskResResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetRun(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Fleet/GetRun',
+            flwr_dot_proto_dot_fleet__pb2.GetRunRequest.SerializeToString,
+            flwr_dot_proto_dot_fleet__pb2.GetRunResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

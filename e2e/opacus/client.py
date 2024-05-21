@@ -135,10 +135,14 @@ class FlowerClient(fl.client.NumPyClient):
 
 def client_fn(cid):
     model = Net()
-    return FlowerClient(model)
+    return FlowerClient(model).to_client()
+
+app = fl.client.ClientApp(
+    client_fn=client_fn,
+)
 
 if __name__ == "__main__":
-    fl.client.start_numpy_client(
+    fl.client.start_client(
         server_address="127.0.0.1:8080",
-        client=FlowerClient(model)
+        client=FlowerClient(model).to_client()
     )

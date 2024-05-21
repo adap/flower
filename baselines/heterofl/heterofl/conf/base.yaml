@@ -1,0 +1,47 @@
+num_clients: 100
+num_epochs: 5
+num_rounds: 800
+seed: 0
+client_resources:
+    num_cpus: 1
+    num_gpus: 0.08
+
+control:
+  model_split_mode: 'dynamic'
+  model_mode: 'a1-b1-c1-d1-e1'
+
+dataset:
+  dataset_name: 'CIFAR10'
+  iid: False
+  shard_per_user : 2 # only used in case of non-iid (i.e. iid = false)
+  balance: false
+  batch_size:
+    train: 10
+    test: 50
+  shuffle:
+    train: true
+    test: false
+
+
+model:
+  model_name: resnet18  # use 'conv' for MNIST
+  hidden_layers: [64 , 128 , 256 , 512]
+  norm: bn
+  scale: 1
+  mask: 1
+
+
+optim_scheduler:
+  optimizer: SGD
+  lr: 0.1
+  momentum: 0.9
+  weight_decay: 5.00e-04
+  scheduler: MultiStepLR
+  milestones: [300, 500]
+
+strategy:
+  _target_: heterofl.strategy.HeteroFL
+  fraction_fit: 0.1
+  fraction_evaluate: 0.1
+  min_fit_clients: 10
+  min_evaluate_clients: 10

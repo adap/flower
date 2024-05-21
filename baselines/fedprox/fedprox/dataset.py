@@ -1,6 +1,5 @@
 """MNIST dataset utilities for federated learning."""
 
-
 from typing import Optional, Tuple
 
 import torch
@@ -17,7 +16,7 @@ def load_datasets(  # pylint: disable=too-many-arguments
     batch_size: Optional[int] = 32,
     seed: Optional[int] = 42,
 ) -> Tuple[DataLoader, DataLoader, DataLoader]:
-    """Creates the dataloaders to be fed into the model.
+    """Create the dataloaders to be fed into the model.
 
     Parameters
     ----------
@@ -36,7 +35,8 @@ def load_datasets(  # pylint: disable=too-many-arguments
     Returns
     -------
     Tuple[DataLoader, DataLoader, DataLoader]
-        The DataLoader for training, the DataLoader for validation, the DataLoader for testing.
+        The DataLoader for training, the DataLoader for validation, the DataLoader
+        for testing.
     """
     print(f"Dataset partitioning config: {config}")
     datasets, testset = _partition_data(

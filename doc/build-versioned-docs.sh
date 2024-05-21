@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # Store the current branch in a variable
 current_branch=$(git rev-parse --abbrev-ref HEAD)
@@ -25,10 +26,8 @@ for current_version in ${versions}; do
  
   # Make the current language available to conf.py
   export current_version
-  git checkout ${current_version}
+  git checkout --force ${current_version}
   echo "INFO: Building sites for ${current_version}"
- 
-  changed=false
  
   for current_language in ${languages}; do
 
@@ -48,22 +47,34 @@ for current_version in ${versions}; do
 
       # Copy updated version of locales
       cp -r ${tmp_dir}/locales/$current_language locales/
-      changed=true
 
     fi
 
+    # Only for v1.5.0, update the versions listed in the switcher
+    if [ "$current_version" = "v1.5.0" ]; then
+      corrected_versions=$(cat <<-END
+html_context['versions'] = list()
+versions = [
+    tag.name
+    for tag in repo.tags
+    if int(tag.name[1]) > 0 and int(tag.name.split('.')[1]) >= 5
+]
+versions.append('main')
+for version in versions:
+    html_context['versions'].append({'name': version})
+END
+      )
+      echo "$corrected_versions" >> source/conf.py
+    fi
+    
     # Copy updated version of html files
     cp -r ${tmp_dir}/_templates source
  
     # Actually building the docs for a given language and version
     sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 
-    git restore source/_templates
-
-    # Restore branch as it was to avoid conflicts
-    if [ changed ]; then
-      git restore locales/${current_language} || rm -rf locales/${current_language}
-    fi
+    # Clean the history of the checked-out branch to remove conflicts
+    git clean -fd
 
   done
 done
@@ -82,6 +93,7 @@ for current_language in ${languages}; do
   export current_language
   sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 done
+rm source/ref-api/*.rst
 
 # Copy main version to the root of the built docs
 cp -r build/html/main/en/* build/html/

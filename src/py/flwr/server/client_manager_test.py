@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 from unittest.mock import MagicMock
 
 from flwr.server.client_manager import SimpleClientManager
-from flwr.server.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
+from flwr.server.superlink.fleet.grpc_bidi.grpc_client_proxy import GrpcClientProxy
 
 
 def test_simple_client_manager_register() -> None:

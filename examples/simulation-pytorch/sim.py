@@ -3,15 +3,17 @@ from collections import OrderedDict
 from typing import Dict, Tuple, List
 
 import torch
-import torchvision
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader
 
 import flwr as fl
 from flwr.common import Metrics
 from flwr.common.typing import Scalar
 
-from utils import Net, train, test, get_mnist
+from datasets import Dataset
+from datasets.utils.logging import disable_progress_bar
+from flwr_datasets import FederatedDataset
 
+from utils import Net, train, test, apply_transforms
 
 parser = argparse.ArgumentParser(description="Flower Simulation with PyTorch")
 
@@ -27,9 +29,9 @@ parser.add_argument(
     default=0.0,
     help="Ratio of GPU memory to assign to a virtual client",
 )
-parser.add_argument("--num_rounds", type=int, default=10, help="Number of FL rounds.")
 
 NUM_CLIENTS = 100
+NUM_ROUNDS = 10
 
 
 # Flower client, adapted from Pytorch quickstart example
@@ -78,21 +80,31 @@ class FlowerClient(fl.client.NumPyClient):
         return float(loss), len(valloader.dataset), {"accuracy": float(accuracy)}
 
 
-def get_client_fn(train_partitions, val_partitions):
+def get_client_fn(dataset: FederatedDataset):
     """Return a function to construct a client.
 
-    The VirtualClientEngine will exectue this function whenever a client is sampled by
+    The VirtualClientEngine will execute this function whenever a client is sampled by
     the strategy to participate.
     """
 
     def client_fn(cid: str) -> fl.client.Client:
         """Construct a FlowerClient with its own dataset partition."""
 
-        # Extract partition for client with id = cid
-        trainset, valset = train_partitions[int(cid)], val_partitions[int(cid)]
+        # Let's get the partition corresponding to the i-th client
+        client_dataset = dataset.load_partition(int(cid), "train")
+
+        # Now let's split it into train (90%) and validation (10%)
+        client_dataset_splits = client_dataset.train_test_split(test_size=0.1, seed=42)
+
+        trainset = client_dataset_splits["train"]
+        valset = client_dataset_splits["test"]
+
+        # Now we apply the transform to each batch.
+        trainset = trainset.with_transform(apply_transforms)
+        valset = valset.with_transform(apply_transforms)
 
         # Create and return client
-        return FlowerClient(trainset, valset)
+        return FlowerClient(trainset, valset).to_client()
 
     return client_fn
 
@@ -113,40 +125,6 @@ def set_params(model: torch.nn.ModuleList, params: List[fl.common.NDArrays]):
     model.load_state_dict(state_dict, strict=True)
 
 
-def prepare_dataset():
-    """Download and partitions the MNIST dataset."""
-
-    # Get the MNIST dataset
-    trainset, testset = get_mnist()
-
-    # Split trainset into `num_partitions` trainsets
-    num_images = len(trainset) // NUM_CLIENTS
-    partition_len = [num_images] * NUM_CLIENTS
-
-    trainsets = random_split(
-        trainset, partition_len, torch.Generator().manual_seed(2023)
-    )
-
-    val_ratio = 0.1
-
-    # Create dataloaders with train+val support
-    train_partitions = []
-    val_partitions = []
-    for trainset_ in trainsets:
-        num_total = len(trainset_)
-        num_val = int(val_ratio * num_total)
-        num_train = num_total - num_val
-
-        for_train, for_val = random_split(
-            trainset_, [num_train, num_val], torch.Generator().manual_seed(2023)
-        )
-
-        train_partitions.append(for_train)
-        val_partitions.append(for_val)
-
-    return train_partitions, val_partitions, testset
-
-
 def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     """Aggregation function for (federated) evaluation metrics, i.e. those returned by
     the client's evaluate() method."""
@@ -159,7 +137,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 def get_evaluate_fn(
-    testset: torchvision.datasets.CIFAR10,
+    centralized_testset: Dataset,
 ):
     """Return an evaluation function for centralized evaluation."""
 
@@ -175,6 +153,12 @@ def get_evaluate_fn(
         set_params(model, parameters)
         model.to(device)
 
+        # Apply transform to dataset
+        testset = centralized_testset.with_transform(apply_transforms)
+
+        # Disable tqdm for dataset preprocessing
+        disable_progress_bar()
+
         testloader = DataLoader(testset, batch_size=50)
         loss, accuracy = test(model, testloader, device=device)
 
@@ -183,26 +167,35 @@ def get_evaluate_fn(
     return evaluate
 
 
+# Download MNIST dataset and partition it
+mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
+centralized_testset = mnist_fds.load_split("test")
+
+# Configure the strategy
+strategy = fl.server.strategy.FedAvg(
+    fraction_fit=0.1,  # Sample 10% of available clients for training
+    fraction_evaluate=0.05,  # Sample 5% of available clients for evaluation
+    min_available_clients=10,
+    on_fit_config_fn=fit_config,
+    evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
+    evaluate_fn=get_evaluate_fn(centralized_testset),  # Global evaluation function
+)
+
+# ClientApp for Flower-Next
+client = fl.client.ClientApp(
+    client_fn=get_client_fn(mnist_fds),
+)
+
+# ServerApp for Flower-Next
+server = fl.server.ServerApp(
+    config=fl.server.ServerConfig(num_rounds=NUM_ROUNDS),
+    strategy=strategy,
+)
+
+
 def main():
     # Parse input arguments
     args = parser.parse_args()
-
-    # Download CIFAR-10 dataset and partition it
-    trainsets, valsets, testset = prepare_dataset()
-
-    # Configure the strategy
-    strategy = fl.server.strategy.FedAvg(
-        fraction_fit=0.1,  # Sample 10% of available clients for training
-        fraction_evaluate=0.05,  # Sample 5% of available clients for evaluation
-        min_fit_clients=10,  # Never sample less than 10 clients for training
-        min_evaluate_clients=5,  # Never sample less than 5 clients for evaluation
-        min_available_clients=int(
-            NUM_CLIENTS * 0.75
-        ),  # Wait until at least 75 clients are available
-        on_fit_config_fn=fit_config,
-        evaluate_metrics_aggregation_fn=weighted_average,  # Aggregate federated metrics
-        evaluate_fn=get_evaluate_fn(testset),  # Global evaluation function
-    )
 
     # Resources to be assigned to each virtual client
     client_resources = {
@@ -212,11 +205,14 @@ def main():
 
     # Start simulation
     fl.simulation.start_simulation(
-        client_fn=get_client_fn(trainsets, valsets),
+        client_fn=get_client_fn(mnist_fds),
         num_clients=NUM_CLIENTS,
         client_resources=client_resources,
-        config=fl.server.ServerConfig(num_rounds=args.num_rounds),
+        config=fl.server.ServerConfig(num_rounds=NUM_ROUNDS),
         strategy=strategy,
+        actor_kwargs={
+            "on_actor_init_fn": disable_progress_bar  # disable tqdm on each actor/process spawning virtual clients
+        },
     )
 
 

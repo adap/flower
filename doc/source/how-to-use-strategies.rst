@@ -45,7 +45,7 @@ Configuring client fit and client evaluate
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The server can pass new configuration values to the client each round by providing a function to :code:`on_fit_config_fn`. The provided function will be called by the strategy and must return a dictionary of configuration key values pairs that will be sent to the client.
-It must return a dictionary of arbitraty configuration values  :code:`client.fit` and :code:`client.evaluate` functions during each round of federated learning. 
+It must return a dictionary of arbitrary configuration values  :code:`client.fit` and :code:`client.evaluate` functions during each round of federated learning. 
 
 .. code-block:: python
 
@@ -86,4 +86,4 @@ Server-side evaluation can be enabled by passing an evaluation function to :code
 Implement a novel strategy
 --------------------------
 
-Writing a fully custom strategy is a bit more involved, but it provides the most flexibility. Read the `Implementing Strategies <implementing-strategies.html>`_ guide to learn more.
+Writing a fully custom strategy is a bit more involved, but it provides the most flexibility. Read the `Implementing Strategies <how-to-implement-strategies.html>`_ guide to learn more.

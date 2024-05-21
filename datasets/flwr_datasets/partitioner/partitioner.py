@@ -58,17 +58,17 @@ class Partitioner(ABC):
         self._dataset = value
 
     @abstractmethod
-    def load_partition(self, idx: int) -> Dataset:
+    def load_partition(self, partition_id: int) -> Dataset:
         """Load a single partition based on the partition index.
 
         Parameters
         ----------
-        idx: int
+        partition_id : int
             the index that corresponds to the requested partition
 
         Returns
         -------
-        dataset_partition: Dataset
+        dataset_partition : Dataset
             single dataset partition
         """
 
@@ -80,7 +80,12 @@ class Partitioner(ABC):
 
         Returns
         -------
-        dataset_assigned: bool
+        dataset_assigned : bool
             True if a dataset is assigned, otherwise False.
         """
         return self._dataset is not None
+
+    @property
+    @abstractmethod
+    def num_partitions(self) -> int:
+        """Total number of partitions."""

@@ -1,0 +1,39 @@
+---
+# this is the config that will be loaded as default by main.py
+# Please follow the provided structure (this will ensuring all baseline follow
+# a similar configuration structure and hence be easy to customise)
+
+algorithm: "FedMLB" # can be "FedAvg" or "FedAvg+KD" or "FedMLB"
+total_clients: 100 # total number of clients
+num_rounds: 1000
+clients_per_round: 5
+local_updates: 50
+batch_size: null # if set to null, it will calculates local_batch_size as round(local_examples * local_epochs / local_updates)
+local_epochs: 5 # number of local epochs
+lr_client: 0.1 # client learning rate
+exp_decay: 0.998
+clipnorm: 10.0
+l2_weight_decay: 1e-3
+lambda_1: 1.0 # it can be >= 0
+lambda_2: 1.0 # it can be >= 0
+random_seed: 23
+starting_round: 1
+restart_from_checkpoint: True # if True, looks for a checkpoint of that config to restart the training
+save_checkpoint: True # if True, saves a checkpoint server model at the end of the training
+logging_memory_usage: False # if True logs memory and GPU's memory usage (need for psutil and nvidia-smi installed)
+
+client_resources:
+  num_cpus: 1.0
+  num_gpus: 0.0
+
+dataset_config:
+  dataset: "cifar100" # can be "cifar100" or "tiny-imagenet"
+  alpha_dirichlet: 0.3 # can be 0.3, 0.6
+
+strategy:
+  _target_: flwr.server.strategy.FedAvg
+  fraction_fit: 0.00001
+  fraction_evaluate: 0.0
+  min_fit_clients: ${clients_per_round}
+  min_evaluate_clients: 0
+  min_available_clients: ${total_clients}

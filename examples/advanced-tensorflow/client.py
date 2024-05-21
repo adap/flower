@@ -6,6 +6,8 @@ import tensorflow as tf
 
 import flwr as fl
 
+from flwr_datasets import FederatedDataset
+
 # Make TensorFlow logs less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
@@ -74,7 +76,7 @@ def main() -> None:
     # Parse command line argument `partition`
     parser = argparse.ArgumentParser(description="Flower")
     parser.add_argument(
-        "--partition",
+        "--client-id",
         type=int,
         default=0,
         choices=range(0, 10),
@@ -84,9 +86,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--toy",
-        type=bool,
-        default=False,
-        required=False,
+        action="store_true",
         help="Set to true to quicky run the client using only 10 datasamples. "
         "Useful for testing purposes. Default: False",
     )
@@ -99,16 +99,16 @@ def main() -> None:
     model.compile("adam", "sparse_categorical_crossentropy", metrics=["accuracy"])
 
     # Load a subset of CIFAR-10 to simulate the local data partition
-    (x_train, y_train), (x_test, y_test) = load_partition(args.partition)
+    x_train, y_train, x_test, y_test = load_partition(args.client_id)
 
     if args.toy:
         x_train, y_train = x_train[:10], y_train[:10]
         x_test, y_test = x_test[:10], y_test[:10]
 
     # Start Flower client
-    client = CifarClient(model, x_train, y_train, x_test, y_test)
+    client = CifarClient(model, x_train, y_train, x_test, y_test).to_client()
 
-    fl.client.start_numpy_client(
+    fl.client.start_client(
         server_address="127.0.0.1:8080",
         client=client,
         root_certificates=Path(".cache/certificates/ca.crt").read_bytes(),
@@ -117,15 +117,16 @@ def main() -> None:
 
 def load_partition(idx: int):
     """Load 1/10th of the training and test data to simulate a partition."""
-    assert idx in range(10)
-    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.cifar10.load_data()
-    return (
-        x_train[idx * 5000 : (idx + 1) * 5000],
-        y_train[idx * 5000 : (idx + 1) * 5000],
-    ), (
-        x_test[idx * 1000 : (idx + 1) * 1000],
-        y_test[idx * 1000 : (idx + 1) * 1000],
-    )
+    # Download and partition dataset
+    fds = FederatedDataset(dataset="cifar10", partitioners={"train": 10})
+    partition = fds.load_partition(idx)
+    partition.set_format("numpy")
+
+    # Divide data on each node: 80% train, 20% test
+    partition = partition.train_test_split(test_size=0.2, seed=42)
+    x_train, y_train = partition["train"]["img"] / 255.0, partition["train"]["label"]
+    x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
+    return x_train, y_train, x_test, y_test
 
 
 if __name__ == "__main__":

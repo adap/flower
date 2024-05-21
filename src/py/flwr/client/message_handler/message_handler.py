@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,111 +15,135 @@
 """Client-side message handler."""
 
 
-from typing import Tuple
+from logging import WARN
+from typing import Optional, Tuple, cast
 
 from flwr.client.client import (
-    Client,
     maybe_call_evaluate,
     maybe_call_fit,
     maybe_call_get_parameters,
     maybe_call_get_properties,
 )
-from flwr.client.message_handler.task_handler import (
-    get_server_message_from_task_ins,
-    wrap_client_message_in_task_res,
+from flwr.client.numpy_client import NumPyClient
+from flwr.client.typing import ClientFn
+from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet, log
+from flwr.common.constant import MessageType, MessageTypeLegacy
+from flwr.common.recordset_compat import (
+    evaluateres_to_recordset,
+    fitres_to_recordset,
+    getparametersres_to_recordset,
+    getpropertiesres_to_recordset,
+    recordset_to_evaluateins,
+    recordset_to_fitins,
+    recordset_to_getparametersins,
+    recordset_to_getpropertiesins,
 )
-from flwr.client.secure_aggregation import SecureAggregationHandler
-from flwr.common import serde
-from flwr.proto.task_pb2 import SecureAggregation, Task, TaskIns, TaskRes
-from flwr.proto.transport_pb2 import ClientMessage, Reason, ServerMessage
+from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
+    ClientMessage,
+    Reason,
+    ServerMessage,
+)
+
+
+class UnexpectedServerMessage(Exception):
+    """Exception indicating that the received message is unexpected."""
 
 
 class UnknownServerMessage(Exception):
     """Exception indicating that the received message is unknown."""
 
 
-def handle(client: Client, task_ins: TaskIns) -> Tuple[TaskRes, int, bool]:
-    """Handle incoming TaskIns from the server.
+def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
+    """Handle control part of the incoming message.
 
     Parameters
     ----------
-    client : Client
-        The Client instance provided by the user.
-    task_ins: TaskIns
-        The task instruction coming from the server, to be processed by the client.
+    message : Message
+        The Message coming from the server, to be processed by the client.
 
     Returns
     -------
-    task_res: TaskRes
-        The task response that should be returned to the server.
+    message : Optional[Message]
+        Message to be sent back to the server. If None, the client should
+        continue to process messages from the server.
     sleep_duration : int
         Number of seconds that the client should disconnect from the server.
-    keep_going : bool
-        Flag that indicates whether the client should continue to process the
-        next message from the server (True) or disconnect and optionally
-        reconnect later (False).
     """
-    server_msg = get_server_message_from_task_ins(task_ins, exclude_reconnect_ins=False)
-    if server_msg is None:
-        # Secure Aggregation
-        if task_ins.task.HasField("sa") and isinstance(
-            client, SecureAggregationHandler
-        ):
-            # pylint: disable-next=invalid-name
-            named_values = serde.named_values_from_proto(task_ins.task.sa.named_values)
-            res = client.handle_secure_aggregation(named_values)
-            task_res = TaskRes(
-                task_id="",
-                group_id="",
-                workload_id="",
-                task=Task(
-                    ancestry=[],
-                    sa=SecureAggregation(named_values=serde.named_values_to_proto(res)),
-                ),
-            )
-            return task_res, 0, True
-        raise NotImplementedError()
-    client_msg, sleep_duration, keep_going = handle_legacy_message(client, server_msg)
-    task_res = wrap_client_message_in_task_res(client_msg)
-    return task_res, sleep_duration, keep_going
+    if message.metadata.message_type == "reconnect":
+        # Retrieve ReconnectIns from recordset
+        recordset = message.content
+        seconds = cast(int, recordset.configs_records["config"]["seconds"])
+        # Construct ReconnectIns and call _reconnect
+        disconnect_msg, sleep_duration = _reconnect(
+            ServerMessage.ReconnectIns(seconds=seconds)
+        )
+        # Store DisconnectRes in recordset
+        reason = cast(int, disconnect_msg.disconnect_res.reason)
+        recordset = RecordSet()
+        recordset.configs_records["config"] = ConfigsRecord({"reason": reason})
+        out_message = message.create_reply(recordset)
+        # Return TaskRes and sleep duration
+        return out_message, sleep_duration
+
+    # Any other message
+    return None, 0
 
 
-def handle_legacy_message(
-    client: Client, server_msg: ServerMessage
-) -> Tuple[ClientMessage, int, bool]:
-    """Handle incoming messages from the server.
+def handle_legacy_message_from_msgtype(
+    client_fn: ClientFn, message: Message, context: Context
+) -> Message:
+    """Handle legacy message in the inner most mod."""
+    client = client_fn(str(message.metadata.partition_id))
 
-    Parameters
-    ----------
-    client : Client
-        The Client instance provided by the user.
-    server_msg: ServerMessage
-        The message coming from the server, to be processed by the client.
+    # Check if NumPyClient is returend
+    if isinstance(client, NumPyClient):
+        client = client.to_client()
+        log(
+            WARN,
+            "Deprecation Warning: The `client_fn` function must return an instance "
+            "of `Client`, but an instance of `NumpyClient` was returned. "
+            "Please use `NumPyClient.to_client()` method to convert it to `Client`.",
+        )
 
-    Returns
-    -------
-    client_msg: ClientMessage
-        The result message that should be returned to the server.
-    sleep_duration : int
-        Number of seconds that the client should disconnect from the server.
-    keep_going : bool
-        Flag that indicates whether the client should continue to process the
-        next message from the server (True) or disconnect and optionally
-        reconnect later (False).
-    """
-    field = server_msg.WhichOneof("msg")
-    if field == "reconnect_ins":
-        disconnect_msg, sleep_duration = _reconnect(server_msg.reconnect_ins)
-        return disconnect_msg, sleep_duration, False
-    if field == "get_properties_ins":
-        return _get_properties(client, server_msg.get_properties_ins), 0, True
-    if field == "get_parameters_ins":
-        return _get_parameters(client, server_msg.get_parameters_ins), 0, True
-    if field == "fit_ins":
-        return _fit(client, server_msg.fit_ins), 0, True
-    if field == "evaluate_ins":
-        return _evaluate(client, server_msg.evaluate_ins), 0, True
-    raise UnknownServerMessage()
+    client.set_context(context)
+
+    message_type = message.metadata.message_type
+
+    # Handle GetPropertiesIns
+    if message_type == MessageTypeLegacy.GET_PROPERTIES:
+        get_properties_res = maybe_call_get_properties(
+            client=client,
+            get_properties_ins=recordset_to_getpropertiesins(message.content),
+        )
+        out_recordset = getpropertiesres_to_recordset(get_properties_res)
+    # Handle GetParametersIns
+    elif message_type == MessageTypeLegacy.GET_PARAMETERS:
+        get_parameters_res = maybe_call_get_parameters(
+            client=client,
+            get_parameters_ins=recordset_to_getparametersins(message.content),
+        )
+        out_recordset = getparametersres_to_recordset(
+            get_parameters_res, keep_input=False
+        )
+    # Handle FitIns
+    elif message_type == MessageType.TRAIN:
+        fit_res = maybe_call_fit(
+            client=client,
+            fit_ins=recordset_to_fitins(message.content, keep_input=True),
+        )
+        out_recordset = fitres_to_recordset(fit_res, keep_input=False)
+    # Handle EvaluateIns
+    elif message_type == MessageType.EVALUATE:
+        evaluate_res = maybe_call_evaluate(
+            client=client,
+            evaluate_ins=recordset_to_evaluateins(message.content, keep_input=True),
+        )
+        out_recordset = evaluateres_to_recordset(evaluate_res)
+    else:
+        raise ValueError(f"Invalid message type: {message_type}")
+
+    # Return Message
+    return message.create_reply(out_recordset)
 
 
 def _reconnect(
@@ -136,65 +160,19 @@ def _reconnect(
     return ClientMessage(disconnect_res=disconnect_res), sleep_duration
 
 
-def _get_properties(
-    client: Client, get_properties_msg: ServerMessage.GetPropertiesIns
-) -> ClientMessage:
-    # Deserialize `get_properties` instruction
-    get_properties_ins = serde.get_properties_ins_from_proto(get_properties_msg)
-
-    # Request properties
-    get_properties_res = maybe_call_get_properties(
-        client=client,
-        get_properties_ins=get_properties_ins,
-    )
-
-    # Serialize response
-    get_properties_res_proto = serde.get_properties_res_to_proto(get_properties_res)
-    return ClientMessage(get_properties_res=get_properties_res_proto)
-
-
-def _get_parameters(
-    client: Client, get_parameters_msg: ServerMessage.GetParametersIns
-) -> ClientMessage:
-    # Deserialize `get_parameters` instruction
-    get_parameters_ins = serde.get_parameters_ins_from_proto(get_parameters_msg)
-
-    # Request parameters
-    get_parameters_res = maybe_call_get_parameters(
-        client=client,
-        get_parameters_ins=get_parameters_ins,
-    )
-
-    # Serialize response
-    get_parameters_res_proto = serde.get_parameters_res_to_proto(get_parameters_res)
-    return ClientMessage(get_parameters_res=get_parameters_res_proto)
-
-
-def _fit(client: Client, fit_msg: ServerMessage.FitIns) -> ClientMessage:
-    # Deserialize fit instruction
-    fit_ins = serde.fit_ins_from_proto(fit_msg)
-
-    # Perform fit
-    fit_res = maybe_call_fit(
-        client=client,
-        fit_ins=fit_ins,
-    )
-
-    # Serialize fit result
-    fit_res_proto = serde.fit_res_to_proto(fit_res)
-    return ClientMessage(fit_res=fit_res_proto)
-
-
-def _evaluate(client: Client, evaluate_msg: ServerMessage.EvaluateIns) -> ClientMessage:
-    # Deserialize evaluate instruction
-    evaluate_ins = serde.evaluate_ins_from_proto(evaluate_msg)
-
-    # Perform evaluation
-    evaluate_res = maybe_call_evaluate(
-        client=client,
-        evaluate_ins=evaluate_ins,
-    )
-
-    # Serialize evaluate result
-    evaluate_res_proto = serde.evaluate_res_to_proto(evaluate_res)
-    return ClientMessage(evaluate_res=evaluate_res_proto)
+def validate_out_message(out_message: Message, in_message_metadata: Metadata) -> bool:
+    """Validate the out message."""
+    out_meta = out_message.metadata
+    in_meta = in_message_metadata
+    if (  # pylint: disable-next=too-many-boolean-expressions
+        out_meta.run_id == in_meta.run_id
+        and out_meta.message_id == ""  # This will be generated by the server
+        and out_meta.src_node_id == in_meta.dst_node_id
+        and out_meta.dst_node_id == in_meta.src_node_id
+        and out_meta.reply_to_message == in_meta.message_id
+        and out_meta.group_id == in_meta.group_id
+        and out_meta.message_type == in_meta.message_type
+        and out_meta.created_at > in_meta.created_at
+    ):
+        return True
+    return False

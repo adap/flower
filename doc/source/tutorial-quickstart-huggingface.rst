@@ -4,10 +4,13 @@
 Quickstart 🤗 Transformers
 ==========================
 
+.. meta::
+   :description: Check out this Federating Learning quickstart tutorial for using Flower with HuggingFace Transformers in order to fine-tune an LLM.
+
 Let's build a federated learning system using Hugging Face Transformers and Flower!
 
-We will leverage Hugging Face to federate the training of language models over multiple clients using Flower. 
-More specifically, we will fine-tune a pre-trained Transformer model (distilBERT) 
+We will leverage Hugging Face to federate the training of language models over multiple clients using Flower.
+More specifically, we will fine-tune a pre-trained Transformer model (distilBERT)
 for sequence classification over a dataset of IMDB ratings.
 The end goal is to detect if a movie rating is positive or negative.
 
@@ -29,8 +32,8 @@ Standard Hugging Face workflow
 Handling the data
 ^^^^^^^^^^^^^^^^^
 
-To fetch the IMDB dataset, we will use Hugging Face's :code:`datasets` library. 
-We then need to tokenize the data and create :code:`PyTorch` dataloaders, 
+To fetch the IMDB dataset, we will use Hugging Face's :code:`datasets` library.
+We then need to tokenize the data and create :code:`PyTorch` dataloaders,
 this is all done in the :code:`load_data` function:
 
 .. code-block:: python
@@ -77,8 +80,8 @@ this is all done in the :code:`load_data` function:
 Training and testing the model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Once we have a way of creating our trainloader and testloader, 
-we can take care of the training and testing. 
+Once we have a way of creating our trainloader and testloader,
+we can take care of the training and testing.
 This is very similar to any :code:`PyTorch` training or testing loop:
 
 .. code-block:: python
@@ -117,12 +120,12 @@ This is very similar to any :code:`PyTorch` training or testing loop:
 Creating the model itself
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To create the model itself, 
+To create the model itself,
 we will just load the pre-trained distillBERT model using Hugging Face’s :code:`AutoModelForSequenceClassification` :
 
 .. code-block:: python
 
-    from transformers import AutoModelForSequenceClassification 
+    from transformers import AutoModelForSequenceClassification
 
     net = AutoModelForSequenceClassification.from_pretrained(
             CHECKPOINT, num_labels=2
@@ -135,8 +138,8 @@ Federating the example
 Creating the IMDBClient
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-To federate our example to multiple clients, 
-we first need to write our Flower client class (inheriting from :code:`flwr.client.NumPyClient`). 
+To federate our example to multiple clients,
+we first need to write our Flower client class (inheriting from :code:`flwr.client.NumPyClient`).
 This is very easy, as our model is a standard :code:`PyTorch` model:
 
 .. code-block:: python
@@ -163,17 +166,17 @@ This is very easy, as our model is a standard :code:`PyTorch` model:
                 return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
 
-The :code:`get_parameters` function lets the server get the client's parameters. 
-Inversely, the :code:`set_parameters` function allows the server to send its parameters to the client. 
-Finally, the :code:`fit` function trains the model locally for the client, 
-and the :code:`evaluate` function tests the model locally and returns the relevant metrics. 
+The :code:`get_parameters` function lets the server get the client's parameters.
+Inversely, the :code:`set_parameters` function allows the server to send its parameters to the client.
+Finally, the :code:`fit` function trains the model locally for the client,
+and the :code:`evaluate` function tests the model locally and returns the relevant metrics.
 
 Starting the server
 ^^^^^^^^^^^^^^^^^^^
 
-Now that we have a way to instantiate clients, we need to create our server in order to aggregate the results. 
-Using Flower, this can be done very easily by first choosing a strategy (here, we are using :code:`FedAvg`, 
-which will define the global weights as the average of all the clients' weights at each round) 
+Now that we have a way to instantiate clients, we need to create our server in order to aggregate the results.
+Using Flower, this can be done very easily by first choosing a strategy (here, we are using :code:`FedAvg`,
+which will define the global weights as the average of all the clients' weights at each round)
 and then using the :code:`flwr.server.start_server` function:
 
 .. code-block:: python
@@ -183,7 +186,7 @@ and then using the :code:`flwr.server.start_server` function:
         losses = [num_examples * m["loss"] for num_examples, m in metrics]
         examples = [num_examples for num_examples, _ in metrics]
         return {"accuracy": sum(accuracies) / sum(examples), "loss": sum(losses) / sum(examples)}
-        
+
     # Define strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=1.0,
@@ -199,7 +202,7 @@ and then using the :code:`flwr.server.start_server` function:
     )
 
 
-The :code:`weighted_average` function is there to provide a way to aggregate the metrics distributed amongst 
+The :code:`weighted_average` function is there to provide a way to aggregate the metrics distributed amongst
 the clients (basically this allows us to display a nice average accuracy and loss for every round).
 
 Putting everything together
@@ -209,19 +212,18 @@ We can now start client instances using:
 
 .. code-block:: python
 
-    fl.client.start_numpy_client(
-        server_address="127.0.0.1:8080", 
-        client=IMDBClient()
+    fl.client.start_client(
+        server_address="127.0.0.1:8080",
+        client=IMDBClient().to_client()
     )
 
 
 And they will be able to connect to the server and start the federated training.
 
-If you want to check out everything put together, 
-you should check out the full code example: 
-[https://github.com/adap/flower/tree/main/examples/quickstart-huggingface](https://github.com/adap/flower/tree/main/examples/quickstart-huggingface). 
+If you want to check out everything put together,
+you should check out the `full code example <https://github.com/adap/flower/tree/main/examples/quickstart-huggingface>`_ .
 
-Of course, this is a very basic example, and a lot can be added or modified, 
+Of course, this is a very basic example, and a lot can be added or modified,
 it was just to showcase how simply we could federate a Hugging Face workflow using Flower.
 
 Note that in this example we used :code:`PyTorch`, but we could have very well used :code:`TensorFlow`.

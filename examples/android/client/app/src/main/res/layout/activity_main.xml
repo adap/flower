@@ -1,131 +1,200 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:background="#f2f2f2"
-    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- Device ID EditText -->
+    <EditText
+        android:id="@+id/device_id_edit_text"
+        style="@style/Widget.Material3.TextInputEditText.FilledBox"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_margin="8dp"
+        android:hint="Client Partition ID (1-10)"
+        android:inputType="numberDecimal"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="#4a5663"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <EditText
-            android:id="@+id/device_id_edit_text"
-            style="@style/Widget.Material3.TextInputEditText.FilledBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:fontFamily="@font/montserrat_light"
-            android:hint="Client Partition ID (1-10)"
-            android:inputType="numberDecimal"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="#4a5663" />
-
-    </LinearLayout>
-
-
+    <!-- FL Server IP EditText -->
     <EditText
         android:id="@+id/serverIP"
         style="@style/Widget.Material3.TextInputEditText.FilledBox"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:fontFamily="@font/montserrat_light"
+        android:layout_margin="8dp"
         android:hint="FL Server IP"
         android:inputType="phone"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="#4a5663" />
+        android:textColor="#4a5663"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/device_id_edit_text" />
 
-
+    <!-- FL Server Port EditText -->
     <EditText
         android:id="@+id/serverPort"
         style="@style/Widget.Material3.TextInputEditText.FilledBox"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:fontFamily="@font/montserrat_light"
+        android:layout_margin="8dp"
         android:hint="FL Server Port"
         android:inputType="numberDecimal"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textColor="#4a5663" />
+        android:textColor="#4a5663"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/serverIP" />
 
+    <!-- Buttons: Load Dataset, Setup Connection, Train Federated -->
+
+
+    <!-- Battery Optimisation Button -->
 
     <Button
         android:id="@+id/load_data"
         style="@android:style/Widget.Material.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10sp"
+        android:layout_margin="8dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/rounded_corner"
         android:backgroundTint="#F2B705"
-        android:fontFamily="@font/share_tech_mono"
-        android:onClick="loadData"
-        android:text="Load Dataset" />
-
+        android:onClick="startWorker"
+        android:text="Start"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.328"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/serverPort" />
 
     <Button
         android:id="@+id/connect"
         style="@android:style/Widget.Material.Button.Colored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="5sp"
+        android:layout_width="83dp"
+        android:layout_height="57dp"
+        android:layout_margin="8dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/rounded_corner"
         android:backgroundTint="#F2B705"
-        android:enabled="false"
-        android:fontFamily="@font/share_tech_mono"
-        android:onClick="connect"
-        android:text="Setup Connection Channel" />
+        android:enabled="true"
+        android:onClick="stopWorker"
+        android:text="Stop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.676"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/serverPort" />
 
     <Button
-        android:id="@+id/trainFederated"
+        android:id="@+id/battery_optimisation"
         style="@android:style/Widget.Material.Button.Colored"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="5sp"
+        android:layout_margin="8dp"
         android:background="@drawable/rounded_corner"
         android:backgroundTint="#F2B705"
-        android:enabled="false"
-        android:fontFamily="@font/share_tech_mono"
-        android:onClick="runGrpc"
-        android:text="Train Federated!" />
+        android:onClick="batteryOptimisation"
+        android:text="battery_optimisation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/connect" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="25sp"
-        android:fontFamily="@font/montserrat_medium"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:text="Activity Log"
-        android:textAlignment="center"
-        android:textColor="#4a5663"
-        android:textSize="16sp"
-        android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/grpc_response_text"
-        android:layout_width="395dp"
-        android:layout_height="267dp"
-        android:layout_gravity="center_horizontal"
+    <!-- RecyclerView for displaying messages -->
+
+    <Button
+        android:id="@+id/refreshButton"
+        android:layout_width="97dp"
+        android:layout_height="48dp"
+        android:layout_margin="4dp"
+        android:layout_marginTop="0dp"
         android:background="@drawable/rounded_corner"
-        android:backgroundTint="#4a5663"
-        android:fontFamily="@font/share_tech_mono"
-        android:gravity="bottom"
-        android:nestedScrollingEnabled="true"
-        android:overScrollMode="always"
-        android:scrollbarAlwaysDrawHorizontalTrack="false"
-        android:scrollbars="vertical"
-        android:text="Welcome to Flower! \n"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textColor="#f2f2f2"
-        android:textSize="12sp"
-        android:verticalScrollbarPosition="defaultPosition" />
+        android:backgroundTint="#F2B705"
+        android:gravity="center"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:text="Refresh"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:onClick="refresh"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.908"
+        app:layout_constraintStart_toEndOf="@+id/results_heading"
+        app:layout_constraintTop_toBottomOf="@+id/battery_optimisation" />
 
-</LinearLayout>
+
+    <Button
+        android:id="@+id/clearButton"
+        android:layout_width="97dp"
+        android:layout_height="48dp"
+        android:layout_margin="4dp"
+        android:layout_marginTop="0dp"
+        android:background="@drawable/rounded_corner"
+        android:backgroundTint="#F2B705"
+        android:gravity="center"
+        android:onClick="clear"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:text="Clear"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@id/refreshButton"
+        app:layout_constraintHorizontal_bias="0.678"
+        app:layout_constraintStart_toEndOf="@+id/results_heading"
+        app:layout_constraintTop_toBottomOf="@+id/battery_optimisation" />
+
+    <TextView
+        android:id="@+id/results_heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:text="Results"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.16"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/battery_optimisation" />
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="49dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="8dp"
+        android:src="@mipmap/ic_launcher"
+        app:layout_constraintEnd_toStartOf="@id/results_heading"
+        app:layout_constraintTop_toBottomOf="@id/battery_optimisation" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="8dp"
+        android:nestedScrollingEnabled="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/results_heading"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <!-- Message TextView -->
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

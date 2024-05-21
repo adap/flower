@@ -1,15 +1,7 @@
 """Flower package version helper."""
 
-
-import sys
+import importlib.metadata as importlib_metadata
 from typing import Tuple
-
-# pylint: disable=import-error, no-name-in-module
-if sys.version_info < (3, 8):
-    import importlib_metadata
-else:
-    import importlib.metadata as importlib_metadata
-# pylint: enable=import-error, no-name-in-module
 
 
 def _check_package(name: str) -> Tuple[str, str]:

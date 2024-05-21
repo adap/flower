@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,19 +14,18 @@
 # ==============================================================================
 """Flower client app."""
 
-
 import sys
 import time
-from logging import INFO
-from typing import Callable, Dict, Optional, Union
+from logging import DEBUG, ERROR, INFO, WARN
+from typing import Callable, ContextManager, Optional, Tuple, Type, Union
 
-from flwr.common import (
-    GRPC_MAX_MESSAGE_LENGTH,
-    EventType,
-    event,
-    ndarrays_to_parameters,
-    parameters_to_ndarrays,
-)
+from cryptography.hazmat.primitives.asymmetric import ec
+from grpc import RpcError
+
+from flwr.client.client import Client
+from flwr.client.client_app import ClientApp, LoadClientAppError
+from flwr.client.typing import ClientFn
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
@@ -34,69 +33,52 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
+    ErrorCode,
 )
-from flwr.common.logger import log
-from flwr.common.typing import (
-    Code,
-    EvaluateIns,
-    EvaluateRes,
-    FitIns,
-    FitRes,
-    GetParametersIns,
-    GetParametersRes,
-    GetPropertiesIns,
-    GetPropertiesRes,
-    NDArrays,
-    Status,
-)
+from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.message import Error
+from flwr.common.retry_invoker import RetryInvoker, exponential
 
-from .client import Client
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
-from .message_handler.message_handler import handle
+from .message_handler.message_handler import handle_control_message
+from .node_state import NodeState
 from .numpy_client import NumPyClient
-from .numpy_client import has_evaluate as numpyclient_has_evaluate
-from .numpy_client import has_fit as numpyclient_has_fit
-from .numpy_client import has_get_parameters as numpyclient_has_get_parameters
-from .numpy_client import has_get_properties as numpyclient_has_get_properties
-
-EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT = """
-NumPyClient.fit did not return a tuple with 3 elements.
-The returned values should have the following type signature:
-
-    Tuple[NDArrays, int, Dict[str, Scalar]]
-
-Example
--------
-
-    model.get_weights(), 10, {"accuracy": 0.95}
-
-"""
-
-EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE = """
-NumPyClient.evaluate did not return a tuple with 3 elements.
-The returned values should have the following type signature:
-
-    Tuple[float, int, Dict[str, Scalar]]
-
-Example
--------
-
-    0.5, 10, {"accuracy": 0.95}
-
-"""
-
-ClientLike = Union[Client, NumPyClient]
 
 
-# pylint: disable=import-outside-toplevel,too-many-locals,too-many-branches
+def _check_actionable_client(
+    client: Optional[Client], client_fn: Optional[ClientFn]
+) -> None:
+    if client_fn is None and client is None:
+        raise ValueError(
+            "Both `client_fn` and `client` are `None`, but one is required"
+        )
+
+    if client_fn is not None and client is not None:
+        raise ValueError(
+            "Both `client_fn` and `client` are provided, but only one is allowed"
+        )
+
+
+# pylint: disable=import-outside-toplevel
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
+# pylint: disable=too-many-arguments
 def start_client(
     *,
     server_address: str,
-    client: Client,
+    client_fn: Optional[ClientFn] = None,
+    client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
+    insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    authentication_keys: Optional[
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
+    max_retries: Optional[int] = None,
+    max_wait_time: Optional[float] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -106,9 +88,11 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    client : flwr.client.Client
+    client_fn : Optional[ClientFn]
+        A callable that instantiates a Client. (default: None)
+    client : Optional[flwr.client.Client]
         An implementation of the abstract base
-        class `flwr.client.Client`.
+        class `flwr.client.Client` (default: None)
     grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
         The maximum length of gRPC messages that can be exchanged with the
         Flower server. The default should be sufficient for most models.
@@ -120,11 +104,22 @@ def start_client(
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    insecure : bool (default: True)
+        Starts an insecure gRPC connection when True. Enables HTTPS connection
+        when False, using system certificates if `root_certificates` is None.
     transport : Optional[str] (default: None)
         Configure the transport layer. Allowed values:
         - 'grpc-bidi': gRPC, bidirectional streaming
         - 'grpc-rere': gRPC, request-response (experimental)
         - 'rest': HTTP (experimental)
+    max_retries: Optional[int] (default: None)
+        The maximum number of times the client will try to connect to the
+        server before giving up in case of a connection error. If set to None,
+        there is no limit to the number of tries.
+    max_wait_time: Optional[float] (default: None)
+        The maximum duration before the client stops trying to
+        connect to the server in case of connection error.
+        If set to None, there is no limit to the total time.
 
     Examples
     --------
@@ -132,74 +127,282 @@ def start_client(
 
     >>> start_client(
     >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
+    >>>     client_fn=client_fn,
     >>> )
 
-    Starting an SSL-enabled gRPC client:
+    Starting an SSL-enabled gRPC client using system certificates:
 
-    >>> from pathlib import Path
+    >>> def client_fn(cid: str):
+    >>>     return FlowerClient()
+    >>>
     >>> start_client(
     >>>     server_address=localhost:8080,
-    >>>     client=FlowerClient(),
+    >>>     client_fn=client_fn,
+    >>>     insecure=False,
+    >>> )
+
+    Starting an SSL-enabled gRPC client using provided certificates:
+
+    >>> from pathlib import Path
+    >>>
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client_fn=client_fn,
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
     event(EventType.START_CLIENT_ENTER)
+    _start_client_internal(
+        server_address=server_address,
+        load_client_app_fn=None,
+        client_fn=client_fn,
+        client=client,
+        grpc_max_message_length=grpc_max_message_length,
+        root_certificates=root_certificates,
+        insecure=insecure,
+        transport=transport,
+        authentication_keys=authentication_keys,
+        max_retries=max_retries,
+        max_wait_time=max_wait_time,
+    )
+    event(EventType.START_CLIENT_LEAVE)
 
-    # Parse IP address
-    parsed_address = parse_address(server_address)
-    if not parsed_address:
-        sys.exit(f"Server address ({server_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
-    # Set the default transport layer
-    if transport is None:
-        transport = TRANSPORT_TYPE_GRPC_BIDI
+# pylint: disable=import-outside-toplevel
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-locals
+# pylint: disable=too-many-statements
+def _start_client_internal(
+    *,
+    server_address: str,
+    load_client_app_fn: Optional[Callable[[], ClientApp]] = None,
+    client_fn: Optional[ClientFn] = None,
+    client: Optional[Client] = None,
+    grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
+    root_certificates: Optional[Union[bytes, str]] = None,
+    insecure: Optional[bool] = None,
+    transport: Optional[str] = None,
+    authentication_keys: Optional[
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
+    max_retries: Optional[int] = None,
+    max_wait_time: Optional[float] = None,
+) -> None:
+    """Start a Flower client node which connects to a Flower server.
 
-    # Use either gRPC bidirectional streaming or REST request/response
-    if transport == TRANSPORT_TYPE_REST:
-        try:
-            from .rest_client.connection import http_request_response
-        except ModuleNotFoundError:
-            sys.exit(MISSING_EXTRA_REST)
-        if server_address[:4] != "http":
-            sys.exit(
-                "When using the REST API, please provide `https://` or "
-                "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
+    Parameters
+    ----------
+    server_address : str
+        The IPv4 or IPv6 address of the server. If the Flower
+        server runs on the same machine on port 8080, then `server_address`
+        would be `"[::]:8080"`.
+    load_client_app_fn : Optional[Callable[[], ClientApp]] (default: None)
+        A function that can be used to load a `ClientApp` instance.
+    client_fn : Optional[ClientFn]
+        A callable that instantiates a Client. (default: None)
+    client : Optional[flwr.client.Client]
+        An implementation of the abstract base
+        class `flwr.client.Client` (default: None)
+    grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
+        The maximum length of gRPC messages that can be exchanged with the
+        Flower server. The default should be sufficient for most models.
+        Users who train very large models might need to increase this
+        value. Note that the Flower server needs to be started with the
+        same value (see `flwr.server.start_server`), otherwise it will not
+        know about the increased limit and block larger messages.
+    root_certificates : Optional[Union[bytes, str]] (default: None)
+        The PEM-encoded root certificates as a byte string or a path string.
+        If provided, a secure connection using the certificates will be
+        established to an SSL-enabled Flower server.
+    insecure : Optional[bool] (default: None)
+        Starts an insecure gRPC connection when True. Enables HTTPS connection
+        when False, using system certificates if `root_certificates` is None.
+    transport : Optional[str] (default: None)
+        Configure the transport layer. Allowed values:
+        - 'grpc-bidi': gRPC, bidirectional streaming
+        - 'grpc-rere': gRPC, request-response (experimental)
+        - 'rest': HTTP (experimental)
+    max_retries: Optional[int] (default: None)
+        The maximum number of times the client will try to connect to the
+        server before giving up in case of a connection error. If set to None,
+        there is no limit to the number of tries.
+    max_wait_time: Optional[float] (default: None)
+        The maximum duration before the client stops trying to
+        connect to the server in case of connection error.
+        If set to None, there is no limit to the total time.
+    """
+    if insecure is None:
+        insecure = root_certificates is None
+
+    if load_client_app_fn is None:
+        _check_actionable_client(client, client_fn)
+
+        if client_fn is None:
+            # Wrap `Client` instance in `client_fn`
+            def single_client_factory(
+                cid: str,  # pylint: disable=unused-argument
+            ) -> Client:
+                if client is None:  # Added this to keep mypy happy
+                    raise ValueError(
+                        "Both `client_fn` and `client` are `None`, but one is required"
+                    )
+                return client  # Always return the same instance
+
+            client_fn = single_client_factory
+
+        def _load_client_app() -> ClientApp:
+            return ClientApp(client_fn=client_fn)
+
+        load_client_app_fn = _load_client_app
+
+    # At this point, only `load_client_app_fn` should be used
+    # Both `client` and `client_fn` must not be used directly
+
+    # Initialize connection context manager
+    connection, address, connection_error_type = _init_connection(
+        transport, server_address
+    )
+
+    retry_invoker = RetryInvoker(
+        wait_gen_factory=exponential,
+        recoverable_exceptions=connection_error_type,
+        max_tries=max_retries,
+        max_time=max_wait_time,
+        on_giveup=lambda retry_state: (
+            log(
+                WARN,
+                "Giving up reconnection after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
             )
-        connection = http_request_response
-    elif transport == TRANSPORT_TYPE_GRPC_RERE:
-        connection = grpc_request_response
-    elif transport == TRANSPORT_TYPE_GRPC_BIDI:
-        connection = grpc_connection
-    else:
-        raise ValueError(
-            f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
-        )
+            if retry_state.tries > 1
+            else None
+        ),
+        on_success=lambda retry_state: (
+            log(
+                INFO,
+                "Connection successful after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+            if retry_state.tries > 1
+            else None
+        ),
+        on_backoff=lambda retry_state: (
+            log(WARN, "Connection attempt failed, retrying...")
+            if retry_state.tries == 1
+            else log(
+                DEBUG,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
+        ),
+    )
+
+    node_state = NodeState()
 
     while True:
         sleep_duration: int = 0
         with connection(
             address,
-            max_message_length=grpc_max_message_length,
-            root_certificates=root_certificates,
+            insecure,
+            retry_invoker,
+            grpc_max_message_length,
+            root_certificates,
+            authentication_keys,
         ) as conn:
-            receive, send, create_node, delete_node = conn
+            # pylint: disable-next=W0612
+            receive, send, create_node, delete_node, get_run = conn
 
             # Register node
             if create_node is not None:
                 create_node()  # pylint: disable=not-callable
 
             while True:
-                task_ins = receive()
-                if task_ins is None:
+                # Receive
+                message = receive()
+                if message is None:
                     time.sleep(3)  # Wait for 3s before asking again
                     continue
-                task_res, sleep_duration, keep_going = handle(client, task_ins)
-                send(task_res)
-                if not keep_going:
+
+                log(INFO, "")
+                if len(message.metadata.group_id) > 0:
+                    log(
+                        INFO,
+                        "[RUN %s, ROUND %s]",
+                        message.metadata.run_id,
+                        message.metadata.group_id,
+                    )
+                log(
+                    INFO,
+                    "Received: %s message %s",
+                    message.metadata.message_type,
+                    message.metadata.message_id,
+                )
+
+                # Handle control message
+                out_message, sleep_duration = handle_control_message(message)
+                if out_message:
+                    send(out_message)
                     break
+
+                # Register context for this run
+                node_state.register_context(run_id=message.metadata.run_id)
+
+                # Retrieve context for this run
+                context = node_state.retrieve_context(run_id=message.metadata.run_id)
+
+                # Create an error reply message that will never be used to prevent
+                # the used-before-assignment linting error
+                reply_message = message.create_error_reply(
+                    error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
+                )
+
+                # Handle app loading and task message
+                try:
+                    # Load ClientApp instance
+                    client_app: ClientApp = load_client_app_fn()
+
+                    # Execute ClientApp
+                    reply_message = client_app(message=message, context=context)
+                except Exception as ex:  # pylint: disable=broad-exception-caught
+
+                    # Legacy grpc-bidi
+                    if transport in ["grpc-bidi", None]:
+                        log(ERROR, "Client raised an exception.", exc_info=ex)
+                        # Raise exception, crash process
+                        raise ex
+
+                    # Don't update/change NodeState
+
+                    e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                    exc_entity = "ClientApp"
+                    if isinstance(ex, LoadClientAppError):
+                        reason = (
+                            "An exception was raised when attempting to load "
+                            "`ClientApp`"
+                        )
+                        e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+                        exc_entity = "SuperNode"
+
+                    log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+
+                    # Create error message
+                    reply_message = message.create_error_reply(
+                        error=Error(code=e_code, reason=reason)
+                    )
+                else:
+                    # No exception, update node state
+                    node_state.update_context(
+                        run_id=message.metadata.run_id,
+                        context=context,
+                    )
+
+                # Send
+                send(reply_message)
+                log(INFO, "Sent reply")
 
             # Unregister node
             if delete_node is not None:
@@ -216,8 +419,6 @@ def start_client(
         )
         time.sleep(sleep_duration)
 
-    event(EventType.START_CLIENT_LEAVE)
-
 
 def start_numpy_client(
     *,
@@ -225,9 +426,16 @@ def start_numpy_client(
     client: NumPyClient,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[bytes] = None,
+    insecure: Optional[bool] = None,
     transport: Optional[str] = None,
 ) -> None:
     """Start a Flower NumPyClient which connects to a gRPC server.
+
+    Warning
+    -------
+    This function is deprecated since 1.7.0. Use :code:`flwr.client.start_client`
+    instead and first convert your :code:`NumPyClient` to type
+    :code:`flwr.client.Client` by executing its :code:`to_client()` method.
 
     Parameters
     ----------
@@ -248,6 +456,9 @@ def start_numpy_client(
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    insecure : Optional[bool] (default: None)
+        Starts an insecure gRPC connection when True. Enables HTTPS connection
+        when False, using system certificates if `root_certificates` is None.
     transport : Optional[str] (default: None)
         Configure the transport layer. Allowed values:
         - 'grpc-bidi': gRPC, bidirectional streaming
@@ -256,137 +467,115 @@ def start_numpy_client(
 
     Examples
     --------
-    Starting a client with an insecure server connection:
+    Starting a gRPC client with an insecure server connection:
 
-    >>> start_client(
+    >>> start_numpy_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
     >>> )
 
-    Starting a SSL-enabled client:
+    Starting an SSL-enabled gRPC client using system certificates:
+
+    >>> start_numpy_client(
+    >>>     server_address=localhost:8080,
+    >>>     client=FlowerClient(),
+    >>>     insecure=False,
+    >>> )
+
+    Starting an SSL-enabled gRPC client using provided certificates:
 
     >>> from pathlib import Path
-    >>> start_client(
+    >>>
+    >>> start_numpy_client(
     >>>     server_address=localhost:8080,
     >>>     client=FlowerClient(),
     >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
     >>> )
     """
-    # Start
+    mssg = (
+        "flwr.client.start_numpy_client() is deprecated. \n\tInstead, use "
+        "`flwr.client.start_client()` by ensuring you first call "
+        "the `.to_client()` method as shown below: \n"
+        "\tflwr.client.start_client(\n"
+        "\t\tserver_address='<IP>:<PORT>',\n"
+        "\t\tclient=FlowerClient().to_client(),"
+        " # <-- where FlowerClient is of type flwr.client.NumPyClient object\n"
+        "\t)\n"
+        "\tUsing `start_numpy_client()` is deprecated."
+    )
+
+    warn_deprecated_feature(name=mssg)
+
+    # Calling this function is deprecated. A warning is thrown.
+    # We first need to convert the supplied client to `Client.`
+
+    wrp_client = client.to_client()
+
     start_client(
         server_address=server_address,
-        client=_wrap_numpy_client(client=client),
+        client=wrp_client,
         grpc_max_message_length=grpc_max_message_length,
         root_certificates=root_certificates,
+        insecure=insecure,
         transport=transport,
     )
 
 
-def to_client(client_like: ClientLike) -> Client:
-    """Take any Client-like object and return it as a Client."""
-    if isinstance(client_like, NumPyClient):
-        return _wrap_numpy_client(client=client_like)
-    return client_like
+def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
+    Callable[
+        [
+            str,
+            bool,
+            RetryInvoker,
+            int,
+            Union[bytes, str, None],
+            Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
+        ],
+        ContextManager[
+            Tuple[
+                Callable[[], Optional[Message]],
+                Callable[[Message], None],
+                Optional[Callable[[], None]],
+                Optional[Callable[[], None]],
+                Optional[Callable[[int], Tuple[str, str]]],
+            ]
+        ],
+    ],
+    str,
+    Type[Exception],
+]:
+    # Parse IP address
+    parsed_address = parse_address(server_address)
+    if not parsed_address:
+        sys.exit(f"Server address ({server_address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
 
+    # Set the default transport layer
+    if transport is None:
+        transport = TRANSPORT_TYPE_GRPC_BIDI
 
-def _constructor(self: Client, numpy_client: NumPyClient) -> None:
-    self.numpy_client = numpy_client  # type: ignore
+    # Use either gRPC bidirectional streaming or REST request/response
+    if transport == TRANSPORT_TYPE_REST:
+        try:
+            from requests.exceptions import ConnectionError as RequestsConnectionError
 
+            from .rest_client.connection import http_request_response
+        except ModuleNotFoundError:
+            sys.exit(MISSING_EXTRA_REST)
+        if server_address[:4] != "http":
+            sys.exit(
+                "When using the REST API, please provide `https://` or "
+                "`http://` before the server address (e.g. `http://127.0.0.1:8080`)"
+            )
+        connection, error_type = http_request_response, RequestsConnectionError
+    elif transport == TRANSPORT_TYPE_GRPC_RERE:
+        connection, error_type = grpc_request_response, RpcError
+    elif transport == TRANSPORT_TYPE_GRPC_BIDI:
+        connection, error_type = grpc_connection, RpcError
+    else:
+        raise ValueError(
+            f"Unknown transport type: {transport} (possible: {TRANSPORT_TYPES})"
+        )
 
-def _get_properties(self: Client, ins: GetPropertiesIns) -> GetPropertiesRes:
-    """Return the current client properties."""
-    properties = self.numpy_client.get_properties(config=ins.config)  # type: ignore
-    return GetPropertiesRes(
-        status=Status(code=Code.OK, message="Success"),
-        properties=properties,
-    )
-
-
-def _get_parameters(self: Client, ins: GetParametersIns) -> GetParametersRes:
-    """Return the current local model parameters."""
-    parameters = self.numpy_client.get_parameters(config=ins.config)  # type: ignore
-    parameters_proto = ndarrays_to_parameters(parameters)
-    return GetParametersRes(
-        status=Status(code=Code.OK, message="Success"), parameters=parameters_proto
-    )
-
-
-def _fit(self: Client, ins: FitIns) -> FitRes:
-    """Refine the provided parameters using the locally held dataset."""
-    # Deconstruct FitIns
-    parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
-
-    # Train
-    results = self.numpy_client.fit(parameters, ins.config)  # type: ignore
-    if not (
-        len(results) == 3
-        and isinstance(results[0], list)
-        and isinstance(results[1], int)
-        and isinstance(results[2], dict)
-    ):
-        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_FIT)
-
-    # Return FitRes
-    parameters_prime, num_examples, metrics = results
-    parameters_prime_proto = ndarrays_to_parameters(parameters_prime)
-    return FitRes(
-        status=Status(code=Code.OK, message="Success"),
-        parameters=parameters_prime_proto,
-        num_examples=num_examples,
-        metrics=metrics,
-    )
-
-
-def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
-    """Evaluate the provided parameters using the locally held dataset."""
-    parameters: NDArrays = parameters_to_ndarrays(ins.parameters)
-
-    results = self.numpy_client.evaluate(parameters, ins.config)  # type: ignore
-    if not (
-        len(results) == 3
-        and isinstance(results[0], float)
-        and isinstance(results[1], int)
-        and isinstance(results[2], dict)
-    ):
-        raise Exception(EXCEPTION_MESSAGE_WRONG_RETURN_TYPE_EVALUATE)
-
-    # Return EvaluateRes
-    loss, num_examples, metrics = results
-    return EvaluateRes(
-        status=Status(code=Code.OK, message="Success"),
-        loss=loss,
-        num_examples=num_examples,
-        metrics=metrics,
-    )
-
-
-def _wrap_numpy_client(client: NumPyClient) -> Client:
-    member_dict: Dict[str, Callable] = {  # type: ignore
-        "__init__": _constructor,
-    }
-
-    # Add wrapper type methods (if overridden)
-
-    if numpyclient_has_get_properties(client=client):
-        member_dict["get_properties"] = _get_properties
-
-    if numpyclient_has_get_parameters(client=client):
-        member_dict["get_parameters"] = _get_parameters
-
-    if numpyclient_has_fit(client=client):
-        member_dict["fit"] = _fit
-
-    if numpyclient_has_evaluate(client=client):
-        member_dict["evaluate"] = _evaluate
-
-    # Create wrapper class
-    wrapper_class = type("NumPyClientWrapper", (Client,), member_dict)
-
-    # Create and return an instance of the newly created class
-    return wrapper_class(numpy_client=client)  # type: ignore
-
-
-def run_client() -> None:
-    """Run Flower client."""
-    log(INFO, "Running Flower client...")
-    time.sleep(3)
+    return connection, address, error_type

@@ -1,0 +1,2 @@
+dataset_name,n_estimators_client,xgb_max_depth,subsample,learning_rate,colsample_bylevel,colsample_bynode,colsample_bytree,alpha,gamma,num_parallel_tree,min_child_weight,result_train,result_test
+abalone,200,3,0.4,0.05,1,1,1,5,10,1,5,3.9291864339707256,4.404329529975106

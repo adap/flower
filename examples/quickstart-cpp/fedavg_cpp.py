@@ -1,11 +1,8 @@
-from ast import Bytes
-from collections import OrderedDict
-from io import BytesIO
 import struct
-from typing import Callable, Dict, List, Tuple, Union
+from ast import Bytes
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-
 from flwr.server.strategy import FedAvg
 from flwr.common import (
     EvaluateRes,
@@ -14,11 +11,8 @@ from flwr.common import (
     Scalar,
     NDArrays,
 )
-from typing import Optional
-from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.aggregate import aggregate, weighted_loss_avg
-from numpy import bytes_, numarray
 
 
 class FedAvgCpp(FedAvg):
@@ -88,7 +82,6 @@ class FedAvgCpp(FedAvg):
         # Do not aggregate if there are failures and failures are not accepted
         if not self.accept_failures and failures:
             return None, {}
-        print(results[0][1])
         loss_aggregated = weighted_loss_avg(
             [
                 (

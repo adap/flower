@@ -15,6 +15,7 @@
 """Utilities for Actors in the Virtual Client Engine."""
 
 import traceback
+import warnings
 from logging import ERROR
 
 from flwr.common.logger import log
@@ -23,6 +24,9 @@ try:
     import tensorflow as TF
 except ModuleNotFoundError:
     TF = None
+
+# Display Deprecation warning once
+warnings.filterwarnings("once", category=DeprecationWarning)
 
 
 def enable_tf_gpu_growth() -> None:
@@ -33,7 +37,7 @@ def enable_tf_gpu_growth() -> None:
     # the same GPU.
     # Luckily we can disable this behavior by enabling memory growth
     # on the GPU. In this way, VRAM allocated to the processes grows based
-    # on the needs for the workload. (this is for instance the default
+    # on the needs for the run. (this is for instance the default
     # behavior in PyTorch)
     # While this behavior is critical for Actors, you'll likely need it
     # as well in your main process (where the server runs and might evaluate

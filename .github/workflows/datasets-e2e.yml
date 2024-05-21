@@ -1,0 +1,52 @@
+name: Datasets-E2E
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "datasets/flwr_datasets/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "datasets/flwr_datasets/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLWR_TELEMETRY_ENABLED: 0
+
+jobs:
+  frameworks:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    # Using approach described here:
+    # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
+    strategy:
+      matrix:
+        include:
+          - directory: pytorch
+
+          - directory: tensorflow
+
+          - directory: scikit-learn
+
+    name: Framework / ${{matrix.directory}}
+
+    defaults:
+      run:
+        working-directory: datasets/e2e/${{ matrix.directory }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: python -m poetry install
+      - name: Run tests
+        run: python -m unittest discover -p '*_test.py'

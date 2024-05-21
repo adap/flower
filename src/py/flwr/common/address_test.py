@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -109,10 +109,10 @@ def test_domain_correct() -> None:
     """Test if a correct domain address is correctly parsed."""
     # Prepare
     addresses = [
-        ("flower.dev:123", ("flower.dev", 123, None)),
-        ("sub.flower.dev:123", ("sub.flower.dev", 123, None)),
-        ("sub2.sub1.flower.dev:123", ("sub2.sub1.flower.dev", 123, None)),
-        ("s5.s4.s3.s2.s1.flower.dev:123", ("s5.s4.s3.s2.s1.flower.dev", 123, None)),
+        ("flower.ai:123", ("flower.ai", 123, None)),
+        ("sub.flower.ai:123", ("sub.flower.ai", 123, None)),
+        ("sub2.sub1.flower.ai:123", ("sub2.sub1.flower.ai", 123, None)),
+        ("s5.s4.s3.s2.s1.flower.ai:123", ("s5.s4.s3.s2.s1.flower.ai", 123, None)),
         ("localhost:123", ("localhost", 123, None)),
         ("https://localhost:123", ("https://localhost", 123, None)),
         ("http://localhost:123", ("http://localhost", 123, None)),
@@ -130,8 +130,8 @@ def test_domain_incorrect() -> None:
     """Test if an incorrect domain address returns None."""
     # Prepare
     addresses = [
-        "flower.dev",
-        "flower.dev:65536",
+        "flower.ai",
+        "flower.ai:65536",
     ]
 
     for address in addresses:

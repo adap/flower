@@ -6,10 +6,10 @@ build-backend = "poetry.masonry.api"
 name = "quickstart-pytorch-lightning"
 version = "0.1.0"
 description = "Federated Learning E2E test with Flower and PyTorch Lightning"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
-pytorch-lightning = "1.6.0"
+pytorch-lightning = "2.2.4"
 torchvision = "0.14.1"

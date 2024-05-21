@@ -6,10 +6,14 @@ build-backend = "poetry.core.masonry.api"
 name = "simulation-pytorch"
 version = "0.1.0"
 description = "Federated Learning Simulation with Flower and PyTorch"
-authors = ["The Flower Authors <hello@flower.dev>"]
+authors = ["The Flower Authors <hello@flower.ai>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
 flwr = { extras = ["simulation"], version = ">=1.0,<2.0" }
-torch = "1.13.1"
-torchvision = "0.14.1"
+flwr-datasets = { extras = ["vision"], version = ">=0.0.2,<1.0.0" }
+torch = "2.1.1"
+torchvision = "0.16.1"
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.27.0"

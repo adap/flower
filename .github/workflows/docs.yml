@@ -8,42 +8,44 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  build_docs:
+  build_and_deploy:
     runs-on: ubuntu-22.04
-    name: Build
+    name: Build and deploy
     steps:
-      - uses: actions/checkout@v3
-      - name: Bootstrap
-        uses: ./.github/actions/bootstrap
-      - name: Install pandoc
-        run: sudo apt install pandoc
-      - name: Install dependencies (mandatory only)
-        run: python -m poetry install --extras "simulation"
-      - name: Build docs
-        run: ./dev/build-docs.sh
-
-  deploy_docs:
-    needs: build_docs
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-22.04
-    name: Deploy 
-    steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Check copyright line
+        run: ./dev/test-copyright.sh
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Install pandoc
         run: sudo apt install pandoc
-      - name: Install dependencies (mandatory only)
+      - name: Install Flower dependencies (mandatory only)
         run: python -m poetry install --extras "simulation"
-      - name: Build and deploy docs
+      - name: Install Flower Datasets
+        run: |
+          cd datasets
+          python -m poetry install
+      - name: Build docs
+        run: ./dev/build-docs.sh ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
+      - name: Deploy docs
+        if: ${{ github.ref == 'refs/heads/main' && github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork }}
         env:
           AWS_DEFAULT_REGION: ${{ secrets. AWS_DEFAULT_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets. AWS_SECRET_ACCESS_KEY }}
-        run: ./dev/deploy-docs.sh
+          DOCS_BUCKET: flower.ai
+        run: |
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./doc/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/framework
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./baselines/doc/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/baselines
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./examples/doc/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/examples
+          aws s3 sync --delete --exclude ".*" --exclude "v/*" --cache-control "no-cache" ./datasets/doc/build/html/ s3://${{ env.DOCS_BUCKET }}/docs/datasets

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,16 +23,16 @@ from flwr.common.typing import NDArrayInt
 
 
 def share_keys_plaintext_concat(
-    source: int, destination: int, b_share: bytes, sk_share: bytes
+    src_node_id: int, dst_node_id: int, b_share: bytes, sk_share: bytes
 ) -> bytes:
     """Combine arguments to bytes.
 
     Parameters
     ----------
-    source : int
-        the secure ID of the source.
-    destination : int
-        the secure ID of the destination.
+    src_node_id : int
+        the node ID of the source.
+    dst_node_id : int
+        the node ID of the destination.
     b_share : bytes
         the private key share of the source sent to the destination.
     sk_share : bytes
@@ -45,8 +45,8 @@ def share_keys_plaintext_concat(
     """
     return b"".join(
         [
-            int.to_bytes(source, 4, "little"),
-            int.to_bytes(destination, 4, "little"),
+            int.to_bytes(src_node_id, 8, "little", signed=True),
+            int.to_bytes(dst_node_id, 8, "little", signed=True),
             int.to_bytes(len(b_share), 4, "little"),
             b_share,
             sk_share,
@@ -64,21 +64,21 @@ def share_keys_plaintext_separate(plaintext: bytes) -> Tuple[int, int, bytes, by
 
     Returns
     -------
-    source : int
-        the secure ID of the source.
-    destination : int
-        the secure ID of the destination.
+    src_node_id : int
+        the node ID of the source.
+    dst_node_id : int
+        the node ID of the destination.
     b_share : bytes
         the private key share of the source sent to the destination.
     sk_share : bytes
         the secret key share of the source sent to the destination.
     """
     src, dst, mark = (
-        int.from_bytes(plaintext[:4], "little"),
-        int.from_bytes(plaintext[4:8], "little"),
-        int.from_bytes(plaintext[8:12], "little"),
+        int.from_bytes(plaintext[:8], "little", signed=True),
+        int.from_bytes(plaintext[8:16], "little", signed=True),
+        int.from_bytes(plaintext[16:20], "little"),
     )
-    ret = (src, dst, plaintext[12 : 12 + mark], plaintext[12 + mark :])
+    ret = (src, dst, plaintext[20 : 20 + mark], plaintext[20 + mark :])
     return ret
 
 

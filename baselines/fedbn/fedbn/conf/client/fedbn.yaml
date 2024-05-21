@@ -1,0 +1,5 @@
+---
+# standard FedBN Flower Client
+_target_: fedbn.client.FedBNFlowerClient
+client_label: FedBN
+l_r: 0.01

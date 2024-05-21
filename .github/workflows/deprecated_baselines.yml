@@ -2,11 +2,15 @@ name: Deprecated-Baselines
 
 on:
   push:
-    branches:
-      - main
+    branches: ['main']
+    paths: ['baselines/flwr_baselines/**']
   pull_request:
-    branches:
-      - main
+    branches: ['main']
+    paths: ['baselines/flwr_baselines/**']
+    
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref == 'refs/heads/main' && github.run_id || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   FLWR_TELEMETRY_ENABLED: 0
@@ -20,7 +24,7 @@ jobs:
     name: Test
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:

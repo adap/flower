@@ -1,49 +1,45 @@
 #include "start.h"
 
-void start::start_client(std::string server_address,
-                         flwr_local::Client* client,
+// cppcheck-suppress unusedFunction
+void start::start_client(std::string server_address, flwr_local::Client *client,
                          int grpc_max_message_length) {
+
+  gRPCRereCommunicator communicator(server_address, grpc_max_message_length);
+
   while (true) {
     int sleep_duration = 0;
 
-    // Set channel parameters
-    grpc::ChannelArguments args;
-    args.SetMaxReceiveMessageSize(grpc_max_message_length);
-    args.SetMaxSendMessageSize(grpc_max_message_length);
+    create_node(&communicator);
 
-    // Establish an insecure gRPC connection to a gRPC server
-    std::shared_ptr<Channel> channel = grpc::CreateCustomChannel(
-        server_address, grpc::InsecureChannelCredentials(), args);
+    while (true) {
+      auto task_ins = receive(&communicator);
+      if (!task_ins) {
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+        continue;
+      }
 
-    // Create stub
-    std::unique_ptr<FlowerService::Stub> stub_ =
-        FlowerService::NewStub(channel);
+      auto [task_res, sleep_duration, keep_going] =
+          handle_task(client, task_ins.value());
 
-    // Read and write messages
-    ClientContext context;
-    std::shared_ptr<ClientReaderWriter<ClientMessage, ServerMessage>>
-        reader_writer(stub_->Join(&context));
-    ServerMessage sm;
-    while (reader_writer->Read(&sm)) {
-      std::tuple<ClientMessage, int, bool> receive = handle(client, sm);
-      sleep_duration = std::get<1>(receive);
-      reader_writer->Write(std::get<0>(receive));
-      if (std::get<2>(receive) == false) {
+      send(&communicator, task_res);
+      if (!keep_going) {
         break;
       }
     }
-    reader_writer->WritesDone();
 
-    // Check connection status
-    Status status = reader_writer->Finish();
-
+    delete_node(&communicator);
     if (sleep_duration == 0) {
       std::cout << "Disconnect and shut down." << std::endl;
       break;
     }
 
-    // Sleep and reconnect afterwards
-    // std::cout << "Disconnect, then re-establish connection after" <<
-    // sleep_duration << "second(s)" << std::endl; Sleep(sleep_duration * 1000);
+    std::cout << "Disconnect, then re-establish connection after"
+              << sleep_duration << "second(s)" << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(sleep_duration));
+
+    if (sleep_duration == 0) {
+      std::cout << "Disconnect and shut down." << std::endl;
+      break;
+    }
   }
 }

@@ -1,0 +1,12 @@
+strategy:
+  _target_: dasha.strategy.DashaAggregator
+  step_size: ???
+
+client:
+  _target_: dasha.client.StochasticDashaClient
+  mega_batch_size: 100
+  stochastic_momentum: 0.1
+  batch_size: 25
+  device: cpu
+  evaluate_accuracy: false
+  strict_load: true

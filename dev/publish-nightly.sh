@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,20 +16,24 @@
 # ==============================================================================
 
 set -e
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"/../
 
 # This script will build and publish a nightly release of Flower under the condition
 # that at least one commit was made in the last 24 hours.
-# It will rename the the package name in the pyproject.toml to from "flwr" to "flwr-nightly".
+# It will rename the package name in the pyproject.toml to from "flwr" to "flwr-nightly".
 # The version name in the pyproject.toml will be appended with "-dev" and the current date.
-# The result will be a release on PyPi of the package "flwr-nightly" of version e.g. 
+# The result will be a release on PyPi of the package "flwr-nightly" of version e.g.
 # "0.1.1.dev20200716" as seen at https://pypi.org/project/flwr-nightly/
+# If the script is called with the flag `--skip-publish`, the name and version are changed
+# in the pyproject.toml but the package won't be published.
 
 if [[ $(git log --since="24 hours ago" --pretty=oneline) ]]; then
     sed -i -E "s/^name = \"(.+)\"/name = \"\1-nightly\"/" pyproject.toml
-    sed -i -E "s/^version = \"(.+)\"/version = \"\1-dev$(date '+%Y%m%d')\"/" pyproject.toml
-    python -m poetry build
-    python -m poetry publish -u __token__ -p $PYPI_TOKEN
+    sed -i -E "s/^version = \"(.+)\"/version = \"\1.dev$(date '+%Y%m%d')\"/" pyproject.toml
+    if [ "$1" != "--skip-publish" ]; then
+        python -m poetry build
+        python -m poetry publish -u __token__ -p $PYPI_TOKEN
+    fi
 else
     echo "There were no commits in the last 24 hours."
 fi

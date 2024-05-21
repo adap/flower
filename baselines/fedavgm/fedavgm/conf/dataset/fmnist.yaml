@@ -1,0 +1,4 @@
+---
+_target_: fedavgm.dataset.fmnist
+num_classes: 10
+input_shape: [28, 28, 1]

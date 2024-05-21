@@ -1,0 +1,44 @@
+---
+# this is the config that will be loaded as default by main.py
+# Please follow the provided structure (this will ensuring all baseline follow
+# a similar configuration structure and hence be easy to customise)
+
+defaults:
+  - _self_
+  - strategy: fednova
+  - optimizer: momentum
+
+var_local_epochs: False
+datapath: fednova/data/
+checkpoint_path: fednova/checkpoints/
+num_clients: 16
+num_epochs: 2
+num_rounds: 100
+batch_size: 32
+NIID: True
+alpha: 0.1
+var_min_epochs: 2
+var_max_epochs: 5
+lr_scheduling: True
+seed: 1
+mode: train
+
+model:
+  _target_: fednova.models.VGG
+
+client_resources:
+  num_cpus: 1
+  num_gpus: 0.125
+
+hydra:
+  sweep:
+    dir: multirun
+    subdir: ${hydra.job.override_dirname}/${seed}
+  job:
+    config:
+      override_dirname:
+        exclude_keys:
+          - seed
+          - num_rounds
+        kv_sep: _
+        item_sep: _

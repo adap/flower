@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,25 +15,28 @@
 """Flower simulation app."""
 
 
+import asyncio
+import logging
 import sys
 import threading
 import traceback
+import warnings
 from logging import ERROR, INFO
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 import ray
 from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
-from flwr.client import ClientLike
+from flwr.client import ClientFn
 from flwr.common import EventType, event
-from flwr.common.logger import log
-from flwr.server import Server
-from flwr.server.app import ServerConfig, init_defaults, run_fl
+from flwr.common.logger import log, set_logger_propagation
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
+from flwr.server.server import Server, init_defaults, run_fl
+from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
 from flwr.simulation.ray_transport.ray_actor import (
-    DefaultActor,
+    ClientAppActor,
     VirtualClientEngineActor,
     VirtualClientEngineActorPool,
     pool_size_from_resources,
@@ -47,7 +50,7 @@ Invalid Arguments in method:
 
 `start_simulation(
     *,
-    client_fn: Callable[[str], ClientLike],
+    client_fn: ClientFn,
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -68,9 +71,10 @@ REASON:
 """
 
 
-def start_simulation(  # pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments,too-many-statements,too-many-branches
+def start_simulation(
     *,
-    client_fn: Callable[[str], ClientLike],
+    client_fn: ClientFn,
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -80,7 +84,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
     client_manager: Optional[ClientManager] = None,
     ray_init_args: Optional[Dict[str, Any]] = None,
     keep_initialised: Optional[bool] = False,
-    actor_type: Type[VirtualClientEngineActor] = DefaultActor,
+    actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
     actor_kwargs: Optional[Dict[str, Any]] = None,
     actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
 ) -> History:
@@ -88,10 +92,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
 
     Parameters
     ----------
-    client_fn : Callable[[str], ClientLike]
+    client_fn : ClientFn
         A function creating client instances. The function must take a single
         `str` argument called `cid`. It should return a single client instance
-        of type ClientLike. Note that the created client instances are ephemeral
+        of type Client. Note that the created client instances are ephemeral
         and will often be destroyed after a single method invocation. Since client
         instances are not long-lived, they should not attempt to carry state over
         method invocations. Any state required by the instance (model, dataset,
@@ -105,8 +109,8 @@ def start_simulation(  # pylint: disable=too-many-arguments
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
-    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1,
-        "num_gpus": 0.0}` CPU and GPU resources for a single client. Supported keys
+    client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1, "num_gpus": 0.0}`)
+        CPU and GPU resources for a single client. Supported keys
         are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
         `num_gpus`, as well as using custom resources, please consult the Ray
         documentation.
@@ -136,10 +140,10 @@ def start_simulation(  # pylint: disable=too-many-arguments
     keep_initialised: Optional[bool] (default: False)
         Set to True to prevent `ray.shutdown()` in case `ray.is_initialized()=True`.
 
-    actor_type: VirtualClientEngineActor (default: DefaultActor)
+    actor_type: VirtualClientEngineActor (default: ClientAppActor)
         Optionally specify the type of actor to use. The actor object, which
         persists throughout the simulation, will be the process in charge of
-        running the clients' jobs (i.e. their `fit()` method).
+        executing a ClientApp wrapping input argument `client_fn`.
 
     actor_kwargs: Optional[Dict[str, Any]] (default: None)
         If you want to create your own Actor classes, you might need to pass
@@ -154,16 +158,29 @@ def start_simulation(  # pylint: disable=too-many-arguments
         is an advanced feature. For all details, please refer to the Ray documentation:
         https://docs.ray.io/en/latest/ray-core/scheduling/index.html
 
+
     Returns
     -------
     hist : flwr.server.history.History
         Object containing metrics from training.
-    """
+    """  # noqa: E501
     # pylint: disable-msg=too-many-locals
     event(
         EventType.START_SIMULATION_ENTER,
         {"num_clients": len(clients_ids) if clients_ids is not None else num_clients},
     )
+
+    # Set logger propagation
+    loop: Optional[asyncio.AbstractEventLoop] = None
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+    finally:
+        if loop and loop.is_running():
+            # Set logger propagation to False to prevent duplicated log output in Colab.
+            logger = logging.getLogger("flwr")
+            _ = set_logger_propagation(logger, False)
 
     # Initialize server and server config
     initialized_server, initialized_config = init_defaults(
@@ -214,6 +231,12 @@ def start_simulation(  # pylint: disable=too-many-arguments
         cluster_resources,
     )
 
+    log(
+        INFO,
+        "Optimize your simulation with Flower VCE: "
+        "https://flower.ai/docs/framework/how-to-run-simulations.html",
+    )
+
     # Log the resources that a single client will be able to use
     if client_resources is None:
         log(
@@ -221,6 +244,15 @@ def start_simulation(  # pylint: disable=too-many-arguments
             "No `client_resources` specified. Using minimal resources for clients.",
         )
         client_resources = {"num_cpus": 1, "num_gpus": 0.0}
+
+    # Each client needs at the very least one CPU
+    if "num_cpus" not in client_resources:
+        warnings.warn(
+            "No `num_cpus` specified in `client_resources`. "
+            "Using `num_cpus=1` for each client.",
+            stacklevel=2,
+        )
+        client_resources["num_cpus"] = 1
 
     log(
         INFO,
@@ -284,6 +316,7 @@ def start_simulation(  # pylint: disable=too-many-arguments
         )
         initialized_server.client_manager().register(client=client_proxy)
 
+    hist = History()
     # pylint: disable=broad-except
     try:
         # Start training
@@ -296,26 +329,38 @@ def start_simulation(  # pylint: disable=too-many-arguments
         log(ERROR, traceback.format_exc())
         log(
             ERROR,
-            "Your simulation crashed :(. This could be because of several reasons."
+            "Your simulation crashed :(. This could be because of several reasons. "
             "The most common are: "
+            "\n\t > Sometimes, issues in the simulation code itself can cause crashes. "
+            "It's always a good idea to double-check your code for any potential bugs "
+            "or inconsistencies that might be contributing to the problem. "
+            "For example: "
+            "\n\t\t - You might be using a class attribute in your clients that "
+            "hasn't been defined."
+            "\n\t\t - There could be an incorrect method call to a 3rd party library "
+            "(e.g., PyTorch)."
+            "\n\t\t - The return types of methods in your clients/strategies might be "
+            "incorrect."
             "\n\t > Your system couldn't fit a single VirtualClient: try lowering "
             "`client_resources`."
             "\n\t > All the actors in your pool crashed. This could be because: "
             "\n\t\t - You clients hit an out-of-memory (OOM) error and actors couldn't "
             "recover from it. Try launching your simulation with more generous "
             "`client_resources` setting (i.e. it seems %s is "
-            "not enough for your workload). Use fewer concurrent actors. "
+            "not enough for your run). Use fewer concurrent actors. "
             "\n\t\t - You were running a multi-node simulation and all worker nodes "
             "disconnected. The head node might still be alive but cannot accommodate "
-            "any actor with resources: %s.",
+            "any actor with resources: %s."
+            "\nTake a look at the Flower simulation examples for guidance "
+            "<https://flower.ai/docs/framework/how-to-run-simulations.html>.",
             client_resources,
             client_resources,
         )
-        hist = History()
+        raise RuntimeError("Simulation crashed.") from ex
 
-    # Stop time monitoring resources in cluster
-    f_stop.set()
-
-    event(EventType.START_SIMULATION_LEAVE)
+    finally:
+        # Stop time monitoring resources in cluster
+        f_stop.set()
+        event(EventType.START_SIMULATION_LEAVE)
 
     return hist

@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +15,22 @@
 """Flower server tests."""
 
 
+import argparse
+import csv
+import tempfile
+from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    NoEncryption,
+    PrivateFormat,
+    PublicFormat,
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
 
 from flwr.common import (
     Code,
@@ -35,8 +48,14 @@ from flwr.common import (
     Status,
     ndarray_to_bytes,
 )
+from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
+    generate_key_pairs,
+    private_key_to_bytes,
+    public_key_to_bytes,
+)
 from flwr.server.client_manager import SimpleClientManager
 
+from .app import _try_setup_client_authentication
 from .client_proxy import ClientProxy
 from .server import Server, evaluate_clients, fit_clients
 
@@ -45,18 +64,20 @@ class SuccessClient(ClientProxy):
     """Test class."""
 
     def get_properties(
-        self, ins: GetPropertiesIns, timeout: Optional[float]
+        self, ins: GetPropertiesIns, timeout: Optional[float], group_id: Optional[int]
     ) -> GetPropertiesRes:
-        """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        """Raise an error because this method is not expected to be called."""
+        raise NotImplementedError()
 
     def get_parameters(
-        self, ins: GetParametersIns, timeout: Optional[float]
+        self, ins: GetParametersIns, timeout: Optional[float], group_id: Optional[int]
     ) -> GetParametersRes:
-        """Raise an Exception because this method is not expected to be called."""
-        raise Exception()
+        """Raise a error because this method is not expected to be called."""
+        raise NotImplementedError()
 
-    def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
+    def fit(
+        self, ins: FitIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> FitRes:
         """Simulate fit by returning a success FitRes with simple set of weights."""
         arr = np.array([[1, 2], [3, 4], [5, 6]])
         arr_serialized = ndarray_to_bytes(arr)
@@ -67,7 +88,9 @@ class SuccessClient(ClientProxy):
             metrics={},
         )
 
-    def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
+    def evaluate(
+        self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> EvaluateRes:
         """Simulate evaluate by returning a success EvaluateRes with loss 1.0."""
         return EvaluateRes(
             status=Status(code=Code.OK, message="Success"),
@@ -76,7 +99,9 @@ class SuccessClient(ClientProxy):
             metrics={},
         )
 
-    def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
+    def reconnect(
+        self, ins: ReconnectIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> DisconnectRes:
         """Simulate reconnect by returning a DisconnectRes with UNKNOWN reason."""
         return DisconnectRes(reason="UNKNOWN")
 
@@ -85,28 +110,34 @@ class FailingClient(ClientProxy):
     """Test class."""
 
     def get_properties(
-        self, ins: GetPropertiesIns, timeout: Optional[float]
+        self, ins: GetPropertiesIns, timeout: Optional[float], group_id: Optional[int]
     ) -> GetPropertiesRes:
-        """Raise an Exception to simulate failure in the client."""
-        raise Exception()
+        """Raise a NotImplementedError to simulate failure in the client."""
+        raise NotImplementedError()
 
     def get_parameters(
-        self, ins: GetParametersIns, timeout: Optional[float]
+        self, ins: GetParametersIns, timeout: Optional[float], group_id: Optional[int]
     ) -> GetParametersRes:
-        """Raise an Exception to simulate failure in the client."""
-        raise Exception()
+        """Raise a NotImplementedError to simulate failure in the client."""
+        raise NotImplementedError()
 
-    def fit(self, ins: FitIns, timeout: Optional[float]) -> FitRes:
-        """Raise an Exception to simulate failure in the client."""
-        raise Exception()
+    def fit(
+        self, ins: FitIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> FitRes:
+        """Raise a NotImplementedError to simulate failure in the client."""
+        raise NotImplementedError()
 
-    def evaluate(self, ins: EvaluateIns, timeout: Optional[float]) -> EvaluateRes:
-        """Raise an Exception to simulate failure in the client."""
-        raise Exception()
+    def evaluate(
+        self, ins: EvaluateIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> EvaluateRes:
+        """Raise a NotImplementedError to simulate failure in the client."""
+        raise NotImplementedError()
 
-    def reconnect(self, ins: ReconnectIns, timeout: Optional[float]) -> DisconnectRes:
-        """Raise an Exception to simulate failure in the client."""
-        raise Exception()
+    def reconnect(
+        self, ins: ReconnectIns, timeout: Optional[float], group_id: Optional[int]
+    ) -> DisconnectRes:
+        """Raise a NotImplementedError to simulate failure in the client."""
+        raise NotImplementedError()
 
 
 def test_fit_clients() -> None:
@@ -122,7 +153,7 @@ def test_fit_clients() -> None:
     client_instructions = [(c, ins) for c in clients]
 
     # Execute
-    results, failures = fit_clients(client_instructions, None, None)
+    results, failures = fit_clients(client_instructions, None, None, 0)
 
     # Assert
     assert len(results) == 1
@@ -150,6 +181,7 @@ def test_eval_clients() -> None:
         client_instructions=client_instructions,
         max_workers=None,
         timeout=None,
+        group_id=0,
     )
 
     # Assert
@@ -169,3 +201,71 @@ def test_set_max_workers() -> None:
 
     # Assert
     assert server.max_workers == 42
+
+
+def test_setup_client_auth() -> None:  # pylint: disable=R0914
+    """Test setup client authentication."""
+    # Prepare
+    _, first_public_key = generate_key_pairs()
+    private_key, public_key = generate_key_pairs()
+
+    server_public_key = public_key.public_bytes(
+        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+    )
+    server_private_key = private_key.private_bytes(
+        Encoding.PEM, PrivateFormat.OpenSSH, NoEncryption()
+    )
+    _, second_public_key = generate_key_pairs()
+
+    # Execute
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Initialize temporary files
+        client_keys_file_path = Path(temp_dir) / "client_keys.csv"
+        server_private_key_path = Path(temp_dir) / "server_private_key"
+        server_public_key_path = Path(temp_dir) / "server_public_key"
+
+        # Fill the files with relevant keys
+        with open(client_keys_file_path, "w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(
+                [
+                    first_public_key.public_bytes(
+                        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+                    ).decode(),
+                    second_public_key.public_bytes(
+                        encoding=Encoding.OpenSSH, format=PublicFormat.OpenSSH
+                    ).decode(),
+                ]
+            )
+        server_public_key_path.write_bytes(server_public_key)
+        server_private_key_path.write_bytes(server_private_key)
+
+        # Mock argparse with `require-client-authentication`` flag
+        mock_args = argparse.Namespace(
+            require_client_authentication=[
+                str(client_keys_file_path),
+                str(server_private_key_path),
+                str(server_public_key_path),
+            ]
+        )
+
+        # Run _try_setup_client_authentication
+        result = _try_setup_client_authentication(mock_args, (b"", b"", b""))
+
+        expected_private_key = load_ssh_private_key(server_private_key, None)
+        expected_public_key = load_ssh_public_key(server_public_key)
+
+        # Assert
+        assert isinstance(expected_private_key, ec.EllipticCurvePrivateKey)
+        assert isinstance(expected_public_key, ec.EllipticCurvePublicKey)
+        assert result is not None
+        assert result[0] == {
+            public_key_to_bytes(first_public_key),
+            public_key_to_bytes(second_public_key),
+        }
+        assert private_key_to_bytes(result[1]) == private_key_to_bytes(
+            expected_private_key
+        )
+        assert public_key_to_bytes(result[2]) == public_key_to_bytes(
+            expected_public_key
+        )

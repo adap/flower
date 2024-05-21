@@ -1,0 +1,19 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "whisper-flower"
+version = "0.1.0"
+description = "On-device Federated Downstreaming for Speech Classification"
+authors = ["The Flower Authors <hello@flower.ai>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+flwr = { extras = ["simulation"], version = ">=1.0,<2.0" }
+transformers = "4.32.1"
+tokenizers = "0.13.3"
+datasets = "2.14.6"
+soundfile = "0.12.1"
+librosa = "0.10.1"
+# this example was tested with pytorch 2.1.0

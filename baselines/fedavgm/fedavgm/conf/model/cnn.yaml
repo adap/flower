@@ -1,0 +1,5 @@
+---
+_target_: fedavgm.models.cnn
+input_shape: ${dataset.input_shape}
+num_classes: ${dataset.num_classes}
+learning_rate: ${client.lr}

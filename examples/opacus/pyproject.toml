@@ -1,17 +1,22 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "flwr_opacus"
+[project]
+name = "opacus-fl"
 version = "0.1.0"
-description = "Differentially Private Federated Learning with Opacus and Flower"
-authors = ["The Flower Authors <hello@flower.dev>"]
+description = "Sample Differential Privacy with Opacus in Flower"
+authors = [
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+]
+dependencies = [
+    "flwr>=1.8.0,<2.0",
+    "flwr-datasets[vision]>=0.0.2,<1.0.0",
+    "torch==2.1.1",
+    "torchvision==0.16.1",
+    "tqdm==4.65.0",
+    "opacus==v1.4.1"
+]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-flwr = "^1.0.0"
-# flwr = { path = "../../", develop = true }  # Development
-opacus = "^1.4.0"
-torch = "^1.13.1"
-torchvision = "^0.14.0"
+[tool.hatch.build.targets.wheel]
+packages = ["."]

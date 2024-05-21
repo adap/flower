@@ -7,11 +7,11 @@
 
 #include <vector>
 
-#include "synthetic_dataset.h"
 #include "linear_algebra_util.h"
+#include "synthetic_dataset.h"
 #include <cstddef>
 class LineFitModel {
- public:
+public:
   LineFitModel(int num_iterations, double learning_rate, int num_params);
 
   std::vector<double> predict(std::vector<std::vector<double>> X);
@@ -30,7 +30,7 @@ class LineFitModel {
 
   size_t get_model_size();
 
- private:
+private:
   int num_iterations;
   int batch_size;
   double learning_rate;
@@ -41,4 +41,4 @@ class LineFitModel {
   double compute_mse(std::vector<double> true_y, std::vector<double> pred);
 };
 
-#endif //FLOWER_CPP_LINE_FIT_MODEL_H
+#endif // FLOWER_CPP_LINE_FIT_MODEL_H

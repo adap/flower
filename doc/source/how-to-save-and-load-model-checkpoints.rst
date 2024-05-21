@@ -91,3 +91,7 @@ To load your progress, you simply append the following lines to your code. Note 
     print("Loading pre-trained model from: ", latest_round_file)
     state_dict = torch.load(latest_round_file)
     net.load_state_dict(state_dict)
+    state_dict_ndarrays = [v.cpu().numpy() for v in net.state_dict().values()]
+    parameters = fl.common.ndarrays_to_parameters(state_dict_ndarrays)
+
+Return/use this object of type ``Parameters`` wherever necessary, such as in the ``initial_parameters`` when defining a ``Strategy``.

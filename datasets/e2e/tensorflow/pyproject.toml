@@ -1,0 +1,16 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "fds-e2-tensorflow"
+version = "0.1.0"
+description = "Flower Datasets with TensorFlow"
+authors = ["The Flower Authors <hello@flower.ai>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+flwr-datasets = { path = "./../../", extras = ["vision"] }
+tensorflow-cpu = "^2.9.1, !=2.11.1"
+tensorflow-io-gcs-filesystem = "<0.35.0"
+parameterized = "==0.9.0"

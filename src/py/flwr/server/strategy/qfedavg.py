@@ -1,4 +1,4 @@
-# Copyright 2020 Adap GmbH. All Rights Reserved.
+# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -185,7 +185,7 @@ class QFedAvg(FedAvg):
         hs_ffl = []
 
         if self.pre_weights is None:
-            raise Exception("QffedAvg pre_weights are None in aggregate_fit")
+            raise AttributeError("QffedAvg pre_weights are None in aggregate_fit")
 
         weights_before = self.pre_weights
         eval_result = self.evaluate(

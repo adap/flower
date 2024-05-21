@@ -19,8 +19,8 @@ Install ``flwr`` from a local copy of the Flower source code via ``pyproject.tom
 
 Install ``flwr`` from a local wheel file via ``pyproject.toml``:
 
-- ``flwr = { path = "../../dist/flwr-1.0.0-py3-none-any.whl" }`` (without extras)
-- ``flwr = { path = "../../dist/flwr-1.0.0-py3-none-any.whl", extras = ["simulation"] }`` (with extras)
+- ``flwr = { path = "../../dist/flwr-1.8.0-py3-none-any.whl" }`` (without extras)
+- ``flwr = { path = "../../dist/flwr-1.8.0-py3-none-any.whl", extras = ["simulation"] }`` (with extras)
 
 Please refer to the Poetry documentation for further details: `Poetry Dependency Specification <https://python-poetry.org/docs/dependency-specification/>`_
 
@@ -48,16 +48,16 @@ Install ``flwr`` from a specific GitHub branch (``branch-name``):
 Open Jupyter Notebooks on Google Colab
 --------------------------------------
 
-Open the notebook ``doc/source/tutorial-get-started-with-flower-pytorch.ipynb``:
+Open the notebook ``doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb``:
 
-- https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-get-started-with-flower-pytorch.ipynb
+- https://colab.research.google.com/github/adap/flower/blob/main/doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb
 
 Open a development version of the same notebook from branch `branch-name` by changing ``main`` to ``branch-name`` (right after ``blob``):
 
-- https://colab.research.google.com/github/adap/flower/blob/branch-name/doc/source/tutorial-get-started-with-flower-pytorch.ipynb
+- https://colab.research.google.com/github/adap/flower/blob/branch-name/doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb
 
 Install a `whl` on Google Colab:
 
 1. In the vertical icon grid on the left hand side, select ``Files`` > ``Upload to session storage``
-2. Upload the whl (e.g., ``flwr-1.6.0-py3-none-any.whl``)
-3. Change ``!pip install -q 'flwr[simulation]' torch torchvision matplotlib`` to ``!pip install -q 'flwr-1.6.0-py3-none-any.whl[simulation]' torch torchvision matplotlib``
+2. Upload the whl (e.g., ``flwr-1.8.0-py3-none-any.whl``)
+3. Change ``!pip install -q 'flwr[simulation]' torch torchvision matplotlib`` to ``!pip install -q 'flwr-1.8.0-py3-none-any.whl[simulation]' torch torchvision matplotlib``

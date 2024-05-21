@@ -56,8 +56,8 @@ class TestIidPartitioner(unittest.TestCase):
         Only the correct data is tested in this method.
 
         In case the dataset is dividable among `num_partitions` the size of each
-        partition should be the same. This checks if the randomly chosen partition
-        has size as expected.
+        partition should be the same. This checks if the randomly chosen partition has
+        size as expected.
         """
         _, partitioner = _dummy_setup(num_partitions, num_rows)
         partition_size = num_rows // num_partitions
@@ -100,11 +100,17 @@ class TestIidPartitioner(unittest.TestCase):
         self, num_partitions: int, num_rows: int
     ) -> None:
         """Test if the data in partition is equal to the expected."""
-        _, partitioner = _dummy_setup(num_partitions, num_rows)
+        dataset, partitioner = _dummy_setup(num_partitions, num_rows)
         partition_size = num_rows // num_partitions
         partition_index = 2
         partition = partitioner.load_partition(partition_index)
-        self.assertEqual(partition["features"][0], partition_index * partition_size)
+        row_id = 0
+        self.assertEqual(
+            partition[row_id]["features"],
+            # Note it's contiguous so partition_size * partition_index gets the first
+            # element of the partition of partition_index
+            dataset[partition_size * partition_index + row_id]["features"],
+        )
 
     @parameterized.expand(  # type: ignore
         [
