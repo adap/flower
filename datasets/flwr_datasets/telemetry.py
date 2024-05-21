@@ -27,7 +27,7 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union, cast
 
-from flwr.common.version import package_name, package_version
+from flwr_datasets.common.version import package_name, package_version
 
 FLWR_TELEMETRY_ENABLED = os.getenv("FLWR_TELEMETRY_ENABLED", "1")
 FLWR_TELEMETRY_LOGGING = os.getenv("FLWR_TELEMETRY_LOGGING", "0")
