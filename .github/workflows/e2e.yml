@@ -129,15 +129,17 @@ jobs:
         with:
           # Cache directory used by Poetry for Unix, described here:
           # https://python-poetry.org/docs/configuration/#cache-dir
-          path: ~/.config/pypoetry
+          path: |
+            ~/.config/pypoetry
+            ~/.local
           key: poetry-local-${{ runner.os }}-3.8-${{ hashFiles('**/poetry.lock') }}-${{ hashFiles('.github/workflows/*.yml') }}
           restore-keys: |
             poetry-local-${{ runner.os }}-3.8-
-      - name: Check cache hits
+      - name: Install dependencies if no cache hits
         if: ${{ steps.cache-packages.outputs.cache-hit != 'true' }}
-        run: echo "No cache hit, installing from scratch"
-      - name: Install dependencies
-        run: python -m poetry install
+        run: echo "No cache hit, installing from scratch" && python -m poetry install
+      # - name: Install dependencies
+      #   run: python -m poetry install
       - name: Install Flower wheel from artifact store
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
