@@ -131,7 +131,7 @@ jobs:
           path: |
             ~/.config/pypoetry
             ~/.local
-          key: poetry-local-${{ runner.os }}-3.8-${{ hashFiles('**/poetry.lock') }}-${{ hashFiles('.github/workflows/*.yml') }}
+          key: poetry-local-${{ runner.os }}-3.8-${{ matrix.directory }}-${{ hashFiles('.github/workflows/*.yml') }}
           restore-keys: |
             poetry-local-${{ runner.os }}-3.8-
       - name: Install dependencies
@@ -147,7 +147,7 @@ jobs:
           path: |
             ~/.fastai
             ./data
-          key: datasets-${{ runner.os }}
+          key: datasets-${{ runner.os }}-${{ matrix.directory }}-${{ hashFiles('.github/workflows/*.yml') }}
           restore-keys: |
             datasets-
       - name: Download dataset
