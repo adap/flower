@@ -69,7 +69,7 @@ class DivideResplitter:
     >>> resplitter = DivideResplitter(
     >>>     divide_config={
     >>>         "train": 0.8,
-    >>>         "test": 0.2,
+    >>>         "valid": 0.2,
     >>>     }
     >>>     divide_split="train",
     >>> )
@@ -77,8 +77,9 @@ class DivideResplitter:
     >>> # new_dataset_dict is
     >>> # {"train": 80% of train, "valid": 20% of train, "test": test-data}
 
-    1) Using "bigger" (i.e. two-level dict) version of divide_config and no `divide_split` to accomplish the
-    same (splitting train into train, valid with 80%, 20% correspondingly.
+    1) Using "bigger" (i.e. two-level dict) version of divide_config and no
+    `divide_split` to accomplish the same (splitting train into train, valid with 80%,
+    20% correspondingly) and additionally dividing the test set.
 
     >>> # Assuming there is a dataset_dict of type `DatasetDict`
     >>> # dataset_dict is {"train": train-data, "test": test-data}
@@ -86,13 +87,15 @@ class DivideResplitter:
     >>>     divide_config={
     >>>         "train": {
     >>>             "train": 0.8,
-    >>>             "test": 0.2,
-    >>>         }
+    >>>             "valid": 0.2,
+    >>>         },
+    >>>         "test": {"test-a": 0.4, "test-b": 0.6 }
     >>>     }
     >>> )
     >>> new_dataset_dict = resplitter(dataset_dict)
     >>> # new_dataset_dict is
-    >>> # {"train": 80% of train, "valid": 20% of train, "test": test-data}
+    >>> # {"train": 80% of train, "valid": 20% of train,
+    >>> # "test-a": 40% of test, "test-b": 60% of test}
     """
 
     def __init__(
