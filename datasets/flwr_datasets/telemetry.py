@@ -114,9 +114,7 @@ class EventType(str, Enum):
     # The type signature is not compatible with mypy, pylint and flake8
     # so each of those needs to be disabled for this line.
     # pylint: disable-next=no-self-argument,arguments-differ,line-too-long
-    def _generate_next_value_(
-        name: str, start: int, count: int, last_values: List[Any]
-    ) -> Any:  # type: ignore # noqa: E501
+    def _generate_next_value_(name: str, start: int, count: int, last_values: List[Any]) -> Any:  # type: ignore # noqa: E501
         return name
 
     PING = auto()
