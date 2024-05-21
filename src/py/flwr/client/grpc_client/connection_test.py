@@ -132,13 +132,13 @@ def test_integration_connection() -> None:
             server_address=f"[::]:{port}",
             insecure=True,
             retry_invoker=RetryInvoker(
-                wait_factory=exponential,
+                wait_gen_factory=exponential,
                 recoverable_exceptions=grpc.RpcError,
                 max_tries=1,
                 max_time=None,
             ),
         ) as conn:
-            receive, send, _, _ = conn
+            receive, send, _, _, _ = conn
 
             # Setup processing loop
             while True:

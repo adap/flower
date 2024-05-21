@@ -34,10 +34,12 @@ service Fleet {
   //
   // HTTP API path: /api/v1/fleet/push-task-res
   rpc PushTaskRes(PushTaskResRequest) returns (PushTaskResResponse) {}
+
+  rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
 }
 
 // CreateNode messages
-message CreateNodeRequest {}
+message CreateNodeRequest { double ping_interval = 1; }
 message CreateNodeResponse { Node node = 1; }
 
 // DeleteNode messages
@@ -45,7 +47,10 @@ message DeleteNodeRequest { Node node = 1; }
 message DeleteNodeResponse {}
 
 // Ping messages
-message PingRequest { Node node = 1; }
+message PingRequest {
+  Node node = 1;
+  double ping_interval = 2;
+}
 message PingResponse { bool success = 1; }
 
 // PullTaskIns messages
@@ -64,5 +69,14 @@ message PushTaskResResponse {
   Reconnect reconnect = 1;
   map<string, uint32> results = 2;
 }
+
+// GetRun messages
+message Run {
+  sint64 run_id = 1;
+  string fab_id = 2;
+  string fab_version = 3;
+}
+message GetRunRequest { sint64 run_id = 1; }
+message GetRunResponse { Run run = 1; }
 
 message Reconnect { uint64 reconnect = 1; }

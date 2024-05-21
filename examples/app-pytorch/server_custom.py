@@ -103,15 +103,19 @@ def main(driver: Driver, context: Context) -> None:
         all_replies: List[Message] = []
         while True:
             replies = driver.pull_messages(message_ids=message_ids)
-            print(f"Got {len(replies)} results")
+            for res in replies:
+                print(f"Got 1 {'result' if res.has_content() else 'error'}")
             all_replies += replies
             if len(all_replies) == len(message_ids):
                 break
+            print("Pulling messages...")
             time.sleep(3)
 
-        # Collect correct results
+        # Filter correct results
         all_fitres = [
-            recordset_to_fitres(msg.content, keep_input=True) for msg in all_replies
+            recordset_to_fitres(msg.content, keep_input=True)
+            for msg in all_replies
+            if msg.has_content()
         ]
         print(f"Received {len(all_fitres)} results")
 
@@ -128,16 +132,21 @@ def main(driver: Driver, context: Context) -> None:
             )
             metrics_results.append((fitres.num_examples, fitres.metrics))
 
-        # Aggregate parameters (FedAvg)
-        parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
-        parameters = parameters_aggregated
+        if len(weights_results) > 0:
+            # Aggregate parameters (FedAvg)
+            parameters_aggregated = ndarrays_to_parameters(aggregate(weights_results))
+            parameters = parameters_aggregated
 
-        # Aggregate metrics
-        metrics_aggregated = weighted_average(metrics_results)
-        history.add_metrics_distributed_fit(
-            server_round=server_round, metrics=metrics_aggregated
-        )
-        print("Round ", server_round, " metrics: ", metrics_aggregated)
+            # Aggregate metrics
+            metrics_aggregated = weighted_average(metrics_results)
+            history.add_metrics_distributed_fit(
+                server_round=server_round, metrics=metrics_aggregated
+            )
+            print("Round ", server_round, " metrics: ", metrics_aggregated)
+        else:
+            print(
+                f"Round {server_round} got {len(weights_results)} results. Skipping aggregation..."
+            )
 
         # Slow down the start of the next round
         time.sleep(sleep_time)

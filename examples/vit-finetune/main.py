@@ -19,7 +19,6 @@ parser.add_argument(
 
 
 def main():
-
     args = parser.parse_args()
 
     # To control the degree of parallelism
