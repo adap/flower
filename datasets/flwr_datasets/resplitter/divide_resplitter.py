@@ -28,7 +28,7 @@ from datasets import DatasetDict
 class DivideResplitter:
     """Dive existing split(s) of the dataset and assign them custom names.
 
-    Create new `DatasetDict` with new split names corresponding the percentages of data
+    Create new `DatasetDict` with new split names with corresponding percentages of data
     and custom names.
 
     Parameters
@@ -62,7 +62,7 @@ class DivideResplitter:
     Create new `DatasetDict` with a divided split "train" into "train" and "valid"
     splits by using 80% and 20% correspondingly. Keep the "test" split.
 
-    1) Using the `divide_split` parameter and "smaller" divide_config
+    1) Using the `divide_split` parameter and "smaller" (i.e. single-level) divide_config
 
     >>> # Assuming there is a dataset_dict of type `DatasetDict`
     >>> # dataset_dict is {"train": train-data, "test": test-data}
@@ -77,7 +77,7 @@ class DivideResplitter:
     >>> # new_dataset_dict is
     >>> # {"train": 80% of train, "valid": 20% of train, "test": test-data}
 
-    1) Using "bigger" version of divide_config and no `divide_split` to accomplish the
+    1) Using "bigger" (i.e. two-level dict) version of divide_config and no `divide_split` to accomplish the
     same (splitting train into train, valid with 80%, 20% correspondingly.
 
     >>> # Assuming there is a dataset_dict of type `DatasetDict`
@@ -209,9 +209,7 @@ class DivideResplitter:
         elif self._config_type == "multiple-splits":
             new_splits = []
             for new_splits_dict in self._multiple_splits_config.values():
-                assert isinstance(new_splits_dict, dict)
                 new_values = list(new_splits_dict.keys())
-                assert isinstance(new_values, list)
                 new_splits.extend(new_values)
         else:
             raise ValueError("Incorrect type of config.")
