@@ -151,7 +151,7 @@ jobs:
           restore-keys: |
             datasets-
       - name: Download dataset
-        if: ${{ matrix.dataset }} && ${{ steps.cache-datasets.outputs.cache-hit != 'true' }}
+        if: ${{ (matrix.dataset) && (steps.cache-datasets.outputs.cache-hit != 'true') }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
         if: ${{ matrix.directory != 'bare-client-auth' }}
