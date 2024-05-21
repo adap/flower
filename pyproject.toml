@@ -88,7 +88,7 @@ rest = ["requests", "starlette", "uvicorn"]
 types-dataclasses = "==0.6.6"
 types-protobuf = "==3.19.18"
 types-requests = "==2.31.0.20240125"
-types-setuptools = "==69.0.0.20240125"
+types-setuptools = "==69.5.0.20240519"
 clang-format = "==17.0.6"
 isort = "==5.13.2"
 black = { version = "==24.2.0", extras = ["jupyter"] }
