@@ -173,7 +173,6 @@ class DivideResplitter:
             start_index = 0
             end_index = 0
             split_data = dataset[split_from]
-            assert isinstance(new_splits_dict, dict)
             for new_split_name, size in new_splits_dict.items():
                 if isinstance(size, float):
                     end_index += int(len(split_data) * size)
