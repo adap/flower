@@ -118,10 +118,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Bootstrap
-        uses: ./.github/actions/bootstrap
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: 3.8
+          cache: 'poetry'
+      - name: Install build tools
+        run: |
+            python -m pip install -U pip==23.3.1
+            python -m pip install -U setuptools==68.2.2
+        shell: bash
+      # - name: Bootstrap
+      #   uses: ./.github/actions/bootstrap
+      #   with:
+      #     python-version: 3.8
       - name: Cache Packages
         id: cache-packages
         uses: actions/cache@v4
