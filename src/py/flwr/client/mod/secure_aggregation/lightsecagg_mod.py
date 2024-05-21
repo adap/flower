@@ -24,7 +24,17 @@ from typing import List, cast
 import numpy as np
 from galois import GF
 
-from flwr.common import ConfigsRecord, Parameters, RecordSet, parameters_to_ndarrays
+import flwr.common.recordset_compat as compat
+from flwr.client.typing import ClientAppCallable
+from flwr.common import (
+    ConfigsRecord,
+    Context,
+    Message,
+    MessageType,
+    Parameters,
+    RecordSet,
+    parameters_to_ndarrays,
+)
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_public_key,
@@ -34,6 +44,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     public_key_to_bytes,
 )
 from flwr.common.secure_aggregation.lightsecagg_constants import (
+    RECORD_KEY_CONFIGS,
     RECORD_KEY_STATE,
     Key,
     Stage,
@@ -104,7 +115,7 @@ class LightSecAggState:
 
         # Save supported types
         for fld in flds:
-            cfg[fld] = self.__dict__[fld]  # type: ignore
+            cfg[fld] = self.__dict__[fld]
 
         # Save to the RecordSet
         rs.configs_records[RECORD_KEY_STATE] = cfg
@@ -133,6 +144,69 @@ class LightSecAggState:
         for k, v in cfg.items():
             state.__dict__[k] = v  # type: ignore
         return state
+
+
+def lightsecagg_mod(
+    msg: Message,
+    ctxt: Context,
+    call_next: ClientAppCallable,
+) -> Message:
+    """Handle messages following the LightSecAgg protocol."""
+    # Ignore non-fit messages
+    if msg.metadata.message_type != MessageType.TRAIN:
+        return call_next(msg, ctxt)
+
+    # Retrieve local state
+    state = LightSecAggState.from_recordset(ctxt.state)
+
+    # Retrieve incoming configs
+    configs = msg.content.configs_records[RECORD_KEY_CONFIGS]
+
+    # Check the validity of the next stage
+    check_stage(state.current_stage, configs)
+
+    # Update the current stage
+    state.current_stage = cast(str, configs.pop(Key.STAGE))
+
+    # Check the validity of the configs based on the current stage
+    check_configs(state.current_stage, configs)
+
+    # Execute
+    out_content = RecordSet()
+    if state.current_stage == Stage.SETUP:
+        state.nid = msg.metadata.dst_node_id
+        res = _setup(state, configs)
+    elif state.current_stage == Stage.EXCHANGE_SUB_MASKS:
+        res = _upload_encrypted_encoded_masks(state, configs)
+    elif state.current_stage == Stage.COLLECT_MASKED_MODELS:
+        out_msg = call_next(msg, ctxt)
+        out_content = out_msg.content
+        fitres = compat.recordset_to_fitres(out_content, keep_input=True)
+        res = _upload_masked_models(
+            state, configs, fitres.num_examples, fitres.parameters
+        )
+        for p_record in out_content.parameters_records.values():
+            p_record.clear()
+    elif state.current_stage == Stage.UNMASK:
+        res = _upload_aggregated_encoded_masks(state, configs)
+    else:
+        raise ValueError(f"Unknown LightSecAgg stage: {state.current_stage}")
+
+    # Save state
+    state.to_recordset(ctxt.state)
+
+    # Return message
+    return msg.create_reply(res)
+
+
+def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
+    """Check the validity of the next stage."""
+    ...
+
+
+def check_configs(stage: str, configs: ConfigsRecord) -> None:
+    """Check the validity of the configs."""
+    ...
 
 
 # set up configurations and return the public key
