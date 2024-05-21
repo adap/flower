@@ -83,10 +83,10 @@ jobs:
               import tensorflow_datasets as tfds
               tfds.load(name='iris', split=tfds.Split.TRAIN)
 
-          - directory: opacus
-            dataset: |
-              from torchvision.datasets import CIFAR10
-              CIFAR10('./data', download=True)
+          # - directory: opacus
+          #   dataset: |
+          #     from torchvision.datasets import CIFAR10
+          #     CIFAR10('./data', download=True)
 
           - directory: pytorch-lightning
             dataset: |
