@@ -63,12 +63,9 @@ class Key:
     DESTINATION_LIST = "dsts"
     CIPHERTEXT_LIST = "ctxts"
     SOURCE_LIST = "srcs"
-    PARAMETERS = "params"
     MASKED_PARAMETERS = "masked_params"
     ACTIVE_NODE_ID_LIST = "active_nids"
-    DEAD_NODE_ID_LIST = "dead_nids"
-    NODE_ID_LIST = "nids"
-    SHARE_LIST = "shares"
+    AGGREGATED_ENCODED_MASK = "aggregated encoded mask"
 
     def __new__(cls) -> Key:
         """Prevent instantiation."""

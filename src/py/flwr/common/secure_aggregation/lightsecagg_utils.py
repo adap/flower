@@ -20,7 +20,7 @@ from typing import Dict, List, cast
 import numpy as np
 from galois import FieldArray
 
-from flwr.common import Array, array_from_numpy, ndarray_to_bytes
+from flwr.common import Array, array_from_numpy
 from flwr.common.constant import SType
 
 from ..typing import NDArrayInt
