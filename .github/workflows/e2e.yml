@@ -140,6 +140,16 @@ jobs:
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
           python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
+      - name: Cache datasets
+        id: cache-datasets
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.fastai
+            ./data
+          key: datasets-${{ runner.os }}
+          restore-keys: |
+            datasets-
       - name: Download dataset
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
