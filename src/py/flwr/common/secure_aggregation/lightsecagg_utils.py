@@ -23,21 +23,21 @@ from galois import FieldArray
 from flwr.common import Array, array_from_numpy
 from flwr.common.constant import SType
 
-from ..typing import NDArrayInt
+from ..typing import NDArray, NDArrayInt
 from .crypto.symmetric_encryption import decrypt, encrypt
 
 
 def LCC_encode_with_points(
-    arr: NDArrayInt, alphas: List[int], betas: List[int], GF: FieldArray
+    arr: NDArrayInt, alphas: List[int], betas: List[int], GF: type[FieldArray]
 ) -> NDArrayInt:
     """Encode the input array."""
     U_enc = generate_Lagrange_coeffs_galois(alphas, betas, GF)
-    encoded_arr = U_enc.dot(arr)
+    encoded_arr: NDArrayInt = U_enc.dot(arr)
     return encoded_arr
 
 
 def LCC_decode_with_points(
-    f_eval: NDArrayInt, alphas_eval: NDArrayInt, betas: NDArrayInt, GF: FieldArray
+    f_eval: NDArrayInt, alphas_eval: List[int], betas: List[int], GF: type[FieldArray]
 ) -> NDArrayInt:
     """Decode the input array."""
     U_dec = generate_Lagrange_coeffs_galois(betas, alphas_eval, GF)
@@ -47,7 +47,7 @@ def LCC_decode_with_points(
 
 
 def generate_Lagrange_coeffs_galois(
-    alpha_list: List[int], beta_list: List[int], GF: FieldArray
+    alpha_list: List[int], beta_list: List[int], GF: type[FieldArray]
 ) -> NDArrayInt:
     """Generate lagrange coefficients for the finite field."""
     num_alphas = len(alpha_list)
@@ -58,7 +58,7 @@ def generate_Lagrange_coeffs_galois(
     mbeta = -betas
 
     denoms = np.zeros(num_betas, dtype=np.int64).view(GF)
-    msk = np.ones(num_betas, dtype=np.bool)
+    msk = np.ones(num_betas, dtype=bool)
 
     for j in range(num_betas):
         msk[j] = False
@@ -75,7 +75,7 @@ def generate_Lagrange_coeffs_galois(
 
 
 def mask_weights(
-    weights: List[NDArrayInt], local_mask: NDArrayInt, GF: FieldArray
+    weights: List[NDArrayInt], local_mask: NDArrayInt, GF: type[FieldArray]
 ) -> List[NDArrayInt]:
     """Mask the model weights in place."""
     pos = 0
@@ -95,7 +95,9 @@ def mask_weights(
 
 
 def unmask_aggregated_weights(
-    aggregated_weights: List[NDArrayInt], aggregated_mask: NDArrayInt, GF: FieldArray
+    aggregated_weights: List[NDArrayInt],
+    aggregated_mask: NDArrayInt,
+    GF: type[FieldArray],
 ) -> List[NDArrayInt]:
     """Unmask the aggregated model weights in place."""
     pos = 0
@@ -118,7 +120,7 @@ def encode_mask(
     num_clients: int,
     min_num_active_clients: int,
     privacy_guarantee: int,
-    galois_field: FieldArray,
+    galois_field: type[FieldArray],
     local_mask: NDArrayInt,
 ) -> NDArrayInt:
     """Encode the given mask and return encoded sub masks."""
@@ -144,11 +146,13 @@ def encode_mask(
 
 
 def compute_aggregated_encoded_mask(
-    encoded_mask_dict: Dict[int, NDArrayInt], active_clients, GF: FieldArray
+    encoded_mask_dict: Dict[int, NDArrayInt],
+    active_nids: List[int],
+    GF: type[FieldArray],
 ) -> NDArrayInt:
     """Compute the aggregated encoded mask."""
-    ret = np.zeros_like(encoded_mask_dict[active_clients[0]]).view(GF)
-    for client_id in active_clients:
+    ret = np.zeros_like(encoded_mask_dict[active_nids[0]]).view(GF)
+    for client_id in active_nids:
         ret += encoded_mask_dict[client_id].view(GF)
     return ret
 
@@ -161,23 +165,26 @@ def padding(d: int, U: int, T: int) -> int:
     return d + remainder
 
 
-def encrypt_sub_mask(key: bytes, sub_mask: np.ndarray) -> bytes:
+def encrypt_sub_mask(key: bytes, sub_mask: NDArrayInt) -> bytes:
     """Encrypt the sub-mask."""
     plaintext = ndarray_to_bytes(sub_mask)
     return encrypt(key, plaintext)
 
 
-def decrypt_sub_mask(key: bytes, ciphertext: bytes) -> np.ndarray:
+def decrypt_sub_mask(key: bytes, ciphertext: bytes) -> NDArrayInt:
     """Decrypt the sub-mask."""
     plaintext = decrypt(key, ciphertext)
-    return ndarray_from_bytes(plaintext)
+    ret = ndarray_from_bytes(plaintext)
+    # Assert the dtype of the sub-mask is int
+    assert np.issubdtype(ret.dtype, np.integer)
+    return ret
 
 
-def ndarray_to_bytes(arr: np.ndarray) -> bytes:
+def ndarray_to_bytes(arr: NDArray) -> bytes:
     """Serialize NumPy ndarray to bytes."""
     return array_from_numpy(arr).data
 
 
-def ndarray_from_bytes(arr_bytes: bytes) -> np.ndarray:
+def ndarray_from_bytes(arr_bytes: bytes) -> NDArray:
     """Deserialize NumPy ndarray from bytes."""
     return Array(dtype="", shape=[], stype=SType.NUMPY, data=arr_bytes).numpy()
