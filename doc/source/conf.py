@@ -124,6 +124,12 @@ autosummary_ignore_module_all = False
 # The full name is still at the top of the page
 add_module_names = False
 
+# Customizations for the sphinx_copybutton extension
+# Omit prompt text when copying code blocks
+copybutton_prompt_text = "$ "
+# Copy all lines when line continuation character is detected
+copybutton_line_continuation_character = "\\"
+
 
 def find_test_modules(package_path):
     """Go through the python files and exclude every *_test.py file."""

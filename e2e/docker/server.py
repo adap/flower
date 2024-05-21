@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
-import flwr as fl
+from flwr.server import ServerApp, ServerConfig
+from flwr.server.strategy import FedAvg
 from flwr.common import Metrics
 
 
@@ -15,13 +16,15 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 
 
 # Define strategy
-strategy = fl.server.strategy.FedAvg(evaluate_metrics_aggregation_fn=weighted_average)
+strategy = FedAvg(evaluate_metrics_aggregation_fn=weighted_average)
 
-# Start Flower server
-hist = fl.server.start_driver(
-    server_address="0.0.0.0:9091",
-    config=fl.server.ServerConfig(num_rounds=3),
+
+# Define config
+config = ServerConfig(num_rounds=3)
+
+
+# Flower ServerApp
+app = ServerApp(
+    config=config,
     strategy=strategy,
 )
-
-assert (hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]) > 0.98
