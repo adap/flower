@@ -26,7 +26,7 @@ from flwr_datasets.telemetry import EventType, _get_source_id, event
 class TelemetryTest(unittest.TestCase):
     """Tests for the telemetry module."""
 
-    @mock.patch("flwr_datasets.telemetry.FLWR_DATASETS_TELEMETRY_ENABLED", "1")
+    @mock.patch("flwr_datasets.telemetry.FLWR_TELEMETRY_ENABLED", "1")
     def test_event(self) -> None:
         """Test if sending works against the actual API."""
         # Prepare
@@ -39,7 +39,7 @@ class TelemetryTest(unittest.TestCase):
         # Assert
         self.assertEqual(actual, expected)
 
-    @mock.patch("flwr_datasets.telemetry.FLWR_DATASETS_TELEMETRY_ENABLED", "1")
+    @mock.patch("flwr_datasets.telemetry.FLWR_TELEMETRY_ENABLED", "1")
     def test_not_blocking(self) -> None:
         """Test if the code is blocking.
 
@@ -58,7 +58,7 @@ class TelemetryTest(unittest.TestCase):
         # Assert
         self.assertLess(duration_actual, duration_max)
 
-    @mock.patch("flwr.common.telemetry.FLWR_TELEMETRY_ENABLED", "0")
+    @mock.patch("flwr_datasets.telemetry.FLWR_TELEMETRY_ENABLED", "0")
     def test_telemetry_disabled(self) -> None:
         """Test opt-out."""
         # Prepare
@@ -102,10 +102,14 @@ class TelemetryTest(unittest.TestCase):
 
         # Execute
         with mock.patch(
-            "flwr.common.telemetry._get_home",
+            "flwr_datasets.telemetry._get_home",
             new_callable=new_callable,
         ):
             source_id = _get_source_id()
 
         # Assert
         self.assertEqual(source_id, except_value)
+
+
+if __name__ == "__main__":
+    unittest.main()
