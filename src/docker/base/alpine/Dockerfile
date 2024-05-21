@@ -61,7 +61,7 @@ RUN apk add --no-cache \
     --gecos "" \
     --uid 49999 app
 
-COPY --from=compile --chown=app /app/venv /app/venv
+COPY --from=compile --chown=app:app /app/venv /app/venv
 
 # Make sure we use the virtualenv
 ENV PATH=/app/venv/bin:$PATH \
