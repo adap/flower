@@ -23,13 +23,13 @@ from typing import Dict, Optional
 import typer
 from typing_extensions import Annotated
 
-from .deps_conf import deps
 from ..utils import (
     is_valid_project_name,
     prompt_options,
     prompt_text,
     sanitize_project_name,
 )
+from .deps_conf import deps
 
 
 class MlFramework(str, Enum):
