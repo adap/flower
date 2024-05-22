@@ -80,7 +80,7 @@ from flwr_datasets.preprocessor import Divider
         ),
     ],
 )
-class TestDivideResplitter(unittest.TestCase):
+class TestDivider(unittest.TestCase):
     """Divider tests."""
 
     divide_config: Union[
@@ -125,7 +125,7 @@ class TestDivideResplitter(unittest.TestCase):
 
 
 class TestDividerIncorrectUseCases(unittest.TestCase):
-    """Resplitter tests."""
+    """Divider tests."""
 
     def setUp(self) -> None:
         """Set up the dataset with 3 splits for tests."""

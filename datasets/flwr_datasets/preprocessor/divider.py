@@ -66,14 +66,14 @@ class Divider:
 
     >>> # Assuming there is a dataset_dict of type `DatasetDict`
     >>> # dataset_dict is {"train": train-data, "test": test-data}
-    >>> resplitter = Divider(
+    >>> divider = Divider(
     >>>     divide_config={
     >>>         "train": 0.8,
     >>>         "valid": 0.2,
     >>>     }
     >>>     divide_split="train",
     >>> )
-    >>> new_dataset_dict = resplitter(dataset_dict)
+    >>> new_dataset_dict = divider(dataset_dict)
     >>> # new_dataset_dict is
     >>> # {"train": 80% of train, "valid": 20% of train, "test": test-data}
 
@@ -83,7 +83,7 @@ class Divider:
 
     >>> # Assuming there is a dataset_dict of type `DatasetDict`
     >>> # dataset_dict is {"train": train-data, "test": test-data}
-    >>> resplitter = Divider(
+    >>> divider = Divider(
     >>>     divide_config={
     >>>         "train": {
     >>>             "train": 0.8,
@@ -92,7 +92,7 @@ class Divider:
     >>>         "test": {"test-a": 0.4, "test-b": 0.6 }
     >>>     }
     >>> )
-    >>> new_dataset_dict = resplitter(dataset_dict)
+    >>> new_dataset_dict = divider(dataset_dict)
     >>> # new_dataset_dict is
     >>> # {"train": 80% of train, "valid": 20% of train,
     >>> # "test-a": 40% of test, "test-b": 60% of test}
