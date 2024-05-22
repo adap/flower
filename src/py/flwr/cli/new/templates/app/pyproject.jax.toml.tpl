@@ -9,12 +9,12 @@ description = ""
 authors = [
     { name = "The Flower Authors", email = "hello@flower.ai" },
 ]
-license = { text = "Apache License (2.0)" }
+license = {text = "Apache License (2.0)"}
 dependencies = [
     "flwr[simulation]>=1.8.0,<2.0",
-    "flwr-datasets[vision]>=0.0.2,<1.0.0",
-    "mlx==0.10.0",
-    "numpy==1.24.4",
+    "jax==0.4.26",
+    "jaxlib==0.4.26",
+    "scikit-learn==1.4.2",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -26,9 +26,3 @@ publisher = "$username"
 [flower.components]
 serverapp = "$import_name.server:app"
 clientapp = "$import_name.client:app"
-
-[flower.engine]
-name = "simulation"
-
-[flower.engine.simulation.supernode]
-num = 2
