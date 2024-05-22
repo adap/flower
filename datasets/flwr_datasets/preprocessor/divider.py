@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""DivideResplitter class for Flower Datasets."""
+"""Divider class for Flower Datasets."""
 
 
 import collections
@@ -25,7 +25,7 @@ from datasets import DatasetDict
 
 # flake8: noqa: E501
 # pylint: disable=line-too-long
-class DivideResplitter:
+class Divider:
     """Dive existing split(s) of the dataset and assign them custom names.
 
     Create new `DatasetDict` with new split names with corresponding percentages of data
@@ -66,7 +66,7 @@ class DivideResplitter:
 
     >>> # Assuming there is a dataset_dict of type `DatasetDict`
     >>> # dataset_dict is {"train": train-data, "test": test-data}
-    >>> resplitter = DivideResplitter(
+    >>> resplitter = Divider(
     >>>     divide_config={
     >>>         "train": 0.8,
     >>>         "valid": 0.2,
@@ -83,7 +83,7 @@ class DivideResplitter:
 
     >>> # Assuming there is a dataset_dict of type `DatasetDict`
     >>> # dataset_dict is {"train": train-data, "test": test-data}
-    >>> resplitter = DivideResplitter(
+    >>> resplitter = Divider(
     >>>     divide_config={
     >>>         "train": {
     >>>             "train": 0.8,

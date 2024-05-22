@@ -17,11 +17,11 @@
 
 from .merger import Merger
 from .preprocessor import Preprocessor
-from .divide_resplitter import DivideResplitter
+from .divider import Divider
 
 
 __all__ = [
     "Merger",
     "Preprocessor",
-    "DivideResplitter",
+    "Divider",
 ]
