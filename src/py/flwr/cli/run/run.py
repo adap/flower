@@ -26,6 +26,7 @@ from flwr.simulation.run_simulation import _run_simulation
 
 OverrideDict = Dict[str, Union[str, "OverrideDict"]]
 
+
 class Engine(str, Enum):
     """Enum defining the engine to run on."""
 
