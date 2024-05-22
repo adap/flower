@@ -76,7 +76,7 @@ flower-client-app client:app --insecure
 Start the Flower `ServerApp`:
 
 ```bash
-flower-server-app server:app --insecure
+flower-server-app server:app --insecure --verbose
 ```
 
 ## Amend the example for practical usage

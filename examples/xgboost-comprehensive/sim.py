@@ -86,7 +86,7 @@ def main():
     # Load centralised test set
     if args.centralised_eval or args.centralised_eval_client:
         log(INFO, "Loading centralised test set...")
-        test_data = fds.load_full("test")
+        test_data = fds.load_split("test")
         test_data.set_format("numpy")
         num_test = test_data.shape[0]
         test_dmatrix = transform_dataset_to_dmatrix(test_data)

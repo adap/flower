@@ -15,7 +15,7 @@
 """MetricsRecord."""
 
 
-from typing import Dict, Optional, get_args
+from typing import Dict, List, Optional, get_args
 
 from flwr.common.typing import MetricsRecordValues, MetricsScalar
 
@@ -84,3 +84,19 @@ class MetricsRecord(TypedDict[str, MetricsRecordValues]):
                 self[k] = metrics_dict[k]
                 if not keep_input:
                     del metrics_dict[k]
+
+    def count_bytes(self) -> int:
+        """Return number of Bytes stored in this object."""
+        num_bytes = 0
+
+        for k, v in self.items():
+            if isinstance(v, List):
+                # both int and float normally take 4 bytes
+                # But MetricRecords are mapped to 64bit int/float
+                # during protobuffing
+                num_bytes += 8 * len(v)
+            else:
+                num_bytes += 8
+            # We also count the bytes footprint of the keys
+            num_bytes += len(k)
+        return num_bytes

@@ -17,6 +17,8 @@
 
 import time
 import unittest
+from threading import Event
+from typing import Optional
 from unittest.mock import Mock, patch
 
 from ..client_manager import SimpleClientManager
@@ -29,9 +31,6 @@ class TestUtils(unittest.TestCase):
     def test_start_update_client_manager_thread(self) -> None:
         """Test start_update_client_manager_thread function."""
         # Prepare
-        sleep = time.sleep
-        sleep_patch = patch("time.sleep", lambda x: sleep(x / 100))
-        sleep_patch.start()
         expected_node_ids = list(range(100))
         updated_expected_node_ids = list(range(80, 120))
         driver = Mock()
@@ -39,20 +38,30 @@ class TestUtils(unittest.TestCase):
         driver.run_id = 123
         driver.get_node_ids.return_value = expected_node_ids
         client_manager = SimpleClientManager()
+        original_wait = Event.wait
+
+        def custom_wait(self: Event, timeout: Optional[float] = None) -> None:
+            if timeout is not None:
+                timeout /= 100
+            original_wait(self, timeout)
 
         # Execute
-        thread, f_stop = start_update_client_manager_thread(driver, client_manager)
-        # Wait until all nodes are registered via `client_manager.sample()`
-        client_manager.sample(len(expected_node_ids))
-        # Retrieve all nodes in `client_manager`
-        node_ids = {proxy.node_id for proxy in client_manager.all().values()}
-        # Update the GetNodesResponse and wait until the `client_manager` is updated
-        driver.get_node_ids.return_value = updated_expected_node_ids
-        sleep(0.1)
-        # Retrieve all nodes in `client_manager`
-        updated_node_ids = {proxy.node_id for proxy in client_manager.all().values()}
-        # Stop the thread
-        f_stop.set()
+        # Patching Event.wait with our custom function
+        with patch.object(Event, "wait", new=custom_wait):
+            thread, f_stop = start_update_client_manager_thread(driver, client_manager)
+            # Wait until all nodes are registered via `client_manager.sample()`
+            client_manager.sample(len(expected_node_ids))
+            # Retrieve all nodes in `client_manager`
+            node_ids = {proxy.node_id for proxy in client_manager.all().values()}
+            # Update the GetNodesResponse and wait until the `client_manager` is updated
+            driver.get_node_ids.return_value = updated_expected_node_ids
+            time.sleep(0.1)
+            # Retrieve all nodes in `client_manager`
+            updated_node_ids = {
+                proxy.node_id for proxy in client_manager.all().values()
+            }
+            # Stop the thread
+            f_stop.set()
 
         # Assert
         assert node_ids == set(expected_node_ids)

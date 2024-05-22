@@ -3,21 +3,63 @@ name: Release nightly
 on:
   schedule:
     - cron: "0 23 * * *"
+    - cron: "30 23 * * *"
 
 env:
   FLWR_TELEMETRY_ENABLED: 0
 
 jobs:
-  release_nightly:
+  release-nightly:
     runs-on: ubuntu-22.04
-    name: Nightly
+    name: Relase nightly on PyPI
     if: github.repository == 'adap/flower'
+    outputs:
+      name: ${{ steps.release.outputs.name }}
+      version: ${{ steps.release.outputs.version }}
+      skip: ${{ steps.release.outputs.skip }}
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
       - name: Release nightly
+        if: github.event.schedule == '0 23 * * *'
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: ./dev/publish-nightly.sh
+      - name: Read nightly version and name
+        if: github.event.schedule == '30 23 * * *'
+        id: release
         run: |
-          ./dev/publish-nightly.sh
+          RESULT=$(./dev/publish-nightly.sh --skip-publish)
+          if [ "$RESULT" == "There were no commits in the last 24 hours." ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+          fi
+
+          echo "name=$(poetry version | awk {'print $1'})" >> $GITHUB_OUTPUT
+          echo "version=$(poetry version -s)" >> $GITHUB_OUTPUT
+
+  build-docker-images:
+    name: Build nightly images
+    if: github.repository == 'adap/flower' && needs.release-nightly.outputs.skip != 'true' && github.event.schedule == '30 23 * * *'
+    uses: ./.github/workflows/_docker-build.yml
+    needs: release-nightly
+    strategy:
+      fail-fast: false
+      matrix:
+        images: [
+          { repository: "flwr/superlink", file-dir: "src/docker/superlink" },
+          { repository: "flwr/supernode", file-dir: "src/docker/supernode" },
+          { repository: "flwr/serverapp", file-dir: "src/docker/serverapp" }
+        ]
+    with:
+      namespace-repository: ${{ matrix.images.repository }}
+      file-dir: ${{ matrix.images.file-dir }}
+      build-args: |
+        FLWR_VERSION=${{ needs.release-nightly.outputs.version }}
+        FLWR_PACKAGE=${{ needs.release-nightly.outputs.name }}
+      tags: |
+        ${{ needs.release-nightly.outputs.version }}
+        nightly
+    secrets:
+      dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}

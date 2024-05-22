@@ -15,16 +15,28 @@
 """Contextmanager for a REST request-response channel to the Flower server."""
 
 
+import random
 import sys
+import threading
 from contextlib import contextmanager
 from copy import copy
 from logging import ERROR, INFO, WARN
-from typing import Callable, Dict, Iterator, Optional, Tuple, Union, cast
+from typing import Callable, Iterator, Optional, Tuple, Type, TypeVar, Union
 
+from cryptography.hazmat.primitives.asymmetric import ec
+from google.protobuf.message import Message as GrpcMessage
+
+from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
 from flwr.client.message_handler.task_handler import get_task_ins, validate_task_ins
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
-from flwr.common.constant import MISSING_EXTRA_REST
+from flwr.common.constant import (
+    MISSING_EXTRA_REST,
+    PING_BASE_MULTIPLIER,
+    PING_CALL_TIMEOUT,
+    PING_DEFAULT_INTERVAL,
+    PING_RANDOM_RANGE,
+)
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
@@ -33,6 +45,11 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
+    DeleteNodeResponse,
+    GetRunRequest,
+    GetRunResponse,
+    PingRequest,
+    PingResponse,
     PullTaskInsRequest,
     PullTaskInsResponse,
     PushTaskResRequest,
@@ -47,19 +64,18 @@ except ModuleNotFoundError:
     sys.exit(MISSING_EXTRA_REST)
 
 
-KEY_NODE = "node"
-KEY_METADATA = "in_message_metadata"
-
-
 PATH_CREATE_NODE: str = "api/v0/fleet/create-node"
 PATH_DELETE_NODE: str = "api/v0/fleet/delete-node"
 PATH_PULL_TASK_INS: str = "api/v0/fleet/pull-task-ins"
 PATH_PUSH_TASK_RES: str = "api/v0/fleet/push-task-res"
+PATH_PING: str = "api/v0/fleet/ping"
+PATH_GET_RUN: str = "/api/v0/fleet/get-run"
+
+T = TypeVar("T", bound=GrpcMessage)
 
 
 @contextmanager
-# pylint: disable-next=too-many-statements
-def http_request_response(
+def http_request_response(  # pylint: disable=,R0913, R0914, R0915
     server_address: str,
     insecure: bool,  # pylint: disable=unused-argument
     retry_invoker: RetryInvoker,
@@ -67,12 +83,16 @@ def http_request_response(
     root_certificates: Optional[
         Union[bytes, str]
     ] = None,  # pylint: disable=unused-argument
+    authentication_keys: Optional[  # pylint: disable=unused-argument
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
+        Optional[Callable[[int], Tuple[str, str]]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -127,143 +147,142 @@ def http_request_response(
             "must be provided as a string path to the client.",
         )
 
-    # Necessary state to validate messages to be sent
-    state: Dict[str, Optional[Metadata]] = {KEY_METADATA: None}
-
-    # Enable create_node and delete_node to store node
-    node_store: Dict[str, Optional[Node]] = {KEY_NODE: None}
+    # Shared variables for inner functions
+    metadata: Optional[Metadata] = None
+    node: Optional[Node] = None
+    ping_thread: Optional[threading.Thread] = None
+    ping_stop_event = threading.Event()
 
     ###########################################################################
-    # receive/send functions
+    # ping/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
+
+    def _request(
+        req: GrpcMessage, res_type: Type[T], api_path: str, retry: bool = True
+    ) -> Optional[T]:
+        # Serialize the request
+        req_bytes = req.SerializeToString()
+
+        # Send the request
+        def post() -> requests.Response:
+            return requests.post(
+                f"{base_url}/{api_path}",
+                data=req_bytes,
+                headers={
+                    "Accept": "application/protobuf",
+                    "Content-Type": "application/protobuf",
+                },
+                verify=verify,
+                timeout=None,
+            )
+
+        if retry:
+            res: requests.Response = retry_invoker.invoke(post)
+        else:
+            res = post()
+
+        # Check status code and headers
+        if res.status_code != 200:
+            return None
+        if "content-type" not in res.headers:
+            log(
+                WARN,
+                "[Node] POST /%s: missing header `Content-Type`",
+                api_path,
+            )
+            return None
+        if res.headers["content-type"] != "application/protobuf":
+            log(
+                WARN,
+                "[Node] POST /%s: header `Content-Type` has wrong value",
+                api_path,
+            )
+            return None
+
+        # Deserialize ProtoBuf from bytes
+        grpc_res = res_type()
+        grpc_res.ParseFromString(res.content)
+        return grpc_res
+
+    def ping() -> None:
+        # Get Node
+        if node is None:
+            log(ERROR, "Node instance missing")
+            return
+
+        # Construct the ping request
+        req = PingRequest(node=node, ping_interval=PING_DEFAULT_INTERVAL)
+
+        # Send the request
+        res = _request(req, PingResponse, PATH_PING, retry=False)
+        if res is None:
+            return
+
+        # Check if success
+        if not res.success:
+            raise RuntimeError("Ping failed unexpectedly.")
+
+        # Wait
+        rd = random.uniform(*PING_RANDOM_RANGE)
+        next_interval: float = PING_DEFAULT_INTERVAL - PING_CALL_TIMEOUT
+        next_interval *= PING_BASE_MULTIPLIER + rd
+        if not ping_stop_event.is_set():
+            ping_stop_event.wait(next_interval)
 
     def create_node() -> None:
         """Set create_node."""
-        create_node_req_proto = CreateNodeRequest()
-        create_node_req_bytes: bytes = create_node_req_proto.SerializeToString()
+        req = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
 
-        res = retry_invoker.invoke(
-            requests.post,
-            url=f"{base_url}/{PATH_CREATE_NODE}",
-            headers={
-                "Accept": "application/protobuf",
-                "Content-Type": "application/protobuf",
-            },
-            data=create_node_req_bytes,
-            verify=verify,
-            timeout=None,
-        )
-
-        # Check status code and headers
-        if res.status_code != 200:
-            return
-        if "content-type" not in res.headers:
-            log(
-                WARN,
-                "[Node] POST /%s: missing header `Content-Type`",
-                PATH_PULL_TASK_INS,
-            )
-            return
-        if res.headers["content-type"] != "application/protobuf":
-            log(
-                WARN,
-                "[Node] POST /%s: header `Content-Type` has wrong value",
-                PATH_PULL_TASK_INS,
-            )
+        # Send the request
+        res = _request(req, CreateNodeResponse, PATH_CREATE_NODE)
+        if res is None:
             return
 
-        # Deserialize ProtoBuf from bytes
-        create_node_response_proto = CreateNodeResponse()
-        create_node_response_proto.ParseFromString(res.content)
-        # pylint: disable-next=no-member
-        node_store[KEY_NODE] = create_node_response_proto.node
+        # Remember the node and the ping-loop thread
+        nonlocal node, ping_thread
+        node = res.node
+        ping_thread = start_ping_loop(ping, ping_stop_event)
 
     def delete_node() -> None:
         """Set delete_node."""
-        if node_store[KEY_NODE] is None:
+        nonlocal node
+        if node is None:
             log(ERROR, "Node instance missing")
             return
-        node: Node = cast(Node, node_store[KEY_NODE])
-        delete_node_req_proto = DeleteNodeRequest(node=node)
-        delete_node_req_req_bytes: bytes = delete_node_req_proto.SerializeToString()
-        res = retry_invoker.invoke(
-            requests.post,
-            url=f"{base_url}/{PATH_DELETE_NODE}",
-            headers={
-                "Accept": "application/protobuf",
-                "Content-Type": "application/protobuf",
-            },
-            data=delete_node_req_req_bytes,
-            verify=verify,
-            timeout=None,
-        )
 
-        # Check status code and headers
-        if res.status_code != 200:
+        # Stop the ping-loop thread
+        ping_stop_event.set()
+        if ping_thread is not None:
+            ping_thread.join()
+
+        # Send DeleteNode request
+        req = DeleteNodeRequest(node=node)
+
+        # Send the request
+        res = _request(req, DeleteNodeResponse, PATH_CREATE_NODE)
+        if res is None:
             return
-        if "content-type" not in res.headers:
-            log(
-                WARN,
-                "[Node] POST /%s: missing header `Content-Type`",
-                PATH_PULL_TASK_INS,
-            )
-            return
-        if res.headers["content-type"] != "application/protobuf":
-            log(
-                WARN,
-                "[Node] POST /%s: header `Content-Type` has wrong value",
-                PATH_PULL_TASK_INS,
-            )
+
+        # Cleanup
+        node = None
 
     def receive() -> Optional[Message]:
         """Receive next task from server."""
         # Get Node
-        if node_store[KEY_NODE] is None:
+        if node is None:
             log(ERROR, "Node instance missing")
             return None
-        node: Node = cast(Node, node_store[KEY_NODE])
 
         # Request instructions (task) from server
-        pull_task_ins_req_proto = PullTaskInsRequest(node=node)
-        pull_task_ins_req_bytes: bytes = pull_task_ins_req_proto.SerializeToString()
+        req = PullTaskInsRequest(node=node)
 
-        # Request instructions (task) from server
-        res = retry_invoker.invoke(
-            requests.post,
-            url=f"{base_url}/{PATH_PULL_TASK_INS}",
-            headers={
-                "Accept": "application/protobuf",
-                "Content-Type": "application/protobuf",
-            },
-            data=pull_task_ins_req_bytes,
-            verify=verify,
-            timeout=None,
-        )
-
-        # Check status code and headers
-        if res.status_code != 200:
+        # Send the request
+        res = _request(req, PullTaskInsResponse, PATH_PULL_TASK_INS)
+        if res is None:
             return None
-        if "content-type" not in res.headers:
-            log(
-                WARN,
-                "[Node] POST /%s: missing header `Content-Type`",
-                PATH_PULL_TASK_INS,
-            )
-            return None
-        if res.headers["content-type"] != "application/protobuf":
-            log(
-                WARN,
-                "[Node] POST /%s: header `Content-Type` has wrong value",
-                PATH_PULL_TASK_INS,
-            )
-            return None
-
-        # Deserialize ProtoBuf from bytes
-        pull_task_ins_response_proto = PullTaskInsResponse()
-        pull_task_ins_response_proto.ParseFromString(res.content)
 
         # Get the current TaskIns
-        task_ins: Optional[TaskIns] = get_task_ins(pull_task_ins_response_proto)
+        task_ins: Optional[TaskIns] = get_task_ins(res)
 
         # Discard the current TaskIns if not valid
         if task_ins is not None and not (
@@ -273,86 +292,64 @@ def http_request_response(
             task_ins = None
 
         # Return the Message if available
+        nonlocal metadata
         message = None
-        state[KEY_METADATA] = None
         if task_ins is not None:
             message = message_from_taskins(task_ins)
-            state[KEY_METADATA] = copy(message.metadata)
+            metadata = copy(message.metadata)
             log(INFO, "[Node] POST /%s: success", PATH_PULL_TASK_INS)
         return message
 
     def send(message: Message) -> None:
         """Send task result back to server."""
         # Get Node
-        if node_store[KEY_NODE] is None:
+        if node is None:
             log(ERROR, "Node instance missing")
             return
 
         # Get incoming message
-        in_metadata = state[KEY_METADATA]
-        if in_metadata is None:
+        nonlocal metadata
+        if metadata is None:
             log(ERROR, "No current message")
             return
 
         # Validate out message
-        if not validate_out_message(message, in_metadata):
+        if not validate_out_message(message, metadata):
             log(ERROR, "Invalid out message")
             return
+        metadata = None
 
         # Construct TaskRes
         task_res = message_to_taskres(message)
 
         # Serialize ProtoBuf to bytes
-        push_task_res_request_proto = PushTaskResRequest(task_res_list=[task_res])
-        push_task_res_request_bytes: bytes = (
-            push_task_res_request_proto.SerializeToString()
-        )
+        req = PushTaskResRequest(task_res_list=[task_res])
 
-        # Send ClientMessage to server
-        res = retry_invoker.invoke(
-            requests.post,
-            url=f"{base_url}/{PATH_PUSH_TASK_RES}",
-            headers={
-                "Accept": "application/protobuf",
-                "Content-Type": "application/protobuf",
-            },
-            data=push_task_res_request_bytes,
-            verify=verify,
-            timeout=None,
-        )
-
-        state[KEY_METADATA] = None
-
-        # Check status code and headers
-        if res.status_code != 200:
-            return
-        if "content-type" not in res.headers:
-            log(
-                WARN,
-                "[Node] POST /%s: missing header `Content-Type`",
-                PATH_PUSH_TASK_RES,
-            )
-            return
-        if res.headers["content-type"] != "application/protobuf":
-            log(
-                WARN,
-                "[Node] POST /%s: header `Content-Type` has wrong value",
-                PATH_PUSH_TASK_RES,
-            )
+        # Send the request
+        res = _request(req, PushTaskResResponse, PATH_PUSH_TASK_RES)
+        if res is None:
             return
 
-        # Deserialize ProtoBuf from bytes
-        push_task_res_response_proto = PushTaskResResponse()
-        push_task_res_response_proto.ParseFromString(res.content)
         log(
             INFO,
             "[Node] POST /%s: success, created result %s",
             PATH_PUSH_TASK_RES,
-            push_task_res_response_proto.results,  # pylint: disable=no-member
+            res.results,  # pylint: disable=no-member
         )
+
+    def get_run(run_id: int) -> Tuple[str, str]:
+        # Construct the request
+        req = GetRunRequest(run_id=run_id)
+
+        # Send the request
+        res = _request(req, GetRunResponse, PATH_GET_RUN)
+        if res is None:
+            return "", ""
+
+        return res.run.fab_id, res.run.fab_version
 
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node)
+        yield (receive, send, create_node, delete_node, get_run)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)

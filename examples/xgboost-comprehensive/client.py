@@ -43,7 +43,7 @@ partition.set_format("numpy")
 if args.centralised_eval:
     # Use centralised test set for evaluation
     train_data = partition
-    valid_data = fds.load_full("test")
+    valid_data = fds.load_split("test")
     valid_data.set_format("numpy")
     num_train = train_data.shape[0]
     num_val = valid_data.shape[0]

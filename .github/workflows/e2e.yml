@@ -45,6 +45,7 @@ jobs:
           [ -z "${{ github.head_ref }}" ] && dir="${{ github.ref_name }}" || dir="pr/${{ github.head_ref }}"
           echo "DIR=$dir" >> "$GITHUB_OUTPUT"
           aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://${{ env.ARTIFACT_BUCKET }}/py/$dir/$sha_short --recursive
+          aws s3 cp --content-disposition "attachment" --cache-control "no-cache" ./ s3://${{ env.ARTIFACT_BUCKET }}/py/$dir/latest --recursive
     outputs:
       whl_path: ${{ steps.upload.outputs.WHL_PATH }}
       short_sha: ${{ steps.upload.outputs.SHORT_SHA }}
@@ -62,6 +63,8 @@ jobs:
           - directory: bare
 
           - directory: bare-https
+
+          - directory: bare-client-auth
 
           - directory: jax
 
@@ -129,10 +132,13 @@ jobs:
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
+        if: ${{ matrix.directory != 'bare-client-auth' }}
         run: ./../test.sh "${{ matrix.directory }}"
       - name: Run virtual client test
+        if: ${{ matrix.directory != 'bare-client-auth' }}
         run: python simulation.py
       - name: Run driver test
+        if: ${{ matrix.directory != 'bare-client-auth' }}
         run: ./../test_driver.sh "${{ matrix.directory }}"
       - name: Run driver test with REST
         if: ${{ matrix.directory == 'bare' }}
@@ -140,6 +146,9 @@ jobs:
       - name: Run driver test with SQLite database
         if: ${{ matrix.directory == 'bare' }}
         run: ./../test_driver.sh bare sqlite
+      - name: Run driver test with client authentication
+        if: ${{ matrix.directory == 'bare-client-auth' }}
+        run: ./../test_driver.sh bare client-auth
 
   strategies:
     runs-on: ubuntu-22.04

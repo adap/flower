@@ -35,7 +35,7 @@ if centralised_eval:
         dataset="jxie/higgs", partitioners={"train": 20}, resplitter=resplit
     )
     log(INFO, "Loading centralised test set...")
-    test_set = fds.load_full("test")
+    test_set = fds.load_split("test")
     test_set.set_format("numpy")
     test_dmatrix = transform_dataset_to_dmatrix(test_set)
 
