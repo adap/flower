@@ -122,7 +122,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3.8
-          cache: 'pip'
       - name: Install build tools
         run: |
             python -m pip install -U pip==23.3.1
@@ -131,6 +130,14 @@ jobs:
       #   uses: ./.github/actions/bootstrap
       #   with:
       #     python-version: 3.8
+      - name: Cache pip
+        id: cache-pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ matrix.directory }}-${{ hashFiles('**/pyproject.toml') }}
+        restore-keys: |
+            pip-${{ runner.os }}-${{ matrix.directory }}
       # - name: Cache Packages
       #   id: cache-packages
       #   uses: actions/cache@v4
