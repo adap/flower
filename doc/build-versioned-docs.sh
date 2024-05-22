@@ -73,6 +73,9 @@ END
     # Actually building the docs for a given language and version
     sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 
+    # Clean the history of the checked-out branch to remove conflicts
+    git clean -fd
+
   done
 done
   
