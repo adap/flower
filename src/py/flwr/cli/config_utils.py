@@ -22,7 +22,7 @@ import tomli
 from flwr.common import object_ref
 
 
-def load_and_validate_with_defaults(
+def load_and_validate(
     path: Optional[Path] = None,
 ) -> Tuple[Optional[Dict[str, Any]], List[str], List[str]]:
     """Load and validate pyproject.toml as dict.
