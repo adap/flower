@@ -20,7 +20,6 @@ from logging import DEBUG
 from multiprocessing import Manager, Queue
 from pathlib import Path
 from queue import Empty
-from threading import Event
 from typing import Callable, Tuple
 
 import cloudpickle
@@ -36,10 +35,9 @@ from .backend import Backend, BackendConfig
 def run_client_app(
     in_queue: "Queue[Tuple[bytes,Message,Context]]",
     out_queue: "Queue[Tuple[Message,Context]]",
-    f_stop: Event,
 ) -> None:
     """Run a ClientApp processing a Message."""
-    while not f_stop.is_set():
+    while True:
         try:
             client_app_pkl, message, context = in_queue.get(timeout=1)
         except Empty:
@@ -67,7 +65,6 @@ class ProcessPoolBackend(Backend):
             raise ValueError(f"Specified work_dir {work_dir} does not exist.")
 
         self.manager = Manager()
-        self.f_stop = self.manager.Event()
         self.in_queue = self.manager.Queue()
         self.out_queue = self.manager.Queue()
 
@@ -92,7 +89,6 @@ class ProcessPoolBackend(Backend):
                 run_client_app,
                 self.in_queue,  # type: ignore
                 self.out_queue,  # type: ignore
-                self.f_stop,
             )
 
         log(DEBUG, "Constructed ProcessPoolExecutor with: %i processes", self.num_proc)
