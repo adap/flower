@@ -22,21 +22,22 @@ Let's dive in!
 .. |startclient_link| replace:: ``start_client()``
 .. |startserver_link| replace:: ``start_server()``
 .. |startsim_link| replace:: ``start_simulation()``
-.. |runsimcli_link| replace:: ``flower-simulation``
 .. |runsim_link| replace:: ``run_simulation()``
 .. |flowernext_superlink_link| replace:: ``flower-superlink``
 .. |flowernext_clientapp_link| replace:: ``flower-client-app``
 .. |flowernext_serverapp_link| replace:: ``flower-server-app``
+.. |flower_simulation_link| replace:: ``flower-simulation``
 .. _clientapp_link: ref-api/flwr.client.ClientApp.html
 .. _serverapp_link: ref-api/flwr.server.ServerApp.html
 .. _startclient_link: ref-api/flwr.client.start_client.html
 .. _startserver_link: ref-api/flwr.server.start_server.html
 .. _startsim_link: ref-api/flwr.simulation.start_simulation.html
-.. _runsimcli_link: ref-api/flwr.simulation.run_simulation_from_cli.html
 .. _runsim_link: ref-api/flwr.simulation.run_simulation.html
 .. _flowernext_superlink_link: ref-api-cli.html#flower-superlink
 .. _flowernext_clientapp_link: ref-api-cli.html#flower-client-app
 .. _flowernext_serverapp_link: ref-api-cli.html#flower-server-app
+.. _flower_simulation_link: ref-api-cli.html#flower-simulation
+
 
 Install update
 --------------
@@ -228,7 +229,7 @@ Simulation in CLI
             ...
         )
 
-- Run |runsimcli_link|_ in CLI and point to the ``server_app`` / ``client_app`` object in the
+- Run |flower_simulation_link|_ in CLI and point to the ``server_app`` / ``client_app`` object in the
   code instead of executing the Python script. Here's an example (assuming the
   ``server_app`` and ``client_app`` objects are in a ``sim.py`` module):
 
