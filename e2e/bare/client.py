@@ -1,8 +1,8 @@
 from datetime import datetime
 
-import flwr as fl
 import numpy as np
 
+import flwr as fl
 from flwr.common import ConfigsRecord
 
 SUBSET_SIZE = 1000
