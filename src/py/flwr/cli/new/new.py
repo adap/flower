@@ -23,6 +23,7 @@ from typing import Dict, Optional
 import typer
 from typing_extensions import Annotated
 
+from .deps_conf import deps
 from ..utils import (
     is_valid_project_name,
     prompt_options,
@@ -143,7 +144,7 @@ def new(
     files = {
         ".gitignore": {"template": "app/.gitignore.tpl"},
         "README.md": {"template": "app/README.md.tpl"},
-        "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
+        "pyproject.toml": {"template": f"app/pyproject.toml.tpl"},
         f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
         f"{import_name}/server.py": {
             "template": f"app/code/server.{framework_str}.py.tpl"
@@ -171,6 +172,7 @@ def new(
         "package_name": package_name,
         "import_name": import_name.replace("-", "_"),
         "username": username,
+        "deps": deps[framework_str],
     }
 
     for file_path, value in files.items():
