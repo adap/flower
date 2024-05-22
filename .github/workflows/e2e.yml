@@ -126,16 +126,14 @@ jobs:
         run: |
             python -m pip install -U pip==23.3.1
         shell: bash
-      - name: Cache pip and Python location
-        id: cache-pip-python
+      - name: Cache Python location
+        id: cache-python
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.cache/pip
-            ${{ env.pythonLocation }}
-          key: pip-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles('**/pyproject.toml') }}
+          path: ${{ env.pythonLocation }}
+          key: pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles('**/pyproject.toml') }}
           restore-keys: |
-            pip-${{ runner.os }}-${{ matrix.directory }}
+            pythonloc-${{ runner.os }}-${{ matrix.directory }}-${{ env.pythonLocation }}
       - name: Install dependencies
         run: python -m pip install --upgrade .
       - name: Install Flower wheel from artifact store
