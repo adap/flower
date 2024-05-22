@@ -1,20 +1,15 @@
 name: Build docker base image
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - "src/docker/base/**"
-      - ".github/workflows/docker-base.yml"
-      # re-run if something chnages in the bootstrap action (e.g. version of the dependencies)
-      - ".github/actions/bootstrap/action.yml"
-      - ".github/workflows/_docker-build.yml"
+  workflow_dispatch:
+    inputs:
+      flwr-version:
+        description: "Version of Flower."
+        required: true
+        type: string
 
 permissions:
   contents: read
-
-env:
-  DEFAULT_UBUNTU: 22.04
 
 jobs:
   parameters:
@@ -24,7 +19,6 @@ jobs:
     outputs:
       pip-version: ${{ steps.versions.outputs.pip-version }}
       setuptools-version: ${{ steps.versions.outputs.setuptools-version }}
-      ubuntu-version: ${{ steps.versions.outputs.ubuntu-version }}
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -36,7 +30,6 @@ jobs:
         run: |
           echo "pip-version=${{ steps.bootstrap.outputs.pip-version }}" >> "$GITHUB_OUTPUT"
           echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
-          echo "ubuntu-version=${{ env.DEFAULT_UBUNTU }}" >> "$GITHUB_OUTPUT"
 
   build-base-images:
     name: Build base images
@@ -46,15 +39,22 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
+        distro:
+          - name: ubuntu
+            version: "22.04"
+          - name: alpine
+            version: "3.19"
     with:
       namespace-repository: flwr/base
-      file-dir: src/docker/base
+      file-dir: src/docker/base/${{ matrix.distro.name }}
       build-args: |
         PYTHON_VERSION=${{ matrix.python-version }}
         PIP_VERSION=${{ needs.parameters.outputs.pip-version }}
         SETUPTOOLS_VERSION=${{ needs.parameters.outputs.setuptools-version }}
-        UBUNTU_VERSION=${{ needs.parameters.outputs.ubuntu-version }}
-      tags: py${{ matrix.python-version }}-ubuntu${{ needs.parameters.outputs.ubuntu-version }}
+        DISTRO=${{ matrix.distro.name }}
+        DISTRO_VERSION=${{ matrix.distro.version }}
+        FLWR_VERSION=${{ github.event.inputs.flwr-version }}
+      tags: ${{ github.event.inputs.flwr-version }}-py${{ matrix.python-version }}-${{ matrix.distro.name }}${{ matrix.distro.version }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
