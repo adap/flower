@@ -27,7 +27,7 @@ python -m docformatter -c -r src/py/flwr -e src/py/flwr/proto
 echo "- docformatter:  done"
 
 echo "- ruff: start"
-python -m ruff check src/py/flwr
+python -m ruff check src/py/flwr e2e
 echo "- ruff: done"
 
 echo "- mypy: start"

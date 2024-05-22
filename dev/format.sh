@@ -19,6 +19,7 @@ python -m docformatter -i -r examples
 # E2E
 python -m isort e2e
 python -m black -q e2e
+python -m ruff check --fix e2e
 
 # Notebooks
 python -m black --ipynb -q doc/source/*.ipynb

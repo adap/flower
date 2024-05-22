@@ -48,4 +48,4 @@ assert (
 state_metrics_last_round = hist.metrics_distributed[STATE_VAR][-1]
 assert (
     len(state_metrics_last_round[1][0]) == 2 * state_metrics_last_round[0]
-), f"There should be twice as many entries in the client state as rounds"
+), "There should be twice as many entries in the client state as rounds"

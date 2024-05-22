@@ -81,7 +81,6 @@ def load_data():
 
 def main() -> None:
     """Centralized training."""
-
     # Load data
     train_loader, val_loader, test_loader = load_data()
 
