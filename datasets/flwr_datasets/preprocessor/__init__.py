@@ -15,10 +15,9 @@
 """Preprocessor package."""
 
 
+from .divider import Divider
 from .merger import Merger
 from .preprocessor import Preprocessor
-from .divider import Divider
-
 
 __all__ = [
     "Merger",

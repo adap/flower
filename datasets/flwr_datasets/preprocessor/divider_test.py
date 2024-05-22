@@ -144,9 +144,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
         drop_remaining_splits = False
 
         with self.assertRaises(ValueError):
-            divider = Divider(
-                divide_config, divide_split, drop_remaining_splits
-            )
+            divider = Divider(divide_config, divide_split, drop_remaining_splits)
             _ = divider(self.dataset_dict)
 
     def test_duplicate_names_in_config_and_dataset_split_names_multisplit(self) -> None:
@@ -154,9 +152,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
         divide_config = {"train": {"valid": 0.5}}
         divide_split = None
         drop_remaining_splits = False
-        divider = Divider(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
             _ = divider(self.dataset_dict)
 
@@ -167,9 +163,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
         divide_config = {"valid": 0.5}
         divide_split = "train"
         drop_remaining_splits = False
-        divider = Divider(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
             _ = divider(self.dataset_dict)
 
@@ -178,9 +172,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
         divide_config = {"train": {"train_1": 0.5, "train_2": 0.7}}
         divide_split = None
         drop_remaining_splits = False
-        divider = Divider(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
             _ = divider(self.dataset_dict)
 
@@ -189,9 +181,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
         divide_config = {"train_1": 0.5, "train_2": 0.7}
         divide_split = "train"
         drop_remaining_splits = False
-        divider = Divider(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
             _ = divider(self.dataset_dict)
 
@@ -200,9 +190,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
         divide_config = {"train": {"train_1": 20, "train_2": 25}}
         divide_split = None
         drop_remaining_splits = False
-        divider = Divider(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
             _ = divider(self.dataset_dict)
 
@@ -211,9 +199,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
         divide_config = {"train_1": 20, "train_2": 25}
         divide_split = "train"
         drop_remaining_splits = False
-        divider = Divider(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
             _ = divider(self.dataset_dict)
 
@@ -222,9 +208,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
         divide_config = {"train": {"train_1": 0.2, "train_2": 0.0001}}
         divide_split = None
         drop_remaining_splits = False
-        divider = Divider(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
             _ = divider(self.dataset_dict)
 
@@ -233,9 +217,7 @@ class TestDividerIncorrectUseCases(unittest.TestCase):
         divide_config = {"train_1": 0.2, "train_2": 0.0001}
         divide_split = "train"
         drop_remaining_splits = False
-        divider = Divider(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
             _ = divider(self.dataset_dict)
 

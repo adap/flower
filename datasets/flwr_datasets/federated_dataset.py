@@ -23,8 +23,8 @@ from flwr_datasets.partitioner import Partitioner
 from flwr_datasets.preprocessor import Preprocessor
 from flwr_datasets.utils import (
     _check_if_dataset_tested,
-    _instantiate_partitioners,
     _instantiate_merger_if_needed,
+    _instantiate_partitioners,
 )
 
 
