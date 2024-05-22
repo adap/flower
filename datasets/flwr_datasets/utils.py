@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
 from flwr_datasets.preprocessor import Preprocessor
-from flwr_datasets.resplitter.merge_resplitter import MergeResplitter
+from flwr_datasets.preprocessor.merger import Merger
 
 tested_datasets = [
     "mnist",
@@ -75,13 +75,13 @@ def _instantiate_partitioners(
     return instantiated_partitioners
 
 
-def _instantiate_resplitter_if_needed(
-    resplitter: Optional[Union[Preprocessor, Dict[str, Tuple[str, ...]]]]
+def _instantiate_merger_if_needed(
+    merger: Optional[Union[Preprocessor, Dict[str, Tuple[str, ...]]]]
 ) -> Optional[Preprocessor]:
-    """Instantiate `MergeResplitter` if preprocessor is merge_config."""
-    if resplitter and isinstance(resplitter, Dict):
-        resplitter = MergeResplitter(merge_config=resplitter)
-    return cast(Optional[Preprocessor], resplitter)
+    """Instantiate `Merger` if preprocessor is merge_config."""
+    if merger and isinstance(merger, Dict):
+        merger = Merger(merge_config=merger)
+    return cast(Optional[Preprocessor], merger)
 
 
 def _check_if_dataset_tested(dataset: str) -> None:

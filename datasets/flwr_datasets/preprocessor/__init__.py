@@ -15,8 +15,10 @@
 """Preprocessor package."""
 
 
-from .merge_resplitter import MergeResplitter
+from .merger import Merger
+from .preprocessor import Preprocessor
 
 __all__ = [
-    "MergeResplitter",
+    "Merger",
+    "Preprocessor",
 ]

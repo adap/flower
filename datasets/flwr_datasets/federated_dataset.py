@@ -24,7 +24,7 @@ from flwr_datasets.preprocessor import Preprocessor
 from flwr_datasets.utils import (
     _check_if_dataset_tested,
     _instantiate_partitioners,
-    _instantiate_resplitter_if_needed,
+    _instantiate_merger_if_needed,
 )
 
 
@@ -48,7 +48,7 @@ class FederatedDataset:
     preprocessor : Optional[Union[Preprocessor, Dict[str, Tuple[str, ...]]]]
         `Callable` that transforms `DatasetDict` by resplitting, removing
         features, creating new features, performing any other preprocessing operation,
-        or configuration dict for `MergeResplitter`. Applied after shuffling. If None,
+        or configuration dict for `Merger`. Applied after shuffling. If None,
         no operation is applied.
     partitioners : Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
@@ -89,7 +89,7 @@ class FederatedDataset:
         _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
         self._subset: Optional[str] = subset
-        self._preprocessor: Optional[Preprocessor] = _instantiate_resplitter_if_needed(
+        self._preprocessor: Optional[Preprocessor] = _instantiate_merger_if_needed(
             preprocessor
         )
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
