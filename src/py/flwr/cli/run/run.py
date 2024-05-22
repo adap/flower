@@ -26,7 +26,6 @@ from flwr.simulation.run_simulation import _run_simulation
 
 OverrideDict = Dict[str, Union[str, "OverrideDict"]]
 
-
 class Engine(str, Enum):
     """Enum defining the engine to run on."""
 
@@ -67,7 +66,7 @@ def run(
     """Run Flower project."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    config, errors, warnings = config_utils.load_and_validate_with_defaults()
+    config, errors, warnings = config_utils.load_and_validate()
 
     if config is None:
         typer.secho(
