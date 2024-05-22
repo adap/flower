@@ -67,9 +67,7 @@ def build(
         )
         raise typer.Exit(code=1)
 
-    conf, errors, warnings = load_and_validate(
-        directory / "pyproject.toml"
-    )
+    conf, errors, warnings = load_and_validate(directory / "pyproject.toml")
     if conf is None:
         typer.secho(
             "Project configuration could not be loaded.\npyproject.toml is invalid:\n"
