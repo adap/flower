@@ -32,7 +32,7 @@ centralised_eval = args.centralised_eval
 # Load centralised test set
 if centralised_eval:
     fds = FederatedDataset(
-        dataset="jxie/higgs", partitioners={"train": 20}, preprocessor=resplit
+        dataset="jxie/higgs", partitioners={"train": 20}, resplitter=resplit
     )
     log(INFO, "Loading centralised test set...")
     test_set = fds.load_split("test")

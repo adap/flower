@@ -32,7 +32,7 @@ partitioner = instantiate_partitioner(
 fds = FederatedDataset(
     dataset="jxie/higgs",
     partitioners={"train": partitioner},
-    preprocessor=resplit,
+    resplitter=resplit,
 )
 
 # Load the partition for this `partition_id`

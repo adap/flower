@@ -80,7 +80,7 @@ def main():
     fds = FederatedDataset(
         dataset="jxie/higgs",
         partitioners={"train": partitioner},
-        preprocessor=resplit,
+        resplitter=resplit,
     )
 
     # Load centralised test set
