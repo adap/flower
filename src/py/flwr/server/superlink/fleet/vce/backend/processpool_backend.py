@@ -32,8 +32,6 @@ from flwr.common.message import Message
 
 from .backend import Backend, BackendConfig
 
-BackendQueue: "Queue[Tuple[ClientApp,Message,Context]]"
-
 
 def run_client_app(
     in_queue: "Queue[Tuple[bytes,Message,Context]]",
@@ -73,7 +71,9 @@ class ProcessPoolBackend(Backend):
         self.in_queue = self.manager.Queue()
         self.out_queue = self.manager.Queue()
 
+        # TODO: read from backend_config
         self.num_proc = 8
+
         self.executor = ProcessPoolExecutor(self.num_proc)
 
     @property
