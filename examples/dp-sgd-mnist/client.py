@@ -1,162 +1,129 @@
 import argparse
 import os
-
+from flwr.client import ClientApp, NumPyClient
 import tensorflow as tf
-from tensorflow_privacy.privacy.optimizers.dp_optimizer_keras_vectorized import (
-    VectorizedDPKerasSGDOptimizer,
-)
-
-import flwr as fl
-
-import common
+from flwr_datasets import FederatedDataset
+import tensorflow_privacy
+from tensorflow_privacy.privacy.analysis import compute_dp_sgd_privacy
 
 
-# Make TensorFlow logs less verbose
+# Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
-# global for tracking privacy
-PRIVACY_LOSS = 0
+
+def load_data(partition_id):
+    fds = FederatedDataset(dataset="cifar10", partitioners={"train": 2})
+    partition = fds.load_partition(partition_id, "train")
+    partition.set_format("numpy")
+
+    # Divide data on each node: 80% train, 20% test
+    partition = partition.train_test_split(test_size=0.2, seed=42)
+    x_train, y_train = partition["train"]["img"] / 255.0, partition["train"]["label"]
+    x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
+
+    return (x_train, y_train), (x_test, y_test)
 
 
-# Define Flower client
-class MnistClient(fl.client.NumPyClient):
-    def __init__(self, model, x_train, y_train, x_test, y_test, args):
+class FlowerClient(NumPyClient):
+    def __init__(
+        self,
+        model,
+        train_data,
+        test_data,
+        l2_norm_clip,
+        noise_multiplier,
+        num_microbatches,
+        learning_rate,
+        batch_size,
+    ) -> None:
+        super().__init__()
         self.model = model
-        self.x_train, self.y_train = x_train, y_train
-        self.x_test, self.y_test = x_test, y_test
-        self.batch_size = args.batch_size
-        self.local_epochs = args.local_epochs
-        self.dpsgd = args.dpsgd
-
-        if args.dpsgd:
-            self.noise_multiplier = args.noise_multiplier
-            if args.batch_size % args.microbatches != 0:
-                raise ValueError(
-                    "Number of microbatches should divide evenly batch_size"
-                )
-            optimizer = VectorizedDPKerasSGDOptimizer(
-                l2_norm_clip=args.l2_norm_clip,
-                noise_multiplier=args.noise_multiplier,
-                num_microbatches=args.microbatches,
-                learning_rate=args.learning_rate,
+        self.x_train, self.y_train = train_data
+        self.x_test, self.y_test = test_data
+        self.noise_multiplier = noise_multiplier
+        self.l2_norm_clip = l2_norm_clip
+        self.num_microbatches = num_microbatches
+        self.learning_rate = learning_rate
+        self.batch_size = batch_size
+        if self.batch_size % self.num_microbatches != 0:
+            raise ValueError(
+                f"Batch size {self.batch_size} is not divisible by the number of microbatches {self.num_microbatches}"
             )
-            # Compute vector of per-example loss rather than its mean over a minibatch.
-            loss = tf.keras.losses.CategoricalCrossentropy(
-                from_logits=True, reduction=tf.losses.Reduction.NONE
-            )
-        else:
-            optimizer = tf.keras.optimizers.SGD(learning_rate=args.learning_rate)
-            loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
 
-        # Compile model with Keras
-        model.compile(optimizer=optimizer, loss=loss, metrics=["accuracy"])
+        self.optimizer = tensorflow_privacy.DPKerasSGDOptimizer(
+            l2_norm_clip=l2_norm_clip,
+            noise_multiplier=noise_multiplier,
+            num_microbatches=num_microbatches,
+            learning_rate=learning_rate,
+        )
+        loss = tf.keras.losses.SparseCategoricalCrossentropy(
+            reduction=tf.losses.Reduction.NONE
+        )
+        self.model.compile(optimizer=self.optimizer, loss=loss, metrics=["accuracy"])
 
     def get_parameters(self, config):
-        """Get parameters of the local model."""
-        raise Exception("Not implemented (server-side parameter initialization)")
+        return self.model.get_weights()
 
     def fit(self, parameters, config):
-        """Train parameters on the locally held training set."""
-        # Update local model parameters
-        global PRIVACY_LOSS
-        if self.dpsgd:
-            privacy_spent = common.compute_epsilon(
-                self.local_epochs,
-                len(self.x_train),
-                self.batch_size,
-                self.noise_multiplier,
-            )
-            PRIVACY_LOSS += privacy_spent
-
         self.model.set_weights(parameters)
-        # Train the model
+
         self.model.fit(
             self.x_train,
             self.y_train,
-            epochs=self.local_epochs,
+            epochs=1,
             batch_size=self.batch_size,
+        )
+
+        compute_dp_sgd_privacy.compute_dp_sgd_privacy(
+            n=self.x_train.shape[0],
+            batch_size=self.batch_size,
+            noise_multiplier=self.noise_multiplier,
+            epochs=1,
+            delta=1e-5,
         )
 
         return self.model.get_weights(), len(self.x_train), {}
 
     def evaluate(self, parameters, config):
-        """Evaluate parameters on the locally held test set."""
-
-        # Update local model with global parameters
         self.model.set_weights(parameters)
-
-        # Evaluate global model parameters on the local test data and return results
+        self.model.compile(
+            optimizer=self.optimizer,
+            loss="sparse_categorical_crossentropy",
+            metrics=["accuracy"],
+        )
         loss, accuracy = self.model.evaluate(self.x_test, self.y_test)
-        num_examples_test = len(self.x_test)
-        return loss, num_examples_test, {"accuracy": accuracy}
+        return loss, len(self.x_test), {"accuracy": accuracy}
 
 
-def main(args) -> None:
-    # Load Keras model
-    model = common.create_cnn_model()
+def client_fn_parameterized(
+    partition_id,
+    noise_multiplier,
+    l2_norm_clip=1.0,
+    num_microbatches=64,
+    learning_rate=0.01,
+    batch_size=64,
+):
+    def client_fn(cid: str):
+        model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+        train_data, test_data = load_data(partition_id=partition_id)
+        return FlowerClient(
+            model,
+            train_data,
+            test_data,
+            noise_multiplier,
+            l2_norm_clip,
+            num_microbatches,
+            learning_rate,
+            batch_size,
+        ).to_client()
 
-    # Load a subset of MNIST to simulate the local data partition
-    (x_train, y_train), (x_test, y_test) = common.load(args.num_clients)[args.partition]
-
-    # drop samples to form exact batches for dpsgd
-    # this is necessary since dpsgd is sensitive to uneven batches
-    # due to microbatching
-    if args.dpsgd and x_train.shape[0] % args.batch_size != 0:
-        drop_num = x_train.shape[0] % args.batch_size
-        x_train = x_train[:-drop_num]
-        y_train = y_train[:-drop_num]
-
-    # Start Flower client
-    client = MnistClient(model, x_train, y_train, x_test, y_test, args)
-    fl.client.start_numpy_client(server_address="127.0.0.1:8080", client=client)
-    if args.dpsgd:
-        print("Privacy Loss: ", PRIVACY_LOSS)
+    return client_fn
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Flower Client")
-    parser.add_argument(
-        "--num-clients",
-        default=2,
-        type=int,
-        help="Total number of fl participants, requied to get correct partition",
-    )
-    parser.add_argument(
-        "--partition",
-        type=int,
-        required=True,
-        help="Data Partion to train on. Must be less than number of clients",
-    )
-    parser.add_argument(
-        "--local-epochs",
-        default=1,
-        type=int,
-        help="Total number of local epochs to train",
-    )
-    parser.add_argument("--batch-size", default=32, type=int, help="Batch size")
-    parser.add_argument(
-        "--learning-rate", default=0.15, type=float, help="Learning rate for training"
-    )
-    # DPSGD specific arguments
-    parser.add_argument(
-        "--dpsgd",
-        default=False,
-        type=bool,
-        help="If True, train with DP-SGD. If False, " "train with vanilla SGD.",
-    )
-    parser.add_argument("--l2-norm-clip", default=1.0, type=float, help="Clipping norm")
-    parser.add_argument(
-        "--noise-multiplier",
-        default=1.1,
-        type=float,
-        help="Ratio of the standard deviation to the clipping norm",
-    )
-    parser.add_argument(
-        "--microbatches",
-        default=32,
-        type=int,
-        help="Number of microbatches " "(must evenly divide batch_size)",
-    )
-    args = parser.parse_args()
+appA = ClientApp(
+    client_fn=client_fn_parameterized(partition_id=0, noise_multiplier=1.0),
+)
 
-    main(args)
+appB = ClientApp(
+    client_fn=client_fn_parameterized(partition_id=1, noise_multiplier=1.5),
+)
