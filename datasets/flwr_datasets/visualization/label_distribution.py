@@ -96,7 +96,7 @@ def plot_label_distributions(
 
     >> from flwr_datasets import FederatedDataset
     >> from flwr_datasets.partitioner import DirichletPartitioner
-    >> from flwr_datasets.visualization import compare_label_distribution
+    >> from flwr_datasets.visualization import plot_label_distributions
     >>
     >> fds = FederatedDataset(
     >>     dataset="cifar10",
@@ -120,7 +120,7 @@ def plot_label_distributions(
 
     >> from flwr_datasets import FederatedDataset
     >> from flwr_datasets.partitioner import DirichletPartitioner
-    >> from flwr_datasets.visualization import compare_label_distribution
+    >> from flwr_datasets.visualization import plot_label_distributions
     >>
     >> fds = FederatedDataset(
     >>     dataset="cifar10",
@@ -146,7 +146,7 @@ def plot_label_distributions(
 
     >> from flwr_datasets import FederatedDataset
     >> from flwr_datasets.partitioner import DirichletPartitioner
-    >> from flwr_datasets.visualization import compare_label_distribution
+    >> from flwr_datasets.visualization import plot_label_distributions
     >>
     >> fds = FederatedDataset(
     >>     dataset="cifar10",
@@ -169,14 +169,14 @@ def plot_label_distributions(
     >> )
 
     You can also visualize the returned DataFrame in Jupyter Notebook
-    >> df.style.background_gradient(axis=None)
+    >> dataframe.style.background_gradient(axis=None)
     """
     _validate_parameters(plot_type, size_unit, partition_id_axis)
 
     if label_name not in partitioner.dataset.column_names:
         raise ValueError(
             f"The specified 'label_name': '{label_name}' is not present in the "
-            f"dataset."
+            f"dataset. The dataset contains columns {partitioner.dataset.column_names}."
         )
 
     if max_num_partitions is None:
@@ -235,6 +235,9 @@ def plot_label_distributions(
         **plot_kwargs,
     )
 
+    if partition_id_axis == "x" and plot_type == "heatmap":
+        dataframe = dataframe.T # revert transposition
+   
     return axis, dataframe
 
 
@@ -269,7 +272,7 @@ def _validate_parameters(
         )
     if partition_id_axis not in AXIS_TYPES:
         raise ValueError(
-            f"Invalid partition_id_axis: {partition_id_axis}. Must be 'x' or 'y'."
+            f"Invalid partition_id_axis: {partition_id_axis}. Must be one of {AXIS_TYPES}."
         )
 
 
