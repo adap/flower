@@ -1,7 +1,8 @@
 """Tests for Flower Docker containers."""
 
 import re
-from time import sleep
+import time
+from typing import Callable, Union
 
 import pytest
 from testcontainers.compose import ContainerIsNotRunning, DockerCompose
@@ -69,14 +70,41 @@ def test_compose_logs():
     services = DockerCompose(context=".", compose_file_name=COMPOSE_MANIFEST)
 
     with services:
-        sleep(35)  # add delay to ensure training completes
+        wait_for_logs(services, RUN_COMPLETE_STR, 120)
+
+
+def wait_for_logs(
+    services: "DockerCompose",
+    predicate: Union[Callable, str],
+    timeout: float = 60,
+    interval: float = 1,
+) -> float:
+    """
+    Wait for the services to emit logs satisfying the predicate.
+
+    Args:
+        services: Services whose logs to wait for.
+        predicate: Predicate that should be satisfied by the logs. If a string,
+            then it is used as the pattern for a multiline regular expression search.
+        timeout: Number of seconds to wait for the predicate to be satisfied.
+            Defaults to wait indefinitely.
+        interval: Interval at which to poll the logs.
+
+    Returns
+    -------
+        duration: Number of seconds until the predicate was satisfied.
+    """
+    if isinstance(predicate, str):
+        predicate = re.compile(predicate, re.MULTILINE).search
+    start = time.time()
+    while True:
+        duration = time.time() - start
         stdout, stderr = services.get_logs()
-
-    assert not stderr
-    assert stdout
-
-    # Split stdout into list of strings. This appears
-    # necessary to capture stdout from buffer and perform regex.
-    lines = re.split(r"\r?\n", stdout)
-
-    assert any(RUN_COMPLETE_STR in line for line in lines)
+        if predicate(stdout) or predicate(stderr):
+            return duration
+        if duration > timeout:
+            raise TimeoutError(
+                f"Services did not emit logs satisfying predicate in {timeout:.3f} "
+                "seconds"
+            )
+        time.sleep(interval)
