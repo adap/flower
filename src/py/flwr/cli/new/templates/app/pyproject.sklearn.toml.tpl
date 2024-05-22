@@ -7,10 +7,14 @@ name = "$package_name"
 version = "1.0.0"
 description = ""
 authors = [
-  { name = "The Flower Authors", email = "hello@flower.ai" },
+    { name = "The Flower Authors", email = "hello@flower.ai" },
 ]
 license = { text = "Apache License (2.0)" }
-dependencies = $deps
+dependencies = [
+    "flwr[simulation]>=1.8.0,<2.0",
+    "flwr-datasets[vision]>=0.0.2,<1.0.0",
+    "scikit-learn>=1.1.1",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
