@@ -18,11 +18,15 @@ import importlib
 from typing import Dict, Type
 
 from .backend import Backend, BackendConfig
+from .processpool_backend import ProcessPoolBackend
 
 is_ray_installed = importlib.util.find_spec("ray") is not None
 
 # Mapping of supported backends
 supported_backends: Dict[str, Type[Backend]] = {}
+
+# Add processpool backend
+supported_backends["pp"] = ProcessPoolBackend
 
 # To log backend-specific error message when chosen backend isn't available
 error_messages_backends: Dict[str, str] = {}
