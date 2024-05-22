@@ -1,14 +1,12 @@
 name: Build docker base image
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - "src/docker/base/**"
-      - ".github/workflows/docker-base.yml"
-      # re-run if something chnages in the bootstrap action (e.g. version of the dependencies)
-      - ".github/actions/bootstrap/action.yml"
-      - ".github/workflows/_docker-build.yml"
+  workflow_dispatch:
+    inputs:
+      flwr-version:
+        description: "Version of Flower."
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -43,7 +41,9 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
         distro:
           - name: ubuntu
-            version: 22.04
+            version: "22.04"
+          - name: alpine
+            version: "3.19"
     with:
       namespace-repository: flwr/base
       file-dir: src/docker/base/${{ matrix.distro.name }}
@@ -53,7 +53,8 @@ jobs:
         SETUPTOOLS_VERSION=${{ needs.parameters.outputs.setuptools-version }}
         DISTRO=${{ matrix.distro.name }}
         DISTRO_VERSION=${{ matrix.distro.version }}
-      tags: py${{ matrix.python-version }}-${{ matrix.distro.name }}${{ matrix.distro.version }}
+        FLWR_VERSION=${{ github.event.inputs.flwr-version }}
+      tags: ${{ github.event.inputs.flwr-version }}-py${{ matrix.python-version }}-${{ matrix.distro.name }}${{ matrix.distro.version }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}

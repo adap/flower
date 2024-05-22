@@ -335,7 +335,8 @@ We enforce the following PR title format:
 (or ``<type>(<project>:skip) <subject>`` to ignore the PR in the changelog)
 
 Where ``<type>`` needs to be in ``{ci, fix, feat, docs, refactor, break}``, ``<project>`` 
-should be in ``{framework, baselines, datasets, examples, or '*' when modifying multiple projects}``, and ``<subject>`` starts with a capitalised verb in the imperative mood.
+should be in ``{framework, baselines, datasets, examples, or '*' when modifying multiple projects which requires the ':skip' flag to be used}``, 
+and ``<subject>`` starts with a capitalised verb in the imperative mood.
 
 Valid examples:
 
@@ -346,6 +347,7 @@ Valid examples:
 Invalid examples:
 
 - ``feat(framework): Add flwr build CLI command`` (extra ``:``)
+- ``feat(*) Add flwr build CLI command`` (missing ``skip`` flag along with ``*``)
 - ``feat(skip) Add flwr build CLI command`` (missing ``<project>``)
 - ``feat(framework) add flwr build CLI command`` (non capitalised verb)
 - ``feat(framework) Add flwr build CLI command.`` (dot at the end)
