@@ -144,7 +144,7 @@ def new(
     files = {
         ".gitignore": {"template": "app/.gitignore.tpl"},
         "README.md": {"template": "app/README.md.tpl"},
-        "pyproject.toml": {"template": f"app/pyproject.toml.tpl"},
+        "pyproject.toml": {"template": "app/pyproject.toml.tpl"},
         f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
         f"{import_name}/server.py": {
             "template": f"app/code/server.{framework_str}.py.tpl"

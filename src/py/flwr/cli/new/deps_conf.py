@@ -1,3 +1,5 @@
+"""Module defining dpendency lists for different frameworks."""
+
 deps = {
     "pytorch": """[
   "flwr[simulation]>=1.8.0,<2.0",
