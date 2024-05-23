@@ -11,7 +11,6 @@ from torchvision.datasets import CIFAR10
 
 import flwr as fl
 
-
 # Define parameters.
 PARAMS = {
     "batch_size": 32,
@@ -57,9 +56,7 @@ def train(net, trainloader, privacy_engine, optimizer, epochs):
             loss = criterion(net(images), labels)
             loss.backward()
             optimizer.step()
-    epsilon = privacy_engine.get_epsilon(
-        delta=PRIVACY_PARAMS["target_delta"]
-    )
+    epsilon = privacy_engine.get_epsilon(delta=PRIVACY_PARAMS["target_delta"])
     return epsilon
 
 
@@ -76,21 +73,26 @@ def test(net, testloader):
     accuracy = correct / len(testloader.dataset)
     return loss, accuracy
 
+
 def load_data():
     transform = transforms.Compose(
         [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
     )
     data = CIFAR10("./data", train=True, download=True, transform=transform)
-    split = math.floor(len(data)* 0.01 * PARAMS["train_split"])
+    split = math.floor(len(data) * 0.01 * PARAMS["train_split"])
     trainset = torch.utils.data.Subset(data, list(range(0, split)))
-    testset = torch.utils.data.Subset(data, list(range(split, math.floor(len(data) * 0.01))))
+    testset = torch.utils.data.Subset(
+        data, list(range(split, math.floor(len(data) * 0.01)))
+    )
     trainloader = DataLoader(trainset, PARAMS["batch_size"])
     testloader = DataLoader(testset, PARAMS["batch_size"])
     sample_rate = PARAMS["batch_size"] / len(trainset)
     return trainloader, testloader, sample_rate
 
+
 model = Net()
 trainloader, testloader, sample_rate = load_data()
+
 
 # Define Flower client.
 class FlowerClient(fl.client.NumPyClient):
@@ -118,7 +120,11 @@ class FlowerClient(fl.client.NumPyClient):
     def fit(self, parameters, config):
         self.set_parameters(parameters)
         epsilon = train(
-            self.model, self.trainloader, self.privacy_engine, self.optimizer, PARAMS["local_epochs"]
+            self.model,
+            self.trainloader,
+            self.privacy_engine,
+            self.optimizer,
+            PARAMS["local_epochs"],
         )
         print(f"epsilon = {epsilon:.2f}")
         return (
@@ -137,12 +143,12 @@ def client_fn(cid):
     model = Net()
     return FlowerClient(model).to_client()
 
+
 app = fl.client.ClientApp(
     client_fn=client_fn,
 )
 
 if __name__ == "__main__":
     fl.client.start_client(
-        server_address="127.0.0.1:8080",
-        client=FlowerClient(model).to_client()
+        server_address="127.0.0.1:8080", client=FlowerClient(model).to_client()
     )
