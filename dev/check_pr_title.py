@@ -46,10 +46,7 @@ if __name__ == "__main__":
     valid = True
     error = "it doesn't have the correct format"
 
-    # This check is there to ignore dependabot PRs from title checks
-    if pr_title.startswith("chore"):
-        sys.exit(0)
-    elif not match:
+    if not match:
         valid = False
     else:
         if not match.group(4).split()[0] in allowed_verbs:
