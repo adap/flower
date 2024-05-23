@@ -73,6 +73,7 @@ iterators = "^0.0.2"
 typer = { version = "^0.9.0", extras=["all"] }
 tomli = "^2.0.1"
 pathspec = "^0.12.1"
+setuptools = "!=70.0.0"
 # Optional dependencies (Simulation Engine)
 ray = { version = "==2.6.3", optional = true, python = ">=3.8,<3.12" }
 # Optional dependencies (REST transport layer)
