@@ -11,7 +11,7 @@ from tensorflow_privacy.privacy.analysis import compute_dp_sgd_privacy
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
-def load_data(partition_id):
+def load_data(partition_id, batch_size):
     fds = FederatedDataset(dataset="cifar10", partitioners={"train": 2})
     partition = fds.load_partition(partition_id, "train")
     partition.set_format("numpy")
@@ -20,6 +20,12 @@ def load_data(partition_id):
     partition = partition.train_test_split(test_size=0.2, seed=42)
     x_train, y_train = partition["train"]["img"] / 255.0, partition["train"]["label"]
     x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
+
+    # Adjust the size of the training dataset to make it evenly divisible by the batch size
+    remainder = len(x_train) % batch_size
+    if remainder != 0:
+        x_train = x_train[:-remainder]
+        y_train = y_train[:-remainder]
 
     return (x_train, y_train), (x_test, y_test)
 
@@ -105,7 +111,9 @@ def client_fn_parameterized(
 ):
     def client_fn(cid: str):
         model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
-        train_data, test_data = load_data(partition_id=partition_id)
+        train_data, test_data = load_data(
+            partition_id=partition_id, batch_size=batch_size
+        )
         return FlowerClient(
             model,
             train_data,
