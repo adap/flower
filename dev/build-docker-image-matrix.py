@@ -170,35 +170,6 @@ if __name__ == "__main__":
         )
     )
 
-    # {
-    #     "base": {
-    #         "images": [
-    #             {
-    #                 "distro": {
-    #                     "name": "ubuntu",
-    #                     "version": "22.04"
-    #                 },
-    #                 "python_version": "3.8",
-    #                 "namespace_repository": "flwr/base",
-    #                 "file_dir": "src/docker/base/ubuntu",
-    #                 "tag": "1.8.0-py3.8-ubuntu22.04",
-    #                 "flwr_version": "1.8.0"
-    #             },
-    #             ...
-    #         ]
-    #     },
-    #     "binary": {
-    #         "images": [
-    #             {
-    #                 "namespace_repository": "flwr/superlink",
-    #                 "file_dir": "src/docker/superlink",
-    #                 "base_image": "1.8.0-py3.11-alpine3.19",
-    #                 "tags": "1.8.0-py3.11-alpine3.19\n1.8.0"
-    #             },
-    #             ...
-    #         ]
-    #     }
-    # }
     print(
         json.dumps(
             {
