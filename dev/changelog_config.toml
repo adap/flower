@@ -7,7 +7,7 @@ project = ["framework", "baselines", "datasets", "examples"]
 
 scope = "skip"
 
-pattern_template = "^({types})\\(({projects})(?::({scope}))?\\) ([A-Z][^\\.\\n]*(?:\\.(?=[^\\.\\n]))*[^\\.\\n]*)$"
+pattern_template = "^({types})\\(({projects})(?::({scope}))?\\) ([A-Z][^\\n]*[^\\.\\n])$"
 
 allowed_verbs=[
   "Abandon",
