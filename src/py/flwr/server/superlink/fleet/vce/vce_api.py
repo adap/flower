@@ -173,7 +173,7 @@ async def run(
     f_stop: asyncio.Event,
 ) -> None:
     """Run the VCE async."""
-    queue: asyncio.Queue[TaskIns] = asyncio.Queue(128)
+    queue = asyncio.Queue(128)
 
     try:
 
