@@ -193,9 +193,6 @@ wrap-descriptions = 88
 [tool.ruff]
 target-version = "py38"
 line-length = 88
-select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
-fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
-ignore = ["B024", "B027", "D205", "D209"]
 exclude = [
     ".bzr",
     ".direnv",
@@ -220,8 +217,13 @@ exclude = [
     "proto",
 ]
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint]
+select = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
+fixable = ["D", "E", "F", "W", "B", "ISC", "C4", "UP"]
+ignore = ["B024", "B027", "D205", "D209"]
+
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "src/py/flwr/server/strategy/*.py" = ["E501"]
