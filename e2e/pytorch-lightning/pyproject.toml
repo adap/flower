@@ -12,4 +12,4 @@ authors = ["The Flower Authors <hello@flower.ai>"]
 python = "^3.8"
 flwr = { path = "../../", develop = true, extras = ["simulation"] }
 pytorch-lightning = "2.2.4"
-torchvision = "0.14.1"
+torchvision = "0.18.0"
