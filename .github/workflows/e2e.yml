@@ -137,6 +137,9 @@ jobs:
       - name: Run virtual client test
         if: ${{ matrix.directory != 'bare-client-auth' }}
         run: python simulation.py
+      - name: Run simulation engine test
+        if: ${{ matrix.directory == 'pytorch' || matrix.directory == 'tensorflow'}}
+        run: python simulation_next.py
       - name: Run driver test
         if: ${{ matrix.directory != 'bare-client-auth' }}
         run: ./../test_driver.sh "${{ matrix.directory }}"

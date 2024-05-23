@@ -33,21 +33,15 @@ strategy = fl.server.strategy.FedAvg(
     evaluate_metrics_aggregation_fn=record_state_metrics
 )
 
-# Run without Flower Next
-hist = fl.simulation.start_simulation(
-    client_fn=client_fn,
-    num_clients=2,
+
+# Define ServerAppp
+server_app = fl.server.ServerApp(
     config=fl.server.ServerConfig(num_rounds=3),
     strategy=strategy,
 )
 
-assert (
-    hist.losses_distributed[-1][1] == 0
-    or (hist.losses_distributed[0][1] / hist.losses_distributed[-1][1]) >= 0.98
-)
 
-# The checks in record_state_metrics don't do anythinng if client's state has a single entry
-state_metrics_last_round = hist.metrics_distributed[STATE_VAR][-1]
-assert (
-    len(state_metrics_last_round[1][0]) == 2 * state_metrics_last_round[0]
-), f"There should be twice as many entries in the client state as rounds"
+# Run with FlowerNext
+fl.simulation.run_simulation(
+    server_app=server_app, client_app=client_app, num_supernodes=2
+)
