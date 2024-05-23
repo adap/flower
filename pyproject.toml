@@ -79,6 +79,7 @@ ray = { version = "==2.6.3", optional = true, python = ">=3.8,<3.12" }
 requests = { version = "^2.31.0", optional = true }
 starlette = { version = "^0.31.0", optional = true }
 uvicorn = { version = "^0.23.0", extras = ["standard"], optional = true }
+setuptools = "69.5.1"
 
 [tool.poetry.extras]
 simulation = ["ray", "pydantic"]
@@ -129,7 +130,6 @@ GitPython = "==3.1.32"
 PyGithub = "==2.1.1"
 licensecheck = "==2024"
 pre-commit = "==3.5.0"
-PyYAML = "==6.0.1"
 
 [tool.isort]
 line_length = 88
