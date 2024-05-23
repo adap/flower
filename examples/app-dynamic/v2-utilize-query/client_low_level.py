@@ -9,6 +9,12 @@ app = ClientApp()
 
 @app.query()
 def query(msg: Message, ctx: Context):
-    # load the model/dataset
-    print(f"In Client msg.content.configs_records: {msg.content.configs_records}")
-    return msg.create_reply(msg.content)
+    try:
+        raise ValueError()
+        # load the model/dataset
+        print(f"In Client msg.content.configs_records: {msg.content.configs_records}")
+        return msg.create_reply(msg.content)
+    except:
+        msg.create_error_reply(
+            error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
+        )
