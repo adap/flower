@@ -1,7 +1,6 @@
 from typing import List, Tuple
 
 import numpy as np
-from client import app as client_app
 from client import client_fn
 
 import flwr as fl
@@ -33,7 +32,6 @@ strategy = fl.server.strategy.FedAvg(
     evaluate_metrics_aggregation_fn=record_state_metrics
 )
 
-# Run without Flower Next
 hist = fl.simulation.start_simulation(
     client_fn=client_fn,
     num_clients=2,
@@ -50,4 +48,4 @@ assert (
 state_metrics_last_round = hist.metrics_distributed[STATE_VAR][-1]
 assert (
     len(state_metrics_last_round[1][0]) == 2 * state_metrics_last_round[0]
-), f"There should be twice as many entries in the client state as rounds"
+), "There should be twice as many entries in the client state as rounds"
