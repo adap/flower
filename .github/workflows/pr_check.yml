@@ -14,6 +14,7 @@ jobs:
   pr_title_check:
     runs-on: ubuntu-22.04
     name: Title format
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
