@@ -4,8 +4,10 @@ from flwr.client import ClientApp, NumPyClient
 import tensorflow as tf
 from flwr_datasets import FederatedDataset
 import tensorflow_privacy
-from tensorflow_privacy.privacy.analysis import compute_dp_sgd_privacy
 
+from tensorflow_privacy.privacy.analysis.compute_dp_sgd_privacy_lib import (
+    compute_dp_sgd_privacy_statement,
+)
 
 # Make TensorFlow log less verbose
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -80,11 +82,11 @@ class FlowerClient(NumPyClient):
             batch_size=self.batch_size,
         )
 
-        compute_dp_sgd_privacy.compute_dp_sgd_privacy(
-            n=self.x_train.shape[0],
+        compute_dp_sgd_privacy_statement(
+            number_of_examples=self.x_train.shape[0],
             batch_size=self.batch_size,
+            num_epochs=1,
             noise_multiplier=self.noise_multiplier,
-            epochs=1,
             delta=1e-5,
         )
 
