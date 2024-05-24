@@ -247,7 +247,7 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--auth-supernode-public-key",
         type=str,
-        help="The supernode's public key (as a path str) to enable authentication.",
+        help="The SuperNode's public key (as a path str) to enable authentication.",
     )
 
 
