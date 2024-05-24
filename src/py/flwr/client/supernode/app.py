@@ -32,9 +32,6 @@ from flwr.common import EventType, event
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
 from flwr.common.object_ref import load_app, validate
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    ssh_types_to_elliptic_curve,
-)
 
 from ..app import _start_client_internal
 
@@ -259,7 +256,7 @@ def _try_setup_client_authentication(
 ) -> Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
     if not args.auth_supernode_private_key and not args.auth_supernode_public_key:
         return None
-    
+
     if not args.auth_supernode_private_key or not args.auth_supernode_public_key:
         sys.exit(
             "Authentication only works by providing file paths to "
