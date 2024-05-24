@@ -193,6 +193,7 @@ jobs:
         run: |
           python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
       - name: Try loading datasets cache
+        id: cache-datasets
         uses: actions/cache/restore@v4
         with:
           path: "~/.keras"
@@ -202,7 +203,7 @@ jobs:
           python -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
       - name: Save cache if on main
         uses: actions/cache/save@v4
-        if: github.ref_name == 'main'
+        if: ${{ github.ref_name == 'main' && !steps.cache-datasets.outputs.cache-hit }}
         with:
           path: "~/.keras"
           key: keras-datasets
