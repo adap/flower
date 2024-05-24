@@ -455,7 +455,7 @@ def _try_setup_client_authentication(
 
     if certificates is None:
         sys.exit(
-            "Authentication only works over secure connections. "
+            "Authentication requires secure connections. "
             "Please provide certificate paths using '--certificates' and "
             "try again."
         )
