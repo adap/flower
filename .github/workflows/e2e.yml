@@ -192,14 +192,20 @@ jobs:
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
           python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
-      - name: Cache Datasets
-        uses: actions/cache@v4
+      - name: Try loading datasets cache
+        uses: actions/cache/restore@v4
         with:
           path: "~/.keras"
           key: keras-datasets
       - name: Download Datasets
         run: |
           python -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
+      - name: Save cache if on main
+        uses: actions/cache/save@v4
+        if: github.ref_name == 'main'
+        with:
+          path: "~/.keras"
+          key: keras-datasets
       - name: Test strategies
         run: |
           python test.py "${{ matrix.strat }}"
