@@ -9,7 +9,7 @@ Flower node authentication works similar to how GitHub SSH authentication works:
 * Shared secret is used to compute the HMAC value of the message sent from SuperNode to SuperLink as a token
 * SuperLink verifies the token
 
-We recommend you to check out the complete `code example <https://github.com/adap/flower/tree/main/examples/flower-client-authentication>`_ demonstrating federated learning with Flower in an authenticated setting.
+We recommend you to check out the complete `code example <https://github.com/adap/flower/tree/main/examples/flower-authentication>`_ demonstrating federated learning with Flower in an authenticated setting.
 
 .. note::
     This guide covers a preview feature that might change in future versions of Flower.
@@ -29,15 +29,17 @@ Use the following terminal command to start a Flower :code:`SuperNode` that has 
 
     flower-superlink
         --certificates certificates/ca.crt certificates/server.pem certificates/server.key
-        --require-client-authentication ./keys/client_public_keys.csv ./keys/server_credentials ./keys/server_credentials.pub
+        --auth-list-public-keys keys/client_public_keys.csv
+        --auth-superlink-private-key keys/server_credentials
+        --auth-superlink-public-key keys/server_credentials.pub
     
-Let's break down the :code:`--require-client-authentication` flag:
+Let's break down the authentication flags:
 
-1. The first argument is a path to a CSV file storing all known node public keys. You need to store all known node public keys that are allowed to participate in a federation in one CSV file (:code:`.csv`).
+1. The first flag :code:`--auth-list-public-keys` expects a path to a CSV file storing all known node public keys. You need to store all known node public keys that are allowed to participate in a federation in one CSV file (:code:`.csv`).
 
     A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas and without any comments. For an example, refer to our code sample, which contains a CSV file with two known node public keys.
 
-2. The second and third arguments are paths to the server's private and public keys. For development purposes, you can generate a private and public key pair using :code:`ssh-keygen -t ecdsa -b 384`.
+2. The second and third flags :code:`--auth-superlink-private-key` and :code:`--auth-superlink-public-key` expects paths to the server's private and public keys. For development purposes, you can generate a private and public key pair using :code:`ssh-keygen -t ecdsa -b 384`.
 
 .. note::
     In Flower 1.9, there is no support for dynamically removing, editing, or adding known node public keys to the SuperLink.
@@ -56,9 +58,10 @@ Use the following terminal command to start an authenticated :code:`SuperNode`:
     flower-client-app client:app
         --root-certificates certificates/ca.crt
         --server 127.0.0.1:9092
-        --authentication-keys ./keys/client_credentials ./keys/client_credentials.pub
+        --auth-supernode-private-key keys/client_credentials
+        --auth-supernode-public-key keys/client_credentials.pub
 
-The :code:`--authentication-keys` flag expects two arguments: a path to the node's private key file and a path to the node's public key file. For development purposes, you can generate a private and public key pair using :code:`ssh-keygen -t ecdsa -b 384`.
+The :code:`--auth-supernode-private-key` flag expects a path to the node's private key file and the :code:`--auth-supernode-public-key` flag expects a path to the node's public key file. For development purposes, you can generate a private and public key pair using :code:`ssh-keygen -t ecdsa -b 384`.
 
 
 Security notice

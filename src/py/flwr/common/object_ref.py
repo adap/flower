@@ -17,6 +17,7 @@
 
 import ast
 import importlib
+import traceback
 from importlib.util import find_spec
 from typing import Any, Optional, Tuple, Type
 
@@ -93,6 +94,7 @@ def load_app(
     try:
         module = importlib.import_module(module_str)
     except ModuleNotFoundError:
+        traceback.print_exc()
         raise error_type(
             f"Unable to load module {module_str}{OBJECT_REF_HELP_STR}",
         ) from None
