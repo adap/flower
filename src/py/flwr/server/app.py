@@ -510,8 +510,8 @@ def _try_setup_client_authentication(
                 else:
                     sys.exit(
                         "Error: Unable to parse the public keys in the CSV "
-                        "file. Please ensure that the CSV file contains valid "
-                        "SSH public keys and try again."
+                        "file. Please ensure that the CSV file path points to a valid "
+                        "known SSH public keys files and try again."
                     )
         return (
             client_public_keys,
