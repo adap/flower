@@ -39,7 +39,7 @@ Let's break down the authentication flags:
 
     A valid CSV file storing known node public keys should list the keys in OpenSSH format, separated by commas and without any comments. For an example, refer to our code sample, which contains a CSV file with two known node public keys.
 
-2. The second and third flags :code:`--auth-superlink-private-key` and :code:`--auth-superlink-public-key` expects paths to the server's private and public keys. For development purposes, you can generate a private and public key pair using :code:`ssh-keygen -t ecdsa -b 384`.
+2. The second and third flags :code:`--auth-superlink-private-key` and :code:`--auth-superlink-public-key` expect paths to the server's private and public keys. For development purposes, you can generate a private and public key pair using :code:`ssh-keygen -t ecdsa -b 384`.
 
 .. note::
     In Flower 1.9, there is no support for dynamically removing, editing, or adding known node public keys to the SuperLink.
