@@ -64,7 +64,7 @@ The script also generates a CSV file that includes each of the generated (client
 
 To start a long-running Flower server (SuperLink) and enable authentication is very easy; all you need to do is type
 `--auth-list-public-keys` containing file path to the known `client_public_keys.csv`, `--auth-superlink-private-key`
-containing file path to the superlink's private key `server_credentials`, and `--auth-superlink-public-key` containing file path to the superlink's public key `server_credentials.pub`. Notice that you can only enable authentication with a secure TLS connection.
+containing file path to the SuperLink's private key `server_credentials`, and `--auth-superlink-public-key` containing file path to the SuperLink's public key `server_credentials.pub`. Notice that you can only enable authentication with a secure TLS connection.
 
 ```bash
 flower-superlink \
