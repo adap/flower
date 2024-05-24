@@ -96,6 +96,7 @@ release = "1.9.0"
 extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosectionlabel",
     "sphinx.ext.autosummary",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
@@ -250,6 +251,9 @@ redirects = {
     "example-mxnet-walk-through": "index.html",
     "ref-api/flwr.simulation.run_simulation_from_cli.html": "index.html",
 }
+
+# Suppress specific warnings
+suppress_warnings = ['autosectionlabel.*']  # Warnings from duplicate labels
 
 # -- Options for HTML output -------------------------------------------------
 
