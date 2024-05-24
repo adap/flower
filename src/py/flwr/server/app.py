@@ -747,12 +747,12 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--auth-superlink-private-key",
         type=str,
-        help="The superlink's private key (as a path str) to enable authentication.",
+        help="The SuperLink's private key (as a path str) to enable authentication.",
     )
     parser.add_argument(
         "--auth-superlink-public-key",
         type=str,
-        help="The superlink's public key (as a path str) to enable authentication.",
+        help="The SuperLink's public key (as a path str) to enable authentication.",
     )
 
 
