@@ -259,9 +259,9 @@ def _try_setup_client_authentication(
 
     if not args.auth_supernode_private_key or not args.auth_supernode_public_key:
         sys.exit(
-            "Authentication only works by providing file paths to "
-            "'--auth-supernode-private-key' and '--auth-supernode-public-key'. "
-            "Please try again."
+            "Authentication requires file paths to both "
+            "'--auth-supernode-private-key' and '--auth-supernode-public-key'"
+            "to be provided (providing only one of them is not sufficient)."
         )
 
     try:
