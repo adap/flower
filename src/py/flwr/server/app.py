@@ -448,9 +448,9 @@ def _try_setup_client_authentication(
         or not args.auth_superlink_public_key
     ):
         sys.exit(
-            "Authentication only works by providing file paths to "
-            "'--auth-list-public-keys', '--auth-superlink-private-key', and"
-            "'--auth-superlink-public-key'. Please try again."
+            "Authentication requires providing file paths for "
+            "'--auth-list-public-keys', '--auth-superlink-private-key' and "
+            "'--auth-superlink-public-key'. Provide all three to enable authentication."
         )
 
     if certificates is None:
