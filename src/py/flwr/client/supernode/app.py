@@ -276,7 +276,7 @@ def _try_setup_client_authentication(
             "Error: Unable to parse the private key file in "
             "'--auth-supernode-private-key'. Authentication requires elliptic "
             "curve private and public key pair. Please ensure that the file "
-            "path contains a valid private key file and try again."
+            "path points to a valid private key file and try again."
         )
 
     try:
@@ -290,7 +290,7 @@ def _try_setup_client_authentication(
             "Error: Unable to parse the public key file in "
             "'--auth-supernode-public-key'. Authentication requires elliptic "
             "curve private and public key pair. Please ensure that the file "
-            "path contains a valid public key file and try again."
+            "path points to a valid public key file and try again."
         )
 
     return (
