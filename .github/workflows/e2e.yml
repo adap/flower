@@ -203,3 +203,16 @@ jobs:
       - name: Test strategies
         run: |
           python test.py "${{ matrix.strat }}"
+  
+  containers:
+    runs-on: ubuntu 22.04
+    timeout-minutes: 10
+    name: Containers
+    defaults:
+      run:
+        working-directory: e2e/docker
+    
+    steps:
+      - uses: actions/checkout@v4
+      - name: Placeholder action
+        run: echo "Run testcontainers"
