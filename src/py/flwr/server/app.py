@@ -349,6 +349,9 @@ def run_superlink() -> None:
             sys.exit(MISSING_EXTRA_REST)
         address_arg = args.rest_fleet_api_address
         parsed_address = parse_address(address_arg)
+        _, ssl_certfile, ssl_keyfile = (
+            certificates if certificates is not None else (None, None, None)
+        )
         if not parsed_address:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
         host, port, _ = parsed_address
@@ -357,8 +360,8 @@ def run_superlink() -> None:
             args=(
                 host,
                 port,
-                certificates[1],
-                certificates[2],
+                ssl_keyfile,
+                ssl_certfile,
                 state_factory,
                 args.rest_fleet_api_workers,
             ),
