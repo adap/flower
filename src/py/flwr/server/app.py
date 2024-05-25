@@ -357,8 +357,8 @@ def run_superlink() -> None:
             args=(
                 host,
                 port,
-                certificates[0],
                 certificates[1],
+                certificates[2],
                 state_factory,
                 args.rest_fleet_api_workers,
             ),
@@ -522,7 +522,7 @@ def _try_setup_client_authentication(
 
 def _try_obtain_certificates(
     args: argparse.Namespace,
-) -> Optional[Union[Tuple[bytes, bytes, bytes], Tuple[bytes, bytes]]]:
+) -> Optional[Tuple[bytes, bytes, bytes]]:
     # Obtain certificates
     if args.insecure:
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
@@ -555,6 +555,7 @@ def _try_obtain_certificates(
             if not isfile(args.ssl_keyfile):
                 sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
             certificates = (
+                b"",
                 Path(args.ssl_certfile).read_bytes(),  # server certificate
                 Path(args.ssl_keyfile).read_bytes(),  # server private key
             )
