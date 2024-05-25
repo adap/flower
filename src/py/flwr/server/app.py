@@ -20,10 +20,10 @@ import csv
 import importlib.util
 import sys
 import threading
-from logging import ERROR, INFO, WARN
+from logging import INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from typing import List, Optional, Sequence, Set, Tuple, Union
+from typing import Optional, Sequence, Set, Tuple, Union
 
 import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -531,17 +531,11 @@ def _try_obtain_certificates(
     if args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
         if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_cert:
             if not isfile(args.ssl_ca_cert):
-                sys.exit(
-                    "Path argument `--ssl-ca-cert` does not point to a file."
-                )
+                sys.exit("Path argument `--ssl-ca-cert` does not point to a file.")
             if not isfile(args.ssl_certfile):
-                sys.exit(
-                    "Path argument `--ssl-certfile` does not point to a file."
-                )
+                sys.exit("Path argument `--ssl-certfile` does not point to a file.")
             if not isfile(args.ssl_keyfile):
-                sys.exit(
-                    "Path argument `--ssl-keyfile` does not point to a file."
-                )
+                sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
             certificates = (
                 Path(args.ssl_ca_cert).read_bytes(),  # CA certificate
                 Path(args.ssl_certfile).read_bytes(),  # server certificate
@@ -557,13 +551,9 @@ def _try_obtain_certificates(
     if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if args.ssl_certfile and args.ssl_keyfile:
             if not isfile(args.ssl_certfile):
-                sys.exit(
-                    "Path argument `--ssl-certfile` does not point to a file."
-                )
+                sys.exit("Path argument `--ssl-certfile` does not point to a file.")
             if not isfile(args.ssl_keyfile):
-                sys.exit(
-                    "Path argument `--ssl-keyfile` does not point to a file."
-                )
+                sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
             certificates = (
                 Path(args.ssl_certfile).read_bytes(),  # server certificate
                 Path(args.ssl_keyfile).read_bytes(),  # server private key
@@ -576,10 +566,10 @@ def _try_obtain_certificates(
                 "in Fleet API server (REST, experimental)."
             )
     sys.exit(
-            "Certificates are required unless running in insecure mode. "
-            "Please provide certificate paths with '--certificates' or run the server "
-            "in insecure mode using '--insecure' if you understand the risks."
-        )
+        "Certificates are required unless running in insecure mode. "
+        "Please provide certificate paths with '--certificates' or run the server "
+        "in insecure mode using '--insecure' if you understand the risks."
+    )
 
 
 def _run_fleet_api_grpc_rere(
