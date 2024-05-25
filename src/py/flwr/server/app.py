@@ -23,7 +23,7 @@ import threading
 from logging import ERROR, INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from typing import List, Optional, Sequence, Set, Tuple
+from typing import List, Optional, Sequence, Set, Tuple, Union
 
 import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -357,8 +357,8 @@ def run_superlink() -> None:
             args=(
                 host,
                 port,
-                args.ssl_keyfile,
-                args.ssl_certfile,
+                certificates[0],
+                certificates[1],
                 state_factory,
                 args.rest_fleet_api_workers,
             ),
@@ -522,25 +522,64 @@ def _try_setup_client_authentication(
 
 def _try_obtain_certificates(
     args: argparse.Namespace,
-) -> Optional[Tuple[bytes, bytes, bytes]]:
+) -> Optional[Union[Tuple[bytes, bytes, bytes], Tuple[bytes, bytes]]]:
     # Obtain certificates
     if args.insecure:
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
-        certificates = None
+        return None
     # Check if certificates are provided
-    elif args.certificates:
-        certificates = (
-            Path(args.certificates[0]).read_bytes(),  # CA certificate
-            Path(args.certificates[1]).read_bytes(),  # server certificate
-            Path(args.certificates[2]).read_bytes(),  # server private key
-        )
-    else:
-        sys.exit(
+    if args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
+        if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_cert:
+            if not isfile(args.ssl_ca_cert):
+                sys.exit(
+                    "Path argument `--ssl-ca-cert` does not point to a file."
+                )
+            if not isfile(args.ssl_certfile):
+                sys.exit(
+                    "Path argument `--ssl-certfile` does not point to a file."
+                )
+            if not isfile(args.ssl_keyfile):
+                sys.exit(
+                    "Path argument `--ssl-keyfile` does not point to a file."
+                )
+            certificates = (
+                Path(args.ssl_ca_cert).read_bytes(),  # CA certificate
+                Path(args.ssl_certfile).read_bytes(),  # server certificate
+                Path(args.ssl_keyfile).read_bytes(),  # server private key
+            )
+            return certificates
+        if args.ssl_certfile or args.ssl_keyfile or args.ssl_ca_cert:
+            sys.exit(
+                "You need to provide valid file paths to `--ssl-certfile`, "
+                "`--ssl-keyfile`, and `—-ssl-ca-cert` to create a secure "
+                "connection in Fleet API server (gRPC-rere)."
+            )
+    if args.fleet_api_type == TRANSPORT_TYPE_REST:
+        if args.ssl_certfile and args.ssl_keyfile:
+            if not isfile(args.ssl_certfile):
+                sys.exit(
+                    "Path argument `--ssl-certfile` does not point to a file."
+                )
+            if not isfile(args.ssl_keyfile):
+                sys.exit(
+                    "Path argument `--ssl-keyfile` does not point to a file."
+                )
+            certificates = (
+                Path(args.ssl_certfile).read_bytes(),  # server certificate
+                Path(args.ssl_keyfile).read_bytes(),  # server private key
+            )
+            return certificates
+        if args.ssl_certfile or args.ssl_keyfile:
+            sys.exit(
+                "You need to provide valid file paths to `--ssl-certfile` "
+                "and `--ssl-keyfile` to create a secure connection "
+                "in Fleet API server (REST, experimental)."
+            )
+    sys.exit(
             "Certificates are required unless running in insecure mode. "
             "Please provide certificate paths with '--certificates' or run the server "
             "in insecure mode using '--insecure' if you understand the risks."
         )
-    return certificates
 
 
 def _run_fleet_api_grpc_rere(
@@ -619,14 +658,6 @@ def _run_fleet_api_rest(
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
     fast_api_app.state.STATE_FACTORY = state_factory
 
-    validation_exceptions = _validate_ssl_files(
-        ssl_certfile=ssl_certfile, ssl_keyfile=ssl_keyfile
-    )
-    if any(validation_exceptions):
-        # Starting with 3.11 we can use ExceptionGroup but for now
-        # this seems to be the reasonable approach.
-        raise ValueError(validation_exceptions)
-
     uvicorn.run(
         app="flwr.server.superlink.fleet.rest_rere.rest_api:app",
         port=port,
@@ -637,32 +668,6 @@ def _run_fleet_api_rest(
         ssl_certfile=ssl_certfile,
         workers=workers,
     )
-
-
-def _validate_ssl_files(
-    ssl_keyfile: Optional[str], ssl_certfile: Optional[str]
-) -> List[ValueError]:
-    validation_exceptions = []
-
-    if ssl_keyfile is not None and not isfile(ssl_keyfile):
-        msg = "Path argument `--ssl-keyfile` does not point to a file."
-        log(ERROR, msg)
-        validation_exceptions.append(ValueError(msg))
-
-    if ssl_certfile is not None and not isfile(ssl_certfile):
-        msg = "Path argument `--ssl-certfile` does not point to a file."
-        log(ERROR, msg)
-        validation_exceptions.append(ValueError(msg))
-
-    if not bool(ssl_keyfile) == bool(ssl_certfile):
-        msg = (
-            "When setting one of `--ssl-keyfile` and "
-            "`--ssl-certfile`, both have to be used."
-        )
-        log(ERROR, msg)
-        validation_exceptions.append(ValueError(msg))
-
-    return validation_exceptions
 
 
 def _parse_args_run_driver_api() -> argparse.ArgumentParser:
@@ -721,13 +726,23 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "Use this flag only if you understand the risks.",
     )
     parser.add_argument(
-        "--certificates",
-        nargs=3,
-        metavar=("CA_CERT", "SERVER_CERT", "PRIVATE_KEY"),
+        "--ssl-certfile",
+        help="Fleet API server SSL certificate file (as a path str) "
+        "to create a secure connection.",
         type=str,
-        help="Paths to the CA certificate, server certificate, and server private "
-        "key, in that order. Note: The server can only be started without "
-        "certificates by enabling the `--insecure` flag.",
+        default=None,
+    )
+    parser.add_argument(
+        "--ssl-keyfile",
+        help="Fleet API server SSL private key file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+    )
+    parser.add_argument(
+        "--ssl-ca-cert",
+        help="Fleet API server SSL CA certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
     )
     parser.add_argument(
         "--database",
@@ -807,18 +822,6 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "--rest-fleet-api-address",
         help="Fleet API (REST) server address (IPv4, IPv6, or a domain name)",
         default=ADDRESS_FLEET_API_REST,
-    )
-    rest_group.add_argument(
-        "--ssl-certfile",
-        help="Fleet API (REST) server SSL certificate file (as a path str), "
-        "needed for using 'https'.",
-        default=None,
-    )
-    rest_group.add_argument(
-        "--ssl-keyfile",
-        help="Fleet API (REST) server SSL private key file (as a path str), "
-        "needed for using 'https'.",
-        default=None,
     )
     rest_group.add_argument(
         "--rest-fleet-api-workers",

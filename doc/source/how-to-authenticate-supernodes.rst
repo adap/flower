@@ -28,7 +28,9 @@ Use the following terminal command to start a Flower :code:`SuperNode` that has 
 .. code-block:: bash
 
     flower-superlink
-        --certificates certificates/ca.crt certificates/server.pem certificates/server.key
+        --ssl-ca-cert certificates/ca.crt 
+        --ssl-certfile certificates/server.pem 
+        --ssl-keyfile certificates/server.key
         --auth-list-public-keys keys/client_public_keys.csv
         --auth-superlink-private-key keys/server_credentials
         --auth-superlink-public-key keys/server_credentials.pub

@@ -42,7 +42,10 @@ Use the following terminal command to start a sever (SuperLink) that uses the pr
 
 .. code-block:: bash
 
-    flower-superlink --certificates certificates/ca.crt certificates/server.pem certificates/server.key
+    flower-superlink 
+      --ssl-ca-cert certificates/ca.crt 
+      --ssl-certfile certificates/server.pem 
+      --ssl-keyfile certificates/server.key
 
 When providing certificates, the server expects a tuple of three certificates paths: CA certificate, server certificate and server private key.
 
