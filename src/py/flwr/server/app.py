@@ -23,7 +23,7 @@ import threading
 from logging import INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from typing import Optional, Sequence, Set, Tuple, Union
+from typing import Optional, Sequence, Set, Tuple
 
 import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
