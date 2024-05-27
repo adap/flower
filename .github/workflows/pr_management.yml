@@ -1,0 +1,57 @@
+name: PR Management
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+
+jobs:
+  pr_title_check:
+    runs-on: ubuntu-22.04
+    name: Check title format
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.11
+          poetry-skip: 'true'
+      - name: Check PR title format 
+        run: python ./dev/check_pr_title.py "${{ github.event.pull_request.title }}"
+
+  enforce-labels:
+    name: Check labels
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+    - name: Ensure PR has labels
+      id: check_labels
+      run: |
+        if [ "$(jq '.pull_request.labels | length' $GITHUB_EVENT_PATH)" -eq "0" ]; then
+          echo "No labels found. Please add a label to this PR."
+          exit 1
+        fi
+
+  assign-reviewers:
+    name: Assign reviewers
+    runs-on: ubuntu-latest
+    if: ${{ github.event.action == 'ready_for_review' }}
+    needs: enforce-labels
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+      - name: Authenticate GitHub CLI
+        run: gh auth login --with-token <<< ${{ secrets.GITHUB_TOKEN }}
+      - name: Parse PR labels and assign reviewers
+        run: |
+          python dev/assign_reviewers.py .github/CODEREVIEWERS \
+                                     ${{ github.event.pull_request.number }} \
+                                     ${{ github.event_path }}
