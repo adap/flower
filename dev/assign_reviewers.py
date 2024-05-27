@@ -30,7 +30,6 @@ def _assign_reviewer(label, reviewers, pr_number):
         print(f"No reviewers to assign for label {label}")
         return
     random_reviewer = random.choice(reviewers)
-    print(f"Assigning reviewer @{random_reviewer} for label {label}")
     try:
         subprocess.run(
             [
@@ -45,6 +44,9 @@ def _assign_reviewer(label, reviewers, pr_number):
         )
     except subprocess.CalledProcessError as e:
         print(f"Error assigning reviewer @{random_reviewer} for label {label}: {e}")
+        sys.exit(1)
+    else:
+        print(f"Assigned reviewer @{random_reviewer} for label {label}")
 
 
 if __name__ == "__main__":
