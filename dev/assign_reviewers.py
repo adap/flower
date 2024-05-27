@@ -9,8 +9,9 @@ import sys
 def _get_pr_labels(event_path):
     with open(event_path, encoding="utf-8") as f:
         event_data = json.load(f)
+    pr_author = event_data["pull_request"]["user"]["login"]
     labels = [label["name"] for label in event_data["pull_request"]["labels"]]
-    return labels
+    return pr_author, labels
 
 
 def _parse_codereviewers(file_path):
@@ -27,7 +28,8 @@ def _parse_codereviewers(file_path):
     return reviewers_map
 
 
-def _assign_reviewer(label, reviewers, repo, pr_number):
+def _assign_reviewer(label, reviewers, pr_author, repo, pr_number):
+    reviewers = [reviewer for reviewer in reviewers if reviewer != pr_author]
     if not reviewers:
         print(f"No reviewers to assign for label {label}")
         return
@@ -40,12 +42,12 @@ def _assign_reviewer(label, reviewers, repo, pr_number):
                 "--method",
                 "POST",
                 "-H",
-                "'Accept: application/vnd.github+json'",
+                "Accept: application/vnd.github+json",
                 "-H",
-                "'X-GitHub-Api-Version: 2022-11-28'",
+                "X-GitHub-Api-Version: 2022-11-28",
                 f"/repos/{repo}/pulls/{pr_number}/requested_reviewers",
                 "-f",
-                f'"reviewers[]={random_reviewer}"',
+                f"reviewers[]={random_reviewer}",
             ],
             check=True,
         )
@@ -69,11 +71,11 @@ if __name__ == "__main__":
     pr_number = sys.argv[3]
     event_path = sys.argv[4]
 
-    pr_labels = _get_pr_labels(event_path)
+    pr_author, pr_labels = _get_pr_labels(event_path)
     reviewers_map = _parse_codereviewers(codereviewers_path)
 
     for label in pr_labels:
         if label in reviewers_map:
-            _assign_reviewer(label, reviewers_map[label], repo, pr_number)
+            _assign_reviewer(label, reviewers_map[label], pr_author, repo, pr_number)
         else:
             print(f"No reviewers found for label {label}")
