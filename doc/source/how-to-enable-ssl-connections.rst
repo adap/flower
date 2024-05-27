@@ -43,7 +43,7 @@ Use the following terminal command to start a sever (SuperLink) that uses the pr
 .. code-block:: bash
 
     flower-superlink 
-      --ssl-ca-cert certificates/ca.crt 
+      --ssl-ca-certfile certificates/ca.crt 
       --ssl-certfile certificates/server.pem 
       --ssl-keyfile certificates/server.key
 

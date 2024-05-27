@@ -532,23 +532,23 @@ def _try_obtain_certificates(
         return None
     # Check if certificates are provided
     if args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
-        if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_cert:
-            if not isfile(args.ssl_ca_cert):
-                sys.exit("Path argument `--ssl-ca-cert` does not point to a file.")
+        if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_certfile:
+            if not isfile(args.ssl_ca_certfile):
+                sys.exit("Path argument `--ssl-ca-certfile` does not point to a file.")
             if not isfile(args.ssl_certfile):
                 sys.exit("Path argument `--ssl-certfile` does not point to a file.")
             if not isfile(args.ssl_keyfile):
                 sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
             certificates = (
-                Path(args.ssl_ca_cert).read_bytes(),  # CA certificate
+                Path(args.ssl_ca_certfile).read_bytes(),  # CA certificate
                 Path(args.ssl_certfile).read_bytes(),  # server certificate
                 Path(args.ssl_keyfile).read_bytes(),  # server private key
             )
             return certificates
-        if args.ssl_certfile or args.ssl_keyfile or args.ssl_ca_cert:
+        if args.ssl_certfile or args.ssl_keyfile or args.ssl_ca_certfile:
             sys.exit(
                 "You need to provide valid file paths to `--ssl-certfile`, "
-                "`--ssl-keyfile`, and `—-ssl-ca-cert` to create a secure "
+                "`--ssl-keyfile`, and `—-ssl-ca-certfile` to create a secure "
                 "connection in Fleet API server (gRPC-rere)."
             )
     if args.fleet_api_type == TRANSPORT_TYPE_REST:
@@ -733,7 +733,7 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         type=str,
     )
     parser.add_argument(
-        "--ssl-ca-cert",
+        "--ssl-ca-certfile",
         help="Fleet API server SSL CA certificate file (as a path str) "
         "to create a secure connection.",
         type=str,

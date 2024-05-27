@@ -68,7 +68,7 @@ containing file path to the SuperLink's private key `server_credentials`, and `-
 
 ```bash
 flower-superlink \
-    --ssl-ca-cert certificates/ca.crt \
+    --ssl-ca-certfile certificates/ca.crt \
     --ssl-certfile certificates/server.pem \
     --ssl-keyfile certificates/server.key \
     --auth-list-public-keys keys/client_public_keys.csv \
