@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import List, Optional, Sequence, Set, Tuple
 
 import grpc
+from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
     load_ssh_private_key,
@@ -45,7 +46,6 @@ from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
-    ssh_types_to_elliptic_curve,
 )
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
@@ -435,44 +435,69 @@ def _try_setup_client_authentication(
     args: argparse.Namespace,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
-    if not args.require_client_authentication:
+    if (
+        not args.auth_list_public_keys
+        and not args.auth_superlink_private_key
+        and not args.auth_superlink_public_key
+    ):
         return None
+
+    if (
+        not args.auth_list_public_keys
+        or not args.auth_superlink_private_key
+        or not args.auth_superlink_public_key
+    ):
+        sys.exit(
+            "Authentication requires providing file paths for "
+            "'--auth-list-public-keys', '--auth-superlink-private-key' and "
+            "'--auth-superlink-public-key'. Provide all three to enable authentication."
+        )
 
     if certificates is None:
         sys.exit(
-            "Client authentication only works over secure connections. "
-            "Please provide certificate paths using '--certificates' when "
-            "enabling '--require-client-authentication'."
+            "Authentication requires secure connections. "
+            "Please provide certificate paths using '--certificates' and "
+            "try again."
         )
 
-    client_keys_file_path = Path(args.require_client_authentication[0])
+    client_keys_file_path = Path(args.auth_list_public_keys)
     if not client_keys_file_path.exists():
         sys.exit(
-            "The provided path to the client public keys CSV file does not exist: "
+            "The provided path to the known public keys CSV file does not exist: "
             f"{client_keys_file_path}. "
-            "Please provide the CSV file path containing known client public keys "
-            "to '--require-client-authentication'."
+            "Please provide the CSV file path containing known public keys "
+            "to '--auth-list-public-keys'."
         )
 
     client_public_keys: Set[bytes] = set()
-    ssh_private_key = load_ssh_private_key(
-        Path(args.require_client_authentication[1]).read_bytes(),
-        None,
-    )
-    ssh_public_key = load_ssh_public_key(
-        Path(args.require_client_authentication[2]).read_bytes()
-    )
 
     try:
-        server_private_key, server_public_key = ssh_types_to_elliptic_curve(
-            ssh_private_key, ssh_public_key
+        ssh_private_key = load_ssh_private_key(
+            Path(args.auth_superlink_private_key).read_bytes(),
+            None,
         )
-    except TypeError:
+        if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm):
         sys.exit(
-            "The file paths provided could not be read as a private and public "
-            "key pair. Client authentication requires an elliptic curve public and "
-            "private key pair. Please provide the file paths containing elliptic "
-            "curve private and public keys to '--require-client-authentication'."
+            "Error: Unable to parse the private key file in "
+            "'--auth-superlink-private-key'. Authentication requires elliptic "
+            "curve private and public key pair. Please ensure that the file "
+            "path points to a valid private key file and try again."
+        )
+
+    try:
+        ssh_public_key = load_ssh_public_key(
+            Path(args.auth_superlink_public_key).read_bytes()
+        )
+        if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm):
+        sys.exit(
+            "Error: Unable to parse the public key file in "
+            "'--auth-superlink-public-key'. Authentication requires elliptic "
+            "curve private and public key pair. Please ensure that the file "
+            "path points to a valid public key file and try again."
         )
 
     with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
@@ -484,14 +509,14 @@ def _try_setup_client_authentication(
                     client_public_keys.add(public_key_to_bytes(public_key))
                 else:
                     sys.exit(
-                        "Error: Unable to parse the public keys in the .csv "
-                        "file. Please ensure that the .csv file contains valid "
-                        "SSH public keys and try again."
+                        "Error: Unable to parse the public keys in the CSV "
+                        "file. Please ensure that the CSV file path points to a valid "
+                        "known SSH public keys files and try again."
                     )
         return (
             client_public_keys,
-            server_private_key,
-            server_public_key,
+            ssh_private_key,
+            ssh_public_key,
         )
 
 
@@ -714,13 +739,20 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         default=DATABASE,
     )
     parser.add_argument(
-        "--require-client-authentication",
-        nargs=3,
-        metavar=("CLIENT_KEYS", "SERVER_PRIVATE_KEY", "SERVER_PUBLIC_KEY"),
+        "--auth-list-public-keys",
         type=str,
-        help="Provide three file paths: (1) a .csv file containing a list of "
-        "known client public keys for authentication, (2) the server's private "
-        "key file, and (3) the server's public key file.",
+        help="A CSV file (as a path str) containing a list of known public "
+        "keys to enable authentication.",
+    )
+    parser.add_argument(
+        "--auth-superlink-private-key",
+        type=str,
+        help="The SuperLink's private key (as a path str) to enable authentication.",
+    )
+    parser.add_argument(
+        "--auth-superlink-public-key",
+        type=str,
+        help="The SuperLink's public key (as a path str) to enable authentication.",
     )
 
 
