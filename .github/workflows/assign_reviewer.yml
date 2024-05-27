@@ -16,6 +16,8 @@ jobs:
           python-version: 3.11
           poetry-skip: 'true'
       - name: Parse PR labels and assign reviewers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           python dev/assign_reviewers.py .github/CODEREVIEWERS \
                                      ${{ github.event.pull_request.number }} \
