@@ -27,7 +27,7 @@ services:
   serverapp:
     build:
       dockerfile: serverapp.Dockerfile
-    command: [ "--insecure", "--server", "superlink:9091" ]
+    command: [ "--insecure", "--superlink-driver-api", "superlink:9091" ]
     # enforce dependency for graceful execution
     depends_on:
       - superlink

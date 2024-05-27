@@ -195,7 +195,7 @@ Deployment
     # In yet another terminal window, run the ServerApp (this starts the actual training run)
     $ flower-server-app server:app \
         --root-certificates <your-ca-cert-filepath> \
-        --server 127.0.0.1:9091
+        --superlink-driver-api 127.0.0.1:9091
 
 Simulation in CLI
 ~~~~~~~~~~~~~~~~~
