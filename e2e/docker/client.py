@@ -1,14 +1,14 @@
 import warnings
 from collections import OrderedDict
 
-from flwr.client import NumPyClient, ClientApp
-from flwr_datasets import FederatedDataset
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from flwr_datasets import FederatedDataset
 from torch.utils.data import DataLoader, Subset
 from torchvision.transforms import Compose, Normalize, ToTensor
 
+from flwr.client import ClientApp, NumPyClient
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -18,6 +18,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 SUBSET_SIZE = 1_000
+
 
 class Net(nn.Module):
     """Model (simple CNN adapted from 'PyTorch: A 60 Minute Blitz')"""
