@@ -106,7 +106,7 @@ certificates to the SuperLink with the ``--root-certificates`` flag.
 .. code-block:: bash
 
   $ docker run --rm \
-    -p 9091:9091 -p 9092:9092 --volume ./certificates/:/app/ flwr/superlink:1.8.0 \
+    -p 9091:9091 -p 9092:9092 --volume ./certificates/:/app/ flwr/superlink:1.9.0 \
     --ssl-ca-certfile ca.crt \
     --ssl-certfile server.pem \
     --ssl-keyfile server.key
