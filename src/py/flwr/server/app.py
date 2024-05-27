@@ -459,8 +459,8 @@ def _try_setup_client_authentication(
     if certificates is None:
         sys.exit(
             "Authentication requires secure connections. "
-            "Please provide certificate paths using '--certificates' and "
-            "try again."
+            "Please provide certificate paths to `--ssl-certfile`, "
+            "`--ssl-keyfile`, and `—-ssl-ca-certfile` and try again."
         )
 
     client_keys_file_path = Path(args.auth_list_public_keys)
@@ -571,7 +571,8 @@ def _try_obtain_certificates(
             )
     sys.exit(
         "Certificates are required unless running in insecure mode. "
-        "Please provide certificate paths with '--certificates' or run the server "
+        "Please provide certificate paths to `--ssl-certfile`, "
+        "`--ssl-keyfile`, and `—-ssl-ca-certfile` or run the server "
         "in insecure mode using '--insecure' if you understand the risks."
     )
 
