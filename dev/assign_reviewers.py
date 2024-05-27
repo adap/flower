@@ -15,7 +15,10 @@ def _parse_codereviewers(file_path):
     reviewers_map = {}
     with open(file_path, encoding="utf-8") as f:
         for line in f:
-            parts = line.strip().split()
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split()
             label = parts[0]
             reviewers = [part.lstrip("@") for part in parts[1:]]
             reviewers_map[label] = reviewers
