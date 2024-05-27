@@ -1,0 +1,22 @@
+name: PR management
+
+on:
+  pull_request:
+    types: [ready_for_review]
+
+jobs:
+  assign-reviewers:
+    runs-on: ubuntu-latest
+    name: Assign reviewers
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap
+        uses: ./.github/actions/bootstrap
+        with:
+          python-version: 3.11
+          poetry-skip: 'true'
+      - name: Parse PR labels and assign reviewers
+        run: |
+          python assign_reviewers.py .github/CODEREVIEWERS \
+                                     ${{ github.event.pull_request.number }} \
+                                     ${{ github.event_path }}
