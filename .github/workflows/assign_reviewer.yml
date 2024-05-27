@@ -17,6 +17,6 @@ jobs:
           poetry-skip: 'true'
       - name: Parse PR labels and assign reviewers
         run: |
-          python assign_reviewers.py .github/CODEREVIEWERS \
+          python dev/assign_reviewers.py .github/CODEREVIEWERS \
                                      ${{ github.event.pull_request.number }} \
                                      ${{ github.event_path }}
