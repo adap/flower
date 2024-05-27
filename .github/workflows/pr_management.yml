@@ -5,9 +5,32 @@ on:
     types: [opened, synchronize, reopened, edited, ready_for_review]
 
 jobs:
+  ensure-draft:
+    name: Ensure draft
+    runs-on: ubuntu-latest
+    if: ${{ github.event.action == 'opened' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure PR is draft
+        if: github.event.pull_request.draft == false
+        run: gh pr ready ${{ github.event.pull_request.number }} --undo
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  assign-author:
+    name: Assign author
+    runs-on: ubuntu-latest
+    if: ${{ github.event.action == 'opened' }}
+    steps:
+      - uses: toshimaru/auto-author-assign@v2.1.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
   pr_title_check:
-    runs-on: ubuntu-22.04
     name: Check title format
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
@@ -32,6 +55,23 @@ jobs:
           exit 1
         fi
 
+  check-merge-conflicts:
+    name: Check conflicts
+    runs-on: ubuntu-latest
+    if: ${{ github.event.action == 'opened' || github.event.action == 'synchronize' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Check for merge conflicts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          if [ "$(git ls-files -u | wc -l)" != "0" ]; then
+            # Move PR to draft if there are conflicts
+            gh pr ready ${{ github.event.pull_request.number }} --undo
+          fi
+
   assign-reviewers:
     name: Assign reviewers
     runs-on: ubuntu-latest
@@ -46,12 +86,9 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      - name: Install GitHub CLI
-        run: sudo apt-get install gh -y
-      - name: Authenticate GitHub CLI
-        run: gh auth login --with-token <<< ${{ secrets.GITHUB_TOKEN }}
       - name: Parse PR labels and assign reviewers
         run: |
+          gh auth login --with-token <<< ${{ secrets.GITHUB_TOKEN }}
           python dev/assign_reviewers.py .github/CODEREVIEWERS \
                                      ${{ github.event.pull_request.number }} \
                                      ${{ github.event_path }}
