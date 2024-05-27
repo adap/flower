@@ -8,6 +8,8 @@ jobs:
   assign-reviewers:
     runs-on: ubuntu-latest
     name: Assign reviewers
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
