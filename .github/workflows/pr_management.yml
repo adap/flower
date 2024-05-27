@@ -72,6 +72,27 @@ jobs:
             gh pr ready ${{ github.event.pull_request.number }} --undo
           fi
 
+  check-failing-ci:
+    name: Check CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if CI is failing
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sha_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/adap/flower/pulls/$1")
+          sha=$(echo "$sha_response" | jq -r '.head.sha')
+
+          status_response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+               "https://api.github.com/repos/adap/flower/commits/$sha/check-runs")
+
+          num_failures=$(echo "$status_response" | jq '[.check_runs[] | select(.conclusion == "failure")] | length')
+
+          if [ "$num_failures" != "0" ]; then
+            gh pr ready ${{ github.event.pull_request.number }} --undo
+          fi
+
   assign-reviewers:
     name: Assign reviewers
     runs-on: ubuntu-latest
