@@ -56,7 +56,7 @@ Use the following terminal command to start a client (SuperNode) that uses the p
 
     flower-client-app client:app
         --root-certificates certificates/ca.crt
-        --server 127.0.0.1:9092
+        --superlink-fleet-api 127.0.0.1:9092
 
 When setting :code:`root_certificates`, the client expects a file path to PEM-encoded root certificates.
 

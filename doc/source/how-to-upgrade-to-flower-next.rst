@@ -185,12 +185,12 @@ Deployment
     # In a new terminal window, start a long-running secure SuperNode
     $ flower-client-app client:app \
         --root-certificates <your-ca-cert-filepath> \
-        --server 127.0.0.1:9092
+        --superlink-fleet-api 127.0.0.1:9092
 
     # In another terminal window, start another long-running secure SuperNode (at least 2 SuperNodes are required)
     $ flower-client-app client:app \
         --root-certificates <your-ca-cert-filepath> \
-        --server 127.0.0.1:9092
+        --superlink-fleet-api 127.0.0.1:9092
 
     # In yet another terminal window, run the ServerApp (this starts the actual training run)
     $ flower-server-app server:app \

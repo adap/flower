@@ -224,7 +224,7 @@ Now that we have built the SuperNode image, we can finally run it.
 
   $ docker run --rm flwr_supernode:0.0.1 client:app \
     --insecure \
-    --server 192.168.1.100:9092
+    --superlink-fleet-api 192.168.1.100:9092
 
 Let's break down each part of this command:
 
@@ -240,7 +240,7 @@ Let's break down each part of this command:
   `SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`__
   when deploying to a production environment.
 
-* | ``--server 192.168.1.100:9092``: This option specifies the address of the SuperLinks Fleet
+* | ``--superlink-fleet-api 192.168.1.100:9092``: This option specifies the address of the SuperLinks Fleet
   | API to connect to. Remember to update it with your SuperLink IP.
 
 .. note::
@@ -268,7 +268,7 @@ certificate within the container. Use the ``--certificates`` flag when starting 
 .. code-block:: bash
 
   $ docker run --rm --volume ./ca.crt:/app/ca.crt flwr_supernode:0.0.1 client:app \
-    --server 192.168.1.100:9092 \
+    --superlink-fleet-api 192.168.1.100:9092 \
     --certificates ca.crt
 
 Flower ServerApp
