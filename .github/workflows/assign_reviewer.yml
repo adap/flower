@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Assign reviewers
     permissions:
+      contents: write
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
@@ -22,5 +23,8 @@ jobs:
       - name: Parse PR labels and assign reviewers
         run: |
           python dev/assign_reviewers.py .github/CODEREVIEWERS \
-                                     ${{ github.event.pull_request.number }} \
-                                     ${{ github.event_path }}
+                                         ${{ github.repository }} \
+                                         ${{ github.event.pull_request.number }} \
+                                         ${{ github.event_path }}
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

@@ -1,3 +1,5 @@
+"""Assigns a reviewer to a PR based on its label."""
+
 import json
 import random
 import subprocess
@@ -25,7 +27,7 @@ def _parse_codereviewers(file_path):
     return reviewers_map
 
 
-def _assign_reviewer(label, reviewers, pr_number):
+def _assign_reviewer(label, reviewers, repo, pr_number):
     if not reviewers:
         print(f"No reviewers to assign for label {label}")
         return
@@ -34,11 +36,16 @@ def _assign_reviewer(label, reviewers, pr_number):
         subprocess.run(
             [
                 "gh",
-                "pr",
-                "edit",
-                pr_number,
-                "--add-reviewer",
-                f"{random_reviewer}",
+                "api",
+                "--method",
+                "POST",
+                "-H",
+                '"Accept: application/vnd.github+json"',
+                "-H",
+                '"X-GitHub-Api-Version: 2022-11-28"',
+                f"/repos/{repo}/pulls/{pr_number}/requested_reviewers",
+                "-f",
+                f'"reviewers[]={random_reviewer}"',
             ],
             check=True,
         )
@@ -50,22 +57,23 @@ def _assign_reviewer(label, reviewers, pr_number):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 5:
         print(
             "Usage: python assign_reviewers.py <CODEREVIEWERS file path>"
-            "<PR_NUMBER> <GH_EVENT file path>"
+            "<REPO> <PR_NUMBER> <GH_EVENT file path>"
         )
         sys.exit(1)
 
     codereviewers_path = sys.argv[1]
-    pr_number = sys.argv[2]
-    event_path = sys.argv[3]
+    repo = sys.argv[2]
+    pr_number = sys.argv[3]
+    event_path = sys.argv[4]
 
     pr_labels = _get_pr_labels(event_path)
     reviewers_map = _parse_codereviewers(codereviewers_path)
 
     for label in pr_labels:
         if label in reviewers_map:
-            _assign_reviewer(label, reviewers_map[label], pr_number)
+            _assign_reviewer(label, reviewers_map[label], repo, pr_number)
         else:
             print(f"No reviewers found for label {label}")
