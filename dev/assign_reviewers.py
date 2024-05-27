@@ -45,7 +45,7 @@ def _assign_reviewer(label, reviewers, repo, pr_number):
                 "'X-GitHub-Api-Version: 2022-11-28'",
                 f"/repos/{repo}/pulls/{pr_number}/requested_reviewers",
                 "-f",
-                f"'reviewers[]={random_reviewer}'",
+                f'"reviewers[]={random_reviewer}"',
             ],
             check=True,
         )
