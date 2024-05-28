@@ -90,6 +90,7 @@ class SimpleClientManager(ClientManager):
     def __init__(self) -> None:
         self.clients: Dict[str, ClientProxy] = {}
         self._cv = threading.Condition()
+        self._waiting = False
 
     def __len__(self) -> int:
         """Return the number of available clients.
@@ -128,10 +129,25 @@ class SimpleClientManager(ClientManager):
         -------
         success : bool
         """
+
+        def enough_clients():
+            if len(self.clients) >= num_clients:
+                self._waiting = False
+                return True
+            else:
+                if self._waiting:
+                    log(
+                        INFO,
+                        "Waiting for at least %s clients "
+                        "to connect... (%s are connected)",
+                        num_clients,
+                        len(self.clients),
+                    )
+                self._waiting = True
+                return False
+
         with self._cv:
-            return self._cv.wait_for(
-                lambda: len(self.clients) >= num_clients, timeout=timeout
-            )
+            return self._cv.wait_for(enough_clients, timeout=timeout)
 
     def register(self, client: ClientProxy) -> bool:
         """Register Flower ClientProxy instance.
