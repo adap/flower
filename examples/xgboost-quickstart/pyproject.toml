@@ -1,15 +1,19 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "xgboost-quickstart"
+[project]
+name = "quickstart-xgboost"
 version = "0.1.0"
-description = "Federated XGBoost with Flower (quickstart)"
-authors = ["The Flower Authors <hello@flower.ai>"]
+description = "XGBoost Federated Learning Quickstart with Flower"
+authors = [
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+]
+dependencies = [
+    "flwr>=1.8.0,<2.0",
+    "flwr-datasets>=0.1.0,<1.0.0",
+    "xgboost>=2.0.0,<3.0.0",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-flwr = ">=1.7.0,<2.0"
-flwr-datasets = ">=0.1.0,<1.0.0"
-xgboost = ">=2.0.0,<3.0.0"
+[tool.hatch.build.targets.wheel]
+packages = ["."]
