@@ -201,7 +201,34 @@ def lightsecagg_mod(
 
 def check_stage(current_stage: str, configs: ConfigsRecord) -> None:
     """Check the validity of the next stage."""
-    ...
+    # Check the existence of Config.STAGE
+    if Key.STAGE not in configs:
+        raise KeyError(
+            f"The required key '{Key.STAGE}' is missing from the ConfigsRecord."
+        )
+
+    # Check the value type of the Config.STAGE
+    next_stage = configs[Key.STAGE]
+    if not isinstance(next_stage, str):
+        raise TypeError(
+            f"The value for the key '{Key.STAGE}' must be of type {str}, "
+            f"but got {type(next_stage)} instead."
+        )
+
+    # Check the validity of the next stage
+    if next_stage == Stage.SETUP:
+        if current_stage != Stage.UNMASK:
+            log(WARNING, "Restart from the setup stage")
+    # If stage is not "setup",
+    # the stage from configs should be the expected next stage
+    else:
+        stages = Stage.all()
+        expected_next_stage = stages[(stages.index(current_stage) + 1) % len(stages)]
+        if next_stage != expected_next_stage:
+            raise ValueError(
+                "Abort secure aggregation: "
+                f"expect {expected_next_stage} stage, but receive {next_stage} stage"
+            )
 
 
 def check_configs(stage: str, configs: ConfigsRecord) -> None:
