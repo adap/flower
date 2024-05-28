@@ -17,22 +17,20 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-import seaborn as sns
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
 import datasets
 from flwr_datasets.metrics import compute_counts
 from flwr_datasets.partitioner import Partitioner
+from visualization.bar_plot import _plot_bar
+from visualization.heatmap_plot import _plot_heatmap
+from visualization.utils import _initialize_figsize, _initialize_xy_labels, \
+    _validate_parameters, _initialize_cbar_title, _initialize_comparison_figsize, \
+    _initialize_comparison_xy_labels
 
 # pylint: disable=too-many-arguments,too-many-locals
-# Constants for plot types and size units
-PLOT_TYPES = ("bar", "heatmap")
-SIZE_UNITS = ("absolute", "percent")
-AXIS_TYPES = ("x", "y")
-
 
 def plot_label_distributions(
     partitioner: Partitioner,
@@ -258,79 +256,6 @@ def plot_label_distributions(
     return axis.figure, axis, dataframe
 
 
-def _initialize_xy_labels(
-    plot_type: str, size_unit: str, partition_id_axis: str
-) -> Tuple[str, str]:
-    if plot_type == "bar":
-        xlabel = "Partition ID"
-        ylabel = "Count" if size_unit == "absolute" else "Percent %"
-    elif plot_type == "heatmap":
-        xlabel = "Partition ID"
-        ylabel = "Label"
-    else:
-        raise ValueError(f"Invalid plot_type: {plot_type}. Must be 'bar' or 'heatmap'.")
-
-    if partition_id_axis == "y":
-        xlabel, ylabel = ylabel, xlabel
-
-    return xlabel, ylabel
-
-
-def _validate_parameters(
-    plot_type: str, size_unit: str, partition_id_axis: str
-) -> None:
-    if plot_type not in PLOT_TYPES:
-        raise ValueError(
-            f"Invalid plot_type: {plot_type}. Must be one of {PLOT_TYPES}."
-        )
-    if size_unit not in SIZE_UNITS:
-        raise ValueError(
-            f"Invalid size_unit: {size_unit}. Must be one of {SIZE_UNITS}."
-        )
-    if partition_id_axis not in AXIS_TYPES:
-        raise ValueError(
-            f"Invalid partition_id_axis: {partition_id_axis}. Must be 'x' or 'y'."
-        )
-
-
-def _initialize_cbar_title(plot_type: str, size_unit: str) -> Optional[str]:
-    if plot_type == "heatmap":
-        return "Count" if size_unit == "absolute" else "Percent %"
-    return None
-
-
-def _initialize_figsize(
-    figsize: Optional[Tuple[float, float]],
-    plot_type: str,
-    partition_id_axis: str,
-    num_partitions: int,
-    num_labels: int,
-) -> Tuple[float, float]:
-    if figsize is not None:
-        if not isinstance(figsize, tuple):
-            raise TypeError(
-                f"'figsize' should of type 'tuple' but given: {type(figsize)}"
-            )
-        return figsize
-
-    if plot_type == "bar":
-        if partition_id_axis == "x":
-            figsize = (6.4, 4.8)
-        elif partition_id_axis == "y":
-            figsize = (6.4, np.sqrt(num_partitions))
-    elif plot_type == "heatmap":
-        if partition_id_axis == "x":
-            figsize = (3 * np.sqrt(num_partitions), np.sqrt(num_labels))
-        elif partition_id_axis == "y":
-            figsize = (3 * np.sqrt(num_labels), np.sqrt(num_partitions))
-    else:
-        raise ValueError(
-            f"The type of plot must be 'bar' or 'heatmap' but given: {plot_type}"
-        )
-    assert figsize is not None
-    return figsize
-
-
 def _plot_data(
     dataframe: pd.DataFrame,
     plot_type: str,
@@ -381,143 +306,6 @@ def _plot_data(
             legend_kwargs
         )
     raise ValueError(f"Invalid plot_type: {plot_type}. Must be 'bar' or 'heatmap'.")
-
-
-def _plot_bar(
-    dataframe: pd.DataFrame,
-    axis: Optional[Axes],
-    figsize: Tuple[float, float],
-    title: str,
-    colormap: Optional[Union[str, mcolors.Colormap]],
-    xlabel: str,
-    ylabel: str,
-    legend: bool,
-    legend_title: str,
-    verbose_labels: bool,
-    partition: datasets.Dataset,
-    label_name: str,
-    plot_kwargs: Dict[str, Any],
-    legend_kwargs: Dict[str, Any],
-
-) -> Axes:
-    if colormap is None:
-        colormap = "RdYlGn"
-    if axis is None:
-        _, axis = plt.subplots(figsize=figsize)
-
-    kind = "bar" if xlabel == "Partition ID" else "barh"
-    axis = dataframe.plot(
-        kind=kind,
-        stacked=True,
-        ax=axis,
-        title=title,
-        legend=False,
-        colormap=colormap,
-        rot=0,
-        **plot_kwargs,
-    )
-
-    if xlabel:
-        axis.set_xlabel(xlabel)
-    if ylabel:
-        axis.set_ylabel(ylabel)
-
-    xticklabels = axis.get_xticklabels()
-    if len(xticklabels) > 20:
-        # Make every other xtick label not visible
-        for i, label in enumerate(xticklabels):
-            if i % 2 == 1:
-                label.set_visible(False)
-
-    if legend:
-        handles, legend_labels = axis.get_legend_handles_labels()
-        if verbose_labels:
-            try:
-                legend_names = partition.features[label_name].int2str(
-                    [int(v) for v in legend_labels]
-                )
-            except AttributeError:
-                legend_names = legend_labels
-        else:
-            legend_names = legend_labels
-
-        _ = axis.figure.legend(
-            handles=handles[::-1],
-            labels=legend_names[::-1],
-            title=legend_title,
-            loc="outside center right",
-            bbox_to_anchor=(1.3, 0.5),
-        )
-
-    return axis
-
-
-def _plot_heatmap(
-    dataframe: pd.DataFrame,
-    axis: Optional[Axes],
-    figsize: Tuple[float, float],
-    title: str,
-    colormap: Optional[Union[str, mcolors.Colormap]],
-    xlabel: str,
-    ylabel: str,
-    cbar_title: Optional[str],
-    legend: bool,
-    plot_kwargs: Dict[str, Any],
-    legend_kwargs: Dict[str, Any],
-
-) -> Axes:
-    if colormap is None:
-        colormap = sns.light_palette("seagreen", as_cmap=True)
-    if axis is None:
-        _, axis = plt.subplots(figsize=figsize)
-
-    fmt = ",d" if "absolute" in dataframe.columns else "0.2f"
-    sns.heatmap(
-        dataframe,
-        ax=axis,
-        cmap=colormap,
-        fmt=fmt,
-        cbar=legend,
-        cbar_kws={"label": cbar_title},
-        **plot_kwargs,
-    )
-
-    if xlabel:
-        axis.set_xlabel(xlabel)
-    if ylabel:
-        axis.set_ylabel(ylabel)
-
-    axis.set_title(title)
-    return axis
-
-
-def _initialize_comparison_figsize(
-    figsize: Optional[Tuple[float, float]], num_partitioners: int
-) -> Tuple[float, float]:
-    if figsize is not None:
-        return figsize
-    x_value = 4 + (num_partitioners - 1) * 2
-    y_value = 4.8
-    figsize = (x_value, y_value)
-    return figsize
-
-
-def _initialize_comparison_xy_labels(
-    plot_type: str, partition_id_axis: str
-) -> Tuple[str, str]:
-    if plot_type == "bar":
-        xlabel = "Partition ID"
-        ylabel = "Class distribution"
-    elif plot_type == "heatmap":
-        xlabel = "Partition ID"
-        ylabel = "Label"
-    else:
-        raise ValueError(f"Invalid plot_type: {plot_type}. Must be 'bar' or 'heatmap'.")
-
-    if partition_id_axis == "y":
-        xlabel, ylabel = ylabel, xlabel
-
-    return xlabel, ylabel
 
 
 def compare_label_distribution(
