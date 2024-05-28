@@ -17,7 +17,7 @@ With Flower 1.8, we introduced the :code:`ClientApp` and :code:`ServerApp`. Thes
 What is a :code:`ClientApp`?
 ----------------------------
 
-The |clientapp_link|_ is an application that can run various tasks on clients, such as federated learning. It is launched on demand by the :code:`SuperNode`. The communication pattern between the :code:`SuperNode` and :code:`ClientApp` uses :code:`Message` and :code:`Context` objects containing all the information needed to run the tasks. Don’t worry about the details of the :code:`Message` and :code:`Context` for now, we will elaborate further below.
+The |clientapp_link|_ is an application that can run various tasks on clients, such as federated learning. It is launched on demand by the :code:`SuperNode`. The communication pattern between the :code:`SuperNode` and :code:`ClientApp` uses :code:`Message` and :code:`Context` objects containing all the information needed to run the tasks. These objects will be elaborated further below.
 
 There are two ways to use the :code:`ClientApp`:
 
@@ -63,7 +63,7 @@ To use :code:`CifarClient()` with the high-level :code:`ClientApp` API, we need 
 
     # file: client.py
 
-    def client_fn() -> Client:
+    def client_fn(cid: str) -> Client:
         return CifarClient().to_client()
 
 Then, we create the :code:`ClientApp` as follows:
@@ -189,7 +189,7 @@ Next, we prepare the updated model parameters and local metrics to be sent to th
 
 .. code-block:: python
 
-    # Construct reply message carrying updated model paramters and generated metrics
+    # Construct reply message carrying updated model parameters and generated metrics
     reply_content = RecordSet()
     reply_content.parameters_records['my_model_returned'] = pytorch_to_parameter_record(model)
     reply_content.metrics_records['train_metrics'] = MetricsRecord(train_metrics)
@@ -223,11 +223,11 @@ For completeness, you can implement the utility functions referenced in the code
             shape=list(ndarray.shape),
         )
 
-    def _basic_array_deserialisation(array: Array) -> NDArray:
+    def _basic_array_deserialization(array: Array) -> NDArray:
         return np.frombuffer(buffer=array.data, dtype=array.dtype).reshape(array.shape)
 
     def pytorch_to_parameter_record(pytorch_module: torch.nn.Module):
-        """Serialise your PyTorch model."""
+        """Serialize your PyTorch model."""
         state_dict = pytorch_module.state_dict()
 
         for k, v in state_dict.items():
@@ -236,10 +236,10 @@ For completeness, you can implement the utility functions referenced in the code
         return ParametersRecord(state_dict)
 
     def parameters_to_pytorch_state_dict(params_record: ParametersRecord):
-        """Reconstruct PyTorch state_dict from its serialised representation."""
+        """Reconstruct PyTorch state_dict from its serialized representation."""
         state_dict = {}
         for k, v in params_record.items():
-            state_dict[k] = torch.tensor(_basic_array_deserialisation(v))
+            state_dict[k] = torch.tensor(_basic_array_deserialization(v))
 
         return state_dict
 
@@ -248,7 +248,7 @@ For completeness, you can implement the utility functions referenced in the code
 
 Now that we’ve implemented client training, let’s walk through how to register an evaluation function in the :code:`ClientApp`.
 
-The structure of the evaluate function is the same as as :code:`app.train()`:
+The structure of :code:`app.evaluate()` is the same as as :code:`app.train()`:
 
 1. Instantiate model
 2. Load local test data
