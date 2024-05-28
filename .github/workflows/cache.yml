@@ -1,0 +1,63 @@
+name: Cache
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    # Using approach described here:
+    # https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs
+    strategy:
+      matrix:
+        include:
+          - directory: bare
+          - directory: bare-https
+          - directory: bare-client-auth
+          - directory: jax
+          - directory: pytorch
+          - directory: tensorflow
+          - directory: tabnet
+          - directory: opacus
+          - directory: pytorch-lightning
+          - directory: scikit-learn
+          - directory: fastai
+          - directory: pandas
+
+    name: Framework / ${{matrix.directory}}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.8
+
+      - name: Cleanup caches by directories
+        # Only keep caches that match the latest keys for each directory
+        run: |
+          gh extension install actions/gh-actions-cache
+          
+          REPO=${{ github.repository }}
+          LATEST_KEY=pythonloc-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./e2e/{0}/pyproject.toml', matrix.directory)) }}
+
+          echo "Fetching list of cache keys"
+          cacheKeys=$(gh actions-cache list -R $REPO | grep "${{matrix.directory}}" | cut -f 1 )
+
+          ## Setting this to not fail the workflow while deleting cache keys. 
+          set +e
+          echo "Deleting caches..."
+          for cacheKey in $cacheKeys
+          do
+            if [ "$cacheKey" != "$LATEST_KEY" ]; then
+              echo -e "\tOld key found -> $cacheKey"
+              gh actions-cache delete "$cacheKey" --confirm
+            fi
+          done
+
+          echo "Done"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
