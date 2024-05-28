@@ -311,7 +311,7 @@ def _start_client_internal(
 
     node_state = NodeState()
 
-    while True:
+    while not run_tracker.interrupt:
         sleep_duration: int = 0
         with connection(
             address,
@@ -608,12 +608,14 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
 class _RunTracker:
     connection: bool = True
     create_node: Optional[Callable[[], None]] = None
+    interrupt: bool = False
 
     def register_signal_handler(self) -> None:
         """Register handlers for exit signals."""
 
         def signal_handler(sig, frame):  # type: ignore
             # pylint: disable=unused-argument
+            self.interrupt = True
             raise StopIteration from None
 
         signal.signal(signal.SIGINT, signal_handler)
