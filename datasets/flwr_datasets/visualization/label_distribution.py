@@ -49,7 +49,7 @@ def plot_label_distributions(
     legend_title: str = "Labels",
     verbose_labels: bool = True,
     **plot_kwargs: Dict[str, Any],
-) -> Tuple[Axes, pd.DataFrame]:
+) -> Tuple[Figure, Axes, pd.DataFrame]:
     """Plot the label distribution of the partitions.
 
     Parameters
@@ -85,6 +85,8 @@ def plot_label_distributions(
 
     Returns
     -------
+    fig : Figure
+        The figure object.
     axis : Axes
         The Axes object with the plot.
     dataframe : pd.DataFrame
@@ -110,7 +112,7 @@ def plot_label_distributions(
     >>     },
     >> )
     >> partitioner = fds.partitioners["train"]
-    >> axis, dataframe = plot_label_distributions(
+    >> figure, axis, dataframe = plot_label_distributions(
     >>     partitioner=partitioner,
     >>     label_name="label"
     >> )
@@ -134,7 +136,7 @@ def plot_label_distributions(
     >>     },
     >> )
     >> partitioner = fds.partitioners["train"]
-    >> axis, dataframe = plot_label_distributions(
+    >> figure, axis, dataframe = plot_label_distributions(
     >>     partitioner=partitioner,
     >>     label_name="label"
     >>     size_unit="percent",
@@ -160,7 +162,7 @@ def plot_label_distributions(
     >>     },
     >> )
     >> partitioner = fds.partitioners["train"]
-    >> axis, dataframe = plot_label_distributions(
+    >> figure, axis, dataframe = plot_label_distributions(
     >>     partitioner=partitioner,
     >>     label_name="label"
     >>     size_unit="percent",
@@ -235,7 +237,7 @@ def plot_label_distributions(
         **plot_kwargs,
     )
 
-    return axis, dataframe
+    return axis.figure, axis, dataframe
 
 
 def _initialize_xy_labels(
@@ -544,7 +546,7 @@ def compare_label_distribution(
     -------
     fig : Figure
         The figure object containing the plots.
-    ax_list : List[Axes]
+    axes_list : List[Axes]
         List of Axes objects for the plots.
     dataframe_list : List[pd.DataFrame]
         List of DataFrames used for each plot.
@@ -599,7 +601,7 @@ def compare_label_distribution(
         zip(partitioner_list, label_name)
     ):
         if idx == (num_partitioners - 1):
-            _, dataframe = plot_label_distributions(
+            *_, dataframe = plot_label_distributions(
                 partitioner,
                 label_name=single_label_name,
                 plot_type=plot_type,
@@ -614,7 +616,7 @@ def compare_label_distribution(
             )
             dataframe_list.append(dataframe)
         else:
-            _, dataframe = plot_label_distributions(
+            *_, dataframe = plot_label_distributions(
                 partitioner,
                 label_name=single_label_name,
                 plot_type=plot_type,
