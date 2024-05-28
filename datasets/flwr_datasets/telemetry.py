@@ -119,8 +119,8 @@ class EventType(str, Enum):
 
     PING = auto()
 
-    FEDERATED_DATASET_CREATE = auto()
-    PARTITIONER_CREATE = auto()
+    FEDERATED_DATASET_CREATED = auto()
+    PARTITIONER_CREATED = auto()
 
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue

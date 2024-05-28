@@ -102,7 +102,7 @@ class FederatedDataset:
         # Indicate if the dataset is prepared for `load_partition` or `load_split`
         self._dataset_prepared: bool = False
         event(
-            EventType.FEDERATED_DATASET_CREATE,
+            EventType.FEDERATED_DATASET_CREATED,
             {
                 "dataset_name": self._dataset_name,
                 "partitioners_ids": [

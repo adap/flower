@@ -32,7 +32,7 @@ class Partitioner(ABC):
     def __init__(self) -> None:
         self._dataset: Optional[Dataset] = None
         event(
-            EventType.PARTITIONER_CREATE,
+            EventType.PARTITIONER_CREATED,
             {"class_name": self.__class__.__name__, "id": id(self)},
         )
 
