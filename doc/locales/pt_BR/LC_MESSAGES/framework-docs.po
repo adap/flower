@@ -3,59 +3,68 @@
 # This file is distributed under the same license as the Flower package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2023.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-03-15 14:23+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2024-05-25 11:09+0000\n"
+"Last-Translator: Gustavo Bertoli <gubertoli@gmail.com>\n"
+"Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
+"flower-docs/framework/pt_BR/>\n"
 "Language: pt_BR\n"
-"Language-Team: pt_BR <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 5.6-dev\n"
 "Generated-By: Babel 2.14.0\n"
 
 #: ../../source/contributor-explanation-architecture.rst:2
 msgid "Flower Architecture"
-msgstr ""
+msgstr "Arquitetura do Flower"
 
 #: ../../source/contributor-explanation-architecture.rst:5
 msgid "Edge Client Engine"
-msgstr ""
+msgstr "Engine do Edge Client"
 
 #: ../../source/contributor-explanation-architecture.rst:7
 msgid ""
 "`Flower <https://flower.ai>`_ core framework architecture with Edge "
 "Client Engine"
 msgstr ""
+"`Flower <https://flower.ai>`_ arquitetura principal do framework com Engine "
+"do Edge Client"
 
 #: ../../source/contributor-explanation-architecture.rst:13
 msgid "Virtual Client Engine"
-msgstr ""
+msgstr "Engine do Virtual Client"
 
 #: ../../source/contributor-explanation-architecture.rst:15
 msgid ""
 "`Flower <https://flower.ai>`_ core framework architecture with Virtual "
 "Client Engine"
 msgstr ""
+"`Flower <https://flower.ai>`_ arquitetura principal do framework com Engine "
+"do Virtual Client"
 
 #: ../../source/contributor-explanation-architecture.rst:21
 msgid "Virtual Client Engine and Edge Client Engine in the same workload"
 msgstr ""
+"Engine do Virtual Client e do Edge Client no mesma carga de trabalho "
+"(workload)"
 
 #: ../../source/contributor-explanation-architecture.rst:23
 msgid ""
 "`Flower <https://flower.ai>`_ core framework architecture with both "
 "Virtual Client Engine and Edge Client Engine"
 msgstr ""
+"`Flower <https://flower.ai>`_ arquitetura principal do framework com ambas "
+"engines do Virtual Client e do Edge Client"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:2
 msgid "How to build Docker Flower images locally"
-msgstr ""
+msgstr "Como construir imagens Docker do Flower localmente"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:4
 msgid ""
@@ -66,26 +75,36 @@ msgid ""
 "if that is what you need. In this guide, we will explain what images "
 "exist and how to build them locally."
 msgstr ""
+"Flower disponibiliza imagens docker em `Docker Hub <https://hub.docker.com/r/"
+"flwr/server/tags>`_ que incluem todas as dependências necesárias para "
+"executar o servidor. Você pode também compilar suas próprias imagens docker "
+"customizadas do zero com uma versão diferente do Python ou do Ubuntu se isso "
+"for o que você precisa. Neste guia, explicaremos quais imagens existem e "
+"como compilar localmente."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:9
 msgid ""
 "Before we can start, we need to meet a few prerequisites in our local "
 "development environment."
 msgstr ""
+"Antes de começarmos, precisamos encontrar alguns pré-requisitos em nosso "
+"ambiente de desenvolvimento local."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:11
 msgid "Clone the flower repository."
-msgstr ""
+msgstr "Clone o repositório do flower."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:17
 msgid "Verify the Docker daemon is running."
-msgstr ""
+msgstr "Verifique que o serviço Docker está rodando."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:19
 msgid ""
 "Please follow the first section on :doc:`Run Flower using Docker <how-to-"
 "run-flower-using-docker>` which covers this step in more detail."
 msgstr ""
+"Por favor, siga a primeira seção em :doc:`Execute o Flower usando Docker "
+"<how-to-run-flower-using-docker>` que cobre este passo em mais detalhes."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:23
 msgid ""
@@ -96,6 +115,12 @@ msgid ""
 "server image is based on the base image, but it additionally installs the"
 " Flower server using ``pip``."
 msgstr ""
+"Atualmente, Flower fornece duas imagens, uma imagem base e uma imagem de "
+"servidor. Também haverá uma imagem de cliente em breve. A imagem base, como "
+"o nome sugere, contém dependências básicas que tanto o servidor quanto o "
+"cliente precisam. Isso inclui dependências do sistema, Python e ferramentas "
+"Python. A imagem do servidor é baseada na imagem base, mas também instala o "
+"servidor Flower usando ``pip```."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:28
 msgid ""
@@ -103,6 +128,9 @@ msgid ""
 "respective Dockerfiles. You can find them in the subdirectories of "
 "``src/docker``."
 msgstr ""
+"As instruções de compilação que montam as imagens estão localizadas nos "
+"respectivos Dockerfiles. Você pode encontrá-los nos subdiretórios ``src/"
+"docker```."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:31
 msgid ""
@@ -114,91 +142,101 @@ msgid ""
 "available build arguments for each image are listed in one of the tables "
 "below."
 msgstr ""
+"Ambas, imagens base e do servidor são configuradas através dos argumentos de "
+"compilação. Através dos argumentos de compilação, podemos tornar nossa "
+"compilação mais flexível. Por exemplo, na imagem base, podemos especificar a "
+"versão do Python para instalar usando o argumento de compilação "
+"`PYTHON_VERSION`. Alguns dos argumentos de compilação têm valores padrão, "
+"outros devem ser especificados ao compilar a imagem. Todos os argumentos de "
+"compilação disponíveis para cada imagem estão listados em uma das tabelas "
+"abaixo."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:38
 msgid "Building the base image"
-msgstr ""
+msgstr "Construindo a imagem base"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:44
 #: ../../source/contributor-how-to-build-docker-images.rst:86
 msgid "Build argument"
-msgstr ""
+msgstr "Argumento de compilação"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:45
 #: ../../source/contributor-how-to-build-docker-images.rst:87
 msgid "Description"
-msgstr ""
+msgstr "Descrição"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:46
 #: ../../source/contributor-how-to-build-docker-images.rst:88
 msgid "Required"
-msgstr ""
+msgstr "Necessário"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:47
 #: ../../source/contributor-how-to-build-docker-images.rst:89
 msgid "Example"
-msgstr ""
+msgstr "Exemplo"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:48
 msgid "``PYTHON_VERSION``"
-msgstr ""
+msgstr "``PYTHON_VERSION``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:49
 msgid "Version of ``python`` to be installed."
-msgstr ""
+msgstr "Versão do ``python`` a ser instalada."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:50
 #: ../../source/contributor-how-to-build-docker-images.rst:54
 #: ../../source/contributor-how-to-build-docker-images.rst:58
 #: ../../source/contributor-how-to-build-docker-images.rst:100
 msgid "Yes"
-msgstr ""
+msgstr "Sim"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:51
 msgid "``3.11``"
-msgstr ""
+msgstr "``3.11``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:52
 msgid "``PIP_VERSION``"
-msgstr ""
+msgstr "``PIP_VERSION``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:53
 msgid "Version of ``pip`` to be installed."
-msgstr ""
+msgstr "Versão do ``pip`` a ser instalada."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:55
 msgid "``23.0.1``"
-msgstr ""
+msgstr "``23.0.1``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:56
 msgid "``SETUPTOOLS_VERSION``"
-msgstr ""
+msgstr "``SETUPTOOLS_VERSION``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:57
 msgid "Version of ``setuptools`` to be installed."
-msgstr ""
+msgstr "Versão do ``setuptools`` a ser instalada."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:59
 msgid "``69.0.2``"
-msgstr ""
+msgstr "``69.0.2``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:60
 msgid "``UBUNTU_VERSION``"
-msgstr ""
+msgstr "``UBUNTU_VERSION``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:61
 msgid "Version of the official Ubuntu Docker image."
-msgstr ""
+msgstr "Versão da imagem Docker oficial do Ubuntu."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:62
 msgid "Defaults to ``22.04``."
-msgstr ""
+msgstr "Como padrão ``22.04``."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:65
 msgid ""
 "The following example creates a base image with Python 3.11.0, pip 23.0.1"
 " and setuptools 69.0.2:"
 msgstr ""
+"O exemplo seguinte cria uma imagem base com Python 3.11.0, pip 23.0.1 e "
+"setuptools 69.0.2:"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:76
 msgid ""
@@ -206,52 +244,58 @@ msgid ""
 "the build arguments as well as the name and tag can be adapted to your "
 "needs. These values serve as examples only."
 msgstr ""
+"O nome da imagem é ``flwr_base`` com a tag ``0.1.0``. Lembre-se que os "
+"argumentos de construção assim como o nome e a tag podem ser adaptados de "
+"acordo com suas necessidades. Estes valores servem apenas como exemplo."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:80
 msgid "Building the server image"
-msgstr ""
+msgstr "Construindo a imagem do servidor"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:90
 msgid "``BASE_REPOSITORY``"
-msgstr ""
+msgstr "``BASE_REPOSITORY``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:91
 msgid "The repository name of the base image."
-msgstr ""
+msgstr "O nome do repositório da imagem base."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:92
 msgid "Defaults to ``flwr/server``."
-msgstr ""
+msgstr "Pré-definido para ``flwr/server``."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:94
 msgid "``BASE_IMAGE_TAG``"
-msgstr ""
+msgstr "``BASE_IMAGE_TAG``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:95
+#, fuzzy
 msgid "The image tag of the base image."
-msgstr ""
+msgstr "A tag da imagem da imagem base."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:96
 msgid "Defaults to ``py3.11-ubuntu22.04``."
-msgstr ""
+msgstr "Pré-definido para ``py3.11-ubuntu22.04``."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:98
 msgid "``FLWR_VERSION``"
-msgstr ""
+msgstr "``FLWR_VERSION``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:99
 msgid "Version of Flower to be installed."
-msgstr ""
+msgstr "Versão do Flower a ser instalada."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:101
 msgid "``1.7.0``"
-msgstr ""
+msgstr "``1.7.0``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:103
 msgid ""
 "The following example creates a server image with the official Flower "
 "base image py3.11-ubuntu22.04 and Flower 1.7.0:"
 msgstr ""
+"O exemplo a seguir cria uma imagem de servidor com a imagem base oficial do "
+"Flower py3.11-ubuntu22.04 e Flower 1.7.0:"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:114
 msgid ""
@@ -259,6 +303,9 @@ msgid ""
 " the build arguments as well as the name and tag can be adapted to your "
 "needs. These values serve as examples only."
 msgstr ""
+"O nome da imagem é ``flwr_server`` e a tag ``0.1.0``. Lembre-se que os "
+"argumentos de compilação, bem como o nome e a tag podem ser adaptados às "
+"suas necessidades. Esses valores servem apenas como exemplos."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:117
 msgid ""
@@ -268,14 +315,19 @@ msgid ""
 " match the name of your image and the value of ``BASE_IMAGE_TAG`` must "
 "match the tag of your image."
 msgstr ""
+"Se você quiser usar sua própria imagem base ao invés da imagem oficial base "
+"do Flower, tudo que você precisa fazer é definir os argumentos "
+"``BASE_REPOSITORY`` e ``BASE_IMAGE_TAG`` como parte do comando de "
+"compilação. O valor de ``BASE_REPOSITORY`` deve corresponder ao nome da sua "
+"imagem e o valor de ``BASE_IMAGE_TAG`` deve corresponder à tag da sua imagem."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:131
 msgid "After creating the image, we can test whether the image is working:"
-msgstr ""
+msgstr "Depois de criar a imagem, podemos testar se a imagem está funcionando:"
 
 #: ../../source/contributor-how-to-contribute-translations.rst:2
 msgid "Contribute translations"
-msgstr ""
+msgstr "Contribua com traduções"
 
 #: ../../source/contributor-how-to-contribute-translations.rst:4
 msgid ""
@@ -288,17 +340,30 @@ msgid ""
 "also be a great opportunity for those wanting to become open source "
 "contributors with little prerequisites."
 msgstr ""
+"Desde o `Flower 1.5 <https://flower.ai/docs/framework/ref-changelog."
+"html#v1-5-0-2023-08-31>`_ nós introduzimos traduções para nossas páginas de "
+"documentação, mas, como você pode ter notado, as traduções são muitas vezes "
+"imperfeitas. Se você fala línguas diferentes do inglês, você pode ser capaz "
+"de nos ajudar neste esforço para tornar o aprendizado federado acessível a "
+"tantas pessoas quanto possível, contribuindo para essas traduções! Isso "
+"também pode ser uma grande oportunidade para aqueles que querem se tornar "
+"contribuintes de código aberto com poucos pré-requisitos."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:13
+#, fuzzy
 msgid ""
 "Our translation project is publicly available over on `Weblate "
 "<https://hosted.weblate.org/projects/flower-docs/framework/>`_, this "
 "where most of the work will happen."
 msgstr ""
+"Nosso projeto de tradução está disponível publicamente em `Weblate "
+"<https://hosted.weblate.org/projects/flower-docs/framework/>`_, onde a "
+"maioria do trabalho acontecerá."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:18
+#, fuzzy
 msgid "Contribute to existing languages"
-msgstr ""
+msgstr "Contribuir para as línguas existentes"
 
 #: ../../source/contributor-how-to-contribute-translations.rst:23
 msgid ""
@@ -308,6 +373,10 @@ msgid ""
 " profile settings can be found `here "
 "<https://docs.weblate.org/en/latest/user/profile.html>`_."
 msgstr ""
+"A primeira coisa que você precisa fazer para contribuir é criar uma conta "
+"Weblate gratuita nesta `página <https://hosted.weblate.org/accounts/register/"
+">`_. Mais informações sobre as configurações de perfil podem ser encontradas "
+"`aqui <https://docs.weblate.org/en/latest/user/profile.html>`_."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:29
 msgid ""
@@ -316,12 +385,18 @@ msgid ""
 "docs/framework/>`_. Here, you should see the different existing languages"
 " that can be found on the website."
 msgstr ""
+"Uma vez que você esteja conectado ao Weblate, você pode navegar até o "
+"projeto `Flower Framework <https://hosted.weblate.org/projects/flower-docs/"
+"framework/>`_. Aqui, você deve ver os diferentes idiomas existentes que "
+"podem ser encontrados no site."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:34
 msgid ""
 "Once you have selected the language you want to contribute to, you should"
 " see a similar interface to this:"
 msgstr ""
+"Uma vez que você tenha selecionado o idioma que deseja contribuir, você deve "
+"ver uma interface semelhante a esta:"
 
 #: ../../source/contributor-how-to-contribute-translations.rst:39
 msgid ""
@@ -330,10 +405,14 @@ msgid ""
 "will automatically bring you to the translation interface for "
 "untranslated strings."
 msgstr ""
+"A opção mais direta aqui é clicar no botão ``Translate`` no canto superior "
+"direito (na seção ``Translation status``). Isso te levará automaticamente "
+"para a interface de tradução de strings ainda não traduzidas."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:43
+#, fuzzy
 msgid "This is what the interface looks like:"
-msgstr ""
+msgstr "É assim que a interface se parece:"
 
 #: ../../source/contributor-how-to-contribute-translations.rst:47
 msgid ""
@@ -344,6 +423,13 @@ msgid ""
 "your translation to suggestions for other users to view), or ``Skip`` (to"
 " go to the next untranslated string without saving anything)."
 msgstr ""
+"Você insire sua tradução na caixa de texto no topo e depois, uma vez que "
+"você está satisfeito com ela, você pressiona ``Save and continue`` (para "
+"salvar a tradução e ir para a próxima string não traduzida), ``Save and "
+"stay`` (para salvar a tradução e ficar na mesma página), ``Suggest`` (para "
+"adicionar sua tradução para sugestões para outros usuários verem), ou "
+"``Skip`` (para ir para a próxima string não traduzida sem salvar nada na "
+"atual)."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:54
 msgid ""
@@ -353,6 +439,11 @@ msgid ""
 "translations in ``Other languages``, and the ``History`` of translations "
 "for this string."
 msgstr ""
+"Para ajudar com as traduções, você pode ver na parte inferior o ``Nearby "
+"strings`` (strings próximas), o ``Comments`` (comentários de outros "
+"contribuidores), o ``Automatic suggestions`` (sugestões atuomáticas de "
+"sistemas de tradução automática), as traduções em ``Other languages`` ("
+"outras línguas), e o ``History`` (histórico) de traduções para esta string."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:59
 msgid ""
@@ -360,6 +451,9 @@ msgid ""
 "click the link under ``Source string location`` in order to view the "
 "source of the doc file containing the string."
 msgstr ""
+"À direita, sob a seção ``String information``, você também pode clicar no "
+"link sob ``Source string location`` para visualizar a fonte do arquivo doc "
+"que contém a string."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:63
 msgid ""
@@ -367,10 +461,14 @@ msgid ""
 "this `in-depth guide "
 "<https://docs.weblate.org/en/latest/user/translating.html>`_."
 msgstr ""
+"Para obter mais informações sobre como traduzir usando o Weblate, você pode "
+"conferir este `guia detalhado <https://docs.weblate.org/en/latest/user/"
+"translating.html>`_."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:67
+#, fuzzy
 msgid "Add new languages"
-msgstr ""
+msgstr "Adicionar novos idiomas"
 
 #: ../../source/contributor-how-to-contribute-translations.rst:69
 msgid ""
@@ -378,10 +476,14 @@ msgid ""
 "either on `Slack <https://flower.ai/join-slack>`_, or by opening an issue"
 " on our `GitHub repo <https://github.com/adap/flower>`_."
 msgstr ""
+"Se você quiser adicionar uma nova língua, primeiro você terá que entrar em "
+"contato conosco, no `Slack <https://flower.ai/join-slack>`_, ou abrindo uma "
+"issue no nosso `repositório GitHub <https://github.com/adap/flower>`_."
 
 #: ../../source/contributor-how-to-create-new-messages.rst:2
+#, fuzzy
 msgid "Creating New Messages"
-msgstr ""
+msgstr "Criando novas mensagens"
 
 #: ../../source/contributor-how-to-create-new-messages.rst:4
 msgid ""
@@ -21349,4 +21451,3 @@ msgstr ""
 
 #~ msgid "|08cb60859b07461588fe44e55810b050|"
 #~ msgstr ""
-

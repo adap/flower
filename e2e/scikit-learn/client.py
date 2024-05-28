@@ -1,11 +1,11 @@
 import warnings
-import flwr as fl
-import numpy as np
 
+import numpy as np
+import utils
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 
-import utils
+import flwr as fl
 
 # Load MNIST dataset from https://www.openml.org/d/554
 (X_train, y_train), (X_test, y_test) = utils.load_mnist()
@@ -23,6 +23,7 @@ model = LogisticRegression(
 
 # Setting initial parameters, akin to model.compile for keras models
 utils.set_initial_params(model)
+
 
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
@@ -42,9 +43,11 @@ class FlowerClient(fl.client.NumPyClient):
         loss = log_loss(y_test, model.predict_proba(X_test))
         accuracy = model.score(X_test, y_test)
         return loss, len(X_test), {"accuracy": accuracy}
-        
+
+
 def client_fn(cid):
     return FlowerClient().to_client()
+
 
 app = fl.client.ClientApp(
     client_fn=client_fn,
@@ -52,4 +55,6 @@ app = fl.client.ClientApp(
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_client(server_address="0.0.0.0:8080", client=FlowerClient().to_client())
+    fl.client.start_client(
+        server_address="0.0.0.0:8080", client=FlowerClient().to_client()
+    )
