@@ -19,7 +19,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from datasets import Dataset
-from flwr_datasets.common.telemetry import EventType, event
+from flwr_datasets.common import EventType, event
 
 
 class Partitioner(ABC):
