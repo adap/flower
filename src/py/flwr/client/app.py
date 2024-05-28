@@ -268,7 +268,6 @@ def _start_client_internal(
     run_tracker = _RunTracker()
 
     def _on_sucess(retry_state: RetryState) -> None:
-        run_tracker.connection = True
         if retry_state.tries > 1:
             log(
                 INFO,
@@ -280,7 +279,6 @@ def _start_client_internal(
                 run_tracker.create_node()
 
     def _on_backoff(retry_state: RetryState) -> None:
-        run_tracker.connection = False
         if retry_state.tries == 1:
             log(WARN, "Connection attempt failed, retrying...")
         else:
@@ -330,7 +328,7 @@ def _start_client_internal(
                 create_node()  # pylint: disable=not-callable
 
             run_tracker.register_signal_handler()
-            while True:
+            while not run_tracker.interrupt:
                 try:
                     # Receive
                     message = receive()
@@ -424,10 +422,6 @@ def _start_client_internal(
                 except StopIteration:
                     sleep_duration = 0
                     break
-
-            # Unregister node
-            if delete_node is not None and run_tracker.connection:
-                delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
@@ -606,7 +600,6 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
 
 @dataclass
 class _RunTracker:
-    connection: bool = True
     create_node: Optional[Callable[[], None]] = None
     interrupt: bool = False
 
