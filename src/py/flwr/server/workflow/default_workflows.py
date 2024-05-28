@@ -18,12 +18,22 @@
 import io
 import timeit
 from logging import INFO, WARN
-from typing import Optional, cast
+from typing import List, Optional, Tuple, Union, cast
 
 import flwr.common.recordset_compat as compat
-from flwr.common import ConfigsRecord, Context, GetParametersIns, ParametersRecord, log
+from flwr.common import (
+    Code,
+    ConfigsRecord,
+    Context,
+    EvaluateRes,
+    FitRes,
+    GetParametersIns,
+    ParametersRecord,
+    log,
+)
 from flwr.common.constant import MessageType, MessageTypeLegacy
 
+from ..client_proxy import ClientProxy
 from ..compat.app_utils import start_update_client_manager_thread
 from ..compat.legacy_context import LegacyContext
 from ..driver import Driver
@@ -136,7 +146,14 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
             ]
         )
         msg = list(messages)[0]
-        if msg.has_content():
+
+        if (
+            msg.has_content()
+            and compat._extract_status_from_recordset(  # pylint: disable=W0212
+                "getparametersres", msg.content
+            ).code
+            == Code.OK
+        ):
             log(INFO, "Received initial parameters from one random client")
             paramsrecord = next(iter(msg.content.parameters_records.values()))
         else:
@@ -257,18 +274,20 @@ def default_fit_workflow(  # pylint: disable=R0914
     )
 
     # Aggregate training results
-    results = [
-        (
-            node_id_to_proxy[msg.metadata.src_node_id],
-            compat.recordset_to_fitres(msg.content, False),
-        )
-        for msg in messages
-        if msg.has_content()
-    ]
-    failures = [Exception(msg.error) for msg in messages if msg.has_error()]
-    aggregated_result = context.strategy.aggregate_fit(
-        current_round, results, failures  # type: ignore
-    )
+    results: List[Tuple[ClientProxy, FitRes]] = []
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
+    for msg in messages:
+        if msg.has_content():
+            proxy = node_id_to_proxy[msg.metadata.src_node_id]
+            fitres = compat.recordset_to_fitres(msg.content, False)
+            if fitres.status.code == Code.OK:
+                results.append((proxy, fitres))
+            else:
+                failures.append((proxy, fitres))
+        else:
+            failures.append(Exception(msg.error))
+
+    aggregated_result = context.strategy.aggregate_fit(current_round, results, failures)
     parameters_aggregated, metrics_aggregated = aggregated_result
 
     # Update the parameters and write history
@@ -341,17 +360,21 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     )
 
     # Aggregate the evaluation results
-    results = [
-        (
-            node_id_to_proxy[msg.metadata.src_node_id],
-            compat.recordset_to_evaluateres(msg.content),
-        )
-        for msg in messages
-        if msg.has_content()
-    ]
-    failures = [Exception(msg.error) for msg in messages if msg.has_error()]
+    results: List[Tuple[ClientProxy, EvaluateRes]] = []
+    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]] = []
+    for msg in messages:
+        if msg.has_content():
+            proxy = node_id_to_proxy[msg.metadata.src_node_id]
+            evalres = compat.recordset_to_evaluateres(msg.content)
+            if evalres.status.code == Code.OK:
+                results.append((proxy, evalres))
+            else:
+                failures.append((proxy, evalres))
+        else:
+            failures.append(Exception(msg.error))
+
     aggregated_result = context.strategy.aggregate_evaluate(
-        current_round, results, failures  # type: ignore
+        current_round, results, failures
     )
 
     loss_aggregated, metrics_aggregated = aggregated_result

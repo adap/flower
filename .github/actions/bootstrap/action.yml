@@ -6,13 +6,17 @@ inputs:
     default: 3.8
   pip-version:
     description: "Version of pip to be installed using pip"
-    default: 23.3.1
+    default: 24.0.0
   setuptools-version:
     description: "Version of setuptools to be installed using pip"
-    default: 68.2.2
+    default: 69.5.1
   poetry-version:
     description: "Version of poetry to be installed using pip"
     default: 1.7.1
+  poetry-skip:
+    description: "Option to skip the poetry installation"
+    required: false
+    default: "false"
 outputs:
   python-version:
     description: "Version range or exact version of Python or PyPy"
@@ -35,10 +39,12 @@ runs:
         python-version: ${{ inputs.python-version }}
     - name: Install build tools
       run: |
-        python -m pip install -U pip==${{ inputs.pip-version }}
-        python -m pip install -U setuptools==${{ inputs.setuptools-version }}
-        python -m pip install -U poetry==${{ inputs.poetry-version }}
-        python -m poetry config virtualenvs.create false
+        if ${{ inputs.poetry-skip == 'false' }}; then
+          python -m pip install -U pip==${{ inputs.pip-version }}
+          python -m pip install -U setuptools==${{ inputs.setuptools-version }}
+          python -m pip install -U poetry==${{ inputs.poetry-version }}
+          python -m poetry config virtualenvs.create false
+        fi
       shell: bash
     - id: versions
       shell: bash
