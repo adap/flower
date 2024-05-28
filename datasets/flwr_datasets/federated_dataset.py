@@ -21,7 +21,7 @@ import datasets
 from datasets import Dataset, DatasetDict
 from flwr_datasets.partitioner import Partitioner
 from flwr_datasets.resplitter import Resplitter
-from flwr_datasets.telemetry import EventType, event
+from flwr_datasets.common.telemetry import EventType, event
 from flwr_datasets.utils import (
     _check_if_dataset_tested,
     _instantiate_partitioners,
