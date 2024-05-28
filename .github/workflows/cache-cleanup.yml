@@ -1,10 +1,10 @@
-name: Cache
+name: Cache cleanup
 
 on:
-  workflow_dispatch:
+  workflow_dispatch
 
 jobs:
-  cleanup:
+  e2e-cleanup:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     # Using approach described here:
