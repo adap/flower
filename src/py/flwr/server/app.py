@@ -15,7 +15,6 @@
 """Flower server app."""
 
 import argparse
-import asyncio
 import csv
 import importlib.util
 import sys
@@ -26,6 +25,7 @@ from pathlib import Path
 from typing import List, Optional, Sequence, Set, Tuple
 
 import grpc
+from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
     load_ssh_private_key,
@@ -38,14 +38,12 @@ from flwr.common.constant import (
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
-    TRANSPORT_TYPE_VCE,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
-    ssh_types_to_elliptic_curve,
 )
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
@@ -63,7 +61,6 @@ from .superlink.fleet.grpc_bidi.grpc_server import (
 )
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
-from .superlink.fleet.vce import start_vce
 from .superlink.state import StateFactory
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
@@ -196,6 +193,9 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
 def run_driver_api() -> None:
     """Run Flower server (Driver API)."""
     log(INFO, "Starting Flower server (Driver API)")
+    # Running `flower-driver-api` is deprecated
+    warn_deprecated_feature("flower-driver-api")
+    log(WARN, "Use `flower-superlink` instead")
     event(EventType.RUN_DRIVER_API_ENTER)
     args = _parse_args_run_driver_api().parse_args()
 
@@ -233,6 +233,9 @@ def run_driver_api() -> None:
 def run_fleet_api() -> None:
     """Run Flower server (Fleet API)."""
     log(INFO, "Starting Flower server (Fleet API)")
+    # Running `flower-fleet-api` is deprecated
+    warn_deprecated_feature("flower-fleet-api")
+    log(WARN, "Use `flower-superlink` instead")
     event(EventType.RUN_FLEET_API_ENTER)
     args = _parse_args_run_fleet_api().parse_args()
 
@@ -395,17 +398,6 @@ def run_superlink() -> None:
             interceptors=interceptors,
         )
         grpc_servers.append(fleet_server)
-    elif args.fleet_api_type == TRANSPORT_TYPE_VCE:
-        f_stop = asyncio.Event()  # Does nothing
-        _run_fleet_api_vce(
-            num_supernodes=args.num_supernodes,
-            client_app_attr=args.client_app,
-            backend_name=args.backend,
-            backend_config_json_stream=args.backend_config,
-            app_dir=args.app_dir,
-            state_factory=state_factory,
-            f_stop=f_stop,
-        )
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
@@ -429,44 +421,69 @@ def _try_setup_client_authentication(
     args: argparse.Namespace,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> Optional[Tuple[Set[bytes], ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
-    if not args.require_client_authentication:
+    if (
+        not args.auth_list_public_keys
+        and not args.auth_superlink_private_key
+        and not args.auth_superlink_public_key
+    ):
         return None
+
+    if (
+        not args.auth_list_public_keys
+        or not args.auth_superlink_private_key
+        or not args.auth_superlink_public_key
+    ):
+        sys.exit(
+            "Authentication requires providing file paths for "
+            "'--auth-list-public-keys', '--auth-superlink-private-key' and "
+            "'--auth-superlink-public-key'. Provide all three to enable authentication."
+        )
 
     if certificates is None:
         sys.exit(
-            "Client authentication only works over secure connections. "
-            "Please provide certificate paths using '--certificates' when "
-            "enabling '--require-client-authentication'."
+            "Authentication requires secure connections. "
+            "Please provide certificate paths using '--certificates' and "
+            "try again."
         )
 
-    client_keys_file_path = Path(args.require_client_authentication[0])
+    client_keys_file_path = Path(args.auth_list_public_keys)
     if not client_keys_file_path.exists():
         sys.exit(
-            "The provided path to the client public keys CSV file does not exist: "
+            "The provided path to the known public keys CSV file does not exist: "
             f"{client_keys_file_path}. "
-            "Please provide the CSV file path containing known client public keys "
-            "to '--require-client-authentication'."
+            "Please provide the CSV file path containing known public keys "
+            "to '--auth-list-public-keys'."
         )
 
     client_public_keys: Set[bytes] = set()
-    ssh_private_key = load_ssh_private_key(
-        Path(args.require_client_authentication[1]).read_bytes(),
-        None,
-    )
-    ssh_public_key = load_ssh_public_key(
-        Path(args.require_client_authentication[2]).read_bytes()
-    )
 
     try:
-        server_private_key, server_public_key = ssh_types_to_elliptic_curve(
-            ssh_private_key, ssh_public_key
+        ssh_private_key = load_ssh_private_key(
+            Path(args.auth_superlink_private_key).read_bytes(),
+            None,
         )
-    except TypeError:
+        if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm):
         sys.exit(
-            "The file paths provided could not be read as a private and public "
-            "key pair. Client authentication requires an elliptic curve public and "
-            "private key pair. Please provide the file paths containing elliptic "
-            "curve private and public keys to '--require-client-authentication'."
+            "Error: Unable to parse the private key file in "
+            "'--auth-superlink-private-key'. Authentication requires elliptic "
+            "curve private and public key pair. Please ensure that the file "
+            "path points to a valid private key file and try again."
+        )
+
+    try:
+        ssh_public_key = load_ssh_public_key(
+            Path(args.auth_superlink_public_key).read_bytes()
+        )
+        if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm):
+        sys.exit(
+            "Error: Unable to parse the public key file in "
+            "'--auth-superlink-public-key'. Authentication requires elliptic "
+            "curve private and public key pair. Please ensure that the file "
+            "path points to a valid public key file and try again."
         )
 
     with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
@@ -478,14 +495,14 @@ def _try_setup_client_authentication(
                     client_public_keys.add(public_key_to_bytes(public_key))
                 else:
                     sys.exit(
-                        "Error: Unable to parse the public keys in the .csv "
-                        "file. Please ensure that the .csv file contains valid "
-                        "SSH public keys and try again."
+                        "Error: Unable to parse the public keys in the CSV "
+                        "file. Please ensure that the CSV file path points to a valid "
+                        "known SSH public keys files and try again."
                     )
         return (
             client_public_keys,
-            server_private_key,
-            server_public_key,
+            ssh_private_key,
+            ssh_public_key,
         )
 
 
@@ -536,29 +553,6 @@ def _run_fleet_api_grpc_rere(
     fleet_grpc_server.start()
 
     return fleet_grpc_server
-
-
-# pylint: disable=too-many-arguments
-def _run_fleet_api_vce(
-    num_supernodes: int,
-    client_app_attr: str,
-    backend_name: str,
-    backend_config_json_stream: str,
-    app_dir: str,
-    state_factory: StateFactory,
-    f_stop: asyncio.Event,
-) -> None:
-    log(INFO, "Flower VCE: Starting Fleet API (VirtualClientEngine)")
-
-    start_vce(
-        num_supernodes=num_supernodes,
-        client_app_attr=client_app_attr,
-        backend_name=backend_name,
-        backend_config_json_stream=backend_config_json_stream,
-        state_factory=state_factory,
-        app_dir=app_dir,
-        f_stop=f_stop,
-    )
 
 
 # pylint: disable=import-outside-toplevel,too-many-arguments
@@ -708,13 +702,20 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         default=DATABASE,
     )
     parser.add_argument(
-        "--require-client-authentication",
-        nargs=3,
-        metavar=("CLIENT_KEYS", "SERVER_PRIVATE_KEY", "SERVER_PUBLIC_KEY"),
+        "--auth-list-public-keys",
         type=str,
-        help="Provide three file paths: (1) a .csv file containing a list of "
-        "known client public keys for authentication, (2) the server's private "
-        "key file, and (3) the server's public key file.",
+        help="A CSV file (as a path str) containing a list of known public "
+        "keys to enable authentication.",
+    )
+    parser.add_argument(
+        "--auth-superlink-private-key",
+        type=str,
+        help="The SuperLink's private key (as a path str) to enable authentication.",
+    )
+    parser.add_argument(
+        "--auth-superlink-public-key",
+        type=str,
+        help="The SuperLink's public key (as a path str) to enable authentication.",
     )
 
 
@@ -743,14 +744,6 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         dest="fleet_api_type",
         const=TRANSPORT_TYPE_REST,
         help="Start a Fleet API server (REST, experimental)",
-    )
-
-    ex_group.add_argument(
-        "--vce",
-        action="store_const",
-        dest="fleet_api_type",
-        const=TRANSPORT_TYPE_VCE,
-        help="Start a Fleet API server (VirtualClientEngine)",
     )
 
     # Fleet API gRPC-rere options
@@ -787,37 +780,4 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         help="Set the number of concurrent workers for the Fleet API REST server.",
         type=int,
         default=1,
-    )
-
-    # Fleet API VCE options
-    vce_group = parser.add_argument_group("Fleet API (VCE) server options", "")
-    vce_group.add_argument(
-        "--client-app",
-        help="For example: `client:app` or `project.package.module:wrapper.app`.",
-    )
-    vce_group.add_argument(
-        "--num-supernodes",
-        type=int,
-        help="Number of simulated SuperNodes.",
-    )
-    vce_group.add_argument(
-        "--backend",
-        default="ray",
-        type=str,
-        help="Simulation backend that executes the ClientApp.",
-    )
-    vce_group.add_argument(
-        "--backend-config",
-        type=str,
-        default='{"client_resources": {"num_cpus":1, "num_gpus":0.0}, "tensorflow": 0}',
-        help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
-        "configure a backend. Values supported in <value> are those included by "
-        "`flwr.common.typing.ConfigsRecordValues`. ",
-    )
-    parser.add_argument(
-        "--app-dir",
-        default="",
-        help="Add specified directory to the PYTHONPATH and load"
-        "ClientApp from there."
-        " Default: current working directory.",
     )
