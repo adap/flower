@@ -169,7 +169,7 @@ def create_event(event_type: EventType, event_details: Optional[Dict[str, Any]])
         "source": state["source"],
         "cluster": state["cluster"],
         "date": date,
-        "flower-datasets": {
+        "flower": {
             "package_name": package_name,
             "package_version": package_version,
         },
