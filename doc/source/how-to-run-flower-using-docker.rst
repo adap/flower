@@ -2,7 +2,8 @@ Run Flower using Docker
 =======================
 
 The simplest way to get started with Flower is by using the pre-made Docker images, which you can
-find on `Docker Hub <https://hub.docker.com/u/flwr>`__.
+find on `Docker Hub <https://hub.docker.com/u/flwr>`__. Supported architectures include ``amd64``
+and ``arm64v8``.
 
 Before you start, make sure that the Docker daemon is running:
 
@@ -165,9 +166,9 @@ is located. In the file, we list all the dependencies that the ClientApp require
 
 .. code-block::
 
-  flwr-datasets[vision]>=0.0.2,<1.0.0
-  torch==2.1.1
-  torchvision==0.16.1
+  flwr-datasets[vision]>=0.1.0,<1.0.0
+  torch==2.2.1
+  torchvision==0.17.1
   tqdm==4.66.3
 
 .. important::
@@ -188,7 +189,7 @@ The ``Dockerfile.supernode`` contains the instructions that assemble the SuperNo
   WORKDIR /app
 
   COPY requirements.txt .
-  RUN python -m pip install -U --no-cache-dir -r requirements.txt && pyenv rehash
+  RUN python -m pip install -U --no-cache-dir -r requirements.txt
 
   COPY client.py ./
   ENTRYPOINT ["flower-client-app", "client:app"]
@@ -267,7 +268,7 @@ certificate within the container. Use the ``--certificates`` flag when starting 
 
 .. code-block:: bash
 
-  $ docker run --rm --volume ./ca.crt:/app/ca.crt flwr_supernode:0.0.1 client:app \
+  $ docker run --rm --volume ./ca.crt:/app/ca.crt flwr_supernode:0.0.1 \
     --server 192.168.1.100:9092 \
     --certificates ca.crt
 
@@ -382,19 +383,57 @@ certificate within the container. Use the ``--certificates`` flag when starting 
 
 .. code-block:: bash
 
-  $ docker run --rm --volume ./ca.crt:/app/ca.crt flwr_serverapp:0.0.1 client:app \
+  $ docker run --rm --volume ./ca.crt:/app/ca.crt flwr_serverapp:0.0.1 \
     --server 192.168.1.100:9091 \
     --certificates ca.crt
 
 Advanced Docker options
 -----------------------
 
+Run with root user privileges
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Flower Docker images, by default, run with a non-root user (username/groupname: ``app``,
+UID/GID: ``49999``). Using root user is not recommended unless it is necessary for specific
+tasks during the build process. Always make sure to run the container as a non-root user in
+production to maintain security best practices.
+
+**Run a container with root user privileges**
+
+Run the Docker image with the ``-u`` flag and specify ``root`` as the username:
+
+.. code-block:: bash
+
+   $ docker run --rm -u root flwr/superlink:1.8.0
+
+This command will run the Docker container with root user privileges.
+
+**Run the build process with root user privileges**
+
+If you want to switch to the root user during the build process of the Docker image to install
+missing system dependencies, you can use the ``USER root`` directive within your Dockerfile.
+
+.. code-block:: dockerfile
+
+  FROM flwr/supernode:1.8.0
+
+  # Switch to root user
+  USER root
+
+  # Install missing dependencies (requires root access)
+  RUN apt-get update && apt-get install -y <required-package-name>
+
+  # Switch back to non-root user app
+  USER app
+
+  # Continue with your Docker image build process
+  ...
+
 Using a different Flower version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to use a different version of Flower, for example Flower nightly, you can do so by
-changing the tag. All available versions are on
-`Docker Hub <https://hub.docker.com/r/flwr/superlink/tags>`__.
+changing the tag. All available versions are on `Docker Hub <https://hub.docker.com/u/flwr>`__.
 
 Pinning a Docker image to a specific version
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
