@@ -25,7 +25,7 @@ jobs:
           - directory: fastai
           - directory: pandas
 
-    name: Framework / ${{matrix.directory}}
+    name: Framework / ${{ matrix.directory }}
 
     steps:
       - name: Check out code
@@ -45,7 +45,7 @@ jobs:
           LATEST_KEY=pythonloc-${{ matrix.directory }}-${{ env.pythonLocation }}-${{ hashFiles(format('./e2e/{0}/pyproject.toml', matrix.directory)) }}
 
           echo "Fetching list of cache keys"
-          cacheKeys=$(gh actions-cache list -R $REPO | grep "${{matrix.directory}}" | cut -f 1 )
+          cacheKeys=$(gh actions-cache list -R $REPO | grep "${{ matrix.directory }}" | cut -f 1 )
 
           ## Setting this to not fail the workflow while deleting cache keys. 
           set +e
