@@ -20,7 +20,7 @@ import unittest
 from typing import Callable
 from unittest import mock
 
-from flwr_datasets.telemetry import EventType, _get_source_id, event
+from flwr_datasets.common.telemetry import EventType, _get_source_id, event
 
 
 class TelemetryTest(unittest.TestCase):
