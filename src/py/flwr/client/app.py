@@ -268,7 +268,6 @@ def _start_client_internal(
     run_tracker = _RunTracker()
 
     def _on_sucess(retry_state: RetryState) -> None:
-        run_tracker.connection = True
         if retry_state.tries > 1:
             log(
                 INFO,
@@ -280,7 +279,6 @@ def _start_client_internal(
                 run_tracker.create_node()
 
     def _on_backoff(retry_state: RetryState) -> None:
-        run_tracker.connection = False
         if retry_state.tries == 1:
             log(WARN, "Connection attempt failed, retrying...")
         else:
@@ -311,7 +309,7 @@ def _start_client_internal(
 
     node_state = NodeState()
 
-    while True:
+    while not run_tracker.interrupt:
         sleep_duration: int = 0
         with connection(
             address,
@@ -330,7 +328,7 @@ def _start_client_internal(
                 create_node()  # pylint: disable=not-callable
 
             run_tracker.register_signal_handler()
-            while True:
+            while not run_tracker.interrupt:
                 try:
                     # Receive
                     message = receive()
@@ -404,7 +402,10 @@ def _start_client_internal(
                             e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
                             exc_entity = "SuperNode"
 
-                        log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+                        if not run_tracker.interrupt:
+                            log(
+                                ERROR, "%s raised an exception", exc_entity, exc_info=ex
+                            )
 
                         # Create error message
                         reply_message = message.create_error_reply(
@@ -424,10 +425,6 @@ def _start_client_internal(
                 except StopIteration:
                     sleep_duration = 0
                     break
-
-            # Unregister node
-            if delete_node is not None and run_tracker.connection:
-                delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
@@ -606,14 +603,15 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
 
 @dataclass
 class _RunTracker:
-    connection: bool = True
     create_node: Optional[Callable[[], None]] = None
+    interrupt: bool = False
 
     def register_signal_handler(self) -> None:
         """Register handlers for exit signals."""
 
         def signal_handler(sig, frame):  # type: ignore
             # pylint: disable=unused-argument
+            self.interrupt = True
             raise StopIteration from None
 
         signal.signal(signal.SIGINT, signal_handler)
