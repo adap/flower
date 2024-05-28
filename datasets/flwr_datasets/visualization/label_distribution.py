@@ -48,7 +48,8 @@ def plot_label_distributions(
     legend: bool = False,
     legend_title: str = "Labels",
     verbose_labels: bool = True,
-    **plot_kwargs: Dict[str, Any],
+    plot_kwargs: Optional[Dict[str, Any]] = None,
+    legend_kwargs: Optional[Dict[str, Any]] = None,
 ) -> Tuple[Figure, Axes, pd.DataFrame]:
     """Plot the label distribution of the partitions.
 
@@ -82,6 +83,17 @@ def plot_label_distributions(
         Name for the legend.
     verbose_labels : bool
         Whether to use verbose versions of the labels.
+    plot_kwargs: Optional[Dict[str, Any]]
+        Any key value pair that can be passed to a plot function that are not supported
+        directly. In case of the parameter doubling (e.g. specifying cmap here too) the
+        chosen value will be taken from the explicit arguments (e.g. cmap specified as
+        an argument to this function not the value in this dictionary).
+    legend_kwargs: Optional[Dict[str, Any]]
+        Any key value pair that can be passed to a figure.legend in case of bar plot or
+        cbar_kws in case of heatmap that are not supported directly. In case of the
+        parameter doubling (e.g. specifying legend_title here too) the
+        chosen value will be taken from the explicit arguments (e.g. legend_title
+        specified as an argument to this function not the value in this dictionary).
 
     Returns
     -------
@@ -180,6 +192,11 @@ def plot_label_distributions(
             f"The specified 'label_name': '{label_name}' is not present in the "
             f"dataset."
         )
+    if plot_kwargs is None:
+        plot_kwargs = {}
+
+    if legend_kwargs is None:
+        legend_kwargs = {}
 
     if max_num_partitions is None:
         max_num_partitions = partitioner.num_partitions
@@ -234,7 +251,8 @@ def plot_label_distributions(
         legend_title,
         partition,
         label_name,
-        **plot_kwargs,
+        plot_kwargs,
+        legend_kwargs
     )
 
     return axis.figure, axis, dataframe
@@ -328,7 +346,8 @@ def _plot_data(
     legend_title: str,
     partition: datasets.Dataset,
     label_name: str,
-    **plot_kwargs: Dict[str, Any],
+    plot_kwargs: Dict[str, Any],
+    legend_kwargs: Dict[str, Any],
 ) -> Axes:
     if plot_type == "bar":
         return _plot_bar(
@@ -344,7 +363,8 @@ def _plot_data(
             verbose_labels,
             partition,
             label_name,
-            **plot_kwargs,
+            plot_kwargs,
+            legend_kwargs,
         )
     if plot_type == "heatmap":
         return _plot_heatmap(
@@ -357,7 +377,8 @@ def _plot_data(
             ylabel,
             cbar_title,
             legend,
-            **plot_kwargs,
+            plot_kwargs,
+            legend_kwargs
         )
     raise ValueError(f"Invalid plot_type: {plot_type}. Must be 'bar' or 'heatmap'.")
 
@@ -375,7 +396,9 @@ def _plot_bar(
     verbose_labels: bool,
     partition: datasets.Dataset,
     label_name: str,
-    **plot_kwargs: Dict[str, Any],
+    plot_kwargs: Dict[str, Any],
+    legend_kwargs: Dict[str, Any],
+
 ) -> Axes:
     if colormap is None:
         colormap = "RdYlGn"
@@ -419,8 +442,8 @@ def _plot_bar(
             legend_names = legend_labels
 
         _ = axis.figure.legend(
-            handles[::-1],
-            legend_names[::-1],
+            handles=handles[::-1],
+            labels=legend_names[::-1],
             title=legend_title,
             loc="outside center right",
             bbox_to_anchor=(1.3, 0.5),
@@ -439,7 +462,9 @@ def _plot_heatmap(
     ylabel: str,
     cbar_title: Optional[str],
     legend: bool,
-    **plot_kwargs: Dict[str, Any],
+    plot_kwargs: Dict[str, Any],
+    legend_kwargs: Dict[str, Any],
+
 ) -> Axes:
     if colormap is None:
         colormap = sns.light_palette("seagreen", as_cmap=True)
