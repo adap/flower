@@ -11,7 +11,7 @@ authors = [
 ]
 dependencies = [
     "flwr>=1.8.0,<2.0",
-    "flwr-datasets[vision]>=0.0.2,<1.0.0",
+    "flwr-datasets[vision]>=0.1.0,<1.0.0",
     "tensorflow-estimator~=2.4",
     "tensorflow-probability~=0.22.0",
     "tensorflow>=2.4.0,<=2.15.0",
