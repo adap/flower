@@ -17,7 +17,7 @@ With Flower 1.8, we introduced the :code:`ClientApp` and :code:`ServerApp`. Thes
 What is a :code:`ClientApp`?
 ----------------------------
 
-The |clientapp_link|_ is an application that can run various tasks on clients, such as federated learning. It is launched on demand by the :code:`SuperNode`. The communication pattern between the :code:`SuperNode` and :code:`ClientApp` uses :code:`Message` and :code:`Context` objects containing all the information needed to run the tasks. These objects will be elaborated further below.
+The |clientapp_link|_ is an application that can run various tasks on clients, such as model training. It is launched on demand by the :code:`SuperNode`. The communication pattern between the :code:`SuperNode` and :code:`ClientApp` uses :code:`Message` and :code:`Context` objects containing all the information needed to run the tasks. These objects will be elaborated further below.
 
 There are two ways to use the :code:`ClientApp`:
 
@@ -96,9 +96,8 @@ With Flower 1.8, we provide a set of low-level APIs to allow more versatile ways
 
 * :code:`app.train()`
 * :code:`app.evaluate()`
-* :code:`app.query()`
 
-which, you guessed it, runs the training, evaluation, and query on client-side data. 
+which runs the training and evaluation on client-side data. 
 
 .. admonition:: Important
     :class: important
