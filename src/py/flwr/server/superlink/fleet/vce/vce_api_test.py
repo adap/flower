@@ -17,6 +17,7 @@
 
 import asyncio
 import threading
+import time
 from itertools import cycle
 from json import JSONDecodeError
 from math import pi
@@ -26,8 +27,14 @@ from typing import Dict, Optional, Set, Tuple
 from unittest import IsolatedAsyncioTestCase
 from uuid import UUID
 
-from flwr.common import GetPropertiesIns, Message, Metadata
-from flwr.common.constant import MESSAGE_TYPE_GET_PROPERTIES
+from flwr.client.client_app import LoadClientAppError
+from flwr.common import (
+    DEFAULT_TTL,
+    GetPropertiesIns,
+    Message,
+    MessageTypeLegacy,
+    Metadata,
+)
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.server.superlink.fleet.vce.vce_api import (
@@ -47,7 +54,6 @@ def terminate_simulation(f_stop: asyncio.Event, sleep_duration: int) -> None:
 def init_state_factory_nodes_mapping(
     num_nodes: int,
     num_messages: int,
-    erroneous_message: Optional[bool] = False,
 ) -> Tuple[StateFactory, NodeToPartitionMapping, Dict[UUID, float]]:
     """Instatiate StateFactory, register nodes and pre-insert messages in the state."""
     # Register a state and a run_id in it
@@ -62,7 +68,6 @@ def init_state_factory_nodes_mapping(
         nodes_mapping=nodes_mapping,
         run_id=run_id,
         num_messages=num_messages,
-        erroneous_message=erroneous_message,
     )
     return state_factory, nodes_mapping, expected_results
 
@@ -73,11 +78,10 @@ def register_messages_into_state(
     nodes_mapping: NodeToPartitionMapping,
     run_id: int,
     num_messages: int,
-    erroneous_message: Optional[bool] = False,
 ) -> Dict[UUID, float]:
     """Register `num_messages` into the state factory."""
     state: InMemoryState = state_factory.state()  # type: ignore
-    state.run_ids.add(run_id)
+    state.run_ids[run_id] = ("Mock/mock", "v1.0.0")
     # Artificially add TaskIns to state so they can be processed
     # by the Simulation Engine logic
     nodes_cycle = cycle(nodes_mapping.keys())  # we have more messages than supernodes
@@ -98,16 +102,15 @@ def register_messages_into_state(
                 src_node_id=0,
                 dst_node_id=dst_node_id,  # indicate destination node
                 reply_to_message="",
-                ttl="",
-                message_type=(
-                    "a bad message"
-                    if erroneous_message
-                    else MESSAGE_TYPE_GET_PROPERTIES
-                ),
+                ttl=DEFAULT_TTL,
+                message_type=MessageTypeLegacy.GET_PROPERTIES,
             ),
         )
         # Convert Message to TaskIns
         taskins = message_to_taskins(message)
+        # Normally recorded by the driver servicer
+        # but since we don't have one in this test, we do this manually
+        taskins.task.pushed_at = time.time()
         # Instert in state
         task_id = state.store_task_ins(taskins)
         if task_id:
@@ -119,21 +122,21 @@ def register_messages_into_state(
     return expected_results
 
 
-def _autoresolve_working_dir(rel_client_app_dir: str = "backend") -> str:
-    """Correctly resolve working directory."""
+def _autoresolve_app_dir(rel_client_app_dir: str = "backend") -> str:
+    """Correctly resolve working directory for the app."""
     file_path = Path(__file__)
-    working_dir = Path.cwd()
-    rel_workdir = file_path.relative_to(working_dir)
+    app_dir = Path.cwd()
+    rel_app_dir = file_path.relative_to(app_dir)
 
     # Susbtract lats element and append "backend/test" (wher the client module is.)
-    return str(rel_workdir.parent / rel_client_app_dir)
+    return str(rel_app_dir.parent / rel_client_app_dir)
 
 
 # pylint: disable=too-many-arguments
 def start_and_shutdown(
     backend: str = "ray",
     client_app_attr: str = "raybackend_test:client_app",
-    working_dir: str = "",
+    app_dir: str = "",
     num_supernodes: Optional[int] = None,
     state_factory: Optional[StateFactory] = None,
     nodes_mapping: Optional[NodeToPartitionMapping] = None,
@@ -157,8 +160,8 @@ def start_and_shutdown(
         termination_th.start()
 
     # Resolve working directory if not passed
-    if not working_dir:
-        working_dir = _autoresolve_working_dir()
+    if not app_dir:
+        app_dir = _autoresolve_app_dir()
 
     start_vce(
         num_supernodes=num_supernodes,
@@ -166,7 +169,7 @@ def start_and_shutdown(
         backend_name=backend,
         backend_config_json_stream=backend_config,
         state_factory=state_factory,
-        working_dir=working_dir,
+        app_dir=app_dir,
         f_stop=f_stop,
         existing_nodes_mapping=nodes_mapping,
     )
@@ -191,28 +194,9 @@ class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
         state_factory, nodes_mapping, _ = init_state_factory_nodes_mapping(
             num_nodes=num_nodes, num_messages=num_messages
         )
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(LoadClientAppError):
             start_and_shutdown(
                 client_app_attr="totally_fictitious_app:client",
-                state_factory=state_factory,
-                nodes_mapping=nodes_mapping,
-            )
-
-    def test_erroneous_messages(self) -> None:
-        """Test handling of error in async worker (consumer).
-
-        We register messages which will trigger an error when handling, triggering an
-        error.
-        """
-        num_messages = 100
-        num_nodes = 59
-
-        state_factory, nodes_mapping, _ = init_state_factory_nodes_mapping(
-            num_nodes=num_nodes, num_messages=num_messages, erroneous_message=True
-        )
-
-        with self.assertRaises(RuntimeError):
-            start_and_shutdown(
                 state_factory=state_factory,
                 nodes_mapping=nodes_mapping,
             )

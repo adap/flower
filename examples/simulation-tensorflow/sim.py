@@ -83,7 +83,7 @@ def get_client_fn(dataset: FederatedDataset):
         client_dataset = dataset.load_partition(int(cid), "train")
 
         # Now let's split it into train (90%) and validation (10%)
-        client_dataset_splits = client_dataset.train_test_split(test_size=0.1)
+        client_dataset_splits = client_dataset.train_test_split(test_size=0.1, seed=42)
 
         trainset = client_dataset_splits["train"].to_tf_dataset(
             columns="image", label_cols="label", batch_size=32
@@ -131,7 +131,7 @@ def get_evaluate_fn(testset: Dataset):
 # Download MNIST dataset and partition it
 mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": NUM_CLIENTS})
 # Get the whole test set for centralised evaluation
-centralized_testset = mnist_fds.load_full("test").to_tf_dataset(
+centralized_testset = mnist_fds.load_split("test").to_tf_dataset(
     columns="image", label_cols="label", batch_size=64
 )
 

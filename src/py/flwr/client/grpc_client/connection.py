@@ -22,7 +22,10 @@ from pathlib import Path
 from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple, Union, cast
 
+from cryptography.hazmat.primitives.asymmetric import ec
+
 from flwr.common import (
+    DEFAULT_TTL,
     GRPC_MAX_MESSAGE_LENGTH,
     ConfigsRecord,
     Message,
@@ -31,14 +34,10 @@ from flwr.common import (
 )
 from flwr.common import recordset_compat as compat
 from flwr.common import serde
-from flwr.common.constant import (
-    MESSAGE_TYPE_EVALUATE,
-    MESSAGE_TYPE_FIT,
-    MESSAGE_TYPE_GET_PARAMETERS,
-    MESSAGE_TYPE_GET_PROPERTIES,
-)
+from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.retry_invoker import RetryInvoker
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     Reason,
@@ -59,17 +58,22 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_connection(  # pylint: disable=R0915
+def grpc_connection(  # pylint: disable=R0913, R0915
     server_address: str,
     insecure: bool,
+    retry_invoker: RetryInvoker,  # pylint: disable=unused-argument
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
+    authentication_keys: Optional[  # pylint: disable=unused-argument
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
+        Optional[Callable[[int], Tuple[str, str]]],
     ]
 ]:
     """Establish a gRPC connection to a gRPC server.
@@ -80,6 +84,11 @@ def grpc_connection(  # pylint: disable=R0915
         The IPv4 or IPv6 address of the server. If the Flower server runs on the same
         machine on port 8080, then `server_address` would be `"0.0.0.0:8080"` or
         `"[::]:8080"`.
+    insecure : bool
+        Starts an insecure gRPC connection when True. Enables HTTPS connection
+        when False, using system certificates if `root_certificates` is None.
+    retry_invoker: RetryInvoker
+        Unused argument present for compatibilty.
     max_message_length : int
         The maximum length of gRPC messages that can be exchanged with the Flower
         server. The default should be sufficient for most models. Users who train
@@ -141,22 +150,22 @@ def grpc_connection(  # pylint: disable=R0915
             recordset = compat.getpropertiesins_to_recordset(
                 serde.get_properties_ins_from_proto(proto.get_properties_ins)
             )
-            message_type = MESSAGE_TYPE_GET_PROPERTIES
+            message_type = MessageTypeLegacy.GET_PROPERTIES
         elif field == "get_parameters_ins":
             recordset = compat.getparametersins_to_recordset(
                 serde.get_parameters_ins_from_proto(proto.get_parameters_ins)
             )
-            message_type = MESSAGE_TYPE_GET_PARAMETERS
+            message_type = MessageTypeLegacy.GET_PARAMETERS
         elif field == "fit_ins":
             recordset = compat.fitins_to_recordset(
                 serde.fit_ins_from_proto(proto.fit_ins), False
             )
-            message_type = MESSAGE_TYPE_FIT
+            message_type = MessageType.TRAIN
         elif field == "evaluate_ins":
             recordset = compat.evaluateins_to_recordset(
                 serde.evaluate_ins_from_proto(proto.evaluate_ins), False
             )
-            message_type = MESSAGE_TYPE_EVALUATE
+            message_type = MessageType.EVALUATE
         elif field == "reconnect_ins":
             recordset = RecordSet()
             recordset.configs_records["config"] = ConfigsRecord(
@@ -178,7 +187,7 @@ def grpc_connection(  # pylint: disable=R0915
                 dst_node_id=0,
                 reply_to_message="",
                 group_id="",
-                ttl="",
+                ttl=DEFAULT_TTL,
                 message_type=message_type,
             ),
             content=recordset,
@@ -190,20 +199,20 @@ def grpc_connection(  # pylint: disable=R0915
         message_type = message.metadata.message_type
 
         # RecordSet --> *Res --> *Res proto -> ClientMessage proto
-        if message_type == MESSAGE_TYPE_GET_PROPERTIES:
+        if message_type == MessageTypeLegacy.GET_PROPERTIES:
             getpropres = compat.recordset_to_getpropertiesres(recordset)
             msg_proto = ClientMessage(
                 get_properties_res=serde.get_properties_res_to_proto(getpropres)
             )
-        elif message_type == MESSAGE_TYPE_GET_PARAMETERS:
+        elif message_type == MessageTypeLegacy.GET_PARAMETERS:
             getparamres = compat.recordset_to_getparametersres(recordset, False)
             msg_proto = ClientMessage(
                 get_parameters_res=serde.get_parameters_res_to_proto(getparamres)
             )
-        elif message_type == MESSAGE_TYPE_FIT:
+        elif message_type == MessageType.TRAIN:
             fitres = compat.recordset_to_fitres(recordset, False)
             msg_proto = ClientMessage(fit_res=serde.fit_res_to_proto(fitres))
-        elif message_type == MESSAGE_TYPE_EVALUATE:
+        elif message_type == MessageType.EVALUATE:
             evalres = compat.recordset_to_evaluateres(recordset)
             msg_proto = ClientMessage(evaluate_res=serde.evaluate_res_to_proto(evalres))
         elif message_type == "reconnect":
@@ -221,7 +230,7 @@ def grpc_connection(  # pylint: disable=R0915
 
     try:
         # Yield methods
-        yield (receive, send, None, None)
+        yield (receive, send, None, None, None)
     finally:
         # Make sure to have a final
         channel.close()

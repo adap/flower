@@ -1,0 +1,17 @@
+[build-system]
+requires = ["poetry-core>=1.4.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "vit-finetune"
+version = "0.1.0"
+description = "FL finetuning of a Vision Transformer with Flower."
+authors = ["The Flower Authors <hello@flower.ai>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+flwr = { extras = ["simulation"], version = ">=1.0,<2.0" }
+flwr-datasets = { extras = ["vision"], version = ">=0.0.2,<1.0.0" }
+torch = "2.2.1"
+torchvision = "0.17.1"
+matplotlib = "3.8.3"

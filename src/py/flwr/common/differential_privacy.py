@@ -162,3 +162,15 @@ def compute_adaptive_noise_params(
         noise_multiplier_value = 0.0
 
     return clipped_count_stddev, noise_multiplier_value
+
+
+def add_localdp_gaussian_noise_to_params(
+    model_params: Parameters, sensitivity: float, epsilon: float, delta: float
+) -> Parameters:
+    """Add local DP gaussian noise to model parameters."""
+    model_params_ndarrays = parameters_to_ndarrays(model_params)
+    add_gaussian_noise_inplace(
+        model_params_ndarrays,
+        sensitivity * np.sqrt(2 * np.log(1.25 / delta)) / epsilon,
+    )
+    return ndarrays_to_parameters(model_params_ndarrays)

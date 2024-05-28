@@ -23,13 +23,8 @@ from flwr import common
 from flwr.client import ClientFn
 from flwr.client.client_app import ClientApp
 from flwr.client.node_state import NodeState
-from flwr.common import Message, Metadata, RecordSet
-from flwr.common.constant import (
-    MESSAGE_TYPE_EVALUATE,
-    MESSAGE_TYPE_FIT,
-    MESSAGE_TYPE_GET_PARAMETERS,
-    MESSAGE_TYPE_GET_PROPERTIES,
-)
+from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
+from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.logger import log
 from flwr.common.recordset_compat import (
     evaluateins_to_recordset,
@@ -110,7 +105,7 @@ class RayActorClientProxy(ClientProxy):
                 src_node_id=0,
                 dst_node_id=int(self.cid),
                 reply_to_message="",
-                ttl=str(timeout) if timeout else "",
+                ttl=timeout if timeout else DEFAULT_TTL,
                 message_type=message_type,
                 partition_id=int(self.cid),
             ),
@@ -126,7 +121,7 @@ class RayActorClientProxy(ClientProxy):
         recordset = getpropertiesins_to_recordset(ins)
         message = self._wrap_recordset_in_message(
             recordset,
-            message_type=MESSAGE_TYPE_GET_PROPERTIES,
+            message_type=MessageTypeLegacy.GET_PROPERTIES,
             timeout=timeout,
             group_id=group_id,
         )
@@ -145,7 +140,7 @@ class RayActorClientProxy(ClientProxy):
         recordset = getparametersins_to_recordset(ins)
         message = self._wrap_recordset_in_message(
             recordset,
-            message_type=MESSAGE_TYPE_GET_PARAMETERS,
+            message_type=MessageTypeLegacy.GET_PARAMETERS,
             timeout=timeout,
             group_id=group_id,
         )
@@ -163,7 +158,7 @@ class RayActorClientProxy(ClientProxy):
         )  # This must stay TRUE since ins are in-memory
         message = self._wrap_recordset_in_message(
             recordset,
-            message_type=MESSAGE_TYPE_FIT,
+            message_type=MessageType.TRAIN,
             timeout=timeout,
             group_id=group_id,
         )
@@ -181,7 +176,7 @@ class RayActorClientProxy(ClientProxy):
         )  # This must stay TRUE since ins are in-memory
         message = self._wrap_recordset_in_message(
             recordset,
-            message_type=MESSAGE_TYPE_EVALUATE,
+            message_type=MessageType.EVALUATE,
             timeout=timeout,
             group_id=group_id,
         )

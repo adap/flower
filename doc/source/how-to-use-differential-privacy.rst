@@ -92,4 +92,35 @@ In addition to the server-side strategy wrapper, the :code:`ClientApp` needs to 
   )
 
 
+Local Differential Privacy
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+To utilize local differential privacy (DP) and add noise to the client model parameters before transmitting them to the server in Flower, you can use the `LocalDpMod`. The following hyperparameters need to be set: clipping norm value, sensitivity, epsilon, and delta.
+
+.. image:: ./_static/DP/localdp.png
+  :align: center
+  :width: 700
+  :alt: local DP mod
+
+Below is a code example that shows how to use :code:`LocalDpMod`:
+
+.. code-block:: python
+
+  from flwr.client.mod.localdp_mod import LocalDpMod
+
+  # Create an instance of the mod with the required params
+  local_dp_obj = LocalDpMod(
+      cfg.clipping_norm, cfg.sensitivity, cfg.epsilon, cfg.delta
+  )
+  # Add local_dp_obj to the client-side mods
+
+  app = fl.client.ClientApp(
+    client_fn=client_fn,
+    mods=[local_dp_obj],
+  )
+
+
 Please note that the order of mods, especially those that modify parameters, is important when using multiple modifiers. Typically, differential privacy (DP) modifiers should be the last to operate on parameters.
+
+Local Training using Privacy Engines
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+For ensuring data instance-level privacy during local model training on the client side, consider leveraging privacy engines such as Opacus and TensorFlow Privacy. For examples of using Flower with these engines, please refer to the Flower examples directory (`Opacus <https://github.com/adap/flower/tree/main/examples/opacus>`_, `Tensorflow Privacy <https://github.com/adap/flower/tree/main/examples/dp-sgd-mnist>`_).

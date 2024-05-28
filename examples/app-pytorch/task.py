@@ -1,16 +1,15 @@
-import warnings
 from collections import OrderedDict
+from logging import INFO
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from flwr.common.logger import log
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
-from tqdm import tqdm
 
 
-warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
@@ -35,9 +34,17 @@ class Net(nn.Module):
         return self.fc3(x)
 
 
+def load_data():
+    """Load CIFAR-10 (training and test set)."""
+    trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+    trainset = CIFAR10("./data", train=True, download=True, transform=trf)
+    testset = CIFAR10("./data", train=False, download=True, transform=trf)
+    return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
+
+
 def train(net, trainloader, valloader, epochs, device):
     """Train the model on the training set."""
-    print("Starting training...")
+    log(INFO, "Starting training...")
     net.to(device)  # move model to GPU if available
     criterion = torch.nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
@@ -68,7 +75,7 @@ def test(net, testloader):
     criterion = torch.nn.CrossEntropyLoss()
     correct, loss = 0, 0.0
     with torch.no_grad():
-        for images, labels in tqdm(testloader):
+        for images, labels in testloader:
             outputs = net(images.to(DEVICE))
             labels = labels.to(DEVICE)
             loss += criterion(outputs, labels).item()
@@ -77,19 +84,11 @@ def test(net, testloader):
     return loss, accuracy
 
 
-def load_data():
-    """Load CIFAR-10 (training and test set)."""
-    trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    trainset = CIFAR10("./data", train=True, download=True, transform=trf)
-    testset = CIFAR10("./data", train=False, download=True, transform=trf)
-    return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
-
-
-def get_parameters(net):
+def get_weights(net):
     return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
 
-def set_parameters(net, parameters):
+def set_weights(net, parameters):
     params_dict = zip(net.state_dict().keys(), parameters)
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     net.load_state_dict(state_dict, strict=True)

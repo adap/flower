@@ -1,4 +1,0 @@
-flwr>=1.8, <2.0
-flwr-datasets[vision]>=0.0.2, <1.0.0
-tensorflow-macos>=2.9.1, != 2.11.1 ; sys_platform == "darwin" and platform_machine == "arm64"
-tensorflow-cpu>=2.9.1, != 2.11.1 ; platform_machine == "x86_64"

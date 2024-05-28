@@ -5,7 +5,6 @@ import pandas as pd
 
 import flwr as fl
 
-
 df = pd.read_csv("./data/client.csv")
 
 column_names = ["sepal length (cm)", "sepal width (cm)"]
@@ -32,8 +31,10 @@ class FlowerClient(fl.client.NumPyClient):
             {},
         )
 
+
 def client_fn(cid):
     return FlowerClient().to_client()
+
 
 app = fl.client.ClientApp(
     client_fn=client_fn,

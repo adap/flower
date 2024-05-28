@@ -19,6 +19,7 @@ from __future__ import annotations
 
 RECORD_KEY_STATE = "secaggplus_state"
 RECORD_KEY_CONFIGS = "secaggplus_configs"
+RATIO_QUANTIZATION_RANGE = 1073741824  # 1 << 30
 
 
 class Stage:
@@ -26,9 +27,9 @@ class Stage:
 
     SETUP = "setup"
     SHARE_KEYS = "share_keys"
-    COLLECT_MASKED_INPUT = "collect_masked_input"
+    COLLECT_MASKED_VECTORS = "collect_masked_vectors"
     UNMASK = "unmask"
-    _stages = (SETUP, SHARE_KEYS, COLLECT_MASKED_INPUT, UNMASK)
+    _stages = (SETUP, SHARE_KEYS, COLLECT_MASKED_VECTORS, UNMASK)
 
     @classmethod
     def all(cls) -> tuple[str, str, str, str]:
@@ -45,12 +46,12 @@ class Key:
 
     STAGE = "stage"
     SAMPLE_NUMBER = "sample_num"
-    SECURE_ID = "secure_id"
     SHARE_NUMBER = "share_num"
     THRESHOLD = "threshold"
     CLIPPING_RANGE = "clipping_range"
     TARGET_RANGE = "target_range"
     MOD_RANGE = "mod_range"
+    MAX_WEIGHT = "max_weight"
     PUBLIC_KEY_1 = "pk1"
     PUBLIC_KEY_2 = "pk2"
     DESTINATION_LIST = "dsts"
@@ -58,9 +59,9 @@ class Key:
     SOURCE_LIST = "srcs"
     PARAMETERS = "params"
     MASKED_PARAMETERS = "masked_params"
-    ACTIVE_SECURE_ID_LIST = "active_sids"
-    DEAD_SECURE_ID_LIST = "dead_sids"
-    SECURE_ID_LIST = "sids"
+    ACTIVE_NODE_ID_LIST = "active_nids"
+    DEAD_NODE_ID_LIST = "dead_nids"
+    NODE_ID_LIST = "nids"
     SHARE_LIST = "shares"
 
     def __new__(cls) -> Key:

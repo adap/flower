@@ -86,7 +86,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.8.0"
+release = "1.9.0"
 
 # -- General configuration ---------------------------------------------------
 
@@ -122,6 +122,12 @@ autosummary_ignore_module_all = False
 # Make the flwr_datasets.federated_dataset.FederatedDataset appear as FederatedDataset
 # The full name is still at the top of the page
 add_module_names = False
+
+# Customizations for the sphinx_copybutton extension
+# Omit prompt text when copying code blocks
+copybutton_prompt_text = "$ "
+# Copy all lines when line continuation character is detected
+copybutton_line_continuation_character = "\\"
 
 
 def find_test_modules(package_path):
@@ -162,7 +168,6 @@ redirects = {
     # Renamed pages
     "installation": "how-to-install-flower.html",
     "configuring-clients.html": "how-to-configure-clients.html",
-    "quickstart_mxnet": "tutorial-quickstart-mxnet.html",
     "quickstart_pytorch_lightning": "tutorial-quickstart-pytorch-lightning.html",
     "quickstart_huggingface": "tutorial-quickstart-huggingface.html",
     "quickstart_pytorch": "tutorial-quickstart-pytorch.html",
@@ -194,7 +199,6 @@ redirects = {
     "quickstart-pandas": "tutorial-quickstart-pandas.html",
     "quickstart-fastai": "tutorial-quickstart-fastai.html",
     "quickstart-pytorch-lightning": "tutorial-quickstart-pytorch-lightning.html",
-    "quickstart-mxnet": "tutorial-quickstart-mxnet.html",
     "quickstart-scikitlearn": "tutorial-quickstart-scikitlearn.html",
     "quickstart-xgboost": "tutorial-quickstart-xgboost.html",
     "quickstart-android": "tutorial-quickstart-android.html",
@@ -240,6 +244,11 @@ redirects = {
     "people": "index.html",
     "organizations": "index.html",
     "publications": "index.html",
+    "quickstart_mxnet": "index.html",
+    "quickstart-mxnet": "index.html",
+    "tutorial-quickstart-mxnet": "index.html",
+    "example-mxnet-walk-through": "index.html",
+    "ref-api/flwr.simulation.run_simulation_from_cli.html": "index.html",
 }
 
 # -- Options for HTML output -------------------------------------------------

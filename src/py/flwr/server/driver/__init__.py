@@ -17,8 +17,10 @@
 
 from .driver import Driver
 from .grpc_driver import GrpcDriver
+from .inmemory_driver import InMemoryDriver
 
 __all__ = [
     "Driver",
     "GrpcDriver",
+    "InMemoryDriver",
 ]

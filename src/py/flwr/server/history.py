@@ -15,6 +15,7 @@
 """Training history."""
 
 
+import pprint
 from functools import reduce
 from typing import Dict, List, Tuple
 
@@ -106,13 +107,19 @@ class History:
                 ],
             )
         if self.metrics_distributed_fit:
-            rep += "History (metrics, distributed, fit):\n" + str(
-                self.metrics_distributed_fit
+            rep += (
+                "History (metrics, distributed, fit):\n"
+                + pprint.pformat(self.metrics_distributed_fit)
+                + "\n"
             )
         if self.metrics_distributed:
-            rep += "History (metrics, distributed, evaluate):\n" + str(
-                self.metrics_distributed
+            rep += (
+                "History (metrics, distributed, evaluate):\n"
+                + pprint.pformat(self.metrics_distributed)
+                + "\n"
             )
         if self.metrics_centralized:
-            rep += "History (metrics, centralized):\n" + str(self.metrics_centralized)
+            rep += "History (metrics, centralized):\n" + pprint.pformat(
+                self.metrics_centralized
+            )
         return rep

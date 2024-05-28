@@ -15,27 +15,30 @@
 """Legacy default workflows."""
 
 
+import io
 import timeit
-from logging import DEBUG, INFO
-from typing import Optional, cast
+from logging import INFO, WARN
+from typing import List, Optional, Tuple, Union, cast
 
 import flwr.common.recordset_compat as compat
-from flwr.common import ConfigsRecord, Context, GetParametersIns, log
-from flwr.common.constant import (
-    MESSAGE_TYPE_EVALUATE,
-    MESSAGE_TYPE_FIT,
-    MESSAGE_TYPE_GET_PARAMETERS,
+from flwr.common import (
+    Code,
+    ConfigsRecord,
+    Context,
+    EvaluateRes,
+    FitRes,
+    GetParametersIns,
+    ParametersRecord,
+    log,
 )
+from flwr.common.constant import MessageType, MessageTypeLegacy
 
+from ..client_proxy import ClientProxy
 from ..compat.app_utils import start_update_client_manager_thread
 from ..compat.legacy_context import LegacyContext
 from ..driver import Driver
 from ..typing import Workflow
-
-KEY_CURRENT_ROUND = "current_round"
-KEY_START_TIME = "start_time"
-CONFIGS_RECORD_KEY = "config"
-PARAMS_RECORD_KEY = "parameters"
+from .constant import MAIN_CONFIGS_RECORD, MAIN_PARAMS_RECORD, Key
 
 
 class DefaultWorkflow:
@@ -66,17 +69,19 @@ class DefaultWorkflow:
         )
 
         # Initialize parameters
+        log(INFO, "[INIT]")
         default_init_params_workflow(driver, context)
 
         # Run federated learning for num_rounds
-        log(INFO, "FL starting")
         start_time = timeit.default_timer()
         cfg = ConfigsRecord()
-        cfg[KEY_START_TIME] = start_time
-        context.state.configs_records[CONFIGS_RECORD_KEY] = cfg
+        cfg[Key.START_TIME] = start_time
+        context.state.configs_records[MAIN_CONFIGS_RECORD] = cfg
 
         for current_round in range(1, context.config.num_rounds + 1):
-            cfg[KEY_CURRENT_ROUND] = current_round
+            log(INFO, "")
+            log(INFO, "[ROUND %s]", current_round)
+            cfg[Key.CURRENT_ROUND] = current_round
 
             # Fit round
             self.fit_workflow(driver, context)
@@ -87,26 +92,27 @@ class DefaultWorkflow:
             # Evaluate round
             self.evaluate_workflow(driver, context)
 
-        # Bookkeeping
+        # Bookkeeping and log results
         end_time = timeit.default_timer()
         elapsed = end_time - start_time
-        log(INFO, "FL finished in %s", elapsed)
-
-        # Log results
         hist = context.history
-        log(INFO, "app_fit: losses_distributed %s", str(hist.losses_distributed))
+        log(INFO, "")
+        log(INFO, "[SUMMARY]")
         log(
             INFO,
-            "app_fit: metrics_distributed_fit %s",
-            str(hist.metrics_distributed_fit),
+            "Run finished %s round(s) in %.2fs",
+            context.config.num_rounds,
+            elapsed,
         )
-        log(INFO, "app_fit: metrics_distributed %s", str(hist.metrics_distributed))
-        log(INFO, "app_fit: losses_centralized %s", str(hist.losses_centralized))
-        log(INFO, "app_fit: metrics_centralized %s", str(hist.metrics_centralized))
+        for idx, line in enumerate(io.StringIO(str(hist))):
+            if idx == 0:
+                log(INFO, "%s", line.strip("\n"))
+            else:
+                log(INFO, "\t%s", line.strip("\n"))
+        log(INFO, "")
 
         # Terminate the thread
         f_stop.set()
-        del driver
         thread.join()
 
 
@@ -115,12 +121,11 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
-    log(INFO, "Initializing global parameters")
     parameters = context.strategy.initialize_parameters(
         client_manager=context.client_manager
     )
     if parameters is not None:
-        log(INFO, "Using initial parameters provided by strategy")
+        log(INFO, "Using initial global parameters provided by strategy")
         paramsrecord = compat.parameters_to_parametersrecord(
             parameters, keep_input=True
         )
@@ -134,21 +139,35 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
             [
                 driver.create_message(
                     content=content,
-                    message_type=MESSAGE_TYPE_GET_PARAMETERS,
+                    message_type=MessageTypeLegacy.GET_PARAMETERS,
                     dst_node_id=random_client.node_id,
-                    group_id="",
-                    ttl="",
+                    group_id="0",
                 )
             ]
         )
-        log(INFO, "Received initial parameters from one random client")
         msg = list(messages)[0]
-        paramsrecord = next(iter(msg.content.parameters_records.values()))
 
-    context.state.parameters_records[PARAMS_RECORD_KEY] = paramsrecord
+        if (
+            msg.has_content()
+            and compat._extract_status_from_recordset(  # pylint: disable=W0212
+                "getparametersres", msg.content
+            ).code
+            == Code.OK
+        ):
+            log(INFO, "Received initial parameters from one random client")
+            paramsrecord = next(iter(msg.content.parameters_records.values()))
+        else:
+            log(
+                WARN,
+                "Failed to receive initial parameters from the client."
+                " Empty initial parameters will be used.",
+            )
+            paramsrecord = ParametersRecord()
+
+    context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
 
     # Evaluate initial parameters
-    log(INFO, "Evaluating initial parameters")
+    log(INFO, "Evaluating initial global parameters")
     parameters = compat.parametersrecord_to_parameters(paramsrecord, keep_input=True)
     res = context.strategy.evaluate(0, parameters=parameters)
     if res is not None:
@@ -168,13 +187,13 @@ def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
     # Retrieve current_round and start_time from the context
-    cfg = context.state.configs_records[CONFIGS_RECORD_KEY]
-    current_round = cast(int, cfg[KEY_CURRENT_ROUND])
-    start_time = cast(float, cfg[KEY_START_TIME])
+    cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+    current_round = cast(int, cfg[Key.CURRENT_ROUND])
+    start_time = cast(float, cfg[Key.START_TIME])
 
     # Centralized evaluation
     parameters = compat.parametersrecord_to_parameters(
-        record=context.state.parameters_records[PARAMS_RECORD_KEY],
+        record=context.state.parameters_records[MAIN_PARAMS_RECORD],
         keep_input=True,
     )
     res_cen = context.strategy.evaluate(current_round, parameters=parameters)
@@ -194,15 +213,17 @@ def default_centralized_evaluation_workflow(_: Driver, context: Context) -> None
         )
 
 
-def default_fit_workflow(driver: Driver, context: Context) -> None:
+def default_fit_workflow(  # pylint: disable=R0914
+    driver: Driver, context: Context
+) -> None:
     """Execute the default workflow for a single fit round."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
     # Get current_round and parameters
-    cfg = context.state.configs_records[CONFIGS_RECORD_KEY]
-    current_round = cast(int, cfg[KEY_CURRENT_ROUND])
-    parametersrecord = context.state.parameters_records[PARAMS_RECORD_KEY]
+    cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+    current_round = cast(int, cfg[Key.CURRENT_ROUND])
+    parametersrecord = context.state.parameters_records[MAIN_PARAMS_RECORD]
     parameters = compat.parametersrecord_to_parameters(
         parametersrecord, keep_input=True
     )
@@ -215,12 +236,11 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
     )
 
     if not client_instructions:
-        log(INFO, "fit_round %s: no clients selected, cancel", current_round)
+        log(INFO, "configure_fit: no clients selected, cancel")
         return
     log(
-        DEBUG,
-        "fit_round %s: strategy sampled %s clients (out of %s)",
-        current_round,
+        INFO,
+        "configure_fit: strategy sampled %s clients (out of %s)",
         len(client_instructions),
         context.client_manager.num_available(),
     )
@@ -232,10 +252,9 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
     out_messages = [
         driver.create_message(
             content=compat.fitins_to_recordset(fitins, True),
-            message_type=MESSAGE_TYPE_FIT,
+            message_type=MessageType.TRAIN,
             dst_node_id=proxy.node_id,
-            group_id="",
-            ttl="",
+            group_id=str(current_round),
         )
         for proxy, fitins in client_instructions
     ]
@@ -244,25 +263,31 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
     # collect `fit` results from all clients participating in this round
     messages = list(driver.send_and_receive(out_messages))
     del out_messages
+    num_failures = len([msg for msg in messages if msg.has_error()])
 
     # No exception/failure handling currently
     log(
-        DEBUG,
-        "fit_round %s received %s results and %s failures",
-        current_round,
-        len(messages),
-        0,
+        INFO,
+        "aggregate_fit: received %s results and %s failures",
+        len(messages) - num_failures,
+        num_failures,
     )
 
     # Aggregate training results
-    results = [
-        (
-            node_id_to_proxy[msg.metadata.src_node_id],
-            compat.recordset_to_fitres(msg.content, False),
-        )
-        for msg in messages
-    ]
-    aggregated_result = context.strategy.aggregate_fit(current_round, results, [])
+    results: List[Tuple[ClientProxy, FitRes]] = []
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
+    for msg in messages:
+        if msg.has_content():
+            proxy = node_id_to_proxy[msg.metadata.src_node_id]
+            fitres = compat.recordset_to_fitres(msg.content, False)
+            if fitres.status.code == Code.OK:
+                results.append((proxy, fitres))
+            else:
+                failures.append((proxy, fitres))
+        else:
+            failures.append(Exception(msg.error))
+
+    aggregated_result = context.strategy.aggregate_fit(current_round, results, failures)
     parameters_aggregated, metrics_aggregated = aggregated_result
 
     # Update the parameters and write history
@@ -270,21 +295,22 @@ def default_fit_workflow(driver: Driver, context: Context) -> None:
         paramsrecord = compat.parameters_to_parametersrecord(
             parameters_aggregated, True
         )
-        context.state.parameters_records[PARAMS_RECORD_KEY] = paramsrecord
+        context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
         context.history.add_metrics_distributed_fit(
             server_round=current_round, metrics=metrics_aggregated
         )
 
 
+# pylint: disable-next=R0914
 def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     """Execute the default workflow for a single evaluate round."""
     if not isinstance(context, LegacyContext):
         raise TypeError(f"Expect a LegacyContext, but get {type(context).__name__}.")
 
     # Get current_round and parameters
-    cfg = context.state.configs_records[CONFIGS_RECORD_KEY]
-    current_round = cast(int, cfg[KEY_CURRENT_ROUND])
-    parametersrecord = context.state.parameters_records[PARAMS_RECORD_KEY]
+    cfg = context.state.configs_records[MAIN_CONFIGS_RECORD]
+    current_round = cast(int, cfg[Key.CURRENT_ROUND])
+    parametersrecord = context.state.parameters_records[MAIN_PARAMS_RECORD]
     parameters = compat.parametersrecord_to_parameters(
         parametersrecord, keep_input=True
     )
@@ -296,12 +322,11 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
         client_manager=context.client_manager,
     )
     if not client_instructions:
-        log(INFO, "evaluate_round %s: no clients selected, cancel", current_round)
+        log(INFO, "configure_evaluate: no clients selected, skipping evaluation")
         return
     log(
-        DEBUG,
-        "evaluate_round %s: strategy sampled %s clients (out of %s)",
-        current_round,
+        INFO,
+        "configure_evaluate: strategy sampled %s clients (out of %s)",
         len(client_instructions),
         context.client_manager.num_available(),
     )
@@ -313,10 +338,9 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     out_messages = [
         driver.create_message(
             content=compat.evaluateins_to_recordset(evalins, True),
-            message_type=MESSAGE_TYPE_EVALUATE,
+            message_type=MessageType.EVALUATE,
             dst_node_id=proxy.node_id,
-            group_id="",
-            ttl="",
+            group_id=str(current_round),
         )
         for proxy, evalins in client_instructions
     ]
@@ -325,25 +349,33 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     # collect `evaluate` results from all clients participating in this round
     messages = list(driver.send_and_receive(out_messages))
     del out_messages
+    num_failures = len([msg for msg in messages if msg.has_error()])
 
     # No exception/failure handling currently
     log(
-        DEBUG,
-        "evaluate_round %s received %s results and %s failures",
-        current_round,
-        len(messages),
-        0,
+        INFO,
+        "aggregate_evaluate: received %s results and %s failures",
+        len(messages) - num_failures,
+        num_failures,
     )
 
     # Aggregate the evaluation results
-    results = [
-        (
-            node_id_to_proxy[msg.metadata.src_node_id],
-            compat.recordset_to_evaluateres(msg.content),
-        )
-        for msg in messages
-    ]
-    aggregated_result = context.strategy.aggregate_evaluate(current_round, results, [])
+    results: List[Tuple[ClientProxy, EvaluateRes]] = []
+    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]] = []
+    for msg in messages:
+        if msg.has_content():
+            proxy = node_id_to_proxy[msg.metadata.src_node_id]
+            evalres = compat.recordset_to_evaluateres(msg.content)
+            if evalres.status.code == Code.OK:
+                results.append((proxy, evalres))
+            else:
+                failures.append((proxy, evalres))
+        else:
+            failures.append(Exception(msg.error))
+
+    aggregated_result = context.strategy.aggregate_evaluate(
+        current_round, results, failures
+    )
 
     loss_aggregated, metrics_aggregated = aggregated_result
 
