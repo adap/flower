@@ -1,5 +1,6 @@
-import flwr as fl
 from pathlib import Path
+
+import flwr as fl
 
 app = fl.server.ServerApp()
 

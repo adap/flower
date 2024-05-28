@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""This module is used to check a given PR title format."""
+"""Used to check a given PR title format."""
 
 import pathlib
 import re
 import sys
-
-import yaml
+import tomllib
 
 
 if __name__ == "__main__":
@@ -26,10 +25,10 @@ if __name__ == "__main__":
     pr_title = sys.argv[1]
 
     # Load the YAML configuration
-    with (pathlib.Path(__file__).parent.resolve() / "changelog.yml").open(
-        encoding="utf-8"
+    with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
+        "rb"
     ) as file:
-        config = yaml.safe_load(file)
+        config = tomllib.load(file)
 
     # Extract types, project, and scope from the config
     types = "|".join(config["type"])
@@ -43,16 +42,35 @@ if __name__ == "__main__":
 
     # Check for the pattern in the first argument given to the script
     match = re.search(pattern, pr_title)
-    if match and match.group(4).split()[0] in allowed_verbs:
-        print("PR title is valid")
+
+    valid = True
+    error = "it doesn't have the correct format"
+
+    # This check is there to ignore dependabot PRs from title checks
+    if pr_title.startswith("chore"):
         sys.exit(0)
+    elif not match:
+        valid = False
     else:
+        if match.group(4).split()[0] not in allowed_verbs:
+            valid = False
+            error = "the <PR_SUBJECT> doesn't start with a verb in the imperative mood"
+        elif match.group(2) == "*" and match.group(3) is None:
+            valid = False
+            error = "the <PR_PROJECT> cannot be '*' without using the ':skip' flag"
+
+    if not valid:
         print(
-            f"PR title `{pr_title}` is invalid, it should be of the form:\n\n\t<PR_TYPE>(<PR_PROJECT>) "
-            f"<PR_SUBJECT>\n\n with <PR_TYPE> in [{types}], and "
-            f"<PR_PROJECT> in [{'|'.join(config['project']) + '|*'}] (where '*' is used when modifying multiple projects), "
-            "and <PR_SUBJECT> starting with "
-            "a capitalized verb in the imperative mood and without any punctuation at the end.\n\n"
-            "A valid example is:\n\n\t`feat(framework) Add flwr build CLI command`\n"
+            f"PR title `{pr_title}` is invalid, {error}.\n\nA PR title should "
+            "be of the form:\n\n\t<PR_TYPE>(<PR_PROJECT>) <PR_SUBJECT>\n\n"
+            f"Or, if the PR shouldn't appear in the changelog:\n\n\t<PR_TYPE>"
+            f"(<PR_PROJECT>:skip) <PR_SUBJECT>\n\nwith <PR_TYPE> in [{types}],\n"
+            f"<PR_PROJECT> in [{'|'.join(config['project']) + '|*'}] "
+            "(where '*' is used when modifying multiple projects and should be used in "
+            "conjunction with the ':skip' flag),\nand <PR_SUBJECT> starting with "
+            "a capitalized verb in the imperative mood and without any punctuation "
+            "at the end.\n\nA valid example is:\n\n\t`feat(framework) "
+            "Add flwr build CLI command`\n\nOr, if the PR shouldn't appear in "
+            "the changelog:\n\n\t`feat(framework:skip) Add new option to build CLI`\n"
         )
         sys.exit(1)

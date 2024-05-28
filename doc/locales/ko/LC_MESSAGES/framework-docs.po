@@ -3,59 +3,63 @@
 # This file is distributed under the same license as the Flower package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-05-13 09:48+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2024-05-14 21:01+0000\n"
+"Last-Translator: \"Young D. Kwon\" <youngkwon311@gmail.com>\n"
+"Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
+"framework/ko/>\n"
 "Language: ko\n"
-"Language-Team: ko <LL@li.org>\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 5.6-dev\n"
 "Generated-By: Babel 2.14.0\n"
 
 #: ../../source/contributor-explanation-architecture.rst:2
 msgid "Flower Architecture"
-msgstr ""
+msgstr "Flower 아키텍처"
 
 #: ../../source/contributor-explanation-architecture.rst:5
 msgid "Edge Client Engine"
-msgstr ""
+msgstr "엣지 클라이언트 엔진"
 
 #: ../../source/contributor-explanation-architecture.rst:7
 msgid ""
 "`Flower <https://flower.ai>`_ core framework architecture with Edge "
 "Client Engine"
-msgstr ""
+msgstr "`Flower <https://flower.ai>`_의 핵심 프레임워크 아키텍처와 엣지 클라이언트 "
+"엔진"
 
 #: ../../source/contributor-explanation-architecture.rst:13
 msgid "Virtual Client Engine"
-msgstr ""
+msgstr "가상 클라이언트 엔진"
 
 #: ../../source/contributor-explanation-architecture.rst:15
 msgid ""
 "`Flower <https://flower.ai>`_ core framework architecture with Virtual "
 "Client Engine"
-msgstr ""
+msgstr "`Flower <https://flower.ai>`_의 핵심 프레임워크 아키텍처와 가상 클라이언트 "
+"엔진"
 
 #: ../../source/contributor-explanation-architecture.rst:21
 msgid "Virtual Client Engine and Edge Client Engine in the same workload"
-msgstr ""
+msgstr "동일 작업에서 가상 클라이언트 엔진과 엣지 클라이언트 엔진"
 
 #: ../../source/contributor-explanation-architecture.rst:23
 msgid ""
 "`Flower <https://flower.ai>`_ core framework architecture with both "
 "Virtual Client Engine and Edge Client Engine"
-msgstr ""
+msgstr "`Flower <https://flower.ai>`_의 핵심 프레임워크 아키텍처와 가상 및 엣지 "
+"클라이언트 엔진"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:2
 msgid "How to build Docker Flower images locally"
-msgstr ""
+msgstr "Docker Flower 이미지를 Locally 구축하는 방법"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:4
 msgid ""
@@ -20705,4 +20709,3 @@ msgid ""
 "pytorch.html>`__ shows how to build a simple federated learning system "
 "with PyTorch and Flower."
 msgstr ""
-
