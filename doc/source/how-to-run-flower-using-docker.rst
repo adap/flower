@@ -102,13 +102,15 @@ PEM-encoded certificate chain.
 Assuming all files we need are in the local ``certificates`` directory, we can use the flag
 ``--volume`` to mount the local directory into the ``/app/`` directory of the container. This allows
 the SuperLink to access the files within the container. Finally, we pass the names of the
-certificates to the SuperLink with the ``--certificates`` flag.
+certificates to the SuperLink with the ``--root-certificates`` flag.
 
 .. code-block:: bash
 
   $ docker run --rm \
-    -p 9091:9091 -p 9092:9092 --volume ./certificates/:/app/ flwr/superlink:1.8.0 \
-    --certificates ca.crt server.pem server.key
+    -p 9091:9091 -p 9092:9092 --volume ./certificates/:/app/ flwr/superlink:1.9.0 \
+    --ssl-ca-certfile ca.crt \
+    --ssl-certfile server.pem \
+    --ssl-keyfile server.key
 
 Flower SuperNode
 ----------------
@@ -264,13 +266,13 @@ To enable SSL, we will need to mount a PEM-encoded root certificate into your Su
 
 Assuming the certificate already exists locally, we can use the flag ``--volume`` to mount the local
 certificate into the container's ``/app/`` directory. This allows the SuperNode to access the
-certificate within the container. Use the ``--certificates`` flag when starting the container.
+certificate within the container. Use the ``--root-certificates`` flag when starting the container.
 
 .. code-block:: bash
 
   $ docker run --rm --volume ./ca.crt:/app/ca.crt flwr_supernode:0.0.1 \
     --server 192.168.1.100:9092 \
-    --certificates ca.crt
+    --root-certificates ca.crt
 
 Flower ServerApp
 ----------------
@@ -379,13 +381,14 @@ To enable SSL, we will need to mount a PEM-encoded root certificate into your Se
 
 Assuming the certificate already exists locally, we can use the flag ``--volume`` to mount the local
 certificate into the container's ``/app/`` directory. This allows the ServerApp to access the
-certificate within the container. Use the ``--certificates`` flag when starting the container.
+certificate within the container. Use the ``--ssl-ca-certfile``, ``--ssl-certfile``, and ``--ssl-keyfile`` 
+flags when starting the container.
 
 .. code-block:: bash
 
   $ docker run --rm --volume ./ca.crt:/app/ca.crt flwr_serverapp:0.0.1 \
     --server 192.168.1.100:9091 \
-    --certificates ca.crt
+    --root-certificates ca.crt
 
 Advanced Docker options
 -----------------------
