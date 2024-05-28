@@ -402,7 +402,10 @@ def _start_client_internal(
                             e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
                             exc_entity = "SuperNode"
 
-                        log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+                        if not run_tracker.interrupt:
+                            log(
+                                ERROR, "%s raised an exception", exc_entity, exc_info=ex
+                            )
 
                         # Create error message
                         reply_message = message.create_error_reply(
