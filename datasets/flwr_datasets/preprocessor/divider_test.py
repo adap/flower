@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""DivideResplitter tests."""
+"""Divider tests."""
 
 import unittest
 from typing import Dict, Union
@@ -20,7 +20,7 @@ from typing import Dict, Union
 from parameterized import parameterized_class
 
 from datasets import Dataset, DatasetDict
-from flwr_datasets.resplitter import DivideResplitter
+from flwr_datasets.preprocessor import Divider
 
 
 @parameterized_class(
@@ -80,8 +80,8 @@ from flwr_datasets.resplitter import DivideResplitter
         ),
     ],
 )
-class TestDivideResplitter(unittest.TestCase):
-    """DivideResplitter tests."""
+class TestDivider(unittest.TestCase):
+    """Divider tests."""
 
     divide_config: Union[
         Dict[str, float],
@@ -105,27 +105,27 @@ class TestDivideResplitter(unittest.TestCase):
 
     def test_resplitting_correct_new_split_names(self) -> None:
         """Test if resplitting produces requested new splits."""
-        resplitter = DivideResplitter(
+        divider = Divider(
             self.divide_config, self.divide_split, self.drop_remaining_splits
         )
-        resplit_dataset = resplitter(self.dataset_dict)
+        resplit_dataset = divider(self.dataset_dict)
         new_keys = set(resplit_dataset.keys())
         self.assertEqual(set(self.split_name_to_size.keys()), new_keys)
 
     def test_resplitting_correct_new_split_sizes(self) -> None:
         """Test if resplitting produces correct sizes of splits."""
-        resplitter = DivideResplitter(
+        divider = Divider(
             self.divide_config, self.divide_split, self.drop_remaining_splits
         )
-        resplit_dataset = resplitter(self.dataset_dict)
+        resplit_dataset = divider(self.dataset_dict)
         split_to_size = {
             split_name: len(split) for split_name, split in resplit_dataset.items()
         }
         self.assertEqual(self.split_name_to_size, split_to_size)
 
 
-class TestDivideResplitterIncorrectUseCases(unittest.TestCase):
-    """Resplitter tests."""
+class TestDividerIncorrectUseCases(unittest.TestCase):
+    """Divider tests."""
 
     def setUp(self) -> None:
         """Set up the dataset with 3 splits for tests."""
@@ -144,21 +144,17 @@ class TestDivideResplitterIncorrectUseCases(unittest.TestCase):
         drop_remaining_splits = False
 
         with self.assertRaises(ValueError):
-            resplitter = DivideResplitter(
-                divide_config, divide_split, drop_remaining_splits
-            )
-            _ = resplitter(self.dataset_dict)
+            divider = Divider(divide_config, divide_split, drop_remaining_splits)
+            _ = divider(self.dataset_dict)
 
     def test_duplicate_names_in_config_and_dataset_split_names_multisplit(self) -> None:
         """Test if resplitting raises when the name collides with the old name."""
         divide_config = {"train": {"valid": 0.5}}
         divide_split = None
         drop_remaining_splits = False
-        resplitter = DivideResplitter(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
-            _ = resplitter(self.dataset_dict)
+            _ = divider(self.dataset_dict)
 
     def test_duplicate_names_in_config_and_dataset_split_names_single_split(
         self,
@@ -167,77 +163,63 @@ class TestDivideResplitterIncorrectUseCases(unittest.TestCase):
         divide_config = {"valid": 0.5}
         divide_split = "train"
         drop_remaining_splits = False
-        resplitter = DivideResplitter(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
-            _ = resplitter(self.dataset_dict)
+            _ = divider(self.dataset_dict)
 
     def test_fraction_sum_up_to_more_than_one_multisplit(self) -> None:
         """Test if resplitting raises when fractions sum up to > 1.0 ."""
         divide_config = {"train": {"train_1": 0.5, "train_2": 0.7}}
         divide_split = None
         drop_remaining_splits = False
-        resplitter = DivideResplitter(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
-            _ = resplitter(self.dataset_dict)
+            _ = divider(self.dataset_dict)
 
     def test_fraction_sum_up_to_more_than_one_single_split(self) -> None:
         """Test if resplitting raises when fractions sum up to > 1.0 ."""
         divide_config = {"train_1": 0.5, "train_2": 0.7}
         divide_split = "train"
         drop_remaining_splits = False
-        resplitter = DivideResplitter(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
-            _ = resplitter(self.dataset_dict)
+            _ = divider(self.dataset_dict)
 
     def test_sample_sizes_sum_up_to_more_than_dataset_size_single_split(self) -> None:
         """Test if resplitting raises when samples size sum up to > len(datset) ."""
         divide_config = {"train": {"train_1": 20, "train_2": 25}}
         divide_split = None
         drop_remaining_splits = False
-        resplitter = DivideResplitter(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
-            _ = resplitter(self.dataset_dict)
+            _ = divider(self.dataset_dict)
 
     def test_sample_sizes_sum_up_to_more_than_dataset_size_multisplit(self) -> None:
         """Test if resplitting raises when samples size sum up to > len(datset) ."""
         divide_config = {"train_1": 20, "train_2": 25}
         divide_split = "train"
         drop_remaining_splits = False
-        resplitter = DivideResplitter(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
-            _ = resplitter(self.dataset_dict)
+            _ = divider(self.dataset_dict)
 
     def test_too_small_size_values_create_empty_dataset_single_split(self) -> None:
         """Test if resplitting raises when fraction creates empty dataset."""
         divide_config = {"train": {"train_1": 0.2, "train_2": 0.0001}}
         divide_split = None
         drop_remaining_splits = False
-        resplitter = DivideResplitter(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
-            _ = resplitter(self.dataset_dict)
+            _ = divider(self.dataset_dict)
 
     def test_too_small_size_values_create_empty_dataset_multisplit(self) -> None:
         """Test if resplitting raises when fraction creates empty dataset."""
         divide_config = {"train_1": 0.2, "train_2": 0.0001}
         divide_split = "train"
         drop_remaining_splits = False
-        resplitter = DivideResplitter(
-            divide_config, divide_split, drop_remaining_splits
-        )
+        divider = Divider(divide_config, divide_split, drop_remaining_splits)
         with self.assertRaises(ValueError):
-            _ = resplitter(self.dataset_dict)
+            _ = divider(self.dataset_dict)
 
 
 if __name__ == "__main__":
