@@ -15,9 +15,7 @@
 """Contextualizable state."""
 
 
-from __future__ import annotations
-
-from typing import Any, TypeVar, cast, get_args, get_origin, get_type_hints
+from typing import Any, List, TypeVar, cast, get_args, get_origin, get_type_hints
 
 import numpy as np
 
@@ -78,15 +76,15 @@ class ContextualizableState:
                     ret.__dict__[key] = bytes_to_ndarray(cast(bytes, configs[key]))
                 # Read List[NDArray]
                 elif origin is list and get_origin(args[0]) is np.ndarray:
-                    bytes_lst = cast(list[bytes], configs[key])
+                    bytes_lst = cast(List[bytes], configs[key])
                     ret.__dict__[key] = [bytes_to_ndarray(b) for b in bytes_lst]
                 # Read common types (ConfigsRecordValues)
                 else:
                     ret.__dict__[key] = configs[key]
             # Read dict
             elif f"{key}:K" in configs and f"{key}:V" in configs and origin is dict:
-                dict_keys = cast(list[Any], configs[f"{key}:K"])
-                dict_values = cast(list[Any], configs[f"{key}:V"])
+                dict_keys = cast(List[Any], configs[f"{key}:K"])
+                dict_values = cast(List[Any], configs[f"{key}:V"])
                 # Check if Dict[Any, NDArray]
                 if get_origin(args[1]) is np.ndarray:
                     dict_values = [
