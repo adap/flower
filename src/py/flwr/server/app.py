@@ -230,7 +230,7 @@ def run_driver_api() -> None:
     grpc_server.wait_for_termination()
 
 
-# pylint: too-many-locals
+# pylint: disable=too-many-locals
 def run_fleet_api() -> None:
     """Run Flower server (Fleet API)."""
     log(INFO, "Starting Flower server (Fleet API)")
