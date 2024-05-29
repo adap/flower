@@ -4,7 +4,7 @@ Use Secure Aggregation
 What is Secure Aggregation?
 ---------------------------
 
-Secure Aggregation is a class of Secure Multi-Party Computation algorithm that provides a way for an aggregated value (such as the sum of data) from multiple parties to be computed without revealing their individual inputs to one another.
+Secure Aggregation is a class of Secure Multi-Party Computation algorithm that provides a way for an aggregated value (such as the sum of model parameters) from multiple parties to be computed without revealing their individual inputs to one another.
 
 To use Secure Aggregration, we need two components: the :code:`secaggplus_mod` and :code:`SecAggPlusWorkflow`.
 
