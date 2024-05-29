@@ -348,6 +348,17 @@ def run_superlink() -> None:
         f"[{fleet_host}]:{fleet_port}" if fleet_is_v6 else f"{fleet_host}:{fleet_port}"
     )
 
+    num_workers = args.fleet_api_num_workers
+    if num_workers != 1:
+        log(
+            WARN,
+            f"The Fleet API currently supports only 1 worker. "
+            f"You have specified {num_workers} workers. "
+            f"Support for multiple workers will be added in future releases. "
+            f"Proceeding with a single worker.",
+        )
+        num_workers = 1
+
     # Start Fleet API
     if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
@@ -369,7 +380,7 @@ def run_superlink() -> None:
                 ssl_keyfile,
                 ssl_certfile,
                 state_factory,
-                args.fleet_api_num_workers,
+                num_workers,
             ),
         )
         fleet_thread.start()
@@ -401,7 +412,7 @@ def run_superlink() -> None:
             state_factory=state_factory,
             certificates=certificates,
             interceptors=interceptors,
-            num_workers=args.fleet_api_num_workers,
+            num_workers=num_workers,
         )
         grpc_servers.append(fleet_server)
     else:
@@ -575,13 +586,6 @@ def _run_fleet_api_grpc_rere(
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
     # Create Fleet API gRPC server
-    if num_workers != 1:
-        raise ValueError(
-            f"The supported number of workers for the Fleet API is "
-            f"1. Instead given {num_workers}. The functionality of >1 workers will be "
-            f"added in the future releases."
-        )
-
     fleet_servicer = FleetServicer(
         state_factory=state_factory,
     )
@@ -616,12 +620,7 @@ def _run_fleet_api_rest(
         from flwr.server.superlink.fleet.rest_rere.rest_api import app as fast_api_app
     except ModuleNotFoundError:
         sys.exit(MISSING_EXTRA_REST)
-    if num_workers != 1:
-        raise ValueError(
-            f"The supported number of workers for the Fleet API is "
-            f"1. Instead given {num_workers}. The functionality of >1 workers will be "
-            f"added in the future releases."
-        )
+
     log(INFO, "Starting Flower REST server")
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
