@@ -40,7 +40,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
