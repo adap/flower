@@ -12,11 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Resplitter."""
+"""Preprocessor package."""
 
 
-from typing import Callable
+from .divider import Divider
+from .merger import Merger
+from .preprocessor import Preprocessor
 
-from datasets import DatasetDict
-
-Resplitter = Callable[[DatasetDict], DatasetDict]
+__all__ = [
+    "Merger",
+    "Preprocessor",
+    "Divider",
+]
