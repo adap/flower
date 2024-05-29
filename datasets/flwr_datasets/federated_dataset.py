@@ -20,11 +20,11 @@ from typing import Dict, Optional, Tuple, Union
 import datasets
 from datasets import Dataset, DatasetDict
 from flwr_datasets.partitioner import Partitioner
-from flwr_datasets.resplitter import Resplitter
+from flwr_datasets.preprocessor import Preprocessor
 from flwr_datasets.utils import (
     _check_if_dataset_tested,
+    _instantiate_merger_if_needed,
     _instantiate_partitioners,
-    _instantiate_resplitter_if_needed,
 )
 
 
@@ -45,9 +45,11 @@ class FederatedDataset:
     subset : str
         Secondary information regarding the dataset, most often subset or version
         (that is passed to the name in datasets.load_dataset).
-    resplitter : Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
-        `Callable` that transforms `DatasetDict` splits, or configuration dict for
-        `MergeResplitter`.
+    preprocessor : Optional[Union[Preprocessor, Dict[str, Tuple[str, ...]]]]
+        `Callable` that transforms `DatasetDict` by resplitting, removing
+        features, creating new features, performing any other preprocessing operation,
+        or configuration dict for `Merger`. Applied after shuffling. If None,
+        no operation is applied.
     partitioners : Dict[str, Union[Partitioner, int]]
         A dictionary mapping the Dataset split (a `str`) to a `Partitioner` or an `int`
         (representing the number of IID partitions that this split should be partitioned
@@ -79,7 +81,7 @@ class FederatedDataset:
         *,
         dataset: str,
         subset: Optional[str] = None,
-        resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]] = None,
+        preprocessor: Optional[Union[Preprocessor, Dict[str, Tuple[str, ...]]]] = None,
         partitioners: Dict[str, Union[Partitioner, int]],
         shuffle: bool = True,
         seed: Optional[int] = 42,
@@ -87,8 +89,8 @@ class FederatedDataset:
         _check_if_dataset_tested(dataset)
         self._dataset_name: str = dataset
         self._subset: Optional[str] = subset
-        self._resplitter: Optional[Resplitter] = _instantiate_resplitter_if_needed(
-            resplitter
+        self._preprocessor: Optional[Preprocessor] = _instantiate_merger_if_needed(
+            preprocessor
         )
         self._partitioners: Dict[str, Partitioner] = _instantiate_partitioners(
             partitioners
@@ -242,8 +244,8 @@ class FederatedDataset:
             # Note it shuffles all the splits. The self._dataset is DatasetDict
             # so e.g. {"train": train_data, "test": test_data}. All splits get shuffled.
             self._dataset = self._dataset.shuffle(seed=self._seed)
-        if self._resplitter:
-            self._dataset = self._resplitter(self._dataset)
+        if self._preprocessor:
+            self._dataset = self._preprocessor(self._dataset)
         self._dataset_prepared = True
 
     def _check_if_no_split_keyword_possible(self) -> None:
