@@ -3,59 +3,59 @@
 # This file is distributed under the same license as the Flower package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-13 09:48+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2024-05-28 11:47+0200\n"
+"PO-Revision-Date: 2024-05-14 21:01+0000\n"
+"Last-Translator: \"Young D. Kwon\" <youngkwon311@gmail.com>\n"
 "Language: ko\n"
-"Language-Team: ko <LL@li.org>\n"
+"Language-Team: Korean <https://hosted.weblate.org/projects/flower-"
+"docs/framework/ko/>\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.14.0\n"
+"Generated-By: Babel 2.15.0\n"
 
 #: ../../source/contributor-explanation-architecture.rst:2
 msgid "Flower Architecture"
-msgstr ""
+msgstr "Flower 아키텍처"
 
 #: ../../source/contributor-explanation-architecture.rst:5
 msgid "Edge Client Engine"
-msgstr ""
+msgstr "엣지 클라이언트 엔진"
 
 #: ../../source/contributor-explanation-architecture.rst:7
 msgid ""
 "`Flower <https://flower.ai>`_ core framework architecture with Edge "
 "Client Engine"
-msgstr ""
+msgstr "`Flower <https://flower.ai>`_의 핵심 프레임워크 아키텍처와 엣지 클라이언트 엔진"
 
 #: ../../source/contributor-explanation-architecture.rst:13
 msgid "Virtual Client Engine"
-msgstr ""
+msgstr "가상 클라이언트 엔진"
 
 #: ../../source/contributor-explanation-architecture.rst:15
 msgid ""
 "`Flower <https://flower.ai>`_ core framework architecture with Virtual "
 "Client Engine"
-msgstr ""
+msgstr "`Flower <https://flower.ai>`_의 핵심 프레임워크 아키텍처와 가상 클라이언트 엔진"
 
 #: ../../source/contributor-explanation-architecture.rst:21
 msgid "Virtual Client Engine and Edge Client Engine in the same workload"
-msgstr ""
+msgstr "동일 작업에서 가상 클라이언트 엔진과 엣지 클라이언트 엔진"
 
 #: ../../source/contributor-explanation-architecture.rst:23
 msgid ""
 "`Flower <https://flower.ai>`_ core framework architecture with both "
 "Virtual Client Engine and Edge Client Engine"
-msgstr ""
+msgstr "`Flower <https://flower.ai>`_의 핵심 프레임워크 아키텍처와 가상 및 엣지 클라이언트 엔진"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:2
 msgid "How to build Docker Flower images locally"
-msgstr ""
+msgstr "Docker Flower 이미지를 Locally 구축하는 방법"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:4
 msgid ""
@@ -74,17 +74,16 @@ msgid ""
 msgstr ""
 
 #: ../../source/contributor-how-to-build-docker-images.rst:11
-#: ../../source/how-to-run-flower-using-docker.rst:129
 msgid "Clone the flower repository."
 msgstr ""
 
 #: ../../source/contributor-how-to-build-docker-images.rst:17
-#: ../../source/how-to-run-flower-using-docker.rst:135
+#: ../../source/how-to-run-flower-using-docker.rst:144
 msgid "Verify the Docker daemon is running."
 msgstr ""
 
 #: ../../source/contributor-how-to-build-docker-images.rst:19
-#: ../../source/how-to-run-flower-using-docker.rst:137
+#: ../../source/how-to-run-flower-using-docker.rst:146
 msgid ""
 "Please follow the first section on :doc:`Run Flower using Docker <how-to-"
 "run-flower-using-docker>` which covers this step in more detail."
@@ -284,22 +283,10 @@ msgstr ""
 msgid ""
 "If you want to use your own base image instead of the official Flower "
 "base image, all you need to do is set the ``BASE_REPOSITORY``, "
-"``PYTHON_VERSION`` and ``UBUNTU_VERSION`` build arguments. .. code-"
-"block:: bash"
+"``PYTHON_VERSION`` and ``UBUNTU_VERSION`` build arguments."
 msgstr ""
 
-#: ../../source/contributor-how-to-build-docker-images.rst:129
-msgid "$ cd src/docker/superlink/ $ docker build \\"
-msgstr ""
-
-#: ../../source/contributor-how-to-build-docker-images.rst:131
-msgid ""
-"--build-arg BASE_REPOSITORY=flwr_base \\ --build-arg PYTHON_VERSION=3.11 "
-"\\ --build-arg UBUNTU_VERSION=ubuntu22.04 \\ --build-arg "
-"FLWR_VERSION=1.8.0 \\ -t flwr_superlink:0.1.0 ."
-msgstr ""
-
-#: ../../source/contributor-how-to-build-docker-images.rst:137
+#: ../../source/contributor-how-to-build-docker-images.rst:138
 msgid "After creating the image, we can test whether the image is working:"
 msgstr ""
 
@@ -1507,7 +1494,7 @@ msgstr ""
 msgid "Creating and merging a pull request (PR)"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:205
+#: ../../source/contributor-tutorial-contribute-on-github.rst:206
 msgid "**Create the PR**"
 msgstr ""
 
@@ -1540,178 +1527,180 @@ msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:193
 msgid ""
+"The title should be changed to adhere to the :ref:`pr_title_format` "
+"guidelines, otherwise it won't be possible to merge the PR. So in this "
+"case, a correct title might be ``docs(framework:skip) Fix typos``."
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:196
+msgid ""
 "The input box in the middle is there for you to describe what your PR "
 "does and to link it to existing issues. We have placed comments (that "
 "won't be rendered once the PR is opened) to guide you through the "
 "process."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:196
-msgid ""
-"It is important to follow the instructions described in comments. For "
-"instance, in order to not break how our changelog system works, you "
-"should read the information above the ``Changelog entry`` section "
-"carefully. You can also checkout some examples and details in the "
-":ref:`changelogentry` appendix."
+#: ../../source/contributor-tutorial-contribute-on-github.rst:199
+msgid "It is important to follow the instructions described in comments."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:200
+#: ../../source/contributor-tutorial-contribute-on-github.rst:201
 msgid ""
 "At the bottom you will find the button to open the PR. This will notify "
 "reviewers that a new PR has been opened and that they should look over it"
 " to merge or to request changes."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:203
+#: ../../source/contributor-tutorial-contribute-on-github.rst:204
 msgid ""
 "If your PR is not yet ready for review, and you don't want to notify "
 "anyone, you have the option to create a draft pull request:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:208
+#: ../../source/contributor-tutorial-contribute-on-github.rst:209
 msgid "**Making new changes**"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:208
+#: ../../source/contributor-tutorial-contribute-on-github.rst:209
 msgid ""
 "Once the PR has been opened (as draft or not), you can still push new "
 "commits to it the same way we did before, by making changes to the branch"
 " associated with the PR."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:230
+#: ../../source/contributor-tutorial-contribute-on-github.rst:231
 msgid "**Review the PR**"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:211
+#: ../../source/contributor-tutorial-contribute-on-github.rst:212
 msgid ""
 "Once the PR has been opened or once the draft PR has been marked as "
 "ready, a review from code owners will be automatically requested:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:215
+#: ../../source/contributor-tutorial-contribute-on-github.rst:216
 msgid ""
 "Code owners will then look into the code, ask questions, request changes "
 "or validate the PR."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:217
+#: ../../source/contributor-tutorial-contribute-on-github.rst:218
 msgid "Merging will be blocked if there are ongoing requested changes."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:221
+#: ../../source/contributor-tutorial-contribute-on-github.rst:222
 msgid ""
 "To resolve them, just push the necessary changes to the branch associated"
 " with the PR:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:225
+#: ../../source/contributor-tutorial-contribute-on-github.rst:226
 msgid "And resolve the conversation:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:229
+#: ../../source/contributor-tutorial-contribute-on-github.rst:230
 msgid ""
 "Once all the conversations have been resolved, you can re-request a "
 "review."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:250
+#: ../../source/contributor-tutorial-contribute-on-github.rst:251
 msgid "**Once the PR is merged**"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:233
+#: ../../source/contributor-tutorial-contribute-on-github.rst:234
 msgid ""
 "If all the automatic tests have passed and reviewers have no more changes"
 " to request, they can approve the PR and merge it."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:237
+#: ../../source/contributor-tutorial-contribute-on-github.rst:238
 msgid ""
 "Once it is merged, you can delete the branch on GitHub (a button should "
 "appear to do so) and also delete it locally by doing:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:244
+#: ../../source/contributor-tutorial-contribute-on-github.rst:245
 msgid "Then you should update your forked repository by doing:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:253
+#: ../../source/contributor-tutorial-contribute-on-github.rst:254
 msgid "Example of first contribution"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:256
+#: ../../source/contributor-tutorial-contribute-on-github.rst:257
 msgid "Problem"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:258
+#: ../../source/contributor-tutorial-contribute-on-github.rst:259
 msgid ""
 "For our documentation, we've started to use the `Diàtaxis framework "
 "<https://diataxis.fr/>`_."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:260
+#: ../../source/contributor-tutorial-contribute-on-github.rst:261
 msgid ""
 "Our \"How to\" guides should have titles that continue the sentence \"How"
 " to …\", for example, \"How to upgrade to Flower 1.0\"."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:262
+#: ../../source/contributor-tutorial-contribute-on-github.rst:263
 msgid ""
 "Most of our guides do not follow this new format yet, and changing their "
 "title is (unfortunately) more involved than one might think."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:264
+#: ../../source/contributor-tutorial-contribute-on-github.rst:265
 msgid ""
 "This issue is about changing the title of a doc from present continuous "
 "to present simple."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:266
+#: ../../source/contributor-tutorial-contribute-on-github.rst:267
 msgid ""
 "Let's take the example of \"Saving Progress\" which we changed to \"Save "
 "Progress\". Does this pass our check?"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:268
+#: ../../source/contributor-tutorial-contribute-on-github.rst:269
 msgid "Before: \"How to saving progress\" ❌"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:270
+#: ../../source/contributor-tutorial-contribute-on-github.rst:271
 msgid "After: \"How to save progress\" ✅"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:273
+#: ../../source/contributor-tutorial-contribute-on-github.rst:274
 msgid "Solution"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:275
+#: ../../source/contributor-tutorial-contribute-on-github.rst:276
 msgid ""
 "This is a tiny change, but it'll allow us to test your end-to-end setup. "
 "After cloning and setting up the Flower repo, here's what you should do:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:277
+#: ../../source/contributor-tutorial-contribute-on-github.rst:278
 msgid "Find the source file in ``doc/source``"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:278
+#: ../../source/contributor-tutorial-contribute-on-github.rst:279
 msgid ""
 "Make the change in the ``.rst`` file (beware, the dashes under the title "
 "should be the same length as the title itself)"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:279
+#: ../../source/contributor-tutorial-contribute-on-github.rst:280
 msgid ""
 "Build the docs and `check the result <contributor-how-to-write-"
 "documentation.html#edit-an-existing-page>`_"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:282
+#: ../../source/contributor-tutorial-contribute-on-github.rst:283
 msgid "Rename file"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:284
+#: ../../source/contributor-tutorial-contribute-on-github.rst:285
 msgid ""
 "You might have noticed that the file name still reflects the old wording."
 " If we just change the file, then we break all existing links to it - it "
@@ -1719,142 +1708,68 @@ msgid ""
 "engine ranking."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:287
+#: ../../source/contributor-tutorial-contribute-on-github.rst:288
 msgid "Here's how to change the file name:"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:289
+#: ../../source/contributor-tutorial-contribute-on-github.rst:290
 msgid "Change the file name to ``save-progress.rst``"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:290
+#: ../../source/contributor-tutorial-contribute-on-github.rst:291
 msgid "Add a redirect rule to ``doc/source/conf.py``"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:292
+#: ../../source/contributor-tutorial-contribute-on-github.rst:293
 msgid ""
 "This will cause a redirect from ``saving-progress.html`` to ``save-"
 "progress.html``, old links will continue to work."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:295
+#: ../../source/contributor-tutorial-contribute-on-github.rst:296
 msgid "Apply changes in the index file"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:297
+#: ../../source/contributor-tutorial-contribute-on-github.rst:298
 msgid ""
 "For the lateral navigation bar to work properly, it is very important to "
 "update the ``index.rst`` file as well. This is where we define the whole "
 "arborescence of the navbar."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:300
+#: ../../source/contributor-tutorial-contribute-on-github.rst:301
 msgid "Find and modify the file name in ``index.rst``"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:303
+#: ../../source/contributor-tutorial-contribute-on-github.rst:304
 msgid "Open PR"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:305
+#: ../../source/contributor-tutorial-contribute-on-github.rst:306
 msgid ""
 "Commit the changes (commit messages are always imperative: \"Do "
 "something\", in this case \"Change …\")"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:306
+#: ../../source/contributor-tutorial-contribute-on-github.rst:307
 msgid "Push the changes to your fork"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:307
-msgid "Open a PR (as shown above)"
-msgstr ""
-
 #: ../../source/contributor-tutorial-contribute-on-github.rst:308
-msgid "Wait for it to be approved!"
+msgid ""
+"Open a PR (as shown above) with title ``docs(framework) Update how-to "
+"guide title``"
 msgstr ""
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:309
+msgid "Wait for it to be approved!"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:310
 msgid "Congrats! 🥳 You're now officially a Flower contributor!"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:313
-msgid "How to write a good PR title"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:315
-msgid ""
-"A well-crafted PR title helps team members quickly understand the purpose"
-" and scope of the changes being proposed. Here's a guide to help you "
-"write a good GitHub PR title:"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:317
-msgid ""
-"1. Be Clear and Concise: Provide a clear summary of the changes in a "
-"concise manner. 1. Use Actionable Verbs: Start with verbs like \"Add,\" "
-"\"Update,\" or \"Fix\" to indicate the purpose. 1. Include Relevant "
-"Information: Mention the affected feature or module for context. 1. Keep "
-"it Short: Avoid lengthy titles for easy readability. 1. Use Proper "
-"Capitalization and Punctuation: Follow grammar rules for clarity."
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:323
-msgid ""
-"Let's start with a few examples for titles that should be avoided because"
-" they do not provide meaningful information:"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:325
-msgid "Implement Algorithm"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:326
-msgid "Database"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:327
-msgid "Add my_new_file.py to codebase"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:328
-msgid "Improve code in module"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:329
-msgid "Change SomeModule"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:331
-msgid ""
-"Here are a few positive examples which provide helpful information "
-"without repeating how they do it, as that is already visible in the "
-"\"Files changed\" section of the PR:"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:333
-msgid "Update docs banner to mention Flower Summit 2023"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:334
-msgid "Remove unnecessary XGBoost dependency"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:335
-msgid "Remove redundant attributes in strategies subclassing FedAvg"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:336
-msgid "Add CI job to deploy the staging system when the ``main`` branch changes"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:337
-msgid ""
-"Add new amazing library which will be used to improve the simulation "
-"engine"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:341
+#: ../../source/contributor-tutorial-contribute-on-github.rst:314
 #: ../../source/tutorial-series-build-a-strategy-from-scratch-pytorch.ipynb:548
 #: ../../source/tutorial-series-customize-the-client-pytorch.ipynb:946
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.ipynb:727
@@ -1863,153 +1778,91 @@ msgstr ""
 msgid "Next steps"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:343
+#: ../../source/contributor-tutorial-contribute-on-github.rst:316
 msgid ""
 "Once you have made your first PR, and want to contribute more, be sure to"
 " check out the following :"
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:345
+#: ../../source/contributor-tutorial-contribute-on-github.rst:318
 msgid ""
 ":doc:`Good first contributions <contributor-ref-good-first-"
 "contributions>`, where you should particularly look into the "
 ":code:`baselines` contributions."
 msgstr ""
 
-#: ../../source/contributor-tutorial-contribute-on-github.rst:349
+#: ../../source/contributor-tutorial-contribute-on-github.rst:322
 #: ../../source/fed/0000-20200102-fed-template.md:60
 msgid "Appendix"
 msgstr ""
 
+#: ../../source/contributor-tutorial-contribute-on-github.rst:327
+msgid "PR title format"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:329
+msgid "We enforce the following PR title format:"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:335
+msgid ""
+"(or ``<type>(<project>:skip) <subject>`` to ignore the PR in the "
+"changelog)"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:337
+msgid ""
+"Where ``<type>`` needs to be in ``{ci, fix, feat, docs, refactor, "
+"break}``, ``<project>`` should be in ``{framework, baselines, datasets, "
+"examples, or '*' when modifying multiple projects which requires the "
+"':skip' flag to be used}``, and ``<subject>`` starts with a capitalised "
+"verb in the imperative mood."
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:341
+msgid "Valid examples:"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:343
+msgid "``feat(framework) Add flwr build CLI command``"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:344
+msgid "``refactor(examples:skip) Improve quickstart-pytorch logging``"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:345
+msgid "``ci(*:skip) Enforce PR title format``"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:347
+msgid "Invalid examples:"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:349
+msgid "``feat(framework): Add flwr build CLI command`` (extra ``:``)"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:350
+msgid ""
+"``feat(*) Add flwr build CLI command`` (missing ``skip`` flag along with "
+"``*``)"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:351
+msgid "``feat(skip) Add flwr build CLI command`` (missing ``<project>``)"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:352
+msgid "``feat(framework) add flwr build CLI command`` (non capitalised verb)"
+msgstr ""
+
+#: ../../source/contributor-tutorial-contribute-on-github.rst:353
+msgid "``feat(framework) Add flwr build CLI command.`` (dot at the end)"
+msgstr ""
+
 #: ../../source/contributor-tutorial-contribute-on-github.rst:354
-msgid "Changelog entry"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:356
-msgid ""
-"When opening a new PR, inside its description, there should be a "
-"``Changelog entry`` header."
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:358
-msgid ""
-"Above this header you should see the following comment that explains how "
-"to write your changelog entry:"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:360
-msgid ""
-"Inside the following 'Changelog entry' section, you should put the "
-"description of your changes that will be added to the changelog alongside"
-" your PR title."
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:363
-msgid ""
-"If the section is completely empty (without any token) or non-existent, "
-"the changelog will just contain the title of the PR for the changelog "
-"entry, without any description."
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:366
-msgid ""
-"If the section contains some text other than tokens, it will use it to "
-"add a description to the change."
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:368
-msgid ""
-"If the section contains one of the following tokens it will ignore any "
-"other text and put the PR under the corresponding section of the "
-"changelog:"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:370
-msgid "<general> is for classifying a PR as a general improvement."
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:372
-msgid "<skip> is to not add the PR to the changelog"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:374
-msgid "<baselines> is to add a general baselines change to the PR"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:376
-msgid "<examples> is to add a general examples change to the PR"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:378
-msgid "<sdk> is to add a general sdk change to the PR"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:380
-msgid "<simulations> is to add a general simulations change to the PR"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:382
-msgid "Note that only one token should be used."
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:384
-msgid ""
-"Its content must have a specific format. We will break down what each "
-"possibility does:"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:386
-msgid ""
-"If the ``### Changelog entry`` section contains nothing or doesn't exist,"
-" the following text will be added to the changelog::"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:390
-msgid ""
-"If the ``### Changelog entry`` section contains a description (and no "
-"token), the following text will be added to the changelog::"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:396
-msgid ""
-"If the ``### Changelog entry`` section contains ``<skip>``, nothing will "
-"change in the changelog."
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:398
-msgid ""
-"If the ``### Changelog entry`` section contains ``<general>``, the "
-"following text will be added to the changelog::"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:402
-msgid ""
-"If the ``### Changelog entry`` section contains ``<baselines>``, the "
-"following text will be added to the changelog::"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:406
-msgid ""
-"If the ``### Changelog entry`` section contains ``<examples>``, the "
-"following text will be added to the changelog::"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:410
-msgid ""
-"If the ``### Changelog entry`` section contains ``<sdk>``, the following "
-"text will be added to the changelog::"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:414
-msgid ""
-"If the ``### Changelog entry`` section contains ``<simulations>``, the "
-"following text will be added to the changelog::"
-msgstr ""
-
-#: ../../source/contributor-tutorial-contribute-on-github.rst:418
-msgid ""
-"Note that only one token must be provided, otherwise, only the first "
-"action (in the order listed above), will be performed."
+msgid "``Add flwr build CLI command.`` (missing ``<type>(<project>)``)"
 msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:2
@@ -2017,7 +1870,7 @@ msgid "Get started as a contributor"
 msgstr ""
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:5
-#: ../../source/how-to-run-flower-using-docker.rst:123
+#: ../../source/how-to-run-flower-using-docker.rst:132
 msgid "Prerequisites"
 msgstr ""
 
@@ -3775,7 +3628,7 @@ msgstr ""
 #: ../../source/how-to-authenticate-supernodes.rst:12
 msgid ""
 "We recommend you to check out the complete `code example "
-"<https://github.com/adap/flower/tree/main/examples/flower-client-"
+"<https://github.com/adap/flower/tree/main/examples/flower-"
 "authentication>`_ demonstrating federated learning with Flower in an "
 "authenticated setting."
 msgstr ""
@@ -3808,18 +3661,19 @@ msgid ""
 "authentication enabled:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:34
-msgid "Let's break down the :code:`--require-client-authentication` flag:"
-msgstr ""
-
 #: ../../source/how-to-authenticate-supernodes.rst:36
-msgid ""
-"The first argument is a path to a CSV file storing all known node public "
-"keys. You need to store all known node public keys that are allowed to "
-"participate in a federation in one CSV file (:code:`.csv`)."
+msgid "Let's break down the authentication flags:"
 msgstr ""
 
 #: ../../source/how-to-authenticate-supernodes.rst:38
+msgid ""
+"The first flag :code:`--auth-list-public-keys` expects a path to a CSV "
+"file storing all known node public keys. You need to store all known node"
+" public keys that are allowed to participate in a federation in one CSV "
+"file (:code:`.csv`)."
+msgstr ""
+
+#: ../../source/how-to-authenticate-supernodes.rst:40
 msgid ""
 "A valid CSV file storing known node public keys should list the keys in "
 "OpenSSH format, separated by commas and without any comments. For an "
@@ -3827,14 +3681,15 @@ msgid ""
 "known node public keys."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:40
+#: ../../source/how-to-authenticate-supernodes.rst:42
 msgid ""
-"The second and third arguments are paths to the server's private and "
+"The second and third flags :code:`--auth-superlink-private-key` and :code"
+":`--auth-superlink-public-key` expect paths to the server's private and "
 "public keys. For development purposes, you can generate a private and "
 "public key pair using :code:`ssh-keygen -t ecdsa -b 384`."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:43
+#: ../../source/how-to-authenticate-supernodes.rst:45
 msgid ""
 "In Flower 1.9, there is no support for dynamically removing, editing, or "
 "adding known node public keys to the SuperLink. To change the set of "
@@ -3843,11 +3698,11 @@ msgid ""
 " nodes is on the roadmap to be released in Flower 1.10 (ETA: June)."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:49
+#: ../../source/how-to-authenticate-supernodes.rst:51
 msgid "Enable node authentication in :code:`SuperNode`"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:51
+#: ../../source/how-to-authenticate-supernodes.rst:53
 msgid ""
 "Similar to the long-running Flower server (:code:`SuperLink`), you can "
 "easily enable node authentication in the long-running Flower client "
@@ -3855,19 +3710,20 @@ msgid ""
 "authenticated :code:`SuperNode`:"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:61
+#: ../../source/how-to-authenticate-supernodes.rst:64
 msgid ""
-"The :code:`--authentication-keys` flag expects two arguments: a path to "
-"the node's private key file and a path to the node's public key file. For"
-" development purposes, you can generate a private and public key pair "
-"using :code:`ssh-keygen -t ecdsa -b 384`."
+"The :code:`--auth-supernode-private-key` flag expects a path to the "
+"node's private key file and the :code:`--auth-supernode-public-key` flag "
+"expects a path to the node's public key file. For development purposes, "
+"you can generate a private and public key pair using :code:`ssh-keygen -t"
+" ecdsa -b 384`."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:65
+#: ../../source/how-to-authenticate-supernodes.rst:68
 msgid "Security notice"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:67
+#: ../../source/how-to-authenticate-supernodes.rst:70
 msgid ""
 "The system's security relies on the credentials of the SuperLink and each"
 " SuperNode. Therefore, it is imperative to safeguard and safely store the"
@@ -3878,14 +3734,14 @@ msgid ""
 "methods."
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:72
+#: ../../source/how-to-authenticate-supernodes.rst:75
 #: ../../source/how-to-enable-ssl-connections.rst:65
 #: ../../source/how-to-use-built-in-mods.rst:85
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:287
 msgid "Conclusion"
 msgstr ""
 
-#: ../../source/how-to-authenticate-supernodes.rst:74
+#: ../../source/how-to-authenticate-supernodes.rst:77
 msgid ""
 "You should now have learned how to start a long-running Flower server "
 "(:code:`SuperLink`) and client (:code:`SuperNode`) with node "
@@ -4477,7 +4333,7 @@ msgid "Install stable release"
 msgstr ""
 
 #: ../../source/how-to-install-flower.rst:15
-#: ../../source/how-to-upgrade-to-flower-next.rst:45
+#: ../../source/how-to-upgrade-to-flower-next.rst:46
 msgid "Using pip"
 msgstr ""
 
@@ -4815,7 +4671,7 @@ msgstr ""
 msgid ""
 "The simplest way to get started with Flower is by using the pre-made "
 "Docker images, which you can find on `Docker Hub "
-"<https://hub.docker.com/u/flwr>`_."
+"<https://hub.docker.com/u/flwr>`__."
 msgstr ""
 
 #: ../../source/how-to-run-flower-using-docker.rst:7
@@ -4838,26 +4694,34 @@ msgid ""
 "official Docker website."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:25
+#: ../../source/how-to-run-flower-using-docker.rst:26
+msgid ""
+"To ensure optimal performance and compatibility, the SuperLink, SuperNode"
+" and ServerApp image must have the same version when running together. "
+"This guarantees seamless integration and avoids potential conflicts or "
+"issues that may arise from using different versions."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:31
 msgid "Flower SuperLink"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:28
+#: ../../source/how-to-run-flower-using-docker.rst:34
 msgid "Quickstart"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:30
+#: ../../source/how-to-run-flower-using-docker.rst:36
 msgid "If you're looking to try out Flower, you can use the following command:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:36
+#: ../../source/how-to-run-flower-using-docker.rst:42
 msgid ""
 "The command pulls the Docker image with the tag ``1.8.0`` from Docker "
 "Hub. The tag specifies the Flower version. In this case, Flower 1.8.0. "
 "The ``--rm`` flag tells Docker to remove the container after it exits."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:42
+#: ../../source/how-to-run-flower-using-docker.rst:48
 msgid ""
 "By default, the Flower SuperLink keeps state in-memory. When using the "
 "Docker flag ``--rm``, the state is not persisted between container "
@@ -4865,7 +4729,7 @@ msgid ""
 "system."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:46
+#: ../../source/how-to-run-flower-using-docker.rst:52
 msgid ""
 "The ``-p <host>:<container>`` flag tells Docker to map the ports "
 "``9091``/``9092`` of the host to ``9091``/``9092`` of the container, "
@@ -4875,38 +4739,39 @@ msgid ""
 " flag ``--insecure``."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:53
-#: ../../source/how-to-run-flower-using-docker.rst:216
+#: ../../source/how-to-run-flower-using-docker.rst:59
+#: ../../source/how-to-run-flower-using-docker.rst:238
+#: ../../source/how-to-run-flower-using-docker.rst:354
 msgid ""
 "The ``--insecure`` flag enables insecure communication (using HTTP, not "
 "HTTPS) and should only be used for testing purposes. We strongly "
 "recommend enabling `SSL <https://flower.ai/docs/framework/how-to-run-"
-"flower-using-docker.html#enabling-ssl-for-secure-connections>`_ when "
+"flower-using-docker.html#enabling-ssl-for-secure-connections>`__ when "
 "deploying to a production environment."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:58
+#: ../../source/how-to-run-flower-using-docker.rst:64
 msgid ""
 "You can use ``--help`` to view all available flags that the SuperLink "
 "supports:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:65
+#: ../../source/how-to-run-flower-using-docker.rst:71
 msgid "Mounting a volume to store the state on the host system"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:67
+#: ../../source/how-to-run-flower-using-docker.rst:73
 msgid ""
 "If you want to persist the state of the SuperLink on your host system, "
 "all you need to do is specify a path where you want to save the file on "
 "your host system and a name for the database file. In the example below, "
-"we tell Docker via the flag ``-v`` to mount the user's home directory "
-"(``~/`` on your host) into the ``/app/`` directory of the container. "
-"Furthermore, we use the flag ``--database`` to specify the name of the "
-"database file."
+"we tell Docker via the flag ``--volume`` to mount the user's home "
+"directory (``~/`` on your host) into the ``/app/`` directory of the "
+"container. Furthermore, we use the flag ``--database`` to specify the "
+"name of the database file."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:80
+#: ../../source/how-to-run-flower-using-docker.rst:86
 msgid ""
 "As soon as the SuperLink starts, the file ``state.db`` is created in the "
 "user's home directory on your host system. If the file already exists, "
@@ -4914,157 +4779,170 @@ msgid ""
 "SuperLink with an empty database, simply remove the ``state.db`` file."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:85
-#: ../../source/how-to-run-flower-using-docker.rst:234
+#: ../../source/how-to-run-flower-using-docker.rst:91
+#: ../../source/how-to-run-flower-using-docker.rst:260
+#: ../../source/how-to-run-flower-using-docker.rst:375
 msgid "Enabling SSL for secure connections"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:87
+#: ../../source/how-to-run-flower-using-docker.rst:93
 msgid ""
 "To enable SSL, you will need a PEM-encoded root certificate, a PEM-"
 "encoded private key and a PEM-encoded certificate chain."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:91
+#: ../../source/how-to-run-flower-using-docker.rst:97
 msgid ""
 "For testing purposes, you can generate your own self-signed certificates."
 " The `Enable SSL connections <https://flower.ai/docs/framework/how-to-"
-"enable-ssl-connections.html#certificates>`_ page contains a section that "
-"will guide you through the process."
+"enable-ssl-connections.html#certificates>`__ page contains a section that"
+" will guide you through the process."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:95
+#: ../../source/how-to-run-flower-using-docker.rst:101
 msgid ""
 "Assuming all files we need are in the local ``certificates`` directory, "
-"we can use the flag ``-v`` to mount the local directory into the "
+"we can use the flag ``--volume`` to mount the local directory into the "
 "``/app/`` directory of the container. This allows the SuperLink to access"
 " the files within the container. Finally, we pass the names of the "
 "certificates to the SuperLink with the ``--certificates`` flag."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:107
+#: ../../source/how-to-run-flower-using-docker.rst:113
 msgid "Flower SuperNode"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:109
+#: ../../source/how-to-run-flower-using-docker.rst:115
 msgid ""
 "The SuperNode Docker image comes with a pre-installed version of Flower "
 "and serves as a base for building your own SuperNode image."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:114
+#: ../../source/how-to-run-flower-using-docker.rst:120
 msgid ""
 "The SuperNode Docker image currently works only with the 1.9.0-nightly "
 "release. A stable version will be available when Flower 1.9.0 (stable) "
 "gets released (ETA: May). A SuperNode nightly image must be paired with "
-"the corresponding SuperLink nightly image released on the same day. To "
-"ensure the versions are in sync, using the concrete tag, e.g., "
-"``1.9.0.dev20240501`` instead of ``nightly`` is recommended."
+"the corresponding SuperLink and ServerApp nightly images released on the "
+"same day. To ensure the versions are in sync, using the concrete tag, "
+"e.g., ``1.9.0.dev20240501`` instead of ``nightly`` is recommended."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:119
+#: ../../source/how-to-run-flower-using-docker.rst:126
 msgid ""
-"We will use the ``app-pytorch`` example, which you can find in the Flower"
-" repository, to illustrate how you can dockerize your client-app."
+"We will use the ``quickstart-pytorch`` example, which you can find in the"
+" Flower repository, to illustrate how you can dockerize your ClientApp."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:125
+#: ../../source/how-to-run-flower-using-docker.rst:134
 msgid ""
 "Before we can start, we need to meet a few prerequisites in our local "
 "development environment. You can skip the first part if you want to run "
-"your client-app instead of the ``app-pytorch`` example."
+"your ClientApp instead of the ``quickstart-pytorch`` example."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:143
+#: ../../source/how-to-run-flower-using-docker.rst:138
+msgid "Clone the Flower repository."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:152
 msgid "Creating a SuperNode Dockerfile"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:145
+#: ../../source/how-to-run-flower-using-docker.rst:154
+#: ../../source/how-to-run-flower-using-docker.rst:289
 msgid "Let's assume the following project layout:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:156
+#: ../../source/how-to-run-flower-using-docker.rst:163
 msgid ""
-"First, we need to create a Dockerfile in the directory where the "
-"``ClientApp`` code is located. If you use the ``app-pytorch`` example, "
-"create a new file called ``Dockerfile`` in ``examples/app-pytorch``."
+"First, we need to create a ``requirements.txt`` file in the directory "
+"where the ``ClientApp`` code is located. In the file, we list all the "
+"dependencies that the ClientApp requires."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:160
+#: ../../source/how-to-run-flower-using-docker.rst:175
 msgid ""
-"The ``Dockerfile`` contains the instructions that assemble the SuperNode "
-"image."
+"Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed "
+"in the ``flwr/supernode`` base image, so you only need to include other "
+"package dependencies in your ``requirements.txt``, such as ``torch``, "
+"``tensorflow``, etc."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:173
+#: ../../source/how-to-run-flower-using-docker.rst:179
+msgid ""
+"Next, we create a Dockerfile. If you use the ``quickstart-pytorch`` "
+"example, create a new file called ``Dockerfile.supernode`` in ``examples"
+"/quickstart-pytorch``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:182
+msgid ""
+"The ``Dockerfile.supernode`` contains the instructions that assemble the "
+"SuperNode image."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:196
 msgid ""
 "In the first two lines, we instruct Docker to use the SuperNode image "
 "tagged ``nightly`` as a base image and set our working directory to "
 "``/app``. The following instructions will now be executed in the ``/app``"
-" directory. Next, we install the ``ClientApp`` dependencies by copying "
-"the ``requirements.txt`` file into the image and run ``pip install``. In "
-"the last two lines, we copy the ``ClientApp`` code (``client.py`` and "
-"``task.py``) into the image and set the entry point to ``flower-client-"
-"app``."
+" directory. Next, we install the ClientApp dependencies by copying the "
+"``requirements.txt`` file into the image and run ``pip install``. In the "
+"last two lines, we copy the ``client.py`` module into the image and set "
+"the entry point to ``flower-client-app`` with the argument "
+"``client:app``. The argument is the object reference of the ClientApp "
+"(``<module>:<attribute>``) that will be run inside the ClientApp."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:181
+#: ../../source/how-to-run-flower-using-docker.rst:205
 msgid "Building the SuperNode Docker image"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:183
+#: ../../source/how-to-run-flower-using-docker.rst:207
 msgid ""
 "Next, we build the SuperNode Docker image by running the following "
-"command in the directory where Dockerfile and client-app code are "
-"located."
+"command in the directory where Dockerfile and ClientApp code are located."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:190
+#: ../../source/how-to-run-flower-using-docker.rst:214
 msgid ""
 "We gave the image the name ``flwr_supernode``, and the tag ``0.0.1``. "
 "Remember that the here chosen values only serve as an example. You can "
 "change them to your needs."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:195
+#: ../../source/how-to-run-flower-using-docker.rst:219
 msgid "Running the SuperNode Docker image"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:197
+#: ../../source/how-to-run-flower-using-docker.rst:221
 msgid "Now that we have built the SuperNode image, we can finally run it."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:205
+#: ../../source/how-to-run-flower-using-docker.rst:229
+#: ../../source/how-to-run-flower-using-docker.rst:345
 msgid "Let's break down each part of this command:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:207
+#: ../../source/how-to-run-flower-using-docker.rst:231
+#: ../../source/how-to-run-flower-using-docker.rst:347
 msgid "``docker run``: This is the command to run a new Docker container."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:208
+#: ../../source/how-to-run-flower-using-docker.rst:232
+#: ../../source/how-to-run-flower-using-docker.rst:348
 msgid ""
 "``--rm``: This option specifies that the container should be "
 "automatically removed when it stops."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst
+#: ../../source/how-to-run-flower-using-docker.rst:233
 msgid "``flwr_supernode:0.0.1``: The name the tag of the Docker image to use."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst
-msgid ""
-"``client:app``: The object reference of the ``ClientApp`` "
-"(``<module>:<attribute>``)."
-msgstr ""
-
-#: ../../source/how-to-run-flower-using-docker.rst
-msgid ""
-"It points to the ``ClientApp`` that will be run inside the SuperNode "
-"container."
-msgstr ""
-
-#: ../../source/how-to-run-flower-using-docker.rst:212
+#: ../../source/how-to-run-flower-using-docker.rst:234
+#: ../../source/how-to-run-flower-using-docker.rst:350
 msgid "``--insecure``: This option enables insecure communication."
 msgstr ""
 
@@ -5078,46 +4956,173 @@ msgstr ""
 msgid "API to connect to. Remember to update it with your SuperLink IP."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:226
+#: ../../source/how-to-run-flower-using-docker.rst:248
+msgid ""
+"To test running Flower locally, you can create a `bridge network "
+"<https://docs.docker.com/network/network-tutorial-standalone/#use-user-"
+"defined-bridge-networks>`__, use the ``--network`` argument and pass the "
+"name of the Docker network to run your SuperNodes."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:252
 msgid ""
 "Any argument that comes after the tag is passed to the Flower SuperNode "
 "binary. To see all available flags that the SuperNode supports, run:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:236
+#: ../../source/how-to-run-flower-using-docker.rst:262
 msgid ""
 "To enable SSL, we will need to mount a PEM-encoded root certificate into "
 "your SuperNode container."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:238
+#: ../../source/how-to-run-flower-using-docker.rst:264
 msgid ""
 "Assuming the certificate already exists locally, we can use the flag "
-"``-v`` to mount the local certificate into the container's ``/app/`` "
-"directory. This allows the SuperNode to access the certificate within the"
-" container. Use the ``--certificates`` flag when starting the container."
+"``--volume`` to mount the local certificate into the container's "
+"``/app/`` directory. This allows the SuperNode to access the certificate "
+"within the container. Use the ``--certificates`` flag when starting the "
+"container."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:249
+#: ../../source/how-to-run-flower-using-docker.rst:275
+msgid "Flower ServerApp"
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:277
+msgid ""
+"The procedure for building and running a ServerApp image is almost "
+"identical to the SuperNode image."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:279
+msgid ""
+"Similar to the SuperNode image, the ServerApp Docker image comes with a "
+"pre-installed version of Flower and serves as a base for building your "
+"own ServerApp image."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:282
+msgid ""
+"We will use the same ``quickstart-pytorch`` example as we do in the "
+"Flower SuperNode section. If you have not already done so, please follow "
+"the `SuperNode Prerequisites`_ before proceeding."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:287
+msgid "Creating a ServerApp Dockerfile"
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:298
+msgid ""
+"First, we need to create a Dockerfile in the directory where the "
+"``ServerApp`` code is located. If you use the ``quickstart-pytorch`` "
+"example, create a new file called ``Dockerfile.serverapp`` in ``examples"
+"/quickstart-pytorch``."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:302
+msgid ""
+"The ``Dockerfile.serverapp`` contains the instructions that assemble the "
+"ServerApp image."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:313
+msgid ""
+"In the first two lines, we instruct Docker to use the ServerApp image "
+"tagged ``1.8.0`` as a base image and set our working directory to "
+"``/app``. The following instructions will now be executed in the ``/app``"
+" directory. In the last two lines, we copy the ``server.py`` module into "
+"the image and set the entry point to ``flower-server-app`` with the "
+"argument ``server:app``. The argument is the object reference of the "
+"ServerApp (``<module>:<attribute>``) that will be run inside the "
+"ServerApp container."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:321
+msgid "Building the ServerApp Docker image"
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:323
+msgid ""
+"Next, we build the ServerApp Docker image by running the following "
+"command in the directory where Dockerfile and ServerApp code are located."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:330
+msgid ""
+"We gave the image the name ``flwr_serverapp``, and the tag ``0.0.1``. "
+"Remember that the here chosen values only serve as an example. You can "
+"change them to your needs."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:335
+msgid "Running the ServerApp Docker image"
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:337
+msgid "Now that we have built the ServerApp image, we can finally run it."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:349
+msgid "``flwr_serverapp:0.0.1``: The name the tag of the Docker image to use."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst
+msgid ""
+"``--server 192.168.1.100:9091``: This option specifies the address of the"
+" SuperLinks Driver"
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:363
+msgid ""
+"To test running Flower locally, you can create a `bridge network "
+"<https://docs.docker.com/network/network-tutorial-standalone/#use-user-"
+"defined-bridge-networks>`__, use the ``--network`` argument and pass the "
+"name of the Docker network to run your ServerApps."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:367
+msgid ""
+"Any argument that comes after the tag is passed to the Flower ServerApp "
+"binary. To see all available flags that the ServerApp supports, run:"
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:377
+msgid ""
+"To enable SSL, we will need to mount a PEM-encoded root certificate into "
+"your ServerApp container."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:379
+msgid ""
+"Assuming the certificate already exists locally, we can use the flag "
+"``--volume`` to mount the local certificate into the container's "
+"``/app/`` directory. This allows the ServerApp to access the certificate "
+"within the container. Use the ``--certificates`` flag when starting the "
+"container."
+msgstr ""
+
+#: ../../source/how-to-run-flower-using-docker.rst:390
 msgid "Advanced Docker options"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:252
+#: ../../source/how-to-run-flower-using-docker.rst:393
 msgid "Using a different Flower version"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:254
+#: ../../source/how-to-run-flower-using-docker.rst:395
 msgid ""
 "If you want to use a different version of Flower, for example Flower "
 "nightly, you can do so by changing the tag. All available versions are on"
-" `Docker Hub <https://hub.docker.com/r/flwr/superlink/tags>`_."
+" `Docker Hub <https://hub.docker.com/r/flwr/superlink/tags>`__."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:259
+#: ../../source/how-to-run-flower-using-docker.rst:400
 msgid "Pinning a Docker image to a specific version"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:261
+#: ../../source/how-to-run-flower-using-docker.rst:402
 msgid ""
 "It may happen that we update the images behind the tags. Such updates "
 "usually include security updates of system dependencies that should not "
@@ -5126,21 +5131,21 @@ msgid ""
 "instead of the tag."
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:266
+#: ../../source/how-to-run-flower-using-docker.rst:407
 msgid ""
 "The following command returns the current image hash referenced by the "
 "``superlink:1.8.0`` tag:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:273
+#: ../../source/how-to-run-flower-using-docker.rst:414
 msgid "Next, we can pin the hash when running a new SuperLink container:"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:282
+#: ../../source/how-to-run-flower-using-docker.rst:423
 msgid "Setting environment variables"
 msgstr ""
 
-#: ../../source/how-to-run-flower-using-docker.rst:284
+#: ../../source/how-to-run-flower-using-docker.rst:425
 msgid ""
 "To set a variable inside a Docker container, you can use the ``-e "
 "<name>=<value>`` flag."
@@ -5613,7 +5618,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:8
-#: ../../source/how-to-upgrade-to-flower-next.rst:42
+#: ../../source/how-to-upgrade-to-flower-next.rst:43
 msgid "Install update"
 msgstr ""
 
@@ -5657,7 +5662,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:24
-#: ../../source/how-to-upgrade-to-flower-next.rst:99
+#: ../../source/how-to-upgrade-to-flower-next.rst:100
 msgid "Required changes"
 msgstr ""
 
@@ -5861,7 +5866,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:89
-#: ../../source/how-to-upgrade-to-flower-next.rst:316
+#: ../../source/how-to-upgrade-to-flower-next.rst:317
 msgid "Further help"
 msgstr ""
 
@@ -5899,44 +5904,44 @@ msgstr ""
 msgid "Let's dive in!"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:47
+#: ../../source/how-to-upgrade-to-flower-next.rst:48
 msgid ""
 "Here's how to update an existing installation of Flower to Flower Next "
 "with ``pip``:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:53
+#: ../../source/how-to-upgrade-to-flower-next.rst:54
 msgid "or if you need Flower Next with simulation:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:60
+#: ../../source/how-to-upgrade-to-flower-next.rst:61
 msgid ""
 "Ensure you set the following version constraint in your "
 "``requirements.txt``"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:70
+#: ../../source/how-to-upgrade-to-flower-next.rst:71
 msgid "or ``pyproject.toml``:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:81
+#: ../../source/how-to-upgrade-to-flower-next.rst:82
 msgid "Using Poetry"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:83
+#: ../../source/how-to-upgrade-to-flower-next.rst:84
 msgid ""
 "Update the ``flwr`` dependency in ``pyproject.toml`` and then reinstall "
 "(don't forget to delete ``poetry.lock`` via ``rm poetry.lock`` before "
 "running ``poetry install``)."
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:85
+#: ../../source/how-to-upgrade-to-flower-next.rst:86
 msgid ""
 "Ensure you set the following version constraint in your "
 "``pyproject.toml``:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:101
+#: ../../source/how-to-upgrade-to-flower-next.rst:102
 msgid ""
 "In Flower Next, the *infrastructure* and *application layers* have been "
 "decoupled. Instead of starting a client in code via ``start_client()``, "
@@ -5949,31 +5954,31 @@ msgid ""
 "way:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:108
+#: ../../source/how-to-upgrade-to-flower-next.rst:109
 msgid "|clientapp_link|_"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:109
+#: ../../source/how-to-upgrade-to-flower-next.rst:110
 msgid ""
 "Wrap your existing client with |clientapp_link|_ instead of launching it "
 "via |startclient_link|_. Here's an example:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:131
+#: ../../source/how-to-upgrade-to-flower-next.rst:132
 msgid "|serverapp_link|_"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:132
+#: ../../source/how-to-upgrade-to-flower-next.rst:133
 msgid ""
 "Wrap your existing strategy with |serverapp_link|_ instead of starting "
 "the server via |startserver_link|_. Here's an example:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:153
+#: ../../source/how-to-upgrade-to-flower-next.rst:154
 msgid "Deployment"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:154
+#: ../../source/how-to-upgrade-to-flower-next.rst:155
 msgid ""
 "Run the ``SuperLink`` using |flowernext_superlink_link|_ before running, "
 "in sequence, |flowernext_clientapp_link|_ (2x) and "
@@ -5981,56 +5986,56 @@ msgid ""
 " `server.py` as Python scripts."
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:157
+#: ../../source/how-to-upgrade-to-flower-next.rst:158
 msgid ""
 "Here's an example to start the server without HTTPS (only for "
 "prototyping):"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:173
+#: ../../source/how-to-upgrade-to-flower-next.rst:174
 msgid ""
 "Here's another example to start with HTTPS. Use the ``--certificates`` "
 "command line argument to pass paths to (CA certificate, server "
 "certificate, and server private key)."
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:200
+#: ../../source/how-to-upgrade-to-flower-next.rst:201
 msgid "Simulation in CLI"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:201
+#: ../../source/how-to-upgrade-to-flower-next.rst:202
 msgid ""
 "Wrap your existing client and strategy with |clientapp_link|_ and "
 "|serverapp_link|_, respectively. There is no need to use |startsim_link|_"
 " anymore. Here's an example:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:231
+#: ../../source/how-to-upgrade-to-flower-next.rst:232
 msgid ""
-"Run |runsimcli_link|_ in CLI and point to the ``server_app`` / "
+"Run |flower_simulation_link|_ in CLI and point to the ``server_app`` / "
 "``client_app`` object in the code instead of executing the Python script."
 " Here's an example (assuming the ``server_app`` and ``client_app`` "
 "objects are in a ``sim.py`` module):"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:248
+#: ../../source/how-to-upgrade-to-flower-next.rst:249
 msgid ""
 "Set default resources for each |clientapp_link|_ using the ``--backend-"
 "config`` command line argument instead of setting the "
 "``client_resources`` argument in |startsim_link|_. Here's an example:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:274
+#: ../../source/how-to-upgrade-to-flower-next.rst:275
 msgid "Simulation in a Notebook"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:275
+#: ../../source/how-to-upgrade-to-flower-next.rst:276
 msgid ""
 "Run |runsim_link|_ in your notebook instead of |startsim_link|_. Here's "
 "an example:"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:318
+#: ../../source/how-to-upgrade-to-flower-next.rst:319
 msgid ""
 "Some official `Flower code examples <https://flower.ai/docs/examples/>`_ "
 "are already updated to Flower Next so they can serve as a reference for "
@@ -6041,18 +6046,18 @@ msgid ""
 " or share and learn from others about migrating to Flower Next."
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:324
+#: ../../source/how-to-upgrade-to-flower-next.rst:325
 msgid "Important"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:327
+#: ../../source/how-to-upgrade-to-flower-next.rst:328
 msgid ""
 "As we continuously enhance Flower Next at a rapid pace, we'll be "
 "periodically updating this guide. Please feel free to share any feedback "
 "with us!"
 msgstr ""
 
-#: ../../source/how-to-upgrade-to-flower-next.rst:333
+#: ../../source/how-to-upgrade-to-flower-next.rst:334
 msgid "Happy migrating! 🚀"
 msgstr ""
 
@@ -10208,10 +10213,6 @@ msgstr ""
 msgid "run\\_superlink"
 msgstr ""
 
-#: ../../source/ref-api/flwr.server.start_driver.rst:2
-msgid "start\\_driver"
-msgstr ""
-
 #: ../../source/ref-api/flwr.server.start_server.rst:2
 msgid "start\\_server"
 msgstr ""
@@ -13302,10 +13303,6 @@ msgstr ""
 msgid ""
 "When diabled, only INFO, WARNING and ERROR log messages will be shown. If"
 " enabled, DEBUG-level logs will be displayed."
-msgstr ""
-
-#: ../../source/ref-api/flwr.simulation.run_simulation_from_cli.rst:2
-msgid "run\\_simulation\\_from\\_cli"
 msgstr ""
 
 #: ../../source/ref-api/flwr.simulation.start_simulation.rst:2
@@ -19591,7 +19588,7 @@ msgid ""
 "We now have a list of ten training sets and ten validation sets "
 "(``trainloaders`` and ``valloaders``) representing the data of ten "
 "different organizations. Each ``trainloader``/``valloader`` pair contains"
-" 4500 training examples and 500 validation examples. There's also a "
+" 4000 training examples and 1000 validation examples. There's also a "
 "single ``testloader`` (we did not split the test set). Again, this is "
 "only necessary for building research or educational systems, actual "
 "federated learning systems have their data naturally distributed across "
@@ -20216,7 +20213,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
-msgid "|191c6b8b5e1d46f99de4872746afa8af|"
+msgid "|d8bf04f23d9b46d8a23cc6f4887d7873|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
@@ -20231,7 +20228,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
-msgid "|21b83f3feb024a049617190555a13549|"
+msgid "|5aa1711387d74d0f8b9c499e1a51627e|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
@@ -20252,7 +20249,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
-msgid "|0dd15b4df7e3422f88aaf74cb401bfa7|"
+msgid "|2bc8e069228d4873804061ff4a95048c|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
@@ -20268,7 +20265,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
-msgid "|60e16f6be7354ca793444e01aa7adf25|"
+msgid "|c258488766324dc9a6807f0e7c4fd5f4|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
@@ -20284,7 +20281,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
-msgid "|a7032acbd65948a8beef8bccbbb9b83a|"
+msgid "|d5f962c3f4ec48529efda980868c14b0|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
@@ -20299,7 +20296,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
-msgid "|dd0e05706e584ee29e07cd39e6af5498|"
+msgid "|a5eccea18d4c43a68b54b65043cabef8|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
@@ -20319,7 +20316,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
-msgid "|2a2031018a1c4f81a69ea16df4947bd0|"
+msgid "|f17662f7df2d42f68cac70a1fdeda8a7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
@@ -20334,7 +20331,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
-msgid "|5e841497933340d3b5c2efbf37e3e6a6|"
+msgid "|241fc906441a4f038c625a19d30d01b2|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
@@ -20474,7 +20471,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
-msgid "|19687aecbc3a485da999b66fe2051005|"
+msgid "|0aa5aa05810b44b6a835cecce28f3137|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
@@ -20498,7 +20495,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
-msgid "|32ef0bbade4d4500b7be97cf62405661|"
+msgid "|c742940dd4bf4de09d8d0d5e8d179638|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
@@ -20522,7 +20519,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
-msgid "|9d57ed324b304a698263f5a983a56a6b|"
+msgid "|1f169ab4601a47e1a226f1628f4ebddb|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
@@ -20545,7 +20542,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
-msgid "|d41510e6781c4bf18c234c6bfb8d4937|"
+msgid "|12cfa9cde14440ecb8c8f6c1d7185bec|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
@@ -20583,7 +20580,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
-msgid "|a0198a7ebbfb4b9289e7312711cbc967|"
+msgid "|72939caf6e294b0986fee6dde96614d7|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
@@ -20677,7 +20674,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
-msgid "|2c13f726c8c843fc8aae997bf906125b|"
+msgid "|83a8daee45da4a98b8d6f24ae098fc50|"
 msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
@@ -20705,4 +20702,526 @@ msgid ""
 "pytorch.html>`__ shows how to build a simple federated learning system "
 "with PyTorch and Flower."
 msgstr ""
+
+#~ msgid ""
+#~ "If you want to use your own "
+#~ "base image instead of the official "
+#~ "Flower base image, all you need to"
+#~ " do is set the ``BASE_REPOSITORY``, "
+#~ "``PYTHON_VERSION`` and ``UBUNTU_VERSION`` build "
+#~ "arguments. .. code-block:: bash"
+#~ msgstr ""
+
+#~ msgid "$ cd src/docker/superlink/ $ docker build \\"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "--build-arg BASE_REPOSITORY=flwr_base \\ "
+#~ "--build-arg PYTHON_VERSION=3.11 \\ --build-"
+#~ "arg UBUNTU_VERSION=ubuntu22.04 \\ --build-arg"
+#~ " FLWR_VERSION=1.8.0 \\ -t flwr_superlink:0.1.0"
+#~ " ."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "It is important to follow the "
+#~ "instructions described in comments. For "
+#~ "instance, in order to not break "
+#~ "how our changelog system works, you "
+#~ "should read the information above the"
+#~ " ``Changelog entry`` section carefully. You"
+#~ " can also checkout some examples and"
+#~ " details in the :ref:`changelogentry` "
+#~ "appendix."
+#~ msgstr ""
+
+#~ msgid "Open a PR (as shown above)"
+#~ msgstr ""
+
+#~ msgid "How to write a good PR title"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "A well-crafted PR title helps team"
+#~ " members quickly understand the purpose "
+#~ "and scope of the changes being "
+#~ "proposed. Here's a guide to help "
+#~ "you write a good GitHub PR title:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "1. Be Clear and Concise: Provide a"
+#~ " clear summary of the changes in "
+#~ "a concise manner. 1. Use Actionable "
+#~ "Verbs: Start with verbs like \"Add,\""
+#~ " \"Update,\" or \"Fix\" to indicate "
+#~ "the purpose. 1. Include Relevant "
+#~ "Information: Mention the affected feature "
+#~ "or module for context. 1. Keep it"
+#~ " Short: Avoid lengthy titles for easy"
+#~ " readability. 1. Use Proper Capitalization"
+#~ " and Punctuation: Follow grammar rules "
+#~ "for clarity."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Let's start with a few examples "
+#~ "for titles that should be avoided "
+#~ "because they do not provide meaningful"
+#~ " information:"
+#~ msgstr ""
+
+#~ msgid "Implement Algorithm"
+#~ msgstr ""
+
+#~ msgid "Database"
+#~ msgstr ""
+
+#~ msgid "Add my_new_file.py to codebase"
+#~ msgstr ""
+
+#~ msgid "Improve code in module"
+#~ msgstr ""
+
+#~ msgid "Change SomeModule"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Here are a few positive examples "
+#~ "which provide helpful information without "
+#~ "repeating how they do it, as that"
+#~ " is already visible in the \"Files"
+#~ " changed\" section of the PR:"
+#~ msgstr ""
+
+#~ msgid "Update docs banner to mention Flower Summit 2023"
+#~ msgstr ""
+
+#~ msgid "Remove unnecessary XGBoost dependency"
+#~ msgstr ""
+
+#~ msgid "Remove redundant attributes in strategies subclassing FedAvg"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Add CI job to deploy the staging"
+#~ " system when the ``main`` branch "
+#~ "changes"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Add new amazing library which will "
+#~ "be used to improve the simulation "
+#~ "engine"
+#~ msgstr ""
+
+#~ msgid "Changelog entry"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "When opening a new PR, inside its"
+#~ " description, there should be a "
+#~ "``Changelog entry`` header."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Above this header you should see "
+#~ "the following comment that explains how"
+#~ " to write your changelog entry:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Inside the following 'Changelog entry' "
+#~ "section, you should put the description"
+#~ " of your changes that will be "
+#~ "added to the changelog alongside your"
+#~ " PR title."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the section is completely empty "
+#~ "(without any token) or non-existent, "
+#~ "the changelog will just contain the "
+#~ "title of the PR for the changelog"
+#~ " entry, without any description."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the section contains some text "
+#~ "other than tokens, it will use it"
+#~ " to add a description to the "
+#~ "change."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the section contains one of the"
+#~ " following tokens it will ignore any"
+#~ " other text and put the PR "
+#~ "under the corresponding section of the"
+#~ " changelog:"
+#~ msgstr ""
+
+#~ msgid "<general> is for classifying a PR as a general improvement."
+#~ msgstr ""
+
+#~ msgid "<skip> is to not add the PR to the changelog"
+#~ msgstr ""
+
+#~ msgid "<baselines> is to add a general baselines change to the PR"
+#~ msgstr ""
+
+#~ msgid "<examples> is to add a general examples change to the PR"
+#~ msgstr ""
+
+#~ msgid "<sdk> is to add a general sdk change to the PR"
+#~ msgstr ""
+
+#~ msgid "<simulations> is to add a general simulations change to the PR"
+#~ msgstr ""
+
+#~ msgid "Note that only one token should be used."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Its content must have a specific "
+#~ "format. We will break down what "
+#~ "each possibility does:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the ``### Changelog entry`` section"
+#~ " contains nothing or doesn't exist, "
+#~ "the following text will be added "
+#~ "to the changelog::"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the ``### Changelog entry`` section"
+#~ " contains a description (and no "
+#~ "token), the following text will be "
+#~ "added to the changelog::"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the ``### Changelog entry`` section"
+#~ " contains ``<skip>``, nothing will change"
+#~ " in the changelog."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the ``### Changelog entry`` section"
+#~ " contains ``<general>``, the following text"
+#~ " will be added to the changelog::"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the ``### Changelog entry`` section"
+#~ " contains ``<baselines>``, the following "
+#~ "text will be added to the "
+#~ "changelog::"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the ``### Changelog entry`` section"
+#~ " contains ``<examples>``, the following "
+#~ "text will be added to the "
+#~ "changelog::"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the ``### Changelog entry`` section"
+#~ " contains ``<sdk>``, the following text "
+#~ "will be added to the changelog::"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If the ``### Changelog entry`` section"
+#~ " contains ``<simulations>``, the following "
+#~ "text will be added to the "
+#~ "changelog::"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Note that only one token must be"
+#~ " provided, otherwise, only the first "
+#~ "action (in the order listed above), "
+#~ "will be performed."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "We recommend you to check out the"
+#~ " complete `code example "
+#~ "<https://github.com/adap/flower/tree/main/examples/flower-"
+#~ "client-authentication>`_ demonstrating federated "
+#~ "learning with Flower in an authenticated"
+#~ " setting."
+#~ msgstr ""
+
+#~ msgid "Let's break down the :code:`--require-client-authentication` flag:"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The first argument is a path to"
+#~ " a CSV file storing all known "
+#~ "node public keys. You need to "
+#~ "store all known node public keys "
+#~ "that are allowed to participate in "
+#~ "a federation in one CSV file "
+#~ "(:code:`.csv`)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The second and third arguments are "
+#~ "paths to the server's private and "
+#~ "public keys. For development purposes, "
+#~ "you can generate a private and "
+#~ "public key pair using :code:`ssh-keygen"
+#~ " -t ecdsa -b 384`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The :code:`--authentication-keys` flag expects"
+#~ " two arguments: a path to the "
+#~ "node's private key file and a path"
+#~ " to the node's public key file. "
+#~ "For development purposes, you can "
+#~ "generate a private and public key "
+#~ "pair using :code:`ssh-keygen -t ecdsa"
+#~ " -b 384`."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The simplest way to get started "
+#~ "with Flower is by using the "
+#~ "pre-made Docker images, which you can"
+#~ " find on `Docker Hub "
+#~ "<https://hub.docker.com/u/flwr>`_."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ``--insecure`` flag enables insecure "
+#~ "communication (using HTTP, not HTTPS) "
+#~ "and should only be used for "
+#~ "testing purposes. We strongly recommend "
+#~ "enabling `SSL <https://flower.ai/docs/framework/how-"
+#~ "to-run-flower-using-docker.html#enabling-"
+#~ "ssl-for-secure-connections>`_ when "
+#~ "deploying to a production environment."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you want to persist the state"
+#~ " of the SuperLink on your host "
+#~ "system, all you need to do is "
+#~ "specify a path where you want to"
+#~ " save the file on your host "
+#~ "system and a name for the database"
+#~ " file. In the example below, we "
+#~ "tell Docker via the flag ``-v`` to"
+#~ " mount the user's home directory "
+#~ "(``~/`` on your host) into the "
+#~ "``/app/`` directory of the container. "
+#~ "Furthermore, we use the flag "
+#~ "``--database`` to specify the name of"
+#~ " the database file."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "For testing purposes, you can generate"
+#~ " your own self-signed certificates. "
+#~ "The `Enable SSL connections "
+#~ "<https://flower.ai/docs/framework/how-to-enable-"
+#~ "ssl-connections.html#certificates>`_ page contains "
+#~ "a section that will guide you "
+#~ "through the process."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Assuming all files we need are in"
+#~ " the local ``certificates`` directory, we"
+#~ " can use the flag ``-v`` to "
+#~ "mount the local directory into the "
+#~ "``/app/`` directory of the container. "
+#~ "This allows the SuperLink to access "
+#~ "the files within the container. Finally,"
+#~ " we pass the names of the "
+#~ "certificates to the SuperLink with the"
+#~ " ``--certificates`` flag."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The SuperNode Docker image currently "
+#~ "works only with the 1.9.0-nightly "
+#~ "release. A stable version will be "
+#~ "available when Flower 1.9.0 (stable) "
+#~ "gets released (ETA: May). A SuperNode"
+#~ " nightly image must be paired with"
+#~ " the corresponding SuperLink nightly image"
+#~ " released on the same day. To "
+#~ "ensure the versions are in sync, "
+#~ "using the concrete tag, e.g., "
+#~ "``1.9.0.dev20240501`` instead of ``nightly`` "
+#~ "is recommended."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "We will use the ``app-pytorch`` "
+#~ "example, which you can find in the"
+#~ " Flower repository, to illustrate how "
+#~ "you can dockerize your client-app."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Before we can start, we need to"
+#~ " meet a few prerequisites in our "
+#~ "local development environment. You can "
+#~ "skip the first part if you want"
+#~ " to run your client-app instead "
+#~ "of the ``app-pytorch`` example."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "First, we need to create a "
+#~ "Dockerfile in the directory where the"
+#~ " ``ClientApp`` code is located. If "
+#~ "you use the ``app-pytorch`` example, "
+#~ "create a new file called ``Dockerfile``"
+#~ " in ``examples/app-pytorch``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "The ``Dockerfile`` contains the instructions"
+#~ " that assemble the SuperNode image."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "In the first two lines, we "
+#~ "instruct Docker to use the SuperNode "
+#~ "image tagged ``nightly`` as a base "
+#~ "image and set our working directory "
+#~ "to ``/app``. The following instructions "
+#~ "will now be executed in the "
+#~ "``/app`` directory. Next, we install the"
+#~ " ``ClientApp`` dependencies by copying the"
+#~ " ``requirements.txt`` file into the image"
+#~ " and run ``pip install``. In the "
+#~ "last two lines, we copy the "
+#~ "``ClientApp`` code (``client.py`` and "
+#~ "``task.py``) into the image and set "
+#~ "the entry point to ``flower-client-"
+#~ "app``."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Next, we build the SuperNode Docker "
+#~ "image by running the following command"
+#~ " in the directory where Dockerfile "
+#~ "and client-app code are located."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "``client:app``: The object reference of "
+#~ "the ``ClientApp`` (``<module>:<attribute>``)."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "It points to the ``ClientApp`` that "
+#~ "will be run inside the SuperNode "
+#~ "container."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Assuming the certificate already exists "
+#~ "locally, we can use the flag "
+#~ "``-v`` to mount the local certificate"
+#~ " into the container's ``/app/`` directory."
+#~ " This allows the SuperNode to access"
+#~ " the certificate within the container. "
+#~ "Use the ``--certificates`` flag when "
+#~ "starting the container."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "If you want to use a different "
+#~ "version of Flower, for example Flower"
+#~ " nightly, you can do so by "
+#~ "changing the tag. All available versions"
+#~ " are on `Docker Hub "
+#~ "<https://hub.docker.com/r/flwr/superlink/tags>`_."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Run |runsimcli_link|_ in CLI and point"
+#~ " to the ``server_app`` / ``client_app`` "
+#~ "object in the code instead of "
+#~ "executing the Python script. Here's an"
+#~ " example (assuming the ``server_app`` and"
+#~ " ``client_app`` objects are in a "
+#~ "``sim.py`` module):"
+#~ msgstr ""
+
+#~ msgid "start\\_driver"
+#~ msgstr ""
+
+#~ msgid "run\\_simulation\\_from\\_cli"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "We now have a list of ten "
+#~ "training sets and ten validation sets"
+#~ " (``trainloaders`` and ``valloaders``) "
+#~ "representing the data of ten different"
+#~ " organizations. Each ``trainloader``/``valloader`` "
+#~ "pair contains 4500 training examples and"
+#~ " 500 validation examples. There's also "
+#~ "a single ``testloader`` (we did not "
+#~ "split the test set). Again, this "
+#~ "is only necessary for building research"
+#~ " or educational systems, actual federated"
+#~ " learning systems have their data "
+#~ "naturally distributed across multiple "
+#~ "partitions."
+#~ msgstr ""
+
+#~ msgid "|191c6b8b5e1d46f99de4872746afa8af|"
+#~ msgstr ""
+
+#~ msgid "|21b83f3feb024a049617190555a13549|"
+#~ msgstr ""
+
+#~ msgid "|0dd15b4df7e3422f88aaf74cb401bfa7|"
+#~ msgstr ""
+
+#~ msgid "|60e16f6be7354ca793444e01aa7adf25|"
+#~ msgstr ""
+
+#~ msgid "|a7032acbd65948a8beef8bccbbb9b83a|"
+#~ msgstr ""
+
+#~ msgid "|dd0e05706e584ee29e07cd39e6af5498|"
+#~ msgstr ""
+
+#~ msgid "|2a2031018a1c4f81a69ea16df4947bd0|"
+#~ msgstr ""
+
+#~ msgid "|5e841497933340d3b5c2efbf37e3e6a6|"
+#~ msgstr ""
+
+#~ msgid "|19687aecbc3a485da999b66fe2051005|"
+#~ msgstr ""
+
+#~ msgid "|32ef0bbade4d4500b7be97cf62405661|"
+#~ msgstr ""
+
+#~ msgid "|9d57ed324b304a698263f5a983a56a6b|"
+#~ msgstr ""
+
+#~ msgid "|d41510e6781c4bf18c234c6bfb8d4937|"
+#~ msgstr ""
+
+#~ msgid "|a0198a7ebbfb4b9289e7312711cbc967|"
+#~ msgstr ""
+
+#~ msgid "|2c13f726c8c843fc8aae997bf906125b|"
+#~ msgstr ""
 
