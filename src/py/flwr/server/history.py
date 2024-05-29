@@ -91,32 +91,32 @@ class History:
         """
         rep = ""
         if self.losses_distributed:
-            rep += "History (loss, distributed):\n" + pprint.pformat(
-                reduce(
-                    lambda a, b: a + b,
-                    [
-                        f"\tround {server_round}: {loss}\n"
-                        for server_round, loss in self.losses_distributed
-                    ],
-                )
+            rep += "History (loss, distributed):\n" + reduce(
+                lambda a, b: a + b,
+                [
+                    f"\tround {server_round}: {loss}\n"
+                    for server_round, loss in self.losses_distributed
+                ],
             )
         if self.losses_centralized:
-            rep += "History (loss, centralized):\n" + pprint.pformat(
-                reduce(
-                    lambda a, b: a + b,
-                    [
-                        f"\tround {server_round}: {loss}\n"
-                        for server_round, loss in self.losses_centralized
-                    ],
-                )
+            rep += "History (loss, centralized):\n" + reduce(
+                lambda a, b: a + b,
+                [
+                    f"\tround {server_round}: {loss}\n"
+                    for server_round, loss in self.losses_centralized
+                ],
             )
         if self.metrics_distributed_fit:
-            rep += "History (metrics, distributed, fit):\n" + pprint.pformat(
-                self.metrics_distributed_fit
+            rep += (
+                "History (metrics, distributed, fit):\n"
+                + pprint.pformat(self.metrics_distributed_fit)
+                + "\n"
             )
         if self.metrics_distributed:
-            rep += "History (metrics, distributed, evaluate):\n" + pprint.pformat(
-                self.metrics_distributed
+            rep += (
+                "History (metrics, distributed, evaluate):\n"
+                + pprint.pformat(self.metrics_distributed)
+                + "\n"
             )
         if self.metrics_centralized:
             rep += "History (metrics, centralized):\n" + pprint.pformat(

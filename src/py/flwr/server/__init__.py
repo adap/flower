@@ -22,7 +22,6 @@ from .app import start_server as start_server
 from .client_manager import ClientManager as ClientManager
 from .client_manager import SimpleClientManager as SimpleClientManager
 from .compat import LegacyContext as LegacyContext
-from .compat import start_driver as start_driver
 from .driver import Driver as Driver
 from .history import History as History
 from .run_serverapp import run_server_app as run_server_app
@@ -41,7 +40,6 @@ __all__ = [
     "ServerApp",
     "ServerConfig",
     "SimpleClientManager",
-    "start_driver",
     "start_server",
     "strategy",
     "workflow",

@@ -72,14 +72,14 @@ typer = { version = "^0.9.0", extras=["all"] }
 tomli = "^2.0.1"
 pathspec = "^0.12.1"
 # Optional dependencies (Simulation Engine)
-ray = { version = "==2.6.3", optional = true, python = ">=3.8,<3.12" }
+ray = { version = "==2.10.0", optional = true, python = ">=3.8,<3.12" }
 # Optional dependencies (REST transport layer)
 requests = { version = "^2.31.0", optional = true }
 starlette = { version = "^0.31.0", optional = true }
 uvicorn = { version = "^0.23.0", extras = ["standard"], optional = true }
 
 [tool.poetry.extras]
-simulation = ["ray", "pydantic"]
+simulation = ["ray"]
 rest = ["requests", "starlette", "uvicorn"]
 
 [tool.poetry.group.dev.dependencies]

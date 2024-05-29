@@ -1,7 +1,8 @@
 import os
 
-import flwr as fl
 import tensorflow as tf
+
+import flwr as fl
 
 SUBSET_SIZE = 1000
 
@@ -31,8 +32,10 @@ class FlowerClient(fl.client.NumPyClient):
         loss, accuracy = model.evaluate(x_test, y_test)
         return loss, len(x_test), {"accuracy": accuracy}
 
+
 def client_fn(cid):
     return FlowerClient().to_client()
+
 
 app = fl.client.ClientApp(
     client_fn=client_fn,
@@ -40,4 +43,6 @@ app = fl.client.ClientApp(
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_client(server_address="127.0.0.1:8080", client=FlowerClient().to_client())
+    fl.client.start_client(
+        server_address="127.0.0.1:8080", client=FlowerClient().to_client()
+    )
