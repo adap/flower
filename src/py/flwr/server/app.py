@@ -263,10 +263,10 @@ def run_fleet_api() -> None:
             "You have specified %d workers. "
             "Support for multiple workers will be added in future releases. "
             "Proceeding with a single worker.",
-            args.fleet_api_num_workers
+            args.fleet_api_num_workers,
         )
         num_workers = 1
-    
+
     # Start Fleet API
     if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
@@ -374,7 +374,7 @@ def run_superlink() -> None:
             "You have specified %d workers. "
             "Support for multiple workers will be added in future releases. "
             "Proceeding with a single worker.",
-            args.fleet_api_num_workers
+            args.fleet_api_num_workers,
         )
         num_workers = 1
 
