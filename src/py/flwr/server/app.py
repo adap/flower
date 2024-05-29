@@ -248,6 +248,25 @@ def run_fleet_api() -> None:
     grpc_servers = []
     bckg_threads = []
 
+    address_arg = args.fleet_api_address
+    parsed_address = parse_address(address_arg)
+    if not parsed_address:
+        sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
+    num_workers = args.fleet_api_num_workers
+    if num_workers != 1:
+        log(
+            WARN,
+            "The Fleet API currently supports only 1 worker. "
+            "You have specified %d workers. "
+            "Support for multiple workers will be added in future releases. "
+            "Proceeding with a single worker.",
+            args.fleet_api_num_workers
+        )
+        num_workers = 1
+    
     # Start Fleet API
     if args.fleet_api_type == TRANSPORT_TYPE_REST:
         if (
@@ -256,20 +275,19 @@ def run_fleet_api() -> None:
             and importlib.util.find_spec("uvicorn")
         ) is None:
             sys.exit(MISSING_EXTRA_REST)
-        address_arg = args.rest_fleet_api_address
-        parsed_address = parse_address(address_arg)
-        if not parsed_address:
-            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, _ = parsed_address
+
+        _, ssl_certfile, ssl_keyfile = (
+            certificates if certificates is not None else (None, None, None)
+        )
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
             args=(
                 host,
                 port,
-                args.ssl_keyfile,
-                args.ssl_certfile,
+                ssl_keyfile,
+                ssl_certfile,
                 state_factory,
-                args.rest_fleet_api_workers,
+                num_workers,
             ),
         )
         fleet_thread.start()
@@ -352,10 +370,11 @@ def run_superlink() -> None:
     if num_workers != 1:
         log(
             WARN,
-            f"The Fleet API currently supports only 1 worker. "
-            f"You have specified {num_workers} workers. "
-            f"Support for multiple workers will be added in future releases. "
-            f"Proceeding with a single worker.",
+            "The Fleet API currently supports only 1 worker. "
+            "You have specified %d workers. "
+            "Support for multiple workers will be added in future releases. "
+            "Proceeding with a single worker.",
+            args.fleet_api_num_workers
         )
         num_workers = 1
 
@@ -412,7 +431,6 @@ def run_superlink() -> None:
             state_factory=state_factory,
             certificates=certificates,
             interceptors=interceptors,
-            num_workers=num_workers,
         )
         grpc_servers.append(fleet_server)
     else:
@@ -582,7 +600,6 @@ def _run_fleet_api_grpc_rere(
     state_factory: StateFactory,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
     interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None,
-    num_workers: int = 1,
 ) -> grpc.Server:
     """Run Fleet API (gRPC, request-response)."""
     # Create Fleet API gRPC server
