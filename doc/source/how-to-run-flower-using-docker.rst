@@ -72,19 +72,26 @@ Mounting a volume to store the state on the host system
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you want to persist the state of the SuperLink on your host system, all you need to do is specify
-a path where you want to save the file on your host system and a name for the database file. In the
-example below, we tell Docker via the flag ``--volume`` to mount the user's home directory
-(``~/`` on your host) into the ``/app/`` directory of the container. Furthermore, we use the
-flag ``--database`` to specify the name of the database file.
+a directory where you want to save the file on your host system and a name for the database file. By
+default, the SuperLink container runs with a non-root user called ``app`` with the user ID
+``49999``. It is recommended to create new directory and change the user ID of the directory to
+``49999`` to ensure the mounted directory has the proper permissions.
+
+In the example below, we create a new directory, change the user ID to ``49999`` and tell Docker
+via the flag ``--volume`` to mount the local ``state`` directory into the ``/app/state`` directory
+of the container. Furthermore, we use the flag ``--database`` to specify the name of the database
+file.
 
 .. code-block:: bash
 
+  $ mkdir state
+  $ chmod 49999:49999 state
   $ docker run --rm \
-    -p 9091:9091 -p 9092:9092 --volume ~/:/app/ flwr/superlink:1.8.0 \
+    -p 9091:9091 -p 9092:9092 --volume ./state/:/app/state flwr/superlink:1.8.0 \
     --insecure \
     --database state.db
 
-As soon as the SuperLink starts, the file ``state.db`` is created in the user's home directory on
+As soon as the SuperLink starts, the file ``state.db`` is created in the ``state`` directory on
 your host system. If the file already exists, the SuperLink tries to restore the state from the
 file. To start the SuperLink with an empty database, simply remove the ``state.db`` file.
 
@@ -100,17 +107,27 @@ PEM-encoded certificate chain.
   page contains a section that will guide you through the process.
 
 Assuming all files we need are in the local ``certificates`` directory, we can use the flag
-``--volume`` to mount the local directory into the ``/app/`` directory of the container. This allows
-the SuperLink to access the files within the container. Finally, we pass the names of the
-certificates to the SuperLink with the ``--root-certificates`` flag.
+``--volume`` to mount the local directory into the ``/app/certificates/`` directory of the container.
+This allows the SuperLink to access the files within the container. The ``ro`` stands for
+``read-only``. Docker volumes default to ``read-write``; that option tells Docker to make the volume
+``read-only`` instead. Finally, we pass the names of the certificates and key file to the SuperLink
+with the ``--ssl-ca-certfile``, ``--ssl-certfile`` and ``--ssl-keyfile`` flag.
 
 .. code-block:: bash
 
   $ docker run --rm \
-    -p 9091:9091 -p 9092:9092 --volume ./certificates/:/app/ flwr/superlink:1.9.0 \
-    --ssl-ca-certfile ca.crt \
-    --ssl-certfile server.pem \
-    --ssl-keyfile server.key
+    -p 9091:9091 -p 9092:9092 \
+    --volume ./certificates/:/app/certificates/:ro flwr/superlink:nightly \
+    --ssl-ca-certfile certificates/ca.crt \
+    --ssl-certfile certificates/server.pem \
+    --ssl-keyfile certificates/server.key
+
+.. note::
+
+  Because Flower containers, by default, run with a non-root user ``app``, the mounted files and
+  directories must have the proper permissions for the user ID ``49999``. For example, to change the
+  user ID of all files in the ``certificates/`` directory to ``49999``, you can run
+  ``chown 49999:49999 certificates/*``.
 
 Flower SuperNode
 ----------------
@@ -225,7 +242,7 @@ Now that we have built the SuperNode image, we can finally run it.
 
 .. code-block:: bash
 
-  $ docker run --rm flwr_supernode:0.0.1 client:app \
+  $ docker run --rm flwr_supernode:0.0.1 \
     --insecure \
     --server 192.168.1.100:9092
 
@@ -381,8 +398,7 @@ To enable SSL, we will need to mount a PEM-encoded root certificate into your Se
 
 Assuming the certificate already exists locally, we can use the flag ``--volume`` to mount the local
 certificate into the container's ``/app/`` directory. This allows the ServerApp to access the
-certificate within the container. Use the ``--ssl-ca-certfile``, ``--ssl-certfile``, and ``--ssl-keyfile`` 
-flags when starting the container.
+certificate within the container. Use the ``--root-certificates`` flags when starting the container.
 
 .. code-block:: bash
 
