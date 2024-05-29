@@ -15,7 +15,7 @@
 """Contextualizable state."""
 
 
-from typing import Any, List, TypeVar, cast, get_args, get_origin, get_type_hints
+from typing import Any, List, Type, TypeVar, cast, get_args, get_origin, get_type_hints
 
 import numpy as np
 
@@ -61,7 +61,7 @@ class ContextualizableState:
         return ret
 
     @classmethod
-    def from_configsrecord(cls: type[T], configs: ConfigsRecord) -> T:
+    def from_configsrecord(cls: Type[T], configs: ConfigsRecord) -> T:
         """Construct an instance from a ConfigsRecord."""
         ret = cls()
         type_hints = get_type_hints(cls)
