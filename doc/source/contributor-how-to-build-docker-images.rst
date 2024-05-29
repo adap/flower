@@ -44,16 +44,16 @@ Building the base image
      - Example
    * - ``DISTRO``
      - The Linux distribution to use as the base image.
-     - Defaults to ``ubuntu`` for Ubuntu and ``alpine`` for Alpine.
-     -
+     - No
+     - ``ubuntu``
    * - ``DISTRO_VERSION``
      - Version of the Linux distribution.
-     - Defaults to ``22.04`` for Ubuntu and ``3.19`` for Alpine.
-     -
+     - No
+     - ``22.04``
    * - ``PYTHON_VERSION``
      - Version of ``python`` to be installed.
-     - Defaults to ``3.11``
-     -
+     - No
+     - ``3.11`` or ``3.11.1``
    * - ``PIP_VERSION``
      - Version of ``pip`` to be installed.
      - Yes
@@ -67,18 +67,19 @@ Building the base image
      - Yes
      - ``1.8.0``
    * - ``FLWR_PACKAGE``
-     - The Flower package to be installed (``flwr`` or ``flwr-nightly``).
-     - Defaults to ``flwr``
-     -
+     - The Flower package to be installed.
+     - No
+     - ``flwr`` or ``flwr-nightly``
 
 
-The following example creates a base Ubuntu 22.02/Alpine 3.19 image with Python 3.11.0, pip 23.0.1,
+The following example creates a base Ubuntu/Alpine image with Python 3.11.0, pip 23.0.1,
 setuptools 69.0.2 and Flower 1.8.0:
 
 .. code-block:: bash
 
   $ cd src/docker/base/<ubuntu|alpine>
   $ docker build \
+    --build-arg PYTHON_VERSION=3.11.0 \
     --build-arg FLWR_VERSION=1.8.0 \
     --build-arg PIP_VERSION=23.0.1 \
     --build-arg SETUPTOOLS_VERSION=69.0.2 \
@@ -100,8 +101,8 @@ Building the SuperLink/SuperNode or ServerApp image
      - Example
    * - ``BASE_REPOSITORY``
      - The repository name of the base image.
-     - Defaults to ``flwr/base``.
-     -
+     - No
+     - ``flwr/base``
    * - ``BASE_IMAGE``
      - The Tag of the Flower base image.
      - Yes
