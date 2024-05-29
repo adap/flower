@@ -33,7 +33,7 @@ def _validate_parameters(
         )
     if partition_id_axis not in AXIS_TYPES:
         raise ValueError(
-            f"Invalid partition_id_axis: {partition_id_axis}. Must be 'x' or 'y'."
+            f"Invalid partition_id_axis: {partition_id_axis}. Must be one of {AXIS_TYPES}."
         )
 def _initialize_figsize(
     figsize: Optional[Tuple[float, float]],

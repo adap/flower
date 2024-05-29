@@ -108,7 +108,7 @@ def plot_label_distributions(
 
     >> from flwr_datasets import FederatedDataset
     >> from flwr_datasets.partitioner import DirichletPartitioner
-    >> from flwr_datasets.visualization import compare_label_distribution
+    >> from flwr_datasets.visualization import plot_label_distributions
     >>
     >> fds = FederatedDataset(
     >>     dataset="cifar10",
@@ -132,7 +132,7 @@ def plot_label_distributions(
 
     >> from flwr_datasets import FederatedDataset
     >> from flwr_datasets.partitioner import DirichletPartitioner
-    >> from flwr_datasets.visualization import compare_label_distribution
+    >> from flwr_datasets.visualization import plot_label_distributions
     >>
     >> fds = FederatedDataset(
     >>     dataset="cifar10",
@@ -158,7 +158,7 @@ def plot_label_distributions(
 
     >> from flwr_datasets import FederatedDataset
     >> from flwr_datasets.partitioner import DirichletPartitioner
-    >> from flwr_datasets.visualization import compare_label_distribution
+    >> from flwr_datasets.visualization import plot_label_distributions
     >>
     >> fds = FederatedDataset(
     >>     dataset="cifar10",
@@ -181,14 +181,14 @@ def plot_label_distributions(
     >> )
 
     You can also visualize the returned DataFrame in Jupyter Notebook
-    >> df.style.background_gradient(axis=None)
+    >> dataframe.style.background_gradient(axis=None)
     """
     _validate_parameters(plot_type, size_unit, partition_id_axis)
 
     if label_name not in partitioner.dataset.column_names:
         raise ValueError(
             f"The specified 'label_name': '{label_name}' is not present in the "
-            f"dataset."
+            f"dataset. The dataset contains columns {partitioner.dataset.column_names}."
         )
     if plot_kwargs is None:
         plot_kwargs = {}
@@ -253,6 +253,9 @@ def plot_label_distributions(
         legend_kwargs
     )
 
+    if partition_id_axis == "x" and plot_type == "heatmap":
+        dataframe = dataframe.T # revert transposition
+   
     return axis.figure, axis, dataframe
 
 
