@@ -736,7 +736,8 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "--log-file",
         type=str,
         default="",
-        help="Log file where SuperLink's logs are written.",
+        help="Log file where SuperLink's logs are written. "
+        "(e.g. --log-file ./mylogs/superlink.log)",
     )
 
 
