@@ -313,10 +313,10 @@ def run_superlink() -> None:
 
     args = _parse_args_run_superlink().parse_args()
 
-    if args.log_to_file:
-        log_dir = Path(args.log_dir)
+    if args.log_file:
+        log_dir = Path(args.log_file).parent
         log_dir.mkdir(parents=True, exist_ok=True)
-        configure(identifier="superlink", filename=log_dir / "superlink.log")
+        configure(identifier="superlink", filename=args.log_file)
 
     # Parse IP address
     parsed_address = parse_address(args.driver_api_address)
@@ -733,16 +733,10 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         help="The SuperLink's public key (as a path str) to enable authentication.",
     )
     parser.add_argument(
-        "--log-to-file",
-        action="store_true",
-        help="Flag to enable the saving of logs to a file.",
-    )
-
-    parser.add_argument(
-        "--log-dir",
+        "--log-file",
         type=str,
-        default="./logs",
-        help="Directory where SuperLink's logs will be saved.",
+        default="",
+        help="Log file where SuperLink's logs are written.",
     )
 
 
