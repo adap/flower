@@ -77,15 +77,14 @@ default, the SuperLink container runs with a non-root user called ``app`` with t
 ``49999``. It is recommended to create new directory and change the user ID of the directory to
 ``49999`` to ensure the mounted directory has the proper permissions.
 
-In the example below, we create a new directory, change the user ID to ``49999`` and tell Docker
-via the flag ``--volume`` to mount the local ``state`` directory into the ``/app/state`` directory
-of the container. Furthermore, we use the flag ``--database`` to specify the name of the database
-file.
+In the example below, we create a new directory, change the user ID and tell Docker via the flag
+``--volume`` to mount the local ``state`` directory into the ``/app/state`` directory of the
+container. Furthermore, we use the flag ``--database`` to specify the name of the database file.
 
 .. code-block:: bash
 
   $ mkdir state
-  $ chmod 49999:49999 state
+  $ sudo chmod 49999:49999 state
   $ docker run --rm \
     -p 9091:9091 -p 9092:9092 --volume ./state/:/app/state flwr/superlink:1.8.0 \
     --insecure \
@@ -126,8 +125,8 @@ with the ``--ssl-ca-certfile``, ``--ssl-certfile`` and ``--ssl-keyfile`` flag.
 
   Because Flower containers, by default, run with a non-root user ``app``, the mounted files and
   directories must have the proper permissions for the user ID ``49999``. For example, to change the
-  user ID of all files in the ``certificates/`` directory to ``49999``, you can run
-  ``chown 49999:49999 certificates/*``.
+  user ID of all files in the ``certificates/`` directory, you can run
+  ``sudo chown 49999:49999 certificates/*``.
 
 Flower SuperNode
 ----------------
