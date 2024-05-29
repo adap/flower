@@ -66,19 +66,20 @@ def run_client_app() -> None:
     args = _parse_args_run_client_app().parse_args()
 
     if args.server != ADDRESS_FLEET_API_GRPC_RERE:
-        warn = "Passing flag --server is deprecated. Use --superlink-fleet-api instead."
+        warn = "Passing flag --server is deprecated. Use --superlink instead."
         warn_deprecated_feature(warn)
 
-        if args.superlink_fleet_api != ADDRESS_FLEET_API_GRPC_RERE:
-            # if `--superlink-fleet-api` also passed, then
+        if args.superlink != ADDRESS_FLEET_API_GRPC_RERE:
+            # if `--superlink` also passed, then
             # warn user that this argument overrides what was passed with `--server`
             log(
                 WARN,
-                "Both `--server` and `--superlink-fleet-api` were passed. "
-                "`--server` will be ignored.",
+                "Both `--server` and `--superlink` were passed. "
+                "`--server` will be ignored. Connecting to the Superlink Fleet API "
+                f"at {args.superlink}.",
             )
         else:
-            args.superlink_fleet_api = args.server
+            args.superlink = args.server
 
     root_certificates = _get_certificates(args)
     log(
@@ -90,7 +91,7 @@ def run_client_app() -> None:
     authentication_keys = _try_setup_client_authentication(args)
 
     _start_client_internal(
-        server_address=args.superlink_fleet_api,
+        server_address=args.superlink,
         load_client_app_fn=load_fn,
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
@@ -117,7 +118,7 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
             WARN,
             "Option `--insecure` was set. "
             "Starting insecure HTTP client connected to %s.",
-            args.superlink_fleet_api,
+            args.superlink,
         )
         root_certificates = None
     else:
@@ -131,7 +132,7 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
             DEBUG,
             "Starting secure HTTPS client connected to %s "
             "with the following certificates: %s.",
-            args.superlink_fleet_api,
+            args.superlink,
             cert_path,
         )
     return root_certificates
@@ -234,7 +235,7 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         help="Server address",
     )
     parser.add_argument(
-        "--superlink-fleet-api",
+        "--superlink",
         default=ADDRESS_FLEET_API_GRPC_RERE,
         help="Fleet API (gRPC-rere) SuperLink address (IPv4, IPv6, or a domain name)",
     )

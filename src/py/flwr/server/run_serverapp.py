@@ -79,21 +79,20 @@ def run_server_app() -> None:
     args = _parse_args_run_server_app().parse_args()
 
     if args.server != ADDRESS_DRIVER_API:
-        warn = (
-            "Passing flag --server is deprecated. Use --superlink-driver-api instead."
-        )
+        warn = "Passing flag --server is deprecated. Use --superlink instead."
         warn_deprecated_feature(warn)
 
-        if args.superlink_driver_api != ADDRESS_DRIVER_API:
-            # if `--superlink-driver-api` also passed, then
+        if args.superlink != ADDRESS_DRIVER_API:
+            # if `--superlink` also passed, then
             # warn user that this argument overrides what was passed with `--server`
             log(
                 WARN,
-                "Both `--server` and `--superlink-driver-api` were passed. "
-                "`--server` will be ignored.",
+                "Both `--server` and `--superlink` were passed. "
+                "`--server` will be ignored. Connecting to the Superlink Driver API "
+                f"at {args.superlink}.",
             )
         else:
-            args.superlink_driver_api = args.server
+            args.superlink = args.server
 
     update_console_handler(
         level=DEBUG if args.verbose else INFO,
@@ -114,7 +113,7 @@ def run_server_app() -> None:
             WARN,
             "Option `--insecure` was set. "
             "Starting insecure HTTP client connected to %s.",
-            args.superlink_driver_api,
+            args.superlink,
         )
         root_certificates = None
     else:
@@ -128,7 +127,7 @@ def run_server_app() -> None:
             DEBUG,
             "Starting secure HTTPS client connected to %s "
             "with the following certificates: %s.",
-            args.superlink_driver_api,
+            args.superlink,
             cert_path,
         )
 
@@ -149,7 +148,7 @@ def run_server_app() -> None:
 
     # Initialize GrpcDriver
     driver = GrpcDriver(
-        driver_service_address=args.superlink_driver_api,
+        driver_service_address=args.superlink,
         root_certificates=root_certificates,
         fab_id=args.fab_id,
         fab_version=args.fab_version,
@@ -198,7 +197,7 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         help="Server address",
     )
     parser.add_argument(
-        "--superlink-driver-api",
+        "--superlink",
         default=ADDRESS_DRIVER_API,
         help="Driver API (gRPC-rere) SuperLink address (IPv4, IPv6, or a domain name)",
     )

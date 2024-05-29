@@ -19,7 +19,7 @@ services:
       resources:
         limits:
           cpus: '2'
-    command: [ "--insecure", "--superlink-fleet-api", "superlink:9092" ]
+    command: [ "--insecure", "--superlink", "superlink:9092" ]
     depends_on:
       - superlink
 
@@ -27,7 +27,7 @@ services:
   serverapp:
     build:
       dockerfile: serverapp.Dockerfile
-    command: [ "--insecure", "--superlink-driver-api", "superlink:9091" ]
+    command: [ "--insecure", "--superlink", "superlink:9091" ]
     # enforce dependency for graceful execution
     depends_on:
       - superlink

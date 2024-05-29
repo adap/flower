@@ -59,7 +59,7 @@ Use the following terminal command to start an authenticated :code:`SuperNode`:
     
     flower-client-app client:app
         --root-certificates certificates/ca.crt
-        --superlink-fleet-api 127.0.0.1:9092
+        --superlink 127.0.0.1:9092
         --auth-supernode-private-key keys/client_credentials
         --auth-supernode-public-key keys/client_credentials.pub
 
