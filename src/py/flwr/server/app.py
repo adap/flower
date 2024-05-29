@@ -40,7 +40,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.logger import configure, log, warn_deprecated_feature
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
@@ -312,6 +312,11 @@ def run_superlink() -> None:
     event(EventType.RUN_SUPERLINK_ENTER)
 
     args = _parse_args_run_superlink().parse_args()
+
+    if args.log_to_file:
+        log_dir = Path(args.log_dir)
+        log_dir.mkdir(parents=True, exist_ok=True)
+        configure(identifier="superlink", filename=log_dir / "superlink.log")
 
     # Parse IP address
     parsed_address = parse_address(args.driver_api_address)
@@ -726,6 +731,18 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "--auth-superlink-public-key",
         type=str,
         help="The SuperLink's public key (as a path str) to enable authentication.",
+    )
+    parser.add_argument(
+        "--log-to-file",
+        action="store_true",
+        help="Flag to enable the saving of logs to a file.",
+    )
+
+    parser.add_argument(
+        "--log-dir",
+        type=str,
+        default="./logs",
+        help="Directory where SuperLink's logs will be saved.",
     )
 
 
