@@ -12,8 +12,10 @@ This guide explains how you can use Flower framework's |driverapi_link|_ API to 
 
 .. |driverapi_link| replace:: ``Driver()``
 .. |recordset_link| replace:: ``RecordSet()``
+.. |flower_serverapp_link| replace:: ``flower-server-app``
 .. _driverapi_link: ref-api/flwr.server.Driver.html
 .. _recordset_link: ref-api/flwr.common.RecordSet.html
+.. _flower_serverapp_link: ref-api-cli.html#flower-server-app
 
 Setup
 -----
@@ -32,6 +34,8 @@ Before diving into the :code:`Driver` API, we need to setup your :code:`server.p
 Next, we initialize the :code:`main()` function using :code:`@app.main()`. Within :code:`main()`, we define the workload that we want. For example, in federated learning workloads, we define a number of server rounds (:code:`server_round`) and loop over them throughout training:
 
 .. code-block:: python
+
+    # File: server.py
 
     @app.main()
     def main(driver: Driver, context: Context):
@@ -54,8 +58,8 @@ To select nodes in each server round, we run :code:`Driver.get_node_ids()` to re
 
 .. code-block:: python
 
-    # In `main()`:
-    ...
+    # File: server.py
+    
     num_client_nodes_per_round = 3
 
     for server_round in range(num_rounds):
@@ -95,6 +99,8 @@ Here is an example of how to push a PyTorch model and instructions to a set of c
 
 .. code-block:: python
 
+    # File: server.py
+
     def pytorch_to_parameter_record(pytorch_module: torch.nn.Module):
         state_dict = pytorch_module.state_dict()
         for k, v in state_dict.items():
@@ -110,8 +116,8 @@ Then, we create a :code:`RecordSet` and add parameters and configurations to :co
 
 .. code-block:: python
 
+    # File: server.py
     # In the for-loop in `main()`
-    ...
 
     # Create a RecordSet
     recordset = RecordSet()
@@ -125,6 +131,8 @@ Then, we create a :code:`RecordSet` and add parameters and configurations to :co
 Next, we create a list of :code:`Messages`, one for each node ID. To do so, we loop over all node IDs and run :code:`Driver.create_message()` with the :code:`recordset` as the content of the message: 
 
 .. code-block:: python
+
+    # File: server.py
 
     messages = []
     for node_id in node_ids:
@@ -141,11 +149,15 @@ Finally, we use :code:`Driver.push_messages()` to push the list of :code:`Messag
 
 .. code-block:: python
 
+    # File: server.py
+
     message_ids = driver.push_messages(messages)
 
 :code:`Driver.push_messages()` yields an iterable list of message IDs. In some real-world scenarios, you may encounter situations where only some :code:`Messages` can be pushed, so it is good practice to filter out empty message IDs:
 
 .. code-block:: python
+
+    # File: server.py
 
     # Wait for results, ignore empty message_ids
     message_ids = [message_id for message_id in message_ids if message_id != ""]
@@ -157,6 +169,8 @@ Pull messages from nodes
 Once messages are successfully sent to the nodes, we can use the associated message IDs to get results from these nodes. To do so, we continuously run :code:`Driver.pull_messages()` with the list of :code:`message_ids` until all of the :code:`Messages` from the nodes are received. 
 
 .. code-block:: python
+
+    # File: server.py
 
     all_replies: List[Message] = []
     while True:
@@ -172,6 +186,8 @@ Once messages are successfully sent to the nodes, we can use the associated mess
 To only keep :code:`Messages` with content, we apply a simple filter on the results:
 
 .. code-block:: python
+
+    # File: server.py
 
     # Filter correct results
     all_replies = [
@@ -189,6 +205,8 @@ Now that we have a results from the nodes in the form of :code:`Messages`, we ca
 
 .. code-block:: python
 
+    # File: server.py
+
     # Print metrics from nodes
     for reply in all_replies:
     	print(reply.content.metrics_records)
@@ -197,6 +215,8 @@ And here is how we can retrieve :code:`parameters_records` from the contents and
 
 .. code-block:: python
 
+    # File: server.py
+
     # Convert received parameters_records to state_dicts
     received_state_dicts = [
         parameters_to_pytorch_state_dict(
@@ -204,3 +224,31 @@ And here is how we can retrieve :code:`parameters_records` from the contents and
         )
         for reply in all_replies
     ]
+
+Run :code:`ServerApp`
+---------------------
+
+To use the :code:`Driver` API, we run the :code:`ServerApp` from CLI using the |flower_serverapp_link|_ command. Pass the :code:`<module>:<attribute>` to the command, where :code:`module` is the filename (:code:`server.py`) and :code:`attribute` is the instantiated :code:`ServerApp` in the :code:`module`:
+
+.. code-block:: shell
+
+    $ flower-server-app server:app  --insecure
+
+.. admonition:: Note
+    :class: note
+
+    In this example, the :code:`--insecure` command line argument starts Flower without HTTPS and is only used for prototyping. To run with HTTPS, we instead use the argument :code:`--root-certificates` and pass the paths to the certificate. Please refer to `Flower CLI reference <ref-api-cli.html#flower-server-app>`_ for implementation details.
+
+Conclusion
+----------
+
+Congratulations! You now know how to use the :code:`Driver` API to query training nodes and send/receive messages from them.
+
+A full example on the :code:`Driver` API is coming soon, so stay tuned!
+
+.. admonition:: Important
+    :class: important
+
+    As we continuously enhance Flower at a rapid pace, we'll periodically update the functionality and this how-to document. Please feel free to share any feedback with us!
+
+If there are further questions, `join the Flower Slack <https://flower.ai/join-slack/>`_ and use the channel ``#questions``. You can also `participate in Flower Discuss <https://discuss.flower.ai/>`_ where you can find us answering questions, or share and learn from others about migrating to Flower Next.
