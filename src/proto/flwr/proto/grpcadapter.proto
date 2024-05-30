@@ -22,7 +22,7 @@ service GrpcAdapter {
 }
 
 message MessageContainer {
-  map<string, bytes> metadata = 1;
+  map<string, string> metadata = 1;
   string grpc_message_name = 2;
   bytes grpc_message_content = 3;
 }

@@ -18,11 +18,11 @@ class MessageContainer(google.protobuf.message.Message):
         KEY_FIELD_NUMBER: builtins.int
         VALUE_FIELD_NUMBER: builtins.int
         key: typing.Text
-        value: builtins.bytes
+        value: typing.Text
         def __init__(self,
             *,
             key: typing.Text = ...,
-            value: builtins.bytes = ...,
+            value: typing.Text = ...,
             ) -> None: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
@@ -30,12 +30,12 @@ class MessageContainer(google.protobuf.message.Message):
     GRPC_MESSAGE_NAME_FIELD_NUMBER: builtins.int
     GRPC_MESSAGE_CONTENT_FIELD_NUMBER: builtins.int
     @property
-    def metadata(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, builtins.bytes]: ...
+    def metadata(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
     grpc_message_name: typing.Text
     grpc_message_content: builtins.bytes
     def __init__(self,
         *,
-        metadata: typing.Optional[typing.Mapping[typing.Text, builtins.bytes]] = ...,
+        metadata: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
         grpc_message_name: typing.Text = ...,
         grpc_message_content: builtins.bytes = ...,
         ) -> None: ...
