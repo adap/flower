@@ -129,7 +129,7 @@ With this brief explanation of Flower’s messaging pattern, let’s walk throug
 
 The :code:`app.train()` decorator registers a single training task on a client, e.g. for FL, it executes one FL round of model training on a client. The following steps outline how to implement it.
 
-First, import the necessary modules and register the function :code:`train()` using the decorator :code:`@app.train()`:
+First, import the necessary modules, register the function :code:`train()` using the decorator :code:`@app.train()`, and instantiate the model:
 
 .. code-block:: python
 
@@ -140,26 +140,25 @@ First, import the necessary modules and register the function :code:`train()` us
 
     app = ClientApp()
 
+    # instantiate model
+    model = Net()
+
     @app.train()
     def train(msg: Message, ctx: Context):
         ...
 
 Now, we implement the steps to train a model on the client, which generally follow the pattern:
 
-#. Instantiate model
 #. Load local data
 #. Get model and configs (e.g. from the :code:`ServerApp`)
 #. Train model
 #. Return results
 
-The first two steps are straightforward and we can implement as follows:
+The first step is straightforward and we can implement as follows:
 
 .. code-block:: python
 
     # File: client.py
-
-    # instantiate model
-    model = Net()
 
     # load local training and validation data
     train_loader, val_loader, _ = load_data()
@@ -209,6 +208,20 @@ Next, we prepare the updated model parameters and local metrics to be sent to th
     reply_content.parameters_records['my_model_returned'] = pytorch_to_parameter_record(model)
     reply_content.metrics_records['train_metrics'] = MetricsRecord(train_metrics)
 
+As an additional option, we keep track of the metrics by saving the training metrics variable, :code:`train_metrics`, in the :code:`Context` as a :code:`RecordSet()` by assigning it to :code:`metrics_records['prev']`. This is useful if we want to implement different training techniques like early-stopping. The code is implemented as follows:
+
+.. code-block:: python
+
+    # File: client.py
+
+    # log local context
+    if 'prev' in ctx.state.metrics_records:
+        print(f"last round training metrics were: {ctx.state.metrics_records['prev']}")
+    else:
+        print("no context info")
+    
+    # store metrics in context
+    ctx.state.metrics_records['prev'] = MetricsRecord(train_metrics)
 
 Finally, we return :code:`reply_content` to the :code:`ServerApp` using the :code:`Message.create_reply()` method:
 
@@ -277,6 +290,7 @@ The structure of :code:`app.evaluate()` is the same as as :code:`app.train()`:
 3. Get aggregated model parameters (e.g. from the :code:`ServerApp`)
 4. Evaluate aggregated model
 5. Return results
+6. (Optional) Log and store test metrics to local context
 
 Putting it together, our code is implemented as follows:
 
@@ -307,6 +321,13 @@ Putting it together, our code is implemented as follows:
         # 5. Construct reply message carrying test metrics
         reply_content = RecordSet()
         reply_content.metrics_records['test_metrics'] = MetricsRecord(test_metrics)
+
+        # (Optional) 6. Log and store metrics to local context
+        if 'prev' in ctx.state.metrics_records:
+            print(f"last round testing metrics were: {ctx.state.metrics_records['prev']}")
+        else:
+            print("no context info")
+        ctx.state.metrics_records['prev'] = MetricsRecord(test_metrics)
 
         return msg.create_reply(reply_content)
 
