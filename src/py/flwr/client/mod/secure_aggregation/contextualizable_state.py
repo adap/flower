@@ -15,7 +15,7 @@
 """Contextualizable state."""
 
 
-from typing import Any, List, Type, TypeVar, cast, get_args, get_origin, get_type_hints
+from typing import Any, List, Type, TypeVar, cast, get_args, get_origin
 
 import numpy as np
 
@@ -31,7 +31,7 @@ class ContextualizableState:
     def to_configsrecord(self) -> ConfigsRecord:
         """Convert the instance to a ConfigsRecord."""
         ret = ConfigsRecord()
-        type_hints = get_type_hints(self.__class__)
+        type_hints = self.__class__.__annotations__
 
         for key, value in self.__dict__.items():
             if key not in type_hints:
@@ -64,7 +64,7 @@ class ContextualizableState:
     def from_configsrecord(cls: Type[T], configs: ConfigsRecord) -> T:
         """Construct an instance from a ConfigsRecord."""
         ret = cls()
-        type_hints = get_type_hints(cls)
+        type_hints = cls.__annotations__
 
         for key, value_type in type_hints.items():
             origin = get_origin(value_type)
