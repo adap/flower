@@ -134,9 +134,9 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     channel.subscribe(on_channel_state_change)
 
     # Shared variables for inner functions
-    if adapter is None:
-        adapter = FleetStub
-    stub = adapter(channel)
+    if adapter_cls is None:
+        adapter_cls = FleetStub
+    stub = adapter_cls(channel)
     metadata: Optional[Metadata] = None
     node: Optional[Node] = None
     ping_thread: Optional[threading.Thread] = None
