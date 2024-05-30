@@ -76,7 +76,8 @@ def run_client_app() -> None:
                 WARN,
                 "Both `--server` and `--superlink` were passed. "
                 "`--server` will be ignored. Connecting to the Superlink Fleet API "
-                f"at {args.superlink}.",
+                "at %s.",
+                args.superlink,
             )
         else:
             args.superlink = args.server

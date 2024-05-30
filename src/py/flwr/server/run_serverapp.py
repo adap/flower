@@ -89,7 +89,8 @@ def run_server_app() -> None:
                 WARN,
                 "Both `--server` and `--superlink` were passed. "
                 "`--server` will be ignored. Connecting to the Superlink Driver API "
-                f"at {args.superlink}.",
+                "at %s.",
+                args.superlink,
             )
         else:
             args.superlink = args.server
