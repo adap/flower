@@ -15,19 +15,35 @@
 """Grpc Adapter."""
 
 
-from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
-from flwr.proto.grpcadapter_pb2 import MessageContainer
-from typing import Any, TypeVar, Type, cast
-from google.protobuf.message import Message as GrpcMessage
-from flwr.proto.fleet_pb2 import CreateNodeRequest, CreateNodeResponse, DeleteNodeRequest, DeleteNodeResponse, PingRequest, PingResponse, PullTaskInsResponse, PullTaskInsRequest, PushTaskResRequest, PushTaskResResponse, GetRunRequest, GetRunResponse
-import flwr
+from typing import Any, Type, TypeVar, cast
 
+from google.protobuf.message import Message as GrpcMessage
+
+import flwr
+from flwr.proto.fleet_pb2 import (
+    CreateNodeRequest,
+    CreateNodeResponse,
+    DeleteNodeRequest,
+    DeleteNodeResponse,
+    GetRunRequest,
+    GetRunResponse,
+    PingRequest,
+    PingResponse,
+    PullTaskInsRequest,
+    PullTaskInsResponse,
+    PushTaskResRequest,
+    PushTaskResResponse,
+)
+from flwr.proto.grpcadapter_pb2 import MessageContainer
+from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
 
 KEY_FLOWER_VERSION = "flower-version"
 T = TypeVar("T", bound=GrpcMessage)
 
 
 class GrpcAdapter:
+    """Grpc Adapter."""
+
     def __init__(self, channel: Any) -> None:
         self.stub = GrpcAdapterStub(channel)
 
@@ -35,7 +51,7 @@ class GrpcAdapter:
         container_req = MessageContainer(
             metadata={KEY_FLOWER_VERSION: flwr.__version__},
             grpc_message_name=request.__class__.__qualname__,
-            grpc_message_content=request.SerializeToString()
+            grpc_message_content=request.SerializeToString(),
         )
         container_res = cast(MessageContainer, self.stub.SendReceive(container_req))
         if container_res.grpc_message_name != response_type.__qualname__:
@@ -44,10 +60,29 @@ class GrpcAdapter:
                 f", but got {container_res.grpc_message_name}."
             )
         response = response_type()
-        response.ParseFromString(container_res)
+        response.ParseFromString(container_res.grpc_message_content)
         return response
-    
-    def CreateNode():
-        ...
 
+    def CreateNode(self, request: CreateNodeRequest) -> CreateNodeResponse:
+        """."""
+        return self._send_and_receive(request, CreateNodeResponse)
 
+    def DeleteNode(self, request: DeleteNodeRequest) -> DeleteNodeResponse:
+        """."""
+        return self._send_and_receive(request, DeleteNodeResponse)
+
+    def Ping(self, request: PingRequest) -> PingResponse:
+        """."""
+        return self._send_and_receive(request, PingResponse)
+
+    def PullTaskIns(self, request: PullTaskInsRequest) -> PullTaskInsResponse:
+        """."""
+        return self._send_and_receive(request, PullTaskInsResponse)
+
+    def PushTaskRes(self, request: PushTaskResRequest) -> PushTaskResResponse:
+        """."""
+        return self._send_and_receive(request, PushTaskResResponse)
+
+    def GetRun(self, request: GetRunRequest) -> GetRunResponse:
+        """."""
+        return self._send_and_receive(request, GetRunResponse)
