@@ -29,11 +29,11 @@ else:
 
     def get_origin(tp: Any) -> Any:
         """Get the unsubscripted version of a type."""
-        return tp.__origin__
+        return getattr(tp, "__origin__", None)
 
     def get_args(tp: Any) -> Any:
         """Get type arguments with all substitutions performed."""
-        return tp.__args__
+        return getattr(tp, "__args__", ())
 
 
 T = TypeVar("T")
