@@ -80,8 +80,6 @@ def test_state_with_ndarray() -> None:
     recon_state = TestState.from_configsrecord(state.to_configsrecord())
 
     # Assert
-    print(recon_state.arr)
-    print(state.arr)
     assert np.array_equal(recon_state.arr, state.arr)
     assert np.array_equal(recon_state.int_arr, state.int_arr)
     assert np.array_equal(recon_state.float_arr, state.float_arr)
@@ -110,9 +108,6 @@ def test_state_with_dict() -> None:
 
     # Assert
     assert recon_state.d1 == state.d1
-    assert list(recon_state.d2.keys()) == list(recon_state.d2.keys())
-    print(recon_state.d2)
-    print(state.d2)
     assert all(
         np.array_equal(v1, v2)
         for v1, v2 in zip(recon_state.d2.values(), state.d2.values())
