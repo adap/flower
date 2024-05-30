@@ -109,13 +109,13 @@ Building the SuperLink/SuperNode or ServerApp image
      - ``1.8.0-py3.10-ubuntu22.04``
 
 The following example creates a SuperLink/SuperNode or ServerApp image with the official Flower
-base image 1.8.0-py3.10-ubuntu22.04:
+base image:
 
 .. code-block:: bash
 
   $ cd src/docker/<superlink|supernode|serverapp>/
   $ docker build \
-    --build-arg BASE_IMAGE=1.8.0-py3.10-ubuntu22.04 \
+    --build-arg BASE_IMAGE=<FLOWER-VERSION>-py<PY-VERSION>-<DISTRIBUTION and VERSION> \
     -t flwr_superlink:0.1.0 .
 
 
