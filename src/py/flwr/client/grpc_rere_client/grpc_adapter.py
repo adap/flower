@@ -20,7 +20,7 @@ from typing import Any, Type, TypeVar, cast
 from google.protobuf.message import Message as GrpcMessage
 
 import flwr
-from flwr.proto.fleet_pb2 import (
+from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
     DeleteNodeRequest,
@@ -34,7 +34,7 @@ from flwr.proto.fleet_pb2 import (
     PushTaskResRequest,
     PushTaskResResponse,
 )
-from flwr.proto.grpcadapter_pb2 import MessageContainer
+from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
 
 KEY_FLOWER_VERSION = "flower-version"
@@ -63,26 +63,32 @@ class GrpcAdapter:
         response.ParseFromString(container_res.grpc_message_content)
         return response
 
+    # pylint: disable-next=C0103
     def CreateNode(self, request: CreateNodeRequest) -> CreateNodeResponse:
         """."""
         return self._send_and_receive(request, CreateNodeResponse)
 
+    # pylint: disable-next=C0103
     def DeleteNode(self, request: DeleteNodeRequest) -> DeleteNodeResponse:
         """."""
         return self._send_and_receive(request, DeleteNodeResponse)
 
+    # pylint: disable-next=C0103
     def Ping(self, request: PingRequest) -> PingResponse:
         """."""
         return self._send_and_receive(request, PingResponse)
 
+    # pylint: disable-next=C0103
     def PullTaskIns(self, request: PullTaskInsRequest) -> PullTaskInsResponse:
         """."""
         return self._send_and_receive(request, PullTaskInsResponse)
 
+    # pylint: disable-next=C0103
     def PushTaskRes(self, request: PushTaskResRequest) -> PushTaskResResponse:
         """."""
         return self._send_and_receive(request, PushTaskResResponse)
 
+    # pylint: disable-next=C0103
     def GetRun(self, request: GetRunRequest) -> GetRunResponse:
         """."""
         return self._send_and_receive(request, GetRunResponse)
