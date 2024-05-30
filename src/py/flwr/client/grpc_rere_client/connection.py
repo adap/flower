@@ -73,7 +73,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     authentication_keys: Optional[
         Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
-    adapter: Optional[Type[FleetStub]] = None,
+    adapter_cls: Optional[Type[FleetStub]] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
