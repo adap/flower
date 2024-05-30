@@ -15,12 +15,26 @@
 """Contextualizable state."""
 
 
-from typing import Any, List, Type, TypeVar, cast, get_args, get_origin, get_type_hints
+import sys
+from typing import Any, List, Type, TypeVar, cast, get_type_hints
 
 import numpy as np
 
 from flwr.common import ConfigsRecord
 from flwr.common.parameter import bytes_to_ndarray, ndarray_to_bytes
+
+if sys.version_info >= (3, 9):
+    from typing import get_args, get_origin
+else:
+
+    def get_origin(tp: Any) -> Any:
+        """Get the unsubscripted version of a type."""
+        return tp.__origin__
+
+    def get_args(tp: Any) -> Any:
+        """Get type arguments with all substitutions performed."""
+        return tp.__args__
+
 
 T = TypeVar("T")
 
