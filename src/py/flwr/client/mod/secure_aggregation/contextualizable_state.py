@@ -71,7 +71,9 @@ class ContextualizableState:
         for key, value_type in type_hints.items():
             origin = get_origin(value_type)
             args = get_args(value_type)
-            print(f"origin: {origin} || args: {args}")
+            print(
+                f"key: {key} || type: {value_type} || origin: {origin} || args: {args}"
+            )
 
             if key in configs:
                 # Read NDArray
