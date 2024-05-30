@@ -84,7 +84,7 @@ container. Furthermore, we use the flag ``--database`` to specify the name of th
 .. code-block:: bash
 
   $ mkdir state
-  $ sudo chmod 49999:49999 state
+  $ sudo chmod -R 49999:49999 state
   $ docker run --rm \
     -p 9091:9091 -p 9092:9092 --volume ./state/:/app/state flwr/superlink:1.8.0 \
     --insecure \
@@ -126,7 +126,7 @@ with the ``--ssl-ca-certfile``, ``--ssl-certfile`` and ``--ssl-keyfile`` flag.
   Because Flower containers, by default, run with a non-root user ``app``, the mounted files and
   directories must have the proper permissions for the user ID ``49999``. For example, to change the
   user ID of all files in the ``certificates/`` directory, you can run
-  ``sudo chown 49999:49999 certificates/*``.
+  ``sudo chown -R 49999:49999 certificates/*``.
 
 Flower SuperNode
 ----------------
