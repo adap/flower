@@ -22,7 +22,7 @@ import numpy as np
 
 from flwr.common.typing import NDArray, NDArrayFloat, NDArrayInt
 
-from .contextualizable_state import ContextualizableState
+from .state_conversion import from_configsrecord, to_configsrecord
 
 
 def test_state_with_common_types() -> None:
@@ -30,7 +30,7 @@ def test_state_with_common_types() -> None:
 
     # Prepare
     @dataclass
-    class TestState(ContextualizableState):  # pylint: disable=R0902
+    class TestState:  # pylint: disable=R0902
         """."""
 
         int_: int = 123
@@ -49,7 +49,7 @@ def test_state_with_common_types() -> None:
     state = TestState()
 
     # Execute
-    recon_state = TestState.from_configsrecord(state.to_configsrecord())
+    recon_state = from_configsrecord(TestState, to_configsrecord(state))
 
     # Assert
     assert recon_state == state
@@ -60,7 +60,7 @@ def test_state_with_ndarray() -> None:
 
     # Prepare
     @dataclass
-    class TestState(ContextualizableState):
+    class TestState:
         """."""
 
         arr: NDArray = field(default_factory=lambda: np.array(["sfd", "1"]))
@@ -77,7 +77,7 @@ def test_state_with_ndarray() -> None:
     state = TestState()
 
     # Execute
-    recon_state = TestState.from_configsrecord(state.to_configsrecord())
+    recon_state = from_configsrecord(TestState, to_configsrecord(state))
 
     # Assert
     assert np.array_equal(recon_state.arr, state.arr)
@@ -95,7 +95,7 @@ def test_state_with_dict() -> None:
 
     # Prepare
     @dataclass
-    class TestState(ContextualizableState):
+    class TestState:
         """."""
 
         d1: Dict[int, bytes] = field(default_factory=lambda: {-2: b"!~0241", 99: b""})
@@ -104,7 +104,7 @@ def test_state_with_dict() -> None:
     state = TestState()
 
     # Execute
-    recon_state = TestState.from_configsrecord(state.to_configsrecord())
+    recon_state = from_configsrecord(TestState, to_configsrecord(state))
 
     # Assert
     assert recon_state.d1 == state.d1
