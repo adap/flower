@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Tests for the conversion functions."""
+"""Conversion functions between an annotated class instance and a ConfigsRecord."""
 
 import sys
 from typing import Any, List, Type, TypeVar, cast, get_type_hints
@@ -39,7 +39,7 @@ T = TypeVar("T")
 
 
 def to_configsrecord(instance: object) -> ConfigsRecord:
-    """Convert the instance to a ConfigsRecord."""
+    """Convert the annotated class instance to a ConfigsRecord."""
     ret = ConfigsRecord()
     type_hints = get_type_hints(instance.__class__)
 
@@ -72,7 +72,7 @@ def to_configsrecord(instance: object) -> ConfigsRecord:
 
 
 def from_configsrecord(cls: Type[T], configs: ConfigsRecord) -> T:
-    """Construct an instance from a ConfigsRecord."""
+    """Construct an annotated class instance from a ConfigsRecord."""
     ret = cls()
     type_hints = get_type_hints(cls)
 
