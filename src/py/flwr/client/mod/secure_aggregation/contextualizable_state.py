@@ -65,10 +65,13 @@ class ContextualizableState:
         """Construct an instance from a ConfigsRecord."""
         ret = cls()
         type_hints = get_type_hints(cls)
+        print(f"type hints: \n{type_hints}\n")
+        print(f"configs: \n{configs}")
 
         for key, value_type in type_hints.items():
             origin = get_origin(value_type)
             args = get_args(value_type)
+            print(f"origin: {origin} || args: {args}")
 
             if key in configs:
                 # Read NDArray
