@@ -56,6 +56,7 @@ from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import AuthenticateClientInterceptor
+from .grpc_adapter import GrpcAdapter
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -73,7 +74,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     authentication_keys: Optional[
         Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
-    adapter_cls: Optional[Type[FleetStub]] = None,
+    adapter_cls: Optional[Union[Type[FleetStub], Type[GrpcAdapter]]] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],

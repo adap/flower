@@ -19,7 +19,7 @@ from typing import Any, Type, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
-import flwr
+from flwr.common.version import package_version
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -51,13 +51,17 @@ class GrpcAdapter:
     def __init__(self, channel: Any) -> None:
         self.stub = GrpcAdapterStub(channel)
 
-    def _send_and_receive(self, request: GrpcMessage, response_type: Type[T]) -> T:
+    def _send_and_receive(
+        self, request: GrpcMessage, response_type: Type[T], **kwargs: Any
+    ) -> T:
         container_req = MessageContainer(
-            metadata={KEY_FLOWER_VERSION: flwr.__version__},
+            metadata={KEY_FLOWER_VERSION: package_version},
             grpc_message_name=request.__class__.__qualname__,
             grpc_message_content=request.SerializeToString(),
         )
-        container_res = cast(MessageContainer, self.stub.SendReceive(container_req))
+        container_res = cast(
+            MessageContainer, self.stub.SendReceive(container_req, **kwargs)
+        )
         if container_res.grpc_message_name != response_type.__qualname__:
             raise ValueError(
                 f"Invalid grpc_message_name. Expected {response_type.__qualname__}"
@@ -68,26 +72,34 @@ class GrpcAdapter:
         return response
 
     # pylint: disable=C0103
-    def CreateNode(self, request: CreateNodeRequest) -> CreateNodeResponse:
+    def CreateNode(
+        self, request: CreateNodeRequest, **kwargs: Any
+    ) -> CreateNodeResponse:
         """."""
-        return self._send_and_receive(request, CreateNodeResponse)
+        return self._send_and_receive(request, CreateNodeResponse, **kwargs)
 
-    def DeleteNode(self, request: DeleteNodeRequest) -> DeleteNodeResponse:
+    def DeleteNode(
+        self, request: DeleteNodeRequest, **kwargs: Any
+    ) -> DeleteNodeResponse:
         """."""
-        return self._send_and_receive(request, DeleteNodeResponse)
+        return self._send_and_receive(request, DeleteNodeResponse, **kwargs)
 
-    def Ping(self, request: PingRequest) -> PingResponse:
+    def Ping(self, request: PingRequest, **kwargs: Any) -> PingResponse:
         """."""
-        return self._send_and_receive(request, PingResponse)
+        return self._send_and_receive(request, PingResponse, **kwargs)
 
-    def PullTaskIns(self, request: PullTaskInsRequest) -> PullTaskInsResponse:
+    def PullTaskIns(
+        self, request: PullTaskInsRequest, **kwargs: Any
+    ) -> PullTaskInsResponse:
         """."""
-        return self._send_and_receive(request, PullTaskInsResponse)
+        return self._send_and_receive(request, PullTaskInsResponse, **kwargs)
 
-    def PushTaskRes(self, request: PushTaskResRequest) -> PushTaskResResponse:
+    def PushTaskRes(
+        self, request: PushTaskResRequest, **kwargs: Any
+    ) -> PushTaskResResponse:
         """."""
-        return self._send_and_receive(request, PushTaskResResponse)
+        return self._send_and_receive(request, PushTaskResResponse, **kwargs)
 
-    def GetRun(self, request: GetRunRequest) -> GetRunResponse:
+    def GetRun(self, request: GetRunRequest, **kwargs: Any) -> GetRunResponse:
         """."""
-        return self._send_and_receive(request, GetRunResponse)
+        return self._send_and_receive(request, GetRunResponse, **kwargs)
