@@ -14,14 +14,14 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
 def load_data(partition_id, batch_size):
-    fds = FederatedDataset(dataset="cifar10", partitioners={"train": 2})
+    fds = FederatedDataset(dataset="mnist", partitioners={"train": 2})
     partition = fds.load_partition(partition_id, "train")
     partition.set_format("numpy")
 
     # Divide data on each node: 80% train, 20% test
     partition = partition.train_test_split(test_size=0.2, seed=42)
-    x_train, y_train = partition["train"]["img"] / 255.0, partition["train"]["label"]
-    x_test, y_test = partition["test"]["img"] / 255.0, partition["test"]["label"]
+    x_train, y_train = partition["train"]["image"] / 255.0, partition["train"]["label"]
+    x_test, y_test = partition["test"]["image"] / 255.0, partition["test"]["label"]
 
     # Adjust the size of the training dataset to make it evenly divisible by the batch size
     remainder = len(x_train) % batch_size
@@ -112,7 +112,18 @@ def client_fn_parameterized(
     batch_size=64,
 ):
     def client_fn(cid: str):
-        model = tf.keras.applications.MobileNetV2((32, 32, 3), classes=10, weights=None)
+        model = tf.keras.Sequential(
+            [
+                tf.keras.layers.InputLayer(input_shape=(28, 28, 1)),
+                tf.keras.layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
+                tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+                tf.keras.layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+                tf.keras.layers.MaxPooling2D(pool_size=(2, 2)),
+                tf.keras.layers.Flatten(),
+                tf.keras.layers.Dense(128, activation="relu"),
+                tf.keras.layers.Dense(10, activation="softmax"),
+            ]
+        )
         train_data, test_data = load_data(
             partition_id=partition_id, batch_size=batch_size
         )
