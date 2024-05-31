@@ -54,7 +54,7 @@ def plot_comparison_label_distribution(
         Column name or list of column names identifying labels for each partitioner.
     plot_type : str
         Type of plot, either "bar" or "heatmap".
-    size_unit : str, default "percent"
+    size_unit : str
         "absolute" for raw counts, or "percent" to normalize values to 100%.
     max_num_partitions : Optional[int]
         Maximum number of partitions to include in the plot. If None, all partitions
@@ -66,7 +66,7 @@ def plot_comparison_label_distribution(
     subtitle : str
         Subtitle for the figure. Defaults to "Comparison of Per Partition Label
          Distribution"
-    titles : Optional[List[str]], default None
+    titles : Optional[List[str]]
         Titles for each subplot. If None, no titles are set.
     cmap : Optional[Union[str, mcolors.Colormap]]
         Colormap for the heatmap.
