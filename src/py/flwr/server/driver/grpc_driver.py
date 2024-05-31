@@ -151,31 +151,40 @@ class GrpcDriver(Driver):
             * CA certificate.
             * server certificate.
             * server private key.
+    fab_id : str (default: None)
+        The identifier of the FAB used in the run.
+    fab_version : str (default: None)
+        The version of the FAB used in the run.
     """
 
     def __init__(
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
         root_certificates: Optional[bytes] = None,
+        fab_id: Optional[str] = None,
+        fab_version: Optional[str] = None,
     ) -> None:
         self.addr = driver_service_address
         self.root_certificates = root_certificates
-        self.grpc_driver_helper: Optional[GrpcDriverHelper] = None
+        self.driver_helper: Optional[GrpcDriverHelper] = None
         self.run_id: Optional[int] = None
+        self.fab_id = fab_id if fab_id is not None else ""
+        self.fab_version = fab_version if fab_version is not None else ""
         self.node = Node(node_id=0, anonymous=True)
 
     def _get_grpc_driver_helper_and_run_id(self) -> Tuple[GrpcDriverHelper, int]:
         # Check if the GrpcDriverHelper is initialized
-        if self.grpc_driver_helper is None or self.run_id is None:
+        if self.driver_helper is None or self.run_id is None:
             # Connect and create run
-            self.grpc_driver_helper = GrpcDriverHelper(
+            self.driver_helper = GrpcDriverHelper(
                 driver_service_address=self.addr,
                 root_certificates=self.root_certificates,
             )
-            self.grpc_driver_helper.connect()
-            res = self.grpc_driver_helper.create_run(CreateRunRequest())
+            self.driver_helper.connect()
+            req = CreateRunRequest(fab_id=self.fab_id, fab_version=self.fab_version)
+            res = self.driver_helper.create_run(req)
             self.run_id = res.run_id
-        return self.grpc_driver_helper, self.run_id
+        return self.driver_helper, self.run_id
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
@@ -300,7 +309,7 @@ class GrpcDriver(Driver):
     def close(self) -> None:
         """Disconnect from the SuperLink if connected."""
         # Check if GrpcDriverHelper is initialized
-        if self.grpc_driver_helper is None:
+        if self.driver_helper is None:
             return
         # Disconnect
-        self.grpc_driver_helper.disconnect()
+        self.driver_helper.disconnect()
