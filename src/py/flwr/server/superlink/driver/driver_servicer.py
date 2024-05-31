@@ -16,7 +16,7 @@
 
 
 import time
-from logging import DEBUG, INFO
+from logging import DEBUG
 from typing import List, Optional, Set
 from uuid import UUID
 
@@ -62,7 +62,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: CreateRunRequest, context: grpc.ServicerContext
     ) -> CreateRunResponse:
         """Create run ID."""
-        log(INFO, "DriverServicer.CreateRun")
+        log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
         run_id = state.create_run(request.fab_id, request.fab_version)
         return CreateRunResponse(run_id=run_id)
