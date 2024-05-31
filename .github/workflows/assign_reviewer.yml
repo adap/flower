@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Assign reviewers
     permissions:
-      contents: write
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
