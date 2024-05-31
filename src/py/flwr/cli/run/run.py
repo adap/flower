@@ -15,22 +15,36 @@
 """Flower command line interface `run` command."""
 
 import sys
+from enum import Enum
+from typing import Optional
 
 import typer
+from typing_extensions import Annotated
 
 from flwr.cli import config_utils
 from flwr.simulation.run_simulation import _run_simulation
 
 
-def run() -> None:
+class Engine(str, Enum):
+    """Enum defining the engine to run on."""
+
+    SIMULATION = "simulation"
+
+
+def run(
+    engine: Annotated[
+        Optional[Engine],
+        typer.Option(case_sensitive=False, help="The ML framework to use"),
+    ] = None,
+) -> None:
     """Run Flower project."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    config, errors, warnings = config_utils.load_and_validate_with_defaults()
+    config, errors, warnings = config_utils.load_and_validate()
 
     if config is None:
         typer.secho(
-            "Project configuration could not be loaded.\nflower.toml is invalid:\n"
+            "Project configuration could not be loaded.\npyproject.toml is invalid:\n"
             + "\n".join([f"- {line}" for line in errors]),
             fg=typer.colors.RED,
             bold=True,
@@ -49,9 +63,11 @@ def run() -> None:
 
     server_app_ref = config["flower"]["components"]["serverapp"]
     client_app_ref = config["flower"]["components"]["clientapp"]
-    engine = config["flower"]["engine"]["name"]
 
-    if engine == "simulation":
+    if engine is None:
+        engine = config["flower"]["engine"]["name"]
+
+    if engine == Engine.SIMULATION:
         num_supernodes = config["flower"]["engine"]["simulation"]["supernode"]["num"]
 
         typer.secho("Starting run... ", fg=typer.colors.BLUE)

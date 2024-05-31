@@ -41,6 +41,7 @@ def test_render_template() -> None:
         "project_name": "FedGPT",
         "package_name": "fedgpt",
         "import_name": "fedgpt",
+        "username": "flwrlabs",
     }
 
     # Execute
@@ -69,13 +70,14 @@ def test_create_file(tmp_path: str) -> None:
 def test_new_correct_name(tmp_path: str) -> None:
     """Test if project with correct name is created for framework."""
     # Prepare
+    framework = MlFramework.PYTORCH
+    username = "flwrlabs"
     expected_names = [
         ("FedGPT", "fedgpt", "fedgpt"),
         ("My-Flower-App", "my-flower-app", "my_flower_app"),
     ]
 
     for project_name, expected_top_level_dir, expected_module_dir in expected_names:
-        framework = MlFramework.PYTORCH
         expected_files_top_level = {
             expected_module_dir,
             "README.md",
@@ -96,7 +98,7 @@ def test_new_correct_name(tmp_path: str) -> None:
             # Change into the temprorary directory
             os.chdir(tmp_path)
             # Execute
-            new(project_name=project_name, framework=framework)
+            new(project_name=project_name, framework=framework, username=username)
 
             # Assert
             file_list = os.listdir(os.path.join(tmp_path, expected_top_level_dir))
@@ -112,10 +114,10 @@ def test_new_correct_name(tmp_path: str) -> None:
 
 def test_new_incorrect_name(tmp_path: str) -> None:
     """Test if project with incorrect name is created for framework."""
+    framework = MlFramework.PYTORCH
+    username = "flwrlabs"
+
     for project_name in ["My_Flower_App", "My.Flower App"]:
-
-        framework = MlFramework.PYTORCH
-
         # Current directory
         origin = os.getcwd()
 
@@ -126,7 +128,11 @@ def test_new_incorrect_name(tmp_path: str) -> None:
             with pytest.raises(OSError) as exc_info:
 
                 # Execute
-                new(project_name=project_name, framework=framework)
+                new(
+                    project_name=project_name,
+                    framework=framework,
+                    username=username,
+                )
 
                 assert "Failed to read from stdin" in str(exc_info.value)
 

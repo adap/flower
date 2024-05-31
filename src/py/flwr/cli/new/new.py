@@ -37,6 +37,9 @@ class MlFramework(str, Enum):
     NUMPY = "NumPy"
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
+    JAX = "JAX"
+    HUGGINGFACE = "HF"
+    MLX = "MLX"
     SKLEARN = "sklearn"
 
 
@@ -87,10 +90,14 @@ def new(
         Optional[MlFramework],
         typer.Option(case_sensitive=False, help="The ML framework to use"),
     ] = None,
+    username: Annotated[
+        Optional[str],
+        typer.Option(case_sensitive=False, help="The Flower username of the author"),
+    ] = None,
 ) -> None:
     """Create new Flower project."""
     if project_name is None:
-        project_name = prompt_text("Please provide project name")
+        project_name = prompt_text("Please provide the project name")
     if not is_valid_project_name(project_name):
         project_name = prompt_text(
             "Please provide a name that only contains "
@@ -99,20 +106,15 @@ def new(
             default=sanitize_project_name(project_name),
         )
 
-    print(
-        typer.style(
-            f"🔨 Creating Flower project {project_name}...",
-            fg=typer.colors.GREEN,
-            bold=True,
-        )
-    )
+    if username is None:
+        username = prompt_text("Please provide your Flower username")
 
     if framework is not None:
         framework_str = str(framework.value)
     else:
         framework_value = prompt_options(
             "Please select ML framework by typing in the number",
-            [mlf.value for mlf in MlFramework],
+            sorted([mlf.value for mlf in MlFramework]),
         )
         selected_value = [
             name
@@ -122,6 +124,14 @@ def new(
         framework_str = selected_value[0]
 
     framework_str = framework_str.lower()
+
+    print(
+        typer.style(
+            f"\n🔨 Creating Flower project {project_name}...",
+            fg=typer.colors.GREEN,
+            bold=True,
+        )
+    )
 
     # Set project directory path
     cwd = os.getcwd()
@@ -146,6 +156,10 @@ def new(
     # Depending on the framework, generate task.py file
     frameworks_with_tasks = [
         MlFramework.PYTORCH.value.lower(),
+        MlFramework.JAX.value.lower(),
+        MlFramework.HUGGINGFACE.value.lower(),
+        MlFramework.MLX.value.lower(),
+        MlFramework.TENSORFLOW.value.lower(),
     ]
     if framework_str in frameworks_with_tasks:
         files[f"{import_name}/task.py"] = {
@@ -156,6 +170,7 @@ def new(
         "project_name": project_name,
         "package_name": package_name,
         "import_name": import_name.replace("-", "_"),
+        "username": username,
     }
 
     for file_path, value in files.items():

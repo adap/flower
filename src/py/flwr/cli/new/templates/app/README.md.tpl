@@ -8,7 +8,7 @@ pip install .
 
 ## Run (Simulation Engine)
 
-In the `$import_name` directory, use `flwr run` to run a local simulation:
+In the `$project_name` directory, use `flwr run` to run a local simulation:
 
 ```bash
 flwr run
