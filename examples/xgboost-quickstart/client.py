@@ -92,9 +92,21 @@ params = {
 
 # Define Flower client
 class XgbClient(fl.client.Client):
-    def __init__(self):
-        self.bst = None
-        self.config = None
+    def __init__(
+        self,
+        train_dmatrix,
+        valid_dmatrix,
+        num_train,
+        num_val,
+        num_local_round,
+        params,
+    ):
+        self.train_dmatrix = train_dmatrix
+        self.valid_dmatrix = valid_dmatrix
+        self.num_train = num_train
+        self.num_val = num_val
+        self.num_local_round = num_local_round
+        self.params = params
 
     def get_parameters(self, ins: GetParametersIns) -> GetParametersRes:
         _ = (self, ins)
@@ -106,41 +118,41 @@ class XgbClient(fl.client.Client):
             parameters=Parameters(tensor_type="", tensors=[]),
         )
 
-    def _local_boost(self):
+    def _local_boost(self, bst_input):
         # Update trees based on local training data.
-        for i in range(num_local_round):
-            self.bst.update(train_dmatrix, self.bst.num_boosted_rounds())
+        for i in range(self.num_local_round):
+            bst_input.update(self.train_dmatrix, bst_input.num_boosted_rounds())
 
-        # Extract the last N=num_local_round trees for sever aggregation
-        bst = self.bst[
-            self.bst.num_boosted_rounds()
-            - num_local_round : self.bst.num_boosted_rounds()
+        # Bagging: extract the last N=num_local_round trees for sever aggregation
+        bst = bst_input[
+            bst_input.num_boosted_rounds()
+            - self.num_local_round : bst_input.num_boosted_rounds()
         ]
 
         return bst
 
     def fit(self, ins: FitIns) -> FitRes:
-        if not self.bst:
+        global_round = int(ins.config["global_round"])
+        if global_round == 1:
             # First round local training
-            log(INFO, "Start training at round 1")
             bst = xgb.train(
-                params,
-                train_dmatrix,
-                num_boost_round=num_local_round,
-                evals=[(valid_dmatrix, "validate"), (train_dmatrix, "train")],
+                self.params,
+                self.train_dmatrix,
+                num_boost_round=self.num_local_round,
+                evals=[(self.valid_dmatrix, "validate"), (self.train_dmatrix, "train")],
             )
-            self.config = bst.save_config()
-            self.bst = bst
         else:
+            bst = xgb.Booster(params=self.params)
             for item in ins.parameters.tensors:
                 global_model = bytearray(item)
 
             # Load global model into booster
-            self.bst.load_model(global_model)
-            self.bst.load_config(self.config)
+            bst.load_model(global_model)
 
-            bst = self._local_boost()
+            # Local training
+            bst = self._local_boost(bst)
 
+        # Save model
         local_model = bst.save_raw("json")
         local_model_bytes = bytes(local_model)
 
@@ -150,16 +162,26 @@ class XgbClient(fl.client.Client):
                 message="OK",
             ),
             parameters=Parameters(tensor_type="", tensors=[local_model_bytes]),
-            num_examples=num_train,
+            num_examples=self.num_train,
             metrics={},
         )
 
     def evaluate(self, ins: EvaluateIns) -> EvaluateRes:
-        eval_results = self.bst.eval_set(
-            evals=[(valid_dmatrix, "valid")],
-            iteration=self.bst.num_boosted_rounds() - 1,
+        # Load global model
+        bst = xgb.Booster(params=self.params)
+        for para in ins.parameters.tensors:
+            para_b = bytearray(para)
+        bst.load_model(para_b)
+
+        # Run evaluation
+        eval_results = bst.eval_set(
+            evals=[(self.valid_dmatrix, "valid")],
+            iteration=bst.num_boosted_rounds() - 1,
         )
         auc = round(float(eval_results.split("\t")[1].split(":")[1]), 4)
+
+        global_round = ins.config["global_round"]
+        log(INFO, f"AUC = {auc} at round {global_round}")
 
         return EvaluateRes(
             status=Status(
@@ -167,10 +189,20 @@ class XgbClient(fl.client.Client):
                 message="OK",
             ),
             loss=0.0,
-            num_examples=num_val,
+            num_examples=self.num_val,
             metrics={"AUC": auc},
         )
 
 
 # Start Flower client
-fl.client.start_client(server_address="127.0.0.1:8080", client=XgbClient().to_client())
+fl.client.start_client(
+    server_address="127.0.0.1:8080",
+    client=XgbClient(
+        train_dmatrix,
+        valid_dmatrix,
+        num_train,
+        num_val,
+        num_local_round,
+        params,
+    ).to_client(),
+)
