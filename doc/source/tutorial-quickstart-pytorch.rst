@@ -242,7 +242,7 @@ learning in action. First, we run the :code:`flower-superlink` command in one te
 .. admonition:: Note
     :class: note
 
-    In this example, the :code:`--insecure` command line argument starts Flower without HTTPS and is only used for prototyping. To run with HTTPS, we instead use the argument :code:`--certificates` and pass the paths to the certificates. Please refer to `Flower CLI reference <ref-api-cli.html>`_ for implementation details.
+    In this example, the :code:`--insecure` command line argument starts Flower without HTTPS and is only used for prototyping. To run with HTTPS, we instead use the arguments :code:`--ssl-ca-certfile`, :code:`--ssl-certfile`, and :code:`--ssl-keyfile` and pass the paths to the certificates. Please refer to `Flower CLI reference <ref-api-cli.html#flower-superlink>`_ for implementation details.
 
 .. code-block:: shell
 
