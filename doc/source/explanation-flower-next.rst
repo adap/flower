@@ -26,6 +26,7 @@ With Flower Next, we address this set of challenges by decoupling and standardiz
     :align: center
     :width: 800
     :alt: Flower infrastructure layer
+    :class: no-scaled-link
     
     Flower infrastructure layer consisting of the SuperLink and SuperNodes.
 
@@ -62,8 +63,9 @@ On the application layer, we have the ServerApp and ClientApp. These are essenti
     :align: center
     :width: 800
     :alt: Flower infrastructure and application layers
+    :class: no-scaled-link
 
-    Flower application layer consisting of the ServerApp and ClientApps, interacting with the infrastructure layer.
+    Flower application layer (ServerApp and ClientApps) interacting with the infrastructure layer.
 
 ServerApp
 ~~~~~~~~~
