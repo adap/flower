@@ -75,7 +75,7 @@ def plot_comparison_label_distribution(
     legend_title : Optional[str]
         Title for the legend. If None, the defaults will be takes based on the type of
         plot.
-    verbose_labels : bool, default True
+    verbose_labels : bool
         Whether to use verbose versions of the labels.
     plot_kwargs_list: Optional[Dict[str, Any]]
         List of plot_kwargs. Any key value pair that can be passed to a plot function
@@ -104,30 +104,30 @@ def plot_comparison_label_distribution(
     Compare the difference of using different alpha (concentration) parameters in
     DirichletPartitioner.
 
-    >> from flwr_datasets import FederatedDataset
-    >> from flwr_datasets.partitioner import DirichletPartitioner
-    >> from flwr_datasets.visualization import compare_label_distribution
-    >>
-    >> partitioner_list = []
-    >> alpha_list = [10_000.0, 100.0, 1.0, 0.1, 0.01, 0.00001]
-    >> for alpha in alpha_list:
-    >>     fds = FederatedDataset(
-    >>         dataset="cifar10",
-    >>         partitioners={
-    >>             "train": DirichletPartitioner(
-    >>                 num_partitions=20,
-    >>                 partition_by="label",
-    >>                 alpha=alpha,
-    >>                 min_partition_size=0,
-    >>             ),
-    >>         },
-    >>     )
-    >>     partitioner_list.append(fds.partitioners["train"])
-    >> fig, axes, dataframe_list = compare_label_distribution(
-    >>     partitioner_list=partitioner_list,
-    >>     label_name="label",
-    >>     titles=[f"Concentration = {alpha}" for alpha in alpha_list],
-    >> )
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import DirichletPartitioner
+    >>> from flwr_datasets.visualization import plot_comparison_label_distribution
+    >>> 
+    >>> partitioner_list = []
+    >>> alpha_list = [10_000.0, 100.0, 1.0, 0.1, 0.01, 0.00001]
+    >>> for alpha in alpha_list:
+    >>>     fds = FederatedDataset(
+    >>>         dataset="cifar10",
+    >>>         partitioners={
+    >>>             "train": DirichletPartitioner(
+    >>>                 num_partitions=20,
+    >>>                 partition_by="label",
+    >>>                 alpha=alpha,
+    >>>                 min_partition_size=0,
+    >>>             ),
+    >>>         },
+    >>>     )
+    >>>     partitioner_list.append(fds.partitioners["train"])
+    >>> fig, axes, dataframe_list = plot_comparison_label_distribution(
+    >>>     partitioner_list=partitioner_list,
+    >>>     label_name="label",
+    >>>     titles=[f"Concentration = {alpha}" for alpha in alpha_list],
+    >>> )
     """
     num_partitioners = len(partitioner_list)
     if isinstance(label_name, str):
