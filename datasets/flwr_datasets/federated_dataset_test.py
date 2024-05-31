@@ -170,20 +170,20 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
         fds = FederatedDataset(
             dataset=self.dataset_name,
             partitioners={"train": 100},
-            resplitter={"full": ("train", self.test_split)},
+            preprocessor={"full": ("train", self.test_split)},
         )
         full = fds.load_split("full")
         self.assertEqual(dataset_length, len(full))
 
     # pylint: disable=protected-access
     def test_resplit_dataset_to_change_names(self) -> None:
-        """Test resplitter to change the names of the partitions."""
+        """Test preprocessor to change the names of the partitions."""
         if self.test_split is None:
             return
         fds = FederatedDataset(
             dataset=self.dataset_name,
             partitioners={"new_train": 100},
-            resplitter={
+            preprocessor={
                 "new_train": ("train",),
                 "new_" + self.test_split: (self.test_split,),
             },
@@ -195,7 +195,7 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
         )
 
     def test_resplit_dataset_by_callable(self) -> None:
-        """Test resplitter to change the names of the partitions."""
+        """Test preprocessor to change the names of the partitions."""
         if self.test_split is None:
             return
 
@@ -209,7 +209,7 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
             )
 
         fds = FederatedDataset(
-            dataset=self.dataset_name, partitioners={"train": 100}, resplitter=resplit
+            dataset=self.dataset_name, partitioners={"train": 100}, preprocessor=resplit
         )
         full = fds.load_split("full")
         dataset = datasets.load_dataset(self.dataset_name)
@@ -298,7 +298,7 @@ class ShufflingResplittingOnArtificialDatasetTest(unittest.TestCase):
         fds = FederatedDataset(
             dataset="does-not-matter",
             partitioners={"train": 10},
-            resplitter=resplit,
+            preprocessor=resplit,
             shuffle=True,
         )
         train = fds.load_split("train")
@@ -411,7 +411,7 @@ class IncorrectUsageFederatedDatasets(unittest.TestCase):
         fds = FederatedDataset(
             dataset="mnist",
             partitioners={"train": 100},
-            resplitter={"full": ("train", "test")},
+            preprocessor={"full": ("train", "test")},
         )
         with self.assertRaises(ValueError):
             fds.load_partition(0, "train")
