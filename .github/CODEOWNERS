@@ -17,3 +17,10 @@ README.md @jafermarq @tanertopal @danieljanes
 
 # Changelog
 /doc/source/ref-changelog.md @jafermarq @tanertopal @danieljanes
+
+# Translations
+/doc/locales @charlesbvll @tanertopal @danieljanes
+
+# GitHub Actions and Workflows
+/.github/workflows @Robert-Steiner @tanertopal @danieljanes
+/.github/actions @Robert-Steiner @tanertopal @danieljanes
