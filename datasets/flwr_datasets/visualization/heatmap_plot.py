@@ -15,6 +15,7 @@
 """Label distribution heatmap plotting."""
 from typing import Optional, Tuple, Union, Dict, Any
 
+import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import colors as mcolors, pyplot as plt
@@ -24,37 +25,77 @@ from matplotlib.axes import Axes
 def _plot_heatmap(
     dataframe: pd.DataFrame,
     axis: Optional[Axes],
-    figsize: Tuple[float, float],
+    figsize: Optional[Tuple[float, float]],
     title: str,
     colormap: Optional[Union[str, mcolors.Colormap]],
-    xlabel: str,
-    ylabel: str,
-    cbar_title: Optional[str],
+    partition_id_axis: str,
+    size_unit: str,
     legend: bool,
-    plot_kwargs: Dict[str, Any],
-    legend_kwargs: Dict[str, Any],
-
+    legend_title: Optional[str],
+    plot_kwargs: Optional[Dict[str, Any]],
+    legend_kwargs: Optional[Dict[str, Any]],
 ) -> Axes:
-    if colormap is None:
-        colormap = sns.light_palette("seagreen", as_cmap=True)
+
     if axis is None:
+        if figsize is None:
+            figsize = _initialize_figsize(
+                partition_id_axis=partition_id_axis,
+                num_partitions=dataframe.shape[0],
+                num_labels=dataframe.shape[1]
+            )
         _, axis = plt.subplots(figsize=figsize)
 
-    fmt = ",d" if "absolute" in dataframe.columns else "0.2f"
+    # Handle plot_kwargs
+    if plot_kwargs is None:
+        plot_kwargs = {}
+
+    # Handle optional parameters
+    if colormap is not None:
+        plot_kwargs["cmap"] = colormap
+    elif "cmap" not in plot_kwargs:
+        plot_kwargs["cmap"] = sns.light_palette("seagreen", as_cmap=True)
+
+    if "fmt" not in plot_kwargs:
+        plot_kwargs["fmt"] = ",d" if size_unit == "absolute" else "0.2f"
+
+    if legend_kwargs is None:
+        legend_kwargs = {}
+    if legend:
+        plot_kwargs["cbar"] = True
+
+        if legend_title is not None:
+            legend_kwargs["label"] = legend_title
+        else:
+            legend_kwargs["label"] = _initialize_cbar_title(size_unit)
+    else:
+        plot_kwargs["cbar"] = False
+
+    if partition_id_axis == "x":
+        dataframe = dataframe.T
+
     sns.heatmap(
         dataframe,
         ax=axis,
-        cmap=colormap,
-        fmt=fmt,
-        cbar=legend,
-        cbar_kws={"label": cbar_title},
         **plot_kwargs,
+        cbar_kws=legend_kwargs,
     )
-
-    if xlabel:
-        axis.set_xlabel(xlabel)
-    if ylabel:
-        axis.set_ylabel(ylabel)
-
     axis.set_title(title)
     return axis
+
+def _initialize_figsize(
+    partition_id_axis: str,
+    num_partitions: int,
+    num_labels: int,
+) -> Tuple[float, float]:
+
+    figsize = (0.0, 0.0)
+    if partition_id_axis == "x":
+        figsize = (3 * np.sqrt(num_partitions), np.sqrt(num_labels))
+    elif partition_id_axis == "y":
+        figsize = (3 * np.sqrt(num_labels), np.sqrt(num_partitions))
+
+    return figsize
+
+
+def _initialize_cbar_title(size_unit: str) -> Optional[str]:
+    return "Count" if size_unit == "absolute" else "Percent %"

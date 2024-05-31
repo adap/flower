@@ -13,9 +13,10 @@
 # limitations under the License.
 # ==============================================================================
 """Label distribution bar plotting."""
-from typing import Optional, Tuple, Union, Dict, Any
+from typing import Optional, Tuple, Union, Dict, Any, List
 
 import datasets
+import numpy as np
 import pandas as pd
 from matplotlib import colors as mcolors, pyplot as plt
 from matplotlib.axes import Axes
@@ -24,67 +25,112 @@ from matplotlib.axes import Axes
 def _plot_bar(
     dataframe: pd.DataFrame,
     axis: Optional[Axes],
-    figsize: Tuple[float, float],
+    figsize: Optional[Tuple[float, float]],
     title: str,
     colormap: Optional[Union[str, mcolors.Colormap]],
-    xlabel: str,
-    ylabel: str,
+    partition_id_axis: str,
+    size_unit: str,
     legend: bool,
-    legend_title: str,
-    verbose_labels: bool,
-    partition: datasets.Dataset,
-    label_name: str,
-    plot_kwargs: Dict[str, Any],
-    legend_kwargs: Dict[str, Any],
+    legend_title: Optional[str],
+    plot_kwargs: Optional[Dict[str, Any]],
+    legend_kwargs: Optional[Dict[str, Any]],
 
 ) -> Axes:
-    if colormap is None:
-        colormap = "RdYlGn"
+
     if axis is None:
+        if figsize is None:
+            figsize = _initialize_figsize(partition_id_axis=partition_id_axis, num_partitions=dataframe.shape[0])
         _, axis = plt.subplots(figsize=figsize)
 
-    kind = "bar" if xlabel == "Partition ID" else "barh"
+    # Handle plot_kwargs
+    if plot_kwargs is None:
+        plot_kwargs = {}
+
+    kind = "bar" if partition_id_axis =="x" else "barh"
+    if "kind" not in plot_kwargs:
+        plot_kwargs["kind"] = kind
+
+    # Handle non-optional parameters
+    plot_kwargs["title"] = title
+
+    # Handle optional parameters
+    if colormap is not None:
+        plot_kwargs["colormap"] = colormap
+    elif "colormap" not in plot_kwargs:
+        plot_kwargs["colormap"] = "RdYlGn"
+
+    if "xlabel" not in plot_kwargs and "ylabel" not in plot_kwargs:
+        xlabel, ylabel = _initialize_xy_labels(size_unit=size_unit, partition_id_axis=partition_id_axis)
+        plot_kwargs["xlabel"] = xlabel
+        plot_kwargs["ylabel"] = ylabel
+
+    # Make the x ticks readable (they appear 90 degrees rotated by default)
+    if "rot" not in plot_kwargs:
+        plot_kwargs["rot"] = 0
+
+    # Handle hard-coded parameters
+    # Legend is handled separately (via axes.legend call not in the plot())
+    if "legend" not in plot_kwargs:
+        plot_kwargs["legend"] = False
+
+    # Make the bar plot stacked
+    if "stacked" not in plot_kwargs:
+        plot_kwargs["stacked"] = True
+
     axis = dataframe.plot(
-        kind=kind,
-        stacked=True,
         ax=axis,
-        title=title,
-        legend=False,
-        colormap=colormap,
-        rot=0,
         **plot_kwargs,
     )
 
-    if xlabel:
-        axis.set_xlabel(xlabel)
-    if ylabel:
-        axis.set_ylabel(ylabel)
-
-    xticklabels = axis.get_xticklabels()
-    if len(xticklabels) > 20:
-        # Make every other xtick label not visible
-        for i, label in enumerate(xticklabels):
-            if i % 2 == 1:
-                label.set_visible(False)
-
     if legend:
-        handles, legend_labels = axis.get_legend_handles_labels()
-        if verbose_labels:
-            try:
-                legend_names = partition.features[label_name].int2str(
-                    [int(v) for v in legend_labels]
-                )
-            except AttributeError:
-                legend_names = legend_labels
-        else:
-            legend_names = legend_labels
+        if legend_kwargs is None:
+            legend_kwargs = {}
 
+        if legend_title is not None:
+            legend_kwargs["title"] = legend_title
+        elif "title" not in legend_kwargs:
+            legend_kwargs["title"] = "Labels"
+
+        if "loc" not in legend_kwargs:
+            legend_kwargs["loc"] = "outside center right"
+
+        if "bbox_to_anchor" not in legend_kwargs:
+            legend_kwargs["bbox_to_anchor"] = (1.2, 0.5)
+
+        handles, legend_labels = axis.get_legend_handles_labels()
         _ = axis.figure.legend(
             handles=handles[::-1],
-            labels=legend_names[::-1],
-            title=legend_title,
-            loc="outside center right",
-            bbox_to_anchor=(1.3, 0.5),
+            labels=legend_labels[::-1],
+            **legend_kwargs
         )
 
+    # Heuristic to make the partition id on xticks non-overlapping
+    if partition_id_axis == "x":
+        xticklabels = axis.get_xticklabels()
+        if len(xticklabels) > 20:
+            # Make every other xtick label not visible
+            for i, label in enumerate(xticklabels):
+                if i % 2 == 1:
+                    label.set_visible(False)
     return axis
+
+def _initialize_figsize(
+    partition_id_axis: str,
+    num_partitions: int,
+) -> Tuple[float, float]:
+    figsize = (0.0, 0.0)
+    if partition_id_axis == "x":
+        figsize = (6.4, 4.8)
+    elif partition_id_axis == "y":
+        figsize = (6.4, np.sqrt(num_partitions))
+    return figsize
+def _initialize_xy_labels(
+        size_unit: str, partition_id_axis: str
+) -> Tuple[str, str]:
+    xlabel = "Partition ID"
+    ylabel = "Count" if size_unit == "absolute" else "Percent %"
+
+    if partition_id_axis == "y":
+        xlabel, ylabel = ylabel, xlabel
+
+    return xlabel, ylabel
