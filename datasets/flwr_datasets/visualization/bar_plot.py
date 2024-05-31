@@ -99,7 +99,9 @@ def _plot_bar(
             legend_kwargs["loc"] = "outside center right"
 
         if "bbox_to_anchor" not in legend_kwargs:
-            legend_kwargs["bbox_to_anchor"] = (1.2, 0.5)
+            max_len_label_str = max([len(str(column)) for column in dataframe.columns])
+            shift = min(0.05 + max_len_label_str / 100, 0.15)
+            legend_kwargs["bbox_to_anchor"] = (1.0 + shift, 0.5)
 
         handles, legend_labels = axis.get_legend_handles_labels()
         _ = axis.figure.legend(
