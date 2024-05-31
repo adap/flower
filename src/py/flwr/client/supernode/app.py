@@ -15,11 +15,25 @@
 """Flower SuperNode."""
 
 import argparse
-from logging import DEBUG, INFO
+import sys
+from logging import DEBUG, INFO, WARN
+from pathlib import Path
+from typing import Callable, Optional, Tuple
 
+from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.serialization import (
+    load_ssh_private_key,
+    load_ssh_public_key,
+)
+
+from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
+from flwr.common.object_ref import load_app, validate
+
+from ..app import _start_client_internal
 
 
 def run_supernode() -> None:
@@ -41,6 +55,97 @@ def run_supernode() -> None:
     )
 
 
+def run_client_app() -> None:
+    """Run Flower client app."""
+    log(INFO, "Long-running Flower client starting")
+
+    event(EventType.RUN_CLIENT_APP_ENTER)
+
+    args = _parse_args_run_client_app().parse_args()
+
+    root_certificates = _get_certificates(args)
+    log(
+        DEBUG,
+        "Flower will load ClientApp `%s`",
+        getattr(args, "client-app"),
+    )
+    load_fn = _get_load_client_app_fn(args)
+    authentication_keys = _try_setup_client_authentication(args)
+
+    _start_client_internal(
+        server_address=args.server,
+        load_client_app_fn=load_fn,
+        transport="rest" if args.rest else "grpc-rere",
+        root_certificates=root_certificates,
+        insecure=args.insecure,
+        authentication_keys=authentication_keys,
+        max_retries=args.max_retries,
+        max_wait_time=args.max_wait_time,
+    )
+    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
+
+
+def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
+    """Load certificates if specified in args."""
+    # Obtain certificates
+    if args.insecure:
+        if args.root_certificates is not None:
+            sys.exit(
+                "Conflicting options: The '--insecure' flag disables HTTPS, "
+                "but '--root-certificates' was also specified. Please remove "
+                "the '--root-certificates' option when running in insecure mode, "
+                "or omit '--insecure' to use HTTPS."
+            )
+        log(
+            WARN,
+            "Option `--insecure` was set. "
+            "Starting insecure HTTP client connected to %s.",
+            args.server,
+        )
+        root_certificates = None
+    else:
+        # Load the certificates if provided, or load the system certificates
+        cert_path = args.root_certificates
+        if cert_path is None:
+            root_certificates = None
+        else:
+            root_certificates = Path(cert_path).read_bytes()
+        log(
+            DEBUG,
+            "Starting secure HTTPS client connected to %s "
+            "with the following certificates: %s.",
+            args.server,
+            cert_path,
+        )
+    return root_certificates
+
+
+def _get_load_client_app_fn(
+    args: argparse.Namespace,
+) -> Callable[[], ClientApp]:
+    """Get the load_client_app_fn function."""
+    client_app_dir = args.dir
+    if client_app_dir is not None:
+        sys.path.insert(0, client_app_dir)
+
+    app_ref: str = getattr(args, "client-app")
+    valid, error_msg = validate(app_ref)
+    if not valid and error_msg:
+        raise LoadClientAppError(error_msg) from None
+
+    def _load() -> ClientApp:
+        client_app = load_app(app_ref, LoadClientAppError)
+
+        if not isinstance(client_app, ClientApp):
+            raise LoadClientAppError(
+                f"Attribute {app_ref} is not of type {ClientApp}",
+            ) from None
+
+        return client_app
+
+    return _load
+
+
 def _parse_args_run_supernode() -> argparse.ArgumentParser:
     """Parse flower-supernode command line arguments."""
     parser = argparse.ArgumentParser(
@@ -57,17 +162,34 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "If not provided, defaults to an empty string.",
     )
     _parse_args_common(parser)
+    parser.add_argument(
+        "--flwr-dir",
+        default=None,
+        help="""The path containing installed Flower Apps.
+    By default, this value isequal to:
+
+        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+        - `$HOME/.flwr/` in all other cases
+    """,
+    )
 
     return parser
 
 
-def parse_args_run_client_app(parser: argparse.ArgumentParser) -> None:
-    """Parse command line arguments."""
+def _parse_args_run_client_app() -> argparse.ArgumentParser:
+    """Parse flower-client-app command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Start a Flower client app",
+    )
+
     parser.add_argument(
         "client-app",
         help="For example: `client:app` or `project.package.module:wrapper.app`",
     )
-    _parse_args_common(parser)
+    _parse_args_common(parser=parser)
+
+    return parser
 
 
 def _parse_args_common(parser: argparse.ArgumentParser) -> None:
@@ -116,4 +238,62 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         help="Add specified directory to the PYTHONPATH and load Flower "
         "app from there."
         " Default: current working directory.",
+    )
+    parser.add_argument(
+        "--auth-supernode-private-key",
+        type=str,
+        help="The SuperNode's private key (as a path str) to enable authentication.",
+    )
+    parser.add_argument(
+        "--auth-supernode-public-key",
+        type=str,
+        help="The SuperNode's public key (as a path str) to enable authentication.",
+    )
+
+
+def _try_setup_client_authentication(
+    args: argparse.Namespace,
+) -> Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
+    if not args.auth_supernode_private_key and not args.auth_supernode_public_key:
+        return None
+
+    if not args.auth_supernode_private_key or not args.auth_supernode_public_key:
+        sys.exit(
+            "Authentication requires file paths to both "
+            "'--auth-supernode-private-key' and '--auth-supernode-public-key'"
+            "to be provided (providing only one of them is not sufficient)."
+        )
+
+    try:
+        ssh_private_key = load_ssh_private_key(
+            Path(args.auth_supernode_private_key).read_bytes(),
+            None,
+        )
+        if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm):
+        sys.exit(
+            "Error: Unable to parse the private key file in "
+            "'--auth-supernode-private-key'. Authentication requires elliptic "
+            "curve private and public key pair. Please ensure that the file "
+            "path points to a valid private key file and try again."
+        )
+
+    try:
+        ssh_public_key = load_ssh_public_key(
+            Path(args.auth_supernode_public_key).read_bytes()
+        )
+        if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm):
+        sys.exit(
+            "Error: Unable to parse the public key file in "
+            "'--auth-supernode-public-key'. Authentication requires elliptic "
+            "curve private and public key pair. Please ensure that the file "
+            "path points to a valid public key file and try again."
+        )
+
+    return (
+        ssh_private_key,
+        ssh_public_key,
     )
