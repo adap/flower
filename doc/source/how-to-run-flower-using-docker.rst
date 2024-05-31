@@ -75,7 +75,9 @@ If you want to persist the state of the SuperLink on your host system, all you n
 a directory where you want to save the file on your host system and a name for the database file. By
 default, the SuperLink container runs with a non-root user called ``app`` with the user ID
 ``49999``. It is recommended to create new directory and change the user ID of the directory to
-``49999`` to ensure the mounted directory has the proper permissions.
+``49999`` to ensure the mounted directory has the proper permissions. If you later want to delete
+the directory, you can change the user ID back to the current user ID by running
+``sudo chown -R $USER:$(id -gn) state``.
 
 In the example below, we create a new directory, change the user ID and tell Docker via the flag
 ``--volume`` to mount the local ``state`` directory into the ``/app/state`` directory of the
