@@ -7,6 +7,11 @@ This guide explains how you can use Flower framework's |driverapi_link|_ API to 
 * `Push messages to nodes`_
 * `Pull messages from nodes`_
 
+.. admonition:: Note
+    :class: note
+
+    The :code:`SuperNode` is a `long-running process <explanation-flower-next.html#supernode>`_ that runs the :code:`ClientApp`.
+
 ..
     Generate link text as literal.
 
@@ -52,9 +57,9 @@ Now that we have completed the setup, let’s walk through how we can use the Dr
 Select nodes
 ------------
 
-The first stage of a federated learning workflow is to select client nodes. For simplicity, we will refer to client nodes as nodes throughout this guide. 
+The first stage of a federated learning workflow is to select which :code:`SuperNodes` connected to the SuperLink will be involved in a given round. For simplicity, we refer to :code:`SuperNodes` as "nodes" throughout this guide.
 
-To select nodes in each server round, we run :code:`Driver.get_node_ids()` to retrieve all connected node IDs. Occasionally, the Driver API may not immediately return enough node IDs (e.g. due to real-world network issues), so we loop and wait until the minimum number of nodes are available. If we have a large pool of nodes which we want to sample from - as is commonly the case for federated learning systems - we can randomly sample node IDs using, for instance, :code:`random.sample(all_node_ids, num_client_nodes_per_round)`. One example is shown below:
+To select nodes in each server round, we run :code:`Driver.get_node_ids()` to retrieve all connected node IDs. Occasionally, the Driver API may not immediately return enough node IDs (e.g. due to some nodes went offline or a node is taking longer than expected to start up), so we loop and wait until the minimum number of nodes are available. If we have a large pool of nodes which we want to sample from - as is commonly the case for federated learning systems - we can randomly sample node IDs using, for instance, :code:`random.sample(all_node_ids, num_client_nodes_per_round)`. One example is shown below:
 
 .. code-block:: python
 
@@ -88,14 +93,14 @@ To select nodes in each server round, we run :code:`Driver.get_node_ids()` to re
 Push messages to nodes
 ----------------------
 
-Now that we have a list of node IDs, we can push information to them to execute a task such as training or evaluating a model. To achieve this, we will first use :code:`Driver.create_message()` to create a :code:`Message` and then use :code:`Driver.push_message()` to push the :code:`Messages` to the list of node IDs. 
+Now that we have a list of node IDs, we can push information to them to execute a task such as training or evaluating a model. To achieve this, we will first use :code:`Driver.create_message()` to create a :code:`Message` and then use :code:`Driver.push_message()` to push the :code:`Message` to the :code:`SuperLink` (which will relay it to the appropiate node).
 
 .. admonition:: Note
     :class: note
 
     Each :code:`Message` contains a |recordset_link|_ object. It contains :code:`parameters_records`, :code:`metrics_records`, and :code:`configs_records` attributes, which are - unsurprisingly - parameters, metrics, and configurations that are used by a node to execute a task. 
 
-Here is an example of how to push a PyTorch model and instructions to a set of client node IDs to train the model. First, we define a utility function to convert a PyTorch model into a :code:`ParametersRecord` and create a PyTorch model in :code:`main()` (we’ve omitted the implementation details for :code:`Net()`, but you can refer to :doc:`this quickstart tutorial <tutorial-quickstart-pytorch>` for an example):
+Here is an example of how to push a PyTorch model and instructions to a set of node IDs to train the model. First, we define a utility function to convert a PyTorch model into a :code:`ParametersRecord` and create a PyTorch model in :code:`main()` (we’ve omitted the implementation details for :code:`Net()`, but you can refer to :doc:`this quickstart tutorial <tutorial-quickstart-pytorch>` for an example):
 
 .. code-block:: python
 
@@ -128,7 +133,7 @@ Then, we create a :code:`RecordSet` and add parameters and configurations to :co
     # Add a training configuration for 1 epoch only to the RecordSet
     recordset.configs_records["my_config"] = ConfigsRecord({"epochs": 1})
 
-Next, we create a list of :code:`Messages`, one for each node ID. To do so, we loop over all node IDs and run :code:`Driver.create_message()` with the :code:`recordset` as the content of the message: 
+Next, we create a list of :code:`Message` objects, one for each node ID. To do so, we loop over all node IDs and run :code:`Driver.create_message()` with the :code:`recordset` as the content of the message. We also specify that :code:`message_type=MessageType.TRAIN` to instruct the :code:`ClientApp` to run its train method. (The other options for :code:`message_type` are :code:`MessageType.EVALUATE` and :code:`MessageType.Query`, for the evaluation and query tasks in the :code:`ClientApp`.) Here is the following code:
 
 .. code-block:: python
 
@@ -145,7 +150,13 @@ Next, we create a list of :code:`Messages`, one for each node ID. To do so, we l
         )
         messages.append(message)
 
-Finally, we use :code:`Driver.push_messages()` to push the list of :code:`Messages` containing the encapsulated parameters and configurations to the nodes.
+.. admonition:: Note
+    :class: important
+
+    For reference, the :code:`Message` object created in the above code block is exactly what the :code:`ClientApp` will receive in its :code:`app.train()` method in the :doc:`How to use ClientApp<how-to-use-clientapp>` guide.
+
+
+Finally, we use :code:`Driver.push_messages()` to push the list of :code:`Message` objects containing the encapsulated parameters and configurations to the nodes.
 
 .. code-block:: python
 
@@ -153,7 +164,7 @@ Finally, we use :code:`Driver.push_messages()` to push the list of :code:`Messag
 
     message_ids = driver.push_messages(messages)
 
-:code:`Driver.push_messages()` yields an iterable list of message IDs. In some real-world scenarios, you may encounter situations where only some :code:`Messages` can be pushed, so it is good practice to filter out empty message IDs:
+:code:`Driver.push_messages()` yields an iterable list of message IDs. In some real-world scenarios, you may encounter situations where only some :code:`Message` objects can be pushed, so it is good practice to filter out empty message IDs:
 
 .. code-block:: python
 
@@ -166,7 +177,7 @@ Finally, we use :code:`Driver.push_messages()` to push the list of :code:`Messag
 Pull messages from nodes
 ------------------------
 
-Once messages are successfully sent to the nodes, we can use the associated message IDs to get results from these nodes. To do so, we continuously run :code:`Driver.pull_messages()` with the list of :code:`message_ids` until all of the :code:`Messages` from the nodes are received. 
+Once messages are successfully sent to the nodes, we can use the associated message IDs to get results from these nodes. To do so, we continuously run :code:`Driver.pull_messages()` with the list of :code:`message_ids` until all of the :code:`Message` objects from the nodes are received. What is happening here is that the :code:`ServerApp` is requesting the :code:`SuperLink` for any results from the :code:`Message` objects previously pushed, of which the :code:`Driver` has retained the IDs.
 
 .. code-block:: python
 
@@ -183,7 +194,7 @@ Once messages are successfully sent to the nodes, we can use the associated mess
         print("Pulling messages...")
         time.sleep(3)
 
-To only keep :code:`Messages` with content, we apply a simple filter on the results:
+To only keep :code:`Message` objects with content, we apply a simple filter on the results:
 
 .. code-block:: python
 
@@ -201,7 +212,7 @@ To only keep :code:`Messages` with content, we apply a simple filter on the resu
 Process results from nodes
 --------------------------
 
-Now that we have a results from the nodes in the form of :code:`Messages`, we can access their content and use them for any subsequent server-side tasks. Here is how we print the :code:`metrics_records` for each node in a for-loop:
+Now that we have a results from the nodes in the form of :code:`Message` objects, we can access their content and use them for any subsequent server-side tasks. Here is how we print the :code:`metrics_records` for each node in a for-loop:
 
 .. code-block:: python
 
