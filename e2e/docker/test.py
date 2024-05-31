@@ -79,8 +79,7 @@ def wait_for_logs(
     timeout: float = 60,
     interval: float = 1,
 ) -> float:
-    """
-    Wait for the services to emit logs satisfying the predicate.
+    """Wait for the services to emit logs satisfying the predicate.
 
     Args:
         services: Services whose logs to wait for.
