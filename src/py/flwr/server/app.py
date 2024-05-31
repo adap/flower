@@ -36,6 +36,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
+    TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
@@ -48,6 +49,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
+from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 
 from .client_manager import ClientManager
 from .history import History
@@ -55,6 +57,7 @@ from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
 from .strategy import Strategy
 from .superlink.driver.driver_grpc import run_driver_api_grpc
+from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
@@ -401,6 +404,20 @@ def run_superlink() -> None:
             interceptors=interceptors,
         )
         grpc_servers.append(fleet_server)
+    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
+        address_arg = args.grpc_rere_fleet_api_address
+        parsed_address = parse_address(address_arg)
+        if not parsed_address:
+            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
+        host, port, is_v6 = parsed_address
+        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
+        fleet_server = _run_fleet_api_grpc_adapter(
+            address=address,
+            state_factory=state_factory,
+            certificates=certificates,
+        )
+        grpc_servers.append(fleet_server)
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
@@ -517,7 +534,7 @@ def _try_obtain_certificates(
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
         return None
     # Check if certificates are provided
-    if args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
+    if args.fleet_api_type in [TRANSPORT_TYPE_GRPC_RERE, TRANSPORT_TYPE_GRPC_ADAPTER]:
         if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_certfile:
             if not isfile(args.ssl_ca_certfile):
                 sys.exit("Path argument `--ssl-ca-certfile` does not point to a file.")
@@ -584,6 +601,30 @@ def _run_fleet_api_grpc_rere(
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
+    fleet_grpc_server.start()
+
+    return fleet_grpc_server
+
+
+def _run_fleet_api_grpc_adapter(
+    address: str,
+    state_factory: StateFactory,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
+) -> grpc.Server:
+    """Run Fleet API (GrpcAdapter)."""
+    # Create Fleet API gRPC server
+    fleet_servicer = GrpcAdapterServicer(
+        state_factory=state_factory,
+    )
+    fleet_add_servicer_to_server_fn = add_GrpcAdapterServicer_to_server
+    fleet_grpc_server = generic_create_grpc_server(
+        servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
+        server_address=address,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        certificates=certificates,
+    )
+
+    log(INFO, "Flower ECE: Starting Fleet API (GrpcAdapter) on %s", address)
     fleet_grpc_server.start()
 
     return fleet_grpc_server
@@ -747,6 +788,13 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         const=TRANSPORT_TYPE_GRPC_RERE,
         default=TRANSPORT_TYPE_GRPC_RERE,
         help="Start a Fleet API server (gRPC-rere)",
+    )
+    ex_group.add_argument(
+        "--grpc-adapter",
+        action="store_const",
+        dest="fleet_api_type",
+        const=TRANSPORT_TYPE_GRPC_ADAPTER,
+        help="Start a Fleet API server (GrpcAdapter, experimental)",
     )
     ex_group.add_argument(
         "--rest",

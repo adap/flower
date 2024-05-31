@@ -27,6 +27,7 @@ To use the REST API, install `flwr` with the `rest` extra:
 
 TRANSPORT_TYPE_GRPC_BIDI = "grpc-bidi"
 TRANSPORT_TYPE_GRPC_RERE = "grpc-rere"
+TRANSPORT_TYPE_GRPC_ADAPTER = "grpc-adapter"
 TRANSPORT_TYPE_REST = "rest"
 TRANSPORT_TYPE_VCE = "vce"
 TRANSPORT_TYPES = [

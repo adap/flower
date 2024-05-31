@@ -29,6 +29,11 @@ from cryptography.hazmat.primitives.serialization import (
 
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
+from flwr.common.constant import (
+    TRANSPORT_TYPE_GRPC_ADAPTER,
+    TRANSPORT_TYPE_GRPC_RERE,
+    TRANSPORT_TYPE_REST,
+)
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log
 from flwr.common.object_ref import load_app, validate
@@ -75,7 +80,7 @@ def run_client_app() -> None:
     _start_client_internal(
         server_address=args.server,
         load_client_app_fn=load_fn,
-        transport="rest" if args.rest else "grpc-rere",
+        transport=args.transport,
         root_certificates=root_certificates,
         insecure=args.insecure,
         authentication_keys=authentication_keys,
@@ -199,9 +204,27 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         help="Run the client without HTTPS. By default, the client runs with "
         "HTTPS enabled. Use this flag only if you understand the risks.",
     )
-    parser.add_argument(
+    ex_group = parser.add_mutually_exclusive_group()
+    ex_group.add_argument(
+        "--grpc-rere",
+        action="store_const",
+        dest="transport",
+        const=TRANSPORT_TYPE_GRPC_RERE,
+        default=TRANSPORT_TYPE_GRPC_RERE,
+        help="Use grpc-rere as a transport layer for the client.",
+    )
+    ex_group.add_argument(
+        "--grpc-adapter",
+        action="store_const",
+        dest="transport",
+        const=TRANSPORT_TYPE_GRPC_ADAPTER,
+        help="Use grpc-adapter as a transport layer for the client.",
+    )
+    ex_group.add_argument(
         "--rest",
-        action="store_true",
+        action="store_const",
+        dest="transport",
+        const=TRANSPORT_TYPE_REST,
         help="Use REST as a transport layer for the client.",
     )
     parser.add_argument(
