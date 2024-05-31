@@ -1,7 +1,7 @@
 Use Driver API
 ==============
 
-This guide explains how you can use Flower framework's |driverapi_link|_ API to customize the :code:`ServerApp` for *any* server workloads in your federated learning system. The Driver APIs are a specific set of server-side APIs that provide a robust way to communicate with client nodes in a Flower federated learning system. They include methods to:
+This guide explains how you can use Flower framework's |driverapi_link|_ API to customize the :code:`ServerApp` for *any* server workloads in your federated learning system. The Driver APIs are a specific set of server-side APIs that provide a robust way to communicate with a :code:`SuperNode` in a Flower federated learning system. They include methods to:
 
 * `Select nodes`_
 * `Push messages to nodes`_
