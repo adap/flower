@@ -13,9 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Plotting utils."""
-from typing import Optional, Tuple
 
-from visualization.constants import PLOT_TYPES, SIZE_UNITS, AXIS_TYPES
+from flwr_datasets.visualization.constants import AXIS_TYPES, PLOT_TYPES, SIZE_UNITS
 
 
 def _validate_parameters(
@@ -31,35 +30,6 @@ def _validate_parameters(
         )
     if partition_id_axis not in AXIS_TYPES:
         raise ValueError(
-            f"Invalid partition_id_axis: {partition_id_axis}. Must be one of {AXIS_TYPES}."
+            f"Invalid partition_id_axis: {partition_id_axis}. "
+            f"Must be one of {AXIS_TYPES}."
         )
-
-
-
-def _initialize_comparison_figsize(
-    figsize: Optional[Tuple[float, float]], num_partitioners: int
-) -> Tuple[float, float]:
-    if figsize is not None:
-        return figsize
-    x_value = 4 + (num_partitioners - 1) * 2
-    y_value = 4.8
-    figsize = (x_value, y_value)
-    return figsize
-
-
-def _initialize_comparison_xy_labels(
-    plot_type: str, partition_id_axis: str
-) -> Tuple[str, str]:
-    if plot_type == "bar":
-        xlabel = "Partition ID"
-        ylabel = "Class distribution"
-    elif plot_type == "heatmap":
-        xlabel = "Partition ID"
-        ylabel = "Label"
-    else:
-        raise ValueError(f"Invalid plot_type: {plot_type}. Must be one of {PLOT_TYPES}.")
-
-    if partition_id_axis == "y":
-        xlabel, ylabel = ylabel, xlabel
-
-    return xlabel, ylabel

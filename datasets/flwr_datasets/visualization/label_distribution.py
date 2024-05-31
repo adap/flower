@@ -14,41 +14,38 @@
 # ==============================================================================
 """Label distribution plotting."""
 import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-import datasets
 from flwr_datasets.metrics import compute_counts
 from flwr_datasets.partitioner import Partitioner
 from flwr_datasets.visualization.bar_plot import _plot_bar
 from flwr_datasets.visualization.heatmap_plot import _plot_heatmap
-from flwr_datasets.visualization.utils import _validate_parameters, _initialize_comparison_figsize, \
-    _initialize_comparison_xy_labels
-
+from flwr_datasets.visualization.utils import _validate_parameters
 
 # pylint: disable=too-many-arguments,too-many-locals
 
+
 def plot_label_distributions(
-        partitioner: Partitioner,
-        label_name: str,
-        plot_type: str = "bar",
-        size_unit: str = "absolute",
-        max_num_partitions: Optional[int] = None,
-        partition_id_axis: str = "x",
-        axis: Optional[Axes] = None,
-        figsize: Optional[Tuple[float, float]] = None,
-        title: str = "Per Partition Label Distribution",
-        cmap: Optional[Union[str, mcolors.Colormap]] = None,
-        legend: bool = False,
-        legend_title: Optional[str] = None,
-        verbose_labels: bool = True,
-        plot_kwargs: Optional[Dict[str, Any]] = None,
-        legend_kwargs: Optional[Dict[str, Any]] = None,
+    partitioner: Partitioner,
+    label_name: str,
+    plot_type: str = "bar",
+    size_unit: str = "absolute",
+    max_num_partitions: Optional[int] = None,
+    partition_id_axis: str = "x",
+    axis: Optional[Axes] = None,
+    figsize: Optional[Tuple[float, float]] = None,
+    title: str = "Per Partition Label Distribution",
+    cmap: Optional[Union[str, mcolors.Colormap]] = None,
+    legend: bool = False,
+    legend_title: Optional[str] = None,
+    verbose_labels: bool = True,
+    plot_kwargs: Optional[Dict[str, Any]] = None,
+    legend_kwargs: Optional[Dict[str, Any]] = None,
 ) -> Tuple[Figure, Axes, pd.DataFrame]:
     """Plot the label distribution of the partitions.
 
@@ -244,7 +241,9 @@ def plot_label_distributions(
             warnings.warn(
                 "The verbose label names can not be established. "
                 "The column specified by 'label_name' needs to be of type "
-                "'ClassLabel'")
+                "'ClassLabel'",
+                stacklevel=1,
+            )
 
     if plot_type == "bar":
         axis = _plot_bar(
@@ -274,8 +273,5 @@ def plot_label_distributions(
             plot_kwargs,
             legend_kwargs,
         )
-
+    assert axis is not None
     return axis.figure, axis, dataframe
-
-
-

@@ -13,36 +13,36 @@
 # limitations under the License.
 # ==============================================================================
 """Comparison of label distribution plotting."""
-from typing import List, Union, Optional, Tuple, Dict, Any
+from typing import Any, Dict, List, Optional, Tuple, Union
 
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-import matplotlib.colors as mcolors
 
 from flwr_datasets.partitioner import Partitioner
+from flwr_datasets.visualization.constants import PLOT_TYPES
+from flwr_datasets.visualization.label_distribution import plot_label_distributions
 
-from flwr_datasets.visualization.utils import _initialize_comparison_figsize, \
-    _initialize_comparison_xy_labels
-from flwr_datasets.visualization import plot_label_distributions
-import matplotlib.pyplot as plt
 
+# pylint: disable=too-many-arguments,too-many-locals
 def plot_comparison_label_distribution(
-        partitioner_list: List[Partitioner],
-        label_name: Union[str, List[str]],
-        plot_type: str = "bar",
-        size_unit: str = "percent",
-        max_num_partitions: Optional[Union[int]] = 30,
-        partition_id_axis: str = "y",
-        figsize: Optional[Tuple[float, float]] = None,
-        subtitle: str = "Comparison of Per Partition Label Distribution",
-        titles: Optional[List[str]] = None,
-        cmap: Optional[Union[str, mcolors.Colormap]] = None,
-        legend: bool = False,
-        legend_title: Optional[str] = None,
-        verbose_labels: bool = True,
-        plot_kwargs_list: Optional[Dict[str, Any]] = None,
-        legend_kwargs: Optional[Dict[str, Any]] = None,
+    partitioner_list: List[Partitioner],
+    label_name: Union[str, List[str]],
+    plot_type: str = "bar",
+    size_unit: str = "percent",
+    max_num_partitions: Optional[Union[int]] = 30,
+    partition_id_axis: str = "y",
+    figsize: Optional[Tuple[float, float]] = None,
+    subtitle: str = "Comparison of Per Partition Label Distribution",
+    titles: Optional[List[str]] = None,
+    cmap: Optional[Union[str, mcolors.Colormap]] = None,
+    legend: bool = False,
+    legend_title: Optional[str] = None,
+    verbose_labels: bool = True,
+    plot_kwargs_list: Optional[List[Optional[Dict[str, Any]]]] = None,
+    legend_kwargs: Optional[Dict[str, Any]] = None,
 ) -> Tuple[Figure, List[Axes], List[pd.DataFrame]]:
     """Compare the label distribution across multiple partitioners.
 
@@ -64,7 +64,8 @@ def plot_comparison_label_distribution(
     figsize : Optional[Tuple[float, float]]
         Size of the figure. If None, a default size is calculated.
     subtitle : str
-        Subtitle for the figure. Default "Comparison of Per Partition Label Distribution"
+        Subtitle for the figure. Defaults to "Comparison of Per Partition Label
+         Distribution"
     titles : Optional[List[str]], default None
         Titles for each subplot. If None, no titles are set.
     cmap : Optional[Union[str, mcolors.Colormap]]
@@ -77,7 +78,7 @@ def plot_comparison_label_distribution(
         plot.
     verbose_labels : bool
         Whether to use verbose versions of the labels.
-    plot_kwargs_list: Optional[Dict[str, Any]]
+    plot_kwargs_list: Optional[List[Optional[Dict[str, Any]]]]
         List of plot_kwargs. Any key value pair that can be passed to a plot function
         that are not supported directly. In case of the parameter doubling
         (e.g. specifying cmap here too) the chosen value will be taken from the
@@ -107,7 +108,7 @@ def plot_comparison_label_distribution(
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import DirichletPartitioner
     >>> from flwr_datasets.visualization import plot_comparison_label_distribution
-    >>> 
+    >>>
     >>> partitioner_list = []
     >>> alpha_list = [10_000.0, 100.0, 1.0, 0.1, 0.01, 0.00001]
     >>> for alpha in alpha_list:
@@ -150,7 +151,7 @@ def plot_comparison_label_distribution(
 
     dataframe_list = []
     for idx, (partitioner, single_label_name, plot_kwargs) in enumerate(
-            zip(partitioner_list, label_name, plot_kwargs_list)
+        zip(partitioner_list, label_name, plot_kwargs_list)
     ):
         if idx == (num_partitioners - 1):
             *_, dataframe = plot_label_distributions(
@@ -166,7 +167,7 @@ def plot_comparison_label_distribution(
                 legend_title=legend_title,
                 verbose_labels=verbose_labels,
                 plot_kwargs=plot_kwargs,
-                legend_kwargs=legend_kwargs
+                legend_kwargs=legend_kwargs,
             )
             dataframe_list.append(dataframe)
         else:
@@ -180,8 +181,7 @@ def plot_comparison_label_distribution(
                 max_num_partitions=max_num_partitions,
                 cmap=cmap,
                 legend=False,
-                plot_kwargs=plot_kwargs
-
+                plot_kwargs=plot_kwargs,
             )
             dataframe_list.append(dataframe)
 
@@ -202,3 +202,34 @@ def plot_comparison_label_distribution(
 
     fig.tight_layout()
     return fig, axes, dataframe_list
+
+
+def _initialize_comparison_figsize(
+    figsize: Optional[Tuple[float, float]], num_partitioners: int
+) -> Tuple[float, float]:
+    if figsize is not None:
+        return figsize
+    x_value = 4 + (num_partitioners - 1) * 2
+    y_value = 4.8
+    figsize = (x_value, y_value)
+    return figsize
+
+
+def _initialize_comparison_xy_labels(
+    plot_type: str, partition_id_axis: str
+) -> Tuple[str, str]:
+    if plot_type == "bar":
+        xlabel = "Partition ID"
+        ylabel = "Class distribution"
+    elif plot_type == "heatmap":
+        xlabel = "Partition ID"
+        ylabel = "Label"
+    else:
+        raise ValueError(
+            f"Invalid plot_type: {plot_type}. Must be one of {PLOT_TYPES}."
+        )
+
+    if partition_id_axis == "y":
+        xlabel, ylabel = ylabel, xlabel
+
+    return xlabel, ylabel

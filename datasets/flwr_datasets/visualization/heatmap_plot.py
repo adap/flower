@@ -13,15 +13,17 @@
 # limitations under the License.
 # ==============================================================================
 """Label distribution heatmap plotting."""
-from typing import Optional, Tuple, Union, Dict, Any
+from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from matplotlib import colors as mcolors, pyplot as plt
+from matplotlib import colors as mcolors
+from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 
 
+# pylint: disable=too-many-arguments,too-many-locals
 def _plot_heatmap(
     dataframe: pd.DataFrame,
     axis: Optional[Axes],
@@ -41,7 +43,7 @@ def _plot_heatmap(
             figsize = _initialize_figsize(
                 partition_id_axis=partition_id_axis,
                 num_partitions=dataframe.shape[0],
-                num_labels=dataframe.shape[1]
+                num_labels=dataframe.shape[1],
             )
         _, axis = plt.subplots(figsize=figsize)
 
@@ -81,6 +83,7 @@ def _plot_heatmap(
     )
     axis.set_title(title)
     return axis
+
 
 def _initialize_figsize(
     partition_id_axis: str,
