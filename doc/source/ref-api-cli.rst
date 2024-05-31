@@ -1,6 +1,16 @@
 Flower CLI reference
 ====================
 
+.. _flower-simulation-apiref:
+
+flower-simulation
+~~~~~~~~~~~~~~~~~
+
+.. argparse::
+   :module: flwr.simulation.run_simulation
+   :func: _parse_args_run_simulation
+   :prog: flower-simulation
+
 .. _flower-superlink-apiref:
 
 flower-superlink
@@ -13,31 +23,11 @@ flower-superlink
 
 .. _flower-driver-api-apiref:
 
-flower-driver-api
-~~~~~~~~~~~~~~~~~
-
-.. argparse::
-   :module: flwr.server.app
-   :func: _parse_args_run_driver_api
-   :prog: flower-driver-api
-
-.. _flower-fleet-api-apiref:
-
-flower-fleet-api
-~~~~~~~~~~~~~~~~
-
-.. argparse::
-   :module: flwr.server.app
-   :func:  _parse_args_run_fleet_api
-   :prog: flower-fleet-api
-
-.. _flower-client-app-apiref:
-
 flower-client-app
 ~~~~~~~~~~~~~~~~~
 
 .. argparse::
-   :module: flwr.client.app
+   :module: flwr.client.supernode.app
    :func: _parse_args_run_client_app
    :prog: flower-client-app
 

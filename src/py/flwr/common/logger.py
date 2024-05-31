@@ -82,13 +82,20 @@ class ConsoleHandler(StreamHandler):
         return formatter.format(record)
 
 
-def update_console_handler(level: int, timestamps: bool, colored: bool) -> None:
+def update_console_handler(
+    level: Optional[int] = None,
+    timestamps: Optional[bool] = None,
+    colored: Optional[bool] = None,
+) -> None:
     """Update the logging handler."""
     for handler in logging.getLogger(LOGGER_NAME).handlers:
         if isinstance(handler, ConsoleHandler):
-            handler.setLevel(level)
-            handler.timestamps = timestamps
-            handler.colored = colored
+            if level is not None:
+                handler.setLevel(level)
+            if timestamps is not None:
+                handler.timestamps = timestamps
+            if colored is not None:
+                handler.colored = colored
 
 
 # Configure console logger
@@ -188,3 +195,29 @@ def warn_deprecated_feature(name: str) -> None:
         """,
         name,
     )
+
+
+def set_logger_propagation(
+    child_logger: logging.Logger, value: bool = True
+) -> logging.Logger:
+    """Set the logger propagation attribute.
+
+    Parameters
+    ----------
+    child_logger : logging.Logger
+        Child logger object
+    value : bool
+        Boolean setting for propagation. If True, both parent and child logger
+        display messages. Otherwise, only the child logger displays a message.
+        This False setting prevents duplicate logs in Colab notebooks.
+        Reference: https://stackoverflow.com/a/19561320
+
+    Returns
+    -------
+    logging.Logger
+        Child logger object with updated propagation setting
+    """
+    child_logger.propagate = value
+    if not child_logger.propagate:
+        child_logger.log(logging.DEBUG, "Logger propagate set to False")
+    return child_logger
