@@ -204,6 +204,10 @@ class State(abc.ABC):  # pylint: disable=R0904
         """Retrieve all currently stored `client_public_keys` as a set."""
 
     @abc.abstractmethod
+    def clear_client_public_keys(self) -> None:
+        """Clear `client_public_keys` set in state."""
+
+    @abc.abstractmethod
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat.
 

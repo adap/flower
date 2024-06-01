@@ -17,12 +17,13 @@
 import argparse
 import csv
 import importlib.util
+import hashlib
 import sys
 import threading
 from logging import INFO, WARN
 from os.path import isfile
 from pathlib import Path
-from typing import Optional, Sequence, Set, Tuple
+from typing import Callable, Optional, Sequence, Set, Tuple
 
 import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -61,7 +62,7 @@ from .superlink.fleet.grpc_bidi.grpc_server import (
 )
 from .superlink.fleet.grpc_rere.fleet_servicer import FleetServicer
 from .superlink.fleet.grpc_rere.server_interceptor import AuthenticateServerInterceptor
-from .superlink.state import StateFactory
+from .superlink.state import StateFactory, State
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
@@ -392,7 +393,7 @@ def run_superlink() -> None:
                 "Client authentication enabled with %d known public keys",
                 len(client_public_keys),
             )
-            interceptors = [AuthenticateServerInterceptor(state)]
+            interceptors = [AuthenticateServerInterceptor(state, Path(args.auth_list_public_keys))]
 
         fleet_server = _run_fleet_api_grpc_rere(
             address=address,
@@ -507,6 +508,55 @@ def _try_setup_client_authentication(
             ssh_private_key,
             ssh_public_key,
         )
+    
+def hash_fn(client_keys_file_path: str, state: State):
+    new_known_keys = set(bytes)
+
+    try:
+        with open(client_keys_file_path, newline="", encoding="utf-8") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                for element in row:
+                    public_key = load_ssh_public_key(element.encode())
+                    if isinstance(public_key, ec.EllipticCurvePublicKey):
+                        new_known_keys.add(public_key_to_bytes(public_key))
+                    else: raise ValueError()
+        
+        state.store_client_public_keys(new_known_keys)
+                        
+    except (ValueError, UnsupportedAlgorithm):
+        pass
+
+def _hash_loop(hash_fn: Callable[[str, State], None], client_keys_file_path: str, state: State, stop_event: threading.Event) -> None:
+    def hash_bytestr_iter(bytesiter, hasher, ashexstr=False):
+        for block in bytesiter:
+            hasher.update(block)
+        return hasher.hexdigest() if ashexstr else hasher.digest()
+
+    def file_as_blockiter(afile, blocksize=65536):
+        with afile:
+            block = afile.read(blocksize)
+            while len(block) > 0:
+                yield block
+                block = afile.read(blocksize)
+        
+    SIXTY_SECONDS = 60
+    hash = hash_bytestr_iter(file_as_blockiter(open(client_keys_file_path, 'rb')), hashlib.sha256())
+    
+    while not stop_event.is_set():
+        new_hash = hash_bytestr_iter(file_as_blockiter(open(client_keys_file_path, 'rb')), hashlib.sha256())
+        if hash != new_hash:
+            hash_fn(client_keys_file_path, state)
+        stop_event.wait(SIXTY_SECONDS)
+
+def _start_hash_loop(client_keys_file_path: str, state: State, stop_event: threading.Event) -> threading.Thread:
+    
+    thread = threading.Thread(
+        target=_hash_loop, args=(hash_fn, client_keys_file_path, state, stop_event), daemon=True
+    )
+    thread.start()
+
+    return thread
 
 
 def _try_obtain_certificates(
