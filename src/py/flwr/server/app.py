@@ -405,7 +405,7 @@ def run_superlink() -> None:
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
-        address_arg = args.grpc_rere_fleet_api_address
+        address_arg = args.grpc_adapter_fleet_api_address
         parsed_address = parse_address(address_arg)
         if not parsed_address:
             sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
