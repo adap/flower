@@ -1,0 +1,11 @@
+# Federated Instruction Tuning on General Dataset (static)
+---
+dataset:
+  name: "vicgalle/alpaca-gpt4"
+
+# FL experimental settings
+num_clients: 20 # total number of clients
+num_rounds: 200
+partitioner:
+  _target_: flwr_datasets.partitioner.IidPartitioner
+  num_partitions: ${num_clients}
