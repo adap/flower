@@ -16,7 +16,7 @@
 
 import pathlib
 from logging import DEBUG, ERROR, WARNING
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 import ray
 
@@ -27,7 +27,6 @@ from flwr.common.message import Message
 from flwr.simulation.ray_transport.ray_actor import (
     BasicActorPool,
     ClientAppActor,
-    init_ray,
 )
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
@@ -57,13 +56,15 @@ class RayBackend(Backend):
         )
 
         if backend_config.get("mute_logging", False):
-            init_ray(
+            self.init_ray(
                 logging_level=WARNING, log_to_driver=False, runtime_env=runtime_env
             )
         elif backend_config.get("silent", False):
-            init_ray(logging_level=WARNING, log_to_driver=True, runtime_env=runtime_env)
+            self.init_ray(
+                logging_level=WARNING, log_to_driver=True, runtime_env=runtime_env
+            )
         else:
-            init_ray(runtime_env=runtime_env)
+            self.init_ray(runtime_env=runtime_env)
 
         # Validate client resources
         self.client_resources_key = "client_resources"
@@ -124,6 +125,11 @@ class RayBackend(Backend):
             )
 
         return client_resources
+
+    def init_ray(self, *args: Any, **kwargs: Any) -> None:
+        """Intialises Ray if not already initialised."""
+        if not ray.is_initialized():
+            ray.init(*args, **kwargs)
 
     @property
     def num_workers(self) -> int:
