@@ -15,6 +15,7 @@
 """Tests for metrics utils."""
 # pylint: disable=no-self-use
 
+
 import unittest
 
 import pandas as pd

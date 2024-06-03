@@ -67,7 +67,7 @@ def plot_comparison_label_distribution(
         Size of the figure. If None, a default size is calculated.
     subtitle : str
         Subtitle for the figure. Defaults to "Comparison of Per Partition Label
-         Distribution"
+        Distribution"
     titles : Optional[List[str]]
         Titles for each subplot. If None, no titles are set.
     cmap : Optional[Union[str, mcolors.Colormap]]
@@ -88,7 +88,7 @@ def plot_comparison_label_distribution(
         the value in this dictionary).
     legend_kwargs: Optional[Dict[str, Any]]
         Any key value pair that can be passed to a figure.legend in case of bar plot or
-        cbar_kws in case of heatmap that are not supported directly. In case of the
+        cbar_kws in case of heatmap that are not supported directly. In case of
         parameter doubling (e.g. specifying legend_title here too) the
         chosen value will be taken from the explicit arguments (e.g. legend_title
         specified as an argument to this function not the value in this dictionary).
