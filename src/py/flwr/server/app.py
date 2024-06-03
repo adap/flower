@@ -814,6 +814,16 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         default=ADDRESS_FLEET_API_GRPC_RERE,
     )
 
+    # Fleet API gRPC-adapter options
+    grpc_adapter_group = parser.add_argument_group(
+        "Fleet API (gRPC-adapter) server options", ""
+    )
+    grpc_adapter_group.add_argument(
+        "--grpc-adapter-fleet-api-address",
+        help="Fleet API (gRPC-adapter) server address (IPv4, IPv6, or a domain name)",
+        default=ADDRESS_FLEET_API_GRPC_RERE,
+    )
+
     # Fleet API REST options
     rest_group = parser.add_argument_group("Fleet API (REST) server options", "")
     rest_group.add_argument(
