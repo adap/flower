@@ -679,7 +679,7 @@ class SqliteState(State):  # pylint: disable=R0904
         rows = self.query(query)
         result: Set[bytes] = {row["public_key"] for row in rows}
         return result
-    
+
     def clear_client_public_keys(self) -> None:
         """Clear `client_public_keys` set in state."""
         query = "DELETE FROM public_key"

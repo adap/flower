@@ -16,23 +16,22 @@
 
 
 import base64
-from logging import WARNING
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
-from pathlib import Path
 import csv
+from logging import WARNING
+from pathlib import Path
+from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives.serialization import (
-    load_ssh_private_key,
-    load_ssh_public_key,
-)
+from cryptography.hazmat.primitives.serialization import load_ssh_public_key
+
 from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     bytes_to_private_key,
     bytes_to_public_key,
     generate_shared_key,
+    public_key_to_bytes,
     verify_hmac,
 )
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -51,11 +50,6 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.state import State
-
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    private_key_to_bytes,
-    public_key_to_bytes,
-)
 
 _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
@@ -170,12 +164,14 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             request_deserializer=method_handler.request_deserializer,
             response_serializer=method_handler.response_serializer,
         )
-    
+
     def _update_client_keys(self):
         new_known_keys = set()
 
         try:
-            with open(self.client_keys_file_path, newline="", encoding="utf-8") as csvfile:
+            with open(
+                self.client_keys_file_path, newline="", encoding="utf-8"
+            ) as csvfile:
                 reader = csv.reader(csvfile)
                 for row in reader:
                     for element in row:
@@ -183,13 +179,19 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                         public_key = load_ssh_public_key(maybe_public_key)
                         if isinstance(public_key, ec.EllipticCurvePublicKey):
                             new_known_keys.add(public_key_to_bytes(public_key))
-                        else: raise ValueError(f"Public key {maybe_public_key} is not an elliptic curve public key")
-            
+                        else:
+                            raise ValueError(
+                                f"Public key {maybe_public_key} is not an "
+                                "elliptic curve public key"
+                            )
+
             self.state.clear_client_public_keys()
             self.state.store_client_public_keys(new_known_keys)
             self.client_public_keys = new_known_keys
-                            
+
         except (ValueError, UnsupportedAlgorithm) as e:
+            log(WARNING, f"Abort updating client_public_keys set due to error: {e}")
+        except Exception as e:
             log(WARNING, f"Abort updating client_public_keys set due to error: {e}")
 
     def _verify_node_id(
