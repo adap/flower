@@ -44,6 +44,8 @@ PING_BASE_MULTIPLIER = 0.8
 PING_RANDOM_RANGE = (-0.1, 0.1)
 PING_MAX_INTERVAL = 1e300
 
+GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
+
 
 class MessageType:
     """Message type."""

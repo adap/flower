@@ -19,6 +19,7 @@ from typing import Any, Type, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
+from flwr.common.constant import GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY
 from flwr.common.version import package_version
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -37,7 +38,6 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2 import MessageContainer  # pylint: disable=E0611
 from flwr.proto.grpcadapter_pb2_grpc import GrpcAdapterStub
 
-KEY_FLOWER_VERSION = "flower-version"
 T = TypeVar("T", bound=GrpcMessage)
 
 
@@ -55,7 +55,7 @@ class GrpcAdapter:
         self, request: GrpcMessage, response_type: Type[T], **kwargs: Any
     ) -> T:
         container_req = MessageContainer(
-            metadata={KEY_FLOWER_VERSION: package_version},
+            metadata={GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY: package_version},
             grpc_message_name=request.__class__.__qualname__,
             grpc_message_content=request.SerializeToString(),
         )
