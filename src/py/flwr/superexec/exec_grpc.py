@@ -47,6 +47,5 @@ def run_superexec_api_grpc(
 
     log(INFO, "Flower ECE: Starting SuperExec API (gRPC-rere) on %s", address)
     superexec_grpc_server.start()
-    print("do we errror")
 
     return superexec_grpc_server
