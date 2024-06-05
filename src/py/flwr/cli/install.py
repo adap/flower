@@ -22,7 +22,7 @@ import tempfile
 import zipfile
 from io import BytesIO
 from pathlib import Path
-from typing import Optional, Union
+from typing import IO, Optional, Union
 
 import typer
 from typing_extensions import Annotated
@@ -82,6 +82,7 @@ def install(
 
 def install_from_fab(fab_file: Union[Path, bytes], flwr_dir: Optional[Path]) -> None:
     """Install from a FAB file after extracting and validating."""
+    fab_file_archive: Union[Path, IO[bytes]]
     if isinstance(fab_file, bytes):
         fab_file_archive = BytesIO(fab_file)
     elif isinstance(fab_file, Path):
