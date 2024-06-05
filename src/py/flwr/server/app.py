@@ -24,6 +24,8 @@ from os.path import isfile
 from pathlib import Path
 from typing import Optional, Sequence, Set, Tuple
 
+from flwr.superexec.test_executor import TestExec
+from flwr.superexec.exec_grpc import run_superexec_api_grpc
 import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -302,6 +304,50 @@ def run_fleet_api() -> None:
         grpc_servers[0].wait_for_termination()
     elif len(bckg_threads) > 0:
         bckg_threads[0].join()
+
+
+def run_superexec() -> None:
+    """Run Flower SuperLink (Driver API and Fleet API)."""
+    log(INFO, "Starting Flower SuperLink")
+
+    event(EventType.RUN_SUPERLINK_ENTER)
+
+    args = _parse_args_run_superexec().parse_args()
+
+    # Parse IP address
+    parsed_address = parse_address(args.address)
+    if not parsed_address:
+        sys.exit(f"Driver IP address ({args.address}) cannot be parsed.")
+    host, port, is_v6 = parsed_address
+    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+
+    # Obtain certificates
+    certificates = _try_obtain_certificates(args)
+
+    # Start Driver API
+    driver_server: grpc.Server = run_superexec_api_grpc(
+        address=address,
+        plugin=TestExec(),
+        certificates=certificates,
+    )
+
+    grpc_servers = [driver_server]
+    bckg_threads = []
+
+    # Graceful shutdown
+    register_exit_handlers(
+        event_type=EventType.RUN_SUPERLINK_LEAVE,
+        grpc_servers=grpc_servers,
+        bckg_threads=bckg_threads,
+    )
+
+    # Block
+    while True:
+        if bckg_threads:
+            for thread in bckg_threads:
+                if not thread.is_alive():
+                    sys.exit(1)
+        driver_server.wait_for_termination(timeout=1)
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
@@ -659,6 +705,28 @@ def _parse_args_run_fleet_api() -> argparse.ArgumentParser:
     _add_args_common(parser=parser)
     _add_args_fleet_api(parser=parser)
 
+    return parser
+
+
+def _parse_args_run_superexec() -> argparse.ArgumentParser:
+    """Parse command line arguments for both Driver API and Fleet API."""
+    parser = argparse.ArgumentParser(
+        description="Start a Flower SuperLink",
+    )
+
+    parser.add_argument(
+        "--address",
+        help="Driver API (gRPC) server address (IPv4, IPv6, or a domain name)",
+        default="0.0.0.0:9093",
+    )
+
+    parser.add_argument(
+        "--insecure",
+        action="store_true",
+        help="Run the server without HTTPS, regardless of whether certificate "
+        "paths are provided. By default, the server runs with HTTPS enabled. "
+        "Use this flag only if you understand the risks.",
+    )
     return parser
 
 

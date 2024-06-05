@@ -130,10 +130,9 @@ def run_server_app() -> None:
 
     # Initialize GrpcDriver
     driver = GrpcDriver(
+        run_id=args.run_id,
         driver_service_address=args.server,
         root_certificates=root_certificates,
-        fab_id=args.fab_id,
-        fab_version=args.fab_version,
     )
 
     # Run the ServerApp with the Driver

@@ -13,3 +13,11 @@
 # limitations under the License.
 # ==============================================================================
 """Flower driver service."""
+
+from .exec_grpc import run_superexec_api_grpc
+from .test_executor import TestExec
+
+__all__ = [
+    "run_superexec_api_grpc",
+    "TestExecutor",
+]

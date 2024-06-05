@@ -15,7 +15,17 @@
 """Executes and monitor a Flower run."""
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from subprocess import Popen
 from typing import Optional
+
+
+@dataclass
+class Run:
+    """Represents a Flower run (composed of a run_id and the associated process)."""
+
+    run_id: int
+    proc: Popen
 
 
 class Executor(ABC):
@@ -24,9 +34,9 @@ class Executor(ABC):
     @abstractmethod
     def start_run(
         self,
-        fab_path: str,
+        fab_file: bytes,
         ttl: Optional[float] = None,
-    ) -> int:
+    ) -> Run:
         """Start a run using the given Flower App ID and version.
 
         This method creates a new run on the SuperLink and returns its run_id
@@ -34,8 +44,8 @@ class Executor(ABC):
 
         Parameters
         ----------
-        fab_path : str
-            The path to the Flower App Bundle file.
+        fab_file : bytes
+            The Flower App Bundle file bytes.
         ttl : Optional[float] (default: None)
             Time-to-live for the round trip of this message, i.e., the time from sending
             this message to receiving a reply. It specifies in seconds the duration for

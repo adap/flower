@@ -15,7 +15,7 @@
 """Driver API servicer."""
 
 
-from logging import DEBUG
+from logging import DEBUG, INFO
 
 import grpc
 
@@ -38,6 +38,6 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self, request: StartRunRequest, context: grpc.ServicerContext
     ) -> StartRunResponse:
         """Create run ID."""
-        log(DEBUG, "DriverServicer.CreateRun")
-        run_id = self.plugin.start_run(request.fab_file)
-        return StartRunResponse(run_id=run_id)
+        log(INFO, "DriverServicer.CreateRun")
+        run = self.plugin.start_run(request.fab_file)
+        return StartRunResponse(run_id=run.run_id)

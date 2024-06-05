@@ -21,9 +21,7 @@ import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
-from flwr.proto.driver_pb2_grpc import (  # pylint: disable=E0611
-    add_DriverServicer_to_server,
-)
+from flwr.proto.exec_pb2_grpc import add_ExecServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 from .exec_servicer import ExecServicer
 from .executor import Executor
@@ -39,7 +37,7 @@ def run_superexec_api_grpc(
     exec_servicer: grpc.Server = ExecServicer(
         plugin=plugin,
     )
-    superexec_add_servicer_to_server_fn = add_DriverServicer_to_server
+    superexec_add_servicer_to_server_fn = add_ExecServicer_to_server
     superexec_grpc_server = generic_create_grpc_server(
         servicer_and_add_fn=(exec_servicer, superexec_add_servicer_to_server_fn),
         server_address=address,
@@ -47,7 +45,8 @@ def run_superexec_api_grpc(
         certificates=certificates,
     )
 
-    log(INFO, "Flower ECE: Starting Driver API (gRPC-rere) on %s", address)
+    log(INFO, "Flower ECE: Starting SuperExec API (gRPC-rere) on %s", address)
     superexec_grpc_server.start()
+    print("do we errror")
 
     return superexec_grpc_server
