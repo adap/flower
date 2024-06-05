@@ -71,7 +71,7 @@ def plot_comparison_label_distribution(
     titles : Optional[List[str]]
         Titles for each subplot. If None, no titles are set.
     cmap : Optional[Union[str, mcolors.Colormap]]
-        Colormap for the heatmap.
+        Colormap for determining the colorspace of the plot.
     legend : bool
         Whether to include a legend. If True, it will be included right-hand side after
         all the plots.

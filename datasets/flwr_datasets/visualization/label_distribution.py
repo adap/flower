@@ -74,7 +74,7 @@ def plot_label_distributions(
     title : str
         Title of the plot.
     cmap : Optional[Union[str, mcolors.Colormap]]
-        Colormap for the heatmap.
+        Colormap for determining the colorspace of the plot.
     legend : bool
         Include the legend.
     legend_title : Optional[str]
