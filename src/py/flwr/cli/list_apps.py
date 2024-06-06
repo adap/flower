@@ -24,13 +24,13 @@ from .config_utils import load_and_validate
 
 
 # pylint: disable=too-many-locals
-def ls(
+def list_apps(
     flwr_dir: Annotated[
         Optional[Path],
         typer.Option(help="The Flower directory, `$HOME/.flwr/` by default."),
     ] = None,
 ) -> None:
-    """Build a Flower project into a Flower App Bundle (FAB)."""
+    """List all the installed Flower Apps."""
     if flwr_dir is None:
         flwr_dir = Path(Path.home() / ".flwr")
 
