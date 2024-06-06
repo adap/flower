@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,22 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets main package."""
+"""Metrics package."""
 
 
-from flwr_datasets import partitioner, preprocessor
-from flwr_datasets import utils as utils
-from flwr_datasets import visualization
-from flwr_datasets.common.version import package_version as _package_version
-from flwr_datasets.federated_dataset import FederatedDataset
+from flwr_datasets.metrics.utils import compute_counts, compute_frequency
 
 __all__ = [
-    "FederatedDataset",
-    "partitioner",
-    "metrics",
-    "visualization",
-    "preprocessor",
-    "utils",
+    "compute_counts",
+    "compute_frequency",
 ]
-
-__version__ = _package_version
