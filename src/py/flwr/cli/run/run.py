@@ -42,6 +42,13 @@ def run(
             case_sensitive=False, help="Use this flag to use the new SuperExec API"
         ),
     ] = False,
+    follow: Annotated[
+        bool,
+        typer.Option(
+            case_sensitive=False, help="Use this flag to stream logs"
+        ),
+    ] = False,
+
 ) -> None:
     """Run Flower project."""
     if use_superexec:
@@ -50,7 +57,7 @@ def run(
 
         from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
         from flwr.common.logger import log
-        from flwr.proto.exec_pb2 import StartRunRequest
+        from flwr.proto.exec_pb2 import StartRunRequest, FetchLogsRequest
         from flwr.proto.exec_pb2_grpc import ExecStub
 
         def on_channel_state_change(channel_connectivity: str) -> None:
@@ -70,6 +77,13 @@ def run(
         req = StartRunRequest()
         res = stub.StartRun(req)
         print(res)
+
+        if follow:
+            req = FetchLogsRequest(run_id=res.run_id)
+            print("test")
+            res = stub.FetchLogs(req)
+            print("XX")
+            print(res)
     else:
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 

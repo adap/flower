@@ -19,6 +19,11 @@ class ExecStub(object):
                 request_serializer=flwr_dot_proto_dot_exec__pb2.StartRunRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_exec__pb2.StartRunResponse.FromString,
                 )
+        self.FetchLogs = channel.unary_unary(
+                '/flwr.proto.Exec/FetchLogs',
+                request_serializer=flwr_dot_proto_dot_exec__pb2.FetchLogsRequest.SerializeToString,
+                response_deserializer=flwr_dot_proto_dot_exec__pb2.FetchLogsResponse.FromString,
+                )
 
 
 class ExecServicer(object):
@@ -31,6 +36,13 @@ class ExecServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def FetchLogs(self, request, context):
+        """Start log stream upon request
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ExecServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -38,6 +50,11 @@ def add_ExecServicer_to_server(servicer, server):
                     servicer.StartRun,
                     request_deserializer=flwr_dot_proto_dot_exec__pb2.StartRunRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_exec__pb2.StartRunResponse.SerializeToString,
+            ),
+            'FetchLogs': grpc.unary_unary_rpc_method_handler(
+                    servicer.FetchLogs,
+                    request_deserializer=flwr_dot_proto_dot_exec__pb2.FetchLogsRequest.FromString,
+                    response_serializer=flwr_dot_proto_dot_exec__pb2.FetchLogsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -63,5 +80,22 @@ class Exec(object):
         return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/StartRun',
             flwr_dot_proto_dot_exec__pb2.StartRunRequest.SerializeToString,
             flwr_dot_proto_dot_exec__pb2.StartRunResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def FetchLogs(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/FetchLogs',
+            flwr_dot_proto_dot_exec__pb2.FetchLogsRequest.SerializeToString,
+            flwr_dot_proto_dot_exec__pb2.FetchLogsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

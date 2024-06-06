@@ -26,6 +26,8 @@ from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
     StartRunResponse,
+    FetchLogsRequest,
+    FetchLogsResponse,
 )
 
 from .executor import Executor
@@ -46,3 +48,23 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         run = self.plugin.start_run(request.fab_file)
         self.runs[run.run_id] = run.proc
         return StartRunResponse(run_id=run.run_id)
+
+    def FetchLogs(
+        self, request: FetchLogsRequest, context: grpc.ServicerContext
+    ) -> FetchLogsResponse:
+        """Get logs."""
+        log(INFO, "ExecServicer.FetchLogs")
+        log_output = "lorem ipsum"
+        proc = self.runs[request.run_id]
+
+        def stream_output(proc):
+            output = proc.stdout.readline()
+            if output == "" and proc.poll() is not None:
+                pass
+            if output:
+                print(f"Run {10} output: {output.strip()}")
+            rc = proc.poll()
+            return output.strip()
+
+        log_output = stream_output(proc) 
+        return FetchLogsResponse(log_output=log_output)
