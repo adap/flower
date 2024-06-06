@@ -14,10 +14,12 @@
 # ==============================================================================
 """Flower driver service."""
 
-from .exec_grpc import run_superexec_api_grpc
-from .test_executor import TestExec
+from .app import run_superexec as run_superexec
+from .exec_grpc import run_superexec_api_grpc as run_superexec_api_grpc
+from .test_executor import TestExec as TestExec
 
 __all__ = [
     "run_superexec_api_grpc",
-    "TestExecutor",
+    "run_superexec",
+    "TestExec",
 ]

@@ -36,49 +36,86 @@ def run(
         Optional[Engine],
         typer.Option(case_sensitive=False, help="The ML framework to use"),
     ] = None,
+    use_superexec: Annotated[
+        bool,
+        typer.Option(
+            case_sensitive=False, help="Use this flag to use the new SuperExec API"
+        ),
+    ] = False,
 ) -> None:
     """Run Flower project."""
-    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
+    if use_superexec:
 
-    config, errors, warnings = config_utils.load_and_validate()
+        from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 
-    if config is None:
-        typer.secho(
-            "Project configuration could not be loaded.\npyproject.toml is invalid:\n"
-            + "\n".join([f"- {line}" for line in errors]),
-            fg=typer.colors.RED,
-            bold=True,
+        from logging import DEBUG
+        from flwr.common.logger import log
+        from flwr.proto.exec_pb2 import StartRunRequest
+        from flwr.proto.exec_pb2_grpc import ExecStub
+
+        def on_channel_state_change(channel_connectivity: str) -> None:
+            """Log channel connectivity."""
+            log(DEBUG, channel_connectivity)
+
+        channel = create_channel(
+            server_address="127.0.0.1:9093",
+            insecure=True,
+            root_certificates=None,
+            max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+            interceptors=None,
         )
-        sys.exit()
+        channel.subscribe(on_channel_state_change)
+        stub = ExecStub(channel)
 
-    if warnings:
-        typer.secho(
-            "Project configuration is missing the following "
-            "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-
-    typer.secho("Success", fg=typer.colors.GREEN)
-
-    server_app_ref = config["flower"]["components"]["serverapp"]
-    client_app_ref = config["flower"]["components"]["clientapp"]
-
-    if engine is None:
-        engine = config["flower"]["engine"]["name"]
-
-    if engine == Engine.SIMULATION:
-        num_supernodes = config["flower"]["engine"]["simulation"]["supernode"]["num"]
-
-        typer.secho("Starting run... ", fg=typer.colors.BLUE)
-        _run_simulation(
-            server_app_attr=server_app_ref,
-            client_app_attr=client_app_ref,
-            num_supernodes=num_supernodes,
-        )
+        req = StartRunRequest()
+        res = stub.StartRun(req)
+        print(res)
     else:
-        typer.secho(
-            f"Engine '{engine}' is not yet supported in `flwr run`",
-            fg=typer.colors.RED,
-            bold=True,
-        )
+        typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
+
+        config, errors, warnings = config_utils.load_and_validate()
+
+        if config is None:
+            typer.secho(
+                "Project configuration could not be loaded.\n"
+                "pyproject.toml is invalid:\n"
+                + "\n".join([f"- {line}" for line in errors]),
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            sys.exit()
+
+        if warnings:
+            typer.secho(
+                "Project configuration is missing the following "
+                "recommended properties:\n"
+                + "\n".join([f"- {line}" for line in warnings]),
+                fg=typer.colors.RED,
+                bold=True,
+            )
+
+        typer.secho("Success", fg=typer.colors.GREEN)
+
+        server_app_ref = config["flower"]["components"]["serverapp"]
+        client_app_ref = config["flower"]["components"]["clientapp"]
+
+        if engine is None:
+            engine = config["flower"]["engine"]["name"]
+
+        if engine == Engine.SIMULATION:
+            num_supernodes = config["flower"]["engine"]["simulation"]["supernode"][
+                "num"
+            ]
+
+            typer.secho("Starting run... ", fg=typer.colors.BLUE)
+            _run_simulation(
+                server_app_attr=server_app_ref,
+                client_app_attr=client_app_ref,
+                num_supernodes=num_supernodes,
+            )
+        else:
+            typer.secho(
+                f"Engine '{engine}' is not yet supported in `flwr run`",
+                fg=typer.colors.RED,
+                bold=True,
+            )

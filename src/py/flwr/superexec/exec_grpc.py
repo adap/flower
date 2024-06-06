@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Driver gRPC API."""
+"""SuperExec gRPC API."""
 
 from logging import INFO
 from typing import Optional, Tuple
@@ -32,7 +32,7 @@ def run_superexec_api_grpc(
     plugin: Executor,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
-    """Run Driver API (gRPC, request-response)."""
+    """Run SuperExec API (gRPC, request-response)."""
     # Create Driver API gRPC server
     exec_servicer: grpc.Server = ExecServicer(
         plugin=plugin,
