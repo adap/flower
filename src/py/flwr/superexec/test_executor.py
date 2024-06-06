@@ -13,7 +13,7 @@ class TestExec(Executor):
         """Echos success."""
         _ = fab_file
         _ = ttl
-        return Run(run_id=10, proc=subprocess.Popen(["echo", "success"]))
+        return Run(run_id=10, proc=subprocess.Popen(["echo", "success"], text=True))
 
 
 exec = TestExec()

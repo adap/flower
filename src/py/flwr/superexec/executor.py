@@ -14,11 +14,10 @@
 # ==============================================================================
 """Executes and monitor a Flower run."""
 
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from subprocess import Popen
+from typing import Optional
 
 
 @dataclass
@@ -26,7 +25,7 @@ class Run:
     """Represents a Flower run (composed of a run_id and the associated process)."""
 
     run_id: int
-    proc: Popen
+    proc: Popen[str]
 
 
 class Executor(ABC):
@@ -36,7 +35,7 @@ class Executor(ABC):
     def start_run(
         self,
         fab_file: bytes,
-        ttl: float | None = None,
+        ttl: Optional[float] = None,
     ) -> Run:
         """Start a run using the given Flower App ID and version.
 
