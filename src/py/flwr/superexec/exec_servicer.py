@@ -36,7 +36,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
     def __init__(self, plugin: Executor) -> None:
         self.plugin = plugin
-        self.runs: Dict[int, Popen[str]] = {}  # pylint: disable=E1136
+        self.runs: Dict[int, Popen] = {}
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
