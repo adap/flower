@@ -11,7 +11,7 @@ Each LLM task within this directory is completely self-contained, with its sourc
 The task subdirectories contain the following structure:
 
 ```bash
-llm-flowertune/<task-name>/
+flowertune-llm-leaderboard/<task-name>/
                  ├── README.md
                  ├── main.py         # <- Flower ClientApp/ServerApp build
                  ├── client.py       # <- Flower client constructor
