@@ -15,9 +15,9 @@
 """Utility to validate the `pyproject.toml` file."""
 
 import zipfile
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, IO
 from io import BytesIO
+from pathlib import Path
+from typing import IO, Any, Dict, List, Optional, Tuple, Union
 
 import tomli
 
