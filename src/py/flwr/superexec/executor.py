@@ -17,9 +17,10 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from subprocess import Popen
-from typing import Optional
+from typing import NewType, Optional
 
-type Process = "Popen[str]"
+Process = NewType("Process", "Popen[str]")
+
 
 @dataclass
 class Run:
