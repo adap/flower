@@ -219,7 +219,7 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
         self.addAsyncCleanup(self.on_cleanup)
 
     def test_backend_creation_with_init_arguments(self) -> None:
-        """Testing whether init args are properly parsed to Ray"""
+        """Testing whether init args are properly parsed to Ray."""
 
         backend_config_4: BackendConfig = {
             "init_args": {"num_cpus": 4},
