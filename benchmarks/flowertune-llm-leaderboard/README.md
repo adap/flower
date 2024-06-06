@@ -2,7 +2,7 @@
 
 # FlowerTune LLM Leaderboard
 
-This repository guides you through the process of federated LLM instruction tuning with pre-trained [LLama2](https://huggingface.co/mistralai/Mistral-7B-v0.3) models across various tasks.
+This repository guides you through the process of federated LLM instruction tuning with a pre-trained [Mistral-7B](https://huggingface.co/mistralai/Mistral-7B-v0.3) models across various tasks.
 Please follow the instructions to run baseline tasks and create your own projects.
 
 
