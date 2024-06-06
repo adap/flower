@@ -40,6 +40,4 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
         run = self.plugin.start_run(request.fab_file)
-        output, _ = run.proc.communicate()
-        print("OUTPUT:", output.decode("utf-8"))
         return StartRunResponse(run_id=run.run_id)

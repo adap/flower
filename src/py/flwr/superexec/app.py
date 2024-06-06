@@ -89,6 +89,11 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
         default="0.0.0.0:9093",
     )
     parser.add_argument(
+        "--dir",
+        help="The directory for the plugin.",
+        default=".",
+    )
+    parser.add_argument(
         "--insecure",
         action="store_true",
         help="Run the server without HTTPS, regardless of whether certificate "
