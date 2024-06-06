@@ -30,6 +30,7 @@ attribute.
 
 def validate(
     module_attribute_str: str,
+    check_module: bool = True,
 ) -> Tuple[bool, Optional[str]]:
     """Validate object reference.
 
@@ -56,16 +57,19 @@ def validate(
             f"Missing attribute in {module_attribute_str}{OBJECT_REF_HELP_STR}",
         )
 
-    # Load module
-    # module = find_spec(module_str)
-    # if module and module.origin:
-    #     if not _find_attribute_in_module(module.origin, attributes_str):
-    #         return (
-    #             False,
-    #             f"Unable to find attribute {attributes_str} in module {module_str}"
-    #             f"{OBJECT_REF_HELP_STR}",
-    #         )
-    return (True, None)
+    if check_module:
+        # Load module
+        module = find_spec(module_str)
+        if module and module.origin:
+            if not _find_attribute_in_module(module.origin, attributes_str):
+                return (
+                    False,
+                    f"Unable to find attribute {attributes_str} in module {module_str}"
+                    f"{OBJECT_REF_HELP_STR}",
+                )
+            return (True, None)
+    else:
+        return (True, None)
 
     return (
         False,
