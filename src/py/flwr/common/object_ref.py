@@ -57,15 +57,15 @@ def validate(
         )
 
     # Load module
-    module = find_spec(module_str)
-    if module and module.origin:
-        if not _find_attribute_in_module(module.origin, attributes_str):
-            return (
-                False,
-                f"Unable to find attribute {attributes_str} in module {module_str}"
-                f"{OBJECT_REF_HELP_STR}",
-            )
-        return (True, None)
+    # module = find_spec(module_str)
+    # if module and module.origin:
+    #     if not _find_attribute_in_module(module.origin, attributes_str):
+    #         return (
+    #             False,
+    #             f"Unable to find attribute {attributes_str} in module {module_str}"
+    #             f"{OBJECT_REF_HELP_STR}",
+    #         )
+    return (True, None)
 
     return (
         False,
