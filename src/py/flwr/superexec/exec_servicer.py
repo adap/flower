@@ -15,7 +15,9 @@
 """SuperExec API servicer."""
 
 
+import subprocess
 from logging import INFO
+from typing import Dict
 
 import grpc
 
@@ -34,6 +36,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
     def __init__(self, plugin: Executor) -> None:
         self.plugin = plugin
+        self.runs: Dict[int, subprocess.Popen[str]] = {}
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
@@ -41,4 +44,5 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
         run = self.plugin.start_run(request.fab_file)
+        self.runs[run.run_id] = run.proc
         return StartRunResponse(run_id=run.run_id)
