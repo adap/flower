@@ -17,9 +17,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from subprocess import Popen
-from typing import NewType, Optional
-
-Process = NewType("Process", "Popen[str]")
+from typing import Optional
 
 
 @dataclass
@@ -27,7 +25,7 @@ class Run:
     """Represents a Flower run (composed of a run_id and the associated process)."""
 
     run_id: int
-    proc: Process
+    proc: Popen[str]  # pylint: disable=E1136
 
 
 class Executor(ABC):
