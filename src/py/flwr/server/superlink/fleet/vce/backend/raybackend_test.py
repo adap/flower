@@ -220,7 +220,6 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
 
     def test_backend_creation_with_init_arguments(self) -> None:
         """Testing whether init args are properly parsed to Ray."""
-
         backend_config_4: BackendConfig = {
             "init_args": {"num_cpus": 4},
             "client_resources": {"num_cpus": 1, "num_gpus": 0},
