@@ -48,14 +48,14 @@ def run_superexec() -> None:
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
 
-    # Start Driver API
-    driver_server: grpc.Server = run_superexec_api_grpc(
+    # Start SuperExec API
+    superexec_server: grpc.Server = run_superexec_api_grpc(
         address=address,
         plugin=_get_exec_plugin(args),
         certificates=certificates,
     )
 
-    grpc_servers = [driver_server]
+    grpc_servers = [superexec_server]
     bckg_threads = []
 
     # Graceful shutdown
@@ -71,7 +71,7 @@ def run_superexec() -> None:
             for thread in bckg_threads:
                 if not thread.is_alive():
                     sys.exit(1)
-        driver_server.wait_for_termination(timeout=1)
+        superexec_server.wait_for_termination(timeout=1)
 
 
 def _parse_args_run_superexec() -> argparse.ArgumentParser:
