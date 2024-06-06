@@ -25,7 +25,7 @@ class Run:
     """Represents a Flower run (composed of a run_id and the associated process)."""
 
     run_id: int
-    proc: Popen
+    proc: Popen  # type: ignore
 
 
 class Executor(ABC):
