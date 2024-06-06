@@ -40,6 +40,8 @@ from flwr.common.object_ref import load_app
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
 
+from .backend import BackendConfig
+
 
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
@@ -215,3 +217,34 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
                 workdir="/?&%$^#%@$!",
             )
         self.addAsyncCleanup(self.on_cleanup)
+
+    def test_backend_creation_with_init_arguments(self) -> None:
+        """Testing whether init args are properly parsed to Ray"""
+
+        backend_config_4: BackendConfig = {
+            "init_args": {"num_cpus": 4},
+            "client_resources": {"num_cpus": 1, "num_gpus": 0},
+        }
+
+        backend_config_2: BackendConfig = {
+            "init_args": {"num_cpus": 2},
+            "client_resources": {"num_cpus": 1, "num_gpus": 0},
+        }
+
+        RayBackend(
+            backend_config=backend_config_4,
+            work_dir="",
+        )
+        nodes = ray.nodes()
+
+        assert nodes[0]["Resources"]["CPU"] == backend_config_4["init_args"]["num_cpus"]
+
+        ray.shutdown()
+
+        RayBackend(
+            backend_config=backend_config_2,
+            work_dir="",
+        )
+        nodes = ray.nodes()
+
+        assert nodes[0]["Resources"]["CPU"] == backend_config_2["init_args"]["num_cpus"]

@@ -16,7 +16,7 @@
 
 import pathlib
 from logging import DEBUG, ERROR, WARNING
-from typing import Any, Callable, Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 import ray
 
@@ -24,15 +24,14 @@ from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
-from flwr.simulation.ray_transport.ray_actor import (
-    BasicActorPool,
-    ClientAppActor,
-)
+from flwr.common.typing import ConfigsRecordValues
+from flwr.simulation.ray_transport.ray_actor import BasicActorPool, ClientAppActor
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
 from .backend import Backend, BackendConfig
 
 ClientResourcesDict = Dict[str, Union[int, float]]
+RunTimeEnvDict = Dict[str, Union[str, List[str]]]
 
 
 class RayBackend(Backend):
@@ -50,42 +49,29 @@ class RayBackend(Backend):
         if not pathlib.Path(work_dir).exists():
             raise ValueError(f"Specified work_dir {work_dir} does not exist.")
 
-        # Init ray and append working dir if needed
-        runtime_env = (
-            self._configure_runtime_env(work_dir=work_dir) if work_dir else None
-        )
-
-        if backend_config.get("mute_logging", False):
-            self.init_ray(
-                logging_level=WARNING, log_to_driver=False, runtime_env=runtime_env
-            )
-        elif backend_config.get("silent", False):
-            self.init_ray(
-                logging_level=WARNING, log_to_driver=True, runtime_env=runtime_env
-            )
-        else:
-            self.init_ray(runtime_env=runtime_env)
+        # Initialise ray
+        self.init_ray(backend_config, work_dir)
 
         # Validate client resources
         self.client_resources_key = "client_resources"
+        client_resources = self._validate_client_resources(config=backend_config)
 
         # Create actor pool
         use_tf = backend_config.get("tensorflow", False)
         actor_kwargs = {"on_actor_init_fn": enable_tf_gpu_growth} if use_tf else {}
 
-        client_resources = self._validate_client_resources(config=backend_config)
         self.pool = BasicActorPool(
             actor_type=ClientAppActor,
             client_resources=client_resources,
             actor_kwargs=actor_kwargs,
         )
 
-    def _configure_runtime_env(self, work_dir: str) -> Dict[str, Union[str, List[str]]]:
+    def _configure_runtime_env(self, work_dir: str) -> RunTimeEnvDict:
         """Return list of files/subdirectories to exclude relative to work_dir.
 
         Without this, Ray will push everything to the Ray Cluster.
         """
-        runtime_env: Dict[str, Union[str, List[str]]] = {"working_dir": work_dir}
+        runtime_env: RunTimeEnvDict = {"working_dir": work_dir}
 
         excludes = []
         path = pathlib.Path(work_dir)
@@ -126,10 +112,36 @@ class RayBackend(Backend):
 
         return client_resources
 
-    def init_ray(self, *args: Any, **kwargs: Any) -> None:
+    def init_ray(self, backend_config: BackendConfig, work_dir: str) -> None:
         """Intialises Ray if not already initialised."""
         if not ray.is_initialized():
-            ray.init(*args, **kwargs)
+            # Init ray and append working dir if needed
+            runtime_env = (
+                self._configure_runtime_env(work_dir=work_dir) if work_dir else None
+            )
+
+            ray_init_args: Dict[
+                str,
+                Union[ConfigsRecordValues, RunTimeEnvDict],
+            ] = {}
+
+            if runtime_env is not None:
+                ray_init_args["runtime_env"] = runtime_env
+
+            # Backwards compatibility: certain settings were previously
+            # set based on certain keywords in backend config
+            if backend_config.get("mute_logging", False):
+                backend_config["init_args"]["logging_level"] = WARNING
+                backend_config["init_args"]["log_to_driver"] = False
+            elif backend_config.get("silent", False):
+                backend_config["init_args"]["logging_level"] = WARNING
+                backend_config["init_args"]["log_to_driver"] = True
+
+            if backend_config.get("init_args", False):
+                for k, v in backend_config["init_args"].items():
+                    ray_init_args[k] = v
+
+            ray.init(**ray_init_args)
 
     @property
     def num_workers(self) -> int:
@@ -158,7 +170,7 @@ class RayBackend(Backend):
         partition_id = message.metadata.partition_id
 
         try:
-            # Submite a task to the pool
+            # Submit a task to the pool
             future = await self.pool.submit(
                 lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
                 (app, message, str(partition_id), context),
