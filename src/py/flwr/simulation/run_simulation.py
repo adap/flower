@@ -22,16 +22,16 @@ import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
 from time import sleep
-from typing import Dict, Optional
+from typing import Optional
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.logger import set_logger_propagation, update_console_handler
-from flwr.common.typing import ConfigsRecordValues
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
+from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.server.superlink.state import StateFactory
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
@@ -65,7 +65,7 @@ def run_simulation(
     client_app: ClientApp,
     num_supernodes: int,
     backend_name: str = "ray",
-    backend_config: Optional[Dict[str, ConfigsRecordValues]] = None,
+    backend_config: Optional[BackendConfig] = None,
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
 ) -> None:
@@ -240,7 +240,7 @@ def _run_simulation(
     client_app: Optional[ClientApp] = None,
     server_app: Optional[ServerApp] = None,
     backend_name: str = "ray",
-    backend_config: Optional[Dict[str, ConfigsRecordValues]] = None,
+    backend_config: Optional[BackendConfig] = None,
     client_app_attr: Optional[str] = None,
     server_app_attr: Optional[str] = None,
     app_dir: str = "",
@@ -297,6 +297,7 @@ def _run_simulation(
     """
     if backend_config is None:
         backend_config = {}
+        backend_config["init_args"] = {}
 
     # Set logging level
     logger = logging.getLogger("flwr")
@@ -304,14 +305,14 @@ def _run_simulation(
         update_console_handler(level=DEBUG, timestamps=True, colored=True)
     else:
         backend_config["init_args"]["logging_level"] = WARNING
-        backend_config["init_args"]["log_to_driver"] = WARNING
+        backend_config["init_args"]["log_to_driver"] = False
 
     if enable_tf_gpu_growth:
         # Check that Backend config has also enabled using GPU growth
         use_tf = backend_config.get("tensorflow", False)
         if not use_tf:
             log(WARNING, "Enabling GPU growth for your backend.")
-            backend_config["tensorflow"] = True
+            backend_config["actor"]["tensorflow"] = True
 
     # Convert config to original JSON-stream format
     backend_config_stream = json.dumps(backend_config)

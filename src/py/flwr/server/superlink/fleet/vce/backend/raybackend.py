@@ -31,6 +31,7 @@ from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 from .backend import Backend, BackendConfig
 
 ClientResourcesDict = Dict[str, Union[int, float]]
+ActorArgsDict = Dict[str, Union[int, float, Callable[[], None]]]
 RunTimeEnvDict = Dict[str, Union[str, List[str]]]
 
 
@@ -57,8 +58,7 @@ class RayBackend(Backend):
         client_resources = self._validate_client_resources(config=backend_config)
 
         # Create actor pool
-        use_tf = backend_config.get("tensorflow", False)
-        actor_kwargs = {"on_actor_init_fn": enable_tf_gpu_growth} if use_tf else {}
+        actor_kwargs = self._validate_actor_arguments(config=backend_config)
 
         self.pool = BasicActorPool(
             actor_type=ClientAppActor,
@@ -111,6 +111,15 @@ class RayBackend(Backend):
             )
 
         return client_resources
+
+    def _validate_actor_arguments(self, config: BackendConfig) -> ActorArgsDict:
+        actor_args_config = config.get("actor", False)
+        actor_args: ActorArgsDict = {}
+        if actor_args_config:
+            use_tf = actor_args.get("tensorflow", False)
+            if use_tf:
+                actor_args["on_actor_init_fn"] = enable_tf_gpu_growth
+        return actor_args
 
     def init_ray(self, backend_config: BackendConfig, work_dir: str) -> None:
         """Intialises Ray if not already initialised."""
