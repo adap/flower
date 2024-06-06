@@ -16,12 +16,17 @@
 
 import sys
 from enum import Enum
+from logging import DEBUG
 from typing import Optional
 
 import typer
 from typing_extensions import Annotated
 
 from flwr.cli import config_utils
+from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
+from flwr.common.logger import log
+from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
+from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
 
 
@@ -31,6 +36,7 @@ class Engine(str, Enum):
     SIMULATION = "simulation"
 
 
+# pylint: disable-next=too-many-locals
 def run(
     engine: Annotated[
         Optional[Engine],
@@ -45,13 +51,6 @@ def run(
 ) -> None:
     """Run Flower project."""
     if use_superexec:
-
-        from logging import DEBUG
-
-        from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-        from flwr.common.logger import log
-        from flwr.proto.exec_pb2 import StartRunRequest
-        from flwr.proto.exec_pb2_grpc import ExecStub
 
         def on_channel_state_change(channel_connectivity: str) -> None:
             """Log channel connectivity."""

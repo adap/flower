@@ -24,4 +24,4 @@ class TestExec(Executor):
         )
 
 
-exec = TestExec()
+exec_plugin = TestExec()
