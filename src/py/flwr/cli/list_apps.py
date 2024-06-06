@@ -59,10 +59,10 @@ def list_apps(
 
             if conf is None:
                 continue
-            else:
-                typer.secho(
-                    f"\t * {username_dir.name}/{app_dir.name}"
-                    f"{' (' + ', '.join(v_list) + ')' if versions else ''}",
-                    fg=typer.colors.GREEN,
-                    bold=True,
-                )
+
+            typer.secho(
+                f"\t * {username_dir.name}/{app_dir.name}"
+                f"{' (' + ', '.join(v_list) + ')' if versions else ''}",
+                fg=typer.colors.GREEN,
+                bold=True,
+            )
