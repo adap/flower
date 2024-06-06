@@ -19,7 +19,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from subprocess import Popen
-from typing import Optional
 
 
 @dataclass
@@ -37,7 +36,7 @@ class Executor(ABC):
     def start_run(
         self,
         fab_file: bytes,
-        ttl: Optional[float] = None,
+        ttl: float | None = None,
     ) -> Run:
         """Start a run using the given Flower App ID and version.
 

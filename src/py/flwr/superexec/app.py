@@ -18,7 +18,7 @@ import argparse
 import sys
 from logging import INFO, WARN
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 import grpc
 
