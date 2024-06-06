@@ -18,9 +18,9 @@ import typer
 
 from .build import build
 from .example import example
+from .list_apps import list_apps
 from .new import new
 from .run import run
-from .list_apps import list_apps
 
 app = typer.Typer(
     help=typer.style(
