@@ -12,7 +12,7 @@ authors = [
 dependencies = [
     "flwr[simulation] @ {root:parent:parent:uri}",
     "fastai>=2.7.12,<3.0.0",
-    "torch>=2.0.0,!=2.0.1,<2.1.0",
+    "torch>=2.0.0,!=2.0.1,<2.4.0",
 ]
 
 [tool.hatch.build.targets.wheel]
