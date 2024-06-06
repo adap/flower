@@ -38,9 +38,8 @@ from flwr.common import (
 )
 from flwr.common.object_ref import load_app
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
+from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
-
-from .backend import BackendConfig
 
 
 class DummyClient(NumPyClient):
@@ -247,3 +246,5 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
         nodes = ray.nodes()
 
         assert nodes[0]["Resources"]["CPU"] == backend_config_2["init_args"]["num_cpus"]
+
+        self.addAsyncCleanup(self.on_cleanup)
