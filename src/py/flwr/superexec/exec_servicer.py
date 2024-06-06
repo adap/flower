@@ -15,8 +15,8 @@
 """SuperExec API servicer."""
 
 
-import subprocess
 from logging import INFO
+from subprocess import Popen
 from typing import Dict
 
 import grpc
@@ -28,7 +28,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunResponse,
 )
 
-from .executor import Executor
+from .executor import Executor, Process
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
@@ -36,7 +36,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
     def __init__(self, plugin: Executor) -> None:
         self.plugin = plugin
-        self.runs: Dict[int, subprocess.Popen[str]] = {}
+        self.runs: Dict[int, Process] = {}
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext

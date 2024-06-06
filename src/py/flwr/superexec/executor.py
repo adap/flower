@@ -19,13 +19,14 @@ from dataclasses import dataclass
 from subprocess import Popen
 from typing import Optional
 
+type Process = "Popen[str]"
 
 @dataclass
 class Run:
     """Represents a Flower run (composed of a run_id and the associated process)."""
 
     run_id: int
-    proc: "Popen[str]"
+    proc: Process
 
 
 class Executor(ABC):
