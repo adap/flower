@@ -18,7 +18,7 @@ import argparse
 import sys
 from logging import INFO, WARN
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import grpc
 
@@ -57,21 +57,16 @@ def run_superexec() -> None:
     )
 
     grpc_servers = [superexec_server]
-    bckg_threads = []
 
     # Graceful shutdown
     register_exit_handlers(
         event_type=EventType.RUN_SUPEREXEC_ENTER,
         grpc_servers=grpc_servers,
-        bckg_threads=bckg_threads,
+        bckg_threads=None,
     )
 
     # Block
     while True:
-        if bckg_threads:
-            for thread in bckg_threads:
-                if not thread.is_alive():
-                    sys.exit(1)
         superexec_server.wait_for_termination(timeout=1)
 
 
