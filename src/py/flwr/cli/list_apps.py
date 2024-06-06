@@ -25,6 +25,10 @@ from .config_utils import load_and_validate
 
 # pylint: disable=too-many-locals
 def list_apps(
+    versions: Annotated[
+        bool,
+        typer.Option(help="Whether or not to display the available versions."),
+    ] = False,
     flwr_dir: Annotated[
         Optional[Path],
         typer.Option(help="The Flower directory, `$HOME/.flwr/` by default."),
@@ -42,12 +46,23 @@ def list_apps(
 
     for username_dir in (flwr_dir / "apps").iterdir():
         for app_dir in username_dir.iterdir():
-            conf, _, _ = load_and_validate(next(app_dir.iterdir()) / "pyproject.toml")
+            conf = None
+            v_list = []
+            if versions:
+                for v_app in app_dir.iterdir():
+                    conf, _, _ = load_and_validate(v_app / "pyproject.toml")
+                    v_list.append(v_app.name)
+            else:
+                conf, _, _ = load_and_validate(
+                    next(app_dir.iterdir()) / "pyproject.toml"
+                )
+
             if conf is None:
                 continue
             else:
                 typer.secho(
-                    f"\t * {username_dir.name}/{app_dir.name}",
+                    f"\t * {username_dir.name}/{app_dir.name}"
+                    f"{' (' + ', '.join(v_list) + ')' if versions else ''}",
                     fg=typer.colors.GREEN,
                     bold=True,
                 )
