@@ -16,7 +16,6 @@
 
 
 from logging import INFO
-from subprocess import Popen
 from typing import Dict
 
 import grpc
