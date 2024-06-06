@@ -1,7 +1,8 @@
 """Test module for executor."""
 
-from .executor import Executor, Run
 import subprocess
+
+from .executor import Executor, Run
 
 
 class TestExec(Executor):

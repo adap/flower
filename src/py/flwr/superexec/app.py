@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 import grpc
+
 from flwr.common import EventType, event, log
 from flwr.common.address import parse_address
 from flwr.common.exit_handlers import register_exit_handlers

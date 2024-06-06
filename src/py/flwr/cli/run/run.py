@@ -46,9 +46,9 @@ def run(
     """Run Flower project."""
     if use_superexec:
 
-        from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-
         from logging import DEBUG
+
+        from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
         from flwr.common.logger import log
         from flwr.proto.exec_pb2 import StartRunRequest
         from flwr.proto.exec_pb2_grpc import ExecStub
