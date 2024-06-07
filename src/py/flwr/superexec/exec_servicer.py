@@ -17,7 +17,6 @@
 
 from logging import INFO
 from subprocess import Popen
-from typing import Dict
 from typing import Dict, Generator, Any
 
 import grpc
@@ -58,7 +57,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         proc = self.runs[request.run_id]
 
         try:
-            for line in iter(proc.stdout.readline, ''):
+            for line in iter(proc.stdout.readline, ""):
                 if context.is_active():
                     yield FetchLogsResponse(log_output=line.strip())
                 else:

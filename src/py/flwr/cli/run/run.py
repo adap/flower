@@ -28,7 +28,10 @@ from flwr.cli import config_utils
 from flwr.cli.build import build
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
+from flwr.proto.exec_pb2 import (
+    StartRunRequest,
+    FetchLogsRequest,
+)  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
 
@@ -59,11 +62,8 @@ def run(
     ] = None,
     follow: Annotated[
         bool,
-        typer.Option(
-            case_sensitive=False, help="Use this flag to stream logs"
-        ),
+        typer.Option(case_sensitive=False, help="Use this flag to stream logs"),
     ] = False,
-
 ) -> None:
     """Run Flower project."""
     if use_superexec:
