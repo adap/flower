@@ -152,7 +152,7 @@ class FMnistClient(fl.client.NumPyClient):
         return (
             get_params(self.net),
             len(trainloader.dataset),
-            {"cid": self.cid},
+            {"cid": self.cid, "malicious": config["malicious"]},
         )
 
     def evaluate(self, parameters, config):

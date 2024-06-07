@@ -88,7 +88,7 @@ def main(cfg: DictConfig) -> None:
     num_malicious = cfg.server.num_malicious
 
     # 2. Prepare your dataset
-    if dataset_name in ["mnist", "fmnist", "cifar"]:
+    if dataset_name in ["mnist", "fmnist"]:
         if dataset_name == "mnist":
             train_path, _ = get_mnist()
         elif dataset_name == "fmnist":
@@ -108,7 +108,7 @@ def main(cfg: DictConfig) -> None:
     # pylint: disable=no-else-return
     def client_fn(cid: str, dataset_name: str = dataset_name):
         client = clients[dataset_name][0]
-        if dataset_name in ["mnist", "fmnist", "cifar", "cifar100"]:
+        if dataset_name in ["mnist", "fmnist"]:
             return client(cid, fed_dir)
         else:
             raise ValueError("Dataset not supported")

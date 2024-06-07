@@ -117,7 +117,7 @@ def create_partitions(
 ) -> XYList:
     """Create partitioned version of a training or test set.
 
-    Currently tested and supported are MNIST, FashionMNIST and CIFAR-10/100
+    Currently tested and supported are MNIST and FashionMNIST
     """
     x, y = unpartitioned_dataset
 
@@ -145,7 +145,7 @@ def create_partitioned_dataset(
 ) -> Tuple[PartitionedDataset, XY]:
     """Create partitioned version of keras dataset.
 
-    Currently tested and supported are MNIST, FashionMNIST and CIFAR-10/100
+    Currently tested and supported are MNIST and FashionMNIST
     """
     xy_train, xy_test = keras_dataset
 
