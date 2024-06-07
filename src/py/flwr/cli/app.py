@@ -20,6 +20,7 @@ from .build import build
 from .example import example
 from .new import new
 from .run import run
+from .log import log
 
 app = typer.Typer(
     help=typer.style(
@@ -34,6 +35,7 @@ app.command()(new)
 app.command()(example)
 app.command()(run)
 app.command()(build)
+app.command()(log)
 
 if __name__ == "__main__":
     app()
