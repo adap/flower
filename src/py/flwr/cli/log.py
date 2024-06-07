@@ -50,19 +50,6 @@ def log(
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    # start_position = 0  # Initially start from the beginning
-    # try:
-    #     with open("/Users/csng/.flwr/log_position.txt", "r") as f:
-    #         start_position = int(f.read().strip())
-    # except FileNotFoundError:
-    #     pass
-
-    # for res in stub.FetchLogs(req):
-    #     print(res.log_output)
-    #     # Update the start position
-    #     with open("/Users/csng/.flwr/log_position.txt", "w+") as f:
-    #         f.write(str(res.position))
-
     req = FetchLogsRequest(run_id=run_id)
 
     for res in stub.FetchLogs(req):

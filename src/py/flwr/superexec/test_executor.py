@@ -16,7 +16,7 @@ class TestExec(Executor):
         return Run(
             run_id=10,
             proc=subprocess.Popen(
-                ["sh", "-c", "for i in {1..5}; do echo $i && fortune | cowsay ; sleep 2; done"],
+                ["sh", "-c", "for i in {1..50}; do echo $i && fortune | cowsay ; sleep 2; done"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
