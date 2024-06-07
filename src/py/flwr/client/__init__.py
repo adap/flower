@@ -33,4 +33,5 @@ __all__ = [
     "run_supernode",
     "start_client",
     "start_numpy_client",
+    "mod",
 ]
