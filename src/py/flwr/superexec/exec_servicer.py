@@ -22,6 +22,7 @@ from typing import Dict, Generator, Any
 import threading
 import grpc
 import time
+import select
 
 from flwr.common.logger import log
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
@@ -57,10 +58,14 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         return StartRunResponse(run_id=run.run_id)
 
     def _capture_logs(self, proc):
+        select_timeout = 1.0
         def run():
-            for line in iter(proc.stdout.readline, ''):
-                with self.lock:
-                    self.logs.append(line.rstrip())
+            while True:
+                reads, _, _ = select.select([proc.stdout], [], [], select_timeout)
+                if reads:
+                    line = proc.stdout.readline()
+                    if line:
+                        self.logs.append(line.rstrip())
 
         threading.Thread(target=run, daemon=True).start()
 
@@ -69,17 +74,6 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     ) -> Generator[FetchLogsResponse, Any, None]:
         """Get logs."""
         log(INFO, "ExecServicer.FetchLogs")
-        # proc = self.runs[request.run_id]
-
-        # try:
-        #     for line in iter(proc.stdout.readline, ''):
-        #         if context.is_active():
-        #             yield FetchLogsResponse(log_output=line.rstrip())
-        #         else:
-        #             break
-        # finally:
-        #     proc.stdout.close()
-        #     proc.kill()
 
         last_sent_index = 0
         while context.is_active():
