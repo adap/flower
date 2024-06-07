@@ -19,7 +19,7 @@ dataset: [MNIST, Income, CIFAR-10, California Housing]
 
 **Hardware Setup:** AMD Ryzen 9, 64 GB RAM, and an NVIDIA 4090 GPU with 24 GB VRAM.
 
-**Estimated time to run:** You can expect to run experiments on the given setup in 2m with MNIST and 1h30m with Fashion-MNIST. With an Apple M2 Pro, 16gb RAM; each experiment with 10 clients for **MNIST** runs in about 24 minutes. Note that experiments with OPT (fang) and AGR-MM (minmax) can be 10x slower.
+**Estimated time to run:** You can expect to run experiments on the given setup in 2m with *MNIST* and 1h30m with *Fashion-MNIST*. With an Apple M2 Pro, 16gb RAM; each experiment with 10 clients for MNIST runs in about 24 minutes. Note that experiments with OPT (fang) and AGR-MM (minmax) can be 10x slower.
 
 **Contributors:** Edoardo Gabrielli, Sapienza University of Rome ([GitHub](https://github.com/edogab33), [Scholar](https://scholar.google.com/citations?user=b3bePdYAAAAJ))
 
