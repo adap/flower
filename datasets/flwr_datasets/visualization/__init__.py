@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,20 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""This module contains functions related to proto compilation."""
+"""Visualization package."""
 
 
-from os import path
+from .comparison_label_distribution import plot_comparison_label_distribution
+from .label_distribution import plot_label_distributions
 
-from .protoc import IN_PATH, OUT_PATH, PROTO_FILES
-
-
-def test_directories() -> None:
-    """Test if all directories exist."""
-    assert path.isdir(IN_PATH)
-    assert path.isdir(OUT_PATH)
-
-
-def test_proto_file_count() -> None:
-    """Test if the correct number of proto files were captured by the glob."""
-    assert len(PROTO_FILES) == 8
+__all__ = [
+    "plot_label_distributions",
+    "plot_comparison_label_distribution",
+]
