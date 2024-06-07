@@ -57,4 +57,3 @@ def logs(
             print(res.log_output)
         else:
             break
-        
