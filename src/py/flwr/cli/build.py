@@ -34,7 +34,7 @@ def build(
         Optional[Path],
         typer.Option(help="The Flower project directory to bundle into a FAB"),
     ] = None,
-) -> None:
+) -> str:
     """Build a Flower project into a Flower App Bundle (FAB).
 
     You can run `flwr build` without any argument to bundle the current directory:
@@ -125,6 +125,8 @@ def build(
     typer.secho(
         f"🎊 Successfully built {fab_filename}.", fg=typer.colors.GREEN, bold=True
     )
+
+    return fab_filename
 
 
 def _get_sha256_hash(file_path: Path) -> str:

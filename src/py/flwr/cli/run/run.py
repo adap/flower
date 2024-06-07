@@ -14,15 +14,18 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
+from io import BytesIO
 import sys
 from enum import Enum
 from logging import DEBUG
+from pathlib import Path
 from typing import Optional
 
 import typer
 from typing_extensions import Annotated
 
 from flwr.cli import config_utils
+from flwr.cli.build import build
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
@@ -48,6 +51,12 @@ def run(
             case_sensitive=False, help="Use this flag to use the new SuperExec API"
         ),
     ] = False,
+    app_path: Annotated[
+        Optional[Path],
+        typer.Option(
+            case_sensitive=False, help="Use this flag to use the new SuperExec API"
+        ),
+    ] = None,
 ) -> None:
     """Run Flower project."""
     if use_superexec:
@@ -66,7 +75,9 @@ def run(
         channel.subscribe(on_channel_state_change)
         stub = ExecStub(channel)
 
-        req = StartRunRequest()
+        fab_path = build(app_path)
+
+        req = StartRunRequest(fab_file=open(fab_path, "rb").read())
         res = stub.StartRun(req)
         print(res)
     else:
