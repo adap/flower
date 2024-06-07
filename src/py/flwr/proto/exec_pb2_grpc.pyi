@@ -5,6 +5,7 @@ isort:skip_file
 import abc
 import flwr.proto.exec_pb2
 import grpc
+import typing
 
 class ExecStub:
     def __init__(self, channel: grpc.Channel) -> None: ...
@@ -12,6 +13,11 @@ class ExecStub:
         flwr.proto.exec_pb2.StartRunRequest,
         flwr.proto.exec_pb2.StartRunResponse]
     """Start run upon request"""
+
+    FetchLogs: grpc.UnaryStreamMultiCallable[
+        flwr.proto.exec_pb2.FetchLogsRequest,
+        flwr.proto.exec_pb2.FetchLogsResponse]
+    """Start log stream upon request"""
 
 
 class ExecServicer(metaclass=abc.ABCMeta):
@@ -21,6 +27,14 @@ class ExecServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.exec_pb2.StartRunResponse:
         """Start run upon request"""
+        pass
+
+    @abc.abstractmethod
+    def FetchLogs(self,
+        request: flwr.proto.exec_pb2.FetchLogsRequest,
+        context: grpc.ServicerContext,
+    ) -> typing.Iterator[flwr.proto.exec_pb2.FetchLogsResponse]:
+        """Start log stream upon request"""
         pass
 
 

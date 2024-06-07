@@ -18,6 +18,7 @@
 from logging import INFO
 from subprocess import Popen
 from typing import Dict
+from typing import Dict, Generator, Any
 
 import grpc
 
@@ -26,6 +27,8 @@ from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
     StartRunResponse,
+    FetchLogsRequest,
+    FetchLogsResponse,
 )
 
 from .executor import Executor
@@ -46,3 +49,20 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         run = self.plugin.start_run(request.fab_file)
         self.runs[run.run_id] = run.proc
         return StartRunResponse(run_id=run.run_id)
+
+    def FetchLogs(
+        self, request: FetchLogsRequest, context: grpc.ServicerContext
+    ) -> Generator[FetchLogsResponse, Any, None]:
+        """Get logs."""
+        log(INFO, "ExecServicer.FetchLogs")
+        proc = self.runs[request.run_id]
+
+        try:
+            for line in iter(proc.stdout.readline, ''):
+                if context.is_active():
+                    yield FetchLogsResponse(log_output=line.strip())
+                else:
+                    break
+        finally:
+            proc.stdout.close()
+            proc.kill()

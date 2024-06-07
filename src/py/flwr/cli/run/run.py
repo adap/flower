@@ -57,6 +57,13 @@ def run(
             case_sensitive=False, help="Use this flag to use the new SuperExec API"
         ),
     ] = None,
+    follow: Annotated[
+        bool,
+        typer.Option(
+            case_sensitive=False, help="Use this flag to stream logs"
+        ),
+    ] = False,
+
 ) -> None:
     """Run Flower project."""
     if use_superexec:
@@ -80,6 +87,11 @@ def run(
         req = StartRunRequest(fab_file=open(fab_path, "rb").read())
         res = stub.StartRun(req)
         print(res)
+
+        if follow:
+            req = FetchLogsRequest(run_id=res.run_id)
+            for res in stub.FetchLogs(req):
+                print(res.log_output)
     else:
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
