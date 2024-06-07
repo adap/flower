@@ -59,7 +59,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         try:
             for line in iter(proc.stdout.readline, ''):
                 if context.is_active():
-                    yield FetchLogsResponse(log_output=line.strip())
+                    yield FetchLogsResponse(log_output=line.rstrip())
                 else:
                     break
         finally:
