@@ -80,10 +80,8 @@ def run(
 
         if follow:
             req = FetchLogsRequest(run_id=res.run_id)
-            print("test")
-            res = stub.FetchLogs(req)
-            print("XX")
-            print(res)
+            for res in stub.FetchLogs(req):
+                print(res.log_output)
     else:
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 

@@ -19,7 +19,7 @@ class ExecStub(object):
                 request_serializer=flwr_dot_proto_dot_exec__pb2.StartRunRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_exec__pb2.StartRunResponse.FromString,
                 )
-        self.FetchLogs = channel.unary_unary(
+        self.FetchLogs = channel.unary_stream(
                 '/flwr.proto.Exec/FetchLogs',
                 request_serializer=flwr_dot_proto_dot_exec__pb2.FetchLogsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_exec__pb2.FetchLogsResponse.FromString,
@@ -51,7 +51,7 @@ def add_ExecServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_exec__pb2.StartRunRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_exec__pb2.StartRunResponse.SerializeToString,
             ),
-            'FetchLogs': grpc.unary_unary_rpc_method_handler(
+            'FetchLogs': grpc.unary_stream_rpc_method_handler(
                     servicer.FetchLogs,
                     request_deserializer=flwr_dot_proto_dot_exec__pb2.FetchLogsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_exec__pb2.FetchLogsResponse.SerializeToString,
@@ -94,7 +94,7 @@ class Exec(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/flwr.proto.Exec/FetchLogs',
+        return grpc.experimental.unary_stream(request, target, '/flwr.proto.Exec/FetchLogs',
             flwr_dot_proto_dot_exec__pb2.FetchLogsRequest.SerializeToString,
             flwr_dot_proto_dot_exec__pb2.FetchLogsResponse.FromString,
             options, channel_credentials,

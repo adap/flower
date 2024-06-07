@@ -17,7 +17,7 @@
 
 import subprocess
 from logging import INFO
-from typing import Dict
+from typing import Dict, Generator, Any
 
 import grpc
 
@@ -51,20 +51,17 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
     def FetchLogs(
         self, request: FetchLogsRequest, context: grpc.ServicerContext
-    ) -> FetchLogsResponse:
+    ) -> Generator[FetchLogsResponse, Any, None]:
         """Get logs."""
         log(INFO, "ExecServicer.FetchLogs")
-        log_output = "lorem ipsum"
         proc = self.runs[request.run_id]
 
-        def stream_output(proc):
-            output = proc.stdout.readline()
-            if output == "" and proc.poll() is not None:
-                pass
-            if output:
-                print(f"Run {10} output: {output.strip()}")
-            rc = proc.poll()
-            return output.strip()
-
-        log_output = stream_output(proc) 
-        return FetchLogsResponse(log_output=log_output)
+        try:
+            for line in iter(proc.stdout.readline, ''):
+                if context.is_active():
+                    yield FetchLogsResponse(log_output=line.strip())
+                else:
+                    break
+        finally:
+            proc.stdout.close()
+            proc.kill()

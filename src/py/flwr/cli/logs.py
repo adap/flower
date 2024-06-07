@@ -51,8 +51,10 @@ def logs(
     stub = ExecStub(channel)
 
     req = FetchLogsRequest(run_id=run_id)
-    res = stub.FetchLogs(req)
-    print(res)
 
-    if follow:
-        pass
+    for res in stub.FetchLogs(req):
+        if follow:
+            print(res.log_output)
+        else:
+            break
+        
