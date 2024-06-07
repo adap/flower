@@ -19,7 +19,10 @@ from logging import INFO
 from subprocess import Popen
 from typing import Dict, Generator, Any
 
+import threading
 import grpc
+import time
+import select
 
 from flwr.common.logger import log
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
@@ -38,7 +41,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
     def __init__(self, plugin: Executor) -> None:
         self.plugin = plugin
-        self.runs: Dict[int, Popen] = {}  # type: ignore
+        self.runs: Dict[int, subprocess.Popen[str]] = {}
+        self.logs = []
+        self.lock = threading.Lock()
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
@@ -47,21 +52,34 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         log(INFO, "ExecServicer.StartRun")
         run = self.plugin.start_run(request.fab_file)
         self.runs[run.run_id] = run.proc
+
+        # Start background thread to capture logs
+        self._capture_logs(run.proc)
         return StartRunResponse(run_id=run.run_id)
+
+    def _capture_logs(self, proc):
+        select_timeout = 1.0
+        def run():
+            while True:
+                reads, _, _ = select.select([proc.stdout], [], [], select_timeout)
+                if reads:
+                    line = proc.stdout.readline()
+                    if line:
+                        self.logs.append(line.rstrip())
+
+        threading.Thread(target=run, daemon=True).start()
 
     def FetchLogs(
         self, request: FetchLogsRequest, context: grpc.ServicerContext
     ) -> Generator[FetchLogsResponse, Any, None]:
         """Get logs."""
         log(INFO, "ExecServicer.FetchLogs")
-        proc = self.runs[request.run_id]
 
-        try:
-            for line in iter(proc.stderr.readline, ""):
-                if context.is_active():
-                    yield FetchLogsResponse(log_output=line.strip())
-                else:
-                    break
-        finally:
-            proc.stderr.close()
-            proc.kill()
+        last_sent_index = 0
+        while context.is_active():
+            with self.lock:
+                if last_sent_index < len(self.logs):
+                    for i in range(last_sent_index, len(self.logs)):
+                        yield FetchLogsResponse(log_output=self.logs[i])
+                    last_sent_index = len(self.logs)
+            time.sleep(0.1)  # Sleep briefly to avoid busy waiting

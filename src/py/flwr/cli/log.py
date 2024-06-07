@@ -12,21 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower command line interface `logs` command."""
+"""Flower command line interface `log` command."""
 
 import typer
 from typing_extensions import Annotated
 
 
-def logs(
+def log(
     run_id: Annotated[
         int,
         typer.Option(case_sensitive=False, help="The Flower run ID to query"),
     ],
     follow: Annotated[
         bool,
-        typer.Option(case_sensitive=False, help="Use this flag to stream logs"),
-    ] = False,
+        typer.Option(case_sensitive=False, help="Use this flag to follow logstream"),
+    ] = True,
 ) -> None:
     """Get logs from Flower run."""
     from logging import DEBUG
@@ -53,7 +53,8 @@ def logs(
     req = FetchLogsRequest(run_id=run_id)
 
     for res in stub.FetchLogs(req):
+        print(res.log_output)
         if follow:
-            print(res.log_output)
+            continue
         else:
             break
