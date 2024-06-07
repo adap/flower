@@ -14,6 +14,7 @@
 # ==============================================================================
 """Utility to validate the `pyproject.toml` file."""
 
+import os
 import zipfile
 from io import BytesIO
 from pathlib import Path
@@ -178,3 +179,13 @@ def load_from_string(toml_content: str) -> Optional[Dict[str, Any]]:
         return data
     except tomli.TOMLDecodeError:
         return None
+
+
+def get_flower_home() -> Path:
+    """Return the Flower home directory based on env variables."""
+    return Path(
+        os.getenv(
+            "FLWR_HOME",
+            f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
+        )
+    )

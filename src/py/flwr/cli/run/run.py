@@ -14,9 +14,8 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
-from io import BytesIO
-import sys
 from enum import Enum
+import sys
 from logging import DEBUG
 from pathlib import Path
 from typing import Optional
@@ -54,6 +53,10 @@ def run(
             case_sensitive=False, help="Use this flag to use the new SuperExec API"
         ),
     ] = False,
+    superexec_address: Annotated[
+        Optional[str],
+        typer.Option(case_sensitive=False, help="The address of the SuperExec server"),
+    ] = None,
     app_path: Annotated[
         Optional[Path],
         typer.Option(
@@ -68,12 +71,29 @@ def run(
     """Run Flower project."""
     if use_superexec:
 
+        if superexec_address is None:
+            gloabl_config = config_utils.load(
+                config_utils.get_flower_home() / "config.toml"
+            )
+            if gloabl_config:
+                superexec_address = gloabl_config["federation"]["default"]
+            else:
+                typer.secho(
+                    "No SuperExec address was provided and no global config "
+                    "was found.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                sys.exit()
+
+        assert superexec_address is not None
+
         def on_channel_state_change(channel_connectivity: str) -> None:
             """Log channel connectivity."""
             log(DEBUG, channel_connectivity)
 
         channel = create_channel(
-            server_address="127.0.0.1:9093",
+            server_address=superexec_address,
             insecure=True,
             root_certificates=None,
             max_message_length=GRPC_MAX_MESSAGE_LENGTH,

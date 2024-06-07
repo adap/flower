@@ -27,7 +27,7 @@ from typing import IO, Optional, Union
 import typer
 from typing_extensions import Annotated
 
-from .config_utils import load_and_validate
+from .config_utils import get_flower_home, load_and_validate
 
 
 def install(
@@ -145,16 +145,7 @@ def validate_and_install(
     version = config["project"]["version"]
 
     install_dir: Path = (
-        (
-            Path(
-                os.getenv(
-                    "FLWR_HOME",
-                    f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
-                )
-            )
-            if not flwr_dir
-            else flwr_dir
-        )
+        (get_flower_home() if not flwr_dir else flwr_dir)
         / "apps"
         / username
         / project_name
@@ -169,7 +160,7 @@ def validate_and_install(
                 bold=True,
             )
         ):
-            return
+            return install_dir
 
     install_dir.mkdir(parents=True, exist_ok=True)
 
