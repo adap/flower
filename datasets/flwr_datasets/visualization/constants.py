@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,22 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Datasets main package."""
+"""Constants for plot types and size units."""
 
-
-from flwr_datasets import partitioner, preprocessor
-from flwr_datasets import utils as utils
-from flwr_datasets import visualization
-from flwr_datasets.common.version import package_version as _package_version
-from flwr_datasets.federated_dataset import FederatedDataset
-
-__all__ = [
-    "FederatedDataset",
-    "partitioner",
-    "metrics",
-    "visualization",
-    "preprocessor",
-    "utils",
-]
-
-__version__ = _package_version
+PLOT_TYPES = ("bar", "heatmap")
+SIZE_UNITS = ("absolute", "percent")
+AXIS_TYPES = ("x", "y")

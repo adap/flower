@@ -221,7 +221,7 @@ def _registration_error(fn_name: str) -> ValueError:
         >>> def client_fn(cid) -> Client:
         >>>     return FlowerClient().to_client()
         >>>
-        >>> app = ClientApp()
+        >>> app = ClientApp(
         >>>     client_fn=client_fn,
         >>> )
 
