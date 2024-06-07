@@ -1,6 +1,8 @@
 """Deployment engine executor plugin."""
 
 import subprocess
+import sys
+from pathlib import Path
 from typing import Optional
 
 from flwr.cli.config_utils import get_fab_metadata
@@ -23,7 +25,6 @@ class DeploymentEngine(Executor):
     ) -> None:
         self.address = address
         self.root_certificates = root_certificates
-        self.run_id = None
         self.stub = None
 
     def _connect(self) -> None:
@@ -35,46 +36,44 @@ class DeploymentEngine(Executor):
             )
             self.stub = DriverStub(channel)
 
-    def _create_run(self, fab_id: str, fab_version: str) -> None:
+    def _create_run(self, fab_id: str, fab_version: str) -> int:
         if self.stub is None:
             self._connect()
 
         assert self.stub is not None
 
-        if self.run_id is None:
-            req = CreateRunRequest(fab_id=fab_id, fab_version=fab_version)
-            res = self.stub.CreateRun(request=req)
-            self.run_id = res.run_id
+        req = CreateRunRequest(fab_id=fab_id, fab_version=fab_version)
+        res = self.stub.CreateRun(request=req)
+        return res.run_id
 
-    def _install_fab(self, fab_file: bytes) -> None:
-        install_from_fab(fab_file, None, True)
+    def _install_fab(self, fab_file: bytes) -> Path:
+        return install_from_fab(fab_file, None, True)
 
     def start_run(self, fab_file: bytes, ttl: Optional[float] = None) -> Run:
-        """Echos success."""
+        """Start run using the Flower Deployment Engine."""
         _ = ttl
         fab_id, fab_version = get_fab_metadata(fab_file)
 
-        if self.run_id is None:
-            self._create_run(fab_id, fab_version)
+        run_id = self._create_run(fab_id, fab_version)
 
-        self._install_fab(fab_file)
+        fab_path = self._install_fab(fab_file)
 
-        assert self.run_id is not None
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", str(fab_path)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
         return Run(
-            run_id=self.run_id,
+            run_id=run_id,
             proc=subprocess.Popen(
                 [
                     "flower-server-app",
                     "build_demo.server:app",
                     "--run-id",
-                    str(self.run_id),
+                    str(run_id),
                     "--insecure",
                 ],
-                # [
-                #     "echo",
-                #     str(self.run_id),
-                # ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,

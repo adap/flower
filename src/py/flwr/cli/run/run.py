@@ -86,7 +86,6 @@ def run(
 
         req = StartRunRequest(fab_file=open(fab_path, "rb").read())
         res = stub.StartRun(req)
-        print(res)
 
         if follow:
             req = FetchLogsRequest(run_id=res.run_id)

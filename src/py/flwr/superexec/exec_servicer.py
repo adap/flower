@@ -57,11 +57,11 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         proc = self.runs[request.run_id]
 
         try:
-            for line in iter(proc.stdout.readline, ""):
+            for line in iter(proc.stderr.readline, ""):
                 if context.is_active():
                     yield FetchLogsResponse(log_output=line.strip())
                 else:
                     break
         finally:
-            proc.stdout.close()
+            proc.stderr.close()
             proc.kill()
