@@ -70,15 +70,15 @@ timeout 2m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth
 sl_pid=$!
 sleep 3
 
-timeout 2m flower-client-app client:app $client_arg $rest_arg_supernode --server $server_address $client_auth_1 &
+timeout 2m flower-client-app client:app $client_arg $rest_arg_supernode --superlink $server_address $client_auth_1 &
 cl1_pid=$!
 sleep 3
 
-timeout 2m flower-client-app client:app $client_arg $rest_arg_supernode --server $server_address $client_auth_2 &
+timeout 2m flower-client-app client:app $client_arg $rest_arg_supernode --superlink $server_address $client_auth_2 &
 cl2_pid=$!
 sleep 3
 
-timeout 2m flower-server-app server:app $client_arg --dir $server_dir --server $server_app_address &
+timeout 2m flower-server-app server:app $client_arg --dir $server_dir --superlink $server_app_address &
 pid=$!
 
 wait $pid
