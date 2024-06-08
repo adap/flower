@@ -16,6 +16,7 @@
 
 
 import logging
+import logging.handlers
 from logging import INFO, WARN, LogRecord
 from logging.handlers import HTTPHandler
 from typing import TYPE_CHECKING, Any, Dict, Optional, TextIO, Tuple
@@ -152,7 +153,9 @@ def configure(
 
     if filename:
         # Create file handler and log to disk
-        file_handler = logging.FileHandler(filename)
+        file_handler = logging.handlers.TimedRotatingFileHandler(
+            filename, when="H", interval=12
+        )
         file_handler.setLevel(level)
         file_handler.setFormatter(formatter)
         FLOWER_LOGGER.addHandler(file_handler)

@@ -781,8 +781,9 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         "--log-file",
         type=str,
         default="",
-        help="Log file where SuperLink's debug logs are written. "
-        "(e.g. --log-file ./mylogs/superlink.log)",
+        help="Log file where SuperLink's logs are written. "
+        "(e.g. --log-file ./mylogs/superlink.log). If you wish to include DEBUG-level "
+        "logs, pass the flag --verbose.",
     )
     parser.add_argument(
         "--verbose",
