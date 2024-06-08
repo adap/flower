@@ -19,7 +19,7 @@ import csv
 import importlib.util
 import sys
 import threading
-from logging import INFO, WARN
+from logging import DEBUG, INFO, WARN
 from os.path import isfile
 from pathlib import Path
 from typing import Optional, Sequence, Set, Tuple
@@ -40,7 +40,12 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import configure, log, warn_deprecated_feature
+from flwr.common.logger import (
+    configure,
+    log,
+    update_console_handler,
+    warn_deprecated_feature,
+)
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
@@ -332,10 +337,17 @@ def run_superlink() -> None:
 
     args = _parse_args_run_superlink().parse_args()
 
+    if args.verbose:
+        update_console_handler(level=DEBUG, timestamps=True, colored=True)
+
     if args.log_file:
         log_dir = Path(args.log_file).parent
         log_dir.mkdir(parents=True, exist_ok=True)
-        configure(identifier="superlink", filename=args.log_file)
+        configure(
+            identifier="superlink",
+            level=DEBUG if args.verbose else INFO,
+            filename=args.log_file,
+        )
 
     # Parse IP address
     parsed_driver_address = parse_address(args.driver_api_address)
@@ -771,6 +783,12 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
         default="",
         help="Log file where SuperLink's debug logs are written. "
         "(e.g. --log-file ./mylogs/superlink.log)",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Inclulde DEBUG-level logs. If set alongside --log-file, the outputed log "
+        "file will include DEBUG-level logs.",
     )
 
 
