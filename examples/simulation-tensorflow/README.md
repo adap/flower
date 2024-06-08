@@ -4,7 +4,7 @@ This introductory example uses the simulation capabilities of Flower to simulate
 
 ## Running the example (via Jupyter Notebook)
 
-Run the example on Google Colab: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adap/flower/blob/main/examples/simulation-tensorflow/sim.ipynb)
+Run the example on Google Colab: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/damjimenezgu/flower/blob/simulation-tensorflow-tabular/examples/simulation-tensorflow/sim.ipynb)
 
 Alternatively, you can run `sim.ipynb` locally or in any other Jupyter environment.
 
