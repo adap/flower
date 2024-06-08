@@ -200,7 +200,7 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     parser.add_argument(
         "--superlink",
         default=ADDRESS_DRIVER_API,
-        help="Driver API (gRPC-rere) SuperLink address (IPv4, IPv6, or a domain name)",
+        help="SuperLink Driver API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
     )
     parser.add_argument(
         "--dir",
