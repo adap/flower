@@ -22,7 +22,8 @@ esac
 
 case "$2" in
   rest)
-    rest_arg="--rest"
+    rest_arg_superlink="--fleet-api-type rest"
+    rest_arg_supernode="--rest"
     server_address="http://localhost:9093"
     server_app_address="127.0.0.1:9091"
     db_arg="--database :flwr-in-memory-state:"
@@ -31,7 +32,8 @@ case "$2" in
     client_auth_2=""
     ;;
   sqlite)
-    rest_arg=""
+    rest_arg_superlink=""
+    rest_arg_supernode=""
     server_address="127.0.0.1:9092"
     server_app_address="127.0.0.1:9091"
     db_arg="--database $(date +%s).db"
@@ -41,7 +43,8 @@ case "$2" in
     ;;
   client-auth)
     ./generate.sh
-    rest_arg=""
+    rest_arg_superlink=""
+    rest_arg_supernode=""
     server_address="127.0.0.1:9092"
     server_app_address="127.0.0.1:9091"
     db_arg="--database :flwr-in-memory-state:"
@@ -52,7 +55,8 @@ case "$2" in
     client_auth_2="--auth-supernode-private-key keys/client_credentials_2 --auth-supernode-public-key keys/client_credentials_2.pub"
     ;;
   *)
-    rest_arg=""
+    rest_arg_superlink=""
+    rest_arg_supernode=""
     server_address="127.0.0.1:9092"
     server_app_address="127.0.0.1:9091"
     db_arg="--database :flwr-in-memory-state:"
@@ -62,15 +66,15 @@ case "$2" in
     ;;
 esac
 
-timeout 2m flower-superlink $server_arg $db_arg $rest_arg $server_auth &
+timeout 2m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth &
 sl_pid=$!
 sleep 3
 
-timeout 2m flower-client-app client:app $client_arg $rest_arg --superlink $server_address $client_auth_1 &
+timeout 2m flower-client-app client:app $client_arg $rest_arg_supernode --superlink $server_address $client_auth_1 &
 cl1_pid=$!
 sleep 3
 
-timeout 2m flower-client-app client:app $client_arg $rest_arg --superlink $server_address $client_auth_2 &
+timeout 2m flower-client-app client:app $client_arg $rest_arg_supernode --superlink $server_address $client_auth_2 &
 cl2_pid=$!
 sleep 3
 

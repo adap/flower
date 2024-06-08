@@ -28,6 +28,7 @@ __all__ = [
     "Client",
     "ClientApp",
     "ClientFn",
+    "mod",
     "NumPyClient",
     "run_client_app",
     "run_supernode",
