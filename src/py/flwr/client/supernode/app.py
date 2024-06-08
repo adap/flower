@@ -238,7 +238,7 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--superlink",
         default=ADDRESS_FLEET_API_GRPC_RERE,
-        help="Fleet API (gRPC-rere) SuperLink address (IPv4, IPv6, or a domain name)",
+        help="SuperLink Fleet API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
     )
     parser.add_argument(
         "--max-retries",
