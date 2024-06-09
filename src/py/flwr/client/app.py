@@ -326,90 +326,93 @@ def _start_client_internal(
                 create_node()  # pylint: disable=not-callable
 
             while True:
-                # Receive
-                message = receive()
-                if message is None:
-                    time.sleep(3)  # Wait for 3s before asking again
-                    continue
+                if True:  # pylint: disable=using-constant-test
+                    # Receive
+                    message = receive()
+                    if message is None:
+                        time.sleep(3)  # Wait for 3s before asking again
+                        continue
 
-                log(INFO, "")
-                if len(message.metadata.group_id) > 0:
+                    log(INFO, "")
+                    if len(message.metadata.group_id) > 0:
+                        log(
+                            INFO,
+                            "[RUN %s, ROUND %s]",
+                            message.metadata.run_id,
+                            message.metadata.group_id,
+                        )
                     log(
                         INFO,
-                        "[RUN %s, ROUND %s]",
-                        message.metadata.run_id,
-                        message.metadata.group_id,
+                        "Received: %s message %s",
+                        message.metadata.message_type,
+                        message.metadata.message_id,
                     )
-                log(
-                    INFO,
-                    "Received: %s message %s",
-                    message.metadata.message_type,
-                    message.metadata.message_id,
-                )
 
-                # Handle control message
-                out_message, sleep_duration = handle_control_message(message)
-                if out_message:
-                    send(out_message)
-                    break
+                    # Handle control message
+                    out_message, sleep_duration = handle_control_message(message)
+                    if out_message:
+                        send(out_message)
+                        break
 
-                # Register context for this run
-                node_state.register_context(run_id=message.metadata.run_id)
+                    # Register context for this run
+                    node_state.register_context(run_id=message.metadata.run_id)
 
-                # Retrieve context for this run
-                context = node_state.retrieve_context(run_id=message.metadata.run_id)
+                    # Retrieve context for this run
+                    context = node_state.retrieve_context(
+                        run_id=message.metadata.run_id
+                    )
 
-                # Create an error reply message that will never be used to prevent
-                # the used-before-assignment linting error
-                reply_message = message.create_error_reply(
-                    error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
-                )
-
-                # Handle app loading and task message
-                try:
-                    # Load ClientApp instance
-                    client_app: ClientApp = load_client_app_fn()
-
-                    # Execute ClientApp
-                    reply_message = client_app(message=message, context=context)
-                except Exception as ex:  # pylint: disable=broad-exception-caught
-
-                    # Legacy grpc-bidi
-                    if transport in ["grpc-bidi", None]:
-                        log(ERROR, "Client raised an exception.", exc_info=ex)
-                        # Raise exception, crash process
-                        raise ex
-
-                    # Don't update/change NodeState
-
-                    e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
-                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-                    exc_entity = "ClientApp"
-                    if isinstance(ex, LoadClientAppError):
-                        reason = (
-                            "An exception was raised when attempting to load "
-                            "`ClientApp`"
-                        )
-                        e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
-                        exc_entity = "SuperNode"
-
-                    log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
-
-                    # Create error message
+                    # Create an error reply message that will never be used to prevent
+                    # the used-before-assignment linting error
                     reply_message = message.create_error_reply(
-                        error=Error(code=e_code, reason=reason)
-                    )
-                else:
-                    # No exception, update node state
-                    node_state.update_context(
-                        run_id=message.metadata.run_id,
-                        context=context,
+                        error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
                     )
 
-                # Send
-                send(reply_message)
-                log(INFO, "Sent reply")
+                    # Handle app loading and task message
+                    try:
+                        # Load ClientApp instance
+                        client_app: ClientApp = load_client_app_fn()
+
+                        # Execute ClientApp
+                        reply_message = client_app(message=message, context=context)
+                    except Exception as ex:  # pylint: disable=broad-exception-caught
+
+                        # Legacy grpc-bidi
+                        if transport in ["grpc-bidi", None]:
+                            log(ERROR, "Client raised an exception.", exc_info=ex)
+                            # Raise exception, crash process
+                            raise ex
+
+                        # Don't update/change NodeState
+
+                        e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+                        # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                        reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                        exc_entity = "ClientApp"
+                        if isinstance(ex, LoadClientAppError):
+                            reason = (
+                                "An exception was raised when attempting to load "
+                                "`ClientApp`"
+                            )
+                            e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+                            exc_entity = "SuperNode"
+
+                        log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+
+                        # Create error message
+                        reply_message = message.create_error_reply(
+                            error=Error(code=e_code, reason=reason)
+                        )
+                    else:
+                        # No exception, update node state
+                        node_state.update_context(
+                            run_id=message.metadata.run_id,
+                            context=context,
+                        )
+
+                    # Send
+                    send(reply_message)
+                    log(INFO, "Sent reply")
 
             # Unregister node
             if delete_node is not None:
