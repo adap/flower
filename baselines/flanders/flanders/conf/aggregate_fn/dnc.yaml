@@ -1,8 +1,0 @@
----
-name: dnc
-
-aggregate_fn:
-  function: flanders.strategies.aggregate.aggregate_dnc
-  parameters:
-    niters: 1
-    c: 1
