@@ -266,6 +266,7 @@ def _start_client_internal(
     )
 
     run_tracker = _RunTracker()
+    _ = run_tracker
 
     def _on_sucess(retry_state: RetryState) -> None:
         if retry_state.tries > 1:
@@ -275,8 +276,6 @@ def _start_client_internal(
                 retry_state.elapsed_time,
                 retry_state.tries,
             )
-            if run_tracker.create_node:
-                run_tracker.create_node()
 
     def _on_backoff(retry_state: RetryState) -> None:
         if retry_state.tries == 1:
@@ -594,7 +593,6 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
 
 @dataclass
 class _RunTracker:
-    create_node: Optional[Callable[[], None]] = None
     interrupt: bool = False
 
     def register_signal_handler(self) -> None:
