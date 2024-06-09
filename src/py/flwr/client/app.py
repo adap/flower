@@ -344,7 +344,6 @@ def _start_client_internal(
                             message.metadata.run_id,
                             message.metadata.group_id,
                         )
-
                     log(
                         INFO,
                         "Received: %s message %s",
@@ -390,8 +389,7 @@ def _start_client_internal(
                         # Don't update/change NodeState
 
                         e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-                        # Reason example:
-                        # "<class 'ZeroDivisionError'>:<'division by zero'>"
+                        # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
                         reason = str(type(ex)) + ":<'" + str(ex) + "'>"
                         exc_entity = "ClientApp"
                         if isinstance(ex, LoadClientAppError):
