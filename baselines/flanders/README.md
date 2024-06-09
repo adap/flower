@@ -19,16 +19,18 @@ dataset: [MNIST, Income, CIFAR-10, California Housing]
 
 **Hardware Setup:** AMD Ryzen 9, 64 GB RAM, and an NVIDIA 4090 GPU with 24 GB VRAM.
 
-**Estimated time to run:** You can expect to run experiments on the given setup in 2m with *MNIST* and 1h30m with *Fashion-MNIST*. With an Apple M2 Pro, 16gb RAM; each experiment with 10 clients for MNIST runs in about 24 minutes. Note that experiments with OPT (fang) and AGR-MM (minmax) can be 10x slower.
+**Estimated time to run:** You can expect to run experiments on the given setup in 2m with *MNIST* and 3m with *Fashion-MNIST*, without attacks. With an Apple M2 Pro, 16gb RAM; each experiment with 10 clients for MNIST runs in about 24 minutes. Note that experiments with OPT (fang) and AGR-MM (minmax) can be up to 10x times slower.
 
 **Contributors:** Edoardo Gabrielli, Sapienza University of Rome ([GitHub](https://github.com/edogab33), [Scholar](https://scholar.google.com/citations?user=b3bePdYAAAAJ))
 
 
 ## Experimental Setup
 
+Please, checkout Appendix F and G of the paper for a comprehensive overview of the hyperparameters setup, however here's a summary.
+
 **Task:** Image classification
 
-**Models:** Appendix F and G of the paper describes the models, but here's a summary.
+**Models:**
 
 MNIST (multilabel classification, fully connected, feed forward NN):
 - Multilevel Perceptron (MLP)
@@ -45,7 +47,7 @@ Fashion-MNIST (multilabel classification, fully connected, feed forward NN):
 - hidden layer 2: 128
 - hidden layer 3: 64
 
-**Dataset:** Every dataset is partitioned into two disjoint sets: 80% for training and 20% for testing. The training set is distributed uniformly across all clients (100), while the testing set is held by the server to evaluate the global model.
+**Dataset:** Every dataset is partitioned into two disjoint sets: 80% for training and 20% for testing. The training set is distributed across all clients (100) by using the Dirichlet distribution with $\alpha=0.5$, simulating a high non-i.i.d. scenario, while the testing set is uniform and held by the server to evaluate the global model.
 
 | Description | Default Value |
 | ----------- | ----- |
@@ -53,6 +55,8 @@ Fashion-MNIST (multilabel classification, fully connected, feed forward NN):
 | Evaluation | centralized |
 | Training set | 80% |
 | Testing set | 20% |
+| Distribution | Dirichlet |
+| $\alpha$ | 0.5 |
 
 **Training Hyperparameters:**
 
