@@ -8,15 +8,16 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-05-28 11:47+0200\n"
-"PO-Revision-Date: 2024-05-14 21:01+0000\n"
-"Last-Translator: \"Young D. Kwon\" <youngkwon311@gmail.com>\n"
+"PO-Revision-Date: 2024-06-10 14:09+0000\n"
+"Last-Translator: 박태현 <qkrxogus113@ajou.ac.kr>\n"
+"Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
+"framework/ko/>\n"
 "Language: ko\n"
-"Language-Team: Korean <https://hosted.weblate.org/projects/flower-"
-"docs/framework/ko/>\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 5.6-dev\n"
 "Generated-By: Babel 2.15.0\n"
 
 #: ../../source/contributor-explanation-architecture.rst:2
@@ -66,21 +67,27 @@ msgid ""
 "is what you need. In this guide, we will explain what images exist and "
 "how to build them locally."
 msgstr ""
+"Flower는 'Docker Hub <https://hub.docker.com/u/flwr>'_에서 미리 만들어진 "
+"Docker 이미지들을 제공합니다. 해당 이미지들은 SuperLink, ServerNode 또는 "
+"ServerApp을 실행하는 데 필요한 모든 dependencies를 포함합니다. 필요한 경우 "
+"다른 버전의 Python이나 Linux 배포판(Ubuntu/Alpine)을 사용해 처음부터 사용자 "
+"정의 Docker 이미지를 빌드할 수도 있습니다. 이 가이드에서는 존재하는 "
+"이미지들과 이들을 로컬에서 빌드하는 방법에 대해 설명하겠습니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:9
 msgid ""
 "Before we can start, we need to meet a few prerequisites in our local "
 "development environment."
-msgstr ""
+msgstr "시작하기 전에, 로컬 개발 환경에서 몇 가지 전제 조건을 충족해야 합니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:11
 msgid "Clone the flower repository."
-msgstr ""
+msgstr "Flower 리포지토리를 복제합니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:17
 #: ../../source/how-to-run-flower-using-docker.rst:144
 msgid "Verify the Docker daemon is running."
-msgstr ""
+msgstr "Docker 데몬이 실행 중인지 확인하십시오."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:19
 #: ../../source/how-to-run-flower-using-docker.rst:146
@@ -88,6 +95,8 @@ msgid ""
 "Please follow the first section on :doc:`Run Flower using Docker <how-to-"
 "run-flower-using-docker>` which covers this step in more detail."
 msgstr ""
+":doc:Run Flower using Docker <how-to-run-flower-using-docker>의 첫 번째 "
+"섹션을 따라 주십시오. 해당 부분을 더 자세히 설명해 줍니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:23
 msgid ""
@@ -97,6 +106,11 @@ msgid ""
 "dependencies, Python and Python tools. The SuperLink image is based on "
 "the base image, but it additionally installs the SuperLink using ``pip``."
 msgstr ""
+"현재, Flower는 \"base\" 이미지 그리고 \"superlink\" 이미지를 제공합니다. "
+"base 이미지는 이름에서 알 수 있듯이 SuperLink가 필요로 하는 기본 "
+"dependencies를 포함하고 있습니다. 여기에는 시스템 dependencies, Python 및 "
+"Python 도구가 포함됩니다. SuperLink 이미지는 base 이미지를 기반으로 하지만 "
+"\"pip\"을 사용하여 SuperLink를 추가로 설치합니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:28
 msgid ""
@@ -104,6 +118,8 @@ msgid ""
 "respective Dockerfiles. You can find them in the subdirectories of "
 "``src/docker``."
 msgstr ""
+"이미지들을 조합하는 빌드 instruction들은 해당 Dockerfile에 있습니다. \"src/"
+"docker\" 의 하위 디렉토리에서 찾을 수 있습니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:31
 msgid ""
@@ -115,93 +131,101 @@ msgid ""
 " image. All available build arguments for each image are listed in one of"
 " the tables below."
 msgstr ""
+"base 이미지와 SuperLink 이미지 둘 다 빌드 argument들을 통해 구성됩니다. 빌드 "
+"argument들을 통해, 빌드를 더 유연하게 만들 수 있습니다. 예를 들어, base "
+"이미지에서 \"PYTHON_VERSION\" 빌드 argument를 사용하여 Python 버전을 지정할 "
+"수 있습니다. 일부 빌드 argument들은 기본값이며, 이미지를 빌드할 때 지정해야 "
+"합니다. 각 이미지에 사용할 수 있는 모든 빌드 argument는 아래 표 중에 "
+"있습니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:38
 msgid "Building the base image"
-msgstr ""
+msgstr "base 이미지 빌드"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:44
 #: ../../source/contributor-how-to-build-docker-images.rst:86
 msgid "Build argument"
-msgstr ""
+msgstr "빌드 argument"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:45
 #: ../../source/contributor-how-to-build-docker-images.rst:87
 msgid "Description"
-msgstr ""
+msgstr "설명"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:46
 #: ../../source/contributor-how-to-build-docker-images.rst:88
 msgid "Required"
-msgstr ""
+msgstr "필수"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:47
 #: ../../source/contributor-how-to-build-docker-images.rst:89
 msgid "Example"
-msgstr ""
+msgstr "예시"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:48
 #: ../../source/contributor-how-to-build-docker-images.rst:94
 msgid "``PYTHON_VERSION``"
-msgstr ""
+msgstr "``PYTHON_VERSION``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:49
 msgid "Version of ``python`` to be installed."
-msgstr ""
+msgstr "설치 된 ``python`` 버전."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:50
 #: ../../source/contributor-how-to-build-docker-images.rst:54
 #: ../../source/contributor-how-to-build-docker-images.rst:58
 #: ../../source/contributor-how-to-build-docker-images.rst:108
 msgid "Yes"
-msgstr ""
+msgstr "예"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:51
 msgid "``3.11``"
-msgstr ""
+msgstr "``3.11``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:52
 msgid "``PIP_VERSION``"
-msgstr ""
+msgstr "``PIP_VERSION``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:53
 msgid "Version of ``pip`` to be installed."
-msgstr ""
+msgstr "설치 된 ``pip`` 버전."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:55
 msgid "``23.0.1``"
-msgstr ""
+msgstr "``23.0.1``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:56
 msgid "``SETUPTOOLS_VERSION``"
-msgstr ""
+msgstr "``SETUPTOOLS_VERSION``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:57
 msgid "Version of ``setuptools`` to be installed."
-msgstr ""
+msgstr "설치 된 ``setuptools`` 버전."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:59
 msgid "``69.0.2``"
-msgstr ""
+msgstr "``69.0.2``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:60
 #: ../../source/contributor-how-to-build-docker-images.rst:98
 msgid "``UBUNTU_VERSION``"
-msgstr ""
+msgstr "``UBUNTU_VERSION``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:61
 msgid "Version of the official Ubuntu Docker image."
-msgstr ""
+msgstr "공식 Ubuntu Docker 이미지 버전."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:62
 msgid "Defaults to ``22.04``."
-msgstr ""
+msgstr "``22.04``이 기본값."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:65
 msgid ""
 "The following example creates a base image with Python 3.11.0, pip 23.0.1"
 " and setuptools 69.0.2:"
 msgstr ""
+"다음 예시에서는 Python 3.11.0, pip 23.0.1 그리고 setuptools 69.0.2의 base "
+"이미지를 만듭니다:"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:76
 msgid ""
@@ -209,68 +233,73 @@ msgid ""
 "the build arguments as well as the name and tag can be adapted to your "
 "needs. These values serve as examples only."
 msgstr ""
+"이미지의 이름은 ``flwr_base``이고 태그는 ``0.1.0``입니다. 필요에 따라 빌드 "
+"argument들 뿐만 아니라 이름과 태그도 정할 수 있습니다. 이 값들은 예시일 "
+"뿐입니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:80
 msgid "Building the SuperLink image"
-msgstr ""
+msgstr "SuperLink 이미지 빌드"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:90
 msgid "``BASE_REPOSITORY``"
-msgstr ""
+msgstr "``BASE_REPOSITORY``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:91
 msgid "The repository name of the base image."
-msgstr ""
+msgstr "base 이미지의 리포지토리 이름."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:92
 msgid "Defaults to ``flwr/base``."
-msgstr ""
+msgstr "``flwr/base``이 기본값."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:95
 msgid "The Python version of the base image."
-msgstr ""
+msgstr "base 이미지의 Python 버전."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:96
 msgid "Defaults to ``py3.11``."
-msgstr ""
+msgstr "``py3.11``이 기본값."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:99
 msgid "The Ubuntu version of the base image."
-msgstr ""
+msgstr "base 이미지의 Ubuntu 버전."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:100
 msgid "Defaults to ``ubuntu22.04``."
-msgstr ""
+msgstr "``ubuntu22.04``이 기본값."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:102
 msgid "``FLWR_PACKAGE``"
-msgstr ""
+msgstr "``FLWR_PACKAGE``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:103
 msgid "The PyPI package to install."
-msgstr ""
+msgstr "설치 할 PyPI 패키지."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:104
 msgid "Defaults to ``flwr``."
-msgstr ""
+msgstr "``flwr``이 기본값."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:106
 msgid "``FLWR_VERSION``"
-msgstr ""
+msgstr "``FLWR_VERSION``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:107
 msgid "Version of Flower to be installed."
-msgstr ""
+msgstr "설치 된 Flower 버전."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:109
 msgid "``1.8.0``"
-msgstr ""
+msgstr "``1.8.0``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:112
 msgid ""
 "The following example creates a SuperLink image with the official Flower "
 "base image py3.11-ubuntu22.04 and Flower 1.8.0:"
 msgstr ""
+"다음 예시에서는 py3.11-ubuntu22.04 및 Flower 1.8.0의 공식 Flower base "
+"이미지로 SuperLink 이미지를 만듭니다:"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:122
 msgid ""
@@ -278,6 +307,9 @@ msgid ""
 "that the build arguments as well as the name and tag can be adapted to "
 "your needs. These values serve as examples only."
 msgstr ""
+"이미지의 이름은 ``flwr_superlink``이고 태그는 ``0.1.0``입니다. 필요에 따라 "
+"빌드 argument들 뿐만 아니라 이름과 태그도 정할 수 있습니다. 이 값들은 예시일 "
+"뿐입니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:125
 msgid ""
@@ -285,14 +317,17 @@ msgid ""
 "base image, all you need to do is set the ``BASE_REPOSITORY``, "
 "``PYTHON_VERSION`` and ``UBUNTU_VERSION`` build arguments."
 msgstr ""
+"공식 Flower base 이미지 대신 자체 base 이미지를 사용 하길 원한다면, "
+"``BASE_REPOSITORY``, ``PYTHON_VERSION`` 및 ``UBUNTU_VERSION`` 빌드 "
+"argument들을 설정해야 합니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:138
 msgid "After creating the image, we can test whether the image is working:"
-msgstr ""
+msgstr "이미지 생성 후에, 이미지가 작동하는지 테스트할 수 있습니다:"
 
 #: ../../source/contributor-how-to-contribute-translations.rst:2
 msgid "Contribute translations"
-msgstr ""
+msgstr "번역 기여"
 
 #: ../../source/contributor-how-to-contribute-translations.rst:4
 msgid ""
@@ -305,6 +340,12 @@ msgid ""
 "also be a great opportunity for those wanting to become open source "
 "contributors with little prerequisites."
 msgstr ""
+"`Flower 1.5 <https://flower.ai/docs/framework/ref changelog."
+"html#v1-5-0-2023-08-31>`_ 부터 문서 페이지에 번역을 도입했지만, 아시다시피 "
+"번역이 불안전한 경우가 많습니다. 만일 영어 이외의 언어를 사용한다면, 많은 "
+"사람들이 Federated Learning에 접근할 수 있도록 번역 작업에 기여함으로써 "
+"저희의 노력에 도움을 주실 수 있습니다! 이는 전제 조건이 거의 없는 오픈 소스 "
+"기여자가 되고자 하는 사람들에게 좋은 기회가 될 수도 있습니다."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:13
 msgid ""
@@ -312,10 +353,12 @@ msgid ""
 "<https://hosted.weblate.org/projects/flower-docs/framework/>`_, this "
 "where most of the work will happen."
 msgstr ""
+"번역 프로젝트는 `Weblate <https://hosted.weblate.org/projects/flower-docs/"
+"framework/>`_에서 공개적으로 진행되며, 대부분의 작업이 이곳에서 이루어집니다."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:18
 msgid "Contribute to existing languages"
-msgstr ""
+msgstr "기존 언어에 기여하기"
 
 #: ../../source/contributor-how-to-contribute-translations.rst:23
 msgid ""
@@ -325,6 +368,10 @@ msgid ""
 " profile settings can be found `here "
 "<https://docs.weblate.org/en/latest/user/profile.html>`_."
 msgstr ""
+"기여를 하기 위해 가장 먼저 해야 할 일은 해당 `page <https://hosted.weblate."
+"org/accounts/register/>`_에서 무료 Weblate 계정을 만드는 것입니다. 프로필 "
+"설정에 대한 자세한 정보는 `here <https://docs.weblate.org/en/latest/user/"
+"profile.html>`_를 참조하세요."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:29
 msgid ""
@@ -333,12 +380,15 @@ msgid ""
 "docs/framework/>`_. Here, you should see the different existing languages"
 " that can be found on the website."
 msgstr ""
+"Weblate에 로그인한 후, `Flower Framework project <https://hosted.weblate.org/"
+"projects/flower-docs/framework/>`_로 이동할 수 있습니다. 여기에서 웹사이트에 "
+"있는 다양한 기존 언어들을 확인할 수 있습니다."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:34
 msgid ""
 "Once you have selected the language you want to contribute to, you should"
 " see a similar interface to this:"
-msgstr ""
+msgstr "기여하고자 하는 언어를 선택하면, 다음과 같은 인터페이스가 나타납니다:"
 
 #: ../../source/contributor-how-to-contribute-translations.rst:39
 msgid ""
@@ -21224,4 +21274,3 @@ msgstr ""
 
 #~ msgid "|2c13f726c8c843fc8aae997bf906125b|"
 #~ msgstr ""
-
