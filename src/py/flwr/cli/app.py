@@ -33,7 +33,6 @@ app = typer.Typer(
 )
 
 app.command()(new)
-app.command()(logs)
 app.command()(example)
 app.command()(run)
 app.command()(build)
