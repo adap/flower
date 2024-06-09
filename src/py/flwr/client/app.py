@@ -325,7 +325,6 @@ def _start_client_internal(
             receive, send, create_node, delete_node, get_run = conn
 
             # Register node
-            run_tracker.create_node = create_node
             if create_node is not None:
                 create_node()  # pylint: disable=not-callable
 
@@ -346,7 +345,6 @@ def _start_client_internal(
                             message.metadata.run_id,
                             message.metadata.group_id,
                         )
-
                     log(
                         INFO,
                         "Received: %s message %s",
@@ -392,8 +390,7 @@ def _start_client_internal(
                         # Don't update/change NodeState
 
                         e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-                        # Reason example:
-                        # "<class 'ZeroDivisionError'>:<'division by zero'>"
+                        # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
                         reason = str(type(ex)) + ":<'" + str(ex) + "'>"
                         exc_entity = "ClientApp"
                         if isinstance(ex, LoadClientAppError):
@@ -609,7 +606,6 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
 
 @dataclass
 class _RunTracker:
-    create_node: Optional[Callable[[], None]] = None
     interrupt: bool = False
     is_connected: bool = False
 

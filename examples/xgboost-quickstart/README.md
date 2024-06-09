@@ -21,36 +21,25 @@ This will create a new directory called `xgboost-quickstart` containing the foll
 -- server.py         <- Defines the server-side logic
 -- client.py         <- Defines the client-side logic
 -- run.sh            <- Commands to run experiments
--- pyproject.toml    <- Example dependencies (if you use Poetry)
--- requirements.txt  <- Example dependencies
+-- pyproject.toml    <- Example dependencies
 ```
 
 ### Installing Dependencies
 
-Project dependencies (such as `xgboost` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### Poetry
+Project dependencies (such as `xgboost` and `flwr`) are defined in `pyproject.toml`. You can install the dependencies by invoking `pip`:
 
 ```shell
-poetry install
-poetry shell
+# From a new python environment, run:
+pip install .
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+Then, to verify that everything works correctly you can run the following command:
 
 ```shell
-poetry run python3 -c "import flwr"
+python3 -c "import flwr"
 ```
 
 If you don't see any errors you're good to go!
-
-#### pip
-
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
-```
 
 ## Run Federated Learning with XGBoost and Flower
 
