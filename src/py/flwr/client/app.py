@@ -327,7 +327,7 @@ def _start_client_internal(
                 create_node()  # pylint: disable=not-callable
 
             while True:
-                if True:
+                if True:  # pylint: disable=using-constant-test
                     # Receive
                     message = receive()
                     if message is None:
