@@ -265,7 +265,7 @@ def _start_client_internal(
         transport, server_address
     )
 
-    run_tracker = _RunTracker()
+    app_state_tracker = _AppStateTracker()
 
     def _on_sucess(retry_state: RetryState) -> None:
         run_tracker.is_connected = True
@@ -276,8 +276,6 @@ def _start_client_internal(
                 retry_state.elapsed_time,
                 retry_state.tries,
             )
-            if run_tracker.create_node:
-                run_tracker.create_node()
 
     def _on_backoff(retry_state: RetryState) -> None:
         run_tracker.is_connected = False
@@ -311,7 +309,7 @@ def _start_client_internal(
 
     node_state = NodeState()
 
-    while not run_tracker.interrupt:
+    while not app_state_tracker.interrupt:
         sleep_duration: int = 0
         with connection(
             address,
@@ -328,8 +326,8 @@ def _start_client_internal(
             if create_node is not None:
                 create_node()  # pylint: disable=not-callable
 
-            run_tracker.register_signal_handler()
-            while not run_tracker.interrupt:
+            app_state_tracker.register_signal_handler()
+            while not app_state_tracker.interrupt:
                 try:
                     # Receive
                     message = receive()
@@ -401,7 +399,7 @@ def _start_client_internal(
                             e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
                             exc_entity = "SuperNode"
 
-                        if not run_tracker.interrupt:
+                        if not app_state_tracker.interrupt:
                             log(
                                 ERROR, "%s raised an exception", exc_entity, exc_info=ex
                             )
@@ -431,7 +429,7 @@ def _start_client_internal(
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
-            del run_tracker
+            del app_state_tracker
             break
 
         # Sleep and reconnect afterwards
@@ -605,7 +603,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
 
 
 @dataclass
-class _RunTracker:
+class _AppStateTracker:
     interrupt: bool = False
     is_connected: bool = False
 
