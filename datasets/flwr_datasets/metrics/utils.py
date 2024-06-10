@@ -44,8 +44,9 @@ def compute_counts(
         `column_name`. The verbose value are possible to extract if the column is a
         feature of type `ClassLabel`.
     max_num_partitions : Optional[int]
-        The number of partitions that will be used. If left None, then all partitions
-        will be used.
+        The maximum number of partitions that will be used. If greater than the
+        total number of partitions in a partitioner, it won't have an effect. If left
+        as None, then all partitions will be used.
 
     Returns
     -------
