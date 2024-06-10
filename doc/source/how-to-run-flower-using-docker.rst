@@ -245,7 +245,7 @@ Now that we have built the SuperNode image, we can finally run it.
 
   $ docker run --rm flwr_supernode:0.0.1 \
     --insecure \
-    --server 192.168.1.100:9092
+    --superlink 192.168.1.100:9092
 
 Let's break down each part of this command:
 
@@ -261,7 +261,7 @@ Let's break down each part of this command:
   `SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`__
   when deploying to a production environment.
 
-* | ``--server 192.168.1.100:9092``: This option specifies the address of the SuperLinks Fleet
+* | ``--superlink 192.168.1.100:9092``: This option specifies the address of the SuperLinks Fleet
   | API to connect to. Remember to update it with your SuperLink IP.
 
 .. note::
@@ -288,8 +288,9 @@ certificate within the container. Use the ``--root-certificates`` flag when star
 
 .. code-block:: bash
 
+
   $ docker run --rm --volume ./ca.crt:/app/ca.crt flwr_supernode:0.0.1 \
-    --server 192.168.1.100:9092 \
+    --superlink 192.168.1.100:9092 \
     --root-certificates ca.crt
 
 Flower ServerApp
@@ -361,7 +362,7 @@ Now that we have built the ServerApp image, we can finally run it.
 
   $ docker run --rm flwr_serverapp:0.0.1 \
     --insecure \
-    --server 192.168.1.100:9091
+    --superlink 192.168.1.100:9091
 
 Let's break down each part of this command:
 
@@ -377,7 +378,7 @@ Let's break down each part of this command:
   `SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html#enabling-ssl-for-secure-connections>`__
   when deploying to a production environment.
 
-* | ``--server 192.168.1.100:9091``: This option specifies the address of the SuperLinks Driver
+* | ``--superlink 192.168.1.100:9091``: This option specifies the address of the SuperLinks Driver
   | API to connect to. Remember to update it with your SuperLink IP.
 
 .. note::
@@ -404,7 +405,7 @@ certificate within the container. Use the ``--root-certificates`` flags when sta
 .. code-block:: bash
 
   $ docker run --rm --volume ./ca.crt:/app/ca.crt flwr_serverapp:0.0.1 \
-    --server 192.168.1.100:9091 \
+    --superlink 192.168.1.100:9091 \
     --root-certificates ca.crt
 
 Advanced Docker options
