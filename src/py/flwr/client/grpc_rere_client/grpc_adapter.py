@@ -15,11 +15,17 @@
 """Grpc Adapter."""
 
 
+import sys
+from logging import DEBUG
 from typing import Any, Type, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.constant import GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY
+from flwr.common import log
+from flwr.common.constant import (
+    GRPC_ADAPTER_METADATA_EXIT_FLAG_KEY,
+    GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY,
+)
 from flwr.common.version import package_version
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -54,19 +60,34 @@ class GrpcAdapter:
     def _send_and_receive(
         self, request: GrpcMessage, response_type: Type[T], **kwargs: Any
     ) -> T:
+        # Serialize request
         container_req = MessageContainer(
             metadata={GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY: package_version},
             grpc_message_name=request.__class__.__qualname__,
             grpc_message_content=request.SerializeToString(),
         )
+
+        # Send via the stub
         container_res = cast(
             MessageContainer, self.stub.SendReceive(container_req, **kwargs)
         )
+
+        # Handle control message
+        exit_flag = container_res.metadata.get(
+            GRPC_ADAPTER_METADATA_EXIT_FLAG_KEY, False
+        )
+        if exit_flag:
+            log(DEBUG, "Exit flag is set to True, exiting...")
+            sys.exit(0)
+
+        # Check the grpc_message_name of the response
         if container_res.grpc_message_name != response_type.__qualname__:
             raise ValueError(
                 f"Invalid grpc_message_name. Expected {response_type.__qualname__}"
                 f", but got {container_res.grpc_message_name}."
             )
+
+        # Deserialize response
         response = response_type()
         response.ParseFromString(container_res.grpc_message_content)
         return response

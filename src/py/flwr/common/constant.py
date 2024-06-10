@@ -47,6 +47,10 @@ PING_MAX_INTERVAL = 1e300
 GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
 
 
+GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
+GRPC_ADAPTER_METADATA_EXIT_FLAG_KEY = "exit-flag"
+
+
 class MessageType:
     """Message type."""
 
