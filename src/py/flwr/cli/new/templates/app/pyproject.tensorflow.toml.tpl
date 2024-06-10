@@ -25,3 +25,9 @@ publisher = "$username"
 [flower.components]
 serverapp = "$import_name.server:app"
 clientapp = "$import_name.client:app"
+
+[flower.engine]
+name = "simulation"
+
+[flower.engine.simulation.supernode]
+num = 2

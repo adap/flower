@@ -34,10 +34,10 @@ RUN apk add --no-cache \
     g++ \
     libffi-dev \
     # create virtual env
-    && python -m venv /opt/venv
+    && python -m venv /python/venv
 
 # Make sure we use the virtualenv
-ENV PATH="/opt/venv/bin:$PATH"
+ENV PATH=/python/venv/bin:$PATH
 
 # Install specific version of pip, setuptools and flwr
 ARG PIP_VERSION
@@ -53,12 +53,20 @@ FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} as base
 
 # required by the grpc package
 RUN apk add --no-cache \
-    libstdc++
+    libstdc++ \
+    # add non-root user
+    && adduser \
+    --no-create-home \
+    --disabled-password \
+    --gecos "" \
+    --uid 49999 app \
+    && mkdir -p /app \
+    && chown -R app:app /app
 
-COPY --from=compile /opt/venv /opt/venv
+COPY --from=compile --chown=app:app /python/venv /python/venv
 
 # Make sure we use the virtualenv
-ENV PATH="/opt/venv/bin:$PATH" \
+ENV PATH=/python/venv/bin:$PATH \
     # Send stdout and stderr stream directly to the terminal. Ensures that no
     # output is retained in a buffer if the application crashes.
     PYTHONUNBUFFERED=1 \
@@ -70,15 +78,6 @@ ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONIOENCODING=UTF-8 \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8
-
-# add non-root user
-RUN adduser \
-    --no-create-home \
-    --disabled-password \
-    --gecos "" \
-    --uid 49999 app \
-    && mkdir -p /app \
-    && chown -R app:app /app
 
 WORKDIR /app
 USER app
