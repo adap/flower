@@ -39,7 +39,7 @@ def test_load_pyproject_toml_load_from_cwd(tmp_path: Path) -> None:
         ]
         license = {text = "Apache License (2.0)"}
         dependencies = [
-            "flwr[simulation]>=1.8.0,<2.0",
+            "flwr[simulation]>=1.9.0,<2.0",
             "numpy>=1.21.0",
         ]
 
@@ -64,7 +64,7 @@ def test_load_pyproject_toml_load_from_cwd(tmp_path: Path) -> None:
             "description": "",
             "authors": [{"email": "hello@flower.ai", "name": "The Flower Authors"}],
             "license": {"text": "Apache License (2.0)"},
-            "dependencies": ["flwr[simulation]>=1.8.0,<2.0", "numpy>=1.21.0"],
+            "dependencies": ["flwr[simulation]>=1.9.0,<2.0", "numpy>=1.21.0"],
         },
         "flower": {
             "publisher": "flwrlabs",
@@ -114,7 +114,7 @@ def test_load_pyproject_toml_from_path(tmp_path: Path) -> None:
         ]
         license = {text = "Apache License (2.0)"}
         dependencies = [
-            "flwr[simulation]>=1.8.0,<2.0",
+            "flwr[simulation]>=1.9.0,<2.0",
             "numpy>=1.21.0",
         ]
 
@@ -139,7 +139,7 @@ def test_load_pyproject_toml_from_path(tmp_path: Path) -> None:
             "description": "",
             "authors": [{"email": "hello@flower.ai", "name": "The Flower Authors"}],
             "license": {"text": "Apache License (2.0)"},
-            "dependencies": ["flwr[simulation]>=1.8.0,<2.0", "numpy>=1.21.0"],
+            "dependencies": ["flwr[simulation]>=1.9.0,<2.0", "numpy>=1.21.0"],
         },
         "flower": {
             "publisher": "flwrlabs",
