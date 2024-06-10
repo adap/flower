@@ -362,11 +362,13 @@ def run_superlink() -> None:
     grpc_servers = [driver_server]
     bckg_threads = []
     if not args.fleet_api_address:
-        args.fleet_api_address = (
-            ADDRESS_FLEET_API_GRPC_RERE
-            if args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE
-            else ADDRESS_FLEET_API_REST
-        )
+        if args.fleet_api_type in [
+            TRANSPORT_TYPE_GRPC_RERE,
+            TRANSPORT_TYPE_GRPC_ADAPTER,
+        ]:
+            args.fleet_api_address = ADDRESS_FLEET_API_GRPC_RERE
+        elif args.fleet_api_type == TRANSPORT_TYPE_REST:
+            args.fleet_api_address = ADDRESS_FLEET_API_REST
     parsed_fleet_address = parse_address(args.fleet_api_address)
     if not parsed_fleet_address:
         sys.exit(f"Fleet IP address ({args.fleet_api_address}) cannot be parsed.")
