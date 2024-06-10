@@ -143,9 +143,10 @@ def compute_frequencies(
 ) -> pd.DataFrame:
     """Compute the frequencies of unique values in a given column in the partitions.
 
-    The frequencies sum up to 1 for a given partition id. This function takes into account all
-    possible labels in the dataset when computing the count for each partition (assign 0 as the
-    size when there are no values for a label in the partition).
+    The frequencies sum up to 1 for a given partition id. This function takes into
+    account all possible labels in the dataset when computing the count for each
+    partition (assign 0 as the size when there are no values for a label in the
+    partition).
 
     Parameters
     ----------
