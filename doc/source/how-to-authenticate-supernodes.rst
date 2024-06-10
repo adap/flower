@@ -43,14 +43,22 @@ Let's break down the authentication flags:
 
 2. The second and third flags :code:`--auth-superlink-private-key` and :code:`--auth-superlink-public-key` expect paths to the server's private and public keys. For development purposes, you can generate a private and public key pair using :code:`ssh-keygen -t ecdsa -b 384`.
 
-.. note::
-    In Flower 1.9, there is no support for dynamically removing, editing, or adding known node public keys to the SuperLink.
-    To change the set of known nodes, you need to shut the server down, edit the CSV file, and start the server again.
-    Support for dynamically changing the set of known nodes is on the roadmap to be released in Flower 1.10 (ETA: June).
+Adding or removing known SuperNodes
+-----------------------------------
 
+To update the list of known node public keys, you need to modify the CSV file specified by the :code:`--auth-list-public-keys` flag. Here’s how to do it:
+
+1. To add a new node, append its public key in OpenSSH format to the CSV file.
+2. To remove a node, delete its public key from the CSV file.
+
+The SuperLink will apply the changes that you made after modifying the CSV file directly without the need of restarting the SuperLink. 
+Since there is no enforcement of ACID properties for modifying the set of known node public keys, we implemented the following rule for handling invalid entry in the CSV file:
+
+.. note::
+    If there is an error (e.g., a key is not in the correct format), no changes will be made to the internal state of the SuperLink. The system will log a warning, and the existing set of keys will remain unchanged. This ensures that only valid keys are stored and used for authentication.
 
 Enable node authentication in :code:`SuperNode`
--------------------------------------------------
+-----------------------------------------------
 
 Similar to the long-running Flower server (:code:`SuperLink`), you can easily enable node authentication in the long-running Flower client (:code:`SuperNode`).
 Use the following terminal command to start an authenticated :code:`SuperNode`:
