@@ -92,9 +92,8 @@ def compute_counts(
     else:
         max_num_partitions = min(max_num_partitions, partitioner.num_partitions)
     assert isinstance(max_num_partitions, int)
-    partitions = [partitioner.load_partition(i) for i in range(max_num_partitions)]
+    partition = partitioner.load_partition(0)
 
-    partition = partitions[0]
     try:
         # Unique labels are needed to represent the correct count of each class
         # (some of the classes can have zero samples that's why this
@@ -105,10 +104,12 @@ def compute_counts(
     except AttributeError:  # If the column_name is not formally a Label
         unique_labels = partitioner.dataset.unique(column_name)
 
-    partition_id_to_label_absolute_size = {
-        pid: _compute_counts(partition[column_name], unique_labels)
-        for pid, partition in enumerate(partitions)
-    }
+    partition_id_to_label_absolute_size = {}
+    for partition_id in range(max_num_partitions):
+        partition = partitioner.load_partition(partition_id)
+        partition_id_to_label_absolute_size[partition_id] = _compute_counts(
+            partition[column_name], unique_labels
+        )
 
     dataframe = pd.DataFrame.from_dict(
         partition_id_to_label_absolute_size, orient="index"
