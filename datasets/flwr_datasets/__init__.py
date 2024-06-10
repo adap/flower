@@ -15,15 +15,18 @@
 """Flower Datasets main package."""
 
 
-from flwr_datasets import partitioner, resplitter
+from flwr_datasets import partitioner, preprocessor
 from flwr_datasets import utils as utils
+from flwr_datasets import visualization
 from flwr_datasets.common.version import package_version as _package_version
 from flwr_datasets.federated_dataset import FederatedDataset
 
 __all__ = [
     "FederatedDataset",
     "partitioner",
-    "resplitter",
+    "metrics",
+    "visualization",
+    "preprocessor",
     "utils",
 ]
 

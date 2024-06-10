@@ -13,22 +13,12 @@
 # limitations under the License.
 # ==============================================================================
 
+# hadolint global ignore=DL3008
 ARG DISTRO=ubuntu
 ARG DISTRO_VERSION=22.04
-FROM $DISTRO:$DISTRO_VERSION as base
+FROM $DISTRO:$DISTRO_VERSION as python
 
-ENV DEBIAN_FRONTEND noninteractive
-# Send stdout and stderr stream directly to the terminal. Ensures that no
-# output is retained in a buffer if the application crashes.
-ENV PYTHONUNBUFFERED 1
-# Typically, bytecode is created on the first invocation to speed up following invocation.
-# However, in Docker we only make a single invocation (when we start the container).
-# Therefore, we can disable bytecode writing.
-ENV PYTHONDONTWRITEBYTECODE 1
-# Ensure that python encoding is always UTF-8.
-ENV PYTHONIOENCODING UTF-8
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies
 RUN apt-get update \
@@ -40,20 +30,72 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PyEnv and Python
-ARG PYTHON_VERSION
-ENV PYENV_ROOT /root/.pyenv
-ENV PATH $PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH
+ARG PYTHON_VERSION=3.11
+ENV PYENV_ROOT=/root/.pyenv
+ENV PATH $PYENV_ROOT/bin:$PATH
 # https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer | bash
-RUN pyenv install ${PYTHON_VERSION} \
-    && pyenv global ${PYTHON_VERSION} \
-    && pyenv rehash
 
-# Install specific version of pip
+# hadolint ignore=DL3003
+RUN git clone https://github.com/pyenv/pyenv.git \
+    && cd pyenv/plugins/python-build || exit \
+    && ./install.sh
+
+# Issue: python-build only accepts the exact Python version e.g. 3.11.1 but
+# we want to allow more general versions like 3.11
+# Solution: first use pyenv to get the exact version and then pass it to python-build
+RUN LATEST=$(pyenv latest -k ${PYTHON_VERSION}) \
+    && python-build "${LATEST}" /usr/local/bin/python
+
+FROM $DISTRO:$DISTRO_VERSION as base
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+    && apt-get -y --no-install-recommends install \
+    libsqlite3-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=python /usr/local/bin/python /usr/local/bin/python
+
+ENV PATH=/usr/local/bin/python/bin:$PATH \
+    # Send stdout and stderr stream directly to the terminal. Ensures that no
+    # output is retained in a buffer if the application crashes.
+    PYTHONUNBUFFERED=1 \
+    # Typically, bytecode is created on the first invocation to speed up following invocation.
+    # However, in Docker we only make a single invocation (when we start the container).
+    # Therefore, we can disable bytecode writing.
+    PYTHONDONTWRITEBYTECODE=1 \
+    # Ensure that python encoding is always UTF-8.
+    PYTHONIOENCODING=UTF-8 \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+# Use a virtual environment to ensure that Python packages are installed in the same location
+# regardless of whether the subsequent image build is run with the app or the root user
+RUN python -m venv /python/venv
+ENV PATH=/python/venv/bin:$PATH
+
 ARG PIP_VERSION
-RUN python -m pip install --no-cache-dir pip==$PIP_VERSION
-
-# Install specific version of setuptools
 ARG SETUPTOOLS_VERSION
-RUN python -m pip install --no-cache-dir setuptools==$SETUPTOOLS_VERSION
+ARG FLWR_VERSION
+ARG FLWR_PACKAGE=flwr
+RUN pip install -U --no-cache-dir \
+    pip==${PIP_VERSION} \
+    setuptools==${SETUPTOOLS_VERSION} \
+    ${FLWR_PACKAGE}==${FLWR_VERSION}
+
+# add non-root user
+RUN adduser \
+    --no-create-home \
+    --disabled-password \
+    --gecos "" \
+    --uid 49999 app \
+    && mkdir -p /app \
+    && chown -R app:app /python \
+    && chown -R app:app /app
+
+WORKDIR /app
+USER app
+ENV HOME=/app
