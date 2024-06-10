@@ -15,7 +15,6 @@
 """SQLite based implemenation of server state."""
 
 
-import os
 import re
 import sqlite3
 import time
@@ -24,13 +23,14 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
+from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .state import State
-from .utils import make_node_unavailable_taskres
+from .utils import generate_rand_int_from_bytes, make_node_unavailable_taskres
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
@@ -540,7 +540,7 @@ class SqliteState(State):  # pylint: disable=R0904
     ) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
-        node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
+        node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
 
         query = "SELECT node_id FROM node WHERE public_key = :public_key;"
         row = self.query(query, {"public_key": public_key})
@@ -615,7 +615,7 @@ class SqliteState(State):  # pylint: disable=R0904
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
-        run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
+        run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
         # Check conflicts
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"

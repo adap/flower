@@ -43,6 +43,10 @@ PING_BASE_MULTIPLIER = 0.8
 PING_RANDOM_RANGE = (-0.1, 0.1)
 PING_MAX_INTERVAL = 1e300
 
+# IDs
+RUN_ID_NUM_BYTES = 8
+NODE_ID_NUM_BYTES = 8
+
 
 class MessageType:
     """Message type."""
