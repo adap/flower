@@ -265,9 +265,10 @@ def _start_client_internal(
         transport, server_address
     )
 
-    run_tracker = _RunTracker()
+    app_state_tracker = _AppStateTracker()
 
     def _on_sucess(retry_state: RetryState) -> None:
+        app_state_tracker.is_connected = True
         if retry_state.tries > 1:
             log(
                 INFO,
@@ -275,10 +276,9 @@ def _start_client_internal(
                 retry_state.elapsed_time,
                 retry_state.tries,
             )
-            if run_tracker.create_node:
-                run_tracker.create_node()
 
     def _on_backoff(retry_state: RetryState) -> None:
+        app_state_tracker.is_connected = False
         if retry_state.tries == 1:
             log(WARN, "Connection attempt failed, retrying...")
         else:
@@ -309,7 +309,7 @@ def _start_client_internal(
 
     node_state = NodeState()
 
-    while True:
+    while not app_state_tracker.interrupt:
         sleep_duration: int = 0
         with connection(
             address,
@@ -326,99 +326,112 @@ def _start_client_internal(
             if create_node is not None:
                 create_node()  # pylint: disable=not-callable
 
-            while True:
-                # Receive
-                message = receive()
-                if message is None:
-                    time.sleep(3)  # Wait for 3s before asking again
-                    continue
+            app_state_tracker.register_signal_handler()
+            while not app_state_tracker.interrupt:
+                try:
+                    # Receive
+                    message = receive()
+                    if message is None:
+                        time.sleep(3)  # Wait for 3s before asking again
+                        continue
 
-                log(INFO, "")
-                if len(message.metadata.group_id) > 0:
+                    log(INFO, "")
+                    if len(message.metadata.group_id) > 0:
+                        log(
+                            INFO,
+                            "[RUN %s, ROUND %s]",
+                            message.metadata.run_id,
+                            message.metadata.group_id,
+                        )
                     log(
                         INFO,
-                        "[RUN %s, ROUND %s]",
-                        message.metadata.run_id,
-                        message.metadata.group_id,
+                        "Received: %s message %s",
+                        message.metadata.message_type,
+                        message.metadata.message_id,
                     )
-                log(
-                    INFO,
-                    "Received: %s message %s",
-                    message.metadata.message_type,
-                    message.metadata.message_id,
-                )
 
-                # Handle control message
-                out_message, sleep_duration = handle_control_message(message)
-                if out_message:
-                    send(out_message)
+                    # Handle control message
+                    out_message, sleep_duration = handle_control_message(message)
+                    if out_message:
+                        send(out_message)
+                        break
+
+                    # Register context for this run
+                    node_state.register_context(run_id=message.metadata.run_id)
+
+                    # Retrieve context for this run
+                    context = node_state.retrieve_context(
+                        run_id=message.metadata.run_id
+                    )
+
+                    # Create an error reply message that will never be used to prevent
+                    # the used-before-assignment linting error
+                    reply_message = message.create_error_reply(
+                        error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
+                    )
+
+                    # Handle app loading and task message
+                    try:
+                        # Load ClientApp instance
+                        client_app: ClientApp = load_client_app_fn()
+
+                        # Execute ClientApp
+                        reply_message = client_app(message=message, context=context)
+                    except Exception as ex:  # pylint: disable=broad-exception-caught
+
+                        # Legacy grpc-bidi
+                        if transport in ["grpc-bidi", None]:
+                            log(ERROR, "Client raised an exception.", exc_info=ex)
+                            # Raise exception, crash process
+                            raise ex
+
+                        # Don't update/change NodeState
+
+                        e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+                        # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                        reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                        exc_entity = "ClientApp"
+                        if isinstance(ex, LoadClientAppError):
+                            reason = (
+                                "An exception was raised when attempting to load "
+                                "`ClientApp`"
+                            )
+                            e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+                            exc_entity = "SuperNode"
+
+                        if not app_state_tracker.interrupt:
+                            log(
+                                ERROR, "%s raised an exception", exc_entity, exc_info=ex
+                            )
+
+                        # Create error message
+                        reply_message = message.create_error_reply(
+                            error=Error(code=e_code, reason=reason)
+                        )
+                    else:
+                        # No exception, update node state
+                        node_state.update_context(
+                            run_id=message.metadata.run_id,
+                            context=context,
+                        )
+
+                    # Send
+                    send(reply_message)
+                    log(INFO, "Sent reply")
+
+                except StopIteration:
+                    sleep_duration = 0
                     break
 
-                # Register context for this run
-                node_state.register_context(run_id=message.metadata.run_id)
-
-                # Retrieve context for this run
-                context = node_state.retrieve_context(run_id=message.metadata.run_id)
-
-                # Create an error reply message that will never be used to prevent
-                # the used-before-assignment linting error
-                reply_message = message.create_error_reply(
-                    error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
-                )
-
-                # Handle app loading and task message
-                try:
-                    # Load ClientApp instance
-                    client_app: ClientApp = load_client_app_fn()
-
-                    # Execute ClientApp
-                    reply_message = client_app(message=message, context=context)
-                except Exception as ex:  # pylint: disable=broad-exception-caught
-
-                    # Legacy grpc-bidi
-                    if transport in ["grpc-bidi", None]:
-                        log(ERROR, "Client raised an exception.", exc_info=ex)
-                        # Raise exception, crash process
-                        raise ex
-
-                    # Don't update/change NodeState
-
-                    e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
-                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-                    exc_entity = "ClientApp"
-                    if isinstance(ex, LoadClientAppError):
-                        reason = (
-                            "An exception was raised when attempting to load "
-                            "`ClientApp`"
-                        )
-                        e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
-                        exc_entity = "SuperNode"
-
-                    log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
-
-                    # Create error message
-                    reply_message = message.create_error_reply(
-                        error=Error(code=e_code, reason=reason)
-                    )
-                else:
-                    # No exception, update node state
-                    node_state.update_context(
-                        run_id=message.metadata.run_id,
-                        context=context,
-                    )
-
-                # Send
-                send(reply_message)
-                log(INFO, "Sent reply")
-
             # Unregister node
-            if delete_node is not None:
+            if delete_node is not None and app_state_tracker.is_connected:
                 delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
+            del app_state_tracker
             break
+
         # Sleep and reconnect afterwards
         log(
             INFO,
@@ -590,9 +603,9 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
 
 
 @dataclass
-class _RunTracker:
-    create_node: Optional[Callable[[], None]] = None
+class _AppStateTracker:
     interrupt: bool = False
+    is_connected: bool = False
 
     def register_signal_handler(self) -> None:
         """Register handlers for exit signals."""
