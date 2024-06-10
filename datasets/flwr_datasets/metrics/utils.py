@@ -41,7 +41,7 @@ def compute_counts(
         Column name identifying label based on which the count will be calculated.
     verbose_names : bool
         Whether to use verbose versions of the values in the column specified by
-        `column_name`. The verbose value are possible to extract if the column is a
+        `column_name`. The verbose values are possible to extract if the column is a
         feature of type `ClassLabel`.
     max_num_partitions : Optional[int]
         The number of partitions that will be used. If left None, then all partitions
@@ -139,8 +139,8 @@ def compute_frequencies(
 ) -> pd.DataFrame:
     """Compute the frequencies of unique values in a given column in the partitions.
 
-    The frequencies sum up to 1 for a given partition id. Take into account all
-    possible labels in dataset when computing count for each partition (assign 0 as the
+    The frequencies sum up to 1 for a given partition id. This function takes into account all
+    possible labels in the dataset when computing the count for each partition (assign 0 as the
     size when there are no values for a label in the partition).
 
     Parameters
