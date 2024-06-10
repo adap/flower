@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Resplitter package."""
+"""Metrics package."""
 
 
-from .merge_resplitter import MergeResplitter
-from .resplitter import Resplitter
+from flwr_datasets.metrics.utils import compute_counts, compute_frequency
 
 __all__ = [
-    "MergeResplitter",
-    "Resplitter",
+    "compute_counts",
+    "compute_frequency",
 ]
