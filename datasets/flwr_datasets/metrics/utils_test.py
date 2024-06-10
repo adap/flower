@@ -70,7 +70,6 @@ class TestPublicMetricsUtils(unittest.TestCase):
 
     def test_compute_frequencies(self) -> None:
         """Test if the frequencies are computed correctly."""
-        print(self.dataset.features)
         iid_partitioner = IidPartitioner(num_partitions=2)
         iid_partitioner.dataset = self.dataset
         frequencies = compute_frequencies(iid_partitioner, column_name="label")
@@ -116,7 +115,6 @@ class TestPublicMetricsUtils(unittest.TestCase):
         frequencies = compute_frequencies(
             iid_partitioner, column_name="label", verbose_names=True
         )
-        print(frequencies)
         pd.testing.assert_frame_equal(frequencies, result)
 
     def test_compute_count_with_smaller_max_partitions(self) -> None:
