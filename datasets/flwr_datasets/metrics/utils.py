@@ -51,8 +51,10 @@ def compute_counts(
     Returns
     -------
     dataframe: pd.DataFrame
-        DataFrame where the rows represent the partition id and the column represent
-        the unique values found in column specified by `column_name`.
+        DataFrame where the row index represent the partition id and the column index
+        represent the unique values found in column specified by `column_name`
+        (e.g. represeting the labels). The value of the dataframe.loc[i, j] represnt
+        the count of the label j, in the partition of index i.
 
     Examples
     --------
@@ -155,14 +157,17 @@ def compute_frequencies(
         `column_name`. The verbose value are possible to extract if the column is a
         feature of type `ClassLabel`.
     max_num_partitions : Optional[int]
-        The number of partitions that will be used. If left None, then all partitions
-        will be used.
+        The maximum number of partitions that will be used. If greater than the
+        total number of partitions in a partitioner, it won't have an effect. If left
+        as None, then all partitions will be used.
 
     Returns
     -------
     dataframe: pd.DataFrame
-        DataFrame where the rows represent the partition id and the column represent
-        the unique values found in column specified by `column_name`.
+        DataFrame where the row index represent the partition id and the column index
+        represent the unique values found in column specified by `column_name`
+        (e.g. represeting the labels). The value of the dataframe.loc[i, j] represnt
+        the ratio of the label j to the total number of sample of in partition i.
 
     Examples
     --------
