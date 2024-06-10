@@ -194,8 +194,6 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
 
         # Stop the ping-loop thread
         ping_stop_event.set()
-        if ping_thread is not None:
-            ping_thread.join()
 
         # Call FleetAPI
         delete_node_request = DeleteNodeRequest(node=node)

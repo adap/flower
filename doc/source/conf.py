@@ -248,7 +248,8 @@ redirects = {
     "quickstart-mxnet": "index.html",
     "tutorial-quickstart-mxnet": "index.html",
     "example-mxnet-walk-through": "index.html",
-    "ref-api/flwr.simulation.run_simulation_from_cli.html": "index.html",
+    "ref-api/flwr.simulation.run_simulation_from_cli": "index.html",
+    "contributor-how-to-create-new-messages": "index.html",
 }
 
 # -- Options for HTML output -------------------------------------------------
