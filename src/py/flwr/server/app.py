@@ -443,15 +443,8 @@ def run_superlink() -> None:
         )
         grpc_servers.append(fleet_server)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
-        address_arg = args.grpc_adapter_fleet_api_address
-        parsed_address = parse_address(address_arg)
-        if not parsed_address:
-            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, is_v6 = parsed_address
-        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-
         fleet_server = _run_fleet_api_grpc_adapter(
-            address=address,
+            address=fleet_address,
             state_factory=state_factory,
             certificates=certificates,
         )
@@ -816,54 +809,20 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--fleet-api-type",
         default=TRANSPORT_TYPE_GRPC_RERE,
-        help="Start a Fleet API server (gRPC-rere)",
+        type=str,
+        choices=[
+            TRANSPORT_TYPE_GRPC_RERE,
+            TRANSPORT_TYPE_REST,
+            TRANSPORT_TYPE_GRPC_ADAPTER,
+        ],
+        help="Start a gRPC-rere or REST (experimental) Fleet API server.",
     )
-    ex_group.add_argument(
-        "--grpc-adapter",
-        action="store_const",
-        dest="fleet_api_type",
-        const=TRANSPORT_TYPE_GRPC_ADAPTER,
-        help="Start a Fleet API server (GrpcAdapter, experimental)",
+    parser.add_argument(
+        "--fleet-api-address",
+        help="Fleet API server address (IPv4, IPv6, or a domain name).",
     )
-    ex_group.add_argument(
-        "--rest",
-        action="store_const",
-        dest="fleet_api_type",
-        const=TRANSPORT_TYPE_REST,
-        help="Start a Fleet API server (REST, experimental)",
-    )
-
-    # Fleet API gRPC-rere options
-    grpc_rere_group = parser.add_argument_group(
-        "Fleet API (gRPC-rere) server options", ""
-    )
-    grpc_rere_group.add_argument(
-        "--grpc-rere-fleet-api-address",
-        help="Fleet API (gRPC-rere) server address (IPv4, IPv6, or a domain name)",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
-    )
-
-    # Fleet API gRPC-adapter options
-    grpc_adapter_group = parser.add_argument_group(
-        "Fleet API (gRPC-adapter) server options", ""
-    )
-    grpc_adapter_group.add_argument(
-        "--grpc-adapter-fleet-api-address",
-        help="Fleet API (gRPC-adapter) server address (IPv4, IPv6, or a domain name)",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
-    )
-
-    # Fleet API REST options
-    rest_group = parser.add_argument_group("Fleet API (REST) server options", "")
-    rest_group.add_argument(
-        "--rest-fleet-api-address",
-        help="Fleet API (REST) server address (IPv4, IPv6, or a domain name)",
-        default=ADDRESS_FLEET_API_REST,
-    )
-    rest_group.add_argument(
-        "--rest-fleet-api-workers",
-        help="Set the number of concurrent workers for the Fleet API REST server.",
-        type=int,
+    parser.add_argument(
+        "--fleet-api-num-workers",
         default=1,
         type=int,
         help="Set the number of concurrent workers for the Fleet API server.",
