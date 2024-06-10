@@ -2,305 +2,236 @@
 
 ## Unreleased
 
-- **Update logging messages** ([#3430](https://github.com/adap/flower/pull/3430))
-
-- **Use abstract `Driver`** ([#3281](https://github.com/adap/flower/pull/3281))
-
-- **Bump actions/upload-artifact from 4.1.0 to 4.3.3** ([#3311](https://github.com/adap/flower/pull/3311))
-
-- **feat(datasets) Add label distribution visualization** ([#3451](https://github.com/adap/flower/pull/3451))
-
-- **Add `State.get_run`** ([#3261](https://github.com/adap/flower/pull/3261))
-
-- **Make `start_driver` require a `Driver` object** ([#3417](https://github.com/adap/flower/pull/3417))
-
-- **feat(framework) Introduce `RunTracker`** ([#3561](https://github.com/adap/flower/pull/3561))
-
-- **feat(framework) Deprecate `--server`, introduce `--superlink` to connect `ServerApp` and `SuperNode` to `SuperLink`** ([#3518](https://github.com/adap/flower/pull/3518))
-
-- **Remove deprecated `flower-driver-api` and `flower-fleet-api` CLIs from docs** ([#3420](https://github.com/adap/flower/pull/3420))
-
-- **docs(framework:skip) Add how to release the docker images** ([#3539](https://github.com/adap/flower/pull/3539))
-
-- **ci(:skip) Update code owners for translations** ([#3515](https://github.com/adap/flower/pull/3515))
-
-- **Fuse `Driver` and `DriverGrpc`** ([#3273](https://github.com/adap/flower/pull/3273))
-
-- **chore(deps): bump lewagon/wait-on-check-action from 1.3.3 to 1.3.4** ([#3349](https://github.com/adap/flower/pull/3349))
-
-- **chore(deps): bump tqdm from 4.65.0 to 4.66.3 in /examples/quickstart-monai** ([#3400](https://github.com/adap/flower/pull/3400))
-
-- **Add client auth interceptor** ([#2946](https://github.com/adap/flower/pull/2946))
-
-- **feat(nightly) Add CI for nightly SuperNode Docker image** ([#3290](https://github.com/adap/flower/pull/3290))
-
-- **Hide private class members of the `Metadata`** ([#3331](https://github.com/adap/flower/pull/3331))
-
-- **fix(:skip) Exclude `setuptools` version from `pyproject.toml`** ([#3494](https://github.com/adap/flower/pull/3494))
-
-- **Add sklearn template for `flwr new`** ([#3251](https://github.com/adap/flower/pull/3251))
-
-- **feat(framework:cli): Add `flwr build` command** ([#3256](https://github.com/adap/flower/pull/3256))
-
-- **Bump docker/metadata-action from 5.3.0 to 5.5.1** ([#2878](https://github.com/adap/flower/pull/2878))
-
-- **chore(deps): bump tqdm from 4.65.0 to 4.66.3 in /examples/flower-client-authentication** ([#3401](https://github.com/adap/flower/pull/3401))
-
-- **Change `AuthenticateServerInterceptor` arguments** ([#3388](https://github.com/adap/flower/pull/3388))
-
-- **Adjust logging levels for simulation** ([#3379](https://github.com/adap/flower/pull/3379))
-
-- **docs(framework) Update copybutton behaviour in Flower documentation** ([#3425](https://github.com/adap/flower/pull/3425))
-
-- **docs(framework:skip) Add section about root user** ([#3520](https://github.com/adap/flower/pull/3520))
-
-- **fix(:skip) Update `ray` and unpin `setuptools`** ([#3501](https://github.com/adap/flower/pull/3501))
-
-- **Fix python version up to 3.11 for simulations** ([#3262](https://github.com/adap/flower/pull/3262))
-
-    Hotfix to cap Python version to 3.11 in simulation.
-
-- **Hide private class memebrs of `Message`** ([#3334](https://github.com/adap/flower/pull/3334))
-
-- **Save `Exception` to `state` in `RetryInvoker`.** ([#3225](https://github.com/adap/flower/pull/3225))
-
-- **Add server auth interceptor** ([#2948](https://github.com/adap/flower/pull/2948))
-
-- **Add `get_run` to the three `connection.py`** ([#3292](https://github.com/adap/flower/pull/3292))
-
-- **fix(nightly) wait 30 min before building nightly images** ([#3294](https://github.com/adap/flower/pull/3294))
-
-- **feat(framework) Add alpine base image** ([#3453](https://github.com/adap/flower/pull/3453))
-
-- **Hide private members of `Error`** ([#3335](https://github.com/adap/flower/pull/3335))
-
-- **fix(framework:skip) Remove pyenv in Dockerfile** ([#3533](https://github.com/adap/flower/pull/3533))
-
-- **Add base abstract `Driver`** ([#3272](https://github.com/adap/flower/pull/3272))
-
-- **Correct dataset name in dp-sa-example** ([#3329](https://github.com/adap/flower/pull/3329))
-
-- **chore(deps): bump tqdm from 4.65.0 to 4.66.3 in /baselines/fjord** ([#3399](https://github.com/adap/flower/pull/3399))
-
-- **Move `run_client_app` to `supernode.app`** ([#3352](https://github.com/adap/flower/pull/3352))
-
-- **feat(workflow) add CI for nighly SuperLink Docker image** ([#3266](https://github.com/adap/flower/pull/3266))
-
-- **feat(framework:cli) Add MLX template for `flwr new`** ([#3291](https://github.com/adap/flower/pull/3291))
-
-- **fix(framework:skip) Remove `pydantic` from list of extras in `pyproject.toml`** ([#3514](https://github.com/adap/flower/pull/3514))
-
-- **Add how to enable client authentication guide** ([#3001](https://github.com/adap/flower/pull/3001))
-
-- **Add valid CSV info in authentication guide** ([#3409](https://github.com/adap/flower/pull/3409))
-
-- **docs(framework) Add latest Weblate translation updates** ([#3286](https://github.com/adap/flower/pull/3286))
-
-- **ci(:skip) Upgrade pip and setuptools** ([#3496](https://github.com/adap/flower/pull/3496))
-
-- **refactor(framework:skip) Add no-op indent level to `_start_client_internal`** ([#3564](https://github.com/adap/flower/pull/3564))
-
-- **refactor(framework) Update CLI SSL flags** ([#3512](https://github.com/adap/flower/pull/3512))
-
-- **Add initial flower next migration doc** ([#3267](https://github.com/adap/flower/pull/3267))
-
-    Add Flower Next migration document.
-
-- **fix(examples:skip) Add Opacus to top-level README** ([#3474](https://github.com/adap/flower/pull/3474))
-
-- **Add gitignore for ref-api** ([#3271](https://github.com/adap/flower/pull/3271))
-
-- **docs(framework) Add latest Hosted Weblate translation updates** ([#3516](https://github.com/adap/flower/pull/3516))
-
-- **fix(framework) Fix the metadata type in `MessageContainer`** ([#3535](https://github.com/adap/flower/pull/3535))
-
-- **Prepare `State` to enable `node_id` verification** ([#3389](https://github.com/adap/flower/pull/3389))
-
-- **docs(framework:skip) Update the Docker contributor page** ([#3523](https://github.com/adap/flower/pull/3523))
-
-- **ci(:skip) Enforce the skip flag on wildcard PRs** ([#3478](https://github.com/adap/flower/pull/3478))
-
-- **fix(framework:skip) Use sqlite3 lib without dev headers** ([#3486](https://github.com/adap/flower/pull/3486))
-
-- **docs(framework:skip) Fix typo in docstrings** ([#3545](https://github.com/adap/flower/pull/3545))
-
-- **break(framework) Remove option to start SuperLink for simulation** ([#3513](https://github.com/adap/flower/pull/3513))
-
-- **chore(ci) add GA Workflow for SuperNode Docker image** ([#3285](https://github.com/adap/flower/pull/3285))
-
-- **docs(framework) Fix the number of examples in pytorch-flower doc** ([#3498](https://github.com/adap/flower/pull/3498))
-
-- **chore(ci) add ServerApp Docker image in the nightly release CI** ([#3391](https://github.com/adap/flower/pull/3391))
-
-- **chore(deps): bump docker/build-push-action from 5.1.0 to 5.3.0** ([#3346](https://github.com/adap/flower/pull/3346))
-
-- **Add authentication state** ([#2917](https://github.com/adap/flower/pull/2917))
-
-- **fix(datasets:skip) Add missing types-setuptools** ([#3465](https://github.com/adap/flower/pull/3465))
-
-- **Use four digits after the decimal point for DP logging** ([#3360](https://github.com/adap/flower/pull/3360))
-
-- **docs(docker) Add ServerApps docs** ([#3439](https://github.com/adap/flower/pull/3439))
-
-- **Deprecate `flower-driver-api` and `flower-fleet-api` commands.** ([#3416](https://github.com/adap/flower/pull/3416))
-
-- **fix(framework:cli): Fix `flwr new` generated README** ([#3376](https://github.com/adap/flower/pull/3376))
-
-- **feat(framework) Use `InMemoryDriver` in simulations** ([#3355](https://github.com/adap/flower/pull/3355))
-
-- **chore(deps): bump tqdm from 4.65.0 to 4.66.3 in /examples/embedded-devices** ([#3398](https://github.com/adap/flower/pull/3398))
-
-- **feat(framework) Add JAX template for `flwr new`** ([#3287](https://github.com/adap/flower/pull/3287))
-
-- **Revert "docs() Remove placeholder search text to Flower documentation"** ([#3440](https://github.com/adap/flower/pull/3440))
-
-- **Mock `Driver` in `driver_client_proxy_test.py`** ([#3343](https://github.com/adap/flower/pull/3343))
-
-- **Update SSL how-to-guide to use Flower Next** ([#3408](https://github.com/adap/flower/pull/3408))
-
-- **Make example Flower 1.8.0 compatible** ([#3200](https://github.com/adap/flower/pull/3200))
-
-- **Add TensorFlow template for `flwr new`** ([#3139](https://github.com/adap/flower/pull/3139))
-
-- **chore(ci) add CI for ServerApp Docker image** ([#3403](https://github.com/adap/flower/pull/3403))
-
-- **docs(framework:skip) Update link for `run-simulation-from-cli`** ([#3382](https://github.com/adap/flower/pull/3382))
-
-- **feat(datasets) Add DivideResplitter** ([#2963](https://github.com/adap/flower/pull/2963))
-
-- **ci(framework) Add `FlowerNext` simulation E2E** ([#3363](https://github.com/adap/flower/pull/3363))
-
-- **feat(framework) Log a warning if the server fails to get initial parameters** ([#3461](https://github.com/adap/flower/pull/3461))
-
-- **Bump actions/download-artifact from 4.1.2 to 4.1.7** ([#3333](https://github.com/adap/flower/pull/3333))
-
-- **Hide `run_simulation_from_cli`** ([#3372](https://github.com/adap/flower/pull/3372))
-
-- **chore(deps): bump tqdm from 4.65.0 to 4.66.3 in /examples/quickstart-pytorch** ([#3397](https://github.com/adap/flower/pull/3397))
-
-- **Verify `node_id` in client auth** ([#3308](https://github.com/adap/flower/pull/3308))
-
-- **ci(:skip) Fix cache cleanup** ([#3521](https://github.com/adap/flower/pull/3521))
-
-- **refactor(framework) Update CLI auth flags** ([#3503](https://github.com/adap/flower/pull/3503))
-
-- **Hide the private class vars of `RecordSet` with a different approach.** ([#3368](https://github.com/adap/flower/pull/3368))
-
-- **feat(docker) add SuperNode dockerfile** ([#3283](https://github.com/adap/flower/pull/3283))
-
-- **docs(framework:skip) Add built-in mods to client doc** ([#3559](https://github.com/adap/flower/pull/3559))
-
-- **chore(deps): bump docker/login-action from 3.0.0 to 3.1.0** ([#3347](https://github.com/adap/flower/pull/3347))
-
-- **docs() Remove placeholder search text to Flower documentation** ([#3432](https://github.com/adap/flower/pull/3432))
-
-- **Fix broken colab link** ([#3204](https://github.com/adap/flower/pull/3204))
-
-- **Add flower-client-authentication code example** ([#2999](https://github.com/adap/flower/pull/2999))
-
-- **chore(deps): update torch requirement from <2.0.0,>=1.13.1 to >=1.13.1,<3.0.0 in /e2e/opacus** ([#3502](https://github.com/adap/flower/pull/3502))
-
-- **fix(examples) Fix Opacus in Flower example** ([#3392](https://github.com/adap/flower/pull/3392))
-
-- **Simple Typo Fix: "stated" to "started"** ([#3274](https://github.com/adap/flower/pull/3274))
-
-- **General updates to Flower SDKs** ([#3357](https://github.com/adap/flower/pull/3357), [3321](https://github.com/adap/flower/pull/3321), [3366](https://github.com/adap/flower/pull/3366))
-
-- **docs(docker) update Run Flower using Docker guide** ([#3278](https://github.com/adap/flower/pull/3278))
-
-- **Add `model_max_length` to AutoTokenizer in quickstart Hugging Face example** ([#3342](https://github.com/adap/flower/pull/3342))
-
-- **Set `console_handler` based on `verbose` value for simulations** ([#3378](https://github.com/adap/flower/pull/3378))
-
-- **feat(framework) Create `failures` for `aggregate_fit/aggregate_evaluate` in `DefaultWorkflows`** ([#3462](https://github.com/adap/flower/pull/3462))
-
-- **Switch private and public key order in State** ([#3386](https://github.com/adap/flower/pull/3386))
-
-- **ci(framework:skip) Enable auto-formatting for E2E** ([#3473](https://github.com/adap/flower/pull/3473))
-
-- **fix(framework:skip) Remove create_node call on reconnect** ([#3566](https://github.com/adap/flower/pull/3566))
-
-- **break(framework) Merge gRPC-rere and REST SuperLink options** ([#3527](https://github.com/adap/flower/pull/3527))
-
-- **fix(examples) Fix TensorFlow-Privacy example** ([#3488](https://github.com/adap/flower/pull/3488))
-
-- **ci(framework:skip) Use new base images is nightly CI** ([#3484](https://github.com/adap/flower/pull/3484))
-
-- **General updates to Flower Simulations** ([#3354](https://github.com/adap/flower/pull/3354))
-
-- **fix(nightly) wait on PyPI** ([#3282](https://github.com/adap/flower/pull/3282))
-
-- **ci(:skip) Fix PR title check regex** ([#3497](https://github.com/adap/flower/pull/3497))
-
-- **feat(framework) Add option to mute everything ran by a ray backend** ([#3435](https://github.com/adap/flower/pull/3435))
-
-- **docs(supernode-docker) Add Docker SuperNode documentation** ([#3371](https://github.com/adap/flower/pull/3371))
-
-- **Make DP noise logs shorter** ([#3433](https://github.com/adap/flower/pull/3433))
-
-- **Add client auth E2E test** ([#2979](https://github.com/adap/flower/pull/2979))
-
-- **docs(framework:skip) Update translation source strings** ([#3519](https://github.com/adap/flower/pull/3519))
-
-- **Bump docker/setup-buildx-action from 3.0.0 to 3.3.0** ([#3255](https://github.com/adap/flower/pull/3255))
-
-- **Fix `LLM-FlowerTune` example** ([#3269](https://github.com/adap/flower/pull/3269))
-
-- **refactor(:skip) Use toml config for PR title script** ([#3464](https://github.com/adap/flower/pull/3464))
-
-- **break(datasets) Rename resplitter parameter and type to preprocessor** ([#3476](https://github.com/adap/flower/pull/3476))
-
-- **feat(docker) add ServerApp Dockerfile** ([#3390](https://github.com/adap/flower/pull/3390))
-
-- **chore(deps): update pytorch-lightning requirement from 2.1.3 to 2.2.4 in /e2e/pytorch-lightning** ([#3387](https://github.com/adap/flower/pull/3387))
-
-- **fix() Fix `setuptools` to `pyproject.toml`** ([#3482](https://github.com/adap/flower/pull/3482))
-
-- **ci(:skip) Ignore dependabot PRs for title checks** ([#3495](https://github.com/adap/flower/pull/3495))
-
-- **Make communications pluggable in C++ SDK** ([#2763](https://github.com/adap/flower/pull/2763))
-
-    In the C++ SDK, the communication related code is now separate from the main client logic. A new abstract class `Communicator` has been introduced along side a gRPC implementation of it.
-
-- **Fix the number of clients in quickstart-pytorch example** ([#3394](https://github.com/adap/flower/pull/3394))
-
-- **Add FedPFT baseline** ([#3268](https://github.com/adap/flower/pull/3268))
-
-- **feat(framework) Add `InMemoryDriver`** ([#3307](https://github.com/adap/flower/pull/3307))
-
-- **ci(framework:skip) Switch to new base images** ([#3483](https://github.com/adap/flower/pull/3483))
-
-- **Fix quickstart-mlx requirements** ([#3202](https://github.com/adap/flower/pull/3202))
-
-- **Hide members and make `RecordSet` picklable.** ([#3209](https://github.com/adap/flower/pull/3209))
-
-- **Refactor `DriverClientProxy`** ([#3326](https://github.com/adap/flower/pull/3326))
-
-- **docs(framework:skip) Add details about the ownership of mounted volumes** ([#3530](https://github.com/adap/flower/pull/3530))
-
-- **General updates to Flower Examples** ([#3205](https://github.com/adap/flower/pull/3205), [3226](https://github.com/adap/flower/pull/3226), [3211](https://github.com/adap/flower/pull/3211), [3252](https://github.com/adap/flower/pull/3252), [3427](https://github.com/adap/flower/pull/3427), [3410](https://github.com/adap/flower/pull/3410), [3426](https://github.com/adap/flower/pull/3426), [3228](https://github.com/adap/flower/pull/3228))
-
-- **chore(deps): bump docker/login-action from 3.1.0 to 3.2.0** ([#3542](https://github.com/adap/flower/pull/3542))
-
-- **Add `__eq__` and `__repr__` to classes** ([#3375](https://github.com/adap/flower/pull/3375))
-
-- **General improvements** ([#3532](https://github.com/adap/flower/pull/3532), [3318](https://github.com/adap/flower/pull/3318), [3565](https://github.com/adap/flower/pull/3565), [3296](https://github.com/adap/flower/pull/3296), [3305](https://github.com/adap/flower/pull/3305), [3246](https://github.com/adap/flower/pull/3246), [3224](https://github.com/adap/flower/pull/3224), [3475](https://github.com/adap/flower/pull/3475), [3297](https://github.com/adap/flower/pull/3297), [3317](https://github.com/adap/flower/pull/3317), [3429](https://github.com/adap/flower/pull/3429), [3196](https://github.com/adap/flower/pull/3196), [3534](https://github.com/adap/flower/pull/3534), [3240](https://github.com/adap/flower/pull/3240), [3365](https://github.com/adap/flower/pull/3365), [3407](https://github.com/adap/flower/pull/3407), [3563](https://github.com/adap/flower/pull/3563), [3344](https://github.com/adap/flower/pull/3344), [3330](https://github.com/adap/flower/pull/3330), [3436](https://github.com/adap/flower/pull/3436), [3300](https://github.com/adap/flower/pull/3300), [3327](https://github.com/adap/flower/pull/3327), [3254](https://github.com/adap/flower/pull/3254), [3253](https://github.com/adap/flower/pull/3253), [3419](https://github.com/adap/flower/pull/3419), [3289](https://github.com/adap/flower/pull/3289), [3208](https://github.com/adap/flower/pull/3208), [3245](https://github.com/adap/flower/pull/3245), [3319](https://github.com/adap/flower/pull/3319), [3203](https://github.com/adap/flower/pull/3203), [3423](https://github.com/adap/flower/pull/3423))
-
-- **feat(framework:cli) Add HuggingFace template for `flwr new`** ([#3284](https://github.com/adap/flower/pull/3284))
-
-- **chore(ci) Add Robert-Steiner to CODEOWNERS** ([#3337](https://github.com/adap/flower/pull/3337))
-
-- **chore(deps): bump tqdm from 4.62.3 to 4.66.3 in /baselines/flwr_baselines** ([#3396](https://github.com/adap/flower/pull/3396))
-
-- **ci(framework) Optimize Ubuntu base image** ([#3458](https://github.com/adap/flower/pull/3458))
-
-- **fix(examples) Update TensorFlow-Privacy example dataset and model** ([#3526](https://github.com/adap/flower/pull/3526))
+  - **Add `get_run` to the three `connection.py`** ([#3292](https://github.com/adap/flower/pull/3292))
+  - **Add `State.get_run`** ([#3261](https://github.com/adap/flower/pull/3261))
 
 ### What's new?
 
+- **Introduce built-in authentication (preview)** ([#2946](https://github.com/adap/flower/pull/2946), [#3388](https://github.com/adap/flower/pull/3388), [#2948](https://github.com/adap/flower/pull/2948), [#2917](https://github.com/adap/flower/pull/2917), [#3386](https://github.com/adap/flower/pull/3386), [#3308](https://github.com/adap/flower/pull/3308), [#3001](https://github.com/adap/flower/pull/3001), [#3409](https://github.com/adap/flower/pull/3409), [#2999](https://github.com/adap/flower/pull/2999), [#2979](https://github.com/adap/flower/pull/2979), [#3389](https://github.com/adap/flower/pull/3389), [#3503](https://github.com/adap/flower/pull/3503), [#3366](https://github.com/adap/flower/pull/3366), [#3357](https://github.com/adap/flower/pull/3357))
+
+  Flower 1.9 introduces the first build-in version of client node authentication. In previous releases, users often wrote glue code to connect Flower to external authentication systems. With this release, the SuperLink can authenticate SuperNodes using a built-in authentication system. A new [how-to guide](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) and a new [code example](https://github.com/adap/flower/tree/main/examples/flower-authentication) help you to get started.
+
+  This is the first preview release of the Flower-native authentication system. Many additional features are on the roadmap for upcoming Flower releases - stay tuned.
+
+  <!-- - **Add client auth interceptor** ([#2946](https://github.com/adap/flower/pull/2946))
+  - **Change `AuthenticateServerInterceptor` arguments** ([#3388](https://github.com/adap/flower/pull/3388))
+  - **Add server auth interceptor** ([#2948](https://github.com/adap/flower/pull/2948))
+  - **Add authentication state** ([#2917](https://github.com/adap/flower/pull/2917))
+  - **Switch private and public key order in State** ([#3386](https://github.com/adap/flower/pull/3386))
+  - **Verify `node_id` in client auth** ([#3308](https://github.com/adap/flower/pull/3308))
+  - **Add how to enable client authentication guide** ([#3001](https://github.com/adap/flower/pull/3001))
+  - **Add valid CSV info in authentication guide** ([#3409](https://github.com/adap/flower/pull/3409))
+  - **Add flower-client-authentication code example** ([#2999](https://github.com/adap/flower/pull/2999))
+  - **Add client auth E2E test** ([#2979](https://github.com/adap/flower/pull/2979))
+  - **Prepare `State` to enable `node_id` verification** ([#3389](https://github.com/adap/flower/pull/3389))
+  - **refactor(framework) Update CLI auth flags** ([#3503](https://github.com/adap/flower/pull/3503)) 
+  - [#3366](https://github.com/adap/flower/pull/3366) 
+  - [#3357](https://github.com/adap/flower/pull/3357) -->
+
+- **Introduce end-to-end Docker support** ([#3483](https://github.com/adap/flower/pull/3483), [#3266](https://github.com/adap/flower/pull/3266), [#3390](https://github.com/adap/flower/pull/3390), [#3283](https://github.com/adap/flower/pull/3283), [#3285](https://github.com/adap/flower/pull/3285), [#3391](https://github.com/adap/flower/pull/3391), [#3403](https://github.com/adap/flower/pull/3403), [#3458](https://github.com/adap/flower/pull/3458), [#3533](https://github.com/adap/flower/pull/3533), [#3453](https://github.com/adap/flower/pull/3453), [#3486](https://github.com/adap/flower/pull/3486), [#3290](https://github.com/adap/flower/pull/3290))
+
+  Full Flower Next Docker support is here! With the release of Flower 1.9, Flower provides stable Docker images for the Flower SuperLink, the Flower SuperNode, and the Flower `ServerApp`. This set of images enables you to run all Flower components in Docker.
+
+  Check out the new [how-to guide]() to get stated.
+
+  <!-- - **ci(framework:skip) Switch to new base images** ([#3483](https://github.com/adap/flower/pull/3483))
+  - **feat(workflow) add CI for nighly SuperLink Docker image** ([#3266](https://github.com/adap/flower/pull/3266))
+  - **feat(docker) add ServerApp Dockerfile** ([#3390](https://github.com/adap/flower/pull/3390))
+  - **feat(docker) add SuperNode dockerfile** ([#3283](https://github.com/adap/flower/pull/3283))
+  - **chore(ci) add GA Workflow for SuperNode Docker image** ([#3285](https://github.com/adap/flower/pull/3285))
+  - **chore(ci) add ServerApp Docker image in the nightly release CI** ([#3391](https://github.com/adap/flower/pull/3391))
+  - **chore(ci) add CI for ServerApp Docker image** ([#3403](https://github.com/adap/flower/pull/3403))
+  - **ci(framework) Optimize Ubuntu base image** ([#3458](https://github.com/adap/flower/pull/3458))
+  - **fix(framework:skip) Remove pyenv in Dockerfile** ([#3533](https://github.com/adap/flower/pull/3533))
+  - **feat(framework) Add alpine base image** ([#3453](https://github.com/adap/flower/pull/3453))
+  - **feat(nightly) Add CI for nightly SuperNode Docker image** ([#3290](https://github.com/adap/flower/pull/3290))
+  - **fix(framework:skip) Use sqlite3 lib without dev headers** ([#3486](https://github.com/adap/flower/pull/3486)) -->
+
+- **Re-architect Flower Next simulation engine** ([#3307](https://github.com/adap/flower/pull/3307), [#3355](https://github.com/adap/flower/pull/3355), [#3272](https://github.com/adap/flower/pull/3272), [#3273](https://github.com/adap/flower/pull/3273), [#3417](https://github.com/adap/flower/pull/3417), [#3281](https://github.com/adap/flower/pull/3281), [#3343](https://github.com/adap/flower/pull/3343), [#3326](https://github.com/adap/flower/pull/3326))
+
+  Flower Next simulations now use a new in-memory `Driver` that improves the reliability of simulations, especially in notebook environments. This is a significant step towards a complete overhaul of the Flower Next simulation architecture.
+
+  <!-- - **feat(framework) Add `InMemoryDriver`** ([#3307](https://github.com/adap/flower/pull/3307))
+  - **feat(framework) Use `InMemoryDriver` in simulations** ([#3355](https://github.com/adap/flower/pull/3355))
+  - **Add base abstract `Driver`** ([#3272](https://github.com/adap/flower/pull/3272))
+  - **Fuse `Driver` and `DriverGrpc`** ([#3273](https://github.com/adap/flower/pull/3273))
+  - **Make `start_driver` require a `Driver` object** ([#3417](https://github.com/adap/flower/pull/3417))
+  - **Use abstract `Driver`** ([#3281](https://github.com/adap/flower/pull/3281))
+  - **Mock `Driver` in `driver_client_proxy_test.py`** ([#3343](https://github.com/adap/flower/pull/3343))
+  - **Refactor `DriverClientProxy`** ([#3326](https://github.com/adap/flower/pull/3326)) -->
+
+- **Improve simulation usability** ([#3354](https://github.com/adap/flower/pull/3354), [#3378](https://github.com/adap/flower/pull/3378), [#3262](https://github.com/adap/flower/pull/3262), [#3435](https://github.com/adap/flower/pull/3435), [#3501](https://github.com/adap/flower/pull/3501), [#3482](https://github.com/adap/flower/pull/3482), [#3494](https://github.com/adap/flower/pull/3494))
+
+  The Flower Next simulation engine comes with improved and configurable logging. The Ray-based simulation backend in Flower 1.9 was updated to use Ray 2.10.
+
+  <!-- - **General updates to Flower Simulations** ([#3354](https://github.com/adap/flower/pull/3354))
+  - **Set `console_handler` based on `verbose` value for simulations** ([#3378](https://github.com/adap/flower/pull/3378))
+  - **Fix python version up to 3.11 for simulations** ([#3262](https://github.com/adap/flower/pull/3262))
+
+    Hotfix to cap Python version to 3.11 in simulation.
+
+  - **feat(framework) Add option to mute everything ran by a ray backend** ([#3435](https://github.com/adap/flower/pull/3435))
+  - **fix(:skip) Update `ray` and unpin `setuptools`** ([#3501](https://github.com/adap/flower/pull/3501))
+  - **fix() Fix `setuptools` to `pyproject.toml`** ([#3482](https://github.com/adap/flower/pull/3482))
+  - **fix(:skip) Exclude `setuptools` version from `pyproject.toml`** ([#3494](https://github.com/adap/flower/pull/3494)) -->
+
+- **Improve** `flower-superlink` **CLI**
+
+  The `flower-superlink` CLI 
+
+  - **refactor(framework) Update CLI SSL flags** ([#3512](https://github.com/adap/flower/pull/3512))
+  - **feat(framework) Deprecate `--server`, introduce `--superlink` to connect `ServerApp` and `SuperNode` to `SuperLink`** ([#3518](https://github.com/adap/flower/pull/3518))
+
+- **Improve** `RecordSet` ([#3209](https://github.com/adap/flower/pull/3209), [#3331](https://github.com/adap/flower/pull/3331), [#3334](https://github.com/adap/flower/pull/3334), [#3335](https://github.com/adap/flower/pull/3335), [#3375](https://github.com/adap/flower/pull/3375), [#3368](https://github.com/adap/flower/pull/3368))
+
+  `RecordSet` is part of the Flower Next low-level API preview release. In Flower 1.9, `RecordSet` received a number of usability improvements that make it easier to build `RecordSet`-based `ServerApp`s and `ClientApp`s.
+
+  <!-- - **Hide members and make `RecordSet` picklable.** ([#3209](https://github.com/adap/flower/pull/3209))
+  - **Hide private class members of the `Metadata`** ([#3331](https://github.com/adap/flower/pull/3331))
+  - **Hide private class memebrs of `Message`** ([#3334](https://github.com/adap/flower/pull/3334))
+  - **Hide private members of `Error`** ([#3335](https://github.com/adap/flower/pull/3335))
+  - **Add `__eq__` and `__repr__` to classes** ([#3375](https://github.com/adap/flower/pull/3375))
+  - **Hide the private class vars of `RecordSet` with a different approach.** ([#3368](https://github.com/adap/flower/pull/3368)) -->
+
+
+- **Launch new** `flwr new` **templates for Apple MLX, Hugging Face Transformers, scikit-learn and TensorFlow** ([#3291](https://github.com/adap/flower/pull/3291), [#3139](https://github.com/adap/flower/pull/3139), [#3284](https://github.com/adap/flower/pull/3284), [#3251](https://github.com/adap/flower/pull/3251), [#3376](https://github.com/adap/flower/pull/3376), [#3287](https://github.com/adap/flower/pull/3287))
+
+  The `flwr` CLI's `flwr new` command is starting to become everone's favorite way of creating new Flowre projects. This release introduces new `flwr new` templates for Apple MLX, Hugging Face Transformers, scikit-learn and TensorFlow. In addition to that, the existing templates also received smaller updates.
+
+  <!-- - **feat(framework:cli) Add MLX template for `flwr new`** ([#3291](https://github.com/adap/flower/pull/3291))
+  - **Add TensorFlow template for `flwr new`** ([#3139](https://github.com/adap/flower/pull/3139))
+  - **feat(framework:cli) Add HuggingFace template for `flwr new`** ([#3284](https://github.com/adap/flower/pull/3284))
+  - **Add sklearn template for `flwr new`** ([#3251](https://github.com/adap/flower/pull/3251))
+  - **fix(framework:cli): Fix `flwr new` generated README** ([#3376](https://github.com/adap/flower/pull/3376))
+  - **feat(framework) Add JAX template for `flwr new`** ([#3287](https://github.com/adap/flower/pull/3287)) -->
+
+- **Introduce experimental** `flwr build` **CLI command** ([#3256](https://github.com/adap/flower/pull/3256))
+
+- **Introduce FedPFT baseline** ([#3268](https://github.com/adap/flower/pull/3268))
+
+  FedPFT allows you to perform one-shot Federated Learning by leveraging widely available foundational models, dramatically reducing communication costs while delivering high performing models. This is work led by Mahdi Beitollahi from Huawei Noah's Ark Lab (Montreal, Canada). Read all the details in their paper: "Parametric Feature Transfer: One-shot Federated Learning with Foundation Models" ([arxiv](https://arxiv.org/abs/2402.01862))
+
+- **Improve logging** ([#3379](https://github.com/adap/flower/pull/3379), [#3430](https://github.com/adap/flower/pull/3430), [#3461](https://github.com/adap/flower/pull/3461), [#3360](https://github.com/adap/flower/pull/3360), [#3433](https://github.com/adap/flower/pull/3433))
+
+  Logs received a substantial update. Not only are logs now much nicer to look at, but they are also more configurable.
+
+  <!-- - **Adjust logging levels for simulation** ([#3379](https://github.com/adap/flower/pull/3379))
+  - **Update logging messages** ([#3430](https://github.com/adap/flower/pull/3430))
+  - **feat(framework) Log a warning if the server fails to get initial parameters** ([#3461](https://github.com/adap/flower/pull/3461))
+  - **Use four digits after the decimal point for DP logging** ([#3360](https://github.com/adap/flower/pull/3360))
+  - **Make DP noise logs shorter** ([#3433](https://github.com/adap/flower/pull/3433)) -->
+
+- **Reliability, clean client shutodwn** ([#3564](https://github.com/adap/flower/pull/3564), [#3561](https://github.com/adap/flower/pull/3561), [#3566](https://github.com/adap/flower/pull/3566), [#3462](https://github.com/adap/flower/pull/3462), [#3225](https://github.com/adap/flower/pull/3225), [#3514](https://github.com/adap/flower/pull/3514), [#3535](https://github.com/adap/flower/pull/3535), [#3372](https://github.com/adap/flower/pull/3372)
+)
+
+  Flower 1.9 includes reliability improvements across many parts of the system. One example is a much improved SuperNode shutdown procedure.
+
+  <!-- - **refactor(framework:skip) Add no-op indent level to `_start_client_internal`** ([#3564](https://github.com/adap/flower/pull/3564))
+  - **feat(framework) Introduce `RunTracker`** ([#3561](https://github.com/adap/flower/pull/3561))
+  - **fix(framework:skip) Remove create_node call on reconnect** ([#3566](https://github.com/adap/flower/pull/3566))
+  - **feat(framework) Create `failures` for `aggregate_fit/aggregate_evaluate` in `DefaultWorkflows`** ([#3462](https://github.com/adap/flower/pull/3462))
+  - **Save `Exception` to `state` in `RetryInvoker`.** ([#3225](https://github.com/adap/flower/pull/3225))
+  - **fix(framework:skip) Remove `pydantic` from list of extras in `pyproject.toml`** ([#3514](https://github.com/adap/flower/pull/3514))
+  - **fix(framework) Fix the metadata type in `MessageContainer`** ([#3535](https://github.com/adap/flower/pull/3535))
+  - **Hide `run_simulation_from_cli`** ([#3372](https://github.com/adap/flower/pull/3372)) -->
+
+- **Update Swift and C++ SDKs** ([#3321](https://github.com/adap/flower/pull/3321), [#2763](https://github.com/adap/flower/pull/2763))
+
+  In the C++ SDK, the communication-related code is now separate from the main client logic. A new abstract class `Communicator` has been introduced along side a gRPC implementation of it.
+
+- **Improve testing, tooling and CI/CD infrastructure** ([#3294](https://github.com/adap/flower/pull/3294), [#3282](https://github.com/adap/flower/pull/3282), [#3311](https://github.com/adap/flower/pull/3311), [#2878](https://github.com/adap/flower/pull/2878), [#3333](https://github.com/adap/flower/pull/3333), [#3255](https://github.com/adap/flower/pull/3255), [#3349](https://github.com/adap/flower/pull/3349), [#3400](https://github.com/adap/flower/pull/3400), [#3401](https://github.com/adap/flower/pull/3401), [#3399](https://github.com/adap/flower/pull/3399), [#3346](https://github.com/adap/flower/pull/3346), [#3398](https://github.com/adap/flower/pull/3398), [#3397](https://github.com/adap/flower/pull/3397), [#3347](https://github.com/adap/flower/pull/3347), [#3502](https://github.com/adap/flower/pull/3502), [#3387](https://github.com/adap/flower/pull/3387), [#3542](https://github.com/adap/flower/pull/3542), [#3396](https://github.com/adap/flower/pull/3396), [#3496](https://github.com/adap/flower/pull/3496), [#3465](https://github.com/adap/flower/pull/3465), [#3473](https://github.com/adap/flower/pull/3473), [#3484](https://github.com/adap/flower/pull/3484), [#3521](https://github.com/adap/flower/pull/3521), [#3363](https://github.com/adap/flower/pull/3363), [#3497](https://github.com/adap/flower/pull/3497), [#3464](https://github.com/adap/flower/pull/3464), [#3495](https://github.com/adap/flower/pull/3495), [#3478](https://github.com/adap/flower/pull/3478), [#3271](https://github.com/adap/flower/pull/3271))
+
+  As always, the Flower tooling, testing, and CI/CD infrastructure received many updates and improvements.
+
+  <!-- - **fix(nightly) wait 30 min before building nightly images** ([#3294](https://github.com/adap/flower/pull/3294))
+  - **fix(nightly) wait on PyPI** ([#3282](https://github.com/adap/flower/pull/3282))
+  - **Bump actions/upload-artifact from 4.1.0 to 4.3.3** ([#3311](https://github.com/adap/flower/pull/3311))
+  - **Bump docker/metadata-action from 5.3.0 to 5.5.1** ([#2878](https://github.com/adap/flower/pull/2878))
+  - **Bump actions/download-artifact from 4.1.2 to 4.1.7** ([#3333](https://github.com/adap/flower/pull/3333))
+  - **Bump docker/setup-buildx-action from 3.0.0 to 3.3.0** ([#3255](https://github.com/adap/flower/pull/3255))
+  - **chore(deps): bump lewagon/wait-on-check-action from 1.3.3 to 1.3.4** ([#3349](https://github.com/adap/flower/pull/3349))
+  - **chore(deps): bump tqdm from 4.65.0 to 4.66.3 in /examples/quickstart-monai** ([#3400](https://github.com/adap/flower/pull/3400))
+  - **chore(deps): bump tqdm from 4.65.0 to 4.66.3 in /examples/flower-client-authentication** ([#3401](https://github.com/adap/flower/pull/3401))
+  - **chore(deps): bump tqdm from 4.65.0 to 4.66.3 in /baselines/fjord** ([#3399](https://github.com/adap/flower/pull/3399))
+  - **chore(deps): bump docker/build-push-action from 5.1.0 to 5.3.0** ([#3346](https://github.com/adap/flower/pull/3346))
+  - **chore(deps): bump tqdm from 4.65.0 to 4.66.3 in /examples/embedded-devices** ([#3398](https://github.com/adap/flower/pull/3398))
+  - **chore(deps): bump tqdm from 4.65.0 to 4.66.3 in /examples/quickstart-pytorch** ([#3397](https://github.com/adap/flower/pull/3397))
+  - **chore(deps): bump docker/login-action from 3.0.0 to 3.1.0** ([#3347](https://github.com/adap/flower/pull/3347))
+  - **chore(deps): update torch requirement from <2.0.0,>=1.13.1 to >=1.13.1,<3.0.0 in /e2e/opacus** ([#3502](https://github.com/adap/flower/pull/3502))
+  - **chore(deps): update pytorch-lightning requirement from 2.1.3 to 2.2.4 in /e2e/pytorch-lightning** ([#3387](https://github.com/adap/flower/pull/3387))
+  - **chore(deps): bump docker/login-action from 3.1.0 to 3.2.0** ([#3542](https://github.com/adap/flower/pull/3542))
+  - **chore(deps): bump tqdm from 4.62.3 to 4.66.3 in /baselines/flwr_baselines** ([#3396](https://github.com/adap/flower/pull/3396))
+  - **ci(:skip) Upgrade pip and setuptools** ([#3496](https://github.com/adap/flower/pull/3496))
+  - **fix(datasets:skip) Add missing types-setuptools** ([#3465](https://github.com/adap/flower/pull/3465))
+  - **ci(framework:skip) Enable auto-formatting for E2E** ([#3473](https://github.com/adap/flower/pull/3473))
+  - **ci(framework:skip) Use new base images is nightly CI** ([#3484](https://github.com/adap/flower/pull/3484))
+  - **ci(:skip) Fix cache cleanup** ([#3521](https://github.com/adap/flower/pull/3521))
+  - **ci(framework) Add `FlowerNext` simulation E2E** ([#3363](https://github.com/adap/flower/pull/3363))
+  - **ci(:skip) Fix PR title check regex** ([#3497](https://github.com/adap/flower/pull/3497))
+  - **refactor(:skip) Use toml config for PR title script** ([#3464](https://github.com/adap/flower/pull/3464))
+  - **ci(:skip) Ignore dependabot PRs for title checks** ([#3495](https://github.com/adap/flower/pull/3495))
+  - **ci(:skip) Enforce the skip flag on wildcard PRs** ([#3478](https://github.com/adap/flower/pull/3478))
+  - **Add gitignore for ref-api** ([#3271](https://github.com/adap/flower/pull/3271)) -->
+
+- **Improve documentation** ([#3530](https://github.com/adap/flower/pull/3530), [#3539](https://github.com/adap/flower/pull/3539), [#3425](https://github.com/adap/flower/pull/3425), [#3520](https://github.com/adap/flower/pull/3520), [#3286](https://github.com/adap/flower/pull/3286), [#3516](https://github.com/adap/flower/pull/3516), [#3523](https://github.com/adap/flower/pull/3523), [#3545](https://github.com/adap/flower/pull/3545), [#3498](https://github.com/adap/flower/pull/3498), [#3439](https://github.com/adap/flower/pull/3439), [#3440](https://github.com/adap/flower/pull/3440), [#3382](https://github.com/adap/flower/pull/3382), [#3559](https://github.com/adap/flower/pull/3559), [#3432](https://github.com/adap/flower/pull/3432), [#3278](https://github.com/adap/flower/pull/3278), [#3371](https://github.com/adap/flower/pull/3371), [#3519](https://github.com/adap/flower/pull/3519), [#3267](https://github.com/adap/flower/pull/3267), [#3204](https://github.com/adap/flower/pull/3204), [#3274](https://github.com/adap/flower/pull/3274))
+
+  As always, the Flower documentation received many improvements. Notable new pages include:
+
+  - [How-to upgrate to Flower Next (Flower Next migration guide)](https://flower.ai/docs/framework/how-to-upgrade-to-flower-next.html)
+
+  - [How-to run Flower using Docker](https://flower.ai/docs/framework/how-to-run-flower-using-docker.html)
+  
+  - [Flower Mods reference](https://flower.ai/docs/framework/ref-api/flwr.client.mod.html#module-flwr.client.mod)
+
+- **General updates to Flower Examples** ([#3205](https://github.com/adap/flower/pull/3205), [#3226](https://github.com/adap/flower/pull/3226), [#3211](https://github.com/adap/flower/pull/3211), [#3252](https://github.com/adap/flower/pull/3252), [#3427](https://github.com/adap/flower/pull/3427), [#3410](https://github.com/adap/flower/pull/3410), [#3426](https://github.com/adap/flower/pull/3426), [#3228](https://github.com/adap/flower/pull/3228), [#3342](https://github.com/adap/flower/pull/3342), [#3200](https://github.com/adap/flower/pull/3200), [#3202](https://github.com/adap/flower/pull/3202), [#3394](https://github.com/adap/flower/pull/3394), [#3488](https://github.com/adap/flower/pull/3488), [#3329](https://github.com/adap/flower/pull/3329), [#3526](https://github.com/adap/flower/pull/3526), [#3392](https://github.com/adap/flower/pull/3392), [#3474](https://github.com/adap/flower/pull/3474), [#3269](https://github.com/adap/flower/pull/3269))
+
+  As always, Flower code examples received many improvements.
+
+  <!-- - **Add `model_max_length` to AutoTokenizer in quickstart Hugging Face example** ([#3342](https://github.com/adap/flower/pull/3342))
+  - **Make example Flower 1.8.0 compatible** ([#3200](https://github.com/adap/flower/pull/3200))
+  - **Fix quickstart-mlx requirements** ([#3202](https://github.com/adap/flower/pull/3202))
+  - **Fix the number of clients in quickstart-pytorch example** ([#3394](https://github.com/adap/flower/pull/3394))
+  - **fix(examples) Fix TensorFlow-Privacy example** ([#3488](https://github.com/adap/flower/pull/3488))
+  - **Correct dataset name in dp-sa-example** ([#3329](https://github.com/adap/flower/pull/3329))
+  - **fix(examples) Update TensorFlow-Privacy example dataset and model** ([#3526](https://github.com/adap/flower/pull/3526))
+  - **fix(examples) Fix Opacus in Flower example** ([#3392](https://github.com/adap/flower/pull/3392))
+  - **fix(examples:skip) Add Opacus to top-level README** ([#3474](https://github.com/adap/flower/pull/3474))
+  - **Fix `LLM-FlowerTune` example** ([#3269](https://github.com/adap/flower/pull/3269)) -->
+
+- **General improvements** ([#3532](https://github.com/adap/flower/pull/3532), [#3318](https://github.com/adap/flower/pull/3318), [#3565](https://github.com/adap/flower/pull/3565), [#3296](https://github.com/adap/flower/pull/3296), [#3305](https://github.com/adap/flower/pull/3305), [#3246](https://github.com/adap/flower/pull/3246), [#3224](https://github.com/adap/flower/pull/3224), [#3475](https://github.com/adap/flower/pull/3475), [#3297](https://github.com/adap/flower/pull/3297), [#3317](https://github.com/adap/flower/pull/3317), [#3429](https://github.com/adap/flower/pull/3429), [#3196](https://github.com/adap/flower/pull/3196), [#3534](https://github.com/adap/flower/pull/3534), [#3240](https://github.com/adap/flower/pull/3240), [#3365](https://github.com/adap/flower/pull/3365), [#3407](https://github.com/adap/flower/pull/3407), [#3563](https://github.com/adap/flower/pull/3563), [#3344](https://github.com/adap/flower/pull/3344), [#3330](https://github.com/adap/flower/pull/3330), [#3436](https://github.com/adap/flower/pull/3436), [#3300](https://github.com/adap/flower/pull/3300), [#3327](https://github.com/adap/flower/pull/3327), [#3254](https://github.com/adap/flower/pull/3254), [#3253](https://github.com/adap/flower/pull/3253), [#3419](https://github.com/adap/flower/pull/3419), [#3289](https://github.com/adap/flower/pull/3289), [#3208](https://github.com/adap/flower/pull/3208), [#3245](https://github.com/adap/flower/pull/3245), [#3319](https://github.com/adap/flower/pull/3319), [#3203](https://github.com/adap/flower/pull/3203), [#3423](https://github.com/adap/flower/pull/3423), [#3352](https://github.com/adap/flower/pull/3352))
+
+### Deprecations
+
+- **Deprecate Python 3.8 support**
+
+  Python 3.8 will stop to receive security fixes in [October 2024](https://devguide.python.org/versions/). We therefore deprecate Python 3.8 support.
+
+- **Deprecate `flower-driver-api` and `flower-fleet-api` commands** ([#3416](https://github.com/adap/flower/pull/3416), [#3420](https://github.com/adap/flower/pull/3420))
+
+  Flower 1.9 also deprecates the two (experimental) CLI tools `flower-driver-api` and `flower-fleet-api`. Both commands will be removed in an upcoming release.
+
+  <!-- - **Remove deprecated `flower-driver-api` and `flower-fleet-api` CLIs from docs** () -->
+
+- **Deprecate** `--server` **and introduce** `--superlink` ([#3518](https://github.com/adap/flower/pull/3518))
+
+  The commands `flower-server-app` and `flower-client-app` should use `--superlink` instead of the now deprecated `--server`. Support for `--server` will be removed in a future release.
+
 ### Incompatible changes
 
-None
+- **Replace** `flower-superlink` **CLI option** `--certificates` **with** `--ssl-ca-certfile` **,** `--ssl-certfile` **and** `--ssl-keyfile` ([#3512](https://github.com/adap/flower/pull/3512), [#3408](https://github.com/adap/flower/pull/3408))
+
+  The `flower-superlink` CLI arguments were restructured in an incompatible way. Instead of passing `--certificates` with three values, you now need to pass three flags () with one value each. The `--server` flag was renamed to `--superlink`.
+  
+  <!-- - **refactor(framework) Update CLI SSL flags** ([#3512](https://github.com/adap/flower/pull/3512))
+  - **Update SSL how-to-guide to use Flower Next** ([#3408](https://github.com/adap/flower/pull/3408)) -->
+
+- **Remove** `--vce` **option to start SuperLink for simulation** ([#3513](https://github.com/adap/flower/pull/3513))
+
+  Instead of separately starting a SuperLink and a `ServerApp` for simulation, simulations must now be started using the single `flower-simulation` command.
+
+- **Merge gRPC-rere and REST SuperLink options** ([#3527](https://github.com/adap/flower/pull/3527))
+  
+  To simplify the usage of `flower-superlink`, previously separate sets of CLI options for REST and gRPC-rere were merged into one unified set of options. Consult the [Flower CLI reference documentation](https://flower.ai/docs/framework/ref-api-cli.html) for details.
 
 ## v1.8.0 (2024-04-03)
 
