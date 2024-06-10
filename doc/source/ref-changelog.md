@@ -63,7 +63,7 @@ We would like to give our special thanks to all the contributors who made the ne
   - [How-to upgrate to Flower Next (Flower Next migration guide)](https://flower.ai/docs/framework/how-to-upgrade-to-flower-next.html)
 
   - [How-to run Flower using Docker](https://flower.ai/docs/framework/how-to-run-flower-using-docker.html)
-  
+
   - [Flower Mods reference](https://flower.ai/docs/framework/ref-api/flwr.client.mod.html#module-flwr.client.mod)
 
 - **General updates to Flower Examples** ([#3205](https://github.com/adap/flower/pull/3205), [#3226](https://github.com/adap/flower/pull/3226), [#3211](https://github.com/adap/flower/pull/3211), [#3252](https://github.com/adap/flower/pull/3252), [#3427](https://github.com/adap/flower/pull/3427), [#3410](https://github.com/adap/flower/pull/3410), [#3426](https://github.com/adap/flower/pull/3426), [#3228](https://github.com/adap/flower/pull/3228), [#3342](https://github.com/adap/flower/pull/3342), [#3200](https://github.com/adap/flower/pull/3200), [#3202](https://github.com/adap/flower/pull/3202), [#3394](https://github.com/adap/flower/pull/3394), [#3488](https://github.com/adap/flower/pull/3488), [#3329](https://github.com/adap/flower/pull/3329), [#3526](https://github.com/adap/flower/pull/3526), [#3392](https://github.com/adap/flower/pull/3392), [#3474](https://github.com/adap/flower/pull/3474), [#3269](https://github.com/adap/flower/pull/3269))
@@ -97,7 +97,7 @@ We would like to give our special thanks to all the contributors who made the ne
   Instead of separately starting a SuperLink and a `ServerApp` for simulation, simulations must now be started using the single `flower-simulation` command.
 
 - **Merge** `--grpc-rere` **and** `--rest` **SuperLink options** ([#3527](https://github.com/adap/flower/pull/3527))
-  
+
   To simplify the usage of `flower-superlink`, previously separate sets of CLI options for gRPC and REST were merged into one unified set of options. Consult the [Flower CLI reference documentation](https://flower.ai/docs/framework/ref-api-cli.html) for details.
 
 ## v1.8.0 (2024-04-03)
