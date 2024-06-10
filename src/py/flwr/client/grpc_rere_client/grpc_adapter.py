@@ -23,8 +23,8 @@ from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common import log
 from flwr.common.constant import (
-    GRPC_ADAPTER_METADATA_EXIT_FLAG_KEY,
     GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY,
+    GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY,
 )
 from flwr.common.version import package_version
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -73,11 +73,12 @@ class GrpcAdapter:
         )
 
         # Handle control message
-        exit_flag = container_res.metadata.get(
-            GRPC_ADAPTER_METADATA_EXIT_FLAG_KEY, False
+        should_exit = (
+            container_res.metadata.get(GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY, "false")
+            == "true"
         )
-        if exit_flag:
-            log(DEBUG, "Exit flag is set to True, exiting...")
+        if should_exit:
+            log(DEBUG, "Received shutdown signal: exit flag is set to True. Exiting...")
             sys.exit(0)
 
         # Check the grpc_message_name of the response
