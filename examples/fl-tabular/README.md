@@ -1,4 +1,4 @@
-# Training with Sample-Level Differential Privacy using Opacus Privacy Engine
+# Flower Example on Adult Census Income Tabular Dataset
 
 Federated Learning on a Tabular Dataset with Flower Framework
 This code exemplifies a federated learning setup using the Flower framework on tabular dataset, based on the "Adult Census Income" dataset. The "Adult Census Income" dataset contains demographic information such as age, education, occupation, etc., with the target attribute being income level (<=50K or >50K). The dataset is partitioned into subsets, simulating a federated environment with 5 clients, each holding a distinct portion of the data. Categorical variables are one-hot encoded, and the data is split into training and testing sets. Federated learning is conducted using the FedAvg strategy for 3 rounds.
