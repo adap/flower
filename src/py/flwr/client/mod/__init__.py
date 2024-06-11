@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Mods."""
+"""Flower Built-in Mods."""
 
 
 from .centraldp_mods import adaptiveclipping_mod, fixedclipping_mod
