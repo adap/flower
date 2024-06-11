@@ -88,3 +88,26 @@ class ErrorCode:
     def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class Record:
+    """Keys for records in a RecordSet."""
+
+    PARAMS = "p"
+    METRICS = "m"
+    CONFIGS = "c"
+
+    def __new__(cls) -> Record:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class Metric:
+    """Keys for metrics in a MetricsRecord."""
+
+    NUM_EXAMPLES = "num_examples"
+    LOSS = "loss"
+
+    def __new__(cls) -> Metric:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
