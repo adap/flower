@@ -76,12 +76,15 @@ class IncomeClassifier(nn.Module):
         self.output = nn.Linear(64, 1)
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
+        self.dropout = nn.Dropout(0.5)
 
     def forward(self, x):
         if self.layer1 is None:
             self.initialize_model(x.size(1))  # Initialize model with input dimension
         x = self.relu(self.layer1(x))
+        x = self.dropout(x)
         x = self.relu(self.layer2(x))
+        x = self.dropout(x)
         x = self.sigmoid(self.output(x))
         return x
 

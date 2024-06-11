@@ -24,7 +24,7 @@ torch.manual_seed(SEED)
 if torch.cuda.is_available():
     torch.cuda.manual_seed(SEED)
 
-NUMBER_OF_CLIENTS = 2
+NUMBER_OF_CLIENTS = 5
 
 
 def load_data(partition_id):
@@ -44,14 +44,20 @@ def load_data(partition_id):
     X = dataset.drop("income", axis=1)
     y = dataset["income"]
 
-    # Define categorical columns
+    # One-hot Encoding
     categorical_cols = X.select_dtypes(include=["object"]).columns
+    categories_for_encoder = []
+    for cat_col in categorical_cols:
+        # Find the index of the categorical column in cat_features
+        cat_index = list(cat_features).index(cat_col)
+        categories_for_encoder.append(categories[cat_index])
 
-    # Ordinal Encoding
-    encoder = OrdinalEncoder()
+    encoder = OneHotEncoder(
+        sparse_output=False, handle_unknown="ignore", categories=categories_for_encoder
+    )
     X_encoded = pd.DataFrame(encoder.fit_transform(X[categorical_cols]))
-    X_encoded.columns = X[categorical_cols].columns
-    X[categorical_cols] = X_encoded
+    X_encoded.columns = encoder.get_feature_names_out(categorical_cols)
+    X = pd.concat([X.drop(categorical_cols, axis=1), X_encoded], axis=1)
 
     split_index = int(0.8 * len(X))
     X_train, X_test = X[:split_index], X[split_index:]
@@ -78,12 +84,15 @@ class IncomeClassifier(nn.Module):
         self.output = nn.Linear(64, 1)
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
+        self.dropout = nn.Dropout(0.5)
 
     def forward(self, x):
         if self.layer1 is None:
             self.initialize_model(x.size(1))  # Initialize model with input dimension
         x = self.relu(self.layer1(x))
+        x = self.dropout(x)
         x = self.relu(self.layer2(x))
+        x = self.dropout(x)
         x = self.sigmoid(self.output(x))
         return x
 
@@ -93,7 +102,7 @@ class IncomeClassifier(nn.Module):
 
 def train(model, train_loader, num_epochs=1):
     criterion = nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)
     model.train()
     for epoch in range(num_epochs):
         for X_batch, y_batch in train_loader:
@@ -153,10 +162,17 @@ class FlowerClient(NumPyClient):
         return loss, len(self.testloader), {"accuracy": accuracy}
 
 
+def client_fn(cid: str) -> Client:
+    train_loader, test_loader, input_dim = load_data(partition_id=int(cid))
+    net = IncomeClassifier()
+    return FlowerClient(net, train_loader, test_loader).to_client()
+
+
+client = ClientApp(client_fn)
+
 net = IncomeClassifier()
 params = ndarrays_to_parameters(get_weights(net))
 
-# Create Strategy
 strategy = FedAvg(
     initial_parameters=params,
 )
@@ -167,12 +183,4 @@ server = ServerApp(
 )
 
 
-def client_fn(cid: str) -> Client:
-    train_loader, test_loader, input_dim = load_data(partition_id=int(cid))
-    net = IncomeClassifier()
-    return FlowerClient(net, train_loader, test_loader).to_client()
-
-
-client = ClientApp(client_fn)
-
-run_simulation(server_app=server, client_app=client, num_supernodes=2)
+run_simulation(server_app=server, client_app=client, num_supernodes=5)
