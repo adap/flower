@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-05-28 11:47+0200\n"
-"PO-Revision-Date: 2024-06-10 14:09+0000\n"
+"PO-Revision-Date: 2024-06-11 06:22+0000\n"
 "Last-Translator: 박태현 <qkrxogus113@ajou.ac.kr>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
@@ -397,10 +397,13 @@ msgid ""
 "will automatically bring you to the translation interface for "
 "untranslated strings."
 msgstr ""
+"여기서 가장 간단한 옵션은 오른쪽 상단(``Translation status`` 부분)에 있는 "
+"``Translate`` 버튼을 클릭하는 것 입니다. 번역되지 않은 문장에 대한 번역 "
+"인터페이스로 자동으로 이동합니다."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:43
 msgid "This is what the interface looks like:"
-msgstr ""
+msgstr "인터페이스는 다음과 같습니다:"
 
 #: ../../source/contributor-how-to-contribute-translations.rst:47
 msgid ""
@@ -411,6 +414,11 @@ msgid ""
 "your translation to suggestions for other users to view), or ``Skip`` (to"
 " go to the next untranslated string without saving anything)."
 msgstr ""
+"번역문을 상단의 텍스트 상자에 입력한 후, 번역이 만족스러우면 ``Save and "
+"continue``(번역을 저장하고 다음 미번역 문장으로 이동), ``Save and stay``("
+"번역을 저장하고 해당 페이지에 머무르기), ``Suggest`` (다른 사용자가 볼 수 "
+"있도록 번역을 제안 항목에 추가), ``Skip``(아무것도 저장하지 않고 다음 미번역 "
+"문장으로 이동) 중 하나를 선택하면 됩니다."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:54
 msgid ""
@@ -420,13 +428,17 @@ msgid ""
 "translations in ``Other languages``, and the ``History`` of translations "
 "for this string."
 msgstr ""
+"번역에 도움을 주기위해 하단에서 `주변 문자열``, ``의견``(다른 기여자의), ``"
+"자동 제안``(기계 번역의), ``다른 언어``의 번역 및 해당 문장의 "
+"번역``히스토리``를 볼 수 있습니다."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:59
 msgid ""
 "On the right, under the ``String information`` section, you can also "
 "click the link under ``Source string location`` in order to view the "
 "source of the doc file containing the string."
-msgstr ""
+msgstr "오른쪽의 ``문자열 정보``에서 ``원본 문자열 위치``를 클릭하여 해당 문장이 "
+"포함된 문서의 파일 소스를 볼 수도 있습니다."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:63
 msgid ""
@@ -434,10 +446,12 @@ msgid ""
 "this `in-depth guide "
 "<https://docs.weblate.org/en/latest/user/translating.html>`_."
 msgstr ""
+"Weblate를 통한 번역에 대한 자세한 정보는 `in-depth guide <https://docs."
+"weblate.org/en/latest/user/translating.html>`_를 확인하세요."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:67
 msgid "Add new languages"
-msgstr ""
+msgstr "새 언어 추가"
 
 #: ../../source/contributor-how-to-contribute-translations.rst:69
 msgid ""
@@ -445,6 +459,9 @@ msgid ""
 "either on `Slack <https://flower.ai/join-slack>`_, or by opening an issue"
 " on our `GitHub repo <https://github.com/adap/flower>`_."
 msgstr ""
+"새 언어를 추가하려면, `Slack <https://flower.ai/join-slack>`에 문의하거나 `"
+"GitHub repo <https://github.com/adap/flower>`_에서 issue에 들어가 문의 해야 "
+"합니다."
 
 #: ../../source/contributor-how-to-create-new-messages.rst:2
 msgid "Creating New Messages"
@@ -561,7 +578,7 @@ msgstr ""
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:2
 msgid "Develop in VSCode Dev Containers"
-msgstr ""
+msgstr "VSCode Dev Container에서 개발"
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:4
 msgid ""
@@ -570,6 +587,10 @@ msgid ""
 "tests. For this purpose we are using the VSCode Remote Containers "
 "extension. What is it? Read the following quote:"
 msgstr ""
+"Flower 프레임워크 작업시, 모든 기여자들이 코드 포맷팅이나 테스트 실행을 위해 "
+"동일한 개발 환경을 사용하길 원합니다. 이를 위해 VSCode Remote Containers "
+"확장을 사용하고 있습니다. 그것이 무엇인지 알아보기 위해 다음 인용문을 "
+"읽어보세요:"
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:7
 msgid ""
@@ -583,6 +604,14 @@ msgid ""
 "separate tools, libraries, or runtimes needed for working with a "
 "codebase."
 msgstr ""
+"Visual Studio Code Remote - 컨테이너 확장을 사용하면 Docker 컨테이너를 모든 "
+"기능을 갖춘 개발 환경으로 사용할 수 있습니다. 이 확장 기능을 사용하면 "
+"컨테이너 내부(또는 컨테이너에 마운트된)의 모든 폴더를 열고 Visual Studio "
+"Code의 모든 기능을 활용할 수 있습니다. 프로젝트에 있는 :code:`devcontainer."
+"json` 파일은 잘 정의된 도구와 런타임 스택을 사용하여 개발 컨테이너에 액세스("
+"또는 생성)하는 방법을 VS Code에 알려줍니다. 이 컨테이너는 애플리케이션을 "
+"실행하거나 코드베이스 작업에 필요한 도구, 라이브러리 또는 런타임을 분리하는 "
+"데 사용할 수 있습니다."
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:9
 msgid ""
