@@ -36,26 +36,15 @@ def log(
     from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
     from flwr.common.logger import log
 
-    # from flwr.proto.exec_pb2 import StreamLogsRequest
-    # from flwr.proto.exec_pb2_grpc import ExecStub
-
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
 
     def stream_logs(run_id, channel, duration):
         """Stream logs with connection refresh."""
-        start_time = time.time()
-        # Set stub and req
-        # stub = ExecStub(channel)
-        # req = StreamLogsRequest(run_id=run_id)
-        for res in ["log"]:
-            print(res)
-            if follow and time.time() - start_time < duration:
-                continue
-            else:
-                log(INFO, "Logstream exceeded duration.")
-                break
+
+    def print_logs(run_id, channel, timeout):
+        """Print logs."""
 
     channel = create_channel(
         server_address="127.0.0.1:9093",
@@ -68,9 +57,14 @@ def log(
     STREAM_DURATION = 60
 
     try:
-        while True:
-            stream_logs(run_id, channel, STREAM_DURATION)
-            time.sleep(5)
-            log(INFO, "Reconnecting to logstream.")
+        if follow:
+            while True:
+                log(INFO, "Streaming logs")
+                stream_logs(run_id, channel, STREAM_DURATION)
+                time.sleep(2)
+                log(INFO, "Reconnecting to logstream")
+        else:
+            print_logs(run_id, channel, timeout=1)
     except KeyboardInterrupt:
-        log(INFO, "Exiting `flwr log`.")
+        log(INFO, "Exiting logstream")
+        channel.close()
