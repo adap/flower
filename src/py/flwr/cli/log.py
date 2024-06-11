@@ -15,6 +15,7 @@
 """Flower command line interface `log` command."""
 
 import time
+import grpc
 
 import typer
 from typing_extensions import Annotated
@@ -40,10 +41,10 @@ def log(
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
 
-    def stream_logs(run_id, channel, duration) -> None:
+    def stream_logs(run_id, channel: grpc.Channel, duration: int) -> None:
         """Stream logs with connection refresh."""
 
-    def print_logs(run_id, channel, timeout) -> None:
+    def print_logs(run_id, channel: grpc.Channel, timeout: int) -> None:
         """Print logs."""
 
     channel = create_channel(
