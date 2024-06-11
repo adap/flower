@@ -15,8 +15,8 @@
 """Flower command line interface `log` command."""
 
 import time
-import grpc
 
+import grpc
 import typer
 from typing_extensions import Annotated
 
