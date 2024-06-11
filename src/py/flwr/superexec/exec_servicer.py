@@ -20,7 +20,7 @@ import threading
 import time
 from logging import INFO
 from subprocess import Popen
-from typing import Any, Dict, Generator
+from typing import Any, Dict, List, Generator
 
 import grpc
 
@@ -42,7 +42,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     def __init__(self, plugin: Executor) -> None:
         self.plugin = plugin
         self.runs: Dict[int, Popen[str]] = {}
-        self.logs = []
+        self.logs: List[str] = []
         self.lock = threading.Lock()
 
     def StartRun(
@@ -57,10 +57,10 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self._capture_logs(run.proc)
         return StartRunResponse(run_id=run.run_id)
 
-    def _capture_logs(self, proc):
+    def _capture_logs(self, proc: Popen[str]) -> None:
         select_timeout = 1.0
 
-        def run():
+        def run() -> None:
             while True:
                 reads, _, _ = select.select([proc.stderr], [], [], select_timeout)
                 if reads:

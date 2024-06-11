@@ -25,7 +25,7 @@ class DeploymentEngine(Executor):
     ) -> None:
         self.address = address
         self.root_certificates = root_certificates
-        self.stub = None
+        self.stub: Optional[DriverStub] = None
 
     def _connect(self) -> None:
         if self.stub is None:

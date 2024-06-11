@@ -104,12 +104,12 @@ def run(
 
         fab_path = build(app_path)
 
-        req = StartRunRequest(fab_file=open(fab_path, "rb").read())
-        res = stub.StartRun(req)
+        start_run_req = StartRunRequest(fab_file=open(fab_path, "rb").read())
+        start_run_res = stub.StartRun(start_run_req)
 
         if follow:
-            req = FetchLogsRequest(run_id=res.run_id)
-            for res in stub.FetchLogs(req):
+            fetch_logs_req = FetchLogsRequest(run_id=start_run_res.run_id)
+            for res in stub.FetchLogs(fetch_logs_req):
                 print(res.log_output)
     else:
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)

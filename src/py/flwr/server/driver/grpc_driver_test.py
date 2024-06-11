@@ -46,7 +46,7 @@ class TestGrpcDriver(unittest.TestCase):
             return_value=self.mock_grpc_driver_helper,
         )
         self.patcher.start()
-        self.driver = GrpcDriver()
+        self.driver = GrpcDriver(run_id=61016)
 
     def tearDown(self) -> None:
         """Cleanup after each test."""
