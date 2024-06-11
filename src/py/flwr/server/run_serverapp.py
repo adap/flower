@@ -149,9 +149,11 @@ def run_server_app() -> None:
 
     # Initialize GrpcDriver
     driver = GrpcDriver(
-        run_id=args.run_id,
         driver_service_address=args.superlink,
         root_certificates=root_certificates,
+        fab_id=args.fab_id,
+        fab_version=args.fab_version,
+        run_id=args.run_id,
     )
 
     # Run the ServerApp with the Driver
@@ -209,7 +211,20 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         " Default: current working directory.",
     )
     parser.add_argument(
+        "--fab-id",
+        default=None,
+        type=str,
+        help="The identifier of the FAB used in the run.",
+    )
+    parser.add_argument(
+        "--fab-version",
+        default=None,
+        type=str,
+        help="The version of the FAB used in the run.",
+    )
+    parser.add_argument(
         "--run-id",
+        default=None,
         type=int,
         help="The identifier of the run to start.",
     )
