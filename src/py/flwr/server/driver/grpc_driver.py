@@ -136,6 +136,7 @@ class GrpcDriverHelper:
 
 
 class GrpcDriver(Driver):
+    # pylint: disable=too-many-instance-attributes, too-many-arguments
     """`Driver` class provides an interface to the Driver API.
 
     Parameters
