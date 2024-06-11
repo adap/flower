@@ -45,7 +45,6 @@ def log(
     channel = create_channel()
 
     try:
-        while True:
-            print('Log')
+        print('Log')
     except KeyboardInterrupt:
         log(INFO, "Exiting `flwr log`.")
