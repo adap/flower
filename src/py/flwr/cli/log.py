@@ -40,10 +40,10 @@ def log(
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
 
-    def stream_logs(run_id, channel, duration):
+    def stream_logs(run_id, channel, duration) -> None:
         """Stream logs with connection refresh."""
 
-    def print_logs(run_id, channel, timeout):
+    def print_logs(run_id, channel, timeout) -> None:
         """Print logs."""
 
     channel = create_channel(
