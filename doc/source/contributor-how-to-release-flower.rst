@@ -12,6 +12,24 @@ The version number of a release is stated in ``pyproject.toml``. To release a ne
 2. Once the changelog has been updated with all the changes, open a pull request.
 3. Once the pull request is merged, tag the release commit with the version number as soon as the PR is merged: ``git tag v<NEW_VERSION>`` (notice the ``v`` added before the version number), then ``git push --tags``. This will create a draft release on GitHub containing the correct artifacts and the relevant part of the changelog.
 4. Check the draft release on GitHub, and if everything is good, publish it.
+5. Trigger the CI for building the Docker images.
+
+To trigger the workflow, a collaborator must create a ``workflow_dispatch`` event in the
+GitHub CI. This can be done either through the UI or via the GitHub CLI. The event requires only one
+input, the Flower version, to be released.
+
+**Via the UI**
+
+1. Go to the ``Build docker images`` workflow `page <https://github.com/adap/flower/actions/workflows/docker-images.yml>`_.
+2. Click on the ``Run workflow`` button and type the new version of Flower in the ``Version of Flower`` input field.
+3. Click on the **green** ``Run workflow`` button.
+
+.. image:: _static/docker-ci-release.png
+
+**Via the GitHub CI**
+
+1. Make sure you are logged in via ``gh auth login`` and that the current working directory is the root of the Flower repository.
+2. Trigger the workflow via ``gh workflow run docker-images.yml -f flwr-version=<NEW_VERSION>``.
 
 After the release
 -----------------
