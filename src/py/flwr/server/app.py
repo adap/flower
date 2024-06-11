@@ -445,7 +445,7 @@ def run_superlink() -> None:
         driver_server.wait_for_termination(timeout=1)
 
 
-def _format_address(address: str) -> Tuple[str, str, str]:
+def _format_address(address: str) -> Tuple[str, str, int]:
     parsed_address = parse_address(address)
     if not parsed_address:
         sys.exit(f"IP address ({address}) cannot be parsed.")
