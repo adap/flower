@@ -7,7 +7,6 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
-# Load dataset
 url = "https://archive.ics.uci.edu/ml/machine-learning-databases/adult/adult.data"
 column_names = [
     "age",
@@ -31,43 +30,35 @@ data = pd.read_csv(
     url, header=None, names=column_names, na_values=" ?", sep=",\s", engine="python"
 )
 
-# Handle missing values
 data.dropna(inplace=True)
 
-# Encode categorical variables
 label_encoders = {}
 for column in data.select_dtypes(include=["object"]).columns:
     label_encoders[column] = LabelEncoder()
     data[column] = label_encoders[column].fit_transform(data[column])
 
-# Split data into features and target
 X = data.drop("income", axis=1).values
 y = data["income"].values
 
-# Split data into training and test sets
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-# Scale the features
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-# Convert to PyTorch tensors
 X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
 X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
 y_train_tensor = torch.tensor(y_train, dtype=torch.float32).view(-1, 1)
 y_test_tensor = torch.tensor(y_test, dtype=torch.float32).view(-1, 1)
 
-# Create DataLoader
 train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
 test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 
-# Define the model
 class IncomeClassifier(nn.Module):
     def __init__(self):
         super(IncomeClassifier, self).__init__()
@@ -92,7 +83,6 @@ class IncomeClassifier(nn.Module):
         self.layer1 = nn.Linear(input_dim, 128)
 
 
-# Initialize the model
 model = IncomeClassifier()
 
 
@@ -124,8 +114,6 @@ def evaluate(model, test_loader):
         print(f"Accuracy: {accuracy:.2f}")
 
 
-# Train the model
 train(model, train_loader, num_epochs=10)
 
-# Evaluate the model
 evaluate(model, test_loader)
