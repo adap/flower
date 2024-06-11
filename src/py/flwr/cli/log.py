@@ -36,6 +36,8 @@ def log(
     from flwr.proto.exec_pb2 import StreamLogsRequest
     from flwr.proto.exec_pb2_grpc import ExecStub
 
+    # TODO: Set SuperExec address
+
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
