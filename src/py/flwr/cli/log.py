@@ -14,8 +14,15 @@
 # ==============================================================================
 """Flower command line interface `log` command."""
 
+from logging import DEBUG
+
 import typer
 from typing_extensions import Annotated
+
+from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
+from flwr.common.logger import log as flwr_log
+from flwr.proto.exec_pb2 import FetchLogsRequest
+from flwr.proto.exec_pb2_grpc import ExecStub
 
 
 def log(
@@ -29,16 +36,10 @@ def log(
     ] = True,
 ) -> None:
     """Get logs from Flower run."""
-    from logging import DEBUG
-
-    from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-    from flwr.common.logger import log
-    from flwr.proto.exec_pb2 import FetchLogsRequest
-    from flwr.proto.exec_pb2_grpc import ExecStub
 
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
-        log(DEBUG, channel_connectivity)
+        flwr_log(DEBUG, channel_connectivity)
 
     channel = create_channel(
         server_address="127.0.0.1:9093",
@@ -56,5 +57,4 @@ def log(
         print(res.log_output)
         if follow:
             continue
-        else:
-            break
+        break

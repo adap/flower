@@ -104,7 +104,8 @@ def run(
 
         fab_path = build(app_path)
 
-        start_run_req = StartRunRequest(fab_file=open(fab_path, "rb").read())
+        with open(fab_path, "rb") as f:
+            start_run_req = StartRunRequest(fab_file=f.read())
         start_run_res = stub.StartRun(start_run_req)
 
         if follow:
