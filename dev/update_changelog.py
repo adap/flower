@@ -13,10 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""This module is used to update the changelog."""
+"""Update the changelog using PR titles."""
 
 
+import pathlib
 import re
+import tomllib
 from datetime import date
 from sys import argv
 from typing import Dict, Optional, Set, Tuple
@@ -29,8 +31,22 @@ from github.Tag import Tag
 REPO_NAME = "adap/flower"
 CHANGELOG_FILE = "doc/source/ref-changelog.md"
 CHANGELOG_SECTION_HEADER = "### Changelog entry"
-TYPES_PATTERN = r"(ci|docs|feat|fix|refactor|break)"
-PROJECT_PATTERN = r"(framework|datasets|examples|baselines)"
+
+# Load the YAML configuration
+with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
+    "rb"
+) as file:
+    CONFIG = tomllib.load(file)
+
+# Extract types, project, and scope from the config
+TYPES = "|".join(CONFIG["type"])
+PROJECTS = "|".join(CONFIG["project"]) + "|\\*"
+SCOPE = CONFIG["scope"]
+ALLOWED_VERBS = CONFIG["allowed_verbs"]
+
+# Construct the pattern
+PATTERN_TEMPLATE = CONFIG["pattern_template"]
+PATTERN = PATTERN_TEMPLATE.format(types=TYPES, projects=PROJECTS, scope=SCOPE)
 
 
 def _get_latest_tag(gh_api: Github) -> Tuple[Repository, Optional[Tag]]:
@@ -41,7 +57,7 @@ def _get_latest_tag(gh_api: Github) -> Tuple[Repository, Optional[Tag]]:
 
 
 def _add_shorlog(new_version: str, shortlog: str) -> None:
-    """Update the markdown file with the new version information or update existing logs."""
+    """Update the markdown file with the new version or update existing logs."""
     token = f"<!---TOKEN_{new_version}-->"
     entry = (
         "\n### Thanks to our contributors\n\n"
@@ -101,20 +117,15 @@ def _extract_changelog_entry(
     pr_info: PullRequest,
 ) -> Dict[str, str]:
     """Extract the changelog entry from a pull request's body."""
-    pattern = (
-        rf"^({TYPES_PATTERN})\(({PROJECT_PATTERN})(?::(skip))?\) "
-        r"([A-Z][^\.\n]*(?:\.(?=[^\.\n]))*[^\.\n]*)$"
-    )
-
     # Use regex search to find matches
-    match = re.search(pattern, pr_info.title)
+    match = re.search(PATTERN, pr_info.title)
     if match:
         # Extract components from the regex groups
-        pr_type = match.group(2)
-        pr_project = match.group(4)
-        pr_scope = match.group(5)  # Correctly capture optional sub-scope
+        pr_type = match.group(1)
+        pr_project = match.group(2)
+        pr_scope = match.group(3)  # Correctly capture optional sub-scope
         pr_subject = match.group(
-            6
+            4
         )  # Capture subject starting with uppercase and no terminal period
         return {
             "type": pr_type,
@@ -151,15 +162,21 @@ def _update_changelog(prs: Set[PullRequest]) -> None:
         )
 
         for pr_info in prs:
-
             parsed_title = _extract_changelog_entry(pr_info)
-            pr_type = parsed_title.get("type", "unknown")
 
+            # Skip if PR should be skipped or already in changelog
+            if (
+                parsed_title.get("scope", "unknown") == "skip"
+                or f"#{pr_info.number}]" in content
+            ):
+                continue
+
+            pr_type = parsed_title.get("type", "unknown")
             if pr_type == "feat":
                 insert_content_index = content.find("### What", unreleased_index + 1)
             elif pr_type == "docs":
                 insert_content_index = content.find(
-                    "### Other changes", unreleased_index + 1
+                    "### Documentation improvements", unreleased_index + 1
                 )
             elif pr_type == "break":
                 breaking_changes = True
@@ -168,18 +185,11 @@ def _update_changelog(prs: Set[PullRequest]) -> None:
                 )
             elif pr_type in {"ci", "fix", "refactor"}:
                 insert_content_index = content.find(
-                    "### Documentation improvements", unreleased_index + 1
+                    "### Other changes", unreleased_index + 1
                 )
             else:
                 unknown_changes = True
                 insert_content_index = unreleased_index
-
-            # Skip if PR should be skipped or already in changelog
-            if (
-                parsed_title.get("scope", "unknown") == "skip"
-                or f"#{pr_info.number}]" in content
-            ):
-                continue
 
             pr_reference = _format_pr_reference(
                 pr_info.title, pr_info.number, pr_info.html_url
