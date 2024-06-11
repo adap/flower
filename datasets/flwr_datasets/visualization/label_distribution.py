@@ -15,7 +15,6 @@
 """Label distribution plotting."""
 
 
-import warnings
 from typing import Any, Dict, Optional, Tuple, Union
 
 import matplotlib.colors as mcolors
@@ -23,7 +22,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from flwr_datasets.metrics import compute_counts
+from flwr_datasets.metrics.utils import compute_counts, compute_frequencies
 from flwr_datasets.partitioner import Partitioner
 from flwr_datasets.visualization.bar_plot import _plot_bar
 from flwr_datasets.visualization.heatmap_plot import _plot_heatmap
@@ -81,7 +80,9 @@ def plot_label_distributions(
         Title for the legend. If None, the defaults will be takes based on the type of
         plot.
     verbose_labels : bool
-        Whether to use verbose versions of the labels.
+        Whether to use verbose versions of the labels. These values are used as columns
+        of the returned dataframe and as labels on the legend in a bar plot and columns/
+        rows ticks in a heatmap plot.
     plot_kwargs: Optional[Dict[str, Any]]
         Any key value pair that can be passed to a plot function that are not supported
         directly. In case of the parameter doubling (e.g. specifying cmap here too) the
@@ -192,60 +193,22 @@ def plot_label_distributions(
     """
     _validate_parameters(plot_type, size_unit, partition_id_axis)
 
-    if label_name not in partitioner.dataset.column_names:
-        raise ValueError(
-            f"The specified 'label_name': '{label_name}' is not present in the "
-            f"dataset. The dataset contains columns {partitioner.dataset.column_names}."
+    dataframe = pd.DataFrame()
+    if size_unit == "absolute":
+        dataframe = compute_counts(
+            partitioner=partitioner,
+            column_name=label_name,
+            verbose_names=verbose_labels,
+            max_num_partitions=max_num_partitions,
         )
-
-    if max_num_partitions is None:
-        max_num_partitions = partitioner.num_partitions
-    else:
-        max_num_partitions = min(max_num_partitions, partitioner.num_partitions)
-    assert isinstance(max_num_partitions, int)
-    partitions = [partitioner.load_partition(i) for i in range(max_num_partitions)]
-
-    partition = partitions[0]
-    try:
-        # Unique labels are needed to represent the correct count of each class
-        # (some of the classes can have zero samples that's why this
-        # adjustment is needed)
-        unique_labels = partition.features[label_name].str2int(
-            partition.features[label_name].names
+    elif size_unit == "percent":
+        dataframe = compute_frequencies(
+            partitioner=partitioner,
+            column_name=label_name,
+            verbose_names=verbose_labels,
+            max_num_partitions=max_num_partitions,
         )
-    except AttributeError:  # If the label_name is not formally a Label
-        unique_labels = partitioner.dataset.unique(label_name)
-
-    partition_id_to_label_absolute_size = {
-        pid: compute_counts(partition[label_name], unique_labels)
-        for pid, partition in enumerate(partitions)
-    }
-
-    dataframe = pd.DataFrame.from_dict(
-        partition_id_to_label_absolute_size, orient="index"
-    )
-    dataframe.index.name = "Partition ID"
-
-    if size_unit == "percent":
-        dataframe = dataframe.div(dataframe.sum(axis=1), axis=0) * 100.0
-
-    if verbose_labels:
-        # Adjust the column name values of the dataframe
-        # (these values are used for as labels in bar plot and columns/rows ticks
-        # in heatmap)
-        current_labels = dataframe.columns
-        try:
-            legend_names = partition.features[label_name].int2str(
-                [int(v) for v in current_labels]
-            )
-            dataframe.columns = legend_names
-        except AttributeError:
-            warnings.warn(
-                "The verbose label names can not be established. "
-                "The column specified by 'label_name' needs to be of type "
-                "'ClassLabel'",
-                stacklevel=1,
-            )
+        dataframe = dataframe * 100.0
 
     if plot_type == "bar":
         axis = _plot_bar(
