@@ -72,7 +72,9 @@ def run(
 
         backend_config = None
         if "backend_config" in config["flower"]["engine"]["simulation"]:
-            backend_config = config["flower"]["engine"]["simulation"]["backend_config"]["config"]
+            backend_config = config["flower"]["engine"]["simulation"]["backend_config"][
+                "config"
+            ]
 
         typer.secho("Starting run... ", fg=typer.colors.BLUE)
         _run_simulation(
