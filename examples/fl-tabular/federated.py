@@ -25,13 +25,7 @@ torch.manual_seed(SEED)
 NUMBER_OF_CLIENTS = 5
 
 
-def load_data(partition_id):
-    # Load the FederatedDataset
-    fds = FederatedDataset(
-        dataset="scikit-learn/adult-census-income",
-        partitioners={"train": NUMBER_OF_CLIENTS},
-    )
-
+def load_data(partition_id: int, fds: FederatedDataset):
     train_split = fds.load_split("train").with_format("pandas")[:]
     cat_features = train_split.select_dtypes(include=["object"]).columns.values
     categories = [pd.unique(train_split[cat]).tolist() for cat in cat_features]
@@ -71,7 +65,7 @@ def load_data(partition_id):
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-    return train_loader, test_loader, X_train.shape[1]
+    return train_loader, test_loader
 
 
 class IncomeClassifier(nn.Module):
@@ -160,14 +154,20 @@ class FlowerClient(NumPyClient):
         return loss, len(self.testloader), {"accuracy": accuracy}
 
 
-def client_fn(cid: str) -> Client:
-    train_loader, test_loader, input_dim = load_data(partition_id=int(cid))
-    net = IncomeClassifier()
-    return FlowerClient(net, train_loader, test_loader).to_client()
+def get_client_fn(dataset: FederatedDataset):
+    def client_fn(cid: str) -> Client:
+        train_loader, test_loader = load_data(partition_id=int(cid), fds=dataset)
+        net = IncomeClassifier()
+        return FlowerClient(net, train_loader, test_loader).to_client()
+
+    return client_fn
 
 
-client = ClientApp(client_fn)
-
+fds = FederatedDataset(
+    dataset="scikit-learn/adult-census-income",
+    partitioners={"train": NUMBER_OF_CLIENTS},
+)
+client = ClientApp(client_fn=get_client_fn(fds))
 net = IncomeClassifier()
 params = ndarrays_to_parameters(get_weights(net))
 
