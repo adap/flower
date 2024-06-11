@@ -163,7 +163,7 @@ def run(
         backend = backend_fn()
 
         # Build backend
-        backend.build(app_fn)
+        backend.build(app_fn=app_fn)
 
         # Add workers (they submit Messages to Backend)
         state = state_factory.state()
@@ -329,8 +329,8 @@ def start_vce(
     app_fn = _load
 
     try:
-        # # Test if ClientApp can be loaded
-        # _ = app_fn()
+        # Test if ClientApp can be loaded
+        _ = app_fn()
 
         # Run main simulation loop
         run(
