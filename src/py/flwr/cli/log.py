@@ -15,10 +15,17 @@
 """Flower command line interface `log` command."""
 
 import time
+from logging import DEBUG, INFO
 
 import grpc
 import typer
 from typing_extensions import Annotated
+
+from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
+# Use alias to avoid pylint error E0102: function already defined
+from flwr.common.logger import log as logger
+
+STREAM_DURATION: int = 60
 
 
 def log(
@@ -32,18 +39,16 @@ def log(
     ] = True,
 ) -> None:
     """Get logs from Flower run."""
-    from logging import DEBUG, INFO
-
-    from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-    from flwr.common.logger import log
 
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
-        log(DEBUG, channel_connectivity)
+        logger(DEBUG, channel_connectivity)
 
+    # pylint: disable=unused-argument
     def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
         """Stream logs with connection refresh."""
 
+    # pylint: disable=unused-argument
     def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
         """Print logs."""
 
@@ -55,17 +60,16 @@ def log(
         interceptors=None,
     )
     channel.subscribe(on_channel_state_change)
-    STREAM_DURATION = 60
 
     try:
         if follow:
             while True:
-                log(INFO, "Streaming logs")
+                logger(INFO, "Streaming logs")
                 stream_logs(run_id, channel, STREAM_DURATION)
                 time.sleep(2)
-                log(INFO, "Reconnecting to logstream")
+                logger(INFO, "Reconnecting to logstream")
         else:
             print_logs(run_id, channel, timeout=1)
     except KeyboardInterrupt:
-        log(INFO, "Exiting logstream")
+        logger(INFO, "Exiting logstream")
         channel.close()
