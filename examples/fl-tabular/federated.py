@@ -23,8 +23,6 @@ torch.manual_seed(SEED)
 if torch.cuda.is_available():
     torch.cuda.manual_seed(SEED)
 
-"""### Adult Census Income Dataset Overview"""
-
 NUMBER_OF_CLIENTS = 5
 
 categories = [
