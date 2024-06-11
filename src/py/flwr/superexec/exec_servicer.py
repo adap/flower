@@ -20,7 +20,7 @@ import threading
 import time
 from logging import INFO
 from subprocess import Popen
-from typing import Any, Dict, List, Generator
+from typing import Any, Dict, Generator, List
 
 import grpc
 
