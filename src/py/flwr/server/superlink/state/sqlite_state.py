@@ -611,6 +611,22 @@ class SqliteState(State):  # pylint: disable=R0904
             node_id: int = row[0]["node_id"]
             return node_id
         return None
+    
+    def get_node_ids(self, client_public_keys: Set[bytes]) -> Dict[bytes, int]:
+        """Retrieve stored `node_ids` filtered by `client_public_keys`."""
+        if not client_public_keys:
+            return {}
+
+        public_keys_list = list(client_public_keys)
+        query = "SELECT public_key, node_id FROM node WHERE public_key IN ({})".format(
+            ', '.join(f":public_key{i}" for i in range(len(public_keys_list)))
+        )
+        params = {f"public_key{i}": public_key for i, public_key in enumerate(public_keys_list)}
+        rows = self.query(query, params)
+        
+        public_keys_node_ids = {row["public_key"]: row["node_id"] for row in rows}
+        
+        return public_keys_node_ids
 
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
@@ -672,6 +688,18 @@ class SqliteState(State):  # pylint: disable=R0904
         """Store a `client_public_key` in state."""
         query = "INSERT INTO public_key (public_key) VALUES (:public_key)"
         self.query(query, {"public_key": public_key})
+
+    def remove_client_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Remove a set of `client_public_keys` in state."""
+        if not public_keys:
+            return
+
+        public_keys_list = list(public_keys)
+        query = "DELETE FROM public_key WHERE public_key IN ({})".format(
+            ', '.join(f":public_key{i}" for i in range(len(public_keys_list)))
+        )
+        params = {f"public_key{i}": public_key for i, public_key in enumerate(public_keys_list)}
+        self.query(query, params)
 
     def get_client_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `client_public_keys` as a set."""

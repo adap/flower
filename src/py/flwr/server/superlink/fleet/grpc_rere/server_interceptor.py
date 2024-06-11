@@ -17,9 +17,11 @@
 
 import base64
 import csv
+import os
 from logging import WARNING
 from pathlib import Path
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
+from uuid import UUID
+from typing import Any, Callable, Optional, Sequence, Tuple, Union, List
 
 import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -49,6 +51,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns # pylint: disable=E0611
 from flwr.server.superlink.state import State
 
 _PUBLIC_KEY_HEADER = "public-key"
@@ -102,6 +105,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
         self.server_private_key = bytes_to_private_key(private_key)
         self.encoded_server_public_key = base64.urlsafe_b64encode(public_key)
+        self.timestamp = os.path.getmtime(self.client_keys_file_path)
 
     def intercept_service(
         self,
@@ -131,7 +135,11 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                     _PUBLIC_KEY_HEADER, context.invocation_metadata()
                 )
             )
-            self._update_client_keys()
+            new_timestamp = os.path.getmtime(self.client_keys_file_path)
+            if new_timestamp != self.timestamp:
+                self._update_client_keys()
+                self.timestamp = new_timestamp
+
             if client_public_key_bytes not in self.client_public_keys:
                 context.abort(grpc.StatusCode.UNAUTHENTICATED, "Access denied")
 
@@ -167,7 +175,6 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
     def _update_client_keys(self):
         new_known_keys = set()
-
         try:
             with open(
                 self.client_keys_file_path, newline="", encoding="utf-8"
@@ -185,9 +192,23 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                                 "elliptic curve public key"
                             )
 
-            self.state.clear_client_public_keys()
-            self.state.store_client_public_keys(new_known_keys)
-            self.client_public_keys = new_known_keys
+            existing_known_keys = self.state.get_client_public_keys()
+            add_operations = new_known_keys - existing_known_keys
+            remove_operations = existing_known_keys - new_known_keys
+
+            if len(add_operations) > 0:
+                self.state.store_client_public_keys(add_operations)
+            if len(remove_operations) > 0:
+                self.state.remove_client_public_keys(remove_operations)
+                public_key_node_ids = self.state.get_node_ids(remove_operations)
+                task_ins_list: List[TaskIns] = []
+
+                for public_key, node_id in public_key_node_ids.items():
+                    self.state.delete_node(node_id, public_key)
+                    task_ins_list.append(self.state.get_task_ins(node_id))
+                if len(task_ins_list) > 0:
+                    task_ids = {UUID(task_ins.task_id) for task_ins in task_ins_list}
+                    self.state.delete_tasks(task_ids)
 
         except (ValueError, UnsupportedAlgorithm) as e:
             log(WARNING, f"Abort updating client_public_keys set due to error: {e}")

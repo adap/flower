@@ -273,6 +273,10 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
     def get_node_id(self, client_public_key: bytes) -> Optional[int]:
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
         return self.public_key_to_node_id.get(client_public_key)
+    
+    def get_node_ids(self, client_public_keys: Set[bytes]) -> Dict[bytes, int]:
+        """Retrieve stored `node_ids` filtered by `client_public_keys`."""
+        return {key: self.get_node_id(key) for key in client_public_keys if self.get_node_id(key) is not None}
 
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
@@ -308,12 +312,17 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
     def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
         """Store a set of `client_public_keys` in state."""
         with self.lock:
-            self.client_public_keys = public_keys
+            self.client_public_keys.update(public_keys)
 
     def store_client_public_key(self, public_key: bytes) -> None:
         """Store a `client_public_key` in state."""
         with self.lock:
             self.client_public_keys.add(public_key)
+
+    def remove_client_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Remove a set of `client_public_keys` in state."""
+        with self.lock:
+            self.client_public_keys.difference_update(public_keys)
 
     def get_client_public_keys(self) -> Set[bytes]:
         """Retrieve all currently stored `client_public_keys` as a set."""

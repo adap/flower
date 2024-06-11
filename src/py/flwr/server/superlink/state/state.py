@@ -16,7 +16,7 @@
 
 
 import abc
-from typing import List, Optional, Set, Tuple
+from typing import List, Optional, Set, Tuple, Dict
 from uuid import UUID
 
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
@@ -153,7 +153,11 @@ class State(abc.ABC):  # pylint: disable=R0904
 
     @abc.abstractmethod
     def get_node_id(self, client_public_key: bytes) -> Optional[int]:
-        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+        """Retrieve stored `node_id` filtered by `client_public_key`."""
+        
+    @abc.abstractmethod
+    def get_node_ids(self, client_public_keys: Set[bytes]) -> Dict[bytes, int]:
+        """Retrieve stored `node_ids` filtered by `client_public_keys`."""
 
     @abc.abstractmethod
     def create_run(self, fab_id: str, fab_version: str) -> int:
@@ -198,6 +202,10 @@ class State(abc.ABC):  # pylint: disable=R0904
     @abc.abstractmethod
     def store_client_public_key(self, public_key: bytes) -> None:
         """Store a `client_public_key` in state."""
+
+    @abc.abstractmethod
+    def remove_client_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Remove a set of `client_public_keys` in state."""
 
     @abc.abstractmethod
     def get_client_public_keys(self) -> Set[bytes]:
