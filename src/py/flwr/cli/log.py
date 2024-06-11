@@ -61,15 +61,15 @@ def log(
     )
     channel.subscribe(on_channel_state_change)
 
-    try:
-        if follow:
+    if follow:
+        try:
             while True:
                 logger(INFO, "Streaming logs")
                 stream_logs(run_id, channel, STREAM_DURATION)
                 time.sleep(2)
                 logger(INFO, "Reconnecting to logstream")
-        else:
-            print_logs(run_id, channel, timeout=1)
-    except KeyboardInterrupt:
-        logger(INFO, "Exiting logstream")
-        channel.close()
+        except KeyboardInterrupt:
+            logger(INFO, "Exiting logstream")
+            channel.close()
+    else:
+        print_logs(run_id, channel, timeout=1)
