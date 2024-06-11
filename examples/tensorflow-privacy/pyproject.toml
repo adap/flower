@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tensorflow-privacy-fl"
+version = "0.1.0"
+description = "Sample-level Differential Privacy with Tensorflow-Privacy in Flower"
+authors = [
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+]
+dependencies = [
+    "flwr>=1.8.0,<2.0",
+    "flwr-datasets[vision]>=0.1.0,<1.0.0",
+    "tensorflow-estimator~=2.4",
+    "tensorflow-probability~=0.22.0",
+    "tensorflow>=2.4.0,<=2.15.0",
+    "tensorflow-privacy == 0.9.0"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]

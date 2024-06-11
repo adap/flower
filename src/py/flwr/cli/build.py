@@ -24,7 +24,7 @@ import pathspec
 import typer
 from typing_extensions import Annotated
 
-from .config_utils import load_and_validate_with_defaults
+from .config_utils import load_and_validate
 from .utils import is_valid_project_name
 
 
@@ -63,9 +63,7 @@ def build(
         )
         raise typer.Exit(code=1)
 
-    conf, errors, warnings = load_and_validate_with_defaults(
-        directory / "pyproject.toml"
-    )
+    conf, errors, warnings = load_and_validate(directory / "pyproject.toml")
     if conf is None:
         typer.secho(
             "Project configuration could not be loaded.\npyproject.toml is invalid:\n"
