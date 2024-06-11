@@ -41,7 +41,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
     def __init__(self, plugin: Executor) -> None:
         self.plugin = plugin
-        self.runs: Dict[int, Popen[str]] = {}
+        self.runs: Dict[int, Popen] = {}  # type: ignore
         self.logs: List[str] = []
         self.lock = threading.Lock()
 
@@ -57,13 +57,13 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self._capture_logs(run.proc)
         return StartRunResponse(run_id=run.run_id)
 
-    def _capture_logs(self, proc: Popen[str]) -> None:
+    def _capture_logs(self, proc: Popen) -> None:  # type: ignore
         select_timeout = 1.0
 
         def run() -> None:
             while True:
                 reads, _, _ = select.select([proc.stderr], [], [], select_timeout)
-                if reads:
+                if reads and proc.stderr:
                     line = proc.stderr.readline()
                     if line:
                         self.logs.append(line.rstrip())

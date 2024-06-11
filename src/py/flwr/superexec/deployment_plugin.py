@@ -44,7 +44,7 @@ class DeploymentEngine(Executor):
 
         req = CreateRunRequest(fab_id=fab_id, fab_version=fab_version)
         res = self.stub.CreateRun(request=req)
-        return res.run_id
+        return int(res.run_id)
 
     def _install_fab(self, fab_file: bytes) -> Path:
         return install_from_fab(fab_file, None, True)
