@@ -4,6 +4,7 @@ isort:skip_file
 """
 import abc
 import flwr.proto.fleet_pb2
+import flwr.proto.run_pb2
 import grpc
 
 class FleetStub:
@@ -37,8 +38,8 @@ class FleetStub:
     """
 
     GetRun: grpc.UnaryUnaryMultiCallable[
-        flwr.proto.fleet_pb2.GetRunRequest,
-        flwr.proto.fleet_pb2.GetRunResponse]
+        flwr.proto.run_pb2.GetRunRequest,
+        flwr.proto.run_pb2.GetRunResponse]
 
 
 class FleetServicer(metaclass=abc.ABCMeta):
@@ -84,9 +85,9 @@ class FleetServicer(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def GetRun(self,
-        request: flwr.proto.fleet_pb2.GetRunRequest,
+        request: flwr.proto.run_pb2.GetRunRequest,
         context: grpc.ServicerContext,
-    ) -> flwr.proto.fleet_pb2.GetRunResponse: ...
+    ) -> flwr.proto.run_pb2.GetRunResponse: ...
 
 
 def add_FleetServicer_to_server(servicer: FleetServicer, server: grpc.Server) -> None: ...
