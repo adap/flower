@@ -21,7 +21,7 @@ from typing_extensions import Annotated
 
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as flwr_log
-from flwr.proto.exec_pb2 import FetchLogsRequest
+from flwr.proto.exec_pb2 import FetchLogsRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 
