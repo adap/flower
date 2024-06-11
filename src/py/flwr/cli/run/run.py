@@ -69,12 +69,9 @@ def run(
 
     if engine == Engine.SIMULATION:
         num_supernodes = config["flower"]["engine"]["simulation"]["supernode"]["num"]
-
-        backend_config = None
-        if "backend_config" in config["flower"]["engine"]["simulation"]:
-            backend_config = config["flower"]["engine"]["simulation"]["backend_config"][
-                "config"
-            ]
+        backend_config = config["flower"]["engine"]["simulation"].get(
+            "backend_config", None
+        )
 
         typer.secho("Starting run... ", fg=typer.colors.BLUE)
         _run_simulation(
