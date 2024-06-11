@@ -41,6 +41,16 @@ class MlFramework(str, Enum):
     HUGGINGFACE = "HF"
     MLX = "MLX"
     SKLEARN = "sklearn"
+    FLWRTUNE = "flwrtune"
+
+
+class LLMTaskName(str, Enum):
+    """Available LLM tasks."""
+
+    GENERALNLP = "GeneralNLP"
+    FINANCE = "Finance"
+    MEDICAL = "Medical"
+    CODE = "Code"
 
 
 class TemplateNotFound(Exception):
@@ -125,6 +135,20 @@ def new(
 
     framework_str = framework_str.lower()
 
+    if framework_str == "flwrtune":
+        llm_task_value = prompt_options(
+            "Please select LLM task by typing in the number",
+            sorted([task.value for task in LLMTaskName]),
+        )
+        selected_value = [
+            name
+            for name, value in vars(LLMTaskName).items()
+            if value == llm_task_value
+        ]
+        llm_task_str = selected_value[0]
+
+    llm_task_str = llm_task_str.lower()
+
     print(
         typer.style(
             f"\n🔨 Creating Flower project {project_name}...",
@@ -160,6 +184,7 @@ def new(
         MlFramework.HUGGINGFACE.value.lower(),
         MlFramework.MLX.value.lower(),
         MlFramework.TENSORFLOW.value.lower(),
+        MlFramework.FLWRTUNE.value.lower(),
     ]
     if framework_str in frameworks_with_tasks:
         files[f"{import_name}/task.py"] = {
