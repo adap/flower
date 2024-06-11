@@ -16,11 +16,10 @@
 
 import pathlib
 from logging import DEBUG, ERROR, WARNING
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 import ray
 
-from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
@@ -31,7 +30,7 @@ from flwr.simulation.ray_transport.ray_actor import (
 )
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
-from .backend import Backend, BackendConfig
+from .backend import Backend, BackendConfig, ClientAppFn
 
 ClientResourcesDict = Dict[str, Union[int, float]]
 
@@ -78,6 +77,9 @@ class RayBackend(Backend):
             client_resources=client_resources,
             actor_kwargs=actor_kwargs,
         )
+
+        # Client App that Ray actors execute. To be set via .build()
+        self.clientapp_fn: Optional[ClientAppFn] = None
 
     def _configure_runtime_env(self, work_dir: str) -> Dict[str, Union[str, List[str]]]:
         """Return list of files/subdirectories to exclude relative to work_dir.
@@ -134,14 +136,15 @@ class RayBackend(Backend):
         """Report whether the pool has idle actors."""
         return self.pool.is_actor_available()
 
-    def build(self) -> None:
+    def build(self, app_fn: ClientAppFn) -> None:
         """Build pool of Ray actors that this backend will submit jobs to."""
+        self.clientapp_fn = app_fn
+        log(DEBUG, "Registered ClientApp")
         self.pool.add_actors_to_pool(self.pool.actors_capacity)
         log(DEBUG, "Constructed ActorPool with: %i actors", self.pool.num_actors)
 
     def process_message(
         self,
-        app: Callable[[], ClientApp],
         message: Message,
         context: Context,
     ) -> Tuple[Message, Context]:
@@ -151,11 +154,15 @@ class RayBackend(Backend):
         """
         partition_id = message.metadata.partition_id
 
+        # The callable that returns a ClientApp must have been specified
+        # when calling the `.build()` method.
+        assert self.clientapp_fn is not None
+
         try:
             # Submite a task to the pool
             future = self.pool.submit(
                 lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-                (app, message, str(partition_id), context),
+                (self.clientapp_fn, message, str(partition_id), context),
             )
 
             # Fetch result

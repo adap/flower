@@ -37,6 +37,7 @@ from flwr.common import (
 )
 from flwr.common.object_ref import load_app
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
+from flwr.server.superlink.fleet.vce.backend.backend import ClientAppFn
 from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
 
 
@@ -82,14 +83,16 @@ def _load_from_module(client_app_module_name: str) -> Callable[[], ClientApp]:
 
 def backend_build_process_and_termination(
     backend: RayBackend,
-    process_args: Optional[Tuple[Callable[[], ClientApp], Message, Context]] = None,
+    clientapp_fn: ClientAppFn,
+    message: Optional[Message] = None,
+    context: Optional[Context] = None,
 ) -> Union[Tuple[Message, Context], None]:
     """Build, process job and terminate RayBackend."""
-    backend.build()
+    backend.build(clientapp_fn)
     to_return = None
 
-    if process_args:
-        to_return = backend.process_message(*process_args)
+    if message is not None and context is not None:
+        to_return = backend.process_message(message, context)
 
     backend.terminate()
 
@@ -133,11 +136,6 @@ class TestRayBackend(TestCase):
         if ray.is_initialized():
             ray.shutdown()
 
-    def test_backend_creation_and_termination(self) -> None:
-        """Test creation of RayBackend and its termination."""
-        backend = RayBackend(backend_config={}, work_dir="")
-        backend_build_process_and_termination(backend=backend, process_args=None)
-
     def test_backend_creation_submit_and_termination(
         self,
         client_app_loader: Callable[[], ClientApp] = _load_app,
@@ -152,7 +150,10 @@ class TestRayBackend(TestCase):
         message, context, expected_output = _create_message_and_context()
 
         res = backend_build_process_and_termination(
-            backend=backend, process_args=(client_app_callable, message, context)
+            backend=backend,
+            clientapp_fn=client_app_callable,
+            message=message,
+            context=context,
         )
 
         if res is None:

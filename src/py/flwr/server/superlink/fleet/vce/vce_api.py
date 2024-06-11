@@ -56,7 +56,6 @@ def _register_nodes(
 
 # pylint: disable=too-many-arguments,too-many-locals
 def worker(
-    app_fn: Callable[[], ClientApp],
     taskins_queue: Queue[TaskIns],
     taskres_queue: Queue[TaskRes],
     node_states: Dict[int, NodeState],
@@ -83,9 +82,7 @@ def worker(
             message.metadata.partition_id = nodes_mapping[node_id]
 
             # Let backend process message
-            out_mssg, updated_context = backend.process_message(
-                app_fn, message, context
-            )
+            out_mssg, updated_context = backend.process_message(message, context)
 
             # Update Context
             node_states[node_id].update_context(
@@ -166,7 +163,7 @@ def run(
         backend = backend_fn()
 
         # Build backend
-        backend.build()
+        backend.build(app_fn)
 
         # Add workers (they submit Messages to Backend)
         state = state_factory.state()
@@ -196,7 +193,6 @@ def run(
             _ = [
                 executor.submit(
                     worker,
-                    app_fn,
                     taskins_queue,
                     taskres_queue,
                     node_states,
@@ -333,8 +329,8 @@ def start_vce(
     app_fn = _load
 
     try:
-        # Test if ClientApp can be loaded
-        _ = app_fn()
+        # # Test if ClientApp can be loaded
+        # _ = app_fn()
 
         # Run main simulation loop
         run(

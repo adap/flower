@@ -24,6 +24,7 @@ from flwr.common.message import Message
 from flwr.common.typing import ConfigsRecordValues
 
 BackendConfig = Dict[str, Dict[str, ConfigsRecordValues]]
+ClientAppFn = Callable[[], ClientApp]
 
 
 class Backend(ABC):
@@ -33,7 +34,7 @@ class Backend(ABC):
         """Construct a backend."""
 
     @abstractmethod
-    def build(self) -> None:
+    def build(self, app_fn: ClientAppFn) -> None:
         """Build backend.
 
         Different components need to be in place before workers in a backend are ready
@@ -60,7 +61,6 @@ class Backend(ABC):
     @abstractmethod
     def process_message(
         self,
-        app: Callable[[], ClientApp],
         message: Message,
         context: Context,
     ) -> Tuple[Message, Context]:
