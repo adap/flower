@@ -11,6 +11,7 @@ from torch.utils.data import TensorDataset, DataLoader
 import torch.nn as nn
 from collections import OrderedDict
 import torch.optim as optim
+from sklearn.preprocessing import OrdinalEncoder
 
 import numpy as np
 import random
@@ -23,112 +24,7 @@ torch.manual_seed(SEED)
 if torch.cuda.is_available():
     torch.cuda.manual_seed(SEED)
 
-NUMBER_OF_CLIENTS = 5
-
-categories = [
-    [
-        "Private",
-        "?",
-        "Self-emp-not-inc",
-        "Federal-gov",
-        "Self-emp-inc",
-        "Local-gov",
-        "State-gov",
-        "Never-worked",
-        "Without-pay",
-    ],
-    [
-        "Some-college",
-        "HS-grad",
-        "Assoc-voc",
-        "Bachelors",
-        "7th-8th",
-        "Prof-school",
-        "10th",
-        "Doctorate",
-        "11th",
-        "12th",
-        "Masters",
-        "9th",
-        "Preschool",
-        "Assoc-acdm",
-        "1st-4th",
-        "5th-6th",
-    ],
-    [
-        "Married-civ-spouse",
-        "Never-married",
-        "Divorced",
-        "Widowed",
-        "Married-spouse-absent",
-        "Separated",
-        "Married-AF-spouse",
-    ],
-    [
-        "Transport-moving",
-        "?",
-        "Adm-clerical",
-        "Machine-op-inspct",
-        "Tech-support",
-        "Sales",
-        "Exec-managerial",
-        "Prof-specialty",
-        "Handlers-cleaners",
-        "Craft-repair",
-        "Farming-fishing",
-        "Other-service",
-        "Protective-serv",
-        "Priv-house-serv",
-        "Armed-Forces",
-    ],
-    ["Husband", "Own-child", "Not-in-family", "Unmarried", "Other-relative", "Wife"],
-    ["White", "Asian-Pac-Islander", "Black", "Other", "Amer-Indian-Eskimo"],
-    ["Male", "Female"],
-    [
-        "United-States",
-        "Philippines",
-        "Canada",
-        "Germany",
-        "Vietnam",
-        "Italy",
-        "Jamaica",
-        "Cuba",
-        "Columbia",
-        "Taiwan",
-        "Mexico",
-        "Japan",
-        "?",
-        "Ireland",
-        "Puerto-Rico",
-        "India",
-        "Iran",
-        "El-Salvador",
-        "Guatemala",
-        "Haiti",
-        "Outlying-US(Guam-USVI-etc)",
-        "China",
-        "Portugal",
-        "England",
-        "South",
-        "France",
-        "Honduras",
-        "Dominican-Republic",
-        "Cambodia",
-        "Hong",
-        "Greece",
-        "Nicaragua",
-        "Ecuador",
-        "Poland",
-        "Peru",
-        "Laos",
-        "Trinadad&Tobago",
-        "Yugoslavia",
-        "Thailand",
-        "Scotland",
-        "Holand-Netherlands",
-        "Hungary",
-    ],
-]
+NUMBER_OF_CLIENTS = 2
 
 
 def load_data(partition_id):
@@ -138,20 +34,24 @@ def load_data(partition_id):
         partitioners={"train": NUMBER_OF_CLIENTS},
     )
 
+    train_split = fds.load_split("train").with_format("pandas")[:]
+    cat_features = train_split.select_dtypes(include=["object"]).columns.values
+    categories = [pd.unique(train_split[cat]).tolist() for cat in cat_features]
+
     dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
     dataset["income"] = dataset["income"].apply(lambda x: 1 if x == ">50K" else 0)
 
     X = dataset.drop("income", axis=1)
     y = dataset["income"]
 
-    # One-hot Encoding
+    # Define categorical columns
     categorical_cols = X.select_dtypes(include=["object"]).columns
-    encoder = OneHotEncoder(
-        sparse_output=False, handle_unknown="ignore", categories=categories
-    )
+
+    # Ordinal Encoding
+    encoder = OrdinalEncoder()
     X_encoded = pd.DataFrame(encoder.fit_transform(X[categorical_cols]))
-    X_encoded.columns = encoder.get_feature_names_out(categorical_cols)
-    X = pd.concat([X.drop(categorical_cols, axis=1), X_encoded], axis=1)
+    X_encoded.columns = X[categorical_cols].columns
+    X[categorical_cols] = X_encoded
 
     split_index = int(0.8 * len(X))
     X_train, X_test = X[:split_index], X[split_index:]
@@ -171,22 +71,27 @@ def load_data(partition_id):
 
 
 class IncomeClassifier(nn.Module):
-    def __init__(self, input_dim):
+    def __init__(self):
         super(IncomeClassifier, self).__init__()
-        self.layer1 = nn.Linear(input_dim, 128)
+        self.layer1 = None
         self.layer2 = nn.Linear(128, 64)
         self.output = nn.Linear(64, 1)
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
+        if self.layer1 is None:
+            self.initialize_model(x.size(1))  # Initialize model with input dimension
         x = self.relu(self.layer1(x))
         x = self.relu(self.layer2(x))
         x = self.sigmoid(self.output(x))
         return x
 
+    def initialize_model(self, input_dim):
+        self.layer1 = nn.Linear(input_dim, 128)
 
-def train(model, train_loader, num_epochs=5):
+
+def train(model, train_loader, num_epochs=1):
     criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     model.train()
@@ -248,9 +153,7 @@ class FlowerClient(NumPyClient):
         return loss, len(self.testloader), {"accuracy": accuracy}
 
 
-# Initialize the model with dynamic input dimension from a sample partition
-train_loader, test_loader, input_dim = load_data(partition_id=0)
-net = IncomeClassifier(input_dim)
+net = IncomeClassifier()
 params = ndarrays_to_parameters(get_weights(net))
 
 # Create Strategy
@@ -260,16 +163,16 @@ strategy = FedAvg(
 
 server = ServerApp(
     strategy=strategy,
-    config=ServerConfig(num_rounds=3),
+    config=ServerConfig(num_rounds=5),
 )
 
 
 def client_fn(cid: str) -> Client:
     train_loader, test_loader, input_dim = load_data(partition_id=int(cid))
-    net = IncomeClassifier(input_dim)
+    net = IncomeClassifier()
     return FlowerClient(net, train_loader, test_loader).to_client()
 
 
 client = ClientApp(client_fn)
 
-run_simulation(server_app=server, client_app=client, num_supernodes=5)
+run_simulation(server_app=server, client_app=client, num_supernodes=2)
