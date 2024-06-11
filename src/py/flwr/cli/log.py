@@ -14,8 +14,9 @@
 # ==============================================================================
 """Flower command line interface `log` command."""
 
-import typer
 import time
+
+import typer
 from typing_extensions import Annotated
 
 
@@ -35,17 +36,20 @@ def log(
     from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
     from flwr.common.logger import log
 
+    # from flwr.proto.exec_pb2 import StreamLogsRequest
+    # from flwr.proto.exec_pb2_grpc import ExecStub
+
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
 
     def stream_logs(run_id, channel, duration):
-        """Stream logs with connection refresh"""
+        """Stream logs with connection refresh."""
         start_time = time.time()
         # Set stub and req
         # stub = ExecStub(channel)
         # req = StreamLogsRequest(run_id=run_id)
-        for res in ['log']:
+        for res in ["log"]:
             print(res)
             if follow and time.time() - start_time < duration:
                 continue
