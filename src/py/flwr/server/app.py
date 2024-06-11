@@ -333,7 +333,7 @@ def run_superlink() -> None:
     args = _parse_args_run_superlink().parse_args()
 
     # Parse IP address
-    driver_address = _format_address(args.driver_api_address)
+    driver_address, _, _ = _format_address(args.driver_api_address)
 
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
@@ -356,8 +356,8 @@ def run_superlink() -> None:
             if args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE
             else ADDRESS_FLEET_API_REST
         )
-    
-    fleet_address = _format_address(args.fleet_api_address)
+
+    fleet_address, host, port = _format_address(args.fleet_api_address)
 
     num_workers = args.fleet_api_num_workers
     if num_workers != 1:
@@ -387,8 +387,8 @@ def run_superlink() -> None:
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
             args=(
-                fleet_host,
-                fleet_port,
+                host,
+                port,
                 ssl_keyfile,
                 ssl_certfile,
                 state_factory,
@@ -445,14 +445,12 @@ def run_superlink() -> None:
         driver_server.wait_for_termination(timeout=1)
 
 
-def _format_address(address: str) -> str:
+def _format_address(address: str) -> Tuple[str, str, str]:
     parsed_address = parse_address(address)
     if not parsed_address:
         sys.exit(f"IP address ({address}) cannot be parsed.")
     host, port, is_v6 = parsed_address
-    return (
-        f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-    )
+    return (f"[{host}]:{port}" if is_v6 else f"{host}:{port}", host, port)
 
 
 def _try_setup_client_authentication(
