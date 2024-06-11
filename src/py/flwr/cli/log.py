@@ -22,8 +22,6 @@ import typer
 from typing_extensions import Annotated
 
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
-
-# Use alias to avoid pylint error E0102: function already defined
 from flwr.common.logger import log as logger
 
 STREAM_DURATION: int = 60
