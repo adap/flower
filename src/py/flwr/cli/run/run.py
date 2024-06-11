@@ -14,8 +14,8 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
-from enum import Enum
 import sys
+from enum import Enum
 from logging import DEBUG
 from pathlib import Path
 from typing import Optional
@@ -27,10 +27,10 @@ from flwr.cli import config_utils
 from flwr.cli.build import build
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.proto.exec_pb2 import (
-    StartRunRequest,
+from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     FetchLogsRequest,
-)  # pylint: disable=E0611
+    StartRunRequest,
+)
 from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
 
