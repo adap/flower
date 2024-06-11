@@ -18,9 +18,9 @@ import typer
 
 from .build import build
 from .example import example
+from .log import log
 from .new import new
 from .run import run
-from .log import log
 
 app = typer.Typer(
     help=typer.style(
