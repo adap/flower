@@ -141,9 +141,7 @@ def new(
             sorted([task.value for task in LLMTaskName]),
         )
         selected_value = [
-            name
-            for name, value in vars(LLMTaskName).items()
-            if value == llm_task_value
+            name for name, value in vars(LLMTaskName).items() if value == llm_task_value
         ]
         llm_task_str = selected_value[0]
 
