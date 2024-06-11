@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,22 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Built-in Mods."""
+"""Visualization package."""
 
 
-from .centraldp_mods import adaptiveclipping_mod, fixedclipping_mod
-from .comms_mods import message_size_mod, parameters_size_mod
-from .localdp_mod import LocalDpMod
-from .secure_aggregation import secagg_mod, secaggplus_mod
-from .utils import make_ffn
+from .comparison_label_distribution import plot_comparison_label_distribution
+from .label_distribution import plot_label_distributions
 
 __all__ = [
-    "adaptiveclipping_mod",
-    "fixedclipping_mod",
-    "LocalDpMod",
-    "make_ffn",
-    "secagg_mod",
-    "secaggplus_mod",
-    "message_size_mod",
-    "parameters_size_mod",
+    "plot_label_distributions",
+    "plot_comparison_label_distribution",
 ]

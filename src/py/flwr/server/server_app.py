@@ -39,7 +39,7 @@ class ServerApp:
     >>> server_config = ServerConfig(num_rounds=3)
     >>> strategy = FedAvg()
     >>>
-    >>> app = ServerApp()
+    >>> app = ServerApp(
     >>>     server_config=server_config,
     >>>     strategy=strategy,
     >>> )
@@ -106,7 +106,7 @@ class ServerApp:
                     >>> server_config = ServerConfig(num_rounds=3)
                     >>> strategy = FedAvg()
                     >>>
-                    >>> app = ServerApp()
+                    >>> app = ServerApp(
                     >>>     server_config=server_config,
                     >>>     strategy=strategy,
                     >>> )
