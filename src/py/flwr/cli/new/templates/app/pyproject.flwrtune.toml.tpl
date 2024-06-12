@@ -19,9 +19,7 @@ dependencies = [
     "scipy==1.13.0",
     "peft==0.6.2",
     "transformers==4.39.3",
-    "fschat[model_worker,webui]==0.2.35",
-    "openai==0.28.0",
-    "anthropic==0.18.1",
+    "sentencepiece==0.2.0",
 ]
 
 [tool.hatch.build.targets.wheel]
