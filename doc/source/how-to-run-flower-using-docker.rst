@@ -450,8 +450,8 @@ changing the tag. All available versions are on `Docker Hub <https://hub.docker.
 
 .. important::
 
-  When using Flower nightly, the SuperNode nightly image must be paired with the corresponding
-  SuperLink and ServerApp nightly images released on the same day. To ensure the versions are
+  When using Flower nightly, the SuperLink nightly image must be paired with the corresponding
+  SuperNode and ServerApp nightly images released on the same day. To ensure the versions are
   in sync, using the concrete tag, e.g., ``1.10.0.dev20240610`` instead of ``nightly`` is
   recommended.
 
