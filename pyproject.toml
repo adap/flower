@@ -53,8 +53,6 @@ exclude = [
 
 [tool.poetry.scripts]
 flwr = "flwr.cli.app:app"
-flower-driver-api = "flwr.server:run_driver_api"
-flower-fleet-api = "flwr.server:run_fleet_api"
 flower-superlink = "flwr.server:run_superlink"
 flower-supernode = "flwr.client:run_supernode"
 flower-client-app = "flwr.client:run_client_app"
