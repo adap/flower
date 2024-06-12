@@ -49,7 +49,7 @@ def log(
         logger(DEBUG, channel_connectivity)
 
     # pylint: disable=unused-argument
-    def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
+    def stream_logs(run_id: int, channel: grpc.Channel, period: int) -> None:
         """Stream logs from the beginning of a run with connection refresh."""
 
     # pylint: disable=unused-argument
