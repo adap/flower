@@ -15,7 +15,6 @@
 """Flower command line interface `install` command."""
 
 
-import hashlib
 import shutil
 import tempfile
 import zipfile
@@ -27,7 +26,7 @@ import typer
 from typing_extensions import Annotated
 
 from .config_utils import get_flower_home, load_and_validate
-
+from .utils import get_sha256_hash
 
 def install(
     source: Annotated[
@@ -84,10 +83,13 @@ def install_from_fab(
 ) -> Path:
     """Install from a FAB file after extracting and validating."""
     fab_file_archive: Union[Path, IO[bytes]]
+    fab_name: Optional[str]
     if isinstance(fab_file, bytes):
         fab_file_archive = BytesIO(fab_file)
+        fab_name = None
     elif isinstance(fab_file, Path):
         fab_file_archive = fab_file
+        fab_name = fab_file.stem
     else:
         raise ValueError("fab_file must be either a Path or bytes")
 
@@ -118,13 +120,14 @@ def install_from_fab(
 
             shutil.rmtree(info_dir)
 
-            installed_path = validate_and_install(tmpdir_path, flwr_dir, skip_prompt)
+            installed_path = validate_and_install(tmpdir_path, fab_name, flwr_dir, skip_prompt)
 
     return installed_path
 
 
 def validate_and_install(
     project_dir: Path,
+    fab_name: Optional[str],
     flwr_dir: Optional[Path],
     skip_prompt: bool = False,
 ) -> Path:
@@ -139,14 +142,35 @@ def validate_and_install(
         )
         raise typer.Exit(code=1)
 
-    username = config["flower"]["publisher"]
+    publisher = config["flower"]["publisher"]
     project_name = config["project"]["name"]
     version = config["project"]["version"]
 
+    if (
+        fab_name
+        and fab_name != f"{publisher}.{project_name}.{version.replace('.', '-')}"
+    ):        
+        typer.secho(
+            "❌ FAB file has incorrect name. The file name must follow the format "
+            "`<publisher>.<project_name>.<version>.fab`.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
     install_dir: Path = (
-        (get_flower_home() if not flwr_dir else flwr_dir)
+        (
+            Path(
+                os.getenv(
+                    "FLWR_HOME",
+                    f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
+                )
+            )
+            if not flwr_dir
+            else flwr_dir
+        )
         / "apps"
-        / username
+        / publisher
         / project_name
         / version
     )
@@ -184,18 +208,6 @@ def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
     for line in list_content.strip().split("\n"):
         rel_path, hash_expected, _ = line.split(",")
         file_path = tmpdir / rel_path
-        if not file_path.exists() or _get_sha256_hash(file_path) != hash_expected:
+        if not file_path.exists() or get_sha256_hash(file_path) != hash_expected:
             return False
     return True
-
-
-def _get_sha256_hash(file_path: Path) -> str:
-    """Calculate the SHA-256 hash of a file."""
-    sha256 = hashlib.sha256()
-    with open(file_path, "rb") as f:
-        while True:
-            data = f.read(65536)
-            if not data:
-                break
-            sha256.update(data)
-    return sha256.hexdigest()
