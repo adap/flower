@@ -24,6 +24,7 @@ from flwr.common import object_ref
 
 def load_and_validate(
     path: Optional[Path] = None,
+    check_module: bool = True,
 ) -> Tuple[Optional[Dict[str, Any]], List[str], List[str]]:
     """Load and validate pyproject.toml as dict.
 
@@ -42,7 +43,7 @@ def load_and_validate(
         ]
         return (None, errors, [])
 
-    is_valid, errors, warnings = validate(config)
+    is_valid, errors, warnings = validate(config, check_module)
 
     if not is_valid:
         return (None, errors, warnings)
@@ -102,7 +103,9 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
     return len(errors) == 0, errors, warnings
 
 
-def validate(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
+def validate(
+    config: Dict[str, Any], check_module: bool = True
+) -> Tuple[bool, List[str], List[str]]:
     """Validate pyproject.toml."""
     is_valid, errors, warnings = validate_fields(config)
 
@@ -110,12 +113,16 @@ def validate(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
         return False, errors, warnings
 
     # Validate serverapp
-    is_valid, reason = object_ref.validate(config["flower"]["components"]["serverapp"])
+    is_valid, reason = object_ref.validate(
+        config["flower"]["components"]["serverapp"], check_module
+    )
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
 
     # Validate clientapp
-    is_valid, reason = object_ref.validate(config["flower"]["components"]["clientapp"])
+    is_valid, reason = object_ref.validate(
+        config["flower"]["components"]["clientapp"], check_module
+    )
 
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
