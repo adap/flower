@@ -1,7 +1,7 @@
-import flwr as fl
-
 from client import client_fn
 from strategy import FedAnalytics
+
+import flwr as fl
 
 hist = fl.simulation.start_simulation(
     client_fn=client_fn,

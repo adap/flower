@@ -11,7 +11,7 @@ authors = [
 ]
 license = { text = "Apache License (2.0)" }
 dependencies = [
-    "flwr[simulation]>=1.8.0,<2.0",
+    "flwr[simulation]>=1.9.0,<2.0",
     "flwr-datasets>=0.0.2,<1.0.0",
     "torch==2.2.1",
     "transformers>=4.30.0,<5.0"
@@ -29,3 +29,9 @@ publisher = "$username"
 [flower.components]
 serverapp = "$import_name.server:app"
 clientapp = "$import_name.client:app"
+
+[flower.engine]
+name = "simulation"
+
+[flower.engine.simulation.supernode]
+num = 2
