@@ -42,6 +42,7 @@ Create **custom partitioning schemes** or choose from the **implemented partitio
   <em>Comparison of Partitioning Schemes on CIFAR10</em>
 </p>
 PS: This plot was generated using a library function (see flwr_datasets.visualization package for more).
+
 # Installation
 
 ## With pip
