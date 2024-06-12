@@ -15,7 +15,7 @@ dependencies = [
     "flwr-datasets>=0.1.0,<1.0.0",
     "hydra-core==1.3.2",
     "trl==0.8.1",
-    "bitsandbytes==0.43.0",
+    "bitsandbytes==0.43.1",
     "scipy==1.13.0",
     "peft==0.6.2",
     "transformers==4.39.3",
