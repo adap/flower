@@ -1,8 +1,10 @@
-import flwr as fl
+from collections import OrderedDict
+
 import mnist
 import pytorch_lightning as pl
-from collections import OrderedDict
 import torch
+
+import flwr as fl
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -48,6 +50,7 @@ def _set_parameters(model, parameters):
     state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
     model.load_state_dict(state_dict, strict=True)
 
+
 def client_fn(cid):
     model = mnist.LitAutoEncoder()
     train_loader, val_loader, test_loader = mnist.load_data()
@@ -55,9 +58,11 @@ def client_fn(cid):
     # Flower client
     return FlowerClient(model, train_loader, val_loader, test_loader).to_client()
 
+
 app = fl.client.ClientApp(
     client_fn=client_fn,
 )
+
 
 def main() -> None:
     # Model and data

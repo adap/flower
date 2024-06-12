@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import time
 import warnings
-from dataclasses import dataclass
 from typing import Optional, cast
 
 from .record import RecordSet
@@ -26,7 +25,6 @@ from .record import RecordSet
 DEFAULT_TTL = 3600
 
 
-@dataclass
 class Metadata:  # pylint: disable=too-many-instance-attributes
     """A dataclass holding metadata associated with the current message.
 
@@ -161,8 +159,18 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         """Set partition_id."""
         self.__dict__["_partition_id"] = value
 
+    def __repr__(self) -> str:
+        """Return a string representation of this instance."""
+        view = ", ".join([f"{k.lstrip('_')}={v!r}" for k, v in self.__dict__.items()])
+        return f"{self.__class__.__qualname__}({view})"
 
-@dataclass
+    def __eq__(self, other: object) -> bool:
+        """Compare two instances of the class."""
+        if not isinstance(other, self.__class__):
+            raise NotImplementedError
+        return self.__dict__ == other.__dict__
+
+
 class Error:
     """A dataclass that stores information about an error that occurred.
 
@@ -191,8 +199,18 @@ class Error:
         """Reason reported about the error."""
         return cast(Optional[str], self.__dict__["_reason"])
 
+    def __repr__(self) -> str:
+        """Return a string representation of this instance."""
+        view = ", ".join([f"{k.lstrip('_')}={v!r}" for k, v in self.__dict__.items()])
+        return f"{self.__class__.__qualname__}({view})"
 
-@dataclass
+    def __eq__(self, other: object) -> bool:
+        """Compare two instances of the class."""
+        if not isinstance(other, self.__class__):
+            raise NotImplementedError
+        return self.__dict__ == other.__dict__
+
+
 class Message:
     """State of your application from the viewpoint of the entity using it.
 
@@ -356,6 +374,17 @@ class Message:
             message.metadata.ttl = ttl
 
         return message
+
+    def __repr__(self) -> str:
+        """Return a string representation of this instance."""
+        view = ", ".join(
+            [
+                f"{k.lstrip('_')}={v!r}"
+                for k, v in self.__dict__.items()
+                if v is not None
+            ]
+        )
+        return f"{self.__class__.__qualname__}({view})"
 
 
 def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
