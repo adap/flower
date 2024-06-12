@@ -21,7 +21,7 @@ from contextlib import contextmanager
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Callable, Iterator, Optional, Sequence, Tuple, Union, cast
+from typing import Callable, Iterator, Optional, Sequence, Tuple, Type, Union, cast
 
 import grpc
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -44,8 +44,6 @@ from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
-    GetRunRequest,
-    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -53,6 +51,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import AuthenticateClientInterceptor
@@ -73,6 +72,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     authentication_keys: Optional[
         Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
+    adapter_cls: Optional[Type[FleetStub]] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
@@ -133,7 +133,9 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     channel.subscribe(on_channel_state_change)
 
     # Shared variables for inner functions
-    stub = FleetStub(channel)
+    if adapter_cls is None:
+        adapter_cls = FleetStub
+    stub = adapter_cls(channel)
     metadata: Optional[Metadata] = None
     node: Optional[Node] = None
     ping_thread: Optional[threading.Thread] = None
@@ -190,8 +192,6 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
 
         # Stop the ping-loop thread
         ping_stop_event.set()
-        if ping_thread is not None:
-            ping_thread.join()
 
         # Call FleetAPI
         delete_node_request = DeleteNodeRequest(node=node)

@@ -171,31 +171,31 @@ Deployment
     # In yet another terminal window, run the ServerApp (this starts the actual training run)
     $ flower-server-app server:app --insecure
 
-- Here's another example to start with HTTPS. Use the ``--certificates`` command line
-  argument to pass paths to (CA certificate, server certificate, and server private key).
+- Here's another example to start with HTTPS. Use the ``--ssl-ca-certfile``, ``--ssl-certfile``, and ``--ssl-keyfile`` command line
+  options to pass paths to (CA certificate, server certificate, and server private key).
 
 .. code-block:: bash
 
     # Start a secure Superlink
-    $ flower-superlink --certificates \
-        <your-ca-cert-filepath> \
-        <your-server-cert-filepath> \
-        <your-privatekey-filepath>
+    $ flower-superlink \
+        --ssl-ca-certfile <your-ca-cert-filepath> \
+        --ssl-certfile <your-server-cert-filepath> \
+        --ssl-keyfile <your-privatekey-filepath>
 
     # In a new terminal window, start a long-running secure SuperNode
     $ flower-client-app client:app \
         --root-certificates <your-ca-cert-filepath> \
-        --server 127.0.0.1:9092
+        --superlink 127.0.0.1:9092
 
     # In another terminal window, start another long-running secure SuperNode (at least 2 SuperNodes are required)
     $ flower-client-app client:app \
         --root-certificates <your-ca-cert-filepath> \
-        --server 127.0.0.1:9092
+        --superlink 127.0.0.1:9092
 
     # In yet another terminal window, run the ServerApp (this starts the actual training run)
     $ flower-server-app server:app \
         --root-certificates <your-ca-cert-filepath> \
-        --server 127.0.0.1:9091
+        --superlink 127.0.0.1:9091
 
 Simulation in CLI
 ~~~~~~~~~~~~~~~~~

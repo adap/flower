@@ -20,6 +20,7 @@ from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Callable, Optional, Tuple
 
+from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
     load_ssh_private_key,
@@ -29,13 +30,12 @@ from cryptography.hazmat.primitives.serialization import (
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.object_ref import load_app, validate
-from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
-    ssh_types_to_elliptic_curve,
-)
 
 from ..app import _start_client_internal
+
+ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
 
 
 def run_supernode() -> None:
@@ -65,6 +65,23 @@ def run_client_app() -> None:
 
     args = _parse_args_run_client_app().parse_args()
 
+    if args.server != ADDRESS_FLEET_API_GRPC_RERE:
+        warn = "Passing flag --server is deprecated. Use --superlink instead."
+        warn_deprecated_feature(warn)
+
+        if args.superlink != ADDRESS_FLEET_API_GRPC_RERE:
+            # if `--superlink` also passed, then
+            # warn user that this argument overrides what was passed with `--server`
+            log(
+                WARN,
+                "Both `--server` and `--superlink` were passed. "
+                "`--server` will be ignored. Connecting to the Superlink Fleet API "
+                "at %s.",
+                args.superlink,
+            )
+        else:
+            args.superlink = args.server
+
     root_certificates = _get_certificates(args)
     log(
         DEBUG,
@@ -75,7 +92,7 @@ def run_client_app() -> None:
     authentication_keys = _try_setup_client_authentication(args)
 
     _start_client_internal(
-        server_address=args.server,
+        server_address=args.superlink,
         load_client_app_fn=load_fn,
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
@@ -102,7 +119,7 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
             WARN,
             "Option `--insecure` was set. "
             "Starting insecure HTTP client connected to %s.",
-            args.server,
+            args.superlink,
         )
         root_certificates = None
     else:
@@ -116,7 +133,7 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
             DEBUG,
             "Starting secure HTTPS client connected to %s "
             "with the following certificates: %s.",
-            args.server,
+            args.superlink,
             cert_path,
         )
     return root_certificates
@@ -215,8 +232,13 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--server",
-        default="0.0.0.0:9092",
+        default=ADDRESS_FLEET_API_GRPC_RERE,
         help="Server address",
+    )
+    parser.add_argument(
+        "--superlink",
+        default=ADDRESS_FLEET_API_GRPC_RERE,
+        help="SuperLink Fleet API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
     )
     parser.add_argument(
         "--max-retries",
@@ -242,40 +264,60 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         " Default: current working directory.",
     )
     parser.add_argument(
-        "--authentication-keys",
-        nargs=2,
-        metavar=("CLIENT_PRIVATE_KEY", "CLIENT_PUBLIC_KEY"),
+        "--auth-supernode-private-key",
         type=str,
-        help="Provide two file paths: (1) the client's private "
-        "key file, and (2) the client's public key file.",
+        help="The SuperNode's private key (as a path str) to enable authentication.",
+    )
+    parser.add_argument(
+        "--auth-supernode-public-key",
+        type=str,
+        help="The SuperNode's public key (as a path str) to enable authentication.",
     )
 
 
 def _try_setup_client_authentication(
     args: argparse.Namespace,
 ) -> Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]]:
-    if not args.authentication_keys:
+    if not args.auth_supernode_private_key and not args.auth_supernode_public_key:
         return None
 
-    ssh_private_key = load_ssh_private_key(
-        Path(args.authentication_keys[0]).read_bytes(),
-        None,
-    )
-    ssh_public_key = load_ssh_public_key(Path(args.authentication_keys[1]).read_bytes())
+    if not args.auth_supernode_private_key or not args.auth_supernode_public_key:
+        sys.exit(
+            "Authentication requires file paths to both "
+            "'--auth-supernode-private-key' and '--auth-supernode-public-key'"
+            "to be provided (providing only one of them is not sufficient)."
+        )
 
     try:
-        client_private_key, client_public_key = ssh_types_to_elliptic_curve(
-            ssh_private_key, ssh_public_key
+        ssh_private_key = load_ssh_private_key(
+            Path(args.auth_supernode_private_key).read_bytes(),
+            None,
         )
-    except TypeError:
+        if not isinstance(ssh_private_key, ec.EllipticCurvePrivateKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm):
         sys.exit(
-            "The file paths provided could not be read as a private and public "
-            "key pair. Client authentication requires an elliptic curve public and "
-            "private key pair. Please provide the file paths containing elliptic "
-            "curve private and public keys to '--authentication-keys'."
+            "Error: Unable to parse the private key file in "
+            "'--auth-supernode-private-key'. Authentication requires elliptic "
+            "curve private and public key pair. Please ensure that the file "
+            "path points to a valid private key file and try again."
+        )
+
+    try:
+        ssh_public_key = load_ssh_public_key(
+            Path(args.auth_supernode_public_key).read_bytes()
+        )
+        if not isinstance(ssh_public_key, ec.EllipticCurvePublicKey):
+            raise ValueError()
+    except (ValueError, UnsupportedAlgorithm):
+        sys.exit(
+            "Error: Unable to parse the public key file in "
+            "'--auth-supernode-public-key'. Authentication requires elliptic "
+            "curve private and public key pair. Please ensure that the file "
+            "path points to a valid public key file and try again."
         )
 
     return (
-        client_private_key,
-        client_public_key,
+        ssh_private_key,
+        ssh_public_key,
     )

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""MergeResplitter class for Flower Datasets."""
+"""Merger class for Flower Datasets."""
 
 
 import collections
@@ -24,7 +24,7 @@ import datasets
 from datasets import Dataset, DatasetDict
 
 
-class MergeResplitter:
+class Merger:
     """Merge existing splits of the dataset and assign them custom names.
 
     Create new `DatasetDict` with new split names corresponding to the merged existing
@@ -43,13 +43,13 @@ class MergeResplitter:
 
     >>> # Assuming there is a dataset_dict of type `DatasetDict`
     >>> # dataset_dict is {"train": train-data, "valid": valid-data, "test": test-data}
-    >>> merge_resplitter = MergeResplitter(
+    >>> merger = Merger(
     >>>     merge_config={
     >>>         "new_train": ("train", "valid"),
     >>>         "test": ("test", )
     >>>     }
     >>> )
-    >>> new_dataset_dict = merge_resplitter(dataset_dict)
+    >>> new_dataset_dict = merger(dataset_dict)
     >>> # new_dataset_dict is
     >>> # {"new_train": concatenation of train-data and valid-data, "test": test-data}
     """

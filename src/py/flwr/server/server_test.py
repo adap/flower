@@ -242,11 +242,9 @@ def test_setup_client_auth() -> None:  # pylint: disable=R0914
 
         # Mock argparse with `require-client-authentication`` flag
         mock_args = argparse.Namespace(
-            require_client_authentication=[
-                str(client_keys_file_path),
-                str(server_private_key_path),
-                str(server_public_key_path),
-            ]
+            auth_list_public_keys=str(client_keys_file_path),
+            auth_superlink_private_key=str(server_private_key_path),
+            auth_superlink_public_key=str(server_public_key_path),
         )
 
         # Run _try_setup_client_authentication
