@@ -1,5 +1,8 @@
 from flwr.client import Client, ClientApp, NumPyClient
 from task import set_weights, get_weights, train, evaluate, IncomeClassifier, load_data
+from flwr_datasets import FederatedDataset
+
+NUMBER_OF_CLIENTS = 5
 
 
 class FlowerClient(NumPyClient):
@@ -19,10 +22,17 @@ class FlowerClient(NumPyClient):
         return loss, len(self.testloader), {"accuracy": accuracy}
 
 
-def client_fn(cid: str) -> Client:
-    train_loader, test_loader = load_data(partition_id=int(cid))
-    net = IncomeClassifier()
-    return FlowerClient(net, train_loader, test_loader).to_client()
+def get_client_fn(dataset: FederatedDataset):
+    def client_fn(cid: str) -> Client:
+        train_loader, test_loader = load_data(partition_id=int(cid), fds=dataset)
+        net = IncomeClassifier()
+        return FlowerClient(net, train_loader, test_loader).to_client()
+
+    return client_fn
 
 
-app = ClientApp(client_fn=client_fn)
+fds = FederatedDataset(
+    dataset="scikit-learn/adult-census-income",
+    partitioners={"train": NUMBER_OF_CLIENTS},
+)
+app = ClientApp(client_fn=get_client_fn(fds))

@@ -7,14 +7,8 @@ from torch.utils.data import TensorDataset, DataLoader
 import torch.optim as optim
 from collections import OrderedDict
 
-NUMBER_OF_CLIENTS = 5
 
-
-def load_data(partition_id: int):
-    fds = FederatedDataset(
-        dataset="scikit-learn/adult-census-income",
-        partitioners={"train": NUMBER_OF_CLIENTS},
-    )
+def load_data(partition_id: int, fds: FederatedDataset):
     train_split = fds.load_split("train").with_format("pandas")[:]
     cat_features = train_split.select_dtypes(include=["object"]).columns.values
     categories = [pd.unique(train_split[cat]).tolist() for cat in cat_features]
@@ -92,7 +86,6 @@ def train(model, train_loader, num_epochs=1):
             loss = criterion(outputs, y_batch)
             loss.backward()
             optimizer.step()
-        print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}")
 
 
 def evaluate(model, test_loader):
@@ -111,7 +104,6 @@ def evaluate(model, test_loader):
             correct += (predicted == y_batch).sum().item()
     accuracy = correct / total
     loss = loss / len(test_loader)
-    print(f"Accuracy: {accuracy:.2f}")
     return loss, accuracy
 
 
