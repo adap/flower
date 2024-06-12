@@ -14,15 +14,18 @@
 # ==============================================================================
 """Flower command line interface `log` command."""
 
+import sys
 import time
 from logging import DEBUG, INFO
 
 import grpc
 import typer
 from typing_extensions import Annotated
+from typing import Optional
 
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
+from flwr.cli import config_utils
 
 
 def log(
@@ -30,6 +33,10 @@ def log(
         int,
         typer.Option(case_sensitive=False, help="The Flower run ID to query"),
     ],
+    superexec_address: Annotated[
+        Optional[str],
+        typer.Option(case_sensitive=False, help="The address of the SuperExec server"),
+    ] = None,
     period: Annotated[
         int,
         typer.Option(
@@ -56,8 +63,25 @@ def log(
     def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
         """Print logs from the beginning of a run."""
 
+    if superexec_address is None:
+        global_config = config_utils.load(
+            config_utils.get_flower_home() / "config.toml"
+        )
+        if global_config:
+            superexec_address = global_config["federation"]["default"]
+        else:
+            typer.secho(
+                "No SuperExec address was provided and no global config "
+                "was found.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            sys.exit()
+
+    assert superexec_address is not None
+
     channel = create_channel(
-        server_address="127.0.0.1:9093",
+        server_address=superexec_address,
         insecure=True,
         root_certificates=None,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
