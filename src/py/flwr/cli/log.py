@@ -24,14 +24,19 @@ from typing_extensions import Annotated
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
 
-STREAM_DURATION: int = 60
-
 
 def log(
     run_id: Annotated[
         int,
         typer.Option(case_sensitive=False, help="The Flower run ID to query"),
     ],
+    period: Annotated[
+        int,
+        typer.Option(
+            case_sensitive=False,
+            help="Use this to set connection refresh time period (in seconds)",
+        ),
+    ] = 60,
     follow: Annotated[
         bool,
         typer.Option(case_sensitive=False, help="Use this flag to follow logstream"),
@@ -64,7 +69,7 @@ def log(
         try:
             while True:
                 logger(INFO, "Streaming logs")
-                stream_logs(run_id, channel, STREAM_DURATION)
+                stream_logs(run_id, channel, period)
                 time.sleep(2)
                 logger(INFO, "Reconnecting to logstream")
         except KeyboardInterrupt:
