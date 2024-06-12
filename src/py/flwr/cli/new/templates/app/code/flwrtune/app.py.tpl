@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from hydra import compose, initialize
 from hydra.utils import instantiate
-from dataset import get_tokenizer_and_data_collator_and_propt_formatting
+from $import_name.dataset import get_tokenizer_and_data_collator_and_propt_formatting
 
 import flwr as fl
 from flwr_datasets import FederatedDataset
