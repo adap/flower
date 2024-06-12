@@ -21,11 +21,11 @@ from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
-    GetRunRequest,
     PingRequest,
     PullTaskInsRequest,
     PushTaskResRequest,
 )
+from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.state import State
 
