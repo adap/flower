@@ -40,9 +40,14 @@ with (pathlib.Path(__file__).parent.resolve() / "changelog_config.toml").open(
 
 # Extract types, project, and scope from the config
 TYPES = "|".join(CONFIG["type"])
-PROJECTS = "|".join(CONFIG["project"]) + "|\\*"
 SCOPE = CONFIG["scope"]
 ALLOWED_VERBS = CONFIG["allowed_verbs"]
+
+project_list = []
+for project_key, _ in CONFIG["projects"].items():
+    project_list.append(project_key)
+
+PROJECTS = "|".join(project_list) + "|\\*"
 
 # Construct the pattern
 PATTERN_TEMPLATE = CONFIG["pattern_template"]
@@ -144,86 +149,103 @@ def _extract_changelog_entry(
 
 def _update_changelog(prs: Set[PullRequest]) -> None:
     """Update the changelog file with entries from provided pull requests."""
-    breaking_changes = False
-    unknown_changes = False
+    parsed_prs = [(_extract_changelog_entry(pr_info), pr_info) for pr_info in prs]
 
-    with open(CHANGELOG_FILE, "r+", encoding="utf-8") as file:
-        content = file.read()
-        unreleased_index = content.find("## Unreleased")
+    for project_key, project_info in CONFIG["projects"].items():
+        with open(
+            project_info.get("path", CHANGELOG_FILE), "r+", encoding="utf-8"
+        ) as file:
+            breaking_changes = False
+            unknown_changes = False
 
-        if unreleased_index == -1:
-            print("Unreleased header not found in the changelog.")
-            return
+            content = file.read()
+            unreleased_index = content.find("## Unreleased")
 
-        # Find the end of the Unreleased section
-        next_header_index = content.find("## ", unreleased_index + 1)
-        next_header_index = (
-            next_header_index if next_header_index != -1 else len(content)
-        )
+            if unreleased_index == -1:
+                print("Unreleased header not found in the changelog.")
+                return
 
-        for pr_info in prs:
-            parsed_title = _extract_changelog_entry(pr_info)
-
-            # Skip if PR should be skipped or already in changelog
-            if (
-                parsed_title.get("scope", "unknown") == "skip"
-                or f"#{pr_info.number}]" in content
-            ):
-                continue
-
-            pr_type = parsed_title.get("type", "unknown")
-            if pr_type == "feat":
-                insert_content_index = content.find("### What", unreleased_index + 1)
-            elif pr_type == "docs":
-                insert_content_index = content.find(
-                    "### Documentation improvements", unreleased_index + 1
-                )
-            elif pr_type == "break":
-                breaking_changes = True
-                insert_content_index = content.find(
-                    "### Incompatible changes", unreleased_index + 1
-                )
-            elif pr_type in {"ci", "fix", "refactor"}:
-                insert_content_index = content.find(
-                    "### Other changes", unreleased_index + 1
-                )
-            else:
-                unknown_changes = True
-                insert_content_index = unreleased_index
-
-            pr_reference = _format_pr_reference(
-                pr_info.title, pr_info.number, pr_info.html_url
-            )
-
-            content = _insert_entry_no_desc(
-                content,
-                pr_reference,
-                insert_content_index,
-            )
-
+            # Find the end of the Unreleased section
             next_header_index = content.find("## ", unreleased_index + 1)
             next_header_index = (
                 next_header_index if next_header_index != -1 else len(content)
             )
 
-        if unknown_changes:
-            content = _insert_entry_no_desc(
-                content,
-                "### Unknown changes",
-                unreleased_index,
-            )
+            for parsed_title, pr_info in parsed_prs:
 
-        if not breaking_changes:
-            content = _insert_entry_no_desc(
-                content,
-                "None",
-                content.find("### Incompatible changes", unreleased_index + 1),
-            )
+                # Skip if PR is from another project, marked as skipped,
+                # or already in changelog
+                if parsed_title.get("project", "framework") not in [
+                    "baselines",
+                    "examples",
+                ] and (
+                    parsed_title.get("project", "framework") != project_key
+                    or parsed_title.get("scope", "unknown") == "skip"
+                    or f"#{pr_info.number}]" in content
+                ):
+                    continue
 
-        # Finalize content update
-        file.seek(0)
-        file.write(content)
-        file.truncate()
+                pr_type = parsed_title.get("type", "unknown")
+                if pr_type == "feat":
+                    insert_content_index = content.find(
+                        "### What", unreleased_index + 1
+                    )
+                elif pr_type == "docs":
+                    insert_content_index = content.find(
+                        "### Documentation improvements", unreleased_index + 1
+                    )
+                elif pr_type == "break":
+                    breaking_changes = True
+                    insert_content_index = content.find(
+                        "### Incompatible changes", unreleased_index + 1
+                    )
+                elif pr_type in {"ci", "fix", "refactor"}:
+                    insert_content_index = content.find(
+                        "### Other changes", unreleased_index + 1
+                    )
+                else:
+                    unknown_changes = True
+                    insert_content_index = unreleased_index
+
+                pr_reference = _format_pr_reference(
+                    pr_info.title, pr_info.number, pr_info.html_url
+                )
+
+                content = _insert_entry_no_desc(
+                    content,
+                    pr_reference,
+                    insert_content_index,
+                )
+
+                next_header_index = content.find("## ", unreleased_index + 1)
+                next_header_index = (
+                    next_header_index if next_header_index != -1 else len(content)
+                )
+
+            if unknown_changes:
+                content = _insert_entry_no_desc(
+                    content,
+                    "### Unknown changes",
+                    unreleased_index,
+                )
+
+            if (
+                not breaking_changes
+                and content.find(
+                    "### Incompatible changes\n\nNone", unreleased_index + 1
+                )
+                == -1
+            ):
+                content = _insert_entry_no_desc(
+                    content,
+                    "None",
+                    content.find("### Incompatible changes", unreleased_index + 1),
+                )
+
+            # Finalize content update
+            file.seek(0)
+            file.write(content)
+            file.truncate()
 
 
 def _insert_entry_no_desc(

@@ -3,8 +3,6 @@
 
 type = ["ci", "docs", "feat", "fix", "refactor", "break"]
 
-project = ["framework", "baselines", "datasets", "examples"]
-
 scope = "skip"
 
 pattern_template = "^({types})\\(({projects})(?::({scope}))?\\) ([A-Z][^\\n]*[^\\.\\n])$"
@@ -970,3 +968,15 @@ allowed_verbs=[
   "Wrap",
   "Write"
 ]
+
+[projects.framework]
+path = "doc/source/ref-changelog.md"
+
+[projects.datasets]
+path = "datasets/doc/source/ref-changelog.md"
+
+[projects.examples]
+path = "doc/source/ref-changelog.md"
+
+[projects.baselines]
+path = "doc/source/ref-changelog.md"
