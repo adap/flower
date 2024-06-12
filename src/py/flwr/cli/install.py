@@ -148,7 +148,10 @@ def validate_and_install(
     project_name = config["project"]["name"]
     version = config["project"]["version"]
 
-    if fab_name and fab_name != f"{publisher}.{project_name}.{version.replace('.', '-')}":
+    if (
+        fab_name
+        and fab_name != f"{publisher}.{project_name}.{version.replace('.', '-')}"
+    ):
         typer.secho(
             "❌ FAB file has incorrect name. The file name must follow the format "
             "`<publisher>.<project_name>.<version>.fab`.",
