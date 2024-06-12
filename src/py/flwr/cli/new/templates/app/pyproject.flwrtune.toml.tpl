@@ -32,7 +32,7 @@ publisher = "$username"
 
 [flower.components]
 serverapp = "$import_name.app:server"
-clientapp = "$import_name.app.client"
+clientapp = "$import_name.app:client"
 
 [flower.engine]
 name = "simulation"
