@@ -79,7 +79,9 @@ def install(
     install_from_fab(source, flwr_dir)
 
 
-def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]) -> None:
+def install_from_fab(
+    fab_file: Path, flwr_dir: Optional[Path], skip_prompt: bool = False
+) -> None:
     """Install from a FAB file after extracting and validating."""
     with tempfile.TemporaryDirectory() as tmpdir:
         with zipfile.ZipFile(fab_file, "r") as zipf:
@@ -108,14 +110,17 @@ def install_from_fab(fab_file: Path, flwr_dir: Optional[Path]) -> None:
 
             shutil.rmtree(info_dir)
 
-            validate_and_install(tmpdir_path, fab_file.stem, flwr_dir)
+            validate_and_install(tmpdir_path, fab_file.stem, flwr_dir, skip_prompt)
 
 
 def validate_and_install(
-    project_dir: Path, fab_name: str, flwr_dir: Optional[Path]
+    project_dir: Path,
+    fab_name: str,
+    flwr_dir: Optional[Path],
+    skip_prompt: bool = False,
 ) -> None:
     """Validate TOML files and install the project to the desired directory."""
-    config, _, _ = load_and_validate(project_dir / "pyproject.toml")
+    config, _, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
 
     if config is None:
         typer.secho(
@@ -154,15 +159,16 @@ def validate_and_install(
         / project_name
         / version
     )
-    if install_dir.exists() and not typer.confirm(
-        typer.style(
-            f"\n💬 {project_name} version {version} is already installed, "
-            "do you want to reinstall it?",
-            fg=typer.colors.MAGENTA,
-            bold=True,
-        )
-    ):
-        return
+    if install_dir.exists() and not skip_prompt:
+        if not typer.confirm(
+            typer.style(
+                f"\n💬 {project_name} version {version} is already installed, "
+                "do you want to reinstall it?",
+                fg=typer.colors.MAGENTA,
+                bold=True,
+            )
+        ):
+            return
 
     install_dir.mkdir(parents=True, exist_ok=True)
 
