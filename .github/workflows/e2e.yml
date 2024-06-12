@@ -210,14 +210,24 @@ jobs:
           python test.py "${{ matrix.strat }}"
   
   containers:
-    runs-on: ubuntu 22.04
-    timeout-minutes: 10
-    name: Containers
-    defaults:
-      run:
-        working-directory: e2e/docker
-    
-    steps:
-      - uses: actions/checkout@v4
-      - name: Placeholder action
-        run: echo "Run testcontainers"
+  runs-on: ubuntu-22.04
+  timeout-minutes: 60
+  name: Containers / docker
+  defaults:
+    run:
+      working-directory: e2e/docker
+  steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.8
+    - name: Install build tools
+      run: |
+        python -m pip install -U pip==23.3.1 
+    - name: Install dependencies
+      run: |
+        python -m pip install .
+    - name: Test e2e containers
+      run: |
+        pytest test.py    
