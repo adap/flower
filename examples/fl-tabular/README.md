@@ -14,8 +14,9 @@ This will create a new directory called `fl-tabular` containing the following fi
 
 ```shell
 -- pyproject.toml
--- centralized.py
--- federated.py
+-- client.py
+-- server.py
+-- task.py
 -- README.md
 ```
 
