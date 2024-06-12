@@ -89,9 +89,12 @@ def run_simulation(
     backend_name : str (default: ray)
         A simulation backend that runs `ClientApp`s.
 
-    backend_config : Optional[Dict[str, ConfigsRecordValues]]
-        'A dictionary, e.g {"<keyA>": <value>, "<keyB>": <value>} to configure a
-        backend. Values supported in <value> are those included by
+    backend_config : Optional[Dict[str, Dict[str, ConfigsRecordValues]]]
+        'A dictionary to configure a backend. Separate dictionaries to configure
+        different elements of backend. Supported top-level keys are `init_args`
+        for values parsed to initialization of backend, `client_resources`
+        to define the resources for clients, and `actor` to define the actor
+        parameters. Values supported in <value> are those included by
         `flwr.common.typing.ConfigsRecordValues`.
 
     enable_tf_gpu_growth : bool (default: False)
@@ -266,9 +269,12 @@ def _run_simulation(
     backend_name : str (default: ray)
         A simulation backend that runs `ClientApp`s.
 
-    backend_config : Optional[Dict[str, ConfigsRecordValues]]
-        'A dictionary, e.g {"<keyA>":<value>, "<keyB>":<value>} to configure a
-        backend. Values supported in <value> are those included by
+    backend_config : Optional[Dict[str, Dict[str, ConfigsRecordValues]]]
+        'A dictionary to configure a backend. Separate dictionaries to configure
+        different elements of backend. Supported top-level keys are `init_args`
+        for values parsed to initialization of backend, `client_resources`
+        to define the resources for clients, and `actor` to define the actor
+        parameters. Values supported in <value> are those included by
         `flwr.common.typing.ConfigsRecordValues`.
 
     client_app_attr : str
@@ -387,7 +393,8 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--backend-config",
         type=str,
-        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0}, "tensorflow": 0}',
+        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0},'
+        '"actor": {"tensorflow": 0},}',
         help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
         "configure a backend. Values supported in <value> are those included by "
         "`flwr.common.typing.ConfigsRecordValues`. ",
