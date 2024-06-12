@@ -15,7 +15,6 @@
 """Flower command line interface `install` command."""
 
 
-import hashlib
 import os
 import shutil
 import tempfile
@@ -27,6 +26,7 @@ import typer
 from typing_extensions import Annotated
 
 from .config_utils import load_and_validate
+from .utils import get_sha256_hash
 
 
 def install(
@@ -130,14 +130,14 @@ def validate_and_install(
         )
         raise typer.Exit(code=1)
 
-    username = config["flower"]["publisher"]
+    publisher = config["flower"]["publisher"]
     project_name = config["project"]["name"]
     version = config["project"]["version"]
 
-    if fab_name != f"{username}.{project_name}.{version.replace('.', '-')}":
+    if fab_name != f"{publisher}.{project_name}.{version.replace('.', '-')}":
         typer.secho(
-            "❌ FAB file has incorrect name, it should be "
-            "`<username>.<project_name>.<version>.fab`.",
+            "❌ FAB file has incorrect name. The file name must follow the format "
+            "`<publisher>.<project_name>.<version>.fab`.",
             fg=typer.colors.RED,
             bold=True,
         )
@@ -155,7 +155,7 @@ def validate_and_install(
             else flwr_dir
         )
         / "apps"
-        / username
+        / publisher
         / project_name
         / version
     )
@@ -191,18 +191,6 @@ def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
     for line in list_content.strip().split("\n"):
         rel_path, hash_expected, _ = line.split(",")
         file_path = tmpdir / rel_path
-        if not file_path.exists() or _get_sha256_hash(file_path) != hash_expected:
+        if not file_path.exists() or get_sha256_hash(file_path) != hash_expected:
             return False
     return True
-
-
-def _get_sha256_hash(file_path: Path) -> str:
-    """Calculate the SHA-256 hash of a file."""
-    sha256 = hashlib.sha256()
-    with open(file_path, "rb") as f:
-        while True:
-            data = f.read(65536)
-            if not data:
-                break
-            sha256.update(data)
-    return sha256.hexdigest()
