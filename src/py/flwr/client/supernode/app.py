@@ -49,8 +49,11 @@ def run_supernode() -> None:
 
     args = _parse_args_run_supernode().parse_args()
 
+    _warn_deprecated_server_arg(args)
+
     root_certificates = _get_certificates(args)
     load_fn = _get_load_client_app_fn(args, multi_app=True)
+    authentication_keys = _try_setup_client_authentication(args)
 
     _start_client_internal(
         server_address=args.server,
@@ -58,6 +61,7 @@ def run_supernode() -> None:
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
         insecure=args.insecure,
+        authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
     )
@@ -76,22 +80,7 @@ def run_client_app() -> None:
 
     args = _parse_args_run_client_app().parse_args()
 
-    if args.server != ADDRESS_FLEET_API_GRPC_RERE:
-        warn = "Passing flag --server is deprecated. Use --superlink instead."
-        warn_deprecated_feature(warn)
-
-        if args.superlink != ADDRESS_FLEET_API_GRPC_RERE:
-            # if `--superlink` also passed, then
-            # warn user that this argument overrides what was passed with `--server`
-            log(
-                WARN,
-                "Both `--server` and `--superlink` were passed. "
-                "`--server` will be ignored. Connecting to the Superlink Fleet API "
-                "at %s.",
-                args.superlink,
-            )
-        else:
-            args.superlink = args.server
+    _warn_deprecated_server_arg(args)
 
     root_certificates = _get_certificates(args)
     load_fn = _get_load_client_app_fn(args, multi_app=False)
@@ -108,6 +97,26 @@ def run_client_app() -> None:
         max_wait_time=args.max_wait_time,
     )
     register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
+
+
+def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
+    """Warn about the deprecated argument `--server`."""
+    if args.server != ADDRESS_FLEET_API_GRPC_RERE:
+        warn = "Passing flag --server is deprecated. Use --superlink instead."
+        warn_deprecated_feature(warn)
+
+        if args.superlink != ADDRESS_FLEET_API_GRPC_RERE:
+            # if `--superlink` also passed, then
+            # warn user that this argument overrides what was passed with `--server`
+            log(
+                WARN,
+                "Both `--server` and `--superlink` were passed. "
+                "`--server` will be ignored. Connecting to the Superlink Fleet API "
+                "at %s.",
+                args.superlink,
+            )
+        else:
+            args.superlink = args.server
 
 
 def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
