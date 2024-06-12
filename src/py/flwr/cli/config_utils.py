@@ -14,6 +14,7 @@
 # ==============================================================================
 """Utility to validate the `pyproject.toml` file."""
 
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -121,3 +122,13 @@ def validate(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
         return False, [reason], []
 
     return True, [], []
+
+
+def get_flower_home() -> Path:
+    """Return the Flower home directory based on env variables."""
+    return Path(
+        os.getenv(
+            "FLWR_HOME",
+            f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
+        )
+    )
