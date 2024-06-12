@@ -357,20 +357,20 @@ def _start_client_internal(
                         send(out_message)
                         break
 
-                # Get run info
-                run_id = message.metadata.run_id
-                if run_id not in run_info:
-                    if get_run is not None:
-                        run_info[run_id] = get_run(run_id)
-                    # If get_run is None, i.e., in grpc-bidi mode
-                    else:
-                        run_info[run_id] = ("", "")
+                    # Get run info
+                    run_id = message.metadata.run_id
+                    if run_id not in run_info:
+                        if get_run is not None:
+                            run_info[run_id] = get_run(run_id)
+                        # If get_run is None, i.e., in grpc-bidi mode
+                        else:
+                            run_info[run_id] = ("", "")
 
-                # Register context for this run
-                node_state.register_context(run_id=run_id)
+                    # Register context for this run
+                    node_state.register_context(run_id=run_id)
 
-                # Retrieve context for this run
-                context = node_state.retrieve_context(run_id=run_id)
+                    # Retrieve context for this run
+                    context = node_state.retrieve_context(run_id=run_id)
 
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error
@@ -378,10 +378,10 @@ def _start_client_internal(
                         error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
                     )
 
-                # Handle app loading and task message
-                try:
-                    # Load ClientApp instance
-                    client_app: ClientApp = load_client_app_fn(*run_info[run_id])
+                    # Handle app loading and task message
+                    try:
+                        # Load ClientApp instance
+                        client_app: ClientApp = load_client_app_fn(*run_info[run_id])
 
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)
@@ -412,16 +412,16 @@ def _start_client_internal(
                                 ERROR, "%s raised an exception", exc_entity, exc_info=ex
                             )
 
-                    # Create error message
-                    reply_message = message.create_error_reply(
-                        error=Error(code=e_code, reason=reason)
-                    )
-                else:
-                    # No exception, update node state
-                    node_state.update_context(
-                        run_id=run_id,
-                        context=context,
-                    )
+                        # Create error message
+                        reply_message = message.create_error_reply(
+                            error=Error(code=e_code, reason=reason)
+                        )
+                    else:
+                        # No exception, update node state
+                        node_state.update_context(
+                            run_id=run_id,
+                            context=context,
+                        )
 
                     # Send
                     send(reply_message)
