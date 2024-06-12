@@ -24,8 +24,6 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    GetRunRequest,
-    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -33,9 +31,13 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResRequest,
     PushTaskResResponse,
     Reconnect,
-    Run,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
+    Run,
+)
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State
 
