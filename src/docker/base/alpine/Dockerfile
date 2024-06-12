@@ -54,6 +54,7 @@ FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} as base
 # required by the grpc package
 RUN apk add --no-cache \
     libstdc++ \
+    ca-certificates \
     # add non-root user
     && adduser \
     --no-create-home \
