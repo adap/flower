@@ -45,11 +45,11 @@ def log(
 
     # pylint: disable=unused-argument
     def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
-        """Stream logs with connection refresh."""
+        """Stream logs from the beginning of a run with connection refresh."""
 
     # pylint: disable=unused-argument
     def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
-        """Print logs."""
+        """Print logs from the beginning of a run."""
 
     channel = create_channel(
         server_address="127.0.0.1:9093",
