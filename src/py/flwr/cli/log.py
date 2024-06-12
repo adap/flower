@@ -17,15 +17,15 @@
 import sys
 import time
 from logging import DEBUG, INFO
+from typing import Optional
 
 import grpc
 import typer
 from typing_extensions import Annotated
-from typing import Optional
 
+from flwr.cli import config_utils
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
-from flwr.cli import config_utils
 
 
 def log(
@@ -71,8 +71,7 @@ def log(
             superexec_address = global_config["federation"]["default"]
         else:
             typer.secho(
-                "No SuperExec address was provided and no global config "
-                "was found.",
+                "No SuperExec address was provided and no global config was found.",
                 fg=typer.colors.RED,
                 bold=True,
             )
