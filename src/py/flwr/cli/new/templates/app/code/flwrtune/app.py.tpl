@@ -18,7 +18,7 @@ with initialize(config_path="conf", version_base="1.1"):
     cfg = compose(config_name="config")
 
 # Initialise static config
-with initialize(config_path="conf"):
+with initialize(config_path="conf", version_base="1.1"):
     cfg_static = compose(config_name="static_config")
 
 cfg.train.num_rounds = cfg_static.num_rounds
