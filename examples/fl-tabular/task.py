@@ -1,31 +1,20 @@
-from flwr.client import Client, ClientApp, NumPyClient
-from flwr.server import ServerApp, ServerConfig
-from flwr.server.strategy import FedAvg
-from flwr.simulation import run_simulation
+import torch.nn as nn
 from flwr_datasets import FederatedDataset
-from flwr.common import ndarrays_to_parameters
 from sklearn.preprocessing import OneHotEncoder
 import pandas as pd
 import torch
 from torch.utils.data import TensorDataset, DataLoader
-import torch.nn as nn
-from collections import OrderedDict
 import torch.optim as optim
-from sklearn.preprocessing import OrdinalEncoder
-
-import numpy as np
-import random
-
-# Set seed for reproducibility
-SEED = 42
-random.seed(SEED)
-np.random.seed(SEED)
-torch.manual_seed(SEED)
+from collections import OrderedDict
 
 NUMBER_OF_CLIENTS = 5
 
 
-def load_data(partition_id: int, fds: FederatedDataset):
+def load_data(partition_id: int):
+    fds = FederatedDataset(
+        dataset="scikit-learn/adult-census-income",
+        partitioners={"train": NUMBER_OF_CLIENTS},
+    )
     train_split = fds.load_split("train").with_format("pandas")[:]
     cat_features = train_split.select_dtypes(include=["object"]).columns.values
     categories = [pd.unique(train_split[cat]).tolist() for cat in cat_features]
@@ -80,7 +69,7 @@ class IncomeClassifier(nn.Module):
 
     def forward(self, x):
         if self.layer1 is None:
-            self.initialize_model(x.size(1))  # Initialize model with input dimension
+            self.initialize_model(x.size(1))
         x = self.relu(self.layer1(x))
         x = self.dropout(x)
         x = self.relu(self.layer2(x))
@@ -135,50 +124,3 @@ def set_weights(net, parameters):
 def get_weights(net):
     ndarrays = [val.cpu().numpy() for _, val in net.state_dict().items()]
     return ndarrays
-
-
-class FlowerClient(NumPyClient):
-    def __init__(self, net, trainloader, testloader):
-        self.net = net
-        self.trainloader = trainloader
-        self.testloader = testloader
-
-    def fit(self, parameters, config):
-        set_weights(self.net, parameters)
-        train(self.net, self.trainloader)
-        return get_weights(self.net), len(self.trainloader), {}
-
-    def evaluate(self, parameters, config):
-        set_weights(self.net, parameters)
-        loss, accuracy = evaluate(self.net, self.testloader)
-        return loss, len(self.testloader), {"accuracy": accuracy}
-
-
-def get_client_fn(dataset: FederatedDataset):
-    def client_fn(cid: str) -> Client:
-        train_loader, test_loader = load_data(partition_id=int(cid), fds=dataset)
-        net = IncomeClassifier()
-        return FlowerClient(net, train_loader, test_loader).to_client()
-
-    return client_fn
-
-
-fds = FederatedDataset(
-    dataset="scikit-learn/adult-census-income",
-    partitioners={"train": NUMBER_OF_CLIENTS},
-)
-client = ClientApp(client_fn=get_client_fn(fds))
-net = IncomeClassifier()
-params = ndarrays_to_parameters(get_weights(net))
-
-strategy = FedAvg(
-    initial_parameters=params,
-)
-
-server = ServerApp(
-    strategy=strategy,
-    config=ServerConfig(num_rounds=5),
-)
-
-
-run_simulation(server_app=server, client_app=client, num_supernodes=5)

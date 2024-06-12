@@ -1,7 +1,7 @@
 # Flower Example on Adult Census Income Tabular Dataset
 
 Federated Learning on a Tabular Dataset with Flower Framework
-This code exemplifies a federated learning setup using the Flower framework on tabular dataset, based on the "Adult Census Income" dataset. The "Adult Census Income" dataset contains demographic information such as age, education, occupation, etc., with the target attribute being income level (\<=50K or >50K). The dataset is partitioned into subsets, simulating a federated environment with 5 clients, each holding a distinct portion of the data. Categorical variables are one-hot encoded, and the data is split into training and testing sets. Federated learning is conducted using the FedAvg strategy for 3 rounds.
+This code exemplifies a federated learning setup using the Flower framework on tabular dataset, based on the "Adult Census Income" dataset. The "Adult Census Income" dataset contains demographic information such as age, education, occupation, etc., with the target attribute being income level (\<=50K or >50K). The dataset is partitioned into subsets, simulating a federated environment with 5 clients, each holding a distinct portion of the data. Categorical variables are one-hot encoded, and the data is split into training and testing sets. Federated learning is conducted using the FedAvg strategy for 5 rounds.
 
 ## Environments Setup
 
@@ -30,14 +30,8 @@ pip install .
 
 ## Running Code
 
-### 1. Centralized
+### Federated Using Flower Simulation
 
 ```bash
-python centralized.py
-```
-
-### 2. Federated Using Flower Simulation
-
-```bash
-python federated.py
+flower-simulation --server-app server:app --client-app client:app --num-supernodes 5
 ```
