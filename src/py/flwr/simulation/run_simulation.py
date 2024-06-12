@@ -103,7 +103,7 @@ def run_simulation(
         works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
 
     verbose_logging : bool (default: False)
-        When diabled, only INFO, WARNING and ERROR log messages will be shown. If
+        When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
     _run_simulation(
@@ -132,7 +132,7 @@ def run_serverapp_th(
     def server_th_with_start_checks(  # type: ignore
         tf_gpu_growth: bool, stop_event: asyncio.Event, **kwargs
     ) -> None:
-        """Run SeverApp, after check if GPU memory grouwth has to be set.
+        """Run SeverApp, after check if GPU memory growth has to be set.
 
         Upon exception, trigger stop event for Simulation Engine.
         """
@@ -182,7 +182,7 @@ def _main_loop(
 ) -> None:
     """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread.
 
-    Everything runs on the main thread or a separate one, depening on whether the main
+    Everything runs on the main thread or a separate one, depending on whether the main
     thread already contains a running Asyncio event loop. This is the case if running
     the Simulation Engine on a Jupyter/Colab notebook.
     """
@@ -287,12 +287,12 @@ def _run_simulation(
         A boolean to indicate whether to enable GPU growth on the main thread. This is
         desirable if you make use of a TensorFlow model on your `ServerApp` while
         having your `ClientApp` running on the same GPU. Without enabling this, you
-        might encounter an out-of-memory error becasue TensorFlow by default allocates
+        might encounter an out-of-memory error because TensorFlow by default allocates
         all GPU memory. Read mor about how `tf.config.experimental.set_memory_growth()`
         works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
 
     verbose_logging : bool (default: False)
-        When diabled, only INFO, WARNING and ERROR log messages will be shown. If
+        When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
     if backend_config is None:
@@ -330,7 +330,7 @@ def _run_simulation(
         server_app_attr,
     )
     # Detect if there is an Asyncio event loop already running.
-    # If yes, run everything on a separate thread. In environmnets
+    # If yes, run everything on a separate thread. In environments
     # like Jupyter/Colab notebooks, there is an event loop present.
     run_in_thread = False
     try:
@@ -342,7 +342,7 @@ def _run_simulation(
         run_in_thread = True
 
     except RuntimeError:
-        log(DEBUG, "No asyncio event loop runnig")
+        log(DEBUG, "No asyncio event loop running")
 
     finally:
         if run_in_thread:
