@@ -29,7 +29,7 @@ def message_size_mod(
 ) -> Message:
     """Message size mod.
 
-    This mod logs the size in Bytes of the message being transmited.
+    This mod logs the size in bytes of the message being transmited.
     """
     message_size_in_bytes = 0
 
@@ -42,7 +42,7 @@ def message_size_mod(
     for m_record in msg.content.metrics_records.values():
         message_size_in_bytes += m_record.count_bytes()
 
-    log(INFO, "Message size: %i Bytes", message_size_in_bytes)
+    log(INFO, "Message size: %i bytes", message_size_in_bytes)
 
     return call_next(msg, ctxt)
 
@@ -53,7 +53,7 @@ def parameters_size_mod(
     """Parameters size mod.
 
     This mod logs the number of parameters transmitted in the message as well as their
-    size in Bytes.
+    size in bytes.
     """
     model_size_stats = {}
     parameters_size_in_bytes = 0
@@ -74,6 +74,6 @@ def parameters_size_mod(
     if model_size_stats:
         log(INFO, model_size_stats)
 
-    log(INFO, "Total parameters transmited: %i Bytes", parameters_size_in_bytes)
+    log(INFO, "Total parameters transmitted: %i bytes", parameters_size_in_bytes)
 
     return call_next(msg, ctxt)

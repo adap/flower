@@ -46,7 +46,7 @@ def _register_nodes(
     for i in range(num_nodes):
         node_id = state.create_node(ping_interval=PING_MAX_INTERVAL)
         nodes_mapping[node_id] = i
-    log(INFO, "Registered %i nodes", len(nodes_mapping))
+    log(DEBUG, "Registered %i nodes", len(nodes_mapping))
     return nodes_mapping
 
 
@@ -293,7 +293,7 @@ def start_vce(
         node_states[node_id] = NodeState()
 
     # Load backend config
-    log(INFO, "Supported backends: %s", list(supported_backends.keys()))
+    log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
     backend_config = json.loads(backend_config_json_stream)
 
     try:
