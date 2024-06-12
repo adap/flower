@@ -1,5 +1,3 @@
-"""$project_name: A Flower / flwrtune app."""
-
 # Federated Instruction Tuning
 ---
 model:
