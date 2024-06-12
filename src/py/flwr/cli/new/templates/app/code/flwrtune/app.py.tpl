@@ -14,7 +14,7 @@ from $import_name.server import get_on_fit_config, fit_weighted_average, get_eva
 
 
 # Initialise regular config
-with initialize(config_path="conf"):
+with initialize(config_path="conf", version_base="1.1"):
     cfg = compose(config_name="config")
 
 # Initialise static config
