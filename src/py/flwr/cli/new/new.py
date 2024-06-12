@@ -144,8 +144,7 @@ def new(
             name for name, value in vars(LLMTaskName).items() if value == llm_task_value
         ]
         llm_task_str = selected_value[0]
-
-    llm_task_str = llm_task_str.lower()
+        llm_task_str = llm_task_str.lower()
 
     print(
         typer.style(
@@ -161,40 +160,91 @@ def new(
     import_name = package_name.replace("-", "_")
     project_dir = os.path.join(cwd, package_name)
 
-    # List of files to render
-    files = {
-        ".gitignore": {"template": "app/.gitignore.tpl"},
-        "README.md": {"template": "app/README.md.tpl"},
-        "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
-        f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-        f"{import_name}/server.py": {
-            "template": f"app/code/server.{framework_str}.py.tpl"
-        },
-        f"{import_name}/client.py": {
-            "template": f"app/code/client.{framework_str}.py.tpl"
-        },
-    }
-
-    # Depending on the framework, generate task.py file
-    frameworks_with_tasks = [
-        MlFramework.PYTORCH.value.lower(),
-        MlFramework.JAX.value.lower(),
-        MlFramework.HUGGINGFACE.value.lower(),
-        MlFramework.MLX.value.lower(),
-        MlFramework.TENSORFLOW.value.lower(),
-        MlFramework.FLWRTUNE.value.lower(),
-    ]
-    if framework_str in frameworks_with_tasks:
-        files[f"{import_name}/task.py"] = {
-            "template": f"app/code/task.{framework_str}.py.tpl"
-        }
-
     context = {
         "project_name": project_name,
         "package_name": package_name,
         "import_name": import_name.replace("-", "_"),
         "username": username,
     }
+
+    # List of files to render
+    if framework_str == "flwrtune":
+        files = {
+            ".gitignore": {"template": "app/.gitignore.tpl"},
+            "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
+            "README.md": {"template": f"app/README.{framework_str}.md.tpl"},
+            f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
+            f"{import_name}/server.py": {
+                "template": "app/code/flwrtune/server.py.tpl"
+            },
+            f"{import_name}/client.py": {
+                "template": "app/code/flwrtune/client.py.tpl"
+            },
+            f"{import_name}/app.py": {"template": "app/code/flwrtune/app.py.tpl"},
+            f"{import_name}/models.py": {
+                "template": "app/code/flwrtune/models.py.tpl"
+            },
+            f"{import_name}/dataset.py": {
+                "template": "app/code/flwrtune/dataset.py.tpl"
+            },
+            f"{import_name}/conf/config.yaml": {
+                "template": "app/code/flwrtune/config.yaml.tpl"
+            },
+            f"{import_name}/conf/static_config.yaml": {
+                "template": "app/code/flwrtune/static_config.yaml.tpl"
+            },
+        }
+
+        # Task specific context
+        fraction_fit = 0.2 if llm_task_str == "code" else 0.1
+        if llm_task_str == "generalnlp":
+            task_name = "General NLP"
+            num_clients = 20
+            dataset_name = "vicgalle/alpaca-gpt4"
+        elif llm_task_str == "finance":
+            task_name = "Finance"
+            num_clients = 50
+            dataset_name = "FinGPT/fingpt-sentiment-train"
+        elif llm_task_str == "medical":
+            task_name = "Medical"
+            num_clients = 20
+            dataset_name = "medalpaca/medical_meadow_medical_flashcards"
+        else:
+            task_name = "Code"
+            num_clients = 10
+            dataset_name = "lucasmccabe-lmi/CodeAlpaca-20k"
+
+        context["llm_task_str"] = llm_task_str
+        context["fraction_fit"] = fraction_fit
+        context["num_clients"] = num_clients
+        context["dataset_name"] = dataset_name
+        context["task_name"] = task_name
+    else:
+        files = {
+            ".gitignore": {"template": "app/.gitignore.tpl"},
+            "README.md": {"template": "app/README.md.tpl"},
+            "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
+            f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
+            f"{import_name}/server.py": {
+                "template": f"app/code/server.{framework_str}.py.tpl"
+            },
+            f"{import_name}/client.py": {
+                "template": f"app/code/client.{framework_str}.py.tpl"
+            },
+        }
+
+        # Depending on the framework, generate task.py file
+        frameworks_with_tasks = [
+            MlFramework.PYTORCH.value.lower(),
+            MlFramework.JAX.value.lower(),
+            MlFramework.HUGGINGFACE.value.lower(),
+            MlFramework.MLX.value.lower(),
+            MlFramework.TENSORFLOW.value.lower(),
+        ]
+        if framework_str in frameworks_with_tasks:
+            files[f"{import_name}/task.py"] = {
+                "template": f"app/code/task.{framework_str}.py.tpl"
+            }
 
     for file_path, value in files.items():
         render_and_create(
