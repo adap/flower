@@ -37,6 +37,7 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.driver_pb2_grpc import DriverStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .driver import Driver
@@ -101,6 +102,17 @@ class GrpcDriverHelper:
         res: CreateRunResponse = self.stub.CreateRun(request=req)
         return res
 
+    def get_run(self, req: GetRunRequest) -> GetRunResponse:
+        """Get run information."""
+        # Check if channel is open
+        if self.stub is None:
+            log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
+            raise ConnectionError("`GrpcDriverHelper` instance not connected")
+
+        # Call gRPC Driver API
+        res: GetRunResponse = self.stub.GetRun(request=req)
+        return res
+
     def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
         """Get client IDs."""
         # Check if channel is open
@@ -157,39 +169,69 @@ class GrpcDriver(Driver):
         The version of the FAB used in the run.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
         root_certificates: Optional[bytes] = None,
         fab_id: Optional[str] = None,
         fab_version: Optional[str] = None,
+        run_id: Optional[int] = None,
     ) -> None:
         self.addr = driver_service_address
         self.root_certificates = root_certificates
         self.driver_helper: Optional[GrpcDriverHelper] = None
-        self.run_id: Optional[int] = None
-        self.fab_id = fab_id if fab_id is not None else ""
-        self.fab_version = fab_version if fab_version is not None else ""
+        self._run_id = run_id
+        self._fab_id = fab_id if fab_id is not None else ""
+        self._fab_ver = fab_version if fab_version is not None else ""
         self.node = Node(node_id=0, anonymous=True)
+
+    @property
+    def run_id(self) -> int:
+        """Run ID."""
+        _, run_id = self._get_grpc_driver_helper_and_run_id()
+        return run_id
+
+    @property
+    def fab_id(self) -> str:
+        """FAB ID."""
+        self._get_grpc_driver_helper_and_run_id()
+        return self._fab_id
+
+    @property
+    def fab_version(self) -> str:
+        """FAB version."""
+        self._get_grpc_driver_helper_and_run_id()
+        return self._fab_ver
 
     def _get_grpc_driver_helper_and_run_id(self) -> Tuple[GrpcDriverHelper, int]:
         # Check if the GrpcDriverHelper is initialized
-        if self.driver_helper is None or self.run_id is None:
+        if self.driver_helper is None or self._run_id is None:
             # Connect and create run
             self.driver_helper = GrpcDriverHelper(
                 driver_service_address=self.addr,
                 root_certificates=self.root_certificates,
             )
             self.driver_helper.connect()
-            req = CreateRunRequest(fab_id=self.fab_id, fab_version=self.fab_version)
-            res = self.driver_helper.create_run(req)
-            self.run_id = res.run_id
-        return self.driver_helper, self.run_id
+            # Create the run if the run_id is not provided
+            if self._run_id is None:
+                create_run_req = CreateRunRequest(
+                    fab_id=self._fab_id, fab_version=self._fab_ver
+                )
+                create_run_res = self.driver_helper.create_run(create_run_req)
+                self._run_id = create_run_res.run_id
+            # Get the run if the run_id is provided
+            else:
+                get_run_req = GetRunRequest(run_id=self._run_id)
+                get_run_res = self.driver_helper.get_run(get_run_req)
+                self._fab_id = get_run_res.run.fab_id
+                self._fab_ver = get_run_res.run.fab_version
+
+        return self.driver_helper, self._run_id
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            message.metadata.run_id == self.run_id
+            message.metadata.run_id == self._run_id
             and message.metadata.src_node_id == self.node.node_id
             and message.metadata.message_id == ""
             and message.metadata.reply_to_message == ""

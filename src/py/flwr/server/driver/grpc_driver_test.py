@@ -52,11 +52,27 @@ class TestGrpcDriver(unittest.TestCase):
         """Cleanup after each test."""
         self.patcher.stop()
 
+    def test_get_run(self) -> None:
+        """Test the GrpcDriver starting with run_id."""
+        # Prepare
+        self.driver._run_id = 61016  # pylint: disable=protected-access
+        mock_response = Mock()
+        mock_response.run = Mock()
+        mock_response.run.run_id = 61016
+        mock_response.run.fab_id = "mock/mock"
+        mock_response.run.fab_version = "v1.0.0"
+        self.mock_grpc_driver_helper.get_run.return_value = mock_response
+
+        # Assert
+        self.assertEqual(self.driver.run_id, 61016)
+        self.assertEqual(self.driver.fab_id, "mock/mock")
+        self.assertEqual(self.driver.fab_version, "v1.0.0")
+
     def test_check_and_init_grpc_driver_already_initialized(self) -> None:
         """Test that GrpcDriverHelper doesn't initialize if run is created."""
         # Prepare
         self.driver.driver_helper = self.mock_grpc_driver_helper
-        self.driver.run_id = 61016
+        self.driver._run_id = 61016  # pylint: disable=protected-access
 
         # Execute
         # pylint: disable-next=protected-access

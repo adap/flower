@@ -35,6 +35,11 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import (  # pylint: disable=E0611
+    GetRunRequest,
+    GetRunResponse,
+    Run,
+)
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
@@ -128,6 +133,20 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         context.set_code(grpc.StatusCode.OK)
         return PullTaskResResponse(task_res_list=task_res_list)
+
+    def GetRun(
+        self, request: GetRunRequest, context: grpc.ServicerContext
+    ) -> GetRunResponse:
+        """Get run information."""
+        log(DEBUG, "DriverServicer.GetRun")
+
+        # Init state
+        state: State = self.state_factory.state()
+
+        # Retrieve run information
+        run_id, fab_id, fab_version = state.get_run(request.run_id)
+        run = Run(run_id=run_id, fab_id=fab_id, fab_version=fab_version)
+        return GetRunResponse(run=run)
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
