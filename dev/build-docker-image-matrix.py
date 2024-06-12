@@ -1,5 +1,5 @@
 """
-Usage: python dev/build-docker-image-matrix.py --flwr-version <flower version e.g. 1.8.0>
+Usage: python dev/build-docker-image-matrix.py --flwr-version <flower version e.g. 1.9.0>
 """
 
 import argparse

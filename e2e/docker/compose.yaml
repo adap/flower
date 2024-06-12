@@ -18,8 +18,8 @@ services:
       replicas: 2
       resources:
         limits:
-          cpus: '3'
-    command: [ "--insecure", "--server", "superlink:9092" ]
+          cpus: '2'
+    command: [ "--insecure", "--superlink", "superlink:9092" ]
     depends_on:
       - superlink
 
@@ -27,7 +27,7 @@ services:
   serverapp:
     build:
       dockerfile: serverapp.Dockerfile
-    command: [ "--insecure", "--server", "superlink:9091" ]
+    command: [ "--insecure", "--superlink", "superlink:9091" ]
     # enforce dependency for graceful execution
     depends_on:
       - superlink
