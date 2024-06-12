@@ -18,6 +18,7 @@ import typer
 
 from .build import build
 from .example import example
+from .install import install
 from .log import log
 from .new import new
 from .run import run
@@ -35,6 +36,7 @@ app.command()(new)
 app.command()(example)
 app.command()(run)
 app.command()(build)
+app.command()(install)
 app.command()(log)
 
 if __name__ == "__main__":
