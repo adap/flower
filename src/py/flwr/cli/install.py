@@ -28,6 +28,7 @@ from typing_extensions import Annotated
 from .config_utils import get_flower_home, load_and_validate
 from .utils import get_sha256_hash
 
+
 def install(
     source: Annotated[
         Optional[Path],
@@ -120,7 +121,9 @@ def install_from_fab(
 
             shutil.rmtree(info_dir)
 
-            installed_path = validate_and_install(tmpdir_path, fab_name, flwr_dir, skip_prompt)
+            installed_path = validate_and_install(
+                tmpdir_path, fab_name, flwr_dir, skip_prompt
+            )
 
     return installed_path
 
@@ -149,7 +152,7 @@ def validate_and_install(
     if (
         fab_name
         and fab_name != f"{publisher}.{project_name}.{version.replace('.', '-')}"
-    ):        
+    ):
         typer.secho(
             "❌ FAB file has incorrect name. The file name must follow the format "
             "`<publisher>.<project_name>.<version>.fab`.",
@@ -159,16 +162,7 @@ def validate_and_install(
         raise typer.Exit(code=1)
 
     install_dir: Path = (
-        (
-            Path(
-                os.getenv(
-                    "FLWR_HOME",
-                    f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
-                )
-            )
-            if not flwr_dir
-            else flwr_dir
-        )
+        (get_flower_home() if not flwr_dir else flwr_dir)
         / "apps"
         / publisher
         / project_name
