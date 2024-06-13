@@ -186,7 +186,7 @@ def _get_load_client_app_fn(
     if not multi_app:
         log(
             DEBUG,
-            "Flower will load ClientApp `%s`",
+            "Flower SuperNode will always load ClientApp `%s`", 
             getattr(args, "client-app"),
         )
         valid, error_msg = validate(default_app_ref)
