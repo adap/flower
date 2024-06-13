@@ -74,7 +74,7 @@ def run(
     follow: Annotated[
         bool,
         typer.Option(case_sensitive=False, help="Use this flag to stream logs"),
-    ] = False,
+    ] = True,
 ) -> None:
     """Run Flower project."""
     if use_superexec:
@@ -125,6 +125,7 @@ def run(
                     log(INFO, "Reconnecting to logstream")
             except KeyboardInterrupt:
                 log(INFO, "Exiting logstream")
+            finally:
                 channel.close()
     else:
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)

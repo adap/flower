@@ -22,7 +22,7 @@ service Exec {
   rpc StartRun(StartRunRequest) returns (StartRunResponse) {}
 
   // Start log stream upon request
-  rpc FetchLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
+  rpc StreamLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
 }
 
 message StartRunRequest { bytes fab_file = 1; }

@@ -27,7 +27,7 @@ from flwr.proto.exec_pb2 import StreamLogsRequest
 from flwr.proto.exec_pb2_grpc import ExecStub
 
 
-def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
+def stream_logs(run_id: int, channel: grpc.Channel, period: int) -> None:
     """Stream logs from the beginning of a run with connection refresh."""
     start_time = time.time()
     stub = ExecStub(channel)
@@ -35,7 +35,7 @@ def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
 
     for res in stub.StreamLogs(req):
         print(res.log_output)
-        if time.time() - start_time > duration:
+        if time.time() - start_time > period:
             break
 
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
