@@ -8,15 +8,16 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-05-28 11:47+0200\n"
-"PO-Revision-Date: 2024-05-10 06:59+0000\n"
+"PO-Revision-Date: 2024-06-12 10:09+0000\n"
 "Last-Translator: Yan Gao <y.gaogy@gmail.com>\n"
+"Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
+"flower-docs/framework/zh_Hans/>\n"
 "Language: zh_Hans\n"
-"Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects"
-"/flower-docs/framework/zh_Hans/>\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 5.6-dev\n"
 "Generated-By: Babel 2.15.0\n"
 
 #: ../../source/contributor-explanation-architecture.rst:2
@@ -295,8 +296,9 @@ msgid "``FLWR_PACKAGE``"
 msgstr "``FLWR_VERSION``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:103
+#, fuzzy
 msgid "The PyPI package to install."
-msgstr ""
+msgstr "要安装的 PyPI 软件包。"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:104
 #, fuzzy
@@ -1118,12 +1120,16 @@ msgstr ""
 "3.10 <https://docs.python.org/3.10/>`_或更高版本。"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:14
+#, fuzzy
 msgid ""
 "Due to a known incompatibility with `ray "
 "<https://docs.ray.io/en/latest/>`_, we currently recommend utilizing at "
 "most `Python 3.11 <https://docs.python.org/3.11/>`_ for running Flower "
 "simulations."
 msgstr ""
+"由于已知与 `ray <https://docs.ray.io/en/latest/>`_ 不兼容，"
+"我们目前建议最多使用 `Python 3.11 <https://docs.python.org/3.11/>`_ 运行 "
+"Flower 仿真。"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:19
 #, fuzzy
@@ -1738,11 +1744,14 @@ msgid ""
 msgstr "在这个例子中，你可以看到请求将我分叉的版本库中的分支 ``doc-fixes`` 合并到 Flower 版本库中的分支 ``main``。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:193
+#, fuzzy
 msgid ""
 "The title should be changed to adhere to the :ref:`pr_title_format` "
 "guidelines, otherwise it won't be possible to merge the PR. So in this "
 "case, a correct title might be ``docs(framework:skip) Fix typos``."
 msgstr ""
+"应该修改标题以符合 :ref:`pr_title_format` 准则，否则将无法合并 "
+"PR。因此，在这种情况下，正确的标题可能是 ``docs(framework:skip)修复错字``。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:196
 msgid ""
@@ -1753,8 +1762,9 @@ msgid ""
 msgstr "中间的输入框供您描述 PR 的作用，并将其与现有问题联系起来。我们在此放置了注释（一旦 PR 打开，注释将不会显示），以指导您完成整个过程。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:199
+#, fuzzy
 msgid "It is important to follow the instructions described in comments."
-msgstr ""
+msgstr "请务必遵守注释中的说明。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:201
 msgid ""
@@ -1989,10 +1999,12 @@ msgid "Push the changes to your fork"
 msgstr "将更改推送到分叉"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:308
+#, fuzzy
 msgid ""
 "Open a PR (as shown above) with title ``docs(framework) Update how-to "
 "guide title``"
-msgstr ""
+msgstr "打开一个 PR（如上图所示），标题为\"`docs(framework) Update how-to guide "
+"title```\"。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:309
 msgid "Wait for it to be approved!"
@@ -2033,20 +2045,24 @@ msgid "Appendix"
 msgstr "附录"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:327
+#, fuzzy
 msgid "PR title format"
-msgstr ""
+msgstr "PR 标题格式"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:329
+#, fuzzy
 msgid "We enforce the following PR title format:"
-msgstr ""
+msgstr "我们执行以下 PR 标题格式："
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:335
+#, fuzzy
 msgid ""
 "(or ``<type>(<project>:skip) <subject>`` to ignore the PR in the "
 "changelog)"
-msgstr ""
+msgstr "(或 ``<type>(<project>:skip) <subject>`` 忽略更新日志中的 PR）。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:337
+#, fuzzy
 msgid ""
 "Where ``<type>`` needs to be in ``{ci, fix, feat, docs, refactor, "
 "break}``, ``<project>`` should be in ``{framework, baselines, datasets, "
@@ -2054,6 +2070,10 @@ msgid ""
 "':skip' flag to be used}``, and ``<subject>`` starts with a capitalised "
 "verb in the imperative mood."
 msgstr ""
+"其中 ``<type>`` 需要使用 ``{ci, fix, feat, docs, refactor, break}``, "
+"``<project>`` 应该使用 ``{framework, baselines, datasets, examples, 或者 '*' "
+"当修改多个项目时需要使用 ':skip'标记}``, 并且 ``<subject>`` "
+"应该以一个大写的动词开始。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:341
 #, fuzzy
@@ -2061,16 +2081,19 @@ msgid "Valid examples:"
 msgstr "实例"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:343
+#, fuzzy
 msgid "``feat(framework) Add flwr build CLI command``"
-msgstr ""
+msgstr "`feat(框架) 添加 flwr build CLI 命令```"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:344
+#, fuzzy
 msgid "``refactor(examples:skip) Improve quickstart-pytorch logging``"
-msgstr ""
+msgstr "``refactor(examples:skip) Improve quickstart-pytorch logging``."
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:345
+#, fuzzy
 msgid "``ci(*:skip) Enforce PR title format``"
-msgstr ""
+msgstr "`ci(*:skip)执行 PR 标题格式``。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:347
 #, fuzzy
@@ -2078,30 +2101,38 @@ msgid "Invalid examples:"
 msgstr "模拟示例"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:349
+#, fuzzy
 msgid "``feat(framework): Add flwr build CLI command`` (extra ``:``)"
-msgstr ""
+msgstr "`feat(框架)： 添加 flwr build CLI 命令``（额外的``:``)"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:350
+#, fuzzy
 msgid ""
 "``feat(*) Add flwr build CLI command`` (missing ``skip`` flag along with "
 "``*``)"
-msgstr ""
+msgstr "`feat(*)添加flwr构建CLI命令``（缺少``skip``标志和``*``）。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:351
+#, fuzzy
 msgid "``feat(skip) Add flwr build CLI command`` (missing ``<project>``)"
-msgstr ""
+msgstr "`feat(skip)添加flwr构建CLI命令``（缺少``<project>`）。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:352
+#, fuzzy
 msgid "``feat(framework) add flwr build CLI command`` (non capitalised verb)"
-msgstr ""
+msgstr "`feat(framework)添加 flwr 构建 CLI 命令``（非大写动词）"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:353
+#, fuzzy
 msgid "``feat(framework) Add flwr build CLI command.`` (dot at the end)"
-msgstr ""
+msgstr "feat(框架) 添加 flwr 构建 CLI 命令。"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:354
+#, fuzzy
 msgid "``Add flwr build CLI command.`` (missing ``<type>(<project>)``)"
 msgstr ""
+"``添加 flwr build CLI 命令.``（缺少``<type>(<project>)``） ``Add flwr build "
+"CLI command.`` (missing ``<type>(<project>)``)"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:2
 msgid "Get started as a contributor"
@@ -2264,49 +2295,62 @@ msgid "Run Linters and Tests"
 msgstr "运行分类器和测试"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:106
+#, fuzzy
 msgid "Add a pre-commit hook"
-msgstr ""
+msgstr "添加预先提交钩子"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:108
+#, fuzzy
 msgid ""
 "Developers may integrate a pre-commit hook into their workflow utilizing "
 "the `pre-commit <https://pre-commit.com/#install>`_ library. The pre-"
 "commit hook is configured to execute two primary operations: "
 "``./dev/format.sh`` and ``./dev/test.sh`` scripts."
 msgstr ""
+"开发人员可利用 `pre-commit <https://pre-commit.com/#install>`_ "
+"库将预提交钩子集成到工作流程中。预提交钩子被配置为执行两个主要操作： `./dev/"
+"format.sh`` 和 ``./dev/test.sh`` 脚本。"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:110
+#, fuzzy
 msgid "There are multiple ways developers can use this:"
-msgstr ""
+msgstr "开发人员可以通过多种方式使用它："
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:112
+#, fuzzy
 msgid "Install the pre-commit hook to your local git directory by simply running:"
-msgstr ""
+msgstr "在本地 git 目录中安装预提交钩子，只需运行"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:118
+#, fuzzy
 msgid ""
 "Each ``git commit`` will trigger the execution of formatting and "
 "linting/test scripts."
-msgstr ""
+msgstr "每次 \"git 提交 \"都会触发格式化和内核/测试脚本的执行。"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:119
+#, fuzzy
 msgid ""
 "If in a hurry, bypass the hook using ``--no-verify`` with the ``git "
 "commit`` command. ::"
-msgstr ""
+msgstr "如果赶时间，可使用 ``--no-verify`` 和 ``git commit` 命令绕过钩子："
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:124
+#, fuzzy
 msgid ""
 "For developers who prefer not to install the hook permanently, it is "
 "possible to execute a one-time check prior to committing changes by using"
 " the following command:"
-msgstr ""
+msgstr "对于不想永久安装钩子的开发人员，可以使用以下命令在提交更改之前执行一次性检查"
+"："
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:130
+#, fuzzy
 msgid ""
 "This executes the formatting and linting checks/tests on all the files "
 "without modifying the default behavior of ``git commit``."
-msgstr ""
+msgstr "这将在不修改 ``git commit`` "
+"默认行为的情况下对所有文件执行格式化和词排检查/测试。"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:133
 msgid "Run Github Actions (CI) locally"
@@ -4068,36 +4112,45 @@ msgid ""
 msgstr "然后，服务器可以使用定制的策略来汇总这些字典中提供的指标："
 
 #: ../../source/how-to-authenticate-supernodes.rst:2
+#, fuzzy
 msgid "Authenticate SuperNodes"
-msgstr ""
+msgstr "验证超级节点"
 
 #: ../../source/how-to-authenticate-supernodes.rst:4
+#, fuzzy
 msgid ""
 "Flower has built-in support for authenticated SuperNodes that you can use"
 " to verify the identities of each SuperNode connecting to a SuperLink. "
 "Flower node authentication works similar to how GitHub SSH authentication"
 " works:"
 msgstr ""
+"Flower 内置了对经过身份验证的超级节点的支持，您可以用它来验证连接到超级链接的"
+"每个超级节点的身份。Flower 节点身份验证的工作方式与 GitHub SSH "
+"身份验证的工作方式类似："
 
 #: ../../source/how-to-authenticate-supernodes.rst:7
+#, fuzzy
 msgid "SuperLink (server) stores a list of known (client) node public keys"
-msgstr ""
+msgstr "超级链接（服务器）存储已知（客户端）节点公钥列表"
 
 #: ../../source/how-to-authenticate-supernodes.rst:8
+#, fuzzy
 msgid ""
 "Using ECDH, both SuperNode and SuperLink independently derive a shared "
 "secret"
-msgstr ""
+msgstr "使用 ECDH，超级节点和超级链路可独立生成共享秘密"
 
 #: ../../source/how-to-authenticate-supernodes.rst:9
+#, fuzzy
 msgid ""
 "Shared secret is used to compute the HMAC value of the message sent from "
 "SuperNode to SuperLink as a token"
-msgstr ""
+msgstr "共享秘密用于计算作为令牌从超级节点发送到超级链接的信息的 HMAC 值"
 
 #: ../../source/how-to-authenticate-supernodes.rst:10
+#, fuzzy
 msgid "SuperLink verifies the token"
-msgstr ""
+msgstr "超级链接验证令牌"
 
 #: ../../source/how-to-authenticate-supernodes.rst:12
 #, fuzzy
@@ -4111,22 +4164,26 @@ msgstr ""
 "<https://github.com/adap/flower/tree/main/examples/android>`_了解更多信息。"
 
 #: ../../source/how-to-authenticate-supernodes.rst:15
+#, fuzzy
 msgid ""
 "This guide covers a preview feature that might change in future versions "
 "of Flower."
-msgstr ""
+msgstr "本指南涵盖的预览功能可能会在 Flower 的未来版本中有所改变。"
 
 #: ../../source/how-to-authenticate-supernodes.rst:18
+#, fuzzy
 msgid ""
 "For increased security, node authentication can only be used when "
 "encrypted connections (SSL/TLS) are enabled."
-msgstr ""
+msgstr "为提高安全性，只有启用加密连接（SSL/TLS）时才能使用节点验证。"
 
 #: ../../source/how-to-authenticate-supernodes.rst:21
+#, fuzzy
 msgid "Enable node authentication in :code:`SuperLink`"
-msgstr ""
+msgstr "在 :code:`SuperLink` 中启用节点验证"
 
 #: ../../source/how-to-authenticate-supernodes.rst:23
+#, fuzzy
 msgid ""
 "To enable node authentication, first you need to configure SSL/TLS "
 "connections to secure the SuperLink<>SuperNode communication. You can "
@@ -4137,36 +4194,56 @@ msgid ""
 ":code:`SuperNode` that has both secure connections and node "
 "authentication enabled:"
 msgstr ""
+"要启用节点验证，首先需要配置 SSL/TLS 连接，以确保 SuperLink<>SuperNode "
+"通信的安全。您可以在 <https://flower.ai/docs/framework/how-to-enable-ssl-"
+"connections.html>`_ 找到完整的指南。配置安全连接后，您就可以在长期运行的 "
+"Flower :code:`SuperLink`中启用客户端身份验证。"
+"使用以下终端命令启动一个同时启用了安全连接和节点验证的 Flower "
+":code:`SuperNode`："
 
 #: ../../source/how-to-authenticate-supernodes.rst:36
+#, fuzzy
 msgid "Let's break down the authentication flags:"
-msgstr ""
+msgstr "让我们来分析一下身份验证标志："
 
 #: ../../source/how-to-authenticate-supernodes.rst:38
+#, fuzzy
 msgid ""
 "The first flag :code:`--auth-list-public-keys` expects a path to a CSV "
 "file storing all known node public keys. You need to store all known node"
 " public keys that are allowed to participate in a federation in one CSV "
 "file (:code:`.csv`)."
 msgstr ""
+"第一个标志 :code:`--auth-list-public-keys`（密码：`--auth-list-public-keys`）"
+"需要一个 CSV 文件路径，该文件存储了所有已知节点的公钥。您需要在一个 CSV "
+"文件（:code:`.csv`）中存储所有允许参与联盟的已知节点公钥。"
 
 #: ../../source/how-to-authenticate-supernodes.rst:40
+#, fuzzy
 msgid ""
 "A valid CSV file storing known node public keys should list the keys in "
 "OpenSSH format, separated by commas and without any comments. For an "
 "example, refer to our code sample, which contains a CSV file with two "
 "known node public keys."
 msgstr ""
+"存储已知节点公开密钥的有效 CSV 文件应以 OpenSSH "
+"格式列出密钥，以逗号分隔，不含任何注释。有关示例，请参阅我们的代码示例，"
+"其中包含一个包含两个已知节点公钥的 CSV 文件。"
 
 #: ../../source/how-to-authenticate-supernodes.rst:42
+#, fuzzy
 msgid ""
 "The second and third flags :code:`--auth-superlink-private-key` and :code"
 ":`--auth-superlink-public-key` expect paths to the server's private and "
 "public keys. For development purposes, you can generate a private and "
 "public key pair using :code:`ssh-keygen -t ecdsa -b 384`."
 msgstr ""
+"第二和第三个标记 :code:`--auth-superlink-private-key` 和 :code:`--auth-"
+"superlink-public-key` 希望指向服务器私钥和公钥的路径。出于开发目的，"
+"您可以使用 :code:`ssh-keygen -t ecdsa -b 384` 生成一对私钥和公钥。"
 
 #: ../../source/how-to-authenticate-supernodes.rst:45
+#, fuzzy
 msgid ""
 "In Flower 1.9, there is no support for dynamically removing, editing, or "
 "adding known node public keys to the SuperLink. To change the set of "
@@ -4174,20 +4251,29 @@ msgid ""
 "start the server again. Support for dynamically changing the set of known"
 " nodes is on the roadmap to be released in Flower 1.10 (ETA: June)."
 msgstr ""
+"在 Flower 1.9 中，超级链接不支持动态删除、编辑或添加已知节点公钥。要更改已知"
+"节点集，您需要关闭服务器，编辑 CSV 文件，然后重新启动服务器。"
+"动态更改已知节点集的支持已列入 Flower 1.10（预计发布时间：6 月）的路线图。"
 
 #: ../../source/how-to-authenticate-supernodes.rst:51
+#, fuzzy
 msgid "Enable node authentication in :code:`SuperNode`"
-msgstr ""
+msgstr "在 :code:`SuperNode` 中启用节点验证"
 
 #: ../../source/how-to-authenticate-supernodes.rst:53
+#, fuzzy
 msgid ""
 "Similar to the long-running Flower server (:code:`SuperLink`), you can "
 "easily enable node authentication in the long-running Flower client "
 "(:code:`SuperNode`). Use the following terminal command to start an "
 "authenticated :code:`SuperNode`:"
 msgstr ""
+"与长期运行的 Flower 服务器（:code:`SuperLink`）类似，您也可以在长期运行的 "
+"Flower 客户端（:code:`SuperNode`）中轻松启用节点身份验证。"
+"使用以下终端命令启动已验证的 :code:`SuperNode`："
 
 #: ../../source/how-to-authenticate-supernodes.rst:64
+#, fuzzy
 msgid ""
 "The :code:`--auth-supernode-private-key` flag expects a path to the "
 "node's private key file and the :code:`--auth-supernode-public-key` flag "
@@ -4195,12 +4281,17 @@ msgid ""
 "you can generate a private and public key pair using :code:`ssh-keygen -t"
 " ecdsa -b 384`."
 msgstr ""
+":code:`--auth-supernode-private-key`标志需要节点私钥文件的路径，:code:`-auth-"
+"supernode-public-key`标志需要节点公钥文件的路径。出于开发目的，可以使用 :code"
+":`ssh-keygen -t ecdsa -b 384` 生成一对私钥和公钥。"
 
 #: ../../source/how-to-authenticate-supernodes.rst:68
+#, fuzzy
 msgid "Security notice"
-msgstr ""
+msgstr "安全通知"
 
 #: ../../source/how-to-authenticate-supernodes.rst:70
+#, fuzzy
 msgid ""
 "The system's security relies on the credentials of the SuperLink and each"
 " SuperNode. Therefore, it is imperative to safeguard and safely store the"
@@ -4210,6 +4301,9 @@ msgid ""
 "communication is done in a secure manner, using trusted communication "
 "methods."
 msgstr ""
+"系统的安全性依赖于超级链接和每个超级节点的凭证。因此，必须保护和安全存储凭证"
+"，以避免公钥基础设施 (PKI) 假冒攻击等安全风险。节点验证机制还涉及人机交互，因"
+"此请确保使用可信的通信方法，以安全的方式进行所有通信。"
 
 #: ../../source/how-to-authenticate-supernodes.rst:75
 #: ../../source/how-to-enable-ssl-connections.rst:65
@@ -4219,12 +4313,16 @@ msgid "Conclusion"
 msgstr "总结"
 
 #: ../../source/how-to-authenticate-supernodes.rst:77
+#, fuzzy
 msgid ""
 "You should now have learned how to start a long-running Flower server "
 "(:code:`SuperLink`) and client (:code:`SuperNode`) with node "
 "authentication enabled. You should also know the significance of the "
 "private key and store it safely to minimize security risks."
 msgstr ""
+"现在，您应该已经学会了如何启动长期运行的 Flower 服务器（:code:`SuperLink`）和"
+"客户端（:code:`SuperNode`）并启用节点身份验证。您还应该知道私钥的重要性，并将"
+"其安全存储，以尽量减少安全风险。"
 
 #: ../../source/how-to-configure-clients.rst:2
 msgid "Configure clients"
@@ -5312,12 +5410,16 @@ msgstr ""
 "`安装后步骤 <https://docs.docker.com/engine/install/linux-postinstall/>`_进行操作。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:26
+#, fuzzy
 msgid ""
 "To ensure optimal performance and compatibility, the SuperLink, SuperNode"
 " and ServerApp image must have the same version when running together. "
 "This guarantees seamless integration and avoids potential conflicts or "
 "issues that may arise from using different versions."
 msgstr ""
+"为确保最佳性能和兼容性，SuperLink、SuperNode 和 ServerApp 映像在一起运行时必"
+"须具有相同的版本。这可确保无缝集成，并避免因使用不同版本而可能产生的潜在冲突"
+"或问题。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:31
 #, fuzzy
@@ -5467,12 +5569,14 @@ msgid "Flower SuperNode"
 msgstr "Flower 服务器"
 
 #: ../../source/how-to-run-flower-using-docker.rst:115
+#, fuzzy
 msgid ""
 "The SuperNode Docker image comes with a pre-installed version of Flower "
 "and serves as a base for building your own SuperNode image."
-msgstr ""
+msgstr "超级节点 Docker 镜像预装了 Flower 版本，可作为构建自己的超级节点镜像的基础。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:120
+#, fuzzy
 msgid ""
 "The SuperNode Docker image currently works only with the 1.9.0-nightly "
 "release. A stable version will be available when Flower 1.9.0 (stable) "
@@ -5481,12 +5585,19 @@ msgid ""
 "same day. To ensure the versions are in sync, using the concrete tag, "
 "e.g., ``1.9.0.dev20240501`` instead of ``nightly`` is recommended."
 msgstr ""
+"超级节点 Docker 映像目前仅适用于 1.9.0-nightly 版本。稳定版将在 Flower 1.9."
+"0（稳定版）发布时推出（预计发布时间：5 月）。超级节点夜间镜像必须与同一天发布"
+"的相应超级链接和服务器应用程序夜间镜像配对。为确保版本同步，建议使用具体标签"
+"，例如``1.9.0.dev20240501``，而不是``nightly``。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:126
+#, fuzzy
 msgid ""
 "We will use the ``quickstart-pytorch`` example, which you can find in the"
 " Flower repository, to illustrate how you can dockerize your ClientApp."
 msgstr ""
+"我们将使用 \"quickstart-pytorch\"（快速启动-pytorch）示例来说明如何对 "
+"ClientApp 进行 docker 化。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:134
 #, fuzzy
@@ -5502,43 +5613,58 @@ msgid "Clone the Flower repository."
 msgstr "**叉花仓库**"
 
 #: ../../source/how-to-run-flower-using-docker.rst:152
+#, fuzzy
 msgid "Creating a SuperNode Dockerfile"
-msgstr ""
+msgstr "创建超级节点 Dockerfile"
 
 #: ../../source/how-to-run-flower-using-docker.rst:154
 #: ../../source/how-to-run-flower-using-docker.rst:289
+#, fuzzy
 msgid "Let's assume the following project layout:"
-msgstr ""
+msgstr "假设项目布局如下"
 
 #: ../../source/how-to-run-flower-using-docker.rst:163
+#, fuzzy
 msgid ""
 "First, we need to create a ``requirements.txt`` file in the directory "
 "where the ``ClientApp`` code is located. In the file, we list all the "
 "dependencies that the ClientApp requires."
 msgstr ""
+"首先，我们需要在 ``ClientApp`` 代码所在的目录中创建一个 ``requirements.txt`` "
+"文件。在该文件中，我们列出了 ClientApp 需要的所有依赖项。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:175
+#, fuzzy
 msgid ""
 "Note that `flwr <https://pypi.org/project/flwr/>`__ is already installed "
 "in the ``flwr/supernode`` base image, so you only need to include other "
 "package dependencies in your ``requirements.txt``, such as ``torch``, "
 "``tensorflow``, etc."
 msgstr ""
+"请注意，`flwr <https://pypi.org/project/flwr/>`__ 已经安装在`flwr/"
+"supernode``基础镜像中，因此只需在`requirements."
+"txt``中包含其他依赖包，如`torch``、`tensorflow`等。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:179
+#, fuzzy
 msgid ""
 "Next, we create a Dockerfile. If you use the ``quickstart-pytorch`` "
 "example, create a new file called ``Dockerfile.supernode`` in ``examples"
 "/quickstart-pytorch``."
 msgstr ""
+"接下来，我们创建一个 Dockerfile。如果使用 ``quickstart-pytorch`` 示例，请在 "
+"``examples/quickstart-pytorch`` 中创建一个名为 ``Dockerfile.supernode`` "
+"的新文件。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:182
+#, fuzzy
 msgid ""
 "The ``Dockerfile.supernode`` contains the instructions that assemble the "
 "SuperNode image."
-msgstr ""
+msgstr "Dockerfile.supernode \"包含组装超级节点映像的指令。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:196
+#, fuzzy
 msgid ""
 "In the first two lines, we instruct Docker to use the SuperNode image "
 "tagged ``nightly`` as a base image and set our working directory to "
@@ -5550,6 +5676,13 @@ msgid ""
 "``client:app``. The argument is the object reference of the ClientApp "
 "(``<module>:<attribute>``) that will be run inside the ClientApp."
 msgstr ""
+"在前两行中，我们指示 Docker 使用标记为 ``nightly`` 的 SuperNode "
+"镜像作为基础镜像，并将工作目录设置为 ``/app``。下面的指令将在 ``/app`` "
+"目录中执行。接下来，我们通过将 ``requirements.txt`` 文件复制到映像中并运行 ``"
+"pip install`` 来安装 ClientApp 依赖项。最后两行，我们将 ``client.py`` "
+"模块复制到映像中，并将入口点设置为 ``flower-client-app``，参数为 "
+"``client:app``。参数是将在 ClientApp 内运行的 ClientApp "
+"的对象引用（``<模块>:<属性>``）。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:205
 #, fuzzy
@@ -5557,17 +5690,22 @@ msgid "Building the SuperNode Docker image"
 msgstr "启动服务器"
 
 #: ../../source/how-to-run-flower-using-docker.rst:207
+#, fuzzy
 msgid ""
 "Next, we build the SuperNode Docker image by running the following "
 "command in the directory where Dockerfile and ClientApp code are located."
-msgstr ""
+msgstr "接下来，我们在 Dockerfile 和 ClientApp 代码所在的目录下运行以下命令，构建 "
+"SuperNode Docker 映像。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:214
+#, fuzzy
 msgid ""
 "We gave the image the name ``flwr_supernode``, and the tag ``0.0.1``. "
 "Remember that the here chosen values only serve as an example. You can "
 "change them to your needs."
 msgstr ""
+"我们将图像命名为 ``flwr_supernode``，标签为 ``0.0."
+"1``。请记住，这里选择的值只是一个示例。您可以根据自己的需要进行更改。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:219
 #, fuzzy
@@ -5575,64 +5713,79 @@ msgid "Running the SuperNode Docker image"
 msgstr "启动服务器"
 
 #: ../../source/how-to-run-flower-using-docker.rst:221
+#, fuzzy
 msgid "Now that we have built the SuperNode image, we can finally run it."
-msgstr ""
+msgstr "现在，我们已经构建了超级节点镜像，终于可以运行它了。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:229
 #: ../../source/how-to-run-flower-using-docker.rst:345
+#, fuzzy
 msgid "Let's break down each part of this command:"
-msgstr ""
+msgstr "让我们来分析一下这条命令的各个部分："
 
 #: ../../source/how-to-run-flower-using-docker.rst:231
 #: ../../source/how-to-run-flower-using-docker.rst:347
+#, fuzzy
 msgid "``docker run``: This is the command to run a new Docker container."
-msgstr ""
+msgstr "`docker run``： 这是运行新 Docker 容器的命令。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:232
 #: ../../source/how-to-run-flower-using-docker.rst:348
+#, fuzzy
 msgid ""
 "``--rm``: This option specifies that the container should be "
 "automatically removed when it stops."
-msgstr ""
+msgstr "`-rm``： 该选项指定容器停止时应自动移除。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:233
+#, fuzzy
 msgid "``flwr_supernode:0.0.1``: The name the tag of the Docker image to use."
-msgstr ""
+msgstr "flwr_supernode:0.0.1``： 要使用的 Docker 映像的名称和标记。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:234
 #: ../../source/how-to-run-flower-using-docker.rst:350
+#, fuzzy
 msgid "``--insecure``: This option enables insecure communication."
-msgstr ""
+msgstr "不安全\"： 该选项启用不安全通信。"
 
 #: ../../source/how-to-run-flower-using-docker.rst
+#, fuzzy
 msgid ""
 "``--server 192.168.1.100:9092``: This option specifies the address of the"
 " SuperLinks Fleet"
-msgstr ""
+msgstr "``--server 192.168.1.100:9092``: 该选项指定超级链接舰队的地址"
 
 #: ../../source/how-to-run-flower-using-docker.rst
+#, fuzzy
 msgid "API to connect to. Remember to update it with your SuperLink IP."
-msgstr ""
+msgstr "要连接的 API。记住用您的超级链接 IP 更新它。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:248
+#, fuzzy
 msgid ""
 "To test running Flower locally, you can create a `bridge network "
 "<https://docs.docker.com/network/network-tutorial-standalone/#use-user-"
 "defined-bridge-networks>`__, use the ``--network`` argument and pass the "
 "name of the Docker network to run your SuperNodes."
 msgstr ""
+"要测试在本地运行 Flower，可以创建一个 \"桥接网络 <https://docs.docker.com/"
+"network/network-tutorial-standalone/#use-user-defined-bridge-networks>`__\"，"
+"使用\"--网络 \"参数并传递 Docker 网络的名称，以运行超级节点。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:252
+#, fuzzy
 msgid ""
 "Any argument that comes after the tag is passed to the Flower SuperNode "
 "binary. To see all available flags that the SuperNode supports, run:"
-msgstr ""
+msgstr "标记后的任何参数都将传递给 Flower "
+"超级节点二进制文件。要查看超级节点支持的所有可用标记，请运行"
 
 #: ../../source/how-to-run-flower-using-docker.rst:262
+#, fuzzy
 msgid ""
 "To enable SSL, we will need to mount a PEM-encoded root certificate into "
 "your SuperNode container."
-msgstr ""
+msgstr "要启用 SSL，我们需要将 PEM 编码的根证书挂载到 SuperNode 容器中。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:264
 #, fuzzy
@@ -5652,44 +5805,58 @@ msgid "Flower ServerApp"
 msgstr "Flower 服务器。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:277
+#, fuzzy
 msgid ""
 "The procedure for building and running a ServerApp image is almost "
 "identical to the SuperNode image."
-msgstr ""
+msgstr "构建和运行 ServerApp 映像的程序与 SuperNode 映像几乎完全相同。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:279
+#, fuzzy
 msgid ""
 "Similar to the SuperNode image, the ServerApp Docker image comes with a "
 "pre-installed version of Flower and serves as a base for building your "
 "own ServerApp image."
 msgstr ""
+"与 SuperNode 映像类似，ServerApp Docker 映像也预装了 Flower 版本，"
+"可作为构建自己的 ServerApp 映像的基础。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:282
+#, fuzzy
 msgid ""
 "We will use the same ``quickstart-pytorch`` example as we do in the "
 "Flower SuperNode section. If you have not already done so, please follow "
 "the `SuperNode Prerequisites`_ before proceeding."
 msgstr ""
+"我们将使用与 \"Flower SuperNode \"部分相同的 \"quickstart-pytorch \"示例"
+"。如果您还没有这样做，请在继续之前遵循 \"SuperNode 先决条件\"。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:287
+#, fuzzy
 msgid "Creating a ServerApp Dockerfile"
-msgstr ""
+msgstr "创建 ServerApp Dockerfile"
 
 #: ../../source/how-to-run-flower-using-docker.rst:298
+#, fuzzy
 msgid ""
 "First, we need to create a Dockerfile in the directory where the "
 "``ServerApp`` code is located. If you use the ``quickstart-pytorch`` "
 "example, create a new file called ``Dockerfile.serverapp`` in ``examples"
 "/quickstart-pytorch``."
 msgstr ""
+"首先，我们需要在 ``ServerApp`` 代码所在的目录中创建一个 Dockerfile。如果使用 "
+"``quickstart-pytorch`` 示例，请在 ``examples/quickstart-pytorch`` "
+"中创建一个名为 ``Dockerfile.serverapp`` 的新文件。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:302
+#, fuzzy
 msgid ""
 "The ``Dockerfile.serverapp`` contains the instructions that assemble the "
 "ServerApp image."
-msgstr ""
+msgstr "Dockerfile.serverapp \"包含组装 ServerApp 镜像的说明。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:313
+#, fuzzy
 msgid ""
 "In the first two lines, we instruct Docker to use the ServerApp image "
 "tagged ``1.8.0`` as a base image and set our working directory to "
@@ -5700,6 +5867,11 @@ msgid ""
 "ServerApp (``<module>:<attribute>``) that will be run inside the "
 "ServerApp container."
 msgstr ""
+"在前两行中，我们指示 Docker 使用标记为 ``1.8.0`` 的 ServerApp "
+"镜像作为基础镜像，并将工作目录设置为 ``/app``。下面的指令将在 ``/app`` "
+"目录中执行。在最后两行中，我们将 ``server.py`` 模块复制到映像中，"
+"并将入口点设置为 ``flower-server-app``，参数为 ``server:app``。参数是将在 "
+"ServerApp 容器内运行的 ServerApp 的对象引用（``<模块>:<属性>``）。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:321
 #, fuzzy
@@ -5707,17 +5879,22 @@ msgid "Building the ServerApp Docker image"
 msgstr "启动服务器"
 
 #: ../../source/how-to-run-flower-using-docker.rst:323
+#, fuzzy
 msgid ""
 "Next, we build the ServerApp Docker image by running the following "
 "command in the directory where Dockerfile and ServerApp code are located."
-msgstr ""
+msgstr "接下来，我们在 Dockerfile 和 ServerApp 代码所在的目录下运行以下命令，构建 "
+"ServerApp Docker 镜像。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:330
+#, fuzzy
 msgid ""
 "We gave the image the name ``flwr_serverapp``, and the tag ``0.0.1``. "
 "Remember that the here chosen values only serve as an example. You can "
 "change them to your needs."
 msgstr ""
+"我们给图片命名为 ``flwr_serverapp``，标签为 ``0.0."
+"1``。请记住，这里选择的值只是一个示例。您可以根据自己的需要进行更改。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:335
 #, fuzzy
@@ -5725,32 +5902,42 @@ msgid "Running the ServerApp Docker image"
 msgstr "启动服务器"
 
 #: ../../source/how-to-run-flower-using-docker.rst:337
+#, fuzzy
 msgid "Now that we have built the ServerApp image, we can finally run it."
-msgstr ""
+msgstr "现在我们已经构建了 ServerApp 镜像，终于可以运行它了。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:349
+#, fuzzy
 msgid "``flwr_serverapp:0.0.1``: The name the tag of the Docker image to use."
-msgstr ""
+msgstr "flwr_serverapp:0.0.1``： 要使用的 Docker 映像的名称和标记。"
 
 #: ../../source/how-to-run-flower-using-docker.rst
+#, fuzzy
 msgid ""
 "``--server 192.168.1.100:9091``: This option specifies the address of the"
 " SuperLinks Driver"
-msgstr ""
+msgstr "``--server 192.168.1.100:9091``: 此选项指定超级链接驱动程序的地址"
 
 #: ../../source/how-to-run-flower-using-docker.rst:363
+#, fuzzy
 msgid ""
 "To test running Flower locally, you can create a `bridge network "
 "<https://docs.docker.com/network/network-tutorial-standalone/#use-user-"
 "defined-bridge-networks>`__, use the ``--network`` argument and pass the "
 "name of the Docker network to run your ServerApps."
 msgstr ""
+"要测试在本地运行 Flower，可以创建一个 ``bridge network <https://docs.docker."
+"com/network/network-tutorial-standalone/#use-user-defined-bridge-"
+"networks>`___，使用 ``--network`` 参数并传递 Docker 网络的名称，以运行 "
+"ServerApps。"
 
 #: ../../source/how-to-run-flower-using-docker.rst:367
+#, fuzzy
 msgid ""
 "Any argument that comes after the tag is passed to the Flower ServerApp "
 "binary. To see all available flags that the ServerApp supports, run:"
-msgstr ""
+msgstr "标记后的任何参数都将传递给 Flower ServerApp 二进制文件。要查看 ServerApp "
+"支持的所有可用标记，请运行"
 
 #: ../../source/how-to-run-flower-using-docker.rst:377
 #, fuzzy
@@ -6715,6 +6902,7 @@ msgid "Upgrade to Flower Next"
 msgstr "升级至 Flower 1.0"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:4
+#, fuzzy
 msgid ""
 "Welcome to the migration guide for updating Flower to Flower Next! "
 "Whether you're a seasoned user or just getting started, this guide will "
@@ -6722,18 +6910,27 @@ msgid ""
 " latest features and improvements in Flower Next, starting from version "
 "1.8."
 msgstr ""
+"欢迎阅读从 Flower 升级到 Flower Next 的迁移指南！"
+"无论您是经验丰富的用户还是刚刚开始使用 "
+"Flower，本指南都将帮助您顺利过渡现有设置，以利用 Flower Next 从 1.8 "
+"版开始的最新功能和改进。"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:9
+#, fuzzy
 msgid ""
 "This guide shows how to reuse pre-``1.8`` Flower code with minimum code "
 "changes by using the *compatibility layer* in Flower Next. In another "
 "guide, we will show how to run Flower Next end-to-end with pure Flower "
 "Next APIs."
 msgstr ""
+"本指南展示了如何通过使用 Flower Next 中的*可兼容层*，以最小的代码改动重用```1"
+".8```前的 Flower 代码。在另一个指南中，我们将介绍如何使用纯 Flower Next API "
+"端到端运行 Flower Next。"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:13
+#, fuzzy
 msgid "Let's dive in!"
-msgstr ""
+msgstr "让我们深入了解一下！"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:48
 #, fuzzy
@@ -6748,14 +6945,16 @@ msgid "or if you need Flower Next with simulation:"
 msgstr "启动 Flower 模拟"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:61
+#, fuzzy
 msgid ""
 "Ensure you set the following version constraint in your "
 "``requirements.txt``"
-msgstr ""
+msgstr "确保在 ``requirements.txt`` 中设置了以下版本限制"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:71
+#, fuzzy
 msgid "or ``pyproject.toml``:"
-msgstr ""
+msgstr "或 ``pyproject.toml```："
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:82
 #, fuzzy
@@ -6780,6 +6979,7 @@ msgid ""
 msgstr "将 ``pyproject.toml`` 中的次要版本增加一个。"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:102
+#, fuzzy
 msgid ""
 "In Flower Next, the *infrastructure* and *application layers* have been "
 "decoupled. Instead of starting a client in code via ``start_client()``, "
@@ -6791,6 +6991,12 @@ msgid ""
 "to run your project both in the traditional way and in the Flower Next "
 "way:"
 msgstr ""
+"在 Flower Next 中，*基础架构层*和*应用层*已经解耦。你不再需要在代码中通过``st"
+"art_client()``启动客户端，而是创建一个|clientapp_link|_，然后通过命令行启动它"
+"。无需通过``start_server()``在代码中启动服务器，而是创建一个 |serverapp_link|"
+"_ 并通过命令行启动它。服务器和客户端的长期运行组件被称为超级链接（SuperLink）"
+"和超级节点（SuperNode）。以下是无需手动更新的非破坏性更改，"
+"可让您以传统方式和 Flower Next 方式运行项目："
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:109
 #, fuzzy
@@ -6798,10 +7004,12 @@ msgid "|clientapp_link|_"
 msgstr "客户端"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:110
+#, fuzzy
 msgid ""
 "Wrap your existing client with |clientapp_link|_ instead of launching it "
 "via |startclient_link|_. Here's an example:"
-msgstr ""
+msgstr "用 |clientapp_link|_ 封装现有客户端，而不是通过 |startclient_link|_ "
+"启动。下面是一个例子："
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:132
 #, fuzzy
@@ -6809,35 +7017,45 @@ msgid "|serverapp_link|_"
 msgstr "服务器"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:133
+#, fuzzy
 msgid ""
 "Wrap your existing strategy with |serverapp_link|_ instead of starting "
 "the server via |startserver_link|_. Here's an example:"
-msgstr ""
+msgstr "用 |serverapp_link|_ 包住现有策略，而不是通过 |startserver_link|_ "
+"启动服务器。下面是一个例子："
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:154
+#, fuzzy
 msgid "Deployment"
-msgstr ""
+msgstr "调配"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:155
+#, fuzzy
 msgid ""
 "Run the ``SuperLink`` using |flowernext_superlink_link|_ before running, "
 "in sequence, |flowernext_clientapp_link|_ (2x) and "
 "|flowernext_serverapp_link|_. There is no need to execute `client.py` and"
 " `server.py` as Python scripts."
 msgstr ""
+"在依次运行 |flowernext_clientapp_link|_ (2x) 和 |flowernext_serverapp_link|_ "
+"之前，使用 |flowernext_superlink_link|_ 运行 ``SuperLink`` 。无需将 |client."
+"py` 和 `server.py` 作为 Python 脚本执行。"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:158
+#, fuzzy
 msgid ""
 "Here's an example to start the server without HTTPS (only for "
 "prototyping):"
-msgstr ""
+msgstr "下面是一个在不使用 HTTPS 的情况下启动服务器的示例（仅用于原型开发）："
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:174
+#, fuzzy
 msgid ""
 "Here's another example to start with HTTPS. Use the ``--certificates`` "
 "command line argument to pass paths to (CA certificate, server "
 "certificate, and server private key)."
-msgstr ""
+msgstr "下面是另一个使用 HTTPS 的示例。使用 ``--certificates`` 命令行参数传递路径（"
+"CA 证书、服务器证书和服务器私钥）。"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:201
 #, fuzzy
@@ -6845,36 +7063,48 @@ msgid "Simulation in CLI"
 msgstr "运行模拟"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:202
+#, fuzzy
 msgid ""
 "Wrap your existing client and strategy with |clientapp_link|_ and "
 "|serverapp_link|_, respectively. There is no need to use |startsim_link|_"
 " anymore. Here's an example:"
 msgstr ""
+"分别用 |clientapp_link|_ 和 |serverapp_link|_ 封装现有的客户端和策略。"
+"无需再使用 |startsim_link|_。下面是一个示例："
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:232
+#, fuzzy
 msgid ""
 "Run |flower_simulation_link|_ in CLI and point to the ``server_app`` / "
 "``client_app`` object in the code instead of executing the Python script."
 " Here's an example (assuming the ``server_app`` and ``client_app`` "
 "objects are in a ``sim.py`` module):"
 msgstr ""
+"在 CLI 中运行 |flower_simulation_link|_ 并指向代码中的 ``server_app`` "
+"/``client_app`` 对象，而不是执行 Python 脚本。下面是一个示例（假定 "
+"`server_app`` 和 `client_app`` 对象位于 `sim.py`` 模块中）："
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:249
+#, fuzzy
 msgid ""
 "Set default resources for each |clientapp_link|_ using the ``--backend-"
 "config`` command line argument instead of setting the "
 "``client_resources`` argument in |startsim_link|_. Here's an example:"
 msgstr ""
+"使用 ``--backend-config`` 命令行参数为每个 |clientapp_link|_ 设置默认资源，"
+"而不是在 |startsim_link|_ 中设置 ``client_resources`` 参数。下面是一个例子："
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:275
+#, fuzzy
 msgid "Simulation in a Notebook"
-msgstr ""
+msgstr "笔记本中的模拟"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:276
+#, fuzzy
 msgid ""
 "Run |runsim_link|_ in your notebook instead of |startsim_link|_. Here's "
 "an example:"
-msgstr ""
+msgstr "在笔记本中运行 |runsim_link|_，而不是 |startsim_link|_。下面是一个例子："
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:319
 #, fuzzy
@@ -6897,15 +7127,18 @@ msgid "Important"
 msgstr "重要变更："
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:328
+#, fuzzy
 msgid ""
 "As we continuously enhance Flower Next at a rapid pace, we'll be "
 "periodically updating this guide. Please feel free to share any feedback "
 "with us!"
-msgstr ""
+msgstr "随着 Flower Next "
+"的不断快速改进，我们将定期更新本指南。如有任何反馈，请随时与我们分享！"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:334
+#, fuzzy
 msgid "Happy migrating! 🚀"
-msgstr ""
+msgstr "移民愉快！🚀"
 
 #: ../../source/how-to-use-built-in-mods.rst:2
 #, fuzzy
@@ -9316,8 +9549,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.encode:1 of
+#, fuzzy
 msgid "Encode the string using the codec registered for encoding."
-msgstr ""
+msgstr "使用注册的编码解码器对字符串进行编码。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9328,8 +9562,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.replace:1 of
+#, fuzzy
 msgid "Return a copy with all occurrences of substring old replaced by new."
-msgstr ""
+msgstr "返回用 new 替换子串 old 的所有出现次数的副本。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9340,10 +9575,11 @@ msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.rsplit:1 flwr.common.EventType.split:1 of
+#, fuzzy
 msgid ""
 "Return a list of the substrings in the string, using sep as the separator"
 " string."
-msgstr ""
+msgstr "使用 sep 作为分隔符，返回字符串中的子字符串列表。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9359,8 +9595,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.join:1 of
+#, fuzzy
 msgid "Concatenate any number of strings."
-msgstr ""
+msgstr "连接任意数量的字符串。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9369,8 +9606,9 @@ msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.capitalize:1 of
+#, fuzzy
 msgid "Return a capitalized version of the string."
-msgstr ""
+msgstr "返回字符串的大写版本。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9379,8 +9617,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.casefold:1 of
+#, fuzzy
 msgid "Return a version of the string suitable for caseless comparisons."
-msgstr ""
+msgstr "返回适合无例比较的字符串版本。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9389,8 +9628,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.title:1 of
+#, fuzzy
 msgid "Return a version of the string where each word is titlecased."
-msgstr ""
+msgstr "返回字符串的版本，其中每个单词都使用了标题大小写。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9413,10 +9653,11 @@ msgid ""
 msgstr ":py:obj:`Context <flwr.common.Context>`\\ \\(state\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
+#, fuzzy
 msgid ""
 "Return the number of non-overlapping occurrences of substring sub in "
 "string S[start:end]."
-msgstr ""
+msgstr "返回子字符串 sub 在字符串 S[start:end] 中非重叠出现的次数。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9427,8 +9668,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.expandtabs:1 of
+#, fuzzy
 msgid "Return a copy where all tab characters are expanded using spaces."
-msgstr ""
+msgstr "返回使用空格扩展所有制表符的副本。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9438,10 +9680,11 @@ msgid ""
 msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
+#, fuzzy
 msgid ""
 "Return the lowest index in S where substring sub is found, such that sub "
 "is contained within S[start:end]."
-msgstr ""
+msgstr "返回在 S 中找到子串 sub 的最低索引，且 sub 包含在 S[start:end] 中。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9450,8 +9693,9 @@ msgstr ":py:obj:`partition_id <flwr.common.Metadata.partition_id>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.partition:1 flwr.common.EventType.rpartition:1 of
+#, fuzzy
 msgid "Partition the string into three parts using the given separator."
-msgstr ""
+msgstr "使用给定的分隔符将字符串分为三部分。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9469,8 +9713,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.ljust:1 of
+#, fuzzy
 msgid "Return a left-justified string of length width."
-msgstr ""
+msgstr "返回长度为 width 的左对齐字符串。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9479,8 +9724,9 @@ msgstr ":py:obj:`now <flwr.common.now>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.lower:1 of
+#, fuzzy
 msgid "Return a copy of the string converted to lowercase."
-msgstr ""
+msgstr "返回转换为小写的字符串副本。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9489,8 +9735,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.lstrip:1 of
+#, fuzzy
 msgid "Return a copy of the string with leading whitespace removed."
-msgstr ""
+msgstr "返回去掉前导空白的字符串副本。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9500,10 +9747,11 @@ msgid ""
 msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
+#, fuzzy
 msgid ""
 "Return the highest index in S where substring sub is found, such that sub"
 " is contained within S[start:end]."
-msgstr ""
+msgstr "返回在 S 中找到子串 sub 的最高索引，且 sub 包含在 S[start:end] 中。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9521,8 +9769,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.rjust:1 of
+#, fuzzy
 msgid "Return a right-justified string of length width."
-msgstr ""
+msgstr "返回长度为 width 的右对齐字符串。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9531,8 +9780,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.rstrip:1 of
+#, fuzzy
 msgid "Return a copy of the string with trailing whitespace removed."
-msgstr ""
+msgstr "返回去掉尾部空白的字符串副本。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9548,8 +9798,9 @@ msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.splitlines:1 of
+#, fuzzy
 msgid "Return a list of the lines in the string, breaking at line boundaries."
-msgstr ""
+msgstr "返回字符串中的行列表，以行为分界线。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9558,8 +9809,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.strip:1 of
+#, fuzzy
 msgid "Return a copy of the string with leading and trailing whitespace removed."
-msgstr ""
+msgstr "返回去掉前导和尾部空白的字符串副本。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9568,10 +9820,11 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.swapcase:1 of
+#, fuzzy
 msgid ""
 "Convert uppercase characters to lowercase and lowercase characters to "
 "uppercase."
-msgstr ""
+msgstr "将大写字母转换为小写字母，将小写字母转换为大写字母。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9580,8 +9833,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.translate:1 of
+#, fuzzy
 msgid "Replace each character in the string using the given translation table."
-msgstr ""
+msgstr "使用给定的翻译表替换字符串中的每个字符。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9590,8 +9844,9 @@ msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.upper:1 of
+#, fuzzy
 msgid "Return a copy of the string converted to uppercase."
-msgstr ""
+msgstr "返回转换为大写字符串的副本。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9601,8 +9856,9 @@ msgid ""
 msgstr ":py:obj:`Status <flwr.common.Status>`\\ \\(code\\, message\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
+#, fuzzy
 msgid "Return True if S starts with the specified prefix, False otherwise."
-msgstr ""
+msgstr "如果 S 以指定前缀开头，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9612,8 +9868,9 @@ msgid ""
 msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
+#, fuzzy
 msgid "Return True if S ends with the specified suffix, False otherwise."
-msgstr ""
+msgstr "如果 S 以指定后缀结束，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9624,8 +9881,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.removeprefix:1 of
+#, fuzzy
 msgid "Return a str with the given prefix string removed if present."
-msgstr ""
+msgstr "返回一个字符串，如果存在，则去掉给定的前缀字符串。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9636,8 +9894,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.removesuffix:1 of
+#, fuzzy
 msgid "Return a str with the given suffix string removed if present."
-msgstr ""
+msgstr "返回一个字符串，如果存在给定的后缀字符串，则将其删除。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9646,8 +9905,9 @@ msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isascii:1 of
+#, fuzzy
 msgid "Return True if all characters in the string are ASCII, False otherwise."
-msgstr ""
+msgstr "如果字符串中的所有字符都是 ASCII 码，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9656,8 +9916,9 @@ msgstr ":py:obj:`now <flwr.common.now>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.islower:1 of
+#, fuzzy
 msgid "Return True if the string is a lowercase string, False otherwise."
-msgstr ""
+msgstr "如果字符串是小写字符串，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9666,8 +9927,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isupper:1 of
+#, fuzzy
 msgid "Return True if the string is an uppercase string, False otherwise."
-msgstr ""
+msgstr "如果字符串是大写字符串，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9676,8 +9938,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.istitle:1 of
+#, fuzzy
 msgid "Return True if the string is a title-cased string, False otherwise."
-msgstr ""
+msgstr "如果字符串是带标题的字符串，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9686,8 +9949,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isspace:1 of
+#, fuzzy
 msgid "Return True if the string is a whitespace string, False otherwise."
-msgstr ""
+msgstr "如果字符串是空白字符串，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9696,8 +9960,9 @@ msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isdecimal:1 of
+#, fuzzy
 msgid "Return True if the string is a decimal string, False otherwise."
-msgstr ""
+msgstr "如果字符串是十进制字符串，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9706,8 +9971,9 @@ msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isdigit:1 of
+#, fuzzy
 msgid "Return True if the string is a digit string, False otherwise."
-msgstr ""
+msgstr "如果字符串是数字字符串，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9716,8 +9982,9 @@ msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isnumeric:1 of
+#, fuzzy
 msgid "Return True if the string is a numeric string, False otherwise."
-msgstr ""
+msgstr "如果字符串是数字字符串，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9726,8 +9993,9 @@ msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isalpha:1 of
+#, fuzzy
 msgid "Return True if the string is an alphabetic string, False otherwise."
-msgstr ""
+msgstr "如果字符串是字母字符串，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9736,8 +10004,9 @@ msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isalnum:1 of
+#, fuzzy
 msgid "Return True if the string is an alpha-numeric string, False otherwise."
-msgstr ""
+msgstr "如果字符串是字母数字字符串，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9746,8 +10015,9 @@ msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isidentifier:1 of
+#, fuzzy
 msgid "Return True if the string is a valid Python identifier, False otherwise."
-msgstr ""
+msgstr "如果字符串是有效的 Python 标识符，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9756,8 +10026,9 @@ msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isprintable:1 of
+#, fuzzy
 msgid "Return True if the string is printable, False otherwise."
-msgstr ""
+msgstr "如果字符串可打印，则返回 True，否则返回 False。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9766,10 +10037,11 @@ msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.zfill:1 of
+#, fuzzy
 msgid ""
 "Pad a numeric string with zeros on the left, to fill a field of the given"
 " width."
-msgstr ""
+msgstr "在数字字符串左侧填充零，以填满给定宽度的字段。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9781,8 +10053,9 @@ msgstr ""
 "\\*\\*kwargs\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
+#, fuzzy
 msgid "Return a formatted version of S, using substitutions from args and kwargs."
-msgstr ""
+msgstr "使用 args 和 kwargs 的替换，返回 S 的格式化版本。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9790,8 +10063,9 @@ msgid ":py:obj:`format_map <flwr.common.EventType.format_map>`\\ \\(mapping\\)"
 msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
+#, fuzzy
 msgid "Return a formatted version of S, using substitutions from mapping."
-msgstr ""
+msgstr "使用映射中的替换，返回 S 的格式化版本。"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #, fuzzy
@@ -9800,8 +10074,9 @@ msgstr ":py:obj:`TRAIN <flwr.common.MessageType.TRAIN>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.maketrans:1 of
+#, fuzzy
 msgid "Return a translation table usable for str.translate()."
-msgstr ""
+msgstr "返回可用于 str.translate() 的翻译表。"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 #, fuzzy
@@ -9975,30 +10250,36 @@ msgstr ""
 "<flwr.common.EventType.RUN_SUPERLINK_LEAVE>`\\"
 
 #: flwr.common.EventType.capitalize:3 of
+#, fuzzy
 msgid ""
 "More specifically, make the first character have upper case and the rest "
 "lower case."
-msgstr ""
+msgstr "更具体地说，让第一个字符大写，其余字符小写。"
 
 #: flwr.common.EventType.center:3 flwr.common.EventType.ljust:3
 #: flwr.common.EventType.rjust:3 of
+#, fuzzy
 msgid "Padding is done using the specified fill character (default is a space)."
-msgstr ""
+msgstr "使用指定的填充字符（默认为空格）进行填充。"
 
 #: flwr.common.EventType.count:1 of
+#, fuzzy
 msgid ""
 "Return the number of non-overlapping occurrences of substring sub in "
 "string S[start:end].  Optional arguments start and end are interpreted as"
 " in slice notation."
-msgstr ""
+msgstr "返回子串 sub 在字符串 S[start:end] 中非重叠出现的次数。 可选参数 start 和 "
+"end 按切分符号解释。"
 
 #: flwr.common.EventType.encode:3 of
+#, fuzzy
 msgid "encoding"
-msgstr ""
+msgstr "编码"
 
 #: flwr.common.EventType.encode:4 of
+#, fuzzy
 msgid "The encoding in which to encode the string."
-msgstr ""
+msgstr "字符串的编码。"
 
 #: flwr.common.EventType.encode:9 of
 #, fuzzy
@@ -10006,6 +10287,7 @@ msgid "errors"
 msgstr "错误"
 
 #: flwr.common.EventType.encode:6 of
+#, fuzzy
 msgid ""
 "The error handling scheme to use for encoding errors. The default is "
 "'strict' meaning that encoding errors raise a UnicodeEncodeError.  Other "
@@ -10013,134 +10295,177 @@ msgid ""
 "as any other name registered with codecs.register_error that can handle "
 "UnicodeEncodeErrors."
 msgstr ""
+"编码错误的错误处理方案。默认值为 \"strict\"，即编码错误会引发 "
+"UnicodeEncodeError。 其他可能的值包括 \"ignore\"、\"replace \"和 "
+"\"xmlcharrefreplace\"，以及通过 codecs.register_error 注册的、可处理 "
+"UnicodeEncodeErrror 的其他名称。"
 
 #: flwr.common.EventType.endswith:1 of
+#, fuzzy
 msgid ""
 "Return True if S ends with the specified suffix, False otherwise. With "
 "optional start, test S beginning at that position. With optional end, "
 "stop comparing S at that position. suffix can also be a tuple of strings "
 "to try."
 msgstr ""
+"如果 S 以指定后缀结束，则返回 True，否则返回 False。如果起始位置可选，"
+"则从该位置开始测试 S。如果使用可选的 end，则在该位置停止比较 "
+"S。后缀也可以是要尝试的字符串元组。"
 
 #: flwr.common.EventType.expandtabs:3 of
+#, fuzzy
 msgid "If tabsize is not given, a tab size of 8 characters is assumed."
-msgstr ""
+msgstr "如果未给出制表符大小，则假定制表符大小为 8 个字符。"
 
 #: flwr.common.EventType.find:1 flwr.common.EventType.index:1 of
+#, fuzzy
 msgid ""
 "Return the lowest index in S where substring sub is found, such that sub "
 "is contained within S[start:end].  Optional arguments start and end are "
 "interpreted as in slice notation."
 msgstr ""
+"返回在 S 中找到子串 sub 的最低索引，即 sub 包含在 S[start:end] 中。 可选参数 "
+"start 和 end 按切分符号解释。"
 
 #: flwr.common.EventType.find:5 flwr.common.EventType.rfind:5 of
+#, fuzzy
 msgid "Return -1 on failure."
-msgstr ""
+msgstr "失败时返回-1。"
 
 #: flwr.common.EventType.format:1 of
+#, fuzzy
 msgid ""
 "Return a formatted version of S, using substitutions from args and "
 "kwargs. The substitutions are identified by braces ('{' and '}')."
-msgstr ""
+msgstr "使用来自 args 和 kwargs 的替换，返回 S "
+"的格式化版本。替换用大括号（'{'和'}'）标识。"
 
 #: flwr.common.EventType.format_map:1 of
+#, fuzzy
 msgid ""
 "Return a formatted version of S, using substitutions from mapping. The "
 "substitutions are identified by braces ('{' and '}')."
-msgstr ""
+msgstr "使用映射中的替换，返回 S 的格式化版本。替换用大括号（'{'和'}'）标识。"
 
 #: flwr.common.EventType.index:5 flwr.common.EventType.rindex:5 of
+#, fuzzy
 msgid "Raises ValueError when the substring is not found."
-msgstr ""
+msgstr "如果未找到子串，则引发 ValueError。"
 
 #: flwr.common.EventType.isalnum:3 of
+#, fuzzy
 msgid ""
 "A string is alpha-numeric if all characters in the string are alpha-"
 "numeric and there is at least one character in the string."
-msgstr ""
+msgstr "如果字符串中的所有字符都是字母数字，且字符串中至少有一个字符，则该字符串为字"
+"母数字字符串。"
 
 #: flwr.common.EventType.isalpha:3 of
+#, fuzzy
 msgid ""
 "A string is alphabetic if all characters in the string are alphabetic and"
 " there is at least one character in the string."
-msgstr ""
+msgstr "如果字符串中的所有字符都是字母，并且字符串中至少有一个字符，那么该字符串就是"
+"字母字符串。"
 
 #: flwr.common.EventType.isascii:3 of
+#, fuzzy
 msgid ""
 "ASCII characters have code points in the range U+0000-U+007F. Empty "
 "string is ASCII too."
-msgstr ""
+msgstr "ASCII 字符的码位范围为 U+0000-U+007F。空字符串也是 ASCII 字符。"
 
 #: flwr.common.EventType.isdecimal:3 of
+#, fuzzy
 msgid ""
 "A string is a decimal string if all characters in the string are decimal "
 "and there is at least one character in the string."
-msgstr ""
+msgstr "如果字符串中的所有字符都是十进制，并且字符串中至少有一个字符是十进制，那么该"
+"字符串就是十进制字符串。"
 
 #: flwr.common.EventType.isdigit:3 of
+#, fuzzy
 msgid ""
 "A string is a digit string if all characters in the string are digits and"
 " there is at least one character in the string."
-msgstr ""
+msgstr "如果字符串中的所有字符都是数字，并且字符串中至少有一个字符，那么该字符串就是"
+"数字字符串。"
 
 #: flwr.common.EventType.isidentifier:3 of
+#, fuzzy
 msgid ""
 "Call keyword.iskeyword(s) to test whether string s is a reserved "
 "identifier, such as \"def\" or \"class\"."
-msgstr ""
+msgstr "调用 keyword.iskeyword(s) 测试字符串 s 是否为保留标识符，如 \"def \"或 "
+"\"class\"。"
 
 #: flwr.common.EventType.islower:3 of
+#, fuzzy
 msgid ""
 "A string is lowercase if all cased characters in the string are lowercase"
 " and there is at least one cased character in the string."
-msgstr ""
+msgstr "如果字符串中的所有大小写字符都是小写，且字符串中至少有一个大小写字符，则该字"
+"符串为小写字符串。"
 
 #: flwr.common.EventType.isnumeric:3 of
+#, fuzzy
 msgid ""
 "A string is numeric if all characters in the string are numeric and there"
 " is at least one character in the string."
-msgstr ""
+msgstr "如果字符串中的所有字符都是数字，且字符串中至少有一个字符，则该字符串为数字字"
+"符串。"
 
 #: flwr.common.EventType.isprintable:3 of
+#, fuzzy
 msgid ""
 "A string is printable if all of its characters are considered printable "
 "in repr() or if it is empty."
-msgstr ""
+msgstr "如果字符串的所有字符在 repr() "
+"中都被认为是可打印的，或者字符串为空，那么该字符串就是可打印的。"
 
 #: flwr.common.EventType.isspace:3 of
+#, fuzzy
 msgid ""
 "A string is whitespace if all characters in the string are whitespace and"
 " there is at least one character in the string."
-msgstr ""
+msgstr "如果字符串中的所有字符都是空格，且字符串中至少有一个字符，则该字符串为空格。"
 
 #: flwr.common.EventType.istitle:3 of
+#, fuzzy
 msgid ""
 "In a title-cased string, upper- and title-case characters may only follow"
 " uncased characters and lowercase characters only cased ones."
-msgstr ""
+msgstr "在标题大小写字符串中，大写和标题大小写字符只能跟在无大小写字符之后，小写字符"
+"只能跟在有大小写字符之后。"
 
 #: flwr.common.EventType.isupper:3 of
+#, fuzzy
 msgid ""
 "A string is uppercase if all cased characters in the string are uppercase"
 " and there is at least one cased character in the string."
-msgstr ""
+msgstr "如果字符串中所有带大小写的字符都是大写，并且字符串中至少有一个带大小写的字符"
+"，则该字符串为大写字符串。"
 
 #: flwr.common.EventType.join:3 of
+#, fuzzy
 msgid ""
 "The string whose method is called is inserted in between each given "
 "string. The result is returned as a new string."
-msgstr ""
+msgstr "方法被调用的字符串会被插入每个给定的字符串之间。结果将以新字符串的形式返回。"
 
 #: flwr.common.EventType.join:6 of
+#, fuzzy
 msgid "Example: '.'.join(['ab', 'pq', 'rs']) -> 'ab.pq.rs'"
-msgstr ""
+msgstr "示例：'.'.join(['ab', 'pq', 'rs']) -> 'ab.pq.rs'"
 
 #: flwr.common.EventType.lstrip:3 flwr.common.EventType.rstrip:3
 #: flwr.common.EventType.strip:3 of
+#, fuzzy
 msgid "If chars is given and not None, remove characters in chars instead."
-msgstr ""
+msgstr "如果给定的是 chars 而不是 None，则删除 chars 中的字符。"
 
 #: flwr.common.EventType.maketrans:3 of
+#, fuzzy
 msgid ""
 "If there is only one argument, it must be a dictionary mapping Unicode "
 "ordinals (integers) or characters to Unicode ordinals, strings or None. "
@@ -10150,32 +10475,43 @@ msgid ""
 "same position in y. If there is a third argument, it must be a string, "
 "whose characters will be mapped to None in the result."
 msgstr ""
+"如果只有一个参数，则必须是一个将 Unicode 序号（整数）或字符映射到 Unicode "
+"序号、字符串或 None 的字典。字符键将被转换为序号。如果有两个参数，它们必须是"
+"长度相等的字符串，在生成的字典中，x 中的每个字符将被映射到 y "
+"中相同位置的字符。"
 
 #: flwr.common.EventType.partition:3 of
+#, fuzzy
 msgid ""
 "This will search for the separator in the string.  If the separator is "
 "found, returns a 3-tuple containing the part before the separator, the "
 "separator itself, and the part after it."
-msgstr ""
+msgstr "它会在字符串中搜索分隔符。 如果找到分隔符，则返回一个包含分隔符前部分、"
+"分隔符本身和分隔符后部分的 3 元组。"
 
 #: flwr.common.EventType.partition:7 of
+#, fuzzy
 msgid ""
 "If the separator is not found, returns a 3-tuple containing the original "
 "string and two empty strings."
-msgstr ""
+msgstr "如果找不到分隔符，则返回一个包含原始字符串和两个空字符串的 3 元组。"
 
 #: flwr.common.EventType.removeprefix:3 of
+#, fuzzy
 msgid ""
 "If the string starts with the prefix string, return string[len(prefix):]."
 " Otherwise, return a copy of the original string."
-msgstr ""
+msgstr "如果字符串以前缀字符串开始，则返回 "
+"string[len(prefix):]。否则，返回原始字符串的副本。"
 
 #: flwr.common.EventType.removesuffix:3 of
+#, fuzzy
 msgid ""
 "If the string ends with the suffix string and that suffix is not empty, "
 "return string[:-len(suffix)]. Otherwise, return a copy of the original "
 "string."
-msgstr ""
+msgstr "如果字符串以后缀字符串结尾，且后缀不为空，则返回 "
+"string[:-len(suffix)]。否则，返回原始字符串的副本。"
 
 #: flwr.common.EventType.replace:5 of
 #, fuzzy
@@ -10183,92 +10519,115 @@ msgid "count"
 msgstr "背景"
 
 #: flwr.common.EventType.replace:4 of
+#, fuzzy
 msgid ""
 "Maximum number of occurrences to replace. -1 (the default value) means "
 "replace all occurrences."
-msgstr ""
+msgstr "要替换的最大出现次数。-1（默认值）表示替换所有出现次数。"
 
 #: flwr.common.EventType.replace:7 of
+#, fuzzy
 msgid ""
 "If the optional argument count is given, only the first count occurrences"
 " are replaced."
-msgstr ""
+msgstr "如果给出可选参数 count，则只替换第一个计数出现的次数。"
 
 #: flwr.common.EventType.rfind:1 flwr.common.EventType.rindex:1 of
+#, fuzzy
 msgid ""
 "Return the highest index in S where substring sub is found, such that sub"
 " is contained within S[start:end].  Optional arguments start and end are "
 "interpreted as in slice notation."
 msgstr ""
+"返回在 S 中找到子串 sub 且 sub 包含在 S[start:end] 中的最高索引。 可选参数 "
+"start 和 end 按切分符号解释。"
 
 #: flwr.common.EventType.rpartition:3 of
+#, fuzzy
 msgid ""
 "This will search for the separator in the string, starting at the end. If"
 " the separator is found, returns a 3-tuple containing the part before the"
 " separator, the separator itself, and the part after it."
-msgstr ""
+msgstr "它会从字符串的末尾开始搜索分隔符。如果找到分隔符，则返回一个包含分隔符前部分"
+"、分隔符本身和分隔符后部分的 3 元组。"
 
 #: flwr.common.EventType.rpartition:7 of
+#, fuzzy
 msgid ""
 "If the separator is not found, returns a 3-tuple containing two empty "
 "strings and the original string."
-msgstr ""
+msgstr "如果找不到分隔符，则返回一个包含两个空字符串和原始字符串的 3 元组。"
 
 #: flwr.common.EventType.rsplit:7 flwr.common.EventType.split:7 of
+#, fuzzy
 msgid "sep"
-msgstr ""
+msgstr "sep"
 
 #: flwr.common.EventType.rsplit:4 flwr.common.EventType.split:4 of
+#, fuzzy
 msgid "The separator used to split the string."
-msgstr ""
+msgstr "用于分割字符串的分隔符。"
 
 #: flwr.common.EventType.rsplit:6 flwr.common.EventType.split:6 of
+#, fuzzy
 msgid ""
 "When set to None (the default value), will split on any whitespace "
 "character (including \\\\n \\\\r \\\\t \\\\f and spaces) and will discard"
 " empty strings from the result."
 msgstr ""
+"当设置为 \"无\"（默认值）时，将对任何空白字符（包括 \\n"
+" \\r \\t \\f 和空格）进行分割，并从结果中剔除空字符串。"
 
 #: flwr.common.EventType.rsplit:11 flwr.common.EventType.split:11 of
+#, fuzzy
 msgid "maxsplit"
-msgstr ""
+msgstr "最大分割"
 
 #: flwr.common.EventType.rsplit:10 flwr.common.EventType.split:10 of
+#, fuzzy
 msgid ""
 "Maximum number of splits (starting from the left). -1 (the default value)"
 " means no limit."
-msgstr ""
+msgstr "最大分割次数（从左边开始）。-1（默认值）表示没有限制。"
 
 #: flwr.common.EventType.rsplit:13 of
+#, fuzzy
 msgid "Splitting starts at the end of the string and works to the front."
-msgstr ""
+msgstr "从琴弦末端开始分弦，一直到琴弦前端。"
 
 #: flwr.common.EventType.split:13 of
+#, fuzzy
 msgid ""
 "Note, str.split() is mainly useful for data that has been intentionally "
 "delimited.  With natural text that includes punctuation, consider using "
 "the regular expression module."
-msgstr ""
+msgstr "注意，str.split() 主要适用于有意分隔的数据。 "
+"对于包含标点符号的自然文本，可以考虑使用正则表达式模块。"
 
 #: flwr.common.EventType.splitlines:3 of
+#, fuzzy
 msgid ""
 "Line breaks are not included in the resulting list unless keepends is "
 "given and true."
-msgstr ""
+msgstr "除非指定 keepends 为 true，否则换行符不会包含在生成的列表中。"
 
 #: flwr.common.EventType.startswith:1 of
+#, fuzzy
 msgid ""
 "Return True if S starts with the specified prefix, False otherwise. With "
 "optional start, test S beginning at that position. With optional end, "
 "stop comparing S at that position. prefix can also be a tuple of strings "
 "to try."
 msgstr ""
+"如果 S 以指定的前缀开始，则返回 True，否则返回 False。如果选择 start，"
+"则从该位置开始测试 S。如果使用可选的 end，则在该位置停止比较 S。"
 
 #: flwr.common.EventType.title:3 of
+#, fuzzy
 msgid ""
 "More specifically, words start with uppercased characters and all "
 "remaining cased characters have lower case."
-msgstr ""
+msgstr "更具体地说，单词以大写字母开头，其余所有大小写字符均为小写。"
 
 #: flwr.common.EventType.translate:5 of
 #, fuzzy
@@ -10276,21 +10635,26 @@ msgid "table"
 msgstr "数据库"
 
 #: flwr.common.EventType.translate:4 of
+#, fuzzy
 msgid ""
 "Translation table, which must be a mapping of Unicode ordinals to Unicode"
 " ordinals, strings, or None."
-msgstr ""
+msgstr "翻译表，必须是 Unicode 序号到 Unicode 序号、字符串或无的映射。"
 
 #: flwr.common.EventType.translate:7 of
+#, fuzzy
 msgid ""
 "The table must implement lookup/indexing via __getitem__, for instance a "
 "dictionary or list.  If this operation raises LookupError, the character "
 "is left untouched.  Characters mapped to None are deleted."
 msgstr ""
+"表必须通过 __getitem__ 实现查找/索引，例如字典或列表。 如果该操作引发 "
+"LookupError，该字符将保持不变。 映射为 None 的字符将被删除。"
 
 #: flwr.common.EventType.zfill:3 of
+#, fuzzy
 msgid "The string is never truncated."
-msgstr ""
+msgstr "字符串不会被截断。"
 
 #: ../../source/ref-api/flwr.common.FitIns.rst:2
 #, fuzzy
@@ -10492,25 +10856,32 @@ msgstr "遇到的错误。"
 
 #: flwr.common.message.Message.create_error_reply:5
 #: flwr.common.message.Message.create_reply:9 of
+#, fuzzy
 msgid ""
 "Time-to-live for this message in seconds. If unset, it will be set based "
 "on the remaining time for the received message before it expires. This "
 "follows the equation:  ttl = msg.meta.ttl - (reply.meta.created_at - "
 "msg.meta.created_at)"
 msgstr ""
+"该信息的有效时间（秒）。如果未设置，则将根据收到的信息过期前的剩余时间来设置"
+"。其计算公式为：ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta."
+"created_at)"
 
 #: flwr.common.message.Message.create_error_reply:5
 #: flwr.common.message.Message.create_reply:9 of
+#, fuzzy
 msgid ""
 "Time-to-live for this message in seconds. If unset, it will be set based "
 "on the remaining time for the received message before it expires. This "
 "follows the equation:"
-msgstr ""
+msgstr "该信息的有效时间（秒）。如果未设置，则将根据接收到的信息过期前的剩余时间来设"
+"置。其计算公式如下"
 
 #: flwr.common.message.Message.create_error_reply:9
 #: flwr.common.message.Message.create_reply:13 of
+#, fuzzy
 msgid "ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)"
-msgstr ""
+msgstr "ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)"
 
 #: flwr.common.message.Message.create_reply:3 of
 #, fuzzy
@@ -10631,8 +11002,9 @@ msgstr ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
 
 #: flwr.common.Metadata.created_at:1
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
+#, fuzzy
 msgid "Unix timestamp when the message was created."
-msgstr ""
+msgstr "创建信息时的 Unix 时间戳。"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 #, fuzzy
@@ -15720,8 +16092,9 @@ msgstr ""
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.unmask_stage:1
 #: of
+#, fuzzy
 msgid "Execute the 'unmask' stage."
-msgstr ""
+msgstr "执行 \"解除屏蔽 \"阶段。"
 
 #: ../../source/ref-api/flwr.server.workflow.SecAggWorkflow.rst:2
 #, fuzzy
@@ -15729,12 +16102,16 @@ msgid "SecAggWorkflow"
 msgstr "工作流程"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:1 of
+#, fuzzy
 msgid ""
 "Bases: "
 ":py:class:`~flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow`"
 msgstr ""
+"基础： :py:class:`~flwr.server.workflow.secure_aggregation."
+"secaggplus_workflow.SecAggPlusWorkflow`."
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:3 of
+#, fuzzy
 msgid ""
 "The SecAgg protocol ensures the secure summation of integer vectors owned"
 " by multiple parties, without accessing any individual integer vector. "
@@ -15748,27 +16125,40 @@ msgid ""
 "('parameters') from the client's `FitRes`. The server then aggregates "
 "these contributions to compute the weighted average of model parameters."
 msgstr ""
+"SecAgg 协议可确保对多方拥有的整数向量进行安全求和，而不会访问任何单个整数向量"
+"。该工作流程允许服务器计算所有客户端模型参数的加权平均值，确保个人贡献保持私"
+"密。这可以通过客户端同时发送加权因子和本地更新参数的加权版本来实现，为了保护"
+"隐私，两者都会被屏蔽。具体来说，每个客户端都会上传带掩码的\"[w, w * params]\""
+"，其中加权因子 \"w \"是示例数（\"num_examples\"），\"params \"代表客户端 "
+"\"FitRes \"中的模型参数（\"parameters\""
+"）。然后，服务器会汇总这些贡献，计算模型参数的加权平均值。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:14 of
+#, fuzzy
 msgid ""
 "The protocol involves four main stages: - 'setup': Send SecAgg "
 "configuration to clients and collect their public keys. - 'share keys': "
 "Broadcast public keys among clients and collect encrypted secret"
 msgstr ""
+"协议包括四个主要阶段： - 设置\"： 向客户端发送 SecAgg 配置并收集它们的公钥。-"
+" 共享密钥\"： 在客户端之间广播公钥并收集加密密钥。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:54 of
+#, fuzzy
 msgid ""
 "Each client's private key is split into N shares under the SecAgg "
 "protocol, where N is the number of selected clients."
-msgstr ""
+msgstr "根据 SecAgg 协议，每个客户的私人密钥被分成 N 份，其中 N 是所选客户的数量。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:56 of
+#, fuzzy
 msgid ""
 "Generally, higher `reconstruction_threshold` means better privacy "
 "guarantees but less tolerance to dropouts."
-msgstr ""
+msgstr "一般来说，\"重建阈值 \"越高，隐私保证就越好，但对丢包的容忍度就越低。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:60 of
+#, fuzzy
 msgid ""
 "When `reconstruction_threshold` is a float, it is interpreted as the "
 "proportion of the number of all selected clients needed for the "
@@ -15776,45 +16166,62 @@ msgid ""
 "setting the security threshold relative to the number of selected "
 "clients."
 msgstr ""
+"当 `reconstruction_threshold` 为浮点数时，它被解释为重建私钥所需的所有选定客"
+"户端数量的比例。此功能可根据所选客户端的数量灵活设置安全阈值。"
 
 #: flwr.server.workflow.secure_aggregation.secagg_workflow.SecAggWorkflow:64 of
+#, fuzzy
 msgid ""
 "`reconstruction_threshold`, and the quantization parameters "
 "(`clipping_range`, `quantization_range`, `modulus_range`) play critical "
 "roles in balancing privacy, robustness, and efficiency within the SecAgg "
 "protocol."
 msgstr ""
+"重构阈值 \"和量化参数（\"裁剪范围\"、\"量化范围\"、\"模量范围\"）在 SecAgg "
+"协议中平衡隐私性、鲁棒性和效率方面起着至关重要的作用。"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`collect_masked_vectors_stage "
 "<flwr.server.workflow.SecAggWorkflow.collect_masked_vectors_stage>`\\ "
 "\\(driver\\, ...\\)"
 msgstr ""
+":py:obj:`collect_masked_vectors_stage <flwr.server.workflow.SecAggWorkflow."
+"collect_masked_vectors_stage>`\\(driver\\, ...\\)"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`setup_stage <flwr.server.workflow.SecAggWorkflow.setup_stage>`\\"
 " \\(driver\\, context\\, state\\)"
 msgstr ""
+":py:obj:`setup_stage <flwr.server.workflow.SecAggWorkflow.setup_stage>`\\("
+"driver\\, context\\, state\\)"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`share_keys_stage "
 "<flwr.server.workflow.SecAggWorkflow.share_keys_stage>`\\ \\(driver\\, "
 "context\\, state\\)"
 msgstr ""
+"py:obj:`share_keys_stage <flwr.server.workflow.SecAggWorkflow."
+"share_keys_stage>`\\(driver\\, context\\, state\\)"
 
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow.collect_masked_vectors_stage:1:<autosummary>:1
 #: of
+#, fuzzy
 msgid ""
 ":py:obj:`unmask_stage "
 "<flwr.server.workflow.SecAggWorkflow.unmask_stage>`\\ \\(driver\\, "
 "context\\, state\\)"
 msgstr ""
+":py:obj:`unmask_stage <flwr.server.workflow.SecAggWorkflow.unmask_stage>`\\ "
+"\\(driver\\, context\\, state\\)"
 
 #: ../../source/ref-api/flwr.simulation.rst:2
 #, fuzzy
@@ -15822,10 +16229,13 @@ msgid "simulation"
 msgstr "运行模拟"
 
 #: ../../source/ref-api/flwr.simulation.rst:18:<autosummary>:1
+#, fuzzy
 msgid ""
 ":py:obj:`start_simulation <flwr.simulation.start_simulation>`\\ \\(\\*\\,"
 " client\\_fn\\[\\, ...\\]\\)"
 msgstr ""
+":py:obj:`start_simulation <flwr.simulation.start_simulation>`\\ \\(\\*\\, "
+"client\\_fn\\[\\, ...\\]\\)"
 
 #: ../../source/ref-api/flwr.simulation.rst:18:<autosummary>:1
 #: flwr.simulation.app.start_simulation:1 of
@@ -15833,15 +16243,19 @@ msgid "Start a Ray-based Flower simulation server."
 msgstr "启动基于 Ray 的Flower模拟服务器。"
 
 #: ../../source/ref-api/flwr.simulation.rst:18:<autosummary>:1
+#, fuzzy
 msgid ""
 ":py:obj:`run_simulation <flwr.simulation.run_simulation>`\\ "
 "\\(server\\_app\\, client\\_app\\, ...\\)"
 msgstr ""
+":py:obj:`run_simulation <flwr.simulation.run_simulation>`\\ \\(server\\_app\\"
+", client\\_app\\, ...\\)"
 
 #: ../../source/ref-api/flwr.simulation.rst:18:<autosummary>:1
 #: flwr.simulation.run_simulation.run_simulation:1 of
+#, fuzzy
 msgid "Run a Flower App using the Simulation Engine."
-msgstr ""
+msgstr "使用模拟引擎运行花朵应用程序。"
 
 #: ../../source/ref-api/flwr.simulation.run_simulation.rst:2
 #, fuzzy
@@ -15849,36 +16263,46 @@ msgid "run\\_simulation"
 msgstr "运行模拟"
 
 #: flwr.simulation.run_simulation.run_simulation:3 of
+#, fuzzy
 msgid ""
 "The `ServerApp` to be executed. It will send messages to different "
 "`ClientApp` instances running on different (virtual) SuperNodes."
-msgstr ""
+msgstr "要执行的 `ServerApp`。它将向运行在不同（虚拟）超级节点上的不同 "
+"`ClientApp`实例发送消息。"
 
 #: flwr.simulation.run_simulation.run_simulation:6 of
+#, fuzzy
 msgid ""
 "The `ClientApp` to be executed by each of the SuperNodes. It will receive"
 " messages sent by the `ServerApp`."
-msgstr ""
+msgstr "由每个超级节点执行的 `ClientApp`。它将接收由 `ServerApp` 发送的信息。"
 
 #: flwr.simulation.run_simulation.run_simulation:9 of
+#, fuzzy
 msgid ""
 "Number of nodes that run a ClientApp. They can be sampled by a Driver in "
 "the ServerApp and receive a Message describing what the ClientApp should "
 "perform."
-msgstr ""
+msgstr "运行 ClientApp 的节点数。它们可被 ServerApp 中的驱动程序采样，并接收描述 "
+"ClientApp 应执行的操作的信息。"
 
 #: flwr.simulation.run_simulation.run_simulation:13 of
+#, fuzzy
 msgid "A simulation backend that runs `ClientApp`s."
-msgstr ""
+msgstr "运行 \"客户端应用程序 \"的模拟后台。"
 
 #: flwr.simulation.run_simulation.run_simulation:15 of
+#, fuzzy
 msgid ""
 "'A dictionary, e.g {\"<keyA>\": <value>, \"<keyB>\": <value>} to "
 "configure a backend. Values supported in <value> are those included by "
 "`flwr.common.typing.ConfigsRecordValues`."
 msgstr ""
+"字典，例如 {\"<keyA>\"： <value>, \"<keyB>\"： <value>} 来配置后端。<value> "
+"中支持的值是 `flwr.common.typing.ConfigsRecordValues`中包含的值。"
 
 #: flwr.simulation.run_simulation.run_simulation:19 of
+#, fuzzy
 msgid ""
 "A boolean to indicate whether to enable GPU growth on the main thread. "
 "This is desirable if you make use of a TensorFlow model on your "
@@ -15888,12 +16312,20 @@ msgid ""
 "`tf.config.experimental.set_memory_growth()` works in the TensorFlow "
 "documentation: https://www.tensorflow.org/api/stable."
 msgstr ""
+"布尔值，用于指示是否在主线程上启用 GPU 增长。如果您在 \"ServerApp \"上使用 "
+"TensorFlow 模型，同时让 \"ClientApp \"在同一 GPU "
+"上运行，则最好启用此选项。如果不启用此功能，您可能会遇到内存不足的错误，因为 "
+"TensorFlow 默认会分配所有 GPU 内存。有关 `tf.config.experimental."
+"set_memory_growth()` 如何工作的更多信息，请参阅 TensorFlow 文档：https://www."
+"tensorflow.org/api/stable。"
 
 #: flwr.simulation.run_simulation.run_simulation:26 of
+#, fuzzy
 msgid ""
 "When diabled, only INFO, WARNING and ERROR log messages will be shown. If"
 " enabled, DEBUG-level logs will be displayed."
-msgstr ""
+msgstr "启用后，将只显示 INFO、WARNING 和 ERROR 日志信息。启用后，将显示 DEBUG "
+"级日志。"
 
 #: ../../source/ref-api/flwr.simulation.start_simulation.rst:2
 #, fuzzy
@@ -16109,6 +16541,7 @@ msgstr ""
 "TOKEN_v1.5.0-->"
 
 #: ../../source/ref-changelog.md:21
+#, fuzzy
 msgid ""
 "**Introduce Flower Next high-level API (stable)** "
 "([#3002](https://github.com/adap/flower/pull/3002), "
@@ -16137,8 +16570,27 @@ msgid ""
 "[#3195](https://github.com/adap/flower/pull/3195), "
 "[#3197](https://github.com/adap/flower/pull/3197))"
 msgstr ""
+"**介绍 Flower Next 高级应用程序接口（稳定版）** ([#3002](https://github.com/"
+"adap/flower/pull/3002), [#2934](https://github.com/adap/flower/pull/2934), "
+"[#2958](https://github.com/adap/flower/pull/2958), [#3173](https://github."
+"com/adap/flower/pull/3173), [#3174](https://github.com/adap/flower/pull/3174)"
+", [#2923](https://github.com/adap/flower/pull/2923), [#2691](https://github."
+"com/adap/flower/pull/2691), [#3079](https://github.com/adap/flower/pull/3079)"
+", [#2961](https://github.com/adap/flower/pull/2961), [#2924](https://github."
+"com/adap/flower/pull/2924), [#3166](https://github.com/adap/flower/pull/3166)"
+", [#3031](https://github.com/adap/flower/pull/3031), [#3057](https://github."
+"com/adap/flower/pull/3057), [#3000](https://github.com/adap/flower/pull/3000)"
+", [#3113](https://github.com/adap/flower/pull/3113), [#2957](https://github."
+"com/adap/flower/pull/2957), [#3183](https://github.com/adap/flower/pull/3183)"
+", [#3180](https://github.com/adap/flower/pull/3180), [#3035](https://github."
+"com/adap/flower/pull/3035), [#3189](https://github.com/adap/flower/pull/3189)"
+", [#3185](https://github.com/adap/flower/pull/3185), [#3190](https://github."
+"com/adap/flower/pull/3190), [#3191](https://github.com/adap/flower/pull/3191)"
+", [#3195](https://github.com/adap/flower/pull/3195), [#3197](https://github."
+"com/adap/flower/pull/3197))"
 
 #: ../../source/ref-changelog.md:23
+#, fuzzy
 msgid ""
 "The Flower Next high-level API is stable! Flower Next is the future of "
 "Flower - all new features (like Flower Mods) will be built on top of it. "
@@ -16151,6 +16603,13 @@ msgid ""
 " line of code. The best part? It's fully compatible with existing Flower "
 "projects that use `Strategy`, `NumPyClient` & co."
 msgstr ""
+"Flower Next 高级应用程序接口已经稳定！Flower Next 是 Flower 的未来 - "
+"所有新功能（如 Flower Mods）都将构建在它之上。您可以使用 `ServerApp` 和 "
+"`ClientApp` 开始将现有项目迁移到 Flower Next（请查看 `quickstart-pytorch` 或 "
+"`quickstart-tensorflow` ，详细的迁移指南将在不久后发布）。Flower Next 允许您"
+"同时运行多个项目（我们称之为多重运行），并在模拟环境或部署环境中执行同一项目"
+"，而无需更改任何代码。最棒的是什么？它与使用 `Strategy`、`NumPyClient` "
+"等的现有 Flower 项目完全兼容。"
 
 #: ../../source/ref-changelog.md:25
 #, fuzzy
@@ -16165,6 +16624,7 @@ msgstr ""
 "[#2493](https://github.com/adap/flower/pull/2493))"
 
 #: ../../source/ref-changelog.md:27
+#, fuzzy
 msgid ""
 "In addition to the Flower Next *high-level* API that uses `Strategy`, "
 "`NumPyClient` & co, Flower 1.8 also comes with a preview version of the "
@@ -16180,6 +16640,15 @@ msgid ""
 "metrics, stateful computations on the client node and implementations of "
 "custom SMPC protocols, to name just a few."
 msgstr ""
+"除了使用 \"Strategy\"、\"NumPyClient \"等的 Flower Next 高级应用程序接口外，"
+"Flower 1.8 还提供了新的 Flower Next 低级应用程序接口的预览版。低级应用程序接"
+"口允许通过向/从客户端节点发送/接收单个消息，对学习过程的各个方面进行细粒度控"
+"制。新的 \"ServerApp \"支持注册一个自定义的 \"main \"函数"
+"，允许为异步FL、循环训练或联合分析等方法编写自定义训练循环。新的 \"ClientApp "
+"\"支持注册 \"训练\"、\"评估 \"和 \"查询 \"函数，这些函数可以访问从 "
+"\"ServerApp \"接收到的原始信息。新的抽象（如 \"RecordSet\"、\"Message \"和 "
+"\"Context\"）进一步支持发送多个模型、多套配置值和指标、"
+"客户端节点上的有状态计算以及自定义 SMPC 协议的实现等。"
 
 #: ../../source/ref-changelog.md:29
 #, fuzzy
@@ -16194,6 +16663,7 @@ msgstr ""
 "[#2248](https://github.com/adap/flower/pull/2248))"
 
 #: ../../source/ref-changelog.md:31
+#, fuzzy
 msgid ""
 "Flower Modifiers (we call them Mods) can intercept messages and analyze, "
 "edit or handle them directly. Mods can be used to develop pluggable "
@@ -16204,6 +16674,11 @@ msgid ""
 "SecAgg+. The Flower Mods API is released as a preview, but researchers "
 "can already use it to experiment with arbirtrary SMPC protocols."
 msgstr ""
+"Flower Modifiers（我们称之为 Mods）可以拦截信息，并直接对其进行分析、编辑或处"
+"理。修改器可用于开发可在不同项目中使用的可插拔模块。Flower 1.8 已经包含了记录"
+"信息大小、通过网络发送的参数数量、固定剪切和自适应剪切的差分隐私、"
+"本地差分隐私以及安全聚合协议 SecAgg 和 SecAgg+ 的 Mods。Flower Mods API "
+"作为预览版发布，但研究人员已经可以用它来试验任意的 SMPC 协议。"
 
 #: ../../source/ref-changelog.md:33
 #, fuzzy
@@ -16225,6 +16700,7 @@ msgstr ""
 "[#1475](https://github.com/adap/flower/pull/1475)))"
 
 #: ../../source/ref-changelog.md:35
+#, fuzzy
 msgid ""
 "We are introducing LLM FlowerTune, an introductory example that "
 "demonstrates federated LLM fine-tuning of pre-trained Llama2 models on "
@@ -16233,6 +16709,12 @@ msgid ""
 "Federated LLM Fine-tuning with Flower](https://flower.ai/blog/2024-03-14"
 "-llm-flowertune-federated-llm-finetuning-with-flower/) for more details."
 msgstr ""
+"我们将介绍 LLM FlowerTune，这是一个介绍性示例，演示了在 Alpaca-GPT4 "
+"数据集上对预先训练好的 Llama2 模型进行联合 LLM "
+"微调。该示例可轻松调整以使用不同的模型和/或数据集。请阅读我们的博文 [LLM "
+"FlowerTune: Federated LLM Fine-tuning with Flower](https://flower.ai/blog/"
+"2024-03-14-llm-flowertune-federated-llm-finetuning-with-flower/) "
+"了解更多详情。"
 
 #: ../../source/ref-changelog.md:37
 #, fuzzy
@@ -16256,6 +16738,7 @@ msgstr ""
 "[#994](https://github.com/adap/flower/pull/994))"
 
 #: ../../source/ref-changelog.md:39
+#, fuzzy
 msgid ""
 "Built-in Differential Privacy is here! Flower supports both central and "
 "local differential privacy (DP). Central DP can be configured with either"
@@ -16267,6 +16750,13 @@ msgid ""
 "the new Differential Privacy components](https://flower.ai/docs/framework"
 "/how-to-use-differential-privacy.html) in Flower."
 msgstr ""
+"内置差分保密功能！Flower 支持中央和本地差分保密 "
+"(DP)。中央差分隐私可配置为固定或自适应剪切。剪切可以发生在服务器端或客户端。"
+"本地 DP "
+"在客户端进行剪切和噪声处理。新的文档页面[解释差分隐私方法](https://flower.ai/"
+"docs/framework/explanation-differential-privacy.html) "
+"和新的操作指南[如何使用新的差分隐私组件](https://flower.ai/docs/framework/"
+"how-to-use-differential-privacy.html) 介绍了 Flower 的使用方法。"
 
 #: ../../source/ref-changelog.md:41
 #, fuzzy
@@ -16281,6 +16771,7 @@ msgstr ""
 "[#2248](https://github.com/adap/flower/pull/2248))"
 
 #: ../../source/ref-changelog.md:43
+#, fuzzy
 msgid ""
 "Built-in Secure Aggregation is here! Flower now supports different secure"
 " aggregation protocols out-of-the-box. The best part? You can add secure "
@@ -16292,6 +16783,12 @@ msgid ""
 "combine Federated Learning, Differential Privacy and Secure Aggregation "
 "in the same project."
 msgstr ""
+"内置安全聚合功能！Flower "
+"现在支持不同的安全聚合协议。最棒的是什么？只需几行代码，"
+"您就可以将安全聚合添加到 Flower 项目中。在这个初始版本中，我们包含了对 "
+"SecAgg 和 SecAgg+ 的支持，但更多协议将很快实现。我们还将添加详细的文档，"
+"解释安全聚合以及如何在 Flower 中使用它。您可以查看新的代码示例，了解如何使用 "
+"Flower 在同一项目中轻松结合联合学习、差分隐私和安全聚合。"
 
 #: ../../source/ref-changelog.md:45
 #, fuzzy
@@ -16315,10 +16812,12 @@ msgstr ""
 "[#2171](https://github.com/adap/flower/pull/2171))"
 
 #: ../../source/ref-changelog.md:47
+#, fuzzy
 msgid ""
 "A new `flwr` CLI command allows creating new Flower projects (`flwr new`)"
 " and then running them using the Simulation Engine (`flwr run`)."
-msgstr ""
+msgstr "新的 `flwr` CLI 命令允许创建新的 Flower 项目（`flwr "
+"new`），然后使用仿真引擎运行它们（`flwr run`）。"
 
 #: ../../source/ref-changelog.md:49
 #, fuzzy
@@ -16344,11 +16843,14 @@ msgstr ""
 "[#1733](https://github.com/adap/flower/pull/1733))"
 
 #: ../../source/ref-changelog.md:51
+#, fuzzy
 msgid ""
 "The Flower Simulation Engine can now run Flower Next projects. For "
 "notebook environments, there's also a new `run_simulation` function that "
 "can run `ServerApp` and `ClientApp`."
 msgstr ""
+"Flower 模拟引擎现在可以运行 Flower Next 项目。对于笔记本环境，还有一个新的 "
+"`run_simulation` 函数，可以运行 `ServerApp` 和 `ClientApp`。"
 
 #: ../../source/ref-changelog.md:53
 #, fuzzy
@@ -16358,6 +16860,7 @@ msgid ""
 msgstr "** 添加一个新的 gRPC 选项**（[#2197](https://github.com/adap/flower/pull/2197)）"
 
 #: ../../source/ref-changelog.md:55
+#, fuzzy
 msgid ""
 "A SuperNode will now try to reconnect indefinitely to the SuperLink in "
 "case of connection errors. The arguments `--max-retries` and `--max-wait-"
@@ -16367,6 +16870,10 @@ msgid ""
 "wait-time` defines the time before the SuperNode gives up trying to "
 "reconnect to the SuperLink."
 msgstr ""
+"如果出现连接错误，超级节点现在会尝试无限期地重新连接超级链接。现在可以向 "
+"`flower-client-app` 命令传递参数 `-ax-retries` 和 `-max-wait-time`。"
+"最大重试次数 \"将定义客户端在放弃重新连接超级链接之前的重试次数，而 "
+"\"最大等待时间 \"则定义超级节点放弃重新连接超级链接之前的等待时间。"
 
 #: ../../source/ref-changelog.md:57
 #, fuzzy
@@ -16384,12 +16891,16 @@ msgstr ""
 "[#1679](https://github.com/adap/flower/pull/1679)"
 
 #: ../../source/ref-changelog.md:59
+#, fuzzy
 msgid ""
 "There's a new [FedStar](https://flower.ai/docs/baselines/fedstar.html) "
 "baseline. Several other baselined have been updated as well."
 msgstr ""
+"有一条新的 [FedStar](https://flower.ai/docs/baselines/fedstar.html) "
+"基准线。其他几条基准线也已更新。"
 
 #: ../../source/ref-changelog.md:61
+#, fuzzy
 msgid ""
 "**Improve documentation and translations** "
 "([#3050](https://github.com/adap/flower/pull/3050), "
@@ -16409,13 +16920,29 @@ msgid ""
 "[#2990](https://github.com/adap/flower/pull/2990), "
 "[#2989](https://github.com/adap/flower/pull/2989))"
 msgstr ""
+"**改进文件和翻译** ([#3050](https://github.com/adap/flower/pull/3050), "
+"[#3044](https://github.com/adap/flower/pull/3044), [#3043](https://github."
+"com/adap/flower/pull/3043), [#2986](https://github.com/adap/flower/pull/2986)"
+", [#3041](https://github.com/adap/flower/pull/3041), [#3046](https://github."
+"com/adap/flower/pull/3046), [#3042](https://github.com/adap/flower/pull/3042)"
+", [#2978](https://github.com/adap/flower/pull/2978), [#2952](https://github."
+"com/adap/flower/pull/2952), [#3167](https://github.com/adap/flower/pull/3167)"
+", [#2953](https://github.com/adap/flower/pull/2953), [#3045](https://github."
+"com/adap/flower/pull/3045), [#2654](https://github.com/adap/flower/pull/2654)"
+", [#3082](https://github.com/adap/flower/pull/3082), [#2990](https://github."
+"com/adap/flower/pull/2990), [#2989](https://github.com/adap/flower/pull/"
+"2989))"
 
 #: ../../source/ref-changelog.md:63
+#, fuzzy
 msgid ""
 "As usual, we merged many smaller and larger improvements to the "
 "documentation. A special thank you goes to [Sebastian van der "
 "Voort](https://github.com/svdvoort) for landing a big documentation PR!"
 msgstr ""
+"像往常一样，我们合并了许多对文档的较大和较小的改进。特别要感谢 [Sebastian "
+"van der Voort](https://github.com/svdvoort)，他为我们带来了一份重要的文档 "
+"PR！"
 
 #: ../../source/ref-changelog.md:65
 #, fuzzy
@@ -16444,6 +16971,7 @@ msgstr ""
 "[#1515](https://github.com/adap/flower/pull/1515))"
 
 #: ../../source/ref-changelog.md:67
+#, fuzzy
 msgid ""
 "Two new examples show federated training of a Vision Transformer (ViT) "
 "and federated learning in a medical context using the popular MONAI "
@@ -16451,8 +16979,13 @@ msgid ""
 " new Flower Next `ServerApp` and `ClientApp`. Many other examples "
 "received considerable updates as well."
 msgstr ""
+"两个新示例展示了视觉转换器（ViT）的联合训练，以及使用流行的 MONAI "
+"库在医疗环境中进行的联合学习。quickstart-pytorch \"和 \"quickstart-"
+"tensorflow \"展示了新的 Flower Next \"ServerApp \"和 \"ClientApp\""
+"。许多其他示例也得到了大量更新。"
 
 #: ../../source/ref-changelog.md:69
+#, fuzzy
 msgid ""
 "**General improvements** "
 "([#3171](https://github.com/adap/flower/pull/3171), "
@@ -16529,6 +17062,56 @@ msgid ""
 "[#2955](https://github.com/adap/flower/pull/2955), "
 "[#2954](https://github.com/adap/flower/pull/2954))"
 msgstr ""
+"**一般改进**([#3171](https://github.com/adap/flower/pull/3171), "
+"[3099](https://github.com/adap/flower/pull/3099), [3003](https://github.com/"
+"adap/flower/pull/3003), [3145](https://github.com/adap/flower/pull/3145), "
+"[3017](https://github.com/adap/flower/pull/3017), [3085](https://github.com/"
+"adap/flower/pull/3085), [3012](https://github.com/adap/flower/pull/3012), "
+"[3119](https://github.com/adap/flower/pull/3119), [2991](https://github.com/"
+"adap/flower/pull/2991), [2970](https://github.com/adap/flower/pull/2970), "
+"[2980](https://github.com/adap/flower/pull/2980), [3086](https://github.com/"
+"adap/flower/pull/3086), [2932](https://github.com/adap/flower/pull/2932), "
+"[2928](https://github.com/adap/flower/pull/2928), [2941](https://github.com/"
+"adap/flower/pull/2941), [2933](https://github.com/adap/flower/pull/2933), "
+"[3181](https://github.com/adap/flower/pull/3181), [2973](https://github.com/"
+"adap/flower/pull/2973), [2992](https://github.com/adap/flower/pull/2992), "
+"[2915](https://github.com/adap/flower/pull/2915), [3040](https://github.com/"
+"adap/flower/pull/3040), [3022](https://github.com/adap/flower/pull/3022), "
+"[3032](https://github.com/adap/flower/pull/3032), [2902](https://github.com/"
+"adap/flower/pull/2902), [2931](https://github.com/adap/flower/pull/2931), "
+"[3005](https://github.com/adap/flower/pull/3005), [3132](https://github.com/"
+"adap/flower/pull/3132), [3115](https://github.com/adap/flower/pull/3115), "
+"[2944](https://github.com/adap/flower/pull/2944), [3064](https://github.com/"
+"adap/flower/pull/3064), [3106](https://github.com/adap/flower/pull/3106), "
+"[2974](https://github.com/adap/flower/pull/2974), [3178](https://github.com/"
+"adap/flower/pull/3178), [2993](https://github.com/adap/flower/pull/2993), "
+"[3186](https://github.com/adap/flower/pull/3186), [3091](https://github.com/"
+"adap/flower/pull/3091), [3125](https://github.com/adap/flower/pull/3125), "
+"[3093](https://github.com/adap/flower/pull/3093), [3013](https://github.com/"
+"adap/flower/pull/3013), [3033](https://github.com/adap/flower/pull/3033), "
+"[3133](https://github.com/adap/flower/pull/3133), [3068](https://github.com/"
+"adap/flower/pull/3068), [2916](https://github.com/adap/flower/pull/2916), "
+"[2975](https://github.com/adap/flower/pull/2975), [2984](https://github.com/"
+"adap/flower/pull/2984), [2846](https://github.com/adap/flower/pull/2846), "
+"[3077](https://github.com/adap/flower/pull/3077), [3143](https://github.com/"
+"adap/flower/pull/3143), [2921](https://github.com/adap/flower/pull/2921), "
+"[3101](https://github.com/adap/flower/pull/3101), [2927](https://github.com/"
+"adap/flower/pull/2927), [2995](https://github.com/adap/flower/pull/2995), "
+"[2972](https://github.com/adap/flower/pull/2972), [2912](https://github.com/"
+"adap/flower/pull/2912), [3065](https://github.com/adap/flower/pull/3065), "
+"[3028](https://github.com/adap/flower/pull/3028), [2922](https://github.com/"
+"adap/flower/pull/2922), [2982](https://github.com/adap/flower/pull/2982), "
+"[2914](https://github.com/adap/flower/pull/2914), [3179](https://github.com/"
+"adap/flower/pull/3179), [3080](https://github.com/adap/flower/pull/3080), "
+"[2994](https://github.com/adap/flower/pull/2994), [3187](https://github.com/"
+"adap/flower/pull/3187), [2926](https://github.com/adap/flower/pull/2926), "
+"[3018](https://github.com/adap/flower/pull/3018), [3144](https://github.com/"
+"adap/flower/pull/3144), [3011](https://github.com/adap/flower/pull/3011), "
+"[#3152](https://github.com/adap/flower/pull/3152), [#2836](https://github."
+"com/adap/flower/pull/2836), [#2929](https://github.com/adap/flower/pull/2929)"
+", [#2943](https://github.com/adap/flower/pull/2943), [#2955](https://github."
+"com/adap/flower/pull/2955), [#2954](https://github.com/adap/flower/pull/"
+"2954))"
 
 #: ../../source/ref-changelog.md:75
 #, fuzzy
@@ -16568,6 +17151,7 @@ msgstr ""
 "[#2435](https://github.com/adap/flower/pull/2435))"
 
 #: ../../source/ref-changelog.md:87
+#, fuzzy
 msgid ""
 "Subclasses of `Client` and `NumPyClient` can now store local state that "
 "remains on the client. Let's start with the highlight first: this new "
@@ -16579,6 +17163,12 @@ msgid ""
 "different rounds of execution to enable stateful computations in a "
 "unified way across simulation and deployment."
 msgstr ""
+"客户端 \"和 \"NumPyClient \"的子类现在可以存储保留在客户端上的本地状态"
+"。让我们先从亮点开始：这一新功能与模拟客户端（通过 "
+"`start_simulation`）和网络客户端（通过 `start_client`）兼容。这也是 `Context`"
+" 和 `RecordSet` 等新抽象的首次预览。客户端可以通过 `state.RecordSet` 访问 "
+"`RecordSet` 类型的状态： RecordSet = self.context.state`。对该 `RecordSet` "
+"的更改会在不同轮执行中保留，以便在模拟和部署中以统一的方式进行有状态计算。"
 
 #: ../../source/ref-changelog.md:89
 #, fuzzy
@@ -16588,6 +17178,7 @@ msgid ""
 msgstr "**改进示例笔记** ([#2005](https://github.com/adap/flower/pull/2005))"
 
 #: ../../source/ref-changelog.md:91
+#, fuzzy
 msgid ""
 "Flower is faster than ever. All `FedAvg`-derived strategies now use in-"
 "place aggregation to reduce memory consumption. The Flower client "
@@ -16595,6 +17186,9 @@ msgid ""
 "which results in significant speedups, especially when the client-side "
 "training time is short."
 msgstr ""
+"Flower 的速度比以往更快。所有源于 `FedAvg` "
+"的策略现在都使用就地聚合，以减少内存消耗。Flower 客户端序列化/解序列化已从头"
+"开始重写，从而显著提高了速度，尤其是在客户端训练时间较短的情况下。"
 
 #: ../../source/ref-changelog.md:93
 #, fuzzy
@@ -16606,11 +17200,14 @@ msgstr ""
 "([#1598](https://github.com/adap/flower/pull/1598))"
 
 #: ../../source/ref-changelog.md:95
+#, fuzzy
 msgid ""
 "Flower has official support for federated learning using [Apple "
 "MLX](https://ml-explore.github.io/mlx) via the new `quickstart-mlx` code "
 "example."
 msgstr ""
+"通过新的 `quickstart-mlx` 代码示例，Flower 正式支持使用 [Apple MLX](https"
+"://ml-explore.github.io/mlx)的联合学习。"
 
 #: ../../source/ref-changelog.md:97
 #, fuzzy
@@ -16623,6 +17220,7 @@ msgstr ""
 "[#1764](https://github.com/adap/flower/pull/1764))"
 
 #: ../../source/ref-changelog.md:99
+#, fuzzy
 msgid ""
 "A new strategy called `FedXgbCyclic` supports a client-by-client style of"
 " training (often called cyclic). The `xgboost-comprehensive` code example"
@@ -16630,6 +17228,10 @@ msgid ""
 "comprehensive` now also supports simulation mode. With this, Flower "
 "offers best-in-class XGBoost support."
 msgstr ""
+"名为 `FedXgbCyclic` 的新策略支持逐个客户端的训练风格（通常称为循环"
+"）。xgboost-comprehensive \"代码示例展示了如何在一个完整的项目中使用它"
+"。除此之外，`xgboost-comprehensive` 现在还支持模拟模式。由此，Flower "
+"提供了同类最佳的 XGBoost 支持。"
 
 #: ../../source/ref-changelog.md:101
 #, fuzzy
@@ -16639,10 +17241,12 @@ msgid ""
 msgstr "** 支持 Python 3.10** ([#1320](https://github.com/adap/flower/pull/1320))"
 
 #: ../../source/ref-changelog.md:103
+#, fuzzy
 msgid ""
 "Framework tests now run on Python 3.8, 3.9, 3.10, and 3.11. This will "
 "ensure better support for users using more recent Python versions."
-msgstr ""
+msgstr "框架测试现在可在 Python 3.8、3.9、3.10 和 3.11 上运行。这将确保为使用最新 "
+"Python 版本的用户提供更好的支持。"
 
 #: ../../source/ref-changelog.md:105
 #, fuzzy
@@ -16654,10 +17258,11 @@ msgstr ""
 "([#2283](https://github.com/adap/flower/pull/2283))"
 
 #: ../../source/ref-changelog.md:107
+#, fuzzy
 msgid ""
 "The `grpcio` and `protobuf` dependencies were updated to their latest "
 "versions for improved security and performance."
-msgstr ""
+msgstr "为提高安全性和性能，\"grpcio \"和 \"protobuf \"依赖项已更新至最新版本。"
 
 #: ../../source/ref-changelog.md:109
 #, fuzzy
@@ -16681,12 +17286,16 @@ msgstr ""
 "[#994](https://github.com/adap/flower/pull/994))"
 
 #: ../../source/ref-changelog.md:111
+#, fuzzy
 msgid ""
 "The Flower server can now be run using an official Docker image. A new "
 "how-to guide explains [how to run Flower using "
 "Docker](https://flower.ai/docs/framework/how-to-run-flower-using-"
 "docker.html). An official Flower client Docker image will follow."
 msgstr ""
+"现在可以使用官方 Docker 映像运行 Flower 服务器了。新的操作指南介绍了 ["
+"如何使用 Docker 运行 Flower](https://flower.ai/docs/framework/how-to-run-"
+"flower-using-docker.html)。Flower 客户端 Docker 官方镜像将随后发布。"
 
 #: ../../source/ref-changelog.md:113
 #, fuzzy
@@ -16726,10 +17335,12 @@ msgstr ""
 "[#1310](https://github.com/adap/flower/pull/1310)"
 
 #: ../../source/ref-changelog.md:121
+#, fuzzy
 msgid ""
 "Several code examples were updated to use [Flower "
 "Datasets](https://flower.ai/docs/datasets/)."
-msgstr ""
+msgstr "更新了多个代码示例，以使用 [Flower Datasets](https://flower.ai/docs/datasets/"
+") 。"
 
 #: ../../source/ref-changelog.md:123
 #, fuzzy
@@ -16757,8 +17368,9 @@ msgstr ""
 "[#1794](https://github.com/adap/flower/pull/1794))"
 
 #: ../../source/ref-changelog.md:125
+#, fuzzy
 msgid "Many Flower code examples received substantial updates."
-msgstr ""
+msgstr "许多 \"Flower \"代码示例得到了大幅更新。"
 
 #: ../../source/ref-changelog.md:127 ../../source/ref-changelog.md:220
 msgid "**Update Flower Baselines**"
@@ -16818,6 +17430,7 @@ msgstr ""
 "[#1614](https://github.com/adap/flower/pull/1614)))"
 
 #: ../../source/ref-changelog.md:138
+#, fuzzy
 msgid ""
 "**Improved testing and development infrastructure** "
 "([#2797](https://github.com/adap/flower/pull/2797), "
@@ -16850,12 +17463,34 @@ msgid ""
 "[#2661](https://github.com/adap/flower/pull/2661), "
 "[#2398](https://github.com/adap/flower/pull/2398))"
 msgstr ""
+"**改进测试和开发基础设施** ([#2797](https://github.com/adap/flower/pull/2797)"
+", [#2676](https://github.com/adap/flower/pull/2676), [#2644](https://github."
+"com/adap/flower/pull/2644), [#2656](https://github.com/adap/flower/pull/2656)"
+", [#2848](https://github.com/adap/flower/pull/2848), [#2675](https://github."
+"com/adap/flower/pull/2675), [#2735](https://github.com/adap/flower/pull/2735)"
+", [#2767](https://github.com/adap/flower/pull/2767), [#2732](https://github."
+"com/adap/flower/pull/2732), [#2744](https://github.com/adap/flower/pull/2744)"
+", [#2681](https://github.com/adap/flower/pull/2681), [#2699](https://github."
+"com/adap/flower/pull/2699), [#2745](https://github.com/adap/flower/pull/2745)"
+", [#2734](https://github.com/adap/flower/pull/2734), [#2731](https://github."
+"com/adap/flower/pull/2731), [#2652](https://github.com/adap/flower/pull/2652)"
+", [#2720](https://github.com/adap/flower/pull/2720), [#2721](https://github."
+"com/adap/flower/pull/2721), [#2717](https://github.com/adap/flower/pull/2717)"
+", [#2864](https://github.com/adap/flower/pull/2864), [#2694](https://github."
+"com/adap/flower/pull/2694), [#2709](https://github.com/adap/flower/pull/2709)"
+", [#2658](https://github.com/adap/flower/pull/2658), [#2796](https://github."
+"com/adap/flower/pull/2796), [#2692](https://github.com/adap/flower/pull/2692)"
+", [#2657](https://github.com/adap/flower/pull/2657), [#2813](https://github."
+"com/adap/flower/pull/2813), [#2661](https://github.com/adap/flower/pull/2661)"
+", [#2398](https://github.com/adap/flower/pull/2398))"
 
 #: ../../source/ref-changelog.md:140
+#, fuzzy
 msgid ""
 "The Flower testing and development infrastructure has received "
 "substantial updates. This makes Flower 1.7 the most tested release ever."
-msgstr ""
+msgstr "Flower 测试和开发基础架构已得到大幅更新。这使得 Flower 1.7 "
+"成为有史以来经过最多测试的版本。"
 
 #: ../../source/ref-changelog.md:142
 #, fuzzy
@@ -16894,6 +17529,7 @@ msgstr ""
 "[#2183](https://github.com/adap/flower/pull/2183))"
 
 #: ../../source/ref-changelog.md:144
+#, fuzzy
 msgid ""
 "**General improvements** "
 "([#2803](https://github.com/adap/flower/pull/2803), "
@@ -16933,6 +17569,31 @@ msgid ""
 "[#2672](https://github.com/adap/flower/pull/2672), "
 "[#2759](https://github.com/adap/flower/pull/2759))"
 msgstr ""
+"**一般改进** ([#2803](https://github.com/adap/flower/pull/2803), "
+"[#2847](https://github.com/adap/flower/pull/2847), [#2877](https://github."
+"com/adap/flower/pull/2877), [#2690](https://github.com/adap/flower/pull/2690)"
+", [#2889](https://github.com/adap/flower/pull/2889), [#2874](https://github."
+"com/adap/flower/pull/2874), [#2819](https://github.com/adap/flower/pull/2819)"
+", [#2689](https://github.com/adap/flower/pull/2689), [#2457](https://github."
+"com/adap/flower/pull/2457), [#2870](https://github.com/adap/flower/pull/2870)"
+", [#2669](https://github.com/adap/flower/pull/2669), [#2876](https://github."
+"com/adap/flower/pull/2876), [#2885](https://github.com/adap/flower/pull/2885)"
+", [#2858](https://github.com/adap/flower/pull/2858), [#2867](https://github."
+"com/adap/flower/pull/2867), [#2351](https://github.com/adap/flower/pull/2351)"
+", [#2886](https://github.com/adap/flower/pull/2886), [#2860](https://github."
+"com/adap/flower/pull/2860), [#2828](https://github.com/adap/flower/pull/2828)"
+", [#2869](https://github.com/adap/flower/pull/2869), [#2875](https://github."
+"com/adap/flower/pull/2875), [#2733](https://github.com/adap/flower/pull/2733)"
+", [#2488](https://github.com/adap/flower/pull/2488), [#2646](https://github."
+"com/adap/flower/pull/2646), [#2879](https://github.com/adap/flower/pull/2879)"
+", [#2821](https://github.com/adap/flower/pull/2821), [#2855](https://github."
+"com/adap/flower/pull/2855), [#2800](https://github.com/adap/flower/pull/2800)"
+", [#2807](https://github.com/adap/flower/pull/2807), [#2801](https://github."
+"com/adap/flower/pull/2801), [#2804](https://github.com/adap/flower/pull/2804)"
+", [#2851](https://github.com/adap/flower/pull/2851), [#2787](https://github."
+"com/adap/flower/pull/2787), [#2852](https://github.com/adap/flower/pull/2852)"
+", [#2672](https://github.com/adap/flower/pull/2672), [#2759](https://github."
+"com/adap/flower/pull/2759))"
 
 #: ../../source/ref-changelog.md:148
 #, fuzzy
@@ -16945,6 +17606,7 @@ msgstr ""
 "[#2508](https://github.com/adap/flower/pull/2508))"
 
 #: ../../source/ref-changelog.md:150
+#, fuzzy
 msgid ""
 "Until now, clients of type `NumPyClient` needed to be started via "
 "`start_numpy_client`. In our efforts to consolidate framework APIs, we "
@@ -16954,6 +17616,11 @@ msgid ""
 "object to `start_client`. The examples and the documentation have been "
 "updated accordingly."
 msgstr ""
+"到目前为止，\"NumPyClient \"类型的客户端需要通过 \"start_numpy_client \"启动"
+"。为了整合框架 API，我们引入了一些变化，现在所有客户端类型都应通过 "
+"`start_client` 启动。要继续使用 `NumPyClient` 客户端，只需首先调用 `."
+"to_client()` 方法，然后将返回的 `Client` 对象传递给 "
+"`start_client`。示例和文档已相应更新。"
 
 #: ../../source/ref-changelog.md:152
 #, fuzzy
@@ -16963,11 +17630,13 @@ msgid ""
 msgstr "**移除过时的 KerasClient**（[#857](https://github.com/adap/flower/pull/857)）"
 
 #: ../../source/ref-changelog.md:154
+#, fuzzy
 msgid ""
 "Legacy DP wrapper classes are deprecated, but still functional. This is "
 "in preparation for an all-new pluggable version of differential privacy "
 "support in Flower."
-msgstr ""
+msgstr "传统的 DP 封装类已废弃，但仍可正常使用。这是为 Flower "
+"中的全新可插拔差分隐私支持版本做准备。"
 
 #: ../../source/ref-changelog.md:156
 #, fuzzy
@@ -16998,11 +17667,14 @@ msgstr ""
 "[#2615](https://github.com/adap/flower/pull/2615))"
 
 #: ../../source/ref-changelog.md:162
+#, fuzzy
 msgid ""
 "Experimental fields `sa`, `legacy_server_message` and "
 "`legacy_client_message` were removed from `Task` message. The removed "
 "fields are superseded by the new `RecordSet` abstraction."
 msgstr ""
+"从 `Task` 消息中删除了试验性字段 `sa`、 `legacy_server_message` 和 "
+"`legacy_client_message`。删除的字段已被新的 `RecordSet` 抽象所取代。"
 
 #: ../../source/ref-changelog.md:164
 #, fuzzy
@@ -17012,11 +17684,14 @@ msgid ""
 msgstr "**新的 scikit-learn 代码示例** ([#748](https://github.com/adap/flower/pull/748))"
 
 #: ../../source/ref-changelog.md:166
+#, fuzzy
 msgid ""
 "The development of the MXNet fremework has ended and the project is now "
 "[archived on GitHub](https://github.com/apache/mxnet). Existing MXNet "
 "examples won't receive updates."
 msgstr ""
+"MXNet fremework 的开发工作已经结束，该项目现已[归档于 GitHub](https://github."
+"com/apache/mxnet)。现有的 MXNet 示例不会收到更新。"
 
 #: ../../source/ref-changelog.md:168
 #, fuzzy
@@ -17024,6 +17699,7 @@ msgid "v1.6.0 (2023-11-28)"
 msgstr "v1.4.0 (2023-04-21)"
 
 #: ../../source/ref-changelog.md:174
+#, fuzzy
 msgid ""
 "`Aashish Kolluri`, `Adam Narozniak`, `Alessio Mora`, `Barathwaja S`, "
 "`Charles Beauville`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Gabriel "
@@ -17032,6 +17708,12 @@ msgid ""
 "`Steve Laskaridis`, `Taner Topal`, `William Lindskog`, `Yan Gao`, "
 "`cnxdeveloper`, `k3nfalt` <!---TOKEN_v1.6.0-->"
 msgstr ""
+"`Aashish Kolluri`, `Adam Narozniak`, `Alessio Mora`, `Barathwaja S`, `"
+"Charles Beauville`, `Daniel J. Beutel`, `Daniel Nata Nugraha`, `Gabriel Mota`"
+", `Heng Pan`, `Ivan Agarský`, `JS.KIM`, `Javier`, `Marius Schlegel`, `Navin "
+"Chandra`, `Nic Lane`, `Peterpan828`, `Qinbin Li`, `Shaz-hash`, `Steve "
+"Laskaridis`, `Taner Topal`, `William Lindskog`, `Yan Gao`, `cnxdeveloper`, "
+"`k3nfalt` <!---TOKEN_v1.6.0-->"
 
 #: ../../source/ref-changelog.md:178
 msgid ""
@@ -17061,10 +17743,13 @@ msgstr ""
 "[#1567](https://github.com/adap/flower/pull/1567))"
 
 #: ../../source/ref-changelog.md:182
+#, fuzzy
 msgid ""
 "We have added a new `xgboost-quickstart` example alongside a new "
 "`xgboost-comprehensive` example that goes more in-depth."
 msgstr ""
+"我们添加了一个新的 \"xgboost-quickstart \"示例和一个新的 \"xgboost-"
+"comprehensive \"示例，后者更加深入。"
 
 #: ../../source/ref-changelog.md:184
 #, fuzzy
@@ -17074,12 +17759,16 @@ msgid ""
 msgstr "**新的 iOS CoreML 代码示例**（[#1289](https://github.com/adap/flower/pull/1289)）"
 
 #: ../../source/ref-changelog.md:186
+#, fuzzy
 msgid ""
 "We had many questions about Vertical Federated Learning using Flower, so "
 "we decided to add an simple example for it on the [Titanic "
 "dataset](https://www.kaggle.com/competitions/titanic/data) alongside a "
 "tutorial (in the README)."
 msgstr ""
+"我们收到了许多关于使用 Flower 进行垂直联合学习的问题，因此我们决定在 ["
+"Titanic 数据集](https://www.kaggle.com/competitions/titanic/data) "
+"上添加一个简单的示例，并附上教程（在 README 中）。"
 
 #: ../../source/ref-changelog.md:188
 msgid ""
@@ -17138,6 +17827,7 @@ msgstr ""
 "[#2400](https://github.com/adap/flower/pull/2400)"
 
 #: ../../source/ref-changelog.md:202
+#, fuzzy
 msgid ""
 "Flower is moving to HTTPS by default. The new `flower-server` requires "
 "passing `--certificates`, but users can enable `--insecure` to use HTTP "
@@ -17146,13 +17836,21 @@ msgid ""
 "an HTTPS-enabled server or requires opt-out via passing `--insecure` to "
 "enable insecure HTTP connections."
 msgstr ""
+"Flower 默认使用 HTTPS。新的 \"flower-server \"需要通过\"--证书\"，"
+"但用户可以启用\"--不安全 \"来使用 HTTP 进行原型开发。这同样适用于 `flower-"
+"client`，它可以使用用户提供的凭证或 gRPC 绑定证书连接到支持 HTTPS 的服务器，"
+"也可以通过传递 `--insecure`来启用不安全的 HTTP 连接。"
 
 #: ../../source/ref-changelog.md:204
+#, fuzzy
 msgid ""
 "For backward compatibility, `start_client()` and `start_numpy_client()` "
 "will still start in insecure mode by default. In a future release, "
 "insecure connections will require user opt-in by passing `insecure=True`."
 msgstr ""
+"为了向后兼容，`start_client()` 和 `start_numpy_client()` "
+"默认仍以不安全模式启动。在未来的版本中，不安全连接将需要用户通过传递 "
+"`insecure=True` 进行选择。"
 
 #: ../../source/ref-changelog.md:206
 msgid ""
@@ -17355,6 +18053,7 @@ msgstr ""
 "[#1475](https://github.com/adap/flower/pull/1475)))"
 
 #: ../../source/ref-changelog.md:254
+#, fuzzy
 msgid ""
 "**General improvements** "
 "([#2309](https://github.com/adap/flower/pull/2309), "
@@ -17385,6 +18084,25 @@ msgid ""
 "[#2553](https://github.com/adap/flower/pull/2553), "
 "[#2596](https://github.com/adap/flower/pull/2596))"
 msgstr ""
+"**一般改进** ([#2309](https://github.com/adap/flower/pull/2309), "
+"[#2310](https://github.com/adap/flower/pull/2310), [#2313](https://github."
+"com/adap/flower/pull/2313), [#2316](https://github.com/adap/flower/pull/2316)"
+", [#2317](https://github.com/adap/flower/pull/2317), [#2349](https://github."
+"com/adap/flower/pull/2349), [#2360](https://github.com/adap/flower/pull/2360)"
+", [#2402](https://github.com/adap/flower/pull/2402), [#2446](https://github."
+"com/adap/flower/pull/2446), [#2561](https://github.com/adap/flower/pull/2561)"
+", [#2273](https://github.com/adap/flower/pull/2273), [#2267](https://github."
+"com/adap/flower/pull/2267), [#2274](https://github.com/adap/flower/pull/2274)"
+", [#2275](https://github.com/adap/flower/pull/2275), [#2432](https://github."
+"com/adap/flower/pull/2432), [#2251](https://github.com/adap/flower/pull/2251)"
+", [#2321](https://github.com/adap/flower/pull/2321), [#1936](https://github."
+"com/adap/flower/pull/1936), [#2408](https://github.com/adap/flower/pull/2408)"
+", [#2413](https://github.com/adap/flower/pull/2413), [#2401](https://github."
+"com/adap/flower/pull/2401), [#2531](https://github.com/adap/flower/pull/2531)"
+", [#2534](https://github.com/adap/flower/pull/2534), [#2535](https://github."
+"com/adap/flower/pull/2535), [#2521](https://github.com/adap/flower/pull/2521)"
+", [#2553](https://github.com/adap/flower/pull/2553), [#2596](https://github."
+"com/adap/flower/pull/2596))"
 
 #: ../../source/ref-changelog.md:256 ../../source/ref-changelog.md:346
 #: ../../source/ref-changelog.md:410 ../../source/ref-changelog.md:464
@@ -22077,6 +22795,7 @@ msgstr ""
 "还需要导入几个软件包，如 Flower 和 scikit-learn："
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:67
+#, fuzzy
 msgid ""
 "Prior to local training, we need to load the MNIST dataset, a popular "
 "image classification dataset of handwritten digits for machine learning, "
@@ -22086,6 +22805,11 @@ msgid ""
 "training set for each partition ID defined in the :code:`--partition-id` "
 "argument."
 msgstr ""
+"在本地训练之前，我们需要加载 MNIST "
+"数据集（一个用于机器学习的流行手写数字图像分类数据集），并对数据集进行 FL "
+"分区。使用 \"Flower Datasets <https://flower.ai/docs/datasets>`"
+"_\"可以方便地实现这一点。:code:`FederatedDataset.load_partition()` 方法为 "
+":code:`--partition-id` 参数中定义的每个分区 ID 加载分区训练集。"
 
 #: ../../source/tutorial-quickstart-scikitlearn.rst:95
 msgid ""
@@ -22667,6 +23391,7 @@ msgid "Cyclic training"
 msgstr "集中式训练"
 
 #: ../../source/tutorial-quickstart-xgboost.rst:605
+#, fuzzy
 msgid ""
 "In addition to bagging aggregation, we offer a cyclic training scheme, "
 "which performs FL in a client-by-client fashion. Instead of aggregating "
@@ -22675,14 +23400,20 @@ msgid ""
 "XGBoost trees will be passed to the next client as an initialised model "
 "for next round's boosting."
 msgstr ""
+"除了袋式聚合，我们还提供了一种循环训练方案，它以逐个客户端的方式执行 FL。在循"
+"环训练方案中，每轮只有一个客户端参与训练，而不是多个客户端聚合在一起。"
+"训练好的本地 XGBoost 树将传递给下一个客户端，作为下一轮提升的初始化模型。"
 
 #: ../../source/tutorial-quickstart-xgboost.rst:609
+#, fuzzy
 msgid ""
 "To do this, we first customise a :code:`ClientManager` in "
 ":code:`server_utils.py`:"
-msgstr ""
+msgstr "为此，我们首先要在 :code:`server_utils.py` 中自定义一个 "
+":code:`ClientManager`："
 
 #: ../../source/tutorial-quickstart-xgboost.rst:649
+#, fuzzy
 msgid ""
 "The customised :code:`ClientManager` samples all available clients in "
 "each FL round based on the order of connection to the server. Then, we "
@@ -22691,19 +23422,29 @@ msgid ""
 "select only one client in given round and pass the received model to next"
 " client."
 msgstr ""
+"定制的 :code:`ClientManager` 会根据连接服务器的顺序，在每轮 FL "
+"中对所有可用客户端进行采样。然后，我们在 :code:`flwr.server.strategy."
+"fedxgb_cyclic.py`\"中定义了一个新策略 :code:`FedXgbCyclic`，以便在给定回合中"
+"按顺序只选择一个客户端，并将接收到的模型传递给下一个客户端。"
 
 #: ../../source/tutorial-quickstart-xgboost.rst:690
+#, fuzzy
 msgid ""
 "Unlike the original :code:`FedAvg`, we don't perform aggregation here. "
 "Instead, we just make a copy of the received client model as global model"
 " by overriding :code:`aggregate_fit`."
 msgstr ""
+"与最初的 :code:`FedAvg` 不同，我们在这里不执行聚合。相反，我们只是通过覆盖 "
+":code:`aggregate_fit` 将接收到的客户端模型复制为全局模型。"
 
 #: ../../source/tutorial-quickstart-xgboost.rst:693
+#, fuzzy
 msgid ""
 "Also, the customised :code:`configure_fit` and :code:`configure_evaluate`"
 " methods ensure the clients to be sequentially selected given FL round:"
 msgstr ""
+"此外，定制的 :code:`configure_fit` 和 :code:`configure_evaluate` "
+"方法可确保在 FL 轮中按顺序选择客户："
 
 #: ../../source/tutorial-quickstart-xgboost.rst:757
 msgid "Customised data partitioning"
@@ -22758,40 +23499,51 @@ msgid "Flower simulation"
 msgstr "运行模拟"
 
 #: ../../source/tutorial-quickstart-xgboost.rst:832
+#, fuzzy
 msgid ""
 "We also provide an example code (:code:`sim.py`) to use the simulation "
 "capabilities of Flower to simulate federated XGBoost training on either a"
 " single machine or a cluster of machines."
 msgstr ""
+"我们还提供了一个示例代码（:code:`sim.py`），用于使用 Flower "
+"的模拟功能在单台机器或机器集群上模拟联合 XGBoost 训练。"
 
 #: ../../source/tutorial-quickstart-xgboost.rst:866
+#, fuzzy
 msgid ""
 "After importing all required packages, we define a :code:`main()` "
 "function to perform the simulation process:"
-msgstr ""
+msgstr "导入所有需要的软件包后，我们定义了一个 :code:`main()` 函数来执行模拟程序："
 
 #: ../../source/tutorial-quickstart-xgboost.rst:921
+#, fuzzy
 msgid ""
 "We first load the dataset and perform data partitioning, and the pre-"
 "processed data is stored in a :code:`list`. After the simulation begins, "
 "the clients won't need to pre-process their partitions again."
-msgstr ""
+msgstr "我们首先加载数据集并执行数据分区，预处理后的数据存储在 :code:`list` "
+"中。模拟开始后，客户端就不需要再预处理分区了。"
 
 #: ../../source/tutorial-quickstart-xgboost.rst:924
+#, fuzzy
 msgid "Then, we define the strategies and other hyper-parameters:"
-msgstr ""
+msgstr "然后，我们定义策略和其他超参数："
 
 #: ../../source/tutorial-quickstart-xgboost.rst:975
+#, fuzzy
 msgid ""
 "After that, we start the simulation by calling "
 ":code:`fl.simulation.start_simulation`:"
-msgstr ""
+msgstr "然后，我们调用 :code:`fl.simulation.start_simulation` 开始模拟："
 
 #: ../../source/tutorial-quickstart-xgboost.rst:995
+#, fuzzy
 msgid ""
 "One of key parameters for :code:`start_simulation` is :code:`client_fn` "
 "which returns a function to construct a client. We define it as follows:"
 msgstr ""
+":code:`start_simulation` 的一个关键参数是 "
+":code:`client_fn`，它返回一个用于构建客户端的函数。我们将其定义如下："
 
 #: ../../source/tutorial-quickstart-xgboost.rst:1038
 msgid "Arguments parser"
@@ -22832,12 +23584,14 @@ msgid ""
 msgstr "这定义了客户端数据分区的各种选项。此外，通过设置 :code:`-centralised-eval`，客户端还可以选择在集中测试集上进行评估。"
 
 #: ../../source/tutorial-quickstart-xgboost.rst:1148
+#, fuzzy
 msgid "We also have an argument parser for simulation:"
-msgstr ""
+msgstr "我们还有一个用于模拟的参数解析器："
 
 #: ../../source/tutorial-quickstart-xgboost.rst:1226
+#, fuzzy
 msgid "This integrates all arguments for both client and server sides."
-msgstr ""
+msgstr "这整合了客户端和服务器端的所有参数。"
 
 #: ../../source/tutorial-quickstart-xgboost.rst:1229
 msgid "Example commands"
@@ -22856,8 +23610,9 @@ msgid "Then, on each client terminal, we start the clients:"
 msgstr "然后，我们在每个客户终端上启动客户机："
 
 #: ../../source/tutorial-quickstart-xgboost.rst:1244
+#, fuzzy
 msgid "To run the same experiment with Flower simulation:"
-msgstr ""
+msgstr "运行与 Flower 模拟相同的实验："
 
 #: ../../source/tutorial-quickstart-xgboost.rst:1250
 #, fuzzy
@@ -23562,12 +24317,16 @@ msgid ""
 msgstr "每个组织都将充当联邦学习系统中的客户端。因此，有十个组织参与联邦学习，就意味着有十个客户端连接到联邦学习服务器："
 
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.ipynb:144
+#, fuzzy
 msgid ""
 "Let's now create the Federated Dataset abstraction that from ``flwr-"
 "datasets`` that partitions the CIFAR-10. We will create small training "
 "and test set for each edge device and wrap each of them into a PyTorch "
 "``DataLoader``:"
 msgstr ""
+"现在，让我们从 ``flwr-datasets`` 中创建 Federated Dataset 抽象，以分割 "
+"CIFAR-10。我们将为每个边缘设备创建小型训练集和测试集，并将它们分别封装到 "
+"PyTorch ``DataLoader`` 中："
 
 #: ../../source/tutorial-series-get-started-with-flower-pytorch.ipynb:198
 #, fuzzy
@@ -24310,8 +25069,9 @@ msgid ""
 msgstr "在机器学习中，我们有一个模型和数据。模型可以是一个神经网络（如图所示），也可以是其他东西，比如经典的线性回归。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
+#, fuzzy
 msgid "|d8bf04f23d9b46d8a23cc6f4887d7873|"
-msgstr ""
+msgstr "|d8bf04f23d9b46d8a23cc6f4887d7873|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
 msgid "Model and data"
@@ -24325,8 +25085,9 @@ msgid ""
 msgstr "我们使用数据来训练模型，以完成一项有用的任务。任务可以是检测图像中的物体、转录音频或玩围棋等游戏。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
+#, fuzzy
 msgid "|5aa1711387d74d0f8b9c499e1a51627e|"
-msgstr ""
+msgstr "|5aa1711387d74d0f8b9c499e1a51627e|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
 msgid "Train model using data"
@@ -24346,8 +25107,9 @@ msgid ""
 msgstr "它源于智能手机上用户与应用程序的交互、汽车上传感器数据的收集、笔记本电脑上键盘输入的接收，或者智能扬声器上某人试着唱的歌。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
+#, fuzzy
 msgid "|2bc8e069228d4873804061ff4a95048c|"
-msgstr ""
+msgstr "|2bc8e069228d4873804061ff4a95048c|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
 msgid "Data on a phone"
@@ -24364,8 +25126,9 @@ msgstr ""
 "\"通常不只是一个地方，而是很多地方。它可能是多个运行同一应用程序的设备。但也可能是多个组织，都在为同一任务生成数据。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
+#, fuzzy
 msgid "|c258488766324dc9a6807f0e7c4fd5f4|"
-msgstr ""
+msgstr "|c258488766324dc9a6807f0e7c4fd5f4|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
 msgid "Data is on many devices"
@@ -24380,8 +25143,9 @@ msgid ""
 msgstr "因此，要使用机器学习或任何类型的数据分析，过去使用的方法是在中央服务器上收集所有数据。这个服务器可以在数据中心的某个地方，也可以在云端的某个地方。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
+#, fuzzy
 msgid "|d5f962c3f4ec48529efda980868c14b0|"
-msgstr ""
+msgstr "|d5f962c3f4ec48529efda980868c14b0|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
 msgid "Central data collection"
@@ -24395,8 +25159,9 @@ msgid ""
 msgstr "一旦所有数据都收集到一处，我们最终就可以使用机器学习算法在数据上训练我们的模型。这就是我们基本上一直依赖的机器学习方法。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
+#, fuzzy
 msgid "|a5eccea18d4c43a68b54b65043cabef8|"
-msgstr ""
+msgstr "|a5eccea18d4c43a68b54b65043cabef8|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
 msgid "Central model training"
@@ -24415,8 +25180,9 @@ msgid ""
 msgstr "我们刚刚看到的经典机器学习方法可以在某些情况下使用。很好的例子包括对假日照片进行分类或分析网络流量。在这些案例中，所有数据自然都可以在中央服务器上获得。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
+#, fuzzy
 msgid "|f17662f7df2d42f68cac70a1fdeda8a7|"
-msgstr ""
+msgstr "|f17662f7df2d42f68cac70a1fdeda8a7|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
 msgid "Centralized possible"
@@ -24430,8 +25196,9 @@ msgid ""
 msgstr "但这种方法并不适用于许多其他情况。例如，集中服务器上没有数据，或者一台服务器上的数据不足以训练出一个好的模型。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
+#, fuzzy
 msgid "|241fc906441a4f038c625a19d30d01b2|"
-msgstr ""
+msgstr "|241fc906441a4f038c625a19d30d01b2|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
 msgid "Centralized impossible"
@@ -24578,8 +25345,9 @@ msgid ""
 msgstr "我们首先在服务器上初始化模型。这与经典的集中式学习完全相同：我们随机或从先前保存的检查点初始化模型参数。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
+#, fuzzy
 msgid "|0aa5aa05810b44b6a835cecce28f3137|"
-msgstr ""
+msgstr "|0aa5aa05810b44b6a835cecce28f3137|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
 msgid "Initialize global model"
@@ -24602,8 +25370,9 @@ msgid ""
 msgstr "接下来，我们会将全局模型的参数发送到连接的客户端节点（如智能手机等边缘设备或企业的服务器）。这是为了确保每个参与节点都使用相同的模型参数开始本地训练。我们通常只使用几个连接节点，而不是所有节点。这样做的原因是，选择越来越多的客户端节点会导致收益递减。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
+#, fuzzy
 msgid "|c742940dd4bf4de09d8d0d5e8d179638|"
-msgstr ""
+msgstr "|c742940dd4bf4de09d8d0d5e8d179638|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
 msgid "Send global model"
@@ -24628,8 +25397,9 @@ msgstr ""
 "（mini-batches）。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:240
+#, fuzzy
 msgid "|1f169ab4601a47e1a226f1628f4ebddb|"
-msgstr ""
+msgstr "|1f169ab4601a47e1a226f1628f4ebddb|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:311
 msgid "Train on local data"
@@ -24651,8 +25421,9 @@ msgid ""
 msgstr "经过本地训练后，每个客户节点最初收到的模型参数都会略有不同。参数之所以不同，是因为每个客户端节点的本地数据集中都有不同的数据。然后，客户端节点将这些模型更新发回服务器。它们发送的模型更新既可以是完整的模型参数，也可以只是本地训练过程中积累的梯度。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
+#, fuzzy
 msgid "|12cfa9cde14440ecb8c8f6c1d7185bec|"
-msgstr ""
+msgstr "|12cfa9cde14440ecb8c8f6c1d7185bec|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:313
 msgid "Send model updates"
@@ -24697,8 +25468,9 @@ msgstr ""
 " 100 个示例的 10 倍。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:273
+#, fuzzy
 msgid "|72939caf6e294b0986fee6dde96614d7|"
-msgstr ""
+msgstr "|72939caf6e294b0986fee6dde96614d7|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:315
 msgid "Aggregate model updates"
@@ -24804,8 +25576,9 @@ msgstr ""
 "为联邦学习、分析和评估提供了一种统一的方法。它允许用户联邦化任何工作负载、任何 ML 框架和任何编程语言。"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
+#, fuzzy
 msgid "|83a8daee45da4a98b8d6f24ae098fc50|"
-msgstr ""
+msgstr "|83a8daee45da4a98b8d6f24ae098fc50|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:340
 msgid ""
@@ -26925,4 +27698,3 @@ msgstr ""
 
 #~ msgid "|ff726bc5505e432388ee2fdd6ef420b9|"
 #~ msgstr ""
-
