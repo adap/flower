@@ -15,12 +15,197 @@
 """Utils for metrics computation."""
 
 
-from typing import List, Union
+import warnings
+from typing import List, Optional, Union
 
 import pandas as pd
 
+from flwr_datasets.partitioner import Partitioner
+
 
 def compute_counts(
+    partitioner: Partitioner,
+    column_name: str,
+    verbose_names: bool = False,
+    max_num_partitions: Optional[int] = None,
+) -> pd.DataFrame:
+    """Compute the counts of unique values in a given column in the partitions.
+
+    Take into account all possible labels in dataset when computing count for each
+    partition (assign 0 as the size when there are no values for a label in the
+    partition).
+
+    Parameters
+    ----------
+    partitioner : Partitioner
+        Partitioner with an assigned dataset.
+    column_name : str
+        Column name identifying label based on which the count will be calculated.
+    verbose_names : bool
+        Whether to use verbose versions of the values in the column specified by
+        `column_name`. The verbose values are possible to extract if the column is a
+        feature of type `ClassLabel`.
+    max_num_partitions : Optional[int]
+        The maximum number of partitions that will be used. If greater than the
+        total number of partitions in a partitioner, it won't have an effect. If left
+        as None, then all partitions will be used.
+
+    Returns
+    -------
+    dataframe: pd.DataFrame
+        DataFrame where the row index represent the partition id and the column index
+        represent the unique values found in column specified by `column_name`
+        (e.g. represeting the labels). The value of the dataframe.loc[i, j] represents
+        the count of the label j, in the partition of index i.
+
+    Examples
+    --------
+    Generate DataFrame with label counts resulting from DirichletPartitioner on cifar10
+
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import DirichletPartitioner
+    >>> from flwr_datasets.metrics import compute_counts
+    >>>
+    >>> fds = FederatedDataset(
+    >>>     dataset="cifar10",
+    >>>     partitioners={
+    >>>         "train": DirichletPartitioner(
+    >>>             num_partitions=20,
+    >>>             partition_by="label",
+    >>>             alpha=0.3,
+    >>>             min_partition_size=0,
+    >>>         ),
+    >>>     },
+    >>> )
+    >>> partitioner = fds.partitioners["train"]
+    >>> counts_dataframe = compute_counts(
+    >>>     partitioner=partitioner,
+    >>>     column_name="label"
+    >>> )
+    """
+    if column_name not in partitioner.dataset.column_names:
+        raise ValueError(
+            f"The specified 'column_name': '{column_name}' is not present in the "
+            f"dataset. The dataset contains columns {partitioner.dataset.column_names}."
+        )
+
+    if max_num_partitions is None:
+        max_num_partitions = partitioner.num_partitions
+    else:
+        max_num_partitions = min(max_num_partitions, partitioner.num_partitions)
+    assert isinstance(max_num_partitions, int)
+    partition = partitioner.load_partition(0)
+
+    try:
+        # Unique labels are needed to represent the correct count of each class
+        # (some of the classes can have zero samples that's why this
+        # adjustment is needed)
+        unique_labels = partition.features[column_name].str2int(
+            partition.features[column_name].names
+        )
+    except AttributeError:  # If the column_name is not formally a Label
+        unique_labels = partitioner.dataset.unique(column_name)
+
+    partition_id_to_label_absolute_size = {}
+    for partition_id in range(max_num_partitions):
+        partition = partitioner.load_partition(partition_id)
+        partition_id_to_label_absolute_size[partition_id] = _compute_counts(
+            partition[column_name], unique_labels
+        )
+
+    dataframe = pd.DataFrame.from_dict(
+        partition_id_to_label_absolute_size, orient="index"
+    )
+    dataframe.index.name = "Partition ID"
+
+    if verbose_names:
+        # Adjust the column name values of the dataframe
+        current_labels = dataframe.columns
+        try:
+            legend_names = partitioner.dataset.features[column_name].int2str(
+                [int(v) for v in current_labels]
+            )
+            dataframe.columns = legend_names
+        except AttributeError:
+            warnings.warn(
+                "The verbose names can not be established. "
+                "The column specified by 'column_name' needs to be of type "
+                "'ClassLabel' to create a verbose names. "
+                "The available names will used.",
+                stacklevel=1,
+            )
+    return dataframe
+
+
+def compute_frequencies(
+    partitioner: Partitioner,
+    column_name: str,
+    verbose_names: bool = False,
+    max_num_partitions: Optional[int] = None,
+) -> pd.DataFrame:
+    """Compute the frequencies of unique values in a given column in the partitions.
+
+    The frequencies sum up to 1 for a given partition id. This function takes into
+    account all possible labels in the dataset when computing the count for each
+    partition (assign 0 as the size when there are no values for a label in the
+    partition).
+
+    Parameters
+    ----------
+    partitioner : Partitioner
+        Partitioner with an assigned dataset.
+    column_name : str
+        Column name identifying label based on which the count will be calculated.
+    verbose_names : bool
+        Whether to use verbose versions of the values in the column specified by
+        `column_name`. The verbose value are possible to extract if the column is a
+        feature of type `ClassLabel`.
+    max_num_partitions : Optional[int]
+        The maximum number of partitions that will be used. If greater than the
+        total number of partitions in a partitioner, it won't have an effect. If left
+        as None, then all partitions will be used.
+
+    Returns
+    -------
+    dataframe: pd.DataFrame
+        DataFrame where the row index represent the partition id and the column index
+        represent the unique values found in column specified by `column_name`
+        (e.g. represeting the labels). The value of the dataframe.loc[i, j] represnt
+        the ratio of the label j to the total number of sample of in partition i.
+
+    Examples
+    --------
+    Generate DataFrame with label counts resulting from DirichletPartitioner on cifar10
+
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import DirichletPartitioner
+    >>> from flwr_datasets.metrics import compute_frequencies
+    >>>
+    >>> fds = FederatedDataset(
+    >>>     dataset="cifar10",
+    >>>     partitioners={
+    >>>         "train": DirichletPartitioner(
+    >>>             num_partitions=20,
+    >>>             partition_by="label",
+    >>>             alpha=0.3,
+    >>>             min_partition_size=0,
+    >>>         ),
+    >>>     },
+    >>> )
+    >>> partitioner = fds.partitioners["train"]
+    >>> counts_dataframe = compute_frequencies(
+    >>>     partitioner=partitioner,
+    >>>     column_name="label"
+    >>> )
+    """
+    dataframe = compute_counts(
+        partitioner, column_name, verbose_names, max_num_partitions
+    )
+    dataframe = dataframe.div(dataframe.sum(axis=1), axis=0)
+    return dataframe
+
+
+def _compute_counts(
     labels: Union[List[int], List[str]], unique_labels: Union[List[int], List[str]]
 ) -> pd.Series:
     """Compute the count of labels when taking into account all possible labels.
@@ -51,7 +236,7 @@ def compute_counts(
     return label_counts_with_zeros
 
 
-def compute_frequency(
+def _compute_frequencies(
     labels: Union[List[int], List[str]], unique_labels: Union[List[int], List[str]]
 ) -> pd.Series:
     """Compute the distribution of labels when taking into account all possible labels.
@@ -70,9 +255,9 @@ def compute_frequency(
     -------
         The pd.Series with label as indices and probabilities as values.
     """
-    counts = compute_counts(labels, unique_labels)
+    counts = _compute_counts(labels, unique_labels)
     if len(labels) == 0:
-        counts = counts.astype(float)
-        return counts
-    counts = counts.divide(len(labels))
-    return counts
+        frequencies = counts.astype(float)
+        return frequencies
+    frequencies = counts.divide(len(labels))
+    return frequencies

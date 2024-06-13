@@ -4,6 +4,7 @@ isort:skip_file
 """
 import abc
 import flwr.proto.driver_pb2
+import flwr.proto.run_pb2
 import grpc
 
 class DriverStub:
@@ -27,6 +28,11 @@ class DriverStub:
         flwr.proto.driver_pb2.PullTaskResRequest,
         flwr.proto.driver_pb2.PullTaskResResponse]
     """Get task results"""
+
+    GetRun: grpc.UnaryUnaryMultiCallable[
+        flwr.proto.run_pb2.GetRunRequest,
+        flwr.proto.run_pb2.GetRunResponse]
+    """Get run details"""
 
 
 class DriverServicer(metaclass=abc.ABCMeta):
@@ -60,6 +66,14 @@ class DriverServicer(metaclass=abc.ABCMeta):
         context: grpc.ServicerContext,
     ) -> flwr.proto.driver_pb2.PullTaskResResponse:
         """Get task results"""
+        pass
+
+    @abc.abstractmethod
+    def GetRun(self,
+        request: flwr.proto.run_pb2.GetRunRequest,
+        context: grpc.ServicerContext,
+    ) -> flwr.proto.run_pb2.GetRunResponse:
+        """Get run details"""
         pass
 
 
