@@ -29,7 +29,7 @@ from cryptography.hazmat.primitives.serialization import (
     load_ssh_public_key,
 )
 
-from flwr.cli.config_utils import validate_fields
+from flwr.cli.config_utils import get_flower_home, validate_fields
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
 from flwr.common.exit_handlers import register_exit_handlers
@@ -170,12 +170,7 @@ def _get_load_client_app_fn(
     flwr_dir = Path("")
     if "flwr_dir" in args:
         if args.flwr_dir is None:
-            flwr_dir = Path(
-                os.getenv(
-                    "FLWR_HOME",
-                    f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
-                )
-            )
+            flwr_dir = get_flower_home()
         else:
             flwr_dir = Path(args.flwr_dir)
 
