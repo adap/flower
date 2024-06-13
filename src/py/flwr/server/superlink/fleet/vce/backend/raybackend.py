@@ -15,7 +15,7 @@
 """Ray backend for the Fleet API using the Simulation Engine."""
 
 import pathlib
-from logging import DEBUG, ERROR, WARNING
+from logging import DEBUG, ERROR
 from typing import Callable, Dict, List, Tuple, Union
 
 import ray
@@ -51,6 +51,7 @@ class RayBackend(Backend):
             raise ValueError(f"Specified work_dir {work_dir} does not exist.")
 
         # Initialise ray
+        self.init_args_key = "init_args"
         self.init_ray(backend_config, work_dir)
 
         # Validate client resources
@@ -133,22 +134,13 @@ class RayBackend(Backend):
                 str,
                 Union[ConfigsRecordValues, RunTimeEnvDict],
             ] = {}
+            
+            if backend_config.get(self.init_args_key):
+                for k, v in backend_config[self.init_args_key].items():
+                    ray_init_args[k] = v
 
             if runtime_env is not None:
                 ray_init_args["runtime_env"] = runtime_env
-
-            # Backwards compatibility: certain settings were previously
-            # set based on certain keywords in backend config
-            if backend_config.get("mute_logging", False):
-                backend_config["init_args"]["logging_level"] = WARNING
-                backend_config["init_args"]["log_to_driver"] = False
-            elif backend_config.get("silent", False):
-                backend_config["init_args"]["logging_level"] = WARNING
-                backend_config["init_args"]["log_to_driver"] = True
-
-            if backend_config.get("init_args", False):
-                for k, v in backend_config["init_args"].items():
-                    ray_init_args[k] = v
 
             ray.init(**ray_init_args)
 
