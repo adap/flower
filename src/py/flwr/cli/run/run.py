@@ -65,6 +65,13 @@ def run(
             case_sensitive=False, help="Use this flag to use the new SuperExec API"
         ),
     ] = None,
+    period: Annotated[
+        int,
+        typer.Option(
+            case_sensitive=False,
+            help="Use this to set connection refresh time period (in seconds)",
+        ),
+    ] = 60,
     follow: Annotated[
         bool,
         typer.Option(case_sensitive=False, help="Use this flag to stream logs"),
