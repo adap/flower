@@ -29,7 +29,7 @@ class Run:
 
 
 class Executor(ABC):
-    """Executes and monitor a Flower run."""
+    """Execute and monitor a Flower run."""
 
     @abstractmethod
     def start_run(
