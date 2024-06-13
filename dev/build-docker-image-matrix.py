@@ -22,9 +22,9 @@ class Distro:
 
 LATEST_SUPPORTED_PYTHON_VERSION = "3.11"
 SUPPORTED_PYTHON_VERSIONS = [
-    "3.8",
-    "3.9",
-    "3.10",
+    # "3.8",
+    # "3.9",
+    # "3.10",
     LATEST_SUPPORTED_PYTHON_VERSION,
 ]
 
@@ -144,7 +144,7 @@ if __name__ == "__main__":
         [Distro(DistroName.ALPINE, "3.19")],
     )
 
-    base_images = ubuntu_base_images + alpine_base_images
+    base_images = ubuntu_base_images
 
     binary_images = (
         # ubuntu and alpine images for the latest supported python version
