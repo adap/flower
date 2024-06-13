@@ -91,6 +91,7 @@ def render_and_create(file_path: str, template: str, context: Dict[str, str]) ->
     create_file(file_path, content)
 
 
+# pylint: disable=too-many-locals,too-many-branches,too-many-statements
 def new(
     project_name: Annotated[
         Optional[str],
@@ -155,8 +156,10 @@ def new(
     )
 
     # Set project directory path
+    cwd = os.getcwd()
     package_name = re.sub(r"[-_.]+", "-", project_name).lower()
     import_name = package_name.replace("-", "_")
+    project_dir = os.path.join(cwd, package_name)
 
     context = {
         "project_name": project_name,
@@ -188,35 +191,29 @@ def new(
         }
 
         # Task specific context
+        fraction_fit = "0.2" if llm_task_str == "code" else "0.1"
+        if llm_task_str == "generalnlp":
+            task_name = "General NLP"
+            num_clients = "20"
+            dataset_name = "vicgalle/alpaca-gpt4"
+        elif llm_task_str == "finance":
+            task_name = "Finance"
+            num_clients = "50"
+            dataset_name = "FinGPT/fingpt-sentiment-train"
+        elif llm_task_str == "medical":
+            task_name = "Medical"
+            num_clients = "20"
+            dataset_name = "medalpaca/medical_meadow_medical_flashcards"
+        else:
+            task_name = "Code"
+            num_clients = "10"
+            dataset_name = "lucasmccabe-lmi/CodeAlpaca-20k"
+
         context["llm_task_str"] = llm_task_str
-        context["fraction_fit"] = "0.2" if llm_task_str == "code" else "0.1"
-        context["task_name"] = (
-            "General NLP"
-            if llm_task_str == "generalnlp"
-            else (
-                "Finance"
-                if llm_task_str == "finance"
-                else "Medical" if llm_task_str == "medical" else "Code"
-            )
-        )
-        context["num_clients"] = (
-            "20"
-            if llm_task_str in ("generalnlp", "medical")
-            else "50" if llm_task_str == "finance" else "10"
-        )
-        context["dataset_name"] = (
-            "vicgalle/alpaca-gpt4"
-            if llm_task_str == "generalnlp"
-            else (
-                "FinGPT/fingpt-sentiment-train"
-                if llm_task_str == "finance"
-                else (
-                    "medalpaca/medical_meadow_medical_flashcards"
-                    if llm_task_str == "medical"
-                    else "lucasmccabe-lmi/CodeAlpaca-20k"
-                )
-            )
-        )
+        context["fraction_fit"] = fraction_fit
+        context["task_name"] = task_name
+        context["num_clients"] = num_clients
+        context["dataset_name"] = dataset_name
     else:
         files = {
             ".gitignore": {"template": "app/.gitignore.tpl"},
@@ -246,7 +243,7 @@ def new(
 
     for file_path, value in files.items():
         render_and_create(
-            file_path=os.path.join(os.path.join(os.getcwd(), package_name), file_path),
+            file_path=os.path.join(project_dir, file_path),
             template=value["template"],
             context=context,
         )
