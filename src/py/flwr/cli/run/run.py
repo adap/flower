@@ -102,7 +102,7 @@ def run(
         )
 
 
-def _start_superexec_run():
+def _start_superexec_run() -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
