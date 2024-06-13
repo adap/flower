@@ -21,6 +21,7 @@ from logging import DEBUG, INFO
 from pathlib import Path
 from typing import Optional
 
+import grpc
 import typer
 from typing_extensions import Annotated
 
@@ -125,6 +126,9 @@ def run(
                     log(INFO, "Reconnecting to logstream")
             except KeyboardInterrupt:
                 log(INFO, "Exiting logstream")
+            except grpc.RpcError as e:
+                if e.code() == grpc.StatusCode.CANCELLED:
+                    pass
             finally:
                 channel.close()
     else:
