@@ -15,10 +15,10 @@
 """Validators."""
 
 
+import time
 from typing import List, Union
 
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
-import time
 
 
 # pylint: disable-next=too-many-branches,too-many-statements
