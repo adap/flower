@@ -61,7 +61,16 @@ jobs:
           ${{ inputs.file-dir }}
           ${{ inputs.build-args }}'''.encode())
           # Adds two spaces to the line breaks to ensure proper indentation
-          # when passing the multi-line to the wretry.action.
+          # when passing the multi-line string to the wretry.action.
+          # Without it, the multi-line string is passed like this:
+          #
+          # build-args: |
+          #   ARG1=
+          # ARG2=
+          # ARG3=
+          #
+          # This causes the Docker action to interpret ARG2 and ARG3 as keys instead
+          # of values ​​of the multi-line string.
           build_args = '''${{ inputs.build-args }}'''.replace("\n", "\n  ")
 
           with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:

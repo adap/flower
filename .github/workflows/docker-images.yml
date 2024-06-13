@@ -53,23 +53,23 @@ jobs:
         DISTRO=${{ matrix.images.distro.name }}
         DISTRO_VERSION=${{ matrix.images.distro.version }}
         FLWR_VERSION=${{ matrix.images.flwr_version }}
-      tags: test
+      tags: ${{ matrix.images.tag }}
     secrets:
       dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  # build-binary-images:
-  #   name: Build binary images
-  #   uses: ./.github/workflows/_docker-build.yml
-  #   needs: [parameters, build-base-images]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix: ${{ fromJson(needs.parameters.outputs.matrix).binary }}
-  #   with:
-  #     namespace-repository: ${{ matrix.images.namespace_repository }}
-  #     file-dir: ${{ matrix.images.file_dir }}
-  #     build-args: BASE_IMAGE=${{ matrix.images.base_image }}
-  #     tags: ${{ matrix.images.tags }}
-  #   secrets:
-  #     dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
-  #     dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+  build-binary-images:
+    name: Build binary images
+    uses: ./.github/workflows/_docker-build.yml
+    needs: [parameters, build-base-images]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.parameters.outputs.matrix).binary }}
+    with:
+      namespace-repository: ${{ matrix.images.namespace_repository }}
+      file-dir: ${{ matrix.images.file_dir }}
+      build-args: BASE_IMAGE=${{ matrix.images.base_image }}
+      tags: ${{ matrix.images.tags }}
+    secrets:
+      dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
