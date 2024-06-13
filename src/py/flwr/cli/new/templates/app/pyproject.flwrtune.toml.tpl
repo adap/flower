@@ -11,7 +11,7 @@ authors = [
 ]
 license = { text = "Apache License (2.0)" }
 dependencies = [
-    "flwr[simulation]>=1.8.0,<2.0",
+    "flwr[simulation]>=1.9.0,<2.0",
     "flwr-datasets>=0.1.0,<1.0.0",
     "hydra-core==1.3.2",
     "trl==0.8.1",
