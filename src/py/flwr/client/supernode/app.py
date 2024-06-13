@@ -28,9 +28,10 @@ from cryptography.hazmat.primitives.serialization import (
     load_ssh_public_key,
 )
 
-from flwr.cli.config_utils import get_flower_home, validate_fields
+from flwr.cli.config_utils import validate_fields
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
+from flwr.common.config import get_flower_home
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.object_ref import load_app, validate

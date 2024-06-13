@@ -25,7 +25,9 @@ from typing import IO, Optional, Union
 import typer
 from typing_extensions import Annotated
 
-from .config_utils import get_flower_home, load_and_validate
+from flwr.common.config import get_flower_home
+
+from .config_utils import load_and_validate
 from .utils import get_sha256_hash
 
 
