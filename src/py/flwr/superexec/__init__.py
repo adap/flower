@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower driver service."""
+"""Flower SuperExec service."""
 
 from .app import run_superexec as run_superexec
 
