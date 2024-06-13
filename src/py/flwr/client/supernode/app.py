@@ -15,7 +15,6 @@
 """Flower SuperNode."""
 
 import argparse
-import os
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
@@ -229,7 +228,7 @@ def _get_load_client_app_fn(
 
             # Load pyproject.toml file
             toml_path = project_dir / "pyproject.toml"
-            if not os.path.isfile(toml_path):
+            if not toml_path.is_file():
                 raise LoadClientAppError(
                     f"Cannot find pyproject.toml in {project_dir}",
                 ) from None

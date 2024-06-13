@@ -15,7 +15,6 @@
 """Flower command line interface `install` command."""
 
 
-import os
 import shutil
 import tempfile
 import zipfile
