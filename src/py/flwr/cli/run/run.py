@@ -16,9 +16,10 @@
 
 import sys
 from enum import Enum
-from logging import DEBUG
+from logging import DEBUG, INFO
 from pathlib import Path
 from typing import Optional
+import time
 
 import typer
 from typing_extensions import Annotated
@@ -28,12 +29,13 @@ from flwr.cli.build import build
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    FetchLogsRequest,
+    StreamLogsRequest,
     StartRunRequest,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
 
+from ..log import stream_logs
 
 class Engine(str, Enum):
     """Enum defining the engine to run on."""
@@ -109,9 +111,15 @@ def run(
         start_run_res = stub.StartRun(start_run_req)
 
         if follow:
-            fetch_logs_req = FetchLogsRequest(run_id=start_run_res.run_id)
-            for res in stub.FetchLogs(fetch_logs_req):
-                print(res.log_output)
+            try:
+                while True:
+                    log(INFO, "Streaming logs")
+                    stream_logs(start_run_res.run_id, channel, period)
+                    time.sleep(2)
+                    log(INFO, "Reconnecting to logstream")
+            except KeyboardInterrupt:
+                log(INFO, "Exiting logstream")
+                channel.close()
     else:
         typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
