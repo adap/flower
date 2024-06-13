@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower superexec app."""
+"""Flower SuperExec app."""
 
 import argparse
 import sys
@@ -155,7 +155,7 @@ def _try_obtain_certificates(
 def _get_exec_plugin(
     args: argparse.Namespace,
 ) -> Executor:
-    """Get the load_client_app_fn function."""
+    """Get the executor plugin."""
     exec_plugin_dir = args.executor_dir
     if exec_plugin_dir is not None:
         sys.path.insert(0, exec_plugin_dir)
