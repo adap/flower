@@ -17,7 +17,7 @@ from $import_name.server import get_on_fit_config, fit_weighted_average, get_eva
 # Avoid warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
-os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = 1
+os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = "1"
 
 # Initialise regular config
 with initialize(config_path="conf", version_base="1.1"):
