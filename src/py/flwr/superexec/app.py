@@ -66,9 +66,7 @@ def run_superexec() -> None:
         bckg_threads=None,
     )
 
-    # Block
-    while True:
-        superexec_server.wait_for_termination(timeout=1)
+    superexec_server.wait_for_termination()
 
 
 def _parse_args_run_superexec() -> argparse.ArgumentParser:
