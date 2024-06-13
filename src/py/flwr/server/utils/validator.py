@@ -15,6 +15,7 @@
 """Validators."""
 
 
+import time
 from typing import List, Union
 
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
@@ -46,6 +47,11 @@ def validate_task_ins_or_res(tasks_ins_res: Union[TaskIns, TaskRes]) -> List[str
     if tasks_ins_res.task.pushed_at < 1711497600.0:
         # unix timestamp of 27 March 2024 00h:00m:00s UTC
         validation_errors.append("`pushed_at` is not a recent timestamp")
+
+    # Verify TTL and created_at time
+    current_time = time.time()
+    if tasks_ins_res.task.created_at + tasks_ins_res.task.ttl <= current_time:
+        validation_errors.append("Task TTL has expired")
 
     # TaskIns specific
     if isinstance(tasks_ins_res, TaskIns):
