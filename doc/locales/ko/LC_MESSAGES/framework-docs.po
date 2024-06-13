@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-05-28 11:47+0200\n"
-"PO-Revision-Date: 2024-06-11 06:22+0000\n"
+"PO-Revision-Date: 2024-06-13 16:07+0000\n"
 "Last-Translator: 박태현 <qkrxogus113@ajou.ac.kr>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
@@ -621,16 +621,20 @@ msgid ""
 "means that you can seamlessly switch your entire development environment "
 "just by connecting to a different container."
 msgstr ""
+"작업 공간 파일은 로컬 파일 시스템에서 마운트되거나 컨테이너에 복사 또는 "
+"클론됩니다. 확장 프로그램은 컨테이너 내부에 설치되고 실행되며, 도구, 플랫폼 "
+"및 파일 시스템에 완전한 접근 권한을 갖습니다. 이는 다른 컨테이너에 연결하는 "
+"것만으로 전체 개발 환경을 원활하게 전환할 수 있음을 의미합니다."
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:11
 msgid ""
 "Source: `Official VSCode documentation <https://code.visualstudio.com/docs/"
 "devcontainers/containers>`_"
-msgstr ""
+msgstr "출처 : 공식 VSCode 문서"
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:15
 msgid "Getting started"
-msgstr ""
+msgstr "시작하기"
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:17
 msgid ""
@@ -641,6 +645,12 @@ msgid ""
 "your command line. Additionally, install the `VSCode Containers Extension "
 "<vscode:extension/ms-vscode-remote.remote-containers>`_."
 msgstr ""
+"`Dockerfile`을 설정하고 구성하는 것과 개발 컨테이너 구성은 약간 복잡할 수 "
+"있습니다. 다행히도, 이를 직접 할 필요는 없습니다. 일반적으로 시스템에 `"
+"Docker <https://docs.docker.com/engine/install/>`_를 설치하고 커맨드 "
+"라인에서 사용할 수 있는지 확인하는 것으로 충분합니다. 추가로 `VSCode "
+"Containers Extension <vscode:extension/ms-vscode-remote.remote-containers>`"
+"_을 설치하세요."
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:19
 msgid ""
@@ -651,36 +661,46 @@ msgid ""
 "left corner of your VSCode window and select the option *(Re)Open Folder in "
 "Container*."
 msgstr ""
+"이제 준비가 완료되었습니다. VSCode를 시작하면 컨테이너 환경에서 실행할지를 "
+"묻고, 확인하면 자동으로 컨테이너를 빌드하고 사용할 것입니다. VSCode에 "
+"수동으로 개발 컨테이너를 사용하도록 지시하려면, 확장을 설치한 후, VSCode "
+"창의 왼쪽 하단에 있는 초록색 부을 클릭하고 *(Re)Open Folder in Container* "
+"옵션을 선택하세요."
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:21
 msgid ""
 "In some cases your setup might be more involved. For those cases consult the "
 "following sources:"
-msgstr ""
+msgstr "경우에 따라 설정이 더 복잡할 수도 있습니다. 이러한 경우에는 다음 소스를 "
+"참조하세요:"
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:23
 msgid ""
 "`Developing inside a Container <https://code.visualstudio.com/docs/"
 "devcontainers/containers#_system-requirements>`_"
 msgstr ""
+"`컨테이너 내부 개발<https://code.visualstudio.com/docs/devcontainers/"
+"containers#_system-requirements>`_"
 
 #: ../../source/contributor-how-to-develop-in-vscode-dev-containers.rst:24
 msgid ""
 "`Remote development in Containers <https://code.visualstudio.com/docs/"
 "devcontainers/tutorial>`_"
 msgstr ""
+"`컨테이너 원격 개발<https://code.visualstudio.com/docs/devcontainers/"
+"tutorial>`_"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:2
 msgid "Install development versions"
-msgstr ""
+msgstr "개발 버전 설치하기"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:5
 msgid "Install development versions of Flower"
-msgstr ""
+msgstr "Flower 개발 버전 설치하기"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:8
 msgid "Using Poetry (recommended)"
-msgstr ""
+msgstr "Poetry 사용하기(권장)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:10
 msgid ""
@@ -688,50 +708,62 @@ msgid ""
 "``pyproject.toml`` and then reinstall (don't forget to delete ``poetry."
 "lock`` (``rm poetry.lock``) before running ``poetry install``)."
 msgstr ""
+"PyPI에서 ``flwr`` 사전 릴리스 설치하기: ``pyproject.toml``에서 ``flwr``의 "
+"dependency를 업데이트한 다음, 재설치하세요(``poetry 설치``이전에 ``poetry."
+"lock`` (``rm poetry.lock``)를 제거하는 것을 잊지 마세요)."
 
 #: ../../source/contributor-how-to-install-development-versions.rst:12
 msgid ""
 "``flwr = { version = \"1.0.0a0\", allow-prereleases = true }`` (without "
 "extras)"
 msgstr ""
+"``flwr = { version = \"1.0.0a0\", allow-prereleases = true }`` (extras 제외)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:13
 msgid ""
 "``flwr = { version = \"1.0.0a0\", allow-prereleases = true, extras = "
 "[\"simulation\"] }`` (with extras)"
 msgstr ""
+"``flwr = { version = \"1.0.0a0\", allow-prereleases = true, extras = ["
+"\"simulation\"] }`` (extras 포함)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:15
 msgid ""
 "Install ``flwr`` from a local copy of the Flower source code via ``pyproject."
 "toml``:"
-msgstr ""
+msgstr "``pyproject.toml``을 통해 Flower 소스 코드의 로컬 복사본에서 ``flwr``을 설치:"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:17
 msgid "``flwr = { path = \"../../\", develop = true }`` (without extras)"
-msgstr ""
+msgstr "``flwr = { path = \"../../\", develop = true }`` (extras 제외)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:18
 msgid ""
 "``flwr = { path = \"../../\", develop = true, extras = [\"simulation\"] }`` "
 "(with extras)"
 msgstr ""
+"``flwr = { path = \"../../\", develop = true, extras = [\"simulation\"] }`` ("
+"extras 포함)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:20
 msgid "Install ``flwr`` from a local wheel file via ``pyproject.toml``:"
-msgstr ""
+msgstr "``pyproject.toml``을 통해 로컬 wheel file에서 ``flwr``을 설치하세요:"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:22
 msgid ""
 "``flwr = { path = \"../../dist/flwr-1.8.0-py3-none-any.whl\" }`` (without "
 "extras)"
 msgstr ""
+"``flwr = { path = \"../../dist/flwr-1.8.0-py3-none-any.whl\" }`` (extras "
+"제외)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:23
 msgid ""
 "``flwr = { path = \"../../dist/flwr-1.8.0-py3-none-any.whl\", extras = "
 "[\"simulation\"] }`` (with extras)"
 msgstr ""
+"``flwr = { path = \"../../dist/flwr-1.8.0-py3-none-any.whl\", extras = ["
+"\"simulation\"] }`` (extras 포함)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:25
 msgid ""
@@ -739,101 +771,120 @@ msgid ""
 "Dependency Specification <https://python-poetry.org/docs/dependency-"
 "specification/>`_"
 msgstr ""
+"자세한 내용은 Poetry 문서를 참고하세요: `Poetry Dependency Specification "
+"<https://python-poetry.org/docs/dependency-specification/>`_"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:28
 msgid "Using pip (recommended on Colab)"
-msgstr ""
+msgstr "pip 사용하기(Colab에서 권장)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:30
 msgid "Install a ``flwr`` pre-release from PyPI:"
-msgstr ""
+msgstr "PyPI에서 ``flwr`` 사전 릴리스를 설치하기:"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:32
 msgid "``pip install -U --pre flwr`` (without extras)"
-msgstr ""
+msgstr "``pip install -U --pre flwr`` (extras 제외)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:33
 msgid "``pip install -U --pre flwr[simulation]`` (with extras)"
-msgstr ""
+msgstr "``pip install -U --pre flwr[simulation]`` (extras 포함)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:35
 msgid ""
 "Python packages can be installed from git repositories. Use one of the "
 "following commands to install the Flower directly from GitHub."
 msgstr ""
+"Python 패키지는 git 저장소에서 설치할 수 있습니다. 다음 명령어 중 하나를 "
+"사용하여 GitHub에서 직접 Flower를 설치하세요."
 
 #: ../../source/contributor-how-to-install-development-versions.rst:37
 msgid "Install ``flwr`` from the default GitHub branch (``main``):"
-msgstr ""
+msgstr "기본 GitHub branch (``main``)에서 ``flwr`` 를 설치하기:"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:39
 msgid ""
 "``pip install flwr@git+https://github.com/adap/flower.git`` (without extras)"
-msgstr ""
+msgstr "``pip install flwr@git+https://github.com/adap/flower.git`` (extras 제외)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:40
 msgid ""
 "``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` "
 "(with extras)"
 msgstr ""
+"``pip install flwr[simulation]@git+https://github.com/adap/flower.git`` ("
+"extras 포함)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:42
 msgid "Install ``flwr`` from a specific GitHub branch (``branch-name``):"
-msgstr ""
+msgstr "특정 GitHub branch (``branch-name``)에서 ``flwr``설치하기:"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:44
 msgid ""
 "``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` "
 "(without extras)"
 msgstr ""
+"``pip install flwr@git+https://github.com/adap/flower.git@branch-name`` ("
+"extras 제외)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:45
 msgid ""
 "``pip install flwr[simulation]@git+https://github.com/adap/flower.git@branch-"
 "name`` (with extras)"
 msgstr ""
+"``pip install flwr[simulation]@git+https://github.com/adap/flower.git@branch-"
+"name`` (extras 포함)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:49
 msgid "Open Jupyter Notebooks on Google Colab"
-msgstr ""
+msgstr "Google Colab에서 Jupyter Notebooks 열기"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:51
 msgid ""
 "Open the notebook ``doc/source/tutorial-series-get-started-with-flower-"
 "pytorch.ipynb``:"
 msgstr ""
+"``doc/source/tutorial-series-get-started-with-flower-pytorch.ipynb``"
+"notebook을 엽니다:"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:53
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/main/doc/source/"
 "tutorial-series-get-started-with-flower-pytorch.ipynb"
 msgstr ""
+"https://colab.research.google.com/github/adap/flower/blob/main/doc/source/"
+"tutorial-series-get-started-with-flower-pytorch.ipynb"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:55
 msgid ""
 "Open a development version of the same notebook from branch `branch-name` by "
 "changing ``main`` to ``branch-name`` (right after ``blob``):"
 msgstr ""
+"``main``을 ``branch-name``(``blob`` 바로 뒤)으로 변경하여 동일한 notebook의 "
+"개발 버전을 브랜치 `branch-name`에서 엽니다 :"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:57
 msgid ""
 "https://colab.research.google.com/github/adap/flower/blob/branch-name/doc/"
 "source/tutorial-series-get-started-with-flower-pytorch.ipynb"
 msgstr ""
+"https://colab.research.google.com/github/adap/flower/blob/branch-name/doc/"
+"source/tutorial-series-get-started-with-flower-pytorch.ipynb"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:59
 msgid "Install a `whl` on Google Colab:"
-msgstr ""
+msgstr "Google Colab에서 `whl` 설치하기:"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:61
 msgid ""
 "In the vertical icon grid on the left hand side, select ``Files`` > ``Upload "
 "to session storage``"
-msgstr ""
+msgstr "왼쪽의 수직 아이콘 그리드에서 ``Files`` > ``Upload to session storage``를 "
+"선택하세요"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:62
 msgid "Upload the whl (e.g., ``flwr-1.8.0-py3-none-any.whl``)"
-msgstr ""
+msgstr "whl (예:``flwr-1.8.0-py3-none-any.whl``)을 업로드하세요"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:63
 msgid ""
@@ -841,26 +892,31 @@ msgid ""
 "to ``!pip install -q 'flwr-1.8.0-py3-none-any.whl[simulation]' torch "
 "torchvision matplotlib``"
 msgstr ""
+"``!pip install -q 'flwr[simulation]' torch torchvision matplotlib``를 ``!pip "
+"install -q 'flwr-1.8.0-py3-none-any.whl[simulation]' torch torchvision "
+"matplotlib``로 바꾸세요"
 
 #: ../../source/contributor-how-to-release-flower.rst:2
 msgid "Release Flower"
-msgstr ""
+msgstr "Flower 릴리즈 하기"
 
 #: ../../source/contributor-how-to-release-flower.rst:4
 msgid ""
 "This document describes the current release process. It may or may not "
 "change in the future."
-msgstr ""
+msgstr "이 문서는 현재 릴리즈 과정을 설명합니다. 이는 앞으로 변경될 수도 있습니다."
 
 #: ../../source/contributor-how-to-release-flower.rst:7
 msgid "During the release"
-msgstr ""
+msgstr "릴리즈 동안에"
 
 #: ../../source/contributor-how-to-release-flower.rst:9
 msgid ""
 "The version number of a release is stated in ``pyproject.toml``. To release "
 "a new version of Flower, the following things need to happen (in that order):"
 msgstr ""
+"릴리즈의 버전 번호는 ``pyproject.toml``에 명시되어 있습니다. Flower의 새 "
+"버전을 릴리즈하려면 다음 작업이 순서대로 수행되어야 합니다:"
 
 #: ../../source/contributor-how-to-release-flower.rst:11
 msgid ""
@@ -868,6 +924,9 @@ msgid ""
 "order to add every new change to the changelog (feel free to make manual "
 "changes to the changelog afterwards until it looks good)."
 msgstr ""
+"모든 새로운 변경 사항을 변경 로그에 추가하기 위해``python3 src/py/flwr_tool/"
+"update_changelog.py <YOUR_GH_TOKEN>``을 실행합니다 (변경 로그가 만족스러워질 "
+"때까지 수동으로 변경해도 됩니다)."
 
 #: ../../source/contributor-how-to-release-flower.rst:12
 msgid ""
@@ -878,6 +937,12 @@ msgid ""
 "and current date, and it will add a thanking message for the contributors. "
 "Open a pull request with those changes."
 msgstr ""
+"모든 변경 사항으로 변경 로그가 업데이트되면,``./dev/prepare-release-"
+"changelog.sh v<NEW_VERSION>``을 실행합니다. 여기서 ``<NEW_VERSION>``은 "
+"``pyproject.toml``에 명시된 버전 번호입니다 (앞에 ``v``가 추가된 것을 "
+"주의하세요). 이 명령어는 변경 로그의 ``Unreleased``헤더를 해당 버전과 현재 "
+"날짜로 교체하고, 기여자들에게 감사 메시지가 추가됩니다. 이러한 변경 사항으로 "
+"pull request합니다."
 
 #: ../../source/contributor-how-to-release-flower.rst:13
 msgid ""
