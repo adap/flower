@@ -15,7 +15,6 @@
 """Flower command line interface `install` command."""
 
 
-import os
 import shutil
 import tempfile
 import zipfile
@@ -25,6 +24,8 @@ from typing import IO, Optional, Union
 
 import typer
 from typing_extensions import Annotated
+
+from flwr.common.config import get_flwr_dir
 
 from .config_utils import load_and_validate
 from .utils import get_sha256_hash
@@ -165,16 +166,7 @@ def validate_and_install(
         raise typer.Exit(code=1)
 
     install_dir: Path = (
-        (
-            Path(
-                os.getenv(
-                    "FLWR_HOME",
-                    f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
-                )
-            )
-            if not flwr_dir
-            else flwr_dir
-        )
+        (get_flwr_dir() if not flwr_dir else flwr_dir)
         / "apps"
         / publisher
         / project_name
