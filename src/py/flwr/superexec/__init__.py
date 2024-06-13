@@ -17,4 +17,3 @@
 
 def run_superexec() -> None:
     """Empty stub."""
-    pass
