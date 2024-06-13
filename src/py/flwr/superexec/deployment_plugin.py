@@ -52,11 +52,12 @@ class DeploymentEngine(Executor):
     def start_run(self, fab_file: bytes, ttl: Optional[float] = None) -> Run:
         """Start run using the Flower Deployment Engine."""
         _ = ttl
-        fab_id, fab_version = get_fab_metadata(fab_file)
+        fab_version, fab_id = get_fab_metadata(fab_file)
 
         run_id = self._create_run(fab_id, fab_version)
 
         fab_path = self._install_fab(fab_file)
+        fab_name = Path(fab_id).name
 
         subprocess.check_call(
             [sys.executable, "-m", "pip", "install", str(fab_path)],
@@ -69,7 +70,7 @@ class DeploymentEngine(Executor):
             proc=subprocess.Popen(
                 [
                     "flower-server-app",
-                    "build_demo.server:app",
+                    f"{fab_name}.server:app",
                     "--run-id",
                     str(run_id),
                     "--insecure",
