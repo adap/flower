@@ -32,7 +32,7 @@ from .executor import Executor
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
-    """Driver API servicer."""
+    """SuperExec API servicer."""
 
     def __init__(self, plugin: Executor) -> None:
         self.plugin = plugin
