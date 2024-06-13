@@ -54,6 +54,7 @@ exclude = [
 [tool.poetry.scripts]
 flwr = "flwr.cli.app:app"
 flower-superlink = "flwr.server:run_superlink"
+flower-superexec = "flwr.superexec:run_superexec"
 flower-supernode = "flwr.client:run_supernode"
 flower-client-app = "flwr.client:run_client_app"
 flower-server-app = "flwr.server:run_server_app"
