@@ -32,7 +32,7 @@ class StartRunResponse(google.protobuf.message.Message):
     def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
 global___StartRunResponse = StartRunResponse
 
-class FetchLogsRequest(google.protobuf.message.Message):
+class StreamLogsRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     RUN_ID_FIELD_NUMBER: builtins.int
     run_id: builtins.int
@@ -41,9 +41,9 @@ class FetchLogsRequest(google.protobuf.message.Message):
         run_id: builtins.int = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
-global___FetchLogsRequest = FetchLogsRequest
+global___StreamLogsRequest = StreamLogsRequest
 
-class FetchLogsResponse(google.protobuf.message.Message):
+class StreamLogsResponse(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     LOG_OUTPUT_FIELD_NUMBER: builtins.int
     log_output: typing.Text
@@ -52,4 +52,4 @@ class FetchLogsResponse(google.protobuf.message.Message):
         log_output: typing.Text = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["log_output",b"log_output"]) -> None: ...
-global___FetchLogsResponse = FetchLogsResponse
+global___StreamLogsResponse = StreamLogsResponse
