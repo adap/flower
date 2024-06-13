@@ -41,3 +41,4 @@ def reformat(dataset, llm_task):
     if llm_task == "medical":
         dataset = dataset.remove_columns(['instruction'])
         dataset = dataset.rename_column("input", "instruction")
+    return dataset
