@@ -30,10 +30,12 @@ from cryptography.hazmat.primitives.serialization import (
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log
+from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.object_ref import load_app, validate
 
 from ..app import _start_client_internal
+
+ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
 
 
 def run_supernode() -> None:
@@ -63,6 +65,23 @@ def run_client_app() -> None:
 
     args = _parse_args_run_client_app().parse_args()
 
+    if args.server != ADDRESS_FLEET_API_GRPC_RERE:
+        warn = "Passing flag --server is deprecated. Use --superlink instead."
+        warn_deprecated_feature(warn)
+
+        if args.superlink != ADDRESS_FLEET_API_GRPC_RERE:
+            # if `--superlink` also passed, then
+            # warn user that this argument overrides what was passed with `--server`
+            log(
+                WARN,
+                "Both `--server` and `--superlink` were passed. "
+                "`--server` will be ignored. Connecting to the Superlink Fleet API "
+                "at %s.",
+                args.superlink,
+            )
+        else:
+            args.superlink = args.server
+
     root_certificates = _get_certificates(args)
     log(
         DEBUG,
@@ -73,7 +92,7 @@ def run_client_app() -> None:
     authentication_keys = _try_setup_client_authentication(args)
 
     _start_client_internal(
-        server_address=args.server,
+        server_address=args.superlink,
         load_client_app_fn=load_fn,
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
@@ -100,7 +119,7 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
             WARN,
             "Option `--insecure` was set. "
             "Starting insecure HTTP client connected to %s.",
-            args.server,
+            args.superlink,
         )
         root_certificates = None
     else:
@@ -114,7 +133,7 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
             DEBUG,
             "Starting secure HTTPS client connected to %s "
             "with the following certificates: %s.",
-            args.server,
+            args.superlink,
             cert_path,
         )
     return root_certificates
@@ -213,8 +232,13 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--server",
-        default="0.0.0.0:9092",
+        default=ADDRESS_FLEET_API_GRPC_RERE,
         help="Server address",
+    )
+    parser.add_argument(
+        "--superlink",
+        default=ADDRESS_FLEET_API_GRPC_RERE,
+        help="SuperLink Fleet API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
     )
     parser.add_argument(
         "--max-retries",
