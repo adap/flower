@@ -77,7 +77,6 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     parser.add_argument(
         "executor",
         help="For example: `deployment:exec` or `project.package.module:wrapper.exec`.",
-        required=True,
     )
     parser.add_argument(
         "--address",
@@ -157,7 +156,7 @@ def _get_exec_plugin(
     args: argparse.Namespace,
 ) -> Executor:
     """Get the load_client_app_fn function."""
-    exec_plugin_dir = args.dir
+    exec_plugin_dir = args.executor_dir
     if exec_plugin_dir is not None:
         sys.path.insert(0, exec_plugin_dir)
 
