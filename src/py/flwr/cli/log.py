@@ -28,6 +28,16 @@ from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
 
 
+# pylint: disable=unused-argument
+def stream_logs(run_id: int, channel: grpc.Channel, period: int) -> None:
+    """Stream logs from the beginning of a run with connection refresh."""
+
+
+# pylint: disable=unused-argument
+def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
+    """Print logs from the beginning of a run."""
+
+
 def log(
     run_id: Annotated[
         int,
@@ -54,14 +64,6 @@ def log(
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         logger(DEBUG, channel_connectivity)
-
-    # pylint: disable=unused-argument
-    def stream_logs(run_id: int, channel: grpc.Channel, period: int) -> None:
-        """Stream logs from the beginning of a run with connection refresh."""
-
-    # pylint: disable=unused-argument
-    def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
-        """Print logs from the beginning of a run."""
 
     if superexec_address is None:
         global_config = config_utils.load(
