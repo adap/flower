@@ -92,7 +92,7 @@ def run_simulation(
     backend_config : Optional[Dict[str, Dict[str, ConfigsRecordValues]]]
         'A dictionary to configure a backend. Separate dictionaries to configure
         different elements of backend. Supported top-level keys are `init_args`
-        for values parsed to initialization of backend, `client_resources`
+        for values parsed to initialisation of backend, `client_resources`
         to define the resources for clients, and `actor` to define the actor
         parameters. Values supported in <value> are those included by
         `flwr.common.typing.ConfigsRecordValues`.
@@ -272,7 +272,7 @@ def _run_simulation(
     backend_config : Optional[Dict[str, Dict[str, ConfigsRecordValues]]]
         'A dictionary to configure a backend. Separate dictionaries to configure
         different elements of backend. Supported top-level keys are `init_args`
-        for values parsed to initialization of backend, `client_resources`
+        for values parsed to initialisation of backend, `client_resources`
         to define the resources for clients, and `actor` to define the actor
         parameters. Values supported in <value> are those included by
         `flwr.common.typing.ConfigsRecordValues`.
@@ -303,6 +303,8 @@ def _run_simulation(
     """
     if backend_config is None:
         backend_config = {}
+
+    if "init_args" not in backend_config:
         backend_config["init_args"] = {}
 
     # Set logging level
@@ -311,11 +313,11 @@ def _run_simulation(
         update_console_handler(level=DEBUG, timestamps=True, colored=True)
     else:
         backend_config["init_args"]["logging_level"] = WARNING
-        backend_config["init_args"]["log_to_driver"] = False
+        backend_config["init_args"]["log_to_driver"] = True
 
     if enable_tf_gpu_growth:
         # Check that Backend config has also enabled using GPU growth
-        use_tf = backend_config.get("tensorflow", False)
+        use_tf = backend_config.get("actor", {}).get("tensorflow", False)
         if not use_tf:
             log(WARNING, "Enabling GPU growth for your backend.")
             backend_config["actor"]["tensorflow"] = True
