@@ -315,7 +315,9 @@ def run_superlink() -> None:
 def _format_address(address: str) -> Tuple[str, str, int]:
     parsed_address = parse_address(address)
     if not parsed_address:
-        sys.exit(f"Address ({address}) cannot be parsed (expected: URL or IPv4 or IPv6).")
+        sys.exit(
+            f"Address ({address}) cannot be parsed (expected: URL or IPv4 or IPv6)."
+        )
     host, port, is_v6 = parsed_address
     return (f"[{host}]:{port}" if is_v6 else f"{host}:{port}", host, port)
 
