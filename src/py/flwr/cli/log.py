@@ -16,7 +16,7 @@
 
 import sys
 import time
-from logging import DEBUG, INFO
+from logging import DEBUG, ERROR, INFO
 from typing import Optional
 
 import grpc
@@ -93,12 +93,18 @@ def log(
     if follow:
         try:
             while True:
-                logger(INFO, "Streaming logs")
+                logger(INFO, "Starting logstream")
                 stream_logs(run_id, channel, period)
                 time.sleep(2)
                 logger(INFO, "Reconnecting to logstream")
         except KeyboardInterrupt:
             logger(INFO, "Exiting logstream")
+        except grpc.RpcError as e:
+            # pylint: disable=E1101
+            if e.code() == grpc.StatusCode.NOT_FOUND:
+                logger(ERROR, "`run_id` is invalid, exiting")
+        finally:
             channel.close()
     else:
+        logger(INFO, "Printing logstream")
         print_logs(run_id, channel, timeout=1)
