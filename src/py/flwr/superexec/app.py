@@ -161,7 +161,7 @@ def _get_exec_plugin(
     if exec_plugin_dir is not None:
         sys.path.insert(0, exec_plugin_dir)
 
-    plugin_ref: str = getattr(args, "executor")
+    plugin_ref: str = args.executor
     valid, error_msg = validate(plugin_ref)
     if not valid and error_msg:
         raise LoadExecPluginError(error_msg) from None
