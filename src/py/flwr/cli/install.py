@@ -15,7 +15,6 @@
 """Flower command line interface `install` command."""
 
 
-import os
 import shutil
 import tempfile
 import zipfile
@@ -25,6 +24,8 @@ from typing import IO, Optional, Union
 
 import typer
 from typing_extensions import Annotated
+
+from flwr.common.config import get_flwr_dir
 
 from .config_utils import load_and_validate
 from .utils import get_sha256_hash
@@ -84,7 +85,7 @@ def install_from_fab(
     fab_file: Union[Path, bytes],
     flwr_dir: Optional[Path],
     skip_prompt: bool = False,
-) -> None:
+) -> Path:
     """Install from a FAB file after extracting and validating."""
     fab_file_archive: Union[Path, IO[bytes]]
     fab_name: Optional[str]
@@ -124,7 +125,11 @@ def install_from_fab(
 
             shutil.rmtree(info_dir)
 
-            validate_and_install(tmpdir_path, fab_name, flwr_dir, skip_prompt)
+            installed_path = validate_and_install(
+                tmpdir_path, fab_name, flwr_dir, skip_prompt
+            )
+
+    return installed_path
 
 
 def validate_and_install(
@@ -132,7 +137,7 @@ def validate_and_install(
     fab_name: Optional[str],
     flwr_dir: Optional[Path],
     skip_prompt: bool = False,
-) -> None:
+) -> Path:
     """Validate TOML files and install the project to the desired directory."""
     config, _, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
 
@@ -161,16 +166,7 @@ def validate_and_install(
         raise typer.Exit(code=1)
 
     install_dir: Path = (
-        (
-            Path(
-                os.getenv(
-                    "FLWR_HOME",
-                    f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
-                )
-            )
-            if not flwr_dir
-            else flwr_dir
-        )
+        (get_flwr_dir() if not flwr_dir else flwr_dir)
         / "apps"
         / publisher
         / project_name
@@ -185,7 +181,7 @@ def validate_and_install(
                 bold=True,
             )
         ):
-            return
+            return install_dir
 
     install_dir.mkdir(parents=True, exist_ok=True)
 
@@ -201,6 +197,8 @@ def validate_and_install(
         fg=typer.colors.GREEN,
         bold=True,
     )
+
+    return install_dir
 
 
 def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
