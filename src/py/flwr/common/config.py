@@ -12,10 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower SuperExec service."""
+"""Provide functions for managing global Flower config."""
 
-from .app import run_superexec as run_superexec
+import os
+from pathlib import Path
 
-__all__ = [
-    "run_superexec",
-]
+
+def get_flwr_dir() -> Path:
+    """Return the Flower home directory based on env variables."""
+    return Path(
+        os.getenv(
+            "FLWR_HOME",
+            f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
+        )
+    )

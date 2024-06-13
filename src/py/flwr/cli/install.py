@@ -25,7 +25,9 @@ from typing import IO, Optional, Union
 import typer
 from typing_extensions import Annotated
 
-from .config_utils import get_flower_home, load_and_validate
+from flwr.common.config import get_flwr_dir
+
+from .config_utils import load_and_validate
 from .utils import get_sha256_hash
 
 
@@ -80,7 +82,9 @@ def install(
 
 
 def install_from_fab(
-    fab_file: Union[Path, bytes], flwr_dir: Optional[Path], skip_prompt: bool = False
+    fab_file: Union[Path, bytes],
+    flwr_dir: Optional[Path],
+    skip_prompt: bool = False,
 ) -> Path:
     """Install from a FAB file after extracting and validating."""
     fab_file_archive: Union[Path, IO[bytes]]
@@ -162,7 +166,7 @@ def validate_and_install(
         raise typer.Exit(code=1)
 
     install_dir: Path = (
-        (get_flower_home() if not flwr_dir else flwr_dir)
+        (get_flwr_dir() if not flwr_dir else flwr_dir)
         / "apps"
         / publisher
         / project_name
