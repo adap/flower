@@ -34,7 +34,7 @@ app = typer.Typer(
 
 app.command()(new)
 app.command()(example)
-app.command()(run)  # type: ignore
+app.command()(run)
 app.command()(build)
 app.command()(install)
 
