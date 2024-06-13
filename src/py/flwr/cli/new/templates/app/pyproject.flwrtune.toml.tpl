@@ -38,5 +38,5 @@ name = "simulation"
 [flower.engine.simulation.supernode]
 num = $num_clients
 
-[flower.engine.simulation.backend_config]
-config = { client_resources = { num_cpus = 8, num_gpus = 1.0 } }
+[flower.engine.simulation]
+backend_config = { client_resources = { num_cpus = 8, num_gpus = 1.0 } }
