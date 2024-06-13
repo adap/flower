@@ -25,7 +25,7 @@ from flwr.common import object_ref
 
 
 def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
-    """Start a Flower client node which connects to a Flower server.
+    """Extract the fab_id and the fab_version from a FAB file or path.
 
     Parameters
     ----------
