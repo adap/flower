@@ -17,11 +17,11 @@
 import typer
 from typer.main import get_command
 
-from .build import build
-from .example import example
-from .install import install
-from .new import new
-from .run import run
+from .build import build as build
+from .example import example as example
+from .install import install as install
+from .new import new as new
+from .run import run as run
 
 app = typer.Typer(
     help=typer.style(
