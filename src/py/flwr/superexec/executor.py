@@ -39,7 +39,7 @@ class Executor(ABC):
     ) -> Run:
         """Start a run using the given Flower App ID and version.
 
-        This method creates a new run on the SuperLink and returns its run_id
+        This method creates a new run on the SuperLink, returns its run_id
         and also starts the run execution.
 
         Parameters
