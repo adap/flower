@@ -17,6 +17,7 @@
 
 import ast
 import importlib
+import os
 import sys
 from importlib.util import find_spec
 from typing import Any, Optional, Tuple, Type
@@ -99,6 +100,7 @@ def load_app(
     try:
         # Clear cached modules in the project directory
         if project_dir is not None:
+            project_dir = os.path.abspath(project_dir)
             for mod_name in list(sys.modules.keys()):
                 path: Optional[str] = getattr(sys.modules[mod_name], "__file__", None)
                 if path is not None and path.startswith(project_dir):
