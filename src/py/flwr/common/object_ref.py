@@ -104,7 +104,7 @@ def load_app(
             for mod_name in list(sys.modules.keys()):
                 path: Optional[str] = getattr(sys.modules[mod_name], "__file__", None)
                 if path is not None and path.startswith(project_dir):
-                    importlib.reload(sys.modules[mod_name])
+                    sys.modules[mod_name] = importlib.reload(sys.modules[mod_name])
 
         module = importlib.import_module(module_str)
     except ModuleNotFoundError:
