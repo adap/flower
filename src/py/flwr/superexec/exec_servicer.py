@@ -15,15 +15,15 @@
 """SuperExec API servicer."""
 
 
-from logging import INFO, DEBUG
-from dataclasses import dataclass
-from subprocess import Popen
-from typing import Dict, Generator, Any, List
-
-import threading
-import grpc
-import time
 import select
+import threading
+import time
+from dataclasses import dataclass
+from logging import INFO
+from subprocess import Popen
+from typing import Any, Dict, Generator, List
+
+import grpc
 
 from flwr.common.logger import log
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
@@ -45,6 +45,7 @@ class LogStream:
     stop_event: threading.Event
     logs: List[str]
     capture_thread: threading.Thread
+
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """Driver API servicer."""
@@ -70,9 +71,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         logs: List[str] = []
         # Start a background thread to capture the log output
         capture_thread = threading.Thread(
-            target=self._capture_logs,
-            args=(run, stop_event, logs),
-            daemon=True
+            target=self._capture_logs, args=(run, stop_event, logs), daemon=True
         )
         with self.lock:
             self.log_streams[run.run_id] = LogStream(
@@ -92,7 +91,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 [],
                 [],
                 self.select_timeout,
-            ) 
+            )
             for stream in ready_to_read:
                 line = stream.readline().rstrip()
                 if line:

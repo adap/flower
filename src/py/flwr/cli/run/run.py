@@ -15,11 +15,11 @@
 """Flower command line interface `run` command."""
 
 import sys
+import time
 from enum import Enum
 from logging import DEBUG, INFO
 from pathlib import Path
 from typing import Optional
-import time
 
 import typer
 from typing_extensions import Annotated
@@ -28,13 +28,12 @@ from flwr.cli import config_utils
 from flwr.cli.build import build
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    StartRunRequest,
-)
+from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
 
 from ..log import stream_logs
+
 
 class Engine(str, Enum):
     """Enum defining the engine to run on."""
@@ -115,6 +114,7 @@ def run(
         with open(fab_path, "rb") as f:
             start_run_req = StartRunRequest(fab_file=f.read())
         start_run_res = stub.StartRun(start_run_req)
+        log(INFO, "Starting run with id: %s", start_run_res.run_id)
 
         if follow:
             try:

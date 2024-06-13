@@ -15,7 +15,7 @@
 """Flower command line interface `log` command."""
 
 import time
-from logging import DEBUG, INFO, ERROR
+from logging import DEBUG, ERROR, INFO
 
 import grpc
 import typer
@@ -38,6 +38,7 @@ def stream_logs(run_id: int, channel: grpc.Channel, period: int) -> None:
         if time.time() - start_time > period:
             break
 
+
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     """Print logs from the beginning of a run."""
     stub = ExecStub(channel)
@@ -56,6 +57,7 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
         finally:
             channel.close()
             break
+
 
 def log(
     run_id: Annotated[
@@ -79,7 +81,6 @@ def log(
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         logger(DEBUG, channel_connectivity)
-
 
     channel = create_channel(
         server_address="127.0.0.1:9093",
