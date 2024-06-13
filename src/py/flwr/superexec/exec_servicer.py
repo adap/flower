@@ -15,14 +15,14 @@
 """SuperExec API servicer."""
 
 
-from logging import INFO, DEBUG
-from subprocess import Popen
-from typing import Dict, Generator, Any
-
-import threading
-import grpc
-import time
 import select
+import threading
+import time
+from logging import INFO
+from subprocess import Popen
+from typing import Any, Dict, Generator
+
+import grpc
 
 from flwr.common.logger import log
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
@@ -60,16 +60,14 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         logs = []
         # Start a background thread to capture the log output
         capture_thread = threading.Thread(
-            target=self._capture_logs,
-            args=(run, stop_event, logs),
-            daemon=True
+            target=self._capture_logs, args=(run, stop_event, logs), daemon=True
         )
         with self.lock:
             self.log_streams[run.run_id] = {
-                'process': run.proc,
-                'stop_event': stop_event,
-                'logs': logs,
-                'capture_thread': capture_thread,
+                "process": run.proc,
+                "stop_event": stop_event,
+                "logs": logs,
+                "capture_thread": capture_thread,
             }
         capture_thread.start()
 
@@ -82,7 +80,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 [],
                 [],
                 self.select_timeout,
-            ) 
+            )
             for stream in ready_to_read:
                 line = stream.readline().rstrip()
                 if line:
@@ -107,7 +105,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             with self.lock:
                 if request.run_id not in self.log_streams:
                     context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
-                logs = self.log_streams[request.run_id]['logs']
+                logs = self.log_streams[request.run_id]["logs"]
                 if last_sent_index < len(logs):
                     for i in range(last_sent_index, len(logs)):
                         yield StreamLogsResponse(log_output=logs[i])
