@@ -84,7 +84,7 @@ def install_from_fab(
     fab_file: Union[Path, bytes],
     flwr_dir: Optional[Path],
     skip_prompt: bool = False,
-) -> None:
+) -> Path:
     """Install from a FAB file after extracting and validating."""
     fab_file_archive: Union[Path, IO[bytes]]
     fab_name: Optional[str]
@@ -124,7 +124,11 @@ def install_from_fab(
 
             shutil.rmtree(info_dir)
 
-            validate_and_install(tmpdir_path, fab_name, flwr_dir, skip_prompt)
+            installed_path = validate_and_install(
+                tmpdir_path, fab_name, flwr_dir, skip_prompt
+            )
+
+    return installed_path
 
 
 def validate_and_install(
@@ -132,7 +136,7 @@ def validate_and_install(
     fab_name: Optional[str],
     flwr_dir: Optional[Path],
     skip_prompt: bool = False,
-) -> None:
+) -> Path:
     """Validate TOML files and install the project to the desired directory."""
     config, _, _ = load_and_validate(project_dir / "pyproject.toml", check_module=False)
 
@@ -185,7 +189,7 @@ def validate_and_install(
                 bold=True,
             )
         ):
-            return
+            return install_dir
 
     install_dir.mkdir(parents=True, exist_ok=True)
 
@@ -201,6 +205,8 @@ def validate_and_install(
         fg=typer.colors.GREEN,
         bold=True,
     )
+
+    return install_dir
 
 
 def _verify_hashes(list_content: str, tmpdir: Path) -> bool:
