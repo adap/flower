@@ -116,6 +116,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             with self.lock:
                 if request.run_id not in self.log_streams:
                     context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+                if self.log_streams[request.run_id].process.poll() is not None:
+                    log(INFO, "Run finished")
+                    context.cancel()
                 logs = self.log_streams[request.run_id].logs
                 if last_sent_index < len(logs):
                     for i in range(last_sent_index, len(logs)):

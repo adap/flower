@@ -103,6 +103,8 @@ def log(
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.NOT_FOUND:
                 logger(ERROR, "`run_id` is invalid, exiting")
+            if e.code() == grpc.StatusCode.CANCELLED:
+                pass
         finally:
             channel.close()
     else:
