@@ -134,7 +134,7 @@ class RayBackend(Backend):
                 str,
                 Union[ConfigsRecordValues, RunTimeEnvDict],
             ] = {}
-            
+
             if backend_config.get(self.init_args_key):
                 for k, v in backend_config[self.init_args_key].items():
                     ray_init_args[k] = v
