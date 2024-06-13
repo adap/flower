@@ -34,7 +34,6 @@ def run_superexec_api_grpc(
     certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run SuperExec API (gRPC, request-response)."""
-    # Create Driver API gRPC server
     exec_servicer: grpc.Server = ExecServicer(
         plugin=plugin,
     )
