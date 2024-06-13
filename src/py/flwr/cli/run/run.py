@@ -29,7 +29,6 @@ from flwr.cli.build import build
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
-    StreamLogsRequest,
     StartRunRequest,
 )
 from flwr.proto.exec_pb2_grpc import ExecStub
