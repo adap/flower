@@ -1,6 +1,7 @@
 """$project_name: A Flower / flwrtune app."""
 
 import os
+import warnings
 from datetime import datetime
 from hydra import compose, initialize
 from hydra.utils import instantiate
@@ -12,6 +13,11 @@ from flwr_datasets import FederatedDataset
 from $import_name.client import gen_client_fn
 from $import_name.server import get_on_fit_config, fit_weighted_average, get_evaluate_fn
 
+
+# Avoid warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+os.environ["TOKENIZERS_PARALLELISM"] = "true"
+os.environ["RAY_DISABLE_DOCKER_CPU_WARNING"] = 1
 
 # Initialise regular config
 with initialize(config_path="conf", version_base="1.1"):
