@@ -19,7 +19,7 @@ import subprocess
 import unittest
 from unittest.mock import MagicMock
 
-from flwr.proto.exec_pb2 import StartRunRequest
+from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 
 from .exec_servicer import ExecServicer
 
@@ -31,12 +31,13 @@ class ExecServicerTestCase(unittest.TestCase):
         """Test StartRun method of ExecServicer."""
         run_res = MagicMock()
         run_res.run_id = 10
-        run_res.proc = subprocess.Popen(
+        with subprocess.Popen(
             ["echo", "success"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-        )
+        ) as proc:
+            run_res.proc = proc
 
         exec_plugin = MagicMock()
         exec_plugin.start_run = lambda _: run_res
