@@ -30,13 +30,13 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
     Parameters
     ----------
     fab_file : Union[Path, bytes]
-        The Flower App bundle file to validate and extract the metadata from.
+        The Flower App Bundle file to validate and extract the metadata from.
         It can either be a path to the file or the file itself as bytes.
 
     Returns
     -------
     Tuple[str, str]
-        The `fab_version` and `fab_id` of the given Flower App bundle.
+        The `fab_version` and `fab_id` of the given Flower App Bundle.
     """
     fab_file_archive: Union[Path, IO[bytes]]
     if isinstance(fab_file, bytes):
