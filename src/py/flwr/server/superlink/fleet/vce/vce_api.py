@@ -16,6 +16,7 @@
 
 import asyncio
 import json
+import os
 import sys
 import time
 import traceback
@@ -274,6 +275,8 @@ def start_vce(
         # Use mapping constructed externally. This also means nodes
         # have previously being registered.
         nodes_mapping = existing_nodes_mapping
+    # Convert to the absolute path
+    app_dir = os.path.abspath(app_dir)
 
     if not state_factory:
         log(INFO, "A StateFactory was not supplied to the SimulationEngine.")
