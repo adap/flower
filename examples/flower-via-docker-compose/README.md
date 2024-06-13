@@ -249,6 +249,9 @@ By incorporating these steps, we have enriched our monitoring capabilities to no
 - **Prometheus Overview**: Learn more about Prometheus at their [official documentation](https://prometheus.io/docs/introduction/overview/).
 - **cAdvisor Guide**: For information on monitoring Docker containers with cAdvisor, see this [Prometheus guide](https://prometheus.io/docs/guides/cadvisor/).
 
+## Updates 
+In order to run the example, the _url_ key in `./config/provisioning/datasources/prometheus-datasource.yml` has been changed to `http://prometheus:9090` to reflect the internal network setup. This change ensures that Grafana can access Prometheus metrics correctly.	It was formerly set to `http://host.docker.internal:9090`.
+
 ## Conclusion
 
 This project serves as a foundational example of managing device heterogeneity within the federated learning context, employing the Flower framework alongside Docker, Prometheus, and Grafana. It's designed to be a starting point for users to explore and further adapt to the complexities of device heterogeneity in federated learning environments.
