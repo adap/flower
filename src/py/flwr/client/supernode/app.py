@@ -31,7 +31,7 @@ from cryptography.hazmat.primitives.serialization import (
 from flwr.cli.config_utils import validate_fields
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
-from flwr.common.config import get_flower_home
+from flwr.common.config import get_flwr_dir
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.object_ref import load_app, validate
@@ -170,7 +170,7 @@ def _get_load_client_app_fn(
     flwr_dir = Path("")
     if "flwr_dir" in args:
         if args.flwr_dir is None:
-            flwr_dir = get_flower_home()
+            flwr_dir = get_flwr_dir()
         else:
             flwr_dir = Path(args.flwr_dir)
 

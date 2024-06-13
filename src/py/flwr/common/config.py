@@ -18,7 +18,7 @@ import os
 from pathlib import Path
 
 
-def get_flower_home() -> Path:
+def get_flwr_dir() -> Path:
     """Return the Flower home directory based on env variables."""
     return Path(
         os.getenv(
