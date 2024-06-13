@@ -34,7 +34,10 @@ class Engine(str, Enum):
 def run(
     engine: Annotated[
         Optional[Engine],
-        typer.Option(case_sensitive=False, help="The ML framework to use"),
+        typer.Option(
+            case_sensitive=False,
+            help="The engine to run FL with (currently only simulation is supported).",
+        ),
     ] = None,
 ) -> None:
     """Run Flower project."""
