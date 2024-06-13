@@ -24,6 +24,7 @@ import grpc
 
 from flwr.common import EventType, event, log
 from flwr.common.address import parse_address
+from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.object_ref import load_app, validate
 
@@ -60,7 +61,7 @@ def run_superexec() -> None:
 
     # Graceful shutdown
     register_exit_handlers(
-        event_type=EventType.RUN_SUPEREXEC_ENTER,
+        event_type=EventType.RUN_SUPEREXEC_LEAVE,
         grpc_servers=grpc_servers,
         bckg_threads=None,
     )
@@ -76,16 +77,17 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
         description="Start a Flower SuperExec",
     )
     parser.add_argument(
-        "executor-plugin",
+        "executor",
         help="For example: `deployment:exec` or `project.package.module:wrapper.exec`.",
+        required=True,
     )
     parser.add_argument(
         "--address",
         help="SuperExec (gRPC) server address (IPv4, IPv6, or a domain name)",
-        default="0.0.0.0:9093",
+        default=SUPEREXEC_DEFAULT_ADDRESS,
     )
     parser.add_argument(
-        "--dir",
+        "--executor-dir",
         help="The directory for the plugin.",
         default=".",
     )
@@ -95,6 +97,25 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
         help="Run the server without HTTPS, regardless of whether certificate "
         "paths are provided. By default, the server runs with HTTPS enabled. "
         "Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--ssl-certfile",
+        help="Fleet API server SSL certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+        default=None,
+    )
+    parser.add_argument(
+        "--ssl-keyfile",
+        help="Fleet API server SSL private key file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+    )
+    parser.add_argument(
+        "--ssl-ca-certfile",
+        help="Fleet API server SSL CA certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
     )
     return parser
 
@@ -142,7 +163,7 @@ def _get_exec_plugin(
     if exec_plugin_dir is not None:
         sys.path.insert(0, exec_plugin_dir)
 
-    plugin_ref: str = getattr(args, "executor-plugin")
+    plugin_ref: str = getattr(args, "executor")
     valid, error_msg = validate(plugin_ref)
     if not valid and error_msg:
         raise LoadExecPluginError(error_msg) from None
