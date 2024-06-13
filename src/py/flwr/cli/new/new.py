@@ -190,22 +190,22 @@ def new(
         }
 
         # Task specific context
-        fraction_fit = 0.2 if llm_task_str == "code" else 0.1
+        fraction_fit = "0.2" if llm_task_str == "code" else "0.1"
         if llm_task_str == "generalnlp":
             task_name = "General NLP"
-            num_clients = 20
+            num_clients = "20"
             dataset_name = "vicgalle/alpaca-gpt4"
         elif llm_task_str == "finance":
             task_name = "Finance"
-            num_clients = 50
+            num_clients = "50"
             dataset_name = "FinGPT/fingpt-sentiment-train"
         elif llm_task_str == "medical":
             task_name = "Medical"
-            num_clients = 20
+            num_clients = "20"
             dataset_name = "medalpaca/medical_meadow_medical_flashcards"
         else:
             task_name = "Code"
-            num_clients = 10
+            num_clients = "10"
             dataset_name = "lucasmccabe-lmi/CodeAlpaca-20k"
 
         context["llm_task_str"] = llm_task_str

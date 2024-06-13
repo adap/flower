@@ -26,6 +26,13 @@ All settings are defined in `$project_name/conf/static_config.yaml`, which is no
 
 
 ## Running the task
+First make sure that you have got the access to [Mistral-7B](https://huggingface.co/mistralai/Mistral-7B-v0.3) model with your Hugging-Face account.
+Then log in with your [User Access Token](https://huggingface.co/docs/hub/security-tokens).
+
+```bash
+huggingface-cli login --token XXXXXXX
+```
+
 With an activated Python environment, run the task with default config values.
 The configs are in `$project_name/conf/config.yaml` and `$project_name/conf/static_config.yaml`, and are loaded automatically.
 
