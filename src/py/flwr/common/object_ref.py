@@ -17,7 +17,6 @@
 
 import ast
 import importlib
-import os
 import sys
 from importlib.util import find_spec
 from typing import Any, Optional, Tuple, Type
@@ -91,14 +90,6 @@ def load_app(
     refer to a module on the PYTHONPATH, the module needs to have the specified
     attribute.
     """
-    if project_dir is None:
-        # Assume the sys.path[0] is the project directory
-        project_dir = sys.path[0]
-    else:
-        project_dir = os.path.abspath(project_dir)
-        if project_dir not in sys.path:
-            sys.path.insert(0, project_dir)
-
     valid, error_msg = validate(module_attribute_str)
     if not valid and error_msg:
         raise error_type(error_msg) from None
@@ -107,10 +98,11 @@ def load_app(
 
     try:
         # Clear cached modules in the project directory
-        for mod_name in list(sys.modules.keys()):
-            path: Optional[str] = getattr(sys.modules[mod_name], "__file__", None)
-            if path is not None and path.startswith(project_dir):
-                del sys.modules[mod_name]
+        if project_dir is not None:
+            for mod_name in list(sys.modules.keys()):
+                path: Optional[str] = getattr(sys.modules[mod_name], "__file__", None)
+                if path is not None and path.startswith(project_dir):
+                    del sys.modules[mod_name]
 
         module = importlib.import_module(module_str)
     except ModuleNotFoundError:

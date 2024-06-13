@@ -153,7 +153,7 @@ def _get_load_client_app_fn(
         raise LoadClientAppError(error_msg) from None
 
     def _load() -> ClientApp:
-        client_app = load_app(app_ref, LoadClientAppError)
+        client_app = load_app(app_ref, LoadClientAppError, client_app_dir)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
