@@ -30,17 +30,14 @@ from .executor import Executor, Run
 class SimulationEngine(Executor):
     """Simulation engine executor plugin."""
 
-    def _install_fab(self, fab_file: bytes) -> Path:
-        return install_from_fab(fab_file, None, True)
-
     def start_run(self, fab_file: bytes, ttl: Optional[float] = None) -> Run:
         """Start run using the Flower Simulation Engine."""
         _ = ttl
-        _, fab_id, engine_conf = get_fab_metadata(fab_file)
+        _, fab_id = get_fab_metadata(fab_file)
 
         run_id = int.from_bytes(os.urandom(8), "little", signed=True)
 
-        fab_path = self._install_fab(fab_file)
+        fab_path = install_from_fab(fab_file, None, True)
 
         subprocess.check_call(
             [sys.executable, "-m", "pip", "install", str(fab_path)],
@@ -50,7 +47,9 @@ class SimulationEngine(Executor):
 
         fab_name = Path(fab_id).name
 
-        num_nodes = engine_conf["simulation"]["supernode"]["num"]
+        # TODO: return engine_conf from `get_fab_metadata`
+        # num_nodes = engine_conf["simulation"]["supernode"]["num"]
+        num_nodes = 2
 
         return Run(
             run_id=run_id,
