@@ -19,8 +19,9 @@ import os
 import shutil
 import tempfile
 import zipfile
+from io import BytesIO
 from pathlib import Path
-from typing import Optional
+from typing import IO, Optional, Union
 
 import typer
 from typing_extensions import Annotated
@@ -80,11 +81,24 @@ def install(
 
 
 def install_from_fab(
-    fab_file: Path, flwr_dir: Optional[Path], skip_prompt: bool = False
+    fab_file: Union[Path, bytes],
+    flwr_dir: Optional[Path],
+    skip_prompt: bool = False,
 ) -> None:
     """Install from a FAB file after extracting and validating."""
+    fab_file_archive: Union[Path, IO[bytes]]
+    fab_name: Optional[str]
+    if isinstance(fab_file, bytes):
+        fab_file_archive = BytesIO(fab_file)
+        fab_name = None
+    elif isinstance(fab_file, Path):
+        fab_file_archive = fab_file
+        fab_name = fab_file.stem
+    else:
+        raise ValueError("fab_file must be either a Path or bytes")
+
     with tempfile.TemporaryDirectory() as tmpdir:
-        with zipfile.ZipFile(fab_file, "r") as zipf:
+        with zipfile.ZipFile(fab_file_archive, "r") as zipf:
             zipf.extractall(tmpdir)
             tmpdir_path = Path(tmpdir)
             info_dir = tmpdir_path / ".info"
@@ -110,12 +124,12 @@ def install_from_fab(
 
             shutil.rmtree(info_dir)
 
-            validate_and_install(tmpdir_path, fab_file.stem, flwr_dir, skip_prompt)
+            validate_and_install(tmpdir_path, fab_name, flwr_dir, skip_prompt)
 
 
 def validate_and_install(
     project_dir: Path,
-    fab_name: str,
+    fab_name: Optional[str],
     flwr_dir: Optional[Path],
     skip_prompt: bool = False,
 ) -> None:
@@ -134,7 +148,10 @@ def validate_and_install(
     project_name = config["project"]["name"]
     version = config["project"]["version"]
 
-    if fab_name != f"{publisher}.{project_name}.{version.replace('.', '-')}":
+    if (
+        fab_name
+        and fab_name != f"{publisher}.{project_name}.{version.replace('.', '-')}"
+    ):
         typer.secho(
             "❌ FAB file has incorrect name. The file name must follow the format "
             "`<publisher>.<project_name>.<version>.fab`.",
