@@ -105,8 +105,8 @@ jobs:
         id: build
         with:
           action: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
-          attempt_limit: 120 # 120 attempts * 10 secs = ~20 mins
-          attempt_delay: 10000 # 10 secs
+          attempt_limit: 60 # 60 attempts * (9 secs delay + 1 sec retry) = ~10 mins
+          attempt_delay: 9000 # 9 secs
           with: |
             pull: true
             platforms: ${{ matrix.platform.docker }}
