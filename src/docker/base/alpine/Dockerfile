@@ -43,34 +43,11 @@ ENV PATH=/python/venv/bin:$PATH
 ARG PIP_VERSION
 ARG SETUPTOOLS_VERSION
 ARG FLWR_VERSION
-ARG MAX_RETRY=1
 ARG FLWR_PACKAGE=flwr
-RUN <<EOF
-    set -e
-    pip install -U --no-cache-dir \
-        pip==${PIP_VERSION} \
-        setuptools==${SETUPTOOLS_VERSION}
-
-    # On PyPi, it takes some time for a freshly uploaded package to be
-    # distributed across all servers. This leads to spontaneous failures in the
-    # Release CI when we try to build the Docker images after publishing
-    # flwr or flwr-nightly. Therefore we add a retry loop that tries to install
-    # the package every 10 seconds. The loop will end as soon as the package has
-    # been installed or the maximum number of reties has been reached.
-    COUNTER=0
-    while
-        ! pip install -U --no-cache-dir ${FLWR_PACKAGE}==${FLWR_VERSION} &&
-        [ $COUNTER -lt "$MAX_RETRY" ]
-    do
-        sleep 10
-        COUNTER=$((COUNTER + 1))
-    done
-
-    if [ "$COUNTER" -eq "$MAX_RETRY" ]
-    then
-        exit 1
-    fi
-EOF
+RUN pip install -U --no-cache-dir \
+    pip==${PIP_VERSION} \
+    setuptools==${SETUPTOOLS_VERSION} \
+    ${FLWR_PACKAGE}==${FLWR_VERSION}
 
 FROM python:${PYTHON_VERSION}-${DISTRO}${DISTRO_VERSION} as base
 
