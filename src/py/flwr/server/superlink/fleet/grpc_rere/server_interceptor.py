@@ -172,7 +172,7 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
             response_serializer=method_handler.response_serializer,
         )
 
-    def _update_client_keys(self):
+    def _update_client_keys(self) -> None:
         new_known_keys = set()
         try:
             with open(
@@ -187,8 +187,8 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                             new_known_keys.add(public_key_to_bytes(public_key))
                         else:
                             raise ValueError(
-                                f"Public key {maybe_public_key} is not an "
-                                "elliptic curve public key"
+                                f"Public key {maybe_public_key.decode('utf-8')} is "
+                                "not an elliptic curve public key"
                             )
 
             existing_known_keys = self.state.get_client_public_keys()
@@ -202,9 +202,9 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
                 public_key_node_ids = self.state.get_node_ids(remove_operations)
                 task_ins_list: List[TaskIns] = []
 
-                for public_key, node_id in public_key_node_ids.items():
-                    self.state.delete_node(node_id, public_key)
-                    task_ins_list.append(self.state.get_task_ins(node_id))
+                for deleted_key, node_id in public_key_node_ids.items():
+                    self.state.delete_node(node_id, deleted_key)
+                    task_ins_list.extend(self.state.get_task_ins(node_id, limit=None))
                 if len(task_ins_list) > 0:
                     task_ids = {UUID(task_ins.task_id) for task_ins in task_ins_list}
                     self.state.delete_tasks(task_ids)

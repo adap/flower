@@ -276,11 +276,12 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
 
     def get_node_ids(self, client_public_keys: Set[bytes]) -> Dict[bytes, int]:
         """Retrieve stored `node_ids` filtered by `client_public_keys`."""
-        return {
-            key: self.get_node_id(key)
-            for key in client_public_keys
-            if self.get_node_id(key) is not None
-        }
+        result = {}
+        for key in client_public_keys:
+            node_id = self.get_node_id(key)
+            if node_id is not None:
+                result[key] = node_id
+        return result
 
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""

@@ -20,6 +20,7 @@ import csv
 import os
 import tempfile
 import unittest
+from pathlib import Path
 
 import grpc
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
@@ -92,7 +93,7 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         )
 
         self._server_interceptor = AuthenticateServerInterceptor(
-            self.state, self.client_keys_file_path
+            self.state, Path(self.client_keys_file_path)
         )
         self._server: grpc.Server = _run_fleet_api_grpc_rere(
             ADDRESS_FLEET_API_GRPC_RERE, state_factory, None, [self._server_interceptor]
