@@ -107,8 +107,8 @@ def load_app(
         elif "tabnet" in sys.modules:
             log(
                 WARN,
-                "Cannot reload module '%s' from disk due to compatibility issues "
-                "with the 'tabnet' library. The module will be loaded from the "
+                "Cannot reload module `%s` from disk due to compatibility issues "
+                "with the `tabnet` library. The module will be loaded from the "
                 "cache instead. If you experience issues, consider restarting "
                 "the application.",
                 module_str,
