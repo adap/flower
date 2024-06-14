@@ -36,7 +36,7 @@ class Executor(ABC):
         self,
         fab_file: bytes,
         ttl: Optional[float] = None,
-    ) -> RunTracker:
+    ) -> Optional[RunTracker]:
         """Start a run using the given Flower FAB ID and version.
 
         This method creates a new run on the SuperLink, returns its run_id
@@ -54,6 +54,7 @@ class Executor(ABC):
 
         Returns
         -------
-        run_id : RunTracker
-            The run_id and the associated process of the run created by the SuperLink.
+        run_id : Optional[RunTracker]
+            The run_id and the associated process of the run created by the SuperLink,
+            or `None` if it fails.
         """

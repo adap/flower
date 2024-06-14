@@ -15,7 +15,7 @@
 """SuperExec API servicer."""
 
 
-from logging import INFO
+from logging import ERROR, INFO
 from subprocess import Popen
 from typing import Dict
 
@@ -44,5 +44,8 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
         run = self.executor.start_run(request.fab_file)
+        if run is None:
+            log(ERROR, "Executor failed to start run")
+            return StartRunResponse()
         self.runs[run.run_id] = run.proc
         return StartRunResponse(run_id=run.run_id)
