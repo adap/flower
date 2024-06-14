@@ -29,14 +29,35 @@ from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
 
 
-# pylint: disable=unused-argument
-def stream_logs(run_id: int, channel: grpc.Channel, period: int) -> None:
+def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
     """Stream logs from the beginning of a run with connection refresh."""
+    start_time = time.time()
+    stub = ExecStub(channel)
+    req = StreamLogsRequest(run_id=run_id)
 
+    for res in stub.StreamLogs(req):
+        print(res.log_output)
+        if time.time() - start_time > duration:
+            break
 
-# pylint: disable=unused-argument
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     """Print logs from the beginning of a run."""
+    stub = ExecStub(channel)
+    req = StreamLogsRequest(run_id=run_id)
+
+    while True:
+        try:
+            # Enforce timeout for graceful exit
+            for res in stub.StreamLogs(req, timeout=timeout):
+                print(res.log_output)
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                logger(INFO, "No new logs, exiting")
+            if e.code() == grpc.StatusCode.NOT_FOUND:
+                logger(ERROR, "`run_id` is invalid, exiting")
+        finally:
+            channel.close()
+            break
 
 
 def log(
