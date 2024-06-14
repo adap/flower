@@ -19,6 +19,7 @@ import select
 import threading
 import time
 from logging import ERROR, INFO
+from subprocess import Popen
 from typing import Any, Dict, Generator, List
 
 import grpc
@@ -59,7 +60,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         # Start background thread to capture logs
         self._capture_logs(run.proc)
-        
+
         return StartRunResponse(run_id=run.run_id)
 
     def _capture_logs(self, proc: Popen) -> None:  # type: ignore
