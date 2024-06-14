@@ -15,6 +15,7 @@
 """Flower SuperNode."""
 
 import argparse
+import os
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
