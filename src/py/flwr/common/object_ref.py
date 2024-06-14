@@ -115,7 +115,7 @@ def load_app(
             # Reload cached modules in the project directory
             if project_dir is not None:
                 for m in list(sys.modules.values()):
-                    path: Optional[str] = getattr(m, "__file__", None)
+                    path = getattr(m, "__file__", None)
                     if path is not None and path.startswith(project_dir):
                         importlib.reload(m)
 
