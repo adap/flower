@@ -53,6 +53,7 @@ def run_simulation_from_cli() -> None:
         backend_name=args.backend,
         backend_config=backend_config_dict,
         app_dir=args.app_dir,
+        run_id=args.run_id,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
         verbose_logging=args.verbose,
     )
@@ -168,6 +169,13 @@ def run_serverapp_th(
     return serverapp_th
 
 
+def _init_run_id(driver: InMemoryDriver, state: StateFactory, run_id: int) -> None:
+    """Create a run with a given `run_id`."""
+    log(DEBUG, "Pre-registering run with id %s", run_id)
+    state.state().run_ids[run_id] = ("", "")  # type: ignore
+    driver.run_id = run_id
+
+
 # pylint: disable=too-many-locals
 def _main_loop(
     num_supernodes: int,
@@ -175,6 +183,7 @@ def _main_loop(
     backend_config_stream: str,
     app_dir: str,
     enable_tf_gpu_growth: bool,
+    run_id: Optional[int] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
@@ -194,6 +203,9 @@ def _main_loop(
     try:
         # Initialize Driver
         driver = InMemoryDriver(state_factory)
+
+        if run_id:
+            _init_run_id(driver, state_factory, run_id)
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(
@@ -244,6 +256,7 @@ def _run_simulation(
     client_app_attr: Optional[str] = None,
     server_app_attr: Optional[str] = None,
     app_dir: str = "",
+    run_id: Optional[int] = None,
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
 ) -> None:
@@ -282,6 +295,9 @@ def _run_simulation(
     app_dir : str
         Add specified directory to the PYTHONPATH and load `ClientApp` from there.
         (Default: current working directory.)
+
+    run_id : Optional[int]
+        An integer specifying the ID of the run started when running this function.
 
     enable_tf_gpu_growth : bool (default: False)
         A boolean to indicate whether to enable GPU growth on the main thread. This is
@@ -322,6 +338,7 @@ def _run_simulation(
         backend_config_stream,
         app_dir,
         enable_tf_gpu_growth,
+        run_id,
         client_app,
         client_app_attr,
         server_app,
@@ -412,6 +429,11 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         help="Add specified directory to the PYTHONPATH and load"
         "ClientApp and ServerApp from there."
         " Default: current working directory.",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=int,
+        help="Sets the ID of the run started by the Simulation Engine.",
     )
 
     return parser
