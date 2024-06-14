@@ -314,7 +314,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         task_res_uuid = state.store_task_res(task_res)
-        # pylint: disable=unsubscriptable-object
+        # pylint: disable=all
         task_res_list = state.get_task_res(task_ids={task_ins_id}, limit=None)
 
         # Assert
