@@ -22,7 +22,7 @@ from typing import Optional
 
 @dataclass
 class RunTracker:
-    """Represents a Flower run (composed of a run_id and the associated process)."""
+    """Track a Flower run (composed of a run_id and the associated process)."""
 
     run_id: int
     proc: Popen  # type: ignore
