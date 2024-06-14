@@ -16,7 +16,6 @@
 
 
 from logging import ERROR, INFO
-from subprocess import Popen
 from typing import Dict
 
 import grpc
@@ -28,7 +27,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunResponse,
 )
 
-from .executor import Executor
+from .executor import Executor, RunTracker
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
@@ -36,16 +35,20 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
     def __init__(self, executor: Executor) -> None:
         self.executor = executor
-        self.runs: Dict[int, Popen] = {}  # type: ignore
+        self.runs: Dict[int, RunTracker] = {}
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
     ) -> StartRunResponse:
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
+
         run = self.executor.start_run(request.fab_file)
+
         if run is None:
             log(ERROR, "Executor failed to start run")
             return StartRunResponse()
-        self.runs[run.run_id] = run.proc
+
+        self.runs[run.run_id] = run
+
         return StartRunResponse(run_id=run.run_id)
