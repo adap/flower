@@ -27,6 +27,8 @@ from flwr.cli import config_utils
 from flwr.common.config import get_flwr_dir
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
+from flwr.proto.exec_pb2 import StreamLogsRequest
+from flwr.proto.exec_pb2_grpc import ExecStub
 
 
 def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
@@ -39,6 +41,7 @@ def stream_logs(run_id: int, channel: grpc.Channel, duration: int) -> None:
         print(res.log_output)
         if time.time() - start_time > duration:
             break
+
 
 def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     """Print logs from the beginning of a run."""
