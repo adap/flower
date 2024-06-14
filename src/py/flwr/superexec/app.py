@@ -53,7 +53,7 @@ def run_superexec() -> None:
     # Start SuperExec API
     superexec_server: grpc.Server = run_superexec_api_grpc(
         address=address,
-        plugin=_get_exec_plugin(args),
+        executor=_load_executor(args),
         certificates=certificates,
     )
 
@@ -85,13 +85,13 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--executor-dir",
-        help="The directory for the plugin.",
+        help="The directory for the executor.",
         default=".",
     )
     parser.add_argument(
         "--insecure",
         action="store_true",
-        help="Run the server without HTTPS, regardless of whether certificate "
+        help="Run the SuperExec without HTTPS, regardless of whether certificate "
         "paths are provided. By default, the server runs with HTTPS enabled. "
         "Use this flag only if you understand the risks.",
     )
@@ -152,28 +152,27 @@ def _try_obtain_certificates(
     )
 
 
-def _get_exec_plugin(
+def _load_executor(
     args: argparse.Namespace,
 ) -> Executor:
     """Get the executor plugin."""
-    exec_plugin_dir = args.executor_dir
-    if exec_plugin_dir is not None:
-        sys.path.insert(0, exec_plugin_dir)
+    if args.executor_dir is not None:
+        sys.path.insert(0, args.executor_dir)
 
-    plugin_ref: str = args.executor
-    valid, error_msg = validate(plugin_ref)
+    executor_ref: str = args.executor
+    valid, error_msg = validate(executor_ref)
     if not valid and error_msg:
-        raise LoadExecPluginError(error_msg) from None
+        raise LoadExecutorError(error_msg) from None
 
-    exec_plugin = load_app(plugin_ref, LoadExecPluginError)
+    executor = load_app(executor_ref, LoadExecutorError)
 
-    if not isinstance(exec_plugin, Executor):
-        raise LoadExecPluginError(
-            f"Attribute {plugin_ref} is not of type {Executor}",
+    if not isinstance(executor, Executor):
+        raise LoadExecutorError(
+            f"Attribute {executor_ref} is not of type {Executor}",
         ) from None
 
-    return exec_plugin
+    return executor
 
 
-class LoadExecPluginError(Exception):
-    """Error when trying to load `ClientApp`."""
+class LoadExecutorError(Exception):
+    """Error when trying to load `Executor`."""
