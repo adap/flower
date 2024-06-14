@@ -265,10 +265,10 @@ def _start_client_internal(
         transport, server_address
     )
 
-    run_tracker = _RunTracker()
-    _ = run_tracker
+    app_state_tracker = _AppStateTracker()
 
     def _on_sucess(retry_state: RetryState) -> None:
+        app_state_tracker.is_connected = True
         if retry_state.tries > 1:
             log(
                 INFO,
@@ -278,6 +278,7 @@ def _start_client_internal(
             )
 
     def _on_backoff(retry_state: RetryState) -> None:
+        app_state_tracker.is_connected = False
         if retry_state.tries == 1:
             log(WARN, "Connection attempt failed, retrying...")
         else:
@@ -308,7 +309,7 @@ def _start_client_internal(
 
     node_state = NodeState()
 
-    while True:
+    while not app_state_tracker.interrupt:
         sleep_duration: int = 0
         with connection(
             address,
@@ -325,8 +326,9 @@ def _start_client_internal(
             if create_node is not None:
                 create_node()  # pylint: disable=not-callable
 
-            while True:
-                if True:  # pylint: disable=using-constant-test
+            app_state_tracker.register_signal_handler()
+            while not app_state_tracker.interrupt:
+                try:
                     # Receive
                     message = receive()
                     if message is None:
@@ -397,7 +399,10 @@ def _start_client_internal(
                             e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
                             exc_entity = "SuperNode"
 
-                        log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
+                        if not app_state_tracker.interrupt:
+                            log(
+                                ERROR, "%s raised an exception", exc_entity, exc_info=ex
+                            )
 
                         # Create error message
                         reply_message = message.create_error_reply(
@@ -414,13 +419,19 @@ def _start_client_internal(
                     send(reply_message)
                     log(INFO, "Sent reply")
 
+                except StopIteration:
+                    sleep_duration = 0
+                    break
+
             # Unregister node
-            if delete_node is not None:
+            if delete_node is not None and app_state_tracker.is_connected:
                 delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
+            del app_state_tracker
             break
+
         # Sleep and reconnect afterwards
         log(
             INFO,
@@ -592,8 +603,9 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
 
 
 @dataclass
-class _RunTracker:
+class _AppStateTracker:
     interrupt: bool = False
+    is_connected: bool = False
 
     def register_signal_handler(self) -> None:
         """Register handlers for exit signals."""
