@@ -20,7 +20,7 @@ import csv
 import os
 from logging import WARNING
 from pathlib import Path
-from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, List, Optional, Sequence, Set, Tuple, Union
 from uuid import UUID
 
 import grpc
@@ -173,46 +173,56 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
         )
 
     def _update_client_keys(self) -> None:
-        new_known_keys = set()
         try:
-            with open(
-                self.client_keys_file_path, newline="", encoding="utf-8"
-            ) as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                    for element in row:
-                        maybe_public_key = element.encode()
-                        public_key = load_ssh_public_key(maybe_public_key)
-                        if isinstance(public_key, ec.EllipticCurvePublicKey):
-                            new_known_keys.add(public_key_to_bytes(public_key))
-                        else:
-                            raise ValueError(
-                                f"Public key {maybe_public_key.decode('utf-8')} is "
-                                "not an elliptic curve public key"
-                            )
-
+            new_known_keys = self._read_and_parse_keys()
             existing_known_keys = self.state.get_client_public_keys()
             add_operations = new_known_keys - existing_known_keys
             remove_operations = existing_known_keys - new_known_keys
 
-            if len(add_operations) > 0:
-                self.state.store_client_public_keys(add_operations)
-            if len(remove_operations) > 0:
-                self.state.remove_client_public_keys(remove_operations)
-                public_key_node_ids = self.state.get_node_ids(remove_operations)
-                task_ins_list: List[TaskIns] = []
-
-                for deleted_key, node_id in public_key_node_ids.items():
-                    self.state.delete_node(node_id, deleted_key)
-                    task_ins_list.extend(self.state.get_task_ins(node_id, limit=None))
-                if len(task_ins_list) > 0:
-                    task_ids = {UUID(task_ins.task_id) for task_ins in task_ins_list}
-                    self.state.delete_tasks(task_ids)
+            self._update_state_keys(add_operations, remove_operations)
 
         except (ValueError, UnsupportedAlgorithm) as e:
-            log(WARNING, f"Abort updating client_public_keys set due to error: {e}")
+            log(WARNING, "Abort updating client_public_keys set due to error: %s", e)
         except Exception as e:
-            log(WARNING, f"Abort updating client_public_keys set due to error: {e}")
+            log(
+                WARNING,
+                "Abort updating client_public_keys set due to unexpected error: %s",
+                e,
+            )
+
+    def _read_and_parse_keys(self) -> Set[bytes]:
+        new_known_keys = set()
+        with open(self.client_keys_file_path, newline="", encoding="utf-8") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                for element in row:
+                    maybe_public_key = element.encode()
+                    public_key = load_ssh_public_key(maybe_public_key)
+                    if isinstance(public_key, ec.EllipticCurvePublicKey):
+                        new_known_keys.add(public_key_to_bytes(public_key))
+                    else:
+                        raise ValueError(
+                            f"Public key {maybe_public_key.decode('utf-8')} is "
+                            "not an elliptic curve public key"
+                        )
+        return new_known_keys
+
+    def _update_state_keys(
+        self, add_operations: Set[bytes], remove_operations: Set[bytes]
+    ) -> None:
+        if add_operations:
+            self.state.store_client_public_keys(add_operations)
+        if remove_operations:
+            self.state.remove_client_public_keys(remove_operations)
+            public_key_node_ids = self.state.get_node_ids(remove_operations)
+            task_ins_list: List[TaskIns] = []
+
+            for deleted_key, node_id in public_key_node_ids.items():
+                self.state.delete_node(node_id, deleted_key)
+                task_ins_list.extend(self.state.get_task_ins(node_id, limit=None))
+            if task_ins_list:
+                task_ids = {UUID(task_ins.task_id) for task_ins in task_ins_list}
+                self.state.delete_tasks(task_ids)
 
     def _verify_node_id(
         self,
