@@ -104,13 +104,13 @@ def load_app(
             for mod_name in list(sys.modules.keys()):
                 path: Optional[str] = getattr(sys.modules[mod_name], "__file__", None)
                 if path is not None and path.startswith(project_dir):
-                    sys.modules[mod_name] = importlib.reload(sys.modules[mod_name])
+                    importlib.reload(sys.modules[mod_name])
 
         module = importlib.import_module(module_str)
-    except ModuleNotFoundError:
+    except ModuleNotFoundError as err:
         raise error_type(
             f"Unable to load module {module_str}{OBJECT_REF_HELP_STR}",
-        ) from None
+        ) from err
 
     # Recursively load attribute
     attribute = module
