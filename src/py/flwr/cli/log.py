@@ -17,7 +17,7 @@
 import sys
 import time
 from logging import DEBUG, ERROR, INFO
-from typing import Optional, Any
+from typing import Optional
 
 import grpc
 import typer
