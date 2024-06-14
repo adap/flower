@@ -14,11 +14,11 @@
 # ==============================================================================
 """Execute and monitor a Flower run."""
 
+import threading
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from subprocess import Popen
-from typing import Optional, List
-import threading
+from typing import List, Optional
 
 
 @dataclass

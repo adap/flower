@@ -18,9 +18,7 @@
 import select
 import threading
 import time
-from dataclasses import dataclass
 from logging import ERROR, INFO
-from subprocess import Popen
 from typing import Any, Dict, Generator, List
 
 import grpc
@@ -34,7 +32,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsResponse,
 )
 
-from .executor import Executor, RunTracker, LogStreamer
+from .executor import Executor, LogStreamer, RunTracker
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
