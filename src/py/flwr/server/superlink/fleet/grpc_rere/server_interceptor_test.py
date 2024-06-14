@@ -69,7 +69,6 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
             delete=False, mode="w+", newline="", encoding="utf-8", suffix=".csv"
         ) as temp_file:
             self.temp_file = temp_file
-        self.temp_file.seek(0)
 
         self.client_keys_file_path = self.temp_file.name
         with open(
