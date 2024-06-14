@@ -21,8 +21,8 @@ from typing import Optional
 
 
 @dataclass
-class Run:
-    """Represents a Flower run (composed of a run_id and the associated process)."""
+class RunTracker:
+    """Track a Flower run (composed of a run_id and the associated process)."""
 
     run_id: int
     proc: Popen  # type: ignore
@@ -35,9 +35,8 @@ class Executor(ABC):
     def start_run(
         self,
         fab_file: bytes,
-        ttl: Optional[float] = None,
-    ) -> Run:
-        """Start a run using the given Flower App ID and version.
+    ) -> Optional[RunTracker]:
+        """Start a run using the given Flower FAB ID and version.
 
         This method creates a new run on the SuperLink, returns its run_id
         and also starts the run execution.
@@ -46,14 +45,10 @@ class Executor(ABC):
         ----------
         fab_file : bytes
             The Flower App Bundle file bytes.
-        ttl : Optional[float] (default: None)
-            Time-to-live for the round trip of this message, i.e., the time from sending
-            this message to receiving a reply. It specifies in seconds the duration for
-            which the message and its potential reply are considered valid. If unset,
-            the default TTL (i.e., `common.DEFAULT_TTL`) will be used.
 
         Returns
         -------
-        run_id : int
-            The run_id of the run created by the SuperLink.
+        run_id : Optional[RunTracker]
+            The run_id and the associated process of the run created by the SuperLink,
+            or `None` if it fails.
         """
