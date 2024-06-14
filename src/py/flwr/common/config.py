@@ -16,6 +16,9 @@
 
 import os
 from pathlib import Path
+from typing import Optional, Union, Dict, Any
+
+APP_DIR = "apps"
 
 
 def get_flwr_dir() -> Path:
@@ -26,3 +29,18 @@ def get_flwr_dir() -> Path:
             f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
         )
     )
+
+
+def get_project_dir(
+    fab_id: str, fab_version: str, flwr_dir: Optional[Union[str, Path]] = None
+) -> Path:
+    """Return the project directory based on the given fab_id, fab_version."""
+    if flwr_dir is None:
+        flwr_dir = get_flwr_dir()
+
+    publisher, project_name = fab_id.split("/")
+    return Path(flwr_dir) / APP_DIR / publisher / project_name / fab_version
+
+
+def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
+    """"""
