@@ -35,8 +35,6 @@ from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import InMemoryState, SqliteState, State
 
-import uuid
-
 
 class StateTest(unittest.TestCase):
     """Test all state implementations."""
