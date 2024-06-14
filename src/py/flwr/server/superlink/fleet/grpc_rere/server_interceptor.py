@@ -20,8 +20,8 @@ import csv
 import os
 from logging import WARNING
 from pathlib import Path
+from typing import Any, Callable, List, Optional, Sequence, Tuple, Union
 from uuid import UUID
-from typing import Any, Callable, Optional, Sequence, Tuple, Union, List
 
 import grpc
 from cryptography.exceptions import UnsupportedAlgorithm
@@ -51,7 +51,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
-from flwr.proto.task_pb2 import TaskIns # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 from flwr.server.superlink.state import State
 
 _PUBLIC_KEY_HEADER = "public-key"
