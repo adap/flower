@@ -38,7 +38,7 @@ from .executor import Executor, RunTracker, LogStreamer
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
-    """Driver API servicer."""
+    """SuperExec API servicer."""
 
     def __init__(self, executor: Executor) -> None:
         self.executor = executor
