@@ -106,17 +106,17 @@ def load_app(
         else:
             module = sys.modules[module_str]
             if project_dir is None:
-                if module.__file__ is not None:
+                if getattr(module, "__file__", None) is not None:
                     project_dir = str(Path(module.__file__).parent)
             else:
                 project_dir = str(Path(project_dir).absolute())
 
             # Reload cached modules in the project directory
             if project_dir is not None:
-                for mname in list(sys.modules.keys()):
-                    path: Optional[str] = sys.modules[mname].__file__
+                for m in list(sys.modules.values()):
+                    path: Optional[str] = getattr(m, "__file__", None)
                     if path is not None and path.startswith(project_dir):
-                        importlib.reload(sys.modules[mname])
+                        importlib.reload(m)
 
     except ModuleNotFoundError as err:
         raise error_type(
