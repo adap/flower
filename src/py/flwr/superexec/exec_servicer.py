@@ -96,8 +96,10 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
             if run.proc.poll() is not None:
                 log(INFO, "Subprocess finished, exiting log capture")
-                run.proc.stdout.close()
-                run.proc.stderr.close()
+                if run.proc.stdout:
+                    run.proc.stdout.close()
+                if run.proc.stderr:
+                    run.proc.stderr.close()
                 stop_event.set()
                 break
 
