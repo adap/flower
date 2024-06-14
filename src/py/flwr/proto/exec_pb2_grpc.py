@@ -19,8 +19,8 @@ class ExecStub(object):
                 request_serializer=flwr_dot_proto_dot_exec__pb2.StartRunRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_exec__pb2.StartRunResponse.FromString,
                 )
-        self.FetchLogs = channel.unary_stream(
-                '/flwr.proto.Exec/FetchLogs',
+        self.StreamLogs = channel.unary_stream(
+                '/flwr.proto.Exec/StreamLogs',
                 request_serializer=flwr_dot_proto_dot_exec__pb2.StreamLogsRequest.SerializeToString,
                 response_deserializer=flwr_dot_proto_dot_exec__pb2.StreamLogsResponse.FromString,
                 )
@@ -36,7 +36,7 @@ class ExecServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def FetchLogs(self, request, context):
+    def StreamLogs(self, request, context):
         """Start log stream upon request
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -51,8 +51,8 @@ def add_ExecServicer_to_server(servicer, server):
                     request_deserializer=flwr_dot_proto_dot_exec__pb2.StartRunRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_exec__pb2.StartRunResponse.SerializeToString,
             ),
-            'FetchLogs': grpc.unary_stream_rpc_method_handler(
-                    servicer.FetchLogs,
+            'StreamLogs': grpc.unary_stream_rpc_method_handler(
+                    servicer.StreamLogs,
                     request_deserializer=flwr_dot_proto_dot_exec__pb2.StreamLogsRequest.FromString,
                     response_serializer=flwr_dot_proto_dot_exec__pb2.StreamLogsResponse.SerializeToString,
             ),
@@ -84,7 +84,7 @@ class Exec(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def FetchLogs(request,
+    def StreamLogs(request,
             target,
             options=(),
             channel_credentials=None,
@@ -94,7 +94,7 @@ class Exec(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/flwr.proto.Exec/FetchLogs',
+        return grpc.experimental.unary_stream(request, target, '/flwr.proto.Exec/StreamLogs',
             flwr_dot_proto_dot_exec__pb2.StreamLogsRequest.SerializeToString,
             flwr_dot_proto_dot_exec__pb2.StreamLogsResponse.FromString,
             options, channel_credentials,
