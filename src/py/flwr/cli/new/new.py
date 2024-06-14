@@ -49,7 +49,7 @@ class TemplateNotFound(Exception):
 
 def load_template(name: str) -> str:
     """Load template from template directory and return as text."""
-    tpl_dir = Path(__file__).absolute().parent / "templates"
+    tpl_dir = Path(__file__).resolve().parent / "templates"
     tpl_file_path = tpl_dir / name
 
     if not tpl_file_path.is_file():

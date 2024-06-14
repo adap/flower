@@ -45,7 +45,7 @@ def run(
         )
 
     if server_app_dir is not None:
-        sys.path.insert(0, str(Path(server_app_dir).absolute()))
+        sys.path.insert(0, str(Path(server_app_dir).resolve()))
 
     # Load ServerApp if needed
     def _load() -> ServerApp:
