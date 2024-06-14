@@ -2,7 +2,7 @@
 ---
 model:
   name: "mistralai/Mistral-7B-v0.3"
-  quantization: 8 # 8 or 4 if you want to do quantization with BitsAndBytes
+  quantization: 4 # 8 or 4 if you want to do quantization with BitsAndBytes
   gradient_checkpointing: True
   lora:
     peft_lora_r: 32
