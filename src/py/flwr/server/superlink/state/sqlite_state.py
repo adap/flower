@@ -712,7 +712,10 @@ class SqliteState(State):  # pylint: disable=R0904
             return False
 
     def get_valid_task_ins(self, task_id: str) -> Optional[dict]:
-        """Check if the TaskIns exists and is valid (not expired). Return TaskIns if valid."""
+        """Check if the TaskIns exists and is valid (not expired).
+
+        Return TaskIns if valid.
+        """
         query = """
             SELECT *
             FROM task_ins
