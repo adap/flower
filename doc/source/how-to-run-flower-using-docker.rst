@@ -86,7 +86,7 @@ container. Furthermore, we use the flag ``--database`` to specify the name of th
 .. code-block:: bash
 
   $ mkdir state
-  $ sudo chmod -R 49999:49999 state
+  $ sudo chown -R 49999:49999 state
   $ docker run --rm \
     -p 9091:9091 -p 9092:9092 --volume ./state/:/app/state flwr/superlink:1.9.0 \
     --insecure \
