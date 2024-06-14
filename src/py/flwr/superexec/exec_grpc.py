@@ -30,13 +30,12 @@ from .executor import Executor
 
 def run_superexec_api_grpc(
     address: str,
-    plugin: Executor,
+    executor: Executor,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
 ) -> grpc.Server:
     """Run SuperExec API (gRPC, request-response)."""
-    # Create Driver API gRPC server
     exec_servicer: grpc.Server = ExecServicer(
-        plugin=plugin,
+        executor=executor,
     )
     superexec_add_servicer_to_server_fn = add_ExecServicer_to_server
     superexec_grpc_server = generic_create_grpc_server(

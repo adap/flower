@@ -24,13 +24,13 @@ from typing import Optional
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 
-from .executor import Executor, Run
+from .executor import Executor, RunTracker
 
 
 class SimulationEngine(Executor):
     """Simulation engine executor plugin."""
 
-    def start_run(self, fab_file: bytes, ttl: Optional[float] = None) -> Run:
+    def start_run(self, fab_file: bytes, ttl: Optional[float] = None) -> RunTracker:
         """Start run using the Flower Simulation Engine."""
         _ = ttl
         _, fab_id = get_fab_metadata(fab_file)
@@ -51,7 +51,7 @@ class SimulationEngine(Executor):
         # num_nodes = engine_conf["simulation"]["supernode"]["num"]
         num_nodes = 2
 
-        return Run(
+        return RunTracker(
             run_id=run_id,
             proc=subprocess.Popen(
                 [

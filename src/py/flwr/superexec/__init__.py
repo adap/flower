@@ -1,4 +1,4 @@
-# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower driver service."""
+"""Flower SuperExec service."""
 
 from .app import run_superexec as run_superexec
-from .exec_grpc import run_superexec_api_grpc as run_superexec_api_grpc
-from .test_executor import TestExec as TestExec
 
 __all__ = [
-    "run_superexec_api_grpc",
     "run_superexec",
-    "TestExec",
 ]
