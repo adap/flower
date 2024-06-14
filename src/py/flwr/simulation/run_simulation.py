@@ -297,7 +297,7 @@ def _run_simulation(
         (Default: current working directory.)
 
     run_id : Optional[int]
-        An integer specifying the id of the run started when running this function.
+        An integer specifying the ID of the run started when running this function.
 
     enable_tf_gpu_growth : bool (default: False)
         A boolean to indicate whether to enable GPU growth on the main thread. This is
