@@ -302,7 +302,10 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         run_id = state.create_run("mock/mock", "v1.0.0")
-        task_ins_id = uuid4()
+
+        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_ins_id = state.store_task_ins(task_ins)
+
         task_res = create_task_res(
             producer_node_id=0,
             anonymous=True,
@@ -507,11 +510,23 @@ class StateTest(unittest.TestCase):
         # Prepare
         state: State = self.state_factory()
         run_id = state.create_run("mock/mock", "v1.0.0")
+
+        task_ins_0 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_ins_1 = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_ins_id_0 = state.store_task_ins(task_ins_0)
+        task_ins_id_1 = state.store_task_ins(task_ins_1)
+
         task_0 = create_task_res(
-            producer_node_id=0, anonymous=True, ancestry=["1"], run_id=run_id
+            producer_node_id=0,
+            anonymous=True,
+            ancestry=[str(task_ins_id_0)],
+            run_id=run_id,
         )
         task_1 = create_task_res(
-            producer_node_id=0, anonymous=True, ancestry=["1"], run_id=run_id
+            producer_node_id=0,
+            anonymous=True,
+            ancestry=[str(task_ins_id_1)],
+            run_id=run_id,
         )
 
         # Store two tasks
@@ -663,6 +678,32 @@ class StateTest(unittest.TestCase):
         err_taskres = task_res_list[1]
         assert err_taskres.task.HasField("error")
         assert err_taskres.task.error.code == ErrorCode.NODE_UNAVAILABLE
+
+    def test_store_task_res_taskins_expired(self) -> None:
+        """Test behavior of store_task_res when the TaskIns it references is expired."""
+        # Prepare
+        state: State = self.state_factory()
+        run_id = state.create_run("mock/mock", "v1.0.0")
+
+        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_ins.task.created_at = time.time() - task_ins.task.ttl + 0.5
+        task_ins_id = state.store_task_ins(task_ins)
+
+        # Wait for 0.5 second for TaskIns to expire
+        time.sleep(0.5)
+
+        task = create_task_res(
+            producer_node_id=0,
+            anonymous=True,
+            ancestry=[str(task_ins_id)],
+            run_id=run_id,
+        )
+
+        # Execute
+        result = state.store_task_res(task)
+
+        # Assert
+        assert result == None
 
 
 def create_task_ins(

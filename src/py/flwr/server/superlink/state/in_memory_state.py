@@ -116,6 +116,19 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             log(ERROR, errors)
             return None
 
+        with self.lock:
+            # Check if the TaskIns it is replying to exists and is valid
+            task_ins_id = task_res.task.ancestry[0]
+            task_ins = self.task_ins_store.get(UUID(task_ins_id))
+
+            if task_ins is None:
+                log(ERROR, "TaskIns with task_id %s does not exist.", task_ins_id)
+                return None
+
+            if task_ins.task.created_at + task_ins.task.ttl <= time.time():
+                log(ERROR, "TaskIns with task_id %s is expired.", task_ins_id)
+                return None
+
         # Validate run_id
         if task_res.run_id not in self.run_ids:
             log(ERROR, "`run_id` is invalid")
