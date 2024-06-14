@@ -16,9 +16,11 @@
 
 import sys
 from enum import Enum
-from logging import DEBUG
+from logging import DEBUG, INFO
 from typing import Optional
 
+import time
+import grpc
 import typer
 from typing_extensions import Annotated
 
@@ -30,6 +32,7 @@ from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
 
+from ..log import stream_logs
 
 class Engine(str, Enum):
     """Enum defining the engine to run on."""
@@ -49,10 +52,21 @@ def run(
             case_sensitive=False, help="Use this flag to use the new SuperExec API"
         ),
     ] = False,
+    period: Annotated[
+        int,
+        typer.Option(
+            case_sensitive=False,
+            help="Use this to set connection refresh time period (in seconds)",
+        ),
+    ] = 60,
+    follow: Annotated[
+        bool,
+        typer.Option(case_sensitive=False, help="Use this flag to stream logs"),
+    ] = True,
 ) -> None:
     """Run Flower project."""
     if use_superexec:
-        _start_superexec_run()
+        _start_superexec_run(period: int, follow: bool)
         return
 
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
@@ -102,7 +116,7 @@ def run(
         )
 
 
-def _start_superexec_run() -> None:
+def _start_superexec_run(period: int, follow: bool) -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
@@ -118,4 +132,19 @@ def _start_superexec_run() -> None:
     stub = ExecStub(channel)
 
     req = StartRunRequest()
-    stub.StartRun(req)
+    res = stub.StartRun(req)
+
+    if follow:
+        try:
+            while True:
+                log(INFO, "Streaming logs")
+                stream_logs(res.run_id, channel, period)
+                time.sleep(2)
+                log(INFO, "Reconnecting to logstream")
+        except KeyboardInterrupt:
+            log(INFO, "Exiting logstream")
+        except grpc.RpcError as e:
+            if e.code() == grpc.StatusCode.CANCELLED:
+                pass
+        finally:
+            channel.close()
