@@ -97,20 +97,20 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--ssl-certfile",
-        help="Fleet API server SSL certificate file (as a path str) "
+        help="SuperExec server SSL certificate file (as a path str) "
         "to create a secure connection.",
         type=str,
         default=None,
     )
     parser.add_argument(
         "--ssl-keyfile",
-        help="Fleet API server SSL private key file (as a path str) "
+        help="SuperExec server SSL private key file (as a path str) "
         "to create a secure connection.",
         type=str,
     )
     parser.add_argument(
         "--ssl-ca-certfile",
-        help="Fleet API server SSL CA certificate file (as a path str) "
+        help="SuperExec server SSL CA certificate file (as a path str) "
         "to create a secure connection.",
         type=str,
     )
