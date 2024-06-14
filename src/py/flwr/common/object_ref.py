@@ -82,7 +82,7 @@ def validate(
     )
 
 
-def load_app(
+def load_app(  # pylint: disable= too-many-branches
     module_attribute_str: str,
     error_type: Type[Exception],
     project_dir: Optional[str] = None,
