@@ -16,7 +16,6 @@
 
 
 import subprocess
-import unittest
 from unittest.mock import MagicMock
 
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
@@ -24,37 +23,30 @@ from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from .exec_servicer import ExecServicer
 
 
-class ExecServicerTestCase(unittest.TestCase):
-    """Test suite for class ExecServicer and helper functions."""
+def test_start_run() -> None:
+    """Test StartRun method of ExecServicer."""
+    run_res = MagicMock()
+    run_res.run_id = 10
+    with subprocess.Popen(
+        ["echo", "success"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    ) as proc:
+        run_res.proc = proc
 
-    def test_start_run(self) -> None:
-        """Test StartRun method of ExecServicer."""
-        run_res = MagicMock()
-        run_res.run_id = 10
-        with subprocess.Popen(
-            ["echo", "success"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        ) as proc:
-            run_res.proc = proc
+    exec_plugin = MagicMock()
+    exec_plugin.start_run = lambda _: run_res
 
-        exec_plugin = MagicMock()
-        exec_plugin.start_run = lambda _: run_res
+    context_mock = MagicMock()
 
-        context_mock = MagicMock()
+    request = StartRunRequest()
+    request.fab_file = b"test"
 
-        request = StartRunRequest()
-        request.fab_file = b"test"
+    # Create a instance of FlowerServiceServicer
+    servicer = ExecServicer(plugin=exec_plugin)
 
-        # Create a instance of FlowerServiceServicer
-        servicer = ExecServicer(plugin=exec_plugin)
+    # Execute
+    response = servicer.StartRun(request, context_mock)
 
-        # Execute
-        response = servicer.StartRun(request, context_mock)
-
-        assert response.run_id == 10
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    assert response.run_id == 10
