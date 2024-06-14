@@ -24,9 +24,9 @@ import typer
 from typing_extensions import Annotated
 
 from flwr.cli import config_utils
+from flwr.common.config import get_flwr_dir
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
-from flwr.common.config import get_flwr_dir
 
 
 # pylint: disable=unused-argument
@@ -67,9 +67,7 @@ def log(
         logger(DEBUG, channel_connectivity)
 
     if superexec_address is None:
-        global_config = config_utils.load(
-            get_flwr_dir / "config.toml"
-        )
+        global_config = config_utils.load(get_flwr_dir / "config.toml")
         if global_config:
             superexec_address = global_config["federation"]["default"]
         else:
