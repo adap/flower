@@ -16,6 +16,7 @@
 
 
 import argparse
+import os
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
@@ -45,7 +46,7 @@ def run(
         )
 
     if server_app_dir is not None:
-        sys.path.insert(0, server_app_dir)
+        sys.path.insert(0, os.path.abspath(server_app_dir))
 
     # Load ServerApp if needed
     def _load() -> ServerApp:
