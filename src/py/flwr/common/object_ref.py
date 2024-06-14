@@ -106,8 +106,9 @@ def load_app(
         else:
             module = sys.modules[module_str]
             if project_dir is None:
-                if getattr(module, "__file__", None) is not None:
-                    project_dir = str(Path(module.__file__).parent)
+                path: Optional[str] = getattr(module, "__file__", None)
+                if path is not None:
+                    project_dir = str(Path(path).parent)
             else:
                 project_dir = str(Path(project_dir).absolute())
 
