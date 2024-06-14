@@ -48,11 +48,6 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     stub = ExecStub(channel)
     req = StreamLogsRequest(run_id=run_id)
 
-    def is_channel_closed(channel: grpc.Channel) -> Any:
-        state = channel.get_state(try_to_connect=False)
-        return state == grpc.ChannelConnectivity.SHUTDOWN
-
-    should_break = False
     while True:
         try:
             # Enforce timeout for graceful exit
@@ -60,16 +55,14 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
                 print(res.log_output)
         except grpc.RpcError as e:
             if e.code() == grpc.StatusCode.DEADLINE_EXCEEDED:
-                logger(INFO, "No new logs, exiting")
-            if e.code() == grpc.StatusCode.NOT_FOUND:
-                logger(ERROR, "`run_id` is invalid, exiting")
-        finally:
-            channel.close()
-            if is_channel_closed(channel):
-                should_break = True
+                break
+            elif e.code() == grpc.StatusCode.NOT_FOUND:
+                logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
+                break
+            elif e.code() == grpc.StatusCode.CANCELLED:
+                break
 
-        if should_break:
-            break
+    channel.close()
 
 
 def log(
