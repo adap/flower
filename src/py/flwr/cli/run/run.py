@@ -15,11 +15,11 @@
 """Flower command line interface `run` command."""
 
 import sys
+import time
 from enum import Enum
 from logging import DEBUG, INFO
 from typing import Optional
 
-import time
 import grpc
 import typer
 from typing_extensions import Annotated
@@ -33,6 +33,7 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
 
 from ..log import stream_logs
+
 
 class Engine(str, Enum):
     """Enum defining the engine to run on."""
