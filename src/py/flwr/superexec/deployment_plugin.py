@@ -12,7 +12,7 @@ from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
 from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
 
-from .executor import Executor, Run
+from .executor import Executor, RunTracker
 
 
 class DeploymentEngine(Executor):
@@ -49,7 +49,7 @@ class DeploymentEngine(Executor):
     def _install_fab(self, fab_file: bytes) -> Path:
         return install_from_fab(fab_file, None, True)
 
-    def start_run(self, fab_file: bytes, ttl: Optional[float] = None) -> Run:
+    def start_run(self, fab_file: bytes, ttl: Optional[float] = None) -> RunTracker:
         """Start run using the Flower Deployment Engine."""
         _ = ttl
         fab_id, fab_version = get_fab_metadata(fab_file)
@@ -64,7 +64,7 @@ class DeploymentEngine(Executor):
             stderr=subprocess.DEVNULL,
         )
 
-        return Run(
+        return RunTracker(
             run_id=run_id,
             proc=subprocess.Popen(
                 [
