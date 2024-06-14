@@ -2,43 +2,52 @@
 
 # FlowerTune LLM Leaderboard
 
-This repository guides you through the process of federated LLM instruction tuning with a pre-trained [Mistral-7B](https://huggingface.co/mistralai/Mistral-7B-v0.3) models across various tasks.
-Please follow the instructions to run baseline tasks and create your own projects.
+This repository guides you through the process of federated LLM instruction tuning with a 
+pre-trained [Mistral-7B](https://huggingface.co/mistralai/Mistral-7B-v0.3) models across different domains.
+Please follow the instructions to run and evaluate the LLM baselines.
 
 
 ## Structure
-Each LLM task within this directory is completely self-contained, with its source code neatly organized in its respective subdirectory.
-The task subdirectories contain the following structure:
+Each LLM challenge within this directory is completely self-contained, with its source code neatly organized in its respective subdirectory.
+The challenge subdirectories contain the following structure:
 
 ```bash
-flowertune-llm-leaderboard/<task-name>/
-                 ├── README.md
-                 ├── main.py         # <- Flower ClientApp/ServerApp build
-                 ├── client.py       # <- Flower client constructor
-                 ├── server.py       # <- Sever-related functions
-                 ├── model.py        # <- Model build
-                 ├── dataset.py      # <- Dataset and tokenizer build
-                 ├── pyproject.toml           # <- Environment dependencies
-                 ├── conf/config.yaml         # <- User configuration
-                 ├── static_conf/config.yaml  # <- Static configuration
-                 └── <evaluation>             # <- Evaluation metrics
+flowertune-llm/<challenge-name>
+                      ├── README.md
+                      ├── pyproject.toml   # <- Environment dependencies
+                      └── <challenge_name>
+                                ├── app.py          # <- Flower ClientApp/ServerApp build
+                                ├── client.py       # <- Flower client constructor
+                                ├── server.py       # <- Sever-related functions
+                                ├── models.py       # <- Model build
+                                ├── dataset.py      # <- Dataset and tokenizer build
+                                ├── conf/config.yaml         # <- User configuration
+                                └── conf/static_config.yaml  # <- Static configuration   
 ```
 
-## Running FlowerTune-LLM tasks
-
-Each LLM-FlowerTune task is self-contained in its own directory.
-Running a task can be done by:
-
-1. Follow the `Environments setup` section in the `README.md` of each task subdirectory to create a new project directory.
+The `evaluation` subdirectory contains the code and instruction to evaluate trained LLMs for different domains.
 
 
-2. Navigate inside the directory of the task you'd like to run.
+## Create a new project
+Assuming `flwr` package is already installed on your system (check [here](https://flower.ai/docs/framework/how-to-install-flower.html) for `flwr` installation).
+We provide a single-line command to create a new project directory based on your selected challenge:
 
+```shell
+flwr new --framework=flwrtune --username=your_flower_account
+```
 
-3. Install project dependencies are defined in `pyproject.toml`. 
+Then you will see a prompt to ask your project name and the choice of LLM challenges. 
+Type your project name and select your preferred challenge, 
+and then a new project directory with same structure as above will be generated automatically.
 
+## Running FlowerTune LLM challenges
 
-4. Run the task as indicated in the `Running the task` section in the `README.md`.
+With a new project directory created, running a challenge task can be done by:
 
+1. Navigate inside the directory that you just created.
 
-5. Test your trained model following the `README.md` in the `evaluation` subdirectory.
+2. Follow the `Environments setup` section in the `README.md` to install project dependencies.
+
+4. Run the challenge task as indicated in the `Running the task` section in the `README.md`.
+
+5. Test your trained LLM following the `README.md` in the `evaluation/challenge-name` directory.
