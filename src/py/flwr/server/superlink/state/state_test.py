@@ -302,7 +302,6 @@ class StateTest(unittest.TestCase):
         state: State = self.state_factory()
         run_id = state.create_run("mock/mock", "v1.0.0")
 
-        # pylint: disable=unsubscriptable-object
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
         task_ins_id = state.store_task_ins(task_ins)
 
@@ -315,6 +314,7 @@ class StateTest(unittest.TestCase):
 
         # Execute
         task_res_uuid = state.store_task_res(task_res)
+        # pylint: disable=unsubscriptable-object
         task_res_list = state.get_task_res(task_ids={task_ins_id}, limit=None)
 
         # Assert
