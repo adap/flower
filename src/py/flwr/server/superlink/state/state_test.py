@@ -22,7 +22,6 @@ from abc import abstractmethod
 from datetime import datetime, timezone
 from typing import List
 from unittest.mock import patch
-from uuid import uuid4
 
 from flwr.common import DEFAULT_TTL
 from flwr.common.constant import ErrorCode
@@ -703,7 +702,7 @@ class StateTest(unittest.TestCase):
         result = state.store_task_res(task)
 
         # Assert
-        assert result == None
+        assert result is None
 
 
 def create_task_ins(
