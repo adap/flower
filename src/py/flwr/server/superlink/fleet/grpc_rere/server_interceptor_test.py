@@ -65,9 +65,10 @@ class TestServerInterceptor(unittest.TestCase):  # pylint: disable=R0902
         self._client_private_key, self._client_public_key = generate_key_pairs()
         self._server_private_key, self._server_public_key = generate_key_pairs()
         self.new_private_key, self.new_public_key = generate_key_pairs()
-        self.temp_file = tempfile.NamedTemporaryFile(
+        with tempfile.NamedTemporaryFile(
             delete=False, mode="w+", newline="", encoding="utf-8", suffix=".csv"
-        )
+        ) as temp_file:
+            self.temp_file = temp_file
         self.temp_file.seek(0)
 
         self.client_keys_file_path = self.temp_file.name

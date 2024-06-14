@@ -618,8 +618,11 @@ class SqliteState(State):  # pylint: disable=R0904
             return {}
 
         public_keys_list = list(client_public_keys)
-        query = "SELECT public_key, node_id FROM node WHERE public_key IN ({})".format(
-            ", ".join(f":public_key{i}" for i in range(len(public_keys_list)))
+        placeholders = ", ".join(
+            f":public_key{i}" for i in range(len(public_keys_list))
+        )
+        query = (
+            f"SELECT public_key, node_id FROM node WHERE public_key IN ({placeholders})"
         )
         params = {
             f"public_key{i}": public_key
@@ -698,9 +701,10 @@ class SqliteState(State):  # pylint: disable=R0904
             return
 
         public_keys_list = list(public_keys)
-        query = "DELETE FROM public_key WHERE public_key IN ({})".format(
-            ", ".join(f":public_key{i}" for i in range(len(public_keys_list)))
+        placeholders = ", ".join(
+            f":public_key{i}" for i in range(len(public_keys_list))
         )
+        query = f"DELETE FROM public_key WHERE public_key IN ({placeholders})"
         params = {
             f"public_key{i}": public_key
             for i, public_key in enumerate(public_keys_list)
