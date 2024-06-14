@@ -67,7 +67,7 @@ def log(
         logger(DEBUG, channel_connectivity)
 
     if superexec_address is None:
-        global_config = config_utils.load(get_flwr_dir / "config.toml")
+        global_config = config_utils.load(get_flwr_dir() / "config.toml")
         if global_config:
             superexec_address = global_config["federation"]["default"]
         else:
