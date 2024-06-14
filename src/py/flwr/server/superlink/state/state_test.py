@@ -314,8 +314,9 @@ class StateTest(unittest.TestCase):
 
         # Execute
         task_res_uuid = state.store_task_res(task_res)
-        # pylint: disable=all
-        task_res_list = state.get_task_res(task_ids={task_ins_id}, limit=None)
+
+        if task_ins_id is not None:
+            task_res_list = state.get_task_res(task_ids={task_ins_id}, limit=None)
 
         # Assert
         retrieved_task_res = task_res_list[0]
