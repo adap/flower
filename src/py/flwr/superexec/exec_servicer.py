@@ -78,7 +78,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         return StartRunResponse(run_id=run.run_id)
 
-    def _capture_logs(self, run, stop_event, logs):
+    def _capture_logs(self, run, stop_event, logs) -> None:
         while not stop_event.is_set():
             ready_to_read, _, _ = select.select(
                 [run.proc.stdout, run.proc.stderr],
