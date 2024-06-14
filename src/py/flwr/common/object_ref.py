@@ -19,8 +19,11 @@ import ast
 import importlib
 import sys
 from importlib.util import find_spec
+from logging import WARN
 from pathlib import Path
 from typing import Any, Optional, Tuple, Type
+
+from .logger import log
 
 OBJECT_REF_HELP_STR = """
 \n\nThe object reference string should have the form <module>:<attribute>. Valid
@@ -98,11 +101,19 @@ def load_app(
     module_str, _, attributes_str = module_attribute_str.partition(":")
 
     try:
-        # Hack: `tabnet` does not work with `importlib.reload`
-        do_not_reload = "tabnet" in sys.modules
-
-        if module_str not in sys.modules or do_not_reload:
+        if module_str not in sys.modules:
             module = importlib.import_module(module_str)
+        # Hack: `tabnet` does not work with `importlib.reload`
+        elif "tabnet" in sys.modules:
+            log(
+                WARN,
+                "Cannot reload module '%s' from disk due to compatibility issues "
+                "with the 'tabnet' library. The module will be loaded from the "
+                "cache instead. If you experience issues, consider restarting "
+                "the application.",
+                module_str,
+            )
+            module = sys.modules[module_str]
         else:
             module = sys.modules[module_str]
             if project_dir is None:
