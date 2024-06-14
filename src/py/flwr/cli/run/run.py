@@ -61,9 +61,7 @@ def run(
     ] = None,
     app_path: Annotated[
         Optional[Path],
-        typer.Option(
-            case_sensitive=False, help="Use this flag to use the new SuperExec API"
-        ),
+        typer.Option(case_sensitive=False, help="Path of the FAB to run"),
     ] = None,
     follow: Annotated[
         bool,
