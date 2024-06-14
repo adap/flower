@@ -92,7 +92,7 @@ def log(
     if follow:
         try:
             while True:
-                logger(INFO, "Starting logstream")
+                logger(INFO, "Starting logstream for run_id `%s`", run_id)
                 stream_logs(run_id, channel, period)
                 time.sleep(2)
                 logger(INFO, "Reconnecting to logstream")
@@ -101,11 +101,11 @@ def log(
         except grpc.RpcError as e:
             # pylint: disable=E1101
             if e.code() == grpc.StatusCode.NOT_FOUND:
-                logger(ERROR, "`run_id` is invalid, exiting")
+                logger(ERROR, "Invalid run_id `%s`, exiting", run_id)
             if e.code() == grpc.StatusCode.CANCELLED:
                 pass
         finally:
             channel.close()
     else:
-        logger(INFO, "Printing logstream")
-        print_logs(run_id, channel, timeout=1)
+        logger(INFO, "Printing logstream for run_id `%s`", run_id)
+        print_logs(run_id, channel, timeout=5)
