@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Fower SuperExec package."""
+"""Flower SuperExec service."""
 
+from .app import run_superexec as run_superexec
 
-def run_superexec() -> None:
-    """Empty stub."""
+__all__ = [
+    "run_superexec",
+]
