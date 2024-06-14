@@ -35,8 +35,8 @@ def test_start_run() -> None:
     ) as proc:
         run_res.proc = proc
 
-    exec_plugin = MagicMock()
-    exec_plugin.start_run = lambda _: run_res
+    executor = MagicMock()
+    executor.start_run = lambda _: run_res
 
     context_mock = MagicMock()
 
@@ -44,7 +44,7 @@ def test_start_run() -> None:
     request.fab_file = b"test"
 
     # Create a instance of FlowerServiceServicer
-    servicer = ExecServicer(plugin=exec_plugin)
+    servicer = ExecServicer(executor=executor)
 
     # Execute
     response = servicer.StartRun(request, context_mock)

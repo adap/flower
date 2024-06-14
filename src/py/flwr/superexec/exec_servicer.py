@@ -34,8 +34,8 @@ from .executor import Executor
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """SuperExec API servicer."""
 
-    def __init__(self, plugin: Executor) -> None:
-        self.plugin = plugin
+    def __init__(self, executor: Executor) -> None:
+        self.executor = executor
         self.runs: Dict[int, Popen] = {}  # type: ignore
 
     def StartRun(
@@ -43,6 +43,6 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     ) -> StartRunResponse:
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
-        run = self.plugin.start_run(request.fab_file)
+        run = self.executor.start_run(request.fab_file)
         self.runs[run.run_id] = run.proc
         return StartRunResponse(run_id=run.run_id)
