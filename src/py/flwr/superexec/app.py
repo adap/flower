@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower superexec app."""
+"""Flower SuperExec app."""
 
 import argparse
 import sys
@@ -24,6 +24,7 @@ import grpc
 
 from flwr.common import EventType, event, log
 from flwr.common.address import parse_address
+from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.object_ref import load_app, validate
 
@@ -52,7 +53,7 @@ def run_superexec() -> None:
     # Start SuperExec API
     superexec_server: grpc.Server = run_superexec_api_grpc(
         address=address,
-        plugin=_get_exec_plugin(args),
+        executor=_load_executor(args),
         certificates=certificates,
     )
 
@@ -60,14 +61,12 @@ def run_superexec() -> None:
 
     # Graceful shutdown
     register_exit_handlers(
-        event_type=EventType.RUN_SUPEREXEC_ENTER,
+        event_type=EventType.RUN_SUPEREXEC_LEAVE,
         grpc_servers=grpc_servers,
         bckg_threads=None,
     )
 
-    # Block
-    while True:
-        superexec_server.wait_for_termination(timeout=1)
+    superexec_server.wait_for_termination()
 
 
 def _parse_args_run_superexec() -> argparse.ArgumentParser:
@@ -76,25 +75,44 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
         description="Start a Flower SuperExec",
     )
     parser.add_argument(
-        "executor-plugin",
+        "executor",
         help="For example: `deployment:exec` or `project.package.module:wrapper.exec`.",
     )
     parser.add_argument(
         "--address",
         help="SuperExec (gRPC) server address (IPv4, IPv6, or a domain name)",
-        default="0.0.0.0:9093",
+        default=SUPEREXEC_DEFAULT_ADDRESS,
     )
     parser.add_argument(
-        "--dir",
-        help="The directory for the plugin.",
+        "--executor-dir",
+        help="The directory for the executor.",
         default=".",
     )
     parser.add_argument(
         "--insecure",
         action="store_true",
-        help="Run the server without HTTPS, regardless of whether certificate "
+        help="Run the SuperExec without HTTPS, regardless of whether certificate "
         "paths are provided. By default, the server runs with HTTPS enabled. "
         "Use this flag only if you understand the risks.",
+    )
+    parser.add_argument(
+        "--ssl-certfile",
+        help="SuperExec server SSL certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+        default=None,
+    )
+    parser.add_argument(
+        "--ssl-keyfile",
+        help="SuperExec server SSL private key file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+    )
+    parser.add_argument(
+        "--ssl-ca-certfile",
+        help="SuperExec server SSL CA certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
     )
     return parser
 
@@ -134,28 +152,27 @@ def _try_obtain_certificates(
     )
 
 
-def _get_exec_plugin(
+def _load_executor(
     args: argparse.Namespace,
 ) -> Executor:
-    """Get the load_client_app_fn function."""
-    exec_plugin_dir = args.dir
-    if exec_plugin_dir is not None:
-        sys.path.insert(0, exec_plugin_dir)
+    """Get the executor plugin."""
+    if args.executor_dir is not None:
+        sys.path.insert(0, args.executor_dir)
 
-    plugin_ref: str = getattr(args, "executor-plugin")
-    valid, error_msg = validate(plugin_ref)
+    executor_ref: str = args.executor
+    valid, error_msg = validate(executor_ref)
     if not valid and error_msg:
-        raise LoadExecPluginError(error_msg) from None
+        raise LoadExecutorError(error_msg) from None
 
-    exec_plugin = load_app(plugin_ref, LoadExecPluginError)
+    executor = load_app(executor_ref, LoadExecutorError)
 
-    if not isinstance(exec_plugin, Executor):
-        raise LoadExecPluginError(
-            f"Attribute {plugin_ref} is not of type {Executor}",
+    if not isinstance(executor, Executor):
+        raise LoadExecutorError(
+            f"Attribute {executor_ref} is not of type {Executor}",
         ) from None
 
-    return exec_plugin
+    return executor
 
 
-class LoadExecPluginError(Exception):
-    """Error when trying to load `ClientApp`."""
+class LoadExecutorError(Exception):
+    """Error when trying to load `Executor`."""
