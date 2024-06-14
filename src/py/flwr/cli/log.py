@@ -17,7 +17,7 @@
 import sys
 import time
 from logging import DEBUG, ERROR, INFO
-from typing import Optional
+from typing import Optional, Any
 
 import grpc
 import typer
@@ -48,7 +48,7 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
     stub = ExecStub(channel)
     req = StreamLogsRequest(run_id=run_id)
 
-    def is_channel_closed(channel):
+    def is_channel_closed(channel: grpc.Channel) -> Any:
         state = channel.get_state(try_to_connect=False)
         return state == grpc.ChannelConnectivity.SHUTDOWN
 
