@@ -21,7 +21,7 @@ from typing import Optional
 
 
 @dataclass
-class Run:
+class RunTracker:
     """Represents a Flower run (composed of a run_id and the associated process)."""
 
     run_id: int
@@ -36,7 +36,7 @@ class Executor(ABC):
         self,
         fab_file: bytes,
         ttl: Optional[float] = None,
-    ) -> Run:
+    ) -> RunTracker:
         """Start a run using the given Flower App ID and version.
 
         This method creates a new run on the SuperLink, returns its run_id
