@@ -35,6 +35,8 @@ from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import InMemoryState, SqliteState, State
 
+import uuid
+
 
 class StateTest(unittest.TestCase):
     """Test all state implementations."""
@@ -302,6 +304,7 @@ class StateTest(unittest.TestCase):
         state: State = self.state_factory()
         run_id = state.create_run("mock/mock", "v1.0.0")
 
+        # pylint: disable=unsubscriptable-object
         task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
         task_ins_id = state.store_task_ins(task_ins)
 
