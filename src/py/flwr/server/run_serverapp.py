@@ -16,7 +16,6 @@
 
 
 import argparse
-import os
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
@@ -46,15 +45,12 @@ def run(
         )
 
     if server_app_dir is not None:
-        server_app_dir = os.path.abspath(server_app_dir)
         sys.path.insert(0, server_app_dir)
 
     # Load ServerApp if needed
     def _load() -> ServerApp:
         if server_app_attr:
-            server_app: ServerApp = load_app(
-                server_app_attr, LoadServerAppError, server_app_dir
-            )
+            server_app: ServerApp = load_app(server_app_attr, LoadServerAppError)
 
             if not isinstance(server_app, ServerApp):
                 raise LoadServerAppError(

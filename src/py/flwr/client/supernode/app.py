@@ -15,7 +15,6 @@
 """Flower SuperNode."""
 
 import argparse
-import os
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
@@ -175,7 +174,7 @@ def _get_load_client_app_fn(
         else:
             flwr_dir = Path(args.flwr_dir)
 
-    sys.path.insert(0, os.path.abspath(flwr_dir))
+    sys.path.insert(0, str(flwr_dir))
 
     default_app_ref: str = getattr(args, "client-app")
 
@@ -192,8 +191,8 @@ def _get_load_client_app_fn(
     def _load(fab_id: str, fab_version: str) -> ClientApp:
         # If multi-app feature is disabled
         if not multi_app:
-            # Set the project directory
-            abs_proj_dir = os.path.abspath(args.dir)
+            # Set sys.path
+            sys.path[0] = args.dir
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -205,8 +204,8 @@ def _get_load_client_app_fn(
                 ) from None
 
             log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
-            # Set the project directory
-            abs_proj_dir = os.path.abspath(args.dir)
+            # Set sys.path
+            sys.path[0] = args.dir
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -245,14 +244,11 @@ def _get_load_client_app_fn(
                     f"Invalid pyproject.toml:\n{error_msg}",
                 ) from None
 
-            # Set the project directory
-            abs_proj_dir = os.path.abspath(project_dir)
+            # Set sys.path
+            sys.path[0] = str(project_dir)
 
             # Set app reference
             client_app_ref = config["flower"]["components"]["clientapp"]
-
-        # Set system path
-        sys.path[0] = abs_proj_dir
 
         # Load ClientApp
         log(
@@ -260,7 +256,7 @@ def _get_load_client_app_fn(
             "Loading ClientApp `%s`",
             client_app_ref,
         )
-        client_app = load_app(client_app_ref, LoadClientAppError, abs_proj_dir)
+        client_app = load_app(client_app_ref, LoadClientAppError)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
