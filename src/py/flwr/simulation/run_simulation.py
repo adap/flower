@@ -433,7 +433,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-id",
         type=int,
-        help="Sets the id of the run started by the Simulation Engine.",
+        help="Sets the ID of the run started by the Simulation Engine.",
     )
 
     return parser
