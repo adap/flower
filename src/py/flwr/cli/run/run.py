@@ -25,6 +25,7 @@ from typing_extensions import Annotated
 
 from flwr.cli import config_utils
 from flwr.cli.build import build
+from flwr.common.config import get_flwr_dir
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -72,9 +73,7 @@ def run(
     if use_superexec:
 
         if superexec_address is None:
-            gloabl_config = config_utils.load(
-                config_utils.get_flower_home() / "config.toml"
-            )
+            gloabl_config = config_utils.load(get_flwr_dir() / "config.toml")
             if gloabl_config:
                 superexec_address = gloabl_config["federation"]["default"]
             else:
