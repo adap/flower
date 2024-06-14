@@ -19,7 +19,7 @@ import select
 import threading
 import time
 from dataclasses import dataclass
-from logging import INFO
+from logging import ERROR, INFO
 from subprocess import Popen
 from typing import Any, Dict, Generator, List
 
@@ -34,38 +34,34 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsResponse,
 )
 
-from .executor import Executor
-
-
-@dataclass
-class LogStream:
-    """Represents a logstream for a `run_id`."""
-
-    process: Popen
-    stop_event: threading.Event
-    logs: List[str]
-    capture_thread: threading.Thread
+from .executor import Executor, RunTracker, LogStreamer
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """Driver API servicer."""
 
-    def __init__(self, plugin: Executor) -> None:
-        self.plugin = plugin
-        self.runs: Dict[int, Popen[str]] = {}
+    def __init__(self, executor: Executor) -> None:
+        self.executor = executor
+        self.runs: Dict[int, RunTracker] = {}
 
         self.lock = threading.Lock()
 
         self.select_timeout: int = 1
-        self.log_streams: Dict[int, LogStream] = {}
+        self.log_streams: Dict[int, LogStreamer] = {}
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
     ) -> StartRunResponse:
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
-        run = self.plugin.start_run(request.fab_file)
-        self.runs[run.run_id] = run.proc
+
+        run = self.executor.start_run(request.fab_file)
+
+        if run is None:
+            log(ERROR, "Executor failed to start run")
+            return StartRunResponse()
+
+        self.runs[run.run_id] = run
 
         stop_event = threading.Event()
         logs: List[str] = []
@@ -74,7 +70,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             target=self._capture_logs, args=(run, stop_event, logs), daemon=True
         )
         with self.lock:
-            self.log_streams[run.run_id] = LogStream(
+            self.log_streams[run.run_id] = LogStreamer(
                 process=run.proc,
                 stop_event=stop_event,
                 logs=logs,
