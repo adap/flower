@@ -183,12 +183,6 @@ class AuthenticateServerInterceptor(grpc.ServerInterceptor):  # type: ignore
 
         except (ValueError, UnsupportedAlgorithm) as e:
             log(WARNING, "Abort updating client_public_keys set due to error: %s", e)
-        except Exception as e:
-            log(
-                WARNING,
-                "Abort updating client_public_keys set due to unexpected error: %s",
-                e,
-            )
 
     def _read_and_parse_keys(self) -> Set[bytes]:
         new_known_keys = set()
