@@ -275,7 +275,7 @@ def start_vce(
         # Use mapping constructed externally. This also means nodes
         # have previously being registered.
         nodes_mapping = existing_nodes_mapping
-    app_dir = str(Path(app_dir).resolve())
+    app_dir = str(Path(app_dir).absolute())
 
     if not state_factory:
         log(INFO, "A StateFactory was not supplied to the SimulationEngine.")

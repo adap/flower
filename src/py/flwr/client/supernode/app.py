@@ -174,7 +174,7 @@ def _get_load_client_app_fn(
         else:
             flwr_dir = Path(args.flwr_dir)
 
-    sys.path.insert(0, str(flwr_dir.resolve()))
+    sys.path.insert(0, str(flwr_dir.absolute()))
 
     default_app_ref: str = getattr(args, "client-app")
 
@@ -192,7 +192,7 @@ def _get_load_client_app_fn(
         # If multi-app feature is disabled
         if not multi_app:
             # Get sys path to be inserted
-            sys_path = Path(args.dir).resolve()
+            sys_path = Path(args.dir).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -205,7 +205,7 @@ def _get_load_client_app_fn(
 
             log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
             # Get sys path to be inserted
-            sys_path = Path(args.dir).resolve()
+            sys_path = Path(args.dir).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -245,7 +245,7 @@ def _get_load_client_app_fn(
                 ) from None
 
             # Get sys path to be inserted
-            sys_path = Path(project_dir).resolve()
+            sys_path = Path(project_dir).absolute()
 
             # Set app reference
             client_app_ref = config["flower"]["components"]["clientapp"]
