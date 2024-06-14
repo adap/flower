@@ -137,13 +137,14 @@ def _start_superexec_run(period: int, follow: bool) -> None:
     if follow:
         try:
             while True:
-                log(INFO, "Streaming logs")
+                log(INFO, "Starting logstream for run_id `%s`", res.run_id)
                 stream_logs(res.run_id, channel, period)
                 time.sleep(2)
                 log(INFO, "Reconnecting to logstream")
         except KeyboardInterrupt:
             log(INFO, "Exiting logstream")
         except grpc.RpcError as e:
+            # pylint: disable=E1101
             if e.code() == grpc.StatusCode.CANCELLED:
                 pass
         finally:
