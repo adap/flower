@@ -26,6 +26,7 @@ from typing_extensions import Annotated
 from flwr.cli import config_utils
 from flwr.cli.build import build
 from flwr.common.config import get_flwr_dir
+from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
@@ -94,18 +95,19 @@ def run(
             "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
             fg=typer.colors.RED,
             bold=True,
-          
+        )
+
     typer.secho("Success", fg=typer.colors.GREEN)
-          
+
     server_app_ref = config["flower"]["components"]["serverapp"]
     client_app_ref = config["flower"]["components"]["clientapp"]
-          
+
     if engine is None:
         engine = config["flower"]["engine"]["name"]
-          
+
     if engine == Engine.SIMULATION:
         num_supernodes = config["flower"]["engine"]["simulation"]["supernode"]["num"]
-          
+
         typer.secho("Starting run... ", fg=typer.colors.BLUE)
         _run_simulation(
             server_app_attr=server_app_ref,
@@ -131,15 +133,14 @@ def _start_superexec_run(
             superexec_address = gloabl_config["federation"]["default"]
         else:
             typer.secho(
-                "No SuperExec address was provided and no global config "
-                "was found.",
+                "No SuperExec address was provided and no global config was found.",
                 fg=typer.colors.RED,
                 bold=True,
             )
             sys.exit()
 
     assert superexec_address is not None
-    
+
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
