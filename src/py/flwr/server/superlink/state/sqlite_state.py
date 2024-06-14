@@ -718,11 +718,6 @@ class SqliteState(State):  # pylint: disable=R0904
         result: Set[bytes] = {row["public_key"] for row in rows}
         return result
 
-    def clear_client_public_keys(self) -> None:
-        """Clear `client_public_keys` set in state."""
-        query = "DELETE FROM public_key"
-        self.query(query)
-
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""
         query = "SELECT * FROM run WHERE run_id = ?;"

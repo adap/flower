@@ -333,10 +333,6 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         """Retrieve all currently stored `client_public_keys` as a set."""
         return self.client_public_keys
 
-    def clear_client_public_keys(self) -> None:
-        """Clear `client_public_keys` set in state."""
-        self.client_public_keys.clear()
-
     def get_run(self, run_id: int) -> Tuple[int, str, str]:
         """Retrieve information about the run with the specified `run_id`."""
         with self.lock:
