@@ -14,9 +14,9 @@
 # ==============================================================================
 """Flower command line interface `new` command."""
 
-import os
 import re
 from enum import Enum
+from pathlib import Path
 from string import Template
 from typing import Dict, Optional
 
@@ -49,10 +49,10 @@ class TemplateNotFound(Exception):
 
 def load_template(name: str) -> str:
     """Load template from template directory and return as text."""
-    tpl_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "templates"))
-    tpl_file_path = os.path.join(tpl_dir, name)
+    tpl_dir = Path(__file__).absolute().parent / "templates"
+    tpl_file_path = tpl_dir / name
 
-    if not os.path.isfile(tpl_file_path):
+    if not tpl_file_path.is_file():
         raise TemplateNotFound(f"Template '{name}' not found")
 
     with open(tpl_file_path, encoding="utf-8") as tpl_file:
@@ -70,7 +70,7 @@ def render_template(template: str, data: Dict[str, str]) -> str:
 
 def create_file(file_path: str, content: str) -> None:
     """Create file including all nessecary directories and write content into file."""
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    Path(file_path).parent.mkdir(parents=True, exist_ok=True)
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
 
@@ -134,10 +134,10 @@ def new(
     )
 
     # Set project directory path
-    cwd = os.getcwd()
+    cwd = Path.cwd()
     package_name = re.sub(r"[-_.]+", "-", project_name).lower()
     import_name = package_name.replace("-", "_")
-    project_dir = os.path.join(cwd, package_name)
+    project_dir = cwd / package_name
 
     # List of files to render
     files = {
@@ -175,7 +175,7 @@ def new(
 
     for file_path, value in files.items():
         render_and_create(
-            file_path=os.path.join(project_dir, file_path),
+            file_path=str(project_dir / file_path),
             template=value["template"],
             context=context,
         )
