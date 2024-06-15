@@ -65,6 +65,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
         run = self.plugin.start_run(request.fab_file)
+        log(INFO,"start run plugin")
         self.runs[run.run_id] = run.proc
 
         stop_event = threading.Event()
@@ -82,6 +83,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             )
         capture_thread.start()
 
+        log(INFO,"responding")
         return StartRunResponse(run_id=run.run_id)
 
     def _capture_logs(self, run, stop_event, logs):
