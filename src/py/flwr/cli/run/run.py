@@ -61,8 +61,12 @@ def run(
     app_path: Annotated[
         Optional[Path],
         typer.Option(
-            case_sensitive=False, help="Use this flag to use the new SuperExec API"
+            case_sensitive=False, help="Path to a directory created with `flwr new`"
         ),
+    ] = None,
+    fab_path: Annotated[
+        Optional[Path],
+        typer.Option(case_sensitive=False, help="Path to a FAB."),
     ] = None,
     period: Annotated[
         int,
@@ -110,7 +114,10 @@ def run(
         channel.subscribe(on_channel_state_change)
         stub = ExecStub(channel)
 
-        fab_path = build(app_path)
+        if fab_path is None:
+            fab_path = build(app_path, use_superexec)
+        else:
+            log(INFO, "Passed FAB directory, skipping `flwr build`.")
 
         with open(fab_path, "rb") as f:
             start_run_req = StartRunRequest(fab_file=f.read())

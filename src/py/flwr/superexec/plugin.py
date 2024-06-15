@@ -2,16 +2,18 @@
 
 import subprocess
 import sys
+from logging import INFO
 from pathlib import Path
 from typing import Optional
-from logging import INFO
+
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common.grpc import create_channel
+from flwr.common.logger import log
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
 from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
-from flwr.common.logger import log
+
 from .executor import Executor, Run
 
 
@@ -56,11 +58,11 @@ class DeploymentEngine(Executor):
 
         run_id = self._create_run(fab_id, fab_version)
 
-        log(INFO,"extracting FAB")
+        log(INFO, "Extracting FAB")
         fab_path = self._install_fab(fab_file)
         fab_name = Path(fab_id).name
 
-        log(INFO,"installing FAB")
+        log(INFO, "Installing FAB")
         subprocess.check_call(
             [sys.executable, "-m", "pip", "install", str(fab_path)],
             stdout=subprocess.DEVNULL,
