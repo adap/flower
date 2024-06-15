@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Executes and monitor a Flower run."""
+"""Execute and monitor a Flower run."""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
