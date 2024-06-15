@@ -82,4 +82,4 @@ class DeploymentEngine(Executor):
         )
 
 
-deployment_plugin = DeploymentEngine()
+deployment = DeploymentEngine()

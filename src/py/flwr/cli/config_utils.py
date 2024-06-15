@@ -14,7 +14,6 @@
 # ==============================================================================
 """Utility to validate the `pyproject.toml` file."""
 
-import os
 import zipfile
 from io import BytesIO
 from pathlib import Path
@@ -26,18 +25,18 @@ from flwr.common import object_ref
 
 
 def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
-    """Start a Flower client node which connects to a Flower server.
+    """Extract the fab_id and the fab_version from a FAB file or path.
 
     Parameters
     ----------
     fab_file : Union[Path, bytes]
-        The Flower App bundle file to validate and extract the metadata from.
+        The Flower App Bundle file to validate and extract the metadata from.
         It can either be a path to the file or the file itself as bytes.
 
     Returns
     -------
     Tuple[str, str]
-        The `fab_version` and `fab_id` of the given Flower App bundle.
+        The `fab_version` and `fab_id` of the given Flower App Bundle.
     """
     fab_file_archive: Union[Path, IO[bytes]]
     if isinstance(fab_file, bytes):
@@ -179,13 +178,3 @@ def load_from_string(toml_content: str) -> Optional[Dict[str, Any]]:
         return data
     except tomli.TOMLDecodeError:
         return None
-
-
-def get_flower_home() -> Path:
-    """Return the Flower home directory based on env variables."""
-    return Path(
-        os.getenv(
-            "FLWR_HOME",
-            f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
-        )
-    )

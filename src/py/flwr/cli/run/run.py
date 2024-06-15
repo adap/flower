@@ -57,7 +57,7 @@ def run(
     superexec_address: Annotated[
         Optional[str],
         typer.Option(case_sensitive=False, help="The address of the SuperExec server"),
-    ] = None,
+    ] = "localhost:9093",
     app_path: Annotated[
         Optional[Path],
         typer.Option(

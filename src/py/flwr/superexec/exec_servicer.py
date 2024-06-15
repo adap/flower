@@ -39,7 +39,7 @@ from .executor import Executor
 
 @dataclass
 class LogStream:
-    """Represents a logstream for a `run_id`"""
+    """Represents a logstream for a `run_id`."""
 
     process: Popen
     stop_event: threading.Event

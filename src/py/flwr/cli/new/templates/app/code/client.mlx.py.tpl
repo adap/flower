@@ -58,7 +58,7 @@ class FlowerClient(NumPyClient):
 
 
 def client_fn(cid):
-    data = load_data(int(cid), 2)
+    data = load_data(0, 2)
 
     # Return Client instance
     return FlowerClient(data).to_client()

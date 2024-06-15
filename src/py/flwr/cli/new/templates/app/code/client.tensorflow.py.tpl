@@ -31,7 +31,7 @@ class FlowerClient(NumPyClient):
 def client_fn(cid):
     # Load model and data
     net = load_model()
-    x_train, y_train, x_test, y_test = load_data(int(cid), 2)
+    x_train, y_train, x_test, y_test = load_data(0, 2)
 
     # Return Client instance
     return FlowerClient(net, x_train, y_train, x_test, y_test).to_client()

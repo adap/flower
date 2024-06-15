@@ -56,7 +56,6 @@ def print_logs(run_id: int, channel: grpc.Channel, timeout: int) -> None:
                 logger(ERROR, "`run_id` is invalid, exiting")
         finally:
             channel.close()
-            break
 
 
 def log(
