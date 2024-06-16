@@ -146,7 +146,7 @@ def run(
 
         channel = create_channel(
             server_address=superexec_address,
-            insecure=True,
+            insecure=certificates is None,
             root_certificates=certificates,
             max_message_length=GRPC_MAX_MESSAGE_LENGTH,
             interceptors=None,
