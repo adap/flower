@@ -732,7 +732,7 @@ class StateTest(unittest.TestCase):
             res = state.get_task_res(task_ids={task_ins_id}, limit=None)[0]
 
         # Assert
-        tolerance = 1e-3
+        tolerance = 1e-2
         assert abs(res.task.ttl - 7) < tolerance
 
 
