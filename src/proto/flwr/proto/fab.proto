@@ -7,7 +7,7 @@ message Fab {
   // The hash is calculated using the SHA-256 algorithm and is represented as a
   // hex string (sha256hex).
   string hash = 1;
-  // This field contains the fab file as a byte array.
+  // This field contains the fab file contents a one bytes blob.
   bytes content = 2;
 }
 
