@@ -55,7 +55,9 @@ class FfsTest(unittest.TestCase):
         assert hash_actual == hash_expected
 
         # Check if file was created
-        assert [hash_expected, f"{hash_expected}.META"] == os.listdir(self.tmp_dir.name)
+        assert {hash_expected, f"{hash_expected}.META"} == set(
+            os.listdir(self.tmp_dir.name)
+        )
 
     def test_get(self) -> None:
         """Test if object can be retrieved."""
@@ -104,7 +106,7 @@ class FfsTest(unittest.TestCase):
         ffs.delete(hash_expected)
 
         # Assert
-        assert [] == os.listdir(self.tmp_dir.name)
+        assert set() == set(os.listdir(self.tmp_dir.name))
 
     def test_list(self) -> None:
         """Test if object hashes can be listed."""
@@ -128,7 +130,7 @@ class FfsTest(unittest.TestCase):
         hashes = ffs.list()
 
         # Assert
-        assert [hash_expected] == hashes
+        assert {hash_expected} == set(hashes)
 
 
 class DiskFfsTest(FfsTest, unittest.TestCase):
