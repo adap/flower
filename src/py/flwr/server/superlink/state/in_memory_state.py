@@ -90,11 +90,13 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                     and task_ins.task.consumer.anonymous is False
                     and task_ins.task.consumer.node_id == node_id
                     and task_ins.task.delivered_at == ""
+                    and task_ins.task.created_at + task_ins.task.ttl > time.time()
                 ) or (
                     node_id is None  # Anonymous
                     and task_ins.task.consumer.anonymous is True
                     and task_ins.task.consumer.node_id == 0
                     and task_ins.task.delivered_at == ""
+                    and task_ins.task.created_at + task_ins.task.ttl > time.time()
                 ):
                     task_ins_list.append(task_ins)
                 if limit and len(task_ins_list) == limit:

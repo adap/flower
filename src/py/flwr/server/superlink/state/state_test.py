@@ -735,6 +735,25 @@ class StateTest(unittest.TestCase):
         tolerance = 1e-2
         assert abs(res.task.ttl - 7) < tolerance
 
+    def test_get_task_ins_not_return_expired(self) -> None:
+        """Test get_task_ins not to return expired tasks."""
+        # Prepare
+        consumer_node_id = 1
+        state = self.state_factory()
+        run_id = state.create_run("mock/mock", "v1.0.0")
+        task_ins = create_task_ins(
+            consumer_node_id=consumer_node_id, anonymous=False, run_id=run_id
+        )
+        task_ins.task.created_at = time.time() - 5
+        task_ins.task.ttl = 5.1
+
+        state.store_task_ins(task_ins=task_ins)
+
+        time.sleep(2)
+
+        task_ins_list = state.get_task_ins(node_id=1, limit=None)
+        assert len(task_ins_list) == 0
+
 
 def create_task_ins(
     consumer_node_id: int,
