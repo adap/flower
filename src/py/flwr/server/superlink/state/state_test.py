@@ -728,7 +728,8 @@ class StateTest(unittest.TestCase):
 
         # Execute
         state.store_task_res(task_res)
-        res = state.get_task_res(task_ids={task_ins_id}, limit=None)[0]
+        if task_ins_id is not None:
+            res = state.get_task_res(task_ids={task_ins_id}, limit=None)[0]
 
         # Assert
         tolerance = 1e-3
