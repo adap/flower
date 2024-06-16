@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package flwr.proto;
+
+message Fab {
+  // This field is the hash of the data field. It is used to identify the data.
+  // The hash is calculated using the SHA-256 algorithm and is represented as a
+  // hex string (sha256hex).
+  string hash = 1;
+  // This field contains the fab file as a byte array.
+  bytes content = 2;
+}
+
+message GetFabRequest { string hash = 1; }
+message GetFabResponse { Fab fab = 1; }
