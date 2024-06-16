@@ -90,6 +90,25 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
         default=".",
     )
     parser.add_argument(
+        "--ssl-ca-certfile",
+        help="Fleet API server SSL CA certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+    )
+    parser.add_argument(
+        "--ssl-certfile",
+        help="Fleet API server SSL certificate file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+        default=None,
+    )
+    parser.add_argument(
+        "--ssl-keyfile",
+        help="Fleet API server SSL private key file (as a path str) "
+        "to create a secure connection.",
+        type=str,
+    )
+    parser.add_argument(
         "--insecure",
         action="store_true",
         help="Run the server without HTTPS, regardless of whether certificate "

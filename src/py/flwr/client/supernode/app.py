@@ -56,7 +56,7 @@ def run_supernode() -> None:
     authentication_keys = _try_setup_client_authentication(args)
 
     _start_client_internal(
-        server_address=args.server,
+        server_address=args.superlink,
         load_client_app_fn=load_fn,
         transport="rest" if args.rest else "grpc-rere",
         root_certificates=root_certificates,
