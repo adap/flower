@@ -41,7 +41,7 @@ class Engine(str, Enum):
 def run(
     engine: Annotated[
         Optional[Engine],
-        typer.Option(case_sensitive=False, help="The engine to run Flower on"),
+        typer.Option(case_sensitive=False, help="The execution engine to run the project"),
     ] = None,
     use_superexec: Annotated[
         bool,
