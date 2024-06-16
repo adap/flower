@@ -21,6 +21,7 @@ import os
 import tempfile
 import unittest
 from abc import abstractmethod
+from typing import Dict
 
 from flwr.server.superlink.ffs import DiskFfs, Ffs
 
@@ -30,6 +31,8 @@ class FfsTest(unittest.TestCase):
 
     # This is to True in each child class
     __test__ = False
+
+    tmp_dir: tempfile.TemporaryDirectory  # type: ignore
 
     @abstractmethod
     def ffs_factory(self) -> Ffs:
@@ -60,13 +63,15 @@ class FfsTest(unittest.TestCase):
         ffs: Ffs = self.ffs_factory()
         content_expected = b"content"
         hash_expected = hashlib.sha256(content_expected).hexdigest()
-        meta_expected = {}
+        meta_expected: Dict[str, str] = {"meta_key": "meta_value"}
 
         with open(os.path.join(self.tmp_dir.name, hash_expected), "wb") as file:
             file.write(content_expected)
 
         with open(
-            os.path.join(self.tmp_dir.name, f"{hash_expected}.META"), "w"
+            os.path.join(self.tmp_dir.name, f"{hash_expected}.META"),
+            "w",
+            encoding="utf-8",
         ) as file:
             json.dump(meta_expected, file)
 
@@ -83,13 +88,15 @@ class FfsTest(unittest.TestCase):
         ffs: Ffs = self.ffs_factory()
         content_expected = b"content"
         hash_expected = hashlib.sha256(content_expected).hexdigest()
-        meta_expected = {}
+        meta_expected: Dict[str, str] = {"meta_key": "meta_value"}
 
         with open(os.path.join(self.tmp_dir.name, hash_expected), "wb") as file:
             file.write(content_expected)
 
         with open(
-            os.path.join(self.tmp_dir.name, f"{hash_expected}.META"), "w"
+            os.path.join(self.tmp_dir.name, f"{hash_expected}.META"),
+            "w",
+            encoding="utf-8",
         ) as file:
             json.dump(meta_expected, file)
 
@@ -105,13 +112,15 @@ class FfsTest(unittest.TestCase):
         ffs: Ffs = self.ffs_factory()
         content_expected = b"content"
         hash_expected = hashlib.sha256(content_expected).hexdigest()
-        meta_expected = {}
+        meta_expected: Dict[str, str] = {"meta_key": "meta_value"}
 
         with open(os.path.join(self.tmp_dir.name, hash_expected), "wb") as file:
             file.write(content_expected)
 
         with open(
-            os.path.join(self.tmp_dir.name, f"{hash_expected}.META"), "w"
+            os.path.join(self.tmp_dir.name, f"{hash_expected}.META"),
+            "w",
+            encoding="utf-8",
         ) as file:
             json.dump(meta_expected, file)
 

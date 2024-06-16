@@ -24,14 +24,14 @@ from flwr.server.superlink.ffs.ffs import Ffs
 
 def write_dict_to_file(data_dict: Dict[str, str], file_path: str) -> None:
     """Write a Dict to a file in JSON format."""
-    with open(file_path, "w") as file:
+    with open(file_path, "w", encoding="utf-8") as file:
         json.dump(data_dict, file)
 
 
 def read_dict_from_file(file_path: str) -> Dict[str, str]:
     """Read a Dict from a JSON file."""
-    with open(file_path) as file:
-        data_dict = json.load(file)
+    with open(file_path, encoding="utf-8") as file:
+        data_dict: Dict[str, str] = json.load(file)
     return data_dict
 
 
