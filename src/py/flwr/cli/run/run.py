@@ -18,6 +18,7 @@ import sys
 import time
 from enum import Enum
 from logging import DEBUG, INFO
+from os.path import isfile
 from pathlib import Path
 from typing import Optional
 
@@ -79,6 +80,30 @@ def run(
         bool,
         typer.Option(case_sensitive=False, help="Use this flag to stream logs"),
     ] = True,
+    ssl_ca_certfile: Annotated[
+        Optional[Path],
+        typer.Option(
+            case_sensitive=False,
+            help="Fleet API server SSL CA certificate file (as a path str) "
+            "to create a secure connection.",
+        ),
+    ] = None,
+    ssl_certfile: Annotated[
+        Optional[Path],
+        typer.Option(
+            case_sensitive=False,
+            help="Fleet API server SSL certificate file (as a path str) "
+            "to create a secure connection.",
+        ),
+    ] = None,
+    ssl_keyfile: Annotated[
+        Optional[Path],
+        typer.Option(
+            case_sensitive=False,
+            help="Fleet API server SSL private key file (as a path str) "
+            "to create a secure connection.",
+        ),
+    ] = None,
 ) -> None:
     """Run Flower project."""
     if use_superexec:
@@ -104,10 +129,25 @@ def run(
             """Log channel connectivity."""
             log(DEBUG, channel_connectivity)
 
+        # Obtain certificates
+        certificates = None
+        if ssl_certfile and ssl_keyfile and ssl_ca_certfile:
+            if not isfile(ssl_ca_certfile):
+                sys.exit("Path argument `--ssl-ca-certfile` does not point to a file.")
+            if not isfile(ssl_certfile):
+                sys.exit("Path argument `--ssl-certfile` does not point to a file.")
+            if not isfile(ssl_keyfile):
+                sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
+            certificates = (
+                Path(ssl_ca_certfile).read_bytes(),  # CA certificate
+                Path(ssl_certfile).read_bytes(),  # server certificate
+                Path(ssl_keyfile).read_bytes(),  # server private key
+            )
+
         channel = create_channel(
             server_address=superexec_address,
             insecure=True,
-            root_certificates=None,
+            root_certificates=certificates,
             max_message_length=GRPC_MAX_MESSAGE_LENGTH,
             interceptors=None,
         )
