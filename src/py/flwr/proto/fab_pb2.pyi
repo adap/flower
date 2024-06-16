@@ -21,7 +21,7 @@ class Fab(google.protobuf.message.Message):
     """
 
     content: builtins.bytes
-    """This field contains the fab file as a byte array."""
+    """This field contains the fab file contents a one bytes blob."""
 
     def __init__(self,
         *,
