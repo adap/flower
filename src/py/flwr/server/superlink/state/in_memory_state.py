@@ -129,8 +129,10 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 log(ERROR, "TaskIns with task_id %s is expired.", task_ins_id)
                 return None
 
-            # Limit the TaskRes TTL to not exceed the expiration time of the TaskIns it replies to
-            # Condition: TaskIns.created_at + TaskIns.ttl ≥ TaskRes.created_at + TaskRes.ttl
+            # Limit the TaskRes TTL to not exceed the
+            # expiration time of the TaskIns it replies to.
+            # Condition: TaskIns.created_at + TaskIns.ttl ≥
+            #            TaskRes.created_at + TaskRes.ttl
             if (
                 task_res.task.ttl
                 > task_ins.task.created_at

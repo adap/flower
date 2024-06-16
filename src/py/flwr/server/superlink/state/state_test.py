@@ -727,7 +727,7 @@ class StateTest(unittest.TestCase):
         task_res.task.ttl = 8
 
         # Execute
-        result = state.store_task_res(task_res)
+        state.store_task_res(task_res)
         res = state.get_task_res(task_ids={task_ins_id}, limit=None)[0]
 
         # Assert
