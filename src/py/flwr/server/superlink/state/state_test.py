@@ -706,6 +706,34 @@ class StateTest(unittest.TestCase):
         # Assert
         assert result is None
 
+    def test_store_task_res_limit_ttl(self) -> None:
+        """Test behavior of store_task_res to limit the TTL of TaskRes."""
+        # Prepare
+        state: State = self.state_factory()
+        run_id = state.create_run("mock/mock", "v1.0.0")
+
+        task_ins = create_task_ins(consumer_node_id=0, anonymous=True, run_id=run_id)
+        task_ins.task.created_at = time.time() - 5
+        task_ins.task.ttl = 10
+        task_ins_id = state.store_task_ins(task_ins)
+
+        task_res = create_task_res(
+            producer_node_id=0,
+            anonymous=True,
+            ancestry=[str(task_ins_id)],
+            run_id=run_id,
+        )
+        task_res.task.created_at = time.time() - 2
+        task_res.task.ttl = 8
+
+        # Execute
+        result = state.store_task_res(task_res)
+        res = state.get_task_res(task_ids={task_ins_id}, limit=None)[0]
+
+        # Assert
+        tolerance = 1e-3
+        assert abs(res.task.ttl - 7) < tolerance
+
 
 def create_task_ins(
     consumer_node_id: int,

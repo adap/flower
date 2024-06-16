@@ -356,6 +356,16 @@ class SqliteState(State):  # pylint: disable=R0904
             )
             return None
 
+        # Limit the TaskRes TTL to not exceed the expiration time of the TaskIns it replies to
+        # Condition: TaskIns.created_at + TaskIns.ttl ≥ TaskRes.created_at + TaskRes.ttl
+        if (
+            task_res.task.ttl
+            > task_ins["created_at"] + task_ins["ttl"] - task_res.task.created_at
+        ):
+            task_res.task.ttl = (
+                task_ins["created_at"] + task_ins["ttl"] - task_res.task.created_at
+            )
+
         # Store TaskRes
         task_res.task_id = str(task_id)
         data = (task_res_to_dict(task_res),)
