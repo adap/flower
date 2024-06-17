@@ -27,6 +27,13 @@ class RunTracker:
 
     run_id: int
     proc: Popen  # type: ignore
+
+
+@dataclass
+class LogStreamer:
+    """Track logs for a process that executed the Flower run."""
+
+    proc: Popen  # type: ignore
     stop_event: threading.Event
     logs: List[str]
     capture_thread: threading.Thread
