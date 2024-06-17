@@ -405,6 +405,32 @@ class SqliteState(State):  # pylint: disable=R0904
         if limit is not None and limit < 1:
             raise AssertionError("`limit` must be >= 1")
 
+        # Check if corresponding TaskIns exists and is not expired
+        task_ids_placeholders = ",".join([f":id_{i}" for i in range(len(task_ids))])
+        query = f"""
+            SELECT *
+            FROM task_ins
+            WHERE task_id IN ({task_ids_placeholders})
+            AND (created_at + ttl) > CAST(strftime('%s', 'now') AS REAL)
+        """
+        query += ";"
+
+        data = {}
+        for index, task_id in enumerate(task_ids):
+            data[f"id_{index}"] = str(task_id)
+
+        task_ins_rows = self.query(query, data)
+
+        if not task_ins_rows:
+            log(ERROR, "TaskIns does not exist.")
+            return None
+
+        for row in task_ins_rows:
+            task_ins = dict_to_task_ins(row)
+            if task_ins.task.created_at + task_ins.task.ttl <= time.time():
+                log(ERROR, "TaskIns with task_id %s is expired.", task_ins.task_id)
+                break
+
         # Retrieve all anonymous Tasks
         if len(task_ids) == 0:
             return []
