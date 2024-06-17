@@ -16,7 +16,7 @@
 
 
 from logging import ERROR, INFO
-from typing import Dict
+from typing import Any, Dict, Generator
 
 import grpc
 
@@ -57,6 +57,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
     def StreamLogs(
         self, request: StreamLogsRequest, context: grpc.ServicerContext
-    ) -> StreamLogsResponse:
+    ) -> Generator[StreamLogsResponse, Any, None]:
         """Get logs."""
-        pass
+        logs = ['a', 'b', 'c']
+        while context.is_active():
+            for i in range(len(logs)):
+                yield StreamLogsResponse(log_output=logs[i])
