@@ -33,12 +33,13 @@ class _Checker:
     def __init__(
         self,
         data: RecordSetData,
-        type: type[ParametersRecord] | type[MetricsRecord] | type[ConfigsRecord],
+        r_type: type[ParametersRecord] | type[MetricsRecord] | type[ConfigsRecord],
     ) -> None:
         self.data = data
-        self._type = type
+        self._type = r_type
 
     def check_key(self, key: str) -> None:
+        """Check the validity of the key."""
         data = self.data
         if not isinstance(key, str):
             raise TypeError(
@@ -55,7 +56,7 @@ class _Checker:
             orig_value = data.configs_records[key]
 
         if orig_value is not None and not isinstance(orig_value, self._type):
-            raise KeyError(
+            raise TypeError(
                 f"Key '{key}' is already associated with "
                 f"a '{type(orig_value).__name__}', but a value "
                 f"of type '{self._type.__name__}' was provided."
@@ -64,6 +65,7 @@ class _Checker:
     def check_value(
         self, value: ParametersRecord | MetricsRecord | ConfigsRecord
     ) -> None:
+        """Check the validity of the value."""
         if not isinstance(value, self._type):
             raise TypeError(
                 f"Expected `{self._type.__name__}`, but received "
@@ -140,13 +142,13 @@ class RecordSet:
         return data.configs_records
 
     @overload
-    def __getitem__(self, key: Literal["p"]) -> ParametersRecord: ...
+    def __getitem__(self, key: Literal["p"]) -> ParametersRecord: ...  # noqa: E704
 
     @overload
-    def __getitem__(self, key: Literal["m"]) -> MetricsRecord: ...
+    def __getitem__(self, key: Literal["m"]) -> MetricsRecord: ...  # noqa: E704
 
     @overload
-    def __getitem__(self, key: Literal["c"]) -> ConfigsRecord: ...
+    def __getitem__(self, key: Literal["c"]) -> ConfigsRecord: ...  # noqa: E704
 
     def __getitem__(self, key: str) -> ParametersRecord | MetricsRecord | ConfigsRecord:
         """Return the record for the specified key."""
@@ -173,6 +175,22 @@ class RecordSet:
     ) -> None:
         """Set the record for the specified key."""
         data = cast(RecordSetData, self.__dict__["_data"])
+        builtin_key_name: str | None = None
+        record_type: (
+            type[ParametersRecord] | type[MetricsRecord] | type[ConfigsRecord] | None
+        ) = None
+        if key == Record.PARAMS:
+            builtin_key_name, record_type = "Record.PARAMS", ParametersRecord
+        elif key == Record.METRICS:
+            builtin_key_name, record_type = "Record.METRICS", MetricsRecord
+        elif key == Record.CONFIGS:
+            builtin_key_name, record_type = "Record.CONFIGS", ConfigsRecord
+        if record_type is not None and not isinstance(value, record_type):
+            raise TypeError(
+                f"Expected value of type `{record_type.__name__}` for built-in key "
+                f"`{builtin_key_name}`, but received type `{type(value).__name__}`."
+            )
+
         if isinstance(value, ParametersRecord):
             data.parameters_records[key] = value
         elif isinstance(value, MetricsRecord):

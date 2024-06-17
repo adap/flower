@@ -17,11 +17,12 @@
 import pickle
 from collections import namedtuple
 from copy import deepcopy
-from typing import Callable, Dict, List, OrderedDict, Type, Union
+from typing import Any, Callable, Dict, List, OrderedDict, Type, Union
 
 import numpy as np
 import pytest
 
+from flwr.common.constant import Record
 from flwr.common.parameter import ndarrays_to_parameters, parameters_to_ndarrays
 from flwr.common.recordset_compat import (
     parameters_to_parametersrecord,
@@ -430,3 +431,29 @@ def test_recordset_repr() -> None:
 
     # Assert
     assert str(rs) == str(expected)
+
+
+@pytest.mark.parametrize(
+    "rs, key, value, exc_type",
+    [
+        # Invalid key type
+        (RecordSet(), 12, ConfigsRecord(), TypeError),
+        # Invalid value type
+        (RecordSet(), "resnet", 0.9, TypeError),
+        # Invalid record type for built-in keys
+        (RecordSet(), Record.PARAMS, MetricsRecord(), TypeError),
+        (RecordSet(), Record.PARAMS, ConfigsRecord(), TypeError),
+        (RecordSet(), Record.METRICS, ParametersRecord(), TypeError),
+        (RecordSet(), Record.METRICS, ConfigsRecord(), TypeError),
+        (RecordSet(), Record.CONFIGS, ParametersRecord(), TypeError),
+        (RecordSet(), Record.CONFIGS, MetricsRecord(), TypeError),
+        # Invalid reassignment (different record types)
+        (RecordSet({"model": ParametersRecord()}), "model", ConfigsRecord(), TypeError),
+    ],
+)
+def test_invalid_assignment(
+    rs: RecordSet, key: str, value: Any, exc_type: Type[Exception]
+) -> None:
+    """Test invalid assignment to RecordSet."""
+    with pytest.raises(exc_type):
+        rs[key] = value
