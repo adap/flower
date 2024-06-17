@@ -90,11 +90,13 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                     and task_ins.task.consumer.anonymous is False
                     and task_ins.task.consumer.node_id == node_id
                     and task_ins.task.delivered_at == ""
+                    and task_ins.task.created_at + task_ins.task.ttl > time.time()
                 ) or (
                     node_id is None  # Anonymous
                     and task_ins.task.consumer.anonymous is True
                     and task_ins.task.consumer.node_id == 0
                     and task_ins.task.delivered_at == ""
+                    and task_ins.task.created_at + task_ins.task.ttl > time.time()
                 ):
                     task_ins_list.append(task_ins)
                 if limit and len(task_ins_list) == limit:
@@ -115,6 +117,35 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         if any(errors):
             log(ERROR, errors)
             return None
+
+        with self.lock:
+            # Check if the TaskIns it is replying to exists and is valid
+            task_ins_id = task_res.task.ancestry[0]
+            task_ins = self.task_ins_store.get(UUID(task_ins_id))
+
+            if task_ins is None:
+                log(ERROR, "TaskIns with task_id %s does not exist.", task_ins_id)
+                return None
+
+            if task_ins.task.created_at + task_ins.task.ttl <= time.time():
+                log(ERROR, "TaskIns with task_id %s is expired.", task_ins_id)
+                return None
+
+            # Limit the TaskRes TTL to not exceed the
+            # expiration time of the TaskIns it replies to.
+            # Condition: TaskIns.created_at + TaskIns.ttl ≥
+            #            TaskRes.created_at + TaskRes.ttl
+            if (
+                task_res.task.ttl
+                > task_ins.task.created_at
+                + task_ins.task.ttl
+                - task_res.task.created_at
+            ):
+                task_res.task.ttl = (
+                    task_ins.task.created_at
+                    + task_ins.task.ttl
+                    - task_res.task.created_at
+                )
 
         # Validate run_id
         if task_res.run_id not in self.run_ids:
