@@ -82,19 +82,20 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         run: RunTracker,
     ) -> None:
         stop_event = run.stop_event
-        logs = run.logs
         while not stop_event.is_set():
+            # Select streams only when ready to read
             ready_to_read, _, _ = select.select(
                 [run.proc.stdout, run.proc.stderr],
                 [],
                 [],
                 self.select_timeout,
             )
+            # Read from std* and append to RunTracker.logs
             for stream in ready_to_read:
                 line = stream.readline().rstrip()
                 if line:
                     with self.lock:
-                        logs.append(f"{line}")
+                        run.logs.append(f"{line}")
 
             if run.proc.poll() is not None:
                 log(INFO, "Subprocess finished, exiting log capture")
@@ -114,13 +115,17 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         last_sent_index = 0
         while context.is_active():
             with self.lock:
+                # Exit if run_id not found
                 if request.run_id not in self.runs:
                     context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
                 logs = self.runs[request.run_id].logs
+                # Yield n'th row of logs, if n'th row < len(logs)
                 if last_sent_index < len(logs):
                     for i in range(last_sent_index, len(logs)):
                         yield StreamLogsResponse(log_output=logs[i])
                     last_sent_index = len(logs)
+                # Shutdown context if process has completed. Previously stored
+                # logs will still be printed.
                 if self.runs[request.run_id].proc.poll() is not None:
                     log(INFO, "Run ID `%s` completed", request.run_id)
                     context.cancel()
