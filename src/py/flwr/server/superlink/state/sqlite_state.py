@@ -386,7 +386,7 @@ class SqliteState(State):  # pylint: disable=R0904
 
         return task_id
 
-    # pylint: disable-next=R0914
+    # pylint: disable-next=R0912,R0915,R0914
     def get_task_res(self, task_ids: Set[UUID], limit: Optional[int]) -> List[TaskRes]:
         """Get TaskRes for task_ids.
 
