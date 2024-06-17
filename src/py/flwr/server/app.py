@@ -40,7 +40,7 @@ from flwr.common.constant import (
     TRANSPORT_TYPE_REST,
 )
 from flwr.common.exit_handlers import register_exit_handlers
-from flwr.common.logger import log, warn_deprecated_feature
+from flwr.common.logger import log
 from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
     private_key_to_bytes,
     public_key_to_bytes,
@@ -190,120 +190,6 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     return hist
 
 
-def run_driver_api() -> None:
-    """Run Flower server (Driver API)."""
-    log(INFO, "Starting Flower server (Driver API)")
-    # Running `flower-driver-api` is deprecated
-    warn_deprecated_feature("flower-driver-api")
-    log(WARN, "Use `flower-superlink` instead")
-    event(EventType.RUN_DRIVER_API_ENTER)
-    args = _parse_args_run_driver_api().parse_args()
-
-    # Parse IP address
-    parsed_address = parse_address(args.driver_api_address)
-    if not parsed_address:
-        sys.exit(f"Driver IP address ({args.driver_api_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-
-    # Obtain certificates
-    certificates = _try_obtain_certificates(args)
-
-    # Initialize StateFactory
-    state_factory = StateFactory(args.database)
-
-    # Start server
-    grpc_server: grpc.Server = run_driver_api_grpc(
-        address=address,
-        state_factory=state_factory,
-        certificates=certificates,
-    )
-
-    # Graceful shutdown
-    register_exit_handlers(
-        event_type=EventType.RUN_DRIVER_API_LEAVE,
-        grpc_servers=[grpc_server],
-        bckg_threads=[],
-    )
-
-    # Block
-    grpc_server.wait_for_termination()
-
-
-def run_fleet_api() -> None:
-    """Run Flower server (Fleet API)."""
-    log(INFO, "Starting Flower server (Fleet API)")
-    # Running `flower-fleet-api` is deprecated
-    warn_deprecated_feature("flower-fleet-api")
-    log(WARN, "Use `flower-superlink` instead")
-    event(EventType.RUN_FLEET_API_ENTER)
-    args = _parse_args_run_fleet_api().parse_args()
-
-    # Obtain certificates
-    certificates = _try_obtain_certificates(args)
-
-    # Initialize StateFactory
-    state_factory = StateFactory(args.database)
-
-    grpc_servers = []
-    bckg_threads = []
-
-    # Start Fleet API
-    if args.fleet_api_type == TRANSPORT_TYPE_REST:
-        if (
-            importlib.util.find_spec("requests")
-            and importlib.util.find_spec("starlette")
-            and importlib.util.find_spec("uvicorn")
-        ) is None:
-            sys.exit(MISSING_EXTRA_REST)
-        address_arg = args.rest_fleet_api_address
-        parsed_address = parse_address(address_arg)
-        if not parsed_address:
-            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, _ = parsed_address
-        fleet_thread = threading.Thread(
-            target=_run_fleet_api_rest,
-            args=(
-                host,
-                port,
-                args.ssl_keyfile,
-                args.ssl_certfile,
-                state_factory,
-                args.rest_fleet_api_workers,
-            ),
-        )
-        fleet_thread.start()
-        bckg_threads.append(fleet_thread)
-    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
-        address_arg = args.grpc_rere_fleet_api_address
-        parsed_address = parse_address(address_arg)
-        if not parsed_address:
-            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, is_v6 = parsed_address
-        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-        fleet_server = _run_fleet_api_grpc_rere(
-            address=address,
-            state_factory=state_factory,
-            certificates=certificates,
-        )
-        grpc_servers.append(fleet_server)
-    else:
-        raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
-
-    # Graceful shutdown
-    register_exit_handlers(
-        event_type=EventType.RUN_FLEET_API_LEAVE,
-        grpc_servers=grpc_servers,
-        bckg_threads=bckg_threads,
-    )
-
-    # Block
-    if len(grpc_servers) > 0:
-        grpc_servers[0].wait_for_termination()
-    elif len(bckg_threads) > 0:
-        bckg_threads[0].join()
-
-
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
 def run_superlink() -> None:
     """Run Flower SuperLink (Driver API and Fleet API)."""
@@ -314,11 +200,7 @@ def run_superlink() -> None:
     args = _parse_args_run_superlink().parse_args()
 
     # Parse IP address
-    parsed_address = parse_address(args.driver_api_address)
-    if not parsed_address:
-        sys.exit(f"Driver IP address ({args.driver_api_address}) cannot be parsed.")
-    host, port, is_v6 = parsed_address
-    address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
+    driver_address, _, _ = _format_address(args.driver_api_address)
 
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
@@ -328,13 +210,33 @@ def run_superlink() -> None:
 
     # Start Driver API
     driver_server: grpc.Server = run_driver_api_grpc(
-        address=address,
+        address=driver_address,
         state_factory=state_factory,
         certificates=certificates,
     )
 
     grpc_servers = [driver_server]
     bckg_threads = []
+    if not args.fleet_api_address:
+        args.fleet_api_address = (
+            ADDRESS_FLEET_API_GRPC_RERE
+            if args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE
+            else ADDRESS_FLEET_API_REST
+        )
+
+    fleet_address, host, port = _format_address(args.fleet_api_address)
+
+    num_workers = args.fleet_api_num_workers
+    if num_workers != 1:
+        log(
+            WARN,
+            "The Fleet API currently supports only 1 worker. "
+            "You have specified %d workers. "
+            "Support for multiple workers will be added in future releases. "
+            "Proceeding with a single worker.",
+            args.fleet_api_num_workers,
+        )
+        num_workers = 1
 
     # Start Fleet API
     if args.fleet_api_type == TRANSPORT_TYPE_REST:
@@ -344,14 +246,11 @@ def run_superlink() -> None:
             and importlib.util.find_spec("uvicorn")
         ) is None:
             sys.exit(MISSING_EXTRA_REST)
-        address_arg = args.rest_fleet_api_address
-        parsed_address = parse_address(address_arg)
+
         _, ssl_certfile, ssl_keyfile = (
             certificates if certificates is not None else (None, None, None)
         )
-        if not parsed_address:
-            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, _ = parsed_address
+
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
             args=(
@@ -360,19 +259,12 @@ def run_superlink() -> None:
                 ssl_keyfile,
                 ssl_certfile,
                 state_factory,
-                args.rest_fleet_api_workers,
+                num_workers,
             ),
         )
         fleet_thread.start()
         bckg_threads.append(fleet_thread)
     elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
-        address_arg = args.grpc_rere_fleet_api_address
-        parsed_address = parse_address(address_arg)
-        if not parsed_address:
-            sys.exit(f"Fleet IP address ({address_arg}) cannot be parsed.")
-        host, port, is_v6 = parsed_address
-        address = f"[{host}]:{port}" if is_v6 else f"{host}:{port}"
-
         maybe_keys = _try_setup_client_authentication(args, certificates)
         interceptors: Optional[Sequence[grpc.ServerInterceptor]] = None
         if maybe_keys is not None:
@@ -395,7 +287,7 @@ def run_superlink() -> None:
             interceptors = [AuthenticateServerInterceptor(state)]
 
         fleet_server = _run_fleet_api_grpc_rere(
-            address=address,
+            address=fleet_address,
             state_factory=state_factory,
             certificates=certificates,
             interceptors=interceptors,
@@ -418,6 +310,16 @@ def run_superlink() -> None:
                 if not thread.is_alive():
                     sys.exit(1)
         driver_server.wait_for_termination(timeout=1)
+
+
+def _format_address(address: str) -> Tuple[str, str, int]:
+    parsed_address = parse_address(address)
+    if not parsed_address:
+        sys.exit(
+            f"Address ({address}) cannot be parsed (expected: URL or IPv4 or IPv6)."
+        )
+    host, port, is_v6 = parsed_address
+    return (f"[{host}]:{port}" if is_v6 else f"{host}:{port}", host, port)
 
 
 def _try_setup_client_authentication(
@@ -596,7 +498,7 @@ def _run_fleet_api_rest(
     ssl_keyfile: Optional[str],
     ssl_certfile: Optional[str],
     state_factory: StateFactory,
-    workers: int,
+    num_workers: int,
 ) -> None:
     """Run Driver API (REST-based)."""
     try:
@@ -605,12 +507,7 @@ def _run_fleet_api_rest(
         from flwr.server.superlink.fleet.rest_rere.rest_api import app as fast_api_app
     except ModuleNotFoundError:
         sys.exit(MISSING_EXTRA_REST)
-    if workers != 1:
-        raise ValueError(
-            f"The supported number of workers for the Fleet API (REST server) is "
-            f"1. Instead given {workers}. The functionality of >1 workers will be "
-            f"added in the future releases."
-        )
+
     log(INFO, "Starting Flower REST server")
 
     # See: https://www.starlette.io/applications/#accessing-the-app-instance
@@ -624,42 +521,8 @@ def _run_fleet_api_rest(
         access_log=True,
         ssl_keyfile=ssl_keyfile,
         ssl_certfile=ssl_certfile,
-        workers=workers,
+        workers=num_workers,
     )
-
-
-def _parse_args_run_driver_api() -> argparse.ArgumentParser:
-    """Parse command line arguments for Driver API."""
-    parser = argparse.ArgumentParser(
-        description="Start a Flower Driver API server. "
-        "This server will be responsible for "
-        "receiving TaskIns from the Driver script and "
-        "sending them to the Fleet API. Once the client nodes "
-        "are done, they will send the TaskRes back to this Driver API server (through"
-        " the Fleet API) which will then send them back to the Driver script.",
-    )
-
-    _add_args_common(parser=parser)
-    _add_args_driver_api(parser=parser)
-
-    return parser
-
-
-def _parse_args_run_fleet_api() -> argparse.ArgumentParser:
-    """Parse command line arguments for Fleet API."""
-    parser = argparse.ArgumentParser(
-        description="Start a Flower Fleet API server."
-        "This server will be responsible for "
-        "sending TaskIns (received from the Driver API) to the client nodes "
-        "and of receiving TaskRes sent back from those same client nodes once "
-        "they are done. Then, this Fleet API server can send those "
-        "TaskRes back to the Driver API.",
-    )
-
-    _add_args_common(parser=parser)
-    _add_args_fleet_api(parser=parser)
-
-    return parser
 
 
 def _parse_args_run_superlink() -> argparse.ArgumentParser:
@@ -732,50 +595,27 @@ def _add_args_common(parser: argparse.ArgumentParser) -> None:
 def _add_args_driver_api(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--driver-api-address",
-        help="Driver API (gRPC) server address (IPv4, IPv6, or a domain name)",
+        help="Driver API (gRPC) server address (IPv4, IPv6, or a domain name).",
         default=ADDRESS_DRIVER_API,
     )
 
 
 def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
     # Fleet API transport layer type
-    ex_group = parser.add_mutually_exclusive_group()
-    ex_group.add_argument(
-        "--grpc-rere",
-        action="store_const",
-        dest="fleet_api_type",
-        const=TRANSPORT_TYPE_GRPC_RERE,
+    parser.add_argument(
+        "--fleet-api-type",
         default=TRANSPORT_TYPE_GRPC_RERE,
-        help="Start a Fleet API server (gRPC-rere)",
+        type=str,
+        choices=[TRANSPORT_TYPE_GRPC_RERE, TRANSPORT_TYPE_REST],
+        help="Start a gRPC-rere or REST (experimental) Fleet API server.",
     )
-    ex_group.add_argument(
-        "--rest",
-        action="store_const",
-        dest="fleet_api_type",
-        const=TRANSPORT_TYPE_REST,
-        help="Start a Fleet API server (REST, experimental)",
+    parser.add_argument(
+        "--fleet-api-address",
+        help="Fleet API server address (IPv4, IPv6, or a domain name).",
     )
-
-    # Fleet API gRPC-rere options
-    grpc_rere_group = parser.add_argument_group(
-        "Fleet API (gRPC-rere) server options", ""
-    )
-    grpc_rere_group.add_argument(
-        "--grpc-rere-fleet-api-address",
-        help="Fleet API (gRPC-rere) server address (IPv4, IPv6, or a domain name)",
-        default=ADDRESS_FLEET_API_GRPC_RERE,
-    )
-
-    # Fleet API REST options
-    rest_group = parser.add_argument_group("Fleet API (REST) server options", "")
-    rest_group.add_argument(
-        "--rest-fleet-api-address",
-        help="Fleet API (REST) server address (IPv4, IPv6, or a domain name)",
-        default=ADDRESS_FLEET_API_REST,
-    )
-    rest_group.add_argument(
-        "--rest-fleet-api-workers",
-        help="Set the number of concurrent workers for the Fleet API REST server.",
-        type=int,
+    parser.add_argument(
+        "--fleet-api-num-workers",
         default=1,
+        type=int,
+        help="Set the number of concurrent workers for the Fleet API server.",
     )
