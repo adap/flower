@@ -177,11 +177,11 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                 task_ins = self.task_ins_store.get(reply_to)
                 if task_ins is None:
                     log(ERROR, "TaskIns with task_id %s does not exist.", reply_to)
-                    return None
+                    return []
 
                 if task_ins.task.created_at + task_ins.task.ttl <= time.time():
                     log(ERROR, "TaskIns with task_id %s is expired.", reply_to)
-                    return None
+                    return []
 
                 if reply_to in task_ids and task_res.task.delivered_at == "":
                     task_res_list.append(task_res)

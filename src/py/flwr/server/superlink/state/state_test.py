@@ -784,7 +784,7 @@ class StateTest(unittest.TestCase):
         task_res_list = state.get_task_res(task_ids={task_id}, limit=None)
 
         # Assert
-        assert task_res_list is None
+        assert len(task_res_list) == 0
 
 
 def create_task_ins(
