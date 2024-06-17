@@ -20,7 +20,6 @@ from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Callable, Optional, Tuple
 
-import tomli
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
@@ -28,10 +27,9 @@ from cryptography.hazmat.primitives.serialization import (
     load_ssh_public_key,
 )
 
-from flwr.cli.config_utils import validate_fields
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
-from flwr.common.config import get_flwr_dir
+from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.object_ref import load_app, validate
@@ -172,7 +170,7 @@ def _get_load_client_app_fn(
         if args.flwr_dir is None:
             flwr_dir = get_flwr_dir()
         else:
-            flwr_dir = Path(args.flwr_dir)
+            flwr_dir = Path(args.flwr_dir).absolute()
 
     sys.path.insert(0, str(flwr_dir))
 
@@ -211,38 +209,11 @@ def _get_load_client_app_fn(
             client_app_ref = default_app_ref
         # If multi-app feature is enabled
         else:
-            # Check the fab_id
-            if fab_id.count("/") != 1:
-                raise LoadClientAppError(
-                    f"Invalid FAB ID: {fab_id}",
-                ) from None
-            username, project_name = fab_id.split("/")
-
-            # Locate the directory
-            project_dir = flwr_dir / "apps" / username / project_name / fab_version
-
-            # Check if the directory exists
-            if not project_dir.exists():
-                raise LoadClientAppError(
-                    f"Invalid Flower App directory: {project_dir}",
-                ) from None
-
-            # Load pyproject.toml file
-            toml_path = project_dir / "pyproject.toml"
-            if not toml_path.is_file():
-                raise LoadClientAppError(
-                    f"Cannot find pyproject.toml in {project_dir}",
-                ) from None
-            with open(toml_path, encoding="utf-8") as toml_file:
-                config = tomli.loads(toml_file.read())
-
-            # Validate pyproject.toml fields
-            is_valid, errors, _ = validate_fields(config)
-            if not is_valid:
-                error_msg = "\n".join([f"  - {error}" for error in errors])
-                raise LoadClientAppError(
-                    f"Invalid pyproject.toml:\n{error_msg}",
-                ) from None
+            try:
+                project_dir = get_project_dir(fab_id, fab_version, flwr_dir)
+                config = get_project_config(project_dir)
+            except Exception as e:
+                raise LoadClientAppError("Failed to load ClientApp") from e
 
             # Set sys.path
             sys.path[0] = str(project_dir)
