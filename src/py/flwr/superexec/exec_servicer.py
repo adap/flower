@@ -41,11 +41,8 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     def __init__(self, executor: Executor) -> None:
         self.executor = executor
         self.runs: Dict[int, RunTracker] = {}
-
         self.lock = threading.Lock()
-
         self.select_timeout: int = 1
-        # self.log_streams: Dict[int, LogStreamer] = {}
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
