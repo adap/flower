@@ -5,6 +5,7 @@ isort:skip_file
 import builtins
 import google.protobuf.descriptor
 import google.protobuf.message
+import typing
 import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
@@ -30,3 +31,25 @@ class StartRunResponse(google.protobuf.message.Message):
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
 global___StartRunResponse = StartRunResponse
+
+class StreamLogsRequest(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    RUN_ID_FIELD_NUMBER: builtins.int
+    run_id: builtins.int
+    def __init__(self,
+        *,
+        run_id: builtins.int = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["run_id",b"run_id"]) -> None: ...
+global___StreamLogsRequest = StreamLogsRequest
+
+class StreamLogsResponse(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    LOG_OUTPUT_FIELD_NUMBER: builtins.int
+    log_output: typing.Text
+    def __init__(self,
+        *,
+        log_output: typing.Text = ...,
+        ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["log_output",b"log_output"]) -> None: ...
+global___StreamLogsResponse = StreamLogsResponse
