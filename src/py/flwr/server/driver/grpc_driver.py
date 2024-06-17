@@ -136,6 +136,7 @@ class GrpcDriverHelper:
 
 
 class GrpcDriver(Driver):
+    # pylint: disable=too-many-instance-attributes, too-many-arguments
     """`Driver` class provides an interface to the Driver API.
 
     Parameters
@@ -163,27 +164,37 @@ class GrpcDriver(Driver):
         root_certificates: Optional[bytes] = None,
         fab_id: Optional[str] = None,
         fab_version: Optional[str] = None,
+        run_id: Optional[int] = None,
     ) -> None:
         self.addr = driver_service_address
         self.root_certificates = root_certificates
         self.driver_helper: Optional[GrpcDriverHelper] = None
-        self.run_id: Optional[int] = None
         self.fab_id = fab_id if fab_id is not None else ""
         self.fab_version = fab_version if fab_version is not None else ""
+        if run_id:
+            self.run_id: Optional[int] = run_id
+            self.no_run_id = False
+        else:
+            self.run_id = None
+            self.no_run_id = True
         self.node = Node(node_id=0, anonymous=True)
 
     def _get_grpc_driver_helper_and_run_id(self) -> Tuple[GrpcDriverHelper, int]:
         # Check if the GrpcDriverHelper is initialized
-        if self.driver_helper is None or self.run_id is None:
+        if self.driver_helper is None:
             # Connect and create run
             self.driver_helper = GrpcDriverHelper(
                 driver_service_address=self.addr,
                 root_certificates=self.root_certificates,
             )
             self.driver_helper.connect()
+        if self.no_run_id and self.run_id is None:
             req = CreateRunRequest(fab_id=self.fab_id, fab_version=self.fab_version)
             res = self.driver_helper.create_run(req)
             self.run_id = res.run_id
+
+        assert self.run_id is not None
+
         return self.driver_helper, self.run_id
 
     def _check_message(self, message: Message) -> None:
