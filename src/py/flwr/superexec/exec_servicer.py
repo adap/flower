@@ -58,4 +58,5 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     def StreamLogs(
         self, request: StreamLogsRequest, context: grpc.ServicerContext
     ) -> StreamLogsResponse:
+        """Get logs."""
         pass
