@@ -36,6 +36,15 @@ TRANSPORT_TYPES = [
     TRANSPORT_TYPE_VCE,
 ]
 
+SUPEREXEC_DEFAULT_ADDRESS = "0.0.0.0:9093"
+
+# Constants for ping
+PING_DEFAULT_INTERVAL = 30
+PING_CALL_TIMEOUT = 5
+PING_BASE_MULTIPLIER = 0.8
+PING_RANDOM_RANGE = (-0.1, 0.1)
+PING_MAX_INTERVAL = 1e300
+
 
 class MessageType:
     """Message type."""
@@ -66,5 +75,18 @@ class SType:
     NUMPY = "numpy.ndarray"
 
     def __new__(cls) -> SType:
+        """Prevent instantiation."""
+        raise TypeError(f"{cls.__name__} cannot be instantiated.")
+
+
+class ErrorCode:
+    """Error codes for Message's Error."""
+
+    UNKNOWN = 0
+    LOAD_CLIENT_APP_EXCEPTION = 1
+    CLIENT_APP_RAISED_EXCEPTION = 2
+    NODE_UNAVAILABLE = 3
+
+    def __new__(cls) -> ErrorCode:
         """Prevent instantiation."""
         raise TypeError(f"{cls.__name__} cannot be instantiated.")

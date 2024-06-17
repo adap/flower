@@ -1,21 +1,33 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
-name = "$project_name"
+[project]
+name = "$package_name"
 version = "1.0.0"
 description = ""
-license = "Apache-2.0"
 authors = [
-    "The Flower Authors <hello@flower.ai>",
+    { name = "The Flower Authors", email = "hello@flower.ai" },
 ]
-readme = "README.md"
+license = { text = "Apache License (2.0)" }
+dependencies = [
+    "flwr[simulation]>=1.9.0,<2.0",
+    "flwr-datasets[vision]>=0.0.2,<1.0.0",
+    "tensorflow>=2.11.1",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.9,<3.11"
-# Mandatory dependencies
-flwr = { version = "^1.8.0", extras = ["simulation"] }
-flwr-datasets = { version = "^0.0.2", extras = ["vision"] }
-tensorflow-cpu = { version = ">=2.9.1,<2.11.1 || >2.11.1", markers = "platform_machine == \"x86_64\"" }
-tensorflow-macos = { version = ">=2.9.1,<2.11.1 || >2.11.1", markers = "sys_platform == \"darwin\" and platform_machine == \"arm64\"" }
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[flower]
+publisher = "$username"
+
+[flower.components]
+serverapp = "$import_name.server:app"
+clientapp = "$import_name.client:app"
+
+[flower.engine]
+name = "simulation"
+
+[flower.engine.simulation.supernode]
+num = 2

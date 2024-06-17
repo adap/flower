@@ -14,6 +14,8 @@
 # ==============================================================================
 """RecordSet tests."""
 
+import pickle
+from collections import namedtuple
 from copy import deepcopy
 from typing import Callable, Dict, List, OrderedDict, Type, Union
 
@@ -33,7 +35,7 @@ from flwr.common.typing import (
     Parameters,
 )
 
-from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord
+from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet
 
 
 def get_ndarrays() -> NDArrays:
@@ -398,3 +400,33 @@ def test_count_bytes_configsrecord() -> None:
 
     record_bytest_count = c_record.count_bytes()
     assert bytes_in_dict == record_bytest_count
+
+
+def test_record_is_picklable() -> None:
+    """Test if RecordSet and *Record are picklable."""
+    # Prepare
+    p_record = ParametersRecord()
+    m_record = MetricsRecord({"aa": 123})
+    c_record = ConfigsRecord({"cc": bytes(9)})
+    rs = RecordSet()
+    rs.parameters_records["params"] = p_record
+    rs.metrics_records["metrics"] = m_record
+    rs.configs_records["configs"] = c_record
+
+    # Execute
+    pickle.dumps((p_record, m_record, c_record, rs))
+
+
+def test_recordset_repr() -> None:
+    """Test the string representation of RecordSet."""
+    # Prepare
+    kwargs = {
+        "parameters_records": {"params": ParametersRecord()},
+        "metrics_records": {"metrics": MetricsRecord({"aa": 123})},
+        "configs_records": {"configs": ConfigsRecord({"cc": bytes(9)})},
+    }
+    rs = RecordSet(**kwargs)  # type: ignore
+    expected = namedtuple("RecordSet", kwargs.keys())(**kwargs)
+
+    # Assert
+    assert str(rs) == str(expected)

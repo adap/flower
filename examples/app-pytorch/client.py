@@ -18,7 +18,6 @@ trainloader, testloader = load_data()
 
 # Define FlowerClient and client_fn
 class FlowerClient(NumPyClient):
-
     def fit(self, parameters, config):
         set_weights(net, parameters)
         results = train(net, trainloader, testloader, epochs=1, device=DEVICE)

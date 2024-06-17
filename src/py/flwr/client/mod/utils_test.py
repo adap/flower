@@ -20,6 +20,7 @@ from typing import List, cast
 
 from flwr.client.typing import ClientAppCallable, Mod
 from flwr.common import (
+    DEFAULT_TTL,
     ConfigsRecord,
     Context,
     Message,
@@ -84,7 +85,7 @@ def _get_dummy_flower_message() -> Message:
             src_node_id=0,
             dst_node_id=0,
             reply_to_message="",
-            ttl="",
+            ttl=DEFAULT_TTL,
             message_type="mock",
         ),
     )

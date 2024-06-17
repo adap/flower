@@ -14,7 +14,6 @@ This will create a new directory called `quickstart-pytorch` containing the foll
 
 ```shell
 -- pyproject.toml
--- requirements.txt
 -- client.py
 -- server.py
 -- README.md
@@ -22,30 +21,22 @@ This will create a new directory called `quickstart-pytorch` containing the foll
 
 ### Installing Dependencies
 
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### Poetry
+Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml`. You can install the dependencies by invoking `pip`:
 
 ```shell
-poetry install
-poetry shell
+# From a new python environment, run:
+pip install .
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+Then, to verify that everything works correctly you can run the following command:
 
 ```shell
-poetry run python3 -c "import flwr"
+python3 -c "import flwr"
 ```
 
 If you don't see any errors you're good to go!
 
-#### pip
-
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
-```
+______________________________________________________________________
 
 ## Run Federated Learning with PyTorch and Flower
 
@@ -72,3 +63,29 @@ python3 client.py --partition-id 1
 ```
 
 You will see that PyTorch is starting a federated training. Look at the [code](https://github.com/adap/flower/tree/main/examples/quickstart-pytorch) for a detailed explanation.
+
+______________________________________________________________________
+
+## Run Federated Learning with PyTorch and `Flower Next`
+
+### 1. Start the long-running Flower server (SuperLink)
+
+```bash
+flower-superlink --insecure
+```
+
+### 2. Start the long-running Flower clients (SuperNodes)
+
+Start 2 Flower `SuperNodes` in 2 separate terminal windows, using:
+
+```bash
+flower-client-app client:app --insecure
+```
+
+### 3. Run the Flower App
+
+With both the long-running server (SuperLink) and two clients (SuperNode) up and running, we can now run the actual Flower App:
+
+```bash
+flower-server-app server:app --insecure
+```

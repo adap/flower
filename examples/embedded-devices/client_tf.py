@@ -44,7 +44,7 @@ def prepare_dataset(use_mnist: bool):
         partition = fds.load_partition(partition_id, "train")
         partition.set_format("numpy")
         # Divide data on each node: 90% train, 10% test
-        partition = partition.train_test_split(test_size=0.1)
+        partition = partition.train_test_split(test_size=0.1, seed=42)
         x_train, y_train = (
             partition["train"][img_key] / 255.0,
             partition["train"]["label"],

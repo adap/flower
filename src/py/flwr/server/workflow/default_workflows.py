@@ -17,13 +17,23 @@
 
 import io
 import timeit
-from logging import INFO
-from typing import Optional, cast
+from logging import INFO, WARN
+from typing import List, Optional, Tuple, Union, cast
 
 import flwr.common.recordset_compat as compat
-from flwr.common import ConfigsRecord, Context, GetParametersIns, log
+from flwr.common import (
+    Code,
+    ConfigsRecord,
+    Context,
+    EvaluateRes,
+    FitRes,
+    GetParametersIns,
+    ParametersRecord,
+    log,
+)
 from flwr.common.constant import MessageType, MessageTypeLegacy
 
+from ..client_proxy import ClientProxy
 from ..compat.app_utils import start_update_client_manager_thread
 from ..compat.legacy_context import LegacyContext
 from ..driver import Driver
@@ -88,7 +98,12 @@ class DefaultWorkflow:
         hist = context.history
         log(INFO, "")
         log(INFO, "[SUMMARY]")
-        log(INFO, "Run finished %s rounds in %.2fs", context.config.num_rounds, elapsed)
+        log(
+            INFO,
+            "Run finished %s round(s) in %.2fs",
+            context.config.num_rounds,
+            elapsed,
+        )
         for idx, line in enumerate(io.StringIO(str(hist))):
             if idx == 0:
                 log(INFO, "%s", line.strip("\n"))
@@ -127,13 +142,27 @@ def default_init_params_workflow(driver: Driver, context: Context) -> None:
                     message_type=MessageTypeLegacy.GET_PARAMETERS,
                     dst_node_id=random_client.node_id,
                     group_id="0",
-                    ttl="",
                 )
             ]
         )
-        log(INFO, "Received initial parameters from one random client")
         msg = list(messages)[0]
-        paramsrecord = next(iter(msg.content.parameters_records.values()))
+
+        if (
+            msg.has_content()
+            and compat._extract_status_from_recordset(  # pylint: disable=W0212
+                "getparametersres", msg.content
+            ).code
+            == Code.OK
+        ):
+            log(INFO, "Received initial parameters from one random client")
+            paramsrecord = next(iter(msg.content.parameters_records.values()))
+        else:
+            log(
+                WARN,
+                "Failed to receive initial parameters from the client."
+                " Empty initial parameters will be used.",
+            )
+            paramsrecord = ParametersRecord()
 
     context.state.parameters_records[MAIN_PARAMS_RECORD] = paramsrecord
 
@@ -226,7 +255,6 @@ def default_fit_workflow(  # pylint: disable=R0914
             message_type=MessageType.TRAIN,
             dst_node_id=proxy.node_id,
             group_id=str(current_round),
-            ttl="",
         )
         for proxy, fitins in client_instructions
     ]
@@ -246,14 +274,20 @@ def default_fit_workflow(  # pylint: disable=R0914
     )
 
     # Aggregate training results
-    results = [
-        (
-            node_id_to_proxy[msg.metadata.src_node_id],
-            compat.recordset_to_fitres(msg.content, False),
-        )
-        for msg in messages
-    ]
-    aggregated_result = context.strategy.aggregate_fit(current_round, results, [])
+    results: List[Tuple[ClientProxy, FitRes]] = []
+    failures: List[Union[Tuple[ClientProxy, FitRes], BaseException]] = []
+    for msg in messages:
+        if msg.has_content():
+            proxy = node_id_to_proxy[msg.metadata.src_node_id]
+            fitres = compat.recordset_to_fitres(msg.content, False)
+            if fitres.status.code == Code.OK:
+                results.append((proxy, fitres))
+            else:
+                failures.append((proxy, fitres))
+        else:
+            failures.append(Exception(msg.error))
+
+    aggregated_result = context.strategy.aggregate_fit(current_round, results, failures)
     parameters_aggregated, metrics_aggregated = aggregated_result
 
     # Update the parameters and write history
@@ -267,6 +301,7 @@ def default_fit_workflow(  # pylint: disable=R0914
         )
 
 
+# pylint: disable-next=R0914
 def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     """Execute the default workflow for a single evaluate round."""
     if not isinstance(context, LegacyContext):
@@ -306,7 +341,6 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
             message_type=MessageType.EVALUATE,
             dst_node_id=proxy.node_id,
             group_id=str(current_round),
-            ttl="",
         )
         for proxy, evalins in client_instructions
     ]
@@ -326,14 +360,22 @@ def default_evaluate_workflow(driver: Driver, context: Context) -> None:
     )
 
     # Aggregate the evaluation results
-    results = [
-        (
-            node_id_to_proxy[msg.metadata.src_node_id],
-            compat.recordset_to_evaluateres(msg.content),
-        )
-        for msg in messages
-    ]
-    aggregated_result = context.strategy.aggregate_evaluate(current_round, results, [])
+    results: List[Tuple[ClientProxy, EvaluateRes]] = []
+    failures: List[Union[Tuple[ClientProxy, EvaluateRes], BaseException]] = []
+    for msg in messages:
+        if msg.has_content():
+            proxy = node_id_to_proxy[msg.metadata.src_node_id]
+            evalres = compat.recordset_to_evaluateres(msg.content)
+            if evalres.status.code == Code.OK:
+                results.append((proxy, evalres))
+            else:
+                failures.append((proxy, evalres))
+        else:
+            failures.append(Exception(msg.error))
+
+    aggregated_result = context.strategy.aggregate_evaluate(
+        current_round, results, failures
+    )
 
     loss_aggregated, metrics_aggregated = aggregated_result
 

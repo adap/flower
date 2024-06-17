@@ -21,9 +21,11 @@ from flwr.common.constant import MISSING_EXTRA_REST
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
+    PingRequest,
     PullTaskInsRequest,
     PushTaskResRequest,
 )
+from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
 from flwr.server.superlink.fleet.message_handler import message_handler
 from flwr.server.superlink.state import State
 
@@ -152,11 +154,67 @@ async def push_task_res(request: Request) -> Response:  # Check if token is need
     )
 
 
+async def ping(request: Request) -> Response:
+    """Ping."""
+    _check_headers(request.headers)
+
+    # Get the request body as raw bytes
+    ping_request_bytes: bytes = await request.body()
+
+    # Deserialize ProtoBuf
+    ping_request_proto = PingRequest()
+    ping_request_proto.ParseFromString(ping_request_bytes)
+
+    # Get state from app
+    state: State = app.state.STATE_FACTORY.state()
+
+    # Handle message
+    ping_response_proto = message_handler.ping(request=ping_request_proto, state=state)
+
+    # Return serialized ProtoBuf
+    ping_response_bytes = ping_response_proto.SerializeToString()
+    return Response(
+        status_code=200,
+        content=ping_response_bytes,
+        headers={"Content-Type": "application/protobuf"},
+    )
+
+
+async def get_run(request: Request) -> Response:
+    """GetRun."""
+    _check_headers(request.headers)
+
+    # Get the request body as raw bytes
+    get_run_request_bytes: bytes = await request.body()
+
+    # Deserialize ProtoBuf
+    get_run_request_proto = GetRunRequest()
+    get_run_request_proto.ParseFromString(get_run_request_bytes)
+
+    # Get state from app
+    state: State = app.state.STATE_FACTORY.state()
+
+    # Handle message
+    get_run_response_proto = message_handler.get_run(
+        request=get_run_request_proto, state=state
+    )
+
+    # Return serialized ProtoBuf
+    get_run_response_bytes = get_run_response_proto.SerializeToString()
+    return Response(
+        status_code=200,
+        content=get_run_response_bytes,
+        headers={"Content-Type": "application/protobuf"},
+    )
+
+
 routes = [
     Route("/api/v0/fleet/create-node", create_node, methods=["POST"]),
     Route("/api/v0/fleet/delete-node", delete_node, methods=["POST"]),
     Route("/api/v0/fleet/pull-task-ins", pull_task_ins, methods=["POST"]),
     Route("/api/v0/fleet/push-task-res", push_task_res, methods=["POST"]),
+    Route("/api/v0/fleet/ping", ping, methods=["POST"]),
+    Route("/api/v0/fleet/get-run", get_run, methods=["POST"]),
 ]
 
 app: Starlette = Starlette(

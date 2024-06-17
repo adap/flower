@@ -15,7 +15,8 @@
 """Driver API servicer."""
 
 
-from logging import DEBUG, INFO
+import time
+from logging import DEBUG
 from typing import List, Optional, Set
 from uuid import UUID
 
@@ -34,6 +35,7 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State, StateFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
@@ -61,9 +63,9 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         self, request: CreateRunRequest, context: grpc.ServicerContext
     ) -> CreateRunResponse:
         """Create run ID."""
-        log(INFO, "DriverServicer.CreateRun")
+        log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
-        run_id = state.create_run()
+        run_id = state.create_run(request.fab_id, request.fab_version)
         return CreateRunResponse(run_id=run_id)
 
     def PushTaskIns(
@@ -71,6 +73,11 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
     ) -> PushTaskInsResponse:
         """Push a set of TaskIns."""
         log(DEBUG, "DriverServicer.PushTaskIns")
+
+        # Set pushed_at (timestamp in seconds)
+        pushed_at = time.time()
+        for task_ins in request.task_ins_list:
+            task_ins.task.pushed_at = pushed_at
 
         # Validate request
         _raise_if(len(request.task_ins_list) == 0, "`task_ins_list` must not be empty")
@@ -122,6 +129,12 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
 
         context.set_code(grpc.StatusCode.OK)
         return PullTaskResResponse(task_res_list=task_res_list)
+
+    def GetRun(
+        self, request: GetRunRequest, context: grpc.ServicerContext
+    ) -> GetRunResponse:
+        """Get run information."""
+        raise NotImplementedError
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:

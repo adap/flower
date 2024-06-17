@@ -20,8 +20,8 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 
 from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.partitioner import IidPartitioner, Partitioner
-from flwr_datasets.resplitter import Resplitter
-from flwr_datasets.resplitter.merge_resplitter import MergeResplitter
+from flwr_datasets.preprocessor import Preprocessor
+from flwr_datasets.preprocessor.merger import Merger
 
 tested_datasets = [
     "mnist",
@@ -29,6 +29,11 @@ tested_datasets = [
     "fashion_mnist",
     "sasha/dog-food",
     "zh-plus/tiny-imagenet",
+    "scikit-learn/adult-census-income",
+    "cifar100",
+    "svhn",
+    "sentiment140",
+    "speech_commands",
 ]
 
 
@@ -70,13 +75,13 @@ def _instantiate_partitioners(
     return instantiated_partitioners
 
 
-def _instantiate_resplitter_if_needed(
-    resplitter: Optional[Union[Resplitter, Dict[str, Tuple[str, ...]]]]
-) -> Optional[Resplitter]:
-    """Instantiate `MergeResplitter` if resplitter is merge_config."""
-    if resplitter and isinstance(resplitter, Dict):
-        resplitter = MergeResplitter(merge_config=resplitter)
-    return cast(Optional[Resplitter], resplitter)
+def _instantiate_merger_if_needed(
+    merger: Optional[Union[Preprocessor, Dict[str, Tuple[str, ...]]]]
+) -> Optional[Preprocessor]:
+    """Instantiate `Merger` if preprocessor is merge_config."""
+    if merger and isinstance(merger, Dict):
+        merger = Merger(merge_config=merger)
+    return cast(Optional[Preprocessor], merger)
 
 
 def _check_if_dataset_tested(dataset: str) -> None:
@@ -133,6 +138,7 @@ def divide_dataset(
     >>> train_test = divide_dataset(dataset=partition, division=division)
     >>> train, test = train_test["train"], train_test["test"]
     """
+    _check_division_config_correctness(division)
     dataset_length = len(dataset)
     ranges = _create_division_indices_ranges(dataset_length, division)
     if isinstance(division, (list, tuple)):
@@ -162,7 +168,7 @@ def _create_division_indices_ranges(
         for fraction in division:
             end_idx += int(dataset_length * fraction)
             ranges.append(range(start_idx, end_idx))
-            start_idx += end_idx
+            start_idx = end_idx
     elif isinstance(division, dict):
         ranges = []
         start_idx = 0
@@ -170,7 +176,7 @@ def _create_division_indices_ranges(
         for fraction in division.values():
             end_idx += int(dataset_length * fraction)
             ranges.append(range(start_idx, end_idx))
-            start_idx += end_idx
+            start_idx = end_idx
     else:
         TypeError(
             f"The type of the `division` should be dict, "
@@ -274,6 +280,7 @@ def concatenate_divisions(
     concatenated_divisions : Dataset
         A dataset created as concatenation of the divisions from all partitions.
     """
+    _check_division_config_correctness(partition_division)
     divisions = []
     zero_len_divisions = 0
     for partition_id in range(partitioner.num_partitions):
