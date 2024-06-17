@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-05-28 11:47+0200\n"
-"PO-Revision-Date: 2024-06-13 16:07+0000\n"
+"PO-Revision-Date: 2024-06-16 09:09+0000\n"
 "Last-Translator: 박태현 <qkrxogus113@ajou.ac.kr>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
@@ -301,8 +301,8 @@ msgid ""
 "The following example creates a SuperLink image with the official Flower "
 "base image py3.11-ubuntu22.04 and Flower 1.8.0:"
 msgstr ""
-"다음 예시에서는 py3.11-ubuntu22.04 및 Flower 1.8.0의 공식 Flower base 이미지"
-"로 SuperLink 이미지를 만듭니다:"
+"다음 예시에서는 py3.11-ubuntu22.04 및 Flower 1.8.0의 공식 Flower base "
+"이미지로 SuperLink 이미지를 만듭니다:"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:122
 msgid ""
@@ -731,7 +731,8 @@ msgstr ""
 msgid ""
 "Install ``flwr`` from a local copy of the Flower source code via ``pyproject."
 "toml``:"
-msgstr "``pyproject.toml``을 통해 Flower 소스 코드의 로컬 복사본에서 ``flwr``을 설치:"
+msgstr "``pyproject.toml``을 통해 Flower 소스 코드의 로컬 복사본에서 ``flwr``을 "
+"설치하세요:"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:17
 msgid "``flwr = { path = \"../../\", develop = true }`` (without extras)"
@@ -817,7 +818,7 @@ msgstr ""
 
 #: ../../source/contributor-how-to-install-development-versions.rst:42
 msgid "Install ``flwr`` from a specific GitHub branch (``branch-name``):"
-msgstr "특정 GitHub branch (``branch-name``)에서 ``flwr``설치하기:"
+msgstr "특정 GitHub branch (``branch-name``)에서 ``flwr`` 설치하기:"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:44
 msgid ""
