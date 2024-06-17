@@ -59,7 +59,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self, request: StreamLogsRequest, context: grpc.ServicerContext
     ) -> Generator[StreamLogsResponse, Any, None]:
         """Get logs."""
-        logs = ['a', 'b', 'c']
+        logs = ["a", "b", "c"]
         while context.is_active():
             for i in range(len(logs)):
                 yield StreamLogsResponse(log_output=logs[i])
