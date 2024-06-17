@@ -26,7 +26,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
     StartRunResponse,
     StreamLogsRequest,
-    StreamLogsResponse
+    StreamLogsResponse,
 )
 
 from .executor import Executor, RunTracker
