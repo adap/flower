@@ -19,8 +19,11 @@ package flwr.proto;
 
 message Run {
   sint64 run_id = 1;
-  string fab_id = 2;
-  string fab_version = 3;
+  // Intentially we are not embedding the bundle into
+  // the Run message so that the SuperNode can first
+  // check if it locally already has a FAB with the
+  // given id.
+  string fab_hash = 2;
 }
 message GetRunRequest { sint64 run_id = 1; }
 message GetRunResponse { Run run = 1; }

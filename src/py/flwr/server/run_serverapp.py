@@ -151,8 +151,7 @@ def run_server_app() -> None:
     driver = GrpcDriver(
         driver_service_address=args.superlink,
         root_certificates=root_certificates,
-        fab_id=args.fab_id,
-        fab_version=args.fab_version,
+        fab_hash=args.fab_hash,
         run_id=args.run_id,
     )
 

@@ -345,7 +345,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         if res is None:
             return "", ""
 
-        return res.run.fab_id, res.run.fab_version
+        return res.run.fab_hash
 
     try:
         # Yield methods

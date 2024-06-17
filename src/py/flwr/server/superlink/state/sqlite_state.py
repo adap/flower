@@ -61,8 +61,7 @@ CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
     run_id          INTEGER UNIQUE,
-    fab_id          TEXT,
-    fab_version     TEXT
+    fab_hash          TEXT
 );
 """
 
@@ -612,8 +611,8 @@ class SqliteState(State):  # pylint: disable=R0904
             return node_id
         return None
 
-    def create_run(self, fab_id: str, fab_version: str) -> int:
-        """Create a new run for the specified `fab_id` and `fab_version`."""
+    def create_run(self, fab_hash: str) -> int:
+        """Create a new run for the specified `fab_hash`."""
         # Sample a random int64 as run_id
         run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
@@ -621,8 +620,8 @@ class SqliteState(State):  # pylint: disable=R0904
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
         # If run_id does not exist
         if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
-            query = "INSERT INTO run (run_id, fab_id, fab_version) VALUES (?, ?, ?);"
-            self.query(query, (run_id, fab_id, fab_version))
+            query = "INSERT INTO run (run_id, fab_hash) VALUES (?, ?, ?);"
+            self.query(query, (run_id, fab_hash))
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -680,15 +679,15 @@ class SqliteState(State):  # pylint: disable=R0904
         result: Set[bytes] = {row["public_key"] for row in rows}
         return result
 
-    def get_run(self, run_id: int) -> Tuple[int, str, str]:
+    def get_run(self, run_id: int) -> Tuple[int, str]:
         """Retrieve information about the run with the specified `run_id`."""
         query = "SELECT * FROM run WHERE run_id = ?;"
         try:
             row = self.query(query, (run_id,))[0]
-            return run_id, row["fab_id"], row["fab_version"]
+            return run_id, row["fab_hash"]
         except sqlite3.IntegrityError:
             log(ERROR, "`run_id` does not exist.")
-            return 0, "", ""
+            return 0, ""
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""

@@ -13,18 +13,21 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 class Run(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     RUN_ID_FIELD_NUMBER: builtins.int
-    FAB_ID_FIELD_NUMBER: builtins.int
-    FAB_VERSION_FIELD_NUMBER: builtins.int
+    FAB_HASH_FIELD_NUMBER: builtins.int
     run_id: builtins.int
-    fab_id: typing.Text
-    fab_version: typing.Text
+    fab_hash: typing.Text
+    """Intentially we are not embedding the bundle into
+    the Run message so that the SuperNode can first
+    check if it locally already has a FAB with the
+    given id.
+    """
+
     def __init__(self,
         *,
         run_id: builtins.int = ...,
-        fab_id: typing.Text = ...,
-        fab_version: typing.Text = ...,
+        fab_hash: typing.Text = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_id",b"fab_id","fab_version",b"fab_version","run_id",b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab_hash",b"fab_hash","run_id",b"run_id"]) -> None: ...
 global___Run = Run
 
 class GetRunRequest(google.protobuf.message.Message):

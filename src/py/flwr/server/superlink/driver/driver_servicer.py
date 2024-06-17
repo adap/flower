@@ -38,14 +38,17 @@ from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State, StateFactory
+from flwr.server.superlink.ffs import Ffs, FfsFactory
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 
 class DriverServicer(driver_pb2_grpc.DriverServicer):
     """Driver API servicer."""
 
-    def __init__(self, state_factory: StateFactory) -> None:
+    def __init__(self, state_factory: StateFactory, ffs_factory: FfsFactory) -> None:
         self.state_factory = state_factory
+        self.ffs_factory = ffs_factory
+
 
     def GetNodes(
         self, request: GetNodesRequest, context: grpc.ServicerContext
@@ -65,7 +68,8 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create run ID."""
         log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
-        run_id = state.create_run(request.fab_id, request.fab_version)
+        run_id = state.create_run(request.fab.hash)
+        ffs.put(request.fab.content)
         return CreateRunResponse(run_id=run_id)
 
     def PushTaskIns(

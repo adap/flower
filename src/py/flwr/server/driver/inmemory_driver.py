@@ -35,21 +35,17 @@ class InMemoryDriver(Driver):
     ----------
     state_factory : StateFactory
         A StateFactory embedding a state that this driver can interface with.
-    fab_id : str (default: None)
+    fab_hash : str (default: None)
         The identifier of the FAB used in the run.
-    fab_version : str (default: None)
-        The version of the FAB used in the run.
     """
 
     def __init__(
         self,
         state_factory: StateFactory,
-        fab_id: Optional[str] = None,
-        fab_version: Optional[str] = None,
+        fab_hash: Optional[str] = None,
     ) -> None:
         self.run_id: Optional[int] = None
-        self.fab_id = fab_id if fab_id is not None else ""
-        self.fab_version = fab_version if fab_version is not None else ""
+        self.fab_hash = fab_hash if fab_hash is not None else ""
         self.node = Node(node_id=0, anonymous=True)
         self.state = state_factory.state()
 
@@ -70,9 +66,7 @@ class InMemoryDriver(Driver):
         If unset, create a new run.
         """
         if self.run_id is None:
-            self.run_id = self.state.create_run(
-                fab_id=self.fab_id, fab_version=self.fab_version
-            )
+            self.run_id = self.state.create_run(fab_hash=self.fab_hash)
         return self.run_id
 
     def create_message(  # pylint: disable=too-many-arguments

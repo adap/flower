@@ -268,7 +268,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         )
 
         # Return fab_id and fab_version
-        return get_run_response.run.fab_id, get_run_response.run.fab_version
+        return get_run_response.run.fab_hash
 
     try:
         # Yield methods

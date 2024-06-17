@@ -38,13 +38,13 @@ class DeploymentEngine(Executor):
             )
             self.stub = DriverStub(channel)
 
-    def _create_run(self, fab_id: str, fab_version: str) -> int:
+    def _create_run(self, fab_hash: str) -> int:
         if self.stub is None:
             self._connect()
 
         assert self.stub is not None
 
-        req = CreateRunRequest(fab_id=fab_id, fab_version=fab_version)
+        req = CreateRunRequest(fab_hash=fab_hash)
         res = self.stub.CreateRun(request=req)
         return int(res.run_id)
 

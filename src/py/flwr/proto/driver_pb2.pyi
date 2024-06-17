@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import builtins
+import flwr.proto.fab_pb2
 import flwr.proto.node_pb2
 import flwr.proto.task_pb2
 import google.protobuf.descriptor
@@ -16,16 +17,15 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 class CreateRunRequest(google.protobuf.message.Message):
     """CreateRun"""
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    FAB_ID_FIELD_NUMBER: builtins.int
-    FAB_VERSION_FIELD_NUMBER: builtins.int
-    fab_id: typing.Text
-    fab_version: typing.Text
+    FAB_FIELD_NUMBER: builtins.int
+    @property
+    def fab(self) -> flwr.proto.fab_pb2.Fab: ...
     def __init__(self,
         *,
-        fab_id: typing.Text = ...,
-        fab_version: typing.Text = ...,
+        fab: typing.Optional[flwr.proto.fab_pb2.Fab] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_id",b"fab_id","fab_version",b"fab_version"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["fab",b"fab"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab",b"fab"]) -> None: ...
 global___CreateRunRequest = CreateRunRequest
 
 class CreateRunResponse(google.protobuf.message.Message):

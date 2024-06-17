@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x66lwr/proto/run.proto\x12\nflwr.proto\":\n\x03Run\x12\x0e\n\x06run_id\x18\x01 \x01(\x12\x12\x0e\n\x06\x66\x61\x62_id\x18\x02 \x01(\t\x12\x13\n\x0b\x66\x61\x62_version\x18\x03 \x01(\t\"\x1f\n\rGetRunRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x12\".\n\x0eGetRunResponse\x12\x1c\n\x03run\x18\x01 \x01(\x0b\x32\x0f.flwr.proto.Runb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x66lwr/proto/run.proto\x12\nflwr.proto\"\'\n\x03Run\x12\x0e\n\x06run_id\x18\x01 \x01(\x12\x12\x10\n\x08\x66\x61\x62_hash\x18\x02 \x01(\t\"\x1f\n\rGetRunRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x12\".\n\x0eGetRunResponse\x12\x1c\n\x03run\x18\x01 \x01(\x0b\x32\x0f.flwr.proto.Runb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -22,9 +22,9 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'flwr.proto.run_pb2', _globa
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _globals['_RUN']._serialized_start=36
-  _globals['_RUN']._serialized_end=94
-  _globals['_GETRUNREQUEST']._serialized_start=96
-  _globals['_GETRUNREQUEST']._serialized_end=127
-  _globals['_GETRUNRESPONSE']._serialized_start=129
-  _globals['_GETRUNRESPONSE']._serialized_end=175
+  _globals['_RUN']._serialized_end=75
+  _globals['_GETRUNREQUEST']._serialized_start=77
+  _globals['_GETRUNREQUEST']._serialized_end=108
+  _globals['_GETRUNRESPONSE']._serialized_start=110
+  _globals['_GETRUNRESPONSE']._serialized_end=156
 # @@protoc_insertion_point(module_scope)

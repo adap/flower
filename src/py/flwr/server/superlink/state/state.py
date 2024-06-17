@@ -156,11 +156,11 @@ class State(abc.ABC):  # pylint: disable=R0904
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
 
     @abc.abstractmethod
-    def create_run(self, fab_id: str, fab_version: str) -> int:
-        """Create a new run for the specified `fab_id` and `fab_version`."""
+    def create_run(self, fab_hash: str) -> int:
+        """Create a new run for the specified `fab_hash`."""
 
     @abc.abstractmethod
-    def get_run(self, run_id: int) -> Tuple[int, str, str]:
+    def get_run(self, run_id: int) -> Tuple[int, str]:
         """Retrieve information about the run with the specified `run_id`.
 
         Parameters
@@ -173,8 +173,7 @@ class State(abc.ABC):  # pylint: disable=R0904
         Tuple[int, str, str]
             A tuple containing three elements:
             - `run_id`: The identifier of the run, same as the specified `run_id`.
-            - `fab_id`: The identifier of the FAB used in the specified run.
-            - `fab_version`: The version of the FAB used in the specified run.
+            - `fab_hash`: The identifier of the FAB used in the specified run.
         """
 
     @abc.abstractmethod

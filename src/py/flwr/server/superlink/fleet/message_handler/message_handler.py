@@ -112,6 +112,6 @@ def get_run(
     request: GetRunRequest, state: State  # pylint: disable=W0613
 ) -> GetRunResponse:
     """Get run information."""
-    run_id, fab_id, fab_version = state.get_run(request.run_id)
-    run = Run(run_id=run_id, fab_id=fab_id, fab_version=fab_version)
+    run_id, fab_hash = state.get_run(request.run_id)
+    run = Run(run_id=run_id, fab_hash=fab_hash)
     return GetRunResponse(run=run)
