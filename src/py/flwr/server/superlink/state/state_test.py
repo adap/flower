@@ -781,7 +781,8 @@ class StateTest(unittest.TestCase):
         time.sleep(2)
 
         # Execute
-        task_res_list = state.get_task_res(task_ids={task_id}, limit=None)
+        if task_id is not None:
+            task_res_list = state.get_task_res(task_ids={task_id}, limit=None)
 
         # Assert
         assert len(task_res_list) == 0

@@ -415,11 +415,11 @@ class SqliteState(State):  # pylint: disable=R0904
         """
         query += ";"
 
-        data = {}
+        task_ins_data = {}
         for index, task_id in enumerate(task_ids):
-            data[f"id_{index}"] = str(task_id)
+            task_ins_data[f"id_{index}"] = str(task_id)
 
-        task_ins_rows = self.query(query, data)
+        task_ins_rows = self.query(query, task_ins_data)
 
         if not task_ins_rows:
             log(ERROR, "TaskIns does not exist.")
