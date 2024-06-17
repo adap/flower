@@ -27,13 +27,6 @@ class RunTracker:
 
     run_id: int
     proc: Popen  # type: ignore
-
-
-@dataclass
-class LogStreamer:
-    """Represents a logstream for a `run_id`."""
-
-    process: Popen  # type: ignore
     stop_event: threading.Event
     logs: List[str]
     capture_thread: threading.Thread

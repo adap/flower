@@ -32,7 +32,7 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsResponse,
 )
 
-from .executor import Executor, LogStreamer, RunTracker
+from .executor import Executor, RunTracker
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
@@ -45,7 +45,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self.lock = threading.Lock()
 
         self.select_timeout: int = 1
-        self.log_streams: Dict[int, LogStreamer] = {}
+        # self.log_streams: Dict[int, LogStreamer] = {}
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
@@ -59,17 +59,16 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             log(ERROR, "Executor failed to start run")
             return StartRunResponse()
 
-        self.runs[run.run_id] = run
-
         stop_event = threading.Event()
         logs: List[str] = []
         # Start a background thread to capture the log output
         capture_thread = threading.Thread(
-            target=self._capture_logs, args=(run, stop_event, logs), daemon=True
+            target=self._capture_logs, args=(run,), daemon=True
         )
         with self.lock:
-            self.log_streams[run.run_id] = LogStreamer(
-                process=run.proc,
+            self.runs[run.run_id] = RunTracker(
+                run_id=run.run_id,
+                proc=run.proc,
                 stop_event=stop_event,
                 logs=logs,
                 capture_thread=capture_thread,
@@ -79,8 +78,11 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         return StartRunResponse(run_id=run.run_id)
 
     def _capture_logs(
-        self, run: RunTracker, stop_event: threading.Event, logs: List[str]
+        self,
+        run: RunTracker,
     ) -> None:
+        stop_event = run.stop_event
+        logs = run.logs
         while not stop_event.is_set():
             ready_to_read, _, _ = select.select(
                 [run.proc.stdout, run.proc.stderr],
@@ -103,7 +105,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                 stop_event.set()
                 break
 
-    def StreamLogs(
+    def StreamLogs(  # pylint: disable=C0103
         self, request: StreamLogsRequest, context: grpc.ServicerContext
     ) -> Generator[StreamLogsResponse, Any, None]:
         """Get logs."""
@@ -112,14 +114,14 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         last_sent_index = 0
         while context.is_active():
             with self.lock:
-                if request.run_id not in self.log_streams:
+                if request.run_id not in self.runs:
                     context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
-                logs = self.log_streams[request.run_id].logs
+                logs = self.runs[request.run_id].logs
                 if last_sent_index < len(logs):
                     for i in range(last_sent_index, len(logs)):
                         yield StreamLogsResponse(log_output=logs[i])
                     last_sent_index = len(logs)
-                if self.log_streams[request.run_id].process.poll() is not None:
+                if self.runs[request.run_id].proc.poll() is not None:
                     log(INFO, "Run ID `%s` completed", request.run_id)
                     context.cancel()
             time.sleep(0.1)  # Sleep briefly to avoid busy waiting
