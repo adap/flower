@@ -61,5 +61,5 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Get logs."""
         logs = ["a", "b", "c"]
         while context.is_active():
-            for i in range(len(logs)):
+            for i in range(len(logs)):  # pylint: disable=C0200
                 yield StreamLogsResponse(log_output=logs[i])
