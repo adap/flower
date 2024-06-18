@@ -142,7 +142,9 @@ def new(
             sorted([challenge.value for challenge in LLMChallengeName]),
         )
         selected_value = [
-            name for name, value in vars(LLMChallengeName).items() if value == llm_challenge_value
+            name
+            for name, value in vars(LLMChallengeName).items()
+            if value == llm_challenge_value
         ]
         llm_challenge_str = selected_value[0]
         llm_challenge_str = llm_challenge_str.lower()
