@@ -30,6 +30,7 @@ from .pathological_partitioner import PathologicalPartitioner
 from .shard_partitioner import ShardPartitioner
 from .size_partitioner import SizePartitioner
 from .square_partitioner import SquarePartitioner
+from .semantic_partitioner import SemanticPartitioner
 from .vertical_even_partitioner import VerticalEvenPartitioner
 from .vertical_size_partitioner import VerticalSizePartitioner
 
@@ -49,6 +50,7 @@ __all__ = [
     "ShardPartitioner",
     "SizePartitioner",
     "SquarePartitioner",
+    "SemanticPartitioner"
     "VerticalEvenPartitioner",
     "VerticalSizePartitioner",
 ]
