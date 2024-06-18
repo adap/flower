@@ -45,6 +45,11 @@ PING_BASE_MULTIPLIER = 0.8
 PING_RANDOM_RANGE = (-0.1, 0.1)
 PING_MAX_INTERVAL = 1e300
 
+# Constants for FAB
+APP_DIR = "apps"
+FAB_CONFIG_FILE = "pyproject.toml"
+FLWR_HOME = "FLWR_HOME"
+
 
 class MessageType:
     """Message type."""
