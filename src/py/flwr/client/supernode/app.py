@@ -29,6 +29,7 @@ from cryptography.hazmat.primitives.serialization import (
 
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
+from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.object_ref import load_app, validate
@@ -44,11 +45,23 @@ def run_supernode() -> None:
 
     event(EventType.RUN_SUPERNODE_ENTER)
 
-    _ = _parse_args_run_supernode().parse_args()
+    args = _parse_args_run_supernode().parse_args()
 
-    log(
-        DEBUG,
-        "Flower SuperNode starting...",
+    _warn_deprecated_server_arg(args)
+
+    root_certificates = _get_certificates(args)
+    load_fn = _get_load_client_app_fn(args, multi_app=True)
+    authentication_keys = _try_setup_client_authentication(args)
+
+    _start_client_internal(
+        server_address=args.superlink,
+        load_client_app_fn=load_fn,
+        transport="rest" if args.rest else "grpc-rere",
+        root_certificates=root_certificates,
+        insecure=args.insecure,
+        authentication_keys=authentication_keys,
+        max_retries=args.max_retries,
+        max_wait_time=args.max_wait_time,
     )
 
     # Graceful shutdown
@@ -65,6 +78,27 @@ def run_client_app() -> None:
 
     args = _parse_args_run_client_app().parse_args()
 
+    _warn_deprecated_server_arg(args)
+
+    root_certificates = _get_certificates(args)
+    load_fn = _get_load_client_app_fn(args, multi_app=False)
+    authentication_keys = _try_setup_client_authentication(args)
+
+    _start_client_internal(
+        server_address=args.superlink,
+        load_client_app_fn=load_fn,
+        transport="rest" if args.rest else "grpc-rere",
+        root_certificates=root_certificates,
+        insecure=args.insecure,
+        authentication_keys=authentication_keys,
+        max_retries=args.max_retries,
+        max_wait_time=args.max_wait_time,
+    )
+    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
+
+
+def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
+    """Warn about the deprecated argument `--server`."""
     if args.server != ADDRESS_FLEET_API_GRPC_RERE:
         warn = "Passing flag --server is deprecated. Use --superlink instead."
         warn_deprecated_feature(warn)
@@ -81,27 +115,6 @@ def run_client_app() -> None:
             )
         else:
             args.superlink = args.server
-
-    root_certificates = _get_certificates(args)
-    log(
-        DEBUG,
-        "Flower will load ClientApp `%s`",
-        getattr(args, "client-app"),
-    )
-    load_fn = _get_load_client_app_fn(args)
-    authentication_keys = _try_setup_client_authentication(args)
-
-    _start_client_internal(
-        server_address=args.superlink,
-        load_client_app_fn=load_fn,
-        transport="rest" if args.rest else "grpc-rere",
-        root_certificates=root_certificates,
-        insecure=args.insecure,
-        authentication_keys=authentication_keys,
-        max_retries=args.max_retries,
-        max_wait_time=args.max_wait_time,
-    )
-    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
 def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
@@ -140,24 +153,88 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
 
 
 def _get_load_client_app_fn(
-    args: argparse.Namespace,
-) -> Callable[[], ClientApp]:
-    """Get the load_client_app_fn function."""
-    client_app_dir = args.dir
-    if client_app_dir is not None:
-        sys.path.insert(0, client_app_dir)
+    args: argparse.Namespace, multi_app: bool
+) -> Callable[[str, str], ClientApp]:
+    """Get the load_client_app_fn function.
 
-    app_ref: str = getattr(args, "client-app")
-    valid, error_msg = validate(app_ref)
-    if not valid and error_msg:
-        raise LoadClientAppError(error_msg) from None
+    If `multi_app` is True, this function loads the specified ClientApp
+    based on `fab_id` and `fab_version`. If `fab_id` is empty, a default
+    ClientApp will be loaded.
 
-    def _load() -> ClientApp:
-        client_app = load_app(app_ref, LoadClientAppError)
+    If `multi_app` is False, it ignores `fab_id` and `fab_version` and
+    loads a default ClientApp.
+    """
+    # Find the Flower directory containing Flower Apps (only for multi-app)
+    flwr_dir = Path("")
+    if "flwr_dir" in args:
+        if args.flwr_dir is None:
+            flwr_dir = get_flwr_dir()
+        else:
+            flwr_dir = Path(args.flwr_dir).absolute()
+
+    sys.path.insert(0, str(flwr_dir.absolute()))
+
+    default_app_ref: str = getattr(args, "client-app")
+
+    if not multi_app:
+        log(
+            DEBUG,
+            "Flower SuperNode will load and validate ClientApp `%s`",
+            getattr(args, "client-app"),
+        )
+        valid, error_msg = validate(default_app_ref)
+        if not valid and error_msg:
+            raise LoadClientAppError(error_msg) from None
+
+    def _load(fab_id: str, fab_version: str) -> ClientApp:
+        # If multi-app feature is disabled
+        if not multi_app:
+            # Get sys path to be inserted
+            sys_path = Path(args.dir).absolute()
+
+            # Set app reference
+            client_app_ref = default_app_ref
+        # If multi-app feature is enabled but the fab id is not specified
+        elif fab_id == "":
+            if default_app_ref == "":
+                raise LoadClientAppError(
+                    "Invalid FAB ID: The FAB ID is empty.",
+                ) from None
+
+            log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
+            # Get sys path to be inserted
+            sys_path = Path(args.dir).absolute()
+
+            # Set app reference
+            client_app_ref = default_app_ref
+        # If multi-app feature is enabled
+        else:
+            try:
+                project_dir = get_project_dir(fab_id, fab_version, flwr_dir)
+                config = get_project_config(project_dir)
+            except Exception as e:
+                raise LoadClientAppError("Failed to load ClientApp") from e
+
+            # Get sys path to be inserted
+            sys_path = Path(project_dir).absolute()
+
+            # Set app reference
+            client_app_ref = config["flower"]["components"]["clientapp"]
+
+        # Set sys.path
+        sys.path.insert(0, str(sys_path))
+
+        # Load ClientApp
+        log(
+            DEBUG,
+            "Loading ClientApp `%s`",
+            client_app_ref,
+        )
+        client_app = load_app(client_app_ref, LoadClientAppError)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
-                f"Attribute {app_ref} is not of type {ClientApp}",
+                f"Attribute {client_app_ref} is not of type {ClientApp}",
             ) from None
 
         return client_app
