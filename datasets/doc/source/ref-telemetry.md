@@ -35,7 +35,7 @@ Flower telemetry collects the following metrics:
 
 **Hardware properties.** Understanding the hardware environment that Flower Datasets is being used in helps to decide whether we should, for example, put more effort into supporting low-resource environments.
 
-**Execution mode.** Knowing what execution mode Flower starts in enables us to understand how heavily certain features are being used and better prioritize based on that.
+**Dataset and Partitioners names.** Knowing what datasets and Partitioners are used enables us to provide more detailed code examples and tutorials and better prioritize work on development and support for them.
 
 **Cluster.** Flower telemetry assigns a random in-memory cluster ID each time a Flower workload starts. This allows us to understand which device types not only start Flower workloads but also successfully complete them.
 
