@@ -48,7 +48,7 @@ T = TypeVar("T", bound=GrpcMessage)
 
 
 class GrpcAdapter:
-    """Adapter class to send and receive gRPC messages via the GrpcAdapterStub.
+    """Adapter class to send and receive gRPC messages via the ``GrpcAdapterStub``.
 
     This class utilizes the ``GrpcAdapterStub`` to send and receive gRPC messages
     which are defined and used by the Fleet API, as defined in ``fleet.proto``.
