@@ -43,7 +43,8 @@ class SemanticPartitioner(Partitioner):
     which used tensorflow-federated.
 
     References：
-    https://arxiv.org/abs/2110.14216 (accepted by ICLR 2022)
+    What Do We Mean by Generalization in Federated Learning? (accepted by ICLR 2022)
+    https://arxiv.org/abs/2110.14216 
 
     (Cited from section 4.1 in the paper)
     
