@@ -19,6 +19,7 @@ import sys
 from logging import DEBUG
 from typing import Any, Type, TypeVar, cast
 
+import grpc
 from google.protobuf.message import Message as GrpcMessage
 
 from flwr.common import log
@@ -47,13 +48,13 @@ T = TypeVar("T", bound=GrpcMessage)
 
 
 class GrpcAdapter:
-    """The Adapter class to send and receive gRPC messages via the GrpcAdapterStub.
+    """Adapter class to send and receive gRPC messages via the GrpcAdapterStub.
 
-    This class utilizes the GrpcAdapterStub to send and receive gRPC messages which are
-    defined and used by the Fleet API, as defined in `fleet.proto`.
+    This class utilizes the ``GrpcAdapterStub`` to send and receive gRPC messages
+    which are defined and used by the Fleet API, as defined in ``fleet.proto``.
     """
 
-    def __init__(self, channel: Any) -> None:
+    def __init__(self, channel: grpc.Channel) -> None:
         self.stub = GrpcAdapterStub(channel)
 
     def _send_and_receive(
@@ -77,7 +78,10 @@ class GrpcAdapter:
             == "true"
         )
         if should_exit:
-            log(DEBUG, "Received shutdown signal: exit flag is set to True. Exiting...")
+            log(
+                DEBUG,
+                'Received shutdown signal: exit flag is set to ``"true"``. Exiting...',
+            )
             sys.exit(0)
 
         # Check the grpc_message_name of the response
@@ -92,35 +96,38 @@ class GrpcAdapter:
         response.ParseFromString(container_res.grpc_message_content)
         return response
 
-    # pylint: disable=C0103
-    def CreateNode(
+    def CreateNode(  # pylint: disable=C0103
         self, request: CreateNodeRequest, **kwargs: Any
     ) -> CreateNodeResponse:
         """."""
         return self._send_and_receive(request, CreateNodeResponse, **kwargs)
 
-    def DeleteNode(
+    def DeleteNode(  # pylint: disable=C0103
         self, request: DeleteNodeRequest, **kwargs: Any
     ) -> DeleteNodeResponse:
         """."""
         return self._send_and_receive(request, DeleteNodeResponse, **kwargs)
 
-    def Ping(self, request: PingRequest, **kwargs: Any) -> PingResponse:
+    def Ping(  # pylint: disable=C0103
+        self, request: PingRequest, **kwargs: Any
+    ) -> PingResponse:
         """."""
         return self._send_and_receive(request, PingResponse, **kwargs)
 
-    def PullTaskIns(
+    def PullTaskIns(  # pylint: disable=C0103
         self, request: PullTaskInsRequest, **kwargs: Any
     ) -> PullTaskInsResponse:
         """."""
         return self._send_and_receive(request, PullTaskInsResponse, **kwargs)
 
-    def PushTaskRes(
+    def PushTaskRes(  # pylint: disable=C0103
         self, request: PushTaskResRequest, **kwargs: Any
     ) -> PushTaskResResponse:
         """."""
         return self._send_and_receive(request, PushTaskResResponse, **kwargs)
 
-    def GetRun(self, request: GetRunRequest, **kwargs: Any) -> GetRunResponse:
+    def GetRun(  # pylint: disable=C0103
+        self, request: GetRunRequest, **kwargs: Any
+    ) -> GetRunResponse:
         """."""
         return self._send_and_receive(request, GetRunResponse, **kwargs)
