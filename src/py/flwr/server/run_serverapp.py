@@ -148,12 +148,19 @@ def run_server_app() -> None:
     server_app_attr = getattr(args, "server-app")
 
     # Initialize GrpcDriver
-    driver = GrpcDriver(
-        driver_service_address=args.superlink,
-        root_certificates=root_certificates,
-        fab_id=args.fab_id,
-        fab_version=args.fab_version,
-    )
+    if args.run_id is None:
+        driver = GrpcDriver(
+            driver_service_address=args.superlink,
+            root_certificates=root_certificates,
+            fab_id=args.fab_id,
+            fab_version=args.fab_version,
+        )
+    else:
+        driver = GrpcDriver(
+            driver_service_address=args.superlink,
+            root_certificates=root_certificates,
+            run_id=args.run_id,
+        )
 
     # Run the ServerApp with the Driver
     run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
@@ -172,6 +179,8 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "server-app",
+        nargs="?",
+        default="",
         help="For example: `server:app` or `project.package.module:wrapper.app`",
     )
     parser.add_argument(
@@ -220,6 +229,12 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         default=None,
         type=str,
         help="The version of the FAB used in the run.",
+    )
+    parser.add_argument(
+        "--run-id",
+        default=None,
+        type=str,
+        help="The identifier of the run.",
     )
 
     return parser
