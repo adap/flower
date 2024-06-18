@@ -16,6 +16,7 @@
 
 
 from contextlib import contextmanager
+from logging import ERROR
 from typing import Callable, Iterator, Optional, Tuple, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -23,6 +24,7 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from flwr.client.grpc_rere_client.connection import grpc_request_response
 from flwr.client.grpc_rere_client.grpc_adapter import GrpcAdapter
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
+from flwr.common.logger import log
 from flwr.common.message import Message
 from flwr.common.retry_invoker import RetryInvoker
 
@@ -67,6 +69,8 @@ def grpc_adapter(  # pylint: disable=R0913
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Client authentication is not supported for this transport type.
 
     Returns
     -------
@@ -76,6 +80,8 @@ def grpc_adapter(  # pylint: disable=R0913
     delete_node : Optional[Callable]
     get_run : Optional[Callable]
     """
+    if authentication_keys is not None:
+        log(ERROR, "Client authentication is not supported for this transport type.")
     with grpc_request_response(
         server_address=server_address,
         insecure=insecure,

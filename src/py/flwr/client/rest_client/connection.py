@@ -117,6 +117,8 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Client authentication is not supported for this transport type.
 
     Returns
     -------
@@ -149,6 +151,8 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
             "For the REST API, the root certificates "
             "must be provided as a string path to the client.",
         )
+    if authentication_keys is not None:
+        log(ERROR, "Client authentication is not supported for this transport type.")
 
     # Shared variables for inner functions
     metadata: Optional[Metadata] = None
