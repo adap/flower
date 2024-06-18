@@ -2,12 +2,17 @@ name: Translations
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Runs every day at midnight. Adjust the timing as needed.
-  workflow_dispatch: # Allows you to manually trigger the workflow.
+    - cron: '0 0 * * *' # Runs every day at midnight
+  workflow_dispatch: # Allows to manually trigger the workflow
 
 jobs:
   update-and-pr:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      branch-name: auto-update-trans-text
     name: Update text
     steps:
       - uses: actions/checkout@v4
@@ -17,12 +22,12 @@ jobs:
         with:
           python-version: 3.10
 
-      - name: Install dependencies (mandatory only)
+      - name: Install dependencies
         run: | 
           python -m poetry install
           pip install sphinx==7.2.0
 
-      - name: Update Text and Languages for All Locales
+      - name: Update text and translations for all locales
         run: |
           cd doc
           make update-text
@@ -37,9 +42,9 @@ jobs:
       - name: Commit changes
         id: commit_changes
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add doc/locales
           git commit -m "Update text and language files" || echo "::set-output name=changes::false"
           echo "::set-output name=changes::true"
         continue-on-error: true
@@ -49,15 +54,15 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: 'create-pr-branch' # This is the branch where changes will be pushed
+          branch: '${{ env.branch-name }}'
 
       - name: Create Pull Request
         if: steps.commit_changes.outputs.changes == 'true'
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          branch: 'create-pr-branch' # Ensure this matches the branch above
+          branch: '${{ env.branch-name }}'
           delete-branch: true
-          title: 'Update text and language files'
+          title: 'docs(framework:skip) Update source texts for translations (automated)'
           body: 'This PR is auto-generated to update text and language files.'
           draft: false
