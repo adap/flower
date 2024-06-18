@@ -55,8 +55,8 @@ class IncomeClassifier(nn.Module):
     def __init__(self):
         super(IncomeClassifier, self).__init__()
         self.layer1 = None
-        self.layer2 = nn.Linear(128, 64)
-        self.output = nn.Linear(64, 1)
+        self.layer2 = nn.Linear(64, 32)
+        self.output = nn.Linear(32, 1)
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
         self.dropout = nn.Dropout(0.5)
@@ -72,12 +72,12 @@ class IncomeClassifier(nn.Module):
         return x
 
     def initialize_model(self, input_dim):
-        self.layer1 = nn.Linear(input_dim, 128)
+        self.layer1 = nn.Linear(input_dim, 64)
 
 
 def train(model, train_loader, num_epochs=1):
     criterion = nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
     model.train()
     for epoch in range(num_epochs):
         for X_batch, y_batch in train_loader:
