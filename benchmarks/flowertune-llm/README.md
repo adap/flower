@@ -2,12 +2,13 @@
 
 # FlowerTune LLM Leaderboard
 This repository guides you through the process of federated LLM instruction tuning with a 
-pre-trained [Mistral-7B](https://huggingface.co/mistralai/Mistral-7B-v0.3) models across 4 domains --- general NLP, finance, medical and code.
+pre-trained [Mistral-7B](https://huggingface.co/mistralai/Mistral-7B-v0.3) model across 4 domains --- general NLP, finance, medical and code.
 
-Please follow the instructions to run and evaluate the LLM baselines.
+Please follow the instructions to run and evaluate the federated LLMs.
 
 
 ## Create a new project
+As the first step, please register a Flower account on [Flower website](https://flower.ai/login).
 Assuming `flwr` package is already installed on your system (check [here](https://flower.ai/docs/framework/how-to-install-flower.html) for `flwr` installation).
 We provide a single-line command to create a new project directory based on your selected challenge:
 
@@ -37,8 +38,9 @@ After running `flwr new`, you will see a new directory generated with the follow
                 └── conf/static_config.yaml  # <- Static configuration   
 ```
 
-This can serve as the starting point for you to build up your own LLM fine-tuning methods.
-Note that any modification to the content of `conf/static_config.yaml` is strictly prohibited to maintain fair comparisons.
+This can serve as the starting point for you to build up your own federated LLM fine-tuning methods.
+Please note that any modification to the content of `conf/static_config.yaml` is strictly prohibited for those who wish to participate in the FlowerTune LLM Leaderboard. 
+Otherwise, the submission will not be considered.
 
 
 ## Run FlowerTune LLM challenges
@@ -48,7 +50,7 @@ With a new project directory created, running a baseline challenge can be done b
 1. Navigate inside the directory that you just created.
 
 
-2. Follow the `Environments setup` section in the `README.md` to install project dependencies.
+2. Follow the `Environments setup` section of `README.md` in the project directory to install project dependencies.
 
 
 3. Run the challenge as indicated in the `Running the challenge` section in the `README.md`.
