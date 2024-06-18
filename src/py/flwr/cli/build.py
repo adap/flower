@@ -14,7 +14,6 @@
 # ==============================================================================
 """Flower command line interface `build` command."""
 
-import hashlib
 import os
 import zipfile
 from pathlib import Path
@@ -25,7 +24,7 @@ import typer
 from typing_extensions import Annotated
 
 from .config_utils import load_and_validate
-from .utils import is_valid_project_name
+from .utils import get_sha256_hash, is_valid_project_name
 
 
 # pylint: disable=too-many-locals
@@ -34,7 +33,7 @@ def build(
         Optional[Path],
         typer.Option(help="The Flower project directory to bundle into a FAB"),
     ] = None,
-) -> None:
+) -> str:
     """Build a Flower project into a Flower App Bundle (FAB).
 
     You can run `flwr build` without any argument to bundle the current directory:
@@ -115,7 +114,7 @@ def build(
                 fab_file.write(file_path, archive_path)
 
                 # Calculate file info
-                sha256_hash = _get_sha256_hash(file_path)
+                sha256_hash = get_sha256_hash(file_path)
                 file_size_bits = os.path.getsize(file_path) * 8  # size in bits
                 list_file_content += f"{archive_path},{sha256_hash},{file_size_bits}\n"
 
@@ -126,17 +125,7 @@ def build(
         f"🎊 Successfully built {fab_filename}.", fg=typer.colors.GREEN, bold=True
     )
 
-
-def _get_sha256_hash(file_path: Path) -> str:
-    """Calculate the SHA-256 hash of a file."""
-    sha256 = hashlib.sha256()
-    with open(file_path, "rb") as f:
-        while True:
-            data = f.read(65536)  # Read in 64kB blocks
-            if not data:
-                break
-            sha256.update(data)
-    return sha256.hexdigest()
+    return fab_filename
 
 
 def _load_gitignore(directory: Path) -> pathspec.PathSpec:
