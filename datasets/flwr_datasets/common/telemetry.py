@@ -67,15 +67,15 @@ def _get_home() -> Path:
 def _get_source_id() -> str:
     """Get existing or new source ID."""
     source_id = "unavailable"
-    # Check if .flwr_datasets in home exists
+    # Check if .flwr in home exists
     try:
         home = _get_home()
     except RuntimeError:
         # If the home directory can’t be resolved, RuntimeError is raised.
         return source_id
 
-    flwr_datasets_dir = home.joinpath(".flwr_datasets")
-    # Create .flwr_datasets directory if it does not exist yet.
+    flwr_datasets_dir = home.joinpath(".flwr")
+    # Create .flwr directory if it does not exist yet.
     try:
         flwr_datasets_dir.mkdir(parents=True, exist_ok=True)
     except PermissionError:
