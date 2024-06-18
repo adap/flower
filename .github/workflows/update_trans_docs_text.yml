@@ -43,13 +43,11 @@ jobs:
           done
 
       - name: Commit changes
-        id: commit_changes
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add doc/locales
-          git commit -m "Update text and language files" || echo "::set-output name=changes::false"
-          echo "::set-output name=changes::true"
+          git commit -m "Update text and language files"
         continue-on-error: true
 
       - name: Calculate diff  # Even without doc changes the update-lang command will generate 228 additions and 60 deletions, so we only want to open a PR when there is more
@@ -59,18 +57,18 @@ jobs:
           deletions=$(git diff --numstat HEAD^1 | awk '{s+=$2} END {print s}')
           echo "Additions: $additions"
           echo "Deletions: $deletions"
-          echo "::set-output name=additions::$additions"
-          echo "::set-output name=deletions::$deletions"
+          echo "additions=$additions" >> $GITHUB_OUTPUT
+          echo "deletions=$deletions" >> $GITHUB_OUTPUT
 
       - name: Push changes
-        if: steps.calculate_diff.outputs.additions > 228 && steps.calculate_diff.outputs.deletions > 60 && steps.commit_changes.outputs.changes == 'true'
+        if: steps.calculate_diff.outputs.additions > 228 && steps.calculate_diff.outputs.deletions > 60
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: '${{ env.branch-name }}'
 
       - name: Create Pull Request
-        if: steps.calculate_diff.outputs.additions > 228 && steps.calculate_diff.outputs.deletions > 60 && steps.commit_changes.outputs.changes == 'true'
+        if: steps.calculate_diff.outputs.additions > 228 && steps.calculate_diff.outputs.deletions > 60
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
