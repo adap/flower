@@ -17,7 +17,7 @@
 
 import uuid
 from contextlib import contextmanager
-from logging import DEBUG
+from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple, Union, cast
@@ -101,6 +101,8 @@ def grpc_connection(  # pylint: disable=R0913, R0915
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Client authentication is not supported for this transport type.
 
     Returns
     -------
@@ -123,6 +125,8 @@ def grpc_connection(  # pylint: disable=R0913, R0915
     """
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
+    if authentication_keys is not None:
+        log(ERROR, "Client authentication is not supported for this transport type.")
 
     channel = create_channel(
         server_address=server_address,
