@@ -29,12 +29,12 @@ from cryptography.hazmat.primitives.serialization import (
 
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
+from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
 from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
-from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.object_ref import load_app, validate
@@ -61,7 +61,7 @@ def run_supernode() -> None:
     _start_client_internal(
         server_address=args.superlink,
         load_client_app_fn=load_fn,
-        transport="rest" if args.rest else "grpc-rere",
+        transport=args.transport,
         root_certificates=root_certificates,
         insecure=args.insecure,
         authentication_keys=authentication_keys,
@@ -92,7 +92,7 @@ def run_client_app() -> None:
     _start_client_internal(
         server_address=args.superlink,
         load_client_app_fn=load_fn,
-        transport="rest" if args.rest else "grpc-rere",
+        transport=args.transport,
         root_certificates=root_certificates,
         insecure=args.insecure,
         authentication_keys=authentication_keys,
@@ -120,27 +120,6 @@ def _warn_deprecated_server_arg(args: argparse.Namespace) -> None:
             )
         else:
             args.superlink = args.server
-
-    root_certificates = _get_certificates(args)
-    log(
-        DEBUG,
-        "Flower will load ClientApp `%s`",
-        getattr(args, "client-app"),
-    )
-    load_fn = _get_load_client_app_fn(args)
-    authentication_keys = _try_setup_client_authentication(args)
-
-    _start_client_internal(
-        server_address=args.superlink,
-        load_client_app_fn=load_fn,
-        transport=args.transport,
-        root_certificates=root_certificates,
-        insecure=args.insecure,
-        authentication_keys=authentication_keys,
-        max_retries=args.max_retries,
-        max_wait_time=args.max_wait_time,
-    )
-    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
 
 
 def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
