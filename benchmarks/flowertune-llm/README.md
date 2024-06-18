@@ -40,7 +40,7 @@ After running `flwr new`, you will see a new directory generated with the follow
 ```
 
 This can serve as the starting point for you to build up your own federated LLM fine-tuning methods.
-Please note that any modification to the content of `conf/static_config.yaml` is strictly prohibited for those who wish to participate in the FlowerTune LLM Leaderboard.
+Please note that any modification to the content of `conf/static_config.yaml` is strictly prohibited for those who wish to participate in the [LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard).
 Otherwise, the submission will not be considered.
 
 ## Run FlowerTune LLM challenges
