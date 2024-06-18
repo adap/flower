@@ -15,7 +15,6 @@
 """Probability partitioner class that works with Hugging Face Datasets."""
 
 
-import warnings
 from typing import Dict, List, Optional, Union
 
 import numpy as np
@@ -26,7 +25,6 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class ProbabilityPartitioner(Partitioner):
-
     def __init__(
         self,
         probabilities: NDArrayFloat,
@@ -80,7 +78,6 @@ class ProbabilityPartitioner(Partitioner):
         self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
 
-
     def _determine_partition_id_to_indices_if_needed(
         self,
     ) -> None:
@@ -96,19 +93,28 @@ class ProbabilityPartitioner(Partitioner):
 
         for unique_label in self._unique_classes:
             unique_label_to_indices[unique_label] = np.where(labels == unique_label)[0]
-            unique_label_to_size[unique_label] = len(unique_label_to_indices[unique_label])
+            unique_label_to_size[unique_label] = len(
+                unique_label_to_indices[unique_label]
+            )
 
-        self._partition_id_to_indices = {partition_id: [] for partition_id in range(self._num_partitions)}
+        self._partition_id_to_indices = {
+            partition_id: [] for partition_id in range(self._num_partitions)
+        }
 
         for unique_label in self._unique_classes:
             probabilities_per_label = self._probabilities[:, unique_label]
-            split_sizes = (unique_label_to_size[unique_label] * probabilities_per_label).astype(int)
-
-            beg_id = 0
+            split_sizes = (
+                unique_label_to_size[unique_label] * probabilities_per_label
+            ).astype(int)
+            cumsum_division_numbers = np.cumsum(split_sizes)
+            indices_on_which_split = cumsum_division_numbers.astype(int)[:-1]
+            split_indices = np.split(
+                unique_label_to_indices[unique_label], indices_on_which_split
+            )
             for partition_id in range(self._num_partitions):
-                end_id = beg_id + split_sizes[partition_id]
-                self._partition_id_to_indices[partition_id].extend(unique_label_to_indices[unique_label][beg_id:end_id].tolist())
-                beg_id = end_id
+                self._partition_id_to_indices[partition_id].extend(
+                    split_indices[partition_id]
+                )
 
         self._partition_id_to_indices_determined = True
 
