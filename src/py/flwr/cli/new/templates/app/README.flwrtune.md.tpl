@@ -41,7 +41,7 @@ flwr run
 ```
 
 ## VRAM consumption
-We use Mistral-7B model with 4-bit quantization as default. The estimated VRAM consumption per client for each challenge is shown as below:
+We use Mistral-7B model with 4-bit quantization as default. The estimated VRAM consumption per client for each challenge is shown below:
 
 | Challenges | GeneralNLP |   Finance  |   Medical  |    Code    |
 | :--------: | :--------: | :--------: | :--------: | :--------: |
