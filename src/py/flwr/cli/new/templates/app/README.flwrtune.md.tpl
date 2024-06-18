@@ -22,7 +22,7 @@ pip install -e .
 The dataset is partitioned into $num_clients shards with IID fashion serving as clients.
 We randomly sample $fraction_fit clients to be available for each round,
 and the federated fine-tuning lasts for `200` rounds.
-All settings are defined in `$project_name/conf/static_config.yaml`, which is not allowed to be modified for fair competition.
+All settings are defined in `$project_name/conf/static_config.yaml`, which is not allowed to be modified for fair competition if you plan to participated in the LLM leaderboard.
 
 
 ## Running the challenge
