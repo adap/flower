@@ -25,6 +25,7 @@ from .partitioner import Partitioner
 from .shard_partitioner import ShardPartitioner
 from .size_partitioner import SizePartitioner
 from .square_partitioner import SquarePartitioner
+from .semantic_partitioner import SemanticPartitioner
 
 __all__ = [
     "IidPartitioner",
@@ -37,4 +38,5 @@ __all__ = [
     "SquarePartitioner",
     "ShardPartitioner",
     "ExponentialPartitioner",
+    "SemanticPartitioner"
 ]
