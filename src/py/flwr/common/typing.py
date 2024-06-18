@@ -189,7 +189,7 @@ class ClientMessage:
 
 @dataclass
 class Run:
-    """Run Information."""
+    """Run details."""
 
     run_id: int
     fab_id: str
