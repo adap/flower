@@ -44,8 +44,8 @@ class MlFramework(str, Enum):
     FLWRTUNE = "flwrtune"
 
 
-class LLMTaskName(str, Enum):
-    """Available LLM tasks."""
+class LLMChallengeName(str, Enum):
+    """Available LLM challenges."""
 
     GENERALNLP = "GeneralNLP"
     FINANCE = "Finance"
@@ -137,15 +137,15 @@ def new(
     framework_str = framework_str.lower()
 
     if framework_str == "flwrtune":
-        llm_task_value = prompt_options(
-            "Please select LLM task by typing in the number",
-            sorted([task.value for task in LLMTaskName]),
+        llm_challenge_value = prompt_options(
+            "Please select LLM challenge by typing in the number",
+            sorted([challenge.value for challenge in LLMChallengeName]),
         )
         selected_value = [
-            name for name, value in vars(LLMTaskName).items() if value == llm_task_value
+            name for name, value in vars(LLMChallengeName).items() if value == llm_challenge_value
         ]
-        llm_task_str = selected_value[0]
-        llm_task_str = llm_task_str.lower()
+        llm_challenge_str = selected_value[0]
+        llm_challenge_str = llm_challenge_str.lower()
 
     print(
         typer.style(
@@ -190,28 +190,28 @@ def new(
             },
         }
 
-        # Task specific context
-        fraction_fit = "0.2" if llm_task_str == "code" else "0.1"
-        if llm_task_str == "generalnlp":
-            task_name = "General NLP"
+        # Challenge specific context
+        fraction_fit = "0.2" if llm_challenge_str == "code" else "0.1"
+        if llm_challenge_str == "generalnlp":
+            challenge_name = "General NLP"
             num_clients = "20"
             dataset_name = "vicgalle/alpaca-gpt4"
-        elif llm_task_str == "finance":
-            task_name = "Finance"
+        elif llm_challenge_str == "finance":
+            challenge_name = "Finance"
             num_clients = "50"
             dataset_name = "FinGPT/fingpt-sentiment-train"
-        elif llm_task_str == "medical":
-            task_name = "Medical"
+        elif llm_challenge_str == "medical":
+            challenge_name = "Medical"
             num_clients = "20"
             dataset_name = "medalpaca/medical_meadow_medical_flashcards"
         else:
-            task_name = "Code"
+            challenge_name = "Code"
             num_clients = "10"
             dataset_name = "lucasmccabe-lmi/CodeAlpaca-20k"
 
-        context["llm_task_str"] = llm_task_str
+        context["llm_challenge_str"] = llm_challenge_str
         context["fraction_fit"] = fraction_fit
-        context["task_name"] = task_name
+        context["challenge_name"] = challenge_name
         context["num_clients"] = num_clients
         context["dataset_name"] = dataset_name
     else:

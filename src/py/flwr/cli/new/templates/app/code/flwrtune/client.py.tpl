@@ -111,7 +111,7 @@ def gen_client_fn(
 
         # Let's get the partition corresponding to the i-th client
         client_trainset = fds.load_partition(int(cid), "train")
-        client_trainset = reformat(client_trainset, llm_task="$llm_task_str")
+        client_trainset = reformat(client_trainset, llm_task="$llm_challenge_str")
 
         return FlowerClient(
             model_cfg,
