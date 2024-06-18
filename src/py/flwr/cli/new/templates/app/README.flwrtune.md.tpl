@@ -27,7 +27,7 @@ All settings are defined in `$project_name/conf/static_config.yaml`, which is no
 
 ## Running the challenge
 First make sure that you have got the access to [Mistral-7B](https://huggingface.co/mistralai/Mistral-7B-v0.3) model with your Hugging-Face account. You can request access directly from the Hugging-Face website.
-Then log in with your [User Access Token](https://huggingface.co/docs/hub/security-tokens):
+Then, log in with your [User Access Token](https://huggingface.co/docs/hub/security-tokens). Note you only need to complete this stage once in your development machine:
 
 ```bash
 huggingface-cli login --token XXXXXXX
