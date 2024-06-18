@@ -8,7 +8,7 @@ which allows users to perform the training on a single GPU.
 ## Methodology
 This baseline performs federated LLM fine-tuning with [LoRA](https://arxiv.org/pdf/2106.09685) using the [🤗PEFT](https://huggingface.co/docs/peft/en/index) library.
 The clients' models are aggregated with FedAvg strategy.
-This provides a baseline performance for the leaderboard of General NLP task.
+This provides a baseline performance for the leaderboard of $task_name challenge.
 
 
 ## Environments setup
@@ -33,7 +33,7 @@ Then log in with your [User Access Token](https://huggingface.co/docs/hub/securi
 huggingface-cli login --token XXXXXXX
 ```
 
-With an activated Python environment, run the task with default config values.
+With an activated Python environment, run the challenge task with default config values.
 The configs are in `$project_name/conf/config.yaml` and `$project_name/conf/static_config.yaml`, and are loaded automatically.
 
 ```bash
