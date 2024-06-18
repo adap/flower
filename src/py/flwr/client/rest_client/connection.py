@@ -120,7 +120,11 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
 
     Returns
     -------
-    receive, send : Callable, Callable
+    receive : Callable
+    send : Callable
+    create_node : Optional[Callable]
+    delete_node : Optional[Callable]
+    get_run : Optional[Callable]
     """
     log(
         WARN,

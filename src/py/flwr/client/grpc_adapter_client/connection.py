@@ -74,6 +74,7 @@ def grpc_adapter(  # pylint: disable=R0913
     send : Callable
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
+    get_run : Optional[Callable]
     """
     with grpc_request_response(
         server_address=server_address,

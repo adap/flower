@@ -114,6 +114,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     send : Callable
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
+    get_run : Optional[Callable]
     """
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
