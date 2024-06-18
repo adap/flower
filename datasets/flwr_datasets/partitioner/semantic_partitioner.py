@@ -98,7 +98,7 @@ class SemanticPartitioner(Partitioner):
     Examples
     --------
     >>> from flwr_datasets import FederatedDataset
-    >>> from flwr_datasets import SemanticPartitioner
+    >>> from flwr_datasets.partitioner import SemanticPartitioner
     >>> partitioner = SemanticPartitioner(
     >>>     num_partitions=10,
     >>>     partition_by="label",
