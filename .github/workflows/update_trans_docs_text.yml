@@ -52,7 +52,7 @@ jobs:
           echo "::set-output name=changes::true"
         continue-on-error: true
 
-      - name: Calculate diff
+      - name: Calculate diff  # Even without doc changes the update-lang command will generate 228 additions and 60 deletions, so we only want to open a PR when there is more
         id: calculate_diff
         run: |
           additions=$(git diff --numstat HEAD^1 | awk '{s+=$1} END {print s}')
