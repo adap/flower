@@ -29,6 +29,7 @@ Create **custom partitioning schemes** or choose from the **implemented partitio
 * Linear partitioner `LinearPartitioner`
 * Square partitioner `SquarePartitioner`
 * Exponential partitioner `ExponentialPartitioner`
+* Semantic partitioner `SemanticPartitioner` (only for image datasets)
 * more to come in future releases.
 
 # Installation
