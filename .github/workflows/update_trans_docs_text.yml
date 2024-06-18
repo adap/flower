@@ -20,12 +20,15 @@ jobs:
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
-          python-version: 3.10
+          python-version: '3.10'
 
       - name: Install dependencies
-        run: | 
+        run: |
           python -m poetry install
-          pip install sphinx==7.2.0
+          pip install sphinx==7.3.7
+
+      - name: Install pandoc
+        uses: nikeee/setup-pandoc@v1
 
       - name: Update text and translations for all locales
         run: |
@@ -49,15 +52,25 @@ jobs:
           echo "::set-output name=changes::true"
         continue-on-error: true
 
+      - name: Calculate diff
+        id: calculate_diff
+        run: |
+          additions=$(git diff --numstat HEAD^1 | awk '{s+=$1} END {print s}')
+          deletions=$(git diff --numstat HEAD^1 | awk '{s+=$2} END {print s}')
+          echo "Additions: $additions"
+          echo "Deletions: $deletions"
+          echo "::set-output name=additions::$additions"
+          echo "::set-output name=deletions::$deletions"
+
       - name: Push changes
-        if: steps.commit_changes.outputs.changes == 'true'
+        if: steps.calculate_diff.outputs.additions > 228 && steps.calculate_diff.outputs.deletions > 60 && steps.commit_changes.outputs.changes == 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: '${{ env.branch-name }}'
 
       - name: Create Pull Request
-        if: steps.commit_changes.outputs.changes == 'true'
+        if: steps.calculate_diff.outputs.additions > 228 && steps.calculate_diff.outputs.deletions > 60 && steps.commit_changes.outputs.changes == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
