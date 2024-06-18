@@ -17,7 +17,7 @@
 
 import time
 import warnings
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, cast
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
@@ -46,10 +46,11 @@ class InMemoryDriver(Driver):
         state_factory: StateFactory,
         fab_id: Optional[str] = None,
         fab_version: Optional[str] = None,
+        run_id: Optional[int] = None,
     ) -> None:
-        self.run_id: Optional[int] = None
-        self.fab_id = fab_id if fab_id is not None else ""
-        self.fab_version = fab_version if fab_version is not None else ""
+        self._run_id = run_id
+        self._fab_id = fab_id
+        self._fab_ver = fab_version
         self.node = Node(node_id=0, anonymous=True)
         self.state = state_factory.state()
 
@@ -64,16 +65,36 @@ class InMemoryDriver(Driver):
         ):
             raise ValueError(f"Invalid message: {message}")
 
-    def _get_run_id(self) -> int:
-        """Return run_id.
-
-        If unset, create a new run.
-        """
-        if self.run_id is None:
-            self.run_id = self.state.create_run(
-                fab_id=self.fab_id, fab_version=self.fab_version
+    def _init_run(self) -> None:
+        """Initialize the run."""
+        # Run ID is not provided
+        if self._run_id is None:
+            self._fab_id = "" if self._fab_id is None else self._fab_id
+            self._fab_ver = "" if self._fab_ver is None else self._fab_ver
+            self._run_id = self.state.create_run(
+                fab_id=self._fab_id, fab_version=self._fab_ver
             )
-        return self.run_id
+        # Run ID is provided
+        elif self._fab_id is None or self._fab_ver is None:
+            _, self._fab_id, self._fab_ver = self.state.get_run(self._run_id)
+
+    @property
+    def run_id(self) -> int:
+        """Run ID."""
+        self._init_run()
+        return cast(int, self._run_id)
+
+    @property
+    def fab_id(self) -> str:
+        """FAB ID."""
+        self._init_run()
+        return cast(str, self._fab_id)
+
+    @property
+    def fab_version(self) -> str:
+        """FAB version."""
+        self._init_run()
+        return cast(str, self._fab_ver)
 
     def create_message(  # pylint: disable=too-many-arguments
         self,
@@ -88,7 +109,6 @@ class InMemoryDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        run_id = self._get_run_id()
         if ttl:
             warnings.warn(
                 "A custom TTL was set, but note that the SuperLink does not enforce "
@@ -99,7 +119,7 @@ class InMemoryDriver(Driver):
         ttl_ = DEFAULT_TTL if ttl is None else ttl
 
         metadata = Metadata(
-            run_id=run_id,
+            run_id=self.run_id,
             message_id="",  # Will be set by the server
             src_node_id=self.node.node_id,
             dst_node_id=dst_node_id,
@@ -112,8 +132,7 @@ class InMemoryDriver(Driver):
 
     def get_node_ids(self) -> List[int]:
         """Get node IDs."""
-        run_id = self._get_run_id()
-        return list(self.state.get_nodes(run_id))
+        return list(self.state.get_nodes(self.run_id))
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
         """Push messages to specified node IDs.

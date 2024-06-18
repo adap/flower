@@ -173,7 +173,7 @@ def _init_run_id(driver: InMemoryDriver, state: StateFactory, run_id: int) -> No
     """Create a run with a given `run_id`."""
     log(DEBUG, "Pre-registering run with id %s", run_id)
     state.state().run_ids[run_id] = ("", "")  # type: ignore
-    driver.run_id = run_id
+    driver._run_id = run_id  # pylint: disable=protected-access
 
 
 # pylint: disable=too-many-locals

@@ -24,6 +24,21 @@ from flwr.common import Message, RecordSet
 class Driver(ABC):
     """Abstract base Driver class for the Driver API."""
 
+    @property
+    @abstractmethod
+    def run_id(self) -> int:
+        """Run ID."""
+
+    @property
+    @abstractmethod
+    def fab_id(self) -> str:
+        """FAB ID."""
+
+    @property
+    @abstractmethod
+    def fab_version(self) -> str:
+        """FAB version."""
+
     @abstractmethod
     def create_message(  # pylint: disable=too-many-arguments
         self,

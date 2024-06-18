@@ -79,12 +79,26 @@ class TestInMemoryDriver(unittest.TestCase):
         """
         # Create driver
         self.num_nodes = 42
-        self.driver = InMemoryDriver(StateFactory(""))
-        self.driver.state = MagicMock()
-        self.driver.state.get_nodes.return_value = [
+        self.state = MagicMock()
+        self.state.get_nodes.return_value = [
             int.from_bytes(os.urandom(8), "little", signed=True)
             for _ in range(self.num_nodes)
         ]
+        state_factory = MagicMock()
+        state_factory.state.return_value = self.state
+        self.driver = InMemoryDriver(state_factory)
+        self.driver.state = self.state
+
+    def test_get_run(self) -> None:
+        """Test the InMemoryDriver starting with run_id."""
+        # Prepare
+        self.driver._run_id = 61016  # pylint: disable=protected-access
+        self.state.get_run.return_value = (61016, "mock/mock", "v1.0.0")
+
+        # Assert
+        self.assertEqual(self.driver.run_id, 61016)
+        self.assertEqual(self.driver.fab_id, "mock/mock")
+        self.assertEqual(self.driver.fab_version, "v1.0.0")
 
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
@@ -104,7 +118,7 @@ class TestInMemoryDriver(unittest.TestCase):
         ]
 
         taskins_ids = [uuid4() for _ in range(num_messages)]
-        self.driver.state.store_task_ins.side_effect = taskins_ids  # type: ignore
+        self.state.store_task_ins.side_effect = taskins_ids
 
         # Execute
         msg_ids = list(self.driver.push_messages(msgs))
@@ -141,7 +155,7 @@ class TestInMemoryDriver(unittest.TestCase):
                 task=Task(ancestry=[msg_ids[1]], error=error_to_proto(Error(code=0)))
             ),
         ]
-        self.driver.state.get_task_res.return_value = task_res_list  # type: ignore
+        self.state.get_task_res.return_value = task_res_list
 
         # Execute
         pulled_msgs = list(self.driver.pull_messages(msg_ids))
@@ -167,8 +181,8 @@ class TestInMemoryDriver(unittest.TestCase):
                 task=Task(ancestry=[msg_ids[1]], error=error_to_proto(Error(code=0)))
             ),
         ]
-        self.driver.state.store_task_ins.side_effect = msg_ids  # type: ignore
-        self.driver.state.get_task_res.return_value = task_res_list  # type: ignore
+        self.state.store_task_ins.side_effect = msg_ids
+        self.state.get_task_res.return_value = task_res_list
 
         # Execute
         ret_msgs = list(self.driver.send_and_receive(msgs))
@@ -193,8 +207,8 @@ class TestInMemoryDriver(unittest.TestCase):
                 task=Task(ancestry=[msg_ids[1]], error=error_to_proto(Error(code=0)))
             ),
         ]
-        self.driver.state.store_task_ins.side_effect = msg_ids  # type: ignore
-        self.driver.state.get_task_res.return_value = task_res_list  # type: ignore
+        self.state.store_task_ins.side_effect = msg_ids
+        self.state.get_task_res.return_value = task_res_list
 
         # Execute
         with patch("time.sleep", side_effect=lambda t: time.sleep(t * 0.01)):
