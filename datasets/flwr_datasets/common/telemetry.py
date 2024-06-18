@@ -74,14 +74,14 @@ def _get_source_id() -> str:
         # If the home directory can’t be resolved, RuntimeError is raised.
         return source_id
 
-    flwr_datasets_dir = home.joinpath(".flwr")
+    flwr_dir = home.joinpath(".flwr")
     # Create .flwr directory if it does not exist yet.
     try:
-        flwr_datasets_dir.mkdir(parents=True, exist_ok=True)
+        flwr_dir.mkdir(parents=True, exist_ok=True)
     except PermissionError:
         return source_id
 
-    source_file = flwr_datasets_dir.joinpath("source")
+    source_file = flwr_dir.joinpath("source")
 
     # If no source_file exists create one and write it
     if not source_file.exists():
