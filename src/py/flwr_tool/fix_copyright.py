@@ -7,12 +7,12 @@ Example:
 
 
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import List
 
+from flwr_tool.check_copyright import COPYRIGHT_FORMAT, _get_file_creation_year
 from flwr_tool.init_py_check import get_init_dir_list_and_warnings
-from flwr_tool.check_copyright import _get_file_creation_year, COPYRIGHT_FORMAT
 
 
 def _fix_copyright(dir_list: List[str]) -> None:

@@ -7,13 +7,12 @@ Example:
 
 
 import os
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
 from typing import List
 
 from flwr_tool.init_py_check import get_init_dir_list_and_warnings
-
 
 COPYRIGHT_FORMAT = """# Copyright {} Flower Labs GmbH. All Rights Reserved.
 #
