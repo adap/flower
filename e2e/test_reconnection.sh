@@ -26,44 +26,57 @@ dir_arg="--dir ./.."
 
 timeout 2m flower-superlink --insecure $db_arg $rest_arg &
 sl_pid=$!
+echo "Starting SuperLink"
 sleep 3
 
 timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
 cl1_pid=$!
+echo "Starting first client"
 sleep 3
 
 timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
 cl2_pid=$!
+echo "Starting second client"
 sleep 3
 
-# Kill superlink
+# Kill superlink, this should send the clients into their retry loops
 kill $sl_pid
+echo "Killing Superlink"
 sleep 3
 
-# Restart superlink
+# Restart superlink, the clients should now be able to reconnect to it
 timeout 2m flower-superlink --insecure $db_arg $rest_arg &
 sl_pid=$!
+echo "Restarting Superlink"
 sleep 20
 
-# Kill first client
+# Kill first client, this should send a DeleteNode message to the Superlink
 kill $cl1_pid
+echo "Killing first client"
 sleep 3
 
-# Restart first client
+# Starting new client, this is so we have enough clients to start the server-app
 timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
 cl1_pid=$!
+echo "Starting new client"
 sleep 5
 
+# We start the server-app to begining the training
 timeout 2m flower-server-app server:app --insecure $dir_arg $rest_arg --server $server_app_address &
 pid=$!
+echo "Starting server-app to start training"
 
-# Kill first client
+# Kill first client as soon as the training starts,
+# the server-app should just receive a failure in this case and continue the rounds
+# when enough clients are connected
 kill $cl1_pid
+echo "Killing first client"
 sleep 1
 
-# Restart first client
+# Restart first client so enough clients are connected to continue the FL rounds
 timeout 2m flower-client-app client:app --insecure $rest_arg --server $server_address &
 cl1_pid=$!
+echo "Starting new client"
 
 wait $pid
 res=$?
