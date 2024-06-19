@@ -19,13 +19,13 @@ def fix_all_init_files(dir_list: List[str]) -> None:
     """Sort the __all__ variables that are in __init__.py files."""
     warning_list = []
 
-    for dir in dir_list:
-        init_file, all_list, all_lines = get_all_var_list(dir)
+    for init_dir in dir_list:
+        init_file, all_list, all_lines = get_all_var_list(init_dir)
 
         if all_list:
             sorted_all_list = sorted(all_list)
             if not all_list == sorted_all_list:
-                warning_message = "- " + str(dir)
+                warning_message = "- " + str(init_dir)
                 warning_list.append(warning_message)
 
                 old_all_lines = "\n".join(all_lines)
@@ -65,5 +65,5 @@ if __name__ == "__main__":
         )
     for i, _ in enumerate(sys.argv):
         abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
-        warnings, dir_list = get_init_dir_list_and_warnings(abs_path)
-        fix_all_init_files(dir_list)
+        warnings, init_dirs = get_init_dir_list_and_warnings(abs_path)
+        fix_all_init_files(init_dirs)

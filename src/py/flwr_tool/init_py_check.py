@@ -48,13 +48,13 @@ def check_missing_init_files(absolute_path: str) -> List[str]:
     return dir_list
 
 
-def get_all_var_list(dir: str) -> Tuple[Path, List[str], List[str]]:
+def get_all_var_list(init_dir: str) -> Tuple[Path, List[str], List[str]]:
     """Get the __all__ list of a __init__.py file.
 
     The function returns the path of the '__init__.py' file of the given dir, as well as
     the list itself, and the list of lines corresponding to the list.
     """
-    init_file = Path(dir) / "__init__.py"
+    init_file = Path(init_dir) / "__init__.py"
     all_lines = []
     all_list = []
     capture = False
@@ -79,8 +79,8 @@ def check_all_init_files(dir_list: List[str]) -> None:
     """Check if __all__ is in alphabetical order in __init__.py files."""
     warning_list = []
 
-    for dir in dir_list:
-        init_file, all_list, _ = get_all_var_list(dir)
+    for init_dir in dir_list:
+        init_file, all_list, _ = get_all_var_list(init_dir)
 
         if all_list and not all_list == sorted(all_list):
             warning_message = "- " + str(init_file)
@@ -104,5 +104,5 @@ if __name__ == "__main__":
         )
     for i, _ in enumerate(sys.argv):
         abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
-        dir_list = check_missing_init_files(abs_path)
-        check_all_init_files(dir_list)
+        init_dirs = check_missing_init_files(abs_path)
+        check_all_init_files(init_dirs)
