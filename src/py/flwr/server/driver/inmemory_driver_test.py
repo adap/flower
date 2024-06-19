@@ -93,7 +93,9 @@ class TestInMemoryDriver(unittest.TestCase):
         """Test the InMemoryDriver starting with run_id."""
         # Prepare
         self.driver._run_id = 61016  # pylint: disable=protected-access
-        self.state.get_run.return_value = (61016, "mock/mock", "v1.0.0")
+        self.state.get_run.return_value = MagicMock(
+            run_id=61016, fab_id="mock/mock", fab_version="v1.0.0"
+        )
 
         # Assert
         self.assertEqual(self.driver.run.run_id, 61016)
