@@ -240,11 +240,9 @@ jobs:
         if: ${{ matrix.framework == 'TensorFlow' }}
         run: |
           python -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
-      - name: Create new project
+      - name: Create and run new project
         run: |
           flwr new e2e-${{ matrix.framework }} --framework ${{ matrix.framework }} --username ghaction
-      - name: Run project
-        run: |
           cd e2e-${{ matrix.framework }} 
-          pip install .
+          pip install -e .
           flwr run
