@@ -17,7 +17,7 @@
 
 import time
 import warnings
-from typing import Iterable, List, Optional, cast
+from typing import Iterable, List, Optional
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
@@ -44,14 +44,13 @@ class InMemoryDriver(Driver):
 
     def __init__(
         self,
+        run_id: int,
         state_factory: StateFactory,
-        fab_id: Optional[str] = None,
-        fab_version: Optional[str] = None,
-        run_id: Optional[int] = None,
     ) -> None:
         self._run_id = run_id
-        self._fab_id = fab_id
-        self._fab_ver = fab_version
+        self._fab_id = ""
+        self._fab_ver = ""
+        self._has_initialized = False
         self.node = Node(node_id=0, anonymous=True)
         self.state = state_factory.state()
 
@@ -68,29 +67,23 @@ class InMemoryDriver(Driver):
 
     def _init_run(self) -> None:
         """Initialize the run."""
-        # Run ID is not provided
-        if self._run_id is None:
-            self._fab_id = "" if self._fab_id is None else self._fab_id
-            self._fab_ver = "" if self._fab_ver is None else self._fab_ver
-            self._run_id = self.state.create_run(
-                fab_id=self._fab_id, fab_version=self._fab_ver
-            )
-        # Run ID is provided
-        elif self._fab_id is None or self._fab_ver is None:
-            run = self.state.get_run(self._run_id)
-            if run is None:
-                raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
-            self._fab_id = run.fab_id
-            self._fab_ver = run.fab_version
+        if self._has_initialized:
+            return
+        run = self.state.get_run(self._run_id)
+        if run is None:
+            raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
+        self._fab_id = run.fab_id
+        self._fab_ver = run.fab_version
+        self._has_initialized = True
 
     @property
     def run(self) -> Run:
         """Run ID."""
         self._init_run()
         return Run(
-            run_id=cast(int, self._run_id),
-            fab_id=cast(str, self._fab_id),
-            fab_version=cast(str, self._fab_ver),
+            run_id=self._run_id,
+            fab_id=self._fab_id,
+            fab_version=self._fab_ver,
         )
 
     def create_message(  # pylint: disable=too-many-arguments

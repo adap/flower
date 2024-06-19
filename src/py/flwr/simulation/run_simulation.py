@@ -201,8 +201,11 @@ def _main_loop(
     f_stop = asyncio.Event()
     serverapp_th = None
     try:
+        # Create run (with empty fab_id and fab_version)
+        run_id = state_factory.state().create_run("", "")
+
         # Initialize Driver
-        driver = InMemoryDriver(state_factory)
+        driver = InMemoryDriver(run_id=run_id, state_factory=state_factory)
 
         if run_id:
             _init_run_id(driver, state_factory, run_id)
