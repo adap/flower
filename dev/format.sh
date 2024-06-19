@@ -3,6 +3,7 @@ set -e
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
 
 # Python
+python -m flwr_tool.init_py_fix src/py/flwr
 python -m isort --skip src/py/flwr/proto src/py
 python -m black -q --exclude src/py/flwr/proto src/py
 python -m docformatter -i -r src/py/flwr -e src/py/flwr/proto
