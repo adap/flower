@@ -55,6 +55,5 @@ if __name__ == "__main__":
         )
     for i, _ in enumerate(sys.argv):
         abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
-        init_dirs: List[str]
-        _, init_dirs = get_init_dir_list_and_warnings(abs_path)
-        _fix_copyright(init_dirs)
+        _, other_list_of_directories = get_init_dir_list_and_warnings(abs_path)
+        _fix_copyright(other_list_of_directories)
