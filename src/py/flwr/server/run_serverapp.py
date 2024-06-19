@@ -52,7 +52,9 @@ def run(
     # Load ServerApp if needed
     def _load() -> ServerApp:
         if server_app_attr:
-            server_app: ServerApp = load_app(server_app_attr, LoadServerAppError)
+            server_app: ServerApp = load_app(
+                server_app_attr, LoadServerAppError, server_app_dir
+            )
 
             if not isinstance(server_app, ServerApp):
                 raise LoadServerAppError(
