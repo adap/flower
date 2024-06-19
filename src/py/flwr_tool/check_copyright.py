@@ -35,6 +35,7 @@ def _get_file_creation_year(filepath: str):
         ["git", "log", "--diff-filter=A", "--format=%ai", "--", filepath],
         stdout=subprocess.PIPE,
         text=True,
+        check=True,
     )
     date_str = result.stdout.splitlines()[-1]  # Get the first commit date
     creation_year = date_str.split("-")[0]  # Extract the year
