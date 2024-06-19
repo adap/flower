@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Optional
 
 from flwr.common import Context, EventType, RecordSet, event
+from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
@@ -76,7 +77,7 @@ def run(
     log(DEBUG, "ServerApp finished running.")
 
 
-def run_server_app() -> None:
+def run_server_app() -> None:  # pylint: disable=too-many-branches
     """Run Flower server app."""
     event(EventType.RUN_SERVER_APP_ENTER)
 
@@ -136,30 +137,49 @@ def run_server_app() -> None:
             cert_path,
         )
 
-    log(
-        DEBUG,
-        "Flower will load ServerApp `%s`",
-        getattr(args, "server-app"),
+    if getattr(args, "server-app") != "" and args.run_id is not None:
+        log(
+            WARN,
+            "Both `--run-id` and `server-app` were passed. "
+            "`server-app` will be ignored.",
+        )
+
+    stub = GrpcDriverStub(
+        driver_service_address=args.superlink, root_certificates=root_certificates
     )
+    # Create run if run_id is not provided
+    if args.run_id is None:
+        req = CreateRunRequest(fab_id=args.fab_id, fab_version=args.fab_version)
+        res = stub.create_run(req)
+        run_id = res.run_id
+    else:
+        run_id = args.run_id
+
+    # Initialize GrpcDriver
+    driver = GrpcDriver(run_id=run_id, stub=stub)
+
+    # Dynamically obtain ServerApp path based on run_id
+    if args.run_id is not None:
+        if args.flwr_dir is None:
+            flwr_dir = get_flwr_dir()
+        else:
+            flwr_dir = Path(args.flwr_dir).absolute()
+        server_app_dir = str(
+            get_project_dir(driver.run.fab_id, driver.run.fab_version, flwr_dir)
+        )
+        config = get_project_config(server_app_dir)
+        server_app_attr = config["flower"]["components"]["serverapp"]
+    else:
+        server_app_dir = str(Path(args.dir).absolute())
+        server_app_attr = getattr(args, "server-app")
+
+    log(DEBUG, "Flower will load ServerApp `%s` in %s", server_app_attr, server_app_dir)
 
     log(
         DEBUG,
         "root_certificates: `%s`",
         root_certificates,
     )
-
-    server_app_dir = args.dir
-    server_app_attr = getattr(args, "server-app")
-
-    # Create run
-    stub = GrpcDriverStub(
-        driver_service_address=args.superlink, root_certificates=root_certificates
-    )
-    req = CreateRunRequest(fab_id=args.fab_id, fab_version=args.fab_version)
-    res = stub.create_run(req)
-
-    # Initialize GrpcDriver
-    driver = GrpcDriver(run_id=res.run_id, stub=stub)
 
     # Run the ServerApp with the Driver
     run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
@@ -234,6 +254,17 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         default=None,
         type=str,
         help="The identifier of the run.",
+    )
+    parser.add_argument(
+        "--flwr-dir",
+        default=None,
+        help="""The path containing installed Flower Apps.
+    By default, this value isequal to:
+
+        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+        - `$HOME/.flwr/` in all other cases
+    """,
     )
 
     return parser
