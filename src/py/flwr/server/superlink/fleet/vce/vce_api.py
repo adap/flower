@@ -20,6 +20,7 @@ import sys
 import time
 import traceback
 from logging import DEBUG, ERROR, INFO, WARN
+from pathlib import Path
 from typing import Callable, Dict, List, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
@@ -274,6 +275,7 @@ def start_vce(
         # Use mapping constructed externally. This also means nodes
         # have previously being registered.
         nodes_mapping = existing_nodes_mapping
+    app_dir = str(Path(app_dir).absolute())
 
     if not state_factory:
         log(INFO, "A StateFactory was not supplied to the SimulationEngine.")
@@ -323,7 +325,7 @@ def start_vce(
             if app_dir is not None:
                 sys.path.insert(0, app_dir)
 
-            app: ClientApp = load_app(client_app_attr, LoadClientAppError)
+            app: ClientApp = load_app(client_app_attr, LoadClientAppError, app_dir)
 
             if not isinstance(app, ClientApp):
                 raise LoadClientAppError(
