@@ -22,12 +22,12 @@ from .secure_aggregation import secagg_mod, secaggplus_mod
 from .utils import make_ffn
 
 __all__ = [
+    "LocalDpMod",
     "adaptiveclipping_mod",
     "fixedclipping_mod",
-    "LocalDpMod",
     "make_ffn",
-    "secagg_mod",
-    "secaggplus_mod",
     "message_size_mod",
     "parameters_size_mod",
+    "secagg_mod",
+    "secaggplus_mod",
 ]
