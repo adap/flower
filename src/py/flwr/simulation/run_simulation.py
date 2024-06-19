@@ -21,6 +21,7 @@ import logging
 import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
+from flwr.common.typing import Run
 from time import sleep
 from typing import Dict, Optional
 
@@ -172,7 +173,7 @@ def run_serverapp_th(
 def _init_run_id(driver: InMemoryDriver, state: StateFactory, run_id: int) -> None:
     """Create a run with a given `run_id`."""
     log(DEBUG, "Pre-registering run with id %s", run_id)
-    state.state().run_ids[run_id] = ("", "")  # type: ignore
+    state.state().run_ids[run_id] = Run(run_id, "", "")  # type: ignore
     driver._run_id = run_id  # pylint: disable=protected-access
 
 
