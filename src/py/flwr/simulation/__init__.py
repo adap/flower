@@ -36,4 +36,7 @@ To install the necessary dependencies, install `flwr` with the `simulation` extr
         raise ImportError(RAY_IMPORT_ERROR)
 
 
-__all__ = ["start_simulation", "run_simulation"]
+__all__ = [
+    "run_simulation",
+    "start_simulation",
+]
