@@ -21,7 +21,7 @@ import sys
 from importlib.util import find_spec
 from logging import WARN
 from pathlib import Path
-from typing import Any, Optional, Tuple, Type
+from typing import Any, Optional, Tuple, Type, Union
 
 from .logger import log
 
@@ -85,7 +85,7 @@ def validate(
 def load_app(  # pylint: disable= too-many-branches
     module_attribute_str: str,
     error_type: Type[Exception],
-    project_dir: Optional[str] = None,
+    project_dir: Optional[Union[str, Path]] = None,
 ) -> Any:
     """Return the object specified in a module attribute string.
 
