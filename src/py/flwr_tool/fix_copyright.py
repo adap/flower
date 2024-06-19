@@ -39,6 +39,9 @@ def _insert_or_edit_copyright(py_file: Path) -> None:
 
 def _fix_copyright(dir_list: List[str]) -> None:
     for valid_dir in dir_list:
+        if "proto" in valid_dir:
+            continue
+
         dir_path = Path(valid_dir)
         for py_file in dir_path.glob("*.py"):
             _insert_or_edit_copyright(py_file)
