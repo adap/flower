@@ -230,16 +230,6 @@ jobs:
         if: ${{ github.repository == 'adap/flower' && !github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         run: |
           python -m pip install https://${{ env.ARTIFACT_BUCKET }}/py/${{ needs.wheel.outputs.dir }}/${{ needs.wheel.outputs.short_sha }}/${{ needs.wheel.outputs.whl_path }}
-      - name: Cache Datasets
-        if: ${{ matrix.framework == 'TensorFlow' }}
-        uses: actions/cache@v4
-        with:
-          path: "~/.keras"
-          key: keras-datasets
-      - name: Download Datasets
-        if: ${{ matrix.framework == 'TensorFlow' }}
-        run: |
-          python -c "import tensorflow as tf; tf.keras.datasets.mnist.load_data()"
       - name: Create and run new project
         run: |
           flwr new e2e-${{ matrix.framework }} --framework ${{ matrix.framework }} --username ghaction
