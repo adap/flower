@@ -36,9 +36,11 @@ from flwr.common import (
 
 
 class Client(ABC):
-    """Abstract base class for Flower clients. and now if I want multiple
-    lines is it possible? Maybe I need to do something else, I'm not quite
-    sure."""
+    """Abstract base class for Flower clients.
+
+    and now if I want multiple lines is it possible? Maybe I need to do something else,
+    I'm not quite sure.
+    """
 
     context: Context
 
