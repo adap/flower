@@ -46,6 +46,7 @@ classifiers = [
 ]
 packages = [
     { include = "flwr", from = "src/py" },
+    { include = "flwr_tool", from = "src/py" },
 ]
 exclude = [
     "src/py/**/*_test.py",
