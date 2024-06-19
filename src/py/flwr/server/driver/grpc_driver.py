@@ -153,10 +153,11 @@ class GrpcDriver(Driver):
             * CA certificate.
             * server certificate.
             * server private key.
-    fab_id : str (default: None)
-        The identifier of the FAB used in the run.
-    fab_version : str (default: None)
-        The version of the FAB used in the run.
+    run_id : int
+        The identifier of the run.
+    stub : Optional[GrpcDriverStub] (default: None)
+        The ``GrpcDriverStub`` instance used to communicate with the SuperLink.
+        If None, an instance connected to "[::]:9091" will be created.
     """
 
     def __init__(  # pylint: disable=too-many-arguments

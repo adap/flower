@@ -34,12 +34,10 @@ class InMemoryDriver(Driver):
 
     Parameters
     ----------
+    run_id : int
+        The identifier of the run.
     state_factory : StateFactory
         A StateFactory embedding a state that this driver can interface with.
-    fab_id : str (default: None)
-        The identifier of the FAB used in the run.
-    fab_version : str (default: None)
-        The version of the FAB used in the run.
     """
 
     def __init__(
