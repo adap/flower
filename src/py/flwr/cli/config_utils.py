@@ -54,7 +54,7 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
         if conf is None:
             raise ValueError("Invalid TOML content in pyproject.toml")
 
-        is_valid, errors, _ = validate(conf)
+        is_valid, errors, _ = validate(conf, check_module=False)
         if not is_valid:
             raise ValueError(errors)
 

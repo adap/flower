@@ -459,7 +459,7 @@ evaluate function are bogus, as they won't be used on the server side.
 The `client_fn` we will use in our `start_simulation` function to generate our 3
 clients will be very basic:
 
-```pyhton3
+```python3
 partitions, label = get_partitions_and_label()
 
 def client_fn(cid):
