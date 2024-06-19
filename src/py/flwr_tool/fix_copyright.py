@@ -1,8 +1,8 @@
 # Copyright 2024 Flower Labs GmbH. All Rights Reserved.
-"""Check if copyright notices are present in all Python files.
+"""Fix copyright notices in all Python files of a given directory.
 
 Example:
-    python -m flwr_tool.check_copyright src/py/flwr
+    python -m flwr_tool.fix_copyright src/py/flwr
 """
 
 
@@ -15,8 +15,7 @@ from flwr_tool.init_py_check import get_init_dir_list_and_warnings
 from flwr_tool.check_copyright import _get_file_creation_year, COPYRIGHT_FORMAT
 
 
-def _check_copyright(dir_list: List[str]) -> None:
-    warning_list = []
+def _fix_copyright(dir_list: List[str]) -> None:
     for valid_dir in dir_list:
         dir_path = Path(valid_dir)
         for py_file in dir_path.glob("*.py"):
@@ -37,12 +36,6 @@ def _check_copyright(dir_list: List[str]) -> None:
                 lines.insert(0, expected_copyright)
             py_file.write_text("\n".join(lines))
 
-    if len(warning_list) > 0:
-        print("Missing or incorrect copyright notice in the following files:")
-        for warning in warning_list:
-            print(warning)
-        sys.exit(1)
-
 
 if __name__ == "__main__":
     if len(sys.argv) == 0:
@@ -53,4 +46,4 @@ if __name__ == "__main__":
     for i, _ in enumerate(sys.argv):
         abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
         _, init_dirs = get_init_dir_list_and_warnings(abs_path)
-        _check_copyright(init_dirs)
+        _fix_copyright(init_dirs)
