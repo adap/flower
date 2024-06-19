@@ -23,6 +23,6 @@ strategy = FedAvg(
 
 # Create ServerApp
 app = ServerApp(
-    config=ServerConfig(num_rounds=3),
+    config=ServerConfig(num_rounds=1),
     strategy=strategy,
 )
