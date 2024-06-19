@@ -22,6 +22,7 @@ from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
 from flwr.common.serde import message_from_taskres, message_to_taskins
+from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.server.superlink.state import StateFactory
 
@@ -57,7 +58,7 @@ class InMemoryDriver(Driver):
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            message.metadata.run_id == self.run_id
+            message.metadata.run_id == self.run.run_id
             and message.metadata.src_node_id == self.node.node_id
             and message.metadata.message_id == ""
             and message.metadata.reply_to_message == ""
@@ -76,25 +77,21 @@ class InMemoryDriver(Driver):
             )
         # Run ID is provided
         elif self._fab_id is None or self._fab_ver is None:
-            _, self._fab_id, self._fab_ver = self.state.get_run(self._run_id)
+            run = self.state.get_run(self._run_id)
+            if run is None:
+                raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
+            self._fab_id = run.fab_id
+            self._fab_ver = run.fab_version
 
     @property
-    def run_id(self) -> int:
+    def run(self) -> Run:
         """Run ID."""
         self._init_run()
-        return cast(int, self._run_id)
-
-    @property
-    def fab_id(self) -> str:
-        """FAB ID."""
-        self._init_run()
-        return cast(str, self._fab_id)
-
-    @property
-    def fab_version(self) -> str:
-        """FAB version."""
-        self._init_run()
-        return cast(str, self._fab_ver)
+        return Run(
+            run_id=cast(int, self._run_id),
+            fab_id=cast(str, self._fab_id),
+            fab_version=cast(str, self._fab_ver),
+        )
 
     def create_message(  # pylint: disable=too-many-arguments
         self,
@@ -119,7 +116,7 @@ class InMemoryDriver(Driver):
         ttl_ = DEFAULT_TTL if ttl is None else ttl
 
         metadata = Metadata(
-            run_id=self.run_id,
+            run_id=self.run.run_id,
             message_id="",  # Will be set by the server
             src_node_id=self.node.node_id,
             dst_node_id=dst_node_id,
@@ -132,7 +129,7 @@ class InMemoryDriver(Driver):
 
     def get_node_ids(self) -> List[int]:
         """Get node IDs."""
-        return list(self.state.get_nodes(self.run_id))
+        return list(self.state.get_nodes(self.run.run_id))
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
         """Push messages to specified node IDs.

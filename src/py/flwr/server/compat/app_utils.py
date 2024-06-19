@@ -91,7 +91,7 @@ def _update_client_manager(
                 node_id=node_id,
                 driver=driver,
                 anonymous=False,
-                run_id=driver.run_id,
+                run_id=driver.run.run_id,
             )
             if client_manager.register(client_proxy):
                 registered_nodes[node_id] = client_proxy

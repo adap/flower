@@ -25,6 +25,7 @@ from flwr.common import DEFAULT_TTL, EventType, Message, Metadata, RecordSet, ev
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.serde import message_from_taskres, message_to_taskins
+from flwr.common.typing import Run
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
@@ -186,22 +187,14 @@ class GrpcDriver(Driver):
         self.node = Node(node_id=0, anonymous=True)
 
     @property
-    def run_id(self) -> int:
-        """Run ID."""
+    def run(self) -> Run:
+        """Run information."""
         _, run_id = self._get_grpc_driver_helper_and_run_id()
-        return run_id
-
-    @property
-    def fab_id(self) -> str:
-        """FAB ID."""
-        self._get_grpc_driver_helper_and_run_id()
-        return self._fab_id
-
-    @property
-    def fab_version(self) -> str:
-        """FAB version."""
-        self._get_grpc_driver_helper_and_run_id()
-        return self._fab_ver
+        return Run(
+            run_id=run_id,
+            fab_id=self._fab_id,
+            fab_version=self._fab_ver,
+        )
 
     def _get_grpc_driver_helper_and_run_id(self) -> Tuple[GrpcDriverHelper, int]:
         # Check if the GrpcDriverHelper is initialized
@@ -223,6 +216,8 @@ class GrpcDriver(Driver):
             else:
                 get_run_req = GetRunRequest(run_id=self._run_id)
                 get_run_res = self.driver_helper.get_run(get_run_req)
+                if not get_run_res.HasField("run"):
+                    raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
                 self._fab_id = get_run_res.run.fab_id
                 self._fab_ver = get_run_res.run.fab_version
 

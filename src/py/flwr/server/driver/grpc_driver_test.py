@@ -64,9 +64,9 @@ class TestGrpcDriver(unittest.TestCase):
         self.mock_grpc_driver_helper.get_run.return_value = mock_response
 
         # Assert
-        self.assertEqual(self.driver.run_id, 61016)
-        self.assertEqual(self.driver.fab_id, "mock/mock")
-        self.assertEqual(self.driver.fab_version, "v1.0.0")
+        self.assertEqual(self.driver.run.run_id, 61016)
+        self.assertEqual(self.driver.run.fab_id, "mock/mock")
+        self.assertEqual(self.driver.run.fab_version, "v1.0.0")
 
     def test_check_and_init_grpc_driver_already_initialized(self) -> None:
         """Test that GrpcDriverHelper doesn't initialize if run is created."""
@@ -89,7 +89,7 @@ class TestGrpcDriver(unittest.TestCase):
 
         # Assert
         self.mock_grpc_driver_helper.connect.assert_called_once()
-        self.assertEqual(self.driver.run_id, 61016)
+        self.assertEqual(self.driver.run.run_id, 61016)
 
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""

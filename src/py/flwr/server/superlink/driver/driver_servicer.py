@@ -144,9 +144,9 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         state: State = self.state_factory.state()
 
         # Retrieve run information
-        run_id, fab_id, fab_version = state.get_run(request.run_id)
-        run = Run(run_id=run_id, fab_id=fab_id, fab_version=fab_version)
-        return GetRunResponse(run=run)
+        run = state.get_run(request.run_id)
+        run_proto = None if run is None else Run(**vars(run))
+        return GetRunResponse(run=run_proto)
 
 
 def _raise_if(validation_error: bool, detail: str) -> None:
