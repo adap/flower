@@ -52,7 +52,22 @@ Call `connect()` on the `GrpcDriverStub` instance before calling any of the othe
 
 
 class GrpcDriverStub(DriverStub):
-    """`GrpcDriverStub` provides access to the gRPC Driver API/service."""
+    """`GrpcDriverStub` provides access to the gRPC Driver API/service.
+
+    Parameters
+    ----------
+    driver_service_address : Optional[str]
+        The IPv4 or IPv6 address of the Driver API server.
+        Defaults to `"[::]:9091"`.
+    certificates : bytes (default: None)
+        Tuple containing root certificate, server certificate, and private key
+        to start a secure SSL-enabled server. The tuple is expected to have
+        three bytes elements in the following order:
+
+            * CA certificate.
+            * server certificate.
+            * server private key.
+    """
 
     def __init__(
         self,
@@ -142,17 +157,6 @@ class GrpcDriver(Driver):
 
     Parameters
     ----------
-    driver_service_address : Optional[str]
-        The IPv4 or IPv6 address of the Driver API server.
-        Defaults to `"[::]:9091"`.
-    certificates : bytes (default: None)
-        Tuple containing root certificate, server certificate, and private key
-        to start a secure SSL-enabled server. The tuple is expected to have
-        three bytes elements in the following order:
-
-            * CA certificate.
-            * server certificate.
-            * server private key.
     run_id : int
         The identifier of the run.
     stub : Optional[GrpcDriverStub] (default: None)
