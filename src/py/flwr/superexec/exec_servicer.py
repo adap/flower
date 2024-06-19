@@ -16,7 +16,7 @@
 
 
 from logging import ERROR, INFO
-from typing import Dict
+from typing import Any, Dict, Generator
 
 import grpc
 
@@ -25,6 +25,8 @@ from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
     StartRunResponse,
+    StreamLogsRequest,
+    StreamLogsResponse,
 )
 
 from .executor import Executor, RunTracker
@@ -52,3 +54,12 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         self.runs[run.run_id] = run
 
         return StartRunResponse(run_id=run.run_id)
+
+    def StreamLogs(
+        self, request: StreamLogsRequest, context: grpc.ServicerContext
+    ) -> Generator[StreamLogsResponse, Any, None]:
+        """Get logs."""
+        logs = ["a", "b", "c"]
+        while context.is_active():
+            for i in range(len(logs)):  # pylint: disable=C0200
+                yield StreamLogsResponse(log_output=logs[i])

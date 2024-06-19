@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,20 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""This module contains functions related to proto compilation."""
+"""Tests for the GrpcAdapter class."""
 
 
-from os import path
+import inspect
 
-from .protoc import IN_PATH, OUT_PATH, PROTO_FILES
+from flwr.proto.fleet_pb2_grpc import FleetServicer
 
-
-def test_directories() -> None:
-    """Test if all directories exist."""
-    assert path.isdir(IN_PATH)
-    assert path.isdir(OUT_PATH)
+from .grpc_adapter import GrpcAdapter
 
 
-def test_proto_file_count() -> None:
-    """Test if the correct number of proto files were captured by the glob."""
-    assert len(PROTO_FILES) == 11
+def test_grpc_adapter_methods() -> None:
+    """Test if GrpcAdapter implements all required methods."""
+    # Prepare
+    methods = {
+        name for name, ref in inspect.getmembers(GrpcAdapter) if inspect.isfunction(ref)
+    }
+    expected_methods = {
+        name
+        for name, ref in inspect.getmembers(FleetServicer)
+        if inspect.isfunction(ref)
+    }
+
+    # Assert
+    assert expected_methods.issubset(methods)
