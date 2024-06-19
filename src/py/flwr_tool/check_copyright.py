@@ -45,6 +45,9 @@ def _get_file_creation_year(filepath: str):
 def _check_copyright(dir_list: List[str]) -> None:
     warning_list = []
     for valid_dir in dir_list:
+        if "proto" in valid_dir:
+            continue
+
         dir_path = Path(valid_dir)
         for py_file in dir_path.glob("*.py"):
             creation_year = _get_file_creation_year(str(py_file.absolute()))
