@@ -27,6 +27,7 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PullTaskResRequest,
     PushTaskInsRequest,
 )
+from flwr.proto.run_pb2 import Run  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
 from .grpc_driver import GrpcDriver
@@ -38,7 +39,7 @@ class TestGrpcDriver(unittest.TestCase):
     def setUp(self) -> None:
         """Initialize mock GrpcDriverStub and Driver instance before each test."""
         mock_response = Mock(
-            run=Mock(run_id=61016, fab_id="mock/mock", fab_version="v1.0.0")
+            run=Run(run_id=61016, fab_id="mock/mock", fab_version="v1.0.0")
         )
         self.mock_grpc_driver_stub = Mock()
         self.mock_grpc_driver_stub.get_run.return_value = mock_response

@@ -16,8 +16,10 @@
 
 import time
 import warnings
-from logging import DEBUG, ERROR
+from logging import DEBUG, ERROR, WARNING
 from typing import Iterable, List, Optional, Tuple
+
+import grpc
 
 from flwr.common import DEFAULT_TTL, EventType, Message, Metadata, RecordSet, event
 from flwr.common.grpc import create_channel
@@ -51,7 +53,7 @@ Call `connect()` on the `GrpcDriverStub` instance before calling any of the othe
 """
 
 
-class GrpcDriverStub(DriverStub):
+class GrpcDriverStub:
     """`GrpcDriverStub` provides access to the gRPC Driver API/service.
 
     Parameters
@@ -74,81 +76,90 @@ class GrpcDriverStub(DriverStub):
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
         root_certificates: Optional[bytes] = None,
     ) -> None:
-        event(EventType.DRIVER_CONNECT)
         self.driver_service_address = driver_service_address
         self.root_certificates = root_certificates
+        self.channel: Optional[grpc.Channel] = None
+        self.stub: Optional[DriverStub] = None
+
+    def connect(self) -> None:
+        """Connect to the Driver API."""
+        event(EventType.DRIVER_CONNECT)
+        if self.channel is not None or self.stub is not None:
+            log(WARNING, "Already connected")
+            return
         self.channel = create_channel(
             server_address=self.driver_service_address,
             insecure=(self.root_certificates is None),
             root_certificates=self.root_certificates,
         )
-        super().__init__(self.channel)
+        self.stub = DriverStub(self.channel)
         log(DEBUG, "[Driver] Connected to %s", self.driver_service_address)
 
     def disconnect(self) -> None:
         """Disconnect from the Driver API."""
         event(EventType.DRIVER_DISCONNECT)
-        if self.channel is None:
+        if self.channel is None or self.stub is None:
             log(DEBUG, "Already disconnected")
             return
         channel = self.channel
         self.channel = None
+        self.stub = None
         channel.close()
         log(DEBUG, "[Driver] Disconnected")
 
     def create_run(self, req: CreateRunRequest) -> CreateRunResponse:
         """Request for run ID."""
         # Check if channel is open
-        if self.channel is None:
+        if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise ConnectionError("`GrpcDriverStub` instance not connected")
 
         # Call Driver API
-        res: CreateRunResponse = self.CreateRun(request=req)
+        res: CreateRunResponse = self.stub.CreateRun(request=req)
         return res
 
     def get_run(self, req: GetRunRequest) -> GetRunResponse:
         """Get run information."""
         # Check if channel is open
-        if self.channel is None:
+        if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise ConnectionError("`GrpcDriverStub` instance not connected")
 
         # Call gRPC Driver API
-        res: GetRunResponse = self.GetRun(request=req)
+        res: GetRunResponse = self.stub.GetRun(request=req)
         return res
 
     def get_nodes(self, req: GetNodesRequest) -> GetNodesResponse:
         """Get client IDs."""
         # Check if channel is open
-        if self.channel is None:
+        if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise ConnectionError("`GrpcDriverStub` instance not connected")
 
         # Call gRPC Driver API
-        res: GetNodesResponse = self.GetNodes(request=req)
+        res: GetNodesResponse = self.stub.GetNodes(request=req)
         return res
 
     def push_task_ins(self, req: PushTaskInsRequest) -> PushTaskInsResponse:
         """Schedule tasks."""
         # Check if channel is open
-        if self.channel is None:
+        if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise ConnectionError("`GrpcDriverStub` instance not connected")
 
         # Call gRPC Driver API
-        res: PushTaskInsResponse = self.PushTaskIns(request=req)
+        res: PushTaskInsResponse = self.stub.PushTaskIns(request=req)
         return res
 
     def pull_task_res(self, req: PullTaskResRequest) -> PullTaskResResponse:
         """Get task results."""
         # Check if channel is open
-        if self.channel is None:
+        if self.stub is None:
             log(ERROR, ERROR_MESSAGE_DRIVER_NOT_CONNECTED)
             raise ConnectionError("`GrpcDriverStub` instance not connected")
 
         # Call Driver API
-        res: PullTaskResResponse = self.PullTaskRes(request=req)
+        res: PullTaskResResponse = self.stub.PullTaskRes(request=req)
         return res
 
 
@@ -170,21 +181,15 @@ class GrpcDriver(Driver):
         stub: Optional[GrpcDriverStub] = None,
     ) -> None:
         self.stub = stub
-        self._run_id = run_id
-        self._fab_id = ""
-        self._fab_ver = ""
+        self._run = Run(run_id=run_id, fab_id="", fab_version="")
         self._has_initialized = False
         self.node = Node(node_id=0, anonymous=True)
 
     @property
     def run(self) -> Run:
         """Run information."""
-        _, run_id = self._get_grpc_driver_helper_and_run_id()
-        return Run(
-            run_id=run_id,
-            fab_id=self._fab_id,
-            fab_version=self._fab_ver,
-        )
+        self._get_grpc_driver_helper_and_run_id()
+        return Run(**vars(self._run))
 
     def _get_grpc_driver_helper_and_run_id(self) -> Tuple[GrpcDriverStub, int]:
         # Check if the GrpcDriverStub is initialized
@@ -194,20 +199,19 @@ class GrpcDriver(Driver):
                 self.stub = GrpcDriverStub()
 
             # Get the run info
-            req = GetRunRequest(run_id=self._run_id)
+            req = GetRunRequest(run_id=self._run.run_id)
             res = self.stub.get_run(req)
             if not res.HasField("run"):
-                raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
-            self._fab_id = res.run.fab_id
-            self._fab_ver = res.run.fab_version
+                raise RuntimeError(f"Cannot find the run with ID: {self._run.run_id}")
+            self._run = Run(**{fld.name: v for fld, v in res.run.ListFields()})
             self._has_initialized = True
 
-        return self.stub, self._run_id
+        return self.stub, self._run.run_id
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            message.metadata.run_id == self._run_id
+            message.metadata.run_id == self._run.run_id
             and message.metadata.src_node_id == self.node.node_id
             and message.metadata.message_id == ""
             and message.metadata.reply_to_message == ""
