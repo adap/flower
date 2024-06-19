@@ -82,7 +82,80 @@ def start_client(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
-    """Start a Flower client. Node which connects to a Flower server."""
+    """Start a Flower client. Node which connects to a Flower server.
+
+    And I probably can't do multiline summary right? Otherwise it would be
+    weird I think. What do you think?
+
+    Parameters
+    ----------
+    server_address : str
+        The IPv4 or IPv6 address of the server. If the Flower
+        server runs on the same machine on port 8080, then `server_address`
+        would be `"[::]:8080"`.
+    client_fn : Optional[ClientFn]
+        A callable that instantiates a Client. (default: None)
+    client : Optional[flwr.client.Client]
+        An implementation of the abstract base
+        class `flwr.client.Client` (default: None)
+    grpc_max_message_length : int (default: 536_870_912, this equals 512MB)
+        The maximum length of gRPC messages that can be exchanged with the
+        Flower server. The default should be sufficient for most models.
+        Users who train very large models might need to increase this
+        value. Note that the Flower server needs to be started with the
+        same value (see `flwr.server.start_server`), otherwise it will not
+        know about the increased limit and block larger messages.
+    root_certificates : Optional[Union[bytes, str]] (default: None)
+        The PEM-encoded root certificates as a byte string or a path string.
+        If provided, a secure connection using the certificates will be
+        established to an SSL-enabled Flower server.
+    insecure : bool (default: True)
+        Starts an insecure gRPC connection when True. Enables HTTPS connection
+        when False, using system certificates if `root_certificates` is None.
+    transport : Optional[str] (default: None)
+        Configure the transport layer. Allowed values:
+        - 'grpc-bidi': gRPC, bidirectional streaming
+        - 'grpc-rere': gRPC, request-response (experimental)
+        - 'rest': HTTP (experimental)
+    max_retries: Optional[int] (default: None)
+        The maximum number of times the client will try to connect to the
+        server before giving up in case of a connection error. If set to None,
+        there is no limit to the number of tries.
+    max_wait_time: Optional[float] (default: None)
+        The maximum duration before the client stops trying to
+        connect to the server in case of connection error.
+        If set to None, there is no limit to the total time.
+
+    Examples
+    --------
+    Starting a gRPC client with an insecure server connection:
+
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client_fn=client_fn,
+    >>> )
+
+    Starting an SSL-enabled gRPC client using system certificates:
+
+    >>> def client_fn(cid: str):
+    >>>     return FlowerClient()
+    >>>
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client_fn=client_fn,
+    >>>     insecure=False,
+    >>> )
+
+    Starting an SSL-enabled gRPC client using provided certificates:
+
+    >>> from pathlib import Path
+    >>>
+    >>> start_client(
+    >>>     server_address=localhost:8080,
+    >>>     client_fn=client_fn,
+    >>>     root_certificates=Path("/crts/root.pem").read_bytes(),
+    >>> )
+    """
     event(EventType.START_CLIENT_ENTER)
     _start_client_internal(
         server_address=server_address,
