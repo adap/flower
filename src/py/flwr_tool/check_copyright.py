@@ -30,7 +30,7 @@ COPYRIGHT_FORMAT = """# Copyright {} Flower Labs GmbH. All Rights Reserved.
 # =============================================================================="""
 
 
-def _get_file_creation_year(filepath: str):
+def _get_file_creation_year(filepath: str) -> str:
     result = subprocess.run(
         ["git", "log", "--diff-filter=A", "--format=%ai", "--", filepath],
         stdout=subprocess.PIPE,
@@ -72,5 +72,6 @@ if __name__ == "__main__":
         )
     for i, _ in enumerate(sys.argv):
         abs_path: str = os.path.abspath(os.path.join(os.getcwd(), sys.argv[i]))
+        init_dirs: List[str]
         _, init_dirs = get_init_dir_list_and_warnings(abs_path)
         _check_copyright(init_dirs)
