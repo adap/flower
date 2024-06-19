@@ -82,7 +82,7 @@ def start_client(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
-    """Start a Flower client node which connects to a Flower server.
+    """Start a Flower client. Node which connects to a Flower server.
 
     Parameters
     ----------
