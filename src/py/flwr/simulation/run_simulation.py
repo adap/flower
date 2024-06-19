@@ -21,14 +21,13 @@ import logging
 import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
-from flwr.common.typing import Run
 from time import sleep
 from typing import Dict, Optional
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.logger import set_logger_propagation, update_console_handler
-from flwr.common.typing import ConfigsRecordValues
+from flwr.common.typing import ConfigsRecordValues, Run
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
