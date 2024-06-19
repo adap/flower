@@ -235,7 +235,7 @@ def _get_load_client_app_fn(
             "Loading ClientApp `%s`",
             client_app_ref,
         )
-        client_app = load_app(client_app_ref, LoadClientAppError)
+        client_app = load_app(client_app_ref, LoadClientAppError, sys_path)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(

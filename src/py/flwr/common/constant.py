@@ -55,6 +55,10 @@ FAB_CONFIG_FILE = "pyproject.toml"
 FLWR_HOME = "FLWR_HOME"
 
 
+GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
+GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
+
+
 class MessageType:
     """Message type."""
 

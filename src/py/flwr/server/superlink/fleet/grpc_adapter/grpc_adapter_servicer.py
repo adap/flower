@@ -21,9 +21,7 @@ from typing import Callable, Type, TypeVar
 import grpc
 from google.protobuf.message import Message as GrpcMessage
 
-from flwr.common.constant import GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY
 from flwr.common.logger import log
-from flwr.common.version import package_version
 from flwr.proto import grpcadapter_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -53,7 +51,7 @@ def _handle(
     req = request_type.FromString(msg_container.grpc_message_content)
     res = handler(req)
     return MessageContainer(
-        metadata={GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY: package_version},
+        metadata={},
         grpc_message_name=res.__class__.__qualname__,
         grpc_message_content=res.SerializeToString(),
     )
