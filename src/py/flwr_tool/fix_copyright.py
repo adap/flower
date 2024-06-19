@@ -34,7 +34,7 @@ def _insert_or_edit_copyright(py_file: Path) -> None:
             lines = lines[end_index:]
 
         lines.insert(0, expected_copyright)
-    py_file.write_text("\n".join(lines))
+    py_file.write_text("\n".join(lines), newline="\n")
 
 
 def _fix_copyright(dir_list: List[str]) -> None:
