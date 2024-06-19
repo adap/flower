@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,22 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Flower Built-in Mods."""
-
-
-from .centraldp_mods import adaptiveclipping_mod, fixedclipping_mod
-from .comms_mods import message_size_mod, parameters_size_mod
-from .localdp_mod import LocalDpMod
-from .secure_aggregation import secagg_mod, secaggplus_mod
-from .utils import make_ffn
-
-__all__ = [
-    "LocalDpMod",
-    "adaptiveclipping_mod",
-    "fixedclipping_mod",
-    "make_ffn",
-    "message_size_mod",
-    "parameters_size_mod",
-    "secagg_mod",
-    "secaggplus_mod",
-]
+"""Client-side part of the GrpcAdapter transport layer."""
