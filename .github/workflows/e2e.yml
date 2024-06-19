@@ -243,6 +243,6 @@ jobs:
       - name: Create and run new project
         run: |
           flwr new e2e-${{ matrix.framework }} --framework ${{ matrix.framework }} --username ghaction
-          cd e2e-${{ matrix.framework }} 
+          cd e2e-$(echo "${{ matrix.framework }}" | tr '[:upper:]' '[:lower:]')
           pip install -e .
           flwr run
