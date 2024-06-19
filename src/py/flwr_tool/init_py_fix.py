@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 """Fix provided directory and sub-directories for unsorted __all__ in __init__.py files.
 
 Example:
