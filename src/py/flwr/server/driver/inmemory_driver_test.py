@@ -31,6 +31,7 @@ from flwr.common.serde import (
     message_to_taskres,
     recordset_to_proto,
 )
+from flwr.common.typing import Run
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import InMemoryState, SqliteState, StateFactory
 
@@ -84,7 +85,7 @@ class TestInMemoryDriver(unittest.TestCase):
             int.from_bytes(os.urandom(8), "little", signed=True)
             for _ in range(self.num_nodes)
         ]
-        self.state.get_run.return_value = MagicMock(
+        self.state.get_run.return_value = Run(
             run_id=61016, fab_id="mock/mock", fab_version="v1.0.0"
         )
         state_factory = MagicMock(state=lambda: self.state)

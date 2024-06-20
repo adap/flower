@@ -169,11 +169,14 @@ def run_serverapp_th(
     return serverapp_th
 
 
-def _init_run_id(driver: InMemoryDriver, state: StateFactory, run_id: int) -> None:
-    """Create a run with a given `run_id`."""
+def _override_run_id(state: StateFactory, run_id_to_replace: int, run_id: int) -> None:
+    """Override the run_id of an existing Run."""
     log(DEBUG, "Pre-registering run with id %s", run_id)
-    state.state().run_ids[run_id] = Run(run_id, "", "")  # type: ignore
-    driver._run_id = run_id  # pylint: disable=protected-access
+    # Remove run
+    run_info: Run = state.state().run_ids.pop(run_id_to_replace)  # type: ignore
+    # Update with new run_id and insert back in state
+    run_info.run_id = run_id
+    state.state().run_ids[run_id] = run_info  # type: ignore
 
 
 # pylint: disable=too-many-locals
@@ -202,13 +205,14 @@ def _main_loop(
     serverapp_th = None
     try:
         # Create run (with empty fab_id and fab_version)
-        run_id = state_factory.state().create_run("", "")
-
-        # Initialize Driver
-        driver = InMemoryDriver(run_id=run_id, state_factory=state_factory)
+        run_id_ = state_factory.state().create_run("", "")
 
         if run_id:
-            _init_run_id(driver, state_factory, run_id)
+            _override_run_id(state_factory, run_id_to_replace=run_id_, run_id=run_id)
+            run_id_ = run_id
+
+        # Initialize Driver
+        driver = InMemoryDriver(run_id=run_id_, state_factory=state_factory)
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(

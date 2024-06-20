@@ -26,7 +26,10 @@ from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
+from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 
+from .driver import Driver
+from .driver.grpc_driver import GrpcDriver, GrpcDriverStub
 from .driver import Driver
 from .driver.grpc_driver import GrpcDriver, GrpcDriverStub
 from .server_app import LoadServerAppError, ServerApp
@@ -180,6 +183,20 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         "root_certificates: `%s`",
         root_certificates,
     )
+
+    server_app_dir = args.dir
+    server_app_attr = getattr(args, "server-app")
+
+    # Create run
+    stub = GrpcDriverStub(
+        driver_service_address=args.superlink, root_certificates=root_certificates
+    )
+    stub.connect()
+    req = CreateRunRequest(fab_id=args.fab_id, fab_version=args.fab_version)
+    res = stub.create_run(req)
+
+    # Initialize GrpcDriver
+    driver = GrpcDriver(run_id=res.run_id, stub=stub)
 
     # Run the ServerApp with the Driver
     run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
