@@ -18,7 +18,7 @@ Developer Machine Setup
 -----------------------
 
 Preliminaries
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 Some system-wide dependencies are needed.
 
 For macOS
