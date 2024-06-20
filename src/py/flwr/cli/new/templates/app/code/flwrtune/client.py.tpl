@@ -16,9 +16,8 @@ from $import_name.dataset import reformat
 
 
 # pylint: disable=too-many-arguments
-class FlowerClient(
-    fl.client.NumPyClient
-):  # pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
+class FlowerClient(NumPyClient):
     """Standard Flower client for CNN training."""
 
     def __init__(
