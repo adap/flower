@@ -44,7 +44,7 @@ class MlFramework(str, Enum):
     FLWRTUNE = "flwrtune"
 
 
-class LLMChallengeName(str, Enum):
+class LlmChallengeName(str, Enum):
     """Available LLM challenges."""
 
     GENERALNLP = "GeneralNLP"
