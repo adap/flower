@@ -16,7 +16,7 @@
 
 
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Dict, List, Optional
 
 from datasets import Dataset
 
@@ -30,6 +30,7 @@ class Partitioner(ABC):
 
     def __init__(self) -> None:
         self._dataset: Optional[Dataset] = None
+        self._partition_id_to_indices: Dict[int, List[int]] = {}
 
     @property
     def dataset(self) -> Dataset:
@@ -84,3 +85,8 @@ class Partitioner(ABC):
     @abstractmethod
     def num_partitions(self) -> int:
         """Total number of partitions."""
+
+    @property
+    @abstractmethod
+    def partition_id_to_indices(self) -> Dict[int, List[int]]:
+        """Partition id to indices (the result of partitioning)."""
