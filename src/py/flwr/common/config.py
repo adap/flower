@@ -33,8 +33,7 @@ def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
                 f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
             )
         )
-    else:
-        return Path(provided_path).absolute()
+    return Path(provided_path).absolute()
 
 
 def get_project_dir(
