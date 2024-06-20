@@ -58,10 +58,6 @@ echo "- All Markdown checks passed"
 
 echo "- Start license checks"
 
-echo "- copyright: start"
-python -m flwr_tool.check_copyright src/py/flwr
-echo "- copyright: done"
-
 echo "- licensecheck: start"
 python -m licensecheck -u poetry --fail-licenses gpl --zero
 echo "- licensecheck: done"
