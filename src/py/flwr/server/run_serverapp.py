@@ -259,7 +259,7 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         "--flwr-dir",
         default=None,
         help="""The path containing installed Flower Apps.
-    By default, this value isequal to:
+    By default, this value is equal to:
 
         - `$FLWR_HOME/` if `$FLWR_HOME` is defined
         - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
