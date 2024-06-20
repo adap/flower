@@ -15,8 +15,14 @@ README.md @jafermarq @tanertopal @danieljanes
 # Flower Examples
 /examples @jafermarq @tanertopal @danieljanes
 
+# Flower Templates
+/src/py/flwr/cli/new/templates @jafermarq @tanertopal @danieljanes
+
 # Changelog
 /doc/source/ref-changelog.md @jafermarq @tanertopal @danieljanes
+
+# Translations
+/doc/locales @charlesbvll @tanertopal @danieljanes
 
 # GitHub Actions and Workflows
 /.github/workflows @Robert-Steiner @tanertopal @danieljanes

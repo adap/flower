@@ -54,7 +54,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get -y --no-install-recommends install \
-    libsqlite3-dev \
+    libsqlite3-0 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=python /usr/local/bin/python /usr/local/bin/python
@@ -74,8 +74,8 @@ ENV PATH=/usr/local/bin/python/bin:$PATH \
 
 # Use a virtual environment to ensure that Python packages are installed in the same location
 # regardless of whether the subsequent image build is run with the app or the root user
-RUN python -m venv /app/venv
-ENV PATH=/app/venv/bin:$PATH
+RUN python -m venv /python/venv
+ENV PATH=/python/venv/bin:$PATH
 
 ARG PIP_VERSION
 ARG SETUPTOOLS_VERSION
@@ -92,6 +92,8 @@ RUN adduser \
     --disabled-password \
     --gecos "" \
     --uid 49999 app \
+    && mkdir -p /app \
+    && chown -R app:app /python \
     && chown -R app:app /app
 
 WORKDIR /app
