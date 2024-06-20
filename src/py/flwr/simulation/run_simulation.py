@@ -27,7 +27,7 @@ from typing import Dict, Optional
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.logger import set_logger_propagation, update_console_handler
-from flwr.common.typing import ConfigsRecordValues
+from flwr.common.typing import ConfigsRecordValues, Run
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
@@ -169,6 +169,16 @@ def run_serverapp_th(
     return serverapp_th
 
 
+def _override_run_id(state: StateFactory, run_id_to_replace: int, run_id: int) -> None:
+    """Override the run_id of an existing Run."""
+    log(DEBUG, "Pre-registering run with id %s", run_id)
+    # Remove run
+    run: Run = state.state().run_ids.pop(run_id_to_replace)  # type: ignore
+    # Update with new run_id and insert back in state
+    run.run_id = run_id
+    state.state().run_ids[run_id] = run  # type: ignore
+
+
 # pylint: disable=too-many-locals
 def _main_loop(
     num_supernodes: int,
@@ -176,7 +186,7 @@ def _main_loop(
     backend_config_stream: str,
     app_dir: str,
     enable_tf_gpu_growth: bool,
-    run_id: Optional[int] = None,
+    run_id_: Optional[int] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
@@ -195,10 +205,14 @@ def _main_loop(
     serverapp_th = None
     try:
         # Create run (with empty fab_id and fab_version)
-        run_id_ = state_factory.state().create_run("", "")
+        run_id = state_factory.state().create_run("", "")
+
+        if run_id_:
+            _override_run_id(state_factory, run_id_to_replace=run_id, run_id=run_id_)
+            run_id = run_id_
 
         # Initialize Driver
-        driver = InMemoryDriver(run_id=run_id_, state_factory=state_factory)
+        driver = InMemoryDriver(run_id=run_id, state_factory=state_factory)
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(
