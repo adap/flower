@@ -26,10 +26,7 @@ from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
-from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 
-from .driver import Driver
-from .driver.grpc_driver import GrpcDriver, GrpcDriverStub
 from .driver import Driver
 from .driver.grpc_driver import GrpcDriver, GrpcDriverStub
 from .server_app import LoadServerAppError, ServerApp
