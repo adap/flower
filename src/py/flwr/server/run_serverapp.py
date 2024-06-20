@@ -182,20 +182,6 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         root_certificates,
     )
 
-    server_app_dir = args.dir
-    server_app_attr = getattr(args, "server-app")
-
-    # Create run
-    stub = GrpcDriverStub(
-        driver_service_address=args.superlink, root_certificates=root_certificates
-    )
-    stub.connect()
-    req = CreateRunRequest(fab_id=args.fab_id, fab_version=args.fab_version)
-    res = stub.create_run(req)
-
-    # Initialize GrpcDriver
-    driver = GrpcDriver(run_id=res.run_id, stub=stub)
-
     # Run the ServerApp with the Driver
     run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
 
