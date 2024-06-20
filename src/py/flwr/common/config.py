@@ -24,14 +24,17 @@ from flwr.cli.config_utils import validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
 
 
-def get_flwr_dir() -> Path:
+def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
     """Return the Flower home directory based on env variables."""
-    return Path(
-        os.getenv(
-            FLWR_HOME,
-            f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
+    if provided_path is None or not Path(provided_path).is_dir():
+        return Path(
+            os.getenv(
+                FLWR_HOME,
+                f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
+            )
         )
-    )
+    else:
+        return Path(provided_path).absolute()
 
 
 def get_project_dir(
