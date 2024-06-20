@@ -24,20 +24,8 @@ import tomli
 from flwr.common import object_ref
 
 
-def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
-    """Extract the fab_id and the fab_version from a FAB file or path.
-
-    Parameters
-    ----------
-    fab_file : Union[Path, bytes]
-        The Flower App Bundle file to validate and extract the metadata from.
-        It can either be a path to the file or the file itself as bytes.
-
-    Returns
-    -------
-    Tuple[str, str]
-        The `fab_version` and `fab_id` of the given Flower App Bundle.
-    """
+def _load_valid_fab_config(fab_file: Union[Path, bytes]) -> Dict[str, Any]:
+    """Load the config from a FAB file or path and ensure it's valid."""
     fab_file_archive: Union[Path, IO[bytes]]
     if isinstance(fab_file, bytes):
         fab_file_archive = BytesIO(fab_file)
@@ -58,10 +46,48 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
         if not is_valid:
             raise ValueError(errors)
 
-        return (
-            conf["project"]["version"],
-            f"{conf['flower']['publisher']}/{conf['project']['name']}",
-        )
+        return conf
+
+
+def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
+    """Extract the fab_id and the fab_version from a FAB file or path.
+
+    Parameters
+    ----------
+    fab_file : Union[Path, bytes]
+        The Flower App Bundle file to validate and extract the metadata from.
+        It can either be a path to the file or the file itself as bytes.
+
+    Returns
+    -------
+    Tuple[str, str]
+        The `fab_version` and `fab_id` of the given Flower App Bundle.
+    """
+    conf = _load_valid_fab_config(fab_file)
+    fab_version: str = conf["project"]["version"]
+    fab_id: str = f"{conf['flower']['publisher']}/{conf['project']['name']}"
+
+    return (fab_version, fab_id)
+
+
+def get_fab_engine_conf(fab_file: Union[Path, bytes]) -> Dict[str, Any]:
+    """Extract the engine config from a FAB file or path.
+
+    Parameters
+    ----------
+    fab_file : Union[Path, bytes]
+        The Flower App Bundle file to validate and extract the metadata from.
+        It can either be a path to the file or the file itself as bytes.
+
+    Returns
+    -------
+    Dict[str, Any]
+        A dictionary containing the [flower.engine] specification for the FAB.
+    """
+    conf = _load_valid_fab_config(fab_file)
+    engine_conf: Dict[str, Any] = conf["flower"]["engine"]
+
+    return engine_conf
 
 
 def load_and_validate(
