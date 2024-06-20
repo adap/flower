@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ from typing import Dict, List, Optional, Set, Tuple
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
+from flwr.common.typing import Run
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
@@ -40,7 +41,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         self.public_key_to_node_id: Dict[bytes, int] = {}
 
         # Map run_id to (fab_id, fab_version)
-        self.run_ids: Dict[int, Tuple[str, str]] = {}
+        self.run_ids: Dict[int, Run] = {}
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
 
@@ -281,7 +282,9 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
             run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
             if run_id not in self.run_ids:
-                self.run_ids[run_id] = (fab_id, fab_version)
+                self.run_ids[run_id] = Run(
+                    run_id=run_id, fab_id=fab_id, fab_version=fab_version
+                )
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -319,13 +322,13 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         """Retrieve all currently stored `client_public_keys` as a set."""
         return self.client_public_keys
 
-    def get_run(self, run_id: int) -> Tuple[int, str, str]:
+    def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
         with self.lock:
             if run_id not in self.run_ids:
                 log(ERROR, "`run_id` is invalid")
-                return 0, "", ""
-            return run_id, *self.run_ids[run_id]
+                return None
+            return self.run_ids[run_id]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""

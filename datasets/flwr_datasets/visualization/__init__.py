@@ -19,6 +19,6 @@ from .comparison_label_distribution import plot_comparison_label_distribution
 from .label_distribution import plot_label_distributions
 
 __all__ = [
-    "plot_label_distributions",
     "plot_comparison_label_distribution",
+    "plot_label_distributions",
 ]
