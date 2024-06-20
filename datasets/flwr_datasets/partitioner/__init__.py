@@ -47,7 +47,7 @@ __all__ = [
     "NaturalIdPartitioner",
     "Partitioner",
     "PathologicalPartitioner",
-    "SemanticPartitioner"
+    "SemanticPartitioner",
     "ShardPartitioner",
     "SizePartitioner",
     "SquarePartitioner",
