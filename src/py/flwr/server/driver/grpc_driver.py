@@ -17,7 +17,7 @@
 import time
 import warnings
 from logging import DEBUG, ERROR, WARNING
-from typing import Iterable, List, Optional, Tuple
+from typing import Iterable, List, Optional, Tuple, cast
 
 import grpc
 
@@ -180,38 +180,35 @@ class GrpcDriver(Driver):
         run_id: int,
         stub: Optional[GrpcDriverStub] = None,
     ) -> None:
-        self.stub = stub
-        self._run = Run(run_id=run_id, fab_id="", fab_version="")
-        self._has_initialized = False
+        self._run_id = run_id
+        self._run: Optional[Run] = None
+        self.stub = stub if stub is not None else GrpcDriverStub()
         self.node = Node(node_id=0, anonymous=True)
 
     @property
     def run(self) -> Run:
         """Run information."""
         self._get_grpc_driver_helper_and_run_id()
-        return Run(**vars(self._run))
+        return Run(**vars(cast(Run, self._run)))
 
     def _get_grpc_driver_helper_and_run_id(self) -> Tuple[GrpcDriverStub, int]:
-        # Check if the GrpcDriverStub is initialized
-        if not self._has_initialized or self.stub is None:
-            # Connect and create run
-            if self.stub is None:
-                self.stub = GrpcDriverStub()
-
+        # Check if is initialized
+        if self._run is None:
+            # Connect
+            self.stub.connect()
             # Get the run info
-            req = GetRunRequest(run_id=self._run.run_id)
+            req = GetRunRequest(run_id=self._run_id)
             res = self.stub.get_run(req)
             if not res.HasField("run"):
-                raise RuntimeError(f"Cannot find the run with ID: {self._run.run_id}")
+                raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
             self._run = Run(**{fld.name: v for fld, v in res.run.ListFields()})
-            self._has_initialized = True
 
         return self.stub, self._run.run_id
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            message.metadata.run_id == self._run.run_id
+            message.metadata.run_id == cast(Run, self._run).run_id
             and message.metadata.src_node_id == self.node.node_id
             and message.metadata.message_id == ""
             and message.metadata.reply_to_message == ""
@@ -330,8 +327,8 @@ class GrpcDriver(Driver):
 
     def close(self) -> None:
         """Disconnect from the SuperLink if connected."""
-        # Check if GrpcDriverStub is initialized
-        if self.stub is None:
+        # Check if is initialized
+        if self._run is None:
             return
         # Disconnect
         self.stub.disconnect()

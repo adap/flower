@@ -17,7 +17,7 @@
 
 import time
 import warnings
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, cast
 from uuid import UUID
 
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
@@ -46,11 +46,9 @@ class InMemoryDriver(Driver):
         state_factory: StateFactory,
     ) -> None:
         self._run_id = run_id
-        self._fab_id = ""
-        self._fab_ver = ""
-        self._has_initialized = False
-        self.node = Node(node_id=0, anonymous=True)
+        self._run: Optional[Run] = None
         self.state = state_factory.state()
+        self.node = Node(node_id=0, anonymous=True)
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
@@ -65,24 +63,18 @@ class InMemoryDriver(Driver):
 
     def _init_run(self) -> None:
         """Initialize the run."""
-        if self._has_initialized:
+        if self._run is not None:
             return
         run = self.state.get_run(self._run_id)
         if run is None:
             raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
-        self._fab_id = run.fab_id
-        self._fab_ver = run.fab_version
-        self._has_initialized = True
+        self._run = run
 
     @property
     def run(self) -> Run:
         """Run ID."""
         self._init_run()
-        return Run(
-            run_id=self._run_id,
-            fab_id=self._fab_id,
-            fab_version=self._fab_ver,
-        )
+        return Run(**vars(cast(Run, self._run)))
 
     def create_message(  # pylint: disable=too-many-arguments
         self,

@@ -194,9 +194,6 @@ class TestGrpcDriver(unittest.TestCase):
 
     def test_del_with_uninitialized_driver(self) -> None:
         """Test cleanup behavior when Driver is not initialized."""
-        # Prepare
-        self.driver.stub = None
-
         # Execute
         self.driver.close()
 
