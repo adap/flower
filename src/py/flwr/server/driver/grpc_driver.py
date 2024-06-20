@@ -323,7 +323,7 @@ class GrpcDriver(Driver):
 
     def close(self) -> None:
         """Disconnect from the SuperLink if connected."""
-        # Check if is initialized
+        # Check if `connect` was called before
         if self._run is None:
             return
         # Disconnect
