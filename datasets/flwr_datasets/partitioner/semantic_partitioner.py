@@ -18,16 +18,16 @@
 import warnings
 from typing import Any, Callable, Dict, List, Optional, Union
 
-import torch
 import numpy as np
-import datasets
-from torch.distributions import MultivariateNormal, kl_divergence
-from torchvision import models
+import torch
 from scipy.optimize import linear_sum_assignment
-from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
+from sklearn.preprocessing import StandardScaler
+from torch.distributions import MultivariateNormal, kl_divergence
+from torchvision import models
 
+import datasets
 from flwr_datasets.common.typing import NDArrayFloat
 from flwr_datasets.partitioner.partitioner import Partitioner
 
