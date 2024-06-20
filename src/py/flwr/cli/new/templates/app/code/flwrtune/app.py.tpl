@@ -7,7 +7,8 @@ from hydra import compose, initialize
 from hydra.utils import instantiate
 from $import_name.dataset import get_tokenizer_and_data_collator_and_propt_formatting
 
-import flwr as fl
+from flwr.client import ClientApp
+from flwr.server import ServerApp, ServerConfig
 from flwr_datasets import FederatedDataset
 
 from $import_name.client import gen_client_fn

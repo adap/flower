@@ -8,7 +8,7 @@ from trl import SFTTrainer
 from transformers import TrainingArguments
 from peft import get_peft_model_state_dict, set_peft_model_state_dict
 
-import flwr as fl
+from flwr.client import NumPyClient
 from flwr.common.typing import NDArrays, Scalar
 
 from $import_name.models import get_model, cosine_annealing
