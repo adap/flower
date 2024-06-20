@@ -29,6 +29,9 @@ from flwr.proto.transport_pb2_grpc import (  # pylint: disable=E0611
 )
 from flwr.server.client_manager import ClientManager
 from flwr.server.superlink.driver.driver_servicer import DriverServicer
+from flwr.server.superlink.fleet.grpc_adapter.grpc_adapter_servicer import (
+    GrpcAdapterServicer,
+)
 from flwr.server.superlink.fleet.grpc_bidi.flower_service_servicer import (
     FlowerServiceServicer,
 )
@@ -154,6 +157,7 @@ def start_grpc_server(  # pylint: disable=too-many-arguments
 def generic_create_grpc_server(  # pylint: disable=too-many-arguments
     servicer_and_add_fn: Union[
         Tuple[FleetServicer, AddServicerToServerFn],
+        Tuple[GrpcAdapterServicer, AddServicerToServerFn],
         Tuple[FlowerServiceServicer, AddServicerToServerFn],
         Tuple[DriverServicer, AddServicerToServerFn],
     ],
