@@ -149,6 +149,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
     )
     # Create run if run_id is not provided
     if args.run_id is None:
+        stub.connect()
         req = CreateRunRequest(fab_id=args.fab_id, fab_version=args.fab_version)
         res = stub.create_run(req)
         run_id = res.run_id
@@ -266,7 +267,7 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     parser.add_argument(
         "--run-id",
         default=None,
-        type=str,
+        type=int,
         help="The identifier of the run.",
     )
     parser.add_argument(
