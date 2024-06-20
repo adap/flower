@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@ from .secure_aggregation import secagg_mod, secaggplus_mod
 from .utils import make_ffn
 
 __all__ = [
+    "LocalDpMod",
     "adaptiveclipping_mod",
     "fixedclipping_mod",
-    "LocalDpMod",
     "make_ffn",
-    "secagg_mod",
-    "secaggplus_mod",
     "message_size_mod",
     "parameters_size_mod",
+    "secagg_mod",
+    "secaggplus_mod",
 ]
