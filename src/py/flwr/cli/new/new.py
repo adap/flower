@@ -139,11 +139,11 @@ def new(
     if framework_str == "flwrtune":
         llm_challenge_value = prompt_options(
             "Please select LLM challenge by typing in the number",
-            sorted([challenge.value for challenge in LLMChallengeName]),
+            sorted([challenge.value for challenge in LlmChallengeName]),
         )
         selected_value = [
             name
-            for name, value in vars(LLMChallengeName).items()
+            for name, value in vars(LlmChallengeName).items()
             if value == llm_challenge_value
         ]
         llm_challenge_str = selected_value[0]
