@@ -19,10 +19,16 @@ from abc import ABC, abstractmethod
 from typing import Iterable, List, Optional
 
 from flwr.common import Message, RecordSet
+from flwr.common.typing import Run
 
 
 class Driver(ABC):
     """Abstract base Driver class for the Driver API."""
+
+    @property
+    @abstractmethod
+    def run(self) -> Run:
+        """Run information."""
 
     @abstractmethod
     def create_message(  # pylint: disable=too-many-arguments

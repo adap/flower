@@ -28,15 +28,15 @@ from .square_partitioner import SquarePartitioner
 from .semantic_partitioner import SemanticPartitioner
 
 __all__ = [
-    "IidPartitioner",
-    "Partitioner",
-    "NaturalIdPartitioner",
     "DirichletPartitioner",
-    "SizePartitioner",
-    "LinearPartitioner",
-    "InnerDirichletPartitioner",
-    "SquarePartitioner",
-    "ShardPartitioner",
     "ExponentialPartitioner",
+    "IidPartitioner",
+    "InnerDirichletPartitioner",
+    "LinearPartitioner",
+    "NaturalIdPartitioner",
+    "Partitioner",
+    "ShardPartitioner",
+    "SizePartitioner",
+    "SquarePartitioner",
     "SemanticPartitioner"
 ]
