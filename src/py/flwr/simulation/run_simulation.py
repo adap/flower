@@ -91,7 +91,7 @@ def run_simulation(
     backend_name : str (default: ray)
         A simulation backend that runs `ClientApp`s.
 
-    backend_config : Optional[Dict[str, Dict[str, ConfigsRecordValues]]]
+    backend_config : Optional[BackendConfig]
         'A dictionary to configure a backend. Separate dictionaries to configure
         different elements of backend. Supported top-level keys are `init_args`
         for values parsed to initialisation of backend, `client_resources`
@@ -290,7 +290,7 @@ def _run_simulation(
     backend_name : str (default: ray)
         A simulation backend that runs `ClientApp`s.
 
-    backend_config : Optional[Dict[str, Dict[str, ConfigsRecordValues]]]
+    backend_config : Optional[BackendConfig]
         'A dictionary to configure a backend. Separate dictionaries to configure
         different elements of backend. Supported top-level keys are `init_args`
         for values parsed to initialisation of backend, `client_resources`
