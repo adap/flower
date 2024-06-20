@@ -137,11 +137,9 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
             cert_path,
         )
 
-    if getattr(args, "server-app") != "" and args.run_id is not None:
-        log(
-            WARN,
-            "Both `--run-id` and `server-app` were passed. "
-            "`server-app` will be ignored.",
+    if not (getattr(args, "server-app") is None) ^ (args.run_id is None):
+        raise ValueError(
+            "Either `server-app` or `--run-id` should be set but not both. "
         )
 
     stub = GrpcDriverStub(
@@ -200,7 +198,7 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     parser.add_argument(
         "server-app",
         nargs="?",
-        default="",
+        default=None,
         help="For example: `server:app` or `project.package.module:wrapper.app`",
     )
     parser.add_argument(
