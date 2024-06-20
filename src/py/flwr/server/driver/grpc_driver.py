@@ -195,7 +195,7 @@ class GrpcDriver(Driver):
         # Check if is initialized
         if self._run is None:
             # Connect
-            if self.stub.is_connected():
+            if not self.stub.is_connected():
                 self.stub.connect()
             # Get the run info
             req = GetRunRequest(run_id=self._run_id)
