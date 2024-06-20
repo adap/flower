@@ -202,7 +202,11 @@ class GrpcDriver(Driver):
             res = self.stub.get_run(req)
             if not res.HasField("run"):
                 raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
-            self._run = Run(**{fld.name: v for fld, v in res.run.ListFields()})
+            self._run = Run(
+                run_id=res.run.run_id,
+                fab_id=res.run.fab_id,
+                fab_version=res.run.fab_version,
+            )
 
         return self.stub, self._run.run_id
 
@@ -254,9 +258,9 @@ class GrpcDriver(Driver):
 
     def get_node_ids(self) -> List[int]:
         """Get node IDs."""
-        grpc_driver_helper, run_id = self._get_stub_and_run_id()
+        stub, run_id = self._get_stub_and_run_id()
         # Call GrpcDriverStub method
-        res = grpc_driver_helper.get_nodes(GetNodesRequest(run_id=run_id))
+        res = stub.get_nodes(GetNodesRequest(run_id=run_id))
         return [node.node_id for node in res.nodes]
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
@@ -265,7 +269,7 @@ class GrpcDriver(Driver):
         This method takes an iterable of messages and sends each message
         to the node specified in `dst_node_id`.
         """
-        grpc_driver_helper, _ = self._get_stub_and_run_id()
+        stub, _ = self._get_stub_and_run_id()
         # Construct TaskIns
         task_ins_list: List[TaskIns] = []
         for msg in messages:
@@ -276,9 +280,7 @@ class GrpcDriver(Driver):
             # Add to list
             task_ins_list.append(taskins)
         # Call GrpcDriverStub method
-        res = grpc_driver_helper.push_task_ins(
-            PushTaskInsRequest(task_ins_list=task_ins_list)
-        )
+        res = stub.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
         return list(res.task_ids)
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
@@ -287,9 +289,9 @@ class GrpcDriver(Driver):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        grpc_driver, _ = self._get_stub_and_run_id()
+        stub, _ = self._get_stub_and_run_id()
         # Pull TaskRes
-        res = grpc_driver.pull_task_res(
+        res = stub.pull_task_res(
             PullTaskResRequest(node=self.node, task_ids=message_ids)
         )
         # Convert TaskRes to Message
