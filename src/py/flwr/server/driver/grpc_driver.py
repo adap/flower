@@ -61,14 +61,10 @@ class GrpcDriverStub:
     driver_service_address : Optional[str]
         The IPv4 or IPv6 address of the Driver API server.
         Defaults to `"[::]:9091"`.
-    certificates : bytes (default: None)
-        Tuple containing root certificate, server certificate, and private key
-        to start a secure SSL-enabled server. The tuple is expected to have
-        three bytes elements in the following order:
-
-            * CA certificate.
-            * server certificate.
-            * server private key.
+    root_certificates : Optional[bytes] (default: None)
+        The PEM-encoded root certificates as a byte string.
+        If provided, a secure connection using the certificates will be
+        established to an SSL-enabled Flower server.
     """
 
     def __init__(
