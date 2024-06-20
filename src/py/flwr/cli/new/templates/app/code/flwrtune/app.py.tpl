@@ -72,6 +72,6 @@ strategy = instantiate(
 
 # ServerApp for Flower Next
 server = fl.server.ServerApp(
-    config=fl.server.ServerConfig(num_rounds=cfg_static.num_rounds),
+    config=ServerConfig(num_rounds=cfg_static.num_rounds),
     strategy=strategy,
 )
