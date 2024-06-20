@@ -186,7 +186,7 @@ def _main_loop(
     backend_config_stream: str,
     app_dir: str,
     enable_tf_gpu_growth: bool,
-    run_id_: Optional[int] = None,
+    run_id: Optional[int] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
@@ -205,14 +205,14 @@ def _main_loop(
     serverapp_th = None
     try:
         # Create run (with empty fab_id and fab_version)
-        run_id = state_factory.state().create_run("", "")
+        run_id_ = state_factory.state().create_run("", "")
 
-        if run_id_:
-            _override_run_id(state_factory, run_id_to_replace=run_id, run_id=run_id_)
-            run_id = run_id_
+        if run_id:
+            _override_run_id(state_factory, run_id_to_replace=run_id_, run_id=run_id)
+            run_id_ = run_id
 
         # Initialize Driver
-        driver = InMemoryDriver(run_id=run_id, state_factory=state_factory)
+        driver = InMemoryDriver(run_id=run_id_, state_factory=state_factory)
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(
