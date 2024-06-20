@@ -36,7 +36,7 @@ def build(
 ) -> str:
     """Build a Flower project into a Flower App Bundle (FAB).
 
-    You can run ``flwr build`` without any argument to bundle the current directory,
+    You can run ``flwr build`` without any arguments to bundle the current directory,
     or you can use ``--directory`` to build a specific directory:
     ``flwr build --directory ./projects/flower-hello-world``.
     """
