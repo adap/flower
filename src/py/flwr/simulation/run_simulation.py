@@ -173,10 +173,10 @@ def _override_run_id(state: StateFactory, run_id_to_replace: int, run_id: int) -
     """Override the run_id of an existing Run."""
     log(DEBUG, "Pre-registering run with id %s", run_id)
     # Remove run
-    run: Run = state.state().run_ids.pop(run_id_to_replace)  # type: ignore
+    run_info: Run = state.state().run_ids.pop(run_id_to_replace)  # type: ignore
     # Update with new run_id and insert back in state
-    run.run_id = run_id
-    state.state().run_ids[run_id] = run  # type: ignore
+    run_info.run_id = run_id
+    state.state().run_ids[run_id] = run_info  # type: ignore
 
 
 # pylint: disable=too-many-locals
