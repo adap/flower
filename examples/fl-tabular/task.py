@@ -52,24 +52,19 @@ def load_data(partition_id: int, fds: FederatedDataset):
 
 
 class IncomeClassifier(nn.Module):
-    def __init__(self):
+    def __init__(self, input_dim: int):
         super(IncomeClassifier, self).__init__()
-        self.layer1 = None
+        self.layer1 = nn.Linear(input_dim, 128)
         self.layer2 = nn.Linear(128, 64)
         self.output = nn.Linear(64, 1)
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        if self.layer1 is None:
-            self.initialize_model(x.size(1))
         x = self.relu(self.layer1(x))
         x = self.relu(self.layer2(x))
         x = self.sigmoid(self.output(x))
         return x
-
-    def initialize_model(self, input_dim):
-        self.layer1 = nn.Linear(input_dim, 128)
 
 
 def train(model, train_loader, num_epochs=1):

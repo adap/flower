@@ -25,7 +25,7 @@ class FlowerClient(NumPyClient):
 def get_client_fn(dataset: FederatedDataset):
     def client_fn(cid: str) -> Client:
         train_loader, test_loader = load_data(partition_id=int(cid), fds=dataset)
-        net = IncomeClassifier()
+        net = IncomeClassifier(14)
         return FlowerClient(net, train_loader, test_loader).to_client()
 
     return client_fn
