@@ -60,7 +60,7 @@ client = fl.client.ClientApp(
 )
 
 # Instantiate strategy according to config. Here we pass other arguments
-# that are only defined at run time.
+# that are only defined at runtime.
 strategy = instantiate(
     cfg.strategy,
     on_fit_config_fn=get_on_fit_config(),
