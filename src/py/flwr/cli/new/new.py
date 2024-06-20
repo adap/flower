@@ -16,6 +16,7 @@
 
 import os
 import re
+import subprocess
 from enum import Enum
 from string import Template
 from typing import Dict, Optional
@@ -180,6 +181,17 @@ def new(
             context=context,
         )
 
+    if (
+        subprocess.run(
+            ["pip", "install", "-e", project_dir],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        ).returncode
+        != 0
+    ):
+        raise typer.Exit(code=1)
+
     print(
         typer.style(
             "🎊 Project creation successful.\n\n"
@@ -190,7 +202,7 @@ def new(
     )
     print(
         typer.style(
-            f"	cd {project_name}\n" + "	pip install -e .\n	flwr run\n",
+            f"	cd {project_name}\n" + "	flwr run\n",
             fg=typer.colors.BRIGHT_CYAN,
             bold=True,
         )
