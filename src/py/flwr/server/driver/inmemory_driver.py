@@ -51,9 +51,10 @@ class InMemoryDriver(Driver):
         self.node = Node(node_id=0, anonymous=True)
 
     def _check_message(self, message: Message) -> None:
+        self._init_run()
         # Check if the message is valid
         if not (
-            message.metadata.run_id == self.run.run_id
+            message.metadata.run_id == cast(Run, self._run).run_id
             and message.metadata.src_node_id == self.node.node_id
             and message.metadata.message_id == ""
             and message.metadata.reply_to_message == ""
@@ -89,6 +90,7 @@ class InMemoryDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
+        self._init_run()
         if ttl:
             warnings.warn(
                 "A custom TTL was set, but note that the SuperLink does not enforce "
@@ -99,7 +101,7 @@ class InMemoryDriver(Driver):
         ttl_ = DEFAULT_TTL if ttl is None else ttl
 
         metadata = Metadata(
-            run_id=self.run.run_id,
+            run_id=cast(Run, self._run).run_id,
             message_id="",  # Will be set by the server
             src_node_id=self.node.node_id,
             dst_node_id=dst_node_id,
@@ -112,7 +114,8 @@ class InMemoryDriver(Driver):
 
     def get_node_ids(self) -> List[int]:
         """Get node IDs."""
-        return list(self.state.get_nodes(self.run.run_id))
+        self._init_run()
+        return list(self.state.get_nodes(cast(Run, self._run).run_id))
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
         """Push messages to specified node IDs.
