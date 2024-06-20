@@ -27,7 +27,7 @@ from typing import Dict, Optional
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.logger import set_logger_propagation, update_console_handler
-from flwr.common.typing import ConfigsRecordValues, Run
+from flwr.common.typing import ConfigsRecordValues
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
@@ -169,13 +169,6 @@ def run_serverapp_th(
     return serverapp_th
 
 
-def _init_run_id(driver: InMemoryDriver, state: StateFactory, run_id: int) -> None:
-    """Create a run with a given `run_id`."""
-    log(DEBUG, "Pre-registering run with id %s", run_id)
-    state.state().run_ids[run_id] = Run(run_id, "", "")  # type: ignore
-    driver._run_id = run_id  # pylint: disable=protected-access
-
-
 # pylint: disable=too-many-locals
 def _main_loop(
     num_supernodes: int,
@@ -202,13 +195,10 @@ def _main_loop(
     serverapp_th = None
     try:
         # Create run (with empty fab_id and fab_version)
-        run_id = state_factory.state().create_run("", "")
+        run_id_ = state_factory.state().create_run("", "")
 
         # Initialize Driver
-        driver = InMemoryDriver(run_id=run_id, state_factory=state_factory)
-
-        if run_id:
-            _init_run_id(driver, state_factory, run_id)
+        driver = InMemoryDriver(run_id=run_id_, state_factory=state_factory)
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(
