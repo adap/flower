@@ -21,10 +21,10 @@ import unittest
 from typing import Tuple
 
 import numpy as np
-from datasets import Dataset
-from torchvision import models
 from parameterized import parameterized
+from torchvision import models
 
+from datasets import Dataset
 from flwr_datasets.partitioner.semantic_partitioner import SemanticPartitioner
 
 
