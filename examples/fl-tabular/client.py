@@ -1,6 +1,6 @@
 from flwr.client import Client, ClientApp, NumPyClient
-from task import set_weights, get_weights, train, evaluate, IncomeClassifier, load_data
 from flwr_datasets import FederatedDataset
+from task import set_weights, get_weights, train, evaluate, IncomeClassifier, load_data
 
 NUMBER_OF_CLIENTS = 5
 
