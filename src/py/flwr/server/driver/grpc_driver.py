@@ -77,6 +77,10 @@ class GrpcDriverStub:
         self.channel: Optional[grpc.Channel] = None
         self.stub: Optional[DriverStub] = None
 
+    def is_connected(self) -> bool:
+        """Return True if connected to the Driver API server, otherwise False."""
+        return self.channel is not None
+
     def connect(self) -> None:
         """Connect to the Driver API."""
         event(EventType.DRIVER_CONNECT)
@@ -184,14 +188,15 @@ class GrpcDriver(Driver):
     @property
     def run(self) -> Run:
         """Run information."""
-        self._get_grpc_driver_helper_and_run_id()
+        self._get_stub_and_run_id()
         return Run(**vars(cast(Run, self._run)))
 
-    def _get_grpc_driver_helper_and_run_id(self) -> Tuple[GrpcDriverStub, int]:
+    def _get_stub_and_run_id(self) -> Tuple[GrpcDriverStub, int]:
         # Check if is initialized
         if self._run is None:
             # Connect
-            self.stub.connect()
+            if self.stub.is_connected():
+                self.stub.connect()
             # Get the run info
             req = GetRunRequest(run_id=self._run_id)
             res = self.stub.get_run(req)
@@ -225,7 +230,7 @@ class GrpcDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        _, run_id = self._get_grpc_driver_helper_and_run_id()
+        _, run_id = self._get_stub_and_run_id()
         if ttl:
             warnings.warn(
                 "A custom TTL was set, but note that the SuperLink does not enforce "
@@ -249,7 +254,7 @@ class GrpcDriver(Driver):
 
     def get_node_ids(self) -> List[int]:
         """Get node IDs."""
-        grpc_driver_helper, run_id = self._get_grpc_driver_helper_and_run_id()
+        grpc_driver_helper, run_id = self._get_stub_and_run_id()
         # Call GrpcDriverStub method
         res = grpc_driver_helper.get_nodes(GetNodesRequest(run_id=run_id))
         return [node.node_id for node in res.nodes]
@@ -260,7 +265,7 @@ class GrpcDriver(Driver):
         This method takes an iterable of messages and sends each message
         to the node specified in `dst_node_id`.
         """
-        grpc_driver_helper, _ = self._get_grpc_driver_helper_and_run_id()
+        grpc_driver_helper, _ = self._get_stub_and_run_id()
         # Construct TaskIns
         task_ins_list: List[TaskIns] = []
         for msg in messages:
@@ -282,7 +287,7 @@ class GrpcDriver(Driver):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        grpc_driver, _ = self._get_grpc_driver_helper_and_run_id()
+        grpc_driver, _ = self._get_stub_and_run_id()
         # Pull TaskRes
         res = grpc_driver.pull_task_res(
             PullTaskResRequest(node=self.node, task_ids=message_ids)
@@ -324,7 +329,7 @@ class GrpcDriver(Driver):
     def close(self) -> None:
         """Disconnect from the SuperLink if connected."""
         # Check if `connect` was called before
-        if self._run is None:
+        if not self.stub.is_connected():
             return
         # Disconnect
         self.stub.disconnect()

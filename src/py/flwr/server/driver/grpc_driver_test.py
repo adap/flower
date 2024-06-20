@@ -184,7 +184,7 @@ class TestGrpcDriver(unittest.TestCase):
         """Test cleanup behavior when Driver is initialized."""
         # Prepare
         # pylint: disable-next=protected-access
-        self.driver._get_grpc_driver_helper_and_run_id()
+        self.driver._get_stub_and_run_id()
 
         # Execute
         self.driver.close()

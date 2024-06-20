@@ -155,6 +155,7 @@ def run_server_app() -> None:
     stub = GrpcDriverStub(
         driver_service_address=args.superlink, root_certificates=root_certificates
     )
+    stub.connect()
     req = CreateRunRequest(fab_id=args.fab_id, fab_version=args.fab_version)
     res = stub.create_run(req)
 
