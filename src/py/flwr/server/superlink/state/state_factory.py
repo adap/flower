@@ -26,7 +26,16 @@ from .state import State
 
 
 class StateFactory:
-    """Factory class that creates State instances."""
+    """Factory class that creates State instances.
+
+    Parameters
+    ----------
+    database : str
+        A string representing the path to the database file that will be opened.
+        Note that passing ':memory:' will open a connection to a database that is
+        in RAM, instead of on disk. For more information on special in-memory
+        databases, please refer to https://sqlite.org/inmemorydb.html.
+    """
 
     def __init__(self, database: str) -> None:
         self.database = database

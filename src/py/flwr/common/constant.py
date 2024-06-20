@@ -27,6 +27,7 @@ To use the REST API, install `flwr` with the `rest` extra:
 
 TRANSPORT_TYPE_GRPC_BIDI = "grpc-bidi"
 TRANSPORT_TYPE_GRPC_RERE = "grpc-rere"
+TRANSPORT_TYPE_GRPC_ADAPTER = "grpc-adapter"
 TRANSPORT_TYPE_REST = "rest"
 TRANSPORT_TYPE_VCE = "vce"
 TRANSPORT_TYPES = [
@@ -44,6 +45,18 @@ PING_CALL_TIMEOUT = 5
 PING_BASE_MULTIPLIER = 0.8
 PING_RANDOM_RANGE = (-0.1, 0.1)
 PING_MAX_INTERVAL = 1e300
+
+GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
+GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
+
+# Constants for FAB
+APP_DIR = "apps"
+FAB_CONFIG_FILE = "pyproject.toml"
+FLWR_HOME = "FLWR_HOME"
+
+
+GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
+GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
 
 
 class MessageType:
