@@ -44,7 +44,7 @@ def run(
     if not (server_app_attr is None) ^ (loaded_server_app is None):
         raise ValueError(
             "Either `server_app_attr` or `loaded_server_app` should be set "
-            "but not both. "
+            "but not both."
         )
 
     if server_app_dir is not None:
@@ -140,7 +140,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
     if not (getattr(args, "server-app") is None) ^ (args.run_id is None):
         raise sys.exit(
             "Invalid options: Either `server-app` or `--run-id` "
-            "should be set but not both. "
+            "should be set but not both."
         )
 
     stub = GrpcDriverStub(
