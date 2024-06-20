@@ -90,12 +90,16 @@ def run(
 
     if engine == Engine.SIMULATION:
         num_supernodes = config["flower"]["engine"]["simulation"]["supernode"]["num"]
+        backend_config = config["flower"]["engine"]["simulation"].get(
+            "backend_config", None
+        )
 
         typer.secho("Starting run... ", fg=typer.colors.BLUE)
         _run_simulation(
             server_app_attr=server_app_ref,
             client_app_attr=client_app_ref,
             num_supernodes=num_supernodes,
+            backend_config=backend_config,
         )
     else:
         typer.secho(
