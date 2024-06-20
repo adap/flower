@@ -1,52 +1,53 @@
 import torch.nn as nn
 from flwr_datasets import FederatedDataset
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 import pandas as pd
 import torch
 from torch.utils.data import TensorDataset, DataLoader
 import torch.optim as optim
 from collections import OrderedDict
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OrdinalEncoder
 
 
 def load_data(partition_id: int, fds: FederatedDataset):
-    train_split = fds.load_split("train").with_format("pandas")[:]
-    cat_features = train_split.select_dtypes(include=["object"]).columns.values
-    categories = [pd.unique(train_split[cat]).tolist() for cat in cat_features]
-
     dataset = fds.load_partition(partition_id, "train").with_format("pandas")[:]
-    dataset["income"] = dataset["income"].apply(lambda x: 1 if x == ">50K" else 0)
+
+    dataset.dropna(inplace=True)
+
+    categorical_cols = dataset.select_dtypes(include=["object"]).columns
+    ordinal_encoder = OrdinalEncoder()
+    dataset[categorical_cols] = ordinal_encoder.fit_transform(dataset[categorical_cols])
 
     X = dataset.drop("income", axis=1)
     y = dataset["income"]
 
-    # One-hot Encoding
-    categorical_cols = X.select_dtypes(include=["object"]).columns
-    categories_for_encoder = []
-    for cat_col in categorical_cols:
-        # Find the index of the categorical column in cat_features
-        cat_index = list(cat_features).index(cat_col)
-        categories_for_encoder.append(categories[cat_index])
-
-    encoder = OneHotEncoder(
-        sparse_output=False, handle_unknown="ignore", categories=categories_for_encoder
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
     )
-    X_encoded = pd.DataFrame(encoder.fit_transform(X[categorical_cols]))
-    X_encoded.columns = encoder.get_feature_names_out(categorical_cols)
-    X = pd.concat([X.drop(categorical_cols, axis=1), X_encoded], axis=1)
 
-    split_index = int(0.8 * len(X))
-    X_train, X_test = X[:split_index], X[split_index:]
-    y_train, y_test = y[:split_index], y[split_index:]
+    numeric_features = X.select_dtypes(include=["float64", "int64"]).columns
+    numeric_transformer = Pipeline(steps=[("scaler", StandardScaler())])
 
-    X_train_tensor = torch.tensor(X_train.values, dtype=torch.float32)
-    y_train_tensor = torch.tensor(y_train.values, dtype=torch.float32).unsqueeze(1)
-    X_test_tensor = torch.tensor(X_test.values, dtype=torch.float32)
-    y_test_tensor = torch.tensor(y_test.values, dtype=torch.float32).unsqueeze(1)
+    preprocessor = ColumnTransformer(
+        transformers=[("num", numeric_transformer, numeric_features)]
+    )
+
+    X_train = preprocessor.fit_transform(X_train)
+    X_test = preprocessor.transform(X_test)
+
+    X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
+    X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
+    y_train_tensor = torch.tensor(y_train.values, dtype=torch.float32).view(-1, 1)
+    y_test_tensor = torch.tensor(y_test.values, dtype=torch.float32).view(-1, 1)
 
     train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
     test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
     return train_loader, test_loader
 
@@ -55,24 +56,21 @@ class IncomeClassifier(nn.Module):
     def __init__(self):
         super(IncomeClassifier, self).__init__()
         self.layer1 = None
-        self.layer2 = nn.Linear(64, 32)
-        self.output = nn.Linear(32, 1)
+        self.layer2 = nn.Linear(128, 64)
+        self.output = nn.Linear(64, 1)
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
-        self.dropout = nn.Dropout(0.5)
 
     def forward(self, x):
         if self.layer1 is None:
             self.initialize_model(x.size(1))
         x = self.relu(self.layer1(x))
-        x = self.dropout(x)
         x = self.relu(self.layer2(x))
-        x = self.dropout(x)
         x = self.sigmoid(self.output(x))
         return x
 
     def initialize_model(self, input_dim):
-        self.layer1 = nn.Linear(input_dim, 64)
+        self.layer1 = nn.Linear(input_dim, 128)
 
 
 def train(model, train_loader, num_epochs=1):
