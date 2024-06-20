@@ -46,8 +46,6 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeResponse,
     DeleteNodeRequest,
     DeleteNodeResponse,
-    GetRunRequest,
-    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -56,6 +54,7 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     PushTaskResResponse,
 )
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 try:
@@ -118,10 +117,16 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Client authentication is not supported for this transport type.
 
     Returns
     -------
-    receive, send : Callable, Callable
+    receive : Callable
+    send : Callable
+    create_node : Optional[Callable]
+    delete_node : Optional[Callable]
+    get_run : Optional[Callable]
     """
     log(
         WARN,
@@ -146,6 +151,8 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
             "For the REST API, the root certificates "
             "must be provided as a string path to the client.",
         )
+    if authentication_keys is not None:
+        log(ERROR, "Client authentication is not supported for this transport type.")
 
     # Shared variables for inner functions
     metadata: Optional[Metadata] = None

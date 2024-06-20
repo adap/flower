@@ -19,7 +19,7 @@ import sys
 import time
 from dataclasses import dataclass
 from logging import DEBUG, ERROR, INFO, WARN
-from typing import Callable, ContextManager, Optional, Tuple, Type, Union
+from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
@@ -31,6 +31,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
+    TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -41,6 +42,7 @@ from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 
+from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
@@ -177,7 +179,7 @@ def start_client(
 def _start_client_internal(
     *,
     server_address: str,
-    load_client_app_fn: Optional[Callable[[], ClientApp]] = None,
+    load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
     client_fn: Optional[ClientFn] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
@@ -252,7 +254,7 @@ def _start_client_internal(
 
             client_fn = single_client_factory
 
-        def _load_client_app() -> ClientApp:
+        def _load_client_app(_1: str, _2: str) -> ClientApp:
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app
@@ -308,6 +310,8 @@ def _start_client_internal(
     )
 
     node_state = NodeState()
+    # run_id -> (fab_id, fab_version)
+    run_info: Dict[int, Tuple[str, str]] = {}
 
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
@@ -319,7 +323,6 @@ def _start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            # pylint: disable-next=W0612
             receive, send, create_node, delete_node, get_run = conn
 
             # Register node
@@ -356,13 +359,20 @@ def _start_client_internal(
                         send(out_message)
                         break
 
+                    # Get run info
+                    run_id = message.metadata.run_id
+                    if run_id not in run_info:
+                        if get_run is not None:
+                            run_info[run_id] = get_run(run_id)
+                        # If get_run is None, i.e., in grpc-bidi mode
+                        else:
+                            run_info[run_id] = ("", "")
+
                     # Register context for this run
-                    node_state.register_context(run_id=message.metadata.run_id)
+                    node_state.register_context(run_id=run_id)
 
                     # Retrieve context for this run
-                    context = node_state.retrieve_context(
-                        run_id=message.metadata.run_id
-                    )
+                    context = node_state.retrieve_context(run_id=run_id)
 
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error
@@ -373,7 +383,7 @@ def _start_client_internal(
                     # Handle app loading and task message
                     try:
                         # Load ClientApp instance
-                        client_app: ClientApp = load_client_app_fn()
+                        client_app: ClientApp = load_client_app_fn(*run_info[run_id])
 
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)
@@ -411,7 +421,7 @@ def _start_client_internal(
                     else:
                         # No exception, update node state
                         node_state.update_context(
-                            run_id=message.metadata.run_id,
+                            run_id=run_id,
                             context=context,
                         )
 
@@ -592,6 +602,8 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         connection, error_type = http_request_response, RequestsConnectionError
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
         connection, error_type = grpc_request_response, RpcError
+    elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
+        connection, error_type = grpc_adapter, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
         connection, error_type = grpc_connection, RpcError
     else:
