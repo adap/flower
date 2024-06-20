@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
+from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
@@ -680,15 +681,17 @@ class SqliteState(State):  # pylint: disable=R0904
         result: Set[bytes] = {row["public_key"] for row in rows}
         return result
 
-    def get_run(self, run_id: int) -> Tuple[int, str, str]:
+    def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
         query = "SELECT * FROM run WHERE run_id = ?;"
         try:
             row = self.query(query, (run_id,))[0]
-            return run_id, row["fab_id"], row["fab_version"]
+            return Run(
+                run_id=run_id, fab_id=row["fab_id"], fab_version=row["fab_version"]
+            )
         except sqlite3.IntegrityError:
             log(ERROR, "`run_id` does not exist.")
-            return 0, "", ""
+            return None
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
