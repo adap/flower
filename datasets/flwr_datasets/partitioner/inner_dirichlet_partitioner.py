@@ -91,7 +91,6 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._num_unique_classes: Optional[int] = None
         self._num_partitions = len(self._partition_sizes)
 
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
         self._partition_id_to_indices_determined = False
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:

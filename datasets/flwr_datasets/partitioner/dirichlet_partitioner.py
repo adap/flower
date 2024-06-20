@@ -111,7 +111,6 @@ class DirichletPartitioner(Partitioner):
         # The attributes below are determined during the first call to load_partition
         self._avg_num_of_samples_per_partition: Optional[float] = None
         self._unique_classes: Optional[Union[List[int], List[str]]] = None
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
         self._partition_id_to_indices_determined = False
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:

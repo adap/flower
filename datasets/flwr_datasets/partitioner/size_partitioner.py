@@ -60,7 +60,6 @@ class SizePartitioner(Partitioner):
         self._partition_id_to_size_fn = partition_id_to_size_fn
 
         self._partition_id_to_size: Dict[int, int] = {}
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
         # A flag to perform only a single compute to determine the indices
         self._partition_id_to_indices_determined = False
 

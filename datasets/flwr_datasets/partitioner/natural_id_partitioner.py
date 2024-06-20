@@ -61,7 +61,6 @@ class NaturalIdPartitioner(Partitioner):
         super().__init__()
         self._partition_id_to_natural_id: Dict[int, str] = {}
         self._natural_id_to_partition_id: Dict[str, int] = {}
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
         self._partition_by = partition_by
 
     def _create_int_partition_id_to_natural_id(self) -> None:
