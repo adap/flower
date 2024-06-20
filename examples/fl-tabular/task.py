@@ -1,7 +1,6 @@
 import torch.nn as nn
 from flwr_datasets import FederatedDataset
 from sklearn.preprocessing import StandardScaler
-import pandas as pd
 import torch
 from torch.utils.data import TensorDataset, DataLoader
 import torch.optim as optim
