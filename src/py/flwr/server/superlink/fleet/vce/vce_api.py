@@ -325,7 +325,7 @@ def start_vce(
             if app_dir is not None:
                 sys.path.insert(0, app_dir)
 
-            app: ClientApp = load_app(client_app_attr, LoadClientAppError)
+            app: ClientApp = load_app(client_app_attr, LoadClientAppError, app_dir)
 
             if not isinstance(app, ClientApp):
                 raise LoadClientAppError(
