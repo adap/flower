@@ -260,7 +260,7 @@ def new(
     )
     print(
         typer.style(
-            f"	cd {project_name}\n" + "	pip install -e .\n	flwr run\n",
+            f"	cd {package_name}\n" + "	pip install -e .\n	flwr run\n",
             fg=typer.colors.BRIGHT_CYAN,
             bold=True,
         )
