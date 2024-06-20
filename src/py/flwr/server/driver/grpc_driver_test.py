@@ -183,8 +183,7 @@ class TestGrpcDriver(unittest.TestCase):
     def test_del_with_initialized_driver(self) -> None:
         """Test cleanup behavior when Driver is initialized."""
         # Prepare
-        # pylint: disable-next=protected-access
-        self.driver._get_stub_and_run_id()
+        self.mock_grpc_driver_stub.is_connected.return_value = True
 
         # Execute
         self.driver.close()
@@ -194,6 +193,9 @@ class TestGrpcDriver(unittest.TestCase):
 
     def test_del_with_uninitialized_driver(self) -> None:
         """Test cleanup behavior when Driver is not initialized."""
+        # Prepare
+        self.mock_grpc_driver_stub.is_connected.return_value = False
+
         # Execute
         self.driver.close()
 
