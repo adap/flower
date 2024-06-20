@@ -1,13 +1,12 @@
 """$project_name: A Flower / flwrtune app."""
 
+import math
+
 import torch
 from omegaconf import DictConfig
-from transformers import AutoModelForCausalLM
-from transformers import BitsAndBytesConfig
-from peft import get_peft_model, LoraConfig
+from peft import LoraConfig, get_peft_model
 from peft.utils import prepare_model_for_kbit_training
-
-import math
+from transformers import AutoModelForCausalLM, BitsAndBytesConfig
 
 
 def cosine_annealing(
@@ -17,7 +16,6 @@ def cosine_annealing(
     lrate_min: float = 0.0,
 ) -> float:
     """Implement cosine annealing learning rate schedule."""
-
     cos_inner = math.pi * current_round / total_round
     return lrate_min + 0.5 * (lrate_max - lrate_min) * (1 + math.cos(cos_inner))
 
@@ -28,7 +26,6 @@ def get_model(model_cfg: DictConfig):
     Please refer to this example for `peft + BitsAndBytes`:
     https://github.com/huggingface/peft/blob/main/examples/fp4_finetuning/finetune_fp4_opt_bnb_peft.py
     """
-
     if model_cfg.quantization == 4:
         quantization_config = BitsAndBytesConfig(load_in_4bit=True)
     elif model_cfg.quantization == 8:

@@ -2,17 +2,17 @@
 
 from collections import OrderedDict
 from typing import Callable, Dict, Tuple
-from omegaconf import DictConfig
+
 import torch
-from trl import SFTTrainer
-from transformers import TrainingArguments
+from omegaconf import DictConfig
 from peft import get_peft_model_state_dict, set_peft_model_state_dict
+from transformers import TrainingArguments
+from trl import SFTTrainer
 
 from flwr.client import NumPyClient
 from flwr.common.typing import NDArrays, Scalar
-
-from $import_name.models import get_model, cosine_annealing
 from $import_name.dataset import reformat
+from $import_name.models import cosine_annealing, get_model
 
 
 # pylint: disable=too-many-arguments
@@ -42,12 +42,6 @@ class FlowerClient(NumPyClient):
         self.model = get_model(model_cfg)
 
         self.trainset = trainset
-
-    def get_parameters(self, config: Dict[str, Scalar]) -> NDArrays:
-        """Return the parameters of the current net."""
-
-        state_dict = get_peft_model_state_dict(self.model)
-        return [val.cpu().numpy() for _, val in state_dict.items()]
 
     def fit(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -80,7 +74,7 @@ class FlowerClient(NumPyClient):
         results = trainer.train()
 
         return (
-            self.get_parameters({}),
+            get_parameters(self.model),
             len(self.trainset),
             {"train_loss": results.training_loss},
         )
@@ -92,6 +86,12 @@ def set_parameters(model, parameters: NDArrays) -> None:
     params_dict = zip(peft_state_dict_keys, parameters)
     state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
     set_peft_model_state_dict(model, state_dict)
+
+
+def get_parameters(model) -> NDArrays:
+    """Return the parameters of the current net."""
+    state_dict = get_peft_model_state_dict(model)
+    return [val.cpu().numpy() for _, val in state_dict.items()]
 
 
 def gen_client_fn(
@@ -107,7 +107,6 @@ def gen_client_fn(
 
     def client_fn(cid: str) -> FlowerClient:
         """Create a Flower client representing a single organization."""
-
         # Let's get the partition corresponding to the i-th client
         client_trainset = fds.load_partition(int(cid), "train")
         client_trainset = reformat(client_trainset, llm_task="$llm_challenge_str")
@@ -123,4 +122,3 @@ def gen_client_fn(
         ).to_client()
 
     return client_fn
-
