@@ -38,7 +38,6 @@ def _plot_bar(
     plot_kwargs: Optional[Dict[str, Any]],
     legend_kwargs: Optional[Dict[str, Any]],
 ) -> Axes:
-
     if axis is None:
         if figsize is None:
             figsize = _initialize_figsize(
