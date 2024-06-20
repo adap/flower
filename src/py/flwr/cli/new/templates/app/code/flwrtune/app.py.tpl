@@ -46,7 +46,7 @@ fds = FederatedDataset(
     formatting_prompts_func,
 ) = get_tokenizer_and_data_collator_and_propt_formatting(cfg.model.name)
 
-# ClientApp for Flower-Next
+# ClientApp for Flower Next
 client = fl.client.ClientApp(
     client_fn=gen_client_fn(
         fds,
