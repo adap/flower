@@ -141,6 +141,13 @@ class DirichletPartitioner(Partitioner):
         self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
 
+    @property
+    def partition_id_to_indices(self) -> Dict[int, List[int]]:
+        """Partition id to indices (the result of partitioning)."""
+        self._check_num_partitions_correctness_if_needed()
+        self._determine_partition_id_to_indices_if_needed()
+        return self._partition_id_to_indices
+
     def _initialize_alpha(
         self, alpha: Union[int, float, List[float], NDArrayFloat]
     ) -> NDArrayFloat:

@@ -15,6 +15,8 @@
 """IID partitioner class that works with Hugging Face Datasets."""
 
 
+from typing import Dict, List
+
 import datasets
 from flwr_datasets.partitioner.partitioner import Partitioner
 
@@ -33,6 +35,8 @@ class IidPartitioner(Partitioner):
         if num_partitions <= 0:
             raise ValueError("The number of partitions must be greater than zero.")
         self._num_partitions = num_partitions
+        self._partition_id_to_indices: Dict[int, List[int]] = {}
+        self._partition_id_to_indices_determined = False
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
         """Load a single IID partition based on the partition index.
@@ -47,11 +51,32 @@ class IidPartitioner(Partitioner):
         dataset_partition : Dataset
             single dataset partition
         """
-        return self.dataset.shard(
-            num_shards=self._num_partitions, index=partition_id, contiguous=True
-        )
+        self._determine_partition_id_to_indices_if_needed()
+        return self.dataset.select(self._partition_id_to_indices[partition_id])
 
     @property
     def num_partitions(self) -> int:
         """Total number of partitions."""
         return self._num_partitions
+
+    @property
+    def partition_id_to_indices(self) -> Dict[int, List[int]]:
+        """Partition id to indices (the result of partitioning)."""
+        self._determine_partition_id_to_indices_if_needed()
+        return self._partition_id_to_indices
+
+    def _determine_partition_id_to_indices_if_needed(
+        self,
+    ) -> None:
+        """Create an assignment of indices to the partition indices."""
+        if self._partition_id_to_indices_determined:
+            return
+        for partition_id in range(self.num_partitions):
+            # adapted based on the shard implementation from datasets.Dataset.shard
+            div = len(self.dataset) // self.num_partitions
+            mod = len(self.dataset) % self.num_partitions
+            start = div * partition_id + min(partition_id, mod)
+            end = start + div + (1 if partition_id < mod else 0)
+            indices = list(range(start, end))
+            self._partition_id_to_indices[partition_id] = indices
+        self._partition_id_to_indices_determined = True

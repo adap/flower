@@ -97,7 +97,8 @@ class SizePartitioner(Partitioner):
 
     @property
     def partition_id_to_indices(self) -> Dict[int, List[int]]:
-        """Node id to the list of indices."""
+        """Partition id to indices (the result of partitioning)."""
+        self._determine_partition_id_to_indices_if_needed()
         return self._partition_id_to_indices
 
     def _determine_partition_id_to_size(self) -> None:

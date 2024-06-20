@@ -15,13 +15,12 @@
 """Natural id partitioner class that works with Hugging Face Datasets."""
 
 
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 from tqdm import tqdm
 
 import datasets
-from flwr_datasets.common.typing import NDArrayInt
 from flwr_datasets.partitioner.partitioner import Partitioner
 
 
@@ -62,7 +61,7 @@ class NaturalIdPartitioner(Partitioner):
         super().__init__()
         self._partition_id_to_natural_id: Dict[int, str] = {}
         self._natural_id_to_partition_id: Dict[str, int] = {}
-        self._partition_id_to_indices: Dict[int, NDArrayInt] = {}
+        self._partition_id_to_indices: Dict[int, List[int]] = {}
         self._partition_by = partition_by
 
     def _create_int_partition_id_to_natural_id(self) -> None:
@@ -133,7 +132,21 @@ class NaturalIdPartitioner(Partitioner):
         if len(self._partition_id_to_natural_id) == 0:
             self._create_int_partition_id_to_natural_id()
             self._create_natural_id_to_int_partition_id()
+
+        if len(self._partition_id_to_indices) == 0:
+            self._create_partition_id_to_indices()
         return len(self._partition_id_to_natural_id)
+
+    @property
+    def partition_id_to_indices(self) -> Dict[int, List[int]]:
+        """Partition id to indices (the result of partitioning)."""
+        if len(self._partition_id_to_natural_id) == 0:
+            self._create_int_partition_id_to_natural_id()
+            self._create_natural_id_to_int_partition_id()
+
+        if len(self._partition_id_to_indices) == 0:
+            self._create_partition_id_to_indices()
+        return self._partition_id_to_indices
 
     @property
     def partition_id_to_natural_id(self) -> Dict[int, str]:
