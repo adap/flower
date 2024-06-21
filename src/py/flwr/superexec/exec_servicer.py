@@ -101,20 +101,9 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         log(INFO, "ExecServicer.StreamLogs")
 
         last_sent_index = 0
-        print_once = True
         while context.is_active():
             with self.lock:
-                if print_once:
-                    log(
-                        INFO,
-                        "%s: Run ID `%s`, thread ID `%s`",
-                        datetime.datetime.now(),
-                        request.run_id,
-                        threading.get_ident(),
-                    )
-                    print_once = False
-
-                # Exit if run_id not found
+                # Exit if `run_id` not found
                 if request.run_id not in self.runs:
                     context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
 
