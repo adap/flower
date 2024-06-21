@@ -25,20 +25,67 @@ from parameterized import parameterized_class
 from datasets import Dataset
 from flwr_datasets.partitioner import DirichletPartitioner, IidPartitioner
 from flwr_datasets.partitioner.partitioner import Partitioner
+from partitioner import LinearPartitioner, ExponentialPartitioner, SquarePartitioner, \
+    ShardPartitioner, InnerDirichletPartitioner
 
 partitioner_test_cases = [
     {"partitioner": IidPartitioner, "kwargs": {"num_partitions": 5}},
     {
-        "partitioner": DirichletPartitioner(
-            num_partitions=5, partition_by="label", alpha=0.1, min_partition_size=0
-        ),
+        "partitioner": DirichletPartitioner,
         "kwargs": {
             "num_partitions": 5,
-            "partition_by": "label",
+            "partition_by": "labels",
             "alpha": 0.1,
             "min_partition_size": 0,
         },
     },
+    {
+        "partitioner": DirichletPartitioner,
+        "kwargs": {
+            "num_partitions": 5,
+            "partition_by": "labels",
+            "alpha": [0.1, 0.1, 0.1, 0.1, 0.1],
+            "min_partition_size": 0,
+        },
+    },
+    {
+        "partitioner": InnerDirichletPartitioner,
+        "kwargs": {
+            "partition_sizes": [20] * 5,
+            "partition_by": "labels",
+            "alpha": 0.5,
+
+        },
+    },
+    {
+        "partitioner": LinearPartitioner,
+        "kwargs": {
+            "num_partitions": 5,
+        },
+    },
+    {
+        "partitioner": SquarePartitioner,
+        "kwargs": {
+            "num_partitions": 5,
+        },
+    },
+    {
+        "partitioner": ExponentialPartitioner,
+        "kwargs": {
+            "num_partitions": 5,
+        },
+    },
+    {
+        "partitioner": ShardPartitioner,
+        "kwargs": {
+            "num_partitions":4,
+            "partition_by": "labels",
+            "shard_size": 5,
+            "num_shards_per_partition": 2,
+
+        },
+    },
+
 ]
 
 
