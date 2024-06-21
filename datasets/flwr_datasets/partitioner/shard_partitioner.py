@@ -15,7 +15,7 @@
 """Shard partitioner class."""
 
 
-# pylint: disable=R0912, R0914
+# pylint: disable=R0912, R0914, R0915
 import math
 from typing import Dict, List, Optional
 
@@ -313,8 +313,9 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
                 )
         # Remap the partition_id_to_indices (which reflect on the sorted dataset) back
         # to the assigned given dataset
-        new_id_to_original_id = self._sorted_dataset["original_index"]
-        partition_id_to_indices_remapped = {
+        assert self._sorted_dataset is not None
+        new_id_to_original_id: List[int] = self._sorted_dataset["original_index"]
+        partition_id_to_indices_remapped: Dict[int, List[int]] = {
             pid: [] for pid in range(self._num_partitions)
         }
         for partition_id, indices in partition_id_to_indices.items():
