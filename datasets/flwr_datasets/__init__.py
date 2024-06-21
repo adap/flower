@@ -23,11 +23,12 @@ from flwr_datasets.federated_dataset import FederatedDataset
 
 __all__ = [
     "FederatedDataset",
-    "partitioner",
     "metrics",
-    "visualization",
+    "partitioner",
     "preprocessor",
     "utils",
+    "visualization",
 ]
+
 
 __version__ = _package_version

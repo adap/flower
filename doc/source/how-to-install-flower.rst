@@ -20,7 +20,7 @@ Stable releases are available on `PyPI <https://pypi.org/project/flwr/>`_::
 
 For simulations that use the Virtual Client Engine, ``flwr`` should be installed with the ``simulation`` extra::
 
-  python -m pip install flwr[simulation]
+  python -m pip install "flwr[simulation]"
 
 
 Using conda (or mamba)
