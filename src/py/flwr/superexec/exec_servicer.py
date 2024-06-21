@@ -102,22 +102,23 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         last_sent_index = 0
         while context.is_active():
-            with self.lock:
-                # Exit if `run_id` not found
-                if request.run_id not in self.runs:
-                    context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+            # self.lock appears unnecessary here
 
-                # Yield n'th row of logs, if n'th row < len(logs)
-                logs = self.runs[request.run_id].logs
-                if last_sent_index < len(logs):
-                    for i in range(last_sent_index, len(logs)):
-                        yield StreamLogsResponse(log_output=logs[i])
-                    last_sent_index = len(logs)
+            # Exit if `run_id` not found
+            if request.run_id not in self.runs:
+                context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
 
-                # Shutdown context if process has completed. Previously stored
-                # logs will still be printed.
-                if self.runs[request.run_id].proc.poll() is not None:
-                    log(INFO, "Run ID `%s` completed", request.run_id)
-                    context.cancel()
+            # Yield n'th row of logs, if n'th row < len(logs)
+            logs = self.runs[request.run_id].logs
+            if last_sent_index < len(logs):
+                for i in range(last_sent_index, len(logs)):
+                    yield StreamLogsResponse(log_output=logs[i])
+                last_sent_index = len(logs)
+
+            # Shutdown context if process has completed. Previously stored
+            # logs will still be printed.
+            if self.runs[request.run_id].proc.poll() is not None:
+                log(INFO, "Run ID `%s` completed", request.run_id)
+                context.cancel()
 
             time.sleep(0.1)  # Sleep briefly to avoid busy waiting
