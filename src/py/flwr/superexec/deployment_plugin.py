@@ -16,8 +16,7 @@
 
 import subprocess
 import sys
-from pathlib import Path
-from typing import Optional
+from typing import Optional, override
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
@@ -60,17 +59,14 @@ class DeploymentEngine(Executor):
         res = self.stub.CreateRun(request=req)
         return int(res.run_id)
 
-    def _install_fab(self, fab_file: bytes) -> Path:
-        return install_from_fab(fab_file, None, True)
-
-    def start_run(self, fab_file: bytes, ttl: Optional[float] = None) -> RunTracker:
+    @override
+    def start_run(self, fab_file: bytes) -> RunTracker:
         """Start run using the Flower Deployment Engine."""
-        _ = ttl
         fab_id, fab_version = get_fab_metadata(fab_file)
 
         run_id = self._create_run(fab_id, fab_version)
 
-        fab_path = self._install_fab(fab_file)
+        fab_path = install_from_fab(fab_file, None, True)
 
         subprocess.check_call(
             [sys.executable, "-m", "pip", "install", str(fab_path)],
