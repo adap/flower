@@ -102,8 +102,6 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         last_sent_index = 0
         while context.is_active():
-            # self.lock appears unnecessary here
-
             # Exit if `run_id` not found
             if request.run_id not in self.runs:
                 context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
