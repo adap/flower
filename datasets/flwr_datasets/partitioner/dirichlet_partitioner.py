@@ -23,6 +23,8 @@ import numpy as np
 import datasets
 from flwr_datasets.common.typing import NDArrayFloat
 from flwr_datasets.partitioner.partitioner import Partitioner
+from flwr_datasets.partitioner.utils import _remove_leading_underscores_from_config, \
+    _extract_private_attributes_from_object
 
 
 # pylint: disable=R0902, R0912, R0914
@@ -343,57 +345,3 @@ class DirichletPartitioner(Partitioner):
         if not self._num_partitions > 0:
             raise ValueError("The number of partitions needs to be greater than zero.")
 
-    def to_config(self) -> Dict[str, Any]:
-        """Create a configuration (a dictionary) representing the partitioner.
-
-        This method is used in `to_config_file`.
-
-        Returns
-        -------
-        partitioner_representation: Dict[str, Any]
-            Parameters representing a partitioner.
-        """
-        config = {
-            "_target_": f"{self.__class__.__module__}.{self.__class__.__name__}."
-            f"from_config",
-            "num_partitions": self.num_partitions,
-            "partition_by": self._partition_by,
-            "min_partition_size": self._min_partition_size,
-            "self_balancing": self._self_balancing,
-            "shuffle": self._shuffle,
-            "seed": self._seed,
-        }
-        return config
-
-    @classmethod
-    def from_config(
-        cls,
-        config: Dict[str, Any],
-        partition_id_to_indices: Optional[Dict[int, List[int]]] = None,
-    ) -> "DirichletPartitioner":
-        """Instantiate the partitioner based on the given parameters.
-
-        This method should make sure that the object internal state is correctly
-        reflected (when indices mapping is inferred there should be no need for new
-        partitioning).
-
-        Parameters
-        ----------
-        config: Dict[str, Any]
-            Representation of the partitioner that
-        partition_id_to_indices: Optional[Dict[int, List[int]]]
-            Mapping of partition_id to indices that was created when partitioning the
-            dataset.
-
-        Returns
-        -------
-        partitioner: Partitioner
-            An instantiated partitioner
-        """
-        iid = cls(**config)
-        if partition_id_to_indices is not None:
-            iid._partition_id_to_indices = partition_id_to_indices
-            # _partition_id_to_indices_determined needs to be True to avoid
-            # re-creation of the indices
-            iid._partition_id_to_indices_determined = True
-        return iid
