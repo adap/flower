@@ -24,8 +24,10 @@ from typing import Optional
 from flwr.common import Context, EventType, RecordSet, event
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
+from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 
-from .driver import Driver, GrpcDriver
+from .driver import Driver
+from .driver.grpc_driver import GrpcDriver, GrpcDriverStub
 from .server_app import LoadServerAppError, ServerApp
 
 ADDRESS_DRIVER_API = "0.0.0.0:9091"
@@ -149,13 +151,16 @@ def run_server_app() -> None:
     server_app_dir = args.dir
     server_app_attr = getattr(args, "server-app")
 
-    # Initialize GrpcDriver
-    driver = GrpcDriver(
-        driver_service_address=args.superlink,
-        root_certificates=root_certificates,
-        fab_id=args.fab_id,
-        fab_version=args.fab_version,
+    # Create run
+    stub = GrpcDriverStub(
+        driver_service_address=args.superlink, root_certificates=root_certificates
     )
+    stub.connect()
+    req = CreateRunRequest(fab_id=args.fab_id, fab_version=args.fab_version)
+    res = stub.create_run(req)
+
+    # Initialize GrpcDriver
+    driver = GrpcDriver(run_id=res.run_id, stub=stub)
 
     # Run the ServerApp with the Driver
     run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
