@@ -84,7 +84,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
                     with self.lock:
                         run.logs.append(f"{line}")
 
-            # Close
+            # Close std* to prevent blocking
             if run.proc.poll() is not None:
                 log(INFO, "Subprocess finished, exiting log capture")
                 if run.proc.stdout:
