@@ -67,7 +67,7 @@ class DeploymentEngine(Executor):
     def start_run(self, fab_file: bytes) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
-            fab_id, fab_version = get_fab_metadata(fab_file)
+            fab_version, fab_id = get_fab_metadata(fab_file)
 
             run_id = self._create_run(fab_id, fab_version)
 
