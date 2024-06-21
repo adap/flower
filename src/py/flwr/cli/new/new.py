@@ -177,10 +177,16 @@ def new(
             "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
             "README.md": {"template": f"app/README.{framework_str}.md.tpl"},
             f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-            f"{import_name}/server.py": {"template": "app/code/flwr_tune/server.py.tpl"},
-            f"{import_name}/client.py": {"template": "app/code/flwr_tune/client.py.tpl"},
+            f"{import_name}/server.py": {
+                "template": "app/code/flwr_tune/server.py.tpl"
+            },
+            f"{import_name}/client.py": {
+                "template": "app/code/flwr_tune/client.py.tpl"
+            },
             f"{import_name}/app.py": {"template": "app/code/flwr_tune/app.py.tpl"},
-            f"{import_name}/models.py": {"template": "app/code/flwr_tune/models.py.tpl"},
+            f"{import_name}/models.py": {
+                "template": "app/code/flwr_tune/models.py.tpl"
+            },
             f"{import_name}/dataset.py": {
                 "template": "app/code/flwr_tune/dataset.py.tpl"
             },
