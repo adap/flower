@@ -25,7 +25,7 @@ import yaml
 
 from datasets import Dataset
 from flwr_datasets.partitioner.utils import load_partition_id_to_indices, \
-    _extract_private_attributes_from_object
+    _extract_private_attributes_from_object, _remove_leading_underscores_from_config
 
 
 class Partitioner(ABC):
@@ -158,11 +158,10 @@ class Partitioner(ABC):
         #     # yaml.safe_dump(config, file)
 
     @classmethod
-    @abstractmethod
     def from_config(
-        cls,
-        config: Dict[str, Any],
-        partition_id_to_indices: Optional[Dict[int, List[int]]] = None,
+            cls,
+            config: Dict[str, Any],
+            partition_id_to_indices: Optional[Dict[int, List[int]]] = None,
     ) -> "Partitioner":
         """Instantiate the partitioner based on the given parameters.
 
@@ -183,7 +182,14 @@ class Partitioner(ABC):
         partitioner: Partitioner
             An instantiated partitioner
         """
-        pass
+        config = _remove_leading_underscores_from_config(config)
+        partitioner = cls(**config)
+        if partition_id_to_indices is not None:
+            partitioner._partition_id_to_indices = partition_id_to_indices
+            # _partition_id_to_indices_determined needs to be True to avoid
+            # re-creation of the indices
+            partitioner._partition_id_to_indices_determined = True
+        return partitioner
 
     @classmethod
     def from_config_file(
