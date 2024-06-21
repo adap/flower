@@ -137,7 +137,8 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
             cert_path,
         )
 
-    if not (getattr(args, "server-app") is None) ^ (args.run_id is None):
+    server_app_attr: Optional[str] = getattr(args, "server-app")
+    if not (server_app_attr is None) ^ (args.run_id is None):
         raise sys.exit(
             "Invalid options: Either `server-app` or `--run-id` "
             "should be set but not both."
@@ -160,18 +161,13 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
 
     # Dynamically obtain ServerApp path based on run_id
     if args.run_id is not None:
-        if args.flwr_dir is None:
-            flwr_dir = get_flwr_dir()
-        else:
-            flwr_dir = Path(args.flwr_dir).absolute()
-        server_app_dir = str(
-            get_project_dir(driver.run.fab_id, driver.run.fab_version, flwr_dir)
-        )
+        flwr_dir = get_flwr_dir(args.flwr_dir)
+        run_ = driver.run
+        server_app_dir = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
         config = get_project_config(server_app_dir)
         server_app_attr = config["flower"]["components"]["serverapp"]
     else:
         server_app_dir = str(Path(args.dir).absolute())
-        server_app_attr = getattr(args, "server-app")
 
     log(DEBUG, "Flower will load ServerApp `%s` in %s", server_app_attr, server_app_dir)
 
