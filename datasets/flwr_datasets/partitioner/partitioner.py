@@ -20,11 +20,12 @@ import os
 import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
-
+from flwr_datasets.partitioner.yaml_utils import YamlHandler
 import yaml
 
 from datasets import Dataset
-from flwr_datasets.partitioner.utils import load_partition_id_to_indices
+from flwr_datasets.partitioner.utils import load_partition_id_to_indices, \
+    _extract_private_attributes_from_object
 
 
 class Partitioner(ABC):
@@ -108,7 +109,9 @@ class Partitioner(ABC):
         partitioner_representation: Dict[str, Any]
             Parameters representing a partitioner.
         """
-        pass
+        config = _extract_private_attributes_from_object(self)
+        config["_target_"] = f"{self.__class__.__module__}.{self.__class__.__name__}.from_config"
+        return config
 
     def to_config_file(
         self,
@@ -147,8 +150,12 @@ class Partitioner(ABC):
             with open(indices_path, "w") as indices_file:
                 json.dump(indices, indices_file)
 
-        with open(config_path, "w") as file:
-            yaml.safe_dump(config, file)
+        yaml_handler = YamlHandler()
+        yaml_handler.dump(config, config_path)
+        # with open(config_path, "w") as file:
+        #     yaml_handler = YamlHandler()
+        #     yaml_handler.dump(config, file)
+        #     # yaml.safe_dump(config, file)
 
     @classmethod
     @abstractmethod
@@ -199,8 +206,12 @@ class Partitioner(ABC):
         partitioner : Partitioner
             The instantiated partitioner based on the provided config.
         """
-        with open(config_path) as file:
-            config = yaml.safe_load(file)
+        yaml_handler = YamlHandler()
+        config = yaml_handler.load(config_path)
+        # with open(config_path) as file:
+        #     yaml_handler = YamlHandler()
+        #     config = yaml_handler.load(file)
+            # config = yaml.safe_load(file)
         partition_id_to_indices = None
         if infer_partition_id_to_indices:
             partition_id_to_indices_path = config.pop(
