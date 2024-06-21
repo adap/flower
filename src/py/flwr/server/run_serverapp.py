@@ -22,11 +22,15 @@ from pathlib import Path
 from typing import Optional
 
 from flwr.common import Context, EventType, RecordSet, event
-from flwr.common.logger import log, update_console_handler
+from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
+from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 
-from .driver.driver import Driver
+from .driver import Driver
+from .driver.grpc_driver import GrpcDriver, GrpcDriverStub
 from .server_app import LoadServerAppError, ServerApp
+
+ADDRESS_DRIVER_API = "0.0.0.0:9091"
 
 
 def run(
@@ -43,12 +47,14 @@ def run(
         )
 
     if server_app_dir is not None:
-        sys.path.insert(0, server_app_dir)
+        sys.path.insert(0, str(Path(server_app_dir).absolute()))
 
     # Load ServerApp if needed
     def _load() -> ServerApp:
         if server_app_attr:
-            server_app: ServerApp = load_app(server_app_attr, LoadServerAppError)
+            server_app: ServerApp = load_app(
+                server_app_attr, LoadServerAppError, server_app_dir
+            )
 
             if not isinstance(server_app, ServerApp):
                 raise LoadServerAppError(
@@ -76,6 +82,23 @@ def run_server_app() -> None:
 
     args = _parse_args_run_server_app().parse_args()
 
+    if args.server != ADDRESS_DRIVER_API:
+        warn = "Passing flag --server is deprecated. Use --superlink instead."
+        warn_deprecated_feature(warn)
+
+        if args.superlink != ADDRESS_DRIVER_API:
+            # if `--superlink` also passed, then
+            # warn user that this argument overrides what was passed with `--server`
+            log(
+                WARN,
+                "Both `--server` and `--superlink` were passed. "
+                "`--server` will be ignored. Connecting to the Superlink Driver API "
+                "at %s.",
+                args.superlink,
+            )
+        else:
+            args.superlink = args.server
+
     update_console_handler(
         level=DEBUG if args.verbose else INFO,
         timestamps=args.verbose,
@@ -95,7 +118,7 @@ def run_server_app() -> None:
             WARN,
             "Option `--insecure` was set. "
             "Starting insecure HTTP client connected to %s.",
-            args.server,
+            args.superlink,
         )
         root_certificates = None
     else:
@@ -109,7 +132,7 @@ def run_server_app() -> None:
             DEBUG,
             "Starting secure HTTPS client connected to %s "
             "with the following certificates: %s.",
-            args.server,
+            args.superlink,
             cert_path,
         )
 
@@ -128,13 +151,18 @@ def run_server_app() -> None:
     server_app_dir = args.dir
     server_app_attr = getattr(args, "server-app")
 
-    # Initialize Driver
-    driver = Driver(
-        driver_service_address=args.server,
-        root_certificates=root_certificates,
+    # Create run
+    stub = GrpcDriverStub(
+        driver_service_address=args.superlink, root_certificates=root_certificates
     )
+    stub.connect()
+    req = CreateRunRequest(fab_id=args.fab_id, fab_version=args.fab_version)
+    res = stub.create_run(req)
 
-    # Run the Server App with the Driver
+    # Initialize GrpcDriver
+    driver = GrpcDriver(run_id=res.run_id, stub=stub)
+
+    # Run the ServerApp with the Driver
     run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
 
     # Clean up
@@ -173,8 +201,13 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--server",
-        default="0.0.0.0:9091",
+        default=ADDRESS_DRIVER_API,
         help="Server address",
+    )
+    parser.add_argument(
+        "--superlink",
+        default=ADDRESS_DRIVER_API,
+        help="SuperLink Driver API (gRPC-rere) address (IPv4, IPv6, or a domain name)",
     )
     parser.add_argument(
         "--dir",
@@ -182,6 +215,18 @@ def _parse_args_run_server_app() -> argparse.ArgumentParser:
         help="Add specified directory to the PYTHONPATH and load Flower "
         "app from there."
         " Default: current working directory.",
+    )
+    parser.add_argument(
+        "--fab-id",
+        default=None,
+        type=str,
+        help="The identifier of the FAB used in the run.",
+    )
+    parser.add_argument(
+        "--fab-version",
+        default=None,
+        type=str,
+        help="The version of the FAB used in the run.",
     )
 
     return parser

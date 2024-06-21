@@ -14,6 +14,9 @@
 # ==============================================================================
 """Flower command line interface utils."""
 
+import hashlib
+import re
+from pathlib import Path
 from typing import Callable, List, Optional, cast
 
 import typer
@@ -73,51 +76,63 @@ def prompt_options(text: str, options: List[str]) -> str:
 
 
 def is_valid_project_name(name: str) -> bool:
-    """Check if the given string is a valid Python module name.
+    """Check if the given string is a valid Python project name.
 
-    A valid module name must start with a letter or an underscore, and can only contain
-    letters, digits, and underscores.
+    A valid project name must start with a letter and can only contain letters, digits,
+    and hyphens.
     """
     if not name:
         return False
 
-    # Check if the first character is a letter or underscore
-    if not (name[0].isalpha() or name[0] == "_"):
+    # Check if the first character is a letter
+    if not name[0].isalpha():
         return False
 
-    # Check if the rest of the characters are valid (letter, digit, or underscore)
+    # Check if the rest of the characters are valid (letter, digit, or dash)
     for char in name[1:]:
-        if not (char.isalnum() or char == "_"):
+        if not (char.isalnum() or char in "-"):
             return False
 
     return True
 
 
 def sanitize_project_name(name: str) -> str:
-    """Sanitize the given string to make it a valid Python module name.
+    """Sanitize the given string to make it a valid Python project name.
 
-    This version replaces hyphens with underscores, removes any characters not allowed
-    in Python module names, makes the string lowercase, and ensures it starts with a
-    valid character.
+    This version replaces spaces, dots, slashes, and underscores with dashes, removes
+    any characters not allowed in Python project names, makes the string lowercase, and
+    ensures it starts with a valid character.
     """
-    # Replace '-' with '_'
-    name_with_underscores = name.replace("-", "_").replace(" ", "_")
+    # Replace whitespace with '_'
+    name_with_hyphens = re.sub(r"[ ./_]", "-", name)
 
     # Allowed characters in a module name: letters, digits, underscore
     allowed_chars = set(
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-"
     )
 
     # Make the string lowercase
-    sanitized_name = name_with_underscores.lower()
+    sanitized_name = name_with_hyphens.lower()
 
     # Remove any characters not allowed in Python module names
     sanitized_name = "".join(c for c in sanitized_name if c in allowed_chars)
 
     # Ensure the first character is a letter or underscore
-    if sanitized_name and (
+    while sanitized_name and (
         sanitized_name[0].isdigit() or sanitized_name[0] not in allowed_chars
     ):
-        sanitized_name = "_" + sanitized_name
+        sanitized_name = sanitized_name[1:]
 
     return sanitized_name
+
+
+def get_sha256_hash(file_path: Path) -> str:
+    """Calculate the SHA-256 hash of a file."""
+    sha256 = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        while True:
+            data = f.read(65536)  # Read in 64kB blocks
+            if not data:
+                break
+            sha256.update(data)
+    return sha256.hexdigest()

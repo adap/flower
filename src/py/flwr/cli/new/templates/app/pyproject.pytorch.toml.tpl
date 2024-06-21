@@ -3,15 +3,15 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "$project_name"
+name = "$package_name"
 version = "1.0.0"
 description = ""
 authors = [
     { name = "The Flower Authors", email = "hello@flower.ai" },
 ]
-license = {text = "Apache License (2.0)"}
+license = { text = "Apache License (2.0)" }
 dependencies = [
-    "flwr[simulation]>=1.8.0,<2.0",
+    "flwr[simulation]>=1.9.0,<2.0",
     "flwr-datasets[vision]>=0.0.2,<1.0.0",
     "torch==2.2.1",
     "torchvision==0.17.1",
@@ -20,6 +20,15 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
+[flower]
+publisher = "$username"
+
 [flower.components]
-serverapp = "$project_name.server:app"
-clientapp = "$project_name.client:app"
+serverapp = "$import_name.server:app"
+clientapp = "$import_name.client:app"
+
+[flower.engine]
+name = "simulation"
+
+[flower.engine.simulation.supernode]
+num = 2

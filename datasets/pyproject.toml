@@ -54,10 +54,13 @@ exclude = [
 [tool.poetry.dependencies]
 python = "^3.8"
 numpy = "^1.21.0"
-datasets = "^2.14.6"
+datasets = ">=2.14.6 <2.20.0"
 pillow = { version = ">=6.2.1", optional = true }
 soundfile = { version = ">=0.12.1", optional = true }
 librosa = { version = ">=0.10.0.post2", optional = true }
+tqdm ="^4.66.1"
+matplotlib = "^3.7.5"
+seaborn = "^0.13.0"
 
 [tool.poetry.dev-dependencies]
 isort = "==5.13.2"
@@ -71,6 +74,7 @@ pytest = "==7.1.2"
 pytest-watcher = "==0.4.1"
 ruff = "==0.0.277"
 types-requests = "==2.28.11.17"
+types-setuptools = "==69.0.0.20240125"
 
 [tool.poetry.extras]
 vision = ["pillow"]

@@ -282,7 +282,14 @@ class Server:
         get_parameters_res = random_client.get_parameters(
             ins=ins, timeout=timeout, group_id=server_round
         )
-        log(INFO, "Received initial parameters from one random client")
+        if get_parameters_res.status.code == Code.OK:
+            log(INFO, "Received initial parameters from one random client")
+        else:
+            log(
+                WARN,
+                "Failed to receive initial parameters from the client."
+                " Empty initial parameters will be used.",
+            )
         return get_parameters_res.parameters
 
 
@@ -486,12 +493,9 @@ def run_fl(
 
     log(INFO, "")
     log(INFO, "[SUMMARY]")
-    log(INFO, "Run finished %s rounds in %.2fs", config.num_rounds, elapsed_time)
-    for idx, line in enumerate(io.StringIO(str(hist))):
-        if idx == 0:
-            log(INFO, "%s", line.strip("\n"))
-        else:
-            log(INFO, "\t%s", line.strip("\n"))
+    log(INFO, "Run finished %s round(s) in %.2fs", config.num_rounds, elapsed_time)
+    for line in io.StringIO(str(hist)):
+        log(INFO, "\t%s", line.strip("\n"))
     log(INFO, "")
 
     # Graceful shutdown

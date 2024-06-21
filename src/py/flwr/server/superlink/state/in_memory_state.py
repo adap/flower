@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ from typing import Dict, List, Optional, Set, Tuple
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
+from flwr.common.typing import Run
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
@@ -30,15 +31,24 @@ from flwr.server.utils import validate_task_ins_or_res
 from .utils import make_node_unavailable_taskres
 
 
-class InMemoryState(State):
+class InMemoryState(State):  # pylint: disable=R0902,R0904
     """In-memory State implementation."""
 
     def __init__(self) -> None:
+
         # Map node_id to (online_until, ping_interval)
         self.node_ids: Dict[int, Tuple[float, float]] = {}
-        self.run_ids: Set[int] = set()
+        self.public_key_to_node_id: Dict[bytes, int] = {}
+
+        # Map run_id to (fab_id, fab_version)
+        self.run_ids: Dict[int, Run] = {}
         self.task_ins_store: Dict[UUID, TaskIns] = {}
         self.task_res_store: Dict[UUID, TaskRes] = {}
+
+        self.client_public_keys: Set[bytes] = set()
+        self.server_public_key: Optional[bytes] = None
+        self.server_private_key: Optional[bytes] = None
+
         self.lock = threading.Lock()
 
     def store_task_ins(self, task_ins: TaskIns) -> Optional[UUID]:
@@ -201,23 +211,46 @@ class InMemoryState(State):
         """
         return len(self.task_res_store)
 
-    def create_node(self, ping_interval: float) -> int:
+    def create_node(
+        self, ping_interval: float, public_key: Optional[bytes] = None
+    ) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
         node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
         with self.lock:
-            if node_id not in self.node_ids:
-                self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
-                return node_id
-        log(ERROR, "Unexpected node registration failure.")
-        return 0
+            if node_id in self.node_ids:
+                log(ERROR, "Unexpected node registration failure.")
+                return 0
 
-    def delete_node(self, node_id: int) -> None:
+            if public_key is not None:
+                if (
+                    public_key in self.public_key_to_node_id
+                    or node_id in self.public_key_to_node_id.values()
+                ):
+                    log(ERROR, "Unexpected node registration failure.")
+                    return 0
+
+                self.public_key_to_node_id[public_key] = node_id
+
+            self.node_ids[node_id] = (time.time() + ping_interval, ping_interval)
+            return node_id
+
+    def delete_node(self, node_id: int, public_key: Optional[bytes] = None) -> None:
         """Delete a client node."""
         with self.lock:
             if node_id not in self.node_ids:
                 raise ValueError(f"Node {node_id} not found")
+
+            if public_key is not None:
+                if (
+                    public_key not in self.public_key_to_node_id
+                    or node_id not in self.public_key_to_node_id.values()
+                ):
+                    raise ValueError("Public key or node_id not found")
+
+                del self.public_key_to_node_id[public_key]
+
             del self.node_ids[node_id]
 
     def get_nodes(self, run_id: int) -> Set[int]:
@@ -238,17 +271,64 @@ class InMemoryState(State):
                 if online_until > current_time
             }
 
-    def create_run(self) -> int:
-        """Create one run."""
+    def get_node_id(self, client_public_key: bytes) -> Optional[int]:
+        """Retrieve stored `node_id` filtered by `client_public_keys`."""
+        return self.public_key_to_node_id.get(client_public_key)
+
+    def create_run(self, fab_id: str, fab_version: str) -> int:
+        """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
         with self.lock:
             run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
 
             if run_id not in self.run_ids:
-                self.run_ids.add(run_id)
+                self.run_ids[run_id] = Run(
+                    run_id=run_id, fab_id=fab_id, fab_version=fab_version
+                )
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
+
+    def store_server_private_public_key(
+        self, private_key: bytes, public_key: bytes
+    ) -> None:
+        """Store `server_private_key` and `server_public_key` in state."""
+        with self.lock:
+            if self.server_private_key is None and self.server_public_key is None:
+                self.server_private_key = private_key
+                self.server_public_key = public_key
+            else:
+                raise RuntimeError("Server private and public key already set")
+
+    def get_server_private_key(self) -> Optional[bytes]:
+        """Retrieve `server_private_key` in urlsafe bytes."""
+        return self.server_private_key
+
+    def get_server_public_key(self) -> Optional[bytes]:
+        """Retrieve `server_public_key` in urlsafe bytes."""
+        return self.server_public_key
+
+    def store_client_public_keys(self, public_keys: Set[bytes]) -> None:
+        """Store a set of `client_public_keys` in state."""
+        with self.lock:
+            self.client_public_keys = public_keys
+
+    def store_client_public_key(self, public_key: bytes) -> None:
+        """Store a `client_public_key` in state."""
+        with self.lock:
+            self.client_public_keys.add(public_key)
+
+    def get_client_public_keys(self) -> Set[bytes]:
+        """Retrieve all currently stored `client_public_keys` as a set."""
+        return self.client_public_keys
+
+    def get_run(self, run_id: int) -> Optional[Run]:
+        """Retrieve information about the run with the specified `run_id`."""
+        with self.lock:
+            if run_id not in self.run_ids:
+                log(ERROR, "`run_id` is invalid")
+                return None
+            return self.run_ids[run_id]
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""

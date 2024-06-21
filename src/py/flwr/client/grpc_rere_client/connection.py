@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,10 @@ from contextlib import contextmanager
 from copy import copy
 from logging import DEBUG, ERROR
 from pathlib import Path
-from typing import Callable, Iterator, Optional, Tuple, Union, cast
+from typing import Callable, Iterator, Optional, Sequence, Tuple, Type, Union, cast
+
+import grpc
+from cryptography.hazmat.primitives.asymmetric import ec
 
 from flwr.client.heartbeat import start_ping_loop
 from flwr.client.message_handler.message_handler import validate_out_message
@@ -48,7 +51,11 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
+
+from .client_interceptor import AuthenticateClientInterceptor
+from .grpc_adapter import GrpcAdapter
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -57,18 +64,23 @@ def on_channel_state_change(channel_connectivity: str) -> None:
 
 
 @contextmanager
-def grpc_request_response(  # pylint: disable=R0914, R0915
+def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     server_address: str,
     insecure: bool,
     retry_invoker: RetryInvoker,
     max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,  # pylint: disable=W0613
     root_certificates: Optional[Union[bytes, str]] = None,
+    authentication_keys: Optional[
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
+    adapter_cls: Optional[Union[Type[FleetStub], Type[GrpcAdapter]]] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
+        Optional[Callable[[int], Tuple[str, str]]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -95,6 +107,11 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Tuple containing the elliptic curve private key and public key for
+        authentication from the cryptography library.
+        Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
+        Used to establish an authenticated connection with the server.
 
     Returns
     -------
@@ -102,27 +119,37 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
     send : Callable
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
+    get_run : Optional[Callable]
     """
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
+
+    interceptors: Optional[Sequence[grpc.UnaryUnaryClientInterceptor]] = None
+    if authentication_keys is not None:
+        interceptors = AuthenticateClientInterceptor(
+            authentication_keys[0], authentication_keys[1]
+        )
 
     channel = create_channel(
         server_address=server_address,
         insecure=insecure,
         root_certificates=root_certificates,
         max_message_length=max_message_length,
+        interceptors=interceptors,
     )
     channel.subscribe(on_channel_state_change)
 
     # Shared variables for inner functions
-    stub = FleetStub(channel)
+    if adapter_cls is None:
+        adapter_cls = FleetStub
+    stub = adapter_cls(channel)
     metadata: Optional[Metadata] = None
     node: Optional[Node] = None
     ping_thread: Optional[threading.Thread] = None
     ping_stop_event = threading.Event()
 
     ###########################################################################
-    # ping/create_node/delete_node/receive/send functions
+    # ping/create_node/delete_node/receive/send/get_run functions
     ###########################################################################
 
     def ping() -> None:
@@ -172,8 +199,6 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
 
         # Stop the ping-loop thread
         ping_stop_event.set()
-        if ping_thread is not None:
-            ping_thread.join()
 
         # Call FleetAPI
         delete_node_request = DeleteNodeRequest(node=node)
@@ -241,8 +266,19 @@ def grpc_request_response(  # pylint: disable=R0914, R0915
         # Cleanup
         metadata = None
 
+    def get_run(run_id: int) -> Tuple[str, str]:
+        # Call FleetAPI
+        get_run_request = GetRunRequest(run_id=run_id)
+        get_run_response: GetRunResponse = retry_invoker.invoke(
+            stub.GetRun,
+            request=get_run_request,
+        )
+
+        # Return fab_id and fab_version
+        return get_run_response.run.fab_id, get_run_response.run.fab_version
+
     try:
         # Yield methods
-        yield (receive, send, create_node, delete_node)
+        yield (receive, send, create_node, delete_node, get_run)
     except Exception as exc:  # pylint: disable=broad-except
         log(ERROR, exc)

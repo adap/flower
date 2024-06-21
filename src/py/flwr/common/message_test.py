@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
 """Message tests."""
 
 import time
+from collections import namedtuple
 from contextlib import ExitStack
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Dict, Optional
 
 import pytest
 
 # pylint: enable=E0611
 from . import RecordSet
-from .message import Error, Message
+from .message import Error, Message, Metadata
 from .serde_test import RecordMaker
 
 
@@ -157,3 +158,48 @@ def test_create_reply(
     assert message.metadata.src_node_id == reply_message.metadata.dst_node_id
     assert message.metadata.dst_node_id == reply_message.metadata.src_node_id
     assert reply_message.metadata.reply_to_message == message.metadata.message_id
+
+
+@pytest.mark.parametrize(
+    "cls, kwargs",
+    [
+        (
+            Metadata,
+            {
+                "run_id": 123,
+                "message_id": "msg_456",
+                "src_node_id": 1,
+                "dst_node_id": 2,
+                "reply_to_message": "reply_789",
+                "group_id": "group_xyz",
+                "ttl": 10.0,
+                "message_type": "request",
+                "partition_id": None,
+            },
+        ),
+        (Error, {"code": 1, "reason": "reason_098"}),
+        (
+            Message,
+            {
+                "metadata": RecordMaker(1).metadata(),
+                "content": RecordMaker(1).recordset(1, 1, 1),
+            },
+        ),
+        (
+            Message,
+            {
+                "metadata": RecordMaker(2).metadata(),
+                "error": Error(0, "some reason"),
+            },
+        ),
+    ],
+)
+def test_repr(cls: type, kwargs: Dict[str, Any]) -> None:
+    """Test string representations of Metadata/Message/Error."""
+    # Prepare
+    anon_cls = namedtuple(cls.__qualname__, kwargs.keys())  # type: ignore
+    expected = anon_cls(**kwargs)
+    actual = cls(**kwargs)
+
+    # Assert
+    assert str(actual) == str(expected)

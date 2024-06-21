@@ -89,9 +89,9 @@ def _update_client_manager(
         for node_id in new_nodes:
             client_proxy = DriverClientProxy(
                 node_id=node_id,
-                driver=driver.grpc_driver,  # type: ignore
+                driver=driver,
                 anonymous=False,
-                run_id=driver.run_id,  # type: ignore
+                run_id=driver.run.run_id,
             )
             if client_manager.register(client_proxy):
                 registered_nodes[node_id] = client_proxy

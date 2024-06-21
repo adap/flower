@@ -24,13 +24,12 @@
 
 import datetime
 
-
 project = "Flower"
 copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.9.0"
+release = "1.10.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -63,8 +62,10 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Sphinx redirects, implemented after the doc filename changes.
 # To prevent 404 errors and redirect to the new pages.
-# redirects = {
-# }
+redirects = {
+    "quickstart-mxnet": "index.html",
+    "mxnet-from-centralized-to-federated": "index.html",
+}
 
 
 # -- Options for HTML output -------------------------------------------------

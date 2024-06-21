@@ -24,15 +24,13 @@ from logging import DEBUG, ERROR, INFO, WARNING
 from time import sleep
 from typing import Dict, Optional
 
-import grpc
-
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
-from flwr.common.typing import ConfigsRecordValues
-from flwr.server.driver.driver import Driver
+from flwr.common.logger import set_logger_propagation, update_console_handler
+from flwr.common.typing import ConfigsRecordValues, Run
+from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
-from flwr.server.superlink.driver.driver_grpc import run_driver_api_grpc
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.state import StateFactory
 from flwr.simulation.ray_transport.utils import (
@@ -55,7 +53,7 @@ def run_simulation_from_cli() -> None:
         backend_name=args.backend,
         backend_config=backend_config_dict,
         app_dir=args.app_dir,
-        driver_api_address=args.driver_api_address,
+        run_id=args.run_id,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
         verbose_logging=args.verbose,
     )
@@ -154,7 +152,7 @@ def run_serverapp_th(
             # Upon completion, trigger stop event if one was passed
             if stop_event is not None:
                 stop_event.set()
-                log(WARNING, "Triggered stop event for Simulation Engine.")
+                log(DEBUG, "Triggered stop event for Simulation Engine.")
 
     serverapp_th = threading.Thread(
         target=server_th_with_start_checks,
@@ -171,14 +169,24 @@ def run_serverapp_th(
     return serverapp_th
 
 
+def _override_run_id(state: StateFactory, run_id_to_replace: int, run_id: int) -> None:
+    """Override the run_id of an existing Run."""
+    log(DEBUG, "Pre-registering run with id %s", run_id)
+    # Remove run
+    run_info: Run = state.state().run_ids.pop(run_id_to_replace)  # type: ignore
+    # Update with new run_id and insert back in state
+    run_info.run_id = run_id
+    state.state().run_ids[run_id] = run_info  # type: ignore
+
+
 # pylint: disable=too-many-locals
 def _main_loop(
     num_supernodes: int,
     backend_name: str,
     backend_config_stream: str,
-    driver_api_address: str,
     app_dir: str,
     enable_tf_gpu_growth: bool,
+    run_id: Optional[int] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
@@ -193,21 +201,18 @@ def _main_loop(
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
 
-    # Start Driver API
-    driver_server: grpc.Server = run_driver_api_grpc(
-        address=driver_api_address,
-        state_factory=state_factory,
-        certificates=None,
-    )
-
     f_stop = asyncio.Event()
     serverapp_th = None
     try:
+        # Create run (with empty fab_id and fab_version)
+        run_id_ = state_factory.state().create_run("", "")
+
+        if run_id:
+            _override_run_id(state_factory, run_id_to_replace=run_id_, run_id=run_id)
+            run_id_ = run_id
+
         # Initialize Driver
-        driver = Driver(
-            driver_service_address=driver_api_address,
-            root_certificates=None,
-        )
+        driver = InMemoryDriver(run_id=run_id_, state_factory=state_factory)
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(
@@ -238,9 +243,6 @@ def _main_loop(
         raise RuntimeError("An error was encountered. Ending simulation.") from ex
 
     finally:
-        # Stop Driver
-        driver_server.stop(grace=0)
-        driver.close()
         # Trigger stop event
         f_stop.set()
 
@@ -248,7 +250,7 @@ def _main_loop(
         if serverapp_th:
             serverapp_th.join()
 
-    log(INFO, "Stopping Simulation Engine now.")
+    log(DEBUG, "Stopping Simulation Engine now.")
 
 
 # pylint: disable=too-many-arguments,too-many-locals
@@ -261,7 +263,7 @@ def _run_simulation(
     client_app_attr: Optional[str] = None,
     server_app_attr: Optional[str] = None,
     app_dir: str = "",
-    driver_api_address: str = "0.0.0.0:9091",
+    run_id: Optional[int] = None,
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
 ) -> None:
@@ -301,8 +303,8 @@ def _run_simulation(
         Add specified directory to the PYTHONPATH and load `ClientApp` from there.
         (Default: current working directory.)
 
-    driver_api_address : str (default: "0.0.0.0:9091")
-        Driver API (gRPC) server address (IPv4, IPv6, or a domain name)
+    run_id : Optional[int]
+        An integer specifying the ID of the run started when running this function.
 
     enable_tf_gpu_growth : bool (default: False)
         A boolean to indicate whether to enable GPU growth on the main thread. This is
@@ -316,13 +318,15 @@ def _run_simulation(
         When diabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
-    # Set logging level
-    if not verbose_logging:
-        logger = logging.getLogger("flwr")
-        logger.setLevel(INFO)
-
     if backend_config is None:
         backend_config = {}
+
+    # Set logging level
+    logger = logging.getLogger("flwr")
+    if verbose_logging:
+        update_console_handler(level=DEBUG, timestamps=True, colored=True)
+    else:
+        backend_config["silent"] = True
 
     if enable_tf_gpu_growth:
         # Check that Backend config has also enabled using GPU growth
@@ -339,9 +343,9 @@ def _run_simulation(
         num_supernodes,
         backend_name,
         backend_config_stream,
-        driver_api_address,
         app_dir,
         enable_tf_gpu_growth,
+        run_id,
         client_app,
         client_app_attr,
         server_app,
@@ -364,6 +368,8 @@ def _run_simulation(
 
     finally:
         if run_in_thread:
+            # Set logger propagation to False to prevent duplicated log output in Colab.
+            logger = set_logger_propagation(logger, False)
             log(DEBUG, "Starting Simulation Engine on a new thread.")
             simulation_engine_th = threading.Thread(target=_main_loop, args=args)
             simulation_engine_th.start()
@@ -393,12 +399,6 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         type=int,
         required=True,
         help="Number of simulated SuperNodes.",
-    )
-    parser.add_argument(
-        "--driver-api-address",
-        default="0.0.0.0:9091",
-        type=str,
-        help="For example: `server:app` or `project.package.module:wrapper.app`",
     )
     parser.add_argument(
         "--backend",
@@ -436,6 +436,11 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         help="Add specified directory to the PYTHONPATH and load"
         "ClientApp and ServerApp from there."
         " Default: current working directory.",
+    )
+    parser.add_argument(
+        "--run-id",
+        type=int,
+        help="Sets the ID of the run started by the Simulation Engine.",
     )
 
     return parser
