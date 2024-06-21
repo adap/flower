@@ -14,13 +14,16 @@
 # ==============================================================================
 """Deployment engine executor plugin."""
 
+from logging import ERROR
 import subprocess
 import sys
-from typing import Optional, override
+from typing import Optional
+from typing_extensions import override
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common.grpc import create_channel
+from flwr.common.logger import log
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
 from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
@@ -60,35 +63,39 @@ class DeploymentEngine(Executor):
         return int(res.run_id)
 
     @override
-    def start_run(self, fab_file: bytes) -> RunTracker:
+    def start_run(self, fab_file: bytes) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
-        fab_id, fab_version = get_fab_metadata(fab_file)
+        try:
+            fab_id, fab_version = get_fab_metadata(fab_file)
 
-        run_id = self._create_run(fab_id, fab_version)
+            run_id = self._create_run(fab_id, fab_version)
 
-        fab_path = install_from_fab(fab_file, None, True)
+            fab_path = install_from_fab(fab_file, None, True)
 
-        subprocess.check_call(
-            [sys.executable, "-m", "pip", "install", str(fab_path)],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+            subprocess.check_call(
+                [sys.executable, "-m", "pip", "install", str(fab_path)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
 
-        return RunTracker(
-            run_id=run_id,
-            proc=subprocess.Popen(
-                [
-                    "flower-server-app",
-                    "build_demo.server:app",
-                    "--run-id",
-                    str(run_id),
-                    "--insecure",
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            ),
-        )
+            return RunTracker(
+                run_id=run_id,
+                proc=subprocess.Popen(
+                    [
+                        "flower-server-app",
+                        "build_demo.server:app",
+                        "--run-id",
+                        str(run_id),
+                        "--insecure",
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                ),
+            )
+        except Exception as e:
+            log(ERROR, "Could not start run: %s", str(e))
+            return None
 
 
 deployment_plugin = DeploymentEngine()
