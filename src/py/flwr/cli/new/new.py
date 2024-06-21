@@ -37,6 +37,7 @@ class MlFramework(str, Enum):
     NUMPY = "NumPy"
     PYTORCH = "PyTorch"
     TENSORFLOW = "TensorFlow"
+    XGBOOST = "XGBoost"
     JAX = "JAX"
     HUGGINGFACE = "HF"
     MLX = "MLX"
@@ -156,6 +157,7 @@ def new(
     # Depending on the framework, generate task.py file
     frameworks_with_tasks = [
         MlFramework.PYTORCH.value.lower(),
+        MlFramework.XGBOOST.value.lower(),
         MlFramework.JAX.value.lower(),
         MlFramework.HUGGINGFACE.value.lower(),
         MlFramework.MLX.value.lower(),
