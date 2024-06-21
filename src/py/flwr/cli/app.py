@@ -15,6 +15,7 @@
 """Flower command line interface."""
 
 import typer
+from typer.main import get_command
 
 from .build import build
 from .example import example
@@ -38,6 +39,8 @@ app.command()(run)
 app.command()(build)
 app.command()(install)
 app.command()(log)
+
+typer_click_object = get_command(app)
 
 if __name__ == "__main__":
     app()
