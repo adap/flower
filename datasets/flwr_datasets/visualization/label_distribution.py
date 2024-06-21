@@ -22,6 +22,7 @@ import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from flwr_datasets.common import EventType, event
 from flwr_datasets.metrics.utils import compute_counts, compute_frequencies
 from flwr_datasets.partitioner import Partitioner
 from flwr_datasets.visualization.bar_plot import _plot_bar
@@ -191,6 +192,12 @@ def plot_label_distributions(
     You can also visualize the returned DataFrame in Jupyter Notebook
     >>> dataframe.style.background_gradient(axis=None)
     """
+    event(
+        EventType.PLOT_LABEL_DISTRIBUTION_CALLED,
+        {
+            "plot_type": plot_type,
+        },
+    )
     _validate_parameters(plot_type, size_unit, partition_id_axis)
 
     dataframe = pd.DataFrame()
