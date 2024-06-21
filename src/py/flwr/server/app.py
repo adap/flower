@@ -36,6 +36,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
+    TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
 )
@@ -48,6 +49,7 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 from flwr.proto.fleet_pb2_grpc import (  # pylint: disable=E0611
     add_FleetServicer_to_server,
 )
+from flwr.proto.grpcadapter_pb2_grpc import add_GrpcAdapterServicer_to_server
 
 from .client_manager import ClientManager
 from .history import History
@@ -55,6 +57,7 @@ from .server import Server, init_defaults, run_fl
 from .server_config import ServerConfig
 from .strategy import Strategy
 from .superlink.driver.driver_grpc import run_driver_api_grpc
+from .superlink.fleet.grpc_adapter.grpc_adapter_servicer import GrpcAdapterServicer
 from .superlink.fleet.grpc_bidi.grpc_server import (
     generic_create_grpc_server,
     start_grpc_server,
@@ -200,15 +203,7 @@ def run_superlink() -> None:
     args = _parse_args_run_superlink().parse_args()
 
     # Parse IP address
-    parsed_driver_address = parse_address(args.driver_api_address)
-    if not parsed_driver_address:
-        sys.exit(f"Driver IP address ({args.driver_api_address}) cannot be parsed.")
-    driver_host, driver_port, driver_is_v6 = parsed_driver_address
-    driver_address = (
-        f"[{driver_host}]:{driver_port}"
-        if driver_is_v6
-        else f"{driver_host}:{driver_port}"
-    )
+    driver_address, _, _ = _format_address(args.driver_api_address)
 
     # Obtain certificates
     certificates = _try_obtain_certificates(args)
@@ -226,18 +221,15 @@ def run_superlink() -> None:
     grpc_servers = [driver_server]
     bckg_threads = []
     if not args.fleet_api_address:
-        args.fleet_api_address = (
-            ADDRESS_FLEET_API_GRPC_RERE
-            if args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE
-            else ADDRESS_FLEET_API_REST
-        )
-    parsed_fleet_address = parse_address(args.fleet_api_address)
-    if not parsed_fleet_address:
-        sys.exit(f"Fleet IP address ({args.fleet_api_address}) cannot be parsed.")
-    fleet_host, fleet_port, fleet_is_v6 = parsed_fleet_address
-    fleet_address = (
-        f"[{fleet_host}]:{fleet_port}" if fleet_is_v6 else f"{fleet_host}:{fleet_port}"
-    )
+        if args.fleet_api_type in [
+            TRANSPORT_TYPE_GRPC_RERE,
+            TRANSPORT_TYPE_GRPC_ADAPTER,
+        ]:
+            args.fleet_api_address = ADDRESS_FLEET_API_GRPC_RERE
+        elif args.fleet_api_type == TRANSPORT_TYPE_REST:
+            args.fleet_api_address = ADDRESS_FLEET_API_REST
+
+    fleet_address, host, port = _format_address(args.fleet_api_address)
 
     num_workers = args.fleet_api_num_workers
     if num_workers != 1:
@@ -267,8 +259,8 @@ def run_superlink() -> None:
         fleet_thread = threading.Thread(
             target=_run_fleet_api_rest,
             args=(
-                fleet_host,
-                fleet_port,
+                host,
+                port,
                 ssl_keyfile,
                 ssl_certfile,
                 state_factory,
@@ -306,6 +298,13 @@ def run_superlink() -> None:
             interceptors=interceptors,
         )
         grpc_servers.append(fleet_server)
+    elif args.fleet_api_type == TRANSPORT_TYPE_GRPC_ADAPTER:
+        fleet_server = _run_fleet_api_grpc_adapter(
+            address=fleet_address,
+            state_factory=state_factory,
+            certificates=certificates,
+        )
+        grpc_servers.append(fleet_server)
     else:
         raise ValueError(f"Unknown fleet_api_type: {args.fleet_api_type}")
 
@@ -323,6 +322,16 @@ def run_superlink() -> None:
                 if not thread.is_alive():
                     sys.exit(1)
         driver_server.wait_for_termination(timeout=1)
+
+
+def _format_address(address: str) -> Tuple[str, str, int]:
+    parsed_address = parse_address(address)
+    if not parsed_address:
+        sys.exit(
+            f"Address ({address}) cannot be parsed (expected: URL or IPv4 or IPv6)."
+        )
+    host, port, is_v6 = parsed_address
+    return (f"[{host}]:{port}" if is_v6 else f"{host}:{port}", host, port)
 
 
 def _try_setup_client_authentication(
@@ -422,7 +431,7 @@ def _try_obtain_certificates(
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
         return None
     # Check if certificates are provided
-    if args.fleet_api_type == TRANSPORT_TYPE_GRPC_RERE:
+    if args.fleet_api_type in [TRANSPORT_TYPE_GRPC_RERE, TRANSPORT_TYPE_GRPC_ADAPTER]:
         if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_certfile:
             if not isfile(args.ssl_ca_certfile):
                 sys.exit("Path argument `--ssl-ca-certfile` does not point to a file.")
@@ -489,6 +498,30 @@ def _run_fleet_api_grpc_rere(
     )
 
     log(INFO, "Flower ECE: Starting Fleet API (gRPC-rere) on %s", address)
+    fleet_grpc_server.start()
+
+    return fleet_grpc_server
+
+
+def _run_fleet_api_grpc_adapter(
+    address: str,
+    state_factory: StateFactory,
+    certificates: Optional[Tuple[bytes, bytes, bytes]],
+) -> grpc.Server:
+    """Run Fleet API (GrpcAdapter)."""
+    # Create Fleet API gRPC server
+    fleet_servicer = GrpcAdapterServicer(
+        state_factory=state_factory,
+    )
+    fleet_add_servicer_to_server_fn = add_GrpcAdapterServicer_to_server
+    fleet_grpc_server = generic_create_grpc_server(
+        servicer_and_add_fn=(fleet_servicer, fleet_add_servicer_to_server_fn),
+        server_address=address,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        certificates=certificates,
+    )
+
+    log(INFO, "Flower ECE: Starting Fleet API (GrpcAdapter) on %s", address)
     fleet_grpc_server.start()
 
     return fleet_grpc_server
@@ -609,7 +642,11 @@ def _add_args_fleet_api(parser: argparse.ArgumentParser) -> None:
         "--fleet-api-type",
         default=TRANSPORT_TYPE_GRPC_RERE,
         type=str,
-        choices=[TRANSPORT_TYPE_GRPC_RERE, TRANSPORT_TYPE_REST],
+        choices=[
+            TRANSPORT_TYPE_GRPC_RERE,
+            TRANSPORT_TYPE_GRPC_ADAPTER,
+            TRANSPORT_TYPE_REST,
+        ],
         help="Start a gRPC-rere or REST (experimental) Fleet API server.",
     )
     parser.add_argument(
