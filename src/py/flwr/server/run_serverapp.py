@@ -140,7 +140,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
     server_app_attr: Optional[str] = getattr(args, "server-app")
     if not (server_app_attr is None) ^ (args.run_id is None):
         raise sys.exit(
-            "Please provide either a ServerApp reference or a Run ID. "
+            "Please provide either a ServerApp reference or a Run ID, but not both. "
             "For more details, use: ``flower-server-app -h``"
         )
 
