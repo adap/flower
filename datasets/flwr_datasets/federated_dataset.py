@@ -105,7 +105,6 @@ class FederatedDataset:
         self._dataset_prepared: bool = False
         self._event = {
             "load_partition": {split: False for split in self._partitioners},
-            "load_split": {split: False for split in self._partitioners},
         }
 
     def load_partition(
@@ -277,6 +276,8 @@ class FederatedDataset:
             self._dataset = self._dataset.shuffle(seed=self._seed)
         if self._preprocessor:
             self._dataset = self._preprocessor(self._dataset)
+        available_splits = list(self._dataset.keys())
+        self._event["load_split"] = {split: False for split in available_splits}
         self._dataset_prepared = True
 
     def _check_if_no_split_keyword_possible(self) -> None:
