@@ -77,8 +77,8 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         super().__init__()
         # Attributes based on the constructor
         self._partition_sizes = _instantiate_partition_sizes(partition_sizes)
-        self._initial_alpha = alpha
-        self._alpha: Optional[NDArrayFloat] = None
+        self._alpha = alpha
+        self._full_alpha: Optional[NDArrayFloat] = None
         self._partition_by = partition_by
         self._shuffle = shuffle
         self._seed = seed
@@ -113,7 +113,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._check_partition_sizes_correctness_if_needed()
         self._check_the_sum_of_partition_sizes()
         self._determine_num_unique_classes_if_needed()
-        self._alpha = self._initialize_alpha_if_needed(self._initial_alpha)
+        self._full_alpha = self._initialize_alpha_if_needed(self._alpha)
         self._determine_partition_id_to_indices_if_needed()
         return self.dataset.select(self._partition_id_to_indices[partition_id])
 
@@ -124,7 +124,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._check_partition_sizes_correctness_if_needed()
         self._check_the_sum_of_partition_sizes()
         self._determine_num_unique_classes_if_needed()
-        self._alpha = self._initialize_alpha_if_needed(self._initial_alpha)
+        self._full_alpha = self._initialize_alpha_if_needed(self._alpha)
         self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
 
@@ -135,7 +135,7 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._check_partition_sizes_correctness_if_needed()
         self._check_the_sum_of_partition_sizes()
         self._determine_num_unique_classes_if_needed()
-        self._alpha = self._initialize_alpha_if_needed(self._initial_alpha)
+        self._full_alpha = self._initialize_alpha_if_needed(self._alpha)
         self._determine_partition_id_to_indices_if_needed()
         return self._partition_id_to_indices
 
@@ -159,8 +159,8 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
             Concentration parameter in a format ready to used in computation.
         """
         if self._initialized_alpha:
-            assert self._alpha is not None
-            return self._alpha
+            assert self._full_alpha is not None
+            return self._full_alpha
         if isinstance(alpha, int):
             assert self._num_unique_classes is not None
             alpha = np.array([float(alpha)], dtype=float).repeat(
@@ -207,8 +207,10 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
             return
 
         # Create class priors for the whole partitioning process
-        assert self._alpha is not None
-        class_priors = self._rng.dirichlet(alpha=self._alpha, size=self._num_partitions)
+        assert self._full_alpha is not None
+        class_priors = self._rng.dirichlet(
+            alpha=self._full_alpha, size=self._num_partitions
+        )
         targets = np.asarray(self.dataset[self._partition_by])
         # List representing indices of each class
         assert self._num_unique_classes is not None
