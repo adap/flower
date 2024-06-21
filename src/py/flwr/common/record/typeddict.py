@@ -16,25 +16,10 @@
 
 
 from collections.abc import MutableMapping
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generic,
-    ItemsView,
-    Iterator,
-    KeysView,
-    Optional,
-    TypeVar,
-    Union,
-    ValuesView,
-    cast,
-    overload,
-)
+from typing import Callable, Dict, Generic, Iterator, TypeVar, cast
 
 K = TypeVar("K")  # Key type
 V = TypeVar("V")  # Value type
-_T = TypeVar("_T")
 
 
 class TypedDict(MutableMapping[K, V], Generic[K, V]):
@@ -89,69 +74,3 @@ class TypedDict(MutableMapping[K, V], Generic[K, V]):
         if isinstance(other, dict):
             return data == other
         return NotImplemented
-
-    def items(self) -> ItemsView[K, V]:
-        """R.items() -> a set-like object providing a view on R's items."""
-        return cast(Dict[K, V], self.__dict__["_data"]).items()
-
-    def keys(self) -> KeysView[K]:
-        """R.keys() -> a set-like object providing a view on R's keys."""
-        return cast(Dict[K, V], self.__dict__["_data"]).keys()
-
-    def values(self) -> ValuesView[V]:
-        """R.values() -> an object providing a view on R's values."""
-        return cast(Dict[K, V], self.__dict__["_data"]).values()
-    
-    @overload
-    def update(self, m: SupportsKeysAndGetItem[K, V], /, **kwargs: V) -> None: ...
-    
-
-    def update(self, m: Any = None, **kwargs: Any) -> None:
-        """R.update([E, ]**F) -> None.
-
-        Update R from dict/iterable E and F.
-        """
-        for key, value in dict(m, **kwargs).items():
-            self[key] = value
-
-    @overload
-    def pop(self, key: K, /) -> V: ...
-
-    @overload
-    def pop(self, key: K, /, default: V) -> V: ...
-
-    @overload
-    def pop(self, key: K, /, default: _T) -> Union[V, _T]: ...
-
-    def pop(self, key: K, /, default: Any = None) -> Any:
-        """R.pop(k[,d]) -> v, remove specified key and return the corresponding value.
-
-        If key is not found, d is returned if given, otherwise KeyError is raised.
-        """
-        if default is None:
-            return cast(Dict[K, V], self.__dict__["_data"]).pop(key)
-        else:
-            return cast(Dict[K, V], self.__dict__["_data"]).pop(key, default)
-
-    @overload
-    def get(self, key: K, /) -> Optional[V]: ...
-
-    @overload
-    def get(self, key: K, /, default: Union[V, _T]) -> Union[V, _T]: ...
-
-    def get(self, key: K, /, default: Any = None) -> Any:
-        """R.get(k[,d]) -> R[k] if k in R, else d.
-
-        d defaults to None.
-        """
-        if default is None:
-            return cast(Dict[K, V], self.__dict__["_data"]).get(key)
-        else:
-            return cast(Dict[K, V], self.__dict__["_data"]).get(key, default)
-
-    def clear(self) -> None:
-        """R.clear() -> None.
-
-        Remove all items from R.
-        """
-        cast(Dict[K, V], self.__dict__["_data"]).clear()
