@@ -148,15 +148,15 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         driver_service_address=args.superlink, root_certificates=root_certificates
     )
     # Create run if run_id is not provided
-    if args.run_id is None:
+    if args.run_id is not None:
+        # User provided `--run-id`, but not `server-app`
+        run_id = args.run_id
+    else:
         # User provided `server-app`, but not `--run-id`
         stub.connect()
         req = CreateRunRequest(fab_id=args.fab_id, fab_version=args.fab_version)
         res = stub.create_run(req)
         run_id = res.run_id
-    else:
-        # User provided `--run-id`, but not `server-app`
-        run_id = args.run_id
 
     # Initialize GrpcDriver
     driver = GrpcDriver(run_id=run_id, stub=stub)
