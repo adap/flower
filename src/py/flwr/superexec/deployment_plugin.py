@@ -93,6 +93,7 @@ class DeploymentEngine(Executor):
                     text=True,
                 ),
             )
+        # pylint: disable-next=broad-except
         except Exception as e:
             log(ERROR, "Could not start run: %s", str(e))
             return None
