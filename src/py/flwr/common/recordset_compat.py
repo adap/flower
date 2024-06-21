@@ -213,7 +213,7 @@ def recordset_to_fitres(recordset: RecordSet, keep_input: bool) -> FitRes:
     )
     configs_record = recordset.configs_records[f"{ins_str}.metrics"]
     # pylint: disable-next=protected-access
-    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record._data)
+    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record)
     status = _extract_status_from_recordset(ins_str, recordset)
 
     return FitRes(
@@ -274,7 +274,7 @@ def recordset_to_evaluateres(recordset: RecordSet) -> EvaluateRes:
     configs_record = recordset.configs_records[f"{ins_str}.metrics"]
 
     # pylint: disable-next=protected-access
-    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record._data)
+    metrics = _check_mapping_from_recordscalartype_to_scalar(configs_record)
     status = _extract_status_from_recordset(ins_str, recordset)
 
     return EvaluateRes(
@@ -314,7 +314,7 @@ def recordset_to_getparametersins(recordset: RecordSet) -> GetParametersIns:
     """Derive GetParametersIns from a RecordSet object."""
     config_record = recordset.configs_records["getparametersins.config"]
     # pylint: disable-next=protected-access
-    config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record._data)
+    config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
     return GetParametersIns(config=config_dict)
 
@@ -365,7 +365,7 @@ def recordset_to_getpropertiesins(recordset: RecordSet) -> GetPropertiesIns:
     """Derive GetPropertiesIns from a RecordSet object."""
     config_record = recordset.configs_records["getpropertiesins.config"]
     # pylint: disable-next=protected-access
-    config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record._data)
+    config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
     return GetPropertiesIns(config=config_dict)
 
@@ -384,7 +384,7 @@ def recordset_to_getpropertiesres(recordset: RecordSet) -> GetPropertiesRes:
     res_str = "getpropertiesres"
     config_record = recordset.configs_records[f"{res_str}.properties"]
     # pylint: disable-next=protected-access
-    properties = _check_mapping_from_recordscalartype_to_scalar(config_record._data)
+    properties = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
     status = _extract_status_from_recordset(res_str, recordset=recordset)
 

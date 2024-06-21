@@ -101,13 +101,17 @@ class TypedDict(MutableMapping[K, V], Generic[K, V]):
     def values(self) -> ValuesView[V]:
         """R.values() -> an object providing a view on R's values."""
         return cast(Dict[K, V], self.__dict__["_data"]).values()
+    
+    @overload
+    def update(self, m: SupportsKeysAndGetItem[K, V], /, **kwargs: V) -> None: ...
+    
 
-    def update(self, *args: Any, **kwargs: Any) -> None:
+    def update(self, m: Any = None, **kwargs: Any) -> None:
         """R.update([E, ]**F) -> None.
 
         Update R from dict/iterable E and F.
         """
-        for key, value in dict(*args, **kwargs).items():
+        for key, value in dict(m, **kwargs).items():
             self[key] = value
 
     @overload
@@ -119,7 +123,7 @@ class TypedDict(MutableMapping[K, V], Generic[K, V]):
     @overload
     def pop(self, key: K, /, default: _T) -> Union[V, _T]: ...
 
-    def pop(self, key: K, default: Union[V, _T, None] = None) -> Union[V, _T]:
+    def pop(self, key: K, /, default: Any = None) -> Any:
         """R.pop(k[,d]) -> v, remove specified key and return the corresponding value.
 
         If key is not found, d is returned if given, otherwise KeyError is raised.
@@ -135,9 +139,7 @@ class TypedDict(MutableMapping[K, V], Generic[K, V]):
     @overload
     def get(self, key: K, /, default: Union[V, _T]) -> Union[V, _T]: ...
 
-    def get(
-        self, key: K, /, default: Union[V, _T, None] = None
-    ) -> Union[Optional[V], _T]:
+    def get(self, key: K, /, default: Any = None) -> Any:
         """R.get(k[,d]) -> R[k] if k in R, else d.
 
         d defaults to None.
