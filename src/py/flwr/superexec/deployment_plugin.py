@@ -14,10 +14,11 @@
 # ==============================================================================
 """Deployment engine executor plugin."""
 
-from logging import ERROR
 import subprocess
 import sys
+from logging import ERROR
 from typing import Optional
+
 from typing_extensions import override
 
 from flwr.cli.config_utils import get_fab_metadata
