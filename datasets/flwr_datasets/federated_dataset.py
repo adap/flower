@@ -104,8 +104,8 @@ class FederatedDataset:
         # Indicate if the dataset is prepared for `load_partition` or `load_split`
         self._dataset_prepared: bool = False
         self._event = {
-            "load_partition": {split: False for split in self._partitioners.keys()},
-            "load_split": {split: False for split in self._partitioners.keys()},
+            "load_partition": {split: False for split in self._partitioners},
+            "load_split": {split: False for split in self._partitioners},
         }
 
     def load_partition(
