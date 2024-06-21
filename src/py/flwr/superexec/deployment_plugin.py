@@ -84,7 +84,6 @@ class DeploymentEngine(Executor):
                 proc=subprocess.Popen(
                     [
                         "flower-server-app",
-                        "build_demo.server:app",
                         "--run-id",
                         str(run_id),
                         "--insecure",
