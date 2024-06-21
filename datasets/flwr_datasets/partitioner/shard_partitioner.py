@@ -164,6 +164,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         self._seed = seed
 
         # Utility attributes
+        self._sorted_dataset: Optional[datasets.Dataset] = None
         self._rng = np.random.default_rng(seed=self._seed)  # NumPy random generator
         self._partition_id_to_indices: Dict[int, List[int]] = {}
         self._partition_id_to_indices_determined = False
@@ -225,15 +226,15 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
                 assert self._shard_size is not None
                 if self._keep_incomplete_shard:
                     num_usable_shards_in_dataset = int(
-                        math.ceil(len(self.dataset) / self._shard_size)
+                        math.ceil(len(self._sorted_dataset) / self._shard_size)
                     )
                 else:
                     num_usable_shards_in_dataset = int(
-                        math.floor(len(self.dataset) / self._shard_size)
+                        math.floor(len(self._sorted_dataset) / self._shard_size)
                     )
             else:
                 num_usable_shards_in_dataset = int(
-                    math.floor(len(self.dataset) / self._shard_size)
+                    math.floor(len(self._sorted_dataset) / self._shard_size)
                 )
         elif self._num_shards_per_partition is None:
             if self._shard_size is None:
@@ -243,12 +244,12 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
                 )
             if self._keep_incomplete_shard is False:
                 self._num_shards_used = int(
-                    math.floor(len(self.dataset) / self._shard_size)
+                    math.floor(len(self._sorted_dataset) / self._shard_size)
                 )
                 num_usable_shards_in_dataset = self._num_shards_used
             elif self._keep_incomplete_shard is True:
                 self._num_shards_used = int(
-                    math.ceil(len(self.dataset) / self._shard_size)
+                    math.ceil(len(self._sorted_dataset) / self._shard_size)
                 )
                 num_usable_shards_in_dataset = self._num_shards_used
                 if num_usable_shards_in_dataset < self._num_partitions:
@@ -306,15 +307,30 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         for partition_id in range(self._num_partitions):
             for shard_idx in nid_to_shard_indices[partition_id]:
                 start_id = int(shard_idx * self._shard_size)
-                end_id = min(int((shard_idx + 1) * self._shard_size), len(self.dataset))
+                end_id = min(
+                    int((shard_idx + 1) * self._shard_size), len(self._sorted_dataset)
+                )
                 partition_id_to_indices[partition_id].extend(
                     list(range(start_id, end_id))
                 )
+        # Remap the partition_id_to_indices (which reflect on the sorted dataset) back
+        # to the assigned given dataset
+        new_id_to_original_id = self._sorted_dataset["original_index"]
+        partition_id_to_indices_remapped = {
+            pid: [] for pid in range(self._num_partitions)
+        }
+        for partition_id, indices in partition_id_to_indices.items():
+            for index in indices:
+                partition_id_to_indices_remapped[partition_id].append(
+                    new_id_to_original_id[index]
+                )
+        # No need to keep the _sorted_dataset anymore
+        self._sorted_dataset = None
         if self._shuffle:
-            for indices in partition_id_to_indices.values():
+            for indices in partition_id_to_indices_remapped.values():
                 # In place shuffling
                 self._rng.shuffle(indices)
-        self._partition_id_to_indices = partition_id_to_indices
+        self._partition_id_to_indices = partition_id_to_indices_remapped
         self._partition_id_to_indices_determined = True
 
     def _check_num_partitions_correctness_if_needed(self) -> None:
@@ -334,7 +350,12 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         """
         if self._partition_id_to_indices_determined:
             return
-        self._dataset = self.dataset.sort(self._partition_by)
+        self._sorted_dataset = self.dataset
+        # Persist with the original indexes (note: it does not affect the self._dataset)
+        self._sorted_dataset = self._sorted_dataset.add_column(
+            "original_index", list(range(self._sorted_dataset.num_rows))
+        )
+        self._sorted_dataset = self._sorted_dataset.sort(self._partition_by)
 
     def _compute_shard_size_if_missing(self) -> None:
         """Compute the parameters needed to perform sharding.
