@@ -208,7 +208,9 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
 
         # Create class priors for the whole partitioning process
         assert self._full_alpha is not None
-        class_priors = self._rng.dirichlet(alpha=self._full_alpha, size=self._num_partitions)
+        class_priors = self._rng.dirichlet(
+            alpha=self._full_alpha, size=self._num_partitions
+        )
         targets = np.asarray(self.dataset[self._partition_by])
         # List representing indices of each class
         assert self._num_unique_classes is not None
