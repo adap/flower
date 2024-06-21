@@ -103,7 +103,7 @@ class FederatedDataset:
         self._dataset: Optional[DatasetDict] = None
         # Indicate if the dataset is prepared for `load_partition` or `load_split`
         self._dataset_prepared: bool = False
-        self._telemetry_sent = {
+        self._event = {
             "load_partition": {split: False for split in self._partitioners.keys()},
             "load_split": {split: False for split in self._partitioners.keys()},
         }
@@ -147,7 +147,7 @@ class FederatedDataset:
         partitioner: Partitioner = self._partitioners[split]
         self._assign_dataset_to_partitioner(split)
         partition = partitioner.load_partition(partition_id)
-        if not self._telemetry_sent["load_partition"][split]:
+        if not self._event["load_partition"][split]:
             event(
                 EventType.LOAD_PARTITION_CALLED,
                 {
@@ -158,7 +158,7 @@ class FederatedDataset:
                     "num_partitions": partitioner.num_partitions,
                 },
             )
-            self._telemetry_sent["load_partition"][split] = True
+            self._event["load_partition"][split] = True
         return partition
 
     def load_split(self, split: str) -> Dataset:
@@ -184,7 +184,7 @@ class FederatedDataset:
         self._check_if_split_present(split)
         dataset_split = self._dataset[split]
 
-        if not self._telemetry_sent["load_split"][split]:
+        if not self._event["load_split"][split]:
             event(
                 EventType.LOAD_SPLIT_CALLED,
                 {
@@ -193,7 +193,7 @@ class FederatedDataset:
                     "split": split,
                 },
             )
-            self._telemetry_sent["load_split"][split] = True
+            self._event["load_split"][split] = True
 
         return dataset_split
 
