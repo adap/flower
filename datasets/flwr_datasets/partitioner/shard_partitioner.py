@@ -226,15 +226,15 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
                 assert self._shard_size is not None
                 if self._keep_incomplete_shard:
                     num_usable_shards_in_dataset = int(
-                        math.ceil(len(self._sorted_dataset) / self._shard_size)
+                        math.ceil(len(self.dataset) / self._shard_size)
                     )
                 else:
                     num_usable_shards_in_dataset = int(
-                        math.floor(len(self._sorted_dataset) / self._shard_size)
+                        math.floor(len(self.dataset) / self._shard_size)
                     )
             else:
                 num_usable_shards_in_dataset = int(
-                    math.floor(len(self._sorted_dataset) / self._shard_size)
+                    math.floor(len(self.dataset) / self._shard_size)
                 )
         elif self._num_shards_per_partition is None:
             if self._shard_size is None:
@@ -244,12 +244,12 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
                 )
             if self._keep_incomplete_shard is False:
                 self._num_shards_used = int(
-                    math.floor(len(self._sorted_dataset) / self._shard_size)
+                    math.floor(len(self.dataset) / self._shard_size)
                 )
                 num_usable_shards_in_dataset = self._num_shards_used
             elif self._keep_incomplete_shard is True:
                 self._num_shards_used = int(
-                    math.ceil(len(self._sorted_dataset) / self._shard_size)
+                    math.ceil(len(self.dataset) / self._shard_size)
                 )
                 num_usable_shards_in_dataset = self._num_shards_used
                 if num_usable_shards_in_dataset < self._num_partitions:
@@ -307,9 +307,7 @@ class ShardPartitioner(Partitioner):  # pylint: disable=R0902
         for partition_id in range(self._num_partitions):
             for shard_idx in nid_to_shard_indices[partition_id]:
                 start_id = int(shard_idx * self._shard_size)
-                end_id = min(
-                    int((shard_idx + 1) * self._shard_size), len(self._sorted_dataset)
-                )
+                end_id = min(int((shard_idx + 1) * self._shard_size), len(self.dataset))
                 partition_id_to_indices[partition_id].extend(
                     list(range(start_id, end_id))
                 )
