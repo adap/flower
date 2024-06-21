@@ -1,4 +1,4 @@
-# FlowerTune-LLM on $challenge_name Dataset
+# FlowerTune LLM on $challenge_name Dataset
 
 This directory conducts federated instruction tuning with a pretrained [Mistral-7B](https://huggingface.co/mistralai/Mistral-7B-v0.3) model on a [$challenge_name dataset](https://huggingface.co/datasets/$dataset_name).
 We use [Flower Datasets](https://flower.dev/docs/datasets/) to download, partition and preprocess the dataset.

@@ -1,4 +1,4 @@
-"""$project_name: A Flower / flwrtune app."""
+"""$project_name: A Flower / FlowerTune app."""
 
 from collections import OrderedDict
 from typing import Callable, Dict, Tuple

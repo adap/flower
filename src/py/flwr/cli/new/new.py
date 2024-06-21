@@ -41,7 +41,7 @@ class MlFramework(str, Enum):
     HUGGINGFACE = "HF"
     MLX = "MLX"
     SKLEARN = "sklearn"
-    FLWRTUNE = "flwrtune"
+    FLOWERTUNE = "FlowerTune"
 
 
 class LlmChallengeName(str, Enum):
@@ -136,7 +136,7 @@ def new(
 
     framework_str = framework_str.lower()
 
-    if framework_str == "flwrtune":
+    if framework_str == "flowertune":
         llm_challenge_value = prompt_options(
             "Please select LLM challenge by typing in the number",
             sorted([challenge.value for challenge in LlmChallengeName]),
@@ -171,24 +171,24 @@ def new(
     }
 
     # List of files to render
-    if framework_str == "flwrtune":
+    if framework_str == "flowertune":
         files = {
             ".gitignore": {"template": "app/.gitignore.tpl"},
             "pyproject.toml": {"template": f"app/pyproject.{framework_str}.toml.tpl"},
             "README.md": {"template": f"app/README.{framework_str}.md.tpl"},
             f"{import_name}/__init__.py": {"template": "app/code/__init__.py.tpl"},
-            f"{import_name}/server.py": {"template": "app/code/flwrtune/server.py.tpl"},
-            f"{import_name}/client.py": {"template": "app/code/flwrtune/client.py.tpl"},
-            f"{import_name}/app.py": {"template": "app/code/flwrtune/app.py.tpl"},
-            f"{import_name}/models.py": {"template": "app/code/flwrtune/models.py.tpl"},
+            f"{import_name}/server.py": {"template": "app/code/flwr_tune/server.py.tpl"},
+            f"{import_name}/client.py": {"template": "app/code/flwr_tune/client.py.tpl"},
+            f"{import_name}/app.py": {"template": "app/code/flwr_tune/app.py.tpl"},
+            f"{import_name}/models.py": {"template": "app/code/flwr_tune/models.py.tpl"},
             f"{import_name}/dataset.py": {
-                "template": "app/code/flwrtune/dataset.py.tpl"
+                "template": "app/code/flwr_tune/dataset.py.tpl"
             },
             f"{import_name}/conf/config.yaml": {
-                "template": "app/code/flwrtune/config.yaml.tpl"
+                "template": "app/code/flwr_tune/config.yaml.tpl"
             },
             f"{import_name}/conf/static_config.yaml": {
-                "template": "app/code/flwrtune/static_config.yaml.tpl"
+                "template": "app/code/flwr_tune/static_config.yaml.tpl"
             },
         }
 
