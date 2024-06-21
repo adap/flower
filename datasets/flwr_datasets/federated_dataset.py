@@ -151,8 +151,9 @@ class FederatedDataset:
             event(
                 EventType.LOAD_PARTITION_CALLED,
                 {
-                    "dataset_name": self._dataset_name,
                     "federated_dataset_id": id(self),
+                    "dataset_name": self._dataset_name,
+                    "split": split,
                     "partitioner": partitioner.__class__.__name__,
                     "num_partitions": partitioner.num_partitions,
                 },
@@ -187,8 +188,9 @@ class FederatedDataset:
             event(
                 EventType.LOAD_SPLIT_CALLED,
                 {
-                    "dataset_name": self._dataset_name,
                     "federated_dataset_id": id(self),
+                    "dataset_name": self._dataset_name,
+                    "split": split,
                 },
             )
             self._telemetry_sent["load_split"][split] = True
