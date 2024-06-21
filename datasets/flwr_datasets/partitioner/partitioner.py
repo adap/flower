@@ -152,10 +152,6 @@ class Partitioner(ABC):
 
         yaml_handler = YamlHandler()
         yaml_handler.dump(config, config_path)
-        # with open(config_path, "w") as file:
-        #     yaml_handler = YamlHandler()
-        #     yaml_handler.dump(config, file)
-        #     # yaml.safe_dump(config, file)
 
     @classmethod
     def from_config(
@@ -214,10 +210,6 @@ class Partitioner(ABC):
         """
         yaml_handler = YamlHandler()
         config = yaml_handler.load(config_path)
-        # with open(config_path) as file:
-        #     yaml_handler = YamlHandler()
-        #     config = yaml_handler.load(file)
-            # config = yaml.safe_load(file)
         partition_id_to_indices = None
         if infer_partition_id_to_indices:
             partition_id_to_indices_path = config.pop(
