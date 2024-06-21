@@ -145,7 +145,7 @@ def _recordset_to_fit_or_evaluate_ins_components(
     # get config dict
     config_record = recordset.configs_records[f"{ins_str}.config"]
     # pylint: disable-next=protected-access
-    config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record._data)
+    config_dict = _check_mapping_from_recordscalartype_to_scalar(config_record)
 
     return parameters, config_dict
 

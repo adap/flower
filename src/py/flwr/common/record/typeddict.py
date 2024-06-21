@@ -15,76 +15,92 @@
 """Typed dict base class for *Records."""
 
 
-from typing import Any, Callable, Dict, Generic, Iterator, Tuple, TypeVar, cast
+from collections.abc import MutableMapping
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generic,
+    ItemsView,
+    Iterator,
+    KeysView,
+    Optional,
+    TypeVar,
+    Union,
+    ValuesView,
+    cast,
+    overload,
+)
 
 K = TypeVar("K")  # Key type
 V = TypeVar("V")  # Value type
+_T = TypeVar("_T")
 
 
-class TypedDict(Generic[K, V]):
+class TypedDict(MutableMapping[K, V], Generic[K, V]):
     """Typed dictionary."""
 
     def __init__(
         self, check_key_fn: Callable[[K], None], check_value_fn: Callable[[V], None]
     ):
-        setattr(self, "_check_key_fn", check_key_fn)  # noqa
-        setattr(self, "_check_value_fn", check_value_fn)  # noqa
-        self._data: Dict[K, V] = {}
+        self.__dict__["_check_key_fn"] = check_key_fn
+        self.__dict__["_check_value_fn"] = check_value_fn
+        self.__dict__["_data"] = {}
 
     def __setitem__(self, key: K, value: V) -> None:
         """Set the given key to the given value after type checking."""
-        # Retrieve members
-        check_k = cast(Callable[[K], None], getattr(self, "_check_key_fn"))  # noqa
-        check_v = cast(Callable[[V], None], getattr(self, "_check_value_fn"))  # noqa
         # Check the types of key and value
-        check_k(key)
-        check_v(value)
+        cast(Callable[[K], None], self.__dict__["_check_key_fn"])(key)
+        cast(Callable[[V], None], self.__dict__["_check_value_fn"])(value)
+
         # Set key-value pair
-        self._data[key] = value
+        cast(Dict[K, V], self.__dict__["_data"])[key] = value
 
     def __delitem__(self, key: K) -> None:
         """Remove the item with the specified key."""
-        del self._data[key]
+        del cast(Dict[K, V], self.__dict__["_data"])[key]
 
     def __getitem__(self, item: K) -> V:
         """Return the value for the specified key."""
-        return self._data[item]
+        return cast(Dict[K, V], self.__dict__["_data"])[item]
 
     def __iter__(self) -> Iterator[K]:
         """Yield an iterator over the keys of the dictionary."""
-        return iter(self._data)
+        return iter(cast(Dict[K, V], self.__dict__["_data"]))
 
     def __repr__(self) -> str:
         """Return a string representation of the dictionary."""
-        return self._data.__repr__()
+        return cast(Dict[K, V], self.__dict__["_data"]).__repr__()
 
     def __len__(self) -> int:
         """Return the number of items in the dictionary."""
-        return len(self._data)
+        return len(cast(Dict[K, V], self.__dict__["_data"]))
 
-    def __contains__(self, key: K) -> bool:
+    def __contains__(self, key: object) -> bool:
         """Check if the dictionary contains the specified key."""
-        return key in self._data
+        return key in cast(Dict[K, V], self.__dict__["_data"])
 
     def __eq__(self, other: object) -> bool:
         """Compare this instance to another dictionary or TypedDict."""
+        data = cast(Dict[K, V], self.__dict__["_data"])
         if isinstance(other, TypedDict):
-            return self._data == other._data
+            other_data = cast(Dict[K, V], other.__dict__["_data"])
+            return data == other_data
         if isinstance(other, dict):
-            return self._data == other
+            return data == other
         return NotImplemented
 
-    def items(self) -> Iterator[Tuple[K, V]]:
+    def items(self) -> ItemsView[K, V]:
         """R.items() -> a set-like object providing a view on R's items."""
-        return cast(Iterator[Tuple[K, V]], self._data.items())
+        return cast(Dict[K, V], self.__dict__["_data"]).items()
 
-    def keys(self) -> Iterator[K]:
+    def keys(self) -> KeysView[K]:
         """R.keys() -> a set-like object providing a view on R's keys."""
-        return cast(Iterator[K], self._data.keys())
+        return cast(Dict[K, V], self.__dict__["_data"]).keys()
 
-    def values(self) -> Iterator[V]:
+    def values(self) -> ValuesView[V]:
         """R.values() -> an object providing a view on R's values."""
-        return cast(Iterator[V], self._data.values())
+        return cast(Dict[K, V], self.__dict__["_data"]).values()
 
     def update(self, *args: Any, **kwargs: Any) -> None:
         """R.update([E, ]**F) -> None.
@@ -94,23 +110,46 @@ class TypedDict(Generic[K, V]):
         for key, value in dict(*args, **kwargs).items():
             self[key] = value
 
-    def pop(self, key: K) -> V:
+    @overload
+    def pop(self, key: K, /) -> V: ...
+
+    @overload
+    def pop(self, key: K, /, default: V) -> V: ...
+
+    @overload
+    def pop(self, key: K, /, default: _T) -> Union[V, _T]: ...
+
+    def pop(self, key: K, default: Union[V, _T, None] = None) -> Union[V, _T]:
         """R.pop(k[,d]) -> v, remove specified key and return the corresponding value.
 
         If key is not found, d is returned if given, otherwise KeyError is raised.
         """
-        return self._data.pop(key)
+        if default is None:
+            return cast(Dict[K, V], self.__dict__["_data"]).pop(key)
+        else:
+            return cast(Dict[K, V], self.__dict__["_data"]).pop(key, default)
 
-    def get(self, key: K, default: V) -> V:
+    @overload
+    def get(self, key: K, /) -> Optional[V]: ...
+
+    @overload
+    def get(self, key: K, /, default: Union[V, _T]) -> Union[V, _T]: ...
+
+    def get(
+        self, key: K, /, default: Union[V, _T, None] = None
+    ) -> Union[Optional[V], _T]:
         """R.get(k[,d]) -> R[k] if k in R, else d.
 
         d defaults to None.
         """
-        return self._data.get(key, default)
+        if default is None:
+            return cast(Dict[K, V], self.__dict__["_data"]).get(key)
+        else:
+            return cast(Dict[K, V], self.__dict__["_data"]).get(key, default)
 
     def clear(self) -> None:
         """R.clear() -> None.
 
         Remove all items from R.
         """
-        self._data.clear()
+        cast(Dict[K, V], self.__dict__["_data"]).clear()
