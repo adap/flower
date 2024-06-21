@@ -149,11 +149,13 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
     )
     # Create run if run_id is not provided
     if args.run_id is None:
+        # User provided `server-app`, but not `--run-id`
         stub.connect()
         req = CreateRunRequest(fab_id=args.fab_id, fab_version=args.fab_version)
         res = stub.create_run(req)
         run_id = res.run_id
     else:
+        # User provided `--run-id`, but not `server-app`
         run_id = args.run_id
 
     # Initialize GrpcDriver
@@ -161,12 +163,14 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
 
     # Dynamically obtain ServerApp path based on run_id
     if args.run_id is not None:
+	# User provided `--run-id`, but not `server-app`
         flwr_dir = get_flwr_dir(args.flwr_dir)
         run_ = driver.run
         server_app_dir = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
         config = get_project_config(server_app_dir)
         server_app_attr = config["flower"]["components"]["serverapp"]
     else:
+        # User provided `server-app`, but not `--run-id`
         server_app_dir = str(Path(args.dir).absolute())
 
     log(DEBUG, "Flower will load ServerApp `%s` in %s", server_app_attr, server_app_dir)
