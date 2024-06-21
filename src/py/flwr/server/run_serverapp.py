@@ -140,8 +140,8 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
     server_app_attr: Optional[str] = getattr(args, "server-app")
     if not (server_app_attr is None) ^ (args.run_id is None):
         raise sys.exit(
-            "Invalid options: Either `server-app` or `--run-id` "
-            "should be set but not both."
+            "Please provide either a ServerApp reference or a Run ID. "
+            "For more details, use: ``flower-server-app -h``"
         )
 
     stub = GrpcDriverStub(
