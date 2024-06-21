@@ -103,15 +103,10 @@ class FederatedDataset:
         self._dataset: Optional[DatasetDict] = None
         # Indicate if the dataset is prepared for `load_partition` or `load_split`
         self._dataset_prepared: bool = False
-        event(
-            EventType.FEDERATED_DATASET_CREATED,
-            {
-                "dataset_name": self._dataset_name,
-                "partitioners_ids": [
-                    id(partitioner) for partitioner in partitioners.values()
-                ],
-            },
-        )
+        self._telemetry_sent = {
+            "load_partition": {split: False for split in self._partitioners.keys()},
+            "load_split": {split: False for split in self._partitioners.keys()},
+        }
 
     def load_partition(
         self,
@@ -151,7 +146,19 @@ class FederatedDataset:
         self._check_if_split_possible_to_federate(split)
         partitioner: Partitioner = self._partitioners[split]
         self._assign_dataset_to_partitioner(split)
-        return partitioner.load_partition(partition_id)
+        partition = partitioner.load_partition(partition_id)
+        if not self._telemetry_sent["load_partition"][split]:
+            event(
+                EventType.LOAD_PARTITION_CALLED,
+                {
+                    "dataset_name": self._dataset_name,
+                    "federated_dataset_id": id(self),
+                    "partitioner": partitioner.__class__.__name__,
+                    "num_partitions": partitioner.num_partitions,
+                },
+            )
+            self._telemetry_sent["load_partition"][split] = True
+        return partition
 
     def load_split(self, split: str) -> Dataset:
         """Load the full split of the dataset.
@@ -174,7 +181,19 @@ class FederatedDataset:
         if self._dataset is None:
             raise ValueError("Dataset is not loaded yet.")
         self._check_if_split_present(split)
-        return self._dataset[split]
+        dataset_split = self._dataset[split]
+
+        if not self._telemetry_sent["load_split"][split]:
+            event(
+                EventType.LOAD_SPLIT_CALLED,
+                {
+                    "dataset_name": self._dataset_name,
+                    "federated_dataset_id": id(self),
+                },
+            )
+            self._telemetry_sent["load_split"][split] = True
+
+        return dataset_split
 
     @property
     def partitioners(self) -> Dict[str, Partitioner]:

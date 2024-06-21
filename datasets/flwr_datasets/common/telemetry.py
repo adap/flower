@@ -119,8 +119,10 @@ class EventType(str, Enum):
 
     PING = auto()
 
-    FEDERATED_DATASET_CREATED = auto()
-    PARTITIONER_CREATED = auto()
+    LOAD_PARTITION_CALLED = auto()
+    LOAD_SPLIT_CALLED = auto()
+    PLOT_LABEL_DISTRIBUTION_CALLED = auto()
+    PLOT_COMPARISON_LABEL_DISTRIBUTION_CALLED = auto()
 
 
 # Use the ThreadPoolExecutor with max_workers=1 to have a queue
