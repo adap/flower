@@ -163,7 +163,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
 
     # Dynamically obtain ServerApp path based on run_id
     if args.run_id is not None:
-	# User provided `--run-id`, but not `server-app`
+        # User provided `--run-id`, but not `server-app`
         flwr_dir = get_flwr_dir(args.flwr_dir)
         run_ = driver.run
         server_app_dir = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
