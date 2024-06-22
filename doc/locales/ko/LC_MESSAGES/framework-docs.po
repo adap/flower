@@ -6192,24 +6192,29 @@ msgid ""
 "Remember that the here chosen values only serve as an example. You can "
 "change them to your needs."
 msgstr ""
+"이미지에``flwr_serverapp``이라는 이름을 붙이고 ``0.0.1``이라는 태그를 붙였습"
+"니다. 여기서 선택한 값은 예시일 뿐이라는 점을 기억하세요. 필요에 따라 변경할 "
+"수 있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:357
 msgid "Running the ServerApp Docker image"
-msgstr ""
+msgstr "ServerApp Docker 이미지 실행"
 
 #: ../../source/how-to-run-flower-using-docker.rst:359
 msgid "Now that we have built the ServerApp image, we can finally run it."
-msgstr ""
+msgstr "이제 ServerApp 이미지를 빌드했으니 이제 실행할 수 있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:371
 msgid "``flwr_serverapp:0.0.1``: The name the tag of the Docker image to use."
-msgstr ""
+msgstr "``flwr_serverapp:0.0.1``: 사용할 Docker 이미지의 태그 이름입니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst
 msgid ""
 "``--superlink 192.168.1.100:9091``: This option specifies the address of the "
 "SuperLinks Driver"
 msgstr ""
+"``--superlink 192.168.1.100:9091``: 이 옵션은 SuperLinks 드라이버의 주소를 지"
+"정합니다"
 
 #: ../../source/how-to-run-flower-using-docker.rst:385
 msgid ""
@@ -6218,18 +6223,26 @@ msgid ""
 "networks>`__, use the ``--network`` argument and pass the name of the Docker "
 "network to run your ServerApps."
 msgstr ""
+"로컬에서 Flower를 실행하는 것을 테스트하려면 `bridge network <https://docs."
+"docker.com/network/network-tutorial-standalone/#use-user-defined-bridge-"
+"networks>`__,를 생성하고 ``--network`` argument를 사용하여 ServerApp을 실행"
+"할 Docker 네트워크의 이름을 전달하면 됩니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:389
 msgid ""
 "Any argument that comes after the tag is passed to the Flower ServerApp "
 "binary. To see all available flags that the ServerApp supports, run:"
 msgstr ""
+"태그 뒤에 오는 모든 argument는 Flower ServerApp 바이너리에 전달됩니다. "
+"ServerApp에서 지원하는 사용 가능한 모든 플래그를 보려면 실행하세요:"
 
 #: ../../source/how-to-run-flower-using-docker.rst:399
 msgid ""
 "To enable SSL, we will need to mount a PEM-encoded root certificate into "
 "your ServerApp container."
 msgstr ""
+"SSL을 사용하려면 PEM 인코딩된 루트 인증서를 ServerApp 컨테이너에 마운트해야 "
+"합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:401
 msgid ""
@@ -6238,14 +6251,18 @@ msgid ""
 "directory. This allows the ServerApp to access the certificate within the "
 "container. Use the ``--root-certificates`` flags when starting the container."
 msgstr ""
+"인증서가 이미 로컬에 존재한다고 가정하면, ``--volume`` 플래그를 사용하여 로"
+"컬 인증서를 컨테이너의 ``/app/`` 디렉터리에 마운트할 수 있습니다. 이렇게 하"
+"면 ServerApp이 컨테이너 내의 인증서에 액세스할 수 있습니다. 컨테이너를 시작"
+"할 때 ``--root-certificates`` 플래그를 사용하세요."
 
 #: ../../source/how-to-run-flower-using-docker.rst:412
 msgid "Advanced Docker options"
-msgstr ""
+msgstr "고급 Docker 옵션"
 
 #: ../../source/how-to-run-flower-using-docker.rst:415
 msgid "Run with root user privileges"
-msgstr ""
+msgstr "루트 사용자 권한으로 실행"
 
 #: ../../source/how-to-run-flower-using-docker.rst:417
 msgid ""
@@ -6255,24 +6272,31 @@ msgid ""
 "make sure to run the container as a non-root user in production to maintain "
 "security best practices."
 msgstr ""
+"기본적으로 Flower Docker 이미지는 루트 사용자가 아닌 사용자(사용자명/그룹명:"
+"``app``, UID/GID: ``49999``)로 실행됩니다. 빌드 프로세스 중 특정 작업에 필요"
+"한 경우가 아니라면 루트 사용자를 사용하지 않는 것이 좋습니다. 보안 모범 사례"
+"를 유지하려면 항상 프로덕션 환경에서 루트 사용자가 아닌 사용자로 컨테이너를 "
+"실행해야 합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:422
 msgid "**Run a container with root user privileges**"
-msgstr ""
+msgstr "**루트 사용자 권한으로 컨테이너 실행하기**"
 
 #: ../../source/how-to-run-flower-using-docker.rst:424
 msgid ""
 "Run the Docker image with the ``-u`` flag and specify ``root`` as the "
 "username:"
 msgstr ""
+"``-u`` 플래그를 사용하여 Docker 이미지를 실행하고 사용자 이름으로 ``root``를 "
+"지정합니다:"
 
 #: ../../source/how-to-run-flower-using-docker.rst:430
 msgid "This command will run the Docker container with root user privileges."
-msgstr ""
+msgstr "이 명령은 루트 사용자 권한으로 Docker 컨테이너를 실행합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:432
 msgid "**Run the build process with root user privileges**"
-msgstr ""
+msgstr "**루트 사용자 권한으로 빌드 프로세스를 실행합니다**"
 
 #: ../../source/how-to-run-flower-using-docker.rst:434
 msgid ""
@@ -6280,10 +6304,12 @@ msgid ""
 "Docker image to install missing system dependencies, you can use the ``USER "
 "root`` directive within your Dockerfile."
 msgstr ""
+"Docker 이미지 빌드 과정에서 루트 사용자로 전환하여 누락된 시스템 dependencies"
+"을 설치하려면 Dockerfile 내에서 ``USER root`` 지시어를 사용할 수 있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:454
 msgid "Using a different Flower version"
-msgstr ""
+msgstr "다른 Flower 버전 사용"
 
 #: ../../source/how-to-run-flower-using-docker.rst:456
 msgid ""
@@ -6291,10 +6317,13 @@ msgid ""
 "nightly, you can do so by changing the tag. All available versions are on "
 "`Docker Hub <https://hub.docker.com/u/flwr>`__."
 msgstr ""
+"다른 버전의 Flower를 사용하려면 태그를 변경하여 사용할 수 있습니다(예: "
+"Flower nightly). 사용 가능한 모든 버전은 `Docker Hub <https://hub.docker.com/"
+"u/flwr>`__에 있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:460
 msgid "Pinning a Docker image to a specific version"
-msgstr ""
+msgstr "특정 버전에 Docker 이미지 고정하기"
 
 #: ../../source/how-to-run-flower-using-docker.rst:462
 msgid ""
@@ -6304,30 +6333,38 @@ msgid ""
 "always use the same image, you can specify the hash of the image instead of "
 "the tag."
 msgstr ""
+"태그 뒤에 있는 이미지가 업데이트될 수 있습니다. 이러한 업데이트에는 일반적으"
+"로 Flower의 기능을 변경해서는 안 되는 시스템 dependencies에 대한 보안 업데이"
+"트가 포함됩니다. 그러나 항상 동일한 이미지를 사용하려면 태그 대신 이미지의 해"
+"시를 지정할 수 있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:467
 msgid ""
 "The following command returns the current image hash referenced by the "
 "``superlink:1.8.0`` tag:"
 msgstr ""
+"다음 명령은 ``superlink:1.8.0`` 태그가 참조하는 현재 이미지 해시를 반환합니"
+"다:"
 
 #: ../../source/how-to-run-flower-using-docker.rst:474
 msgid "Next, we can pin the hash when running a new SuperLink container:"
-msgstr ""
+msgstr "다음으로, 새 SuperLink 컨테이너를 실행할 때 해시를 고정할 수 있습니다:"
 
 #: ../../source/how-to-run-flower-using-docker.rst:483
 msgid "Setting environment variables"
-msgstr ""
+msgstr "환경 변수 설정"
 
 #: ../../source/how-to-run-flower-using-docker.rst:485
 msgid ""
 "To set a variable inside a Docker container, you can use the ``-e "
 "<name>=<value>`` flag."
 msgstr ""
+"Docker 컨테이너 내에서 변수를 설정하려면 ``-e <name>=<value>`` 플래그를 사용"
+"하면 됩니다."
 
 #: ../../source/how-to-run-simulations.rst:2
 msgid "Run simulations"
-msgstr ""
+msgstr "시뮬레이션 실행"
 
 #: ../../source/how-to-run-simulations.rst:8
 msgid ""
@@ -6343,6 +6380,15 @@ msgid ""
 "scenarios by means of its `VirtualClientEngine <contributor-explanation-"
 "architecture.html#virtual-client-engine>`_ or VCE."
 msgstr ""
+"Federated 학습 워크로드 시뮬레이션은 다양한 사용 사례에 유용합니다. 대규모 클"
+"라이언트 집단에서 워크로드를 실행하되 많은 수의 물리적 장치를 소싱, 구성 및 "
+"관리할 필요가 없는 경우, 복잡한 설정 과정을 거치지 않고도 액세스 가능한 컴퓨"
+"팅 시스템에서 최대한 빠르게 FL 워크로드를 실행하려는 경우, 다양한 수준의 데이"
+"터 및 시스템 이질성, 클라이언트 가용성, 개인정보 예산 등의 다양한 시나리오에"
+"서 알고리즘을 검증하려는 경우 등 여러 가지 사용 사례에 유용합니다. 이러한 사"
+"례는 FL 워크로드 시뮬레이션이 적합한 사용 사례 중 일부입니다. Flower는 "
+"`VirtualClientEngine <contributor-explanation-architecture.html#virtual-"
+"client-engine>`_ 또는 VCE를 통해 이러한 시나리오를 수용할 수 있습니다."
 
 #: ../../source/how-to-run-simulations.rst:10
 msgid ""
@@ -6354,6 +6400,13 @@ msgid ""
 "html#flwr.client.NumPyClient>`_ and therefore behave in an identical way. In "
 "addition to that, clients managed by the :code:`VirtualClientEngine` are:"
 msgstr ""
+":code:`VirtualClientEngine`은 `virtual` 클라이언트를 예약, 실행 및 관리합니"
+"다. 이러한 클라이언트는 `non-virtual` 클라이언트(예: `flwr.client."
+"start_client <ref-api-flwr.html#start-client>`_ 명령을 통해 실행하는 클라이언"
+"트)와 동일하며, `flwr.client.NumPyClient <ref-api-flwr.html#flwr.client."
+"NumPyClient>`_에서 상속하는 클래스 생성으로 구성될 수 있으므로 동일한 방식으"
+"로 동작합니다. 그 외에도 :code:`VirtualClientEngine`에 의해 관리되는 클라이언"
+"트는 다음과 같습니다:"
 
 #: ../../source/how-to-run-simulations.rst:12
 msgid ""
@@ -6363,6 +6416,11 @@ msgid ""
 "parallelism of your Flower FL simulation. The fewer the resources per "
 "client, the more clients can run concurrently on the same hardware."
 msgstr ""
+"resource-aware: 이는 각 클라이언트가 시스템에서 컴퓨팅 및 메모리의 일부를 할"
+"당받는다는 것을 의미합니다. 사용자는 시뮬레이션을 시작할 때 이를 제어할 수 있"
+"으며, 이를 통해 Flower FL 시뮬레이션의 병렬 처리 정도를 제어할 수 있습니다. "
+"클라이언트당 리소스가 적을수록 동일한 하드웨어에서 더 많은 클라이언트를 동시"
+"에 실행할 수 있습니다."
 
 #: ../../source/how-to-run-simulations.rst:13
 msgid ""
@@ -6370,6 +6428,8 @@ msgid ""
 "manually, instead this gets delegated to :code:`VirtualClientEngine`'s "
 "internals."
 msgstr ""
+"self-managed: 이는 사용자가 클라이언트를 수동으로 실행할 필요가 없으며, 대"
+"신 :code:`VirtualClientEngine`의 내부에 위임된다는 의미입니다."
 
 #: ../../source/how-to-run-simulations.rst:14
 msgid ""
@@ -6378,6 +6438,10 @@ msgid ""
 "fit>`_). The object is destroyed afterwards, releasing the resources it was "
 "assigned and allowing in this way other clients to participate."
 msgstr ""
+"ephemeral: 이는 클라이언트가 FL 프로세스에서 필요할 때만 구체화됨을 의미합니"
+"다(예: `fit() <ref-api-flwr.html#flwr.client.Client.fit>`_을 수행하기 위해). "
+"객체는 나중에 소멸되어 할당된 리소스를 해제하고 다른 클라이언트가 참여할 수 "
+"있도록 허용합니다."
 
 #: ../../source/how-to-run-simulations.rst:16
 msgid ""
@@ -6387,10 +6451,15 @@ msgid ""
 "`Actors <https://docs.ray.io/en/latest/ray-core/actors.html>`_ to spawn "
 "`virtual` clients and run their workload."
 msgstr ""
+":code:`VirtualClientEngine`은 확장 가능한 파이썬 워크로드를 위한 오픈 소스 프"
+"레임워크인 `Ray <https://www.ray.io/>`_를 사용하여 `virtual` 클라이언트를 구"
+"현합니다. 특히 Flower의 :code:`VirtualClientEngine`은 `Actors <https://docs."
+"ray.io/en/latest/ray-core/actors.html>`_를 사용하여 `virtual` 클라이언트를 생"
+"성하고 해당 워크로드를 실행합니다."
 
 #: ../../source/how-to-run-simulations.rst:20
 msgid "Launch your Flower simulation"
-msgstr ""
+msgstr "Flower 시뮬레이션 시작"
 
 #: ../../source/how-to-run-simulations.rst:22
 msgid ""
@@ -6400,10 +6469,15 @@ msgid ""
 "is done with `start_simulation <ref-api-flwr.html#flwr.simulation."
 "start_simulation>`_ and a minimal example looks as follows:"
 msgstr ""
+"Flower 시뮬레이션을 실행하려면 여전히 클라이언트 클래스, 전략 및 유틸리티 함"
+"수를 정의하여 데이터 세트를 다운로드하고 로드(및 파티션)해야 합니다. 이 작업"
+"을 마친 후 시뮬레이션을 시작하려면 `start_simulation <ref-api-flwr.html#flwr."
+"simulation.start_simulation>`_을 사용하면 되며, 최소한의 예시는 다음과 같습니"
+"다:"
 
 #: ../../source/how-to-run-simulations.rst:44
 msgid "VirtualClientEngine resources"
-msgstr ""
+msgstr "VirtualClientEngine 리소스"
 
 #: ../../source/how-to-run-simulations.rst:45
 msgid ""
@@ -6418,10 +6492,19 @@ msgid ""
 "code:`ray_init_args` if you want the VCE to use all your system's CPUs and "
 "GPUs."
 msgstr ""
+"기본적으로 VCE는 모든 시스템 리소스(예: 모든 CPU, 모든 GPU 등)에 액세스할 수 "
+"있으며, 이는 Ray를 시작할 때의 기본 동작이기도 합니다. 그러나 일부 설정에서"
+"는 시뮬레이션에 사용되는 시스템 리소스의 수를 제한하고 싶을 수 있습니다. 이 "
+"설정은 VCE가 내부적으로 Ray의 :code:`ray.init` 명령에 전달하는 :code:"
+"`start_simulation`에 대한 :code:`ray_init_args` 입력 인수를 통해 수행할 수 있"
+"습니다. 구성할 수 있는 전체 설정 목록은 `ray.init <https://docs.ray.io/en/"
+"latest/ray-core/api/doc/ray.init.html#ray-init>`_ 설명서를 확인하세요. VCE가 "
+"시스템의 모든 CPU와 GPU를 사용하도록 하려면 :code:`ray_init_args`를 설정하지 "
+"마세요."
 
 #: ../../source/how-to-run-simulations.rst:62
 msgid "Assigning client resources"
-msgstr ""
+msgstr "클라이언트 리소스 할당"
 
 #: ../../source/how-to-run-simulations.rst:63
 msgid ""
@@ -6429,6 +6512,9 @@ msgid ""
 "nothing else) to each virtual client. This means that if your system has 10 "
 "cores, that many virtual clients can be concurrently running."
 msgstr ""
+"기본적으로 :code:`VirtualClientEngine`은 각 가상 클라이언트에 단일 CPU 코어"
+"를 할당합니다(그 외에는 아무것도 할당하지 않음). 즉, 시스템에 코어가 10개인 "
+"경우 그만큼 많은 가상 클라이언트를 동시에 실행할 수 있습니다."
 
 #: ../../source/how-to-run-simulations.rst:65
 msgid ""
@@ -6439,20 +6525,28 @@ msgid ""
 "flwr.html#flwr.simulation.start_simulation>`_. Two keys are internally used "
 "by Ray to schedule and spawn workloads (in our case Flower clients):"
 msgstr ""
+"대부분의 경우 FL 워크로드의 복잡성(즉, 컴퓨팅 및 메모리 사용량)에 따라 클라이"
+"언트에 할당되는 리소스를 조정하고 싶을 것입니다. 시뮬레이션을 시작할 때 "
+"`client_resources` argument를 `start_simulation <ref-api-flwr.html#flwr."
+"simulation.start_simulation>`_로 설정하여 이를 수행할 수 있습니다. Ray는 내부"
+"적으로 두 개의 키를 사용하여 워크로드(이 경우 Flower 클라이언트)를 스케줄링하"
+"고 스폰합니다:"
 
 #: ../../source/how-to-run-simulations.rst:67
 msgid ":code:`num_cpus` indicates the number of CPU cores a client would get."
 msgstr ""
+":code:`num_cpus`는 클라이언트에서 사용할 수 있는 CPU 코어 수를 나타냅니다."
 
 #: ../../source/how-to-run-simulations.rst:68
 msgid ""
 ":code:`num_gpus` indicates the **ratio** of GPU memory a client gets "
 "assigned."
 msgstr ""
+":code:`num_gpus`는 클라이언트에 할당되는 GPU 메모리의 **비율**을 나타냅니다."
 
 #: ../../source/how-to-run-simulations.rst:70
 msgid "Let's see a few examples:"
-msgstr ""
+msgstr "몇 가지 예를 살펴보겠습니다:"
 
 #: ../../source/how-to-run-simulations.rst:89
 msgid ""
@@ -6466,6 +6560,13 @@ msgid ""
 "strategy) and then will execute them in a resource-aware manner in batches "
 "of 8."
 msgstr ""
+"code:`client_resources`를 사용하여 FL 시뮬레이션의 동시성 정도를 제어할 수 있"
+"지만, 동일한 라운드에서 수십, 수백 또는 수천 개의 클라이언트를 실행하고 훨씬 "
+"더 많은 '휴면'(즉, 라운드에 참여하지 않는) 클라이언트를 보유하는 것을 막을 수"
+"는 없습니다. 라운드당 100명의 클라이언트를 받고 싶지만 시스템이 동시에 8명의 "
+"클라이언트만 수용할 수 있다고 가정해 봅시다. code:`VirtualClientEngine`은 실"
+"행할 100개의 작업(각각 전략에서 샘플링한 클라이언트를 시뮬레이션)을 예약한 다"
+"음 리소스 인식 방식으로 8개씩 일괄적으로 실행합니다."
 
 #: ../../source/how-to-run-simulations.rst:91
 msgid ""
@@ -6474,10 +6575,13 @@ msgid ""
 "at the `Ray documentation <https://docs.ray.io/en/latest/ray-core/scheduling/"
 "resources.html>`_."
 msgstr ""
+"리소스가 FL 클라이언트를 예약하는 데 사용되는 방법과 사용자 지정 리소스를 정"
+"의하는 방법에 대한 모든 복잡한 세부 사항을 이해하려면 'Ray 문서 <https://"
+"docs.ray.io/en/latest/ray-core/scheduling/resources.html>'를 참조하세요."
 
 #: ../../source/how-to-run-simulations.rst:94
 msgid "Simulation examples"
-msgstr ""
+msgstr "시뮬레이션 예제"
 
 #: ../../source/how-to-run-simulations.rst:96
 msgid ""
@@ -6485,6 +6589,9 @@ msgid ""
 "Keras and PyTorch are provided in the `Flower repository <https://github.com/"
 "adap/flower>`_. You can run them on Google Colab too:"
 msgstr ""
+"Tensorflow/Keras와 파이토치에서 바로 실행할 수 있는 몇 가지 Flower 시뮬레이"
+"션 예제는 `Flower 레포지토리 <https://github.com/adap/flower>`_에서 제공됩니"
+"다. Google Colab에서도 실행할 수 있습니다:"
 
 #: ../../source/how-to-run-simulations.rst:98
 msgid ""
@@ -6492,6 +6599,9 @@ msgid ""
 "examples/simulation-tensorflow>`_: 100 clients collaboratively train a MLP "
 "model on MNIST."
 msgstr ""
+"`Tensorflow/Keras 시뮬레이션 <https://github.com/adap/flower/tree/main/"
+"examples/simulation-tensorflow>`_: 100개의 클라이언트가 공동으로 MNIST에서 "
+"MLP 모델을 훈련합니다."
 
 #: ../../source/how-to-run-simulations.rst:99
 msgid ""
@@ -6499,10 +6609,13 @@ msgid ""
 "simulation-pytorch>`_: 100 clients collaboratively train a CNN model on "
 "MNIST."
 msgstr ""
+"파이토치 시뮬레이션 <https://github.com/adap/flower/tree/main/examples/"
+"simulation-pytorch>`_: 100개의 클라이언트가 공동으로 MNIST에서 CNN 모델을 훈"
+"련합니다."
 
 #: ../../source/how-to-run-simulations.rst:104
 msgid "Multi-node Flower simulations"
-msgstr ""
+msgstr "멀티 노드 Flower 시뮬레이션"
 
 #: ../../source/how-to-run-simulations.rst:106
 msgid ""
@@ -6510,20 +6623,25 @@ msgid ""
 "multiple compute nodes. Before starting your multi-node simulation ensure "
 "that you:"
 msgstr ""
+"Flower의 :code:`VirtualClientEngine`을 사용하면 여러 컴퓨팅 노드에서 FL 시뮬"
+"레이션을 실행할 수 있습니다. 멀티 노드 시뮬레이션을 시작하기 전에 다음 사항"
+"을 확인하세요:"
 
 #: ../../source/how-to-run-simulations.rst:108
 msgid "Have the same Python environment in all nodes."
-msgstr ""
+msgstr "모든 노드에서 동일한 Python 환경을 유지합니다."
 
 #: ../../source/how-to-run-simulations.rst:109
 msgid "Have a copy of your code (e.g. your entire repo) in all nodes."
-msgstr ""
+msgstr "모든 노드에 코드 사본(예: 전체 레포지토리)을 보관하세요."
 
 #: ../../source/how-to-run-simulations.rst:110
 msgid ""
 "Have a copy of your dataset in all nodes (more about this in :ref:"
 "`simulation considerations <considerations-for-simulations>`)"
 msgstr ""
+"모든 노드에 데이터 세트의 사본을 보유하세요(자세한 내용은 :ref:`simulation "
+"considerations <considerations-for-simulations>`에서 확인하세요)"
 
 #: ../../source/how-to-run-simulations.rst:111
 msgid ""
@@ -6531,6 +6649,9 @@ msgid ""
 "api-flwr.html#flwr.simulation.start_simulation>`_ so the :code:"
 "`VirtualClientEngine` attaches to a running Ray instance."
 msgstr ""
+":code:`ray_init_args={\"address\"=\"auto\"}`를 `start_simulation <ref-api-"
+"flwr.html#flwr.simulation.start_simulation>`_에 전달하여 :code:"
+"`VirtualClientEngine`이 실행 중인 Ray 인스턴스에 연결되도록 합니다."
 
 #: ../../source/how-to-run-simulations.rst:112
 msgid ""
@@ -6538,6 +6659,9 @@ msgid ""
 "This command will print a few lines, one of which indicates how to attach "
 "other nodes to the head node."
 msgstr ""
+"헤드 노드에서 Ray 시작: 터미널에서 :code:`ray start --head`를 입력합니다. 이 "
+"명령은 몇 줄을 출력하며, 그 중 하나는 다른 노드를 헤드 노드에 연결하는 방법"
+"을 나타냅니다."
 
 #: ../../source/how-to-run-simulations.rst:113
 msgid ""
@@ -6545,12 +6669,17 @@ msgid ""
 "the head and execute it on terminal of a new node: for example :code:`ray "
 "start --address='192.168.1.132:6379'`"
 msgstr ""
+"헤드 노드에 다른 노드 연결: 헤드를 시작한 후 표시된 명령어을 복사하여 새 노드"
+"의 터미널에서 실행합니다: 예: :code:`ray start --"
+"address='192.168.1.132:6379'`"
 
 #: ../../source/how-to-run-simulations.rst:115
 msgid ""
 "With all the above done, you can run your code from the head node as you "
 "would if the simulation was running on a single node."
 msgstr ""
+"위의 모든 작업이 완료되면 단일 노드에서 시뮬레이션을 실행할 때와 마찬가지로 "
+"헤드 노드에서 코드를 실행할 수 있습니다."
 
 #: ../../source/how-to-run-simulations.rst:117
 msgid ""
@@ -6558,22 +6687,28 @@ msgid ""
 "you simply need to run the command :code:`ray stop` in each node's terminal "
 "(including the head node)."
 msgstr ""
+"시뮬레이션이 완료되면 클러스터를 해체하려면 각 노드(헤드 노드 포함)의 터미널"
+"에서 :code:`ray stop` 명령을 실행하기만 하면 됩니다."
 
 #: ../../source/how-to-run-simulations.rst:120
 msgid "Multi-node simulation good-to-know"
-msgstr ""
+msgstr "멀티 노드 시뮬레이션에 대해 알아두면 좋은 사항"
 
 #: ../../source/how-to-run-simulations.rst:122
 msgid ""
 "Here we list a few interesting functionality when running multi-node FL "
 "simulations:"
 msgstr ""
+"여기에서는 멀티 노드 FL 시뮬레이션을 실행할 때 흥미로운 몇 가지 기능을 나열합"
+"니다:"
 
 #: ../../source/how-to-run-simulations.rst:124
 msgid ""
 "User :code:`ray status` to check all nodes connected to your head node as "
 "well as the total resources available to the :code:`VirtualClientEngine`."
 msgstr ""
+"사용자는 :code:`ray status`를 통해 헤드 노드에 연결된 모든 노드와 :code:"
+"`VirtualClientEngine`에 사용 가능한 총 리소스를 확인할 수 있습니다."
 
 #: ../../source/how-to-run-simulations.rst:126
 msgid ""
@@ -6585,16 +6720,24 @@ msgid ""
 "cpus=<NUM_CPUS_FROM_NODE>` and/or `--num-gpus=<NUM_GPUS_FROM_NODE>` in any :"
 "code:`ray start` command (including when starting the head)"
 msgstr ""
+"새 노드를 헤드에 연결하면 해당 노드의 모든 리소스(즉, 모든 CPU, 모든 GPU)가 "
+"헤드 노드에 표시됩니다. 즉, :code:`VirtualClientEngine`은 해당 노드가 실행할 "
+"수 있는 만큼의 `가상` 클라이언트를 예약할 수 있습니다. 일부 설정에서는 시뮬레"
+"이션에서 특정 리소스를 제외하고 싶을 수 있습니다. 모든 :code:`ray start` 명령"
+"(헤드 시작 시 포함)에 `--num-cpus=<NUM_CPUS_FROM_NODE>` 및/또는 `--num-"
+"gpus=<NUM_GPUS_FROM_NODE>`를 추가하여 이 작업을 수행하면 됩니다"
 
 #: ../../source/how-to-run-simulations.rst:132
 msgid "Considerations for simulations"
-msgstr ""
+msgstr "시뮬레이션 시 고려 사항"
 
 #: ../../source/how-to-run-simulations.rst:135
 msgid ""
 "We are actively working on these fronts so to make it trivial to run any FL "
 "workload with Flower simulation."
 msgstr ""
+"Flower 시뮬레이션으로 모든 FL 워크로드를 간편하게 실행할 수 있도록 이러한 측"
+"면에서 적극적으로 노력하고 있습니다."
 
 #: ../../source/how-to-run-simulations.rst:138
 msgid ""
@@ -6606,10 +6749,15 @@ msgid ""
 "with Flower. We also highlight a couple of current limitations in our "
 "implementation."
 msgstr ""
+"현재 VCE를 사용하면 개인 노트북에서 간단한 시나리오를 프로토타이핑하든, 여러 "
+"고성능 GPU 노드에서 복잡한 FL 파이프라인을 훈련하든 상관없이 시뮬레이션 모드"
+"에서 Federated 학습 워크로드를 실행할 수 있습니다. VCE에 더 많은 기능을 추가"
+"하는 동안, 아래에서는 Flower로 FL 파이프라인을 설계할 때 염두에 두어야 할 몇 "
+"가지 사항을 강조합니다. 또한 현재 구현에서 몇 가지 제한 사항을 강조합니다."
 
 #: ../../source/how-to-run-simulations.rst:141
 msgid "GPU resources"
-msgstr ""
+msgstr "GPU 리소스"
 
 #: ../../source/how-to-run-simulations.rst:143
 msgid ""
@@ -6617,6 +6765,9 @@ msgid ""
 "code:`num_gpus` in :code:`client_resources`. This being said, Ray (used "
 "internally by the VCE) is by default:"
 msgstr ""
+"VCE는 :code:`client_resources`에서 :code:`num_gpus` 키를 지정하는 클라이언트"
+"에 GPU 메모리 공유를 할당합니다. 즉, (VCE에서 내부적으로 사용하는) Ray가 기본"
+"적으로 사용됩니다:"
 
 #: ../../source/how-to-run-simulations.rst:146
 msgid ""
@@ -6624,12 +6775,17 @@ msgid ""
 "set :code:`num_gpus=0.5` and you have two GPUs in your system with different "
 "(e.g. 32GB and 8GB) VRAM amounts, they both would run 2 clients concurrently."
 msgstr ""
+"GPU에서 사용 가능한 총 VRAM을 인식하지 못합니다. 즉, 시스템에 서로 다른(예: "
+"32GB와 8GB) VRAM 용량을 가진 두 개의 GPU가 있고 :code:`num_gpus=0.5`를 설정하"
+"면 둘 다 동시에 2개의 클라이언트를 실행하게 됩니다."
 
 #: ../../source/how-to-run-simulations.rst:147
 msgid ""
 "not aware of other unrelated (i.e. not created by the VCE) workloads are "
 "running on the GPU. Two takeaways from this are:"
 msgstr ""
+"관련 없는(즉, VCE에 의해 생성되지 않은) 다른 워크로드가 GPU에서 실행되고 있는"
+"지 알지 못합니다. 여기서 두 가지 시사점을 얻을 수 있습니다:"
 
 #: ../../source/how-to-run-simulations.rst:149
 msgid ""
@@ -6637,6 +6793,9 @@ msgid ""
 "aggregation (by instance when making use of the `evaluate method <how-to-"
 "implement-strategies.html#the-evaluate-method>`_)"
 msgstr ""
+"집계 후 '글로벌 모델'을 평가하려면 Flower 서버에 GPU가 필요할 수 있습니다"
+"(예: `evaluate method <how-to-implement-strategies.html#the-evaluate-"
+"method>`_를 사용할 때)"
 
 #: ../../source/how-to-run-simulations.rst:150
 msgid ""
@@ -6644,6 +6803,8 @@ msgid ""
 "machine you need to mask-out your GPUs with :code:"
 "`CUDA_VISIBLE_DEVICES=\"<GPU_IDs>\"` when launching your experiment."
 msgstr ""
+"동일한 머신에서 여러 개의 독립적인 Flower 시뮬레이션을 실행하려면, 실험을 시"
+"작할 때 :code:`CUDA_VISIBLE_DEVICES=\"<GPU_IDs>\"`로 GPU를 마스킹해야 합니다."
 
 #: ../../source/how-to-run-simulations.rst:153
 msgid ""
@@ -6652,10 +6813,13 @@ msgid ""
 "of client using more VRAM than the ratio specified when starting the "
 "simulation."
 msgstr ""
+"또한 :code:`client_resources`에 전달된 GPU 리소스 제한이 '강제'되지 않아(즉, "
+"초과할 수 있음) 클라이언트가 시뮬레이션을 시작할 때 지정된 비율보다 더 많은 "
+"VRAM을 사용하는 상황이 발생할 수 있습니다."
 
 #: ../../source/how-to-run-simulations.rst:156
 msgid "TensorFlow with GPUs"
-msgstr ""
+msgstr "GPU를 사용한 TensorFlow"
 
 #: ../../source/how-to-run-simulations.rst:158
 msgid ""
@@ -6667,6 +6831,13 @@ msgid ""
 "this default behavior by `enabling memory growth <https://www.tensorflow.org/"
 "guide/gpu#limiting_gpu_memory_growth>`_."
 msgstr ""
+"`TensorFlow와 함께 GPU를 사용 <https://www.tensorflow.org/guide/gpu>`_하면 프"
+"로세스에 보이는 모든 GPU의 거의 전체 GPU 메모리가 매핑됩니다. 이는 최적화 목"
+"적으로 TensorFlow에서 수행됩니다. 그러나 GPU를 여러 개의 '가상' 클라이언트로 "
+"분할하려는 FL 시뮬레이션과 같은 설정에서는 이는 바람직한 메커니즘이 아닙니"
+"다. 다행히도 '메모리 증가 활성화 <https://www.tensorflow.org/guide/"
+"gpu#limiting_gpu_memory_growth>`_'를 통해 이 기본 동작을 비활성화할 수 있습니"
+"다."
 
 #: ../../source/how-to-run-simulations.rst:160
 msgid ""
@@ -6676,6 +6847,10 @@ msgid ""
 "to specify a function to be executed upon actor initialization. In this "
 "case, to enable GPU growth for TF workloads. It would look as follows:"
 msgstr ""
+"이 작업은 메인 프로세스(서버가 실행되는 곳)와 VCE에서 생성한 각 액터에서 수행"
+"해야 합니다. :code:`actor_kwargs`를 통해 예약 키 `\"on_actor_init_fn\"`을 전"
+"달하여 액터 초기화 시 실행할 함수를 지정할 수 있습니다. 이 경우 TF 워크로드"
+"에 대한 GPU 증가를 활성화합니다. 다음과 같이 보입니다:"
 
 #: ../../source/how-to-run-simulations.rst:179
 msgid ""
@@ -6683,10 +6858,12 @@ msgid ""
 "<https://github.com/adap/flower/tree/main/examples/simulation-tensorflow>`_ "
 "example."
 msgstr ""
+"이것이 바로`Tensorflow/Keras Simulation <https://github.com/adap/flower/tree/"
+"main/examples/simulation-tensorflow>`_ 예제에서 사용된 메커니즘입니다."
 
 #: ../../source/how-to-run-simulations.rst:183
 msgid "Multi-node setups"
-msgstr ""
+msgstr "멀티 노드 설정"
 
 #: ../../source/how-to-run-simulations.rst:185
 msgid ""
@@ -6700,6 +6877,14 @@ msgid ""
 "serving mechanism (e.g. using nfs, a database) to circumvent data "
 "duplication."
 msgstr ""
+"VCE는 현재 특정 '가상' 클라이언트를 어느 노드에서 실행할지 제어하는 방법을 제"
+"공하지 않습니다. 즉, 클라이언트가 실행하는 데 필요한 리소스가 하나 이상의 노"
+"드에 있는 경우 해당 노드 중 어느 노드에나 클라이언트 워크로드가 예약될 수 있"
+"습니다. FL 프로세스 후반부(즉, 다른 라운드에서)에는 동일한 클라이언트가 다른 "
+"노드에서 실행될 수 있습니다. 클라이언트가 데이터 세트에 액세스하는 방식에 따"
+"라 모든 노드에 모든 데이터 세트 파티션의 복사본을 보유하거나 데이터 중복을 피"
+"하기 위해 데이터 세트 제공 메커니즘(예: nfs, 데이터베이스 사용)을 사용해야 "
+"할 수 있습니다."
 
 #: ../../source/how-to-run-simulations.rst:187
 msgid ""
@@ -6710,10 +6895,16 @@ msgid ""
 "node it is running from. This is related to the point above also since, in "
 "some way, the client's dataset could be seen as a type of `state`."
 msgstr ""
+"정의상 가상 클라이언트는 임시적 특성으로 인해 '상태 없음'입니다. 클라이언트 "
+"상태는 Flower 클라이언트 클래스의 일부로 구현할 수 있지만, 사용자는 이를 영"
+"구 저장소(예: 데이터베이스, 디스크)에 저장하여 나중에 실행 중인 노드와 관계없"
+"이 동일한 클라이언트가 검색할 수 있도록 해야 합니다. 이는 어떤 식으로든 클라"
+"이언트의 데이터 세트가 일종의 '상태'로 볼 수 있기 때문에 위의 요점과도 관련"
+"이 있습니다."
 
 #: ../../source/how-to-save-and-load-model-checkpoints.rst:2
 msgid "Save and load model checkpoints"
-msgstr ""
+msgstr "모델 체크포인트 저장 및 로드"
 
 #: ../../source/how-to-save-and-load-model-checkpoints.rst:4
 msgid ""
@@ -6721,10 +6912,13 @@ msgid ""
 "how-to guide describes the steps to save (and load) model checkpoints in "
 "Flower."
 msgstr ""
+"Flower는 서버 측에서 모델 업데이트를 자동으로 저장하지 않습니다. 이 사용법 가"
+"이드에서는 Flower에서 모델 체크포인트를 저장(및 로드)하는 단계에 대해 설명합"
+"니다."
 
 #: ../../source/how-to-save-and-load-model-checkpoints.rst:8
 msgid "Model checkpointing"
-msgstr ""
+msgstr "모델 체크포인트"
 
 #: ../../source/how-to-save-and-load-model-checkpoints.rst:10
 msgid ""
@@ -6738,10 +6932,18 @@ msgid ""
 "save returned (aggregated) weights before it returns those aggregated "
 "weights to the caller (i.e., the server):"
 msgstr ""
+":code:`Strategy` 메소드를 사용자 지정하여 서버 측에서 모델 업데이트를 지속할 "
+"수 있습니다. 사용자 지정 전략을 구현하는 것은 항상 옵션이지만 대부분의 경우 "
+"기존 전략을 간단히 사용자 지정하는 것이 더 편리할 수 있습니다. 다음 코드 예시"
+"는 기존의 기본 제공 :code:`FedAvg` 전략을 사용자 지정한 새로운 :code:"
+"`SaveModelStrategy`를 정의합니다. 특히, 기본 클래스(:code:`FedAvg`)에서 :"
+"code:`aggregate_fit`을 호출하여 :code:`aggregate_fit`을 사용자 지정합니다. 그"
+"런 다음 호출자(즉, 서버)에게 집계된 가중치를 반환하기 전에 반환된(집계된) 가"
+"중치를 계속 저장합니다:"
 
 #: ../../source/how-to-save-and-load-model-checkpoints.rst:47
 msgid "Save and load PyTorch checkpoints"
-msgstr ""
+msgstr "파이토치 체크포인트 저장 및 로드"
 
 #: ../../source/how-to-save-and-load-model-checkpoints.rst:49
 msgid ""
@@ -6752,6 +6954,11 @@ msgid ""
 "into the PyTorch ``state_dict`` following the ``OrderedDict`` class "
 "structure."
 msgstr ""
+"이전 예제와 비슷하지만 몇 가지 단계가 추가되어 ``torch.save`` 함수를 사용하"
+"여 파이토치 체크포인트를 저장하는 방법을 보여드리겠습니다. 먼저, "
+"``aggregate_fit``은 ``Parameters`` 객체를 반환하는데, 이 객체는 NumPy "
+"``ndarray``의 목록으로 변환되어야 하며, ``OrderedDict`` 클래스 구조에 따라 파"
+"이토치 ``state_dict``로 변환됩니다."
 
 #: ../../source/how-to-save-and-load-model-checkpoints.rst:85
 msgid ""
@@ -6759,16 +6966,20 @@ msgid ""
 "Note that this will iterate over all saved checkpoints and load the latest "
 "one:"
 msgstr ""
+"진행 상황을 로드하려면 코드에 다음 줄을 추가하기만 하면 됩니다. 이렇게 하면 "
+"저장된 모든 체크포인트를 반복하고 최신 체크포인트를 로드합니다:"
 
 #: ../../source/how-to-save-and-load-model-checkpoints.rst:97
 msgid ""
 "Return/use this object of type ``Parameters`` wherever necessary, such as in "
 "the ``initial_parameters`` when defining a ``Strategy``."
 msgstr ""
+"``전략``을 정의할 때 ``초기_파라미터``와 같이 필요한 경우 ``파라미터`` 유형"
+"의 이 객체를 반환/사용합니다."
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:2
 msgid "Upgrade to Flower 1.0"
-msgstr ""
+msgstr "Flower 1.0으로 업그레이드"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:4
 msgid ""
@@ -6777,33 +6988,42 @@ msgid ""
 "releases), there are a few breaking changes that make it necessary to change "
 "the code of existing 0.x-series projects."
 msgstr ""
+"Flower 1.0이 출시되었습니다. 새로운 기능과 함께 Flower 1.0은 향후 성장을 위"
+"한 안정적인 기반을 제공합니다. Flower 0.19(및 다른 0.x 시리즈 릴리스)와 비교"
+"했을 때 기존 0.x 시리즈 프로젝트의 코드를 변경해야 하는 몇 가지 획기적인 변"
+"경 사항이 있습니다."
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:8
 #: ../../source/how-to-upgrade-to-flower-next.rst:43
 msgid "Install update"
-msgstr ""
+msgstr "업데이트 설치"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:10
 msgid ""
 "Here's how to update an existing installation to Flower 1.0 using either pip "
 "or Poetry:"
 msgstr ""
+"다음은 pip 또는 Poetry를 사용하여 기존 설치를 Flower 1.0으로 업데이트하는 방"
+"법입니다:"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:12
 msgid "pip: add ``-U`` when installing."
-msgstr ""
+msgstr "pip: 설치할 때 ``-U``를 추가합니다."
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:14
 msgid ""
 "``python -m pip install -U flwr`` (when using ``start_server`` and "
 "``start_client``)"
 msgstr ""
+"``python -m pip install -U flwr``(``start_server`` 및 ``start_client``를 사용"
+"하는 경우)"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:15
 msgid ""
 "``python -m pip install -U flwr[simulation]`` (when using "
 "``start_simulation``)"
 msgstr ""
+"``python -m pip install -U flwr[simulation]``(``start_simulation`` 사용 시)"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:17
 msgid ""
@@ -6811,93 +7031,116 @@ msgid ""
 "reinstall (don't forget to delete ``poetry.lock`` via ``rm poetry.lock`` "
 "before running ``poetry install``)."
 msgstr ""
+"Poetry: ``pyproject.toml``에서 ``flwr`` dependency을 업데이트한 다음 다시 설"
+"치하세요(``poetry 설치``를 실행하기 전에 ``rm poetry.lock``을 통해 ``poetry."
+"lock``을 삭제하는 것을 잊지 마세요)."
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:19
 msgid ""
 "``flwr = \"^1.0.0\"`` (when using ``start_server`` and ``start_client``)"
-msgstr ""
+msgstr "``flwr = \"^1.0.0\"``(``start_server`` 및 ``start_client`` 사용 시)"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:20
 msgid ""
 "``flwr = { version = \"^1.0.0\", extras = [\"simulation\"] }`` (when using "
 "``start_simulation``)"
 msgstr ""
+"``flwr = { version = \"^1.0.0\", extras = [\"simulation\"] }`` "
+"(``start_simulation`` 사용 시)"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:24
 #: ../../source/how-to-upgrade-to-flower-next.rst:100
 msgid "Required changes"
-msgstr ""
+msgstr "필수 변경 사항"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:26
 msgid "The following breaking changes require manual updates."
-msgstr ""
+msgstr "다음과 같은 주요 변경 사항에는 수동 업데이트가 필요합니다."
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:29
 msgid "General"
-msgstr ""
+msgstr "일반"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:31
 msgid ""
 "Pass all arguments as keyword arguments (not as positional arguments). "
 "Here's an example:"
 msgstr ""
+"모든 arguments를 위치 arguments가 아닌 키워드 arguments로 전달합니다. 다음은 "
+"예시입니다:"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:33
 msgid ""
 "Flower 0.19 (positional arguments): ``start_client(\"127.0.0.1:8080\", "
 "FlowerClient())``"
 msgstr ""
+"Flower 0.19 (위치 arguments): ``start_client(\"127.0.0.1:8080\", "
+"FlowerClient())``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:34
 msgid ""
 "Flower 1.0 (keyword arguments): "
 "``start_client(server_address=\"127.0.0.1:8080\", client=FlowerClient())``"
 msgstr ""
+"Flower 1.0 (키워드 arguments): "
+"``start_client(server_address=\"127.0.0.1:8080\", client=FlowerClient())``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:37
 #: ../../source/ref-api/flwr.client.Client.rst:2
 msgid "Client"
-msgstr ""
+msgstr "클라이언트"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:39
 msgid ""
 "Subclasses of ``NumPyClient``: change ``def get_parameters(self):``` to "
 "``def get_parameters(self, config):``"
 msgstr ""
+"``NumPyClient``의 서브클래스: ``def get_parameters(self):``를 ``def "
+"get_parameters(self, config):``로 변경합니다"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:40
 msgid ""
 "Subclasses of ``Client``: change ``def get_parameters(self):``` to ``def "
 "get_parameters(self, ins: GetParametersIns):``"
 msgstr ""
+"``클라이언트``의 서브클래스: ``def get_parameters(self):``를 ``def "
+"get_parameters(self, ins: GetParametersIns):``로 변경합니다"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:43
 msgid "Strategies / ``start_server`` / ``start_simulation``"
-msgstr ""
+msgstr "전략 / ``start_server`` / ``start_simulation``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:45
 msgid ""
 "Pass ``ServerConfig`` (instead of a dictionary) to ``start_server`` and "
 "``start_simulation``. Here's an example:"
 msgstr ""
+"Dictionary 대신 ``ServerConfig``를 ``start_server`` 및 ``start_simulation``"
+"에 전달합니다. 다음은 예제입니다:"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:47
 msgid ""
 "Flower 0.19: ``start_server(..., config={\"num_rounds\": 3, "
 "\"round_timeout\": 600.0}, ...)``"
 msgstr ""
+"Flower 0.19: ``start_server(..., config={\"num_rounds\": 3, "
+"\"round_timeout\": 600.0}, ...)``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:48
 msgid ""
 "Flower 1.0: ``start_server(..., config=flwr.server."
 "ServerConfig(num_rounds=3, round_timeout=600.0), ...)``"
 msgstr ""
+"Flower 1.0: ``start_server(..., config=flwr.server."
+"ServerConfig(num_rounds=3, round_timeout=600.0), ...)``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:50
 msgid ""
 "Replace ``num_rounds=1`` in ``start_simulation`` with the new "
 "``config=ServerConfig(...)`` (see previous item)"
 msgstr ""
+"``start_simulation``의 ``num_rounds=1``을 새로운 ``config=ServerConfig(...)``"
+"로 바꿉니다(이전 항목 참조)"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:51
 msgid ""
@@ -6906,18 +7149,21 @@ msgid ""
 "configuring the strategy to sample all clients for evaluation after the last "
 "round of training."
 msgstr ""
+"'start_server`` 호출에서 ``force_final_distributed_eval`` 매개변수를 제거합니"
+"다. 모든 클라이언트에 대한 분산 평가는 마지막 훈련 라운드 후 평가를 위해 모"
+"든 클라이언트를 샘플링하도록 전략을 구성하여 활성화할 수 있습니다."
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:52
 msgid "Rename parameter/ndarray conversion functions:"
-msgstr ""
+msgstr "매개변수/ndarray 변환 함수의 이름을 바꿉니다:"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:54
 msgid "``parameters_to_weights`` --> ``parameters_to_ndarrays``"
-msgstr ""
+msgstr "``parameters_to_weights`` --> ``parameters_to_ndarrays``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:55
 msgid "``weights_to_parameters`` --> ``ndarrays_to_parameters``"
-msgstr ""
+msgstr "``weights_to_parameters`` --> ``ndarrays_to_parameters``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:57
 msgid ""
@@ -6928,22 +7174,28 @@ msgid ""
 "without passing a strategy instance) should now manually initialize FedAvg "
 "with ``fraction_fit`` and ``fraction_evaluate`` set to ``0.1``."
 msgstr ""
+"전략 초기화: 전략이 ``fraction_fit`` 및 ``fraction_evaluate``의 기본값에 의존"
+"하는 경우 ``fraction_fit`` 및 ``fraction_evaluate``를 ``0.1``로 수동 설정합니"
+"다. 전략을 수동으로 생성하지 않는 프로젝트(전략 인스턴스를 전달하지 않고 "
+"``start_server`` 또는 ``start_simulation``을 호출하여)는 이제 "
+"``fraction_fit`` 및 ``fraction_evaluate``를 ``0.1``로 설정하여 FedAvg를 수동"
+"으로 초기화해야 합니다."
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:58
 msgid "Rename built-in strategy parameters (e.g., ``FedAvg``):"
-msgstr ""
+msgstr "기본 제공 전략 매개변수의 이름을 바꿉니다(예: ``FedAvg``):"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:60
 msgid "``fraction_eval`` --> ``fraction_evaluate``"
-msgstr ""
+msgstr "``fraction_eval`` --> ``fraction_evaluate``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:61
 msgid "``min_eval_clients`` --> ``min_evaluate_clients``"
-msgstr ""
+msgstr "``min_eval_clients`` --> ``min_evaluate_clients``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:62
 msgid "``eval_fn`` --> ``evaluate_fn``"
-msgstr ""
+msgstr "``eval_fn`` --> ``evaluate_fn``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:64
 msgid ""
@@ -6951,26 +7203,33 @@ msgid ""
 "functions, for example, ``configure_fit``, ``aggregate_fit``, "
 "``configure_evaluate``, ``aggregate_evaluate``, and ``evaluate_fn``."
 msgstr ""
+"``rnd``의 이름을 ``server_round``로 바꿉니다. 이는 여러 메서드 및 함수(예: "
+"``configure_fit``, ``aggregate_fit``, ``configure_evaluate``, "
+"``aggregate_evaluate`` 및 ``evaluate_fn``)에 영향을 미칩니다."
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:65
 msgid "Add ``server_round`` and ``config`` to ``evaluate_fn``:"
-msgstr ""
+msgstr "``server_round`` 및 ``config``를 ``evaluate_fn``에 추가합니다:"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:67
 msgid ""
 "Flower 0.19: ``def evaluate(parameters: NDArrays) -> Optional[Tuple[float, "
 "Dict[str, Scalar]]]:``"
 msgstr ""
+"Flower 0.19: ``def evaluate(parameters: NDArrays) -> Optional[Tuple[float, "
+"Dict[str, Scalar]]]:``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:68
 msgid ""
 "Flower 1.0: ``def evaluate(server_round: int, parameters: NDArrays, config: "
 "Dict[str, Scalar]) -> Optional[Tuple[float, Dict[str, Scalar]]]:``"
 msgstr ""
+"Flower 1.0: ``def evaluate(server_round: int, parameters: NDArrays, config: "
+"Dict[str, Scalar]) -> Optional[Tuple[float, Dict[str, Scalar]]]:``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:71
 msgid "Custom strategies"
-msgstr ""
+msgstr "사용자 정의 전략"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:73
 msgid ""
@@ -6979,34 +7238,45 @@ msgid ""
 "``aggregate_fit``) and ``List[Union[Tuple[ClientProxy, EvaluateRes], "
 "BaseException]]`` (in ``aggregate_evaluate``)"
 msgstr ""
+"매개변수 ``failures``의 유형이 ``List[BaseException]``에서 "
+"``List[Union[Tuple[ClientProxy], FitRes], BaseException]]``(``aggregate_fit``"
+"에서) 및 ``List[Union[Tuple[ClientProxy], EvaluateRes], "
+"BaseException]]``(``aggregate_evaluate``)로 변경되었습니다"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:74
 msgid ""
 "The ``Strategy`` method ``evaluate`` now receives the current round of "
 "federated learning/evaluation as the first parameter:"
 msgstr ""
+"이제 ``Strategy`` 메서드 ``evaluate``는 현재 federated 학습/평가 라운드를 첫 "
+"번째 파라미터로 받습니다:"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:76
 msgid ""
 "Flower 0.19: ``def evaluate(self, parameters: Parameters) -> "
 "Optional[Tuple[float, Dict[str, Scalar]]]:``"
 msgstr ""
+"Flower 0.19: ``def evaluate(self, parameters: Parameters) -> "
+"Optional[Tuple[float, Dict[str, Scalar]]]:``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:77
 msgid ""
 "Flower 1.0: ``def evaluate(self, server_round: int, parameters: Parameters) -"
 "> Optional[Tuple[float, Dict[str, Scalar]]]:``"
 msgstr ""
+"Flower 1.0: ``def evaluate(self, server_round: int, parameters: Parameters) -"
+"> Optional[Tuple[float, Dict[str, Scalar]]]:``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:80
 msgid "Optional improvements"
-msgstr ""
+msgstr "선택적 개선 사항"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:82
 msgid ""
 "Along with the necessary changes above, there are a number of potential "
 "improvements that just became possible:"
 msgstr ""
+"위의 필수 변경 사항과 함께 방금 가능한 여러 가지 잠재적 개선 사항이 있습니다:"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:84
 msgid ""
@@ -7014,6 +7284,9 @@ msgid ""
 "``NumPyClient``. If you, for example, use server-side evaluation, then empty "
 "placeholder implementations of ``evaluate`` are no longer necessary."
 msgstr ""
+"``Client`` 또는 ``NumPyClient``의 서브 클래스에서 \"placeholder\" 메서드를 제"
+"거합니다. 예를 들어 서버 측 평가를 사용하는 경우 ``evaluate``의 빈 자리 표시"
+"자 구현은 더 이상 필요하지 않습니다."
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:85
 msgid ""
@@ -7021,11 +7294,14 @@ msgid ""
 "``start_simulation(..., config=flwr.server.ServerConfig(num_rounds=3, "
 "round_timeout=600.0), ...)``"
 msgstr ""
+"``start_simulation``을 통해 라운드 타임아웃을 구성합니다: "
+"``start_simulation(..., config=flwr.server.ServerConfig(num_rounds=3, "
+"round_timeout=600.0), ...)``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:89
 #: ../../source/how-to-upgrade-to-flower-next.rst:317
 msgid "Further help"
-msgstr ""
+msgstr "추가 도움말"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:91
 msgid ""
@@ -7035,10 +7311,15 @@ msgid ""
 "`join the Flower Slack <https://flower.ai/join-slack/>`_ and use the channel "
 "``#questions``."
 msgstr ""
+"대부분의 공식 ``Flower code 예제 <https://github.com/adap/flower/tree/main/"
+"examples>`_는 이미 Flower 1.0으로 업데이트되어 있으며, Flower 1.0 API를 사용"
+"하기 위한 참고 자료로 사용할 수 있습니다. 더 궁금한 점이 있다면 ``플라워 슬"
+"랙 <https://flower.ai/join-slack/>`_에 가입하여 ``#questions`` 채널을 이용하"
+"세요."
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:2
 msgid "Upgrade to Flower Next"
-msgstr ""
+msgstr "Flower Next 업그레이드"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:4
 msgid ""
@@ -7047,6 +7328,10 @@ msgid ""
 "smoothly transition your existing setup to take advantage of the latest "
 "features and improvements in Flower Next, starting from version 1.8."
 msgstr ""
+"Flower에서 Flower Next로의 업데이트를 위한 이동 가이드에 오신 것을 환영합니"
+"다! 이 가이드는 숙련된 사용자든 이제 막 시작한 사용자든 상관없이 기존 설정을 "
+"원활하게 전환하여 버전 1.8부터 Flower Next의 최신 기능 및 개선 사항을 활용할 "
+"수 있도록 도와드립니다."
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:9
 msgid ""
@@ -7054,33 +7339,39 @@ msgid ""
 "changes by using the *compatibility layer* in Flower Next. In another guide, "
 "we will show how to run Flower Next end-to-end with pure Flower Next APIs."
 msgstr ""
+"이 가이드에서는 Flower Next의 *호환성 레이어*를 사용하여 최소한의 코드 변경으"
+"로 ``1.8`` 이전의 Flower 코드를 재사용하는 방법을 보여줍니다. 다른 가이드에서"
+"는 순수한 Flower Next API로 Flower Next를 end-to-end로 실행하는 방법을 보여드"
+"리겠습니다."
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:13
 msgid "Let's dive in!"
-msgstr ""
+msgstr "자세히 알아봅시다!"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:48
 msgid ""
 "Here's how to update an existing installation of Flower to Flower Next with "
 "``pip``:"
 msgstr ""
+"기존에 설치된 Flower to Flower Next를 ``pip``으로 업데이트하는 방법은 다음과 "
+"같습니다:"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:54
 msgid "or if you need Flower Next with simulation:"
-msgstr ""
+msgstr "또는 시뮬레이션이 포함된 Flower Next가 필요한 경우:"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:61
 msgid ""
 "Ensure you set the following version constraint in your ``requirements.txt``"
-msgstr ""
+msgstr "``requirements.txt``에서 다음 버전 제약 조건을 설정했는지 확인하세요"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:71
 msgid "or ``pyproject.toml``:"
-msgstr ""
+msgstr "또는 ``pyproject.toml``:"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:82
 msgid "Using Poetry"
-msgstr ""
+msgstr "Poetry 사용"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:84
 msgid ""
@@ -7088,11 +7379,14 @@ msgid ""
 "(don't forget to delete ``poetry.lock`` via ``rm poetry.lock`` before "
 "running ``poetry install``)."
 msgstr ""
+"``pyproject.toml``에서 ``flwr`` dependency을 업데이트한 다음 다시 설치하세요"
+"(``poetry install``을 실행하기 전에 ``rm poetry.lock``을 통해 ``poetry.lock``"
+"을 삭제하는 것을 잊지 마세요)."
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:86
 msgid ""
 "Ensure you set the following version constraint in your ``pyproject.toml``:"
-msgstr ""
+msgstr "``pyproject.toml``에 다음 버전 제약 조건을 설정했는지 확인하세요:"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:102
 msgid ""
@@ -7105,30 +7399,41 @@ msgid ""
 "following non-breaking changes that require manual updates and allow you to "
 "run your project both in the traditional way and in the Flower Next way:"
 msgstr ""
+"Flower Next에서는 *infrastructure*와 *application layers*가 분리되었습니다. "
+"코드에서 ``start_client()``를 통해 클라이언트를 시작하는 대신, 명령줄을 통해 "
+"|clientapp_link|_를 생성하여 시작합니다. 코드에서 ``start_server()``를 통해 "
+"서버를 시작하는 대신 |serverapp_link|_를 생성하고 명령줄을 통해 서버를 시작합"
+"니다. 서버와 클라이언트의 장기 실행 컴포넌트를 SuperLink와 SuperNode라고 합니"
+"다. 수동 업데이트가 필요하지 않고 기존 방식과 Flower Next 방식 모두에서 프로"
+"젝트를 실행할 수 있는 non-breaking 변경 사항은 다음과 같습니다:"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:109
 msgid "|clientapp_link|_"
-msgstr ""
+msgstr "|clientapp_link|_"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:110
 msgid ""
 "Wrap your existing client with |clientapp_link|_ instead of launching it via "
 "|startclient_link|_. Here's an example:"
 msgstr ""
+"|clientapp_link|_를 통해 실행하는 대신 기존 클라이언트를 |clientapp_link|_로 "
+"래핑하세요. 다음은 예시입니다:"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:132
 msgid "|serverapp_link|_"
-msgstr ""
+msgstr "|serverapp_link|_"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:133
 msgid ""
 "Wrap your existing strategy with |serverapp_link|_ instead of starting the "
 "server via |startserver_link|_. Here's an example:"
 msgstr ""
+"서버를 시작하려면 |startserver_link|_를 통해 서버를 시작하는 대신 기존 전략"
+"을 |serverapp_link|_로 래핑하세요. 다음은 예시입니다:"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:154
 msgid "Deployment"
-msgstr ""
+msgstr "배포"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:155
 msgid ""
@@ -7136,11 +7441,16 @@ msgid ""
 "sequence, |flowernext_clientapp_link|_ (2x) and |flowernext_serverapp_link|"
 "_. There is no need to execute `client.py` and `server.py` as Python scripts."
 msgstr ""
+"실행하기 전에 |flowernext_superlink_link|_를 사용하여 ``슈퍼링크``를 실행한 "
+"후 |flowernext_clientapp_link|_(2회) 및 |flowernext_serverapp_link|_를 순서대"
+"로 실행합니다. 'client.py'와 'server.py'를 Python 스크립트로 실행할 필요는 없"
+"습니다."
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:158
 msgid ""
 "Here's an example to start the server without HTTPS (only for prototyping):"
 msgstr ""
+"다음은 HTTPS 없이 서버를 시작하는 예제입니다(프로토타이핑용으로만 사용):"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:174
 msgid ""
@@ -7148,10 +7458,13 @@ msgid ""
 "``--ssl-certfile``, and ``--ssl-keyfile`` command line options to pass paths "
 "to (CA certificate, server certificate, and server private key)."
 msgstr ""
+"다음은 HTTPS로 시작하는 또 다른 예제입니다. '`--ssl-ca-certfile``, '`--ssl-"
+"certfile``, '`--ssl-keyfile`` 명령줄 옵션을 사용하여 (CA 인증서, 서버 인증서 "
+"및 서버 개인 키)의 경로를 전달합니다."
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:201
 msgid "Simulation in CLI"
-msgstr ""
+msgstr "CLI 시뮬레이션"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:202
 msgid ""
@@ -7159,6 +7472,8 @@ msgid ""
 "serverapp_link|_, respectively. There is no need to use |startsim_link|_ "
 "anymore. Here's an example:"
 msgstr ""
+"기존 클라이언트와 전략을 각각 |clientapp_link|_와 |serverapp_link|_로 래핑하"
+"세요. 더 이상 |startsim_link|_를 사용할 필요가 없습니다. 다음은 예시입니다:"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:232
 msgid ""
@@ -7167,6 +7482,9 @@ msgid ""
 "Here's an example (assuming the ``server_app`` and ``client_app`` objects "
 "are in a ``sim.py`` module):"
 msgstr ""
+"CLI에서 |flower_simulation_link|_를 실행하고 Python 스크립트를 실행하는 대신 "
+"코드에서 ``server_app`` / ``client_app`` 개체를 가리키세요. 다음은 예제입니다"
+"(``server_app`` 및 ``client_app`` 객체가 ``sim.py`` 모듈에 있다고 가정):"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:249
 msgid ""
@@ -7174,16 +7492,21 @@ msgid ""
 "config`` command line argument instead of setting the ``client_resources`` "
 "argument in |startsim_link|_. Here's an example:"
 msgstr ""
+"|startsim_link|_에서 ``client_resources`` 인수를 설정하는 대신 ``--backend-"
+"config`` 명령줄 인수를 사용하여 각 |clientapp_link|_에 대한 기본 리소스를 설"
+"정하세요. 다음은 예시입니다:"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:275
 msgid "Simulation in a Notebook"
-msgstr ""
+msgstr "Notebook에서 시뮬레이션"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:276
 msgid ""
 "Run |runsim_link|_ in your notebook instead of |startsim_link|_. Here's an "
 "example:"
 msgstr ""
+"notebook에서 |startsim_link|_ 대신 |runsim_link|_를 실행하세요. 다음은 예시입"
+"니다:"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:319
 msgid ""
@@ -7195,10 +7518,16 @@ msgid ""
 "you can find us answering questions, or share and learn from others about "
 "migrating to Flower Next."
 msgstr ""
+"일부 공식 ``Flower 코드 예제 <https://flower.ai/docs/examples/>`_는 이미 플라"
+"워 넥스트에 업데이트되어 있으므로 플라워 넥스트 API를 사용하는 데 참고할 수 "
+"있습니다. 더 궁금한 점이 있다면 ``플라워 슬랙 <https://flower.ai/join-slack/"
+">`_에 가입하고 ``#questions`` 채널을 이용하세요. 또한, ``Flower Discuss "
+"<https://discuss.flower.ai/>`_에 참여하여 질문에 대한 답변을 확인하거나 다른 "
+"사람들과 Flower Next로의 이동에 대해 공유하고 배울 수 있습니다."
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:325
 msgid "Important"
-msgstr ""
+msgstr "중요"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:328
 msgid ""
@@ -7206,20 +7535,24 @@ msgid ""
 "periodically updating this guide. Please feel free to share any feedback "
 "with us!"
 msgstr ""
+"Flower Next는 빠른 속도로 지속적으로 개선되고 있으므로 이 가이드는 주기적으"
+"로 업데이트될 예정입니다. 피드백이 있으면 언제든지 공유해 주세요!"
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:334
 msgid "Happy migrating! 🚀"
-msgstr ""
+msgstr "행복한 마이그레이션! 🚀"
 
 #: ../../source/how-to-use-built-in-mods.rst:2
 msgid "Use Built-in Mods"
-msgstr ""
+msgstr "기본 제공 모드 사용"
 
 #: ../../source/how-to-use-built-in-mods.rst:4
 msgid ""
 "**Note: This tutorial covers experimental features. The functionality and "
 "interfaces may change in future versions.**"
 msgstr ""
+"**참고: 이 튜토리얼은 실험적인 기능을 다룹니다. 기능 및 인터페이스는 향후 버"
+"전에서 변경될 수 있습니다.**"
 
 #: ../../source/how-to-use-built-in-mods.rst:6
 msgid ""
@@ -7228,10 +7561,13 @@ msgid ""
 "to perform operations before and after a task is processed in the "
 "``ClientApp``."
 msgstr ""
+"이 튜토리얼에서는 내장 모드를 활용하여 ``ClientApp``의 동작을 보강하는 방법"
+"을 배우겠습니다. Mods(Modifiers라고도 함)를 사용하면 ``ClientApp``에서 작업"
+"이 처리되기 전과 후에 작업을 수행할 수 있습니다."
 
 #: ../../source/how-to-use-built-in-mods.rst:9
 msgid "What are Mods?"
-msgstr ""
+msgstr "Mods란 무엇인가요?"
 
 #: ../../source/how-to-use-built-in-mods.rst:11
 msgid ""
@@ -7239,78 +7575,85 @@ msgid ""
 "inspect the incoming ``Message`` and the resulting outgoing ``Message``. The "
 "signature for a ``Mod`` is as follows:"
 msgstr ""
+"Mod는 ``ClientApp``을 감싸는 콜러블입니다. 들어오는 ``Message``와 그 결과로 "
+"나가는 ``Message``를 조작하거나 검사할 수 있습니다. ``Mod``의 시그니처는 다음"
+"과 같습니다:"
 
 #: ../../source/how-to-use-built-in-mods.rst:18
 msgid "A typical mod function might look something like this:"
-msgstr ""
+msgstr "일반적인 mod 함수는 다음과 같은 모습일 수 있습니다:"
 
 #: ../../source/how-to-use-built-in-mods.rst:31
 msgid "Using Mods"
-msgstr ""
+msgstr "Mods 사용"
 
 #: ../../source/how-to-use-built-in-mods.rst:33
 msgid "To use mods in your ``ClientApp``, you can follow these steps:"
-msgstr ""
+msgstr "``ClientApp``에서 mods를 사용하려면 다음 단계를 따르세요:"
 
 #: ../../source/how-to-use-built-in-mods.rst:36
 msgid "1. Import the required mods"
-msgstr ""
+msgstr "1. 필요한 mods를 가져옵니다"
 
 #: ../../source/how-to-use-built-in-mods.rst:38
 msgid "First, import the built-in mod you intend to use:"
-msgstr ""
+msgstr "먼저 사용하려는 기본 제공 mod를 가져옵니다:"
 
 #: ../../source/how-to-use-built-in-mods.rst:46
 msgid "2. Define your client function"
-msgstr ""
+msgstr "2. 클라이언트 기능 정의"
 
 #: ../../source/how-to-use-built-in-mods.rst:48
 msgid ""
 "Define your client function (``client_fn``) that will be wrapped by the "
 "mod(s):"
-msgstr ""
+msgstr "mod(s)로 래핑할 클라이언트 함수('``client_fn``)를 정의합니다:"
 
 #: ../../source/how-to-use-built-in-mods.rst:57
 msgid "3. Create the ``ClientApp`` with mods"
-msgstr ""
+msgstr "3. mods로 ``ClientApp``을 생성합니다"
 
 #: ../../source/how-to-use-built-in-mods.rst:59
 msgid ""
 "Create your ``ClientApp`` and pass the mods as a list to the ``mods`` "
 "argument. The order in which you provide the mods matters:"
 msgstr ""
+"``ClientApp``을 생성하고 mods를 ``mods`` argument에 목록으로 전달합니다. mods"
+"를 제공하는 순서가 중요합니다:"
 
 #: ../../source/how-to-use-built-in-mods.rst:72
 msgid "Order of execution"
-msgstr ""
+msgstr "실행 순서"
 
 #: ../../source/how-to-use-built-in-mods.rst:74
 msgid ""
 "When the ``ClientApp`` runs, the mods are executed in the order they are "
 "provided in the list:"
-msgstr ""
+msgstr "``ClientApp``이 실행되면 목록에 제공된 순서대로 모드가 실행됩니다:"
 
 #: ../../source/how-to-use-built-in-mods.rst:76
 msgid "``example_mod_1`` (outermost mod)"
-msgstr ""
+msgstr "``example_mod_1``(가장 바깥쪽 mod)"
 
 #: ../../source/how-to-use-built-in-mods.rst:77
 msgid "``example_mod_2`` (next mod)"
-msgstr ""
+msgstr "``example_mod_2`` (다음 mod)"
 
 #: ../../source/how-to-use-built-in-mods.rst:78
 msgid ""
 "Message handler (core function that handles the incoming ``Message`` and "
 "returns the outgoing ``Message``)"
 msgstr ""
+"Message handler(들어오는 ``Message``를 처리하고 나가는 ``Message``를 반환하"
+"는 핵심 함수)"
 
 #: ../../source/how-to-use-built-in-mods.rst:79
 msgid "``example_mod_2`` (on the way back)"
-msgstr ""
+msgstr "``example_mod_2``(돌아가는 방법)"
 
 #: ../../source/how-to-use-built-in-mods.rst:80
 msgid "``example_mod_1`` (outermost mod on the way back)"
-msgstr ""
+msgstr "``example_mod_1``(돌아가는 방법에 가장 바깥쪽 모드)"
 
 #: ../../source/how-to-use-built-in-mods.rst:82
 msgid ""
@@ -7318,6 +7661,9 @@ msgid ""
 "passing it to the next mod, and likewise with the outgoing ``Message`` "
 "before returning it up the stack."
 msgstr ""
+"각 mod는 다음 mod로 전달하기 전에 들어오는 ``Message``를 검사하고 수정할 기회"
+"가 있으며, 스택 위로 반환하기 전에 나가는 ``Message``도 마찬가지로 검사하고 "
+"수정할 수 있습니다."
 
 #: ../../source/how-to-use-built-in-mods.rst:87
 msgid ""
@@ -7325,14 +7671,17 @@ msgid ""
 "enhance your ``ClientApp``'s functionality. Remember that the order of mods "
 "is crucial and affects how the input and output are processed."
 msgstr ""
+"이 가이드를 따라 mods를 효과적으로 사용하여 ``ClientApp``의 기능을 향상시키"
+"는 방법을 배웠습니다. mods 순서는 매우 중요하며 입력과 출력이 처리되는 방식"
+"에 영향을 미친다는 점을 기억하세요."
 
 #: ../../source/how-to-use-built-in-mods.rst:89
 msgid "Enjoy building a more robust and flexible ``ClientApp`` with mods!"
-msgstr ""
+msgstr "Mods를 통해 더욱 강력하고 유연한 ``ClientApp``을 구축해 보세요!"
 
 #: ../../source/how-to-use-differential-privacy.rst:2
 msgid "Use Differential Privacy"
-msgstr ""
+msgstr "차분 개인정보 보호 사용"
 
 #: ../../source/how-to-use-differential-privacy.rst:3
 msgid ""
@@ -7340,6 +7689,9 @@ msgid ""
 "framework. If you are not yet familiar with differential privacy, you can "
 "refer to :doc:`explanation-differential-privacy`."
 msgstr ""
+"이 가이드에서는 Flower 프레임워크에서 차분 개인정보 보호 기능을 활용하는 방법"
+"을 설명합니다. 차분 개인정보 보호에 대해 아직 익숙하지 않은 경우 :doc:"
+"`explanation-differential-privacy`를 참조하세요."
 
 #: ../../source/how-to-use-differential-privacy.rst:7
 msgid ""
@@ -7348,6 +7700,9 @@ msgid ""
 "contact us to discuss your requirements and to receive guidance on how to "
 "best use these features."
 msgstr ""
+"Flower의 차분 개인정보 보호는 현재 프리뷰 단계에 있습니다. 민감한 데이터가 있"
+"는 프로덕션 환경에서 이러한 기능을 사용할 계획이라면 언제든지 문의하여 요구 "
+"사항을 논의하고 이러한 기능을 가장 잘 사용하는 방법에 대한 안내를 받으세요."
 
 #: ../../source/how-to-use-differential-privacy.rst:12
 msgid ""
@@ -7356,6 +7711,9 @@ msgid ""
 "framework has made it possible to decide whether to perform clipping on the "
 "server side or the client side."
 msgstr ""
+"이 접근 방식은 업데이트 클리핑과 집계된 모델에 노이즈 추가라는 두 가지 단계"
+"로 구성됩니다. 클리핑 단계의 경우, Flower 프레임워크는 클리핑을 서버 측에서 "
+"수행할지 클라이언트 측에서 수행할지 결정할 수 있도록 했습니다."
 
 #: ../../source/how-to-use-differential-privacy.rst:15
 msgid ""
@@ -7365,6 +7723,10 @@ msgid ""
 "disadvantage of increasing the computational load on the server due to the "
 "need to perform the clipping operation for all clients."
 msgstr ""
+"**Server-side Clipping**: 이 방식은 서버가 모든 클라이언트의 업데이트에 대해 "
+"균일한 클리핑을 적용하고 클리핑 값에 대한 통신 오버헤드를 줄일 수 있다는 장점"
+"이 있습니다. 하지만 모든 클라이언트에 대해 클리핑 작업을 수행해야 하기 때문"
+"에 서버의 계산 부하가 증가한다는 단점도 있습니다."
 
 #: ../../source/how-to-use-differential-privacy.rst:16
 msgid ""
@@ -7373,10 +7735,13 @@ msgid ""
 "of lacking centralized control, as the server has less control over the "
 "clipping process."
 msgstr ""
+"**Client-side Clipping**: 이 방식은 서버의 계산 오버헤드를 줄일 수 있다는 장"
+"점이 있습니다. 하지만 서버가 클리핑 프로세스에 대한 통제력이 떨어지기 때문에 "
+"centralized 제어가 부족하다는 단점도 있습니다."
 
 #: ../../source/how-to-use-differential-privacy.rst:21
 msgid "Server-side Clipping"
-msgstr ""
+msgstr "서버 측 클리핑"
 
 #: ../../source/how-to-use-differential-privacy.rst:22
 msgid ""
@@ -7387,10 +7752,15 @@ msgid ""
 "`DifferentialPrivacyServerSideAdaptiveClipping` for fixed and adaptive "
 "clipping."
 msgstr ""
+"서버 측 클리핑이 있는 중앙 DP의 경우, 실제 :code:`Strategy` 인스턴스를 감싸"
+"는 래퍼 역할을 하는 두 개의 :code:`Strategy` 클래스가 있습니다(예: :code:"
+"`FedAvg`). 두 개의 래퍼 클래스는 고정 및 적응형 클리핑을 위한 :code:"
+"`DifferentialPrivacyServerSideFixedClipping`과 :code:"
+"`DifferentialPrivacyServerSideAdaptiveClipping`입니다."
 
 #: ../../source/how-to-use-differential-privacy.rst:-1
 msgid "server side clipping"
-msgstr ""
+msgstr "서버 측 클리핑"
 
 #: ../../source/how-to-use-differential-privacy.rst:31
 msgid ""
@@ -7400,10 +7770,15 @@ msgid ""
 "`DifferentialPrivacyServerSideAdaptiveClipping` by adjusting the "
 "corresponding input parameters."
 msgstr ""
+"아래 코드 샘플은 :code:`FedAvg` 전략이 :code:"
+"`DifferentialPrivacyServerSideFixedClipping` 래퍼 클래스를 사용하여 서버 측 "
+"고정 클리핑을 사용할 수 있도록 합니다. 해당 입력 매개변수를 조정하여 :code:"
+"`DifferentialPrivacyServerSideAdaptiveClipping`과 동일한 접근 방식을 사용할 "
+"수 있습니다."
 
 #: ../../source/how-to-use-differential-privacy.rst:52
 msgid "Client-side Clipping"
-msgstr ""
+msgstr "클라이언트 측 클리핑"
 
 #: ../../source/how-to-use-differential-privacy.rst:53
 msgid ""
@@ -7415,10 +7790,17 @@ msgid ""
 "`DifferentialPrivacyClientSideFixedClipping` and :code:"
 "`DifferentialPrivacyClientSideAdaptiveClipping`."
 msgstr ""
+"클라이언트 측 클리핑이 있는 중앙 DP의 경우 서버는 각 라운드마다 선택한 클라이"
+"언트에 클리핑 값을 보냅니다. 클라이언트는 기존 Flower :code:`Mods`를 사용하"
+"여 클리핑을 수행할 수 있습니다. 고정 및 적응형 클라이언트 측 클리핑에는 두 가"
+"지 모드를 사용할 수 있습니다: :code:`fixedclipping_mod` 및 :code:"
+"`adaptiveclipping_mod`와 해당 서버 측 래퍼 :code:"
+"`DifferentialPrivacyClientSideFixedClipping` 및 :code:"
+"`DifferentialPrivacyClientSideAdaptiveClipping`이 있습니다."
 
 #: ../../source/how-to-use-differential-privacy.rst:-1
 msgid "client side clipping"
-msgstr ""
+msgstr "클라이언트 측 클리핑"
 
 #: ../../source/how-to-use-differential-privacy.rst:63
 msgid ""
@@ -7427,6 +7809,10 @@ msgid ""
 "`DifferentialPrivacyClientSideFixedClipping` wrapper class and, on the "
 "client, :code:`fixedclipping_mod`:"
 msgstr ""
+"아래 코드 샘플은 :code:`FedAvg` 전략이 클라이언트 측 고정 클리핑과 함께 차분 "
+"프라이버시를 사용할 수 있도록 :code:"
+"`DifferentialPrivacyClientSideFixedClipping` 래퍼 클래스와 클라이언트에서 :"
+"code:`fixedclipping_mod`를 모두 사용하도록 합니다:"
 
 #: ../../source/how-to-use-differential-privacy.rst:80
 msgid ""
@@ -7434,6 +7820,8 @@ msgid ""
 "to configure the matching :code:`fixedclipping_mod` to perform the client-"
 "side clipping:"
 msgstr ""
+"서버 측 전략 래퍼 외에도 클라이언트 측 클리핑을 수행하려면 :code:`ClientApp`"
+"이 일치하는 :code:`fixedclipping_mod`를 구성해야 합니다:"
 
 #: ../../source/how-to-use-differential-privacy.rst:97
 msgid ""
@@ -7442,14 +7830,17 @@ msgid ""
 "`LocalDpMod`. The following hyperparameters need to be set: clipping norm "
 "value, sensitivity, epsilon, and delta."
 msgstr ""
+"로컬 차분 프라이버시(DP)를 활용하고 클라이언트 모델 파라미터를 서버로 전송하"
+"기 전에 노이즈를 추가하려면 `LocalDpMod`를 사용하면 됩니다. 클리핑 노멀 값, "
+"감도, 엡실론, 델타 등의 하이퍼파라미터를 설정해야 합니다."
 
 #: ../../source/how-to-use-differential-privacy.rst:-1
 msgid "local DP mod"
-msgstr ""
+msgstr "로컬 DP mod"
 
 #: ../../source/how-to-use-differential-privacy.rst:104
 msgid "Below is a code example that shows how to use :code:`LocalDpMod`:"
-msgstr ""
+msgstr "다음은 :code:`LocalDpMod`를 사용하는 방법을 보여주는 코드 예시입니다:"
 
 #: ../../source/how-to-use-differential-privacy.rst:122
 msgid ""
@@ -7457,10 +7848,13 @@ msgid ""
 "is important when using multiple modifiers. Typically, differential privacy "
 "(DP) modifiers should be the last to operate on parameters."
 msgstr ""
+"여러 개의 수정자를 사용할 때는 수정자, 특히 매개변수를 수정하는 수정자의 순서"
+"가 중요하다는 점에 유의하세요. 일반적으로 차분 프라이버시(DP) 수정자는 매개변"
+"수에서 가장 마지막에 작동해야 합니다."
 
 #: ../../source/how-to-use-differential-privacy.rst:125
 msgid "Local Training using Privacy Engines"
-msgstr ""
+msgstr "Privacy Engines을 사용한 로컬 훈련"
 
 #: ../../source/how-to-use-differential-privacy.rst:126
 msgid ""
@@ -7471,10 +7865,16 @@ msgid ""
 "flower/tree/main/examples/opacus>`_, `Tensorflow Privacy <https://github.com/"
 "adap/flower/tree/main/examples/dp-sgd-mnist>`_)."
 msgstr ""
+"클라이언트 측에서 로컬 모델을 훈련하는 동안 데이터 인스턴스 수준의 개인 정보 "
+"보호를 보장하려면 Opacus 및 TensorFlow Privacy와 같은 개인 정보 보호 엔진을 "
+"활용하는 것을 고려하세요. 이러한 엔진과 함께 Flower를 사용하는 예제는 Flower "
+"examples directory (`Opacus <https://github.com/adap/flower/tree/main/"
+"examples/opacus>`_, `Tensorflow Privacy <https://github.com/adap/flower/tree/"
+"main/examples/dp-sgd-mnist>`_)를 참조하세요."
 
 #: ../../source/how-to-use-strategies.rst:2
 msgid "Use strategies"
-msgstr ""
+msgstr "전략 사용하기"
 
 #: ../../source/how-to-use-strategies.rst:4
 msgid ""
@@ -7482,36 +7882,42 @@ msgid ""
 "`Strategy` abstraction. A number of built-in strategies are provided in the "
 "core framework."
 msgstr ""
+"Flower는 :code:`Strategy` abstraction를 통해 학습 과정을 완전히 사용자 정의"
+"할 수 있습니다. 핵심 프레임워크에는 여러 가지 기본 제공 전략이 제공됩니다."
 
 #: ../../source/how-to-use-strategies.rst:6
 msgid ""
 "There are three ways to customize the way Flower orchestrates the learning "
 "process on the server side:"
 msgstr ""
+"서버 측에서 Flower가 학습 과정을 조율하는 방식을 사용자 지정하는 방법에는 세 "
+"가지가 있습니다:"
 
 #: ../../source/how-to-use-strategies.rst:8
 msgid "Use an existing strategy, for example, :code:`FedAvg`"
-msgstr ""
+msgstr "기존 전략(예: :code:`FedAvg`)을 사용합니다"
 
 #: ../../source/how-to-use-strategies.rst:9
 #: ../../source/how-to-use-strategies.rst:40
 msgid "Customize an existing strategy with callback functions"
-msgstr ""
+msgstr "콜백 함수로 기존 전략 사용자 지정"
 
 #: ../../source/how-to-use-strategies.rst:10
 #: ../../source/how-to-use-strategies.rst:87
 msgid "Implement a novel strategy"
-msgstr ""
+msgstr "새로운 전략 구현"
 
 #: ../../source/how-to-use-strategies.rst:14
 msgid "Use an existing strategy"
-msgstr ""
+msgstr "기존 전략 사용"
 
 #: ../../source/how-to-use-strategies.rst:16
 msgid ""
 "Flower comes with a number of popular federated learning strategies built-"
 "in. A built-in strategy can be instantiated as follows:"
 msgstr ""
+"Flower에는 여러 가지 인기 있는 federated 학습 전략이 기본으로 제공됩니다. 기"
+"본 제공 전략은 다음과 같이 인스턴스화할 수 있습니다:"
 
 #: ../../source/how-to-use-strategies.rst:25
 msgid ""
@@ -7519,6 +7925,9 @@ msgid ""
 "passes it to the :code:`start_server` function. It is usually recommended to "
 "adjust a few parameters during instantiation:"
 msgstr ""
+"이렇게 하면 모든 매개변수가 기본값으로 유지된 전략이 생성되어 :code:"
+"`start_server` 함수에 전달됩니다. 일반적으로 인스턴스화 중에 몇 가지 매개변수"
+"를 조정하는 것이 좋습니다:"
 
 #: ../../source/how-to-use-strategies.rst:42
 msgid ""
@@ -7526,10 +7935,12 @@ msgid ""
 "Callback functions allow strategies to call user-provided code during "
 "execution."
 msgstr ""
+"기존 전략은 동작을 사용자 지정하는 여러 가지 방법을 제공합니다. 콜백 함수를 "
+"사용하면 전략이 실행 중에 사용자가 제공한 코드를 호출할 수 있습니다."
 
 #: ../../source/how-to-use-strategies.rst:45
 msgid "Configuring client fit and client evaluate"
-msgstr ""
+msgstr "클라이언트 적합성 및 클라이언트 평가 구성"
 
 #: ../../source/how-to-use-strategies.rst:47
 msgid ""
@@ -7540,6 +7951,11 @@ msgid ""
 "arbitrary configuration values  :code:`client.fit` and :code:`client."
 "evaluate` functions during each round of federated learning."
 msgstr ""
+"서버는 매 라운드마다 새로운 설정 값을 클라이언트에 전달하기 위해 :code:"
+"`on_fit_config_fn`에 함수를 제공할 수 있습니다. 제공된 함수는 전략에 의해 호"
+"출되며 클라이언트에 전송될 구성 키 값 쌍의 dictionary를 반환해야 합니다. "
+"federated  학습의 각 라운드 동안 임의의 구성 값 dictionary인 :code:`client."
+"fit` 및 :code:`client.evaluate` 함수를 반환해야 합니다."
 
 #: ../../source/how-to-use-strategies.rst:75
 msgid ""
@@ -7549,6 +7965,10 @@ msgid ""
 "dictionary returned by the :code:`on_fit_config_fn` in its own :code:`client."
 "fit()` function."
 msgstr ""
+":code:`on_fit_config_fn`은 서버에서 클라이언트로 임의의 구성 값을 전달하고, "
+"예를 들어 학습 속도를 조정하기 위해 매 라운드마다 이 값을 잠재적으로 변경하"
+"는 데 사용할 수 있습니다. 클라이언트는 자체 :code:`client.fit()` 함수에서 :"
+"code:`on_fit_config_fn`이 반환한 dictionary를 받습니다."
 
 #: ../../source/how-to-use-strategies.rst:78
 msgid ""
@@ -7556,16 +7976,20 @@ msgid ""
 "`on_evaluate_config_fn` to customize the configuration sent to :code:`client."
 "evaluate()`"
 msgstr ""
+":code:`on_fit_config_fn`과 유사하게, :code:`client.evaluate()`로 전송되는 구"
+"성을 사용자 지정하는 :code:`on_evaluate_config_fn`도 있습니다"
 
 #: ../../source/how-to-use-strategies.rst:81
 msgid "Configuring server-side evaluation"
-msgstr ""
+msgstr "서버 측 평가 구성"
 
 #: ../../source/how-to-use-strategies.rst:83
 msgid ""
 "Server-side evaluation can be enabled by passing an evaluation function to :"
 "code:`evaluate_fn`."
 msgstr ""
+"서버 측 평가는 :code:`evaluate_fn`에 평가 함수를 전달하여 활성화할 수 있습니"
+"다."
 
 #: ../../source/how-to-use-strategies.rst:89
 msgid ""
@@ -7573,70 +7997,77 @@ msgid ""
 "most flexibility. Read the `Implementing Strategies <how-to-implement-"
 "strategies.html>`_ guide to learn more."
 msgstr ""
+"완전한 사용자 지정 전략을 작성하는 것은 조금 더 복잡하지만 유연성이 가장 뛰어"
+"납니다. 자세한 내용은 `Implementing Strategies <how-to-implement-strategies."
+"html>`_ 가이드를 참조하세요."
 
 #: ../../source/index.rst:34
 msgid "Tutorial"
-msgstr ""
+msgstr "튜토리얼"
 
 #: ../../source/index.rst:44
 msgid "Quickstart tutorials"
-msgstr ""
+msgstr "빠른 시작 튜토리얼"
 
 #: ../../source/index.rst:74 ../../source/index.rst:78
 msgid "How-to guides"
-msgstr ""
+msgstr "사용 방법 가이드"
 
 #: ../../source/index.rst:99
 msgid "Legacy example guides"
-msgstr ""
+msgstr "레거시 예제 가이드"
 
 #: ../../source/index.rst:108 ../../source/index.rst:112
 msgid "Explanations"
-msgstr ""
+msgstr "설명"
 
 #: None:-1
 msgid "API reference"
-msgstr ""
+msgstr "API 참조"
 
 #: ../../source/index.rst:137
 msgid "Reference docs"
-msgstr ""
+msgstr "참조 문서"
 
 #: ../../source/index.rst:153
 msgid "Contributor tutorials"
-msgstr ""
+msgstr "기여자 튜토리얼"
 
 #: ../../source/index.rst:160
 msgid "Contributor how-to guides"
-msgstr ""
+msgstr "기여자 사용법 가이드"
 
 #: ../../source/index.rst:172
 msgid "Contributor explanations"
-msgstr ""
+msgstr "기여자 설명"
 
 #: ../../source/index.rst:178
 msgid "Contributor references"
-msgstr ""
+msgstr "기여자 참조"
 
 #: ../../source/index.rst:-1
 msgid ""
 "Check out the documentation of the main Flower Framework enabling easy "
 "Python development for Federated Learning."
 msgstr ""
+"Federated 학습을 위한 Python 개발을 쉽게 할 수 있는 주요 Flower 프레임워크의 "
+"설명서를 확인하세요."
 
 #: ../../source/index.rst:2
 msgid "Flower Framework Documentation"
-msgstr ""
+msgstr "플라워 프레임워크 문서"
 
 #: ../../source/index.rst:7
 msgid ""
 "Welcome to Flower's documentation. `Flower <https://flower.ai>`_ is a "
 "friendly federated learning framework."
 msgstr ""
+"Flower 문서에 오신 것을 환영합니다. Flower <https://flower.ai>`_는 친숙한 "
+"federated 학습 프레임워크입니다."
 
 #: ../../source/index.rst:11
 msgid "Join the Flower Community"
-msgstr ""
+msgstr "Flower 커뮤니티 가입하기"
 
 #: ../../source/index.rst:13
 msgid ""
@@ -7644,14 +8075,16 @@ msgid ""
 "researchers, engineers, students, professionals, academics, and other "
 "enthusiasts."
 msgstr ""
+"Flower 커뮤니티는 연구원, 엔지니어, 학생, 전문가, 학자 및 기타 애호가들로 구"
+"성된 편한 그룹으로 빠르게 성장하고 있습니다."
 
 #: ../../source/index.rst:15
 msgid "Join us on Slack"
-msgstr ""
+msgstr "Slack에 가입하세요"
 
 #: ../../source/index.rst:23
 msgid "Flower Framework"
-msgstr ""
+msgstr "Flower 프레임워크"
 
 #: ../../source/index.rst:25
 msgid ""
@@ -7660,16 +8093,20 @@ msgid ""
 "setting. One of Flower's design goals was to make this simple. Read on to "
 "learn more."
 msgstr ""
+"이 사용자 가이드는 Flower를 사용해 기존 머신 러닝 워크로드를 연합된 환경으로 "
+"가져오고자 하는 연구자와 개발자를 대상으로 합니다. Flower의 설계 목표 중 하나"
+"는 이를 간단하게 만드는 것이었습니다. 자세히 알아보려면 계속 읽어보세요."
 
 #: ../../source/index.rst:30
 msgid "Tutorials"
-msgstr ""
+msgstr "튜토리얼"
 
 #: ../../source/index.rst:32
 msgid ""
 "A learning-oriented series of federated learning tutorials, the best place "
 "to start."
 msgstr ""
+"학습 중심의 federated 학습 튜토리얼 시리즈로, 시작하기에 가장 좋은 곳입니다."
 
 #: ../../source/index.rst:61
 msgid ""
@@ -7682,119 +8119,132 @@ msgid ""
 "`XGBoost <tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-quickstart-"
 "android>` | :doc:`iOS <tutorial-quickstart-ios>`"
 msgstr ""
+"QUICKSTART TUTORIALS: :doc:`PyTorch <tutorial-quickstart-pytorch>` | :doc:"
+"`TensorFlow <tutorial-quickstart-tensorflow>` | :doc:`🤗 Transformers "
+"<tutorial-quickstart-huggingface>` | :doc:`JAX <tutorial-quickstart-jax>` | :"
+"doc:`Pandas <tutorial-quickstart-pandas>` | :doc:`fastai <tutorial-"
+"quickstart-fastai>` | :doc:`PyTorch Lightning <tutorial-quickstart-pytorch-"
+"lightning>` | :doc:`scikit-learn <tutorial-quickstart-scikitlearn>` | :doc:"
+"`XGBoost <tutorial-quickstart-xgboost>` | :doc:`Android <tutorial-quickstart-"
+"android>` | :doc:`iOS <tutorial-quickstart-ios>`"
 
 #: ../../source/index.rst:63
 msgid "We also made video tutorials for PyTorch:"
-msgstr ""
+msgstr "파이토치용 동영상 튜토리얼도 만들었습니다:"
 
 #: ../../source/index.rst:68
 msgid "And TensorFlow:"
-msgstr ""
+msgstr "그리고 TensorFlow도:"
 
 #: ../../source/index.rst:76
 msgid ""
 "Problem-oriented how-to guides show step-by-step how to achieve a specific "
 "goal."
 msgstr ""
+"문제 중심의 방법 가이드는 특정 목표를 달성하는 방법을 단계별로 보여줍니다."
 
 #: ../../source/index.rst:110
 msgid ""
 "Understanding-oriented concept guides explain and discuss key topics and "
 "underlying ideas behind Flower and collaborative AI."
 msgstr ""
+"이해 중심의 개념 가이드에서는 Flower와 협업 AI의 주요 주제와 기본 아이디어를 "
+"설명하고 토론합니다."
 
 #: ../../source/index.rst:120
 msgid "References"
-msgstr ""
+msgstr "참조"
 
 #: ../../source/index.rst:122
 msgid "Information-oriented API reference and other reference material."
-msgstr ""
+msgstr "정보 지향 API 참조 및 기타 참고 자료."
 
 #: ../../source/index.rst:131:<autosummary>:1
 msgid ":py:obj:`flwr <flwr>`\\"
-msgstr ""
+msgstr ":py:obj:`flwr <flwr>`\\"
 
 #: ../../source/index.rst:131:<autosummary>:1 flwr:1 of
 msgid "Flower main package."
-msgstr ""
+msgstr "Flower 메인 패키지."
 
 #: ../../source/index.rst:148
 msgid "Contributor docs"
-msgstr ""
+msgstr "기여자 문서"
 
 #: ../../source/index.rst:150
 msgid ""
 "The Flower community welcomes contributions. The following docs are intended "
 "to help along the way."
 msgstr ""
+"Flower 커뮤니티는 여러분의 기여를 환영합니다. 다음 문서는 그 과정에서 도움을 "
+"드리기 위한 문서입니다."
 
 #: ../../source/ref-api-cli.rst:2
 msgid "Flower CLI reference"
-msgstr ""
+msgstr "Flower CLI 참조"
 
 #: ../../source/ref-api-cli.rst:7
 msgid "flower-simulation"
-msgstr ""
+msgstr "flower-simulation"
 
 #: ../../source/ref-api-cli.rst:17
 msgid "flower-superlink"
-msgstr ""
+msgstr "flower-superlink"
 
 #: ../../source/ref-api-cli.rst:27
 msgid "flower-client-app"
-msgstr ""
+msgstr "flower-client-app"
 
 #: ../../source/ref-api-cli.rst:37
 msgid "flower-server-app"
-msgstr ""
+msgstr "flower-server-app"
 
 #: ../../source/ref-api/flwr.rst:2
 msgid "flwr"
-msgstr ""
+msgstr "flwr"
 
 #: ../../source/ref-api/flwr.client.rst:45 ../../source/ref-api/flwr.rst:25
 #: ../../source/ref-api/flwr.server.rst:49
 msgid "Modules"
-msgstr ""
+msgstr "Modules"
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1
 msgid ":py:obj:`flwr.client <flwr.client>`\\"
-msgstr ""
+msgstr ":py:obj:`flwr.client <flwr.client>`\\"
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1 flwr.client:1 of
 msgid "Flower client."
-msgstr ""
+msgstr "Flower 클라이언트."
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1
 msgid ":py:obj:`flwr.common <flwr.common>`\\"
-msgstr ""
+msgstr ":py:obj:`flwr.common <flwr.common>`\\"
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1 flwr.common:1 of
 msgid "Common components shared between server and client."
-msgstr ""
+msgstr "서버와 클라이언트 간에 공유되는 공통 구성 요소입니다."
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1
 msgid ":py:obj:`flwr.server <flwr.server>`\\"
-msgstr ""
+msgstr ":py:obj:`flwr.server <flwr.server>`\\"
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1
 #: ../../source/ref-api/flwr.server.rst:38:<autosummary>:1 flwr.server:1
 #: flwr.server.server.Server:1 of
 msgid "Flower server."
-msgstr ""
+msgstr "Flower 서버."
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1
 msgid ":py:obj:`flwr.simulation <flwr.simulation>`\\"
-msgstr ""
+msgstr ":py:obj:`flwr.simulation <flwr.simulation>`\\"
 
 #: ../../source/ref-api/flwr.rst:35:<autosummary>:1 flwr.simulation:1 of
 msgid "Flower simulation."
-msgstr ""
+msgstr "Flower 시뮬레이션."
 
 #: ../../source/ref-api/flwr.client.rst:2
 msgid "client"
-msgstr ""
+msgstr "클라이언트"
 
 #: ../../source/ref-api/flwr.client.mod.rst:13
 #: ../../source/ref-api/flwr.client.rst:13
@@ -7802,47 +8252,51 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.rst:13
 #: ../../source/ref-api/flwr.simulation.rst:13
 msgid "Functions"
-msgstr ""
+msgstr "함수"
 
 #: ../../source/ref-api/flwr.client.rst:25:<autosummary>:1
 msgid ":py:obj:`run_client_app <flwr.client.run_client_app>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`run_client_app <flwr.client.run_client_app>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.client.rst:25:<autosummary>:1
 #: flwr.client.supernode.app.run_client_app:1 of
 msgid "Run Flower client app."
-msgstr ""
+msgstr "Flower 클라이언트 앱을 실행합니다."
 
 #: ../../source/ref-api/flwr.client.rst:25:<autosummary>:1
 msgid ":py:obj:`run_supernode <flwr.client.run_supernode>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`run_supernode <flwr.client.run_supernode>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.client.rst:25:<autosummary>:1
 #: flwr.client.supernode.app.run_supernode:1 of
 msgid "Run Flower SuperNode."
-msgstr ""
+msgstr "Flower SuperNode를 실행합니다."
 
 #: ../../source/ref-api/flwr.client.rst:25:<autosummary>:1
 msgid ""
 ":py:obj:`start_client <flwr.client.start_client>`\\ \\(\\*\\, "
 "server\\_address\\[\\, client\\_fn\\, ...\\]\\)"
 msgstr ""
+":py:obj:`start_client <flwr.client.start_client>`\\ \\(\\*\\, "
+"server\\_address\\[\\, client\\_fn\\, ...\\]\\)"
 
 #: ../../source/ref-api/flwr.client.rst:25:<autosummary>:1
 #: flwr.client.app.start_client:1 of
 msgid "Start a Flower client node which connects to a Flower server."
-msgstr ""
+msgstr "Flower 서버에 연결되는 Flower 클라이언트 노드를 시작합니다."
 
 #: ../../source/ref-api/flwr.client.rst:25:<autosummary>:1
 msgid ""
 ":py:obj:`start_numpy_client <flwr.client.start_numpy_client>`\\ \\(\\*\\, "
 "server\\_address\\, client\\)"
 msgstr ""
+":py:obj:`start_numpy_client <flwr.client.start_numpy_client>`\\ \\(\\*\\, "
+"server\\_address\\, client\\)"
 
 #: ../../source/ref-api/flwr.client.rst:25:<autosummary>:1
 #: flwr.client.app.start_numpy_client:1 of
 msgid "Start a Flower NumPyClient which connects to a gRPC server."
-msgstr ""
+msgstr "gRPC 서버에 연결되는 Flower NumPyClient를 시작합니다."
 
 #: ../../source/ref-api/flwr.client.mod.rst:30
 #: ../../source/ref-api/flwr.client.rst:27
@@ -7851,50 +8305,51 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.strategy.rst:17
 #: ../../source/ref-api/flwr.server.workflow.rst:17
 msgid "Classes"
-msgstr ""
+msgstr "클래스"
 
 #: ../../source/ref-api/flwr.client.rst:34:<autosummary>:1
 msgid ":py:obj:`Client <flwr.client.Client>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`Client <flwr.client.Client>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.client.rst:34:<autosummary>:1
 #: flwr.client.client.Client:1 of
 msgid "Abstract base class for Flower clients."
-msgstr ""
+msgstr "Flower 클라이언트를 위한 추상 베이스 클래스입니다."
 
 #: ../../source/ref-api/flwr.client.rst:34:<autosummary>:1
 msgid ""
 ":py:obj:`ClientApp <flwr.client.ClientApp>`\\ \\(\\[client\\_fn\\, mods\\]\\)"
 msgstr ""
+":py:obj:`ClientApp <flwr.client.ClientApp>`\\ \\(\\[client\\_fn\\, mods\\]\\)"
 
 #: ../../source/ref-api/flwr.client.rst:34:<autosummary>:1
 #: flwr.client.client_app.ClientApp:1 of
 msgid "Flower ClientApp."
-msgstr ""
+msgstr "Flower ClientApp."
 
 #: ../../source/ref-api/flwr.client.rst:34:<autosummary>:1
 msgid ":py:obj:`NumPyClient <flwr.client.NumPyClient>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`NumPyClient <flwr.client.NumPyClient>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.client.rst:34:<autosummary>:1
 #: flwr.client.numpy_client.NumPyClient:1 of
 msgid "Abstract base class for Flower clients using NumPy."
-msgstr ""
+msgstr "NumPy를 사용하는 Flower 클라이언트를 위한 추상 베이스 클래스입니다."
 
 #: ../../source/ref-api/flwr.client.rst:52:<autosummary>:1
 msgid ":py:obj:`flwr.client.mod <flwr.client.mod>`\\"
-msgstr ""
+msgstr ":py:obj:`flwr.client.mod <flwr.client.mod>`\\"
 
 #: ../../source/ref-api/flwr.client.rst:52:<autosummary>:1 flwr.client.mod:1 of
 msgid "Flower Built-in Mods."
-msgstr ""
+msgstr "Flower 내장 모드."
 
 #: flwr.client.client.Client:1 flwr.client.numpy_client.NumPyClient:1
 #: flwr.server.client_manager.ClientManager:1
 #: flwr.server.driver.driver.Driver:1 flwr.server.strategy.strategy.Strategy:1
 #: of
 msgid "Bases: :py:class:`~abc.ABC`"
-msgstr ""
+msgstr "Bases: :py:class:`~abc.ABC`"
 
 #: ../../source/ref-api/flwr.client.Client.rst:15
 #: ../../source/ref-api/flwr.client.ClientApp.rst:15
@@ -7962,80 +8417,82 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.workflow.SecAggPlusWorkflow.rst:15
 #: ../../source/ref-api/flwr.server.workflow.SecAggWorkflow.rst:15
 msgid "Methods"
-msgstr ""
+msgstr "메소드"
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 msgid ":py:obj:`evaluate <flwr.client.Client.evaluate>`\\ \\(ins\\)"
-msgstr ""
+msgstr ":py:obj:`evaluate <flwr.client.Client.evaluate>`\\ \\(ins\\)"
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 #: flwr.client.client.Client.evaluate:1
 #: flwr.client.numpy_client.NumPyClient.evaluate:1 of
 msgid "Evaluate the provided parameters using the locally held dataset."
-msgstr ""
+msgstr "로컬로 보유한 데이터 세트를 사용하여 제공된 매개변수를 평가합니다."
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 msgid ":py:obj:`fit <flwr.client.Client.fit>`\\ \\(ins\\)"
-msgstr ""
+msgstr ":py:obj:`fit <flwr.client.Client.fit>`\\ \\(ins\\)"
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 #: flwr.client.client.Client.fit:1 of
 msgid "Refine the provided parameters using the locally held dataset."
-msgstr ""
+msgstr "로컬로 보유한 데이터 세트를 사용하여 제공된 매개변수를 구체화합니다."
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 msgid ":py:obj:`get_context <flwr.client.Client.get_context>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`get_context <flwr.client.Client.get_context>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 #: flwr.client.client.Client.get_context:1
 #: flwr.client.numpy_client.NumPyClient.get_context:1 of
 msgid "Get the run context from this client."
-msgstr ""
+msgstr "이 클라이언트에서 실행 컨텍스트를 가져옵니다."
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 msgid ""
 ":py:obj:`get_parameters <flwr.client.Client.get_parameters>`\\ \\(ins\\)"
 msgstr ""
+":py:obj:`get_parameters <flwr.client.Client.get_parameters>`\\ \\(ins\\)"
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 #: flwr.client.client.Client.get_parameters:1
 #: flwr.client.numpy_client.NumPyClient.get_parameters:1 of
 msgid "Return the current local model parameters."
-msgstr ""
+msgstr "현재 로컬 모델 파라미터를 반환합니다."
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 msgid ""
 ":py:obj:`get_properties <flwr.client.Client.get_properties>`\\ \\(ins\\)"
 msgstr ""
+":py:obj:`get_properties <flwr.client.Client.get_properties>`\\ \\(ins\\)"
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 #: flwr.client.client.Client.get_properties:1 of
 msgid "Return set of client's properties."
-msgstr ""
+msgstr "클라이언트의 속성 집합을 반환합니다."
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 msgid ":py:obj:`set_context <flwr.client.Client.set_context>`\\ \\(context\\)"
-msgstr ""
+msgstr ":py:obj:`set_context <flwr.client.Client.set_context>`\\ \\(context\\)"
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 #: flwr.client.client.Client.set_context:1
 #: flwr.client.numpy_client.NumPyClient.set_context:1 of
 msgid "Apply a run context to this client."
-msgstr ""
+msgstr "이 클라이언트에 실행 컨텍스트를 적용합니다."
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 msgid ":py:obj:`to_client <flwr.client.Client.to_client>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`to_client <flwr.client.Client.to_client>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.client.Client.rst:44:<autosummary>:1
 #: flwr.client.client.Client.to_client:1 of
 msgid "Return client (itself)."
-msgstr ""
+msgstr "클라이언트(자체)를 반환합니다."
 
 #: ../../source/ref-api/flwr.client.Client.rst:46
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:46
@@ -8066,11 +8523,11 @@ msgstr ""
 #: ../../source/ref-api/flwr.server.LegacyContext.rst:25
 #: ../../source/ref-api/flwr.server.ServerConfig.rst:25
 msgid "Attributes"
-msgstr ""
+msgstr "속성"
 
 #: flwr.client.client.Client.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`context <flwr.client.Client.context>`\\"
-msgstr ""
+msgstr ":py:obj:`context <flwr.client.Client.context>`\\"
 
 #: ../../source/ref-api/flwr.common.Parameters.rst:2
 #: flwr.client.app.start_client flwr.client.app.start_numpy_client
@@ -8120,7 +8577,7 @@ msgstr ""
 #: flwr.simulation.app.start_simulation
 #: flwr.simulation.run_simulation.run_simulation of
 msgid "Parameters"
-msgstr ""
+msgstr "매개변수"
 
 #: flwr.client.client.Client.evaluate:3 of
 msgid ""
@@ -8128,6 +8585,8 @@ msgid ""
 "from the server and a dictionary of configuration values used to customize "
 "the local evaluation process."
 msgstr ""
+"서버에서 받은 (전역) 모델 파라미터와 로컬 평가 프로세스를 사용자 지정하는 데 "
+"사용되는 구성 값 사전이 포함된 평가 지침입니다."
 
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
@@ -8156,13 +8615,15 @@ msgstr ""
 #: flwr.server.strategy.strategy.Strategy.initialize_parameters
 #: flwr.simulation.app.start_simulation of
 msgid "Returns"
-msgstr ""
+msgstr "반환"
 
 #: flwr.client.client.Client.evaluate:8 of
 msgid ""
 "The evaluation result containing the loss on the local dataset and other "
 "details such as the number of local data examples used for evaluation."
 msgstr ""
+"로컬 데이터 세트의 손실 및 평가에 사용된 로컬 데이터 예제 수와 같은 기타 세"
+"부 정보가 포함된 평가 결과입니다."
 
 #: flwr.client.client.Client.evaluate flwr.client.client.Client.fit
 #: flwr.client.client.Client.get_parameters
@@ -8189,7 +8650,7 @@ msgstr ""
 #: flwr.server.strategy.strategy.Strategy.initialize_parameters
 #: flwr.simulation.app.start_simulation of
 msgid "Return type"
-msgstr ""
+msgstr "반환 타입"
 
 #: flwr.client.client.Client.fit:3 of
 msgid ""
@@ -8197,36 +8658,41 @@ msgid ""
 "the server and a dictionary of configuration values used to customize the "
 "local training process."
 msgstr ""
+"서버에서 받은 (전역) 모델 파라미터와 로컬 학습 프로세스를 사용자 지정하는 데 "
+"사용되는 구성 값 사전이 포함된 학습 지침입니다."
 
 #: flwr.client.client.Client.fit:8 of
 msgid ""
 "The training result containing updated parameters and other details such as "
 "the number of local training examples used for training."
 msgstr ""
+"업데이트된 매개변수와 훈련에 사용된 로컬 훈련 예제 수와 같은 기타 세부 정보"
+"가 포함된 훈련 결과입니다."
 
 #: flwr.client.client.Client.get_parameters:3 of
 msgid ""
 "The get parameters instructions received from the server containing a "
 "dictionary of configuration values."
 msgstr ""
+"구성 값 dictionary이 포함된 서버에서 받은 매개변수 가져오기 명령어입니다."
 
 #: flwr.client.client.Client.get_parameters:7 of
 msgid "The current local model parameters."
-msgstr ""
+msgstr "현재 로컬 모델 파라미터입니다."
 
 #: flwr.client.client.Client.get_properties:3 of
 msgid ""
 "The get properties instructions received from the server containing a "
 "dictionary of configuration values."
-msgstr ""
+msgstr "구성 값 dictionary이 포함된 서버로부터 받은 속성 가져오기 명령입니다."
 
 #: flwr.client.client.Client.get_properties:7 of
 msgid "The current client properties."
-msgstr ""
+msgstr "현재 클라이언트 속성입니다."
 
 #: ../../source/ref-api/flwr.client.ClientApp.rst:2
 msgid "ClientApp"
-msgstr ""
+msgstr "클라이언트앱"
 
 #: flwr.client.client_app.ClientApp:1 flwr.client.mod.localdp_mod.LocalDpMod:1
 #: flwr.common.constant.MessageType:1 flwr.common.constant.MessageTypeLegacy:1
@@ -8247,7 +8713,7 @@ msgstr ""
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:1
 #: of
 msgid "Bases: :py:class:`object`"
-msgstr ""
+msgstr "Bases: :py:class:`object`"
 
 #: flwr.client.app.start_client:41 flwr.client.app.start_numpy_client:36
 #: flwr.client.client_app.ClientApp:4
@@ -8262,19 +8728,23 @@ msgstr ""
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:14
 #: of
 msgid "Examples"
-msgstr ""
+msgstr "예시"
 
 #: flwr.client.client_app.ClientApp:5 of
 msgid ""
 "Assuming a typical `Client` implementation named `FlowerClient`, you can "
 "wrap it in a `ClientApp` as follows:"
 msgstr ""
+"일반적인 `Client` 구현의 이름이 `FlowerClient`라고 가정하면, 다음과 같이 "
+"`ClientApp`으로 래핑할 수 있습니다:"
 
 #: flwr.client.client_app.ClientApp:16 of
 msgid ""
 "If the above code is in a Python module called `client`, it can be started "
 "as follows:"
 msgstr ""
+"위의 코드가 'client'라는 Python 모듈에 있는 경우 다음과 같이 시작할 수 있습니"
+"다:"
 
 #: flwr.client.client_app.ClientApp:21 of
 msgid ""
@@ -8282,92 +8752,103 @@ msgid ""
 "py` in which the previous code lives in and `app` refers to the global "
 "attribute `app` that points to an object of type `ClientApp`."
 msgstr ""
+"이 `client:app` 예제에서 `client`는 이전 코드가 있는 Python 모듈 `client.py`"
+"를 가리키고 `app`는 `ClientApp` 유형의 객체를 가리키는 전역 속성 `app`을 가리"
+"킵니다."
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`evaluate <flwr.client.ClientApp.evaluate>`\\ \\(\\)"
 
 #: flwr.client.client_app.ClientApp.evaluate:1
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid "Return a decorator that registers the evaluate fn with the client app."
-msgstr ""
+msgstr "클라이언트 앱에 평가함수를 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`query <flwr.client.ClientApp.query>`\\ \\(\\)"
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
 #: flwr.client.client_app.ClientApp.query:1 of
 msgid "Return a decorator that registers the query fn with the client app."
-msgstr ""
+msgstr "클라이언트 앱에 query fn을 등록하는 데코레이터를 반환합니다."
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`train <flwr.client.ClientApp.train>`\\ \\(\\)"
 
 #: flwr.client.client_app.ClientApp.evaluate:1:<autosummary>:1
 #: flwr.client.client_app.ClientApp.train:1 of
 msgid "Return a decorator that registers the train fn with the client app."
-msgstr ""
+msgstr "클라이언트 앱에 train fn을 등록하는 데코레이터를 반환합니다."
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:2
 msgid "NumPyClient"
-msgstr ""
+msgstr "NumPyClient"
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 msgid ""
 ":py:obj:`evaluate <flwr.client.NumPyClient.evaluate>`\\ \\(parameters\\, "
 "config\\)"
 msgstr ""
+":py:obj:`evaluate <flwr.client.NumPyClient.evaluate>`\\ \\(parameters\\, "
+"config\\)"
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 msgid ""
 ":py:obj:`fit <flwr.client.NumPyClient.fit>`\\ \\(parameters\\, config\\)"
 msgstr ""
+":py:obj:`fit <flwr.client.NumPyClient.fit>`\\ \\(parameters\\, config\\)"
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 #: flwr.client.numpy_client.NumPyClient.fit:1 of
 msgid "Train the provided parameters using the locally held dataset."
-msgstr ""
+msgstr "로컬로 보유한 데이터 세트를 사용하여 제공된 파라미터를 학습합니다."
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 msgid ":py:obj:`get_context <flwr.client.NumPyClient.get_context>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`get_context <flwr.client.NumPyClient.get_context>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 msgid ""
 ":py:obj:`get_parameters <flwr.client.NumPyClient.get_parameters>`\\ "
 "\\(config\\)"
 msgstr ""
+":py:obj:`get_parameters <flwr.client.NumPyClient.get_parameters>`\\ "
+"\\(config\\)"
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 msgid ""
 ":py:obj:`get_properties <flwr.client.NumPyClient.get_properties>`\\ "
 "\\(config\\)"
 msgstr ""
+":py:obj:`get_properties <flwr.client.NumPyClient.get_properties>`\\ "
+"\\(config\\)"
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 #: flwr.client.numpy_client.NumPyClient.get_properties:1 of
 msgid "Return a client's set of properties."
-msgstr ""
+msgstr "클라이언트의 속성 집합을 반환합니다."
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 msgid ""
 ":py:obj:`set_context <flwr.client.NumPyClient.set_context>`\\ \\(context\\)"
 msgstr ""
+":py:obj:`set_context <flwr.client.NumPyClient.set_context>`\\ \\(context\\)"
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 msgid ":py:obj:`to_client <flwr.client.NumPyClient.to_client>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`to_client <flwr.client.NumPyClient.to_client>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.client.NumPyClient.rst:44:<autosummary>:1
 #: flwr.client.numpy_client.NumPyClient.to_client:1 of
 msgid "Convert to object to Client type and return it."
-msgstr ""
+msgstr "객체를 클라이언트 유형으로 변환하고 반환합니다."
 
 #: flwr.client.numpy_client.NumPyClient.evaluate:1:<autosummary>:1 of
 msgid ":py:obj:`context <flwr.client.NumPyClient.context>`\\"
-msgstr ""
+msgstr ":py:obj:`context <flwr.client.NumPyClient.context>`\\"
 
 #: flwr.client.numpy_client.NumPyClient.evaluate:3
 #: flwr.client.numpy_client.NumPyClient.fit:3
@@ -8377,7 +8858,7 @@ msgstr ""
 #: flwr.server.strategy.strategy.Strategy.configure_fit:5
 #: flwr.server.strategy.strategy.Strategy.evaluate:8 of
 msgid "The current (global) model parameters."
-msgstr ""
+msgstr "현재(전역) 모델 매개변수입니다."
 
 #: flwr.client.numpy_client.NumPyClient.evaluate:5 of
 msgid ""
@@ -8386,6 +8867,9 @@ msgid ""
 "to the client, for example, to influence the number of examples used for "
 "evaluation."
 msgstr ""
+"서버가 클라이언트의 평가에 영향을 줄 수 있는 구성 매개변수입니다. 예를 들어 "
+"평가에 사용되는 예제 수에 영향을 주기 위해 서버에서 클라이언트로 임의의 값을 "
+"전달하는 데 사용할 수 있습니다."
 
 #: flwr.client.numpy_client.NumPyClient.evaluate:11 of
 msgid ""
@@ -8395,15 +8879,20 @@ msgid ""
 "arbitrary string keys to values of   type bool, bytes, float, int, or str. "
 "It can be used to   communicate arbitrary values back to the server."
 msgstr ""
+"* **loss** (*float*) - 로컬 데이터 세트에서 모델의 평가 손실입니다. * "
+"**num_examples** (*int*) -- 평가에 사용된 예제 수입니다. * **metrics** "
+"(*Dict[str, Scalar]*) -- 임의의 문자열 키를 부울, 바이트, float, int 또는 "
+"str 유형의 값에 매핑하는 dictionary입니다. 임의의 값을 서버에 다시 전달하는 "
+"데 사용할 수 있습니다."
 
 #: flwr.client.numpy_client.NumPyClient.evaluate:11 of
 msgid ""
 "**loss** (*float*) -- The evaluation loss of the model on the local dataset."
-msgstr ""
+msgstr "**loss** (*float*) -- 로컬 데이터 세트에서 모델의 평가 손실입니다."
 
 #: flwr.client.numpy_client.NumPyClient.evaluate:12 of
 msgid "**num_examples** (*int*) -- The number of examples used for evaluation."
-msgstr ""
+msgstr "**num_examples** (*int*) - 평가에 사용된 예제 수입니다."
 
 #: flwr.client.numpy_client.NumPyClient.evaluate:13
 #: flwr.client.numpy_client.NumPyClient.fit:13 of
@@ -8412,6 +8901,9 @@ msgid ""
 "keys to values of type bool, bytes, float, int, or str. It can be used to "
 "communicate arbitrary values back to the server."
 msgstr ""
+"**metrics** (*Dict[str, Scalar]*) - 임의의 문자열 키를 bool, bytes, float, "
+"int 또는 str 타입의 값에 매핑하는 dictionary입니다. 임의의 값을 서버에 다시 "
+"전달하는 데 사용할 수 있습니다."
 
 #: flwr.client.numpy_client.NumPyClient.evaluate:19 of
 msgid ""
@@ -8419,6 +8911,8 @@ msgid ""
 "(int, float, float, Dict[str, Scalar]) have been deprecated and removed "
 "since Flower 0.19."
 msgstr ""
+"이전 반환 유형 형식(int, float, float)과 확장 형식(int, float, float, "
+"Dict[str, Scalar])은 Flower 0.19부터 더 이상 사용되지 않으며 제거되었습니다."
 
 #: flwr.client.numpy_client.NumPyClient.fit:5 of
 msgid ""
@@ -8426,6 +8920,9 @@ msgid ""
 "client. It can be used to communicate arbitrary values from the server to "
 "the client, for example, to set the number of (local) training epochs."
 msgstr ""
+"서버가 클라이언트의 훈련에 영향을 줄 수 있는 구성 매개변수입니다. 예를 들어 "
+"(로컬) 트레이닝 에포크 수를 설정하는 등 서버에서 클라이언트로 임의의 값을 전"
+"달하는 데 사용할 수 있습니다."
 
 #: flwr.client.numpy_client.NumPyClient.fit:11 of
 msgid ""
@@ -8435,31 +8932,40 @@ msgid ""
 "keys to values of type   bool, bytes, float, int, or str. It can be used to "
 "communicate   arbitrary values back to the server."
 msgstr ""
+"* **parameters** (*NDArrays*) - 로컬로 업데이트된 모델 파라미터입니다. * "
+"**num_examples** (*int*) -- 학습에 사용된 예제 수입니다. * **metrics** "
+"(*Dict[str, Scalar]*) - 임의의 문자열 키를 bool, bytes, float, int,또는 str "
+"타입의 값에 매핑하는 dictionary입니다. 임의의 값을 서버에 다시 전달하는 데 사"
+"용할 수 있습니다."
 
 #: flwr.client.numpy_client.NumPyClient.fit:11 of
 msgid "**parameters** (*NDArrays*) -- The locally updated model parameters."
-msgstr ""
+msgstr "**parameters** (*NDArrays*) - 로컬로 업데이트된 모델 파라미터입니다."
 
 #: flwr.client.numpy_client.NumPyClient.fit:12 of
 msgid "**num_examples** (*int*) -- The number of examples used for training."
-msgstr ""
+msgstr "**num_examples** (*int*) - 트레이닝에 사용된 예제 수입니다."
 
 #: flwr.client.numpy_client.NumPyClient.get_parameters:3 of
 msgid ""
 "Configuration parameters requested by the server. This can be used to tell "
 "the client which parameters are needed along with some Scalar attributes."
 msgstr ""
+"서버에서 요청한 구성 매개변수입니다. 이는 일부 스칼라 속성과 함께 어떤 매개변"
+"수가 필요한지 클라이언트에게 알려주는 데 사용할 수 있습니다."
 
 #: flwr.client.numpy_client.NumPyClient.get_parameters:8 of
 msgid ""
 "**parameters** -- The local model parameters as a list of NumPy ndarrays."
-msgstr ""
+msgstr "**parameters** -- 로컬 모델 파라미터를 NumPy 배열 목록으로 표시합니다."
 
 #: flwr.client.numpy_client.NumPyClient.get_properties:3 of
 msgid ""
 "Configuration parameters requested by the server. This can be used to tell "
 "the client which properties are needed along with some Scalar attributes."
 msgstr ""
+"서버에서 요청하는 구성 매개변수입니다. 이는 일부 스칼라 속성과 함께 어떤 속성"
+"이 필요한지 클라이언트에게 알려주는 데 사용할 수 있습니다."
 
 #: flwr.client.numpy_client.NumPyClient.get_properties:8 of
 msgid ""
@@ -8467,131 +8973,152 @@ msgid ""
 "type bool, bytes, float, int, or str. It can be used to communicate "
 "arbitrary property values back to the server."
 msgstr ""
+"**properties** -- 임의의 문자열 키를 bool, bytes, float, int 또는 str 타입의 "
+"값에 매핑하는 dictionary입니다. 임의의 속성 값을 서버에 다시 전달하는 데 사용"
+"할 수 있습니다."
 
 #: ../../source/ref-api/flwr.client.mod.rst:2
 msgid "mod"
-msgstr ""
+msgstr "mod"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 msgid ""
 ":py:obj:`adaptiveclipping_mod <flwr.client.mod.adaptiveclipping_mod>`\\ "
 "\\(msg\\, ctxt\\, call\\_next\\)"
 msgstr ""
+":py:obj:`adaptiveclipping_mod <flwr.client.mod.adaptiveclipping_mod>`\\ "
+"\\(msg\\, ctxt\\, call\\_next\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:1 of
 msgid "Client-side adaptive clipping modifier."
-msgstr ""
+msgstr "클라이언트 측 적응형 클리핑 수정자."
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 msgid ""
 ":py:obj:`fixedclipping_mod <flwr.client.mod.fixedclipping_mod>`\\ \\(msg\\, "
 "ctxt\\, call\\_next\\)"
 msgstr ""
+":py:obj:`fixedclipping_mod <flwr.client.mod.fixedclipping_mod>`\\ \\(msg\\, "
+"ctxt\\, call\\_next\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:1 of
 msgid "Client-side fixed clipping modifier."
-msgstr ""
+msgstr "클라이언트 측 고정 클리핑 수정자."
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 msgid ":py:obj:`make_ffn <flwr.client.mod.make_ffn>`\\ \\(ffn\\, mods\\)"
-msgstr ""
+msgstr ":py:obj:`make_ffn <flwr.client.mod.make_ffn>`\\ \\(ffn\\, mods\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.utils.make_ffn:1 of
 msgid "."
-msgstr ""
+msgstr "."
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 msgid ""
 ":py:obj:`secagg_mod <flwr.client.mod.secagg_mod>`\\ \\(msg\\, ctxt\\, "
 "call\\_next\\)"
 msgstr ""
+":py:obj:`secagg_mod <flwr.client.mod.secagg_mod>`\\ \\(msg\\, ctxt\\, "
+"call\\_next\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.secure_aggregation.secagg_mod.secagg_mod:1 of
 msgid ""
 "Handle incoming message and return results, following the SecAgg protocol."
-msgstr ""
+msgstr "SecAgg 프로토콜에 따라 수신 메시지를 처리하고 결과를 반환합니다."
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 msgid ""
 ":py:obj:`secaggplus_mod <flwr.client.mod.secaggplus_mod>`\\ \\(msg\\, "
 "ctxt\\, call\\_next\\)"
 msgstr ""
+":py:obj:`secaggplus_mod <flwr.client.mod.secaggplus_mod>`\\ \\(msg\\, "
+"ctxt\\, call\\_next\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.secure_aggregation.secaggplus_mod.secaggplus_mod:1 of
 msgid ""
 "Handle incoming message and return results, following the SecAgg+ protocol."
-msgstr ""
+msgstr "SecAgg+ 프로토콜에 따라 수신 메시지를 처리하고 결과를 반환합니다."
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 msgid ""
 ":py:obj:`message_size_mod <flwr.client.mod.message_size_mod>`\\ \\(msg\\, "
 "ctxt\\, call\\_next\\)"
 msgstr ""
+":py:obj:`message_size_mod <flwr.client.mod.message_size_mod>`\\ \\(msg\\, "
+"ctxt\\, call\\_next\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.comms_mods.message_size_mod:1 of
 msgid "Message size mod."
-msgstr ""
+msgstr "메시지 크기 수정."
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 msgid ""
 ":py:obj:`parameters_size_mod <flwr.client.mod.parameters_size_mod>`\\ "
 "\\(msg\\, ctxt\\, call\\_next\\)"
 msgstr ""
+":py:obj:`parameters_size_mod <flwr.client.mod.parameters_size_mod>`\\ "
+"\\(msg\\, ctxt\\, call\\_next\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:28:<autosummary>:1
 #: flwr.client.mod.comms_mods.parameters_size_mod:1 of
 msgid "Parameters size mod."
-msgstr ""
+msgstr "매개변수 크기 mod."
 
 #: ../../source/ref-api/flwr.client.mod.rst:35:<autosummary>:1
 msgid ""
 ":py:obj:`LocalDpMod <flwr.client.mod.LocalDpMod>`\\ \\(clipping\\_norm\\, "
 "sensitivity\\, ...\\)"
 msgstr ""
+":py:obj:`LocalDpMod <flwr.client.mod.LocalDpMod>`\\ \\(clipping\\_norm\\, "
+"sensitivity\\, ...\\)"
 
 #: ../../source/ref-api/flwr.client.mod.rst:35:<autosummary>:1
 #: flwr.client.mod.localdp_mod.LocalDpMod:1 of
 msgid "Modifier for local differential privacy."
-msgstr ""
+msgstr "로컬 차분 프라이버시를 위한 수정자."
 
 #: ../../source/ref-api/flwr.client.mod.LocalDpMod.rst:2
 msgid "LocalDpMod"
-msgstr ""
+msgstr "LocalDpMod"
 
 #: flwr.client.mod.localdp_mod.LocalDpMod:3 of
 msgid ""
 "This mod clips the client model updates and adds noise to the params before "
 "sending them to the server."
 msgstr ""
+"이 모드는 클라이언트 모델 업데이트를 클립하고 서버로 보내기 전에 파라미터에 "
+"노이즈를 추가합니다."
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:12
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:10
 #: flwr.client.mod.localdp_mod.LocalDpMod:6 of
 msgid "It operates on messages of type `MessageType.TRAIN`."
-msgstr ""
+msgstr "이 함수는 `MessageType.TRAIN` 유형의 메시지에 대해 작동합니다."
 
 #: flwr.client.mod.localdp_mod.LocalDpMod:8
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyClientSideFixedClipping:15
 #: flwr.server.strategy.dp_fixed_clipping.DifferentialPrivacyServerSideFixedClipping:8
 #: of
 msgid "The value of the clipping norm."
-msgstr ""
+msgstr "클리핑 기준값입니다."
 
 #: flwr.client.mod.localdp_mod.LocalDpMod:10 of
 msgid "The sensitivity of the client model."
-msgstr ""
+msgstr "클라이언트 모델의 민감도입니다."
 
 #: flwr.client.mod.localdp_mod.LocalDpMod:12 of
 msgid ""
 "The privacy budget. Smaller value of epsilon indicates a higher level of "
 "privacy protection."
 msgstr ""
+"개인정보 보호 예산. 엡실론 값이 작을수록 개인정보 보호 수준이 높음을 나타냅니"
+"다."
 
 #: flwr.client.mod.localdp_mod.LocalDpMod:15 of
 msgid ""
@@ -8599,38 +9126,43 @@ msgid ""
 "provide the desired level of privacy. A smaller value of delta indicates a "
 "stricter privacy guarantee."
 msgstr ""
+"실패 확률입니다. 프라이버시 메커니즘이 원하는 수준의 프라이버시를 제공하지 못"
+"할 확률입니다. 델타 값이 작을수록 프라이버시가 더 엄격하게 보장된다는 의미입"
+"니다."
 
 #: flwr.client.mod.localdp_mod.LocalDpMod:23 of
 msgid ""
 "Create an instance of the local DP mod and add it to the client-side mods:"
-msgstr ""
+msgstr "로컬 DP 모드의 인스턴스를 생성하고 클라이언트 측 모드에 추가합니다:"
 
 #: ../../source/ref-api/flwr.client.mod.adaptiveclipping_mod.rst:2
 msgid "adaptiveclipping\\_mod"
-msgstr ""
+msgstr "adaptiveclipping\\_mod"
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:3 of
 msgid ""
 "This mod needs to be used with the "
 "DifferentialPrivacyClientSideAdaptiveClipping server-side strategy wrapper."
 msgstr ""
+"이 모드는 서버 측 전략 래퍼인 차분 프라이버시 클라이언트 측 적응형 클리핑과 "
+"함께 사용해야 합니다."
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:6
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:6 of
 msgid "The wrapper sends the clipping_norm value to the client."
-msgstr ""
+msgstr "래퍼는 클라이언트에 clipping_norm 값을 전송합니다."
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:8
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:8 of
 msgid ""
 "This mod clips the client model updates before sending them to the server."
-msgstr ""
+msgstr "이 모드는 클라이언트 모델 업데이트를 서버로 보내기 전에 클립합니다."
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:10 of
 msgid ""
 "It also sends KEY_NORM_BIT to the server for computing the new clipping "
 "value."
-msgstr ""
+msgstr "또한 새 클리핑 값을 계산하기 위해 서버로 KEY_NORM_BIT을 전송합니다."
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:15
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:13
@@ -8639,89 +9171,98 @@ msgstr ""
 #: flwr.server.workflow.secure_aggregation.secaggplus_workflow.SecAggPlusWorkflow:60
 #: of
 msgid "Notes"
-msgstr ""
+msgstr "참고"
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:16
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:14 of
 msgid "Consider the order of mods when using multiple."
-msgstr ""
+msgstr "여러 개를 사용할 때는 모드의 순서를 고려하세요."
 
 #: flwr.client.mod.centraldp_mods.adaptiveclipping_mod:18 of
 msgid ""
 "Typically, adaptiveclipping_mod should be the last to operate on params."
 msgstr ""
+"일반적으로 adaptiveclipping_mod는 매개변수에서 가장 마지막으로 작동해야 합니"
+"다."
 
 #: ../../source/ref-api/flwr.client.mod.fixedclipping_mod.rst:2
 msgid "fixedclipping\\_mod"
-msgstr ""
+msgstr "fixedclipping\\_mod"
 
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:3 of
 msgid ""
 "This mod needs to be used with the "
 "DifferentialPrivacyClientSideFixedClipping server-side strategy wrapper."
 msgstr ""
+"이 모드는 서버 측 전략 래퍼인 DifferentialPrivacyClientSideFixedClipping과 함"
+"께 사용해야 합니다."
 
 #: flwr.client.mod.centraldp_mods.fixedclipping_mod:16 of
 msgid "Typically, fixedclipping_mod should be the last to operate on params."
 msgstr ""
+"일반적으로 fixedclipping_mod는 매개변수에서 가장 마지막으로 작동해야 합니다."
 
 #: ../../source/ref-api/flwr.client.mod.make_ffn.rst:2
 msgid "make\\_ffn"
-msgstr ""
+msgstr "make\\_ffn"
 
 #: ../../source/ref-api/flwr.client.mod.message_size_mod.rst:2
 msgid "message\\_size\\_mod"
-msgstr ""
+msgstr "message\\_size\\_mod"
 
 #: flwr.client.mod.comms_mods.message_size_mod:3 of
 msgid "This mod logs the size in bytes of the message being transmited."
-msgstr ""
+msgstr "이 모드는 전송되는 메시지의 크기를 바이트 단위로 기록합니다."
 
 #: ../../source/ref-api/flwr.client.mod.parameters_size_mod.rst:2
 msgid "parameters\\_size\\_mod"
-msgstr ""
+msgstr "parameters\\_size\\_mod"
 
 #: flwr.client.mod.comms_mods.parameters_size_mod:3 of
 msgid ""
 "This mod logs the number of parameters transmitted in the message as well as "
 "their size in bytes."
 msgstr ""
+"이 모드는 메시지에서 전송된 매개변수의 수와 그 크기를 바이트 단위로 기록합니"
+"다."
 
 #: ../../source/ref-api/flwr.client.mod.secagg_mod.rst:2
 msgid "secagg\\_mod"
-msgstr ""
+msgstr "secagg\\_mod"
 
 #: ../../source/ref-api/flwr.client.mod.secaggplus_mod.rst:2
 msgid "secaggplus\\_mod"
-msgstr ""
+msgstr "secaggplus\\_mod"
 
 #: ../../source/ref-api/flwr.client.run_client_app.rst:2
 msgid "run\\_client\\_app"
-msgstr ""
+msgstr "run\\_client\\_app"
 
 #: ../../source/ref-api/flwr.client.run_supernode.rst:2
 msgid "run\\_supernode"
-msgstr ""
+msgstr "run\\_supernode"
 
 #: ../../source/ref-api/flwr.client.start_client.rst:2
 msgid "start\\_client"
-msgstr ""
+msgstr "start\\_client"
 
 #: flwr.client.app.start_client:3 flwr.client.app.start_numpy_client:9 of
 msgid ""
 "The IPv4 or IPv6 address of the server. If the Flower server runs on the "
 "same machine on port 8080, then `server_address` would be `\"[::]:8080\"`."
 msgstr ""
+"서버의 IPv4 또는 IPv6 주소입니다. Flower 서버가 포트 8080의 동일한 컴퓨터에"
+"서 실행되는 경우 `서버_주소`는 `\"[::]:8080\"`이 됩니다."
 
 #: flwr.client.app.start_client:7 of
 msgid "A callable that instantiates a Client. (default: None)"
-msgstr ""
+msgstr "클라이언트를 인스턴스화하는 호출 가능 항목입니다. (기본값: None)"
 
 #: flwr.client.app.start_client:9 of
 msgid ""
 "An implementation of the abstract base class `flwr.client.Client` (default: "
 "None)"
-msgstr ""
+msgstr "추상 베이스 클래스 `flwr.client.Client`의 구현(기본값: None)"
 
 #: flwr.client.app.start_client:12 flwr.client.app.start_numpy_client:15 of
 msgid ""
@@ -8732,6 +9273,11 @@ msgid ""
 "start_server`), otherwise it will not know about the increased limit and "
 "block larger messages."
 msgstr ""
+"Flower 서버와 교환할 수 있는 gRPC 메시지의 최대 길이입니다. 기본값은 대부분"
+"의 모델에 충분합니다. 매우 큰 모델을 훈련하는 사용자는 이 값을 늘려야 할 수"
+"도 있습니다. Flower 서버는 동일한 값으로 시작해야 하며(`flwr.server."
+"start_server` 참조), 그렇지 않으면 증가된 제한을 알지 못해 더 큰 메시지를 차"
+"단합니다."
 
 #: flwr.client.app.start_client:19 flwr.client.app.start_numpy_client:22 of
 msgid ""
@@ -8739,12 +9285,16 @@ msgid ""
 "provided, a secure connection using the certificates will be established to "
 "an SSL-enabled Flower server."
 msgstr ""
+"바이트 문자열 또는 경로 문자열로 PEM 인코딩된 루트 인증서. 제공하면 인증서를 "
+"사용하여 SSL이 활성화된 Flower 서버에 보안 연결이 설정됩니다."
 
 #: flwr.client.app.start_client:23 flwr.client.app.start_numpy_client:26 of
 msgid ""
 "Starts an insecure gRPC connection when True. Enables HTTPS connection when "
 "False, using system certificates if `root_certificates` is None."
 msgstr ""
+"True일 경우 안전하지 않은 gRPC 연결을 시작합니다. root_certificates`가 None"
+"인 경우 시스템 인증서를 사용하여 False일 때 HTTPS 연결을 활성화합니다."
 
 #: flwr.client.app.start_client:26 flwr.client.app.start_numpy_client:29 of
 msgid ""
@@ -8752,6 +9302,8 @@ msgid ""
 "bidirectional streaming - 'grpc-rere': gRPC, request-response (experimental) "
 "- 'rest': HTTP (experimental)"
 msgstr ""
+"전송 계층을 구성합니다. 허용되는 값입니다: - 'grpc-bidi': gRPC, 양방향 스트리"
+"밍 - 'grpc-rere': gRPC, 요청-응답(실험적) - 'rest': HTTP(실험적)"
 
 #: flwr.client.app.start_client:31 of
 msgid ""
@@ -8759,6 +9311,8 @@ msgid ""
 "before giving up in case of a connection error. If set to None, there is no "
 "limit to the number of tries."
 msgstr ""
+"연결 오류 발생 시 클라이언트가 서버 연결을 포기하기 전에 시도하는 최대 횟수입"
+"니다. None으로 설정하면 시도 횟수에 제한이 없습니다."
 
 #: flwr.client.app.start_client:35 of
 msgid ""
@@ -8766,22 +9320,24 @@ msgid ""
 "in case of connection error. If set to None, there is no limit to the total "
 "time."
 msgstr ""
+"연결 오류 발생 시 클라이언트가 서버에 대한 연결을 시도하지 않는 최대 기간입니"
+"다. None으로 설정하면 총 시간에는 제한이 없습니다."
 
 #: flwr.client.app.start_client:42 flwr.client.app.start_numpy_client:37 of
 msgid "Starting a gRPC client with an insecure server connection:"
-msgstr ""
+msgstr "안전하지 않은 서버 연결로 gRPC 클라이언트 시작하기:"
 
 #: flwr.client.app.start_client:49 flwr.client.app.start_numpy_client:44 of
 msgid "Starting an SSL-enabled gRPC client using system certificates:"
-msgstr ""
+msgstr "시스템 인증서를 사용하여 SSL 사용 gRPC 클라이언트를 시작합니다:"
 
 #: flwr.client.app.start_client:60 flwr.client.app.start_numpy_client:52 of
 msgid "Starting an SSL-enabled gRPC client using provided certificates:"
-msgstr ""
+msgstr "제공된 인증서를 사용하여 SSL 지원 gRPC 클라이언트를 시작합니다:"
 
 #: ../../source/ref-api/flwr.client.start_numpy_client.rst:2
 msgid "start\\_numpy\\_client"
-msgstr ""
+msgstr "start\\_numpy\\_client"
 
 #: flwr.client.app.start_numpy_client:5 of
 msgid ""
@@ -8789,92 +9345,106 @@ msgid ""
 "start_client` instead and first convert your :code:`NumPyClient` to type :"
 "code:`flwr.client.Client` by executing its :code:`to_client()` method."
 msgstr ""
+"이 함수는 1.7.0부터 더 이상 사용되지 않습니다. 대신 :code:`flwr.client."
+"start_client`를 사용하고 먼저 :code:`to_client()` 메서드를 실행하여 :code:"
+"`NumPyClient`를 :code:`flwr.client.Client` 유형으로 변환합니다."
 
 #: flwr.client.app.start_numpy_client:13 of
 msgid "An implementation of the abstract base class `flwr.client.NumPyClient`."
-msgstr ""
+msgstr "추상 베이스 클래스 `flwr.client.NumPyClient`의 구현입니다."
 
 #: ../../source/ref-api/flwr.common.rst:2
 msgid "common"
-msgstr ""
+msgstr "공통"
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 msgid ""
 ":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 msgstr ""
+":py:obj:`array_from_numpy <flwr.common.array_from_numpy>`\\ \\(ndarray\\)"
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.record.conversion_utils.array_from_numpy:1 of
 msgid "Create Array from NumPy ndarray."
-msgstr ""
+msgstr "NumPy에서 배열을 만듭니다."
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 msgid ""
 ":py:obj:`bytes_to_ndarray <flwr.common.bytes_to_ndarray>`\\ \\(tensor\\)"
 msgstr ""
+":py:obj:`bytes_to_ndarray <flwr.common.bytes_to_ndarray>`\\ \\(tensor\\)"
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.parameter.bytes_to_ndarray:1 of
 msgid "Deserialize NumPy ndarray from bytes."
-msgstr ""
+msgstr "바이트에서 NumPy를 역직렬화합니다."
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 msgid ""
 ":py:obj:`configure <flwr.common.configure>`\\ \\(identifier\\[\\, "
 "filename\\, host\\]\\)"
 msgstr ""
+":py:obj:`configure <flwr.common.configure>`\\ \\(identifier\\[\\, "
+"filename\\, host\\]\\)"
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.logger.configure:1 of
 msgid "Configure logging to file and/or remote log server."
-msgstr ""
+msgstr "파일 및/또는 원격 로그 서버에 로깅을 구성합니다."
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 msgid ""
 ":py:obj:`event <flwr.common.event>`\\ \\(event\\_type\\[\\, "
 "event\\_details\\]\\)"
 msgstr ""
+":py:obj:`event <flwr.common.event>`\\ \\(event\\_type\\[\\, "
+"event\\_details\\]\\)"
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.telemetry.event:1 of
 msgid "Submit create_event to ThreadPoolExecutor to avoid blocking."
-msgstr ""
+msgstr "차단을 피하기 위해 create_event를 ThreadPoolExecutor에 제출합니다."
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 msgid ""
 ":py:obj:`log <flwr.common.log>`\\ \\(level\\, msg\\, \\*args\\, "
 "\\*\\*kwargs\\)"
 msgstr ""
+":py:obj:`log <flwr.common.log>`\\ \\(level\\, msg\\, \\*args\\, "
+"\\*\\*kwargs\\)"
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1 logging.Logger.log:1
 #: of
 msgid "Log 'msg % args' with the integer severity 'level'."
-msgstr ""
+msgstr "정수 심각도 'level'과 함께 'msg % args'를 기록합니다."
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 msgid ""
 ":py:obj:`ndarray_to_bytes <flwr.common.ndarray_to_bytes>`\\ \\(ndarray\\)"
 msgstr ""
+":py:obj:`ndarray_to_bytes <flwr.common.ndarray_to_bytes>`\\ \\(ndarray\\)"
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.parameter.ndarray_to_bytes:1 of
 msgid "Serialize NumPy ndarray to bytes."
-msgstr ""
+msgstr "NumPy와 배열을 바이트열로 직렬화합니다."
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 msgid ":py:obj:`now <flwr.common.now>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`now <flwr.common.now>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.date.now:1 of
 msgid "Construct a datetime from time.time() with time zone set to UTC."
-msgstr ""
+msgstr "표준 시간대를 UTC로 설정하여 time.time()에서 날짜 시간을 생성합니다."
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 msgid ""
 ":py:obj:`ndarrays_to_parameters <flwr.common.ndarrays_to_parameters>`\\ "
 "\\(ndarrays\\)"
 msgstr ""
+":py:obj:`ndarrays_to_parameters <flwr.common.ndarrays_to_parameters>`\\ "
+"\\(ndarrays\\)"
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.parameter.ndarrays_to_parameters:1
@@ -8882,317 +9452,356 @@ msgstr ""
 #: flwr.server.strategy.fedavg_android.FedAvgAndroid.ndarrays_to_parameters:1
 #: of
 msgid "Convert NumPy ndarrays to parameters object."
-msgstr ""
+msgstr "NumPy 배열을 매개변수 객체로 변환합니다."
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 msgid ""
 ":py:obj:`parameters_to_ndarrays <flwr.common.parameters_to_ndarrays>`\\ "
 "\\(parameters\\)"
 msgstr ""
+":py:obj:`parameters_to_ndarrays <flwr.common.parameters_to_ndarrays>`\\ "
+"\\(parameters\\)"
 
 #: ../../source/ref-api/flwr.common.rst:30:<autosummary>:1
 #: flwr.common.parameter.parameters_to_ndarrays:1 of
 msgid "Convert parameters object to NumPy ndarrays."
-msgstr ""
+msgstr "매개변수 객체를 NumPy 배열로 변환합니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`Array <flwr.common.Array>`\\ \\(dtype\\, shape\\, stype\\, data\\)"
 msgstr ""
+":py:obj:`Array <flwr.common.Array>`\\ \\(dtype\\, shape\\, stype\\, data\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.record.parametersrecord.Array:1 of
 msgid "Array type."
-msgstr ""
+msgstr "배열 유형."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`ClientMessage <flwr.common.ClientMessage>`\\ "
 "\\(\\[get\\_properties\\_res\\, ...\\]\\)"
 msgstr ""
+":py:obj:`ClientMessage <flwr.common.ClientMessage>`\\ "
+"\\(\\[get\\_properties\\_res\\, ...\\]\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.ClientMessage:1 of
 msgid "ClientMessage is a container used to hold one result message."
 msgstr ""
+"ClientMessage는 하나의 결과 메시지를 저장하는 데 사용되는 컨테이너입니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ":py:obj:`Code <flwr.common.Code>`\\ \\(value\\)"
-msgstr ""
+msgstr ":py:obj:`Code <flwr.common.Code>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.Code:1 of
 msgid "Client status codes."
-msgstr ""
+msgstr "클라이언트 상태 코드."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`ConfigsRecord <flwr.common.ConfigsRecord>`\\ "
 "\\(\\[configs\\_dict\\, keep\\_input\\]\\)"
 msgstr ""
+":py:obj:`ConfigsRecord <flwr.common.ConfigsRecord>`\\ "
+"\\(\\[configs\\_dict\\, keep\\_input\\]\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.record.configsrecord.ConfigsRecord:1 of
 msgid "Configs record."
-msgstr ""
+msgstr "레코드를 설정합니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ":py:obj:`Context <flwr.common.Context>`\\ \\(state\\)"
-msgstr ""
+msgstr ":py:obj:`Context <flwr.common.Context>`\\ \\(state\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.context.Context:1 of
 msgid "State of your run."
-msgstr ""
+msgstr "실행 상태."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ":py:obj:`DisconnectRes <flwr.common.DisconnectRes>`\\ \\(reason\\)"
-msgstr ""
+msgstr ":py:obj:`DisconnectRes <flwr.common.DisconnectRes>`\\ \\(reason\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.DisconnectRes:1 of
 msgid "DisconnectRes message from client to server."
-msgstr ""
+msgstr "클라이언트에서 서버로 연결 해제 메시지를 보냅니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`EvaluateIns <flwr.common.EvaluateIns>`\\ \\(parameters\\, config\\)"
 msgstr ""
+":py:obj:`EvaluateIns <flwr.common.EvaluateIns>`\\ \\(parameters\\, config\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.EvaluateIns:1 of
 msgid "Evaluate instructions for a client."
-msgstr ""
+msgstr "클라이언트에 대한 지침을 평가합니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`EvaluateRes <flwr.common.EvaluateRes>`\\ \\(status\\, loss\\, "
 "num\\_examples\\, metrics\\)"
 msgstr ""
+":py:obj:`EvaluateRes <flwr.common.EvaluateRes>`\\ \\(status\\, loss\\, "
+"num\\_examples\\, metrics\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.EvaluateRes:1 of
 msgid "Evaluate response from a client."
-msgstr ""
+msgstr "클라이언트의 응답을 평가합니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
-msgstr ""
+msgstr ":py:obj:`EventType <flwr.common.EventType>`\\ \\(value\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.telemetry.EventType:1 of
 msgid "Types of telemetry events."
-msgstr ""
+msgstr "원격 분석 이벤트의 유형."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ":py:obj:`FitIns <flwr.common.FitIns>`\\ \\(parameters\\, config\\)"
-msgstr ""
+msgstr ":py:obj:`FitIns <flwr.common.FitIns>`\\ \\(parameters\\, config\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.FitIns:1 of
 msgid "Fit instructions for a client."
-msgstr ""
+msgstr "고객을 위한 맞춤 지침."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`FitRes <flwr.common.FitRes>`\\ \\(status\\, parameters\\, "
 "num\\_examples\\, metrics\\)"
 msgstr ""
+":py:obj:`FitRes <flwr.common.FitRes>`\\ \\(status\\, parameters\\, "
+"num\\_examples\\, metrics\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.FitRes:1 of
 msgid "Fit response from a client."
-msgstr ""
+msgstr "클라이언트의 적합성 응답."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
-msgstr ""
+msgstr ":py:obj:`Error <flwr.common.Error>`\\ \\(code\\[\\, reason\\]\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.message.Error:1 of
 msgid "A dataclass that stores information about an error that occurred."
-msgstr ""
+msgstr "발생한 오류에 대한 정보를 저장하는 데이터 클래스입니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`GetParametersIns <flwr.common.GetParametersIns>`\\ \\(config\\)"
 msgstr ""
+":py:obj:`GetParametersIns <flwr.common.GetParametersIns>`\\ \\(config\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.GetParametersIns:1 of
 msgid "Parameters request for a client."
-msgstr ""
+msgstr "클라이언트에 대한 매개변수 요청입니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`GetParametersRes <flwr.common.GetParametersRes>`\\ \\(status\\, "
 "parameters\\)"
 msgstr ""
+":py:obj:`GetParametersRes <flwr.common.GetParametersRes>`\\ \\(status\\, "
+"parameters\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.GetParametersRes:1 of
 msgid "Response when asked to return parameters."
-msgstr ""
+msgstr "매개변수 반환 요청 시 응답합니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`GetPropertiesIns <flwr.common.GetPropertiesIns>`\\ \\(config\\)"
 msgstr ""
+":py:obj:`GetPropertiesIns <flwr.common.GetPropertiesIns>`\\ \\(config\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.GetPropertiesIns:1 of
 msgid "Properties request for a client."
-msgstr ""
+msgstr "클라이언트에 대한 속성 요청."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`GetPropertiesRes <flwr.common.GetPropertiesRes>`\\ \\(status\\, "
 "properties\\)"
 msgstr ""
+":py:obj:`GetPropertiesRes <flwr.common.GetPropertiesRes>`\\ \\(status\\, "
+"properties\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.GetPropertiesRes:1 of
 msgid "Properties response from a client."
-msgstr ""
+msgstr "클라이언트의 속성 응답을 확인합니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`Message <flwr.common.Message>`\\ \\(metadata\\[\\, content\\, "
 "error\\]\\)"
 msgstr ""
+":py:obj:`Message <flwr.common.Message>`\\ \\(metadata\\[\\, content\\, "
+"error\\]\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.message.Message:1 of
 msgid "State of your application from the viewpoint of the entity using it."
-msgstr ""
+msgstr "애플리케이션을 사용하는 엔티티의 관점에서 애플리케이션의 상태입니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ":py:obj:`MessageType <flwr.common.MessageType>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`MessageType <flwr.common.MessageType>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.constant.MessageType:1 of
 msgid "Message type."
-msgstr ""
+msgstr "메시지 타입."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ":py:obj:`MessageTypeLegacy <flwr.common.MessageTypeLegacy>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`MessageTypeLegacy <flwr.common.MessageTypeLegacy>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.constant.MessageTypeLegacy:1 of
 msgid "Legacy message type."
-msgstr ""
+msgstr "레거시 메시지 타입."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`Metadata <flwr.common.Metadata>`\\ \\(run\\_id\\, message\\_id\\, "
 "src\\_node\\_id\\, ...\\)"
 msgstr ""
+":py:obj:`Metadata <flwr.common.Metadata>`\\ \\(run\\_id\\, message\\_id\\, "
+"src\\_node\\_id\\, ...\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.message.Metadata:1 of
 msgid "A dataclass holding metadata associated with the current message."
-msgstr ""
+msgstr "현재 메시지와 관련된 메타데이터를 보유한 데이터 클래스입니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`MetricsRecord <flwr.common.MetricsRecord>`\\ "
 "\\(\\[metrics\\_dict\\, keep\\_input\\]\\)"
 msgstr ""
+":py:obj:`MetricsRecord <flwr.common.MetricsRecord>`\\ "
+"\\(\\[metrics\\_dict\\, keep\\_input\\]\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.record.metricsrecord.MetricsRecord:1 of
 msgid "Metrics record."
-msgstr ""
+msgstr "메트릭 기록."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ":py:obj:`NDArray <flwr.common.NDArray>`\\"
-msgstr ""
+msgstr ":py:obj:`NDArray <flwr.common.NDArray>`\\"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 "alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, :py:class:"
 "`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]"
 msgstr ""
+"alias of :py:class:`~numpy.ndarray`\\ [:py:obj:`~typing.Any`, :py:class:"
+"`~numpy.dtype`\\ [:py:obj:`~typing.Any`]]"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`Parameters <flwr.common.Parameters>`\\ \\(tensors\\, "
 "tensor\\_type\\)"
 msgstr ""
+":py:obj:`Parameters <flwr.common.Parameters>`\\ \\(tensors\\, "
+"tensor\\_type\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.Parameters:1 of
 msgid "Model parameters."
-msgstr ""
+msgstr "모델 매개변수."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ "
 "\\(\\[array\\_dict\\, keep\\_input\\]\\)"
 msgstr ""
+":py:obj:`ParametersRecord <flwr.common.ParametersRecord>`\\ "
+"\\(\\[array\\_dict\\, keep\\_input\\]\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.record.parametersrecord.ParametersRecord:1 of
 msgid "Parameters record."
-msgstr ""
+msgstr "매개변수 기록."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ":py:obj:`ReconnectIns <flwr.common.ReconnectIns>`\\ \\(seconds\\)"
-msgstr ""
+msgstr ":py:obj:`ReconnectIns <flwr.common.ReconnectIns>`\\ \\(seconds\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.ReconnectIns:1 of
 msgid "ReconnectIns message from server to client."
-msgstr ""
+msgstr "서버에서 클라이언트로 메시지를 다시 연결합니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`RecordSet <flwr.common.RecordSet>`\\ "
 "\\(\\[parameters\\_records\\, ...\\]\\)"
 msgstr ""
+":py:obj:`RecordSet <flwr.common.RecordSet>`\\ "
+"\\(\\[parameters\\_records\\, ...\\]\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.record.recordset.RecordSet:1 of
 msgid "RecordSet stores groups of parameters, metrics and configs."
-msgstr ""
+msgstr "RecordSet은 매개변수, 메트릭 및 설정 그룹을 저장합니다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ""
 ":py:obj:`ServerMessage <flwr.common.ServerMessage>`\\ "
 "\\(\\[get\\_properties\\_ins\\, ...\\]\\)"
 msgstr ""
+":py:obj:`ServerMessage <flwr.common.ServerMessage>`\\ "
+"\\(\\[get\\_properties\\_ins\\, ...\\]\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.ServerMessage:1 of
 msgid "ServerMessage is a container used to hold one instruction message."
 msgstr ""
+"ServerMessage는 하나의 instruction 메시지를 저장하는 데 사용되는 컨테이너입니"
+"다."
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 msgid ":py:obj:`Status <flwr.common.Status>`\\ \\(code\\, message\\)"
-msgstr ""
+msgstr ":py:obj:`Status <flwr.common.Status>`\\ \\(code\\, message\\)"
 
 #: ../../source/ref-api/flwr.common.rst:64:<autosummary>:1
 #: flwr.common.typing.Status:1 of
 msgid "Client status."
-msgstr ""
+msgstr "클라이언트 상태."
 
 #: ../../source/ref-api/flwr.common.Array.rst:2
 msgid "Array"
-msgstr ""
+msgstr "배열"
 
 #: flwr.common.record.parametersrecord.Array:3 of
 msgid ""
 "A dataclass containing serialized data from an array-like or tensor-like "
 "object along with some metadata about it."
 msgstr ""
+"배열형 또는 텐서형 객체의 직렬화된 데이터와 그에 대한 일부 메타데이터를 포함"
+"하는 데이터 클래스입니다."
 
 #: flwr.common.record.parametersrecord.Array:6 of
 msgid ""
 "A string representing the data type of the serialised object (e.g. `np."
 "float32`)"
-msgstr ""
+msgstr "직렬화된 객체의 데이터 유형을 나타내는 문자열(예: `np.float32`)"
 
 #: flwr.common.record.parametersrecord.Array:8 of
 msgid ""
@@ -9200,75 +9809,81 @@ msgid ""
 "used to deserialize the data (depending on the serialization method) or "
 "simply as a metadata field."
 msgstr ""
+"직렬화되지 않은 배열과 같은 객체의 모양을 나타내는 목록입니다. 직렬화 방법에 "
+"따라 데이터를 역직렬화하는 데 사용되거나 단순히 메타데이터 필드로 사용됩니다."
 
 #: flwr.common.record.parametersrecord.Array:12 of
 msgid ""
 "A string indicating the type of serialisation mechanism used to generate the "
 "bytes in `data` from an array-like or tensor-like object."
 msgstr ""
+"배열형 또는 텐서형 객체에서 `데이터`의 바이트를 생성하는 데 사용되는 직렬화 "
+"메커니즘의 유형을 나타내는 문자열입니다."
 
 #: flwr.common.record.parametersrecord.Array:15 of
 msgid "A buffer of bytes containing the data."
-msgstr ""
+msgstr "데이터를 포함하는 바이트 버퍼입니다."
 
 #: ../../source/ref-api/flwr.common.Array.rst:26:<autosummary>:1
 msgid ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`numpy <flwr.common.Array.numpy>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.Array.rst:26:<autosummary>:1
 #: flwr.common.record.parametersrecord.Array.numpy:1 of
 msgid "Return the array as a NumPy array."
-msgstr ""
+msgstr "배열을 NumPy 배열로 반환합니다."
 
 #: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
 msgid ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
-msgstr ""
+msgstr ":py:obj:`dtype <flwr.common.Array.dtype>`\\"
 
 #: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
 msgid ":py:obj:`shape <flwr.common.Array.shape>`\\"
-msgstr ""
+msgstr ":py:obj:`shape <flwr.common.Array.shape>`\\"
 
 #: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
 msgid ":py:obj:`stype <flwr.common.Array.stype>`\\"
-msgstr ""
+msgstr ":py:obj:`stype <flwr.common.Array.stype>`\\"
 
 #: flwr.common.record.parametersrecord.Array.numpy:1:<autosummary>:1 of
 msgid ":py:obj:`data <flwr.common.Array.data>`\\"
-msgstr ""
+msgstr ":py:obj:`data <flwr.common.Array.data>`\\"
 
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:2
 msgid "ClientMessage"
-msgstr ""
+msgstr "클라이언트 메시지"
 
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:31:<autosummary>:1
 msgid ":py:obj:`evaluate_res <flwr.common.ClientMessage.evaluate_res>`\\"
-msgstr ""
+msgstr ":py:obj:`evaluate_res <flwr.common.ClientMessage.evaluate_res>`\\"
 
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:31:<autosummary>:1
 msgid ":py:obj:`fit_res <flwr.common.ClientMessage.fit_res>`\\"
-msgstr ""
+msgstr ":py:obj:`fit_res <flwr.common.ClientMessage.fit_res>`\\"
 
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:31:<autosummary>:1
 msgid ""
 ":py:obj:`get_parameters_res <flwr.common.ClientMessage.get_parameters_res>`\\"
 msgstr ""
+":py:obj:`get_parameters_res <flwr.common.ClientMessage.get_parameters_res>`\\"
 
 #: ../../source/ref-api/flwr.common.ClientMessage.rst:31:<autosummary>:1
 msgid ""
 ":py:obj:`get_properties_res <flwr.common.ClientMessage.get_properties_res>`\\"
 msgstr ""
+":py:obj:`get_properties_res <flwr.common.ClientMessage.get_properties_res>`\\"
 
 #: ../../source/ref-api/flwr.common.Code.rst:2
 msgid "Code"
-msgstr ""
+msgstr "코드"
 
 #: flwr.common.typing.Code:1 of
 msgid "Bases: :py:class:`~enum.Enum`"
-msgstr ""
+msgstr "Bases: :py:class:`~enum.Enum`"
 
 #: ../../source/ref-api/flwr.common.Code.rst:26:<autosummary>:1
 msgid ":py:obj:`OK <flwr.common.Code.OK>`\\"
-msgstr ""
+msgstr ":py:obj:`OK <flwr.common.Code.OK>`\\"
 
 #: ../../source/ref-api/flwr.common.Code.rst:26:<autosummary>:1
 msgid ""
