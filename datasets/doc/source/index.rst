@@ -53,9 +53,16 @@ Main features
 -------------
 Flower Datasets library supports:
 
-- **downloading datasets** - choose the dataset from Hugging Face's ``dataset``
-- **partitioning datasets** - customize the partitioning scheme
+- **downloading datasets** - choose the dataset from Hugging Face's ``dataset`` (`link <https://huggingface.co/datasets>`_)
+- **partitioning datasets** - choose one of the implemnted partitioning scheme or create a fully custom one
 - **creating centralized datasets** - leave parts of the dataset unpartitioned (e.g. for centralized evaluation)
+- **visualization of the partitioned datasets** - visualize the label distribution of the partitioned dataset (and compare the results on different parameters of the same partitioning schemes, different datasets, different partitioning schemes, or any mix of them)
+
+
+.. image:: ./_static/readme/comparison_of_partitioning_schemes.png
+  :align: center
+  :alt: Comparison of Partitioning Schemes on CIFAR10
+
 
 Thanks to using Hugging Face's ``datasets`` used under the hood, Flower Datasets integrates with the following popular formats/frameworks:
 
