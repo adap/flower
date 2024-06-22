@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-17 16:09+0200\n"
-"PO-Revision-Date: 2024-06-22 05:06+0000\n"
+"PO-Revision-Date: 2024-06-22 10:52+0000\n"
 "Last-Translator: 박태현 <qkrxogus113@ajou.ac.kr>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
@@ -5102,6 +5102,10 @@ msgid ""
 "in a round if the corresponding :code:`ClientProxy` is included in the "
 "list returned from :code:`configure_evaluate`."
 msgstr ""
+"보다 정교한 구현은 :code:`configure_evaluate`를 사용하여 사용자 지정 "
+"클라이언트 선택 로직을 구현할 수 있습니다. 클라이언트는 "
+":code:`configure_evaluate`에서 반환된 목록에 해당 :code:`ClientProxy`가 "
+"포함된 경우에만 라운드에 참여합니다."
 
 #: ../../source/how-to-implement-strategies.rst:287
 msgid ""
@@ -5112,10 +5116,15 @@ msgid ""
 "different hyperparameters on different clients (via the :code:`config` "
 "dict)."
 msgstr ""
+"이 반환 값의 구조는 사용자에게 많은 유연성을 제공합니다. instructions은 "
+"클라이언트별로 정의되므로 각 클라이언트에 서로 다른 instructions을 전송할 수 "
+"있습니다. 이를 통해 사용자 지정 전략을 통해 예를 들어 클라이언트마다 다른 "
+"모델을 평가하거나 클라이언트마다 다른 하이퍼파라미터를 사용할 수 "
+"있습니다(:code:`config` dict를 통해)."
 
 #: ../../source/how-to-implement-strategies.rst:291
 msgid "The :code:`aggregate_evaluate` method"
-msgstr ""
+msgstr ":code:`aggregate_evaluate` 메서드"
 
 #: ../../source/how-to-implement-strategies.rst:293
 msgid ""
@@ -5123,6 +5132,8 @@ msgid ""
 "returned by the clients that were selected and asked to evaluate in "
 ":code:`configure_evaluate`."
 msgstr ""
+"code:`aggregate_evaluate`는 :code:`configure_evaluate`에서 선택되어 평가를 "
+"요청한 클라이언트가 반환한 결과를 집계하는 역할을 담당합니다."
 
 #: ../../source/how-to-implement-strategies.rst:306
 msgid ""
@@ -5131,6 +5142,10 @@ msgid ""
 ":code:`configure_evaluate`). :code:`aggregate_evaluate` therefore "
 "receives a list of :code:`results`, but also a list of :code:`failures`."
 msgstr ""
+"물론 실패가 발생할 수 있으므로 서버가 명령을 보낸 모든 클라이언트로부터 "
+"결과를 얻을 수 있다는 보장은 없습니다(:code:`configure_evaluate`를 통해). "
+"따라서 :code:`aggregate_evaluate`는 :code:`results` 목록뿐만 아니라 "
+":code:`failures` 목록도 받습니다."
 
 #: ../../source/how-to-implement-strategies.rst:308
 msgid ""
@@ -5139,10 +5154,14 @@ msgid ""
 "optional because :code:`aggregate_evaluate` might decide that the results"
 " provided are not sufficient for aggregation (e.g., too many failures)."
 msgstr ""
+"code:`aggregate_evaluate`는 선택적 :code:`float`(손실)와 집계된 메트릭의 "
+"dictionary를 반환합니다. code:`float` 반환 값은 :code:`aggregate_evaluate`가 "
+"제공된 결과가 집계에 충분하지 않다고 판단할 수 있으므로(예: 실패 수가 너무 "
+"많음) 선택 사항입니다."
 
 #: ../../source/how-to-implement-strategies.rst:311
 msgid "The :code:`evaluate` method"
-msgstr ""
+msgstr ":code:`evaluate` 메서드"
 
 #: ../../source/how-to-implement-strategies.rst:313
 msgid ""
@@ -5151,6 +5170,10 @@ msgid ""
 ":code:`configure_evaluate`/:code:`aggregate_evaluate` enables strategies "
 "to perform both servers-side and client-side (federated) evaluation."
 msgstr ""
+":code:`evaluate`는 서버 측에서 모델 매개변수를 평가하는 역할을 담당합니다. "
+"code:`configure_evaluate`/:code:`aggregate_evaluate`와 함께 :code:`evaluate`"
+"를 사용하면 서버 측과 클라이언트 측(federated) 평가를 모두 수행할 수 있는 "
+"전략을 사용할 수 있습니다."
 
 #: ../../source/how-to-implement-strategies.rst:323
 msgid ""
@@ -5159,63 +5182,69 @@ msgid ""
 ":code:`evaluate` method might not complete successfully (e.g., it might "
 "fail to load the server-side evaluation data)."
 msgstr ""
+"반환 값은 전략에서 서버 측 평가를 구현할 필요가 없거나 사용자 정의 "
+":code:`evaluate` 메서드가 성공적으로 완료되지 않을 수 있기 때문에(예: 서버 "
+"측 평가 데이터를 로드하지 못할 수 있음) 다시 선택 사항으로 설정할 수 "
+"있습니다."
 
 #: ../../source/how-to-install-flower.rst:2
 msgid "Install Flower"
-msgstr ""
+msgstr "Flower 설치"
 
 #: ../../source/how-to-install-flower.rst:6
 msgid "Python version"
-msgstr ""
+msgstr "Python 버전"
 
 #: ../../source/how-to-install-flower.rst:12
 msgid "Install stable release"
-msgstr ""
+msgstr "안정적인 릴리즈 설치"
 
 #: ../../source/how-to-install-flower.rst:15
 #: ../../source/how-to-upgrade-to-flower-next.rst:46
 msgid "Using pip"
-msgstr ""
+msgstr "pip 사용"
 
 #: ../../source/how-to-install-flower.rst:17
 msgid ""
 "Stable releases are available on `PyPI "
 "<https://pypi.org/project/flwr/>`_::"
-msgstr ""
+msgstr "안정적인 릴리즈는 `PyPI <https://pypi.org/project/flwr/>`_:: 에서 확인할 수 "
+"있습니다::"
 
 #: ../../source/how-to-install-flower.rst:21
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr`` should be "
 "installed with the ``simulation`` extra::"
-msgstr ""
+msgstr "가상 클라이언트 엔진을 사용하는 시뮬레이션의 경우 ``flwr``을 ``simulation``"
+"extra와 함께 설치해야 합니다:"
 
 #: ../../source/how-to-install-flower.rst:27
 msgid "Using conda (or mamba)"
-msgstr ""
+msgstr "conda(또는 mamba) 사용"
 
 #: ../../source/how-to-install-flower.rst:29
 msgid "Flower can also be installed from the ``conda-forge`` channel."
-msgstr ""
+msgstr "Flower은 'conda-forge' 채널에서도 설치할 수 있습니다."
 
 #: ../../source/how-to-install-flower.rst:31
 msgid ""
 "If you have not added ``conda-forge`` to your channels, you will first "
 "need to run the following::"
-msgstr ""
+msgstr "채널에 'conda-forge'를 추가하지 않은 경우 먼저 다음을 실행해야 합니다:"
 
 #: ../../source/how-to-install-flower.rst:36
 msgid ""
 "Once the ``conda-forge`` channel has been enabled, ``flwr`` can be "
 "installed with ``conda``::"
-msgstr ""
+msgstr "conda-forge`` 채널이 활성화되면 ``flwr``을 ``conda``로 설치할 수 있습니다::"
 
 #: ../../source/how-to-install-flower.rst:40
 msgid "or with ``mamba``::"
-msgstr ""
+msgstr "또는 ``mamba``::"
 
 #: ../../source/how-to-install-flower.rst:46
 msgid "Verify installation"
-msgstr ""
+msgstr "설치 확인"
 
 #: ../../source/how-to-install-flower.rst:48
 msgid ""
@@ -5223,22 +5252,25 @@ msgid ""
 "installed. If everything worked, it should print the version of Flower to"
 " the command line::"
 msgstr ""
+"다음 명령을 사용하여 Flower가 성공적으로 설치되었는지 확인할 수 있습니다. "
+"모든 것이 정상적으로 작동하면 명령줄에 Flower의 버전이 출력됩니다:"
 
 #: ../../source/how-to-install-flower.rst:55
 msgid "Advanced installation options"
-msgstr ""
+msgstr "고급 설치 옵션"
 
 #: ../../source/how-to-install-flower.rst:58
 msgid "Install via Docker"
-msgstr ""
+msgstr "Docker를 통해 설치"
 
 #: ../../source/how-to-install-flower.rst:60
 msgid ":doc:`How to run Flower using Docker <how-to-run-flower-using-docker>`"
-msgstr ""
+msgstr ":doc:`Docker를 사용하여 Flower를 실행하는 방법 <how-to-run-flower-using-"
+"docker>`"
 
 #: ../../source/how-to-install-flower.rst:63
 msgid "Install pre-release"
-msgstr ""
+msgstr "사전 릴리즈 설치"
 
 #: ../../source/how-to-install-flower.rst:65
 msgid ""
@@ -5246,32 +5278,39 @@ msgid ""
 "pre-release versions (alpha, beta, release candidate) before the stable "
 "release happens::"
 msgstr ""
+"새(불안정할 수 있는) 버전의 Flower는 안정 버전이 출시되기 전에 사전 릴리즈 "
+"버전(알파, 베타, 릴리즈 후보)으로 제공되는 경우가 있습니다:"
 
 #: ../../source/how-to-install-flower.rst:69
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr`` pre-releases"
 " should be installed with the ``simulation`` extra::"
 msgstr ""
+"가상 클라이언트 엔진을 사용하는 시뮬레이션의 경우 ``flwr`` 사전 릴리즈를 "
+"``simulation`` extra와 함께 설치해야 합니다:"
 
 #: ../../source/how-to-install-flower.rst:74
 msgid "Install nightly release"
-msgstr ""
+msgstr "야간 릴리즈 설치"
 
 #: ../../source/how-to-install-flower.rst:76
 msgid ""
 "The latest (potentially unstable) changes in Flower are available as "
 "nightly releases::"
-msgstr ""
+msgstr "Flower의 최신 (불안정할 수 있는) 변경 사항은 다음과 같이 야간 릴리즈로 "
+"제공됩니다:"
 
 #: ../../source/how-to-install-flower.rst:80
 msgid ""
 "For simulations that use the Virtual Client Engine, ``flwr-nightly`` "
 "should be installed with the ``simulation`` extra::"
 msgstr ""
+"가상 클라이언트 엔진을 사용하는 시뮬레이션의 경우, ``flwr-nightly``를 "
+"``simulation`` extr와 함께 설치해야 합니다::"
 
 #: ../../source/how-to-monitor-simulation.rst:2
 msgid "Monitor simulation"
-msgstr ""
+msgstr "모니터 시뮬레이션"
 
 #: ../../source/how-to-monitor-simulation.rst:4
 msgid ""
@@ -5281,16 +5320,22 @@ msgid ""
 "constrain the total usage. Insights from resource consumption can help "
 "you make smarter decisions and speed up the execution time."
 msgstr ""
+"Flower를 사용하면 시뮬레이션을 실행하는 동안 시스템 리소스를 모니터링할 수 "
+"있습니다. 또한 Flower 시뮬레이션 엔진은 강력하며 클라이언트별 리소스 할당 "
+"방법을 결정하고 총 사용량을 제한할 수 있습니다. 리소스 소비에 대한 "
+"인사이트를 통해 더 현명한 결정을 내리고 실행 시간을 단축할 수 있습니다."
 
 #: ../../source/how-to-monitor-simulation.rst:6
 msgid ""
 "The specific instructions assume you are using macOS and have the "
 "`Homebrew <https://brew.sh/>`_ package manager installed."
 msgstr ""
+"구체적인 지침은 macOS를 사용 중이고 'Homebrew <https://brew.sh/>`_ 패키지 "
+"관리자가 설치되어 있다고 가정합니다."
 
 #: ../../source/how-to-monitor-simulation.rst:10
 msgid "Downloads"
-msgstr ""
+msgstr "다운로드"
 
 #: ../../source/how-to-monitor-simulation.rst:16
 msgid ""
@@ -5299,26 +5344,31 @@ msgid ""
 "collected data. They are both well integrated with `Ray "
 "<https://www.ray.io/>`_ which Flower uses under the hood."
 msgstr ""
+"`Prometheus <https://prometheus.io/>`_는 데이터 수집에 사용되며, `Grafana "
+"<https://grafana.com/>`_는 수집된 데이터를 시각화할 수 있게 해줍니다. 이 두 "
+"도구는 모두 Flower가 내부적으로 사용하는 `Ray <https://www.ray.io/>`_와 잘 "
+"통합되어 있습니다."
 
 #: ../../source/how-to-monitor-simulation.rst:18
 msgid ""
 "Overwrite the configuration files (depending on your device, it might be "
 "installed on a different path)."
-msgstr ""
+msgstr "구성 파일을 덮어씁니다(장치에 따라 다른 경로에 설치되어 있을 수 있음)."
 
 #: ../../source/how-to-monitor-simulation.rst:20
 msgid "If you are on an M1 Mac, it should be:"
-msgstr ""
+msgstr "M1 Mac을 사용 중이라면:"
 
 #: ../../source/how-to-monitor-simulation.rst:27
 msgid "On the previous generation Intel Mac devices, it should be:"
-msgstr ""
+msgstr "이전 세대 Intel Mac 장치에서는:"
 
 #: ../../source/how-to-monitor-simulation.rst:34
 msgid ""
 "Open the respective configuration files and change them. Depending on "
 "your device, use one of the two following commands:"
-msgstr ""
+msgstr "각 구성 파일을 열고 변경합니다. 장치에 따라 다음 두 명령 중 하나를 "
+"사용합니다:"
 
 #: ../../source/how-to-monitor-simulation.rst:44
 msgid ""
@@ -5326,6 +5376,8 @@ msgid ""
 "config you see below. You may adjust the time intervals to your "
 "requirements:"
 msgstr ""
+"를 입력한 다음 파일의 모든 텍스트를 삭제하고 아래에 표시된 새 Prometheus "
+"설정을 붙여넣습니다. 요구 사항에 따라 시간 간격을 조정할 수 있습니다:"
 
 #: ../../source/how-to-monitor-simulation.rst:59
 msgid ""
@@ -5333,54 +5385,59 @@ msgid ""
 "the Grafana configuration files. Open those using one of the following "
 "commands as before:"
 msgstr ""
+"이제 Prometheus 구성을 편집한 후 Grafana 구성 파일에 대해서도 동일한 작업을 "
+"수행합니다. 이전과 마찬가지로 다음 명령 중 하나를 사용하여 파일을 엽니다:"
 
 #: ../../source/how-to-monitor-simulation.rst:69
 msgid ""
 "Your terminal editor should open and allow you to apply the following "
 "configuration as before."
-msgstr ""
+msgstr "터미널 편집기가 열리면 이전과 마찬가지로 다음 구성을 적용할 수 있습니다."
 
 #: ../../source/how-to-monitor-simulation.rst:84
 msgid ""
 "Congratulations, you just downloaded all the necessary software needed "
 "for metrics tracking. Now, let’s start it."
-msgstr ""
+msgstr "축하합니다. 매트릭 트레킹에 필요한 모든 소프트웨어를 다운로드하셨습니다. "
+"이제 시작해 보겠습니다."
 
 #: ../../source/how-to-monitor-simulation.rst:88
 msgid "Tracking metrics"
-msgstr ""
+msgstr "매트릭 트래킹"
 
 #: ../../source/how-to-monitor-simulation.rst:90
 msgid ""
 "Before running your Flower simulation, you have to start the monitoring "
 "tools you have just installed and configured."
-msgstr ""
+msgstr "Flower 시뮬레이션을 실행하기 전에 방금 설치 및 구성한 모니터링 도구를 "
+"시작해야 합니다."
 
 #: ../../source/how-to-monitor-simulation.rst:97
 msgid ""
 "Please include the following argument in your Python code when starting a"
 " simulation."
-msgstr ""
+msgstr "시뮬레이션을 시작할 때 Python 코드에 다음 argument를 포함하세요."
 
 #: ../../source/how-to-monitor-simulation.rst:108
 msgid "Now, you are ready to start your workload."
-msgstr ""
+msgstr "이제 워크로드를 시작할 준비가 되었습니다."
 
 #: ../../source/how-to-monitor-simulation.rst:110
 msgid ""
 "Shortly after the simulation starts, you should see the following logs in"
 " your terminal:"
-msgstr ""
+msgstr "시뮬레이션이 시작되고 얼마 지나지 않아 터미널에 다음 로그가 표시됩니다:"
 
 #: ../../source/how-to-monitor-simulation.rst:117
 msgid "You can look at everything at `<http://127.0.0.1:8265>`_ ."
-msgstr ""
+msgstr "`<http://127.0.0.1:8265>`_ 에서 모든 것을 볼 수 있습니다."
 
 #: ../../source/how-to-monitor-simulation.rst:119
 msgid ""
 "It's a Ray Dashboard. You can navigate to Metrics (on the left panel, the"
 " lowest option)."
-msgstr ""
+msgstr "Ray 대시보드입니다. 메트릭(왼쪽 패널의 가장 아래 옵션)으로 이동할 수 "
+"있습니다."
 
 #: ../../source/how-to-monitor-simulation.rst:121
 msgid ""
@@ -5390,6 +5447,11 @@ msgid ""
 "can only use Grafana to explore the metrics. You can start Grafana by "
 "going to ``http://localhost:3000/``."
 msgstr ""
+"또는 오른쪽 위 모서리인 \"Grafana에서 보기\"를 클릭하여 Grafana에서 바로 "
+"확인할 수도 있습니다. Ray 대시보드는 시뮬레이션 중에만 액세스할 수 있다는 "
+"점에 유의하세요. 시뮬레이션이 종료된 후에는 Grafana를 사용하여 메트릭을 "
+"탐색할 수만 있습니다. ``http://localhost:3000/``로 이동하여 Grafana를 시작할 "
+"수 있습니다."
 
 #: ../../source/how-to-monitor-simulation.rst:123
 msgid ""
@@ -5397,16 +5459,19 @@ msgid ""
 "important as they will otherwise block, for example port :code:`3000` on "
 "your machine as long as they are running."
 msgstr ""
+"시각화를 완료한 후에는 Prometheus와 Grafana를 중지합니다. 그렇지 않으면 실행 "
+"중인 동안 컴퓨터에서 포트 :code:`3000` 등을 차단하므로 이 작업이 중요합니다."
 
 #: ../../source/how-to-monitor-simulation.rst:132
 msgid "Resource allocation"
-msgstr ""
+msgstr "리소스 할당"
 
 #: ../../source/how-to-monitor-simulation.rst:134
 msgid ""
 "You must understand how the Ray library works to efficiently allocate "
 "system resources to simulation clients on your own."
-msgstr ""
+msgstr "Ray 라이브러리가 어떻게 작동하는지 이해해야 시뮬레이션 클라이언트에 시스템 "
+"리소스를 효율적으로 할당할 수 있습니다."
 
 #: ../../source/how-to-monitor-simulation.rst:136
 msgid ""
@@ -5417,20 +5482,27 @@ msgid ""
 "You will learn more about that in the later part of this blog. You can "
 "check the system resources by running the following:"
 msgstr ""
+"처음에 시뮬레이션(Ray가 내부에서 처리하는)은 기본적으로 시스템에서 사용 "
+"가능한 모든 리소스를 사용하여 시작되며, 이 리소스는 클라이언트 간에 "
+"공유됩니다. 그렇다고 해서 모든 클라이언트에게 균등하게 분배하거나 모든 "
+"클라이언트에서 동시에 모델 학습이 이루어지는 것은 아닙니다. 이에 대한 자세한 "
+"내용은 이 블로그의 뒷부분에서 설명합니다. 다음을 실행하여 시스템 리소스를 "
+"확인할 수 있습니다:"
 
 #: ../../source/how-to-monitor-simulation.rst:143
 msgid "In Google Colab, the result you see might be similar to this:"
-msgstr ""
+msgstr "Google Colab에서는 이와 유사한 결과가 표시될 수 있습니다:"
 
 #: ../../source/how-to-monitor-simulation.rst:155
 msgid ""
 "However, you can overwrite the defaults. When starting a simulation, do "
 "the following (you don't need to overwrite all of them):"
-msgstr ""
+msgstr "그러나 기본값을 덮어쓸 수 있습니다. 시뮬레이션을 시작할 때 다음을 수행합니다("
+"모두 덮어쓸 필요는 없음):"
 
 #: ../../source/how-to-monitor-simulation.rst:175
 msgid "Let’s also specify the resource for a single client."
-msgstr ""
+msgstr "단일 클라이언트에 대한 리소스도 지정해 보겠습니다."
 
 #: ../../source/how-to-monitor-simulation.rst:205
 msgid ""
@@ -5438,6 +5510,8 @@ msgid ""
 "all the required resources (such that they run in parallel) when the "
 "resources allow."
 msgstr ""
+"이제 중요한 부분이 나옵니다. Ray는 리소스가 허용하는 경우에만 필요한 모든 "
+"리소스가 있을 때(병렬로 실행되는 등) 새 클라이언트를 시작합니다."
 
 #: ../../source/how-to-monitor-simulation.rst:207
 msgid ""
@@ -5448,14 +5522,20 @@ msgid ""
 ":code:`client_num_gpus = 2`, the simulation wouldn't start (even if you "
 "had 2 GPUs but decided to set 1 in :code:`ray_init_args`)."
 msgstr ""
+"위의 예에서는 하나의 클라이언트만 실행되므로 클라이언트가 동시에 실행되지 "
+"않습니다. :code:`client_num_gpus = 0.5` 를 설정하면 두 개의 클라이언트를 "
+"실행할 수 있으므로 동시에 실행할 수 있습니다. 사용 가능한 리소스보다 더 많은 "
+"리소스를 요구하지 않도록 주의하세요. :code:`client_num_gpus = 2`를 지정하면 "
+"시뮬레이션이 시작되지 않습니다(GPU가 2개이지만 :code:`ray_init_args`에서 "
+"1개를 설정한 경우에도 마찬가지입니다)."
 
 #: ../../source/how-to-monitor-simulation.rst:212 ../../source/ref-faq.rst:2
 msgid "FAQ"
-msgstr ""
+msgstr "자주 묻는 질문"
 
 #: ../../source/how-to-monitor-simulation.rst:214
 msgid "Q: I don't see any metrics logged."
-msgstr ""
+msgstr "질문: 기록된 메트릭이 보이지 않습니다."
 
 #: ../../source/how-to-monitor-simulation.rst:216
 msgid ""
@@ -5463,6 +5543,9 @@ msgid ""
 "right corner (\"Last 30 minutes\" by default). Please change the "
 "timeframe to reflect the period when the simulation was running."
 msgstr ""
+"A: 기간이 제대로 설정되지 않았을 수 있습니다. 설정은 오른쪽 상단에 있습니다("
+"기본값은 '지난 30분'). 시뮬레이션이 실행된 기간을 반영하도록 기간을 변경해 "
+"주세요."
 
 #: ../../source/how-to-monitor-simulation.rst:218
 msgid ""
@@ -5470,42 +5553,49 @@ msgid ""
 "server is running and refresh this page” after going to the Metrics tab "
 "in Ray Dashboard."
 msgstr ""
+"질문: \"Grafana 서버가 감지되지 않았습니다. Ray 대시보드의 메트릭 탭으로 "
+"이동한 후 Grafana 서버가 실행 중인지 확인하고 이 페이지를 새로고침하세요."
+"\"라는 메시지가 표시됩니다."
 
 #: ../../source/how-to-monitor-simulation.rst:220
 msgid ""
 "A: You probably don't have Grafana running. Please check the running "
 "services"
-msgstr ""
+msgstr "A: Grafana가 실행되고 있지 않을 수 있습니다. 실행 중인 서비스를 확인하세요"
 
 #: ../../source/how-to-monitor-simulation.rst:226
 msgid ""
 "Q: I see \"This site can't be reached\" when going to "
 "`<http://127.0.0.1:8265>`_."
 msgstr ""
+"Q: `<http://127.0.0.1:8265>`_로 이동할 때 \"이 사이트에 연결할 수 없습니다."
+"\"라는 메시지가 표시됩니다."
 
 #: ../../source/how-to-monitor-simulation.rst:228
 msgid ""
 "A: Either the simulation has already finished, or you still need to start"
 " Prometheus."
-msgstr ""
+msgstr "A: 시뮬레이션이 이미 완료되었거나 아직 Prometheus를 시작해야 합니다."
 
 #: ../../source/how-to-monitor-simulation.rst:232
 msgid "Resources"
-msgstr ""
+msgstr "리소스"
 
 #: ../../source/how-to-monitor-simulation.rst:234
 msgid ""
 "Ray Dashboard: `<https://docs.ray.io/en/latest/ray-observability/getting-"
 "started.html>`_"
 msgstr ""
+"Ray 대시보드: `<https://docs.ray.io/en/latest/ray-observability/getting-"
+"started.html>`_"
 
 #: ../../source/how-to-monitor-simulation.rst:236
 msgid "Ray Metrics: `<https://docs.ray.io/en/latest/cluster/metrics.html>`_"
-msgstr ""
+msgstr "Ray 메트릭: `<https://docs.ray.io/en/latest/cluster/metrics.html>`_"
 
 #: ../../source/how-to-run-flower-using-docker.rst:2
 msgid "Run Flower using Docker"
-msgstr ""
+msgstr "Docker를 사용하여 Flower 실행"
 
 #: ../../source/how-to-run-flower-using-docker.rst:4
 msgid ""
@@ -5514,10 +5604,13 @@ msgid ""
 "<https://hub.docker.com/u/flwr>`__. Supported architectures include "
 "``amd64`` and ``arm64v8``."
 msgstr ""
+"Flower를 시작하는 가장 간단한 방법은 `Docker Hub <https://hub.docker.com/u/"
+"flwr>`__에서 찾을 수 있는 미리 만들어진 Docker 이미지를 사용하는 것입니다. "
+"지원되는 아키텍처는 ``amd64`` 및 ``arm64v8``입니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:8
 msgid "Before you start, make sure that the Docker daemon is running:"
-msgstr ""
+msgstr "시작하기 전에 Docker daemon이 실행 중인지 확인하세요:"
 
 #: ../../source/how-to-run-flower-using-docker.rst:15
 msgid ""
@@ -5526,6 +5619,9 @@ msgid ""
 "You can find installation instruction `here <https://docs.docker.com/get-"
 "docker/>`_."
 msgstr ""
+"전이 표시되지 않고 대신 명령을 찾을 수 없다는 오류가 표시되는 경우 먼저 "
+"Docker를 설치해야 합니다. `여기 <https://docs.docker.com/get-docker/>`_에서 "
+"설치 지침을 찾을 수 있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:21
 msgid ""
@@ -5534,6 +5630,9 @@ msgid ""
 "<https://docs.docker.com/engine/install/linux-postinstall/>`_ on the "
 "official Docker website."
 msgstr ""
+"Linux에서 Docker 명령을 실행하려면 ``sudo`` 권한이 필요합니다. sudo``를 "
+"사용하지 않으려면 공식 Docker 웹사이트의 `Post-installation steps "
+"<https://docs.docker.com/engine/install/linux-postinstall/>`_를 따르세요."
 
 #: ../../source/how-to-run-flower-using-docker.rst:27
 msgid ""
@@ -5542,18 +5641,22 @@ msgid ""
 "This guarantees seamless integration and avoids potential conflicts or "
 "issues that may arise from using different versions."
 msgstr ""
+"최적의 성능과 호환성을 보장하려면 SuperLink, SuperNode 및 ServerApp 이미지를 "
+"함께 실행할 때 버전이 동일해야 합니다. 이렇게 하면 원활한 통합을 보장하고 "
+"서로 다른 버전을 사용할 때 발생할 수 있는 잠재적인 충돌이나 문제를 방지할 수 "
+"있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:32
 msgid "Flower SuperLink"
-msgstr ""
+msgstr "Flower SuperLink"
 
 #: ../../source/how-to-run-flower-using-docker.rst:35
 msgid "Quickstart"
-msgstr ""
+msgstr "빠른 시작"
 
 #: ../../source/how-to-run-flower-using-docker.rst:37
 msgid "If you're looking to try out Flower, you can use the following command:"
-msgstr ""
+msgstr "Flower를 사용해보고 싶다면 다음 명령을 사용하면 됩니다:"
 
 #: ../../source/how-to-run-flower-using-docker.rst:43
 msgid ""
@@ -5561,6 +5664,9 @@ msgid ""
 "Hub. The tag specifies the Flower version. In this case, Flower 1.8.0. "
 "The ``--rm`` flag tells Docker to remove the container after it exits."
 msgstr ""
+"이 명령은 Docker Hub에서 ``1.8.0`` 태그가 있는 Docker 이미지를 가져옵니다. "
+"이 태그는 Flower 버전을 지정합니다. 이 경우, Flower 1.8.0입니다. '`--rm`` "
+"플래그는 컨테이너가 종료된 후 컨테이너를 제거하도록 Docker에 지시합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:49
 msgid ""
@@ -5569,6 +5675,9 @@ msgid ""
 "starts. We will show below how to save the state in a file on your host "
 "system."
 msgstr ""
+"기본적으로 Flower SuperLink는 상태를 in-memory에 유지합니다. Docker 플래그 "
+"`--rm``을 사용하는 경우 컨테이너 시작 사이에 상태가 유지되지 않습니다. "
+"아래에서 호스트 시스템의 파일에 상태를 저장하는 방법을 보여드리겠습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:53
 msgid ""
@@ -5579,6 +5688,11 @@ msgid ""
 "after the tag is passed to the Flower SuperLink. Here, we are passing the"
 " flag ``--insecure``."
 msgstr ""
+"``-p <host>:<container>`` 플래그는 호스트의 포트 ``9091``/``9092``를 "
+"컨테이너의 ``9091``/``9092``에 매핑하여 ``http://localhost:9091``의 드라이버 "
+"API와 ``http://localhost:9092``의 Fleet API에 액세스할 수 있도록 Docker에 "
+"지시합니다. 마지막으로, 태그 뒤에 오는 모든 플래그는 Flower SuperLink에 "
+"전달됩니다. 여기서는 ``--insecure``플래그를 전달합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:60
 #: ../../source/how-to-run-flower-using-docker.rst:259
@@ -5590,16 +5704,20 @@ msgid ""
 "flower-using-docker.html#enabling-ssl-for-secure-connections>`__ when "
 "deploying to a production environment."
 msgstr ""
+"``--insecure`` 플래그는 안전하지 않은 통신(HTTPS가 아닌 HTTP 사용)을 "
+"활성화하며 테스트 목적으로만 사용해야 합니다. 프로덕션 환경에 배포할 때는 `"
+"SSL <https://flower.ai/docs/framework/how-to-run-flower-using-docker.html"
+"#enabling-ssl-for-secure-connections>`__을 활성화할 것을 강력히 권장합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:65
 msgid ""
 "You can use ``--help`` to view all available flags that the SuperLink "
 "supports:"
-msgstr ""
+msgstr "'`--help``을 사용하면 SuperLink가 지원하는 모든 플래그를 볼 수 있습니다:"
 
 #: ../../source/how-to-run-flower-using-docker.rst:72
 msgid "Mounting a volume to store the state on the host system"
-msgstr ""
+msgstr "호스트 시스템에 상태를 저장할 볼륨 마운트하기"
 
 #: ../../source/how-to-run-flower-using-docker.rst:74
 msgid ""
@@ -5613,6 +5731,14 @@ msgid ""
 "you can change the user ID back to the current user ID by running ``sudo "
 "chown -R $USER:$(id -gn) state``."
 msgstr ""
+"호스트 시스템에서 SuperLink의 상태를 유지하려면 호스트 시스템에서 파일을 "
+"저장할 디렉터리와 데이터베이스 파일의 이름을 지정하기만 하면 됩니다. "
+"기본적으로 SuperLink 컨테이너는 사용자 ID가 ``49999``인 ``app``이라는 루트가 "
+"아닌 사용자로 실행됩니다. 마운트된 디렉터리에 적절한 권한이 있는지 "
+"확인하려면 새 디렉터리를 생성하고 디렉터리의 사용자 ID를 ``49999``로 "
+"변경하는 것이 좋습니다. 나중에 디렉터리를 삭제하려면 ``sudo chown -R $USER:$("
+"id -gn) state``를 실행하여 사용자 ID를 현재 사용자 ID로 다시 변경할 수 "
+"있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:82
 msgid ""
@@ -5622,6 +5748,10 @@ msgid ""
 "Furthermore, we use the flag ``--database`` to specify the name of the "
 "database file."
 msgstr ""
+"아래 예에서는 새 디렉터리를 생성하고, 사용자 ID를 변경하고, 플래그 "
+"``--volume``을 통해 Docker에게 로컬 ``state`` 디렉터리를 컨테이너의 ``/app/"
+"state`` 디렉터리에 마운트하도록 지시합니다. 또한 ``--database`` 플래그를 "
+"사용하여 데이터베이스 파일의 이름을 지정합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:95
 msgid ""
@@ -5630,18 +5760,24 @@ msgid ""
 "SuperLink tries to restore the state from the file. To start the "
 "SuperLink with an empty database, simply remove the ``state.db`` file."
 msgstr ""
+"SuperLink가 시작되자마자 호스트 시스템의 ``state`` 디렉터리에 ``state.db`` "
+"파일이 생성됩니다. 파일이 이미 존재하는 경우 SuperLink는 파일에서 상태를 "
+"복원하려고 시도합니다. 빈 데이터베이스로 SuperLink를 시작하려면 ``state.db`` "
+"파일을 제거하면 됩니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:100
 #: ../../source/how-to-run-flower-using-docker.rst:281
 #: ../../source/how-to-run-flower-using-docker.rst:397
 msgid "Enabling SSL for secure connections"
-msgstr ""
+msgstr "보안 연결을 위한 SSL 사용 설정"
 
 #: ../../source/how-to-run-flower-using-docker.rst:102
 msgid ""
 "To enable SSL, you will need a PEM-encoded root certificate, a PEM-"
 "encoded private key and a PEM-encoded certificate chain."
 msgstr ""
+"SSL을 사용하려면 PEM으로 인코딩된 루트 인증서, PEM으로 인코딩된 개인 키 및 "
+"PEM으로 인코딩된 인증서 체인이 필요합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:106
 msgid ""
@@ -5650,6 +5786,9 @@ msgid ""
 "enable-ssl-connections.html#certificates>`__ page contains a section that"
 " will guide you through the process."
 msgstr ""
+"테스트 목적으로 자체 서명된 인증서를 생성할 수 있습니다. 'SSL 연결 사용 "
+"<https://flower.ai/docs/framework/how-to-enable-ssl-connections."
+"html#certificates>`__ 페이지에 프로세스를 안내하는 섹션이 있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:110
 msgid ""
@@ -5662,6 +5801,14 @@ msgid ""
 "the names of the certificates and key file to the SuperLink with the "
 "``--ssl-ca-certfile``, ``--ssl-certfile`` and ``--ssl-keyfile`` flag."
 msgstr ""
+"필요한 모든 파일이 로컬``certificates`` 디렉터리에 있다고 가정하면, "
+"``--volume``플래그를 사용하여 로컬 디렉터리를 컨테이너의 ``/app/certificates/"
+"`` 디렉터리에 마운트할 수 있습니다. 이렇게 하면 SuperLink 가 컨테이너 내의 "
+"파일에 액세스할 수 있습니다. ``ro``는 ``read-only``을 의미합니다. Docker "
+"볼륨은 기본적으로 ``read-write``로 설정되어 있는데, 이 옵션을 사용하면 "
+"볼륨을 ``read-only``으로 만들 수 있습니다. 마지막으로 인증서 및 키 파일의 "
+"이름을 ``--ssl-ca-certfile``, ``--ssl-certfile`` 및 ``--ssl-keyfile`` "
+"플래그와 함께 SuperLink에 전달합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:128
 msgid ""
@@ -5671,16 +5818,22 @@ msgid ""
 " the ``certificates/`` directory, you can run ``sudo chown -R 49999:49999"
 " certificates/*``."
 msgstr ""
+"기본적으로 Flower 컨테이너는 루트가 아닌 사용자 ``app``로 실행되므로 "
+"마운트된 파일과 디렉터리에 사용자 ID ``49999``에 대한 적절한 권한이 있어야 "
+"합니다. 예를 들어, ``certificates/`` 디렉터리에 있는 모든 파일의 사용자 ID를 "
+"변경하려면 ``sudo chown -R 49999:49999 certificates/*``를 실행하면 됩니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:134
 msgid "Flower SuperNode"
-msgstr ""
+msgstr "Flower SuperNode"
 
 #: ../../source/how-to-run-flower-using-docker.rst:136
 msgid ""
 "The SuperNode Docker image comes with a pre-installed version of Flower "
 "and serves as a base for building your own SuperNode image."
 msgstr ""
+"SuperNode Docker 이미지는 Flower의 사전 설치된 버전과 함께 제공되며, 자체 "
+"SuperNode 이미지를 구축하기 위한 기반 역할을 합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:141
 msgid ""
@@ -5691,12 +5844,19 @@ msgid ""
 "same day. To ensure the versions are in sync, using the concrete tag, "
 "e.g., ``1.9.0.dev20240501`` instead of ``nightly`` is recommended."
 msgstr ""
+"SuperNode Docker 이미지는 현재 1.9.0 야간 릴리스에서만 작동합니다. 안정 "
+"버전은 Flower 1.9.0(안정)이 출시되면 사용할 수 있습니다(예상 출시일: 5월). "
+"SuperNode 야간 이미지는 같은 날 릴리스된 해당 SuperLink 및 서버앱 야간 "
+"이미지와 페어링되어야 합니다. 버전이 동기화되도록 하려면 ``nightly`` 대신 ``1"
+".9.0.dev20240501``과 같은 구체적인 태그를 사용하는 것이 좋습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:147
 msgid ""
 "We will use the ``quickstart-pytorch`` example, which you can find in the"
 " Flower repository, to illustrate how you can dockerize your ClientApp."
 msgstr ""
+"Flower 레포지토리에서 찾을 수 있는 ``quickstart-pytorch`` 예제를 사용하여 "
+"ClientApp을 도커라이즈하는 방법을 설명하겠습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:155
 msgid ""
@@ -5704,19 +5864,22 @@ msgid ""
 "development environment. You can skip the first part if you want to run "
 "your ClientApp instead of the ``quickstart-pytorch`` example."
 msgstr ""
+"시작하기 전에 로컬 개발 환경에서 몇 가지 전제 조건을 충족해야 합니다. "
+"'quickstart-pytorch' 예제 대신 ClientApp을 실행하려는 경우 첫 번째 부분을 "
+"건너뛸 수 있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:159
 msgid "Clone the Flower repository."
-msgstr ""
+msgstr "플라워 레포지토리를 클론합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:173
 msgid "Creating a SuperNode Dockerfile"
-msgstr ""
+msgstr "SuperNode Dockerfile 만들기"
 
 #: ../../source/how-to-run-flower-using-docker.rst:175
 #: ../../source/how-to-run-flower-using-docker.rst:311
 msgid "Let's assume the following project layout:"
-msgstr ""
+msgstr "다음과 같은 프로젝트 레이아웃을 가정해 보겠습니다:"
 
 #: ../../source/how-to-run-flower-using-docker.rst:184
 msgid ""
@@ -5724,6 +5887,9 @@ msgid ""
 "where the ``ClientApp`` code is located. In the file, we list all the "
 "dependencies that the ClientApp requires."
 msgstr ""
+"먼저 ``ClientApp`` 코드가 있는 디렉토리에 ``requirements.txt`` 파일을 "
+"만들어야 합니다. 이 파일에는 클라이언트 앱에 필요한 모든 dependencies을 "
+"나열합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:196
 msgid ""
@@ -5732,6 +5898,9 @@ msgid ""
 "package dependencies in your ``requirements.txt``, such as ``torch``, "
 "``tensorflow``, etc."
 msgstr ""
+"`flwr <https://pypi.org/project/flwr/>`__ 는 이미 ``flwr/supernode`` 기본 "
+"이미지에 설치되어 있으므로, ``torch``, ``tensorflow`` 등과 같은 다른 패키지 "
+"dependencies만 ``requirements.txt``에 포함시키면 됩니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:200
 msgid ""
@@ -5739,12 +5908,16 @@ msgid ""
 "example, create a new file called ``Dockerfile.supernode`` in ``examples"
 "/quickstart-pytorch``."
 msgstr ""
+"다음으로, Dockerfile을 생성합니다.``quickstart-pytorch`` 예제를 사용하는 "
+"경우 ``examples/quickstart-pytorch``에 ``Dockerfile.supernode``라는 새 "
+"파일을 생성합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:203
 msgid ""
 "The ``Dockerfile.supernode`` contains the instructions that assemble the "
 "SuperNode image."
-msgstr ""
+msgstr "``Dockerfile.supernode``에는 SuperNode 이미지를 조립하는 지침이 포함되어 "
+"있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:217
 msgid ""
@@ -5758,16 +5931,26 @@ msgid ""
 "``client:app``. The argument is the object reference of the ClientApp "
 "(``<module>:<attribute>``) that will be run inside the ClientApp."
 msgstr ""
+"처음 두 줄에서는 ``nightly`` 태그가 붙은 SuperNode 이미지를 기본 이미지로 "
+"사용하고 작업 디렉터리를 ``/app``로 설정하도록 Docker에 지시합니다. 이제 "
+"``/app`` 디렉토리에서 다음 명령이 실행됩니다. 다음으로, ``requirements.txt`` "
+"파일을 이미지에 복사하여 ClientApp dependencies 요소를 설치하고 ``pip "
+"install``을 실행합니다. 마지막 두 줄에서 ``client.py`` 모듈을 이미지에 "
+"복사하고 ``client:app`` 인수를 사용하여 진입점을 ``flower-client-app``로 "
+"설정합니다. 인수는 클라이언트앱 내부에서 실행될 클라이언트앱의 객체 참조 "
+"(``<module>:<attribute>``) 입니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:226
 msgid "Building the SuperNode Docker image"
-msgstr ""
+msgstr "SuperNode Docker 이미지 빌드"
 
 #: ../../source/how-to-run-flower-using-docker.rst:228
 msgid ""
 "Next, we build the SuperNode Docker image by running the following "
 "command in the directory where Dockerfile and ClientApp code are located."
 msgstr ""
+"다음으로, Dockerfile 및 ClientApp 코드가 있는 디렉터리에서 다음 명령을 "
+"실행하여 SuperNode Docker 이미지를 빌드합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:235
 msgid ""
@@ -5775,50 +5958,54 @@ msgid ""
 "Remember that the here chosen values only serve as an example. You can "
 "change them to your needs."
 msgstr ""
+"이미지에 ``flwr_supernode``라는 이름을 붙이고 ``0.0.1`` 태그를 붙였습니다. "
+"여기서 선택한 값은 예시일 뿐이라는 점을 기억하세요. 필요에 따라 변경할 수 "
+"있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:240
 msgid "Running the SuperNode Docker image"
-msgstr ""
+msgstr "SuperNode Docker 이미지 실행"
 
 #: ../../source/how-to-run-flower-using-docker.rst:242
 msgid "Now that we have built the SuperNode image, we can finally run it."
-msgstr ""
+msgstr "이제 SuperNode 이미지를 빌드했으니 이제 실행할 수 있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:250
 #: ../../source/how-to-run-flower-using-docker.rst:367
 msgid "Let's break down each part of this command:"
-msgstr ""
+msgstr "이 명령의 각 부분을 자세히 살펴보겠습니다:"
 
 #: ../../source/how-to-run-flower-using-docker.rst:252
 #: ../../source/how-to-run-flower-using-docker.rst:369
 msgid "``docker run``: This is the command to run a new Docker container."
-msgstr ""
+msgstr "``docker run``: 새 Docker 컨테이너를 실행하는 명령입니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:253
 #: ../../source/how-to-run-flower-using-docker.rst:370
 msgid ""
 "``--rm``: This option specifies that the container should be "
 "automatically removed when it stops."
-msgstr ""
+msgstr "``--rm``: 이 옵션은 컨테이너가 중지될 때 자동으로 제거되도록 지정합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:254
 msgid "``flwr_supernode:0.0.1``: The name the tag of the Docker image to use."
-msgstr ""
+msgstr "``flwr_supernode:0.0.1``: 사용할 Docker 이미지의 태그 이름입니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:255
 #: ../../source/how-to-run-flower-using-docker.rst:372
 msgid "``--insecure``: This option enables insecure communication."
-msgstr ""
+msgstr "``--insecure``: 이 옵션은 보안되지 않은 통신을 활성화합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst
 msgid ""
 "``--superlink 192.168.1.100:9092``: This option specifies the address of "
 "the SuperLinks Fleet"
-msgstr ""
+msgstr "``--superlink 192.168.1.100:9092``: 이 옵션은 SuperLinks Fleet의 주소를 "
+"지정합니다"
 
 #: ../../source/how-to-run-flower-using-docker.rst
 msgid "API to connect to. Remember to update it with your SuperLink IP."
-msgstr ""
+msgstr "API에 연결할 수 있습니다. SuperLink IP로 업데이트하는 것을 잊지 마세요."
 
 #: ../../source/how-to-run-flower-using-docker.rst:269
 msgid ""
@@ -5827,18 +6014,25 @@ msgid ""
 "defined-bridge-networks>`__, use the ``--network`` argument and pass the "
 "name of the Docker network to run your SuperNodes."
 msgstr ""
+"로컬에서 Flower를 실행하는 것을 테스트하려면 `bridge network <https://docs."
+"docker.com/network/network-tutorial-standalone/#use-user-defined-bridge-"
+"networks>`__를 생성하고 ``--network`` argument를 사용하고 SuperNodes를 "
+"실행할 Docker 네트워크의 이름을 전달하면 됩니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:273
 msgid ""
 "Any argument that comes after the tag is passed to the Flower SuperNode "
 "binary. To see all available flags that the SuperNode supports, run:"
 msgstr ""
+"태그 뒤에 오는 모든 argument는 Flower SuperNode 바이너리에 전달됩니다. "
+"SuperNode가 지원하는 사용 가능한 모든 플래그를 보려면 실행하세요:"
 
 #: ../../source/how-to-run-flower-using-docker.rst:283
 msgid ""
 "To enable SSL, we will need to mount a PEM-encoded root certificate into "
 "your SuperNode container."
-msgstr ""
+msgstr "SSL을 사용하려면 PEM 인코딩된 루트 인증서를 SuperNode 컨테이너에 마운트해야 "
+"합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:285
 msgid ""
@@ -5848,16 +6042,21 @@ msgid ""
 "within the container. Use the ``--root-certificates`` flag when starting "
 "the container."
 msgstr ""
+"인증서가 이미 로컬에 존재한다고 가정하면, ``--volume`` 플래그를 사용하여 "
+"로컬 인증서를 컨테이너의 ``/app/`` 디렉터리에 마운트할 수 있습니다. 이렇게 "
+"하면 SuperNode가 컨테이너 내의 인증서에 액세스할 수 있습니다. 컨테이너를 "
+"시작할 때 ``--root-certificates`` 플래그를 사용하세요."
 
 #: ../../source/how-to-run-flower-using-docker.rst:297
 msgid "Flower ServerApp"
-msgstr ""
+msgstr "Flower 서버앱"
 
 #: ../../source/how-to-run-flower-using-docker.rst:299
 msgid ""
 "The procedure for building and running a ServerApp image is almost "
 "identical to the SuperNode image."
-msgstr ""
+msgstr "ServerApp 이미지를 빌드하고 실행하는 절차는 SuperNode 이미지와 거의 "
+"동일합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:301
 msgid ""
@@ -5865,6 +6064,9 @@ msgid ""
 "pre-installed version of Flower and serves as a base for building your "
 "own ServerApp image."
 msgstr ""
+"SuperNode 이미지와 마찬가지로 ServerApp Docker 이미지는 Flower의 사전 설치된 "
+"버전과 함께 제공되며, 자체 ServerApp 이미지를 구축하기 위한 기본 역할을 "
+"합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:304
 msgid ""
@@ -5872,10 +6074,13 @@ msgid ""
 "Flower SuperNode section. If you have not already done so, please follow "
 "the `SuperNode Prerequisites`_ before proceeding."
 msgstr ""
+"여기서는 Flower SuperNode 섹션에서와 동일한`quickstart-pytorch`` 예제를 "
+"사용하겠습니다. 아직 수행하지 않았다면 계속 진행하기 전에 `SuperNode "
+"Prerequisites`_ 을 따르세요."
 
 #: ../../source/how-to-run-flower-using-docker.rst:309
 msgid "Creating a ServerApp Dockerfile"
-msgstr ""
+msgstr "ServerApp Dockerfile 만들기"
 
 #: ../../source/how-to-run-flower-using-docker.rst:320
 msgid ""
@@ -5884,12 +6089,16 @@ msgid ""
 "example, create a new file called ``Dockerfile.serverapp`` in ``examples"
 "/quickstart-pytorch``."
 msgstr ""
+"먼저, ``ServerApp`` 코드가 있는 디렉토리에 Docker파일을 생성해야 합니다. "
+"``quickstart-pytorch`` 예제를 사용하는 경우 ``examples/quickstart-pytorch``"
+"에 ``Dockerfile.serverapp``이라는 새 파일을 생성합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:324
 msgid ""
 "The ``Dockerfile.serverapp`` contains the instructions that assemble the "
 "ServerApp image."
-msgstr ""
+msgstr "``Dockerfile.serverapp``에는 ServerApp 이미지를 합치는 지침이 포함되어 "
+"있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:335
 msgid ""
@@ -5902,16 +6111,24 @@ msgid ""
 "ServerApp (``<module>:<attribute>``) that will be run inside the "
 "ServerApp container."
 msgstr ""
+"처음 두 줄에서는 ``1.8.0`` 태그가 붙은 ServerApp 이미지를 기본 이미지로 "
+"사용하고 작업 디렉터리를 ``/app``로 설정하도록 Docker에 지시합니다. 이제 "
+"``/app`` 디렉토리에서 다음 명령이 실행됩니다. 마지막 두 줄에서는 ``server."
+"py`` 모듈을 이미지에 복사하고 ``server:app`` argument를 사용하여 진입점을 "
+"``flower-server-app``로 설정합니다. 인수는 ServerApp 컨테이너 내에서 실행될 "
+"ServerApp의 객체 참조(``<module>:<attribute>``)입니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:343
 msgid "Building the ServerApp Docker image"
-msgstr ""
+msgstr "ServerApp Docker 이미지 빌드"
 
 #: ../../source/how-to-run-flower-using-docker.rst:345
 msgid ""
 "Next, we build the ServerApp Docker image by running the following "
 "command in the directory where Dockerfile and ServerApp code are located."
 msgstr ""
+"다음으로, Docker파일과 ServerApp 코드가 있는 디렉터리에서 다음 명령을 "
+"실행하여 ServerApp Docker 이미지를 빌드합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:352
 msgid ""
