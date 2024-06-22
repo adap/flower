@@ -74,6 +74,19 @@ Thanks to using Hugging Face's ``datasets`` used under the hood, Flower Datasets
 - Jax
 - Arrow
 
+Here are a few of the ``Partitioner`` s that are available: (for a full list see `link <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html#module-flwr_datasets.partitioner>`_ )
+
+* Partitioner (the abstract base class) ``Partitioner``
+* IID partitioning ``IidPartitioner(num_partitions)``
+* Dirichlet partitioning ``DirichletPartitioner(num_partitions, partition_by, alpha)``
+* InnerDirichlet partitioning ``InnerDirichletPartitioner(partition_sizes, partition_by, alpha)``
+* Natural ID partitioner ``NaturalIdPartitioner(partition_by)``
+* Size partitioner (the abstract base class for the partitioners dictating the division based the number of samples) ``SizePartitioner``
+* Linear partitioner ``LinearPartitioner(num_partitions)``
+* Square partitioner ``SquarePartitioner(num_partitions)``
+* Exponential partitioner ``ExponentialPartitioner(num_partitions)``
+* more to come in the future releases (contributions are welcome).
+
 Install
 -------
 
