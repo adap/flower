@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-17 16:09+0200\n"
-"PO-Revision-Date: 2024-06-22 03:09+0000\n"
+"PO-Revision-Date: 2024-06-22 05:06+0000\n"
 "Last-Translator: 박태현 <qkrxogus113@ajou.ac.kr>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
@@ -4016,43 +4016,44 @@ msgstr "**제목** (필수) 제안서의 제목을 평이한 언어로 입력합
 msgid ""
 "**status** (Required) The current status of the proposal. See "
 "[workflow](#workflow) for the possible states."
-msgstr ""
+msgstr "**상태** (필수) 제안의 현재 상태입니다. 가능한 상태는 [워크플로](#워크플로)"
+"를 참조하세요."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:98
 msgid ""
 "**authors** (Required) A list of authors of the proposal. This is simply "
 "the GitHub ID."
-msgstr ""
+msgstr "**저자** (필수) 제안서의 작성자 목록입니다. 간단히 GitHub ID입니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:100
 msgid ""
 "**creation-date** (Required) The date that the proposal was first "
 "submitted in a PR."
-msgstr ""
+msgstr "**생성 날짜** (필수) PR에서 제안서를 처음 제출한 날짜입니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:102
 msgid ""
 "**last-updated** (Optional) The date that the proposal was last changed "
 "significantly."
-msgstr ""
+msgstr "**마지막 업데이트** (선택 사항) 제안서가 마지막으로 크게 변경된 날짜입니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:104
 msgid ""
 "**see-also** (Optional) A list of other proposals that are relevant to "
 "this one."
-msgstr ""
+msgstr "**함께 보기** (선택 사항) 이 제안과 관련된 다른 제안 목록입니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:106
 msgid "**replaces** (Optional) A list of proposals that this one replaces."
-msgstr ""
+msgstr "**대체** (선택 사항) 이 제안이 대체하는 제안 목록입니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:108
 msgid "**superseded-by** (Optional) A list of proposals that this one supersedes."
-msgstr ""
+msgstr "**대체됨** (선택 사항) 이 제안이 대체하는 제안의 목록입니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:111
 msgid "Workflow"
-msgstr ""
+msgstr "워크플로우"
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:113
 msgid ""
@@ -4061,6 +4062,9 @@ msgid ""
 "author, who shepherds the enhancement. This person also has to find "
 "committers to Flower willing to review the proposal."
 msgstr ""
+"개선 사항을 구성하는 아이디어는 이미 커뮤니티에서 논의되었거나 제안된 적이 "
+"있어야 합니다. 따라서 개선 사항을 주도하는 사(보통 작성자)이 필요합니다. 이 "
+"사람은 또한 제안을 검토할 의향이 있는 Flower 커미터를 찾아야 합니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:115
 msgid ""
@@ -4070,6 +4074,10 @@ msgid ""
 "state as part of a pull request. Discussions are done as part of the pull"
 " request review."
 msgstr ""
+"새 개선 사항은 `NNNN-YYYYMMDD-enhancement-title.md` 형식의 파일 이름으로 "
+"체크인되며, `NNNN`은 Flower 개선 문서 번호이고 `enhancements`에 해당합니다. "
+"모든 개선 사항은 pull request의 일부로 `잠정` 상태에서 시작됩니다. 토론은 "
+"pull request 검토의 일부로 이루어집니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:117
 msgid ""
@@ -4079,12 +4087,16 @@ msgid ""
 "enhancement as part of their description. After the implementation is "
 "done, the proposal status is changed to `implemented`."
 msgstr ""
+"개선 사항이 검토 및 승인되면 상태가 '구현 가능'으로 변경됩니다. 그런 다음 "
+"실제 구현은 별도의 pull requests를 통해 이루어집니다. 이러한 pull requests는 "
+"설명의 일부로 해당 개선 사항을 언급해야 합니다. 구현이 완료되면 제안 상태는 "
+"'구현됨'으로 변경됩니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:119
 msgid ""
 "Under certain conditions, other states are possible. An Enhancement has "
 "the following states:"
-msgstr ""
+msgstr "특정 조건에서는 다른 상태도 가능합니다. 개선에는 다음과 같은 상태가 있습니다:"
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:121
 msgid ""
@@ -4092,34 +4104,37 @@ msgid ""
 "defined. This is the starting state while the proposal is being fleshed "
 "out and actively defined and discussed."
 msgstr ""
+"'잠정적': 개선 사항이 제안되어 활발히 정의되고 있습니다. 제안이 구체화되고 "
+"활발하게 정의 및 논의되는 동안의 시작 단계입니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:122
 msgid "`implementable`: The enhancement has been reviewed and approved."
-msgstr ""
+msgstr "`구현 가능`: 개선 사항이 검토 및 승인되었습니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:123
 msgid ""
 "`implemented`: The enhancement has been implemented and is no longer "
 "actively changed."
-msgstr ""
+msgstr "`구현됨`: 개선 사항이 구현되었으며 더 이상 활발히 변경되지 않습니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:124
 msgid "`deferred`: The enhancement is proposed but not actively being worked on."
-msgstr ""
+msgstr "'지연됨': 개선 사항이 제안되었지만 아직 활발히 작업 중이 아닙니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:125
 msgid ""
 "`rejected`: The authors and reviewers have decided that this enhancement "
 "is not moving forward."
-msgstr ""
+msgstr "`거부됨`: 작성자와 검토자는 이 개선 사항을 더 이상 진행하지 않기로 "
+"결정했습니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:126
 msgid "`withdrawn`: The authors have withdrawn the enhancement."
-msgstr ""
+msgstr "`철회`: 작성자가 개선 사항을 철회했습니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:127
 msgid "`replaced`: The enhancement has been replaced by a new enhancement."
-msgstr ""
+msgstr "'대체됨': 개선 사항이 새로운 개선 사항으로 대체되었습니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:131
 msgid ""
@@ -4127,6 +4142,8 @@ msgid ""
 "(Issues and Pull Requests) adds more complexity and can be a barrier for "
 "potential first-time contributors."
 msgstr ""
+"GitHub에서 이미 제공하는 프로세스(이슈 및 Pull Requests)에 추가 프로세스를 "
+"추가하면 더 복잡해지고 잠재적인 처음인 기여자에게는 장벽이 될 수 있습니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:133
 msgid ""
@@ -4134,10 +4151,12 @@ msgid ""
 "currently required in the features issue template may be a heavy burden "
 "for non-native English speakers."
 msgstr ""
+"현재 기능 이슈 템플릿에서 요구되는 한 문장 설명 이상으로 제안서 템플릿을 "
+"확장하는 것은 영어가 모국어가 아닌 사용자에게는 큰 부담이 될 수 있습니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:137
 msgid "GitHub Issues"
-msgstr ""
+msgstr "GitHub 이슈"
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:139
 msgid ""
@@ -4149,10 +4168,16 @@ msgid ""
 "parts of the doc. Managing these multiple discussions can be confusing "
 "when using GitHub Issues."
 msgstr ""
+"이러한 종류의 개선을 위해 GitHub 이슈를 사용하면 가능합니다. 예를 들어 "
+"태그를 사용하여 다른 이슈와 구별하고 필터링할 수 있습니다. 주요 이슈는 개선 "
+"사항에 대해 토론하고 검토하는 것입니다: GitHub 이슈에는 댓글 스레드가 하나만 "
+"있습니다. 개선 사항에는 일반적으로 문서의 여러 부분에 대해 동시에 여러 개의 "
+"토론 스레드가 있습니다. GitHub 이슈를 사용할 때 이러한 여러 토론을 관리하면 "
+"혼란스러울 수 있습니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:141
 msgid "Google Docs"
-msgstr ""
+msgstr "Google 문서 도구"
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:143
 msgid ""
@@ -4163,24 +4188,29 @@ msgid ""
 "proposals as part of Flower's repository, the potential for missing links"
 " is much higher."
 msgstr ""
+"Google 문서는 여러 스레드의 토론을 허용합니다. 하지만 Google 문서는 프로젝트 "
+"외부에서 호스팅되므로 커뮤니티에서 검색할 수 있도록 관리해야 합니다. 모든 "
+"제안에 대한 링크 목록을 관리하고 커뮤니티에 제공해야 합니다. Flower 저장소의 "
+"일부로 제안서를 보낼 때와 비교하면 링크가 누락될 가능성이 훨씬 더 높습니다."
 
 #: ../../source/fed/index.md:1
 msgid "FED - Flower Enhancement Doc"
-msgstr ""
+msgstr "FED - Flower 개선 문서"
 
 #: ../../source/how-to-aggregate-evaluation-results.rst:2
 msgid "Aggregate evaluation results"
-msgstr ""
+msgstr "종합 평가 결과"
 
 #: ../../source/how-to-aggregate-evaluation-results.rst:4
 msgid ""
 "The Flower server does not prescribe a way to aggregate evaluation "
 "results, but it enables the user to fully customize result aggregation."
-msgstr ""
+msgstr "Flower 서버는 평가 결과를 집계하는 방법을 규정하고 있지 않지만 사용자가 결과 "
+"집계를 완전히 사용자 지정할 수 있습니다."
 
 #: ../../source/how-to-aggregate-evaluation-results.rst:8
 msgid "Aggregate Custom Evaluation Results"
-msgstr ""
+msgstr "사용자 지정 평가 결과 집계"
 
 #: ../../source/how-to-aggregate-evaluation-results.rst:10
 msgid ""
@@ -4188,16 +4218,20 @@ msgid ""
 " custom evaluation results coming from individual clients. Clients can "
 "return custom metrics to the server by returning a dictionary:"
 msgstr ""
+"동일한 :code:`Strategy`-사용자 지정 방식을 사용하여 개별 클라이언트로부터 "
+"오는 사용자 지정 평가 결과를 집계할 수 있습니다. 클라이언트는 dictionary를 "
+"반환하여 사용자 지정 지표를 서버에 반환할 수 있습니다:"
 
 #: ../../source/how-to-aggregate-evaluation-results.rst:36
 msgid ""
 "The server can then use a customized strategy to aggregate the metrics "
 "provided in these dictionaries:"
-msgstr ""
+msgstr "그런 다음 서버는 사용자 지정 전략을 사용하여 이러한 dictionaries에서 "
+"제공하는 메트릭을 집계할 수 있습니다:"
 
 #: ../../source/how-to-authenticate-supernodes.rst:2
 msgid "Authenticate SuperNodes"
-msgstr ""
+msgstr "SuperNodes 인증하기"
 
 #: ../../source/how-to-authenticate-supernodes.rst:4
 msgid ""
@@ -4206,26 +4240,30 @@ msgid ""
 "Flower node authentication works similar to how GitHub SSH authentication"
 " works:"
 msgstr ""
+"Flower는 SuperLink에 연결하는 각 SuperNodes의 신원을 확인하는 데 사용할 수 "
+"있는 인증된 SuperNodes에 대한 기본 지원을 제공합니다. Flower 노드 인증은 "
+"GitHub SSH 인증 방식과 유사하게 작동합니다:"
 
 #: ../../source/how-to-authenticate-supernodes.rst:7
 msgid "SuperLink (server) stores a list of known (client) node public keys"
-msgstr ""
+msgstr "SuperLink(서버)는 알려진 (클라이언트) 노드 공개키 목록을 저장합니다"
 
 #: ../../source/how-to-authenticate-supernodes.rst:8
 msgid ""
 "Using ECDH, both SuperNode and SuperLink independently derive a shared "
 "secret"
-msgstr ""
+msgstr "SuperNode와 SuperLink는 ECDH를 사용하여 독립적으로 공유된 비밀을 도출합니다"
 
 #: ../../source/how-to-authenticate-supernodes.rst:9
 msgid ""
 "Shared secret is used to compute the HMAC value of the message sent from "
 "SuperNode to SuperLink as a token"
-msgstr ""
+msgstr "비밀 공유는 SuperNode에서 SuperLink로 토큰으로 전송된 메시지의 HMAC 값을 "
+"계산하는 데 사용됩니다"
 
 #: ../../source/how-to-authenticate-supernodes.rst:10
 msgid "SuperLink verifies the token"
-msgstr ""
+msgstr "SuperLink가 토큰을 확인합니다"
 
 #: ../../source/how-to-authenticate-supernodes.rst:12
 msgid ""
@@ -4234,22 +4272,27 @@ msgid ""
 "authentication>`_ demonstrating federated learning with Flower in an "
 "authenticated setting."
 msgstr ""
+"인증된 환경에서 Flower로 federated 학습을 시연하는 전체 '코드 예제 "
+"<https://github.com/adap/flower/tree/main/examples/flower-authentication>`"
+"_를 확인하는 것이 좋습니다."
 
 #: ../../source/how-to-authenticate-supernodes.rst:15
 msgid ""
 "This guide covers a preview feature that might change in future versions "
 "of Flower."
-msgstr ""
+msgstr "이 가이드에서는 향후 버전의 Flower에서 변경될 수 있는 미리보기 기능에 대해 "
+"설명합니다."
 
 #: ../../source/how-to-authenticate-supernodes.rst:18
 msgid ""
 "For increased security, node authentication can only be used when "
 "encrypted connections (SSL/TLS) are enabled."
-msgstr ""
+msgstr "보안을 강화하기 위해 노드 인증은 암호화된 연결(SSL/TLS)을 사용하도록 설정한 "
+"경우에만 사용할 수 있습니다."
 
 #: ../../source/how-to-authenticate-supernodes.rst:21
 msgid "Enable node authentication in :code:`SuperLink`"
-msgstr ""
+msgstr ":code:`SuperLink`에서 노드 인증 활성화"
 
 #: ../../source/how-to-authenticate-supernodes.rst:23
 msgid ""
@@ -4262,10 +4305,16 @@ msgid ""
 ":code:`SuperNode` that has both secure connections and node "
 "authentication enabled:"
 msgstr ""
+"노드 인증을 활성화하려면 먼저 SuperLink<>SuperNode 통신을 보호하기 위해 SSL/"
+"TLS 연결을 구성해야 합니다. 전체 가이드는 `여기 <https://flower.ai/docs/"
+"framework/how-to-enable-ssl-connections.html>`_에서 확인할 수 있습니다. 보안 "
+"연결을 구성한 후, 장기 실행하는 Flower :code:`SuperLink`에서 클라이언트 "
+"인증을 활성화할 수 있습니다. 다음 터미널 명령을 사용하여 보안 연결과 노드 "
+"인증이 모두 활성화된 Flower :code:`SuperNode`를 시작하세요:"
 
 #: ../../source/how-to-authenticate-supernodes.rst:38
 msgid "Let's break down the authentication flags:"
-msgstr ""
+msgstr "인증 플래그를 세분화해 보겠습니다:"
 
 #: ../../source/how-to-authenticate-supernodes.rst:40
 msgid ""
@@ -4274,6 +4323,9 @@ msgid ""
 " public keys that are allowed to participate in a federation in one CSV "
 "file (:code:`.csv`)."
 msgstr ""
+"첫 번째 플래그 :code:`--auth-list-public-keys`는 알려진 모든 노드 공개키를 "
+"저장하는 CSV 파일의 경로를 기대합니다. federation에 참여하도록 허용된 모든 "
+"알려진 노드 공개 키를 하나의 CSV 파일(:code:`.csv`)에 저장해야 합니다."
 
 #: ../../source/how-to-authenticate-supernodes.rst:42
 msgid ""
@@ -4282,6 +4334,9 @@ msgid ""
 "example, refer to our code sample, which contains a CSV file with two "
 "known node public keys."
 msgstr ""
+"알려진 노드 공개키를 저장하는 유효한 CSV 파일은 쉼표로 구분하고 주석 없이 "
+"OpenSSH 형식으로 키를 나열해야 합니다. 예를 들어, 두 개의 알려진 노드 "
+"공개키가 포함된 CSV 파일이 포함된 코드 샘플을 참조하세요."
 
 #: ../../source/how-to-authenticate-supernodes.rst:44
 msgid ""
@@ -4290,6 +4345,10 @@ msgid ""
 "public keys. For development purposes, you can generate a private and "
 "public key pair using :code:`ssh-keygen -t ecdsa -b 384`."
 msgstr ""
+"두 번째 및 세 번째 플래그 :code:`--auth-superlink-private-key` 및 :code"
+":`--auth-superlink-public-key`는 서버의 개인 및 공개 키의 경로를 예상합니다. "
+"개발 목적으로 :code:`ssh-keygen -t ecdsa -b 384`를 사용하여 개인 및 공개 키 "
+"쌍을 생성할 수 있습니다."
 
 #: ../../source/how-to-authenticate-supernodes.rst:47
 msgid ""
@@ -4299,10 +4358,15 @@ msgid ""
 "start the server again. Support for dynamically changing the set of known"
 " nodes is on the roadmap to be released in Flower 1.10 (ETA: June)."
 msgstr ""
+"Flower 1.9에서는 알려진 노드 공개키를 SuperLink에 동적으로 제거, 편집 또는 "
+"추가하는 기능이 지원되지 않습니다. 알려진 노드 집합을 변경하려면 서버를 "
+"종료하고 CSV 파일을 편집한 다음 서버를 다시 시작해야 합니다. 알려진 노드 "
+"집합을 동적으로 변경하는 기능은 Flower 1.10(출시 예정일: 6월)에서 로드맵에 "
+"포함되어 있습니다."
 
 #: ../../source/how-to-authenticate-supernodes.rst:53
 msgid "Enable node authentication in :code:`SuperNode`"
-msgstr ""
+msgstr ":code:`SuperNode`에서 노드 인증을 활성화합니다"
 
 #: ../../source/how-to-authenticate-supernodes.rst:55
 msgid ""
@@ -4311,6 +4375,9 @@ msgid ""
 "(:code:`SuperNode`). Use the following terminal command to start an "
 "authenticated :code:`SuperNode`:"
 msgstr ""
+"장기 실행 중인 Flower 서버(:code:`SuperLink`)와 마찬가지로, 장기 실행 중인 "
+"Flower 클라이언트(:code:`SuperNode`)에서도 노드 인증을 쉽게 활성화할 수 "
+"있습니다. 다음 터미널 명령을 사용하여 인증된 :code:`SuperNode`를 시작하세요:"
 
 #: ../../source/how-to-authenticate-supernodes.rst:66
 msgid ""
@@ -4320,10 +4387,14 @@ msgid ""
 "you can generate a private and public key pair using :code:`ssh-keygen -t"
 " ecdsa -b 384`."
 msgstr ""
+":code:`--auth-supernode-private-key` 플래그는 노드의 개인 키 파일 경로를, "
+":code:`--auth-supernode-public-key` 플래그는 노드의 공개 키 파일 경로를 "
+"예상합니다. 개발 목적으로 :code:`ssh-keygen -t ecdsa -b 384`를 사용하여 개인 "
+"및 공개 키 쌍을 생성할 수 있습니다."
 
 #: ../../source/how-to-authenticate-supernodes.rst:70
 msgid "Security notice"
-msgstr ""
+msgstr "보안 공지"
 
 #: ../../source/how-to-authenticate-supernodes.rst:72
 msgid ""
@@ -4335,13 +4406,18 @@ msgid ""
 "communication is done in a secure manner, using trusted communication "
 "methods."
 msgstr ""
+"시스템의 보안은 SuperLink와 각SuperNode의 자격 증명에 의존합니다. 따라서 "
+"공개키 기반구조(PKI) 사칭 공격과 같은 보안 위험을 피하기 위해 자격 증명을 "
+"보호하고 안전하게 보관하는 것이 필수적입니다. 노드 인증 메커니즘에는 사람의 "
+"상호 작용도 포함되므로 모든 통신이 신뢰할 수 있는 통신 방법을 사용하여 "
+"안전한 방식으로 이루어지도록 하세요."
 
 #: ../../source/how-to-authenticate-supernodes.rst:77
 #: ../../source/how-to-enable-ssl-connections.rst:68
 #: ../../source/how-to-use-built-in-mods.rst:85
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:287
 msgid "Conclusion"
-msgstr ""
+msgstr "결론"
 
 #: ../../source/how-to-authenticate-supernodes.rst:79
 msgid ""
@@ -4350,10 +4426,14 @@ msgid ""
 "authentication enabled. You should also know the significance of the "
 "private key and store it safely to minimize security risks."
 msgstr ""
+"이제 노드 인증이 활성화된 상태에서 장기간 실행되는 Flower "
+"서버(:code:`SuperLink`)와 클라이언트(:code:`SuperNode`)를 시작하는 방법을 "
+"배웠을 것입니다. 또한 보안 위험을 최소화하기 위해 개인키의 중요성을 알고 "
+"안전하게 보관해야 합니다."
 
 #: ../../source/how-to-configure-clients.rst:2
 msgid "Configure clients"
-msgstr ""
+msgstr "클라이언트 구성"
 
 #: ../../source/how-to-configure-clients.rst:4
 msgid ""
@@ -4362,10 +4442,13 @@ msgid ""
 " for example, a popular way to control client-side hyperparameters from "
 "the server."
 msgstr ""
+"모델 파라미터와 함께 Flower는 설정 값을 클라이언트에 전송할 수 있습니다. "
+"구성 값은 다양한 용도로 사용할 수 있습니다. 예를 들어 서버에서 클라이언트 측 "
+"하이퍼파라미터를 제어하는 데 널리 사용되는 방법입니다."
 
 #: ../../source/how-to-configure-clients.rst:7
 msgid "Configuration values"
-msgstr ""
+msgstr "구성 값"
 
 #: ../../source/how-to-configure-clients.rst:9
 msgid ""
@@ -4374,6 +4457,9 @@ msgid ""
 "float), ``int``, or ``str`` (or equivalent types in different languages)."
 " Here is an example of a configuration dictionary in Python:"
 msgstr ""
+"구성 값은 ``str`` 키와 ``bool``, ``bytes``, ``double``(64비트 정밀도 정수), "
+"``int`` 또는 ``str``(또는 다른 언어의 동등한 유형) 유형의 값으로 구성된 "
+"사전으로 표현됩니다. 다음은 Python의 구성 사전 예제입니다:"
 
 #: ../../source/how-to-configure-clients.rst:20
 msgid ""
@@ -4381,6 +4467,9 @@ msgid ""
 "short) to their ProtoBuf representation, transports them to the client "
 "using gRPC, and then deserializes them back to Python dictionaries."
 msgstr ""
+"Flower는 이러한 구성 dictionaries(또는 줄여서 *config dict*)를 ProtoBuf "
+"표현으로 직렬화하고, gRPC를 사용하여 클라이언트로 전송한 다음 다시 Python "
+"dictionaries로 역직렬화합니다."
 
 #: ../../source/how-to-configure-clients.rst:24
 msgid ""
@@ -4390,6 +4479,10 @@ msgid ""
 " by converting them to one of the supported value types (and converting "
 "them back on the client-side)."
 msgstr ""
+"현재 구성 사전에서 컬렉션 유형(예: ``Set``, ``List``, ``Map``)을 값으로 직접 "
+"전송하는 기능은 지원되지 않습니다. 컬렉션을 지원되는 값 유형 중 하나로 "
+"변환한 다음 클라이언트 측에서 다시 변환하여 값으로 보내는 몇 가지 해결 "
+"방법이 있습니다."
 
 #: ../../source/how-to-configure-clients.rst:26
 msgid ""
@@ -4398,10 +4491,13 @@ msgid ""
 " then convert the JSON string back to a list of floating-point numbers on"
 " the client."
 msgstr ""
+"예를 들어 부동 소수점 숫자 목록을 JSON 문자열로 변환한 다음 구성 "
+"dictionary을 사용하여 JSON 문자열을 전송한 다음 클라이언트에서 다시 부동 "
+"소수점 숫자 목록으로 변환할 수 있습니다."
 
 #: ../../source/how-to-configure-clients.rst:30
 msgid "Configuration through built-in strategies"
-msgstr ""
+msgstr "기본 제공 전략을 통한 구성"
 
 #: ../../source/how-to-configure-clients.rst:32
 msgid ""
@@ -4412,6 +4508,11 @@ msgid ""
 "the current round. It then forwards the configuration dictionary to all "
 "the clients selected during that round."
 msgstr ""
+"클라이언트에 구성 값을 보내는 가장 쉬운 방법은 :code:`FedAvg`와 같은 기본 "
+"제공 전략을 사용하는 것입니다. 기본 제공 전략은 소위 구성 함수를 지원합니다. "
+"구성 함수는 내장 전략이 현재 단계의 구성 사전을 가져오기 위해 호출하는 "
+"함수입니다. 그런 다음 해당 단계 동안 선택된 모든 클라이언트에 구성 사전을 "
+"전달합니다."
 
 #: ../../source/how-to-configure-clients.rst:34
 msgid ""
@@ -4420,6 +4521,9 @@ msgid ""
 "federated learning, and (c) the number of epochs to train on the client-"
 "side. Our configuration function could look like this:"
 msgstr ""
+"간단한 예부터 시작하겠습니다. (a) 클라이언트가 사용해야 하는 배치 크기, (b) "
+"현재 글로벌 연합 federated 라운드, (c) 클라이언트 측에서 학습할 에포크 수를 "
+"전송하고 싶다고 가정해 보겠습니다. 구성 함수는 다음과 같습니다:"
 
 #: ../../source/how-to-configure-clients.rst:47
 msgid ""
@@ -4427,10 +4531,12 @@ msgid ""
 "``FedAvg`` during initialization using the parameter "
 ":code:`on_fit_config_fn`:"
 msgstr ""
+"기본 제공 전략이 이 함수를 사용하도록 하려면 초기화 중에 매개 변수 "
+":code:`on_fit_config_fn`을 사용하여 ``FedAvg``에 이 함수를 전달하면 됩니다:"
 
 #: ../../source/how-to-configure-clients.rst:56
 msgid "One the client side, we receive the configuration dictionary in ``fit``:"
-msgstr ""
+msgstr "클라이언트 측에서는 ``fit``으로 구성 dictionary을 받습니다:"
 
 #: ../../source/how-to-configure-clients.rst:67
 msgid ""
@@ -4439,6 +4545,9 @@ msgid ""
 " send different configuration values to `evaluate` (for example, to use a"
 " different batch size)."
 msgstr ""
+"평가를 구성하는 `on_evaluate_config_fn`도 있으며, 같은 방식으로 작동합니다. "
+"다른 배치 크기를 사용하기 위해 다른 구성 값을 `evaluate`로 보내려고 할 수 "
+"있기 때문에 이 함수는 별도의 함수입니다."
 
 #: ../../source/how-to-configure-clients.rst:69
 msgid ""
@@ -4449,20 +4558,25 @@ msgid ""
 "hyperparameter schedule, for example, to increase the number of local "
 "epochs during later rounds, we could do the following:"
 msgstr ""
+"기본 제공 전략은 매 라운드마다 이 함수를 호출합니다(즉, `Strategy."
+"configure_fit` 또는 `Strategy.configure_evaluate`가 실행될 때마다). 매 "
+"라운드마다 `on_evaluate_config_fn`을 호출하면 연속된 라운드에서 config "
+"dict를 변경/변경할 수 있습니다. 예를 들어 이후 라운드에서 로컬 에포크 수를 "
+"늘리기 위해 하이퍼파라미터 일정을 구현하려면 다음과 같이 할 수 있습니다:"
 
 #: ../../source/how-to-configure-clients.rst:82
 msgid "The :code:`FedAvg` strategy will call this function *every round*."
-msgstr ""
+msgstr ":code:`FedAvg` 전략은 이 함수를 *매 라운드마다* 호출합니다."
 
 #: ../../source/how-to-configure-clients.rst:85
 msgid "Configuring individual clients"
-msgstr ""
+msgstr "개별 클라이언트 구성"
 
 #: ../../source/how-to-configure-clients.rst:87
 msgid ""
 "In some cases, it is necessary to send different configuration values to "
 "different clients."
-msgstr ""
+msgstr "경우에 따라 다른 구성 값을 다른 클라이언트에 보내야 하는 경우도 있습니다."
 
 #: ../../source/how-to-configure-clients.rst:89
 msgid ""
@@ -4474,10 +4588,16 @@ msgid ""
 "list, the other clients in this round to not receive this \"special\" "
 "config value):"
 msgstr ""
+"이는 기존 전략을 사용자 지정하거나 :doc:`implementing a custom strategy from "
+"scratch <how-to-implement-strategies>`를 통해 수행할 수 있습니다. 다음은 "
+"사용자 지정 ``\"hello\"'를 추가하여 :code:`FedAvg`를 사용자 지정하는 "
+"무의미한 예입니다: \"world\"`` 구성 키/값 쌍을 *단일 클라이언트*의 config "
+"dict에 추가합니다(목록의 첫 번째 클라이언트만, 이 라운드의 다른 클라이언트는 "
+"이 \"특별한\" 구성 값을 수신하지 않음):"
 
 #: ../../source/how-to-configure-logging.rst:2
 msgid "Configure logging"
-msgstr ""
+msgstr "로깅 구성"
 
 #: ../../source/how-to-configure-logging.rst:4
 msgid ""
@@ -4485,6 +4605,8 @@ msgid ""
 "federated learning workloads. It presents information by default "
 "following a standard message format:"
 msgstr ""
+"Flower 로거는 federated 학습 워크로드에서 발생하는 모든 핵심 이벤트를 "
+"추적합니다. 기본적으로 표준 메시지 형식에 따라 정보를 표시합니다:"
 
 #: ../../source/how-to-configure-logging.rst:13
 msgid ""
@@ -4493,10 +4615,13 @@ msgid ""
 "took place from, as well as the log message itself. In this way, the "
 "logger would typically display information on your terminal as follows:"
 msgstr ""
+"로그 메시지 수준(예: :code:`INFO`, :code:`DEBUG`), 타임스탬프, 로깅이 발생한 "
+"줄, 로그 메시지 자체 등 관련 정보를 포함합니다. 이러한 방식으로 로거는 "
+"일반적으로 다음과 같은 정보를 터미널에 표시합니다:"
 
 #: ../../source/how-to-configure-logging.rst:34
 msgid "Saving log to file"
-msgstr ""
+msgstr "파일에 로그 저장"
 
 #: ../../source/how-to-configure-logging.rst:36
 msgid ""
@@ -4510,6 +4635,14 @@ msgid ""
 "<https://github.com/adap/flower/blob/main/src/py/flwr/common/logger.py>`_"
 " function. For example:"
 msgstr ""
+"기본적으로 Flower 로그는 Federated 학습 워크로드를 실행하는 터미널에 "
+"출력됩니다. 이는 gRPC 기반 페더레이션(즉,:code:`fl.simulation."
+"start_simulation`를 실행하는 경우)과 :code:`VirtualClientEngine`을 사용하는 "
+"경우(즉, :코드:`fl.simulation.start_simulation`을 실행하는 경우) 모두에 "
+"적용됩니다. 경우에 따라 이 로그를 디스크에 저장하고 싶을 수도 있습니다. 이 "
+"경우 `fl.common.logger.configure() <https://github.com/adap/flower/blob/main/"
+"src/py/flwr/common/logger.py>`_ 함수를 호출하여 저장할 수 있습니다. 예를 "
+"들어:"
 
 #: ../../source/how-to-configure-logging.rst:53
 msgid ""
@@ -4518,10 +4651,14 @@ msgid ""
 "you are running the code from. If we inspect we see the log above is also"
 " recorded but prefixing with :code:`identifier` each line:"
 msgstr ""
+"위와 같이 하면 Flower는 터미널에 표시되는 로그를 :code:`log.txt`에 "
+"기록합니다. 이 파일은 코드를 실행한 디렉터리와 동일한 디렉터리에 생성됩니다. "
+"검사해보면 위의 로그도 기록되지만 각 줄 앞에 :code:`identifier` 접두사가 "
+"붙는 것을 확인할 수 있습니다:"
 
 #: ../../source/how-to-configure-logging.rst:74
 msgid "Log your own messages"
-msgstr ""
+msgstr "나만의 메시지 기록"
 
 #: ../../source/how-to-configure-logging.rst:76
 msgid ""
@@ -4529,16 +4666,19 @@ msgid ""
 "by adding more messages relevant to your application. You can achieve "
 "this easily as follows."
 msgstr ""
+"애플리케이션과 관련된 메시지를 더 추가하여 Flower 로거에 기본적으로 표시되는 "
+"정보를 확장할 수 있습니다. 다음과 같이 쉽게 추가할 수 있습니다."
 
 #: ../../source/how-to-configure-logging.rst:102
 msgid ""
 "In this way your logger will show, in addition to the default messages, "
 "the ones introduced by the clients as specified above."
-msgstr ""
+msgstr "이렇게 하면 로거에 기본 메시지 외에 위에서 지정한 대로 클라이언트가 소개한 "
+"메시지가 표시됩니다."
 
 #: ../../source/how-to-configure-logging.rst:128
 msgid "Log to a remote service"
-msgstr ""
+msgstr "원격 서비스에 로그인"
 
 #: ../../source/how-to-configure-logging.rst:130
 msgid ""
@@ -4552,10 +4692,17 @@ msgid ""
 ":code:`HTTPHandler` should you wish to backup or analyze the logs "
 "somewhere else."
 msgstr ""
+"또한 :code:`fl.common.logger.configure` 함수를 사용하면 네이티브 Python "
+":code:`logging.handler.HTTPHandler`를 통해 로그를 푸시할 수 있는 호스트를 "
+"지정할 수 있습니다(:code:`POST`를 통해). 이는 모든 엔티티(예: 서버 및 "
+"클라이언트)에서 로그를 수집하는 것이 번거로울 수 있는 :code:`gRPC` 기반 "
+"Federated 학습 워크로드에서 특히 유용한 기능입니다. Flower 시뮬레이션에서는 "
+"서버가 모든 로그를 자동으로 표시합니다. 로그를 다른 곳에 백업하거나 "
+"분석하려는 경우 :code:`HTTPHandler`를 지정할 수 있습니다."
 
 #: ../../source/how-to-enable-ssl-connections.rst:2
 msgid "Enable SSL connections"
-msgstr ""
+msgstr "SSL 연결 사용"
 
 #: ../../source/how-to-enable-ssl-connections.rst:4
 msgid ""
@@ -4563,6 +4710,9 @@ msgid ""
 "(:code:`SuperLink`) can be started and how a Flower client "
 "(:code:`SuperNode`) can establish a secure connections to it."
 msgstr ""
+"이 가이드에서는 SSL을 지원하는 보안 Flower 서버(:코드:`SuperLink`)를 "
+"시작하는 방법과 Flower 클라이언트(:코드:`SuperNode`)가 이 서버에 보안 연결을 "
+"설정하는 방법을 설명합니다."
 
 #: ../../source/how-to-enable-ssl-connections.rst:7
 msgid ""
@@ -4570,6 +4720,8 @@ msgid ""
 "`here <https://github.com/adap/flower/tree/main/examples/advanced-"
 "tensorflow>`_."
 msgstr ""
+"보안 연결을 보여주는 전체 코드 예제는 '여기 <https://github.com/adap/flower/"
+"tree/main/examples/advanced-tensorflow>`_'에서 확인할 수 있습니다."
 
 #: ../../source/how-to-enable-ssl-connections.rst:10
 msgid ""
@@ -4578,10 +4730,13 @@ msgid ""
 "descriptive on how it does so. Stick to this guide for a deeper "
 "introduction to the topic."
 msgstr ""
+"코드 예제에는 시작 방법을 설명하는 :code:`README.md` 파일이 함께 제공됩니다. "
+"이미 SSL을 사용하도록 설정되어 있지만 그 방법에 대한 설명이 부족할 수 "
+"있습니다. 이 가이드를 참고하여 이 주제에 대해 자세히 알아보세요."
 
 #: ../../source/how-to-enable-ssl-connections.rst:16
 msgid "Certificates"
-msgstr ""
+msgstr "인증서"
 
 #: ../../source/how-to-enable-ssl-connections.rst:18
 msgid ""
@@ -4591,12 +4746,18 @@ msgid ""
 "to ask you to run the script in :code:`examples/advanced-"
 "tensorflow/certificates/generate.sh` with the following command sequence:"
 msgstr ""
+"SSL 사용 연결을 사용하려면 서버와 클라이언트에 인증서를 전달해야 합니다. 이 "
+"가이드에서는 자체 서명된 인증서를 생성하겠습니다. 이 과정은 상당히 복잡할 수 "
+"있으므로 다음 명령 시퀀스를 사용하여 :code:`examples/advanced-tensorflow/"
+"certificates/generate.sh`에서 스크립트를 실행하도록 요청하겠습니다:"
 
 #: ../../source/how-to-enable-ssl-connections.rst:29
 msgid ""
 "This will generate the certificates in :code:`examples/advanced-"
 "tensorflow/.cache/certificates`."
 msgstr ""
+"이렇게 하면 :code:`examples/advanced-tensorflow/.cache/certificates`에 "
+"인증서가 생성됩니다."
 
 #: ../../source/how-to-enable-ssl-connections.rst:31
 msgid ""
@@ -4608,39 +4769,48 @@ msgid ""
 "projects, it might be sufficient to use the self-signed certificates "
 "generated using the scripts mentioned in this guide."
 msgstr ""
+"이 예의 맥락에서 SSL 인증서를 생성하는 접근 방식은 영감과 출발점이 될 수 "
+"있지만 프로덕션 환경에 대한 참조로 사용해서는 안 됩니다. 프로덕션 환경용 "
+"인증서를 올바르게 생성하는 문제에 대해서는 다른 출처를 참조하세요. 중요하지 "
+"않은 프로토타이핑 또는 연구 프로젝트의 경우, 이 가이드에 언급된 스크립트를 "
+"사용하여 생성한 자체 서명 인증서를 사용하는 것으로 충분할 수 있습니다."
 
 #: ../../source/how-to-enable-ssl-connections.rst:39
 msgid "Server (SuperLink)"
-msgstr ""
+msgstr "서버(SuperLink)"
 
 #: ../../source/how-to-enable-ssl-connections.rst:41
 msgid ""
 "Use the following terminal command to start a sever (SuperLink) that uses"
 " the previously generated certificates:"
-msgstr ""
+msgstr "다음 터미널 명령을 사용하여 이전에 생성한 인증서를 사용하는 서버(SuperLink)"
+"를 시작합니다:"
 
 #: ../../source/how-to-enable-ssl-connections.rst:50
 msgid ""
 "When providing certificates, the server expects a tuple of three "
 "certificates paths: CA certificate, server certificate and server private"
 " key."
-msgstr ""
+msgstr "인증서를 제공할 때 서버는 세 가지 인증서 경로의 튜플을 기대합니다: CA "
+"인증서, 서버 인증서 및 서버 개인 키입니다."
 
 #: ../../source/how-to-enable-ssl-connections.rst:54
 msgid "Client (SuperNode)"
-msgstr ""
+msgstr "클라이언트(SuperNode)"
 
 #: ../../source/how-to-enable-ssl-connections.rst:56
 msgid ""
 "Use the following terminal command to start a client (SuperNode) that "
 "uses the previously generated certificates:"
-msgstr ""
+msgstr "다음 터미널 명령을 사용하여 이전에 생성한 인증서를 사용하는 "
+"클라이언트(SuperNode)를 시작합니다:"
 
 #: ../../source/how-to-enable-ssl-connections.rst:64
 msgid ""
 "When setting :code:`root_certificates`, the client expects a file path to"
 " PEM-encoded root certificates."
-msgstr ""
+msgstr "코드:`root_certificates`를 설정하면 클라이언트는 PEM 인코딩된 루트 인증서의 "
+"파일 경로를 예상합니다."
 
 #: ../../source/how-to-enable-ssl-connections.rst:70
 msgid ""
@@ -4648,28 +4818,30 @@ msgid ""
 "using the given script, start an SSL-enabled server and have a client "
 "establish a secure connection to it."
 msgstr ""
+"이제 주어진 스크립트를 사용하여 자체 서명 인증서를 생성하고, SSL 사용 서버를 "
+"시작하고, 클라이언트가 보안 연결을 설정하는 방법을 배웠을 것입니다."
 
 #: ../../source/how-to-enable-ssl-connections.rst:75
 msgid "Additional resources"
-msgstr ""
+msgstr "추가 리소스"
 
 #: ../../source/how-to-enable-ssl-connections.rst:77
 msgid ""
 "These additional sources might be relevant if you would like to dive "
 "deeper into the topic of certificates:"
-msgstr ""
+msgstr "인증서에 대해 더 자세히 알아보고 싶다면 이러한 추가 자료를 참고하세요:"
 
 #: ../../source/how-to-enable-ssl-connections.rst:79
 msgid "`Let's Encrypt <https://letsencrypt.org/docs/>`_"
-msgstr ""
+msgstr "'암호화하세요 <https://letsencrypt.org/docs/>`_'"
 
 #: ../../source/how-to-enable-ssl-connections.rst:80
 msgid "`certbot <https://certbot.eff.org/>`_"
-msgstr ""
+msgstr "인증봇 <https://certbot.eff.org/>`_"
 
 #: ../../source/how-to-implement-strategies.rst:2
 msgid "Implement strategies"
-msgstr ""
+msgstr "전략 구현"
 
 #: ../../source/how-to-implement-strategies.rst:4
 msgid ""
@@ -4680,10 +4852,15 @@ msgid ""
 "evaluate models. Flower provides a few built-in strategies which are "
 "based on the same API described below."
 msgstr ""
+"전략 추상화를 통해 완전한 맞춤형 전략을 구현할 수 있습니다. 전략은 "
+"기본적으로 서버에서 실행되는 federated 학습 알고리즘입니다. 전략은 "
+"클라이언트를 샘플링하는 방법, 학습을 위해 클라이언트를 구성하는 방법, "
+"업데이트를 집계하는 방법, 모델을 평가하는 방법을 결정합니다. Flower는 아래에 "
+"설명된 것과 동일한 API를 기반으로 하는 몇 가지 기본 제공 전략을 제공합니다."
 
 #: ../../source/how-to-implement-strategies.rst:11
 msgid "The :code:`Strategy` abstraction"
-msgstr ""
+msgstr ":code:`Strategy` 추상화"
 
 #: ../../source/how-to-implement-strategies.rst:13
 msgid ""
@@ -4693,12 +4870,15 @@ msgid ""
 "implementations have the exact same capabilities at their disposal as "
 "built-in ones."
 msgstr ""
+"모든 전략 구현은 기본 제공 구현과 타사 구현 모두 추상 기본 클래스인 "
+":code:`flwr.server.strategy.Strategy`에서 파생됩니다. 즉, 사용자 정의 전략 "
+"구현은 기본 제공 구현과 완전히 동일한 기능을 사용할 수 있습니다."
 
 #: ../../source/how-to-implement-strategies.rst:18
 msgid ""
 "The strategy abstraction defines a few abstract methods that need to be "
 "implemented:"
-msgstr ""
+msgstr "전략 추상화에서는 구현해야 하는 몇 가지 추상적인 메서드를 정의합니다:"
 
 #: ../../source/how-to-implement-strategies.rst:75
 msgid ""
@@ -4706,18 +4886,21 @@ msgid ""
 "from the abstract base class :code:`Strategy`) that implements for the "
 "previously shown abstract methods:"
 msgstr ""
+"새 전략을 생성한다는 것은 이전에 표시된 추상 메서드에 대해 구현하는 새로운 "
+":code:`class`(추상 기본 클래스 :code:`Strategy`에서 파생됨)를 구현하는 것을 "
+"의미합니다:"
 
 #: ../../source/how-to-implement-strategies.rst:100
 msgid "The Flower server calls these methods in the following order:"
-msgstr ""
+msgstr "Flower 서버는 다음 순서로 이러한 메서드를 호출합니다:"
 
 #: ../../source/how-to-implement-strategies.rst:177
 msgid "The following sections describe each of those methods in more detail."
-msgstr ""
+msgstr "다음 섹션에서는 이러한 각 방법에 대해 자세히 설명합니다."
 
 #: ../../source/how-to-implement-strategies.rst:180
 msgid "The :code:`initialize_parameters` method"
-msgstr ""
+msgstr ":code:`initialize_parameters` 메서드"
 
 #: ../../source/how-to-implement-strategies.rst:182
 msgid ""
@@ -4725,6 +4908,9 @@ msgid ""
 "of an execution. It is responsible for providing the initial global model"
 " parameters in a serialized form (i.e., as a :code:`Parameters` object)."
 msgstr ""
+"code:`initialize_parameters`는 실행을 처음 시작할 때 한 번만 호출됩니다. 이 "
+"함수는 초기 전역 모델 파라미터를 직렬화된 형식(즉, :code:`Parameters` 객체)"
+"으로 제공하는 역할을 합니다."
 
 #: ../../source/how-to-implement-strategies.rst:184
 msgid ""
@@ -4732,6 +4918,8 @@ msgid ""
 "following example shows how initial parameters can be passed to "
 ":code:`FedAvg`:"
 msgstr ""
+"기본 제공 전략은 사용자가 제공한 초기 매개 변수를 반환합니다. 다음 예는 초기 "
+"매개 변수를 :code:`FedAvg`에 전달하는 방법을 보여줍니다:"
 
 #: ../../source/how-to-implement-strategies.rst:209
 msgid ""
@@ -4744,6 +4932,13 @@ msgid ""
 "useful for prototyping. In practice, it is recommended to always use "
 "server-side parameter initialization."
 msgstr ""
+"Flower 서버는 :code:`initialize_parameters`를 호출하여 "
+":code:`initial_parameters`에 전달된 파라미터를 반환하거나 :code:`None`을 "
+"반환합니다. :code:`initial_parameters`에서 반환되는 매개변수가 없는 경우(즉, "
+":code:`None`) 서버는 무작위로 클라이언트 하나를 선택하여 해당 클라이언트에 "
+"매개변수를 제공하도록 요청합니다. 이는 편의 기능이며 실제로는 권장하지 "
+"않지만 프로토타이핑에는 유용할 수 있습니다. 실제로는 항상 서버 측 매개변수 "
+"초기화를 사용하는 것이 좋습니다."
 
 #: ../../source/how-to-implement-strategies.rst:213
 msgid ""
@@ -4753,10 +4948,14 @@ msgid ""
 "approaches, for example, to fine-tune a pre-trained model using federated"
 " learning."
 msgstr ""
+"서버 측 파라미터 초기화는 강력한 메커니즘입니다. 예를 들어 이전에 저장한 "
+"체크포인트에서 학습을 재개하는 데 사용할 수 있습니다. 또한 federated 학습을 "
+"사용하여 사전 학습된 모델을 미세 조정하는 등 하이브리드 접근 방식을 구현하는 "
+"데 필요한 기본 기능입니다."
 
 #: ../../source/how-to-implement-strategies.rst:216
 msgid "The :code:`configure_fit` method"
-msgstr ""
+msgstr ":code:`configure_fit` 메서드"
 
 #: ../../source/how-to-implement-strategies.rst:218
 msgid ""
@@ -4765,6 +4964,10 @@ msgid ""
 "round means selecting clients and deciding what instructions to send to "
 "these clients. The signature of :code:`configure_fit` makes this clear:"
 msgstr ""
+":code:`configure_fit`은 다가오는 학 라운드를 구성하는 역할을 합니다. 이 "
+"문맥에서 *구성*은 무엇을 의미하나요? 라운드를 구성한다는 것은 클라이언트를 "
+"선택하고 이 클라이언트에게 어떤 지침을 보낼지 결정하는 것을 의미합니다. "
+"code:`configure_fit`의 시그니처를 보면 이를 명확히 알 수 있습니다:"
 
 #: ../../source/how-to-implement-strategies.rst:231
 msgid ""
@@ -4772,6 +4975,9 @@ msgid ""
 "that will be sent to a particular client. Strategy implementations "
 "usually perform the following steps in :code:`configure_fit`:"
 msgstr ""
+"반환 값은 튜플 목록으로, 각 튜플은 특정 클라이언트로 전송될 instruction을 "
+"나타냅니다. 전략 구현은 일반적으로 :code:`configure_fit`에서 다음 단계를 "
+"수행합니다:"
 
 #: ../../source/how-to-implement-strategies.rst:233
 #: ../../source/how-to-implement-strategies.rst:280
@@ -4779,12 +4985,16 @@ msgid ""
 "Use the :code:`client_manager` to randomly sample all (or a subset of) "
 "available clients (each represented as a :code:`ClientProxy` object)"
 msgstr ""
+":code:`client_manager`를 사용하여 사용 가능한 모든 클라이언트(또는 그 하위 "
+"집합)를 무작위로 샘플링합니다(각각 :code:`ClientProxy` 개체로 표시됨)"
 
 #: ../../source/how-to-implement-strategies.rst:234
 msgid ""
 "Pair each :code:`ClientProxy` with the same :code:`FitIns` holding the "
 "current global model :code:`parameters` and :code:`config` dict"
 msgstr ""
+"각 :code:`ClientProxy`를 현재 글로벌 모델 :code:`parameters` 및 "
+":code:`config` dict를 보유한 동일한 :code:`FitIns`와 쌍을 이룹니다"
 
 #: ../../source/how-to-implement-strategies.rst:236
 msgid ""
@@ -4793,6 +5003,9 @@ msgid ""
 "in a round if the corresponding :code:`ClientProxy` is included in the "
 "list returned from :code:`configure_fit`."
 msgstr ""
+"보다 정교한 구현은 :code:`configure_fit`을 사용하여 사용자 지정 클라이언트 "
+"선택 로직을 구현할 수 있습니다. 클라이언트는 :code:`configure_fit`에서 "
+"반환된 목록에 해당 :code:`ClientProxy`가 포함된 경우에만 라운드에 참여합니다."
 
 #: ../../source/how-to-implement-strategies.rst:240
 msgid ""
@@ -4803,10 +5016,15 @@ msgid ""
 "different hyperparameters on different clients (via the :code:`config` "
 "dict)."
 msgstr ""
+"이 반환 값의 구조는 사용자에게 많은 유연성을 제공합니다. instructions은 "
+"클라이언트별로 정의되므로 각 클라이언트에 서로 다른 instructions을 전송할 수 "
+"있습니다. 이를 통해 예를 들어 클라이언트마다 다른 모델을 학습시키거나 "
+"클라이언트마다 다른 하이퍼파라미터를 사용하는 사용자 지정 전략을 사용할 수 "
+"있습니다(:code:`config` dict를 통해)."
 
 #: ../../source/how-to-implement-strategies.rst:243
 msgid "The :code:`aggregate_fit` method"
-msgstr ""
+msgstr ":code:`aggregate_fit` 메서드"
 
 #: ../../source/how-to-implement-strategies.rst:245
 msgid ""
@@ -4814,6 +5032,8 @@ msgid ""
 " by the clients that were selected and asked to train in "
 ":code:`configure_fit`."
 msgstr ""
+"code:`aggregate_fit`은 :code:`configure_fit`에서 훈련하도록 선택되고 요청된 "
+"클라이언트가 반환한 결과를 집계하는 역할을 담당합니다."
 
 #: ../../source/how-to-implement-strategies.rst:258
 msgid ""
@@ -4822,6 +5042,10 @@ msgid ""
 ":code:`configure_fit`). :code:`aggregate_fit` therefore receives a list "
 "of :code:`results`, but also a list of :code:`failures`."
 msgstr ""
+"물론 실패가 발생할 수 있으므로 서버가 명령을 보낸 모든 클라이언트로부터 "
+"결과를 얻을 수 있다는 보장은 없습니다(:code:`configure_fit`을 통해). 따라서 "
+":code:`aggregate_fit`은 :code:`results` 목록뿐만 아니라 :code:`failures` "
+"목록도 받습니다."
 
 #: ../../source/how-to-implement-strategies.rst:260
 msgid ""
@@ -4830,10 +5054,14 @@ msgid ""
 " optional because :code:`aggregate_fit` might decide that the results "
 "provided are not sufficient for aggregation (e.g., too many failures)."
 msgstr ""
+"code:`aggregate_fit`은 선택적 :code:`Parameters` 개체와 집계된 메트릭의 "
+"dictionary를 반환합니다. :code:`Parameters` 반환 값은 :code:`aggregate_fit`"
+"이 제공된 결과가 집계에 충분하지 않다고 판단할 수 있으므로(예: 실패 수가 "
+"너무 많음) 선택 사항입니다."
 
 #: ../../source/how-to-implement-strategies.rst:263
 msgid "The :code:`configure_evaluate` method"
-msgstr ""
+msgstr ":code:`configure_evaluate` 메서드"
 
 #: ../../source/how-to-implement-strategies.rst:265
 msgid ""
@@ -4843,6 +5071,11 @@ msgid ""
 "instructions to send to these clients. The signature of "
 ":code:`configure_evaluate` makes this clear:"
 msgstr ""
+":code:`configure_evaluate`는 다가오는 평가 라운드를 구성하는 역할을 합니다. "
+"이 문맥에서 *구성*은 무엇을 의미하나요? 라운드를 구성한다는 것은 "
+"클라이언트를 선택하고 이러한 클라이언트에 전송할 지침을 결정하는 것을 "
+"의미합니다. :code:`configure_evaluate`의 시그니처를 보면 이를 명확히 알 수 "
+"있습니다:"
 
 #: ../../source/how-to-implement-strategies.rst:278
 msgid ""
@@ -4850,12 +5083,17 @@ msgid ""
 "that will be sent to a particular client. Strategy implementations "
 "usually perform the following steps in :code:`configure_evaluate`:"
 msgstr ""
+"반환 값은 튜플 목록으로, 각 튜플은 특정 클라이언트로 전송될 instructions을 "
+"나타냅니다. 전략 구현은 일반적으로 :code:`configure_evaluate`에서 다음 "
+"단계를 수행합니다:"
 
 #: ../../source/how-to-implement-strategies.rst:281
 msgid ""
 "Pair each :code:`ClientProxy` with the same :code:`EvaluateIns` holding "
 "the current global model :code:`parameters` and :code:`config` dict"
 msgstr ""
+"각 :code:`ClientProxy`를 현재 글로벌 모델 :code:`parameters` 및 "
+":code:`config` dict를 보유한 동일한 :code:`EvaluateIns`와 쌍을 이룹니다"
 
 #: ../../source/how-to-implement-strategies.rst:283
 msgid ""
