@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-17 16:09+0200\n"
-"PO-Revision-Date: 2024-06-22 10:52+0000\n"
+"PO-Revision-Date: 2024-06-23 05:35+0000\n"
 "Last-Translator: 박태현 <qkrxogus113@ajou.ac.kr>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
@@ -9890,26 +9890,32 @@ msgid ""
 ":py:obj:`GET_PROPERTIES_NOT_IMPLEMENTED <flwr.common.Code."
 "GET_PROPERTIES_NOT_IMPLEMENTED>`\\"
 msgstr ""
+":py:obj:`GET_PROPERTIES_NOT_IMPLEMENTED <flwr.common.Code."
+"GET_PROPERTIES_NOT_IMPLEMENTED>`\\"
 
 #: ../../source/ref-api/flwr.common.Code.rst:26:<autosummary>:1
 msgid ""
 ":py:obj:`GET_PARAMETERS_NOT_IMPLEMENTED <flwr.common.Code."
 "GET_PARAMETERS_NOT_IMPLEMENTED>`\\"
 msgstr ""
+":py:obj:`GET_PARAMETERS_NOT_IMPLEMENTED <flwr.common.Code."
+"GET_PARAMETERS_NOT_IMPLEMENTED>`\\"
 
 #: ../../source/ref-api/flwr.common.Code.rst:26:<autosummary>:1
 msgid ":py:obj:`FIT_NOT_IMPLEMENTED <flwr.common.Code.FIT_NOT_IMPLEMENTED>`\\"
-msgstr ""
+msgstr ":py:obj:`FIT_NOT_IMPLEMENTED <flwr.common.Code.FIT_NOT_IMPLEMENTED>`\\"
 
 #: ../../source/ref-api/flwr.common.Code.rst:26:<autosummary>:1
 msgid ""
 ":py:obj:`EVALUATE_NOT_IMPLEMENTED <flwr.common.Code."
 "EVALUATE_NOT_IMPLEMENTED>`\\"
 msgstr ""
+":py:obj:`EVALUATE_NOT_IMPLEMENTED <flwr.common.Code."
+"EVALUATE_NOT_IMPLEMENTED>`\\"
 
 #: ../../source/ref-api/flwr.common.ConfigsRecord.rst:2
 msgid "ConfigsRecord"
-msgstr ""
+msgstr "컨피그 레코드"
 
 #: flwr.common.record.configsrecord.ConfigsRecord:1 of
 msgid ""
@@ -9920,76 +9926,85 @@ msgid ""
 "py:class:`str`] | :py:class:`~typing.List`\\ [:py:class:`bytes`] | :py:class:"
 "`~typing.List`\\ [:py:class:`bool`]]"
 msgstr ""
+"Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ [:py:class:`str`"
+", :py:class:`int` | :py:class:`float` | :py:class:`str` | :py:class:`bytes` |"
+" :py:class:`bool` | :py:class:`~typing.List`\\ [:py:class:`int`] | "
+":py:class:`~typing.List`\\ [:py:class:`float`] | :py:class:`~typing.List`\\ "
+"[:py:class:`str`] | :py:class:`~typing.List`\\ [:py:class:`bytes`] | "
+":py:class:`~typing.List`\\ [:py:class:`bool`]]"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`clear <flwr.common.ConfigsRecord.clear>`\\ \\(\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid "Remove all items from R."
-msgstr ""
+msgstr "R에서 모든 항목을 제거합니다."
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`count_bytes <flwr.common.ConfigsRecord.count_bytes>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`count_bytes <flwr.common.ConfigsRecord.count_bytes>`\\ \\(\\)"
 
 #: flwr.common.record.configsrecord.ConfigsRecord.count_bytes:1
 #: flwr.common.record.metricsrecord.MetricsRecord.count_bytes:1
 #: flwr.common.record.parametersrecord.ParametersRecord.count_bytes:1
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid "Return number of Bytes stored in this object."
-msgstr ""
+msgstr "이 객체에 저장된 바이트 수를 반환합니다."
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
-msgstr ""
+msgstr ":py:obj:`get <flwr.common.ConfigsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1
 #: flwr.common.record.typeddict.TypedDict.get:1 of
 msgid "d defaults to None."
-msgstr ""
+msgstr "d는 기본값이 None입니다."
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`items <flwr.common.ConfigsRecord.items>`\\ \\(\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`keys <flwr.common.ConfigsRecord.keys>`\\ \\(\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
-msgstr ""
+msgstr ":py:obj:`pop <flwr.common.ConfigsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1
 #: flwr.common.record.typeddict.TypedDict.pop:1 of
 msgid ""
 "If key is not found, d is returned if given, otherwise KeyError is raised."
-msgstr ""
+msgstr "키를 찾을 수 없으면 주어진 경우 d가 반환되고, 그렇지 않으면 KeyError가 "
+"발생합니다."
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`update <flwr.common.ConfigsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
+":py:obj:`update <flwr.common.ConfigsRecord.update>`\\ \\(\\[E\\, \\]\\*\\*F\\"
+")"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1
 #: flwr.common.record.typeddict.TypedDict.update:1 of
 msgid "Update R from dict/iterable E and F."
-msgstr ""
+msgstr "dict/iterable E 및 F에서 R을 업데이트합니다."
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`values <flwr.common.ConfigsRecord.values>`\\ \\(\\)"
 
 #: flwr.common.record.configsrecord.ConfigsRecord.count_bytes:3 of
 msgid "This function counts booleans as occupying 1 Byte."
-msgstr ""
+msgstr "이 함수는 booleans을 1바이트를 차지하는 것으로 계산합니다."
 
 #: ../../source/ref-api/flwr.common.Context.rst:2
 msgid "Context"
-msgstr ""
+msgstr "컨텍스트"
 
 #: flwr.common.context.Context:3 of
 msgid ""
@@ -9999,657 +10014,729 @@ msgid ""
 "executing mods. It can also be used as a memory to access at different "
 "points during the lifecycle of this entity (e.g. across multiple rounds)"
 msgstr ""
+"특정 실행에서 엔티티가 추가한 레코드를 보유하며 로컬에 유지됩니다. 즉, "
+"저장된 데이터는 실행 중인 시스템을 벗어나지 않습니다. 모드를 실행할 때 중간 "
+"저장소나 스크래치 패드로 사용할 수 있습니다. 또한 이 엔티티의 수명 주기 동안 "
+"다른 시점에서 액세스하기 위한 메모리로도 사용할 수 있습니다(예: 여러 "
+"라운드에 걸쳐)"
 
 #: ../../source/ref-api/flwr.common.Context.rst:28:<autosummary>:1
 msgid ":py:obj:`state <flwr.common.Context.state>`\\"
-msgstr ""
+msgstr ":py:obj:`state <flwr.common.Context.state>`\\"
 
 #: ../../source/ref-api/flwr.common.DisconnectRes.rst:2
 msgid "DisconnectRes"
-msgstr ""
+msgstr "연결 해제"
 
 #: ../../source/ref-api/flwr.common.DisconnectRes.rst:28:<autosummary>:1
 msgid ":py:obj:`reason <flwr.common.DisconnectRes.reason>`\\"
-msgstr ""
+msgstr ":py:obj:`reason <flwr.common.DisconnectRes.reason>`\\"
 
 #: ../../source/ref-api/flwr.common.Error.rst:2
 msgid "Error"
-msgstr ""
+msgstr "오류"
 
 #: flwr.common.message.Error:3 of
 msgid "An identifier for the error."
-msgstr ""
+msgstr "오류 식별자입니다."
 
 #: flwr.common.message.Error:5 of
 msgid "A reason for why the error arose (e.g. an exception stack-trace)"
-msgstr ""
+msgstr "오류가 발생한 이유(예: 예외 스택 추적)"
 
 #: flwr.common.Error.code:1:<autosummary>:1 of
 msgid ":py:obj:`code <flwr.common.Error.code>`\\"
-msgstr ""
+msgstr ":py:obj:`code <flwr.common.Error.code>`\\"
 
 #: flwr.common.Error.code:1 flwr.common.Error.code:1:<autosummary>:1 of
 msgid "Error code."
-msgstr ""
+msgstr "오류 코드."
 
 #: flwr.common.Error.code:1:<autosummary>:1 of
 msgid ":py:obj:`reason <flwr.common.Error.reason>`\\"
-msgstr ""
+msgstr ":py:obj:`reason <flwr.common.Error.reason>`\\"
 
 #: flwr.common.Error.code:1:<autosummary>:1 flwr.common.Error.reason:1 of
 msgid "Reason reported about the error."
-msgstr ""
+msgstr "오류에 대해 보고된 사유입니다."
 
 #: ../../source/ref-api/flwr.common.EvaluateIns.rst:2
 msgid "EvaluateIns"
-msgstr ""
+msgstr "평가"
 
 #: ../../source/ref-api/flwr.common.EvaluateIns.rst:29:<autosummary>:1
 msgid ":py:obj:`parameters <flwr.common.EvaluateIns.parameters>`\\"
-msgstr ""
+msgstr ":py:obj:`parameters <flwr.common.EvaluateIns.parameters>`\\"
 
 #: ../../source/ref-api/flwr.common.EvaluateIns.rst:29:<autosummary>:1
 msgid ":py:obj:`config <flwr.common.EvaluateIns.config>`\\"
-msgstr ""
+msgstr ":py:obj:`config <flwr.common.EvaluateIns.config>`\\"
 
 #: ../../source/ref-api/flwr.common.EvaluateRes.rst:2
 msgid "EvaluateRes"
-msgstr ""
+msgstr "EvaluateRes"
 
 #: ../../source/ref-api/flwr.common.EvaluateRes.rst:31:<autosummary>:1
 msgid ":py:obj:`status <flwr.common.EvaluateRes.status>`\\"
-msgstr ""
+msgstr ":py:obj:`status <flwr.common.EvaluateRes.status>`\\"
 
 #: ../../source/ref-api/flwr.common.EvaluateRes.rst:31:<autosummary>:1
 msgid ":py:obj:`loss <flwr.common.EvaluateRes.loss>`\\"
-msgstr ""
+msgstr ":py:obj:`loss <flwr.common.EvaluateRes.loss>`\\"
 
 #: ../../source/ref-api/flwr.common.EvaluateRes.rst:31:<autosummary>:1
 msgid ":py:obj:`num_examples <flwr.common.EvaluateRes.num_examples>`\\"
-msgstr ""
+msgstr ":py:obj:`num_examples <flwr.common.EvaluateRes.num_examples>`\\"
 
 #: ../../source/ref-api/flwr.common.EvaluateRes.rst:31:<autosummary>:1
 msgid ":py:obj:`metrics <flwr.common.EvaluateRes.metrics>`\\"
-msgstr ""
+msgstr ":py:obj:`metrics <flwr.common.EvaluateRes.metrics>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:2
 msgid "EventType"
-msgstr ""
+msgstr "이벤트 타입"
 
 #: flwr.common.telemetry.EventType:1 of
 msgid "Bases: :py:class:`str`, :py:class:`~enum.Enum`"
-msgstr ""
+msgstr "Bases: :py:class:`str`, :py:class:`~enum.Enum`"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`encode <flwr.common.EventType.encode>`\\ \\(\\[encoding\\, "
 "errors\\]\\)"
 msgstr ""
+":py:obj:`encode <flwr.common.EventType.encode>`\\ \\(\\[encoding\\, errors\\]"
+"\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.encode:1 of
 msgid "Encode the string using the codec registered for encoding."
-msgstr ""
+msgstr "인코딩용으로 등록된 코덱을 사용하여 문자열을 인코딩합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`replace <flwr.common.EventType.replace>`\\ \\(old\\, new\\[\\, "
 "count\\]\\)"
 msgstr ""
+":py:obj:`replace <flwr.common.EventType.replace>`\\ \\(old\\, new\\[\\, "
+"count\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.replace:1 of
 msgid "Return a copy with all occurrences of substring old replaced by new."
-msgstr ""
+msgstr "이전 하위 문자열이 모두 새 하위 문자열로 바뀐 사본을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`split <flwr.common.EventType.split>`\\ \\(\\[sep\\, maxsplit\\]\\)"
 msgstr ""
+":py:obj:`split <flwr.common.EventType.split>`\\ \\(\\[sep\\, maxsplit\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.rsplit:1 flwr.common.EventType.split:1 of
 msgid ""
 "Return a list of the substrings in the string, using sep as the separator "
 "string."
-msgstr ""
+msgstr "sep를 구분 문자열로 사용하여 문자열의 하위 문자열 목록을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`rsplit <flwr.common.EventType.rsplit>`\\ \\(\\[sep\\, maxsplit\\]\\)"
 msgstr ""
+":py:obj:`rsplit <flwr.common.EventType.rsplit>`\\ \\(\\[sep\\, maxsplit\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`join <flwr.common.EventType.join>`\\ \\(iterable\\, \\/\\)"
-msgstr ""
+msgstr ":py:obj:`join <flwr.common.EventType.join>`\\ \\(iterable\\, \\/\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.join:1 of
 msgid "Concatenate any number of strings."
-msgstr ""
+msgstr "원하는 수의 문자열을 연결합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`capitalize <flwr.common.EventType.capitalize>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`capitalize <flwr.common.EventType.capitalize>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.capitalize:1 of
 msgid "Return a capitalized version of the string."
-msgstr ""
+msgstr "대문자로 된 문자열을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`casefold <flwr.common.EventType.casefold>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`casefold <flwr.common.EventType.casefold>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.casefold:1 of
 msgid "Return a version of the string suitable for caseless comparisons."
-msgstr ""
+msgstr "대소문자 구분 없는 비교에 적합한 문자열을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`title <flwr.common.EventType.title>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`title <flwr.common.EventType.title>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.title:1 of
 msgid "Return a version of the string where each word is titlecased."
-msgstr ""
+msgstr "각 단어의 제목이 대소문자로 구분된 문자열을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`center <flwr.common.EventType.center>`\\ \\(width\\[\\, "
 "fillchar\\]\\)"
 msgstr ""
+":py:obj:`center <flwr.common.EventType.center>`\\ \\(width\\[\\, fillchar\\]"
+"\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.center:1 of
 msgid "Return a centered string of length width."
-msgstr ""
+msgstr "길이 너비의 가운데 문자열을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`count <flwr.common.EventType.count>`\\ \\(sub\\[\\, start\\[\\, "
 "end\\]\\]\\)"
 msgstr ""
+":py:obj:`count <flwr.common.EventType.count>`\\ \\(sub\\[\\, start\\[\\, "
+"end\\]\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 "Return the number of non-overlapping occurrences of substring sub in string "
 "S[start:end]."
-msgstr ""
+msgstr "문자열 S[start:end]에서 하위 문자열 sub이 겹치지 않는 횟수를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`expandtabs <flwr.common.EventType.expandtabs>`\\ \\(\\[tabsize\\]\\)"
 msgstr ""
+":py:obj:`expandtabs <flwr.common.EventType.expandtabs>`\\ \\(\\[tabsize\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.expandtabs:1 of
 msgid "Return a copy where all tab characters are expanded using spaces."
-msgstr ""
+msgstr "모든 탭 문자가 공백을 사용하여 확장된 사본을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`find <flwr.common.EventType.find>`\\ \\(sub\\[\\, start\\[\\, "
 "end\\]\\]\\)"
 msgstr ""
+":py:obj:`find <flwr.common.EventType.find>`\\ \\(sub\\[\\, start\\[\\, end\\]"
+"\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 "Return the lowest index in S where substring sub is found, such that sub is "
 "contained within S[start:end]."
-msgstr ""
+msgstr "하위 문자열 sub이 발견되는 S에서 하위가 S[start:end] 내에 포함되는 가장 낮은 "
+"인덱스를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`partition <flwr.common.EventType.partition>`\\ \\(sep\\, \\/\\)"
 msgstr ""
+":py:obj:`partition <flwr.common.EventType.partition>`\\ \\(sep\\, \\/\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.partition:1 flwr.common.EventType.rpartition:1 of
 msgid "Partition the string into three parts using the given separator."
-msgstr ""
+msgstr "지정된 구분 기호를 사용하여 문자열을 세 부분으로 분할합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`index <flwr.common.EventType.index>`\\ \\(sub\\[\\, start\\[\\, "
 "end\\]\\]\\)"
 msgstr ""
+":py:obj:`index <flwr.common.EventType.index>`\\ \\(sub\\[\\, start\\[\\, "
+"end\\]\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`ljust <flwr.common.EventType.ljust>`\\ \\(width\\[\\, fillchar\\]\\)"
 msgstr ""
+":py:obj:`ljust <flwr.common.EventType.ljust>`\\ \\(width\\[\\, fillchar\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.ljust:1 of
 msgid "Return a left-justified string of length width."
-msgstr ""
+msgstr "왼쪽으로 정렬된 길이의 문자열을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`lower <flwr.common.EventType.lower>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`lower <flwr.common.EventType.lower>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.lower:1 of
 msgid "Return a copy of the string converted to lowercase."
-msgstr ""
+msgstr "소문자로 변환된 문자열 사본을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`lstrip <flwr.common.EventType.lstrip>`\\ \\(\\[chars\\]\\)"
-msgstr ""
+msgstr ":py:obj:`lstrip <flwr.common.EventType.lstrip>`\\ \\(\\[chars\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.lstrip:1 of
 msgid "Return a copy of the string with leading whitespace removed."
-msgstr ""
+msgstr "선행 공백이 제거된 문자열의 복사본을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`rfind <flwr.common.EventType.rfind>`\\ \\(sub\\[\\, start\\[\\, "
 "end\\]\\]\\)"
 msgstr ""
+":py:obj:`rfind <flwr.common.EventType.rfind>`\\ \\(sub\\[\\, start\\[\\, "
+"end\\]\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 "Return the highest index in S where substring sub is found, such that sub is "
 "contained within S[start:end]."
-msgstr ""
+msgstr "부분 문자열 sub이 발견되는 곳에서 sub이 S[start:end] 내에 포함되도록 S에서 "
+"가장 높은 인덱스를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`rindex <flwr.common.EventType.rindex>`\\ \\(sub\\[\\, start\\[\\, "
 "end\\]\\]\\)"
 msgstr ""
+":py:obj:`rindex <flwr.common.EventType.rindex>`\\ \\(sub\\[\\, start\\[\\, "
+"end\\]\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`rjust <flwr.common.EventType.rjust>`\\ \\(width\\[\\, fillchar\\]\\)"
 msgstr ""
+":py:obj:`rjust <flwr.common.EventType.rjust>`\\ \\(width\\[\\, fillchar\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.rjust:1 of
 msgid "Return a right-justified string of length width."
-msgstr ""
+msgstr "길이 너비의 오른쪽 정렬된 문자열을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`rstrip <flwr.common.EventType.rstrip>`\\ \\(\\[chars\\]\\)"
-msgstr ""
+msgstr ":py:obj:`rstrip <flwr.common.EventType.rstrip>`\\ \\(\\[chars\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.rstrip:1 of
 msgid "Return a copy of the string with trailing whitespace removed."
-msgstr ""
+msgstr "후행 공백이 제거된 문자열의 복사본을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`rpartition <flwr.common.EventType.rpartition>`\\ \\(sep\\, \\/\\)"
 msgstr ""
+":py:obj:`rpartition <flwr.common.EventType.rpartition>`\\ \\(sep\\, \\/\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`splitlines <flwr.common.EventType.splitlines>`\\ "
 "\\(\\[keepends\\]\\)"
 msgstr ""
+":py:obj:`splitlines <flwr.common.EventType.splitlines>`\\ \\(\\[keepends\\]\\"
+")"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.splitlines:1 of
 msgid "Return a list of the lines in the string, breaking at line boundaries."
-msgstr ""
+msgstr "문자열의 줄 목록을 줄 경계에서 구분하여 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`strip <flwr.common.EventType.strip>`\\ \\(\\[chars\\]\\)"
-msgstr ""
+msgstr ":py:obj:`strip <flwr.common.EventType.strip>`\\ \\(\\[chars\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.strip:1 of
 msgid ""
 "Return a copy of the string with leading and trailing whitespace removed."
-msgstr ""
+msgstr "선행 및 후행 공백이 제거된 문자열 사본을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`swapcase <flwr.common.EventType.swapcase>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`swapcase <flwr.common.EventType.swapcase>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.swapcase:1 of
 msgid ""
 "Convert uppercase characters to lowercase and lowercase characters to "
 "uppercase."
-msgstr ""
+msgstr "대문자를 소문자로, 소문자를 대문자로 변환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`translate <flwr.common.EventType.translate>`\\ \\(table\\, \\/\\)"
 msgstr ""
+":py:obj:`translate <flwr.common.EventType.translate>`\\ \\(table\\, \\/\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.translate:1 of
 msgid "Replace each character in the string using the given translation table."
-msgstr ""
+msgstr "주어진 번역 테이블을 사용하여 문자열의 각 문자를 바꿉니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`upper <flwr.common.EventType.upper>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`upper <flwr.common.EventType.upper>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.upper:1 of
 msgid "Return a copy of the string converted to uppercase."
-msgstr ""
+msgstr "Return a copy of the string converted to uppercase."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`startswith <flwr.common.EventType.startswith>`\\ \\(prefix\\[\\, "
 "start\\[\\, end\\]\\]\\)"
 msgstr ""
+":py:obj:`startswith <flwr.common.EventType.startswith>`\\ \\(prefix\\[\\, "
+"start\\[\\, end\\]\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid "Return True if S starts with the specified prefix, False otherwise."
-msgstr ""
+msgstr "S가 지정된 접두사로 시작하면 True를 반환하고, 그렇지 않으면 False를 "
+"반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`endswith <flwr.common.EventType.endswith>`\\ \\(suffix\\[\\, "
 "start\\[\\, end\\]\\]\\)"
 msgstr ""
+":py:obj:`endswith <flwr.common.EventType.endswith>`\\ \\(suffix\\[\\, start\\"
+"[\\, end\\]\\]\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid "Return True if S ends with the specified suffix, False otherwise."
-msgstr ""
+msgstr "S가 지정된 접미사로 끝나면 True를 반환하고 그렇지 않으면 False을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`removeprefix <flwr.common.EventType.removeprefix>`\\ \\(prefix\\, "
 "\\/\\)"
 msgstr ""
+":py:obj:`removeprefix <flwr.common.EventType.removeprefix>`\\ \\(prefix\\, \\"
+"/\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.removeprefix:1 of
 msgid "Return a str with the given prefix string removed if present."
-msgstr ""
+msgstr "주어진 접두사 문자열이 있는 경우 제거된 문자열을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`removesuffix <flwr.common.EventType.removesuffix>`\\ \\(suffix\\, "
 "\\/\\)"
 msgstr ""
+":py:obj:`removesuffix <flwr.common.EventType.removesuffix>`\\ \\(suffix\\, \\"
+"/\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.removesuffix:1 of
 msgid "Return a str with the given suffix string removed if present."
-msgstr ""
+msgstr "주어진 접미사 문자열이 있는 경우 제거된 문자열을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`isascii <flwr.common.EventType.isascii>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`isascii <flwr.common.EventType.isascii>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isascii:1 of
 msgid "Return True if all characters in the string are ASCII, False otherwise."
-msgstr ""
+msgstr "문자열의 모든 문자가 ASCII인 경우 True를 반환하고, 그렇지 않으면 False를 "
+"반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`islower <flwr.common.EventType.islower>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`islower <flwr.common.EventType.islower>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.islower:1 of
 msgid "Return True if the string is a lowercase string, False otherwise."
-msgstr ""
+msgstr "문자열이 소문자 문자열이면 True를 반환하고, 그렇지 않으면 False를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`isupper <flwr.common.EventType.isupper>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`isupper <flwr.common.EventType.isupper>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isupper:1 of
 msgid "Return True if the string is an uppercase string, False otherwise."
-msgstr ""
+msgstr "문자열이 대문자 문자열이면 True를 반환하고, 그렇지 않으면 False를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`istitle <flwr.common.EventType.istitle>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`istitle <flwr.common.EventType.istitle>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.istitle:1 of
 msgid "Return True if the string is a title-cased string, False otherwise."
-msgstr ""
+msgstr "문자열이 제목 대/소문자가 구분된 문자열이면 True를 반환하고, 그렇지 않으면 "
+"False를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`isspace <flwr.common.EventType.isspace>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`isspace <flwr.common.EventType.isspace>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isspace:1 of
 msgid "Return True if the string is a whitespace string, False otherwise."
-msgstr ""
+msgstr "문자열이 공백 문자열이면 True를 반환하고, 그렇지 않으면 False를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`isdecimal <flwr.common.EventType.isdecimal>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`isdecimal <flwr.common.EventType.isdecimal>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isdecimal:1 of
 msgid "Return True if the string is a decimal string, False otherwise."
-msgstr ""
+msgstr "문자열이 10진수 문자열이면 True를 반환하고, 그렇지 않으면 False를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`isdigit <flwr.common.EventType.isdigit>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`isdigit <flwr.common.EventType.isdigit>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isdigit:1 of
 msgid "Return True if the string is a digit string, False otherwise."
-msgstr ""
+msgstr "문자열이 숫자 문자열이면 True를 반환하고, 그렇지 않으면 False를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`isnumeric <flwr.common.EventType.isnumeric>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`isnumeric <flwr.common.EventType.isnumeric>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isnumeric:1 of
 msgid "Return True if the string is a numeric string, False otherwise."
-msgstr ""
+msgstr "문자열이 숫자 문자열이면 True를 반환하고, 그렇지 않으면 False를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`isalpha <flwr.common.EventType.isalpha>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`isalpha <flwr.common.EventType.isalpha>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isalpha:1 of
 msgid "Return True if the string is an alphabetic string, False otherwise."
-msgstr ""
+msgstr "문자열이 알파벳 문자열이면 True를 반환하고, 그렇지 않으면 False를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`isalnum <flwr.common.EventType.isalnum>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`isalnum <flwr.common.EventType.isalnum>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isalnum:1 of
 msgid "Return True if the string is an alpha-numeric string, False otherwise."
-msgstr ""
+msgstr "문자열이 영-숫자 문자열이면 True를 반환하고, 그렇지 않으면 False를 "
+"반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`isidentifier <flwr.common.EventType.isidentifier>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`isidentifier <flwr.common.EventType.isidentifier>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isidentifier:1 of
 msgid ""
 "Return True if the string is a valid Python identifier, False otherwise."
-msgstr ""
+msgstr "문자열이 유효한 파이썬 식별자인 경우 True를 반환하고, 그렇지 않으면 False를 "
+"반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`isprintable <flwr.common.EventType.isprintable>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`isprintable <flwr.common.EventType.isprintable>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.isprintable:1 of
 msgid "Return True if the string is printable, False otherwise."
-msgstr ""
+msgstr "문자열을 인쇄할 수 있으면 True를 반환하고, 그렇지 않으면 False를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`zfill <flwr.common.EventType.zfill>`\\ \\(width\\, \\/\\)"
-msgstr ""
+msgstr ":py:obj:`zfill <flwr.common.EventType.zfill>`\\ \\(width\\, \\/\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.zfill:1 of
 msgid ""
 "Pad a numeric string with zeros on the left, to fill a field of the given "
 "width."
-msgstr ""
+msgstr "숫자 문자열을 왼쪽에 0으로 채워서 지정된 너비의 필드를 채웁니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 ":py:obj:`format <flwr.common.EventType.format>`\\ \\(\\*args\\, "
 "\\*\\*kwargs\\)"
 msgstr ""
+":py:obj:`format <flwr.common.EventType.format>`\\ \\(\\*args\\, \\*\\*"
+"kwargs\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 "Return a formatted version of S, using substitutions from args and kwargs."
-msgstr ""
+msgstr "args와 kwarg의 치환을 사용하여 형식이 지정된 S를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`format_map <flwr.common.EventType.format_map>`\\ \\(mapping\\)"
-msgstr ""
+msgstr ":py:obj:`format_map <flwr.common.EventType.format_map>`\\ \\(mapping\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid "Return a formatted version of S, using substitutions from mapping."
-msgstr ""
+msgstr "매핑의 치환을 사용하여 형식이 지정된 S를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`maketrans <flwr.common.EventType.maketrans>`\\"
-msgstr ""
+msgstr ":py:obj:`maketrans <flwr.common.EventType.maketrans>`\\"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.maketrans:1 of
 msgid "Return a translation table usable for str.translate()."
-msgstr ""
+msgstr "str.translate()에 사용할 수 있는 번역 테이블을 반환합니다."
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ":py:obj:`PING <flwr.common.EventType.PING>`\\"
-msgstr ""
+msgstr ":py:obj:`PING <flwr.common.EventType.PING>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`START_CLIENT_ENTER <flwr.common.EventType.START_CLIENT_ENTER>`\\"
 msgstr ""
+":py:obj:`START_CLIENT_ENTER <flwr.common.EventType.START_CLIENT_ENTER>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`START_CLIENT_LEAVE <flwr.common.EventType.START_CLIENT_LEAVE>`\\"
 msgstr ""
+":py:obj:`START_CLIENT_LEAVE <flwr.common.EventType.START_CLIENT_LEAVE>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`START_SERVER_ENTER <flwr.common.EventType.START_SERVER_ENTER>`\\"
 msgstr ""
+":py:obj:`START_SERVER_ENTER <flwr.common.EventType.START_SERVER_ENTER>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`START_SERVER_LEAVE <flwr.common.EventType.START_SERVER_LEAVE>`\\"
 msgstr ""
+":py:obj:`START_SERVER_LEAVE <flwr.common.EventType.START_SERVER_LEAVE>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_DRIVER_API_ENTER <flwr.common.EventType.RUN_DRIVER_API_ENTER>`\\"
 msgstr ""
+":py:obj:`RUN_DRIVER_API_ENTER <flwr.common.EventType.RUN_DRIVER_API_ENTER>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_DRIVER_API_LEAVE <flwr.common.EventType.RUN_DRIVER_API_LEAVE>`\\"
 msgstr ""
+":py:obj:`RUN_DRIVER_API_LEAVE <flwr.common.EventType.RUN_DRIVER_API_LEAVE>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_FLEET_API_ENTER <flwr.common.EventType.RUN_FLEET_API_ENTER>`\\"
 msgstr ""
+":py:obj:`RUN_FLEET_API_ENTER <flwr.common.EventType.RUN_FLEET_API_ENTER>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_FLEET_API_LEAVE <flwr.common.EventType.RUN_FLEET_API_LEAVE>`\\"
 msgstr ""
+":py:obj:`RUN_FLEET_API_LEAVE <flwr.common.EventType.RUN_FLEET_API_LEAVE>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_SUPERLINK_ENTER <flwr.common.EventType.RUN_SUPERLINK_ENTER>`\\"
 msgstr ""
+":py:obj:`RUN_SUPERLINK_ENTER <flwr.common.EventType.RUN_SUPERLINK_ENTER>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_SUPERLINK_LEAVE <flwr.common.EventType.RUN_SUPERLINK_LEAVE>`\\"
 msgstr ""
+":py:obj:`RUN_SUPERLINK_LEAVE <flwr.common.EventType.RUN_SUPERLINK_LEAVE>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`START_SIMULATION_ENTER <flwr.common.EventType."
 "START_SIMULATION_ENTER>`\\"
 msgstr ""
+":py:obj:`START_SIMULATION_ENTER <flwr.common.EventType."
+"START_SIMULATION_ENTER>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`START_SIMULATION_LEAVE <flwr.common.EventType."
 "START_SIMULATION_LEAVE>`\\"
 msgstr ""
+":py:obj:`START_SIMULATION_LEAVE <flwr.common.EventType."
+"START_SIMULATION_LEAVE>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ":py:obj:`DRIVER_CONNECT <flwr.common.EventType.DRIVER_CONNECT>`\\"
-msgstr ""
+msgstr ":py:obj:`DRIVER_CONNECT <flwr.common.EventType.DRIVER_CONNECT>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ":py:obj:`DRIVER_DISCONNECT <flwr.common.EventType.DRIVER_DISCONNECT>`\\"
-msgstr ""
+msgstr ":py:obj:`DRIVER_DISCONNECT <flwr.common.EventType.DRIVER_DISCONNECT>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`START_DRIVER_ENTER <flwr.common.EventType.START_DRIVER_ENTER>`\\"
 msgstr ""
+":py:obj:`START_DRIVER_ENTER <flwr.common.EventType.START_DRIVER_ENTER>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`START_DRIVER_LEAVE <flwr.common.EventType.START_DRIVER_LEAVE>`\\"
 msgstr ""
+":py:obj:`START_DRIVER_LEAVE <flwr.common.EventType.START_DRIVER_LEAVE>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_CLIENT_APP_ENTER <flwr.common.EventType.RUN_CLIENT_APP_ENTER>`\\"
 msgstr ""
+":py:obj:`RUN_CLIENT_APP_ENTER <flwr.common.EventType.RUN_CLIENT_APP_ENTER>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_CLIENT_APP_LEAVE <flwr.common.EventType.RUN_CLIENT_APP_LEAVE>`\\"
 msgstr ""
+":py:obj:`RUN_CLIENT_APP_LEAVE <flwr.common.EventType.RUN_CLIENT_APP_LEAVE>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_SERVER_APP_ENTER <flwr.common.EventType.RUN_SERVER_APP_ENTER>`\\"
 msgstr ""
+":py:obj:`RUN_SERVER_APP_ENTER <flwr.common.EventType.RUN_SERVER_APP_ENTER>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_SERVER_APP_LEAVE <flwr.common.EventType.RUN_SERVER_APP_LEAVE>`\\"
 msgstr ""
+":py:obj:`RUN_SERVER_APP_LEAVE <flwr.common.EventType.RUN_SERVER_APP_LEAVE>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_SUPERNODE_ENTER <flwr.common.EventType.RUN_SUPERNODE_ENTER>`\\"
 msgstr ""
+":py:obj:`RUN_SUPERNODE_ENTER <flwr.common.EventType.RUN_SUPERNODE_ENTER>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_SUPERNODE_LEAVE <flwr.common.EventType.RUN_SUPERNODE_LEAVE>`\\"
 msgstr ""
+":py:obj:`RUN_SUPERNODE_LEAVE <flwr.common.EventType.RUN_SUPERNODE_LEAVE>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_SUPEREXEC_ENTER <flwr.common.EventType.RUN_SUPEREXEC_ENTER>`\\"
 msgstr ""
+":py:obj:`RUN_SUPEREXEC_ENTER <flwr.common.EventType.RUN_SUPEREXEC_ENTER>`\\"
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`RUN_SUPEREXEC_LEAVE <flwr.common.EventType.RUN_SUPEREXEC_LEAVE>`\\"
 msgstr ""
+":py:obj:`RUN_SUPEREXEC_LEAVE <flwr.common.EventType.RUN_SUPEREXEC_LEAVE>`\\"
 
 #: flwr.common.EventType.capitalize:3 of
 msgid ""
