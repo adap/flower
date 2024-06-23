@@ -7,6 +7,15 @@ learning/analytics/evaluation. It is created by the ``Flower Labs`` team that al
 Flower Datasets Framework
 -------------------------
 
+Install
+~~~~~~~
+
+.. code-block:: bash
+
+  python -m pip install flwr-datasets[vision]
+
+Check out all the details on the download in :doc:`how-to-install-flwr-datasets`.
+
 Tutorials
 ~~~~~~~~~
 
@@ -87,28 +96,6 @@ Here are a few of the ``Partitioner`` s that are available: (for a full list see
 * Exponential partitioner ``ExponentialPartitioner(num_partitions)``
 * more to come in the future releases (contributions are welcome).
 
-Install
--------
-
-The simplest install is
-
-.. code-block:: bash
-
-  python -m pip install flwr-datasets
-
-If you plan to use the image datasets
-
-.. code-block:: bash
-
-  python -m pip install flwr-datasets[vision]
-
-If you plan to use the audio datasets
-
-.. code-block:: bash
-
-  python -m pip install flwr-datasets[audio]
-
-Check out the full details on the download in :doc:`how-to-install-flwr-datasets`.
 
 How To Use the library
 ----------------------
