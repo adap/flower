@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-17 16:09+0200\n"
 "PO-Revision-Date: 2024-06-23 08:33+0000\n"
-"Last-Translator: Sijiaomg Ohoh <lisijia1997@gmail.com>\n"
+"Last-Translator: 박태현 <qkrxogus113@ajou.ac.kr>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
 "Language: ko\n"
@@ -10571,7 +10571,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 "Return a formatted version of S, using substitutions from args and kwargs."
-msgstr "args와 kwarg의 치환을 사용하여 형식이 지정된 S를 되돌아갑니다."
+msgstr "args와 kwarg의 치환을 사용하여 형식이 지정된 S를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`format_map <flwr.common.EventType.format_map>`\\ \\(mapping\\)"
@@ -10579,7 +10579,7 @@ msgstr ":py:obj:`format_map <flwr.common.EventType.format_map>`\\ \\(mapping\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid "Return a formatted version of S, using substitutions from mapping."
-msgstr "매핑의 치환을 사용하여 형식이 지정된 S를 되돌아갑니다."
+msgstr "매핑의 치환을 사용하여 형식이 지정된 S를 반환합니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`maketrans <flwr.common.EventType.maketrans>`\\"
@@ -10588,7 +10588,7 @@ msgstr ":py:obj:`maketrans <flwr.common.EventType.maketrans>`\\"
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.maketrans:1 of
 msgid "Return a translation table usable for str.translate()."
-msgstr "str.translate()에 사용할 수 있는 번역 테이블을 되돌아갑니다."
+msgstr "str.translate()에 사용할 수 있는 번역 테이블을 반환합니다."
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ":py:obj:`PING <flwr.common.EventType.PING>`\\"
@@ -10742,13 +10742,13 @@ msgstr ""
 msgid ""
 "More specifically, make the first character have upper case and the rest "
 "lower case."
-msgstr ""
+msgstr "보다 구체적으로, 첫 번째 문자는 대문자로, 나머지는 소문자로 만듭니다."
 
 #: flwr.common.EventType.center:3 flwr.common.EventType.ljust:3
 #: flwr.common.EventType.rjust:3 of
 msgid ""
 "Padding is done using the specified fill character (default is a space)."
-msgstr ""
+msgstr "패딩은 지정된 채우기 문자를 사용하여 수행됩니다(기본값은 공백)."
 
 #: flwr.common.EventType.count:1 of
 msgid ""
@@ -10756,18 +10756,20 @@ msgid ""
 "S[start:end].  Optional arguments start and end are interpreted as in slice "
 "notation."
 msgstr ""
+"문자열 S[start:end]에서 부분 문자열 sub의 겹치지 않는 횟수를 반환합니다.  "
+"선택적 인자 start와 end는 슬라이스 표기법과 같이 해석됩니다."
 
 #: flwr.common.EventType.encode:3 of
 msgid "encoding"
-msgstr ""
+msgstr "인코딩"
 
 #: flwr.common.EventType.encode:4 of
 msgid "The encoding in which to encode the string."
-msgstr ""
+msgstr "문자열을 인코딩합니다."
 
 #: flwr.common.EventType.encode:9 of
 msgid "errors"
-msgstr ""
+msgstr "오류"
 
 #: flwr.common.EventType.encode:6 of
 msgid ""
@@ -10777,6 +10779,10 @@ msgid ""
 "any other name registered with codecs.register_error that can handle "
 "UnicodeEncodeErrors."
 msgstr ""
+"인코딩 오류에 사용할 오류 처리 방식입니다. 기본값은 'strict'로, 인코딩 "
+"오류가 발생하면 UnicodeEncodeError를 발생시킵니다.  다른 가능한 값으로는 "
+"'ignore', 'replace', 'xmlcharrefreplace', 그리고 UnicodeEncodeError를 처리할 "
+"수 있는 codecs.register_error에 등록된 다른 이름도 사용할 수 있습니다."
 
 #: flwr.common.EventType.endswith:1 of
 msgid ""
@@ -10784,10 +10790,14 @@ msgid ""
 "optional start, test S beginning at that position. With optional end, stop "
 "comparing S at that position. suffix can also be a tuple of strings to try."
 msgstr ""
+"S가 지정된 접미사로 끝나면 True를 반환하고, 그렇지 않으면 False를 "
+"반환합니다. 시작 옵션을 사용하면 해당 위치부터 S를 테스트합니다. end 옵션을 "
+"사용하면 해당 위치에서 S 비교를 중지합니다. 접미사는 시도할 문자열의 튜플일 "
+"수도 있습니다."
 
 #: flwr.common.EventType.expandtabs:3 of
 msgid "If tabsize is not given, a tab size of 8 characters is assumed."
-msgstr ""
+msgstr "탭 크기를 지정하지 않으면 크기가 8로 지정됩니다."
 
 #: flwr.common.EventType.find:1 flwr.common.EventType.index:1 of
 msgid ""
@@ -10795,113 +10805,132 @@ msgid ""
 "contained within S[start:end].  Optional arguments start and end are "
 "interpreted as in slice notation."
 msgstr ""
+"부분 문자열 sub가 발견되는 곳의 가장 낮은 인덱스를 반환하며, sub는 "
+"S[start:end] 내에 포함되어야 합니다.  선택적 인자 start와 end는 슬라이스 "
+"표기법과 같이 해석됩니다."
 
 #: flwr.common.EventType.find:5 flwr.common.EventType.rfind:5 of
 msgid "Return -1 on failure."
-msgstr ""
+msgstr "실패 시 -1을 반환합니다."
 
 #: flwr.common.EventType.format:1 of
 msgid ""
 "Return a formatted version of S, using substitutions from args and kwargs. "
 "The substitutions are identified by braces ('{' and '}')."
-msgstr ""
+msgstr "args와 kwargs의 치환을 사용하여 형식이 지정된 S를 반환합니다. 치환은 "
+"중괄호('{' 및 '}')로 식별됩니다."
 
 #: flwr.common.EventType.format_map:1 of
 msgid ""
 "Return a formatted version of S, using substitutions from mapping. The "
 "substitutions are identified by braces ('{' and '}')."
-msgstr ""
+msgstr "매핑의 치환을 사용하여 형식이 지정된 S를 반환합니다. 치환은 중괄호('{' 및 "
+"'}')로 식별됩니다."
 
 #: flwr.common.EventType.index:5 flwr.common.EventType.rindex:5 of
 msgid "Raises ValueError when the substring is not found."
-msgstr ""
+msgstr "부분 문자열을 찾을 수 없을 때 ValueError를 발생시킵니다."
 
 #: flwr.common.EventType.isalnum:3 of
 msgid ""
 "A string is alpha-numeric if all characters in the string are alpha-numeric "
 "and there is at least one character in the string."
-msgstr ""
+msgstr "문자열의 모든 문자가 영숫자이고 문자열에 하나 이상의 문자가 있는 경우 "
+"문자열은 영-숫자입니다."
 
 #: flwr.common.EventType.isalpha:3 of
 msgid ""
 "A string is alphabetic if all characters in the string are alphabetic and "
 "there is at least one character in the string."
-msgstr ""
+msgstr "문자열의 모든 문자가 알파벳이고 문자열에 하나 이상의 문자가 있는 경우 "
+"문자열은 알파벳입니다."
 
 #: flwr.common.EventType.isascii:3 of
 msgid ""
 "ASCII characters have code points in the range U+0000-U+007F. Empty string "
 "is ASCII too."
-msgstr ""
+msgstr "ASCII 문자는 U+0000-U+007F 범위의 코드 포인트가 있습니다. 빈 문자열도 "
+"ASCII입니다."
 
 #: flwr.common.EventType.isdecimal:3 of
 msgid ""
 "A string is a decimal string if all characters in the string are decimal and "
 "there is at least one character in the string."
-msgstr ""
+msgstr "문자열의 모든 문자가 10진수이고 문자열에 하나 이상의 문자가 있는 경우 "
+"문자열은 10진수 문자열입니다."
 
 #: flwr.common.EventType.isdigit:3 of
 msgid ""
 "A string is a digit string if all characters in the string are digits and "
 "there is at least one character in the string."
-msgstr ""
+msgstr "문자열의 모든 문자가 숫자이고 문자열에 하나 이상의 문자가 있는 경우 문자열은 "
+"숫자 문자열입니다."
 
 #: flwr.common.EventType.isidentifier:3 of
 msgid ""
 "Call keyword.iskeyword(s) to test whether string s is a reserved identifier, "
 "such as \"def\" or \"class\"."
 msgstr ""
+"keyword.iskeyword(s)를 호출하여 문자열 s가 \"def\" 또는 \"class\"와 같은 "
+"예약 식별자인지 테스트합니다."
 
 #: flwr.common.EventType.islower:3 of
 msgid ""
 "A string is lowercase if all cased characters in the string are lowercase "
 "and there is at least one cased character in the string."
-msgstr ""
+msgstr "문자열이 모두 소문자이고 문자열에 문자가 하나 이상 있는 경우 문자열은 "
+"소문자입니다."
 
 #: flwr.common.EventType.isnumeric:3 of
 msgid ""
 "A string is numeric if all characters in the string are numeric and there is "
 "at least one character in the string."
-msgstr ""
+msgstr "문자열의 모든 문자가 숫자이고 문자열에 하나 이상의 문자가 있는 경우 문자열은 "
+"숫자입니다."
 
 #: flwr.common.EventType.isprintable:3 of
 msgid ""
 "A string is printable if all of its characters are considered printable in "
 "repr() or if it is empty."
-msgstr ""
+msgstr "문자열은 repr()에서 모든 문자가 인쇄 가능한 것으로 간주되거나 비어 있는 경우 "
+"인쇄할 수 있습니다."
 
 #: flwr.common.EventType.isspace:3 of
 msgid ""
 "A string is whitespace if all characters in the string are whitespace and "
 "there is at least one character in the string."
-msgstr ""
+msgstr "문자열의 모든 문자가 공백이고 문자열에 하나 이상의 문자가 있는 경우 문자열은 "
+"공백입니다."
 
 #: flwr.common.EventType.istitle:3 of
 msgid ""
 "In a title-cased string, upper- and title-case characters may only follow "
 "uncased characters and lowercase characters only cased ones."
-msgstr ""
+msgstr "제목 대/소문자 문자열에서 대문자와 제목 대문자는 대소문자만, 소문자는 "
+"대문자만 뒤에 올 수 있습니다."
 
 #: flwr.common.EventType.isupper:3 of
 msgid ""
 "A string is uppercase if all cased characters in the string are uppercase "
 "and there is at least one cased character in the string."
-msgstr ""
+msgstr "문자열의 모든 문자가 대문자이고 문자열에 문자가 하나 이상 있는 경우 문자열은 "
+"대문자입니다."
 
 #: flwr.common.EventType.join:3 of
 msgid ""
 "The string whose method is called is inserted in between each given string. "
 "The result is returned as a new string."
-msgstr ""
+msgstr "메서드가 호출되는 문자열은 주어진 각 문자열 사이에 삽입됩니다. 결과는 새 "
+"문자열로 반환됩니다."
 
 #: flwr.common.EventType.join:6 of
 msgid "Example: '.'.join(['ab', 'pq', 'rs']) -> 'ab.pq.rs'"
-msgstr ""
+msgstr "Example: '.'.join(['ab', 'pq', 'rs']) -> 'ab.pq.rs'"
 
 #: flwr.common.EventType.lstrip:3 flwr.common.EventType.rstrip:3
 #: flwr.common.EventType.strip:3 of
 msgid "If chars is given and not None, remove characters in chars instead."
-msgstr ""
+msgstr "None이 아닌 문자가 지정되면 대신 문자열에서 문자를 제거합니다."
 
 #: flwr.common.EventType.maketrans:3 of
 msgid ""
@@ -10913,6 +10942,11 @@ msgid ""
 "position in y. If there is a third argument, it must be a string, whose "
 "characters will be mapped to None in the result."
 msgstr ""
+"argument이 하나만 있는 경우, 유니코드 서수(정수) 또는 문자를 유니코드 서수, "
+"문자열 또는 None에 매핑하는 dictionary이어야 합니다. 그러면 문자 키가 서수로 "
+"변환됩니다. 인수가 두 개이면 길이가 같은 문자열이어야 하며, 결과 "
+"dictionary에서 x의 각 문자는 y의 같은 위치에 있는 문자에 매핑됩니다. 세 번째 "
+"인수가 있으면 문자열이어야 하며, 그 문자는 결과에서 None에 매핑됩니다."
 
 #: flwr.common.EventType.partition:3 of
 msgid ""
@@ -10920,18 +10954,23 @@ msgid ""
 "found, returns a 3-tuple containing the part before the separator, the "
 "separator itself, and the part after it."
 msgstr ""
+"문자열에서 구분 기호를 검색합니다.  구분 기호가 발견되면 구분 기호 앞 부분, "
+"구분 기호 자체, 구분 기호 뒤 부분을 포함하는 3-tuple을 반환합니다."
 
 #: flwr.common.EventType.partition:7 of
 msgid ""
 "If the separator is not found, returns a 3-tuple containing the original "
 "string and two empty strings."
-msgstr ""
+msgstr "구분 기호를 찾을 수 없으면 원래 문자열과 빈 문자열 2개를 포함하는 3-튜플을 "
+"반환합니다."
 
 #: flwr.common.EventType.removeprefix:3 of
 msgid ""
 "If the string starts with the prefix string, return string[len(prefix):]. "
 "Otherwise, return a copy of the original string."
 msgstr ""
+"문자열이 접두사 문자열로 시작하면 문자열[len(prefix):]을 반환합니다. 그렇지 "
+"않으면 원본 문자열의 복사본을 반환합니다."
 
 #: flwr.common.EventType.removesuffix:3 of
 msgid ""
@@ -10939,22 +10978,25 @@ msgid ""
 "return string[:-len(suffix)]. Otherwise, return a copy of the original "
 "string."
 msgstr ""
+"문자열이 접미사 문자열로 끝나고 해당 접미사가 비어 있지 않으면 "
+"문자열[:-len(suffix)]을 반환합니다. 그렇지 않으면 원본 문자열의 복사본을 "
+"반환합니다."
 
 #: flwr.common.EventType.replace:5 of
 msgid "count"
-msgstr ""
+msgstr "카운트"
 
 #: flwr.common.EventType.replace:4 of
 msgid ""
 "Maximum number of occurrences to replace. -1 (the default value) means "
 "replace all occurrences."
-msgstr ""
+msgstr "대체할 최대 발생 횟수입니다. -1(기본값)은 모든 항목을 교체한다는 의미입니다."
 
 #: flwr.common.EventType.replace:7 of
 msgid ""
 "If the optional argument count is given, only the first count occurrences "
 "are replaced."
-msgstr ""
+msgstr "선택적 argument 개수를 지정하면 첫 번째 개수만 바뀝니다."
 
 #: flwr.common.EventType.rfind:1 flwr.common.EventType.rindex:1 of
 msgid ""
@@ -10962,6 +11004,9 @@ msgid ""
 "contained within S[start:end].  Optional arguments start and end are "
 "interpreted as in slice notation."
 msgstr ""
+"부분 문자열 sub가 발견되는 곳의 가장 높은 인덱스를 반환하며, sub는 "
+"S[start:end] 내에 포함되어야 합니다.  선택적 인자 start와 end는 슬라이스 "
+"표기법과 같이 해석됩니다."
 
 #: flwr.common.EventType.rpartition:3 of
 msgid ""
@@ -10969,20 +11014,24 @@ msgid ""
 "the separator is found, returns a 3-tuple containing the part before the "
 "separator, the separator itself, and the part after it."
 msgstr ""
+"그러면 문자열에서 끝 부분부터 시작하여 구분 기호를 검색합니다. 구분 기호가 "
+"발견되면 구분 기호 앞 부분, 구분 기호 자체, 구분 기호 뒤 부분을 포함하는 3-"
+"tuple을 반환합니다."
 
 #: flwr.common.EventType.rpartition:7 of
 msgid ""
 "If the separator is not found, returns a 3-tuple containing two empty "
 "strings and the original string."
-msgstr ""
+msgstr "구분 기호를 찾을 수 없는 경우 빈 문자열 2개와 원래 문자열을 포함하는 3-"
+"tuple을 반환합니다."
 
 #: flwr.common.EventType.rsplit:7 flwr.common.EventType.split:7 of
 msgid "sep"
-msgstr ""
+msgstr "sep"
 
 #: flwr.common.EventType.rsplit:4 flwr.common.EventType.split:4 of
 msgid "The separator used to split the string."
-msgstr ""
+msgstr "문자열을 분할하는 데 사용되는 구분 기호입니다."
 
 #: flwr.common.EventType.rsplit:6 flwr.common.EventType.split:6 of
 msgid ""
@@ -10990,20 +11039,22 @@ msgid ""
 "(including \\\\n \\\\r \\\\t \\\\f and spaces) and will discard empty "
 "strings from the result."
 msgstr ""
+"None(기본값)으로 설정하면 모든 공백 문자(\\\\n"
+" \\\\r \\\\t \\\\f 및 공백 포함)를 분할하고 결과에서 빈 문자열을 삭제합니다."
 
 #: flwr.common.EventType.rsplit:11 flwr.common.EventType.split:11 of
 msgid "maxsplit"
-msgstr ""
+msgstr "maxsplit"
 
 #: flwr.common.EventType.rsplit:10 flwr.common.EventType.split:10 of
 msgid ""
 "Maximum number of splits (starting from the left). -1 (the default value) "
 "means no limit."
-msgstr ""
+msgstr "최대 분할 횟수(왼쪽부터 시작). -1(기본값)은 제한이 없음을 의미합니다."
 
 #: flwr.common.EventType.rsplit:13 of
 msgid "Splitting starts at the end of the string and works to the front."
-msgstr ""
+msgstr "분할은 문자열 끝에서 시작하여 앞쪽으로 진행됩니다."
 
 #: flwr.common.EventType.split:13 of
 msgid ""
@@ -11011,12 +11062,14 @@ msgid ""
 "delimited.  With natural text that includes punctuation, consider using the "
 "regular expression module."
 msgstr ""
+"참고로 str.split()은 주로 의도적으로 구분된 데이터에 유용합니다.  구두점이 "
+"포함된 자연 텍스트의 경우 정규식 모듈을 사용하는 것이 좋습니다."
 
 #: flwr.common.EventType.splitlines:3 of
 msgid ""
 "Line breaks are not included in the resulting list unless keepends is given "
 "and true."
-msgstr ""
+msgstr "줄 바꿈은 keepends가 주어지고 참이 아니면 결과 목록에 포함되지 않습니다."
 
 #: flwr.common.EventType.startswith:1 of
 msgid ""
@@ -11024,22 +11077,28 @@ msgid ""
 "optional start, test S beginning at that position. With optional end, stop "
 "comparing S at that position. prefix can also be a tuple of strings to try."
 msgstr ""
+"S가 지정된 접두사로 시작하면 True를 반환하고, 그렇지 않으면 False를 "
+"반환합니다. 시작 옵션을 사용하면 해당 위치에서 시작되는 S를 테스트합니다. "
+"선택적 end를 사용하면 해당 위치에서 S 비교를 중지합니다. 접두사는 시도할 "
+"문자열의 튜플일 수도 있습니다."
 
 #: flwr.common.EventType.title:3 of
 msgid ""
 "More specifically, words start with uppercased characters and all remaining "
 "cased characters have lower case."
-msgstr ""
+msgstr "보다 구체적으로, 단어는 대문자로 시작하고 나머지 모든 대소문자는 소문자로 "
+"표기합니다."
 
 #: flwr.common.EventType.translate:5 of
 msgid "table"
-msgstr ""
+msgstr "table"
 
 #: flwr.common.EventType.translate:4 of
 msgid ""
 "Translation table, which must be a mapping of Unicode ordinals to Unicode "
 "ordinals, strings, or None."
-msgstr ""
+msgstr "유니코드 서수를 유니코드 서수, 문자열 또는 없음으로 매핑하는 번역 "
+"테이블이어야 합니다."
 
 #: flwr.common.EventType.translate:7 of
 msgid ""
@@ -11047,168 +11106,177 @@ msgid ""
 "dictionary or list.  If this operation raises LookupError, the character is "
 "left untouched.  Characters mapped to None are deleted."
 msgstr ""
+"테이블은 사전이나 목록과 같이 __getitem__을 통해 조회/색인을 구현해야 "
+"합니다.  이 작업에서 LookupError가 발생하면 문자는 그대로 유지됩니다.  "
+"없음으로 매핑된 문자는 삭제됩니다."
 
 #: flwr.common.EventType.zfill:3 of
 msgid "The string is never truncated."
-msgstr ""
+msgstr "문자열은 잘리지 않습니다."
 
 #: ../../source/ref-api/flwr.common.FitIns.rst:2
 msgid "FitIns"
-msgstr ""
+msgstr "FitIns"
 
 #: ../../source/ref-api/flwr.common.FitIns.rst:29:<autosummary>:1
 msgid ":py:obj:`parameters <flwr.common.FitIns.parameters>`\\"
-msgstr ""
+msgstr ":py:obj:`parameters <flwr.common.FitIns.parameters>`\\"
 
 #: ../../source/ref-api/flwr.common.FitIns.rst:29:<autosummary>:1
 msgid ":py:obj:`config <flwr.common.FitIns.config>`\\"
-msgstr ""
+msgstr ":py:obj:`config <flwr.common.FitIns.config>`\\"
 
 #: ../../source/ref-api/flwr.common.FitRes.rst:2
 msgid "FitRes"
-msgstr ""
+msgstr "FitRes"
 
 #: ../../source/ref-api/flwr.common.FitRes.rst:31:<autosummary>:1
 msgid ":py:obj:`status <flwr.common.FitRes.status>`\\"
-msgstr ""
+msgstr ":py:obj:`status <flwr.common.FitRes.status>`\\"
 
 #: ../../source/ref-api/flwr.common.FitRes.rst:31:<autosummary>:1
 msgid ":py:obj:`parameters <flwr.common.FitRes.parameters>`\\"
-msgstr ""
+msgstr ":py:obj:`parameters <flwr.common.FitRes.parameters>`\\"
 
 #: ../../source/ref-api/flwr.common.FitRes.rst:31:<autosummary>:1
 msgid ":py:obj:`num_examples <flwr.common.FitRes.num_examples>`\\"
-msgstr ""
+msgstr ":py:obj:`num_examples <flwr.common.FitRes.num_examples>`\\"
 
 #: ../../source/ref-api/flwr.common.FitRes.rst:31:<autosummary>:1
 msgid ":py:obj:`metrics <flwr.common.FitRes.metrics>`\\"
-msgstr ""
+msgstr ":py:obj:`metrics <flwr.common.FitRes.metrics>`\\"
 
 #: ../../source/ref-api/flwr.common.GetParametersIns.rst:2
 msgid "GetParametersIns"
-msgstr ""
+msgstr "GetParametersIns"
 
 #: ../../source/ref-api/flwr.common.GetParametersIns.rst:28:<autosummary>:1
 msgid ":py:obj:`config <flwr.common.GetParametersIns.config>`\\"
-msgstr ""
+msgstr ":py:obj:`config <flwr.common.GetParametersIns.config>`\\"
 
 #: ../../source/ref-api/flwr.common.GetParametersRes.rst:2
 msgid "GetParametersRes"
-msgstr ""
+msgstr "GetParametersRes"
 
 #: ../../source/ref-api/flwr.common.GetParametersRes.rst:29:<autosummary>:1
 msgid ":py:obj:`status <flwr.common.GetParametersRes.status>`\\"
-msgstr ""
+msgstr ":py:obj:`status <flwr.common.GetParametersRes.status>`\\"
 
 #: ../../source/ref-api/flwr.common.GetParametersRes.rst:29:<autosummary>:1
 msgid ":py:obj:`parameters <flwr.common.GetParametersRes.parameters>`\\"
-msgstr ""
+msgstr ":py:obj:`parameters <flwr.common.GetParametersRes.parameters>`\\"
 
 #: ../../source/ref-api/flwr.common.GetPropertiesIns.rst:2
 msgid "GetPropertiesIns"
-msgstr ""
+msgstr "GetPropertiesIns"
 
 #: ../../source/ref-api/flwr.common.GetPropertiesIns.rst:28:<autosummary>:1
 msgid ":py:obj:`config <flwr.common.GetPropertiesIns.config>`\\"
-msgstr ""
+msgstr ":py:obj:`config <flwr.common.GetPropertiesIns.config>`\\"
 
 #: ../../source/ref-api/flwr.common.GetPropertiesRes.rst:2
 msgid "GetPropertiesRes"
-msgstr ""
+msgstr "GetPropertiesRes"
 
 #: ../../source/ref-api/flwr.common.GetPropertiesRes.rst:29:<autosummary>:1
 msgid ":py:obj:`status <flwr.common.GetPropertiesRes.status>`\\"
-msgstr ""
+msgstr ":py:obj:`status <flwr.common.GetPropertiesRes.status>`\\"
 
 #: ../../source/ref-api/flwr.common.GetPropertiesRes.rst:29:<autosummary>:1
 msgid ":py:obj:`properties <flwr.common.GetPropertiesRes.properties>`\\"
-msgstr ""
+msgstr ":py:obj:`properties <flwr.common.GetPropertiesRes.properties>`\\"
 
 #: ../../source/ref-api/flwr.common.Message.rst:2
 msgid "Message"
-msgstr ""
+msgstr "Message"
 
 #: flwr.common.Message.content:1:<autosummary>:1 flwr.common.Message.metadata:1
 #: flwr.common.message.Message:3 of
 msgid "A dataclass including information about the message to be executed."
-msgstr ""
+msgstr "실행할 메시지에 대한 정보를 포함한 데이터 클래스입니다."
 
 #: flwr.common.message.Message:5 of
 msgid ""
 "Holds records either sent by another entity (e.g. sent by the server-side "
 "logic to a client, or vice-versa) or that will be sent to it."
-msgstr ""
+msgstr "다른 엔터티(예: 서버 측 로직이 클라이언트로 전송하거나 그 반대로 전송하는 등)"
+"가 전송했거나 전송할 레코드를 보유합니다."
 
 #: flwr.common.message.Message:8 of
 msgid ""
 "A dataclass that captures information about an error that took place when "
 "processing another message."
-msgstr ""
+msgstr "다른 메시지를 처리할 때 발생한 오류에 대한 정보를 캡처하는 데이터 "
+"클래스입니다."
 
 #: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
 msgid ""
 ":py:obj:`create_error_reply <flwr.common.Message.create_error_reply>`\\ "
 "\\(error\\[\\, ttl\\]\\)"
 msgstr ""
+":py:obj:`create_error_reply <flwr.common.Message.create_error_reply>`\\ \\("
+"error\\[\\, ttl\\]\\)"
 
 #: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
 #: flwr.common.message.Message.create_error_reply:1 of
 msgid "Construct a reply message indicating an error happened."
-msgstr ""
+msgstr "오류가 발생했음을 나타내는 답장 메시지를 작성합니다."
 
 #: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
 msgid ""
 ":py:obj:`create_reply <flwr.common.Message.create_reply>`\\ \\(content\\[\\, "
 "ttl\\]\\)"
 msgstr ""
+":py:obj:`create_reply <flwr.common.Message.create_reply>`\\ \\(content\\[\\, "
+"ttl\\]\\)"
 
 #: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
 #: flwr.common.message.Message.create_reply:1 of
 msgid "Create a reply to this message with specified content and TTL."
-msgstr ""
+msgstr "지정된 콘텐츠와 TTL을 사용하여 이 메시지에 대한 답글을 작성합니다."
 
 #: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
 msgid ":py:obj:`has_content <flwr.common.Message.has_content>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`has_content <flwr.common.Message.has_content>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
 #: flwr.common.message.Message.has_content:1 of
 msgid "Return True if message has content, else False."
-msgstr ""
+msgstr "메시지에 콘텐츠가 있으면 True을 반환하고, 그렇지 않으면 False을 반환합니다."
 
 #: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
 msgid ":py:obj:`has_error <flwr.common.Message.has_error>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`has_error <flwr.common.Message.has_error>`\\ \\(\\)"
 
 #: ../../source/ref-api/flwr.common.Message.rst:35:<autosummary>:1
 #: flwr.common.message.Message.has_error:1 of
 msgid "Return True if message has an error, else False."
-msgstr ""
+msgstr "메시지에 오류가 있으면 True을 반환하고, 그렇지 않으면 False을 반환합니다."
 
 #: flwr.common.Message.content:1:<autosummary>:1 of
 msgid ":py:obj:`content <flwr.common.Message.content>`\\"
-msgstr ""
+msgstr ":py:obj:`content <flwr.common.Message.content>`\\"
 
 #: flwr.common.Message.content:1 flwr.common.Message.content:1:<autosummary>:1
 #: of
 msgid "The content of this message."
-msgstr ""
+msgstr "이 메시지의 내용입니다."
 
 #: flwr.common.Message.content:1:<autosummary>:1 of
 msgid ":py:obj:`error <flwr.common.Message.error>`\\"
-msgstr ""
+msgstr ":py:obj:`error <flwr.common.Message.error>`\\"
 
 #: flwr.common.Message.content:1:<autosummary>:1 flwr.common.Message.error:1 of
 msgid "Error captured by this message."
-msgstr ""
+msgstr "이 메시지가 캡처한 오류입니다."
 
 #: flwr.common.Message.content:1:<autosummary>:1 of
 msgid ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
-msgstr ""
+msgstr ":py:obj:`metadata <flwr.common.Message.metadata>`\\"
 
 #: flwr.common.message.Message.create_error_reply:3 of
 msgid "The error that was encountered."
-msgstr ""
+msgstr "오류가 발생했습니다."
 
 #: flwr.common.message.Message.create_error_reply:5
 #: flwr.common.message.Message.create_reply:9 of
@@ -11218,6 +11286,9 @@ msgid ""
 "the equation:  ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta."
 "created_at)"
 msgstr ""
+"이 메시지의 남은 시간(초)입니다. 설정하지 않으면 수신된 메시지가 만료되기 "
+"전까지 남은 시간을 기준으로 설정됩니다. 이는 다음과 같은 공식을 따릅니다: "
+"ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)"
 
 #: flwr.common.message.Message.create_error_reply:5
 #: flwr.common.message.Message.create_reply:9 of
@@ -11226,11 +11297,13 @@ msgid ""
 "the remaining time for the received message before it expires. This follows "
 "the equation:"
 msgstr ""
+"이 메시지의 남은 시간(초)입니다. 설정하지 않으면 수신된 메시지가 만료되기 "
+"전까지 남은 시간을 기준으로 설정됩니다. 이는 다음 공식을 따릅니다:"
 
 #: flwr.common.message.Message.create_error_reply:9
 #: flwr.common.message.Message.create_reply:13 of
 msgid "ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)"
-msgstr ""
+msgstr "ttl = msg.meta.ttl - (reply.meta.created_at - msg.meta.created_at)"
 
 #: flwr.common.message.Message.create_reply:3 of
 msgid ""
@@ -11238,84 +11311,90 @@ msgid ""
 "'run_id', 'src_node_id', 'dst_node_id', and 'message_type' from this message "
 "and sets 'reply_to_message' to the ID of this message."
 msgstr ""
+"이 메서드는 이 메시지에 대한 응답으로 새로운 '메시지'를 생성합니다. 이 "
+"메시지에서 'run_id', 'src_node_id', 'dst_node_id', 'message_type'을 상속하고 "
+"'reply_to_message'를 이 메시지의 ID로 설정합니다."
 
 #: flwr.common.message.Message.create_reply:7 of
 msgid "The content for the reply message."
-msgstr ""
+msgstr "답장 메시지의 콘텐츠입니다."
 
 #: flwr.common.message.Message.create_reply:16 of
 msgid "A new `Message` instance representing the reply."
-msgstr ""
+msgstr "답장을 나타내는 새로운 `메시지` 인스턴스입니다."
 
 #: ../../source/ref-api/flwr.common.MessageType.rst:2
 msgid "MessageType"
-msgstr ""
+msgstr "MessageType"
 
 #: ../../source/ref-api/flwr.common.MessageType.rst:30:<autosummary>:1
 msgid ":py:obj:`EVALUATE <flwr.common.MessageType.EVALUATE>`\\"
-msgstr ""
+msgstr ":py:obj:`EVALUATE <flwr.common.MessageType.EVALUATE>`\\"
 
 #: ../../source/ref-api/flwr.common.MessageType.rst:30:<autosummary>:1
 msgid ":py:obj:`QUERY <flwr.common.MessageType.QUERY>`\\"
-msgstr ""
+msgstr ":py:obj:`QUERY <flwr.common.MessageType.QUERY>`\\"
 
 #: ../../source/ref-api/flwr.common.MessageType.rst:30:<autosummary>:1
 msgid ":py:obj:`TRAIN <flwr.common.MessageType.TRAIN>`\\"
-msgstr ""
+msgstr ":py:obj:`TRAIN <flwr.common.MessageType.TRAIN>`\\"
 
 #: ../../source/ref-api/flwr.common.MessageTypeLegacy.rst:2
 msgid "MessageTypeLegacy"
-msgstr ""
+msgstr "MessageTypeLegacy"
 
 #: ../../source/ref-api/flwr.common.MessageTypeLegacy.rst:29:<autosummary>:1
 msgid ""
 ":py:obj:`GET_PARAMETERS <flwr.common.MessageTypeLegacy.GET_PARAMETERS>`\\"
 msgstr ""
+":py:obj:`GET_PARAMETERS <flwr.common.MessageTypeLegacy.GET_PARAMETERS>`\\"
 
 #: ../../source/ref-api/flwr.common.MessageTypeLegacy.rst:29:<autosummary>:1
 msgid ""
 ":py:obj:`GET_PROPERTIES <flwr.common.MessageTypeLegacy.GET_PROPERTIES>`\\"
 msgstr ""
+":py:obj:`GET_PROPERTIES <flwr.common.MessageTypeLegacy.GET_PROPERTIES>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
 #: flwr.common.Metadata.run_id:1 flwr.common.message.Metadata:3 of
 msgid "An identifier for the current run."
-msgstr ""
+msgstr "현재 실행에 대한 식별자입니다."
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
 #: flwr.common.Metadata.message_id:1 flwr.common.message.Metadata:5 of
 msgid "An identifier for the current message."
-msgstr ""
+msgstr "현재 메시지의 식별자입니다."
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
 #: flwr.common.Metadata.src_node_id:1 flwr.common.message.Metadata:7 of
 msgid "An identifier for the node sending this message."
-msgstr ""
+msgstr "이 메시지를 보내는 노드의 식별자입니다."
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
 #: flwr.common.Metadata.dst_node_id:1 flwr.common.message.Metadata:9 of
 msgid "An identifier for the node receiving this message."
-msgstr ""
+msgstr "이 메시지를 수신하는 노드의 식별자입니다."
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
 #: flwr.common.Metadata.reply_to_message:1 flwr.common.message.Metadata:11 of
 msgid "An identifier for the message this message replies to."
-msgstr ""
+msgstr "이 메시지가 회신하는 메시지의 식별자입니다."
 
 #: flwr.common.message.Metadata:13 of
 msgid ""
 "An identifier for grouping messages. In some settings, this is used as the "
 "FL round."
-msgstr ""
+msgstr "메시지를 그룹화하기 위한 식별자입니다. 일부 설정에서는 FL 라운드로 "
+"사용됩니다."
 
 #: flwr.common.message.Metadata:16 of
 msgid "Time-to-live for this message in seconds."
-msgstr ""
+msgstr "이 메시지의 유효 시간(초)입니다."
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
 #: flwr.common.Metadata.message_type:1 flwr.common.message.Metadata:18 of
 msgid "A string that encodes the action to be executed on the receiving end."
-msgstr ""
+msgstr "수신 측에서 실행할 작업을 인코딩하는 문자열입니다."
 
 #: flwr.common.message.Metadata:21 of
 msgid ""
@@ -11323,70 +11402,72 @@ msgid ""
 "a ClientApp. Making use of this identifier is more relevant when conducting "
 "simulations."
 msgstr ""
+"클라이언트 앱의 특정 데이터 파티션을 로드할 때 사용할 수 있는 식별자입니다. "
+"시뮬레이션을 수행할 때 이 식별자를 사용하는 것이 더 적절합니다."
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid ":py:obj:`created_at <flwr.common.Metadata.created_at>`\\"
-msgstr ""
+msgstr ":py:obj:`created_at <flwr.common.Metadata.created_at>`\\"
 
 #: flwr.common.Metadata.created_at:1
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid "Unix timestamp when the message was created."
-msgstr ""
+msgstr "메시지가 생성된 때의 Unix timestamp입니다."
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid ":py:obj:`dst_node_id <flwr.common.Metadata.dst_node_id>`\\"
-msgstr ""
+msgstr ":py:obj:`dst_node_id <flwr.common.Metadata.dst_node_id>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid ":py:obj:`group_id <flwr.common.Metadata.group_id>`\\"
-msgstr ""
+msgstr ":py:obj:`group_id <flwr.common.Metadata.group_id>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
 #: flwr.common.Metadata.group_id:1 of
 msgid "An identifier for grouping messages."
-msgstr ""
+msgstr "메시지를 그룹화하기 위한 식별자입니다."
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid ":py:obj:`message_id <flwr.common.Metadata.message_id>`\\"
-msgstr ""
+msgstr ":py:obj:`message_id <flwr.common.Metadata.message_id>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid ":py:obj:`message_type <flwr.common.Metadata.message_type>`\\"
-msgstr ""
+msgstr ":py:obj:`message_type <flwr.common.Metadata.message_type>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid ":py:obj:`partition_id <flwr.common.Metadata.partition_id>`\\"
-msgstr ""
+msgstr ":py:obj:`partition_id <flwr.common.Metadata.partition_id>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1
 #: flwr.common.Metadata.partition_id:1 of
 msgid "An identifier telling which data partition a ClientApp should use."
-msgstr ""
+msgstr "클라이언트앱이 사용해야 하는 데이터 파티션을 알려주는 식별자입니다."
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid ":py:obj:`reply_to_message <flwr.common.Metadata.reply_to_message>`\\"
-msgstr ""
+msgstr ":py:obj:`reply_to_message <flwr.common.Metadata.reply_to_message>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid ":py:obj:`run_id <flwr.common.Metadata.run_id>`\\"
-msgstr ""
+msgstr ":py:obj:`run_id <flwr.common.Metadata.run_id>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid ":py:obj:`src_node_id <flwr.common.Metadata.src_node_id>`\\"
-msgstr ""
+msgstr ":py:obj:`src_node_id <flwr.common.Metadata.src_node_id>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 of
 msgid ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
-msgstr ""
+msgstr ":py:obj:`ttl <flwr.common.Metadata.ttl>`\\"
 
 #: flwr.common.Metadata.created_at:1:<autosummary>:1 flwr.common.Metadata.ttl:1
 #: of
 msgid "Time-to-live for this message."
-msgstr ""
+msgstr "이 메시지를 기다리는 시간입니다."
 
 #: ../../source/ref-api/flwr.common.MetricsRecord.rst:2
 msgid "MetricsRecord"
-msgstr ""
+msgstr "MetricsRecord"
 
 #: flwr.common.record.metricsrecord.MetricsRecord:1 of
 msgid ""
@@ -11394,62 +11475,71 @@ msgid ""
 "`str`, :py:class:`int` | :py:class:`float` | :py:class:`~typing.List`\\ [:py:"
 "class:`int`] | :py:class:`~typing.List`\\ [:py:class:`float`]]"
 msgstr ""
+"Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ [:py:class:`str`"
+", :py:class:`int` | :py:class:`float` | :py:class:`~typing.List`\\ "
+"[:py:class:`int`] | :py:class:`~typing.List`\\ [:py:class:`float`]]"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`clear <flwr.common.MetricsRecord.clear>`\\ \\(\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`count_bytes <flwr.common.MetricsRecord.count_bytes>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`count_bytes <flwr.common.MetricsRecord.count_bytes>`\\ \\(\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
-msgstr ""
+msgstr ":py:obj:`get <flwr.common.MetricsRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`items <flwr.common.MetricsRecord.items>`\\ \\(\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`keys <flwr.common.MetricsRecord.keys>`\\ \\(\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
-msgstr ""
+msgstr ":py:obj:`pop <flwr.common.MetricsRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
+":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, \\]\\*\\*F\\"
+")"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`values <flwr.common.MetricsRecord.values>`\\ \\(\\)"
 msgstr ""
+":py:obj:`update <flwr.common.MetricsRecord.update>`\\ \\(\\[E\\, \\]\\*\\*F\\"
+")"
 
 #: ../../source/ref-api/flwr.common.NDArray.rst:2
 msgid "NDArray"
-msgstr ""
+msgstr "NDArray"
 
 #: ../../source/ref-api/flwr.common.Parameters.rst:29:<autosummary>:1
 msgid ":py:obj:`tensors <flwr.common.Parameters.tensors>`\\"
-msgstr ""
+msgstr ":py:obj:`tensors <flwr.common.Parameters.tensors>`\\"
 
 #: ../../source/ref-api/flwr.common.Parameters.rst:29:<autosummary>:1
 msgid ":py:obj:`tensor_type <flwr.common.Parameters.tensor_type>`\\"
-msgstr ""
+msgstr ":py:obj:`tensor_type <flwr.common.Parameters.tensor_type>`\\"
 
 #: ../../source/ref-api/flwr.common.ParametersRecord.rst:2
 msgid "ParametersRecord"
-msgstr ""
+msgstr "ParametersRecord"
 
 #: flwr.common.record.parametersrecord.ParametersRecord:1 of
 msgid ""
 "Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ [:py:class:"
 "`str`, :py:class:`~flwr.common.record.parametersrecord.Array`]"
 msgstr ""
+"Bases: :py:class:`~flwr.common.record.typeddict.TypedDict`\\ [:py:class:`str`"
+", :py:class:`~flwr.common.record.parametersrecord.Array`]"
 
 #: flwr.common.record.parametersrecord.ParametersRecord:3 of
 msgid ""
@@ -11457,148 +11547,158 @@ msgid ""
 "as an OrderedDict[str, Array]. ParametersRecord objects can be viewed as an "
 "equivalent to PyTorch's state_dict, but holding serialised tensors instead."
 msgstr ""
+"Arrays라는 이름의 데이터 클래스를 순서대로 저장합니다. 즉, OrderedDict[str, "
+"Array]로 항목을 보유합니다. ParametersRecord 객체는 파이토치의 state_dict와 "
+"동등한 것으로 볼 수 있지만, 대신 직렬화된 텐서를 보유합니다."
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`clear <flwr.common.ParametersRecord.clear>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`clear <flwr.common.ParametersRecord.clear>`\\ \\(\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`count_bytes <flwr.common.ParametersRecord.count_bytes>`\\ \\(\\)"
 msgstr ""
+":py:obj:`count_bytes <flwr.common.ParametersRecord.count_bytes>`\\ \\(\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`get <flwr.common.ParametersRecord.get>`\\ \\(k\\[\\,d\\]\\)"
-msgstr ""
+msgstr ":py:obj:`get <flwr.common.ParametersRecord.get>`\\ \\(k\\[\\,d\\]\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`items <flwr.common.ParametersRecord.items>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`items <flwr.common.ParametersRecord.items>`\\ \\(\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`keys <flwr.common.ParametersRecord.keys>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`keys <flwr.common.ParametersRecord.keys>`\\ \\(\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`pop <flwr.common.ParametersRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
-msgstr ""
+msgstr ":py:obj:`pop <flwr.common.ParametersRecord.pop>`\\ \\(k\\[\\,d\\]\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`update <flwr.common.ParametersRecord.update>`\\ \\(\\[E\\, "
 "\\]\\*\\*F\\)"
 msgstr ""
+":py:obj:`update <flwr.common.ParametersRecord.update>`\\ \\(\\[E\\, \\]\\*\\*"
+"F\\)"
 
 #: flwr.common.record.typeddict.TypedDict.clear:1:<autosummary>:1 of
 msgid ":py:obj:`values <flwr.common.ParametersRecord.values>`\\ \\(\\)"
-msgstr ""
+msgstr ":py:obj:`values <flwr.common.ParametersRecord.values>`\\ \\(\\)"
 
 #: flwr.common.record.parametersrecord.ParametersRecord.count_bytes:3 of
 msgid ""
 "Note that a small amount of Bytes might also be included in this counting "
 "that correspond to metadata of the serialized object (e.g. of NumPy array) "
 "needed for deseralization."
-msgstr ""
+msgstr "역직렬화에 필요한 직렬화된 객체의 메타데이터(예: NumPy 배열)에 해당하는 "
+"소량의 바이트도 이 카운팅에 포함될 수 있습니다."
 
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:2
 msgid "ReconnectIns"
-msgstr ""
+msgstr "ReconnectIns"
 
 #: ../../source/ref-api/flwr.common.ReconnectIns.rst:28:<autosummary>:1
 msgid ":py:obj:`seconds <flwr.common.ReconnectIns.seconds>`\\"
-msgstr ""
+msgstr ":py:obj:`seconds <flwr.common.ReconnectIns.seconds>`\\"
 
 #: ../../source/ref-api/flwr.common.RecordSet.rst:2
 msgid "RecordSet"
-msgstr ""
+msgstr "RecordSet"
 
 #: flwr.common.RecordSet.configs_records:1:<autosummary>:1 of
 msgid ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
-msgstr ""
+msgstr ":py:obj:`configs_records <flwr.common.RecordSet.configs_records>`\\"
 
 #: flwr.common.RecordSet.configs_records:1
 #: flwr.common.RecordSet.configs_records:1:<autosummary>:1 of
 msgid "Dictionary holding ConfigsRecord instances."
-msgstr ""
+msgstr "Dictionary holding ConfigsRecord instances."
 
 #: flwr.common.RecordSet.configs_records:1:<autosummary>:1 of
 msgid ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
-msgstr ""
+msgstr ":py:obj:`metrics_records <flwr.common.RecordSet.metrics_records>`\\"
 
 #: flwr.common.RecordSet.configs_records:1:<autosummary>:1
 #: flwr.common.RecordSet.metrics_records:1 of
 msgid "Dictionary holding MetricsRecord instances."
-msgstr ""
+msgstr "Dictionary holding MetricsRecord instances."
 
 #: flwr.common.RecordSet.configs_records:1:<autosummary>:1 of
 msgid ""
 ":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
 msgstr ""
+":py:obj:`parameters_records <flwr.common.RecordSet.parameters_records>`\\"
 
 #: flwr.common.RecordSet.configs_records:1:<autosummary>:1
 #: flwr.common.RecordSet.parameters_records:1 of
 msgid "Dictionary holding ParametersRecord instances."
-msgstr ""
+msgstr "Dictionary holding ParametersRecord instances."
 
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:2
 msgid "ServerMessage"
-msgstr ""
+msgstr "ServerMessage"
 
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:31:<autosummary>:1
 msgid ":py:obj:`evaluate_ins <flwr.common.ServerMessage.evaluate_ins>`\\"
-msgstr ""
+msgstr ":py:obj:`evaluate_ins <flwr.common.ServerMessage.evaluate_ins>`\\"
 
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:31:<autosummary>:1
 msgid ":py:obj:`fit_ins <flwr.common.ServerMessage.fit_ins>`\\"
-msgstr ""
+msgstr ":py:obj:`fit_ins <flwr.common.ServerMessage.fit_ins>`\\"
 
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:31:<autosummary>:1
 msgid ""
 ":py:obj:`get_parameters_ins <flwr.common.ServerMessage.get_parameters_ins>`\\"
 msgstr ""
+":py:obj:`get_parameters_ins <flwr.common.ServerMessage.get_parameters_ins>`\\"
 
 #: ../../source/ref-api/flwr.common.ServerMessage.rst:31:<autosummary>:1
 msgid ""
 ":py:obj:`get_properties_ins <flwr.common.ServerMessage.get_properties_ins>`\\"
 msgstr ""
+":py:obj:`get_properties_ins <flwr.common.ServerMessage.get_properties_ins>`\\"
 
 #: ../../source/ref-api/flwr.common.Status.rst:2
 msgid "Status"
-msgstr ""
+msgstr "Status"
 
 #: ../../source/ref-api/flwr.common.Status.rst:29:<autosummary>:1
 msgid ":py:obj:`code <flwr.common.Status.code>`\\"
-msgstr ""
+msgstr ":py:obj:`code <flwr.common.Status.code>`\\"
 
 #: ../../source/ref-api/flwr.common.Status.rst:29:<autosummary>:1
 msgid ":py:obj:`message <flwr.common.Status.message>`\\"
-msgstr ""
+msgstr ":py:obj:`message <flwr.common.Status.message>`\\"
 
 #: ../../source/ref-api/flwr.common.array_from_numpy.rst:2
 msgid "array\\_from\\_numpy"
-msgstr ""
+msgstr "array\\_from\\_numpy"
 
 #: ../../source/ref-api/flwr.common.bytes_to_ndarray.rst:2
 msgid "bytes\\_to\\_ndarray"
-msgstr ""
+msgstr "bytes\\_to\\_ndarray"
 
 #: ../../source/ref-api/flwr.common.configure.rst:2
 msgid "configure"
-msgstr ""
+msgstr "구성"
 
 #: ../../source/ref-api/flwr.common.event.rst:2
 msgid "event"
-msgstr ""
+msgstr "이벤트"
 
 #: ../../source/ref-api/flwr.common.log.rst:2
 msgid "log"
-msgstr ""
+msgstr "로그"
 
 #: logging.Logger.log:3 of
 msgid ""
 "To pass exception information, use the keyword argument exc_info with a true "
 "value, e.g."
-msgstr ""
+msgstr "예외 정보를 전달하려면 키워드 argument exc_info를 참 값과 함께 사용합니다."
 
 #: logging.Logger.log:6 of
 #, python-format
