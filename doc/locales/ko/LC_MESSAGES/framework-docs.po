@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-17 16:09+0200\n"
-"PO-Revision-Date: 2024-06-23 05:40+0000\n"
+"PO-Revision-Date: 2024-06-23 08:33+0000\n"
 "Last-Translator: Sijiaomg Ohoh <lisijia1997@gmail.com>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
@@ -22169,7 +22169,7 @@ msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:9
 msgid "What is Federated Learning?"
-msgstr ""
+msgstr "연합 학습이란 무엇입니까?"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:13
 msgid ""
@@ -22178,6 +22178,10 @@ msgid ""
 "parts of the tutorial, you will be able to build advanced federated learning "
 "systems that approach the current state of the art in the field."
 msgstr ""
+"이 튜토리얼에서 연합 학습이 무엇인지 배우고 Flower로 첫 번째 시스템을 "
+"구축하고 점진적으로 확장해 나갈 것입니다. 본 튜토리얼의 모든 부분을 완성할 "
+"수 있다면, 당신은 고급 연방 학습 시스템을 구축하여 그 분야의 현재 기술 "
+"수준에 접근할 수 있을 것입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:15
 msgid ""
@@ -22185,6 +22189,8 @@ msgid ""
 "learning. Only a basic understanding of data science and Python programming "
 "is assumed."
 msgstr ""
+"🧑‍🏫이 튜토리얼은 제로베이부터 시작되며 연방 학습에 상세히 아는 필요가 "
+"없습니다. 데이터 과학과 파이썬 프로그래밍에 대한 기본적인 이해만 가정합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:17
 msgid ""
@@ -22194,16 +22200,22 @@ msgid ""
 "from you in the ``#introductions`` channel! And if anything is unclear, head "
 "over to the ``#questions`` channel."
 msgstr ""
+"`Star Flower on GitHub <https://github.com/adap/flower>`__ ⭐️ Slack의 "
+"오픈소스 Flower 커뮤니티에 가입하여 소통하고 질문하고 도움을 받을 수 "
+"있습니다: `Slack 가입<https://flower.ai/join-slack>`__ 🌼 ``#introductions``"
+"채널에서 당신의 목소리를 듣고 싶습니다! 궁금한 점이 있으시면``#questions`` "
+"채널로 방문해 주시기 바랍니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:31
 msgid "Classic machine learning"
-msgstr ""
+msgstr "클래식 머신러닝"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:33
 msgid ""
 "Before we begin to discuss federated learning, let us quickly recap how most "
 "machine learning works today."
-msgstr ""
+msgstr "연방 학습에 대해 논의하기 전에 현재 대부분의 머신러닝이 어떻게 작동하는지 "
+"간략히 요약하겠습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:35
 msgid ""
