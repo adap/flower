@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-17 16:09+0200\n"
 "PO-Revision-Date: 2024-06-23 05:35+0000\n"
-"Last-Translator: 박태현 <qkrxogus113@ajou.ac.kr>\n"
+"Last-Translator: Sijiaomg Ohoh <lisijia1997@gmail.com>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
 "Language: ko\n"
@@ -8185,19 +8185,19 @@ msgstr "Flower CLI 참조"
 
 #: ../../source/ref-api-cli.rst:7
 msgid "flower-simulation"
-msgstr "flower-simulation"
+msgstr "flower 시뮬레이션"
 
 #: ../../source/ref-api-cli.rst:17
 msgid "flower-superlink"
-msgstr "flower-superlink"
+msgstr "flower 초연결"
 
 #: ../../source/ref-api-cli.rst:27
 msgid "flower-client-app"
-msgstr "flower-client-app"
+msgstr "flower 클라이언트 앱"
 
 #: ../../source/ref-api-cli.rst:37
 msgid "flower-server-app"
-msgstr "flower-server-app"
+msgstr "flower 서버 프로그램"
 
 #: ../../source/ref-api/flwr.rst:2
 msgid "flwr"
