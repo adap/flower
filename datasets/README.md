@@ -7,8 +7,20 @@
 [![Slack](https://img.shields.io/badge/Chat-Slack-red)](https://flower.ai/join-slack)
 
 Flower Datasets (`flwr-datasets`) is a library to quickly and easily create datasets for federated learning, federated evaluation, and federated analytics. It was created by the `Flower Labs` team that also created Flower: A Friendly Federated Learning Framework.
-For complete documentation that includes API docs, how-to guides and tutorials please visit https://flower.ai/docs/datasets/ and for full FL example see https://github.com/adap/flower/tree/main/examples.
-Below you'll find a brief overview of the library.
+
+
+> [!TIP]
+> For complete documentation that includes API docs, how-to guides and tutorials please visit the [Flower Datasets Documentation](https://flower.ai/docs/datasets/) and for full FL example see the [Flower Examples page](https://github.com/adap/flower/tree/main/examples).
+
+## Installation
+
+For a complete installation guide visit the [Flower Datasets Documenation](file:///Users/javier/projects/flower/datasets/doc/build/html/how-to-install-flwr-datasets.html)
+
+```bash
+pip install flwr-datasets[vision]
+```
+
+## Overview
 
 Flower Datasets library supports:
 * **downloading datasets** - choose the dataset from Hugging Face's `datasets`,
@@ -24,7 +36,7 @@ Thanks to using Hugging Face's `datasets` used under the hood, Flower Datasets i
 * Jax,
 * Arrow.
 
-Create **custom partitioning schemes** or choose from the **implemented partitioning schemes**:
+Create **custom partitioning schemes** or choose from the **implemented [partitioning schemes](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html#module-flwr_datasets.partitioner)**:
 
 * Partitioner (the abstract base class) `Partitioner`
 * IID partitioning `IidPartitioner(num_partitions)`
@@ -43,33 +55,8 @@ Create **custom partitioning schemes** or choose from the **implemented partitio
 </p>
 PS: This plot was generated using a library function (see flwr_datasets.visualization package for more).
 
-# Installation
 
-## With pip
-
-Flower Datasets can be installed from PyPi
-
-```bash
-pip install flwr-datasets
-```
-
-Install with an extension:
-
-* for image datasets:
-
-```bash
-pip install flwr-datasets[vision]
-```
-
-* for audio datasets:
-
-```bash
-pip install flwr-datasets[audio]
-```
-
-If you plan to change the type of the dataset to run the code with your ML framework, make sure to have it installed too.
-
-# Usage
+## Usage
 
 Flower Datasets exposes the `FederatedDataset` abstraction to represent the dataset needed for federated learning/evaluation/analytics. It has two powerful methods that let you handle the dataset preprocessing: `load_partition(partition_id, split)` and `load_split(split)`.
 
@@ -88,7 +75,7 @@ centralized_data = fds.load_split("test")
 
 For more details, please refer to the specific how-to guides or tutorial. They showcase customization and more advanced features.
 
-# Future release
+## Future release
 
 Here are a few of the things that we will work on in future releases:
 
