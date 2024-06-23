@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-17 16:09+0200\n"
-"PO-Revision-Date: 2024-06-23 11:33+0000\n"
+"PO-Revision-Date: 2024-06-23 14:41+0000\n"
 "Last-Translator: Sijiaomg Ohoh <lisijia1997@gmail.com>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
@@ -22365,14 +22365,17 @@ msgid ""
 "collecting sensor data, a laptop receiving input via the keyboard, or a "
 "smart speaker listening to someone trying to sing a song."
 msgstr ""
+"스마트폰에서 사용자와 앱의 상호 작용, 센서 데이터를 수집하는 자동차, "
+"키보드를 통해 입력을 받는 노트북 또는 누군가 노래를 부르리는 것을 듣는 "
+"스마트 스피커에서 비롯됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:67
 msgid "|9bc21c7dbd17444a8f070c60786e3484|"
-msgstr ""
+msgstr "|9bc21c7dbd17444a8f070c60786e3484|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
 msgid "Data on a phone"
-msgstr ""
+msgstr "핸드푼에 있는 데이터"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:73
 msgid ""
@@ -22381,14 +22384,17 @@ msgid ""
 "the same app. But it could also be several organizations, all generating "
 "data for the same task."
 msgstr ""
+"또한 중요한 것은 이 \"다른 곳\"이 보통 한 곳만 아니라 여러 곳이라는 "
+"것입니다. 같은 앱을 실행하는 여러 기기일 수도 있습니다. 하지만 여러 조직이 "
+"모두 같은 작업을 위해 데이터를 생성하는 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:79
 msgid "|3047bbce54b34099ae559963d0420d79|"
-msgstr ""
+msgstr "|3047bbce54b34099ae559963d0420d79|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:115
 msgid "Data is on many devices"
-msgstr ""
+msgstr "데이터가 여러 장치에 있습니다"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:85
 msgid ""
@@ -22396,14 +22402,17 @@ msgid ""
 "has been used in the past was to collect all data on a central server. This "
 "server can be somewhere in a data center, or somewhere in the cloud."
 msgstr ""
+"따라서 머신러닝이나 어떤 종류의 데이터 분석을 이용하려면 과거에는 중앙 "
+"서버에서 모든 데이터를 수집하는 방법이 사용되었습니다.이 서버는 데이터 센터 "
+"어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
 msgid "|e9f8ce948593444fb838d2f354c7ec5d|"
-msgstr ""
+msgstr "|e9f8ce948593444fb838d2f354c7ec5d|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:117
 msgid "Central data collection"
-msgstr ""
+msgstr "중앙 데이터 수집"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:97
 msgid ""
@@ -22411,18 +22420,21 @@ msgid ""
 "learning algorithms to train our model on the data. This is the machine "
 "learning approach that we've basically always relied on."
 msgstr ""
+"모든 데이터가 한 곳에 모이면, 우리는 궁극적으로 머신러닝 알고리즘을 사용하여 "
+"데이터에서 모델을 훈련시킬 수 있습니다.이것이 바로 우리가 기본적으로 "
+"의지해왔던 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
 msgid "|c24c1478b30e4f74839208628a842d1e|"
-msgstr ""
+msgstr "|c24c1478b30e4f74839208628a842d1e|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:119
 msgid "Central model training"
-msgstr ""
+msgstr "중앙 데이터 훈련"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:130
 msgid "Challenges of classical machine learning"
-msgstr ""
+msgstr "클래식 머신러닝이 만난 도전"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:132
 msgid ""
@@ -22431,14 +22443,17 @@ msgid ""
 "traffic. Cases, where all the data is naturally available on a centralized "
 "server."
 msgstr ""
+"우리가 방금 본 클래식 머신러닝 접근 방식은 경우에 따라 사용될 수 있습니다. "
+"좋은 예로는 휴일 사진을 분류하거나 웹 트래픽을 분석하는 것이 있습니다. "
+"이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에서 사용할 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
 msgid "|1b3613d7a58847b59e1d3180802dbc09|"
-msgstr ""
+msgstr "|1b3613d7a58847b59e1d3180802dbc09|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:173
 msgid "Centralized possible"
-msgstr ""
+msgstr "집중화 가능"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:144
 msgid ""
@@ -22446,14 +22461,17 @@ msgid ""
 "is not available on a centralized server, or cases where the data available "
 "on one server is not enough to train a good model."
 msgstr ""
+"그러나 이 방법은 다른 많은 경우에 적용되지 않습니다.예를 들어, 중앙 집중식 "
+"서버에 데이터가 없거나 서버의 데이터가 좋은 모델을 훈련하기에 충분하지 "
+"않습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
 msgid "|9980b5213db547d0b8024a50992b9e3f|"
-msgstr ""
+msgstr "|9980b5213db547d0b8024a50992b9e3f|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
 msgid "Centralized impossible"
-msgstr ""
+msgstr "집중화 가능"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:156
 msgid ""
@@ -22461,6 +22479,9 @@ msgid ""
 "does not work for a large number of highly important real-world use cases. "
 "Those reasons include:"
 msgstr ""
+"클래식 중앙 집중식 머신러닝 방법이 현실 세계에서 매우 중요한 수많은 사용 "
+"사례를 충족시킬 수 없는 이유가 있습니다.이유는 다음과 같은 여러 가지가 "
+"있습니다:"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:158
 msgid ""
@@ -22474,6 +22495,13 @@ msgid ""
 "different parts of the world, and their data is governed by different data "
 "protection regulations."
 msgstr ""
+"**규정**: GDPR (유럽), CCPA (캘리포니아), PIPEDA (캐나다), LGPD (브라질), "
+"PDPL (아르헨티나), KVKK (터키), POPI (남아프리카공화국), FSS (러시아), CDPR "
+"(중국), PDPB (인도), PIPA (한국), APPI (일본), PDP (인도네시아), PDPA "
+"(싱가포르), APP (호주)등의 법규로 민감한 데이터가 이동하지 않도록 보호하고 "
+"있습니 다. 실제 로이러한 규정은 사용자가 세계의 다른 지역에 살고 데이터가 "
+"다른 데이터 보호 규정에 의해 통제되기 때문에 단일 조직이 자체 사용자 "
+"데이터를 인공 지능 교육에 사용하는 것을 방지하기도 합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:160
 msgid ""
