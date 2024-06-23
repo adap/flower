@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-17 16:09+0200\n"
 "PO-Revision-Date: 2024-06-23 14:41+0000\n"
-"Last-Translator: Sijiaomg Ohoh <lisijia1997@gmail.com>\n"
+"Last-Translator: 박태현 <qkrxogus113@ajou.ac.kr>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
 "Language: ko\n"
@@ -88,7 +88,7 @@ msgstr "시작하기 전에, 로컬 개발 환경에서 몇 가지 전제 조건
 
 #: ../../source/contributor-how-to-build-docker-images.rst:12
 msgid "Clone the flower repository."
-msgstr "Flower 리포지토리를 복제합니다."
+msgstr "Flower 레포지토리를 복제합니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:18
 #: ../../source/how-to-run-flower-using-docker.rst:165
@@ -110,7 +110,7 @@ msgid ""
 "respective Dockerfiles. You can find them in the subdirectories of ``src/"
 "docker``."
 msgstr ""
-"이미지들을 조합하는 빌드 instruction들은 해당 Dockerfile에 있습니다. \"src/"
+"이미지들을 조합하는 빌드 명령어들은 해당 Dockerfile에 있습니다. \"src/"
 "docker\" 의 하위 디렉토리에서 찾을 수 있습니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:28
@@ -122,20 +122,21 @@ msgid ""
 "values, others must be specified when building the image. All available "
 "build arguments for each image are listed in one of the tables below."
 msgstr ""
-"Flower Docker는 빌드 argument를 통해 구성됩니다. 빌드 argument들을 통해, 이미"
-"지를 보다 유연하게 생성할 수 있습니다. 예를 들어, base 이미지에서 "
-"\"PYTHON_VERSION\" 빌드 argument를 사용하여 Python 버전을 지정할 수 있습니"
-"다. 일부 빌드 argument들은 기본값이며, 이미지를 빌드할 때 지정해야 합니다. "
-"각 이미지에 사용할 수 있는 모든 빌드 argument는 아래 표 중에 있습니다."
+"Flower Docker는 빌드 전달인자를 통해 구성됩니다. 빌드 argument들을 통해, "
+"이미지를 보다 유연하게 생성할 수 있습니다. 예를 들어, base 이미지에서 "
+"\"PYTHON_VERSION\" 빌드 전달인자를 사용하여 Python 버전을 지정할 수 "
+"있습니다. 일부 빌드 전달인자들은 기본값이며, 이미지를 빌드할 때 지정해야 "
+"합니다. 각 이미지에 사용할 수 있는 모든 빌드 전달인자는 아래 표 중에 "
+"있습니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:35
 msgid "Building the base image"
-msgstr "base 이미지 빌드"
+msgstr "기본 이미지 빌드"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:41
 #: ../../source/contributor-how-to-build-docker-images.rst:98
 msgid "Build argument"
-msgstr "빌드 argument"
+msgstr "빌드 전달인자"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:42
 #: ../../source/contributor-how-to-build-docker-images.rst:99
@@ -158,7 +159,7 @@ msgstr "``DISTRO``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:46
 msgid "The Linux distribution to use as the base image."
-msgstr "base 이미지 사용을 위한 Linux 배포판."
+msgstr "기본 이미지 사용을 위한 Linux 배포판."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:47
 #: ../../source/contributor-how-to-build-docker-images.rst:51
@@ -266,8 +267,8 @@ msgid ""
 "These values serve as examples only."
 msgstr ""
 "이미지의 이름은 ``flwr_base``이고 태그는 ``0.1.0``입니다. 필요에 따라 빌드 "
-"argument들 뿐만 아니라 이름과 태그도 정할 수 있습니다. 이 값들은 예시일 뿐입"
-"니다."
+"전달인자들 뿐만 아니라 이름과 태그도 정할 수 있습니다. 이 값들은 예시일 "
+"뿐입니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:92
 msgid "Building the SuperLink/SuperNode or ServerApp image"
@@ -279,7 +280,7 @@ msgstr "``BASE_REPOSITORY``"
 
 #: ../../source/contributor-how-to-build-docker-images.rst:103
 msgid "The repository name of the base image."
-msgstr "base 이미지의 리포지토리 이름."
+msgstr "기본 이미지의 레포지토리 이름."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:105
 msgid "``flwr/base``"
@@ -311,7 +312,7 @@ msgid ""
 "image, all you need to do is set the ``BASE_REPOSITORY`` build argument."
 msgstr ""
 "공식 Flower 기본 이미지 대신 자체 기본 이미지를 사용 하길 원한다면, "
-"``BASE_REPOSITORY`` 빌드 argument들을 설정해야 합니다."
+"``BASE_REPOSITORY`` 빌드 전달인자들을 설정해야 합니다."
 
 #: ../../source/contributor-how-to-build-docker-images.rst:133
 msgid "After creating the image, we can test whether the image is working:"
@@ -333,10 +334,10 @@ msgid ""
 "prerequisites."
 msgstr ""
 "`Flower 1.5 <https://flower.ai/docs/framework/ref changelog."
-"html#v1-5-0-2023-08-31>`_ 부터 문서 페이지에 번역을 도입했지만, 아시다시피 번"
-"역이 불안전한 경우가 많습니다. 만일 영어 이외의 언어를 사용한다면, 많은 사람"
-"들이 Federated Learning에 접근할 수 있도록 번역 작업에 기여함으로써 저희의 노"
-"력에 도움을 주실 수 있습니다! 이는 전제 조건이 거의 없는 오픈 소스 기여자가 "
+"html#v1-5-0-2023-08-31>`_ 부터 문서 페이지에 번역을 도입했지만, 아시다시피 "
+"번역이 불안전한 경우가 많습니다. 만일 영어 이외의 언어를 사용한다면, 많은 "
+"사람들이 연합 학습에 접근할 수 있도록 번역 작업에 기여함으로써 저희의 노력에 "
+"도움을 주실 수 있습니다! 이는 전제 조건이 거의 없는 오픈 소스 기여자가 "
 "되고자 하는 사람들에게 좋은 기회가 될 수도 있습니다."
 
 #: ../../source/contributor-how-to-contribute-translations.rst:13
@@ -585,8 +586,8 @@ msgid ""
 "lock`` (``rm poetry.lock``) before running ``poetry install``)."
 msgstr ""
 "PyPI에서 ``flwr`` 사전 릴리스 설치하기: ``pyproject.toml``에서 ``flwr``의 "
-"dependency를 업데이트한 다음, 재설치하세요(``poetry 설치``이전에 ``poetry."
-"lock`` (``rm poetry.lock``)를 제거하는 것을 잊지 마세요)."
+"의존성을 업데이트한 다음, 재설치하세요(``poetry 설치``이전에 ``poetry.lock`` "
+"(``rm poetry.lock``)를 제거하는 것을 잊지 마세요)."
 
 #: ../../source/contributor-how-to-install-development-versions.rst:12
 msgid ""
@@ -658,7 +659,7 @@ msgstr "pip 사용하기(Colab에서 권장)"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:30
 msgid "Install a ``flwr`` pre-release from PyPI:"
-msgstr "PyPI에서 ``flwr`` 사전 릴리스를 설치하기:"
+msgstr "PyPI에서 ``flwr`` 사전 릴리즈를 설치하기:"
 
 #: ../../source/contributor-how-to-install-development-versions.rst:32
 msgid "``pip install -U --pre flwr`` (without extras)"
@@ -1016,7 +1017,7 @@ msgstr "사전 릴리즈 분류"
 #: ../../source/contributor-how-to-release-flower.rst:75
 msgid ""
 "Should the next pre-release be called alpha, beta, or release candidate?"
-msgstr "다음 사전 릴리를 알파, 베타 또는 릴리스 후보라고 불러야 하나요?"
+msgstr "다음 사전 릴리즈를 알파, 베타 또는 릴리스 후보라고 불러야 하나요?"
 
 #: ../../source/contributor-how-to-release-flower.rst:77
 msgid ""
@@ -1115,9 +1116,9 @@ msgid ""
 "to manage dependencies. After installing Poetry you simply create a virtual "
 "environment with:"
 msgstr ""
-"Flower examples은 dependencies을 관리하기 위해 `Poetry <https://python-"
-"poetry.org/docs/>`_를 기반으로 합니다. Poetry를 설치한 후 가상 환경을 생성하"
-"기만 하면 됩니다:"
+"Flower examples은 의존성을 관리하기 위해 `Poetry <https://python-poetry.org/"
+"docs/>`_를 기반으로 합니다. Poetry를 설치한 후 가상 환경을 생성하기만 하면 "
+"됩니다:"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:52
 msgid ""
@@ -1138,9 +1139,9 @@ msgid ""
 "install/index.html>`_  package. After setting it up you can create a virtual "
 "environment with:"
 msgstr ""
-"가상 환경에서  Anaconda를 사용하려면 `conda <https://docs.conda.io/projects/"
-"conda/en/latest/user-guide/install/index.html>`_ 패키지를 설치 및 설정하세"
-"요. 설정 후 다음을 사용하여 가상 환경을 만들 수 있습니다:"
+"가상 환경에서 Anaconda를 사용하려면 `conda <https://docs.conda.io/projects/"
+"conda/en/latest/user-guide/install/index.html>`_ 패키지를 설치 및 "
+"설정하세요. 설정 후 다음을 사용하여 가상 환경을 만들 수 있습니다:"
 
 #: ../../source/contributor-how-to-set-up-a-virtual-env.rst:68
 msgid "and activate the virtual environment with:"
@@ -1224,7 +1225,7 @@ msgstr "``index.rst``에서 새 rst로 연결합니다"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:2
 msgid "Good first contributions"
-msgstr "좋은 첫 번째 기여"
+msgstr "훌륭한 첫 번째 기여"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:4
 msgid ""
@@ -1283,10 +1284,10 @@ msgid ""
 "requests. If you find a baseline that you'd like to work on and that has no "
 "assignees, feel free to assign it to yourself and start working on it!"
 msgstr ""
-"그런 다음 오픈 된 `이슈 <https://github.com/adap/flower/issues?"
-"q=is%3Aopen+is%3Aissue+label%3A%22new+baseline%22>`_에서 baseline 요청을 확인"
-"해야 합니다. 작업하고 싶은 기준선을 찾았지만 담당자가 없는 경우, 자유롭게 자"
-"신에게 할당하고 작업을 시작하세요!"
+"그런 다음 오픈 된 `issues <https://github.com/adap/flower/"
+"issues?q=is%3Aopen+is%3Aissue+label%3A%22new+baseline%22>`_에서 baseline "
+"요청을 확인해야 합니다. 작업하고 싶은 기준선을 찾았지만 담당자가 없는 경우, "
+"자유롭게 자신에게 할당하고 작업을 시작하세요!"
 
 #: ../../source/contributor-ref-good-first-contributions.rst:31
 msgid ""
@@ -1569,8 +1570,8 @@ msgid ""
 "test it, you can finally start making changes!"
 msgstr ""
 ":doc:'기여자를 위한 시작 가이드 <contributor-tutorial-get-started-as-a-"
-"contributor>'를 참조하세요(리포지토리를 복제할 필요는 없습니다). 코드를 작성"
-"하고 테스트할 수 있게 되면 드디어 변경을 시작할 수 있습니다!"
+"contributor>'를 참조하세요(레포지토리를 복제할 필요는 없습니다). 코드를 "
+"작성하고 테스트할 수 있게 되면 드디어 변경을 시작할 수 있습니다!"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:100
 msgid "Making changes"
@@ -1609,8 +1610,7 @@ msgstr "**변경하기**"
 #: ../../source/contributor-tutorial-contribute-on-github.rst:125
 msgid ""
 "Write great code and create wonderful changes using your favorite editor!"
-msgstr ""
-"선호하 편집기를 사용하여 멋진 코드를 작성하고 훌륭한 변화를 만들어 보세요!"
+msgstr "선호하는 편집기를 사용하여 멋진 코드를 작성하고 훌륭한 변화를 만들어 보세요!"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:138
 msgid "**Test and format your code**"
@@ -1923,8 +1923,8 @@ msgid ""
 "This is a tiny change, but it'll allow us to test your end-to-end setup. "
 "After cloning and setting up the Flower repo, here's what you should do:"
 msgstr ""
-"이것은 사소한 변경이지만 end-to-end 설정을 테스트할 수 있습니다. Flower 포지"
-"토리를 복제하고 설정한 후에는 다음과 같이 하세요:"
+"이것은 사소한 변경이지만 end-to-end 설정을 테스트할 수 있습니다. Flower "
+"레포지토리를 복제하고 설정한 후에는 다음과 같이 하세요:"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:278
 msgid "Find the source file in ``doc/source``"
@@ -2042,7 +2042,7 @@ msgstr "다음 단계"
 msgid ""
 "Once you have made your first PR, and want to contribute more, be sure to "
 "check out the following :"
-msgstr "첫 번째 PR을 작성하고 더 많은 기여를 하고 싶다면 다음 을 확인하세요:"
+msgstr "첫 번째 PR을 작성하고 더 많은 기여를 하고 싶다면 다음을 확인하세요:"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:318
 msgid ""
@@ -2103,7 +2103,7 @@ msgstr "``ci(*:skip) Enforce PR title format``"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:347
 msgid "Invalid examples:"
-msgstr "잘못된 예제입니다:"
+msgstr "잘못된 예시입니다:"
 
 #: ../../source/contributor-tutorial-contribute-on-github.rst:349
 msgid "``feat(framework): Add flwr build CLI command`` (extra ``:``)"
@@ -2180,7 +2180,7 @@ msgstr "사전 준비"
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:22
 msgid "Some system-wide dependencies are needed."
-msgstr "일부 시스템 전체에 대한 dependencies이 필요합니다."
+msgstr "일부 시스템 전체에 대한 의존성이 필요합니다."
 
 #: ../../source/contributor-tutorial-get-started-as-a-contributor.rst:25
 msgid "For macOS"
@@ -2414,7 +2414,7 @@ msgstr "그러면 ``doc/build/html``에 HTML 문서가 생성됩니다."
 
 #: ../../source/example-fedbn-pytorch-from-centralized-to-federated.rst:2
 msgid "Example: FedBN in PyTorch - From Centralized To Federated"
-msgstr "예시: PyTorch에서 FedBN - Centralize에서 Federated으로"
+msgstr "예시: PyTorch에서 FedBN - 중앙 집중식에서 연합식으로"
 
 #: ../../source/example-fedbn-pytorch-from-centralized-to-federated.rst:4
 msgid ""
@@ -2430,14 +2430,14 @@ msgstr ""
 "<https://github.com/med-air/FedBN>`_으로 기존 머신러닝 워크로드의 federated "
 "버전을 구축하기 위해 Flower를 사용하는 방법을 보여드립니다. 우리는 PyTorch를 "
 "사용하여 CIFAR-10 데이터 세트에서 컨볼루션 신경망(일괄 정규화 레이어 포함)을 "
-"훈련하고 있습니다. FedBN을 적용할 때, :doc:`예제: 파이토치 -Centralized에서 "
-"Federated으로 <example-pytorch-from-centralized-to-federated>` 와 비교했을 "
-"때 몇 가지 사항만 변경 하면 됩니다."
+"훈련하고 있습니다. FedBN을 적용할 때, :doc:`예제: 파이토치 -중앙 집중식에서 "
+"연합식으로 <example-pytorch-from-centralized-to-federated>` 와 비교했을 때 "
+"몇 가지 사항만 변경 하면 됩니다."
 
 #: ../../source/example-fedbn-pytorch-from-centralized-to-federated.rst:9
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:10
 msgid "Centralized Training"
-msgstr "Centralized 훈련"
+msgstr "중앙 집중식 훈련"
 
 #: ../../source/example-fedbn-pytorch-from-centralized-to-federated.rst:10
 msgid ""
@@ -2446,7 +2446,7 @@ msgid ""
 "to do is modifying the file called :code:`cifar.py`, revised part is shown "
 "below:"
 msgstr ""
-"모든 파일은 :doc:`예제: 파이토치 - Centralized에서 Federated으로 <example-"
+"모든 파일은 :doc:`예제: 파이토치 -중앙 집중식에서 연합식으로 <example-"
 "pytorch-from-centralized-to-federated>`를 기반으로 수정합니다. :code:`cifar."
 "py`라는 파일을 수정하기만 하면 되며, 수정된 부분은 아래와 같습니다:"
 
@@ -2470,14 +2470,14 @@ msgid ""
 "learning system within FedBN, the system consists of one server and two "
 "clients."
 msgstr ""
-"지금까지는 파이토치를 사용해 본 적이 있다면 상당히 익숙하게 보일 것입니다. 다"
-"음 단계로 넘어가서 우리가 구축한 것을 사용하여 FedBN 내에서 하나의 서버와 두 "
-"개의 클라이언트로 구성된 federated 학습 시스템을 만들어 보겠습니다."
+"지금까지는 파이토치를 사용해 본 적이 있다면 상당히 익숙하게 보일 것입니다. "
+"다음 단계로 넘어가서 우리가 구축한 것을 사용하여 FedBN 내에서 하나의 서버와 "
+"두 개의 클라이언트로 구성된 연합학습 시스템을 만들어 보겠습니다."
 
 #: ../../source/example-fedbn-pytorch-from-centralized-to-federated.rst:51
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:167
 msgid "Federated Training"
-msgstr "Federated 훈련"
+msgstr "연합 훈련"
 
 #: ../../source/example-fedbn-pytorch-from-centralized-to-federated.rst:53
 msgid ""
@@ -2488,12 +2488,12 @@ msgid ""
 "`Example: PyTorch - From Centralized To Federated <example-pytorch-from-"
 "centralized-to-federated>`. first."
 msgstr ""
-":doc:`예제: 파이토치 - Centralized에서 Federated으로 <example-pytorch-from-"
-"centralized-to-federated>`를 읽었다면, 다음 부분은 쉽게 따라할 수 있으며 :"
-"code:`client.py`의 :code:`get_parameters`와 :code:`set_parameters` 함수만 수"
-"정해야 합니다. 그렇지 않은 경우 :doc:`예제: 파이토치 - Centralized에서 "
-"Federated으로 <example-pytorch-from-centralized-to-federated>`를 먼저 읽어보"
-"세요."
+":doc:`예제: 파이토치 - 중앙 집중식에서 연합식으로 <example-pytorch-from-"
+"centralized-to-federated>`를 읽었다면, 다음 부분은 쉽게 따라할 수 있으며 "
+":code:`client.py`의 :code:`get_parameters`와 :code:`set_parameters` 함수만 "
+"수정해야 합니다. 그렇지 않은 경우 :doc:`예제: 파이토치 - 중앙 집중식에서 "
+"연합식으로 <example-pytorch-from-centralized-to-federated>`를 먼저 "
+"읽어보세요."
 
 #: ../../source/example-fedbn-pytorch-from-centralized-to-federated.rst:56
 msgid ""
@@ -2525,9 +2525,9 @@ msgid ""
 "and see your (previously centralized) PyTorch project run federated learning "
 "with FedBN strategy across two clients. Congratulations!"
 msgstr ""
-"를 입력하고(클릭하기 전에 서버가 계속 실행 중인지 확인하세요), (이전에 "
-"centralized된) PyTorch 프로젝트가 두 클라이언트에서 FedBN으로 federated 학습"
-"을 실행하는 것을 확인합니다. 축하합니다!"
+"를 입력하고(클릭하기 전에 서버가 계속 실행 중인지 확인하세요), (이전에 중앙 "
+"집중된) PyTorch 프로젝트가 두 클라이언트에서 FedBN으로 연합 학습을 실행하는 "
+"것을 확인합니다. 축하합니다!"
 
 #: ../../source/example-fedbn-pytorch-from-centralized-to-federated.rst:94
 #: ../../source/example-jax-from-centralized-to-federated.rst:277
@@ -2569,15 +2569,15 @@ msgid ""
 "linear_regression/jax.html>`_ tutorial`. Then, we build upon the centralized "
 "training code to run the training in a federated fashion."
 msgstr ""
-"이 튜토리얼에서는 Flower를 사용하여 기존 JAX 워크로드의 federated 버전을 구축"
-"하는 방법을 보여드립니다. JAX를 사용해 scikit-learn 데이터 세트에서 선형 회"
-"귀 모델을 훈련하고 있습니다. 예제는 '파이토치 - Centralized에서 Federated으"
-"로 <https://github.com/adap/flower/blob/main/examples/pytorch-from-"
-"centralized-to-federated>`_ 워크스루와 유사하게 구성하겠습니다. 먼저, `JAX를 "
-"사용한 선형 회귀 <https://coax.readthedocs.io/en/latest/examples/"
-"linear_regression/jax.html>`_ 튜토리얼`을 기반으로 centralized 학습 접근 방식"
-"을 구축합니다. 그런 다음 centralized 트레이닝 코드를 기반으로 federated 방식"
-"으로 트레이닝을 실행합니다."
+"이 튜토리얼에서는 Flower를 사용하여 기존 JAX 워크로드의 연합 버전을 구축하는 "
+"방법을 보여드립니다. JAX를 사용해 scikit-learn 데이터 세트에서 선형 회귀 "
+"모델을 훈련하고 있습니다. 예제는 '파이토치 - Centralized에서 Federated으로 "
+"<https://github.com/adap/flower/blob/main/examples/pytorch-from-centralized-"
+"to-federated>`_ 워크스루와 유사하게 구성하겠습니다. 먼저, `JAX를 사용한 선형 "
+"회귀 <https://coax.readthedocs.io/en/latest/examples/linear_regression/jax."
+"html>`_ 튜토리얼`을 기반으로 centralized 학습 접근 방식을 구축합니다. 그런 "
+"다음 centralized 트레이닝 코드를 기반으로 federated 방식으로 트레이닝을 "
+"실행합니다."
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:10
 #: ../../source/tutorial-quickstart-jax.rst:16
@@ -2601,8 +2601,8 @@ msgid ""
 "of what's going on then have a look at the official `JAX documentation "
 "<https://jax.readthedocs.io/>`_."
 msgstr ""
-"먼저 :code:`선형 회귀` 모델을 기반으로 하는 centralized 훈련 코드에 대한 간략"
-"한 설명부터 시작하겠습니다. 더 자세한 설명을 원하시면 공식 `JAX 문서 "
+"먼저 :code:`선형 회귀` 모델을 기반으로 하는 중앙 집중식 훈련 코드에 대한 "
+"간략한 설명부터 시작하겠습니다. 더 자세한 설명을 원하시면 공식 `JAX 문서 "
 "<https://jax.readthedocs.io/>`_를 참조하세요."
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:23
@@ -2616,13 +2616,13 @@ msgid ""
 "dataset into a training and test set. You can see that we do not yet import "
 "the :code:`flwr` package for federated learning. This will be done later."
 msgstr ""
-"전통적인(centralized) 선형 회귀 훈련에 필요한 모든 구성 요소가 포함된 :code:"
-"`jax_training.py`라는 새 파일을 생성해 보겠습니다. 먼저, JAX 패키지인 :code:"
-"`jax`와 :code:`jaxlib`를 가져와야 합니다. 또한 데이터 세트에 :code:"
-"`make_regression`을 사용하고 데이터 세트를 학습 및 테스트 세트로 분할하기 위"
-"해 :code:`train_test_split`을 사용하므로 :code:`sklearn`을 가져와야 합니다. "
-"연합 학습을 위해 아직 :code:`flwr` 패키지를 가져오지 않은 것을 볼 수 있습니"
-"다. 이 작업은 나중에 수행됩니다."
+"전통적인(중앙 집중식) 선형 회귀 훈련에 필요한 모든 구성 요소가 포함된 "
+":code:`jax_training.py`라는 새 파일을 생성해 보겠습니다. 먼저, JAX 패키지인 "
+":code:`jax`와 :code:`jaxlib`를 가져와야 합니다. 또한 데이터 세트에 "
+":code:`make_regression`을 사용하고 데이터 세트를 학습 및 테스트 세트로 "
+"분할하기 위해 :code:`train_test_split`을 사용하므로 :code:`sklearn`을 "
+"가져와야 합니다. 연합 학습을 위해 아직 :code:`flwr` 패키지를 가져오지 않은 "
+"것을 볼 수 있습니다. 이 작업은 나중에 수행됩니다."
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:37
 #: ../../source/tutorial-quickstart-jax.rst:43
@@ -2679,7 +2679,7 @@ msgstr ""
 #: ../../source/example-jax-from-centralized-to-federated.rst:105
 #: ../../source/tutorial-quickstart-jax.rst:111
 msgid "You can now run your (centralized) JAX linear regression workload:"
-msgstr "이제 (centralized) JAX 선형 회귀 워크로드를 실행할 수 있습니다:"
+msgstr "이제 (중앙 집중식) JAX 선형 회귀 워크로드를 실행할 수 있습니다:"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:111
 #: ../../source/tutorial-quickstart-jax.rst:117
@@ -2709,13 +2709,13 @@ msgid ""
 "one round of the federated learning process, and we repeat this for multiple "
 "rounds."
 msgstr ""
-"기존 워크로드를 federating하는 개념은 항상 동일하고 이해하기 쉽습니다. 서버*"
-"를 시작한 다음 *서버*에 연결된 *클라이언트*에 대해 :code:`jax_training.py`의 "
-"코드를 사용해야 합니다. *서버*는 모델 파라미터를 클라이언트로 전송합니다. 클"
-"라이언트는 학습을 실행하고 파라미터를 업데이트합니다. 업데이트된 파라미터는 *"
-"서버*로 다시 전송되며, 수신된 모든 파라미터 업데이트의 평균을 구합니다. 이는 "
-"federated 학습 프로세스의 한 라운드를 설명하며, 이 과정을 여러 라운드에 걸쳐 "
-"반복합니다."
+"기존 워크로드를 연합하는 개념은 항상 동일하고 이해하기 쉽습니다. 서버*를 "
+"시작한 다음 *서버*에 연결된 *클라이언트*에 대해 :code:`jax_training.py`의 "
+"코드를 사용해야 합니다. *서버*는 모델 파라미터를 클라이언트로 전송합니다. "
+"클라이언트는 학습을 실행하고 파라미터를 업데이트합니다. 업데이트된 "
+"파라미터는 *서버*로 다시 전송되며, 수신된 모든 파라미터 업데이트의 평균을 "
+"구합니다. 이는 연합 학습 프로세스의 한 라운드를 설명하며, 이 과정을 여러 "
+"라운드에 걸쳐 반복합니다."
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:123
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:181
@@ -2726,10 +2726,10 @@ msgid ""
 "`flwr`. Next, we use the :code:`start_server` function to start a server and "
 "tell it to perform three rounds of federated learning."
 msgstr ""
-"이 예제는 하나의 *서버*와 두 개의 *클라이언트*로 구성됩니다. 먼저 :code:"
-"`server.py`를 설정해 보겠습니다. *server*는 Flower 패키지 :code:`flwr`를 가져"
-"와야 합니다. 다음으로, :code:`start_server` 함수를 사용하여 서버를 시작하고 "
-"세 차례의 federated 학습을 수행하도록 지시합니다."
+"이 예제는 하나의 *서버*와 두 개의 *클라이언트*로 구성됩니다. 먼저 "
+":code:`server.py`를 설정해 보겠습니다. *server*는 Flower 패키지 :code:`flwr`"
+"를 가져와야 합니다. 다음으로, :code:`start_server` 함수를 사용하여 서버를 "
+"시작하고 세 차례의 연합 학습을 수행하도록 지시합니다."
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:133
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:191
@@ -2897,13 +2897,14 @@ msgstr ""
 #: ../../source/example-jax-from-centralized-to-federated.rst:245
 #: ../../source/tutorial-quickstart-jax.rst:251
 msgid "Having defined the federation process, we can run it."
-msgstr "federation 프로세스를 정의했으면 이제 실행할 수 있습니다."
+msgstr "연합 프로세스를 정의했으면 이제 실행할 수 있습니다."
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:268
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:301
 #: ../../source/tutorial-quickstart-jax.rst:274
 msgid "And that's it. You can now open two additional terminal windows and run"
-msgstr ""
+msgstr "여기까지입니다. 이제 두 개의 터미널 창을 추가로 열고 다음을 실행할 수 "
+"있습니다"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:274
 #: ../../source/tutorial-quickstart-jax.rst:280
@@ -2913,7 +2914,7 @@ msgid ""
 "Congratulations!"
 msgstr ""
 "를 입력하고(그 전에 서버가 계속 실행 중인지 확인하세요) 두 클라이언트에서 "
-"federated 학습을 실행하는 JAX 프로젝트를 확인합니다. 축하합니다!"
+"연합 학습을 실행하는 JAX 프로젝트를 확인합니다. 축하합니다!"
 
 #: ../../source/example-jax-from-centralized-to-federated.rst:279
 #: ../../source/tutorial-quickstart-jax.rst:285
@@ -2941,7 +2942,7 @@ msgstr ""
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:2
 msgid "Example: PyTorch - From Centralized To Federated"
-msgstr "예제: 파이토치 - 중앙 Centralized에서 Federated으로"
+msgstr "예제: 파이토치 - 중앙 집중식에서 연합식으로"
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:4
 msgid ""
@@ -2953,12 +2954,13 @@ msgid ""
 "cifar10_tutorial.html>`_ tutorial. Then, we build upon the centralized "
 "training code to run the training in a federated fashion."
 msgstr ""
-"이 튜토리얼에서는 Flower를 사용해 기존 머신 러닝 워크로드의 federated 버전을 "
-"구축하는 방법을 보여드립니다. 여기서는 PyTorch를 사용해 CIFAR-10 데이터 세트"
-"에서 컨볼루션 신경망을 훈련합니다. 먼저, 'PyTorch로 딥 러닝 <https://pytorch."
-"org/tutorials/beginner/blitz/cifar10_tutorial.html>`_ 튜토리얼을 기반으로 "
-"centralized 학습 접근 방식을 사용하여 이 머신 러닝 작업을 소개합니다. 그런 다"
-"음 centralized 훈련 코드를 기반으로 federated 방식 훈련을 실행합니다."
+"이 튜토리얼에서는 Flower를 사용해 기존 머신 러닝 워크로드의 연합 버전을 "
+"구축하는 방법을 보여드립니다. 여기서는 PyTorch를 사용해 CIFAR-10 데이터 "
+"세트에서 컨볼루션 신경망을 훈련합니다. 먼저, 'PyTorch로 딥 러닝 "
+"<https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_ "
+"튜토리얼을 기반으로 centralized 학습 접근 방식을 사용하여 이 머신 러닝 "
+"작업을 소개합니다. 그런 다음 centralized 훈련 코드를 기반으로 연합 방식 "
+"훈련을 실행합니다."
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:12
 msgid ""
@@ -2967,9 +2969,10 @@ msgid ""
 "the official `PyTorch tutorial <https://pytorch.org/tutorials/beginner/blitz/"
 "cifar10_tutorial.html>`_."
 msgstr ""
-"centralized CNN 트레이닝 코드에 대한 간략한 설명부터 시작하겠습니다. 무슨 일"
-"이 일어나고 있는지 더 자세히 설명하려면 공식 `PyTorch 튜토리얼 <https://"
-"pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_을 참조하세요."
+"중앙 집중식 CNN 트레이닝 코드에 대한 간략한 설명부터 시작하겠습니다. 무슨 "
+"일이 일어나고 있는지 더 자세히 설명하려면 공식 `PyTorch 튜토리얼 "
+"<https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html>`_을 "
+"참조하세요."
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:15
 msgid ""
@@ -2980,10 +2983,10 @@ msgid ""
 "learning. You can keep all these imports as they are even when we add the "
 "federated learning components at a later point."
 msgstr ""
-"CIFAR-10에 대한 기존 (centralized) 교육에 필요한 모든 구성 요소가 포함된 :"
-"code:`cifar.py`라는 새 파일을 생성해 보겠습니다. 먼저, 필요한 모든 패키지"
-"(예: :code:`torch` 및 :code:`torchvision`)를 가져와야 합니다. federated 학습"
-"을 위한 패키지를 가져오지 않는 것을 확인 할 수 있습니. 나중에 federated 학습 "
+"CIFAR-10에 대한 기존 (중앙 집중식) 교육에 필요한 모든 구성 요소가 포함된 "
+":code:`cifar.py`라는 새 파일을 생성해 보겠습니다. 먼저, 필요한 모든 "
+"패키지(예: :code:`torch` 및 :code:`torchvision`)를 가져와야 합니다. 연합 "
+"학습을 위한 패키지를 가져오지 않는 것을 확인 할 수 있습니. 나중에 연합 학습 "
 "구성 요소를 추가할 때에도 이러한 모든 가져오기를 그대로 유지할 수 있습니다."
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:32
@@ -3052,11 +3055,11 @@ msgid ""
 "from scratch. This can be a considerable effort."
 msgstr ""
 "이전 섹션에서 설명한 간단한 머신 러닝 프로젝트는 단일 데이터 세트(CIFAR-10)"
-"로 모델을 학습시키는데, 이를 centralized 학습이라고 부릅니다. 이전 섹션에서 "
-"설명한 centralized 학습의 개념은 대부분 알고 계실 것이며, 많은 분들이 이전에 "
-"사용해 보셨을 것입니다. 일반적으로 머신 러닝 워크로드를 federated 방식으로 실"
-"행하려면 대부분의 코드를 변경하고 모든 것을 처음부터 다시 설정해야 합니다. 이"
-"는 상당한 노력이 필요할 수 있습니다."
+"로 모델을 학습시키는데, 이를 중앙 집중식 학습이라고 부릅니다. 이전 섹션에서 "
+"설명한 중앙 집중식 학습의 개념은 대부분 알고 계실 것이며, 많은 분들이 이전에 "
+"사용해 보셨을 것입니다. 일반적으로 머신 러닝 워크로드를 연합 방식으로 "
+"실행하려면 대부분의 코드를 변경하고 모든 것을 처음부터 다시 설정해야 합니다. "
+"이는 상당한 노력이 필요할 수 있습니다."
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:173
 msgid ""
@@ -3078,10 +3081,10 @@ msgid ""
 msgstr ""
 "개념은 이해하기 쉽습니다. *서버*를 시작한 다음 *서버*에 연결된 *클라이언트*"
 "에 대해 :code:`cifar.py`의 코드를 사용해야 합니다. *서버*는 모델 파라미터를 "
-"클라이언트로 전송합니다. *클라이언트*는 학습을 실행하고 파라미터를 업데이트합"
-"니다. 업데이트된 파라미터는 *서버*로 다시 전송되며, *서버*는 수신된 모든 파라"
-"미터 업데이트의 평균을 구합니다. 이것은 federated 학습 프로세스의 한 라운드"
-"를 설명하며 여러 라운드에 걸쳐 이 과정을 반복합니다."
+"클라이언트로 전송합니다. *클라이언트*는 학습을 실행하고 파라미터를 "
+"업데이트합니다. 업데이트된 파라미터는 *서버*로 다시 전송되며, *서버*는 "
+"수신된 모든 파라미터 업데이트의 평균을 구합니다. 이것은 연합 학습 프로세스의 "
+"한 라운드를 설명하며 여러 라운드에 걸쳐 이 과정을 반복합니다."
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:197
 msgid ""
@@ -3090,10 +3093,10 @@ msgid ""
 "*client* needs to import :code:`flwr`, but also :code:`torch` to update the "
 "parameters on our PyTorch model:"
 msgstr ""
-"마지막으로, :code:`client.py`에서 *client* 로직을 정의하고 :code:`cifar.py`에"
-"서 이전에 정의한 centralized 학습을 기반으로 구축합니다. *클라이언트*는 :"
-"code:`flwr`을 가져와야 하며, PyTorch 모델의 파라미터를 업데이트하기 위해 :"
-"code:`torch`도 가져와야 합니다:"
+"마지막으로, :code:`client.py`에서 *client* 로직을 정의하고 :code:`cifar.py`"
+"에서 이전에 정의한 중앙 집중식 학습을 기반으로 구축합니다. *클라이언트*는 "
+":code:`flwr`을 가져와야 하며, PyTorch 모델의 파라미터를 업데이트하기 위해 "
+":code:`torch`도 가져와야 합니다:"
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:213
 msgid ""
@@ -3166,9 +3169,9 @@ msgid ""
 "see your (previously centralized) PyTorch project run federated learning "
 "across two clients. Congratulations!"
 msgstr ""
-"를 입력하고(그 전에 서버가 실행 중인지 확인하세요) (이전에는centralized) "
-"PyTorch 프로젝트가 두 클라이언트에서 federated 학습을 실행하는 것을 확인합니"
-"다. 축하합니다!"
+"를 입력하고(그 전에 서버가 실행 중인지 확인하세요) (이전에는 중앙 집중식) "
+"PyTorch 프로젝트가 두 클라이언트에서 연합 학습을 실행하는 것을 확인합니다. "
+"축하합니다!"
 
 #: ../../source/example-pytorch-from-centralized-to-federated.rst:312
 msgid ""
@@ -3323,7 +3326,7 @@ msgstr ""
 
 #: ../../source/explanation-differential-privacy.rst:53
 msgid "Differential Privacy in Federated Learning"
-msgstr "Federated 학습의 차분 프라이버시"
+msgstr "연합 학습의 차분 프라이버시"
 
 #: ../../source/explanation-differential-privacy.rst:54
 msgid ""
@@ -3335,19 +3338,19 @@ msgid ""
 "membership inference and property inference attacks, or model inversion "
 "attacks."
 msgstr ""
-"Federated 학습은 여러 당사자가 원시 데이터를 공유하지 않고도 공동으로 모델을 "
-"학습할 수 있는 데이터 최소화 접근 방식입니다. 그러나 연합 학습은 새로운 개인"
-"정보 보호 문제를 야기하기도 합니다. 당사자와 중앙 서버 간의 모델 업데이트는 "
-"로컬 데이터에 대한 정보를 유출할 수 있습니다. 이러한 유출은 멤버십 추론 및 속"
-"성 추론 공격이나 모델 반전 공격과 같은 공격에 악용될 수 있습니다."
+"연합 학습은 여러 당사자가 원시 데이터를 공유하지 않고도 공동으로 모델을 "
+"학습할 수 있는 데이터 최소화 접근 방식입니다. 그러나 연합 학습은 새로운 "
+"개인정보 보호 문제를 야기하기도 합니다. 당사자와 중앙 서버 간의 모델 "
+"업데이트는 로컬 데이터에 대한 정보를 유출할 수 있습니다. 이러한 유출은 "
+"멤버십 추론 및 속성 추론 공격이나 모델 반전 공격과 같은 공격에 악용될 수 "
+"있습니다."
 
 #: ../../source/explanation-differential-privacy.rst:58
 msgid ""
 "DP can play a crucial role in federated learning to provide privacy for the "
 "clients' data."
-msgstr ""
-"DP는 federated학습에서 클라이언트의 데이터에 대한 개인 정보 보호를 제공하는 "
-"데 중요한 역할을 할 수 있습니다."
+msgstr "DP는 연합 학습에서 클라이언트의 데이터에 대한 개인 정보 보호를 제공하는 데 "
+"중요한 역할을 할 수 있습니다."
 
 #: ../../source/explanation-differential-privacy.rst:60
 msgid ""
@@ -3357,10 +3360,10 @@ msgid ""
 "learning based on where the noise is added: at the server (also known as the "
 "center) or at the client (also known as the local)."
 msgstr ""
-"개인 정보 제공의 세분성 또는 노이즈 추가 위치에 따라 federated 학습에는 다양"
-"한 형태의 DP가 존재합니다. 이 설명에서는 노이즈가 추가되는 위치에 따라 서버"
-"(중앙이라고도 함) 또는 클라이언트(로컬이라고도 함)에서의 federated 학습에서 "
-"DP를 활용하는 두 가지 접근 방식에 중점을 둡니다."
+"개인 정보 제공의 세분성 또는 노이즈 추가 위치에 따라 연합 학습에는 다양한 "
+"형태의 DP가 존재합니다. 이 설명에서는 노이즈가 추가되는 위치에 따라 서버("
+"중앙이라고도 함) 또는 클라이언트(로컬이라고도 함)에서의 연합 학습에서 DP를 "
+"활용하는 두 가지 접근 방식에 중점을 둡니다."
 
 #: ../../source/explanation-differential-privacy.rst:63
 msgid ""
@@ -3412,16 +3415,16 @@ msgid ""
 "norm of the clients' model updates, ensuring that larger updates are scaled "
 "down to fit within the norm `S`."
 msgstr ""
-"federated 학습에서 중앙 DP를 구현하는 방법은 여러 가지가 있지만, 여기서는 [2]"
-"와 [3]에서 제안한 알고리즘에 집중합니다. 전반적인 접근 방식은 클라이언트가 전"
-"송한 모델 업데이트를 잘라내고 집계된 모델에 약간의 노이즈를 추가하는 것입니"
-"다. 각 반복에서 특정 확률로 훈련할 무작위 클라이언트 세트가 선택됩니다. 각 클"
-"라이언트는 자체 데이터에 대해 로컬 학습을 수행합니다. 그런 다음 각 클라이언트"
-"의 업데이트는 특정 값 `S`(민감도 `S`)에 의해 잘립니다. 이렇게 하면 개별 클라"
-"이언트의 영향을 제한할 수 있어 개인정보 보호에 중요하고 견고성에 도움이 되는 "
-"경우가 많습니다. 이를 달성하기 위한 일반적인 접근 방식은 클라이언트 모델 업데"
-"이트의 `L2` 규범을 제한하여 더 큰 업데이트가 규범 `S`에 맞도록 축소되도록 하"
-"는 것입니다."
+"연합 학습에서 중앙 DP를 구현하는 방법은 여러 가지가 있지만, 여기서는 [2]와 "
+"[3]에서 제안한 알고리즘에 집중합니다. 전반적인 접근 방식은 클라이언트가 "
+"전송한 모델 업데이트를 잘라내고 집계된 모델에 약간의 노이즈를 추가하는 "
+"것입니다. 각 반복에서 특정 확률로 훈련할 무작위 클라이언트 세트가 "
+"선택됩니다. 각 클라이언트는 자체 데이터에 대해 로컬 학습을 수행합니다. 그런 "
+"다음 각 클라이언트의 업데이트는 특정 값 `S`(민감도 `S`)에 의해 잘립니다. "
+"이렇게 하면 개별 클라이언트의 영향을 제한할 수 있어 개인정보 보호에 중요하고 "
+"견고성에 도움이 되는 경우가 많습니다. 이를 달성하기 위한 일반적인 접근 "
+"방식은 클라이언트 모델 업데이트의 `L2` 규범을 제한하여 더 큰 업데이트가 규범 "
+"`S`에 맞도록 축소되도록 하는 것입니다."
 
 #: ../../source/explanation-differential-privacy.rst:-1
 msgid "clipping"
@@ -3449,8 +3452,7 @@ msgstr "클리핑"
 msgid ""
 "There are two forms of clipping commonly used in Central DP: Fixed Clipping "
 "and Adaptive Clipping."
-msgstr ""
-"Central DP에서 일반적으로 사용되는 클리핑에는 고정 클리핑과 조정 클리핑의 두 "
+msgstr "중앙 DP에서 일반적으로 사용되는 클리핑에는 고정 클리핑과 조정 클리핑의 두 "
 "가지 형태가 있습니다."
 
 #: ../../source/explanation-differential-privacy.rst:98
@@ -3470,9 +3472,9 @@ msgid ""
 "tuned during the rounds with respect to the quantile of the update norm "
 "distribution."
 msgstr ""
-"**조 클리핑** : 클리핑 임계값은 관찰된 업데이트 분포에 따라 동적으로 조정됩니"
-"다[4]. 즉, 클리핑 값은 업데이트 표준 분포의 사분위수에 따라 라운드가 진행되"
-"는 동안 조정됩니다."
+"**조정 클리핑** : 클리핑 임계값은 관찰된 업데이트 분포에 따라 동적으로 "
+"조정됩니다[4]. 즉, 클리핑 값은 업데이트 표준 분포의 사분위수에 따라 라운드가 "
+"진행되는 동안 조정됩니다."
 
 #: ../../source/explanation-differential-privacy.rst:102
 msgid ""
@@ -3563,7 +3565,7 @@ msgstr "[2] McMahan 외. 차분적 개인 반복 언어 모델 학습."
 msgid ""
 "[3] Geyer et al. Differentially Private Federated Learning: A Client Level "
 "Perspective."
-msgstr "[3] Geyer 외. 차분적 개인 Federated 학습: 고객 수준의 관점."
+msgstr "[3] Geyer 외. 차분적 개인 연합 학습: 고객 수준의 관점."
 
 #: ../../source/explanation-differential-privacy.rst:139
 msgid ""
@@ -3573,7 +3575,7 @@ msgstr "[4] Galen 외. 조정형 클리핑을 통한 차분적 개인 학습."
 #: ../../source/explanation-federated-evaluation.rst:2
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:292
 msgid "Federated evaluation"
-msgstr "Federated 평가"
+msgstr "연합 평가"
 
 #: ../../source/explanation-federated-evaluation.rst:4
 msgid ""
@@ -3581,12 +3583,12 @@ msgid ""
 "systems: centralized (or server-side) evaluation and federated (or client-"
 "side) evaluation."
 msgstr ""
-"federated 학습 시스템에서 모델을 평가하는 데는 centralized(또는 서버 측) 평가"
-"와 federated(또는 클라이언트 측) 평가라는 두 가지 주요 접근 방식이 있습니다."
+"연합 학습 시스템에서 모델을 평가하는 데는 중앙 집중식(또는 서버 측) 평가와 "
+"연합(또는 클라이언트 측) 평가라는 두 가지 주요 접근 방식이 있습니다."
 
 #: ../../source/explanation-federated-evaluation.rst:8
 msgid "Centralized Evaluation"
-msgstr "Centralized 평가"
+msgstr "중앙 집중식 평가"
 
 #: ../../source/explanation-federated-evaluation.rst:11
 msgid "Built-In Strategies"
@@ -3599,9 +3601,9 @@ msgid ""
 "function that can take the current global model parameters as input and "
 "return evaluation results:"
 msgstr ""
-"모든 기본 제공 전략은 초기화 중에 평가 함수를 제공하여 centralized 평가를 지"
-"원합니다. 평가 함수는 현재 글로벌 모델 파라미터를 입력으로 받아 평가 결과를 "
-"반환할 수 있는 모든 함수입니다:"
+"모든 기본 제공 전략은 초기화 중에 평가 함수를 제공하여 중앙 집중식 평가를 "
+"지원합니다. 평가 함수는 현재 글로벌 모델 파라미터를 입력으로 받아 평가 "
+"결과를 반환할 수 있는 모든 함수입니다:"
 
 #: ../../source/explanation-federated-evaluation.rst:58
 msgid "Custom Strategies"
@@ -3620,11 +3622,11 @@ msgstr ""
 
 #: ../../source/explanation-federated-evaluation.rst:65
 msgid "Federated Evaluation"
-msgstr "Federated 평가"
+msgstr "연합 평가"
 
 #: ../../source/explanation-federated-evaluation.rst:68
 msgid "Implementing Federated Evaluation"
-msgstr "Federated 평가 구현"
+msgstr "연합 평가 구현"
 
 #: ../../source/explanation-federated-evaluation.rst:70
 msgid ""
@@ -3636,15 +3638,14 @@ msgstr ""
 
 #: ../../source/explanation-federated-evaluation.rst:101
 msgid "Configuring Federated Evaluation"
-msgstr "Federated 평가 구성"
+msgstr "연합 평가 구성"
 
 #: ../../source/explanation-federated-evaluation.rst:103
 msgid ""
 "Federated evaluation can be configured from the server side. Built-in "
 "strategies support the following arguments:"
-msgstr ""
-"Federated 평가는 서버 측에서 구성할 수 있습니다. 기본 제공 전략은 다음 인수"
-"를 지원합니다:"
+msgstr "연합 평가는 서버 측에서 구성할 수 있습니다. 기본 제공 전략은 다음 인수를 "
+"지원합니다:"
 
 #: ../../source/explanation-federated-evaluation.rst:105
 msgid ""
@@ -3655,11 +3656,11 @@ msgid ""
 "`fraction_evaluate` is set to :code:`0.0`, federated evaluation will be "
 "disabled."
 msgstr ""
-":code:`fraction_evaluate`: 평가를 위해 선택될 클라이언트의 비율을 정의하는 :"
-"code:`float`입니다. 코드:`fraction_evaluate`가 :code:`0.1`로 설정되어 있고 :"
-"code:`100` 클라이언트가 서버에 연결되어 있는 경우 :code:`10`이 평가를 위해 무"
-"작위로 선택됩니다. code:`fraction_evaluate`가 :code:`0.0`으로 설정된 경우 "
-"federated 평가가 비활성화됩니다."
+":code:`fraction_evaluate`: 평가를 위해 선택될 클라이언트의 비율을 정의하는 "
+":code:`float`입니다. 코드:`fraction_evaluate`가 :code:`0.1`로 설정되어 있고 "
+":code:`100` 클라이언트가 서버에 연결되어 있는 경우 :code:`10`이 평가를 위해 "
+"무작위로 선택됩니다. code:`fraction_evaluate`가 :code:`0.0`으로 설정된 경우 "
+"연합 평가가 비활성화됩니다."
 
 #: ../../source/explanation-federated-evaluation.rst:106
 msgid ""
@@ -3723,10 +3724,10 @@ msgid ""
 "workloads implemented in any other framework): https://github.com/adap/"
 "flower/tree/main/examples/advanced-tensorflow"
 msgstr ""
-"federated 평가와 centralized 평가를 모두 사용하는 전체 코드 예제는 *고급 텐서"
-"플로우 예제*(다른 프레임워크에서 구현된 워크로드에도 동일한 접근 방식을 적용"
-"할 수 있음)를 참조하세요: https://github.com/adap/flower/tree/main/examples/"
-"advanced-tensorflow"
+"연합 평가와 중앙 집중식 평가를 모두 사용하는 전체 코드 예제는 *고급 "
+"텐서플로우 예제*(다른 프레임워크에서 구현된 워크로드에도 동일한 접근 방식을 "
+"적용할 수 있음)를 참조하세요: https://github.com/adap/flower/tree/main/"
+"examples/advanced-tensorflow"
 
 #: ../../source/fed/0000-20200102-fed-template.md:10
 msgid "FED Template"
@@ -3980,8 +3981,8 @@ msgid ""
 "Federated Learning algorithms, as these only add features without changing "
 "how Flower works or is used."
 msgstr ""
-"작은 변경 및 추가의 경우, 개선 프로세스를 거치는 것은 시간이 많이 걸리고 불필"
-"요합니다. 예를 들어, 새로운 Federated 학습 알고리즘을 추가하는 것은 Flower의 "
+"작은 변경 및 추가의 경우, 개선 프로세스를 거치는 것은 시간이 많이 걸리고 "
+"불필요합니다. 예를 들어, 새로운 연합 학습 알고리즘을 추가하는 것은 Flower의 "
 "작동 방식이나 사용 방식을 변경하지 않고 기능만 추가하는 것이기 때문입니다."
 
 #: ../../source/fed/0001-20220311-flower-enhancement-doc.md:63
@@ -4327,9 +4328,9 @@ msgid ""
 "adap/flower/tree/main/examples/flower-authentication>`_ demonstrating "
 "federated learning with Flower in an authenticated setting."
 msgstr ""
-"인증된 환경에서 Flower로 federated 학습을 시연하는 전체 '코드 예제 <https://"
-"github.com/adap/flower/tree/main/examples/flower-authentication>`_를 확인하"
-"는 것이 좋습니다."
+"인증된 환경에서 Flower로 연합 학습을 시연하는 전체 '코드 예제 <https://github"
+".com/adap/flower/tree/main/examples/flower-authentication>`_를 확인하는 것이 "
+"좋습니다."
 
 #: ../../source/how-to-authenticate-supernodes.rst:15
 msgid ""
@@ -4576,8 +4577,8 @@ msgid ""
 "configuration function could look like this:"
 msgstr ""
 "간단한 예부터 시작하겠습니다. (a) 클라이언트가 사용해야 하는 배치 크기, (b) "
-"현재 글로벌 연합 federated 라운드, (c) 클라이언트 측에서 학습할 에포크 수를 "
-"전송하고 싶다고 가정해 보겠습니다. 구성 함수는 다음과 같습니다:"
+"현재 글로벌 연합 라운드, (c) 클라이언트 측에서 학습할 에포크 수를 전송하고 "
+"싶다고 가정해 보겠습니다. 구성 함수는 다음과 같습니다:"
 
 #: ../../source/how-to-configure-clients.rst:47
 msgid ""
@@ -4893,7 +4894,7 @@ msgstr "'암호화하세요 <https://letsencrypt.org/docs/>`_'"
 
 #: ../../source/how-to-enable-ssl-connections.rst:80
 msgid "`certbot <https://certbot.eff.org/>`_"
-msgstr "인증봇 <https://certbot.eff.org/>`_"
+msgstr "`인증봇 <https://certbot.eff.org/>`_"
 
 #: ../../source/how-to-implement-strategies.rst:2
 msgid "Implement strategies"
@@ -4908,11 +4909,11 @@ msgid ""
 "provides a few built-in strategies which are based on the same API described "
 "below."
 msgstr ""
-"전략 추상화를 통해 완전한 맞춤형 전략을 구현할 수 있습니다. 전략은 기본적으"
-"로 서버에서 실행되는 federated 학습 알고리즘입니다. 전략은 클라이언트를 샘플"
-"링하는 방법, 학습을 위해 클라이언트를 구성하는 방법, 업데이트를 집계하는 방"
-"법, 모델을 평가하는 방법을 결정합니다. Flower는 아래에 설명된 것과 동일한 API"
-"를 기반으로 하는 몇 가지 기본 제공 전략을 제공합니다."
+"전략 추상화를 통해 완전한 맞춤형 전략을 구현할 수 있습니다. 전략은 "
+"기본적으로 서버에서 실행되는 연합 학습 알고리즘입니다. 전략은 클라이언트를 "
+"샘플링하는 방법, 학습을 위해 클라이언트를 구성하는 방법, 업데이트를 집계하는 "
+"방법, 모델을 평가하는 방법을 결정합니다. Flower는 아래에 설명된 것과 동일한 "
+"API를 기반으로 하는 몇 가지 기본 제공 전략을 제공합니다."
 
 #: ../../source/how-to-implement-strategies.rst:11
 msgid "The :code:`Strategy` abstraction"
@@ -5001,10 +5002,10 @@ msgid ""
 "is also the fundamental capability needed to implement hybrid approaches, "
 "for example, to fine-tune a pre-trained model using federated learning."
 msgstr ""
-"서버 측 파라미터 초기화는 강력한 메커니즘입니다. 예를 들어 이전에 저장한 체크"
-"포인트에서 학습을 재개하는 데 사용할 수 있습니다. 또한 federated 학습을 사용"
-"하여 사전 학습된 모델을 미세 조정하는 등 하이브리드 접근 방식을 구현하는 데 "
-"필요한 기본 기능입니다."
+"서버 측 파라미터 초기화는 강력한 메커니즘입니다. 예를 들어 이전에 저장한 "
+"체크포인트에서 학습을 재개하는 데 사용할 수 있습니다. 또한 연합 학습을 "
+"사용하여 사전 학습된 모델을 미세 조정하는 등 하이브리드 접근 방식을 구현하는 "
+"데 필요한 기본 기능입니다."
 
 #: ../../source/how-to-implement-strategies.rst:216
 msgid "The :code:`configure_fit` method"
@@ -5028,9 +5029,9 @@ msgid ""
 "that will be sent to a particular client. Strategy implementations usually "
 "perform the following steps in :code:`configure_fit`:"
 msgstr ""
-"반환 값은 튜플 목록으로, 각 튜플은 특정 클라이언트로 전송될 instruction을 나"
-"타냅니다. 전략 구현은 일반적으로 :code:`configure_fit`에서 다음 단계를 수행합"
-"니다:"
+"반환 값은 튜플 목록으로, 각 튜플은 특정 클라이언트로 전송될 명령어를 "
+"나타냅니다. 전략 구현은 일반적으로 :code:`configure_fit`에서 다음 단계를 "
+"수행합니다:"
 
 #: ../../source/how-to-implement-strategies.rst:233
 #: ../../source/how-to-implement-strategies.rst:280
@@ -5068,11 +5069,11 @@ msgid ""
 "train, for example, different models on different clients, or use different "
 "hyperparameters on different clients (via the :code:`config` dict)."
 msgstr ""
-"이 반환 값의 구조는 사용자에게 많은 유연성을 제공합니다. instructions은 클라"
-"이언트별로 정의되므로 각 클라이언트에 서로 다른 instructions을 전송할 수 있습"
-"니다. 이를 통해 예를 들어 클라이언트마다 다른 모델을 학습시키거나 클라이언트"
-"마다 다른 하이퍼파라미터를 사용하는 사용자 지정 전략을 사용할 수 있습니다(:"
-"code:`config` dict를 통해)."
+"이 반환 값의 구조는 사용자에게 많은 유연성을 제공합니다. instructions은 "
+"클라이언트별로 정의되므로 각 클라이언트에 서로 다른 명령어를 전송할 수 "
+"있습니다. 이를 통해 예를 들어 클라이언트마다 다른 모델을 학습시키거나 "
+"클라이언트마다 다른 하이퍼파라미터를 사용하는 사용자 지정 전략을 사용할 수 "
+"있습니다(:code:`config` dict를 통해)."
 
 #: ../../source/how-to-implement-strategies.rst:243
 msgid "The :code:`aggregate_fit` method"
@@ -5132,9 +5133,9 @@ msgid ""
 "that will be sent to a particular client. Strategy implementations usually "
 "perform the following steps in :code:`configure_evaluate`:"
 msgstr ""
-"반환 값은 튜플 목록으로, 각 튜플은 특정 클라이언트로 전송될 instructions을 나"
-"타냅니다. 전략 구현은 일반적으로 :code:`configure_evaluate`에서 다음 단계를 "
-"수행합니다:"
+"반환 값은 튜플 목록으로, 각 튜플은 특정 클라이언트로 전송될 명령어를 "
+"나타냅니다. 전략 구현은 일반적으로 :code:`configure_evaluate`에서 다음 "
+"단계를 수행합니다:"
 
 #: ../../source/how-to-implement-strategies.rst:281
 msgid ""
@@ -5164,11 +5165,11 @@ msgid ""
 "evaluate, for example, different models on different clients, or use "
 "different hyperparameters on different clients (via the :code:`config` dict)."
 msgstr ""
-"이 반환 값의 구조는 사용자에게 많은 유연성을 제공합니다. instructions은 클라"
-"이언트별로 정의되므로 각 클라이언트에 서로 다른 instructions을 전송할 수 있습"
-"니다. 이를 통해 사용자 지정 전략을 통해 예를 들어 클라이언트마다 다른 모델을 "
-"평가하거나 클라이언트마다 다른 하이퍼파라미터를 사용할 수 있습니다(:code:"
-"`config` dict를 통해)."
+"이 반환 값의 구조는 사용자에게 많은 유연성을 제공합니다. 명령어는 "
+"클라이언트별로 정의되므로 각 클라이언트에 서로 다른 명령어를 전송할 수 "
+"있습니다. 이를 통해 사용자 지정 전략을 통해 예를 들어 클라이언트마다 다른 "
+"모델을 평가하거나 클라이언트마다 다른 하이퍼파라미터를 사용할 수 "
+"있습니다(:code:`config` dict를 통해)."
 
 #: ../../source/how-to-implement-strategies.rst:291
 msgid "The :code:`aggregate_evaluate` method"
@@ -5470,7 +5471,7 @@ msgstr ""
 msgid ""
 "Please include the following argument in your Python code when starting a "
 "simulation."
-msgstr "시뮬레이션을 시작할 때 Python 코드에 다음 argument를 포함하세요."
+msgstr "시뮬레이션을 시작할 때 Python 코드에 다음 전달인자를 포함하세요."
 
 #: ../../source/how-to-monitor-simulation.rst:108
 msgid "Now, you are ready to start your workload."
@@ -5684,9 +5685,9 @@ msgid ""
 "docker.com/engine/install/linux-postinstall/>`_ on the official Docker "
 "website."
 msgstr ""
-"Linux에서 Docker 명령을 실행하려면 ``sudo`` 권한이 필요합니다. sudo``를 사용"
-"하지 않으려면 공식 Docker 웹사이트의 `Post-installation steps <https://docs."
-"docker.com/engine/install/linux-postinstall/>`_를 따르세요."
+"Linux에서 Docker 명령을 실행하려면 ``sudo`` 권한이 필요합니다. ``sudo`` 를 "
+"사용하지 않으려면 공식 Docker 웹사이트의 `Post-installation steps "
+"<https://docs.docker.com/engine/install/linux-postinstall/>`_를 따르세요."
 
 #: ../../source/how-to-run-flower-using-docker.rst:27
 msgid ""
@@ -5939,8 +5940,8 @@ msgid ""
 "the ``ClientApp`` code is located. In the file, we list all the dependencies "
 "that the ClientApp requires."
 msgstr ""
-"먼저 ``ClientApp`` 코드가 있는 디렉토리에 ``requirements.txt`` 파일을 만들어"
-"야 합니다. 이 파일에는 클라이언트 앱에 필요한 모든 dependencies을 나열합니다."
+"먼저 ``ClientApp`` 코드가 있는 디렉토리에 ``requirements.txt`` 파일을 "
+"만들어야 합니다. 이 파일에는 클라이언트 앱에 필요한 모든 의존성을 나열합니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:196
 msgid ""
@@ -6304,8 +6305,8 @@ msgid ""
 "Docker image to install missing system dependencies, you can use the ``USER "
 "root`` directive within your Dockerfile."
 msgstr ""
-"Docker 이미지 빌드 과정에서 루트 사용자로 전환하여 누락된 시스템 dependencies"
-"을 설치하려면 Dockerfile 내에서 ``USER root`` 지시어를 사용할 수 있습니다."
+"Docker 이미지 빌드 과정에서 루트 사용자로 전환하여 누락된 시스템 의존성을 "
+"설치하려면 Dockerfile 내에서 ``USER root`` 지시어를 사용할 수 있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:454
 msgid "Using a different Flower version"
@@ -6333,10 +6334,10 @@ msgid ""
 "always use the same image, you can specify the hash of the image instead of "
 "the tag."
 msgstr ""
-"태그 뒤에 있는 이미지가 업데이트될 수 있습니다. 이러한 업데이트에는 일반적으"
-"로 Flower의 기능을 변경해서는 안 되는 시스템 dependencies에 대한 보안 업데이"
-"트가 포함됩니다. 그러나 항상 동일한 이미지를 사용하려면 태그 대신 이미지의 해"
-"시를 지정할 수 있습니다."
+"태그 뒤에 있는 이미지가 업데이트될 수 있습니다. 이러한 업데이트에는 "
+"일반적으로 Flower의 기능을 변경해서는 안 되는 시스템 의존성에 대한 보안 "
+"업데이트가 포함됩니다. 그러나 항상 동일한 이미지를 사용하려면 태그 대신 "
+"이미지의 해시를 지정할 수 있습니다."
 
 #: ../../source/how-to-run-flower-using-docker.rst:467
 msgid ""
@@ -7065,8 +7066,7 @@ msgstr "일반"
 msgid ""
 "Pass all arguments as keyword arguments (not as positional arguments). "
 "Here's an example:"
-msgstr ""
-"모든 arguments를 위치 arguments가 아닌 키워드 arguments로 전달합니다. 다음은 "
+msgstr "모든 전달인자를 위치 전달인자가 아닌 키워드 전달인자로 전달합니다. 다음은 "
 "예시입니다:"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:33
@@ -7074,7 +7074,7 @@ msgid ""
 "Flower 0.19 (positional arguments): ``start_client(\"127.0.0.1:8080\", "
 "FlowerClient())``"
 msgstr ""
-"Flower 0.19 (위치 arguments): ``start_client(\"127.0.0.1:8080\", "
+"Flower 0.19 (위치 전달인자): ``start_client(\"127.0.0.1:8080\", "
 "FlowerClient())``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:34
@@ -7082,8 +7082,8 @@ msgid ""
 "Flower 1.0 (keyword arguments): "
 "``start_client(server_address=\"127.0.0.1:8080\", client=FlowerClient())``"
 msgstr ""
-"Flower 1.0 (키워드 arguments): "
-"``start_client(server_address=\"127.0.0.1:8080\", client=FlowerClient())``"
+"Flower 1.0 (키워드 전달인자): ``start_client(server_address=\"127.0.0.1:"
+"8080\", client=FlowerClient())``"
 
 #: ../../source/how-to-upgrade-to-flower-1.0.rst:37
 #: ../../source/ref-api/flwr.client.Client.rst:2
@@ -7379,9 +7379,9 @@ msgid ""
 "(don't forget to delete ``poetry.lock`` via ``rm poetry.lock`` before "
 "running ``poetry install``)."
 msgstr ""
-"``pyproject.toml``에서 ``flwr`` dependency을 업데이트한 다음 다시 설치하세요"
-"(``poetry install``을 실행하기 전에 ``rm poetry.lock``을 통해 ``poetry.lock``"
-"을 삭제하는 것을 잊지 마세요)."
+"``pyproject.toml``에서 ``flwr`` 의존성를 업데이트한 다음 다시 설치하세요(``"
+"poetry install``을 실행하기 전에 ``rm poetry.lock``을 통해 ``poetry.lock``을 "
+"삭제하는 것을 잊지 마세요)."
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:86
 msgid ""
@@ -7441,10 +7441,10 @@ msgid ""
 "sequence, |flowernext_clientapp_link|_ (2x) and |flowernext_serverapp_link|"
 "_. There is no need to execute `client.py` and `server.py` as Python scripts."
 msgstr ""
-"실행하기 전에 |flowernext_superlink_link|_를 사용하여 ``슈퍼링크``를 실행한 "
-"후 |flowernext_clientapp_link|_(2회) 및 |flowernext_serverapp_link|_를 순서대"
-"로 실행합니다. 'client.py'와 'server.py'를 Python 스크립트로 실행할 필요는 없"
-"습니다."
+"실행하기 전에 |flowernext_superlink_link|_를 사용하여 ``SuperLink``를 실행한 "
+"후 |flowernext_clientapp_link|_(2회) 및 |flowernext_serverapp_link|_를 "
+"순서대로 실행합니다. 'client.py'와 'server.py'를 Python 스크립트로 실행할 "
+"필요는 없습니다."
 
 #: ../../source/how-to-upgrade-to-flower-next.rst:158
 msgid ""
@@ -7916,8 +7916,8 @@ msgid ""
 "Flower comes with a number of popular federated learning strategies built-"
 "in. A built-in strategy can be instantiated as follows:"
 msgstr ""
-"Flower에는 여러 가지 인기 있는 federated 학습 전략이 기본으로 제공됩니다. 기"
-"본 제공 전략은 다음과 같이 인스턴스화할 수 있습니다:"
+"Flower에는 여러 가지 인기 있는 연합 학습 전략이 기본으로 제공됩니다. 기본 "
+"제공 전략은 다음과 같이 인스턴스화할 수 있습니다:"
 
 #: ../../source/how-to-use-strategies.rst:25
 msgid ""
@@ -7951,10 +7951,10 @@ msgid ""
 "arbitrary configuration values  :code:`client.fit` and :code:`client."
 "evaluate` functions during each round of federated learning."
 msgstr ""
-"서버는 매 라운드마다 새로운 설정 값을 클라이언트에 전달하기 위해 :code:"
-"`on_fit_config_fn`에 함수를 제공할 수 있습니다. 제공된 함수는 전략에 의해 호"
-"출되며 클라이언트에 전송될 구성 키 값 쌍의 dictionary를 반환해야 합니다. "
-"federated  학습의 각 라운드 동안 임의의 구성 값 dictionary인 :code:`client."
+"서버는 매 라운드마다 새로운 설정 값을 클라이언트에 전달하기 위해 "
+":code:`on_fit_config_fn`에 함수를 제공할 수 있습니다. 제공된 함수는 전략에 "
+"의해 호출되며 클라이언트에 전송될 구성 키 값 쌍의 dictionary를 반환해야 "
+"합니다. 연합 학습의 각 라운드 동안 임의의 구성 값 dictionary인 :code:`client."
 "fit` 및 :code:`client.evaluate` 함수를 반환해야 합니다."
 
 #: ../../source/how-to-use-strategies.rst:75
@@ -8049,8 +8049,7 @@ msgstr "기여자 참조"
 msgid ""
 "Check out the documentation of the main Flower Framework enabling easy "
 "Python development for Federated Learning."
-msgstr ""
-"Federated 학습을 위한 Python 개발을 쉽게 할 수 있는 주요 Flower 프레임워크의 "
+msgstr "연합 학습을 위한 Python 개발을 쉽게 할 수 있는 주요 Flower 프레임워크의 "
 "설명서를 확인하세요."
 
 #: ../../source/index.rst:2
@@ -8062,8 +8061,8 @@ msgid ""
 "Welcome to Flower's documentation. `Flower <https://flower.ai>`_ is a "
 "friendly federated learning framework."
 msgstr ""
-"Flower 문서에 오신 것을 환영합니다. Flower <https://flower.ai>`_는 친숙한 "
-"federated 학습 프레임워크입니다."
+"Flower 문서에 오신 것을 환영합니다. Flower <https://flower.ai>`_는 편한 연합 "
+"학습 프레임워크입니다."
 
 #: ../../source/index.rst:11
 msgid "Join the Flower Community"
@@ -8105,8 +8104,7 @@ msgstr "튜토리얼"
 msgid ""
 "A learning-oriented series of federated learning tutorials, the best place "
 "to start."
-msgstr ""
-"학습 중심의 federated 학습 튜토리얼 시리즈로, 시작하기에 가장 좋은 곳입니다."
+msgstr "학습 중심의 연합 학습 튜토리얼 시리즈로, 시작하기에 가장 좋은 곳입니다."
 
 #: ../../source/index.rst:61
 msgid ""
