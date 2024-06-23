@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-17 16:09+0200\n"
-"PO-Revision-Date: 2024-06-23 08:33+0000\n"
-"Last-Translator: 박태현 <qkrxogus113@ajou.ac.kr>\n"
+"PO-Revision-Date: 2024-06-23 11:33+0000\n"
+"Last-Translator: Sijiaomg Ohoh <lisijia1997@gmail.com>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
 "Language: ko\n"
@@ -22323,14 +22323,16 @@ msgid ""
 "neural network (as depicted here), or something else, like classical linear "
 "regression."
 msgstr ""
+"기계 학습에서 우리는 모델과 데이터를 가지고 있습니다.모델은 신경망((그림과 "
+"같이))일 수도 있고 고전적인 선형 회귀와 같은 다른 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
 msgid "|93b02017c78049bbbd5ae456dcb2c91b|"
-msgstr ""
+msgstr "|93b02017c78049bbbd5ae456dcb2c91b|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:109
 msgid "Model and data"
-msgstr ""
+msgstr "모델과 데이터"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:47
 msgid ""
@@ -22338,20 +22340,24 @@ msgid ""
 "to detect objects in images, transcribe an audio recording, or play a game "
 "like Go."
 msgstr ""
+"우리는 유용한 작업을 수행하기 위해 데이터를 사용하여 모델을 훈련합니다. "
+"작업은 이미지 속 물체를 감지하거나 음성 녹음을 기록하거나 바둑과 같은 게임을 "
+"하는 것일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:53
 msgid "|01471150fd5144c080a176b43e92a3ff|"
-msgstr ""
+msgstr "|01471150fd5144c080a176b43e92a3ff|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:111
 msgid "Train model using data"
-msgstr ""
+msgstr "데이터를 이용한 모델 훈련"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:59
 msgid ""
 "Now, in practice, the training data we work with doesn't originate on the "
 "machine we train the model on. It gets created somewhere else."
-msgstr ""
+msgstr "실제로 우리가 사용하는 훈련 데이터는 모델을 훈련시키는 기계에서 비롯된 것이 "
+"아닙니다. 그 데이터는 다른 곳에서 만들어졌습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:61
 msgid ""
