@@ -24,7 +24,7 @@ Thanks to using Hugging Face's `datasets` used under the hood, Flower Datasets i
 * Jax,
 * Arrow.
 
-Create **custom partitioning schemes** or choose from the **implemented partitioning schemes**:
+Create **custom partitioning schemes** or choose from the **implemented [partitioning schemes](https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html#module-flwr_datasets.partitioner)**:
 
 * Partitioner (the abstract base class) `Partitioner`
 * IID partitioning `IidPartitioner(num_partitions)`
@@ -41,7 +41,7 @@ Create **custom partitioning schemes** or choose from the **implemented partitio
   <br>
   <em>Comparison of Partitioning Schemes on CIFAR10</em>
 </p>
-PS: This plot was generated using a library function (see flwr_datasets.visualization package for more).
+PS: This plot was generated using a library function (see [flwr_datasets.visualization](https://flower.ai/docs/datasets/ref-api/flwr_datasets.visualization.html) package for more).
 
 # Installation
 
@@ -79,7 +79,7 @@ Here's a basic quickstart example of how to partition the MNIST dataset:
 from flwr_datasets import FederatedDataset
 
 # The train split of the MNIST dataset will be partitioned into 100 partitions
-fds = FederatedDataset("mnist", partitioners={"train": 100}
+fds = FederatedDataset("mnist", partitioners={"train": 100})
 
 partition = fds.load_partition(0)
 

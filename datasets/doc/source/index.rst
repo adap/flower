@@ -54,7 +54,7 @@ Main features
 Flower Datasets library supports:
 
 - **downloading datasets** - choose the dataset from Hugging Face's ``dataset`` (`link <https://huggingface.co/datasets>`_)
-- **partitioning datasets** - choose one of the implemnted partitioning scheme or create a fully custom one
+- **partitioning datasets** - choose one of the implemented partitioning scheme or create your own.
 - **creating centralized datasets** - leave parts of the dataset unpartitioned (e.g. for centralized evaluation)
 - **visualization of the partitioned datasets** - visualize the label distribution of the partitioned dataset (and compare the results on different parameters of the same partitioning schemes, different datasets, different partitioning schemes, or any mix of them)
 
@@ -74,7 +74,7 @@ Thanks to using Hugging Face's ``datasets`` used under the hood, Flower Datasets
 - Jax
 - Arrow
 
-Here are a few of the ``Partitioner`` s that are available: (for a full list see `link <https://flower.ai/docs/datasets/ref-api/flwr_datasets.partitioner.html#module-flwr_datasets.partitioner>`_ )
+Here are a few of the ``Partitioner`` s that are available: (for a full list see `link <ref-api/flwr_datasets.partitioner.html#module-flwr_datasets.partitioner>`_ )
 
 * Partitioner (the abstract base class) ``Partitioner``
 * IID partitioning ``IidPartitioner(num_partitions)``
