@@ -16,7 +16,7 @@
 
 
 from logging import ERROR, INFO
-from typing import Any, Dict, Generator
+from typing import Any, Generator
 
 import grpc
 
@@ -29,15 +29,19 @@ from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StreamLogsResponse,
 )
 
-from .executor import Executor, RunTracker
+from .executor import Executor
+from .state import RunStatus
+from .state_factory import SuperexecStateFactory
 
 
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """SuperExec API servicer."""
 
-    def __init__(self, executor: Executor) -> None:
+    def __init__(
+        self, executor: Executor, state_factory: SuperexecStateFactory
+    ) -> None:
         self.executor = executor
-        self.runs: Dict[int, RunTracker] = {}
+        self.state = state_factory.state()
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
@@ -51,44 +55,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
             log(ERROR, "Executor failed to start run")
             return StartRunResponse()
 
-        self.runs[run.run_id] = run
-
-        return StartRunResponse(run_id=run.run_id)
-
-    def StreamLogs(
-        self, request: StreamLogsRequest, context: grpc.ServicerContext
-    ) -> Generator[StreamLogsResponse, Any, None]:
-        """Get logs."""
-        logs = ["a", "b", "c"]
-        while context.is_active():
-            for i in range(len(logs)):  # pylint: disable=C0200
-                yield StreamLogsResponse(log_output=logs[i])
-
-
-class StateFactory:
-    """Factory class that creates State instances."""
-
-
-class StatelessExecServicer(exec_pb2_grpc.ExecServicer):
-    """SuperExec API servicer."""
-
-    def __init__(self, state_factory: StateFactory, executor: Executor) -> None:
-        self.state_factory = state_factory
-        self.executor = Executor
-
-    def StartRun(
-        self, request: StartRunRequest, context: grpc.ServicerContext
-    ) -> StartRunResponse:
-        """Create run ID."""
-        log(INFO, "ExecServicer.StartRun")
-
-        run = self.executor.start_run(request.fab_file)
-
-        if run is None:
-            log(ERROR, "Executor failed to start run")
-            return StartRunResponse()
-
-        self.runs[run.run_id] = run
+        self.state.update_run_tracker(run.run_id, RunStatus.RUNNING)
 
         return StartRunResponse(run_id=run.run_id)
 
