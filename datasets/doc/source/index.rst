@@ -12,9 +12,9 @@ Install
 
 .. code-block:: bash
 
-  python -m pip install flwr-datasets[vision]
+  python -m pip install "flwr-datasets[vision]"
 
-Check out all the details on the download in :doc:`how-to-install-flwr-datasets`.
+Check out all the details on how to install Flower Datasets in :doc:`how-to-install-flwr-datasets`.
 
 Tutorials
 ~~~~~~~~~
