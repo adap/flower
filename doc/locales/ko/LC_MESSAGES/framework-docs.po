@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-17 16:09+0200\n"
-"PO-Revision-Date: 2024-06-23 05:35+0000\n"
+"PO-Revision-Date: 2024-06-23 05:40+0000\n"
 "Last-Translator: Sijiaomg Ohoh <lisijia1997@gmail.com>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
@@ -10571,7 +10571,7 @@ msgstr ""
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ""
 "Return a formatted version of S, using substitutions from args and kwargs."
-msgstr "args와 kwarg의 치환을 사용하여 형식이 지정된 S를 반환합니다."
+msgstr "args와 kwarg의 치환을 사용하여 형식이 지정된 S를 되돌아갑니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`format_map <flwr.common.EventType.format_map>`\\ \\(mapping\\)"
@@ -10579,7 +10579,7 @@ msgstr ":py:obj:`format_map <flwr.common.EventType.format_map>`\\ \\(mapping\\)"
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid "Return a formatted version of S, using substitutions from mapping."
-msgstr "매핑의 치환을 사용하여 형식이 지정된 S를 반환합니다."
+msgstr "매핑의 치환을 사용하여 형식이 지정된 S를 되돌아갑니다."
 
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 msgid ":py:obj:`maketrans <flwr.common.EventType.maketrans>`\\"
@@ -10588,7 +10588,7 @@ msgstr ":py:obj:`maketrans <flwr.common.EventType.maketrans>`\\"
 #: ../../source/ref-api/flwr.common.EventType.rst:163:<autosummary>:1
 #: flwr.common.EventType.maketrans:1 of
 msgid "Return a translation table usable for str.translate()."
-msgstr "str.translate()에 사용할 수 있는 번역 테이블을 반환합니다."
+msgstr "str.translate()에 사용할 수 있는 번역 테이블을 되돌아갑니다."
 
 #: flwr.common.EventType.capitalize:1:<autosummary>:1 of
 msgid ":py:obj:`PING <flwr.common.EventType.PING>`\\"
