@@ -2,7 +2,6 @@ outputs/*
 clients_params/*
 flanders/datasets_files/*
 *.log
-plotting
 flanders/__pycache__
 MNIST
 .DS_Store
