@@ -122,12 +122,44 @@ They will generate the results in `results/all_results.csv`.
 
 To generate the plots, use the notebook in `plotting/plots.ipynb`.
 
-Expected maximum accuracy achieved across different numbers of malicious clients and different attacks:
 
-![](_static/max_acc.jpg)
+### Accuracy over multiple rounds
+**(left) MNIST, FLANDERS+FedAvg with 80% of malicious clients (b = 80); (right) Vanilla FedAvg in the same setting:**
 
-Expected distribution of accuracy from round $L$ to the final round across all the experiments:
+![alt text](_static/screenshot-7.png)
 
-![](_static/boxplot_Income.jpg)
+### Precision and Recall of FLANDERS
 
-![](_static/boxplot_MNIST.jpg)
+**b = 20:**
+
+![alt text](_static/screenshot-4.png)
+---
+
+**b = 60:**
+
+![alt text](_static/screenshot-5.png)
+---
+**b = 80:**
+
+![alt text](_static/screenshot-6.png)
+
+
+### Accuracy w.r.t. number of attackers:
+**b = 0:**
+
+![alt text](_static/screenshot.png)
+
+---
+**b = 20:**
+
+![alt text](_static/screenshot-1.png)
+
+---
+**b = 60:**
+
+![alt text](_static/screenshot-2.png)
+
+---
+**b = 80:**
+
+![alt text](_static/screenshot-3.png)
