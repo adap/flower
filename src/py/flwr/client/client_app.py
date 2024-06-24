@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -221,7 +221,7 @@ def _registration_error(fn_name: str) -> ValueError:
         >>> def client_fn(cid) -> Client:
         >>>     return FlowerClient().to_client()
         >>>
-        >>> app = ClientApp()
+        >>> app = ClientApp(
         >>>     client_fn=client_fn,
         >>> )
 

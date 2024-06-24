@@ -31,10 +31,11 @@ from flwr.common.secure_aggregation.crypto.symmetric_encryption import (
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
-    GetRunRequest,
+    PingRequest,
     PullTaskInsRequest,
     PushTaskResRequest,
 )
+from flwr.proto.run_pb2 import GetRunRequest  # pylint: disable=E0611
 
 _PUBLIC_KEY_HEADER = "public-key"
 _AUTH_TOKEN_HEADER = "auth-token"
@@ -45,6 +46,7 @@ Request = Union[
     PullTaskInsRequest,
     PushTaskResRequest,
     GetRunRequest,
+    PingRequest,
 ]
 
 
@@ -115,7 +117,13 @@ class AuthenticateClientInterceptor(grpc.UnaryUnaryClientInterceptor):  # type: 
             postprocess = True
         elif isinstance(
             request,
-            (DeleteNodeRequest, PullTaskInsRequest, PushTaskResRequest, GetRunRequest),
+            (
+                DeleteNodeRequest,
+                PullTaskInsRequest,
+                PushTaskResRequest,
+                GetRunRequest,
+                PingRequest,
+            ),
         ):
             if self.shared_secret is None:
                 raise RuntimeError("Failure to compute hmac")

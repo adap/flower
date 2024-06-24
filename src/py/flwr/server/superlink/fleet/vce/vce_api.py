@@ -20,6 +20,7 @@ import sys
 import time
 import traceback
 from logging import DEBUG, ERROR, INFO, WARN
+from pathlib import Path
 from typing import Callable, Dict, List, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
@@ -46,7 +47,7 @@ def _register_nodes(
     for i in range(num_nodes):
         node_id = state.create_node(ping_interval=PING_MAX_INTERVAL)
         nodes_mapping[node_id] = i
-    log(INFO, "Registered %i nodes", len(nodes_mapping))
+    log(DEBUG, "Registered %i nodes", len(nodes_mapping))
     return nodes_mapping
 
 
@@ -274,6 +275,7 @@ def start_vce(
         # Use mapping constructed externally. This also means nodes
         # have previously being registered.
         nodes_mapping = existing_nodes_mapping
+    app_dir = str(Path(app_dir).absolute())
 
     if not state_factory:
         log(INFO, "A StateFactory was not supplied to the SimulationEngine.")
@@ -293,7 +295,7 @@ def start_vce(
         node_states[node_id] = NodeState()
 
     # Load backend config
-    log(INFO, "Supported backends: %s", list(supported_backends.keys()))
+    log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
     backend_config = json.loads(backend_config_json_stream)
 
     try:
@@ -323,7 +325,7 @@ def start_vce(
             if app_dir is not None:
                 sys.path.insert(0, app_dir)
 
-            app: ClientApp = load_app(client_app_attr, LoadClientAppError)
+            app: ClientApp = load_app(client_app_attr, LoadClientAppError, app_dir)
 
             if not isinstance(app, ClientApp):
                 raise LoadClientAppError(

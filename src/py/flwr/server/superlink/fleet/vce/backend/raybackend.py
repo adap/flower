@@ -15,7 +15,7 @@
 """Ray backend for the Fleet API using the Simulation Engine."""
 
 import pathlib
-from logging import ERROR, INFO
+from logging import DEBUG, ERROR
 from typing import Callable, Dict, List, Tuple, Union
 
 import ray
@@ -24,16 +24,15 @@ from flwr.client.client_app import ClientApp
 from flwr.common.context import Context
 from flwr.common.logger import log
 from flwr.common.message import Message
-from flwr.simulation.ray_transport.ray_actor import (
-    BasicActorPool,
-    ClientAppActor,
-    init_ray,
-)
+from flwr.common.typing import ConfigsRecordValues
+from flwr.simulation.ray_transport.ray_actor import BasicActorPool, ClientAppActor
 from flwr.simulation.ray_transport.utils import enable_tf_gpu_growth
 
 from .backend import Backend, BackendConfig
 
 ClientResourcesDict = Dict[str, Union[int, float]]
+ActorArgsDict = Dict[str, Union[int, float, Callable[[], None]]]
+RunTimeEnvDict = Dict[str, Union[str, List[str]]]
 
 
 class RayBackend(Backend):
@@ -45,38 +44,35 @@ class RayBackend(Backend):
         work_dir: str,
     ) -> None:
         """Prepare RayBackend by initialising Ray and creating the ActorPool."""
-        log(INFO, "Initialising: %s", self.__class__.__name__)
-        log(INFO, "Backend config: %s", backend_config)
+        log(DEBUG, "Initialising: %s", self.__class__.__name__)
+        log(DEBUG, "Backend config: %s", backend_config)
 
         if not pathlib.Path(work_dir).exists():
             raise ValueError(f"Specified work_dir {work_dir} does not exist.")
 
-        # Init ray and append working dir if needed
-        runtime_env = (
-            self._configure_runtime_env(work_dir=work_dir) if work_dir else None
-        )
-        init_ray(runtime_env=runtime_env)
+        # Initialise ray
+        self.init_args_key = "init_args"
+        self.init_ray(backend_config, work_dir)
 
         # Validate client resources
         self.client_resources_key = "client_resources"
+        client_resources = self._validate_client_resources(config=backend_config)
 
         # Create actor pool
-        use_tf = backend_config.get("tensorflow", False)
-        actor_kwargs = {"on_actor_init_fn": enable_tf_gpu_growth} if use_tf else {}
+        actor_kwargs = self._validate_actor_arguments(config=backend_config)
 
-        client_resources = self._validate_client_resources(config=backend_config)
         self.pool = BasicActorPool(
             actor_type=ClientAppActor,
             client_resources=client_resources,
             actor_kwargs=actor_kwargs,
         )
 
-    def _configure_runtime_env(self, work_dir: str) -> Dict[str, Union[str, List[str]]]:
+    def _configure_runtime_env(self, work_dir: str) -> RunTimeEnvDict:
         """Return list of files/subdirectories to exclude relative to work_dir.
 
         Without this, Ray will push everything to the Ray Cluster.
         """
-        runtime_env: Dict[str, Union[str, List[str]]] = {"working_dir": work_dir}
+        runtime_env: RunTimeEnvDict = {"working_dir": work_dir}
 
         excludes = []
         path = pathlib.Path(work_dir)
@@ -109,13 +105,44 @@ class RayBackend(Backend):
         else:
             client_resources = {"num_cpus": 2, "num_gpus": 0.0}
             log(
-                INFO,
+                DEBUG,
                 "`%s` not specified in backend config. Applying default setting: %s",
                 self.client_resources_key,
                 client_resources,
             )
 
         return client_resources
+
+    def _validate_actor_arguments(self, config: BackendConfig) -> ActorArgsDict:
+        actor_args_config = config.get("actor", False)
+        actor_args: ActorArgsDict = {}
+        if actor_args_config:
+            use_tf = actor_args.get("tensorflow", False)
+            if use_tf:
+                actor_args["on_actor_init_fn"] = enable_tf_gpu_growth
+        return actor_args
+
+    def init_ray(self, backend_config: BackendConfig, work_dir: str) -> None:
+        """Intialises Ray if not already initialised."""
+        if not ray.is_initialized():
+            # Init ray and append working dir if needed
+            runtime_env = (
+                self._configure_runtime_env(work_dir=work_dir) if work_dir else None
+            )
+
+            ray_init_args: Dict[
+                str,
+                Union[ConfigsRecordValues, RunTimeEnvDict],
+            ] = {}
+
+            if backend_config.get(self.init_args_key):
+                for k, v in backend_config[self.init_args_key].items():
+                    ray_init_args[k] = v
+
+            if runtime_env is not None:
+                ray_init_args["runtime_env"] = runtime_env
+
+            ray.init(**ray_init_args)
 
     @property
     def num_workers(self) -> int:
@@ -129,7 +156,7 @@ class RayBackend(Backend):
     async def build(self) -> None:
         """Build pool of Ray actors that this backend will submit jobs to."""
         await self.pool.add_actors_to_pool(self.pool.actors_capacity)
-        log(INFO, "Constructed ActorPool with: %i actors", self.pool.num_actors)
+        log(DEBUG, "Constructed ActorPool with: %i actors", self.pool.num_actors)
 
     async def process_message(
         self,
@@ -144,7 +171,7 @@ class RayBackend(Backend):
         partition_id = message.metadata.partition_id
 
         try:
-            # Submite a task to the pool
+            # Submit a task to the pool
             future = await self.pool.submit(
                 lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
                 (app, message, str(partition_id), context),
@@ -173,4 +200,4 @@ class RayBackend(Backend):
         """Terminate all actors in actor pool."""
         await self.pool.terminate_all_actors()
         ray.shutdown()
-        log(INFO, "Terminated %s", self.__class__.__name__)
+        log(DEBUG, "Terminated %s", self.__class__.__name__)

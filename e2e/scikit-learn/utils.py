@@ -1,7 +1,8 @@
-from typing import Tuple, Union, List
+from typing import List, Tuple, Union
+
 import numpy as np
-from sklearn.linear_model import LogisticRegression
 import openml
+from sklearn.linear_model import LogisticRegression
 
 XY = Tuple[np.ndarray, np.ndarray]
 Dataset = Tuple[XY, XY]
@@ -34,12 +35,11 @@ def set_model_params(
 
 
 def set_initial_params(model: LogisticRegression):
-    """Sets initial parameters as zeros Required since model params are
-    uninitialized until model.fit is called.
+    """Sets initial parameters as zeros Required since model params are uninitialized
+    until model.fit is called.
 
-    But server asks for initial parameters from clients at launch. Refer
-    to sklearn.linear_model.LogisticRegression documentation for more
-    information.
+    But server asks for initial parameters from clients at launch. Refer to
+    sklearn.linear_model.LogisticRegression documentation for more information.
     """
     n_classes = 10  # MNIST has 10 classes
     n_features = 784  # Number of features in dataset
