@@ -14,7 +14,7 @@ Flower Datasets (`flwr-datasets`) is a library to quickly and easily create data
 
 ## Installation
 
-For a complete installation guide visit the [Flower Datasets Documenation](file:///Users/javier/projects/flower/datasets/doc/build/html/how-to-install-flwr-datasets.html)
+For a complete installation guide visit the [Flower Datasets Documenation](https://flower.ai/docs/datasets/)
 
 ```bash
 pip install flwr-datasets[vision]
@@ -53,7 +53,8 @@ Create **custom partitioning schemes** or choose from the **implemented [partiti
   <br>
   <em>Comparison of Partitioning Schemes on CIFAR10</em>
 </p>
-PS: This plot was generated using a library function (see flwr_datasets.visualization package for more).
+
+PS: This plot was generated using a library function (see [flwr_datasets.visualization](https://flower.ai/docs/datasets/ref-api/flwr_datasets.visualization.html) package for more).
 
 
 ## Usage
@@ -66,7 +67,7 @@ Here's a basic quickstart example of how to partition the MNIST dataset:
 from flwr_datasets import FederatedDataset
 
 # The train split of the MNIST dataset will be partitioned into 100 partitions
-fds = FederatedDataset("mnist", partitioners={"train": 100}
+fds = FederatedDataset("mnist", partitioners={"train": 100})
 
 partition = fds.load_partition(0)
 

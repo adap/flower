@@ -1,4 +1,4 @@
-# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PullTaskResRequest,
     PushTaskInsRequest,
 )
+from flwr.proto.run_pb2 import Run  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
 from .grpc_driver import GrpcDriver
@@ -36,58 +37,36 @@ class TestGrpcDriver(unittest.TestCase):
     """Tests for `GrpcDriver` class."""
 
     def setUp(self) -> None:
-        """Initialize mock GrpcDriverHelper and Driver instance before each test."""
-        mock_response = Mock()
-        mock_response.run_id = 61016
-        self.mock_grpc_driver_helper = Mock()
-        self.mock_grpc_driver_helper.create_run.return_value = mock_response
-        self.patcher = patch(
-            "flwr.server.driver.grpc_driver.GrpcDriverHelper",
-            return_value=self.mock_grpc_driver_helper,
+        """Initialize mock GrpcDriverStub and Driver instance before each test."""
+        mock_response = Mock(
+            run=Run(run_id=61016, fab_id="mock/mock", fab_version="v1.0.0")
         )
-        self.patcher.start()
-        self.driver = GrpcDriver()
+        self.mock_grpc_driver_stub = Mock()
+        self.mock_grpc_driver_stub.get_run.return_value = mock_response
+        self.mock_grpc_driver_stub.HasField.return_value = True
+        self.driver = GrpcDriver(run_id=61016, stub=self.mock_grpc_driver_stub)
 
-    def tearDown(self) -> None:
-        """Cleanup after each test."""
-        self.patcher.stop()
-
-    def test_check_and_init_grpc_driver_already_initialized(self) -> None:
-        """Test that GrpcDriverHelper doesn't initialize if run is created."""
-        # Prepare
-        self.driver.driver_helper = self.mock_grpc_driver_helper
-        self.driver.run_id = 61016
-
-        # Execute
-        # pylint: disable-next=protected-access
-        self.driver._get_grpc_driver_helper_and_run_id()
-
+    def test_init_grpc_driver(self) -> None:
+        """Test GrpcDriverStub initialization."""
         # Assert
-        self.mock_grpc_driver_helper.connect.assert_not_called()
-
-    def test_check_and_init_grpc_driver_needs_initialization(self) -> None:
-        """Test GrpcDriverHelper initialization when run is not created."""
-        # Execute
-        # pylint: disable-next=protected-access
-        self.driver._get_grpc_driver_helper_and_run_id()
-
-        # Assert
-        self.mock_grpc_driver_helper.connect.assert_called_once()
-        self.assertEqual(self.driver.run_id, 61016)
+        self.assertEqual(self.driver.run.run_id, 61016)
+        self.assertEqual(self.driver.run.fab_id, "mock/mock")
+        self.assertEqual(self.driver.run.fab_version, "v1.0.0")
+        self.mock_grpc_driver_stub.get_run.assert_called_once()
 
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
         # Prepare
         mock_response = Mock()
         mock_response.nodes = [Mock(node_id=404), Mock(node_id=200)]
-        self.mock_grpc_driver_helper.get_nodes.return_value = mock_response
+        self.mock_grpc_driver_stub.get_nodes.return_value = mock_response
 
         # Execute
         node_ids = self.driver.get_node_ids()
-        args, kwargs = self.mock_grpc_driver_helper.get_nodes.call_args
+        args, kwargs = self.mock_grpc_driver_stub.get_nodes.call_args
 
         # Assert
-        self.mock_grpc_driver_helper.connect.assert_called_once()
+        self.mock_grpc_driver_stub.get_run.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], GetNodesRequest)
@@ -98,7 +77,7 @@ class TestGrpcDriver(unittest.TestCase):
         """Test pushing valid messages."""
         # Prepare
         mock_response = Mock(task_ids=["id1", "id2"])
-        self.mock_grpc_driver_helper.push_task_ins.return_value = mock_response
+        self.mock_grpc_driver_stub.push_task_ins.return_value = mock_response
         msgs = [
             self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)
             for _ in range(2)
@@ -106,10 +85,10 @@ class TestGrpcDriver(unittest.TestCase):
 
         # Execute
         msg_ids = self.driver.push_messages(msgs)
-        args, kwargs = self.mock_grpc_driver_helper.push_task_ins.call_args
+        args, kwargs = self.mock_grpc_driver_stub.push_task_ins.call_args
 
         # Assert
-        self.mock_grpc_driver_helper.connect.assert_called_once()
+        self.mock_grpc_driver_stub.get_run.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PushTaskInsRequest)
@@ -121,7 +100,7 @@ class TestGrpcDriver(unittest.TestCase):
         """Test pushing invalid messages."""
         # Prepare
         mock_response = Mock(task_ids=["id1", "id2"])
-        self.mock_grpc_driver_helper.push_task_ins.return_value = mock_response
+        self.mock_grpc_driver_stub.push_task_ins.return_value = mock_response
         msgs = [
             self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)
             for _ in range(2)
@@ -145,16 +124,16 @@ class TestGrpcDriver(unittest.TestCase):
             ),
             TaskRes(task=Task(ancestry=["id3"], error=error_to_proto(Error(code=0)))),
         ]
-        self.mock_grpc_driver_helper.pull_task_res.return_value = mock_response
+        self.mock_grpc_driver_stub.pull_task_res.return_value = mock_response
         msg_ids = ["id1", "id2", "id3"]
 
         # Execute
         msgs = self.driver.pull_messages(msg_ids)
         reply_tos = {msg.metadata.reply_to_message for msg in msgs}
-        args, kwargs = self.mock_grpc_driver_helper.pull_task_res.call_args
+        args, kwargs = self.mock_grpc_driver_stub.pull_task_res.call_args
 
         # Assert
-        self.mock_grpc_driver_helper.connect.assert_called_once()
+        self.mock_grpc_driver_stub.get_run.assert_called_once()
         self.assertEqual(len(args), 1)
         self.assertEqual(len(kwargs), 0)
         self.assertIsInstance(args[0], PullTaskResRequest)
@@ -165,14 +144,14 @@ class TestGrpcDriver(unittest.TestCase):
         """Test send and receive all messages successfully."""
         # Prepare
         mock_response = Mock(task_ids=["id1"])
-        self.mock_grpc_driver_helper.push_task_ins.return_value = mock_response
+        self.mock_grpc_driver_stub.push_task_ins.return_value = mock_response
         # The response message must include either `content` (i.e. a recordset) or
         # an `Error`. We choose the latter in this case
         error_proto = error_to_proto(Error(code=0))
         mock_response = Mock(
             task_res_list=[TaskRes(task=Task(ancestry=["id1"], error=error_proto))]
         )
-        self.mock_grpc_driver_helper.pull_task_res.return_value = mock_response
+        self.mock_grpc_driver_stub.pull_task_res.return_value = mock_response
         msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
 
         # Execute
@@ -187,9 +166,9 @@ class TestGrpcDriver(unittest.TestCase):
         # Prepare
         sleep_fn = time.sleep
         mock_response = Mock(task_ids=["id1"])
-        self.mock_grpc_driver_helper.push_task_ins.return_value = mock_response
+        self.mock_grpc_driver_stub.push_task_ins.return_value = mock_response
         mock_response = Mock(task_res_list=[])
-        self.mock_grpc_driver_helper.pull_task_res.return_value = mock_response
+        self.mock_grpc_driver_stub.pull_task_res.return_value = mock_response
         msgs = [self.driver.create_message(RecordSet(), "", 0, "", DEFAULT_TTL)]
 
         # Execute
@@ -204,19 +183,21 @@ class TestGrpcDriver(unittest.TestCase):
     def test_del_with_initialized_driver(self) -> None:
         """Test cleanup behavior when Driver is initialized."""
         # Prepare
-        # pylint: disable-next=protected-access
-        self.driver._get_grpc_driver_helper_and_run_id()
+        self.mock_grpc_driver_stub.is_connected.return_value = True
 
         # Execute
         self.driver.close()
 
         # Assert
-        self.mock_grpc_driver_helper.disconnect.assert_called_once()
+        self.mock_grpc_driver_stub.disconnect.assert_called_once()
 
     def test_del_with_uninitialized_driver(self) -> None:
         """Test cleanup behavior when Driver is not initialized."""
+        # Prepare
+        self.mock_grpc_driver_stub.is_connected.return_value = False
+
         # Execute
         self.driver.close()
 
         # Assert
-        self.mock_grpc_driver_helper.disconnect.assert_not_called()
+        self.mock_grpc_driver_stub.disconnect.assert_not_called()

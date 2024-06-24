@@ -23,7 +23,7 @@ python -m flwr_tool.init_py_check src/py/flwr src/py/flwr_tool
 echo "- init_py_check: done"
 
 echo "- docformatter: start"
-python -m docformatter -c -r src/py/flwr e2e -e src/py/flwr/proto 
+python -m docformatter -c -r src/py/flwr e2e -e src/py/flwr/proto
 echo "- docformatter:  done"
 
 echo "- ruff: start"
@@ -57,6 +57,10 @@ echo "- mdformat: done"
 echo "- All Markdown checks passed"
 
 echo "- Start license checks"
+
+echo "- copyright: start"
+python -m flwr_tool.check_copyright src/py/flwr
+echo "- copyright: done"
 
 echo "- licensecheck: start"
 python -m licensecheck -u poetry --fail-licenses gpl --zero
