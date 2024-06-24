@@ -19,7 +19,7 @@ class SuperexecState(ABC):
         """Initialize state."""
 
     @abstractmethod
-    def store_log(self, run_id: int, log_output: str) -> None:
+    def store_log(self, run_id: int, log_output: str, stream: str = "stderr") -> None:
         """Store a log entry for a given run."""
 
     @abstractmethod

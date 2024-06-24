@@ -35,7 +35,7 @@ class InMemorySuperexecState(SuperexecState):
         self.logs: Dict[int, List[str]] = {}
 
     @override
-    def store_log(self, run_id: int, log_output: str) -> None:
+    def store_log(self, run_id: int, log_output: str, stream: str = "stderr") -> None:
         """Store logs into the database."""
         if self.logs[run_id]:
             self.logs[run_id].append(log_output)

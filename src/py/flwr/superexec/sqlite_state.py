@@ -15,6 +15,7 @@
 """SQLite based implemenation of server state."""
 
 
+import datetime
 from typing import List, Optional
 
 import sqlite3
@@ -46,19 +47,22 @@ class SqliteSuperexecState(SuperexecState):
                 CREATE TABLE IF NOT EXISTS logs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     run_id INTEGER,
-                    log_output TEXT,
+                    timestamp TEXT,
+                    stream TEXT,
+                    message TEXT,
                     FOREIGN KEY(run_id) REFERENCES runs(run_id)
                 )
             """
             )
 
     @override
-    def store_log(self, run_id: int, log_output: str) -> None:
+    def store_log(self, run_id: int, log_output: str, stream: str = "stderr") -> None:
         """Store logs into the database."""
         with self.conn:
             self.conn.execute(
-                "INSERT INTO logs (run_id, log_output) VALUES (?, ?)",
-                (run_id, log_output),
+                "INSERT INTO logs (run_id, timestamp, stream, message) "
+                "VALUES (?, ?, ?, ?)",
+                (run_id, datetime.datetime.now().isoformat(), stream, log_output),
             )
 
     @override
