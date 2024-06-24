@@ -126,7 +126,7 @@ To generate the plots, use the notebook in `plotting/plots.ipynb`.
 ### Accuracy over multiple rounds
 **(left) MNIST, FLANDERS+FedAvg with 80% of malicious clients (b = 80); (right) Vanilla FedAvg in the same setting:**
 
-![alt text](_static/screenshot-7.png)
+![alt text](_static/screenshot-8.png)
 
 ### Precision and Recall of FLANDERS
 
