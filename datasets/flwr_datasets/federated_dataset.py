@@ -36,8 +36,9 @@ class FederatedDataset:
 
     Download, partition data among clients (edge devices), or load full dataset.
 
-    Partitions are created using IidPartitioner. Support for different partitioners
-    specification and types will come in future releases.
+    Partitions are created per-split-basis using Partitioners from
+    `flwr_datasets.partitioner` specified in `partitioners` (see `partitioners`
+    parameter for more information).
 
     Parameters
     ----------
@@ -57,23 +58,43 @@ class FederatedDataset:
         into). One or multiple `Partitioner` objects can be specified in that manner,
         but at most, one per split.
     shuffle : bool
-        Whether to randomize the order of samples. Applied prior to resplitting,
-        speratelly to each of the present splits in the dataset. It uses the `seed`
-        argument. Defaults to True.
+        Whether to randomize the order of samples. Applied prior to preprocessing
+        operations, speratelly to each of the present splits in the dataset. It uses
+        the `seed` argument. Defaults to True.
     seed : Optional[int]
         Seed used for dataset shuffling. It has no effect if `shuffle` is False. The
-        seed cannot be set in the later stages. If `None`, then fresh, unpredictable entropy
-        will be pulled from the OS. Defaults to 42.
+        seed cannot be set in the later stages. If `None`, then fresh, unpredictable
+        entropy will be pulled from the OS. Defaults to 42.
 
     Examples
     --------
     Use MNIST dataset for Federated Learning with 100 clients (edge devices):
 
-    >>> mnist_fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
+    >>> from flwr_datasets import FederatedDataset
+    >>>
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": 100})
     >>> # Load partition for client with ID 10.
-    >>> partition = mnist_fds.load_partition(10, "train")
+    >>> partition = fds.load_partition(10)
     >>> # Use test split for centralized evaluation.
-    >>> centralized = mnist_fds.load_split("test")
+    >>> centralized = fds.load_split("test")
+
+    Use CIFAR10 dataset for Federated Laerning with 100 clients:
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import DirichletPartitioner
+    >>>
+    >>> partitioner = DirichletPartitioner(num_partitions=10, partition_by="label",
+    >>>                                    alpha=0.5, min_partition_size=10)
+    >>> fds = FederatedDataset(dataset="cifar10", partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(partition_id=0)
+
+    Visualize the partitioned datasets
+    >>> from flwr_datasets.visualization import plot_label_distributions
+    >>>
+    >>> _ = plot_label_distributions(
+    >>>     partitioner=fds.partitioners["train"],
+    >>>     label_name="label",
+    >>>     legend=True,
+    >>> )
     """
 
     # pylint: disable=too-many-instance-attributes
