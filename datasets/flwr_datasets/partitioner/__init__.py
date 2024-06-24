@@ -27,14 +27,14 @@ from .size_partitioner import SizePartitioner
 from .square_partitioner import SquarePartitioner
 
 __all__ = [
-    "IidPartitioner",
-    "Partitioner",
-    "NaturalIdPartitioner",
     "DirichletPartitioner",
-    "SizePartitioner",
-    "LinearPartitioner",
-    "InnerDirichletPartitioner",
-    "SquarePartitioner",
-    "ShardPartitioner",
     "ExponentialPartitioner",
+    "IidPartitioner",
+    "InnerDirichletPartitioner",
+    "LinearPartitioner",
+    "NaturalIdPartitioner",
+    "Partitioner",
+    "ShardPartitioner",
+    "SizePartitioner",
+    "SquarePartitioner",
 ]

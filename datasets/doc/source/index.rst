@@ -56,7 +56,11 @@ Information-oriented API reference and other reference material.
 
       flwr_datasets
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Reference docs
 
+   ref-telemetry
 
 Main features
 -------------
