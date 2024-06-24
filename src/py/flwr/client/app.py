@@ -14,13 +14,14 @@
 # ==============================================================================
 """Flower client app."""
 
-import argparse
+import signal
 import sys
 import time
+from dataclasses import dataclass
 from logging import DEBUG, ERROR, INFO, WARN
-from pathlib import Path
-from typing import Callable, ContextManager, Optional, Tuple, Type, Union
+from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
+from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
 from flwr.client.client import Client
@@ -30,111 +31,23 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
+    TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
     TRANSPORT_TYPES,
     ErrorCode,
 )
-from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
-from flwr.common.object_ref import load_app, validate
-from flwr.common.retry_invoker import RetryInvoker, exponential
+from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 
+from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
 from .node_state import NodeState
 from .numpy_client import NumPyClient
-from .supernode.app import parse_args_run_client_app
-
-
-def run_client_app() -> None:
-    """Run Flower client app."""
-    log(INFO, "Long-running Flower client starting")
-
-    event(EventType.RUN_CLIENT_APP_ENTER)
-
-    args = _parse_args_run_client_app().parse_args()
-
-    # Obtain certificates
-    if args.insecure:
-        if args.root_certificates is not None:
-            sys.exit(
-                "Conflicting options: The '--insecure' flag disables HTTPS, "
-                "but '--root-certificates' was also specified. Please remove "
-                "the '--root-certificates' option when running in insecure mode, "
-                "or omit '--insecure' to use HTTPS."
-            )
-        log(
-            WARN,
-            "Option `--insecure` was set. "
-            "Starting insecure HTTP client connected to %s.",
-            args.server,
-        )
-        root_certificates = None
-    else:
-        # Load the certificates if provided, or load the system certificates
-        cert_path = args.root_certificates
-        if cert_path is None:
-            root_certificates = None
-        else:
-            root_certificates = Path(cert_path).read_bytes()
-        log(
-            DEBUG,
-            "Starting secure HTTPS client connected to %s "
-            "with the following certificates: %s.",
-            args.server,
-            cert_path,
-        )
-
-    log(
-        DEBUG,
-        "Flower will load ClientApp `%s`",
-        getattr(args, "client-app"),
-    )
-
-    client_app_dir = args.dir
-    if client_app_dir is not None:
-        sys.path.insert(0, client_app_dir)
-
-    app_ref: str = getattr(args, "client-app")
-    valid, error_msg = validate(app_ref)
-    if not valid and error_msg:
-        raise LoadClientAppError(error_msg) from None
-
-    def _load() -> ClientApp:
-        client_app = load_app(app_ref, LoadClientAppError)
-
-        if not isinstance(client_app, ClientApp):
-            raise LoadClientAppError(
-                f"Attribute {app_ref} is not of type {ClientApp}",
-            ) from None
-
-        return client_app
-
-    _start_client_internal(
-        server_address=args.server,
-        load_client_app_fn=_load,
-        transport="rest" if args.rest else "grpc-rere",
-        root_certificates=root_certificates,
-        insecure=args.insecure,
-        max_retries=args.max_retries,
-        max_wait_time=args.max_wait_time,
-    )
-    register_exit_handlers(event_type=EventType.RUN_CLIENT_APP_LEAVE)
-
-
-def _parse_args_run_client_app() -> argparse.ArgumentParser:
-    """Parse flower-client-app command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Start a Flower client app",
-    )
-
-    parse_args_run_client_app(parser=parser)
-
-    return parser
 
 
 def _check_actionable_client(
@@ -165,6 +78,9 @@ def start_client(
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    authentication_keys: Optional[
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
@@ -249,6 +165,7 @@ def start_client(
         root_certificates=root_certificates,
         insecure=insecure,
         transport=transport,
+        authentication_keys=authentication_keys,
         max_retries=max_retries,
         max_wait_time=max_wait_time,
     )
@@ -262,13 +179,16 @@ def start_client(
 def _start_client_internal(
     *,
     server_address: str,
-    load_client_app_fn: Optional[Callable[[], ClientApp]] = None,
+    load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
     client_fn: Optional[ClientFn] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
     insecure: Optional[bool] = None,
     transport: Optional[str] = None,
+    authentication_keys: Optional[
+        Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
+    ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
 ) -> None:
@@ -334,7 +254,7 @@ def _start_client_internal(
 
             client_fn = single_client_factory
 
-        def _load_client_app() -> ClientApp:
+        def _load_client_app(_1: str, _2: str) -> ClientApp:
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app
@@ -346,6 +266,29 @@ def _start_client_internal(
     connection, address, connection_error_type = _init_connection(
         transport, server_address
     )
+
+    app_state_tracker = _AppStateTracker()
+
+    def _on_sucess(retry_state: RetryState) -> None:
+        app_state_tracker.is_connected = True
+        if retry_state.tries > 1:
+            log(
+                INFO,
+                "Connection successful after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+
+    def _on_backoff(retry_state: RetryState) -> None:
+        app_state_tracker.is_connected = False
+        if retry_state.tries == 1:
+            log(WARN, "Connection attempt failed, retrying...")
+        else:
+            log(
+                DEBUG,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
 
     retry_invoker = RetryInvoker(
         wait_gen_factory=exponential,
@@ -362,30 +305,15 @@ def _start_client_internal(
             if retry_state.tries > 1
             else None
         ),
-        on_success=lambda retry_state: (
-            log(
-                INFO,
-                "Connection successful after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-            if retry_state.tries > 1
-            else None
-        ),
-        on_backoff=lambda retry_state: (
-            log(WARN, "Connection attempt failed, retrying...")
-            if retry_state.tries == 1
-            else log(
-                DEBUG,
-                "Connection attempt failed, retrying in %.2f seconds",
-                retry_state.actual_wait,
-            )
-        ),
+        on_success=_on_sucess,
+        on_backoff=_on_backoff,
     )
 
     node_state = NodeState()
+    # run_id -> (fab_id, fab_version)
+    run_info: Dict[int, Tuple[str, str]] = {}
 
-    while True:
+    while not app_state_tracker.interrupt:
         sleep_duration: int = 0
         with connection(
             address,
@@ -393,107 +321,127 @@ def _start_client_internal(
             retry_invoker,
             grpc_max_message_length,
             root_certificates,
+            authentication_keys,
         ) as conn:
-            # pylint: disable-next=W0612
             receive, send, create_node, delete_node, get_run = conn
 
             # Register node
             if create_node is not None:
                 create_node()  # pylint: disable=not-callable
 
-            while True:
-                # Receive
-                message = receive()
-                if message is None:
-                    time.sleep(3)  # Wait for 3s before asking again
-                    continue
+            app_state_tracker.register_signal_handler()
+            while not app_state_tracker.interrupt:
+                try:
+                    # Receive
+                    message = receive()
+                    if message is None:
+                        time.sleep(3)  # Wait for 3s before asking again
+                        continue
 
-                log(INFO, "")
-                if len(message.metadata.group_id) > 0:
+                    log(INFO, "")
+                    if len(message.metadata.group_id) > 0:
+                        log(
+                            INFO,
+                            "[RUN %s, ROUND %s]",
+                            message.metadata.run_id,
+                            message.metadata.group_id,
+                        )
                     log(
                         INFO,
-                        "[RUN %s, ROUND %s]",
-                        message.metadata.run_id,
-                        message.metadata.group_id,
+                        "Received: %s message %s",
+                        message.metadata.message_type,
+                        message.metadata.message_id,
                     )
-                log(
-                    INFO,
-                    "Received: %s message %s",
-                    message.metadata.message_type,
-                    message.metadata.message_id,
-                )
 
-                # Handle control message
-                out_message, sleep_duration = handle_control_message(message)
-                if out_message:
-                    send(out_message)
+                    # Handle control message
+                    out_message, sleep_duration = handle_control_message(message)
+                    if out_message:
+                        send(out_message)
+                        break
+
+                    # Get run info
+                    run_id = message.metadata.run_id
+                    if run_id not in run_info:
+                        if get_run is not None:
+                            run_info[run_id] = get_run(run_id)
+                        # If get_run is None, i.e., in grpc-bidi mode
+                        else:
+                            run_info[run_id] = ("", "")
+
+                    # Register context for this run
+                    node_state.register_context(run_id=run_id)
+
+                    # Retrieve context for this run
+                    context = node_state.retrieve_context(run_id=run_id)
+
+                    # Create an error reply message that will never be used to prevent
+                    # the used-before-assignment linting error
+                    reply_message = message.create_error_reply(
+                        error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
+                    )
+
+                    # Handle app loading and task message
+                    try:
+                        # Load ClientApp instance
+                        client_app: ClientApp = load_client_app_fn(*run_info[run_id])
+
+                        # Execute ClientApp
+                        reply_message = client_app(message=message, context=context)
+                    except Exception as ex:  # pylint: disable=broad-exception-caught
+
+                        # Legacy grpc-bidi
+                        if transport in ["grpc-bidi", None]:
+                            log(ERROR, "Client raised an exception.", exc_info=ex)
+                            # Raise exception, crash process
+                            raise ex
+
+                        # Don't update/change NodeState
+
+                        e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+                        # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                        reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                        exc_entity = "ClientApp"
+                        if isinstance(ex, LoadClientAppError):
+                            reason = (
+                                "An exception was raised when attempting to load "
+                                "`ClientApp`"
+                            )
+                            e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+                            exc_entity = "SuperNode"
+
+                        if not app_state_tracker.interrupt:
+                            log(
+                                ERROR, "%s raised an exception", exc_entity, exc_info=ex
+                            )
+
+                        # Create error message
+                        reply_message = message.create_error_reply(
+                            error=Error(code=e_code, reason=reason)
+                        )
+                    else:
+                        # No exception, update node state
+                        node_state.update_context(
+                            run_id=run_id,
+                            context=context,
+                        )
+
+                    # Send
+                    send(reply_message)
+                    log(INFO, "Sent reply")
+
+                except StopIteration:
+                    sleep_duration = 0
                     break
 
-                # Register context for this run
-                node_state.register_context(run_id=message.metadata.run_id)
-
-                # Retrieve context for this run
-                context = node_state.retrieve_context(run_id=message.metadata.run_id)
-
-                # Create an error reply message that will never be used to prevent
-                # the used-before-assignment linting error
-                reply_message = message.create_error_reply(
-                    error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
-                )
-
-                # Handle app loading and task message
-                try:
-                    # Load ClientApp instance
-                    client_app: ClientApp = load_client_app_fn()
-
-                    # Execute ClientApp
-                    reply_message = client_app(message=message, context=context)
-                except Exception as ex:  # pylint: disable=broad-exception-caught
-
-                    # Legacy grpc-bidi
-                    if transport in ["grpc-bidi", None]:
-                        log(ERROR, "Client raised an exception.", exc_info=ex)
-                        # Raise exception, crash process
-                        raise ex
-
-                    # Don't update/change NodeState
-
-                    e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
-                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-                    exc_entity = "ClientApp"
-                    if isinstance(ex, LoadClientAppError):
-                        reason = (
-                            "An exception was raised when attempting to load "
-                            "`ClientApp`"
-                        )
-                        e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
-                        exc_entity = "SuperNode"
-
-                    log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
-
-                    # Create error message
-                    reply_message = message.create_error_reply(
-                        error=Error(code=e_code, reason=reason)
-                    )
-                else:
-                    # No exception, update node state
-                    node_state.update_context(
-                        run_id=message.metadata.run_id,
-                        context=context,
-                    )
-
-                # Send
-                send(reply_message)
-                log(INFO, "Sent reply")
-
             # Unregister node
-            if delete_node is not None:
+            if delete_node is not None and app_state_tracker.is_connected:
                 delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
+            del app_state_tracker
             break
+
         # Sleep and reconnect afterwards
         log(
             INFO,
@@ -606,7 +554,14 @@ def start_numpy_client(
 
 def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
     Callable[
-        [str, bool, RetryInvoker, int, Union[bytes, str, None]],
+        [
+            str,
+            bool,
+            RetryInvoker,
+            int,
+            Union[bytes, str, None],
+            Optional[Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]],
+        ],
         ContextManager[
             Tuple[
                 Callable[[], Optional[Message]],
@@ -647,6 +602,8 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         connection, error_type = http_request_response, RequestsConnectionError
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
         connection, error_type = grpc_request_response, RpcError
+    elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
+        connection, error_type = grpc_adapter, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
         connection, error_type = grpc_connection, RpcError
     else:
@@ -655,3 +612,20 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         )
 
     return connection, address, error_type
+
+
+@dataclass
+class _AppStateTracker:
+    interrupt: bool = False
+    is_connected: bool = False
+
+    def register_signal_handler(self) -> None:
+        """Register handlers for exit signals."""
+
+        def signal_handler(sig, frame):  # type: ignore
+            # pylint: disable=unused-argument
+            self.interrupt = True
+            raise StopIteration from None
+
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)

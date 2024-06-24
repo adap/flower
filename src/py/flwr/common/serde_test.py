@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -324,7 +324,7 @@ def test_message_to_and_from_taskins(
     maker = RecordMaker(state=1)
     metadata = maker.metadata()
     # pylint: disable-next=protected-access
-    metadata._src_node_id = 0  # Assume driver node
+    metadata.__dict__["_src_node_id"] = 0  # Assume driver node
 
     original = Message(
         metadata=metadata,

@@ -42,5 +42,5 @@ If everything worked, it should print the version of Flower Datasets to the comm
 
 .. code-block:: none
 
-  0.0.1
+  0.2.0
 
