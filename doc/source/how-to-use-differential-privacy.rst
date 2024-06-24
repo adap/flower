@@ -9,7 +9,7 @@ This guide explains how you can utilize differential privacy in the Flower frame
 
 Central Differential Privacy
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This approach consists of two seprate phases: clipping of the updates and adding noise to the aggregated model.
+This approach consists of two separate phases: clipping of the updates and adding noise to the aggregated model.
 For the clipping phase, Flower framework has made it possible to decide whether to perform clipping on the server side or the client side.
 
 - **Server-side Clipping**: This approach has the advantage of the server enforcing uniform clipping across all clients' updates and reducing the communication overhead for clipping values. However, it also has the disadvantage of increasing the computational load on the server due to the need to perform the clipping operation for all clients.

@@ -7,6 +7,15 @@ learning/analytics/evaluation. It is created by the ``Flower Labs`` team that al
 Flower Datasets Framework
 -------------------------
 
+Install
+~~~~~~~
+
+.. code-block:: bash
+
+  python -m pip install "flwr-datasets[vision]"
+
+Check out all the details on how to install Flower Datasets in :doc:`how-to-install-flwr-datasets`.
+
 Tutorials
 ~~~~~~~~~
 
@@ -47,15 +56,26 @@ Information-oriented API reference and other reference material.
 
       flwr_datasets
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Reference docs
 
+   ref-telemetry
 
 Main features
 -------------
 Flower Datasets library supports:
 
-- **downloading datasets** - choose the dataset from Hugging Face's ``dataset``
-- **partitioning datasets** - customize the partitioning scheme
+- **downloading datasets** - choose the dataset from Hugging Face's ``dataset`` (`link <https://huggingface.co/datasets>`_)
+- **partitioning datasets** - choose one of the implemented partitioning scheme or create your own.
 - **creating centralized datasets** - leave parts of the dataset unpartitioned (e.g. for centralized evaluation)
+- **visualization of the partitioned datasets** - visualize the label distribution of the partitioned dataset (and compare the results on different parameters of the same partitioning schemes, different datasets, different partitioning schemes, or any mix of them)
+
+
+.. image:: ./_static/readme/comparison_of_partitioning_schemes.png
+  :align: center
+  :alt: Comparison of Partitioning Schemes on CIFAR10
+
 
 Thanks to using Hugging Face's ``datasets`` used under the hood, Flower Datasets integrates with the following popular formats/frameworks:
 
@@ -67,28 +87,19 @@ Thanks to using Hugging Face's ``datasets`` used under the hood, Flower Datasets
 - Jax
 - Arrow
 
-Install
--------
+Here are a few of the ``Partitioner`` s that are available: (for a full list see `link <ref-api/flwr_datasets.partitioner.html#module-flwr_datasets.partitioner>`_ )
 
-The simplest install is
+* Partitioner (the abstract base class) ``Partitioner``
+* IID partitioning ``IidPartitioner(num_partitions)``
+* Dirichlet partitioning ``DirichletPartitioner(num_partitions, partition_by, alpha)``
+* InnerDirichlet partitioning ``InnerDirichletPartitioner(partition_sizes, partition_by, alpha)``
+* Natural ID partitioner ``NaturalIdPartitioner(partition_by)``
+* Size partitioner (the abstract base class for the partitioners dictating the division based the number of samples) ``SizePartitioner``
+* Linear partitioner ``LinearPartitioner(num_partitions)``
+* Square partitioner ``SquarePartitioner(num_partitions)``
+* Exponential partitioner ``ExponentialPartitioner(num_partitions)``
+* more to come in the future releases (contributions are welcome).
 
-.. code-block:: bash
-
-  python -m pip install flwr-datasets
-
-If you plan to use the image datasets
-
-.. code-block:: bash
-
-  python -m pip install flwr-datasets[vision]
-
-If you plan to use the audio datasets
-
-.. code-block:: bash
-
-  python -m pip install flwr-datasets[audio]
-
-Check out the full details on the download in :doc:`how-to-install-flwr-datasets`.
 
 How To Use the library
 ----------------------
