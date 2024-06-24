@@ -3,7 +3,6 @@ name: Release nightly
 on:
   schedule:
     - cron: "0 23 * * *"
-    - cron: "30 23 * * *"
 
 env:
   FLWR_TELEMETRY_ENABLED: 0
@@ -17,46 +16,65 @@ jobs:
       name: ${{ steps.release.outputs.name }}
       version: ${{ steps.release.outputs.version }}
       skip: ${{ steps.release.outputs.skip }}
+      pip-version: ${{ steps.release.outputs.pip-version }}
+      setuptools-version: ${{ steps.release.outputs.setuptools-version }}
     steps:
       - uses: actions/checkout@v4
       - name: Bootstrap
+        id: bootstrap
         uses: ./.github/actions/bootstrap
       - name: Release nightly
-        if: github.event.schedule == '0 23 * * *'
+        id: release
         env:
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-        run: ./dev/publish-nightly.sh
-      - name: Read nightly version and name
-        if: github.event.schedule == '30 23 * * *'
-        id: release
         run: |
-          RESULT=$(./dev/publish-nightly.sh --skip-publish)
+          RESULT=$(./dev/publish-nightly.sh)
           if [ "$RESULT" == "There were no commits in the last 24 hours." ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
           fi
 
           echo "name=$(poetry version | awk {'print $1'})" >> $GITHUB_OUTPUT
           echo "version=$(poetry version -s)" >> $GITHUB_OUTPUT
+          echo "pip-version=${{ steps.bootstrap.outputs.pip-version }}" >> "$GITHUB_OUTPUT"
+          echo "setuptools-version=${{ steps.bootstrap.outputs.setuptools-version }}" >> "$GITHUB_OUTPUT"
 
-  build-docker-images:
-    name: Build nightly images
-    if: github.repository == 'adap/flower' && needs.release-nightly.outputs.skip != 'true' && github.event.schedule == '30 23 * * *'
+  build-docker-base-images:
+    name: Build nightly base images
+    if: github.repository == 'adap/flower' && needs.release-nightly.outputs.skip != 'true'
     uses: ./.github/workflows/_docker-build.yml
     needs: release-nightly
+    with:
+      namespace-repository: flwr/base
+      file-dir: src/docker/base/ubuntu
+      build-args: |
+        PIP_VERSION=${{ needs.release-nightly.outputs.pip-version }}
+        SETUPTOOLS_VERSION=${{ needs.release-nightly.outputs.setuptools-version }}
+        FLWR_VERSION=${{ needs.release-nightly.outputs.version }}
+        FLWR_PACKAGE=${{ needs.release-nightly.outputs.name }}
+      tags: |
+        ${{ needs.release-nightly.outputs.version }}
+        nightly
+    secrets:
+      dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  build-docker-binary-images:
+    name: Build nightly binary images
+    if: github.repository == 'adap/flower' && needs.release-nightly.outputs.skip != 'true'
+    uses: ./.github/workflows/_docker-build.yml
+    needs: [release-nightly, build-docker-base-images]
     strategy:
       fail-fast: false
       matrix:
         images: [
-          { repository: "flwr/superlink", file-dir: "src/docker/superlink" },
-          { repository: "flwr/supernode", file-dir: "src/docker/supernode" },
-          { repository: "flwr/serverapp", file-dir: "src/docker/serverapp" }
+          { repository: "flwr/superlink", file_dir: "src/docker/superlink" },
+          { repository: "flwr/supernode", file_dir: "src/docker/supernode" },
+          { repository: "flwr/serverapp", file_dir: "src/docker/serverapp" }
         ]
     with:
       namespace-repository: ${{ matrix.images.repository }}
-      file-dir: ${{ matrix.images.file-dir }}
-      build-args: |
-        FLWR_VERSION=${{ needs.release-nightly.outputs.version }}
-        FLWR_PACKAGE=${{ needs.release-nightly.outputs.name }}
+      file-dir: ${{ matrix.images.file_dir }}
+      build-args: BASE_IMAGE=${{ needs.release-nightly.outputs.version }}
       tags: |
         ${{ needs.release-nightly.outputs.version }}
         nightly

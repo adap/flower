@@ -60,8 +60,24 @@ jobs:
           hash = hashlib.sha256('''${{ inputs.namespace-repository }}
           ${{ inputs.file-dir }}
           ${{ inputs.build-args }}'''.encode())
+          # Adds two spaces to the line breaks to ensure proper indentation
+          # when passing the multi-line string to the wretry.action.
+          # Without it, the multi-line string is passed like this:
+          #
+          # build-args: |
+          #   ARG1=
+          # ARG2=
+          # ARG3=
+          #
+          # This causes the Docker action to interpret ARG2 and ARG3 as keys instead
+          # of values ​​of the multi-line string.
+          build_args = '''${{ inputs.build-args }}'''.replace("\n", "\n  ")
+
           with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
               print(f"id={hash.hexdigest()}", file=fh)
+              print("build-args<<EOF", file=fh)
+              print(build_args, file=fh)
+              print("EOF", file=fh)
 
       - name: Set up QEMU
         if: matrix.platform.qemu != ''
@@ -79,24 +95,30 @@ jobs:
         uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
 
       - name: Login to Docker Hub
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
         with:
           username: ${{ secrets.dockerhub-user }}
           password: ${{ secrets.dockerhub-token }}
 
       - name: Build and push
+        uses: Wandalen/wretry.action@6feedb7dedadeb826de0f45ff482b53b379a7844 # v3.5.0
         id: build
-        uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
         with:
-          platforms: ${{ matrix.platform.docker }}
-          context: "{{defaultContext}}:${{ inputs.file-dir }}"
-          build-args: ${{ inputs.build-args }}
-          outputs: type=image,name=${{ inputs.namespace-repository }},push-by-digest=true,name-canonical=true,push=true
+          action: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
+          attempt_limit: 60 # 60 attempts * (9 secs delay + 1 sec retry) = ~10 mins
+          attempt_delay: 9000 # 9 secs
+          with: |
+            pull: true
+            platforms: ${{ matrix.platform.docker }}
+            context: "{{defaultContext}}:${{ inputs.file-dir }}"
+            outputs: type=image,name=${{ inputs.namespace-repository }},push-by-digest=true,name-canonical=true,push=true
+            build-args: |
+              ${{ steps.build-id.outputs.build-args }}
 
       - name: Export digest
         run: |
           mkdir -p /tmp/digests
-          digest="${{ steps.build.outputs.digest }}"
+          digest="${{ fromJSON(steps.build.outputs.outputs).digest }}"
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
@@ -133,7 +155,7 @@ jobs:
         uses: docker/setup-buildx-action@d70bba72b1f3fd22344832f00baa16ece964efeb # v3.3.0
 
       - name: Login to Docker Hub
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
         with:
           username: ${{ secrets.dockerhub-user }}
           password: ${{ secrets.dockerhub-token }}
