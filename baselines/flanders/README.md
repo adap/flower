@@ -1,8 +1,8 @@
 ---
-title: A Byzantine-Resilient Aggregation Scheme for Federated Learning via Matrix Autoregression on Client Updates
+title: Protecting Federated Learning from Extreme Model Poisoning Attacks via Multidimensional Time Series Anomaly Detection
 url: https://arxiv.org/abs/2303.16668
 labels: [robustness, model poisoning, anomaly detection, autoregressive model, regression, classification]
-dataset: [MNIST, Income, CIFAR-10, California Housing]
+dataset: [MNIST, FashionMNIST]
 ---
 
 **Paper:** [arxiv.org/abs/2303.16668](https://arxiv.org/abs/2303.16668)
