@@ -19,7 +19,7 @@ dataset: [MNIST, Income, CIFAR-10, California Housing]
 
 **Hardware Setup:** AMD Ryzen 9, 64 GB RAM, and an NVIDIA 4090 GPU with 24 GB VRAM.
 
-**Estimated time to run:** You can expect to run experiments on the given setup in 2m with *MNIST* and 3m with *Fashion-MNIST*, without attacks. With an Apple M2 Pro, 16gb RAM; each experiment with 10 clients for MNIST runs in about 24 minutes. Note that experiments with OPT (fang) and AGR-MM (minmax) can be up to 10x times slower.
+**Estimated time to run:** You can expect to run experiments on the given setup in 2m with *MNIST* and 3m with *Fashion-MNIST*, without attacks. With an Apple M2 Pro, 16gb RAM, each experiment with 10 clients for MNIST runs in about 24 minutes. Note that experiments with OPT (fang) and AGR-MM (minmax) can be up to 5x times slower.
 
 **Contributors:** Edoardo Gabrielli, Sapienza University of Rome ([GitHub](https://github.com/edogab33), [Scholar](https://scholar.google.com/citations?user=b3bePdYAAAAJ))
 
@@ -107,12 +107,20 @@ python -m flanders.main --multirun dataset=mnist,fmnist server.attack_fn=gaussia
 
 ## Expected Results
 
-By running;
+Use this command to run experiments on FLANDERS+\[baseline\]
 ```bash
-python -m flanders.main --multirun dataset=mnist,fmnist server.attack_fn=gaussian,lie,fang,minmax server.num_malicious=0,1,2,3,4,5,6,7,8,9
+python -m flanders.main --multirun server.num_rounds=50 dataset=fmnist strategy=flanders aggregate_fn=fedavg,trimmedmean,fedmedian,krum,bulyan server.pool_size=100 server.num_malicious=0,20,60,80 server.attack_fn=gaussian,lie,fang,minmax client_resources.num_cpus=0.1 client_resources.num_gpus=0.1
 ```
 
-It will generate the results in `results/all_results.csv`. To generate the plots, use the notebook in `plotting/plots.ipynb`.
+And then this command to run experiments on vanilla baselines:
+
+```bash
+python -m flanders.main --multirun server.num_rounds=50 dataset=fmnist strategy=fedavg,trimmedmean,fedmedian,krum,bulyan server.pool_size=100 server.num_malicious=0,20,60,80 server.attack_fn=gaussian,lie,fang,minmax client_resources.num_cpus=0.1 client_resources.num_gpus=0.1
+```
+
+They will generate the results in `results/all_results.csv`.
+
+To generate the plots, use the notebook in `plotting/plots.ipynb`.
 
 Expected maximum accuracy achieved across different numbers of malicious clients and different attacks:
 

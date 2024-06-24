@@ -9,7 +9,7 @@ server:
   _target_: flanders.server.EnhancedServer
   num_rounds: 100
   pool_size: 100
-  warmup_rounds: 30
+  warmup_rounds: 2
   sampling: 500
   history_dir: clients_params
   magnitude: 10
