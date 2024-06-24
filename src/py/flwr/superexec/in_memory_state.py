@@ -17,17 +17,13 @@
 
 from typing import Dict, List, Optional
 
-import sqlite3
 from typing_extensions import override
 
 from .state import RunStatus, SuperexecState
 
 
 class InMemorySuperexecState(SuperexecState):
-    """SQLite implementation of SuperexecState."""
-
-    def __init__(self, db_path: str):
-        self.conn = sqlite3.connect(db_path)
+    """InMemory implementation of SuperexecState."""
 
     @override
     def initialize(self):
