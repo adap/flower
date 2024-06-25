@@ -15,10 +15,11 @@ END
 
 table_body="\\
 .. list-table:: \\
-   :widths: 15 15 50\\
+   :widths: 50 15 15 15\\
    :header-rows: 1\\
   \\
-   * - Method\\
+   * - Title \\
+     - Framework\\
      - Dataset\\
      - Tags\\
    .. BASELINES_TABLE_ENTRY\\
@@ -41,8 +42,11 @@ function add_table_entry ()
   # get text after "dataset:" in metadata using sed
   dataset=$(echo "$metadata" | sed -n 's/dataset: //p' | sed 's/\[//g; s/\]//g')
 
+  framework=$(echo "$metadata" | sed -n 's/framework: //p' | sed 's/\[//g; s/\]//g')
+
   table_entry="\\
-   * - \`$1 <$1.html>\`_\\
+   * - \`$title <$1.html>\`_\\
+     - $framework\\
      - $dataset\\
      - $labels\\
     \\
@@ -155,6 +159,7 @@ done
 
 echo "" >> $INDEX
 echo "$initial_text" >> $INDEX
+echo "" >> $INDEX
 
 add_all_entries
 

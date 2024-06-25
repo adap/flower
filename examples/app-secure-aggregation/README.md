@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: "Example Flower App with Secure Aggregation"
 url: https://pytorch.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
+framework: [PyTorch]
 ---
 
 # Secure aggregation with Flower (the SecAgg+ protocol) 🧪

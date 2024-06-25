@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: "Flower Embedded Devices Example"
 url: https://pytorch.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
+framework: [PyTorch, TensorFlow]
 ---
 
 # Federated Learning on Embedded Devices with Flower

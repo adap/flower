@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
+title: "Advanced Flower Example using TensorFlow/Keras"
+url: https://tensorflow.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
+framework: [TensorFlow, Keras]
 ---
 
 # Advanced Flower Example (TensorFlow/Keras)

@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
+title: "Flower Android Example using Java and TF Lite"
+url: https://tensorflow.org/lite
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
+framework: [Android, Java, TensorFlowLite]
 ---
 
 # Flower Android Example (TensorFlowLite)

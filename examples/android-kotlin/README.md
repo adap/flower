@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
+title: "Flower Android Example using Kotlin and TF Lite"
+url: https://tensorflow.org/lite
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
+framework: [Android, Kotlin, TensorFlowLite]
 ---
 
 # Flower Android Client Example with Kotlin and TensorFlow Lite 2022

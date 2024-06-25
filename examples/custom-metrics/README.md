@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: "Example Flower App with Custom Metrics"
 url: https://pytorch.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
+framework: [PyTorch]
 ---
 
 # Flower Example using Custom Metrics
