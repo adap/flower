@@ -1,5 +1,5 @@
 ---
-title: "Advanced Flower Example using PyTorch"
+title: Advanced Flower Example using PyTorch
 url: https://pytorch.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]

@@ -1,5 +1,5 @@
 ---
-title: "Flower Android Example using Java and TF Lite"
+title: Flower Android Example using Java and TF Lite
 url: https://tensorflow.org/lite
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]

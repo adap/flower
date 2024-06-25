@@ -1,8 +1,8 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
+title: Flower Example with Authentication
+labels: [advanced, vision, fds]
 dataset: [CIFAR-10]
+framework: [PyTorch]
 ---
 
 # Flower Authentication with PyTorch 🧪

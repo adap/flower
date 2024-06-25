@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: Flower Example using KaplanMeierFitter
 url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+labels: [estimator, medical]
+dataset: [Walton]
+framework: [lifelines]
 ---
 
 # Flower Example using KaplanMeierFitter

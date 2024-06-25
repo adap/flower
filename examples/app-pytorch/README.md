@@ -1,5 +1,5 @@
 ---
-title: "Example Flower App using PyTorch"
+title: Example Flower App using PyTorch
 url: https://pytorch.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]

@@ -3,228 +3,260 @@ Flower Examples Documentation
 
 
 .. list-table:: 
-   :widths: 15 15 50
+   :widths: 50 15 15 15
    :header-rows: 1
   
-   * - Method
+   * - Title 
+     - Framework
      - Dataset
      - Tags
    
-   * - `advanced-pytorch <advanced-pytorch.html>`_
+   * - `"Advanced Flower Example using PyTorch" <advanced-pytorch.html>`_
+     - PyTorch
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `advanced-tensorflow <advanced-tensorflow.html>`_
+   * - `"Flower Android Example using Kotlin and TF Lite" <android-kotlin.html>`_
+     - Android, Kotlin, TensorFlowLite
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `android-kotlin <android-kotlin.html>`_
+   * - `"Flower Android Example using Java and TF Lite" <android.html>`_
+     - Android, Java, TensorFlowLite
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `android <android.html>`_
+   * - `"Example Flower App using PyTorch" <app-pytorch.html>`_
+     - PyTorch
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `app-pytorch <app-pytorch.html>`_
+   * - `"Example Flower App with Secure Aggregation" <app-secure-aggregation.html>`_
+     - PyTorch
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `app-secure-aggregation <app-secure-aggregation.html>`_
+   * - `"Example Flower App with Custom Metrics" <custom-metrics.html>`_
+     - PyTorch
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `custom-metrics <custom-metrics.html>`_
+   * - `"Example Flower App with Custom Metrics" <custom-mods.html>`_
+     - PyTorch
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `custom-mods <custom-mods.html>`_
+   * - `"Simple Flower Example using PyTorch" <federated-kaplan-meier-fitter.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `embedded-devices <embedded-devices.html>`_
+   * - `"Simple Flower Example using PyTorch" <flower-authentication.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `federated-kaplan-meier-fitter <federated-kaplan-meier-fitter.html>`_
+   * - `"Simple Flower Example using PyTorch" <flower-in-30-minutes.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `flower-authentication <flower-authentication.html>`_
+   * - `"Simple Flower Example using PyTorch" <flower-simulation-step-by-step-pytorch.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `flower-in-30-minutes <flower-in-30-minutes.html>`_
+   * - `"Simple Flower Example using PyTorch" <flower-via-docker-compose.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `flower-simulation-step-by-step-pytorch <flower-simulation-step-by-step-pytorch.html>`_
+   * - `"Simple Flower Example using PyTorch" <fl-dp-sa.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `flower-via-docker-compose <flower-via-docker-compose.html>`_
+   * - `"Simple Flower Example using PyTorch" <fl-tabular.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `fl-dp-sa <fl-dp-sa.html>`_
+   * - `"Simple Flower Example using PyTorch" <ios.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `fl-tabular <fl-tabular.html>`_
+   * - `"Simple Flower Example using PyTorch" <llm-flowertune.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `ios <ios.html>`_
+   * - `"Simple Flower Example using PyTorch" <opacus.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `llm-flowertune <llm-flowertune.html>`_
+   * - `"Simple Flower Example using PyTorch" <pytorch-federated-variational-autoencoder.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `opacus <opacus.html>`_
+   * - `"Simple Flower Example using PyTorch" <pytorch-from-centralized-to-federated.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `pytorch-federated-variational-autoencoder <pytorch-federated-variational-autoencoder.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-cpp.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `pytorch-from-centralized-to-federated <pytorch-from-centralized-to-federated.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-fastai.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-cpp <quickstart-cpp.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-huggingface.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-fastai <quickstart-fastai.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-jax.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-huggingface <quickstart-huggingface.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-mlcube.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-jax <quickstart-jax.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-mlx.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-mlcube <quickstart-mlcube.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-monai.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-mlx <quickstart-mlx.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-pandas.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-monai <quickstart-monai.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-pytorch-lightning.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-pandas <quickstart-pandas.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-pytorch.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-pytorch-lightning <quickstart-pytorch-lightning.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-sklearn-tabular.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-pytorch <quickstart-pytorch.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-tabnet.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-sklearn-tabular <quickstart-sklearn-tabular.html>`_
+   * - `"Simple Flower Example using PyTorch" <quickstart-tensorflow.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-tabnet <quickstart-tabnet.html>`_
+   * - `"Simple Flower Example using PyTorch" <simulation-pytorch.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `quickstart-tensorflow <quickstart-tensorflow.html>`_
+   * - `"Simple Flower Example using PyTorch" <simulation-tensorflow.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `simulation-pytorch <simulation-pytorch.html>`_
+   * - `"Simple Flower Example using PyTorch" <sklearn-logreg-mnist.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `simulation-tensorflow <simulation-tensorflow.html>`_
+   * - `"Simple Flower Example using PyTorch" <tensorflow-privacy.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `sklearn-logreg-mnist <sklearn-logreg-mnist.html>`_
+   * - `"Simple Flower Example using PyTorch" <vertical-fl.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `tensorflow-privacy <tensorflow-privacy.html>`_
+   * - `"Simple Flower Example using PyTorch" <vit-finetune.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `vertical-fl <vertical-fl.html>`_
+   * - `"Simple Flower Example using PyTorch" <whisper-federated-finetuning.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `vit-finetune <vit-finetune.html>`_
+   * - `"Simple Flower Example using PyTorch" <xgboost-comprehensive.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
 
-   * - `whisper-federated-finetuning <whisper-federated-finetuning.html>`_
+   * - `"Simple Flower Example using PyTorch" <xgboost-quickstart.html>`_
+     - 
      - CIFAR-10
      - basic, vision, fds
     
-
-   * - `xgboost-comprehensive <xgboost-comprehensive.html>`_
-     - CIFAR-10
-     - basic, vision, fds
-    
-
-   * - `xgboost-quickstart <xgboost-quickstart.html>`_
-     - CIFAR-10
-     - basic, vision, fds
-    
-.. BASELINES_TABLE_ENTRY                                                                                      
+.. BASELINES_TABLE_ENTRY                                                                                  
   
 
 .. toctree::

@@ -1,5 +1,5 @@
 ---
-title: "Flower Embedded Devices Example"
+title: Flower Embedded Devices Example
 url: https://pytorch.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]

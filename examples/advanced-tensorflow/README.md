@@ -1,5 +1,5 @@
 ---
-title: "Advanced Flower Example using TensorFlow/Keras"
+title: Advanced Flower Example using TensorFlow/Keras
 url: https://tensorflow.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
