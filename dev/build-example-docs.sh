@@ -27,23 +27,19 @@ table_body="\\
 function add_table_entry ()
 {
   # extract lines from markdown file between --- and ---, preserving newlines and store in variable called metadata
-  # metadata=$(awk '/^---$/{flag=1; next} flag; /^---$/{exit}' $1/README.md)
+  metadata=$(awk '/^---$/{flag=1; next} flag; /^---$/{exit}' $1/README.md)
 
   # get text after "title:" in metadata using sed
-  # title=$(echo "$metadata" | sed -n 's/title: //p')
-  title=$1
+  title=$(echo "$metadata" | sed -n 's/title: //p')
 
   # get text after "url:" in metadata using sed
-  # url=$(echo "$metadata" | sed -n 's/url: //p')
-  url=$1
+  url=$(echo "$metadata" | sed -n 's/url: //p')
 
   # get text after "labels:" in metadata using sed
-  # labels=$(echo "$metadata" | sed -n 's/labels: //p' | sed 's/\[//g; s/\]//g')
-  labels=$1
+  labels=$(echo "$metadata" | sed -n 's/labels: //p' | sed 's/\[//g; s/\]//g')
 
   # get text after "dataset:" in metadata using sed
-  # dataset=$(echo "$metadata" | sed -n 's/dataset: //p' | sed 's/\[//g; s/\]//g')
-  dataset=$1
+  dataset=$(echo "$metadata" | sed -n 's/dataset: //p' | sed 's/\[//g; s/\]//g')
 
   table_entry="\\
    * - \`$1 <$1.html>\`_\\
@@ -127,15 +123,12 @@ rm -f $INDEX
 # Create empty index file
 touch $INDEX
 
-echo "# Flower Examples Documentation" >> $INDEX
+echo "Flower Examples Documentation" >> $INDEX
+echo "-----------------------------" >> $INDEX
 echo "" >> $INDEX
 echo ".. BASELINES_TABLE_ANCHOR" >> $INDEX
 
-# echo "$initial_text" >> $INDEX && echo "" >> $INDEX
-
 ! sed -i '' -e "s/.. BASELINES_TABLE_ANCHOR/$table_body/" $INDEX
-
-! grep -q ":caption: References" $INDEX && echo "$initial_text" >> $INDEX && echo "" >> $INDEX
 
 cd $ROOT/examples
 # Iterate through each folder in examples/
@@ -154,16 +147,16 @@ for d in $(printf '%s\n' */ | sort -V); do
     # Copy all images of the _static folder into the examples
     # docs static folder
     copy_images $example
+
     add_table_entry $example
     ! sed -i '' -e "s/.. BASELINES_TABLE_ENTRY/$table_entry/" $INDEX
   fi
 done
 
-# echo "\`\`\`{toctree}" >> $INDEX
-# echo "---" >> $INDEX
-# echo "maxdepth: 1" >> $INDEX
-# echo "---" >> $INDEX
+echo "" >> $INDEX
+echo "$initial_text" >> $INDEX
 
-# add_all_entries
+add_all_entries
 
-# echo "\`\`\`" >> $INDEX
+echo "" >> $INDEX
+
