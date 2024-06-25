@@ -141,14 +141,14 @@ for d in $(printf '%s\n' */ | sort -V); do
   if [[ $example != doc ]]; then
 
     # Copy markdown files to correct folder
-    copy_markdown_files $1
+    copy_markdown_files $example
 
     # Add button linked to GitHub
-    add_gh_button $1
+    add_gh_button $example
     
     # Copy all images of the _static folder into the examples
     # docs static folder
-    copy_images $1
+    copy_images $example
     add_table_entry $example
   fi
 done
