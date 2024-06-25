@@ -6,6 +6,50 @@ ROOT=`pwd`
 INDEX=$ROOT/examples/doc/source/index.md
 INSERT_LINE=6
 
+initial_text=$(cat <<-END
+.. toctree::
+  :maxdepth: 1
+  :caption: References
+END
+)
+
+table_body="\\
+.. list-table:: \\
+   :widths: 15 15 50\\
+   :header-rows: 1\\
+  \\
+   * - Method\\
+     - Dataset\\
+     - Tags\\
+   .. BASELINES_TABLE_ENTRY\\
+  "
+
+function add_table_entry ()
+{
+  # extract lines from markdown file between --- and ---, preserving newlines and store in variable called metadata
+  metadata=$(awk '/^---$/{flag=1; next} flag; /^---$/{exit}' $1/README.md)
+
+  # get text after "title:" in metadata using sed
+  title=$(echo "$metadata" | sed -n 's/title: //p')
+
+  # get text after "url:" in metadata using sed
+  url=$(echo "$metadata" | sed -n 's/url: //p')
+
+  # get text after "labels:" in metadata using sed
+  labels=$(echo "$metadata" | sed -n 's/labels: //p' | sed 's/\[//g; s/\]//g')
+
+  # get text after "dataset:" in metadata using sed
+  dataset=$(echo "$metadata" | sed -n 's/dataset: //p' | sed 's/\[//g; s/\]//g')
+
+  table_entry="\\
+   * - \`$1 <$1.html>\`_\\
+     - $dataset\\
+     - $labels\\
+    \\
+.. BASELINES_TABLE_ENTRY\
+  "
+}
+
 copy_markdown_files () {
   for file in $1/*.md; do
     # Copy the README into the source of the Example docs as the name of the example
@@ -81,6 +125,24 @@ touch $INDEX
 
 echo "# Flower Examples Documentation" >> $INDEX
 echo "" >> $INDEX
+
+
+! sed -i '' -e "s/.. BASELINES_TABLE_ANCHOR/$table_body/" $INDEX
+
+! grep -q ":caption: References" $INDEX && echo "$initial_text" >> $INDEX && echo "" >> $INDEX
+
+cd $ROOT/examples
+# Iterate through each folder in examples/
+for d in $(printf '%s\n' */ | sort -V); do
+  # Add entry based on the name of the folder
+  example=${d%/}
+
+  if [[ $example != doc ]]; then
+    add_table_entry $example
+    ! sed -i '' -e "s/.. BASELINES_TABLE_ENTRY/$table_entry/" $INDEX
+  fi
+done
+
 echo "\`\`\`{toctree}" >> $INDEX
 echo "---" >> $INDEX
 echo "maxdepth: 1" >> $INDEX
