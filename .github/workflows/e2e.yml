@@ -164,6 +164,9 @@ jobs:
       - name: Run driver test with client authentication
         if: ${{ matrix.directory == 'bare-client-auth' }}
         run: ./../test_driver.sh bare client-auth
+      - name: Run reconnection test with SQLite database
+        if: ${{ matrix.directory == 'bare' }}
+        run: ./../test_reconnection.sh sqlite
       - name: Cache save Python location
         id: cache-save-python
         uses: actions/cache/save@v4
