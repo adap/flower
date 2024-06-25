@@ -1,3 +1,10 @@
+---
+title: "Simple Flower Example using PyTorch"
+url: https://pytorch.org/
+labels: [basic, vision, fds]
+dataset: [CIFAR-10]
+---
+
 # Flower Example using KaplanMeierFitter
 
 This is an introductory example on **federated survival analysis** using [Flower](https://flower.ai/)

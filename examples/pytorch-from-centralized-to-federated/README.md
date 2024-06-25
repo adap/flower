@@ -1,3 +1,10 @@
+---
+title: "Simple Flower Example using PyTorch"
+url: https://pytorch.org/
+labels: [basic, vision, fds]
+dataset: [CIFAR-10]
+---
+
 # PyTorch: From Centralized To Federated
 
 This example demonstrates how an already existing centralized PyTorch-based machine learning project can be federated with Flower.

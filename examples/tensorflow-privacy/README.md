@@ -1,3 +1,10 @@
+---
+title: "Simple Flower Example using PyTorch"
+url: https://pytorch.org/
+labels: [basic, vision, fds]
+dataset: [CIFAR-10]
+---
+
 # Training with Sample-Level Differential Privacy using TensorFlow-Privacy Engine
 
 In this example, we demonstrate how to train a model with sample-level differential privacy (DP) using Flower. We employ TensorFlow and integrate the tensorflow-privacy Engine to achieve sample-level differential privacy. This setup ensures robust privacy guarantees during the client training phase.

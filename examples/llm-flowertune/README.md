@@ -1,3 +1,10 @@
+---
+title: "Simple Flower Example using PyTorch"
+url: https://pytorch.org/
+labels: [basic, vision, fds]
+dataset: [CIFAR-10]
+---
+
 # LLM FlowerTune: Federated LLM Fine-tuning with Flower
 
 Large language models (LLMs), which have been trained on vast amounts of publicly accessible data, have shown remarkable effectiveness in a wide range of areas.

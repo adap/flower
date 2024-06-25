@@ -1,3 +1,10 @@
+---
+title: "Simple Flower Example using PyTorch"
+url: https://pytorch.org/
+labels: [basic, vision, fds]
+dataset: [CIFAR-10]
+---
+
 # Flower Example using MLX
 
 This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/build/html/index.html), but deep knowledge of MLX is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy.

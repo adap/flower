@@ -1,3 +1,10 @@
+---
+title: "Simple Flower Example using PyTorch"
+url: https://pytorch.org/
+labels: [basic, vision, fds]
+dataset: [CIFAR-10]
+---
+
 # Flower Example using XGBoost (Comprehensive)
 
 This example demonstrates a comprehensive federated learning setup using Flower with XGBoost.

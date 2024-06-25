@@ -27,7 +27,7 @@ table_body="\\
 function add_table_entry ()
 {
   # extract lines from markdown file between --- and ---, preserving newlines and store in variable called metadata
-  metadata=$(awk '/^---$/{flag=1; next} flag; /^---$/{exit}' $1/README.md)
+  # metadata=$(awk '/^---$/{flag=1; next} flag; /^---$/{exit}' $1/README.md)
 
   # get text after "title:" in metadata using sed
   # title=$(echo "$metadata" | sed -n 's/title: //p')
@@ -129,8 +129,13 @@ touch $INDEX
 
 echo "# Flower Examples Documentation" >> $INDEX
 echo "" >> $INDEX
+echo ".. BASELINES_TABLE_ANCHOR" >> $INDEX
 
-echo "$initial_text" >> $INDEX && echo "" >> $INDEX
+# echo "$initial_text" >> $INDEX && echo "" >> $INDEX
+
+! sed -i '' -e "s/.. BASELINES_TABLE_ANCHOR/$table_body/" $INDEX
+
+! grep -q ":caption: References" $INDEX && echo "$initial_text" >> $INDEX && echo "" >> $INDEX
 
 cd $ROOT/examples
 # Iterate through each folder in examples/
@@ -150,6 +155,7 @@ for d in $(printf '%s\n' */ | sort -V); do
     # docs static folder
     copy_images $example
     add_table_entry $example
+    ! sed -i '' -e "s/.. BASELINES_TABLE_ENTRY/$table_entry/" $INDEX
   fi
 done
 

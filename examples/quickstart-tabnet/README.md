@@ -1,3 +1,10 @@
+---
+title: "Simple Flower Example using PyTorch"
+url: https://pytorch.org/
+labels: [basic, vision, fds]
+dataset: [CIFAR-10]
+---
+
 # Flower TabNet Example using TensorFlow
 
 This introductory example to Flower uses Keras but deep knowledge of Keras is not necessarily required to run the example. However, it will help you understanding how to adapt Flower to your use-cases. You can learn more about TabNet from [paper](https://arxiv.org/abs/1908.07442) and its implementation using TensorFlow at [this repository](https://github.com/titu1994/tf-TabNet). Note also that the basis of this example using federated learning is the example from the repository above.

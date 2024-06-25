@@ -1,3 +1,10 @@
+---
+title: "Simple Flower Example using PyTorch"
+url: https://pytorch.org/
+labels: [basic, vision, fds]
+dataset: [CIFAR-10]
+---
+
 # Using custom mods 🧪
 
 > 🧪 = This example covers experimental features that might change in future versions of Flower

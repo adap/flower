@@ -1,3 +1,10 @@
+---
+title: "Simple Flower Example using PyTorch"
+url: https://pytorch.org/
+labels: [basic, vision, fds]
+dataset: [CIFAR-10]
+---
+
 # Flower Example using TensorFlow/Keras + MLCube
 
 This introductory example to Flower uses MLCube together with Keras, but deep knowledge of Keras is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use-cases with MLCube. Running this example in itself is quite easy.

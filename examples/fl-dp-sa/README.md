@@ -1,3 +1,10 @@
+---
+title: "Simple Flower Example using PyTorch"
+url: https://pytorch.org/
+labels: [basic, vision, fds]
+dataset: [CIFAR-10]
+---
+
 # fl_dp_sa
 
 This is a simple example that utilizes central differential privacy with client-side fixed clipping and secure aggregation.
