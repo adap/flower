@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: Simple Flower Example on iOS
 url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+labels: [mobile, vision, fds]
+dataset: [MNIST]
+framework: [swift]
 ---
 
 # FLiOS - A Flower SDK for iOS Devices with Example

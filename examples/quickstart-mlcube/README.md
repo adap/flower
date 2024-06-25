@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+title: Flower Example using TensorFlow/Keras + MLCube 
+url: https://mlcube.org/
+labels: [quickstart, vision, deployment]
+dataset: [MNIST]
+framework: [TensorFlow, Keras]
 ---
 
 # Flower Example using TensorFlow/Keras + MLCube

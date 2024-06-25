@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: Federated LLM Fine-tuning with Flower 
 url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+labels: [llm, nlp, LLama2]
+dataset: [Alpaca-GPT4]
+framework: [PEFT]
 ---
 
 # LLM FlowerTune: Federated LLM Fine-tuning with Flower

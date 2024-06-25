@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+title: Simple Flower Example using fastai
+url: https://fast.ai/
+labels: [quickstart, vision]
+dataset: [MNIST]
+framework: [fastai]
 ---
 
 # Flower Example using fastai

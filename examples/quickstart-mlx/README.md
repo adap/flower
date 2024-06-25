@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+title: Simple Flower Example using MLX
+url: https://ml-explore.github.io/mlx/build/html/index.html 
+labels: [quickstart, vision]
+dataset: [MNIST]
+framework: [MLX]
 ---
 
 # Flower Example using MLX

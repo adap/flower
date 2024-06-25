@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+title: Flower Example using MONAI
+url: https://docs.monai.io/en/latest/index.html
+labels: [quickstart, medical, vision]
+dataset: [MedNIST]
+framework: [MONAI]
 ---
 
 # Flower Example using MONAI

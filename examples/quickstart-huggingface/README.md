@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+title: Flower Transformers Example using HuggingFace
+url: https://huggingface.co/
+labels: [quickstart, llm, nlp, sentiment]
+dataset: [IMDB]
+framework: [transformers]
 ---
 
 # Federated HuggingFace Transformers using Flower and PyTorch

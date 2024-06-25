@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+title: Simple Flower Example using Jax
+url: https://github.com/google/jax
+labels: [quickstart, linear regression]
+dataset: [synthetic]
+framework: [JAX]
 ---
 
 # JAX: From Centralized To Federated

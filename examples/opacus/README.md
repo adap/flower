@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: Sample-Level Differential Privacy using Opacus
 url: https://pytorch.org/
-labels: [basic, vision, fds]
+labels: [dp, security, fds]
 dataset: [CIFAR-10]
+framework: [opacus, PyTorch]
 ---
 
 # Training with Sample-Level Differential Privacy using Opacus Privacy Engine

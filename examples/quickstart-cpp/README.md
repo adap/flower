@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: Simple Flower Example using C++
 url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+labels: [quickstart, linear regression, tabular]
+dataset: [synthetic]
+framework: [c++]
 ---
 
 # Flower Clients in C++ (under development)

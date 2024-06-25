@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: Leveraging Flower and Docker for Device Heterogeneity Management in FL 
 url: https://pytorch.org/
-labels: [basic, vision, fds]
+labels: [deployment, vision, tutorial]
 dataset: [CIFAR-10]
+framework: [Docker]
 ---
 
 # Leveraging Flower and Docker for Device Heterogeneity Management in Federated Learning
