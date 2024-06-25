@@ -85,7 +85,7 @@ copy_images () {
 }
 
 add_to_index () {
-  (echo $INSERT_LINE; echo a; echo $1; echo .; echo wq) | ed $INDEX 2>&1 >/dev/null
+  echo "  $1" >> $INDEX
 }
 
 add_single_entry () {
