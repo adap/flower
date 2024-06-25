@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: Flower main\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-06-17 16:09+0200\n"
-"PO-Revision-Date: 2024-06-25 02:09+0000\n"
-"Last-Translator: Sijiaomg Ohoh <lisijia1997@gmail.com>\n"
+"PO-Revision-Date: 2024-06-25 10:43+0000\n"
+"Last-Translator: \"Young D. Kwon\" <youngkwon311@gmail.com>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/flower-docs/"
 "framework/ko/>\n"
 "Language: ko\n"
@@ -22278,7 +22278,7 @@ msgid ""
 msgstr ""
 "이 튜토리얼에서 연합 학습이 무엇인지 배우고 Flower로 첫 번째 시스템을 "
 "구축하고 점진적으로 확장해 나갈 것입니다. 본 튜토리얼의 모든 부분을 완성할 "
-"수 있다면, 당신은 고급 연방 학습 시스템을 구축하여 그 분야의 현재 기술 "
+"수 있다면, 당신은 고급 연합 학습 시스템을 구축하여 그 분야의 현재 최고 기술 "
 "수준에 접근할 수 있을 것입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:15
@@ -22287,8 +22287,9 @@ msgid ""
 "learning. Only a basic understanding of data science and Python programming "
 "is assumed."
 msgstr ""
-"🧑‍🏫이 튜토리얼은 제로베이부터 시작되며 연방 학습에 상세히 아는 필요가 "
-"없습니다. 데이터 과학과 파이썬 프로그래밍에 대한 기본적인 이해만 가정합니다."
+"🧑‍🏫이 튜토리얼은 사전 지식을 많이 필요로 하지 않으며 연합 학습에 대해 "
+"상세히알 필요는 없습니다. 데이터 과학과 파이썬 프로그래밍에 대한 기본적인 "
+"이해만 가정합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:17
 msgid ""
@@ -22306,13 +22307,13 @@ msgstr ""
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:31
 msgid "Classic machine learning"
-msgstr "클래식 머신러닝"
+msgstr "전통적인 머신러닝(기계학습)"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:33
 msgid ""
 "Before we begin to discuss federated learning, let us quickly recap how most "
 "machine learning works today."
-msgstr "연방 학습에 대해 논의하기 전에 현재 대부분의 머신러닝이 어떻게 작동하는지 "
+msgstr "연합 학습에 대해 논의하기 전에 현재 대부분의 머신러닝이 어떻게 작동하는지 "
 "간략히 요약하겠습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:35
@@ -22321,8 +22322,8 @@ msgid ""
 "neural network (as depicted here), or something else, like classical linear "
 "regression."
 msgstr ""
-"기계 학습에서 우리는 모델과 데이터를 가지고 있습니다.모델은 신경망((그림과 "
-"같이))일 수도 있고 고전적인 선형 회귀와 같은 다른 것일 수도 있습니다."
+"머신러닝에서 우리는 모델과 데이터를 가지고 있습니다. 모델은 신경망(그림과 "
+"같이)일 수도 있고 고전적인 선형 회귀와 같은 다른 것일 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:41
 msgid "|93b02017c78049bbbd5ae456dcb2c91b|"
@@ -22373,7 +22374,7 @@ msgstr "|9bc21c7dbd17444a8f070c60786e3484|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:113
 msgid "Data on a phone"
-msgstr "핸드푼에 있는 데이터"
+msgstr "핸드폰에 있는 데이터"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:73
 msgid ""
@@ -22401,7 +22402,7 @@ msgid ""
 "server can be somewhere in a data center, or somewhere in the cloud."
 msgstr ""
 "따라서 머신러닝이나 어떤 종류의 데이터 분석을 이용하려면 과거에는 중앙 "
-"서버에서 모든 데이터를 수집하는 방법이 사용되었습니다.이 서버는 데이터 센터 "
+"서버에서 모든 데이터를 수집하는 방법이 사용되었습니다. 이 서버는 데이터 센터 "
 "어딘가에 있을 수도 있고 클라우드 어딘가에 있을 수도 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:91
@@ -22419,8 +22420,8 @@ msgid ""
 "learning approach that we've basically always relied on."
 msgstr ""
 "모든 데이터가 한 곳에 모이면, 우리는 궁극적으로 머신러닝 알고리즘을 사용하여 "
-"데이터에서 모델을 훈련시킬 수 있습니다.이것이 바로 우리가 기본적으로 "
-"의지해왔던 머신러닝 방법입니다."
+"데이터에서 모델을 훈련시킬 수 있습니다. 이것이 바로 우리가 기본적으로 사용해 "
+"온 머신러닝 방법입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:103
 msgid "|c24c1478b30e4f74839208628a842d1e|"
@@ -22432,7 +22433,7 @@ msgstr "중앙 데이터 훈련"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:130
 msgid "Challenges of classical machine learning"
-msgstr "클래식 머신러닝이 만난 도전"
+msgstr "클래식 머신러닝의 어려움"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:132
 msgid ""
@@ -22441,9 +22442,9 @@ msgid ""
 "traffic. Cases, where all the data is naturally available on a centralized "
 "server."
 msgstr ""
-"우리가 방금 본 클래식 머신러닝 접근 방식은 경우에 따라 사용될 수 있습니다. "
-"좋은 예로는 휴일 사진을 분류하거나 웹 트래픽을 분석하는 것이 있습니다. "
-"이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에서 사용할 수 있습니다."
+"우리가 방금 본 전통적 머신러닝의 접근 방식은 경우에 따라 다르게 사용될 수 "
+"있습니다. 좋은 예로는 휴일 사진을 분류하거나 웹 트래픽을 분석하는 것이 "
+"있습니다. 이러한 사례에서 모든 데이터는 자연스럽게 중앙 서버에 존재합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:138
 msgid "|1b3613d7a58847b59e1d3180802dbc09|"
@@ -22459,9 +22460,9 @@ msgid ""
 "is not available on a centralized server, or cases where the data available "
 "on one server is not enough to train a good model."
 msgstr ""
-"그러나 이 방법은 다른 많은 경우에 적용되지 않습니다.예를 들어, 중앙 집중식 "
-"서버에 데이터가 없거나 서버의 데이터가 좋은 모델을 훈련하기에 충분하지 "
-"않습니다."
+"그러나 이 방법은 다른 많은 경우에 적용되지 않을 수 있습니다. 예를 들어, 중앙 "
+"집중식 서버에 데이터가 없거나 서버의 데이터가 좋은 모델을 훈련하기에 "
+"충분하지 않을 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:150
 msgid "|9980b5213db547d0b8024a50992b9e3f|"
@@ -22469,7 +22470,7 @@ msgstr "|9980b5213db547d0b8024a50992b9e3f|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:175
 msgid "Centralized impossible"
-msgstr "집중화 가능"
+msgstr "집중화 불가능"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:156
 msgid ""
@@ -22477,8 +22478,8 @@ msgid ""
 "does not work for a large number of highly important real-world use cases. "
 "Those reasons include:"
 msgstr ""
-"클래식 중앙 집중식 머신러닝 방법이 현실 세계에서 매우 중요한 수많은 사용 "
-"사례를 충족시킬 수 없는 이유가 있습니다.이유는 다음과 같은 여러 가지가 "
+"전통적인 중앙 집중식 머신러닝 방법이 현실 세계에서 매우 중요한 수많은 사용 "
+"사례를 충족시킬 수 없는 이유가 있습니다. 이유는 다음과 같은 여러 가지가 "
 "있습니다:"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:158
@@ -22497,9 +22498,9 @@ msgstr ""
 "PDPL (아르헨티나), KVKK (터키), POPI (남아프리카공화국), FSS (러시아), CDPR "
 "(중국), PDPB (인도), PIPA (한국), APPI (일본), PDP (인도네시아), PDPA "
 "(싱가포르), APP (호주)등의 법규로 민감한 데이터가 이동하지 않도록 보호하고 "
-"있습니 다. 실제 로이러한 규정은 사용자가 세계의 다른 지역에 살고 데이터가 "
+"있습니다. 실제로 이러한 규정은 사용자가 세계의 다른 지역에 살고 데이터가 "
 "다른 데이터 보호 규정에 의해 통제되기 때문에 단일 조직이 자체 사용자 "
-"데이터를 인공 지능 교육에 사용하는 것을 방지하기도 합니다."
+"데이터를 인공 지능 학습에 사용하는 것을 방지하기도 합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:160
 msgid ""
@@ -22510,7 +22511,7 @@ msgid ""
 "developed that keyboard, do you? In fact, that use case was the reason "
 "federated learning was invented in the first place."
 msgstr ""
-"**사용자 선호도**:규정 외에도 일부 사용 사례에서 사용자는 데이터가 자기 "
+"**사용자 선호도**: 규정 외에도 일부 사용 사례에서 사용자는 데이터가 자기 "
 "장치를 떠나지 않기를 예상합니다. 휴대폰의 디지털 키보드에 비밀번호와 "
 "신용카드 정보를 입력하면 비밀번호가 해당 키보드를 개발한 회사의 서버에 뜨길 "
 "원하지는 않겠죠? 사실, 이 사용 사례가 애당초 연합 학습이 발명된 이유였습니다."
@@ -22526,13 +22527,13 @@ msgid ""
 "exceedingly expensive infrastructure to process and store. And most of the "
 "data isn't even useful."
 msgstr ""
-"**데이터 볼륨**:일부 센서(예:카메라)는 너무 많은 데이터 볼륨을 생성하여 모든 "
-"데이터를 수집하는 것이 실현 가능하지도 않고 경제적이지도 않습니다(예: 대역폭 "
-"또는 통신 효율로 인해). 전국에 수백 개 기차역이 있는 국가 철도 서비스를 "
-"생각해 보세요. 각 기차역에 수 많은 보안 카메라가 설치되어 있다면,그들이 "
-"생산하는 대량의 원시 온디바이스 데이터는 처리 및 저장을 위해 엄청나게 "
-"강력하고 매우 비싼 인프라를 필요로 합니다.그런데 대부분의 데이터는 "
-"유용하지도 않습니다."
+"**데이터 볼륨**: 일부 센서(예:카메라)는 너무 많은 데이터 볼륨을 생성하여 "
+"모든 데이터를 수집하는 것이 실현 가능하지도 않고 경제적이지도 않습니다(예: "
+"대역폭 또는 통신 효율로 인해). 전국에 수백 개 기차역이 있는 국가 철도 "
+"서비스를 생각해 보세요. 각 기차역에 수 많은 보안 카메라가 설치되어 있다면, "
+"그들이 생산하는 대량의 미가공 된 온디바이스 데이터는 처리 및 저장을 위해 "
+"엄청나게 강력하고 매우 비싼기반 구조를 필요로 합니다. 그런데 대부분의 "
+"데이터는 유용하지도 않습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:164
 msgid "Examples where centralized machine learning does not work include:"
@@ -22555,7 +22556,7 @@ msgstr "더 나은 범위 예측을 위해 전기 자동차의 위치 데이터"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:169
 msgid "End-to-end encrypted messages to train better auto-complete models"
-msgstr "더 나은 자동 완성 모델을 훈련시키기 위한 엔드 투 엔드 암호화된 메시지"
+msgstr "더 나은 자동 완성 모델을 훈련시키기 위한 엔드 투 엔드 암호화 된 메시지"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:171
 msgid ""
@@ -22570,14 +22571,14 @@ msgstr ""
 "`Brave <https://brave.com/>`__ 브라우저나 `Signal <https://signal.org/>`__ "
 "메신저와 같은 개인 정보 보호 시스템의 인기는 사용자들이 개인 정보 보호에 "
 "신경 쓴다는 것을 보여줍니다. 실제로 그러한 대안이 존재하는 경우 다른 "
-"대안보다 개인 정보 보호 강화 버전을 선택합니다. 그런데 이러한 사례에 머신 "
-"러닝 및 데이터 과학을 적용하여 프라이버시 데이터를 활용하려면 어떻게 해야 "
-"합니까? 이 모든 분야는 최근 AI의 발전으로 상당한 이익을 얻을 수 있는 "
+"대안보다 개인 정보 보호 강화 버전을 선택합니다. 그런데 이러한 사례에 "
+"머신러닝 및 데이터 과학을 적용하여 프라이버시 데이터를 활용하려면 어떻게 "
+"해야 합니까? 이 모든 분야는 최근 AI의 발전으로 상당한 이익을 얻을 수 있는 "
 "분야입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:186
 msgid "Federated learning"
-msgstr "연방 학습"
+msgstr "연합 학습"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:188
 msgid ""
@@ -22585,9 +22586,9 @@ msgid ""
 "learning on distributed data by moving the training to the data, instead of "
 "moving the data to the training. Here's the single-sentence explanation:"
 msgstr ""
-"연방 학습은 이 방법을 쉽게 뒤집었습니다. 데이터를 훈련으로 옮기는 대신 "
-"데이터로 훈련을 전환함으로써 분산된 데이터에서 머신러닝을 실현합니다.다음은 "
-"한마디로 설명입니다:"
+"연합 학습은 이 방법을 쉽게 뒤집었습니다. 데이터를 컴퓨팅 센터로 옮기는 대신 "
+"컴퓨팅 능력을 데이터가 생성되는 장소로 이동 시킴으로써 분산된 데이터에서 "
+"머신러닝을 실현합니다. 요약하자면:"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:190
 msgid "Central machine learning: move the data to the computation"
@@ -22595,7 +22596,7 @@ msgstr "중앙 집중식 머신러닝: 데이터를 컴퓨팅 센터로 이동"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:191
 msgid "Federated (machine) learning: move the computation to the data"
-msgstr "연방(기계)학습: 컴퓨팅을 데이터로 옮김"
+msgstr "연합(기계)학습: 컴퓨팅을 데이터로 옮김"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:193
 msgid ""
@@ -22610,28 +22611,29 @@ msgid ""
 "more and more areas that can suddenly be reinvented because they now have "
 "access to vast amounts of previously inaccessible data."
 msgstr ""
-"이를 통해 이전에는 불가능했던 분야에서 머신 러닝(및 기타 데이터 과학 방법)을 "
+"이를 통해 이전에는 불가능했던 분야에서 머신러닝(및 기타 데이터 과학 방법)을 "
 "사용할 수 있습니다. 이제 다양한 병원이 협력할 수 있도록 함으로써 우수한 의료 "
 "AI 모델을 훈련할 수 있습니다. 다양한 금융 기관의 데이터에 대한 AI 모델을 "
 "훈련하여 금융 사기를 해결할 수 있습니다. 개인 정보 보호를 강화하지 않는 "
 "대안보다 더 나은 AI가 내장된 새로운 개인 정보 보호 강화 애플리케이션(예: "
-"보안 메시징)을 구축할 수 있습니다.그것들은 떠오르는 몇 가지 예에 불과합니다. "
-"연합 학습을 구축함에 따라 이전에 액세스할 수 없었던 많은 데이터에 액세스할 "
-"수 있게 되었기 때문에 갑자기 재생될 수 있는 영역이 점점 더 많아지고 있습니다."
+"보안 메시징)을 구축할 수 있습니다. 그것들은 떠오르는 몇 가지 예에 "
+"불과합니다. 연합 학습을 구축함에 따라 이전에 액세스할 수 없었던 많은 "
+"데이터에 액세스할 수 있게 되었기 때문에 갑자기 재생될 수 있는 영역이 점점 더 "
+"많아지고 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:196
 msgid ""
 "So how does federated learning work, exactly? Let's start with an intuitive "
 "explanation."
-msgstr "그렇다면 연방 학습은어떻게 작동합니까?직관적인 설명부터 시작하겠습니다."
+msgstr "그렇다면 연합 학습은 어떻게 작동합니까? 직관적인 설명부터 시작하겠습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:199
 msgid "Federated learning in five steps"
-msgstr "연방 학습의 5단계"
+msgstr "연합 학습의 5단계"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:202
 msgid "Step 0: Initialize global model"
-msgstr "0단계: 전역 모델 초기화"
+msgstr "0단계: 글로벌 모델 초기화"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:204
 msgid ""
@@ -22639,9 +22641,9 @@ msgid ""
 "in classic centralized learning: we initialize the model parameters, either "
 "randomly or from a previously saved checkpoint."
 msgstr ""
-"서버에서 모델을 초기화하는 것으로 시작합니다. 클래식 중앙 집중식 학습에서도 "
-"완전히 동일합니다: 임의로 또는 이전에 저장된 체크포인트에서 모델 매개변수를 "
-"초기화합니다."
+"서버에서 모델을 초기화하는 것으로 시작합니다. 이것은 전통적인 중앙 집중식 "
+"학습과도 동일합니다: 임의로 또는 이전에 저장된 체크포인트에서 모델 "
+"매개변수를 초기화합니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:210
 msgid "|c7afb4c92d154bfaa5e8cb9a150e17f1|"
@@ -22649,7 +22651,7 @@ msgstr "|c7afb4c92d154bfaa5e8cb9a150e17f1|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:307
 msgid "Initialize global model"
-msgstr "전역 모델 초기화"
+msgstr "글로벌 모델 초기화"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:217
 msgid ""
@@ -22670,7 +22672,7 @@ msgstr ""
 "에지 디바이스 또는 조직에 속한 서버)로 보냅니다. 이것은 각 참여 노드가 "
 "동일한 모델 매개변수를 사용하여 로컬 훈련을 시작하도록 하기 위함입니다. "
 "일반적으로 모든 노드가 아닌 몇 개의 연결 노드만 사용합니다. 그 이유는 점점 "
-"더 많은 클라이언트 노드를 선택하면 수익률이 감소하는 것입니다."
+"더 많은 클라이언트 노드를 선택하면 학습의 효율성이 감소하기 때문입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:225
 msgid "|032eb6fed6924ac387b9f13854919196|"
@@ -22678,7 +22680,7 @@ msgstr "|032eb6fed6924ac387b9f13854919196|"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:309
 msgid "Send global model"
-msgstr "전역 모델 전송"
+msgstr "글로벌 모델 전송"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:232
 msgid ""
@@ -22726,7 +22728,7 @@ msgstr ""
 "다릅니다. 파라미터가 다른 이유는 각 클라이언트 노드의 로컬 데이터 세트에 "
 "다른 데이터가 있기 때문입니다. 그런 다음 클라이언트 노드는 이러한 모델 "
 "업데이트를 서버로 다시 보냅니다. 보내는 모델 업데이트는 전체 모델 "
-"파라미터거나 로컬 교육 중에 누적된 그래디언트일 수 있습니다."
+"파라미터거나 로컬 교육 중에 누적된 그레디언트(gradient)일 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:255
 msgid "|7efbe3d29d8349b89594e8947e910525|"
@@ -22750,9 +22752,9 @@ msgid ""
 msgstr ""
 "서버는 선택된 클라이언트 노드들로부터 모델 업데이트들을 수신합니다. 서버가 "
 "100개의 클라이언트 노드를 선택했다면 이제 각각 클라이언트의 로컬 데이터를 "
-"기반으로 훈련된 100개의 약간 다른 원래 글로벌 모델 버전을 갖게 됩니다. "
+"기반으로 훈련된 100개의 조금씩 다른 원래 글로벌 모델 버전을 갖게 됩니다. "
 "하지만 우리는 100개의 모든 클라이언트 노드의 데이터에서 학습한 내용을 "
-"포함하는 모델을 하나 갖고 싶지 않았습니까?"
+"포함하는 모델을 하나만 갖고 싶지 않았습니까?"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:266
 msgid ""
@@ -22801,7 +22803,7 @@ msgid ""
 "models to the server (step 3), and the server then aggregates the model "
 "updates to get a new version of the global model (step 4)."
 msgstr ""
-"단계 1에서 4는 우리가 말하는 단일 라운드 연방 학습입니다. 글로벌 모델 "
+"단계 1에서 4는 우리가 말하는 단일 라운드 연합 학습입니다. 글로벌 모델 "
 "파라미터는 참여하는 클라이언트 노드에 전송되고(1단계), 클라이언트 노드는 "
 "로컬 데이터에 대한 훈련을 받고(2단계), 업데이트된 모델을 서버에 "
 "전송하고(3단계), 서버는 모델 업데이트를 집계하여 글로벌 모델의 새로운 버전을 "
@@ -22831,8 +22833,8 @@ msgid ""
 "should participate in the next round? What's the best way to aggregate model "
 "updates? How can we handle failing client nodes (stragglers)?"
 msgstr ""
-"축하합니다, 이제 연방 학습의 기초에 대해 알게 되었습니다. 물론 아직 논의해야 "
-"할 내용이 많지만 이는 연방 학습의 축소판일 뿐입니다. 본 튜토리얼의 "
+"축하합니다, 이제 연합 학습의 기초에 대해 알게 되었습니다. 물론 아직 논의해야 "
+"할 내용이 많지만 이는 연합 학습의 축소판일 뿐입니다. 본 튜토리얼의 "
 "후반부에는 좀 더 자세히 설명하겠습니다. 흥미로운 질문은 다음과 같습니다: "
 "다음 라운드에 참여해야 할 가장 좋은 클라이언트 노드를 어떻게 선택할 수 "
 "있을까요? 모델 업데이트를 집계하는 가장 좋은 방법은 무엇일까요? 실패한 "
@@ -22847,13 +22849,13 @@ msgid ""
 "systems."
 msgstr ""
 "다양한 클라이언트 노드의 분산된 데이터에 대해 모델을 훈련할 수 있는 것처럼 "
-"해당 데이터에 대한 모델을 평가하여 가치 있는 메트릭을 받을 수도 있습니다. "
-"이를 연합 평가라고 하며 FE라고 약칭하기도 합니다. 사실 연합 평가는 대부분의 "
-"연합 학습 시스템에서 필수적인 부분입니다."
+"해당 데이터에 대한 모델을 평가하여 가치 있는 메트릭(metrics)을 받을 수도 "
+"있습니다. 이를 연합 평가라고 하며 FE라고 약칭하기도 합니다. 사실 연합 평가는 "
+"대부분의 연합 학습 시스템에서 필수적인 부분입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:297
 msgid "Federated analytics"
-msgstr "연방분석"
+msgstr "연합 분석"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:299
 msgid ""
@@ -22869,9 +22871,9 @@ msgstr ""
 "데이터 분석을 통해 귀중한 통찰력을 얻을 수 있지만, 명확한 답변을 얻기에는 "
 "데이터가 충분하지 않은 경우가 많습니다. 특정 유형의 건강 상태가 발생하는 "
 "평균 연령은 몇 살입니까? 연합 분석을 사용하면 여러 클라이언트 노드에서 "
-"이러한 쿼리를 실행할 수 있습니다. 서버가 단일 클라이언트 노드에서 제출한 "
-"결과를 보지 못하도록 보안 애그리게이션과 같은 다른 프라이버시 향상 기술과 "
-"함께 자주 사용됩니다."
+"이러한 쿼리(query)를 실행할 수 있습니다. 서버가 단일 클라이언트 노드에서 "
+"제출한 결과를 보지 못하도록 보안을 강화한 집합 방식과 같은 다른 프라이버시 "
+"향상 기술과 함께 자주 사용됩니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:305
 msgid ""
@@ -22883,11 +22885,12 @@ msgid ""
 "identified. This technique can be considered an optimization that provides a "
 "quantifiable privacy protection measure."
 msgstr ""
-"차등 프라이버시(DP)는 연합 학습의 맥락에서 종종 언급됩니다. 통계 데이터를 "
-"분석하고 공유할 때 사용하는 프라이버시 보호 방식으로, 참가자 개인의 "
-"프라이버시를 보장합니다. DP는 모델 업데이트에 통계적 노이즈를 추가하여 개별 "
-"참가자의 정보를 구별하거나 재식별할 수 없도록 함으로써 이를 달성합니다. 이 "
-"기술은 정량적 개인 정보 보호 조치를 제공하는 최적화라고 볼 수 있습니다."
+"차분 프라이버시(Differential Privacy)는 연합 학습의 맥락에서 종종 "
+"언급됩니다. 통계 데이터를 분석하고 공유할 때 사용하는 프라이버시 보호 "
+"방식으로, 참가자 개인의 프라이버시를 보장합니다. 차분 프라이버시는 모델 "
+"업데이트에 통계적 잡음(noise)를 추가하여 개별 참가자의 정보를 구별하거나 "
+"재식별할 수 없도록 함으로써 이를 달성합니다. 이 기술은 정량적 개인 정보 보호 "
+"조치를 제공하는 최적화라고 볼 수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:326
 msgid "Flower"
@@ -22903,12 +22906,13 @@ msgid ""
 "learning, analytics, and evaluation. It allows the user to federate any "
 "workload, any ML framework, and any programming language."
 msgstr ""
-"연방 학습, 연방 평가 및 연방 분석은 머신 러닝 모델을 앞뒤로 이동하고 로컬 "
+"연합 학습, 연합 평가 및 연합 분석은 머신러닝 모델을 앞뒤로 이동하고 로컬 "
 "데이터에 대해 훈련 및 평가한 다음 업데이트된 모델을 통합하기 위한 기본 "
-"프레임워크가 필요합니다. Flower가 제공하는 인프라는 간단하고 확장 가능하며 "
-"안전한 방식으로 이러한 목표를 달성합니다. 간단히 말해서, Flower는 연방 학습, "
-"분석 및 평가를 위한 통합 접근 방식을 제공합니다. 이를 통해 사용자는 모든 "
-"워크로드, ML 프레임워크 및 모든 프로그래밍 언어를 통합할 수 있습니다."
+"프레임워크가 필요합니다. Flower가 제공하는 기반 구조는 간단하고 확장 "
+"가능하며 안전한 방식으로 이러한 목표를 달성합니다. 간단히 말해서, Flower는 "
+"연합 학습, 분석 및 평가를 위한 통합 접근 방식을 제공합니다. 이를 통해 "
+"사용자는 모든 워크로드, 머신러닝 프레임워크 및 모든 프로그래밍 언어를 통합할 "
+"수 있습니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:334
 msgid "|c00bf2750bc24d229737a0fe1395f0fc|"
@@ -22925,14 +22929,14 @@ msgstr "Flower 연합 학습 서버 및 클라이언트 노드(자동차, 스쿠
 msgid ""
 "Congratulations, you just learned the basics of federated learning and how "
 "it relates to the classic (centralized) machine learning!"
-msgstr "축하합니다, 연방 학습의 기본 지식과 클래식 (중앙 집중식) 머신러닝과 어떻게 "
-"관련되는지 배웠습니다!"
+msgstr "축하합니다, 지금까지 당신은 연합 학습의 기본 지식과 그것이 어떻게 전통적 ("
+"중앙 집중식) 머신러닝과 관련되는지 배웠습니다!"
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:355
 msgid ""
 "In the next part of this tutorial, we are going to build a first federated "
 "learning system with Flower."
-msgstr "이 튜토리얼의 다음 부분에서는 Flower와 함께 첫 번째 연방 학습 시스템을 "
+msgstr "이 튜토리얼의 다음 부분에서는 Flower와 함께 첫 번째 연합 학습 시스템을 "
 "구축할 것입니다."
 
 #: ../../source/tutorial-series-what-is-federated-learning.ipynb:373
@@ -22941,9 +22945,9 @@ msgid ""
 "framework/tutorial-get-started-with-flower-pytorch.html>`__ shows how to "
 "build a simple federated learning system with PyTorch and Flower."
 msgstr ""
-"`Flower 연방 학습 튜토리얼- 1부 <https://flower.ai/docs/framework/tutorial-"
+"`Flower 연합 학습 튜토리얼- 1부 <https://flower.ai/docs/framework/tutorial-"
 "get-started-with-flower-pytorch.html>`__ PyTorch와 Flower를 사용하여 간단한 "
-"연방 학습 시스템을 구축하는 방법을 보여줍니다."
+"연합 학습 시스템을 구축하는 방법을 보여줍니다."
 
 #~ msgid ""
 #~ "Currently, Flower provides two images, a ``base`` image and a "
