@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: Flower Example using PyTorch
 url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+labels: [comprehensive, classification, tabular]
+dataset: [HIGGS]
+framework: [xgboost]
 ---
 
 # Flower Example using XGBoost

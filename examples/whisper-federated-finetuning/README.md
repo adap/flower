@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: On-device Federated Finetuning for Speech Classification
 url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+labels: [finetuning, speech, transformers]
+dataset: [speech_commands]
+framework: [huggingface, whisper]
 ---
 
 # On-device Federated Finetuning for Speech Classification

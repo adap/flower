@@ -1,9 +1,9 @@
 ---
 title: Federated finetuning of a ViT 
 url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
-framework: [torchvision]
+labels: [finetuneing, vision, fds]
+dataset: [Oxford Flower-102]
+framework: [torch, torchvision]
 ---
 
 # Federated finetuning of a ViT
