@@ -1,6 +1,6 @@
 ---
-title: Simple Flower Example using Scikit-Learn
-url: https://pytorch.org/
+title: Flower LogReg Example using Scikit-Learn
+url: https://scikit-learn.org/
 labels: [basic, vision, logistic regression, fds]
 dataset: [MNIST]
 framework: [scikit-learn]

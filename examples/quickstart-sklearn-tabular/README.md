@@ -1,7 +1,7 @@
 ---
-title: Simple Flower Example using Scikit-Learn
+title: Flower Example using Scikit-Learn
 url: https://scikit-learn.org/
-labels: [basic, tabular, fds]
+labels: [quickstart, tabular, fds]
 dataset: [iris]
 framework: [scikit-learn]
 ---

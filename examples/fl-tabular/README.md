@@ -1,5 +1,5 @@
 ---
-title: Simple Flower Example using Scikit-Learn
+title: Flower Example on Adult Census Income Tabular Dataset 
 url: https://pytorch.org/
 labels: [basic, tabular, fds]
 dataset: [adult-census-income]
