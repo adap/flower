@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: PyTorch, From Centralized To Federated
 url: https://pytorch.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
+framework: [torch]
 ---
 
 # PyTorch: From Centralized To Federated
