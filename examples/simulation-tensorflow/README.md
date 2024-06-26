@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+title: Flower Simulation Example using TensorFlow/Keras
+url: https://tensorflow.org/
+labels: [basic, vision, fds, simulation]
+dataset: [MNIST]
+framework: [TensorFlow, Keras]
 ---
 
 # Flower Simulation example using TensorFlow/Keras

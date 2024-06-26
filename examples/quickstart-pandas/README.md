@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+title: Simple Flower Example using Pandas
+url: https://pandas.pydata.org/
+labels: [quickstart, tabular, federated analytics]
+dataset: [iris]
+framework: [Pandas]
 ---
 
 # Flower Example using Pandas

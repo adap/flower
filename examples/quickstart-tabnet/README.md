@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+title: Simple Flower Example using Tabnet
+url: https://github.com/titu1994/tf-TabNet 
+labels: [quickstart, tabular]
+dataset: [iris]
+framework: [tabnet]
 ---
 
 # Flower TabNet Example using TensorFlow

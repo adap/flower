@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+title: Simple Flower Example using Scikit-Learn
+url: https://scikit-learn.org/
+labels: [basic, tabular, fds]
+dataset: [iris]
+framework: [scikit-learn]
 ---
 
 # Flower Example using scikit-learn

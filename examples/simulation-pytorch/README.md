@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: Flower Simulation Example using PyTorch
 url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+labels: [basic, vision, fds, simulation]
+dataset: [MNIST]
+framework: [PyTorch]
 ---
 
 # Flower Simulation example using PyTorch

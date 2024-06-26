@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: Federated finetuning of a ViT 
 url: https://pytorch.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
+framework: [torchvision]
 ---
 
 # Federated finetuning of a ViT

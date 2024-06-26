@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+title: Vertical FL Flower Example
+url: https://www.kaggle.com/competitions/titanic/data 
+labels: [vertical, tabular, advanced]
+dataset: [Titanic]
+framework: [torch, pandas, scikit-learn]
 ---
 
 # Vertical Federated Learning example

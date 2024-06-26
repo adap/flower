@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
-url: https://pytorch.org/
-labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+title: Sample-Level DP using TensorFlow-Privacy Engine 
+url: https://tensorflow.org/
+labels: [basic, vision, fds, privacy, dp]
+dataset: [MNIST]
+framework: [TensorFlow]
 ---
 
 # Training with Sample-Level Differential Privacy using TensorFlow-Privacy Engine

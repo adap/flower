@@ -1,8 +1,9 @@
 ---
-title: "Simple Flower Example using PyTorch"
+title: Simple Flower Example using PyTorch
 url: https://pytorch.org/
-labels: [basic, vision, fds]
+labels: [quickstart, vision, fds]
 dataset: [CIFAR-10]
+framework: [PyTorch]
 ---
 
 # Flower Example using PyTorch
