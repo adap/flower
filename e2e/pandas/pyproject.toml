@@ -14,7 +14,7 @@ maintainers = [
 ]
 dependencies = [
     "flwr[simulation] @ {root:parent:parent:uri}",
-    "numpy>=1.21.0,<2.0.0",
+    "numpy>=1.21.0,<3.0.0",
     "pandas>=2.0.0,<3.0.0",
     "scikit-learn>=1.1.1,<2.0.0",
 ]
