@@ -3,7 +3,7 @@ title: Flower Simulation Step-by-Step
 url: https://pytorch.org/
 labels: [basic, vision, simulation]
 dataset: [MNIST]
-framework: [PyTorch]
+framework: [torch]
 ---
 
 # Flower Simulation Step-by-Step

@@ -3,7 +3,7 @@ title: Simple Flower Example using PyTorch
 url: https://pytorch.org/
 labels: [quickstart, vision, fds]
 dataset: [CIFAR-10]
-framework: [PyTorch]
+framework: [torch, torchvision]
 ---
 
 # Flower Example using PyTorch

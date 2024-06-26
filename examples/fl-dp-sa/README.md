@@ -6,7 +6,7 @@ dataset: [CIFAR-10]
 framework: [torch, torchvision]
 ---
 
-# fl_dp_sa
+# Example of Flower App with DP and SA
 
 This is a simple example that utilizes central differential privacy with client-side fixed clipping and secure aggregation.
 Note: This example is designed for a small number of rounds and is intended for demonstration purposes.

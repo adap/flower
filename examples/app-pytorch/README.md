@@ -3,7 +3,7 @@ title: Example Flower App using PyTorch
 url: https://pytorch.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
-framework: [PyTorch]
+framework: [torch, torchvision]
 ---
 
 # Flower App (PyTorch) 🧪

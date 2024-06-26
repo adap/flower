@@ -1,9 +1,9 @@
 ---
 title: Example Flower App with Custom Metrics
-url: https://pytorch.org/
+url: https://tensorflow.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
-framework: [PyTorch]
+framework: [tensorflow]
 ---
 
 # Flower Example using Custom Metrics

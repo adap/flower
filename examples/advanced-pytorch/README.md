@@ -3,7 +3,7 @@ title: Advanced Flower Example using PyTorch
 url: https://pytorch.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
-framework: [PyTorch]
+framework: [torch, torchvision]
 ---
 
 # Advanced Flower Example (PyTorch)
