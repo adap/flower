@@ -84,12 +84,16 @@ def _instantiate_merger_if_needed(
     return cast(Optional[Preprocessor], merger)
 
 
-def _check_if_dataset_tested(dataset: str) -> None:
+def _check_if_dataset_tested(dataset: Union[str, DatasetDict]) -> None:
     """Check if the dataset is in the narrowed down list of the tested datasets."""
-    if dataset not in tested_datasets:
+    if dataset not in tested_datasets and type(dataset) is str:
         warnings.warn(
             f"The currently tested dataset are {tested_datasets}. Given: {dataset}.",
             stacklevel=1,
+        )
+    elif type(dataset) not in [DatasetDict, str]:
+        raise TypeError(
+            "The provided dataset input is not in the DatasetDict format, neither a str."
         )
 
 
