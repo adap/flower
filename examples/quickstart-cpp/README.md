@@ -1,6 +1,5 @@
 ---
 title: Simple Flower Example using C++
-url: https://pytorch.org/
 labels: [quickstart, linear regression, tabular]
 dataset: [synthetic]
 framework: [c++]

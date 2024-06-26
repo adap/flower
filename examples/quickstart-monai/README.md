@@ -1,6 +1,5 @@
 ---
 title: Flower Example using MONAI
-url: https://docs.monai.io/en/latest/index.html
 labels: [quickstart, medical, vision]
 dataset: [MedNIST]
 framework: [MONAI]

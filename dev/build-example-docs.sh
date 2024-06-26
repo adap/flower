@@ -15,14 +15,14 @@ END
 
 table_body="\\
 .. list-table:: \\
-   :widths: 50 15 15 15\\
-   :header-rows: 1\\
+   :widths: 50 15 15 15 \\
+   :header-rows: 1 \\
   \\
    * - Title \\
-     - Framework\\
-     - Dataset\\
-     - Tags\\
-   .. BASELINES_TABLE_ENTRY\\
+     - Framework \\
+     - Dataset \\
+     - Tags \\
+   .. BASELINES_TABLE_ENTRY \\
   "
 
 function add_table_entry ()
@@ -34,7 +34,7 @@ function add_table_entry ()
   title=$(echo "$metadata" | sed -n 's/title: //p')
 
   # get text after "url:" in metadata using sed
-  url=$(echo "$metadata" | sed -n 's/url: //p')
+  url=$(echo "$metadata" | sed -n 's|url: ||p')
 
   # get text after "labels:" in metadata using sed
   labels=$(echo "$metadata" | sed -n 's/labels: //p' | sed 's/\[//g; s/\]//g')
@@ -45,12 +45,12 @@ function add_table_entry ()
   framework=$(echo "$metadata" | sed -n 's/framework: //p' | sed 's/\[//g; s/\]//g')
 
   table_entry="\\
-   * - \`$title <$1.html>\`_\\
-     - $framework\\
-     - $dataset\\
-     - $labels\\
+   * - \`$title <$1.html>\`_ \\
+     - $framework \\
+     - $dataset \\
+     - $labels \\
     \\
-.. BASELINES_TABLE_ENTRY\
+.. BASELINES_TABLE_ENTRY \
   "
 }
 

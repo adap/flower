@@ -1,6 +1,5 @@
 ---
 title: Simple Flower Example using Tabnet
-url: https://github.com/titu1994/tf-TabNet 
 labels: [quickstart, tabular]
 dataset: [iris]
 framework: [tabnet]

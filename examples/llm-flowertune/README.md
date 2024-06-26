@@ -1,6 +1,5 @@
 ---
 title: Federated LLM Fine-tuning with Flower 
-url: https://pytorch.org/
 labels: [llm, nlp, LLama2]
 dataset: [Alpaca-GPT4]
 framework: [PEFT]

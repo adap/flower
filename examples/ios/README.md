@@ -1,6 +1,5 @@
 ---
 title: Simple Flower Example on iOS
-url: https://pytorch.org/
 labels: [mobile, vision, fds]
 dataset: [MNIST]
 framework: [swift]

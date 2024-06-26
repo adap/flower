@@ -1,6 +1,5 @@
 ---
 title: Flower Android Example using Kotlin and TF Lite
-url: https://tensorflow.org/lite
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
 framework: [Android, Kotlin, TensorFlowLite]

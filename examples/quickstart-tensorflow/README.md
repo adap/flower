@@ -1,6 +1,5 @@
 ---
 title: Simple Flower Example using TensorFlow
-url: https://tensorflow.org/
 labels: [quickstart, vision, fds]
 dataset: [CIFAR-10]
 framework: [TensorFlow]

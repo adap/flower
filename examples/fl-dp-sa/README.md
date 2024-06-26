@@ -1,6 +1,5 @@
 ---
 title: Example of Flower App with DP and SA
-url: https://pytorch.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
 framework: [torch, torchvision]

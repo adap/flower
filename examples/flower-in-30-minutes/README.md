@@ -1,6 +1,5 @@
 ---
 title: 30-minute tutorial running Flower simulation with PyTorch 
-url: https://pytorch.org/
 labels: [colab, vision, simulation]
 dataset: [CIFAR-10]
 framework: [torch]

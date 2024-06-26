@@ -1,6 +1,5 @@
 ---
 title: Simple Flower Example using fastai
-url: https://fast.ai/
 labels: [quickstart, vision]
 dataset: [MNIST]
 framework: [fastai]

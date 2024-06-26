@@ -1,6 +1,5 @@
 ---
 title: Simple Flower Example using Pandas
-url: https://pandas.pydata.org/
 labels: [quickstart, tabular, federated analytics]
 dataset: [iris]
 framework: [Pandas]

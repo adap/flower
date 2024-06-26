@@ -1,6 +1,5 @@
 ---
 title: Flower Example using Scikit-Learn
-url: https://scikit-learn.org/
 labels: [quickstart, tabular, fds]
 dataset: [iris]
 framework: [scikit-learn]

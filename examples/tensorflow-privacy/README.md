@@ -1,6 +1,5 @@
 ---
 title: Sample-Level DP using TensorFlow-Privacy Engine 
-url: https://tensorflow.org/
 labels: [basic, vision, fds, privacy, dp]
 dataset: [MNIST]
 framework: [TensorFlow]

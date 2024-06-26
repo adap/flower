@@ -1,6 +1,5 @@
 ---
 title: Sample-Level Differential Privacy using Opacus
-url: https://pytorch.org/
 labels: [dp, security, fds]
 dataset: [CIFAR-10]
 framework: [opacus, PyTorch]

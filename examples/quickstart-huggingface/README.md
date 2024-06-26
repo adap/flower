@@ -1,6 +1,5 @@
 ---
 title: Flower Transformers Example using HuggingFace
-url: https://huggingface.co/
 labels: [quickstart, llm, nlp, sentiment]
 dataset: [IMDB]
 framework: [transformers]

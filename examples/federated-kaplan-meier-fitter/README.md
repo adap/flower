@@ -1,6 +1,5 @@
 ---
 title: Flower Example using KaplanMeierFitter
-url: https://pytorch.org/
 labels: [estimator, medical]
 dataset: [Walton]
 framework: [lifelines]

@@ -1,6 +1,5 @@
 ---
 title: Example Flower App with Custom Metrics
-url: https://tensorflow.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
 framework: [tensorflow]

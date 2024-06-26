@@ -1,6 +1,5 @@
 ---
 title: On-device Federated Finetuning for Speech Classification
-url: https://pytorch.org/
 labels: [finetuning, speech, transformers]
 dataset: [speech_commands]
 framework: [huggingface, whisper]

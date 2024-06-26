@@ -1,6 +1,5 @@
 ---
 title: Simple Flower Example using MLX
-url: https://ml-explore.github.io/mlx/build/html/index.html 
 labels: [quickstart, vision]
 dataset: [MNIST]
 framework: [MLX]

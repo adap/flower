@@ -1,6 +1,5 @@
 ---
 title: Simple Flower Example using PyTorch-Lightning
-url: https://pytorch.org/
 labels: [quickstart, vision, fds]
 dataset: [MNIST]
 framework: [PyTorch-Lightning]

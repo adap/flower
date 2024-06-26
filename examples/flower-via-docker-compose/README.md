@@ -1,6 +1,5 @@
 ---
 title: Leveraging Flower and Docker for Device Heterogeneity Management in FL 
-url: https://pytorch.org/
 labels: [deployment, vision, tutorial]
 dataset: [CIFAR-10]
 framework: [Docker]

@@ -1,6 +1,5 @@
 ---
 title: Federated Variational Autoencoder using Pytorch
-url: https://pytorch.org/
 labels: [basic, vision, fds]
 dataset: [CIFAR-10]
 framework: [torch, torchvision]

@@ -1,6 +1,5 @@
 ---
 title: Example Flower App with Custom Mods
-url: https://pytorch.org/
 labels: [mods, monitoring, app]
 dataset: [CIFAR-10]
 framework: [torch, wandb, tensorboard, torchvision]

@@ -1,6 +1,5 @@
 ---
 title: Federated finetuning of a ViT 
-url: https://pytorch.org/
 labels: [finetuneing, vision, fds]
 dataset: [Oxford Flower-102]
 framework: [torch, torchvision]

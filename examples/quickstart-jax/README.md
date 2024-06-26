@@ -1,6 +1,5 @@
 ---
 title: Simple Flower Example using Jax
-url: https://github.com/google/jax
 labels: [quickstart, linear regression]
 dataset: [synthetic]
 framework: [JAX]

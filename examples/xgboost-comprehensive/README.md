@@ -1,6 +1,5 @@
 ---
 title: Flower Example using XGBoost
-url: https://pytorch.org/
 labels: [comprehensive, classification, tabular]
 dataset: [HIGGS]
 framework: [xgboost]
