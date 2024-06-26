@@ -13,17 +13,63 @@
 # limitations under the License.
 # ==============================================================================
 """Class constrained partitioner class that works with Hugging Face Datasets."""
+
+
 import warnings
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import numpy as np
 
 import datasets
-from flwr_datasets.partitioner import Partitioner
+from flwr_datasets.partitioner.partitioner import Partitioner
 
 
+# pylint: disable=too-many-arguments, too-many-instance-attributes
 class ClassConstrainedPartitioner(Partitioner):
-    """
+    """Partition dataset such that each partition has a chosen number of classes.
+
+    Implementation based on Federated Learning on Non-IID Data Silos: An Experimental
+    Study https://arxiv.org/pdf/2102.02079.
+
+    The algorithm firstly determines which classe will be assigned to which partitions.
+    For each partition `num_classes_per_partition` are sampled randomly (without
+    repetition) chosen. Given the information about the required classes for each
+    partition, it is determined into how many parts the samples corresponding to this
+    label should be divided. Such division is performed for each class.
+
+    The first class to partition_id assignment can be performed deterministically
+    (`first_class_deterministic_assignment=True`), as in the referenced paper,
+    which will ensure that each class was used at least once if the number of class
+    is <= `num_partitions`.
+
+    Parameters
+    ----------
+    num_partitions : int
+        The total number of partitions that the data will be divided into.
+    partition_by : str
+        Column name of the labels (targets) based on which partitioning works.
+    num_classes_per_partition: int
+        The (exact) number of unique classes that a partition each partition will have.
+    first_class_deterministic_assignment: bool
+        Whether, to deterministically assign first class to each partition.
+    shuffle: bool
+        Whether to randomize the order of samples. Shuffling applied after the
+        samples assignment to partitions.
+    seed: int
+        Seed used for dataset shuffling. It has no effect if `shuffle` is False.
+
+    Examples
+    --------
+    >>> from flwr_datasets.partitioner import ClassConstrainedPartitioner
+    >>> from flwr_datasets import FederatedDataset
+    >>>
+    >>> partitioner = ClassConstrainedPartitioner(
+    >>>     num_partitions=10,
+    >>>     partition_by="label",
+    >>>     num_classes_per_partition=2
+    >>> )
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(0)
     """
 
     def __init__(
@@ -51,7 +97,7 @@ class ClassConstrainedPartitioner(Partitioner):
         self._partition_id_to_unique_labels: Dict[int, List[int]] = {
             pid: [] for pid in range(self._num_partitions)
         }
-        self._unique_labels: Union[List[int], List[str]] = []
+        self._unique_labels: List[int] = []
         # Count in how many partitions the label is used
         self._unique_label_to_times_used_counter: Dict[int, int] = {}
         self._partition_id_to_indices_determined = False
@@ -83,26 +129,22 @@ class ClassConstrainedPartitioner(Partitioner):
         self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
 
-    def _determine_partition_id_to_indices_if_needed(
-        self,
-    ) -> None:
+    def _determine_partition_id_to_indices_if_needed(self) -> None:
         """Create an assignment of indices to the partition indices."""
         if self._partition_id_to_indices_determined:
             return
         self._determine_partition_id_to_unique_labels()
+        assert self._unique_labels is not None
         self._determine_unique_label_to_times_used()
 
-        # unique_label_to_indices  = {}
         labels = np.asarray(self.dataset[self._partition_by])
         for partition_id in range(self._num_partitions):
             self._partition_id_to_indices[partition_id] = []
 
+        unused_labels = []
         for unique_label in self._unique_labels:
             if self._unique_label_to_times_used_counter[unique_label] == 0:
-                warnings.warn(
-                    f"Label: {unique_label} will NOT be used due to the chosen configuration. If you want to ensure that each label is used set 'first_class_deterministic_assignment=True'",
-                    stacklevel=1,
-                )
+                unused_labels.append(unique_label)
                 continue
             # Get the indices in the original dataset where the y == unique_label
             unique_label_to_indices = np.where(labels == unique_label)[0]
@@ -120,6 +162,15 @@ class ClassConstrainedPartitioner(Partitioner):
                     )
                     split_index += 1
 
+        if len(unused_labels) >= 1:
+            warnings.warn(
+                f"Classes: {unused_labels} will NOT be used due to the chosen "
+                f"configuration. If it is undesired behavior consider setting"
+                f" 'first_class_deterministic_assignment=True' which in case when"
+                f" the number of classes is smaller than the number of partitions will "
+                f"utilize all the classes for the created partitions.",
+                stacklevel=1,
+            )
         if self._shuffle:
             for indices in self._partition_id_to_indices.values():
                 # In place shuffling
@@ -136,9 +187,18 @@ class ClassConstrainedPartitioner(Partitioner):
                     "samples in the dataset."
                 )
 
-    def _determine_partition_id_to_unique_labels(self):
+    def _determine_partition_id_to_unique_labels(self) -> None:
         self._unique_labels = self.dataset.unique(self._partition_by)
         num_unique_classes = len(self._unique_labels)
+
+        if self._num_classes_per_partition > num_unique_classes:
+            raise ValueError(
+                f"The specified `num_classes_per_partition`"
+                f"={self._num_classes_per_partition} which is greater than the number "
+                f"of unique classes in the given dataset. Reduce the "
+                f"`num_classes_per_partition` or make use different dataset to do this "
+                f"partitioning."
+            )
 
         if self._first_class_deterministic_assignment:
             for partition_id in range(self._num_partitions):
@@ -162,7 +222,7 @@ class ClassConstrainedPartitioner(Partitioner):
                 ).tolist()
                 self._partition_id_to_unique_labels[partition_id] = labels
 
-    def _determine_unique_label_to_times_used(self):
+    def _determine_unique_label_to_times_used(self) -> None:
         for unique_label in self._unique_labels:
             self._unique_label_to_times_used_counter[unique_label] = 0
         for unique_labels in self._partition_id_to_unique_labels.values():
