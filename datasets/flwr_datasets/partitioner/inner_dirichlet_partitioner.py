@@ -91,7 +91,6 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._num_unique_classes: Optional[int] = None
         self._num_partitions = len(self._partition_sizes)
 
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
         self._partition_id_to_indices_determined = False
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
@@ -128,6 +127,17 @@ class InnerDirichletPartitioner(Partitioner):  # pylint: disable=R0902
         self._alpha = self._initialize_alpha_if_needed(self._initial_alpha)
         self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
+
+    @property
+    def partition_id_to_indices(self) -> Dict[int, List[int]]:
+        """Partition id to indices (the result of partitioning)."""
+        self._check_num_partitions_correctness_if_needed()
+        self._check_partition_sizes_correctness_if_needed()
+        self._check_the_sum_of_partition_sizes()
+        self._determine_num_unique_classes_if_needed()
+        self._alpha = self._initialize_alpha_if_needed(self._initial_alpha)
+        self._determine_partition_id_to_indices_if_needed()
+        return self._partition_id_to_indices
 
     def _initialize_alpha_if_needed(
         self, alpha: Union[int, float, List[float], NDArrayFloat]

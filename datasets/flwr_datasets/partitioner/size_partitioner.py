@@ -60,7 +60,6 @@ class SizePartitioner(Partitioner):
         self._partition_id_to_size_fn = partition_id_to_size_fn
 
         self._partition_id_to_size: Dict[int, int] = {}
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
         # A flag to perform only a single compute to determine the indices
         self._partition_id_to_indices_determined = False
 
@@ -97,7 +96,8 @@ class SizePartitioner(Partitioner):
 
     @property
     def partition_id_to_indices(self) -> Dict[int, List[int]]:
-        """Node id to the list of indices."""
+        """Partition id to indices (the result of partitioning)."""
+        self._determine_partition_id_to_indices_if_needed()
         return self._partition_id_to_indices
 
     def _determine_partition_id_to_size(self) -> None:

@@ -111,7 +111,6 @@ class DirichletPartitioner(Partitioner):
         # The attributes below are determined during the first call to load_partition
         self._avg_num_of_samples_per_partition: Optional[float] = None
         self._unique_classes: Optional[Union[List[int], List[str]]] = None
-        self._partition_id_to_indices: Dict[int, List[int]] = {}
         self._partition_id_to_indices_determined = False
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
@@ -140,6 +139,13 @@ class DirichletPartitioner(Partitioner):
         self._check_num_partitions_correctness_if_needed()
         self._determine_partition_id_to_indices_if_needed()
         return self._num_partitions
+
+    @property
+    def partition_id_to_indices(self) -> Dict[int, List[int]]:
+        """Partition id to indices (the result of partitioning)."""
+        self._check_num_partitions_correctness_if_needed()
+        self._determine_partition_id_to_indices_if_needed()
+        return self._partition_id_to_indices
 
     def _initialize_alpha(
         self, alpha: Union[int, float, List[float], NDArrayFloat]
