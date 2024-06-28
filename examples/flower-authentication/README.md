@@ -2,7 +2,7 @@
 title: Flower Example with Authentication
 labels: [advanced, vision, fds]
 dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
-framework: [torch, torchvision]
+framework: [torch, torchvision | https://pytorch.org/vision/stable/index.html]
 ---
 
 # Flower Authentication with PyTorch 🧪
