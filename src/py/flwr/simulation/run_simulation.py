@@ -22,16 +22,17 @@ import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
 from time import sleep
-from typing import Dict, Optional
+from typing import Optional
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.logger import set_logger_propagation, update_console_handler
-from flwr.common.typing import ConfigsRecordValues, Run
+from flwr.common.typing import Run
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
+from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.server.superlink.state import StateFactory
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
@@ -66,7 +67,7 @@ def run_simulation(
     client_app: ClientApp,
     num_supernodes: int,
     backend_name: str = "ray",
-    backend_config: Optional[Dict[str, ConfigsRecordValues]] = None,
+    backend_config: Optional[BackendConfig] = None,
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
 ) -> None:
@@ -90,9 +91,12 @@ def run_simulation(
     backend_name : str (default: ray)
         A simulation backend that runs `ClientApp`s.
 
-    backend_config : Optional[Dict[str, ConfigsRecordValues]]
-        'A dictionary, e.g {"<keyA>": <value>, "<keyB>": <value>} to configure a
-        backend. Values supported in <value> are those included by
+    backend_config : Optional[BackendConfig]
+        'A dictionary to configure a backend. Separate dictionaries to configure
+        different elements of backend. Supported top-level keys are `init_args`
+        for values parsed to initialisation of backend, `client_resources`
+        to define the resources for clients, and `actor` to define the actor
+        parameters. Values supported in <value> are those included by
         `flwr.common.typing.ConfigsRecordValues`.
 
     enable_tf_gpu_growth : bool (default: False)
@@ -104,7 +108,7 @@ def run_simulation(
         works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
 
     verbose_logging : bool (default: False)
-        When diabled, only INFO, WARNING and ERROR log messages will be shown. If
+        When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
     _run_simulation(
@@ -133,7 +137,7 @@ def run_serverapp_th(
     def server_th_with_start_checks(  # type: ignore
         tf_gpu_growth: bool, stop_event: asyncio.Event, **kwargs
     ) -> None:
-        """Run SeverApp, after check if GPU memory grouwth has to be set.
+        """Run SeverApp, after check if GPU memory growth has to be set.
 
         Upon exception, trigger stop event for Simulation Engine.
         """
@@ -194,7 +198,7 @@ def _main_loop(
 ) -> None:
     """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread.
 
-    Everything runs on the main thread or a separate one, depening on whether the main
+    Everything runs on the main thread or a separate one, depending on whether the main
     thread already contains a running Asyncio event loop. This is the case if running
     the Simulation Engine on a Jupyter/Colab notebook.
     """
@@ -259,7 +263,7 @@ def _run_simulation(
     client_app: Optional[ClientApp] = None,
     server_app: Optional[ServerApp] = None,
     backend_name: str = "ray",
-    backend_config: Optional[Dict[str, ConfigsRecordValues]] = None,
+    backend_config: Optional[BackendConfig] = None,
     client_app_attr: Optional[str] = None,
     server_app_attr: Optional[str] = None,
     app_dir: str = "",
@@ -286,9 +290,12 @@ def _run_simulation(
     backend_name : str (default: ray)
         A simulation backend that runs `ClientApp`s.
 
-    backend_config : Optional[Dict[str, ConfigsRecordValues]]
-        'A dictionary, e.g {"<keyA>":<value>, "<keyB>":<value>} to configure a
-        backend. Values supported in <value> are those included by
+    backend_config : Optional[BackendConfig]
+        'A dictionary to configure a backend. Separate dictionaries to configure
+        different elements of backend. Supported top-level keys are `init_args`
+        for values parsed to initialisation of backend, `client_resources`
+        to define the resources for clients, and `actor` to define the actor
+        parameters. Values supported in <value> are those included by
         `flwr.common.typing.ConfigsRecordValues`.
 
     client_app_attr : str
@@ -310,30 +317,34 @@ def _run_simulation(
         A boolean to indicate whether to enable GPU growth on the main thread. This is
         desirable if you make use of a TensorFlow model on your `ServerApp` while
         having your `ClientApp` running on the same GPU. Without enabling this, you
-        might encounter an out-of-memory error becasue TensorFlow by default allocates
+        might encounter an out-of-memory error because TensorFlow by default allocates
         all GPU memory. Read mor about how `tf.config.experimental.set_memory_growth()`
         works in the TensorFlow documentation: https://www.tensorflow.org/api/stable.
 
     verbose_logging : bool (default: False)
-        When diabled, only INFO, WARNING and ERROR log messages will be shown. If
+        When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
     """
     if backend_config is None:
         backend_config = {}
+
+    if "init_args" not in backend_config:
+        backend_config["init_args"] = {}
 
     # Set logging level
     logger = logging.getLogger("flwr")
     if verbose_logging:
         update_console_handler(level=DEBUG, timestamps=True, colored=True)
     else:
-        backend_config["silent"] = True
+        backend_config["init_args"]["logging_level"] = WARNING
+        backend_config["init_args"]["log_to_driver"] = True
 
     if enable_tf_gpu_growth:
         # Check that Backend config has also enabled using GPU growth
-        use_tf = backend_config.get("tensorflow", False)
+        use_tf = backend_config.get("actor", {}).get("tensorflow", False)
         if not use_tf:
             log(WARNING, "Enabling GPU growth for your backend.")
-            backend_config["tensorflow"] = True
+            backend_config["actor"]["tensorflow"] = True
 
     # Convert config to original JSON-stream format
     backend_config_stream = json.dumps(backend_config)
@@ -352,7 +363,7 @@ def _run_simulation(
         server_app_attr,
     )
     # Detect if there is an Asyncio event loop already running.
-    # If yes, run everything on a separate thread. In environmnets
+    # If yes, run everything on a separate thread. In environments
     # like Jupyter/Colab notebooks, there is an event loop present.
     run_in_thread = False
     try:
@@ -364,7 +375,7 @@ def _run_simulation(
         run_in_thread = True
 
     except RuntimeError:
-        log(DEBUG, "No asyncio event loop runnig")
+        log(DEBUG, "No asyncio event loop running")
 
     finally:
         if run_in_thread:
@@ -409,7 +420,8 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--backend-config",
         type=str,
-        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0}, "tensorflow": 0}',
+        default='{"client_resources": {"num_cpus":2, "num_gpus":0.0},'
+        '"actor": {"tensorflow": 0}}',
         help='A JSON formatted stream, e.g \'{"<keyA>":<value>, "<keyB>":<value>}\' to '
         "configure a backend. Values supported in <value> are those included by "
         "`flwr.common.typing.ConfigsRecordValues`. ",

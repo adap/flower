@@ -23,7 +23,7 @@ python -m flwr_tool.init_py_check src/py/flwr src/py/flwr_tool
 echo "- init_py_check: done"
 
 echo "- docformatter: start"
-python -m docformatter -c -r src/py/flwr e2e -e src/py/flwr/proto 
+python -m docformatter -c -r src/py/flwr e2e -e src/py/flwr/proto
 echo "- docformatter:  done"
 
 echo "- ruff: start"
