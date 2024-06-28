@@ -2,7 +2,7 @@
 title: Flower Embedded Devices Example
 labels: [basic, vision, fds]
 dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
-framework: [PyTorch, TensorFlow]
+framework: [torch | https://pytorch.org/, tensorflow | https://www.tensorflow.org/]
 ---
 
 # Federated Learning on Embedded Devices with Flower

@@ -2,7 +2,7 @@
 title: Example Flower App with Secure Aggregation
 labels: [basic, vision, fds]
 dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
-framework: [numpy]
+framework: [numpy | https://numpy.org/]
 ---
 
 # Secure aggregation with Flower (the SecAgg+ protocol) 🧪
