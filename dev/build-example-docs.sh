@@ -13,22 +13,14 @@ table_text=$(cat <<-END
 END
 )
 
-table_body="\\
-.. list-table:: \\
-   :widths: 50 15 15 15 \\
-   :header-rows: 1 \\
-  \\
-   * - Title \\
-     - Framework \\
-     - Dataset \\
-     - Tags \\
-   .. EXAMPLES_TABLE_ENTRY \\
-  "
-
 function add_table_entry ()
 {
+  local example="$1"
+  local label="$2"
+  local table_var="$3"
+
   # extract lines from markdown file between --- and ---, preserving newlines and store in variable called metadata
-  metadata=$(awk '/^---$/{flag=1; next} flag; /^---$/{exit}' $1/README.md)
+  metadata=$(awk '/^---$/{flag=1; next} flag; /^---$/{exit}' $example/README.md)
 
   # get text after "title:" in metadata using sed
   title=$(echo "$metadata" | sed -n 's/title: //p')
@@ -41,14 +33,13 @@ function add_table_entry ()
 
   framework=$(echo "$metadata" | sed -n 's/framework: //p' | sed 's/\[//g; s/\]//g')
 
-  table_entry="\\
-   * - \`$title <$1.html>\`_ \\
-     - $framework \\
-     - $dataset \\
-     - $labels \\
-    \\
-.. EXAMPLES_TABLE_ENTRY \
-  "
+  table_entry="   * - \`$title <$example.html>\`_ \n     - $framework \n     - $dataset \n     - $labels\n\n"
+
+  if [[ "$labels" == *"$label"* ]]; then
+    eval "$table_var+=\$table_entry"
+    return 0
+  fi
+  return 1
 }
 
 copy_markdown_files () {
@@ -124,7 +115,6 @@ rm -f $INDEX
 # Create empty index file
 touch $INDEX
 
-
 initial_text=$(cat <<-END
 Flower Examples Documentation
 -----------------------------
@@ -144,18 +134,21 @@ The Flower Community is growing quickly - we're a friendly group of researchers,
     Join us on Slack
 
 
-Flower Examples
----------------
+Quickstart Examples
+-------------------
 
-Flower Examples are a collection of example projects written with Flower that explore different domains and features. You can check which examples already exist and/or contribute your own baseline.
+Flower Quickstart Examples are a collection of demo project that show how you can use Flower in combination with other existing frameworks or technologies.
 
-.. EXAMPLES_TABLE_ANCHOR
 END
 )
 
 echo "$initial_text" >> $INDEX
 
-! sed -i '' -e "s/.. EXAMPLES_TABLE_ANCHOR/$table_body/" $INDEX
+# Table headers
+quickstart_table="\n.. list-table::\n   :widths: 50 15 15 15\n   :header-rows: 1\n\n   * - Title\n     - Framework\n     - Dataset\n     - Tags\n\n"
+comprehensive_table="\n.. list-table::\n   :widths: 50 15 15 15\n   :header-rows: 1\n\n   * - Title\n     - Framework\n     - Dataset\n     - Tags\n\n"
+advanced_table="\n.. list-table::\n   :widths: 50 15 15 15\n   :header-rows: 1\n\n   * - Title\n     - Framework\n     - Dataset\n     - Tags\n\n"
+other_table="\n.. list-table::\n   :widths: 50 15 15 15\n   :header-rows: 1\n\n   * - Title\n     - Framework\n     - Dataset\n     - Tags\n\n"
 
 cd $ROOT/examples
 # Iterate through each folder in examples/
@@ -164,7 +157,6 @@ for d in $(printf '%s\n' */ | sort -V); do
   example=${d%/}
 
   if [[ $example != doc ]]; then
-
     # Copy markdown files to correct folder
     copy_markdown_files $example
 
@@ -175,10 +167,55 @@ for d in $(printf '%s\n' */ | sort -V); do
     # docs static folder
     copy_images $example
 
-    add_table_entry $example
-    ! sed -i '' -e "s/.. EXAMPLES_TABLE_ENTRY/$table_entry/" $INDEX
+    # Add entry to the appropriate table
+    if ! add_table_entry $example "quickstart" quickstart_table; then
+      if ! add_table_entry $example "comprehensive" comprehensive_table; then
+        if ! add_table_entry $example "advanced" advanced_table; then
+          add_table_entry $example "" other_table
+        fi
+      fi
+    fi
   fi
 done
+
+# Add the tables to the index
+echo -e "$quickstart_table" >> $INDEX
+
+tmp_text=$(cat <<-END
+Comprehensive Examples
+----------------------
+
+Comprehensive example allow us to explore certain topics more in-depth and are often associated with a simpler, less detailed, example.
+
+END
+)
+echo -e "$tmp_text" >> $INDEX
+
+echo -e "$comprehensive_table" >> $INDEX
+
+tmp_text=$(cat <<-END
+Advanced Examples
+-----------------
+
+Advanced Examples are mostly for users that are both familiar with Federated Learning but also somewhat familiar with Flower\'s main features.
+
+END
+)
+echo -e "$tmp_text" >> $INDEX
+
+echo -e "$advanced_table" >> $INDEX
+
+tmp_text=$(cat <<-END
+Other Examples
+--------------
+
+Flower Examples are a collection of example projects written with Flower that explore different domains and features. You can check which examples already exist and/or contribute your own example.
+
+END
+)
+echo -e "$tmp_text" >> $INDEX
+
+echo -e "$other_table" >> $INDEX
 
 echo "" >> $INDEX
 echo "$table_text" >> $INDEX

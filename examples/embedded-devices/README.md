@@ -72,7 +72,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
 
    - Install `pip`. In the terminal type: `sudo apt install python3-pip -y`
    - Now clone this directory. You just need to execute the `git clone` command shown at the top of this README.md on your device.
-   - Install Flower and your ML framework: We have prepared some convenient installation scripts that will install everything you need. You are free to install other versions of these ML frameworks to suit your needs.
+   - Install Flower and your ML framework of choice: We have prepared some convenient installation scripts that will install everything you need. You are free to install other versions of these ML frameworks to suit your needs.
      - If you want your clients to use PyTorch: `pip3 install -r requirements_pytorch.txt`
      - If you want your clients to use TensorFlow: `pip3 install -r requirements_tf.txt`
 
