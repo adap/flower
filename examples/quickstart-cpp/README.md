@@ -2,7 +2,7 @@
 title: Simple Flower Example using C++
 labels: [quickstart, linear regression, tabular]
 dataset: [synthetic]
-framework: [c++]
+framework: [C++]
 ---
 
 # Flower Clients in C++ (under development)
