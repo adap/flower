@@ -2,7 +2,7 @@
 title: Sample-Level DP using TensorFlow-Privacy Engine 
 labels: [basic, vision, fds, privacy, dp]
 dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
-framework: [TensorFlow]
+framework: [tensorflow | https://www.tensorflow.org/]
 ---
 
 # Training with Sample-Level Differential Privacy using TensorFlow-Privacy Engine
