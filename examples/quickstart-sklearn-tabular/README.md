@@ -1,7 +1,7 @@
 ---
 title: Flower Example using Scikit-Learn
 labels: [quickstart, tabular, fds]
-dataset: [iris]
+dataset: [Iris | https://scikit-learn.org/stable/auto_examples/datasets/plot_iris_dataset.html]
 framework: [scikit-learn]
 ---
 
