@@ -1,6 +1,7 @@
 import os
 import shutil
 import re
+import subprocess
 from pathlib import Path
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -186,8 +187,7 @@ def _main():
 
         index_file.write("\n")
 
-    print(f"Done! Example index written to {INDEX}")
-
 
 if __name__ == "__main__":
     _main()
+    subprocess.call(f"cd {ROOT}/examples/doc && make html", shell=True)
