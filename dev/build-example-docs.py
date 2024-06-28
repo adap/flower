@@ -60,11 +60,11 @@ def _read_metadata(example):
             .strip()
         )
         .replace('"', "")
-        .split(":")
+        .split("|")
     )
     if len(framework_str) > 1:
         framework_name, framework_url = framework_str
-        framework = f"`{framework_name} <{framework_url.strip()}>`_"
+        framework = f"`{framework_name.strip()} <{framework_url.strip()}>`_"
     else:
         framework = framework_str
     return title, labels, dataset, framework

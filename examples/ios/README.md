@@ -1,7 +1,7 @@
 ---
 title: Simple Flower Example on iOS
 labels: [mobile, vision, fds]
-dataset: [`MNIST <https://en.wikipedia.org/wiki/MNIST_database>`_]
+dataset: [MNIST | https://en.wikipedia.org/wiki/MNIST_database]
 framework: [swift]
 ---
 
