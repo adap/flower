@@ -42,6 +42,14 @@ categories = {
 }
 
 
+def _convert_to_link(search_result):
+    if "|" in search_result:
+        name, url = search_result.replace('"', "").split("|")
+        return f"`{name.strip()} <{url.strip()}>`_"
+
+    return search_result
+
+
 def _read_metadata(example):
     with open(os.path.join(example, "README.md")) as f:
         content = f.read()
@@ -50,23 +58,12 @@ def _read_metadata(example):
     labels = (
         re.search(r"^labels:\s*\[(.+?)\]$", metadata, re.MULTILINE).group(1).strip()
     )
-    dataset = (
+    dataset = _convert_to_link(
         re.search(r"^dataset:\s*\[(.+?)\]$", metadata, re.MULTILINE).group(1).strip()
     )
-    framework_str = (
-        (
-            re.search(r"^framework:\s*\[(.+?)\]$", metadata, re.MULTILINE)
-            .group(1)
-            .strip()
-        )
-        .replace('"', "")
-        .split("|")
+    framework = _convert_to_link(
+        re.search(r"^framework:\s*\[(.+?)\]$", metadata, re.MULTILINE).group(1).strip()
     )
-    if len(framework_str) > 1:
-        framework_name, framework_url = framework_str
-        framework = f"`{framework_name.strip()} <{framework_url.strip()}>`_"
-    else:
-        framework = framework_str
     return title, labels, dataset, framework
 
 
