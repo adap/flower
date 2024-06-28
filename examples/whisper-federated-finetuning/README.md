@@ -1,7 +1,7 @@
 ---
 title: On-device Federated Finetuning for Speech Classification
 labels: [finetuning, speech, transformers]
-dataset: [speech_commands]
+dataset: [SpeechCommands | https://huggingface.co/datasets/google/speech_commands]
 framework: [huggingface, whisper]
 ---
 
