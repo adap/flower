@@ -1,7 +1,7 @@
 ---
 title: Flower Android Example using Kotlin and TF Lite
 labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+dataset: ["CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10"]
 framework: [Android, Kotlin, TensorFlowLite]
 ---
 

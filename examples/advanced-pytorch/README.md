@@ -1,7 +1,7 @@
 ---
 title: Advanced Flower Example using PyTorch
 labels: [advanced, vision, fds]
-dataset: [CIFAR-10]
+dataset: ["CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10"]
 framework: [torch, torchvision]
 ---
 

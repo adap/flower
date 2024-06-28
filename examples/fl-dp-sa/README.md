@@ -1,7 +1,7 @@
 ---
 title: Example of Flower App with DP and SA
 labels: [basic, vision, fds]
-dataset: [CIFAR-10]
+dataset: ["CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10"]
 framework: [torch, torchvision]
 ---
 
