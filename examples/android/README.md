@@ -2,7 +2,7 @@
 title: Flower Android Example using Java and TF Lite
 labels: [basic, vision, fds]
 dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
-framework: [Android, Java, TensorFlowLite]
+framework: [Android | https://www.android.com/, Java | https://www.java.com/, TensorFlowLite | https://www.tensorflow.org/lite]
 ---
 
 # Flower Android Example (TensorFlowLite)

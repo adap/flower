@@ -2,7 +2,7 @@
 title: Leveraging Flower and Docker for Device Heterogeneity Management in FL 
 labels: [deployment, vision, tutorial]
 dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
-framework: [Docker]
+framework: [Docker | https://www.docker.com/]
 ---
 
 # Leveraging Flower and Docker for Device Heterogeneity Management in Federated Learning
