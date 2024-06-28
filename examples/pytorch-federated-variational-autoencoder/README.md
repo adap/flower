@@ -2,7 +2,7 @@
 title: Federated Variational Autoencoder using Pytorch
 labels: [basic, vision, fds]
 dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
-framework: [torch, torchvision | https://pytorch.org/vision/stable/index.html]
+framework: [torch | https://pytorch.org/, torchvision | https://pytorch.org/vision/stable/index.html]
 ---
 
 # Flower Example for Federated Variational Autoencoder using Pytorch

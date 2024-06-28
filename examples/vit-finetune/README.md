@@ -2,7 +2,7 @@
 title: Federated finetuning of a ViT 
 labels: [finetuneing, vision, fds]
 dataset: [Oxford Flower-102 | https://www.robots.ox.ac.uk/~vgg/data/flowers/102/]
-framework: [torch, torchvision | https://pytorch.org/vision/stable/index.html]
+framework: [torch | https://pytorch.org/, torchvision | https://pytorch.org/vision/stable/index.html]
 ---
 
 # Federated finetuning of a ViT
