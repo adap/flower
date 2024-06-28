@@ -1,7 +1,7 @@
 ---
 title: Example Flower App with Custom Mods
 labels: [mods, monitoring, app]
-dataset: ["CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10"]
+dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
 framework: [torch, wandb, tensorboard, torchvision]
 ---
 
