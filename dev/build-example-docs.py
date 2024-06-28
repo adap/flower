@@ -44,6 +44,12 @@ categories = {
 
 def _convert_to_link(search_result):
     if "|" in search_result:
+        if "," in search_result:
+            result = ""
+            for part in search_result.split(","):
+                result += f"{_convert_to_link(part)}, "
+            return result[:-2]
+
         name, url = search_result.replace('"', "").split("|")
         return f"`{name.strip()} <{url.strip()}>`_"
 
