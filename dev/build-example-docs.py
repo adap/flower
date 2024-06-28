@@ -55,7 +55,7 @@ def _read_metadata(example):
     )
     framework = (
         re.search(r"^framework:\s*\[(.+?)\]$", metadata, re.MULTILINE).group(1).strip()
-    )
+    ).replace('"', "")
     return title, labels, dataset, framework
 
 
