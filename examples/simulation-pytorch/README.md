@@ -1,7 +1,7 @@
 ---
 title: Flower Simulation Example using PyTorch
 labels: [basic, vision, fds, simulation]
-dataset: [MNIST | https://en.wikipedia.org/wiki/MNIST_database]
+dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
 framework: [torch, torchvision]
 ---
 

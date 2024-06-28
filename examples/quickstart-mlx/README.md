@@ -1,7 +1,7 @@
 ---
 title: Simple Flower Example using MLX
 labels: [quickstart, vision]
-dataset: [MNIST | https://en.wikipedia.org/wiki/MNIST_database]
+dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
 framework: [MLX | https://ml-explore.github.io/mlx/build/html/index.html]
 ---
 
