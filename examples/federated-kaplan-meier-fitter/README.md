@@ -1,8 +1,8 @@
 ---
 title: Flower Example using KaplanMeierFitter
 labels: [estimator, medical]
-dataset: [Walton]
-framework: [lifelines]
+dataset: [Waltons | https://lifelines.readthedocs.io/en/latest/lifelines.datasets.html#lifelines.datasets.load_waltons]
+framework: [lifelines | https://lifelines.readthedocs.io/en/latest/index.html]
 ---
 
 # Flower Example using KaplanMeierFitter

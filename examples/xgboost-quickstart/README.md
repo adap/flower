@@ -1,7 +1,7 @@
 ---
 title: Flower Example using PyTorch
 labels: [quickstart, classification, tabular]
-dataset: [HIGGS]
+dataset: [HIGGS | https://archive.ics.uci.edu/dataset/280/higgs]
 framework: [xgboost]
 ---
 
