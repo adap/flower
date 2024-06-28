@@ -1,0 +1,4 @@
+<resources>
+
+    <style name="Theme.UEFLA" parent="android:Theme.Material.Light.DarkActionBar" />
+</resources>

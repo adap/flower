@@ -1,0 +1,126 @@
+// Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ==============================================================================
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "flwr.android_client";
+option java_outer_classname = "FlowerTransport";
+option objc_class_prefix = "gRPC";
+
+package flwr.proto;
+
+service FlowerService {
+  rpc Join(stream ClientMessage) returns (stream ServerMessage) {}
+}
+
+enum Code {
+  OK = 0;
+  GET_PROPERTIES_NOT_IMPLEMENTED = 1;
+  GET_PARAMETERS_NOT_IMPLEMENTED = 2;
+  FIT_NOT_IMPLEMENTED = 3;
+  EVALUATE_NOT_IMPLEMENTED = 4;
+}
+message Status {
+  Code code = 1;
+  string message = 2;
+}
+message Parameters {
+  repeated bytes tensors = 1;
+  string tensor_type = 2;
+}
+enum Reason {
+  UNKNOWN = 0;
+  RECONNECT = 1;
+  POWER_DISCONNECTED = 2;
+  WIFI_UNAVAILABLE = 3;
+  ACK = 4;
+}
+
+message ServerMessage {
+  message ReconnectIns { int64 seconds = 1; }
+  message GetPropertiesIns { map<string, Scalar> config = 1; }
+  message GetParametersIns { map<string, Scalar> config = 1; }
+  message FitIns {
+    Parameters parameters = 1;
+    map<string, Scalar> config = 2;
+  }
+  message EvaluateIns {
+    Parameters parameters = 1;
+    map<string, Scalar> config = 2;
+  }
+  oneof msg {
+    ReconnectIns reconnect_ins = 1;
+    GetPropertiesIns get_properties_ins = 2;
+    GetParametersIns get_parameters_ins = 3;
+    FitIns fit_ins = 4;
+    EvaluateIns evaluate_ins = 5;
+  }
+}
+
+message ClientMessage {
+  message DisconnectRes { Reason reason = 1; }
+  message GetPropertiesRes {
+    Status status = 1;
+    map<string, Scalar> properties = 2;
+  }
+  message GetParametersRes {
+    Status status = 1;
+    Parameters parameters = 2;
+  }
+  message FitRes {
+    Status status = 1;
+    Parameters parameters = 2;
+    int64 num_examples = 3;
+    map<string, Scalar> metrics = 4;
+  }
+  message EvaluateRes {
+    Status status = 1;
+    float loss = 2;
+    int64 num_examples = 3;
+    map<string, Scalar> metrics = 4;
+  }
+  oneof msg {
+    DisconnectRes disconnect_res = 1;
+    GetPropertiesRes get_properties_res = 2;
+    GetParametersRes get_parameters_res = 3;
+    FitRes fit_res = 4;
+    EvaluateRes evaluate_res = 5;
+  }
+}
+
+message Scalar {
+  // The following `oneof` contains all types that ProtoBuf considers to be
+  // "Scalar Value Types". Commented-out types are listed for reference and
+  // might be enabled in future releases. Source:
+  // https://developers.google.com/protocol-buffers/docs/proto3#scalar
+  oneof scalar {
+    double double = 1;
+    // float float = 2;
+    // int32 int32 = 3;
+    // int64 int64 = 4;
+    // uint32 uint32 = 5;
+    // uint64 uint64 = 6;
+    // sint32 sint32 = 7;
+    sint64 sint64 = 8;
+    // fixed32 fixed32 = 9;
+    // fixed64 fixed64 = 10;
+    // sfixed32 sfixed32 = 11;
+    // sfixed64 sfixed64 = 12;
+    bool bool = 13;
+    string string = 14;
+    bytes bytes = 15;
+  }
+}
