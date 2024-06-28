@@ -1,7 +1,7 @@
 ---
 title: Flower Simulation Step-by-Step
 labels: [basic, vision, simulation]
-dataset: [MNIST]
+dataset: [`MNIST <https://en.wikipedia.org/wiki/MNIST_database>`_]
 framework: [torch]
 ---
 

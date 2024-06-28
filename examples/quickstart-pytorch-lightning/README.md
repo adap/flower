@@ -1,7 +1,7 @@
 ---
 title: Simple Flower Example using PyTorch-Lightning
 labels: [quickstart, vision, fds]
-dataset: [MNIST]
+dataset: [`MNIST <https://en.wikipedia.org/wiki/MNIST_database>`_]
 framework: [PyTorch-Lightning]
 ---
 

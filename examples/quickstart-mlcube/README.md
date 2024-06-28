@@ -1,7 +1,7 @@
 ---
 title: Flower Example using TensorFlow/Keras + MLCube 
 labels: [quickstart, vision, deployment]
-dataset: [MNIST]
+dataset: [`MNIST <https://en.wikipedia.org/wiki/MNIST_database>`_]
 framework: [TensorFlow, Keras]
 ---
 

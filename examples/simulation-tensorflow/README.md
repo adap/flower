@@ -1,7 +1,7 @@
 ---
 title: Flower Simulation Example using TensorFlow/Keras
 labels: [basic, vision, fds, simulation]
-dataset: [MNIST]
+dataset: [`MNIST <https://en.wikipedia.org/wiki/MNIST_database>`_]
 framework: [TensorFlow, Keras]
 ---
 
