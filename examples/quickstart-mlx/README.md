@@ -2,7 +2,7 @@
 title: Simple Flower Example using MLX
 labels: [quickstart, vision]
 dataset: [MNIST]
-framework: [MLX]
+framework: [`MLX <https://ml-explore.github.io/mlx/build/html/index.html`_]
 ---
 
 # Flower Example using MLX

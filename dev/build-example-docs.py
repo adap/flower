@@ -37,7 +37,6 @@ table_headers = "\n.. list-table::\n   :widths: 50 15 15 15\n   :header-rows: 1\
 
 categories = {
     "quickstart": {"table": table_headers, "list": ""},
-    "comprehensive": {"table": table_headers, "list": ""},
     "advanced": {"table": table_headers, "list": ""},
     "other": {"table": table_headers, "list": ""},
 }
@@ -114,7 +113,6 @@ def _add_all_entries(index_file):
             _copy_markdown_files(example_path)
             _add_gh_button(example)
             _copy_images(example)
-            # index_file.write(f"  {example}\n")
 
 
 def _main():
@@ -139,13 +137,6 @@ def _main():
     with open(INDEX, "a") as index_file:
         index_file.write(categories["quickstart"]["table"])
 
-        index_file.write("\nComprehensive Examples\n----------------------\n")
-        index_file.write(
-            "Comprehensive examples allow us to explore certain topics more "
-            "in-depth and are often associated with a simpler, less detailed example.\n"
-        )
-        index_file.write(categories["comprehensive"]["table"])
-
         index_file.write("\nAdvanced Examples\n-----------------\n")
         index_file.write(
             "Advanced Examples are mostly for users that are both familiar with "
@@ -168,11 +159,6 @@ def _main():
             "\n.. toctree::\n  :maxdepth: 1\n  :caption: Quickstart\n  :hidden:\n\n"
         )
         index_file.write(categories["quickstart"]["list"])
-
-        index_file.write(
-            "\n.. toctree::\n  :maxdepth: 1\n  :caption: Comprehensive\n  :hidden:\n\n"
-        )
-        index_file.write(categories["comprehensive"]["list"])
 
         index_file.write(
             "\n.. toctree::\n  :maxdepth: 1\n  :caption: Advanced\n  :hidden:\n\n"

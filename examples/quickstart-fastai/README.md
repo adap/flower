@@ -2,7 +2,7 @@
 title: Simple Flower Example using fastai
 labels: [quickstart, vision]
 dataset: [MNIST]
-framework: [fastai]
+framework: [`fastai <https://fast.ai>`_]
 ---
 
 # Flower Example using fastai

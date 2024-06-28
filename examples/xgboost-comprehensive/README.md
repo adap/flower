@@ -1,6 +1,6 @@
 ---
 title: Flower Example using XGBoost
-labels: [comprehensive, classification, tabular]
+labels: [advanced, classification, tabular]
 dataset: [HIGGS]
 framework: [xgboost]
 ---

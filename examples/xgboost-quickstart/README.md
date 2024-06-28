@@ -1,6 +1,6 @@
 ---
 title: Flower Example using PyTorch
-labels: [comprehensive, classification, tabular]
+labels: [quickstart, classification, tabular]
 dataset: [HIGGS]
 framework: [xgboost]
 ---

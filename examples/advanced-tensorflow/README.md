@@ -1,6 +1,6 @@
 ---
 title: Advanced Flower Example using TensorFlow/Keras
-labels: [basic, vision, fds]
+labels: [advanced, vision, fds]
 dataset: [CIFAR-10]
 framework: [TensorFlow, Keras]
 ---
