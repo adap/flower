@@ -6,10 +6,10 @@ ROOT=`pwd`
 INDEX=$ROOT/examples/doc/source/index.rst
 INSERT_LINE=6
 
-initial_text=$(cat <<-END
+table_text=$(cat <<-END
 .. toctree::
   :maxdepth: 1
-  :caption: References
+  :caption: Projects
 END
 )
 
@@ -22,7 +22,7 @@ table_body="\\
      - Framework \\
      - Dataset \\
      - Tags \\
-   .. BASELINES_TABLE_ENTRY \\
+   .. EXAMPLES_TABLE_ENTRY \\
   "
 
 function add_table_entry ()
@@ -47,7 +47,7 @@ function add_table_entry ()
      - $dataset \\
      - $labels \\
     \\
-.. BASELINES_TABLE_ENTRY \
+.. EXAMPLES_TABLE_ENTRY \
   "
 }
 
@@ -124,12 +124,38 @@ rm -f $INDEX
 # Create empty index file
 touch $INDEX
 
-echo "Flower Examples Documentation" >> $INDEX
-echo "-----------------------------" >> $INDEX
-echo "" >> $INDEX
-echo ".. BASELINES_TABLE_ANCHOR" >> $INDEX
 
-! sed -i '' -e "s/.. BASELINES_TABLE_ANCHOR/$table_body/" $INDEX
+initial_text=$(cat <<-END
+Flower Examples Documentation
+-----------------------------
+
+Welcome to Flower Examples' documentation. \`Flower <https://flower.ai>\`_ is a friendly federated learning framework.
+
+
+Join the Flower Community
+-------------------------
+
+The Flower Community is growing quickly - we're a friendly group of researchers, engineers, students, professionals, academics, and other enthusiasts.
+
+.. button-link:: https://flower.ai/join-slack
+    :color: primary
+    :shadow:
+
+    Join us on Slack
+
+
+Flower Examples
+---------------
+
+Flower Examples are a collection of example projects written with Flower that explore different domains and features. You can check which examples already exist and/or contribute your own baseline.
+
+.. EXAMPLES_TABLE_ANCHOR
+END
+)
+
+echo "$initial_text" >> $INDEX
+
+! sed -i '' -e "s/.. EXAMPLES_TABLE_ANCHOR/$table_body/" $INDEX
 
 cd $ROOT/examples
 # Iterate through each folder in examples/
@@ -150,12 +176,12 @@ for d in $(printf '%s\n' */ | sort -V); do
     copy_images $example
 
     add_table_entry $example
-    ! sed -i '' -e "s/.. BASELINES_TABLE_ENTRY/$table_entry/" $INDEX
+    ! sed -i '' -e "s/.. EXAMPLES_TABLE_ENTRY/$table_entry/" $INDEX
   fi
 done
 
 echo "" >> $INDEX
-echo "$initial_text" >> $INDEX
+echo "$table_text" >> $INDEX
 echo "" >> $INDEX
 
 add_all_entries
