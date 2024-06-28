@@ -1,7 +1,7 @@
 ---
 title: Simple Flower Example using C++
 labels: [quickstart, linear regression, tabular]
-dataset: [synthetic]
+dataset: [Synthetic]
 framework: [C++]
 ---
 
