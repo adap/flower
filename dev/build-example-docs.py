@@ -53,9 +53,20 @@ def _read_metadata(example):
     dataset = (
         re.search(r"^dataset:\s*\[(.+?)\]$", metadata, re.MULTILINE).group(1).strip()
     )
-    framework = (
-        re.search(r"^framework:\s*\[(.+?)\]$", metadata, re.MULTILINE).group(1).strip()
-    ).replace('"', "")
+    framework_str = (
+        (
+            re.search(r"^framework:\s*\[(.+?)\]$", metadata, re.MULTILINE)
+            .group(1)
+            .strip()
+        )
+        .replace('"', "")
+        .split(":")
+    )
+    if len(framework_str) > 1:
+        framework_name, framework_url = framework_str
+        framework = f"`{framework_name} <{framework_url.strip()}>`_"
+    else:
+        framework = framework_str
     return title, labels, dataset, framework
 
 
