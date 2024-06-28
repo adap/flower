@@ -2,7 +2,7 @@
 title: Flower Example using MONAI
 labels: [quickstart, medical, vision]
 dataset: [MedNIST]
-framework: [`MONAI <https://monai.io/>`_]
+framework: [MONAI | https://monai.io/]
 ---
 
 # Flower Example using MONAI
