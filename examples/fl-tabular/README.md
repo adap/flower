@@ -2,7 +2,7 @@
 title: Flower Example on Adult Census Income Tabular Dataset 
 labels: [basic, tabular, fds]
 dataset: [Adult Census Income | https://www.kaggle.com/datasets/uciml/adult-census-income/data]
-framework: [scikit-learn]
+framework: [scikit-learn | https://scikit-learn.org/]
 ---
 
 # Flower Example on Adult Census Income Tabular Dataset
