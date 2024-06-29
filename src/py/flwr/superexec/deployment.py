@@ -83,17 +83,17 @@ class DeploymentEngine(Executor):
             log(INFO, "Created run %s", str(run_id))
 
             # Start ServerApp
-            proc=subprocess.Popen(
-                    [
-                        "flower-server-app",
-                        "--run-id",
-                        str(run_id),
-                        "--insecure",
-                    ],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                ),
+            proc = subprocess.Popen(
+                [
+                    "flower-server-app",
+                    "--run-id",
+                    str(run_id),
+                    "--insecure",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
             log(INFO, "Started run %s", str(run_id))
 
             return RunTracker(
