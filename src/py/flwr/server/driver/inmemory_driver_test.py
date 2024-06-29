@@ -1,4 +1,4 @@
-# Copyright 2022 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,8 +30,9 @@ from flwr.common.serde import (
     message_to_taskres,
     recordset_to_proto,
 )
+from flwr.common.typing import Run
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
-from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.state import InMemoryState, SqliteState, StateFactory
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
 from .inmemory_driver import InMemoryDriver
@@ -79,12 +80,24 @@ class TestInMemoryDriver(unittest.TestCase):
         """
         # Create driver
         self.num_nodes = 42
-        self.driver = InMemoryDriver(StateFactory(""))
-        self.driver.state = MagicMock()
-        self.driver.state.get_nodes.return_value = [
+        self.state = MagicMock()
+        self.state.get_nodes.return_value = [
             generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
             for _ in range(self.num_nodes)
         ]
+        self.state.get_run.return_value = Run(
+            run_id=61016, fab_id="mock/mock", fab_version="v1.0.0"
+        )
+        state_factory = MagicMock(state=lambda: self.state)
+        self.driver = InMemoryDriver(run_id=61016, state_factory=state_factory)
+        self.driver.state = self.state
+
+    def test_get_run(self) -> None:
+        """Test the InMemoryDriver starting with run_id."""
+        # Assert
+        self.assertEqual(self.driver.run.run_id, 61016)
+        self.assertEqual(self.driver.run.fab_id, "mock/mock")
+        self.assertEqual(self.driver.run.fab_version, "v1.0.0")
 
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""
@@ -104,7 +117,7 @@ class TestInMemoryDriver(unittest.TestCase):
         ]
 
         taskins_ids = [uuid4() for _ in range(num_messages)]
-        self.driver.state.store_task_ins.side_effect = taskins_ids  # type: ignore
+        self.state.store_task_ins.side_effect = taskins_ids
 
         # Execute
         msg_ids = list(self.driver.push_messages(msgs))
@@ -141,7 +154,7 @@ class TestInMemoryDriver(unittest.TestCase):
                 task=Task(ancestry=[msg_ids[1]], error=error_to_proto(Error(code=0)))
             ),
         ]
-        self.driver.state.get_task_res.return_value = task_res_list  # type: ignore
+        self.state.get_task_res.return_value = task_res_list
 
         # Execute
         pulled_msgs = list(self.driver.pull_messages(msg_ids))
@@ -167,8 +180,8 @@ class TestInMemoryDriver(unittest.TestCase):
                 task=Task(ancestry=[msg_ids[1]], error=error_to_proto(Error(code=0)))
             ),
         ]
-        self.driver.state.store_task_ins.side_effect = msg_ids  # type: ignore
-        self.driver.state.get_task_res.return_value = task_res_list  # type: ignore
+        self.state.store_task_ins.side_effect = msg_ids
+        self.state.get_task_res.return_value = task_res_list
 
         # Execute
         ret_msgs = list(self.driver.send_and_receive(msgs))
@@ -193,8 +206,8 @@ class TestInMemoryDriver(unittest.TestCase):
                 task=Task(ancestry=[msg_ids[1]], error=error_to_proto(Error(code=0)))
             ),
         ]
-        self.driver.state.store_task_ins.side_effect = msg_ids  # type: ignore
-        self.driver.state.get_task_res.return_value = task_res_list  # type: ignore
+        self.state.store_task_ins.side_effect = msg_ids
+        self.state.get_task_res.return_value = task_res_list
 
         # Execute
         with patch("time.sleep", side_effect=lambda t: time.sleep(t * 0.01)):
@@ -208,19 +221,23 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_task_store_consistency_after_push_pull_sqlitestate(self) -> None:
         """Test tasks are deleted in sqlite state once messages are pulled."""
         # Prepare
-        self.driver = InMemoryDriver(StateFactory(""))
+        state = StateFactory("").state()
+        self.driver = InMemoryDriver(
+            state.create_run("", ""), MagicMock(state=lambda: state)
+        )
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
+        assert isinstance(state, SqliteState)
 
         # Check recorded
-        task_ins = self.driver.state.query("SELECT * FROM task_ins;")  # type: ignore
+        task_ins = state.query("SELECT * FROM task_ins;")
         self.assertEqual(len(task_ins), len(list(msg_ids)))
 
         # Prepare: create replies
         reply_tos = get_replies(self.driver, msg_ids, node_id)
 
         # Query number of task_ins and task_res in State
-        task_res = self.driver.state.query("SELECT * FROM task_res;")  # type: ignore
-        task_ins = self.driver.state.query("SELECT * FROM task_ins;")  # type: ignore
+        task_res = state.query("SELECT * FROM task_res;")
+        task_ins = state.query("SELECT * FROM task_ins;")
 
         # Assert
         self.assertEqual(reply_tos, msg_ids)
@@ -230,18 +247,19 @@ class TestInMemoryDriver(unittest.TestCase):
     def test_task_store_consistency_after_push_pull_inmemory_state(self) -> None:
         """Test tasks are deleted in in-memory state once messages are pulled."""
         # Prepare
-        self.driver = InMemoryDriver(StateFactory(":flwr-in-memory-state:"))
+        state_factory = StateFactory(":flwr-in-memory-state:")
+        state = state_factory.state()
+        self.driver = InMemoryDriver(state.create_run("", ""), state_factory)
         msg_ids, node_id = push_messages(self.driver, self.num_nodes)
+        assert isinstance(state, InMemoryState)
 
         # Check recorded
-        self.assertEqual(
-            len(self.driver.state.task_ins_store), len(list(msg_ids))  # type: ignore
-        )
+        self.assertEqual(len(state.task_ins_store), len(list(msg_ids)))
 
         # Prepare: create replies
         reply_tos = get_replies(self.driver, msg_ids, node_id)
 
         # Assert
         self.assertEqual(reply_tos, msg_ids)
-        self.assertEqual(len(self.driver.state.task_res_store), 0)  # type: ignore
-        self.assertEqual(len(self.driver.state.task_ins_store), 0)  # type: ignore
+        self.assertEqual(len(state.task_res_store), 0)
+        self.assertEqual(len(state.task_ins_store), 0)

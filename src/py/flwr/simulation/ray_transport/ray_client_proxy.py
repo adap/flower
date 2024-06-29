@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class RayActorClientProxy(ClientProxy):
 
         self.app_fn = _load_app
         self.actor_pool = actor_pool
-        self.proxy_state = NodeState()
+        self.proxy_state = NodeState(partition_id=int(self.cid))
 
     def _submit_job(self, message: Message, timeout: Optional[float]) -> Message:
         """Sumbit a message to the ActorPool."""

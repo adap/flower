@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,8 +44,6 @@ from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
-    GetRunRequest,
-    GetRunResponse,
     PingRequest,
     PingResponse,
     PullTaskInsRequest,
@@ -53,9 +51,11 @@ from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.fleet_pb2_grpc import FleetStub  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
+from flwr.proto.run_pb2 import GetRunRequest, GetRunResponse  # pylint: disable=E0611
 from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
 
 from .client_interceptor import AuthenticateClientInterceptor
+from .grpc_adapter import GrpcAdapter
 
 
 def on_channel_state_change(channel_connectivity: str) -> None:
@@ -73,7 +73,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     authentication_keys: Optional[
         Tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey]
     ] = None,
-    adapter_cls: Optional[Type[FleetStub]] = None,
+    adapter_cls: Optional[Union[Type[FleetStub], Type[GrpcAdapter]]] = None,
 ) -> Iterator[
     Tuple[
         Callable[[], Optional[Message]],
@@ -107,6 +107,11 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         Path of the root certificate. If provided, a secure
         connection using the certificates will be established to an SSL-enabled
         Flower server. Bytes won't work for the REST API.
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Tuple containing the elliptic curve private key and public key for
+        authentication from the cryptography library.
+        Source: https://cryptography.io/en/latest/hazmat/primitives/asymmetric/ec/
+        Used to establish an authenticated connection with the server.
 
     Returns
     -------
@@ -114,6 +119,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     send : Callable
     create_node : Optional[Callable]
     delete_node : Optional[Callable]
+    get_run : Optional[Callable]
     """
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
