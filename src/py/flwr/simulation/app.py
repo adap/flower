@@ -94,7 +94,7 @@ def start_simulation(
     *,
     client_fn: ClientFn,
     num_clients: Optional[int] = None,
-    clients_ids: Optional[List[int | str]] = None,
+    clients_ids: Optional[Union[List[int], List[str]]] = None,
     client_resources: Optional[Dict[str, float]] = None,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
@@ -123,7 +123,7 @@ def start_simulation(
     num_clients : Optional[int]
         The total number of clients in this simulation. This must be set if
         `clients_ids` is not set and vice-versa.
-    clients_ids : Optional[List[int|str]]
+    clients_ids : OptionalUnion[List[int],List[str]]]
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
