@@ -16,7 +16,7 @@
 
 import subprocess
 import sys
-from logging import ERROR
+from logging import ERROR, INFO
 from typing import Optional
 
 from typing_extensions import override
@@ -69,7 +69,8 @@ class DeploymentEngine(Executor):
         try:
             fab_version, fab_id = get_fab_metadata(fab_file)
 
-            run_id = self._create_run(fab_id, fab_version)
+            run_id: int = self._create_run(fab_id, fab_version)
+            log(INFO, "Created run %s", str(run_id))
 
             fab_path = install_from_fab(fab_file, None, True)
 
@@ -78,10 +79,7 @@ class DeploymentEngine(Executor):
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-
-            return RunTracker(
-                run_id=run_id,
-                proc=subprocess.Popen(
+            proc=subprocess.Popen(
                     [
                         "flower-server-app",
                         "--run-id",
@@ -92,6 +90,11 @@ class DeploymentEngine(Executor):
                     stderr=subprocess.PIPE,
                     text=True,
                 ),
+            log(INFO, "Started run %s", str(run_id))
+
+            return RunTracker(
+                run_id=run_id,
+                proc=proc,
             )
         # pylint: disable-next=broad-except
         except Exception as e:
@@ -99,4 +102,4 @@ class DeploymentEngine(Executor):
             return None
 
 
-deployment_plugin = DeploymentEngine()
+exec = DeploymentEngine()
