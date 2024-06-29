@@ -42,6 +42,7 @@ class FlowerClient<X : Any, Y : Any>(
         val lock = if (isTraining) trainSampleLock else testSampleLock
         lock.write {
             samples.add(Sample(bottleneck, label))
+            Log.d(TAG, "Added sample: bottleneck=$bottleneck, label=$label, isTraining=$isTraining")
         }
     }
 
@@ -68,8 +69,10 @@ class FlowerClient<X : Any, Y : Any>(
      * Thread-safe.
      */
     fun updateParameters(parameters: Array<ByteBuffer>): Array<ByteBuffer> {
+        Log.d(TAG, "Updating parameters: ${parameters.contentToString()}")
         val outputs = emptyParameterMap()
         runSignatureLocked(parametersToMap(parameters), outputs, "restore")
+        Log.d(TAG, "Updated parameters: ${parameters.contentToString()}")
         return parametersFromMap(outputs)
     }
 
@@ -153,7 +156,9 @@ class FlowerClient<X : Any, Y : Any>(
         val outputs = mapOf<String, Any>(
             "loss" to loss,
         )
+        Log.d(TAG, "Training with inputs: $inputs")
         runSignatureLocked(inputs, outputs, "train")
+        Log.d(TAG, "Training loss: ${loss.get(0)}")
         return loss.get(0)
     }
 
@@ -176,7 +181,7 @@ class FlowerClient<X : Any, Y : Any>(
                 } else {
                     trainingSamples.subList(fromIndex, nextIndex)
                 }
-
+                Log.d(TAG, "Yielding training batch: $batch")
                 yield(batch)
             }
         }
@@ -201,9 +206,11 @@ class FlowerClient<X : Any, Y : Any>(
         outputs: Map<String, Any>,
         signatureKey: String
     ) {
+        Log.d(TAG, "Running signature with key: $signatureKey, inputs: $inputs, outputs: $outputs")
         interpreterLock.withLock {
             interpreter.runSignature(inputs, outputs, signatureKey)
         }
+        Log.d(TAG, "Completed signature with key: $signatureKey")
     }
 
     private fun emptyParameterMap(): Map<String, Any> {

@@ -27,7 +27,7 @@ import dev.flower.flower_tflite.SampleSpec
 import dev.flower.flower_tflite.createFlowerService
 import dev.flower.flower_tflite.helpers.classifierAccuracy
 import dev.flower.flower_tflite.helpers.loadMappedAssetFile
-import dev.flower.flower_tflite.helpers.negativeLogLikelihoodLoss
+import dev.flower.flower_tflite.helpers.categoricalCrossEntropyLoss
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -158,7 +158,6 @@ class TabScreen(carContext: CarContext) : Screen(carContext) {
         val message =
             if (isEngineOK) "Engine is running smoothly" else "Problem: " + EngineStatusService.engineProblem
 
-        // Qua volevo aggiungere una icona di motore verde o rossa in base allo stato del motore
         val iconResId = if (isEngineOK) R.drawable.ic_engine else R.drawable.ic_engine
         val icon = CarIcon.Builder(IconCompat.createWithResource(carContext, iconResId)).build()
 
@@ -178,7 +177,6 @@ class TabScreen(carContext: CarContext) : Screen(carContext) {
                 ).build()
             )
 
-        // Lorem Ipsum di prova, qui andrà messa l'informativa
         paneBuilder.addRow(
             Row.Builder()
                 .setTitle("Informed Consent")
@@ -293,7 +291,7 @@ class TabScreen(carContext: CarContext) : Screen(carContext) {
             { it.toTypedArray() },
             { it.toTypedArray() },
             {Array(it) { FloatArray(CLASSES.size) } },
-            ::negativeLogLikelihoodLoss,
+            ::categoricalCrossEntropyLoss,
             ::classifierAccuracy,
         )
         flowerClient = FlowerClient(buffer, layersSizes, sampleSpec)
