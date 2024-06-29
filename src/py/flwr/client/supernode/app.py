@@ -378,7 +378,7 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "--partition-id",
         type=int,
         help="The data partition index associated to this SuperNode. Better suited "
-        "for prototyping purposes where a SuperNode migh only load a fraction of a "
+        "for prototyping purposes where a SuperNode might only load a fraction of a "
         "artificially partitioned dataset (e.g. using `flwr-datasets`)",
     )
 
