@@ -6,10 +6,10 @@ inputs:
     default: 3.8
   pip-version:
     description: "Version of pip to be installed using pip"
-    default: 24.0.0
+    default: 24.1.1
   setuptools-version:
     description: "Version of setuptools to be installed using pip"
-    default: 69.5.1
+    default: 70.1.1
   poetry-version:
     description: "Version of poetry to be installed using pip"
     default: 1.8.3
