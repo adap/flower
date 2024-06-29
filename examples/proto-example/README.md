@@ -1,6 +1,6 @@
 # proto-example
 
-> [!NOTE]
+> \[!TIP\]
 > An example created from `flwr new`'s `PyTorch` template with updated `client_fn` signature.
 
 ## Install dependencies
@@ -18,6 +18,12 @@ flwr run
 ```
 
 ## Run (Deployment Engine)
+
+### Start the SuperExec
+
+```bash
+flower-superexec flwr.superexec.deployment:executor --insecure
+```
 
 ### Start the SuperLink
 
@@ -39,8 +45,8 @@ In yet another new terminal window, start the second long-running Flower client:
 flower-supernode proto_example.client:app --insecure --partition-id=1
 ```
 
-### Start the ServerApp
+### Start the Run
 
 ```bash
-flower-server-app proto_example.server:app --insecure
+flwr run --use-superexec
 ```
