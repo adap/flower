@@ -1,9 +1,7 @@
 # proto-example
 
-
 > [!NOTE]
 > An example created from `flwr new`'s `PyTorch` template with updated `client_fn` signature.
-
 
 ## Install dependencies
 
