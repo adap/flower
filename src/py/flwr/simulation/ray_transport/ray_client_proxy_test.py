@@ -88,9 +88,7 @@ def prep(
 
     # Create 373 client proxies
     num_proxies = 373  # a prime number
-    mapping = _create_node_id_to_partition_mapping(
-        [str(cid) for cid in range(num_proxies)]
-    )
+    mapping = _create_node_id_to_partition_mapping(list(range(num_proxies)))
     proxies = [
         RayActorClientProxy(
             client_fn=get_dummy_client,
@@ -128,7 +126,7 @@ def test_cid_consistency_one_at_a_time() -> None:
 
         res = recordset_to_getpropertiesres(message_out.content)
 
-        assert int(prox.cid) * pi == res.properties["result"]
+        assert int(prox.partition_id) * pi == res.properties["result"]
 
     ray.shutdown()
 
@@ -161,21 +159,21 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         )
         prox.actor_pool.submit_client_job(
             lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-            (prox.app_fn, message, prox.cid, state),
+            (prox.app_fn, message, str(prox.partition_id), state),
         )
 
     # fetch results one at a time
     shuffle(proxies)
     for prox in proxies:
         message_out, updated_context = prox.actor_pool.get_client_result(
-            prox.cid, timeout=None
+            str(prox.partition_id), timeout=None
         )
         prox.proxy_state.update_context(run_id, context=updated_context)
         res = recordset_to_getpropertiesres(message_out.content)
 
-        assert int(prox.cid) * pi == res.properties["result"]
+        assert prox.partition_id * pi == res.properties["result"]
         assert (
-            str(int(prox.cid) * pi)
+            str(prox.partition_id * pi)
             == prox.proxy_state.retrieve_context(run_id).state.configs_records[
                 "result"
             ]["result"]

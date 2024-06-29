@@ -76,7 +76,7 @@ NodeToPartitionMapping = Dict[int, int]
 
 
 def _create_node_id_to_partition_mapping(
-    partition_ids: List[str],
+    partition_ids: List[int],
 ) -> NodeToPartitionMapping:
     """Given a list of partition_ids, generate a node_id:partition_id mapping."""
     nodes_mapping: NodeToPartitionMapping = {}  # {node-id; partition-id}
@@ -94,7 +94,7 @@ def start_simulation(
     *,
     client_fn: ClientFn,
     num_clients: Optional[int] = None,
-    clients_ids: Optional[List[str]] = None,
+    clients_ids: Optional[List[int | str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
@@ -123,10 +123,11 @@ def start_simulation(
     num_clients : Optional[int]
         The total number of clients in this simulation. This must be set if
         `clients_ids` is not set and vice-versa.
-    clients_ids : Optional[List[str]]
+    clients_ids : Optional[List[int|str]]
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
+        If list contains `str` values, they will be converted to `int`.
     client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1, "num_gpus": 0.0}`)
         CPU and GPU resources for a single client. Supported keys
         are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
@@ -220,13 +221,13 @@ def start_simulation(
             log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
             sys.exit()
         else:
-            partition_ids = clients_ids
+            partition_ids = [int(cid) for cid in clients_ids]
     else:
         if num_clients is None:
             log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
             sys.exit()
         else:
-            partition_ids = [str(x) for x in range(num_clients)]
+            partition_ids = list(range(num_clients))
 
     # Create node-id to partition-id mapping
     nodes_mapping = _create_node_id_to_partition_mapping(partition_ids)

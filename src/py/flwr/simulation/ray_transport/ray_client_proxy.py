@@ -50,7 +50,7 @@ class RayActorClientProxy(ClientProxy):
         partition_id: int,
         actor_pool: VirtualClientEngineActorPool,
     ):
-        super().__init__(cid=str(partition_id))
+        super().__init__(cid=str(node_id))
         self.node_id = node_id
         self.partition_id = partition_id
 
