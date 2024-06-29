@@ -12,7 +12,7 @@ inputs:
     default: 69.5.1
   poetry-version:
     description: "Version of poetry to be installed using pip"
-    default: 1.7.1
+    default: 1.8.3
   poetry-skip:
     description: "Option to skip the poetry installation"
     required: false
