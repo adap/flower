@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Deployment engine executor plugin."""
+"""Deployment engine executor."""
 
 import subprocess
 import sys
@@ -33,7 +33,7 @@ from .executor import Executor, RunTracker
 
 
 class DeploymentEngine(Executor):
-    """Deployment engine executor plugin."""
+    """Deployment engine executor."""
 
     def __init__(
         self,
