@@ -168,7 +168,7 @@ class RayBackend(Backend):
 
         Return output message and updated context.
         """
-        partition_id = message.metadata.partition_id
+        partition_id = context.partition_id
 
         try:
             # Submit a task to the pool

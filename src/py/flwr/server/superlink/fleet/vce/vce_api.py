@@ -57,7 +57,6 @@ async def worker(
     queue: "asyncio.Queue[TaskIns]",
     node_states: Dict[int, NodeState],
     state_factory: StateFactory,
-    nodes_mapping: NodeToPartitionMapping,
     backend: Backend,
 ) -> None:
     """Get TaskIns from queue and pass it to an actor in the pool to execute it."""
@@ -74,8 +73,6 @@ async def worker(
 
             # Convert TaskIns to Message
             message = message_from_taskins(task_ins)
-            # Set partition_id
-            message.metadata.partition_id = nodes_mapping[node_id]
 
             # Let backend process message
             out_mssg, updated_context = await backend.process_message(
@@ -187,9 +184,7 @@ async def run(
         # Add workers (they submit Messages to Backend)
         worker_tasks = [
             asyncio.create_task(
-                worker(
-                    app_fn, queue, node_states, state_factory, nodes_mapping, backend
-                )
+                worker(app_fn, queue, node_states, state_factory, backend)
             )
             for _ in range(backend.num_workers)
         ]

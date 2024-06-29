@@ -205,12 +205,16 @@ def test_cid_consistency_without_proxies() -> None:
                 reply_to_message="",
                 ttl=DEFAULT_TTL,
                 message_type=MessageTypeLegacy.GET_PROPERTIES,
-                partition_id=int(cid),
             ),
         )
         pool.submit_client_job(
             lambda a, c_fn, j_fn, cid_, state: a.run.remote(c_fn, j_fn, cid_, state),
-            (_load_app, message, cid, Context(state=RecordSet())),
+            (
+                _load_app,
+                message,
+                cid,
+                Context(state=RecordSet(), partition_id=int(cid)),
+            ),
         )
 
     # fetch results one at a time
