@@ -236,7 +236,7 @@ def _start_client_internal(
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
     partitioni_id: Optional[int] (default: None)
-        The data partition index associated to this process. Better suited for
+        The data partition index associated with this node. Better suited for
         prototyping purposes.
     """
     if insecure is None:
