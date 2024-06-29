@@ -39,6 +39,7 @@ from flwr.common.recordset_compat import (
     recordset_to_getpropertiesres,
 )
 from flwr.common.recordset_compat_test import _get_valid_getpropertiesins
+from flwr.simulation.app import _create_node_id_to_partition_mapping
 from flwr.simulation.ray_transport.ray_actor import (
     ClientAppActor,
     VirtualClientEngineActor,
@@ -87,13 +88,17 @@ def prep(
 
     # Create 373 client proxies
     num_proxies = 373  # a prime number
+    mapping = _create_node_id_to_partition_mapping(
+        [str(cid) for cid in range(num_proxies)]
+    )
     proxies = [
         RayActorClientProxy(
             client_fn=get_dummy_client,
-            cid=str(cid),
+            node_id=node_id,
+            partition_id=partition_id,
             actor_pool=pool,
         )
-        for cid in range(num_proxies)
+        for node_id, partition_id in mapping.items()
     ]
 
     return proxies, pool

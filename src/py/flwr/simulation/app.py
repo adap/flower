@@ -29,12 +29,14 @@ from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
 from flwr.client import ClientFn
 from flwr.common import EventType, event
+from flwr.common.constant import NODE_ID_NUM_BYTES
 from flwr.common.logger import log, set_logger_propagation
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server, init_defaults, run_fl
 from flwr.server.server_config import ServerConfig
 from flwr.server.strategy import Strategy
+from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.ray_actor import (
     ClientAppActor,
     VirtualClientEngineActor,
@@ -69,6 +71,22 @@ REASON:
         - `len(clients_ids)` == `num_clients`
 
 """
+
+NodeToPartitionMapping = Dict[int, int]
+
+
+def _create_node_id_to_partition_mapping(
+    partition_ids: List[str],
+) -> NodeToPartitionMapping:
+    """Given a list of partition_ids, generate a node_id:partition_id mapping."""
+    nodes_mapping: NodeToPartitionMapping = {}  # {node-id; partition-id}
+    for i in partition_ids:
+        while True:
+            node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
+            if node_id not in nodes_mapping:
+                break
+        nodes_mapping[node_id] = int(i)
+    return nodes_mapping
 
 
 # pylint: disable=too-many-arguments,too-many-statements,too-many-branches
@@ -197,19 +215,21 @@ def start_simulation(
     )
 
     # clients_ids takes precedence
-    cids: List[str]
     if clients_ids is not None:
         if (num_clients is not None) and (len(clients_ids) != num_clients):
             log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
             sys.exit()
         else:
-            cids = clients_ids
+            partition_ids = clients_ids
     else:
         if num_clients is None:
             log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
             sys.exit()
         else:
-            cids = [str(x) for x in range(num_clients)]
+            partition_ids = [str(x) for x in range(num_clients)]
+
+    # Create node-id to partition-id mapping
+    nodes_mapping = _create_node_id_to_partition_mapping(partition_ids)
 
     # Default arguments for Ray initialization
     if not ray_init_args:
@@ -308,10 +328,11 @@ def start_simulation(
     )
 
     # Register one RayClientProxy object for each client with the ClientManager
-    for cid in cids:
+    for node_id, partition_id in nodes_mapping.items():
         client_proxy = RayActorClientProxy(
             client_fn=client_fn,
-            cid=cid,
+            node_id=node_id,
+            partition_id=partition_id,
             actor_pool=pool,
         )
         initialized_server.client_manager().register(client=client_proxy)
