@@ -97,7 +97,6 @@ def handle_legacy_message_from_msgtype(
     except Exception as ex:  # pylint: disable=broad-exception-caught
         log(DEBUG, ex)
         # Attempt execution `client_fn` as it was done before flwr 1.10.0
-        # warnings.warn("using client_fn(cid: str)", category=DeprecationWarning)
         client = client_fn(str(context.partition_id))  # type: ignore
 
     # Check if NumPyClient is returend
