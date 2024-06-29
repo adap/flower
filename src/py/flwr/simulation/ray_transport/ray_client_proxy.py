@@ -46,8 +46,8 @@ class RayActorClientProxy(ClientProxy):
     def __init__(
         self,
         client_fn: ClientFn,
-        partition_id: int,
         node_id: int,
+        partition_id: int,
         actor_pool: VirtualClientEngineActorPool,
     ):
         super().__init__(cid=str(partition_id))
@@ -59,7 +59,7 @@ class RayActorClientProxy(ClientProxy):
 
         self.app_fn = _load_app
         self.actor_pool = actor_pool
-        self.proxy_state = NodeState(partition_id=int(self.partition_id))
+        self.proxy_state = NodeState(partition_id=self.partition_id)
 
     def _submit_job(self, message: Message, timeout: Optional[float]) -> Message:
         """Sumbit a message to the ActorPool."""
