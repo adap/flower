@@ -118,7 +118,7 @@ def build(
         fab_file.writestr(".info/CONTENT", list_file_content)
 
     typer.secho(
-        f"🎊 Successfully built {fab_filename}.", fg=typer.colors.GREEN, bold=True
+        f"🎊 Successfully built {fab_filename}", fg=typer.colors.GREEN, bold=True
     )
 
     return fab_filename

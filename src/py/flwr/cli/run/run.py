@@ -133,4 +133,5 @@ def _start_superexec_run(app_path: Optional[Path]) -> None:
     fab_path = build(app_path)
 
     req = StartRunRequest(fab_file=Path(fab_path).read_bytes())
-    stub.StartRun(req)
+    res = stub.StartRun(req)
+    typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
