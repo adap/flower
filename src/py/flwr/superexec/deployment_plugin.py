@@ -67,18 +67,22 @@ class DeploymentEngine(Executor):
     def start_run(self, fab_file: bytes) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
+            # Install FAB to flwr dir
             fab_version, fab_id = get_fab_metadata(fab_file)
-
-            run_id: int = self._create_run(fab_id, fab_version)
-            log(INFO, "Created run %s", str(run_id))
-
             fab_path = install_from_fab(fab_file, None, True)
 
+            # Install FAB Python package
             subprocess.check_call(
                 [sys.executable, "-m", "pip", "install", str(fab_path)],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
+
+            # Call SuperLink to create run
+            run_id: int = self._create_run(fab_id, fab_version)
+            log(INFO, "Created run %s", str(run_id))
+
+            # Start ServerApp
             proc=subprocess.Popen(
                     [
                         "flower-server-app",
