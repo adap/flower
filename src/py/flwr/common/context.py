@@ -35,7 +35,7 @@ class Context:
         at different points during the lifecycle of this entity (e.g. across
         multiple rounds)
     partition_id : Optional[int] (default: None)
-        An index that specified the data partition that the ClientApp using this Context
+        An index that specifies the data partition that the ClientApp using this Context
         object should make use of. Setting this attribute is better suited for
         simulation or proto typing setups.
     """
