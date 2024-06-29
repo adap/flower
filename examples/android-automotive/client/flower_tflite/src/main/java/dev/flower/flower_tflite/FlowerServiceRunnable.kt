@@ -84,12 +84,15 @@ class FlowerServiceRunnable<X : Any, Y : Any>
     fun handleFitIns(message: ServerMessage): ClientMessage {
         Log.d(TAG, "Handling FitIns")
         callback("Handling Fit request from the server.")
-        val layers = message.fitIns.parameters.tensorsList
+        var layers = message.fitIns.parameters.tensorsList
         assertIntsEqual(layers.size, flowerClient.layersSizes.size)
         val epochConfig = message.fitIns.configMap.getOrDefault(
             "local_epochs", Scalar.newBuilder().setSint64(1).build()
         )!!
-        val epochs = epochConfig.sint64.toInt()
+        var epochs = epochConfig.sint64.toInt()
+        epochs = 1
+        //layers = 2
+        Log.d(TAG, "CRISTO SANTO Epochs: $epochs")
         val newWeights = weightsFromLayers(layers)
         flowerClient.updateParameters(newWeights.toTypedArray())
         flowerClient.fit(

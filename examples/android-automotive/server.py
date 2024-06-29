@@ -16,8 +16,8 @@ def fit_config(server_round: int):
     increase to two local epochs afterwards.
     """
     config = {
-        "batch_size": 32,
-        "local_epochs": 5,
+        "batch_size": 16,
+        "local_epochs": 10,
     }
     return config
 
@@ -26,9 +26,9 @@ def main():
     strategy = FedAvgAndroid(
         fraction_fit=1.0,
         fraction_evaluate=1.0,
-        min_fit_clients=1,
-        min_evaluate_clients=1,
-        min_available_clients=1,
+        min_fit_clients=2,
+        min_evaluate_clients=3,
+        min_available_clients=3,
         evaluate_fn=None,
         on_fit_config_fn=fit_config,
     )

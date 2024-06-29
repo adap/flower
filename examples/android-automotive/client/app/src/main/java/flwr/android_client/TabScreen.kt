@@ -287,6 +287,7 @@ class TabScreen(carContext: CarContext) : Screen(carContext) {
     private fun createFlowerClient() {
         val buffer = loadMappedAssetFile(carContext, "model/enginefaultdb.tflite")
         val layersSizes = intArrayOf(504,36,144,16)
+        Log.d(TAG, "layersSizes: $layersSizes")
         val sampleSpec = SampleSpec<FeatureArray, FloatArray>(
             { it.toTypedArray() },
             { it.toTypedArray() },
@@ -344,6 +345,6 @@ private const val TAG = "TabScreen"
 
 typealias FeatureArray = FloatArray
 
-private val DEVICE_ID = 1
+private val DEVICE_ID = 0
 private val IP = "10.0.2.2"
 private const val PORT = 8080

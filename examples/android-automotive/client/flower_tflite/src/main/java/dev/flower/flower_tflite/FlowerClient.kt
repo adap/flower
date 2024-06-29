@@ -42,7 +42,23 @@ class FlowerClient<X : Any, Y : Any>(
         val lock = if (isTraining) trainSampleLock else testSampleLock
         lock.write {
             samples.add(Sample(bottleneck, label))
-            Log.d(TAG, "Added sample: bottleneck=$bottleneck, label=$label, isTraining=$isTraining")
+            //Log.d(TAG, "Added sample: bottleneck=$bottleneck, label=$label, isTraining=$isTraining")
+            /*
+            if (bottleneck is FloatArray) {
+                for (value in bottleneck) { // Iterate over the elements
+                    Log.d(TAG, "Bottleneck value: $value") // Log each value
+                }
+            } else {
+                Log.d(TAG, "bottleneck is not a FloatArray") // Handle the case where it's not
+            }
+            if (label is FloatArray) {
+                for (value in label) { // Iterate over the elements
+                    Log.d(TAG, "Label value: $value") // Log each value
+                }
+            } else {
+                Log.d(TAG, "label is not a FloatArray") // Handle the case where it's not
+            }
+            */
         }
     }
 
@@ -55,10 +71,10 @@ class FlowerClient<X : Any, Y : Any>(
     fun getParameters(): Array<ByteBuffer> {
         Log.d(TAG, "Getting parameters...")
         val inputs: Map<String, Any> = FakeNonEmptyMap()
-        Log.i(TAG, "Raw weights: $inputs.")
+        Log.i(TAG, "Raw inputs: $inputs.")
         val outputs = emptyParameterMap()
         runSignatureLocked(inputs, outputs, "parameters")
-        Log.i(TAG, "Raw weights: $outputs.")
+        Log.i(TAG, "Raw outputs: $outputs.")
         return parametersFromMap(outputs)
     }
 
@@ -84,7 +100,7 @@ class FlowerClient<X : Any, Y : Any>(
      * @return [List] of average training losses for each epoch.
      */
     fun fit(
-        epochs: Int = 1, batchSize: Int = 32, lossCallback: ((List<Float>) -> Unit)? = null
+        epochs: Int = 1, batchSize: Int = 16, lossCallback: ((List<Float>) -> Unit)? = null
     ): List<Double> {
         Log.d(TAG, "Starting to train for $epochs epochs with batch size $batchSize.")
         // Obtain write lock to prevent training samples from being modified.
@@ -107,6 +123,7 @@ class FlowerClient<X : Any, Y : Any>(
     fun evaluate(): Pair<Float, Float> {
         val result = testSampleLock.read {
             val bottlenecks = testSamples.map { it.bottleneck }
+            Log.d(TAG, "Evaluating with bottlenecks: $bottlenecks.")
             val logits = inference(spec.convertX(bottlenecks))
             spec.loss(testSamples, logits) to spec.accuracy(testSamples, logits)
         }
@@ -181,7 +198,7 @@ class FlowerClient<X : Any, Y : Any>(
                 } else {
                     trainingSamples.subList(fromIndex, nextIndex)
                 }
-                Log.d(TAG, "Yielding training batch: $batch")
+                //Log.d(TAG, "Yielding training batch: $batch")
                 yield(batch)
             }
         }
@@ -206,11 +223,11 @@ class FlowerClient<X : Any, Y : Any>(
         outputs: Map<String, Any>,
         signatureKey: String
     ) {
-        Log.d(TAG, "Running signature with key: $signatureKey, inputs: $inputs, outputs: $outputs")
+        //Log.d(TAG, "Running signature with key: $signatureKey, inputs: $inputs, outputs: $outputs")
         interpreterLock.withLock {
             interpreter.runSignature(inputs, outputs, signatureKey)
         }
-        Log.d(TAG, "Completed signature with key: $signatureKey")
+        //Log.d(TAG, "Completed signature with key: $signatureKey")
     }
 
     private fun emptyParameterMap(): Map<String, Any> {

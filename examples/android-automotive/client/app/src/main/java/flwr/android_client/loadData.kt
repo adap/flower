@@ -33,8 +33,24 @@ suspend fun loadData(
     flowerClient: FlowerClient<FeatureArray, FloatArray>,
     device_id: Int
 ) {
-    readAssetLines(context, "data/part_0.csv") { index, line ->
-        addSample(context, flowerClient, "data/$line", true)
+    if(device_id == 0) {
+        readAssetLines(context, "data/part_0.csv") { index, line ->
+            addSample(context, flowerClient, line, true)
+        }
+        readAssetLines(context, "data/part_1.csv") { index, line ->
+            addSample(context, flowerClient, line, false)
+        }
+    } else if(device_id == 1) {
+        readAssetLines(context, "data/part_2.csv") { index, line ->
+            addSample(context, flowerClient, line, true)
+        }
+        readAssetLines(context, "data/part_3.csv") { index, line ->
+            addSample(context, flowerClient, line, false)
+        }
+    } else if (device_id == 2) {
+        readAssetLines(context, "data/part_4.csv") { index, line ->
+            addSample(context, flowerClient, line, false)
+        }
     }
 }
 
@@ -45,31 +61,15 @@ private fun addSample(
     row: String,
     isTraining: Boolean
 ) {
-    if (ENABLE_DEBUG){
-        println("Adding sample: $row")
-    }
     val parts = row.split(",".toRegex())
-    val index = parts[0][5].toString().toInt()
+    val index = parts[0].toInt()
     val className = CLASSES[index]
-    val labelArray = classToLabel(className)
+    val labelArray = classToArray(className)
     val features = parts.subList(1, parts.size).map { it.toFloat() }.toFloatArray()
-
-    if (ENABLE_DEBUG) {
-        println("Index: $index")
-        print("Feature Array: ")
-        for (feature in features) {
-            print("$feature ")
-        }
-        print("\nLabel Array: ")
-        for (label in labelArray) {
-            print("$label ")
-        }
-        println()
-    }
 
     // add to the list.
     try {
-        //flowerClient.addSample(features, labelArray, isTraining)
+        flowerClient.addSample(features, labelArray, isTraining)
     } catch (e: ExecutionException) {
         throw RuntimeException("Failed to add sample to model", e.cause)
     } catch (e: InterruptedException) {
@@ -77,7 +77,11 @@ private fun addSample(
     }
 }
 
-private const val TAG = "Load Data"
+fun classToArray(className: String): FloatArray {
+    return CLASSES.map {
+        if (className == it) 1f else 0f
+    }.toFloatArray()
+}
 
 const val INPUT_LAYER_SIZE = 14
 
@@ -106,14 +110,3 @@ val FEATURES = listOf(
     "Lambda",
     "AFR"
 )
-
-const val ENABLE_DEBUG = false
-
-
-fun classToLabel(className: String): FloatArray {
-    return CLASSES.map {
-        if (className == it) 1f else 0f
-    }.toFloatArray()
-}
-
-

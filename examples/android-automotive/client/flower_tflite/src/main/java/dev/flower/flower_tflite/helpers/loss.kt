@@ -13,6 +13,7 @@ fun <X> negativeLogLikelihoodLoss(
 }
 */
 
+/*
 fun softmax(logits: Array<FloatArray>): Array<FloatArray> {
     return logits.map { logit ->
         val maxLogit = logit.maxOrNull() ?: throw IllegalArgumentException("Logit cannot be empty")
@@ -28,6 +29,20 @@ fun <X> categoricalCrossEntropyLoss(
 ): Float = averageLossWith(samples, logits) { sample, logit ->
     val softmaxLogit = softmax(arrayOf(logit)).first()
     -ln(softmaxLogit[sample.label.argmax()])
+}*/
+
+fun softmax(logit: FloatArray): FloatArray {
+    val maxLogit = logit.maxOrNull() ?: throw IllegalArgumentException("Logit cannot be empty")
+    val expLogits = logit.map { exp((it - maxLogit).toDouble()).toFloat() }
+    val sumExpLogits = expLogits.sum()
+    return expLogits.map { (it / sumExpLogits).toFloat() }.toFloatArray()
+}
+
+fun <X> categoricalCrossEntropyLoss(
+    samples: MutableList<Sample<X, FloatArray>>,
+    logits: Array<FloatArray>
+): Float = averageLossWith(samples, logits) { sample, logit ->
+    -ln(softmax(logit)[sample.label.argmax()])
 }
 
 fun <X, Y> averageLossWith(

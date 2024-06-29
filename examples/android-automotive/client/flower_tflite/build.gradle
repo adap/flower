@@ -33,7 +33,7 @@ android {
 def grpc_version = '1.56.1'
 
 protobuf {
-    protoc { artifact = 'com.google.protobuf:protoc:3.11.0' }
+    protoc { artifact = 'com.google.protobuf:protoc:21.0-rc-1' }
     plugins {
         grpc {
             artifact = "io.grpc:protoc-gen-grpc-java:$grpc_version"
@@ -54,7 +54,6 @@ protobuf {
 }
 
 dependencies {
-
     implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.9.0'
