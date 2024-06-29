@@ -248,7 +248,8 @@ def _start_client_internal(
         if client_fn is None:
             # Wrap `Client` instance in `client_fn`
             def single_client_factory(
-                cid: str,  # pylint: disable=unused-argument
+                node_id: int,  # pylint: disable=unused-argument
+                partition_id: Optional[int],  # pylint: disable=unused-argument
             ) -> Client:
                 if client is None:  # Added this to keep mypy happy
                     raise ValueError(
