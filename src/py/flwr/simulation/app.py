@@ -85,7 +85,7 @@ def _create_node_id_to_partition_mapping(
             node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
             if node_id not in nodes_mapping:
                 break
-        nodes_mapping[node_id] = int(i)
+        nodes_mapping[node_id] = i
     return nodes_mapping
 
 
