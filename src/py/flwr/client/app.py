@@ -191,6 +191,7 @@ def _start_client_internal(
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
+    partition_id: Optional[int] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -234,6 +235,9 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
+    partitioni_id: Optional[int] (default: None)
+        The data partition index associated with this node. Better suited for
+        prototyping purposes.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -309,7 +313,7 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    node_state = NodeState()
+    node_state = NodeState(partition_id=partition_id)
     # run_id -> (fab_id, fab_version)
     run_info: Dict[int, Tuple[str, str]] = {}
 
