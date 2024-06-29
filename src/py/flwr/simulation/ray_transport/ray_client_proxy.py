@@ -107,7 +107,6 @@ class RayActorClientProxy(ClientProxy):
                 reply_to_message="",
                 ttl=timeout if timeout else DEFAULT_TTL,
                 message_type=message_type,
-                partition_id=int(self.cid),
             ),
         )
 
