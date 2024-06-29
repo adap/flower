@@ -23,7 +23,7 @@ from flwr.common import Context, RecordSet
 class NodeState:
     """State of a node where client nodes execute runs."""
 
-    def __init__(self, partition_id: Optional[int] = None) -> None:
+    def __init__(self, partition_id: Optional[int]) -> None:
         self._meta: Dict[str, Any] = {}  # holds metadata about the node
         self.run_contexts: Dict[int, Context] = {}
         self._partition_id = partition_id
