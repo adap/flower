@@ -72,4 +72,4 @@ class SimulationEngine(Executor):
         )
 
 
-simulation_plugin = SimulationEngine()
+executor = SimulationEngine()
