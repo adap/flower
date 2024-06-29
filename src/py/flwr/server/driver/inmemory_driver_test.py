@@ -15,7 +15,6 @@
 """Tests for in-memory driver."""
 
 
-import os
 import time
 import unittest
 from typing import Iterable, List, Tuple
@@ -23,7 +22,7 @@ from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
 from flwr.common import RecordSet
-from flwr.common.constant import PING_MAX_INTERVAL
+from flwr.common.constant import NODE_ID_NUM_BYTES, PING_MAX_INTERVAL
 from flwr.common.message import Error
 from flwr.common.serde import (
     error_to_proto,
@@ -34,6 +33,7 @@ from flwr.common.serde import (
 from flwr.common.typing import Run
 from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import InMemoryState, SqliteState, StateFactory
+from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
 from .inmemory_driver import InMemoryDriver
 
@@ -82,7 +82,7 @@ class TestInMemoryDriver(unittest.TestCase):
         self.num_nodes = 42
         self.state = MagicMock()
         self.state.get_nodes.return_value = [
-            int.from_bytes(os.urandom(8), "little", signed=True)
+            generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
             for _ in range(self.num_nodes)
         ]
         self.state.get_run.return_value = Run(
