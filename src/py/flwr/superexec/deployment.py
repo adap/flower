@@ -83,7 +83,7 @@ class DeploymentEngine(Executor):
             log(INFO, "Created run %s", str(run_id))
 
             # Start ServerApp
-            proc = subprocess.Popen(
+            proc = subprocess.Popen(  # pylint: disable=consider-using-with
                 [
                     "flower-server-app",
                     "--run-id",
@@ -106,4 +106,4 @@ class DeploymentEngine(Executor):
             return None
 
 
-exec = DeploymentEngine()
+executor = DeploymentEngine()
