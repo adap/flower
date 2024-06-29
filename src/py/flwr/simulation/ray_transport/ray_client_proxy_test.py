@@ -17,7 +17,7 @@
 
 from math import pi
 from random import shuffle
-from typing import Dict, List, Tuple, Type
+from typing import Dict, List, Optional, Tuple, Type
 
 import ray
 
@@ -50,8 +50,8 @@ from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
-    def __init__(self, cid: str) -> None:
-        self.cid = int(cid)
+    def __init__(self, cid: int) -> None:
+        self.cid = cid
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
@@ -64,9 +64,13 @@ class DummyClient(NumPyClient):
         return {"result": result}
 
 
-def get_dummy_client(cid: str) -> Client:
+def get_dummy_client(
+    node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
+) -> Client:
     """Return a DummyClient converted to Client type."""
-    return DummyClient(cid).to_client()
+    if partition_id is None:
+        raise ValueError("`partition_id` is not set.")
+    return DummyClient(partition_id).to_client()
 
 
 def prep(
@@ -205,12 +209,16 @@ def test_cid_consistency_without_proxies() -> None:
                 reply_to_message="",
                 ttl=DEFAULT_TTL,
                 message_type=MessageTypeLegacy.GET_PROPERTIES,
-                partition_id=int(cid),
             ),
         )
         pool.submit_client_job(
             lambda a, c_fn, j_fn, cid_, state: a.run.remote(c_fn, j_fn, cid_, state),
-            (_load_app, message, cid, Context(state=RecordSet())),
+            (
+                _load_app,
+                message,
+                cid,
+                Context(state=RecordSet(), partition_id=int(cid)),
+            ),
         )
 
     # fetch results one at a time

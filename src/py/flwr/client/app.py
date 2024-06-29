@@ -191,6 +191,7 @@ def _start_client_internal(
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
+    partition_id: Optional[int] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -244,7 +245,8 @@ def _start_client_internal(
         if client_fn is None:
             # Wrap `Client` instance in `client_fn`
             def single_client_factory(
-                cid: str,  # pylint: disable=unused-argument
+                node_id: int,  # pylint: disable=unused-argument
+                partition_id: Optional[int],  # pylint: disable=unused-argument
             ) -> Client:
                 if client is None:  # Added this to keep mypy happy
                     raise ValueError(
@@ -309,7 +311,7 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    node_state = NodeState()
+    node_state = NodeState(partition_id=partition_id)
     # run_id -> (fab_id, fab_version)
     run_info: Dict[int, Tuple[str, str]] = {}
 

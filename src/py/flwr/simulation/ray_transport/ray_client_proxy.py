@@ -53,7 +53,7 @@ class RayActorClientProxy(ClientProxy):
 
         self.app_fn = _load_app
         self.actor_pool = actor_pool
-        self.proxy_state = NodeState()
+        self.proxy_state = NodeState(partition_id=int(self.cid))
 
     def _submit_job(self, message: Message, timeout: Optional[float]) -> Message:
         """Sumbit a message to the ActorPool."""
@@ -107,7 +107,6 @@ class RayActorClientProxy(ClientProxy):
                 reply_to_message="",
                 ttl=timeout if timeout else DEFAULT_TTL,
                 message_type=message_type,
-                partition_id=int(self.cid),
             ),
         )
 

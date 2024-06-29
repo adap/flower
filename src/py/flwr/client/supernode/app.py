@@ -67,6 +67,7 @@ def run_supernode() -> None:
         authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
+        partition_id=args.partition_id,
     )
 
     # Graceful shutdown
@@ -372,6 +373,11 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "--auth-supernode-public-key",
         type=str,
         help="The SuperNode's public key (as a path str) to enable authentication.",
+    )
+    parser.add_argument(
+        "--partition-id",
+        type=int,
+        help="Specify data partition index. For prototyping purposes only.",
     )
 
 

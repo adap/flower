@@ -14,8 +14,8 @@
 # ==============================================================================
 """Context."""
 
-
 from dataclasses import dataclass
+from typing import Optional
 
 from .record import RecordSet
 
@@ -36,3 +36,8 @@ class Context:
     """
 
     state: RecordSet
+    partition_id: Optional[int]
+
+    def __init__(self, state: RecordSet, partition_id: Optional[int] = None) -> None:
+        self.state = state
+        self.partition_id = partition_id

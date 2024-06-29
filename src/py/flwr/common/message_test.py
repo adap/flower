@@ -174,7 +174,6 @@ def test_create_reply(
                 "group_id": "group_xyz",
                 "ttl": 10.0,
                 "message_type": "request",
-                "partition_id": None,
             },
         ),
         (Error, {"code": 1, "reason": "reason_098"}),
