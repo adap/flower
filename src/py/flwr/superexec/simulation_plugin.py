@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Simulation engine executor plugin."""
+"""Simulation engine executor."""
 
 
 import os
@@ -28,7 +28,7 @@ from .executor import Executor, RunTracker
 
 
 class SimulationEngine(Executor):
-    """Simulation engine executor plugin."""
+    """Simulation engine executor."""
 
     def start_run(self, fab_file: bytes, ttl: Optional[float] = None) -> RunTracker:
         """Start run using the Flower Simulation Engine."""
