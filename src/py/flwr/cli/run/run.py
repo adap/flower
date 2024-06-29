@@ -54,14 +54,14 @@ def run(
             case_sensitive=False, help="Use this flag to use the new SuperExec API"
         ),
     ] = False,
-    app_path: Annotated[
+    directory: Annotated[
         Optional[Path],
-        typer.Option(case_sensitive=False, help="Path of the FAB to run"),
+        typer.Option(help="Path of the Flower project to run"),
     ] = None,
 ) -> None:
     """Run Flower project."""
     if use_superexec:
-        _start_superexec_run(app_path)
+        _start_superexec_run(directory)
         return
 
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
@@ -115,7 +115,7 @@ def run(
         )
 
 
-def _start_superexec_run(app_path: Optional[Path]) -> None:
+def _start_superexec_run(directory: Optional[Path]) -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
@@ -130,7 +130,7 @@ def _start_superexec_run(app_path: Optional[Path]) -> None:
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    fab_path = build(app_path)
+    fab_path = build(directory)
 
     req = StartRunRequest(fab_file=Path(fab_path).read_bytes())
     res = stub.StartRun(req)

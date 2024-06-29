@@ -31,7 +31,7 @@ from .utils import get_sha256_hash, is_valid_project_name
 def build(
     directory: Annotated[
         Optional[Path],
-        typer.Option(help="The Flower project directory to bundle into a FAB"),
+        typer.Option(help="Path of the Flower project to bundle into a FAB"),
     ] = None,
 ) -> str:
     """Build a Flower project into a Flower App Bundle (FAB).
