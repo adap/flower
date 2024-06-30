@@ -20,7 +20,7 @@ from logging import ERROR
 from typing import Optional
 
 from flwr import common
-from flwr.client import ClientFn
+from flwr.client import ClientFnExt
 from flwr.client.client_app import ClientApp
 from flwr.client.node_state import NodeState
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
@@ -45,7 +45,7 @@ class RayActorClientProxy(ClientProxy):
 
     def __init__(
         self,
-        client_fn: ClientFn,
+        client_fn: ClientFnExt,
         node_id: int,
         partition_id: int,
         actor_pool: VirtualClientEngineActorPool,

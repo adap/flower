@@ -17,7 +17,7 @@
 
 from math import pi
 from random import shuffle
-from typing import Dict, List, Tuple, Type
+from typing import Dict, List, Optional, Tuple, Type
 
 import ray
 
@@ -51,12 +51,12 @@ from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
-    def __init__(self, cid: str) -> None:
-        self.cid = int(cid)
+    def __init__(self, node_id: int) -> None:
+        self.node_id = node_id
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
-        result = int(self.cid) * pi
+        result = self.node_id * pi
 
         # store something in context
         self.context.state.configs_records["result"] = ConfigsRecord(
@@ -65,9 +65,13 @@ class DummyClient(NumPyClient):
         return {"result": result}
 
 
-def get_dummy_client(cid: str) -> Client:
+def get_dummy_client(
+    node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
+) -> Client:
     """Return a DummyClient converted to Client type."""
-    return DummyClient(cid).to_client()
+    if partition_id is None:
+        raise ValueError("`partition_id` is not set.")
+    return DummyClient(partition_id).to_client()
 
 
 def prep(
