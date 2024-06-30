@@ -65,12 +65,18 @@ def _read_metadata(example):
     labels = (
         re.search(r"^labels:\s*\[(.+?)\]$", metadata, re.MULTILINE).group(1).strip()
     )
-    dataset = _convert_to_link(
-        re.search(r"^dataset:\s*\[(.+?)\]$", metadata, re.MULTILINE).group(1).strip()
+    dataset = (
+        re.search(r"^dataset:\s*\[(.+?)\]$", metadata, re.DOTALL | re.MULTILINE)
+        .group(1)
+        .strip()
     )
-    framework = _convert_to_link(
-        re.search(r"^framework:\s*\[(.+?)\]$", metadata, re.MULTILINE).group(1).strip()
+    framework = (
+        re.search(r"^framework:\s*\[(.+?)\]$", metadata, re.DOTALL | re.MULTILINE)
+        .group(1)
+        .strip()
     )
+    dataset = _convert_to_link(re.sub(r"\s+", " ", dataset).strip())
+    framework = _convert_to_link(re.sub(r"\s+", " ", framework).strip())
     return title, labels, dataset, framework
 
 

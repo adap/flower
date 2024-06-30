@@ -2,7 +2,8 @@
 title: On-device Federated Finetuning for Speech Classification
 labels: [finetuning, speech, transformers]
 dataset: [SpeechCommands | https://huggingface.co/datasets/google/speech_commands]
-framework: [transformers | https://huggingface.co/docs/transformers/index, whisper | https://huggingface.co/openai/whisper-tiny]
+framework: [transformers | https://huggingface.co/docs/transformers/index, whisper
+      | https://huggingface.co/openai/whisper-tiny]
 ---
 
 # On-device Federated Finetuning for Speech Classification
@@ -113,9 +114,9 @@ print(len(ids))
 An overview of the FL pipeline built with Flower for this example is illustrated above.
 
 1. At the start of a round, the server communicates the classification head to a fraction of the clients. At round #0, the classification head is randomly intialised.
-2. Each client, using a frozen pre-trained Whisper encoder, trains the classification head using its own data samples.
-3. Once on-site training is completed, each client sends back the (now updated) classification head to the Flower server.
-4. The Flower server aggregates (via FedAvg) the classification heads in order to obtain a new _global_ classification head. This head will be shared with clients in the next round.
+1. Each client, using a frozen pre-trained Whisper encoder, trains the classification head using its own data samples.
+1. Once on-site training is completed, each client sends back the (now updated) classification head to the Flower server.
+1. The Flower server aggregates (via FedAvg) the classification heads in order to obtain a new _global_ classification head. This head will be shared with clients in the next round.
 
 Flower supports two ways of doing Federated Learning: simulated and non-simulated FL. The former, managed by the [`VirtualClientEngine`](https://flower.ai/docs/framework/how-to-run-simulations.html), allows you to run large-scale workloads in a system-aware manner, that scales with the resources available on your system (whether it is a laptop, a desktop with a single GPU, or a cluster of GPU servers). The latter is better suited for settings where clients are unique devices (e.g. a server, a smart device, etc). This example shows you how to use both.
 

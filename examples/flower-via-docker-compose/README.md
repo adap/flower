@@ -1,5 +1,5 @@
 ---
-title: Leveraging Flower and Docker for Device Heterogeneity Management in FL 
+title: Leveraging Flower and Docker for Device Heterogeneity Management in FL
 labels: [deployment, vision, tutorial]
 dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
 framework: [Docker | https://www.docker.com/]
@@ -24,7 +24,7 @@ In this example, we tackle device heterogeneity in federated learning, arising f
      - **Cadvisor**: Collects comprehensive metrics from each Docker container.
      - **Prometheus**: Using `prometheus.yaml` for configuration, it scrapes data from Cadvisor at scheduled intervals, serving as a robust time-series database. Users can access the Prometheus UI at `http://localhost:9090` to create and run queries using PromQL, allowing for detailed insight into container performance.
 
-2. **Mitigating Heterogeneity**:
+1. **Mitigating Heterogeneity**:
 
    - In this basic use case, we address device heterogeneity by establishing rules tailored to each container's system capabilities. This involves modifying training parameters, such as batch sizes and learning rates, based on each device's memory capacity and CPU availability. These settings are specified in the `client_configs` array in the `create_docker_compose` script. For example:
 
@@ -97,7 +97,7 @@ Within the script, specify the number of clients (`total_clients`) and resource 
      - Run `docker-compose down` in another terminal if you are in the same directory. This command will stop and remove the containers, networks, and volumes created by `docker-compose up`.
      - Press `Ctrl+C` once in the terminal where `docker-compose up` is running. This will stop the containers but won't remove them or the networks and volumes they use.
 
-2. **Services Startup**:
+1. **Services Startup**:
 
    - Several services will automatically launch as defined in your `docker-compose.yml` file:
 
@@ -130,7 +130,7 @@ Within the script, specify the number of clients (`total_clients`) and resource 
      e9f4c9644a1c   cadvisor     7.31%     32.14MiB / 500MiB     6.43%     139kB / 6.66MB    500kB / 0B        18
      ```
 
-3. **Automated Grafana Configuration**:
+1. **Automated Grafana Configuration**:
 
    - Grafana is configured to load pre-defined data sources and dashboards for immediate monitoring, facilitated by provisioning files. The provisioning files include `prometheus-datasource.yml` for data sources, located in the `./config/provisioning/datasources` directory, and `dashboard_index.json` for dashboards, in the `./config/provisioning/dashboards` directory. The `grafana.ini` file is also tailored to enhance user experience:
      - **Admin Credentials**: We provide default admin credentials in the `grafana.ini` configuration, which simplifies access by eliminating the need for users to go through the initial login process.
@@ -138,7 +138,7 @@ Within the script, specify the number of clients (`total_clients`) and resource 
 
    These files and settings are directly mounted into the Grafana container via Docker Compose volume mappings. This setup guarantees that upon startup, Grafana is pre-configured for monitoring, requiring no additional manual setup.
 
-4. **Begin Training Process**:
+1. **Begin Training Process**:
 
    - The federated learning training automatically begins once all client containers are successfully connected to the Flower server. This synchronizes the learning process across all participating clients.
 
@@ -205,7 +205,7 @@ In addition to the standard metrics captured by cAdvisor, we have implemented a 
 
    - We began by installing the `prometheus_client` library in our Python environment, enabling us to define and expose custom metrics that Prometheus can scrape.
 
-2. **Defining Metrics in Server Script**:
+1. **Defining Metrics in Server Script**:
 
    - Within our `server.py` script, we have established two key Prometheus Gauge metrics, specifically tailored for monitoring our federated learning model: `model_accuracy` and `model_loss`. These custom gauges are instrumental in capturing the most recent values of the model's accuracy and loss, which are essential metrics for evaluating the model's performance. The gauges are defined as follows:
 
@@ -216,7 +216,7 @@ In addition to the standard metrics captured by cAdvisor, we have implemented a 
      loss_gauge = Gauge('model_loss', 'Current loss of the global model')
      ```
 
-3. **Exposing Metrics via HTTP Endpoint**:
+1. **Exposing Metrics via HTTP Endpoint**:
 
    - We leveraged the `start_http_server` function from the `prometheus_client` library to launch an HTTP server on port 8000. This server provides the `/metrics` endpoint, where the custom metrics are accessible for Prometheus scraping. The function is called at the end of the `main` method in `server.py`:
 
@@ -224,7 +224,7 @@ In addition to the standard metrics captured by cAdvisor, we have implemented a 
      start_http_server(8000)
      ```
 
-4. **Updating Metrics Recording Strategy**:
+1. **Updating Metrics Recording Strategy**:
 
    - The core of our metrics tracking lies in the `strategy.py` file, particularly within the `aggregate_evaluate` method. This method is crucial as it's where the federated learning model's accuracy and loss values are computed after each round of training with the aggregated data from all clients.
 
@@ -233,7 +233,7 @@ In addition to the standard metrics captured by cAdvisor, we have implemented a 
         self.loss_gauge.set(loss_aggregated)
      ```
 
-5. **Configuring Prometheus Scraping**:
+1. **Configuring Prometheus Scraping**:
 
    - In the `prometheus.yml` file, under `scrape_configs`, we configured a new job to scrape the custom metrics from the HTTP server. This setup includes the job's name, the scraping interval, and the target server's URL.
 
