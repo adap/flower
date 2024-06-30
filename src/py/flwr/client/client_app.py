@@ -34,11 +34,11 @@ def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFn
 
     client_fn_args = inspect.signature(client_fn).parameters
 
-    if "cid" in client_fn_args and client_fn_args["cid"].annotation == str:
+    if not all(key in client_fn_args for key in ["node_id", "partition_id"]):
         warn_deprecated_feature(
-            "Passing a `client_fn` with signature `def client_fn(cid: str)` "
-            "is deprecated. Use instead signature `def client_fn(node_id: int, "
-            "partition_id: Optional[int])`.",
+            "`client_fn` now expects a signature `def client_fn(node_id: int, "
+            "partition_id: Optional[int])`.\nYou provided `client_fn` with signature: "
+            f"{dict(client_fn_args.items())}"
         )
 
         # Wrap depcreated client_fn inside a function with the expected signature
