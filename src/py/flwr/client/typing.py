@@ -22,7 +22,8 @@ from flwr.common import Context, Message
 from .client import Client as Client
 
 # Compatibility
-ClientFn = Callable[[int, Optional[int]], Client]
+ClientFn = Callable[[str], Client]
+ClientFnExt = Callable[[int, Optional[int]], Client]
 
 ClientAppCallable = Callable[[Message, Context], Message]
 Mod = Callable[[Message, Context, ClientAppCallable], Message]

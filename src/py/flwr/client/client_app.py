@@ -15,17 +15,41 @@
 """Flower ClientApp."""
 
 
+import inspect
 from typing import Callable, List, Optional
 
+from flwr.client.client import Client
 from flwr.client.message_handler.message_handler import (
     handle_legacy_message_from_msgtype,
 )
 from flwr.client.mod.utils import make_ffn
-from flwr.client.typing import ClientFn, Mod
+from flwr.client.typing import ClientFnExt, Mod
 from flwr.common import Context, Message, MessageType
-from flwr.common.logger import warn_preview_feature
+from flwr.common.logger import warn_deprecated_feature, warn_preview_feature
 
 from .typing import ClientAppCallable
+
+
+def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFnExt:
+
+    client_fn_args = inspect.signature(client_fn).parameters
+
+    if "cid" in client_fn_args and client_fn_args["cid"].annotation == str:
+        warn_deprecated_feature(
+            "Passing a `client_fn` with signature `def client_fn(cid: str)` "
+            "is deprecated. Use instead signature `def client_fn(node_id: int, "
+            "partition_id: Optional[int])`.",
+        )
+
+        # Wrap depcreated client_fn inside a function with the expected signature
+        def adaptor_fn(
+            node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
+        ) -> Client:
+            return client_fn(str(partition_id))  # type: ignore
+
+        return adaptor_fn
+
+    return client_fn
 
 
 class ClientAppException(Exception):
@@ -48,7 +72,7 @@ class ClientApp:
     >>> class FlowerClient(NumPyClient):
     >>>     # ...
     >>>
-    >>> def client_fn(cid):
+    >>> def client_fn(node_id: int, partition_id: Optional[int]):
     >>>    return FlowerClient().to_client()
     >>>
     >>> app = ClientApp(client_fn)
@@ -65,7 +89,7 @@ class ClientApp:
 
     def __init__(
         self,
-        client_fn: Optional[ClientFn] = None,  # Only for backward compatibility
+        client_fn: Optional[ClientFnExt] = None,  # Only for backward compatibility
         mods: Optional[List[Mod]] = None,
     ) -> None:
         self._mods: List[Mod] = mods if mods is not None else []
@@ -73,6 +97,8 @@ class ClientApp:
         # Create wrapper function for `handle`
         self._call: Optional[ClientAppCallable] = None
         if client_fn is not None:
+
+            client_fn = _inspect_maybe_adapt_client_fn_signature(client_fn)
 
             def ffn(
                 message: Message,
