@@ -31,7 +31,6 @@ from .typing import ClientAppCallable
 
 
 def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFnExt:
-
     client_fn_args = inspect.signature(client_fn).parameters
 
     if not all(key in client_fn_args for key in ["node_id", "partition_id"]):
