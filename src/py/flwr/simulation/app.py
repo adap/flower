@@ -93,7 +93,7 @@ def start_simulation(
     Parameters
     ----------
     client_fn : ClientFnExt
-        A function creating client instances. The function must has signature
+        A function creating Client instances. The function must has signature
         `client_fn(node_id: int, partition_id: Optional[int]). It should return
         a single client instance of type Client. Note that the created client
         instances are ephemeral and will often be destroyed after a single method
