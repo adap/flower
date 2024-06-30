@@ -26,7 +26,7 @@ from grpc import RpcError
 
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.client.typing import ClientFn, ClientFnExt
+from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
