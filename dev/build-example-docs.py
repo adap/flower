@@ -79,21 +79,36 @@ def _convert_to_link(search_result):
 def _read_metadata(example):
     with open(os.path.join(example, "README.md")) as f:
         content = f.read()
-    metadata = re.search(r"^---(.*?)^---", content, re.DOTALL | re.MULTILINE).group(1)
-    title = re.search(r"^title:\s*(.+)$", metadata, re.MULTILINE).group(1).strip()
-    labels = (
-        re.search(r"^labels:\s*\[(.+?)\]$", metadata, re.MULTILINE).group(1).strip()
+
+    metadata_match = re.search(r"^---(.*?)^---", content, re.DOTALL | re.MULTILINE)
+    if not metadata_match:
+        raise ValueError("Metadata block not found")
+    metadata = metadata_match.group(1)
+
+    title_match = re.search(r"^title:\s*(.+)$", metadata, re.MULTILINE)
+    if not title_match:
+        raise ValueError("Title not found in metadata")
+    title = title_match.group(1).strip()
+
+    labels_match = re.search(r"^labels:\s*\[(.+?)\]$", metadata, re.MULTILINE)
+    if not labels_match:
+        raise ValueError("Labels not found in metadata")
+    labels = labels_match.group(1).strip()
+
+    dataset_match = re.search(
+        r"^dataset:\s*\[(.+?)\]$", metadata, re.DOTALL | re.MULTILINE
     )
-    dataset = (
-        re.search(r"^dataset:\s*\[(.+?)\]$", metadata, re.DOTALL | re.MULTILINE)
-        .group(1)
-        .strip()
+    if not dataset_match:
+        raise ValueError("Dataset not found in metadata")
+    dataset = dataset_match.group(1).strip()
+
+    framework_match = re.search(
+        r"^framework:\s*\[(.+?)\]$", metadata, re.DOTALL | re.MULTILINE
     )
-    framework = (
-        re.search(r"^framework:\s*\[(.+?)\]$", metadata, re.DOTALL | re.MULTILINE)
-        .group(1)
-        .strip()
-    )
+    if not framework_match:
+        raise ValueError("Framework not found in metadata")
+    framework = framework_match.group(1).strip()
+
     dataset = _convert_to_link(re.sub(r"\s+", " ", dataset).strip())
     framework = _convert_to_link(re.sub(r"\s+", " ", framework).strip())
     return title, labels, dataset, framework
