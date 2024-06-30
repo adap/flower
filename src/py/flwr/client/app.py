@@ -51,7 +51,7 @@ from .numpy_client import NumPyClient
 
 
 def _check_actionable_client(
-    client: Optional[Client], client_fn: Optional[Union[ClientFn, ClientFnExt]]
+    client: Optional[Client], client_fn: Optional[ClientFnExt]
 ) -> None:
     if client_fn is None and client is None:
         raise ValueError(
