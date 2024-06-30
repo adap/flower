@@ -55,7 +55,7 @@ class DummyClient(NumPyClient):
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
-        result = int(self.node_id) * pi
+        result = self.node_id * pi
 
         # store something in context
         self.context.state.configs_records["result"] = ConfigsRecord(
