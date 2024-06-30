@@ -64,31 +64,6 @@ def _check_actionable_client(
         )
 
 
-def _inspect_maybe_adapt_client_fn_signature(
-    client_fn: Union[ClientFn, ClientFnExt]
-) -> ClientFnExt:
-
-    if "cid" in client_fn.__annotations__:
-        warn_deprecated_feature(
-            "Passing a `client_fn` with signature `def client_fn(cid: str)` "
-            "is deprecated. Use instead signature `def client_fn(node_id: int, "
-            "partition_id: Optional[int])`.",
-        )
-
-        # Wrap depcreated client_fn inside a function with the expected signature
-        def adaptor_fn(
-            node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
-        ) -> Client:
-            return client_fn(str(partition_id))  # type: ignore
-
-    else:
-
-        def adaptor_fn(node_id: int, partition_id: Optional[int]) -> Client:
-            return client_fn(node_id, partition_id)  # type: ignore
-
-    return adaptor_fn
-
-
 # pylint: disable=import-outside-toplevel
 # pylint: disable=too-many-branches
 # pylint: disable=too-many-locals
@@ -97,7 +72,7 @@ def _inspect_maybe_adapt_client_fn_signature(
 def start_client(
     *,
     server_address: str,
-    client_fn: Optional[Union[ClientFn, ClientFnExt]] = None,
+    client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
@@ -117,7 +92,7 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    client_fn : Union[ClientFn,ClientFnExt]
+    client_fn : Union[ClientFnExt]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
         An implementation of the abstract base
@@ -205,7 +180,7 @@ def _start_client_internal(
     *,
     server_address: str,
     load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
-    client_fn: Optional[Union[ClientFn, ClientFnExt]] = None,
+    client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
@@ -228,7 +203,7 @@ def _start_client_internal(
         would be `"[::]:8080"`.
     load_client_app_fn : Optional[Callable[[], ClientApp]] (default: None)
         A function that can be used to load a `ClientApp` instance.
-    client_fn : Optional[Union[ClientFn,ClientFnExt]]
+    client_fn : Optional[ClientFnExt]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
         An implementation of the abstract base
@@ -283,8 +258,6 @@ def _start_client_internal(
                 return client  # Always return the same instance
 
             client_fn = single_client_factory
-        else:
-            client_fn = _inspect_maybe_adapt_client_fn_signature(client_fn)
 
         def _load_client_app(_1: str, _2: str) -> ClientApp:
             return ClientApp(client_fn=client_fn)

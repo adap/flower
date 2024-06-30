@@ -39,7 +39,7 @@ from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.object_ref import load_app, validate
 
-from ..app import _inspect_maybe_adapt_client_fn_signature, _start_client_internal
+from ..app import _start_client_internal
 
 ADDRESS_FLEET_API_GRPC_RERE = "0.0.0.0:9092"
 
@@ -242,12 +242,6 @@ def _get_load_client_app_fn(
             raise LoadClientAppError(
                 f"Attribute {client_app_ref} is not of type {ClientApp}",
             ) from None
-
-        # Inspect client_fn signature and adapt to new format if needed.
-        if client_app.client_fn is not None:
-            client_app.client_fn = _inspect_maybe_adapt_client_fn_signature(
-                client_app.client_fn
-            )
 
         return client_app
 
