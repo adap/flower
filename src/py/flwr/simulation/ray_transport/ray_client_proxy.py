@@ -20,7 +20,7 @@ from logging import ERROR
 from typing import Optional
 
 from flwr import common
-from flwr.client import ClientFn
+from flwr.client import ClientFnExt
 from flwr.client.client_app import ClientApp
 from flwr.client.node_state import NodeState
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
@@ -44,7 +44,7 @@ class RayActorClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
     def __init__(
-        self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActorPool
+        self, client_fn: ClientFnExt, cid: str, actor_pool: VirtualClientEngineActorPool
     ):
         super().__init__(cid)
 
