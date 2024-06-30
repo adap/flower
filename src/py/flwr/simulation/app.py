@@ -93,11 +93,11 @@ def start_simulation(
     Parameters
     ----------
     client_fn : ClientFnExt
-        A function creating Client instances. The function must has signature
+        A function creating Client instances. The function must have the signature
         `client_fn(node_id: int, partition_id: Optional[int]). It should return
         a single client instance of type Client. Note that the created client
         instances are ephemeral and will often be destroyed after a single method
-        invocation. Since clientinstances are not long-lived, they should not attempt
+        invocation. Since client instances are not long-lived, they should not attempt
         to carry state over method invocations. Any state required by the instance
         (model, dataset, hyperparameters, ...) should be (re-)created in either the
         call to `client_fn` or the call to any of the client methods (e.g., load
