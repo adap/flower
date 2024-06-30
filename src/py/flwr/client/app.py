@@ -26,7 +26,7 @@ from grpc import RpcError
 
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.client.typing import ClientFn
+from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
@@ -51,7 +51,7 @@ from .numpy_client import NumPyClient
 
 
 def _check_actionable_client(
-    client: Optional[Client], client_fn: Optional[ClientFn]
+    client: Optional[Client], client_fn: Optional[ClientFnExt]
 ) -> None:
     if client_fn is None and client is None:
         raise ValueError(
@@ -72,7 +72,7 @@ def _check_actionable_client(
 def start_client(
     *,
     server_address: str,
-    client_fn: Optional[ClientFn] = None,
+    client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
@@ -92,7 +92,7 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    client_fn : Optional[ClientFn]
+    client_fn : Optional[ClientFnExt]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
         An implementation of the abstract base
@@ -136,7 +136,7 @@ def start_client(
 
     Starting an SSL-enabled gRPC client using system certificates:
 
-    >>> def client_fn(cid: str):
+    >>> def client_fn(node_id: int, partition_id: Optional[int]):
     >>>     return FlowerClient()
     >>>
     >>> start_client(
@@ -180,7 +180,7 @@ def _start_client_internal(
     *,
     server_address: str,
     load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
-    client_fn: Optional[ClientFn] = None,
+    client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
@@ -203,7 +203,7 @@ def _start_client_internal(
         would be `"[::]:8080"`.
     load_client_app_fn : Optional[Callable[[], ClientApp]] (default: None)
         A function that can be used to load a `ClientApp` instance.
-    client_fn : Optional[ClientFn]
+    client_fn : Optional[ClientFnExt]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
         An implementation of the abstract base
@@ -248,7 +248,8 @@ def _start_client_internal(
         if client_fn is None:
             # Wrap `Client` instance in `client_fn`
             def single_client_factory(
-                cid: str,  # pylint: disable=unused-argument
+                node_id: int,  # pylint: disable=unused-argument
+                partition_id: Optional[int],  # pylint: disable=unused-argument
             ) -> Client:
                 if client is None:  # Added this to keep mypy happy
                     raise ValueError(
