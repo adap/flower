@@ -267,8 +267,6 @@ def start_simulation(
         partition_ids, nodes_ids=nodes_ids
     )
 
-    print(nodes_mapping)
-
     # Default arguments for Ray initialization
     if not ray_init_args:
         ray_init_args = {
