@@ -1,3 +1,19 @@
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+"""Build the Flower Example docs."""
+
 import os
 import shutil
 import re
@@ -34,7 +50,10 @@ can use Flower in combination with other existing frameworks or technologies.
 
 """
 
-table_headers = "\n.. list-table::\n   :widths: 50 15 15 15\n   :header-rows: 1\n\n   * - Title\n     - Framework\n     - Dataset\n     - Tags\n\n"
+table_headers = (
+    "\n.. list-table::\n   :widths: 50 15 15 15\n   "
+    ":header-rows: 1\n\n   * - Title\n     - Framework\n     - Dataset\n     - Tags\n\n"
+)
 
 categories = {
     "quickstart": {"table": table_headers, "list": ""},
@@ -83,7 +102,10 @@ def _read_metadata(example):
 def _add_table_entry(example, label, table_var):
     title, labels, dataset, framework = _read_metadata(example)
     example_name = Path(example).stem
-    table_entry = f"   * - `{title} <{example_name}.html>`_ \n     - {framework} \n     - {dataset} \n     - {labels}\n\n"
+    table_entry = (
+        f"   * - `{title} <{example_name}.html>`_ \n     "
+        f"- {framework} \n     - {dataset} \n     - {labels}\n\n"
+    )
     if label in labels:
         categories[table_var]["table"] += table_entry
         categories[table_var]["list"] += f"  {example_name}\n"
