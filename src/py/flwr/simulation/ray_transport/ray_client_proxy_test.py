@@ -50,12 +50,12 @@ from flwr.simulation.ray_transport.ray_client_proxy import RayActorClientProxy
 class DummyClient(NumPyClient):
     """A dummy NumPyClient for tests."""
 
-    def __init__(self, cid: int) -> None:
-        self.cid = cid
+    def __init__(self, node_id: int) -> None:
+        self.node_id = node_id
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return properties by doing a simple calculation."""
-        result = int(self.cid) * pi
+        result = int(self.node_id) * pi
 
         # store something in context
         self.context.state.configs_records["result"] = ConfigsRecord(
