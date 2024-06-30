@@ -96,14 +96,14 @@ def _read_metadata(example):
     labels = labels_match.group(1).strip()
 
     dataset_match = re.search(
-        r"^dataset:\s*\[(.+?)\]$", metadata, re.DOTALL | re.MULTILINE
+        r"^dataset:\s*\[(.*?)\]$", metadata, re.DOTALL | re.MULTILINE
     )
     if not dataset_match:
         raise ValueError("Dataset not found in metadata")
     dataset = dataset_match.group(1).strip()
 
     framework_match = re.search(
-        r"^framework:\s*\[(.+?)\]$", metadata, re.DOTALL | re.MULTILINE
+        r"^framework:\s*\[(.*?|)\]$", metadata, re.DOTALL | re.MULTILINE
     )
     if not framework_match:
         raise ValueError("Framework not found in metadata")

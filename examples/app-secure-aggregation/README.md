@@ -1,7 +1,7 @@
 ---
 title: Example Flower App with Secure Aggregation
 labels: [basic, vision, fds]
-dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
+dataset: []
 framework: [numpy | https://numpy.org/]
 ---
 
