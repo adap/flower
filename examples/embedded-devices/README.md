@@ -60,7 +60,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
    - Click on the gear icon on the bottom right of the `Raspberry Pi Imager` window (the icon only appears after choosing your OS image). Here you can very conveniently set the username/password to access your device over ssh. You'll see I use as username `piubuntu` (you can choose something different) It's also the ideal place to select your WiFi network and add the password (this is of course not needed if you plan to connect the Raspberry Pi via ethernet). Click "save" when you are done.
    - Finally, click on `WRITE` to start flashing Ubuntu onto the uSD card.
 
-1. **Connecting to your Rapsberry Pi**
+2. **Connecting to your Rapsberry Pi**
 
    After `ssh`-ing into your Raspberry Pi for the first time, make sure your OS is up-to-date.
 
@@ -68,7 +68,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
    - And then: `sudo apt upgrade -y` to apply updates (this might take a few minutes on the RPi Zero)
    - Then reboot your RPi with `sudo reboot`. Then ssh into it again.
 
-1. **Preparations for your Flower experiments**
+3. **Preparations for your Flower experiments**
 
    - Install `pip`. In the terminal type: `sudo apt install python3-pip -y`
    - Now clone this directory. You just need to execute the `git clone` command shown at the top of this README.md on your device.
@@ -92,7 +92,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
 
    Please note using swap as if it was RAM comes with a large penalty in terms of data movement.
 
-1. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
+4. Run your Flower experiments following the steps in the [Running FL with Flower](https://github.com/adap/flower/tree/main/examples/embedded-devices#running-fl-training-with-flower) section.
 
 ## Setting up a Jetson Xavier-NX
 
@@ -104,9 +104,9 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
 
    - Extract the image (~18GB and named `sd-blob.img`) and flash it onto the uSD card using [balenaEtcher](https://www.balena.io/etcher/) (or equivalent).
 
-1. **Follow [the instructions](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit) to set up the device.** The first time you boot your Xavier-NX you should plug it into a display to complete the installation process. After that, a display is no longer needed for this example but you could still use it instead of connecting to your device over ssh.
+2. **Follow [the instructions](https://developer.nvidia.com/embedded/learn/get-started-jetson-xavier-nx-devkit) to set up the device.** The first time you boot your Xavier-NX you should plug it into a display to complete the installation process. After that, a display is no longer needed for this example but you could still use it instead of connecting to your device over ssh.
 
-1. **Setup Docker**: Docker comes pre-installed with the Ubuntu image provided by NVIDIA. But for convenience, we will create a new user group and add our user to it (with the idea of not having to use `sudo` for every command involving docker (e.g. `docker run`, `docker ps`, etc)). More details about what this entails can be found in the [Docker documentation](https://docs.docker.com/engine/install/linux-postinstall/). You can achieve this by doing:
+3. **Setup Docker**: Docker comes pre-installed with the Ubuntu image provided by NVIDIA. But for convenience, we will create a new user group and add our user to it (with the idea of not having to use `sudo` for every command involving docker (e.g. `docker run`, `docker ps`, etc)). More details about what this entails can be found in the [Docker documentation](https://docs.docker.com/engine/install/linux-postinstall/). You can achieve this by doing:
 
    ```bash
    sudo usermod -aG docker $USER
@@ -114,7 +114,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
    newgrp docker
    ```
 
-1. **Update OS and install utilities.** Then, install some useful utilities:
+4. **Update OS and install utilities.** Then, install some useful utilities:
 
    ```bash
    sudo apt update && sudo apt upgrade -y
@@ -148,7 +148,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
      echo set -g mouse on > ~/.tmux.conf
      ```
 
-1. **Power modes**. The Jetson devices can operate at different power modes, each making use of more or less CPU cores clocked at different frequencies. The right power mode might very much depend on the application and scenario. When power consumption is not a limiting factor, we could use the highest 15W mode using all 6 CPU cores. On the other hand, if the devices are battery-powered we might want to make use of a low-power mode using 10W and 2 CPU cores. All the details regarding the different power modes of a Jetson Xavier-NX can be found [here](https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%2520Linux%2520Driver%2520Package%2520Development%2520Guide%2Fpower_management_jetson_xavier.html%23wwpID0E0NO0HA). For this demo, we'll be setting the device to high-performance mode:
+5. **Power modes**. The Jetson devices can operate at different power modes, each making use of more or less CPU cores clocked at different frequencies. The right power mode might very much depend on the application and scenario. When power consumption is not a limiting factor, we could use the highest 15W mode using all 6 CPU cores. On the other hand, if the devices are battery-powered we might want to make use of a low-power mode using 10W and 2 CPU cores. All the details regarding the different power modes of a Jetson Xavier-NX can be found [here](https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%2520Linux%2520Driver%2520Package%2520Development%2520Guide%2Fpower_management_jetson_xavier.html%23wwpID0E0NO0HA). For this demo, we'll be setting the device to high-performance mode:
 
    ```bash
    sudo /usr/sbin/nvpmodel -m 2 # 15W with 6cpus @ 1.4GHz
@@ -156,7 +156,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
 
    Jetson Stats (that you launch via `jtop`) also allows you to see and set the power mode on your device. Navigate to the `CTRL` panel and click on one of the `NVM modes` available.
 
-1. **Build base client image**. Before running a Flower client, we need to install `Flower` and other ML dependencies (i.e. Pytorch or Tensorflow). Instead of installing this manually via `pip3 install ...`, let's use the pre-built Docker images provided by NVIDIA. In this way, we can be confident that the ML infrastructure is optimized for these devices. Build your Flower client image with:
+6. **Build base client image**. Before running a Flower client, we need to install `Flower` and other ML dependencies (i.e. Pytorch or Tensorflow). Instead of installing this manually via `pip3 install ...`, let's use the pre-built Docker images provided by NVIDIA. In this way, we can be confident that the ML infrastructure is optimized for these devices. Build your Flower client image with:
 
    ```bash
    # On your Jetson's terminal run
@@ -172,7 +172,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
    flower_client   latest    87e935a8ee37   18 seconds ago   12.6GB
    ```
 
-1. **Access your client image**. Before launching the Flower client, we need to run the image we just created. To keep things simpler, let's run the image in interactive mode (`-it`), mount the entire repository you cloned inside the `/client` directory of your container (`` -v `pwd`:/client ``), and use the NVIDIA runtime so we can access the GPU `--runtime nvidia`:
+7. **Access your client image**. Before launching the Flower client, we need to run the image we just created. To keep things simpler, let's run the image in interactive mode (`-it`), mount the entire repository you cloned inside the `/client` directory of your container (`` -v `pwd`:/client ``), and use the NVIDIA runtime so we can access the GPU `--runtime nvidia`:
 
    ```bash
    # first ensure you are in the `embedded-devices` directory. If you are not, use the `cd` command to navigate to it
@@ -183,7 +183,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
    root@6e6ce826b8bb:/client# <here you can run python commands or any command as usual>
    ```
 
-1. **Run your FL experiments with Flower**. Follow the steps in the section below.
+8. **Run your FL experiments with Flower**. Follow the steps in the section below.
 
 ## Running Embedded FL with Flower
 

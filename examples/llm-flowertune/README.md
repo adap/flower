@@ -127,7 +127,7 @@ Please follow the steps below:
    ```bash
    flower-superlink --insecure
    ```
-1. Start the long-running Flower client (SuperNode)
+2. Start the long-running Flower client (SuperNode)
    ```bash
    # In a new terminal window, start the first long-running Flower client:
    flower-client-app app:client1 --insecure
@@ -136,7 +136,7 @@ Please follow the steps below:
    # In another new terminal window, start the second long-running Flower client:
    flower-client-app app:client2 --insecure
    ```
-1. Run the Flower App
+3. Run the Flower App
    ```bash
    # With both the long-running server (SuperLink) and two clients (SuperNode) up and running,
    # we can now run the actual Flower App:
