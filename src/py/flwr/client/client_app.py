@@ -15,25 +15,26 @@
 """Flower ClientApp."""
 
 
-from typing import Callable, List, Optional, Union
+import inspect
+from typing import Callable, List, Optional
 
 from flwr.client.client import Client
 from flwr.client.message_handler.message_handler import (
     handle_legacy_message_from_msgtype,
 )
 from flwr.client.mod.utils import make_ffn
-from flwr.client.typing import ClientFn, ClientFnExt, Mod
+from flwr.client.typing import ClientFnExt, Mod
 from flwr.common import Context, Message, MessageType
 from flwr.common.logger import warn_deprecated_feature, warn_preview_feature
 
 from .typing import ClientAppCallable
 
 
-def _inspect_maybe_adapt_client_fn_signature(
-    client_fn: Union[ClientFn, ClientFnExt]
-) -> ClientFnExt:
+def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFnExt:
 
-    if "cid" in client_fn.__annotations__:
+    client_fn_args = inspect.signature(client_fn).parameters
+
+    if "cid" in client_fn_args and client_fn_args["cid"].annotation == str:
         warn_deprecated_feature(
             "Passing a `client_fn` with signature `def client_fn(cid: str)` "
             "is deprecated. Use instead signature `def client_fn(node_id: int, "
@@ -46,12 +47,9 @@ def _inspect_maybe_adapt_client_fn_signature(
         ) -> Client:
             return client_fn(str(partition_id))  # type: ignore
 
-    else:
+        return adaptor_fn
 
-        def adaptor_fn(node_id: int, partition_id: Optional[int]) -> Client:
-            return client_fn(node_id, partition_id)  # type: ignore
-
-    return adaptor_fn
+    return client_fn
 
 
 class ClientAppException(Exception):
