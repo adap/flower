@@ -21,7 +21,7 @@ from flwr.client.message_handler.message_handler import (
     handle_legacy_message_from_msgtype,
 )
 from flwr.client.mod.utils import make_ffn
-from flwr.client.typing import ClientFn, Mod
+from flwr.client.typing import ClientFnExt, Mod
 from flwr.common import Context, Message, MessageType
 from flwr.common.logger import warn_preview_feature
 
@@ -65,36 +65,43 @@ class ClientApp:
 
     def __init__(
         self,
-        client_fn: Optional[ClientFn] = None,  # Only for backward compatibility
+        client_fn: Optional[ClientFnExt] = None,  # Only for backward compatibility
         mods: Optional[List[Mod]] = None,
     ) -> None:
         self._mods: List[Mod] = mods if mods is not None else []
 
         # Create wrapper function for `handle`
         self._call: Optional[ClientAppCallable] = None
-        if client_fn is not None:
-
-            def ffn(
-                message: Message,
-                context: Context,
-            ) -> Message:  # pylint: disable=invalid-name
-                out_message = handle_legacy_message_from_msgtype(
-                    client_fn=client_fn, message=message, context=context
-                )
-                return out_message
-
-            # Wrap mods around the wrapped handle function
-            self._call = make_ffn(ffn, mods if mods is not None else [])
+        self.client_fn = client_fn
 
         # Step functions
         self._train: Optional[ClientAppCallable] = None
         self._evaluate: Optional[ClientAppCallable] = None
         self._query: Optional[ClientAppCallable] = None
 
+    def _prep_call(self) -> ClientAppCallable:
+        """Prepare for client_fn-based execution."""
+
+        def ffn(
+            message: Message,
+            context: Context,
+        ) -> Message:  # pylint: disable=invalid-name
+            out_message = handle_legacy_message_from_msgtype(
+                client_fn=self.client_fn,  # type: ignore
+                message=message,
+                context=context,
+            )
+            return out_message
+
+        # Wrap mods around the wrapped handle function
+        return make_ffn(ffn, self._mods)
+
     def __call__(self, message: Message, context: Context) -> Message:
         """Execute `ClientApp`."""
         # Execute message using `client_fn`
-        if self._call:
+        if self.client_fn is not None:
+            if self._call is None:
+                self._call = self._prep_call()
             return self._call(message, context)
 
         # Execute message using a new

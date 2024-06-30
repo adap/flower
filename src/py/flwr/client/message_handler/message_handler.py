@@ -14,7 +14,7 @@
 # ==============================================================================
 """Client-side message handler."""
 
-from logging import DEBUG, WARN
+from logging import WARN
 from typing import Optional, Tuple, cast
 
 from flwr.client.client import (
@@ -24,7 +24,7 @@ from flwr.client.client import (
     maybe_call_get_properties,
 )
 from flwr.client.numpy_client import NumPyClient
-from flwr.client.typing import ClientFn
+from flwr.client.typing import ClientFnExt
 from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet, log
 from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.recordset_compat import (
@@ -89,15 +89,10 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
 
 
 def handle_legacy_message_from_msgtype(
-    client_fn: ClientFn, message: Message, context: Context
+    client_fn: ClientFnExt, message: Message, context: Context
 ) -> Message:
     """Handle legacy message in the inner most mod."""
-    try:
-        client = client_fn(message.metadata.dst_node_id, context.partition_id)
-    except Exception as ex:  # pylint: disable=broad-exception-caught
-        log(DEBUG, ex)
-        # Attempt execution `client_fn` as it was done before flwr 1.10.0
-        client = client_fn(str(context.partition_id))  # type: ignore
+    client = client_fn(message.metadata.dst_node_id, context.partition_id)
 
     # Check if NumPyClient is returend
     if isinstance(client, NumPyClient):
