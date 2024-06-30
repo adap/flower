@@ -29,15 +29,6 @@ from flwr.common.logger import warn_deprecated_feature, warn_preview_feature
 from .typing import ClientAppCallable
 
 
-class ClientAppException(Exception):
-    """Exception raised when an exception is raised while executing a ClientApp."""
-
-    def __init__(self, message: str):
-        ex_name = self.__class__.__name__
-        self.message = f"\nException {ex_name} occurred. Message: " + message
-        super().__init__(self.message)
-
-
 def _inspect_maybe_adapt_client_fn_signature(
     client_fn: Union[ClientFn, ClientFnExt]
 ) -> ClientFnExt:
@@ -63,6 +54,15 @@ def _inspect_maybe_adapt_client_fn_signature(
     return adaptor_fn
 
 
+class ClientAppException(Exception):
+    """Exception raised when an exception is raised while executing a ClientApp."""
+
+    def __init__(self, message: str):
+        ex_name = self.__class__.__name__
+        self.message = f"\nException {ex_name} occurred. Message: " + message
+        super().__init__(self.message)
+
+
 class ClientApp:
     """Flower ClientApp.
 
@@ -74,7 +74,7 @@ class ClientApp:
     >>> class FlowerClient(NumPyClient):
     >>>     # ...
     >>>
-    >>> def client_fn(cid):
+    >>> def client_fn(node_id: int, partition_id: Optional[int]):
     >>>    return FlowerClient().to_client()
     >>>
     >>> app = ClientApp(client_fn)
@@ -98,38 +98,31 @@ class ClientApp:
 
         # Create wrapper function for `handle`
         self._call: Optional[ClientAppCallable] = None
-        self.client_fn = (
-            _inspect_maybe_adapt_client_fn_signature(client_fn) if client_fn else None
-        )
+        if client_fn is not None:
+
+            client_fn = _inspect_maybe_adapt_client_fn_signature(client_fn)
+
+            def ffn(
+                message: Message,
+                context: Context,
+            ) -> Message:  # pylint: disable=invalid-name
+                out_message = handle_legacy_message_from_msgtype(
+                    client_fn=client_fn, message=message, context=context
+                )
+                return out_message
+
+            # Wrap mods around the wrapped handle function
+            self._call = make_ffn(ffn, mods if mods is not None else [])
 
         # Step functions
         self._train: Optional[ClientAppCallable] = None
         self._evaluate: Optional[ClientAppCallable] = None
         self._query: Optional[ClientAppCallable] = None
 
-    def _prep_call(self) -> ClientAppCallable:
-        """Prepare for client_fn-based execution."""
-
-        def ffn(
-            message: Message,
-            context: Context,
-        ) -> Message:  # pylint: disable=invalid-name
-            out_message = handle_legacy_message_from_msgtype(
-                client_fn=self.client_fn,  # type: ignore
-                message=message,
-                context=context,
-            )
-            return out_message
-
-        # Wrap mods around the wrapped handle function
-        return make_ffn(ffn, self._mods)
-
     def __call__(self, message: Message, context: Context) -> Message:
         """Execute `ClientApp`."""
         # Execute message using `client_fn`
-        if self.client_fn is not None:
-            if self._call is None:
-                self._call = self._prep_call()
+        if self._call:
             return self._call(message, context)
 
         # Execute message using a new
