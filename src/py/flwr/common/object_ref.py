@@ -17,8 +17,13 @@
 
 import ast
 import importlib
+import sys
 from importlib.util import find_spec
-from typing import Any, Optional, Tuple, Type
+from logging import WARN
+from pathlib import Path
+from typing import Any, Optional, Tuple, Type, Union
+
+from .logger import log
 
 OBJECT_REF_HELP_STR = """
 \n\nThe object reference string should have the form <module>:<attribute>. Valid
@@ -77,9 +82,10 @@ def validate(
     )
 
 
-def load_app(
+def load_app(  # pylint: disable= too-many-branches
     module_attribute_str: str,
     error_type: Type[Exception],
+    project_dir: Optional[Union[str, Path]] = None,
 ) -> Any:
     """Return the object specified in a module attribute string.
 
@@ -95,11 +101,39 @@ def load_app(
     module_str, _, attributes_str = module_attribute_str.partition(":")
 
     try:
-        module = importlib.import_module(module_str)
-    except ModuleNotFoundError:
+        if module_str not in sys.modules:
+            module = importlib.import_module(module_str)
+        # Hack: `tabnet` does not work with `importlib.reload`
+        elif "tabnet" in sys.modules:
+            log(
+                WARN,
+                "Cannot reload module `%s` from disk due to compatibility issues "
+                "with the `tabnet` library. The module will be loaded from the "
+                "cache instead. If you experience issues, consider restarting "
+                "the application.",
+                module_str,
+            )
+            module = sys.modules[module_str]
+        else:
+            module = sys.modules[module_str]
+            if project_dir is None:
+                path: Optional[str] = getattr(module, "__file__", None)
+                if path is not None:
+                    project_dir = str(Path(path).parent)
+            else:
+                project_dir = str(Path(project_dir).absolute())
+
+            # Reload cached modules in the project directory
+            if project_dir is not None:
+                for m in list(sys.modules.values()):
+                    path = getattr(m, "__file__", None)
+                    if path is not None and path.startswith(project_dir):
+                        importlib.reload(m)
+
+    except ModuleNotFoundError as err:
         raise error_type(
             f"Unable to load module {module_str}{OBJECT_REF_HELP_STR}",
-        ) from None
+        ) from err
 
     # Recursively load attribute
     attribute = module

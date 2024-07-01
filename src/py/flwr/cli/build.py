@@ -31,18 +31,14 @@ from .utils import get_sha256_hash, is_valid_project_name
 def build(
     directory: Annotated[
         Optional[Path],
-        typer.Option(help="The Flower project directory to bundle into a FAB"),
+        typer.Option(help="Path of the Flower project to bundle into a FAB"),
     ] = None,
 ) -> str:
     """Build a Flower project into a Flower App Bundle (FAB).
 
-    You can run `flwr build` without any argument to bundle the current directory:
-
-        `flwr build`
-
-    You can also build a specific directory:
-
-        `flwr build --directory ./projects/flower-hello-world`
+    You can run ``flwr build`` without any arguments to bundle the current directory,
+    or you can use ``--directory`` to build a specific directory:
+    ``flwr build --directory ./projects/flower-hello-world``.
     """
     if directory is None:
         directory = Path.cwd()
@@ -122,7 +118,7 @@ def build(
         fab_file.writestr(".info/CONTENT", list_file_content)
 
     typer.secho(
-        f"🎊 Successfully built {fab_filename}.", fg=typer.colors.GREEN, bold=True
+        f"🎊 Successfully built {fab_filename}", fg=typer.colors.GREEN, bold=True
     )
 
     return fab_filename
