@@ -75,6 +75,7 @@ pytest-watcher = "==0.4.1"
 ruff = "==0.0.277"
 types-requests = "==2.28.11.17"
 types-setuptools = "==69.0.0.20240125"
+types-pyyaml = "^6.0.12.20240311"
 
 [tool.poetry.extras]
 vision = ["pillow"]
