@@ -1,0 +1,6 @@
+FLamby/
+heart_dataset/
+.python-version
+.git/
+__pycache__/
+**/*.pyc
