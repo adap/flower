@@ -77,22 +77,13 @@ NodeToPartitionMapping = Dict[int, int]
 
 
 def _create_node_id_to_partition_mapping(
-    partition_ids: List[int],
-    nodes_ids: Optional[List[int]] = None,
+    num_clients: int,
 ) -> NodeToPartitionMapping:
-    """Given a list of partition_ids, generate a node_id:partition_id mapping.
-
-    If `node_ids` are provided, then use them instead of randomly generated UUIDs.
-    """
+    """Generate a node_id:partition_id mapping."""
     nodes_mapping: NodeToPartitionMapping = {}  # {node-id; partition-id}
-    for i in partition_ids:
+    for i in range(num_clients):
         while True:
-            if nodes_ids is None:
-                # Generate UUID for node
-                node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
-            else:
-                # Use provided node ID
-                node_id = nodes_ids[i]
+            node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
             if node_id not in nodes_mapping:
                 break
         nodes_mapping[node_id] = i
@@ -103,7 +94,7 @@ def _create_node_id_to_partition_mapping(
 def start_simulation(
     *,
     client_fn: ClientFnExt,
-    num_clients: Optional[int] = None,
+    num_clients: int,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
     server: Optional[Server] = None,
@@ -115,7 +106,6 @@ def start_simulation(
     actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
     actor_kwargs: Optional[Dict[str, Any]] = None,
     actor_scheduling: Union[str, NodeAffinitySchedulingStrategy] = "DEFAULT",
-    nodes_ids: Optional[List[int]] = None,
 ) -> History:
     """Start a Ray-based Flower simulation server.
 
@@ -131,14 +121,13 @@ def start_simulation(
         (model, dataset, hyperparameters, ...) should be (re-)created in either the
         call to `client_fn` or the call to any of the client methods (e.g., load
         evaluation data in the `evaluate` method itself).
-    num_clients : Optional[int]
-        The total number of clients in this simulation. This must be set if
-        `clients_ids` is not set and vice-versa.
+    num_clients : int
+        The total number of clients in this simulation.
     clients_ids : Optional[List[str]]
         List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
-        Deprecated in favour of `node_ids` argument.
+        Deprecated in favour of `node_ids` argument. This argument is deprecated.
     client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1, "num_gpus": 0.0}`)
         CPU and GPU resources for a single client. Supported keys
         are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
@@ -187,10 +176,6 @@ def start_simulation(
         compute nodes (e.g. via NodeAffinitySchedulingStrategy). Please note this
         is an advanced feature. For all details, please refer to the Ray documentation:
         https://docs.ray.io/en/latest/ray-core/scheduling/index.html
-    nodes_ids : Optional[List[int]]
-        List node IDs for each client. This is only required if
-        `num_clients` is not set. Setting both `num_clients` and `node_ids`
-        with `len(node_ids)` not equal to `num_clients` generates an error.
 
     Returns
     -------
@@ -203,17 +188,13 @@ def start_simulation(
         {"num_clients": len(clients_ids) if clients_ids is not None else num_clients},
     )
 
-    if clients_ids is not None and nodes_ids is not None:
-        raise ValueError(
-            "Both `clients_ids` and `nodes_ids` are provided, "
-            "but only one is allowed."
-        )
-
     if clients_ids is not None:
         warn_deprecated_feature(
-            "Passing `clients_ids` to `start_simulation` is deprecated. "
-            "Use `nodes_ids` (type List[int]) argument instead."
+            "Passing `clients_ids` to `start_simulation` is deprecated and not longer "
+            "used by `start_simulation`. Use `num_clients` exclusively instead."
         )
+        log(ERROR, "`clients_ids` argument used.")
+        sys.exit()
 
     # Set logger propagation
     loop: Optional[asyncio.AbstractEventLoop] = None
@@ -241,31 +222,8 @@ def start_simulation(
         initialized_config,
     )
 
-    # clients_ids/node_ids takes precedence
-    # Ensure expected number of unique ids are passed
-    if clients_ids is not None:
-        if (num_clients is not None) and (len(set(clients_ids)) != num_clients):
-            log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
-            sys.exit()
-        else:
-            partition_ids = [int(cid) for cid in clients_ids]
-    elif nodes_ids is not None:
-        if (num_clients is not None) and (len(set(nodes_ids)) != num_clients):
-            log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
-            sys.exit()
-        else:
-            partition_ids = list(range(len(nodes_ids)))
-    else:
-        if num_clients is None:
-            log(ERROR, INVALID_ARGUMENTS_START_SIMULATION)
-            sys.exit()
-        else:
-            partition_ids = list(range(num_clients))
-
     # Create node-id to partition-id mapping
-    nodes_mapping = _create_node_id_to_partition_mapping(
-        partition_ids, nodes_ids=nodes_ids
-    )
+    nodes_mapping = _create_node_id_to_partition_mapping(num_clients)
 
     # Default arguments for Ray initialization
     if not ray_init_args:

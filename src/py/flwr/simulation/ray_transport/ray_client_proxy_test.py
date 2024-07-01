@@ -90,7 +90,7 @@ def prep(
 
     # Create 373 client proxies
     num_proxies = 373  # a prime number
-    mapping = _create_node_id_to_partition_mapping(list(range(num_proxies)))
+    mapping = _create_node_id_to_partition_mapping(num_proxies)
     proxies = [
         RayActorClientProxy(
             client_fn=get_dummy_client,
