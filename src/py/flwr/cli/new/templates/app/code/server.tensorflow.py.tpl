@@ -7,7 +7,7 @@ from flwr.server.strategy import FedAvg
 from $import_name.task import load_model
 
 # Define config
-config = ServerConfig(num_rounds=3)
+config = ServerConfig(num_rounds=1)
 
 parameters = ndarrays_to_parameters(load_model().get_weights())
 

@@ -12,9 +12,9 @@ authors = [
 license = {text = "Apache License (2.0)"}
 dependencies = [
     "flwr[simulation]>=1.9.0,<2.0",
-    "jax==0.4.26",
-    "jaxlib==0.4.26",
-    "scikit-learn==1.4.2",
+    "jax==0.4.13",
+    "jaxlib==0.4.13",
+    "scikit-learn==1.3.2",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -26,3 +26,9 @@ publisher = "$username"
 [flower.components]
 serverapp = "$import_name.server:app"
 clientapp = "$import_name.client:app"
+
+[flower.engine]
+name = "simulation"
+
+[flower.engine.simulation.supernode]
+num = 2

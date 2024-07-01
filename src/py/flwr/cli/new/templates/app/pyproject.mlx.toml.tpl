@@ -13,7 +13,7 @@ license = { text = "Apache License (2.0)" }
 dependencies = [
     "flwr[simulation]>=1.9.0,<2.0",
     "flwr-datasets[vision]>=0.0.2,<1.0.0",
-    "mlx==0.10.0",
+    "mlx==0.2.0",
     "numpy==1.24.4",
 ]
 
