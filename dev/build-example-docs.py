@@ -45,7 +45,7 @@ engineers, students, professionals, academics, and other enthusiasts.
 Quickstart Examples
 -------------------
 
-Flower Quickstart Examples are a collection of demo project that show how you
+Flower Quickstart Examples are a collection of demo projects that show how you
 can use Flower in combination with other existing frameworks or technologies.
 
 """
