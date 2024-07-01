@@ -169,7 +169,7 @@ class TestSemanticPartitionerFailure(unittest.TestCase):
         dataset = Dataset.from_dict(data)
         partitioner = SemanticPartitioner(num_partitions=3, partition_by="label")
         partitioner.dataset = dataset
-        with self.assertRaises(TypeError):
+        with self.assertRaises((TypeError, ValueError)):
             partitioner.load_partition(0)
 
     @parameterized.expand([(0,), (-1,)])  # type: ignore

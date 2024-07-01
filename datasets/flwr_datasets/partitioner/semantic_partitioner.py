@@ -247,20 +247,23 @@ class SemanticPartitioner(Partitioner):
         embedding_list = []
         with torch.no_grad():
             for i in range(0, images.shape[0], self._batch_size):
-                batch = torch.tensor(
-                    images[i : i + self._batch_size], dtype=torch.float, device=device
-                )
+                idxs = list(range(i, min(i + self._batch_size, images.shape[0])))
+                batch = torch.tensor(images[idxs], dtype=torch.float, device=device)
                 if batch.shape[1] == 1:
                     batch = batch.broadcast_to((batch.shape[0], 3, *batch.shape[2:]))
                 embedding_list.append(efficient_net(batch).cpu().numpy())
+        embedding_list = np.concatenate(embedding_list)
         embeddings_scaled: NDArrayFloat = StandardScaler(with_std=False).fit_transform(
-            np.concatenate(embedding_list)
+            embedding_list
         )
 
         if 0 < self._pca_components < embeddings_scaled.shape[1]:
             pca = PCA(n_components=self._pca_components, random_state=self._seed)
             # 100000 refers to official implementation
             pca.fit(self._subsample(embeddings_scaled, 100000))
+            embeddings_scaled = torch.tensor(
+                pca.transform(embeddings_scaled), dtype=torch.float, device=device
+            )
 
         targets = np.array(self.dataset[self._partition_by], dtype=np.int64)
         label_cluster_means = [None for _ in self._unique_classes]
@@ -282,7 +285,7 @@ class SemanticPartitioner(Partitioner):
             idx_current_label = np.where(targets == label)[0]
             # 10000 refers to official implementation
             embeddings_of_current_label = self._subsample(
-                embedding_list[idx_current_label], 10000
+                embeddings_scaled[idx_current_label], 10000
             )
 
             gmm.fit(embeddings_of_current_label)
@@ -299,7 +302,9 @@ class SemanticPartitioner(Partitioner):
 
         # Start clustering
         # Format: clusters[i] indicates label i is assigned to clients in clusters[i]
-        clusters: List[List[int]] = [[] for _ in self._unique_classes]
+        clusters: List[List[int]] = [
+            [None for _ in range(self._num_partitions)] for _ in self._unique_classes
+        ]
         partitions = list(range(self._num_partitions))
         unmatched_labels = list(self._unique_classes)
 
@@ -433,7 +438,10 @@ class SemanticPartitioner(Partitioner):
         """Test class variables validation."""
         if not self._num_partitions > 0:
             raise ValueError("The number of partitions needs to be greater than zero.")
-        if not 0 <= self._efficient_net_type <= 7:
+        if not (
+            isinstance(self._efficient_net_type, int)
+            and 0 <= self._efficient_net_type <= 7
+        ):
             raise ValueError(
                 "The efficient net type needs to be in the range of 0 to 7, "
                 "indicates EfficientNet-B0 ~ B7"
