@@ -79,6 +79,7 @@ class FederatedDataset:
     >>> centralized = fds.load_split("test")
 
     Use CIFAR10 dataset for Federated Laerning with 100 clients:
+
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import DirichletPartitioner
     >>>
@@ -87,7 +88,8 @@ class FederatedDataset:
     >>> fds = FederatedDataset(dataset="cifar10", partitioners={"train": partitioner})
     >>> partition = fds.load_partition(partition_id=0)
 
-    Visualize the partitioned datasets
+    Visualize the partitioned datasets:
+
     >>> from flwr_datasets.visualization import plot_label_distributions
     >>>
     >>> _ = plot_label_distributions(

@@ -37,6 +37,7 @@ class NaturalIdPartitioner(Partitioner):
     Examples
     --------
     "flwrlabs/shakespeare" dataset
+
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import NaturalIdPartitioner
     >>>
@@ -46,6 +47,7 @@ class NaturalIdPartitioner(Partitioner):
     >>> partition = fds.load_partition(0)
 
     "sentiment140" (aka Twitter) dataset
+
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import NaturalIdPartitioner
     >>>

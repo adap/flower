@@ -35,6 +35,15 @@ class ExponentialPartitioner(SizePartitioner):
     ----------
     num_partitions : int
         The total number of partitions that the data will be divided into.
+
+    Examples
+    --------
+    >>> from flwr_datasets import FederatedDataset
+    >>> from flwr_datasets.partitioner import ExponentialPartitioner
+    >>>
+    >>> partitioner = ExponentialPartitioner(num_partitions=10)
+    >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
+    >>> partition = fds.load_partition(0)
     """
 
     def __init__(self, num_partitions: int) -> None:
