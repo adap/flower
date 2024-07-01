@@ -53,8 +53,7 @@ Invalid Arguments in method:
 `start_simulation(
     *,
     client_fn: ClientFn,
-    num_clients: Optional[int] = None,
-    node_ids: Optional[List[int]] = None,
+    num_clients: int,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
     server: Optional[Server] = None,
