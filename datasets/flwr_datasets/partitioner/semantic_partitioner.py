@@ -302,14 +302,14 @@ class SemanticPartitioner(Partitioner):
 
         # Start clustering
         # Format: clusters[i] indicates label i is assigned to clients in clusters[i]
-        clusters: List[List[int]] = [
+        clusters = [
             [None for _ in range(self._num_partitions)] for _ in self._unique_classes
         ]
         partitions = list(range(self._num_partitions))
         unmatched_labels = list(self._unique_classes)
 
         latest_matched_label = self._rng_numpy.choice(unmatched_labels)  # type: ignore
-        clusters[latest_matched_label] = partitions
+        clusters[latest_matched_label] = partitions  # type: ignore
 
         unmatched_labels.remove(latest_matched_label)
 
