@@ -188,7 +188,7 @@ def start_simulation(
         is an advanced feature. For all details, please refer to the Ray documentation:
         https://docs.ray.io/en/latest/ray-core/scheduling/index.html
     nodes_ids : Optional[List[int]]
-        List node ids for each client. This is only required if
+        List node IDs for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `node_ids`
         with `len(node_ids)` not equal to `num_clients` generates an error.
 
