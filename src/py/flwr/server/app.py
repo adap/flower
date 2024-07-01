@@ -83,6 +83,7 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     client_manager: Optional[ClientManager] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     certificates: Optional[Tuple[bytes, bytes, bytes]] = None,
+    insecure: Optional[bool] = None,
 ) -> History:
     """Start a Flower server using the gRPC transport layer.
 
@@ -121,6 +122,9 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
             * CA certificate.
             * server certificate.
             * server private key.
+    insecure : Optional[bool] (default: None)
+        If True, starts the server without SSL/TLS (not secure).
+        Defaults to `True` if `certificates` is not provided, otherwise `False`.
 
     Returns
     -------
@@ -144,6 +148,18 @@ def start_server(  # pylint: disable=too-many-arguments,too-many-locals
     >>> )
     """
     event(EventType.START_SERVER_ENTER)
+
+    # Auto-fill insecure
+    if insecure is None:
+        insecure = certificates is None
+
+    # Check for conflicting parameters
+    if insecure and certificates is not None:
+        raise ValueError(
+            "Invalid configuration: 'certificates' should not be provided "
+            "when 'insecure' is set to True. To start an insecure gRPC server, omit "
+            "'certificates', or set 'insecure' to False to start a secure gRPC server."
+        )
 
     # Parse IP address
     parsed_address = parse_address(server_address)
@@ -426,6 +442,14 @@ def _try_setup_client_authentication(
 def _try_obtain_certificates(
     args: argparse.Namespace,
 ) -> Optional[Tuple[bytes, bytes, bytes]]:
+    # Check for conflicting parameters
+    if args.insecure and args.certificates is not None:
+        sys.exit(
+            "Conflicting options: The '--insecure' flag disables HTTPS, "
+            "but '--certificates' was also specified. Please remove "
+            "the '--certificates' option when running in insecure mode, "
+            "or omit '--insecure' to use HTTPS."
+        )
     # Obtain certificates
     if args.insecure:
         log(WARN, "Option `--insecure` was set. Starting insecure HTTP server.")
