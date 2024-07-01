@@ -1,3 +1,10 @@
+---
+title: Example Flower App using PyTorch
+labels: [basic, vision, fds]
+dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
+framework: [torch | https://pytorch.org/, torchvision | https://pytorch.org/vision/stable/index.html]
+---
+
 # Flower App (PyTorch) 🧪
 
 > 🧪 = This example covers experimental features that might change in future versions of Flower

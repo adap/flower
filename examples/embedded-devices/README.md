@@ -1,3 +1,10 @@
+---
+title: Flower Embedded Devices Example
+labels: [basic, vision, fds]
+dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10, MNIST | https://huggingface.co/datasets/ylecun/mnist]
+framework: [torch | https://pytorch.org/, tensorflow | https://www.tensorflow.org/]
+---
+
 # Federated Learning on Embedded Devices with Flower
 
 This example will show you how Flower makes it very easy to run Federated Learning workloads on edge devices. Here we'll be showing how to use NVIDIA Jetson devices and Raspberry Pi as Flower clients. You can run this example using either PyTorch or Tensorflow. The FL workload (i.e. model, dataset and training loop) is mostly borrowed from the [quickstart-pytorch](https://github.com/adap/flower/tree/main/examples/simulation-pytorch) and [quickstart-tensorflow](https://github.com/adap/flower/tree/main/examples/quickstart-tensorflow) examples.
@@ -65,7 +72,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
 
    - Install `pip`. In the terminal type: `sudo apt install python3-pip -y`
    - Now clone this directory. You just need to execute the `git clone` command shown at the top of this README.md on your device.
-   - Install Flower and your ML framework: We have prepared some convenient installation scripts that will install everything you need. You are free to install other versions of these ML frameworks to suit your needs.
+   - Install Flower and your ML framework of choice: We have prepared some convenient installation scripts that will install everything you need. You are free to install other versions of these ML frameworks to suit your needs.
      - If you want your clients to use PyTorch: `pip3 install -r requirements_pytorch.txt`
      - If you want your clients to use TensorFlow: `pip3 install -r requirements_tf.txt`
 
@@ -180,7 +187,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
 
 ## Running Embedded FL with Flower
 
-For this demo, we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. The clients do the same. The dataset is by default split into 50 partitions (each to be assigned to a different client). This can be controlled with the `NUM_CLIENTS` global variable in the client scripts. In this example, each device will play the role of a specific user (specified via `--cid` -- we'll show this later) and therefore only do local training with that portion of the data. For CIFAR-10, clients will be training a MobileNet-v2/3 model.
+For this demo, we'll be using [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. The clients do the same. The dataset is by default split into 50 partitions (each to be assigned to a different client). This can be controlled with the `NUM_CLIENTS` global variable in the client scripts. In this example, each device will play the role of a specific user (specified via `--cid` -- we'll show this later) and therefore only do local training with that portion of the data. For CIFAR-10, clients will be training a MobileNet-v2/3 model.
 
 You can run this example using MNIST and a smaller CNN model by passing flag `--mnist`. This is useful if you are using devices with a very limited amount of memory (e.g. RaspberryPi Zero) or if you want the training taking place on the embedded devices to be much faster (specially if these are CPU-only). The partitioning of the dataset is done in the same way.
 

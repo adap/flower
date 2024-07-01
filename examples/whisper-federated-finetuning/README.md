@@ -1,3 +1,11 @@
+---
+title: On-device Federated Finetuning for Speech Classification
+labels: [finetuning, speech, transformers]
+dataset: [SpeechCommands | https://huggingface.co/datasets/google/speech_commands]
+framework: [transformers | https://huggingface.co/docs/transformers/index, whisper
+      | https://huggingface.co/openai/whisper-tiny]
+---
+
 # On-device Federated Finetuning for Speech Classification
 
 This example demonstrates how to, from a pre-trained [Whisper](https://openai.com/research/whisper) model, finetune it for the downstream task of keyword spotting. We'll be implementing a federated downstream finetuning pipeline using Flower involving a total of 100 clients. As for the downstream dataset, we'll be using the [Google Speech Commands](https://huggingface.co/datasets/speech_commands) dataset for keyword spotting. We'll take the encoder part of the [Whisper-tiny](https://huggingface.co/openai/whisper-tiny) model, freeze its parameters, and learn a lightweight classification (\<800K parameters !!) head to correctly classify a spoken word.

@@ -1,3 +1,10 @@
+---
+title: Flower Simulation Step-by-Step
+labels: [basic, vision, simulation]
+dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
+framework: [torch | https://pytorch.org/]
+---
+
 # Flower Simulation Step-by-Step
 
 > Since this tutorial (and its video series) was put together, Flower has been updated a few times. As a result, some of the steps to construct the environment (see below) have been updated. Some parts of the code have also been updated. Overall, the content of this tutorial and how things work remains the same as in the video tutorials.

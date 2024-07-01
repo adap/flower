@@ -1,4 +1,11 @@
-# fl_dp_sa
+---
+title: Example of Flower App with DP and SA
+labels: [basic, vision, fds]
+dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
+framework: [torch | https://pytorch.org/, torchvision | https://pytorch.org/vision/stable/index.html]
+---
+
+# Example of Flower App with DP and SA
 
 This is a simple example that utilizes central differential privacy with client-side fixed clipping and secure aggregation.
 Note: This example is designed for a small number of rounds and is intended for demonstration purposes.
