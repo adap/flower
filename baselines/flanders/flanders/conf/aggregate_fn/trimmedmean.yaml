@@ -1,0 +1,7 @@
+---
+name: trimmedmean
+
+aggregate_fn:
+  function: flwr.server.strategy.aggregate.aggregate_trimmed_avg
+  parameters:
+    proportiontocut: 0.4

@@ -1,0 +1,10 @@
+---
+name: flanders
+
+strategy:
+  _target_: flanders.strategy.Flanders
+  _recursive_: true
+  num_clients_to_keep: 3  # number of benign local models to filter-out before the aggregation (atm it's set to be pool_size - num_malicious, hard coded in main.py)
+  maxiter: 100 # number of iterations done by MAR
+  alpha: 1
+  beta: 1

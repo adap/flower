@@ -1,0 +1,5 @@
+---
+name: fedmedian
+
+strategy:
+  _target_: flwr.server.strategy.FedMedian
