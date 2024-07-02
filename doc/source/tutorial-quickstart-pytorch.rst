@@ -10,7 +10,12 @@ Quickstart PyTorch
 ..  youtube:: jOmmuzMIQ4c
    :width: 100%
 
-In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using Flower and PyTorch.
+.. admonition:: Disclaimer
+    :class: important
+
+    The Quickstart PyTorch video uses slightly different Flower commands than this tutorial. Please follow the :doc:`Upgrade to Flower Next <how-to-upgrade-to-flower-next>` guide to convert commands shown in the video.
+
+In this tutorial we will learn how to train a Convolutional Neural Network on CIFAR10 using the Flower framework and PyTorch.
 
 First of all, it is recommended to create a virtual environment and run everything within a :doc:`virtualenv <contributor-how-to-set-up-a-virtual-env>`.
 
@@ -20,11 +25,11 @@ Our example consists of one *server* and two *clients* all having the same model
 These updates are then sent to the *server* which will aggregate them to produce a better model. Finally, the *server* sends this improved version of the model back to each *client*.
 A complete cycle of weight updates is called a *round*.
 
-Now that we have a rough idea of what is going on, let's get started. We first need to install Flower. You can do this by running :
+Now that we have a rough idea of what is going on, let's get started. We first need to install Flower and Flower Datasets. You can do this by running:
 
 .. code-block:: shell
 
-  $ pip install flwr
+  $ pip install flwr flwr-datasets[vision]
 
 Since we want to use PyTorch to solve a computer vision task, let's go ahead and install PyTorch and the **torchvision** library:
 
@@ -49,9 +54,9 @@ In a file called :code:`client.py`, import Flower and PyTorch related packages:
     import torch.nn.functional as F
     import torchvision.transforms as transforms
     from torch.utils.data import DataLoader
-    from torchvision.datasets import CIFAR10
 
     import flwr as fl
+    from flwr_datasets import FederatedDataset
 
 In addition, we define the device allocation in PyTorch with:
 
@@ -59,23 +64,31 @@ In addition, we define the device allocation in PyTorch with:
 
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-We use PyTorch to load CIFAR10, a popular colored image classification dataset for machine learning. The PyTorch :code:`DataLoader()` downloads the training and test data that are then normalized.
+We use `Flower Datasets <https://flower.ai/docs/datasets/>`_ to load CIFAR10, a popular colored image classification dataset for machine learning. The :code:`FederatedDataset()` module downloads, partitions, and preprocesses the dataset. The :code:`torchvision.transforms` modules are then used to normalize the training and test data.
 
 .. code-block:: python
 
-    def load_data():
+    def load_data(partition_id):
         """Load CIFAR-10 (training and test set)."""
-        transform = transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+        fds = FederatedDataset(dataset="cifar10", partitioners={"train": 3})
+        partition = fds.load_partition(partition_id)
+        # Divide data on each node: 80% train, 20% test
+        partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
+        pytorch_transforms = Compose(
+            [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
         )
-        trainset = CIFAR10(".", train=True, download=True, transform=transform)
-        testset = CIFAR10(".", train=False, download=True, transform=transform)
-        trainloader = DataLoader(trainset, batch_size=32, shuffle=True)
-        testloader = DataLoader(testset, batch_size=32)
-        num_examples = {"trainset" : len(trainset), "testset" : len(testset)}
-        return trainloader, testloader, num_examples
 
-Define the loss and optimizer with PyTorch. The training of the dataset is done by looping over the dataset, measure the corresponding loss and optimize it.
+        def apply_transforms(batch):
+            """Apply transforms to the partition from FederatedDataset."""
+            batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
+            return batch
+
+        partition_train_test = partition_train_test.with_transform(apply_transforms)
+        trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
+        testloader = DataLoader(partition_train_test["test"], batch_size=32)
+        return trainloader, testloader
+
+We define the loss and optimizer with PyTorch. The training of the dataset is done by looping over the dataset, measure the corresponding loss, and optimize it.
 
 .. code-block:: python
 
@@ -83,15 +96,17 @@ Define the loss and optimizer with PyTorch. The training of the dataset is done 
         """Train the network on the training set."""
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+        net.train()
         for _ in range(epochs):
-            for images, labels in trainloader:
-                images, labels = images.to(DEVICE), labels.to(DEVICE)
+            for batch in trainloader:
+                images = batch["img"].to(DEVICE)
+                labels = batch["label"].to(DEVICE)
                 optimizer.zero_grad()
                 loss = criterion(net(images), labels)
                 loss.backward()
                 optimizer.step()
 
-Define then the validation of the  machine learning network. We loop over the test set and measure the loss and accuracy of the test set.
+We then define the validation of the  machine learning network. We loop over the test set and measure the loss and accuracy of the test set.
 
 .. code-block:: python
 
@@ -99,9 +114,11 @@ Define then the validation of the  machine learning network. We loop over the te
         """Validate the network on the entire test set."""
         criterion = torch.nn.CrossEntropyLoss()
         correct, total, loss = 0, 0, 0.0
+        net.eval()
         with torch.no_grad():
-            for data in testloader:
-                images, labels = data[0].to(DEVICE), data[1].to(DEVICE)
+            for batch in testloader:
+                images = batch["img"].to(DEVICE)
+                labels = batch["label"].to(DEVICE)
                 outputs = net(images)
                 loss += criterion(outputs, labels).item()
                 _, predicted = torch.max(outputs.data, 1)
@@ -137,7 +154,7 @@ The Flower clients will use a simple CNN adapted from 'PyTorch: A 60 Minute Blit
 
     # Load model and data
     net = Net().to(DEVICE)
-    trainloader, testloader, num_examples = load_data()
+    trainloader, testloader = load_data(partition_id=partition_id)
 
 After loading the data set with :code:`load_data()` we define the Flower interface.
 
@@ -179,95 +196,106 @@ which can be implemented in the following way:
         def fit(self, parameters, config):
             self.set_parameters(parameters)
             train(net, trainloader, epochs=1)
-            return self.get_parameters(config={}), num_examples["trainset"], {}
+            return self.get_parameters(config={}), len(trainloader.dataset), {}
 
         def evaluate(self, parameters, config):
             self.set_parameters(parameters)
             loss, accuracy = test(net, testloader)
-            return float(loss), num_examples["testset"], {"accuracy": float(accuracy)}
+            return float(loss), len(testloader.dataset), {"accuracy": float(accuracy)}
 
-We can now create an instance of our class :code:`CifarClient` and add one line
-to actually run this client:
+Next, we create a client function that returns instances of :code:`CifarClient` on-demand when called:
 
 .. code-block:: python
 
-     fl.client.start_client(server_address="[::]:8080", client=CifarClient().to_client())
+    def client_fn(cid: str):
+        return CifarClient().to_client()
 
-That's it for the client. We only have to implement :code:`Client` or
-:code:`NumPyClient` and call :code:`fl.client.start_client()`. If you implement a client of type :code:`NumPyClient` you'll need to first call its :code:`to_client()` method. The string :code:`"[::]:8080"` tells the client which server to connect to. In our case we can run the server and the client on the same machine, therefore we use
-:code:`"[::]:8080"`. If we run a truly federated workload with the server and
-clients running on different machines, all that needs to change is the
-:code:`server_address` we point the client at.
+Finally, we create a :code:`ClientApp()` object that uses this client function:
+
+.. code-block:: python
+
+    app = ClientApp(client_fn=client_fn)
+
+That's it for the client. We only have to implement :code:`Client` or :code:`NumPyClient`, create a :code:`ClientApp`, and pass the client function to it. If we implement a client of type :code:`NumPyClient` we'll need to first call its :code:`to_client()` method.
+
 
 Flower Server
 -------------
 
-For simple workloads we can start a Flower server and leave all the
+For simple workloads, we create a :code:`ServerApp` and leave all the
 configuration possibilities at their default values. In a file named
-:code:`server.py`, import Flower and start the server:
+:code:`server.py`, import Flower and create a :code:`ServerApp`:
 
 .. code-block:: python
 
-    import flwr as fl
+    from flwr.server import ServerApp
 
-    fl.server.start_server(config=fl.server.ServerConfig(num_rounds=3))
+    app = ServerApp()
+
 
 Train the model, federated!
 ---------------------------
 
-With both client and server ready, we can now run everything and see federated
-learning in action. FL systems usually have a server and multiple clients. We
-therefore have to start the server first:
+With both :code:`ClientApps` and :code:`ServerApp` ready, we can now run everything and see federated
+learning in action. First, we run the :code:`flower-superlink` command in one terminal to start the infrastructure. This step only needs to be run once.
+
+.. admonition:: Note
+    :class: note
+
+    In this example, the :code:`--insecure` command line argument starts Flower without HTTPS and is only used for prototyping. To run with HTTPS, we instead use the arguments :code:`--ssl-ca-certfile`, :code:`--ssl-certfile`, and :code:`--ssl-keyfile` and pass the paths to the certificates. Please refer to `Flower CLI reference <ref-api-cli.html#flower-superlink>`_ for implementation details.
 
 .. code-block:: shell
 
-    $ python server.py
+    $ flower-superlink --insecure
 
-Once the server is running we can start the clients in different terminals.
-Open a new terminal and start the first client:
-
-.. code-block:: shell
-
-    $ python client.py
-
-Open another terminal and start the second client:
+FL systems usually have a server and multiple clients. We therefore need to start multiple `SuperNodes`, one for each client, respectively. First, we open a new terminal and start the first `SuperNode` using the :code:`flower-client-app` command.
 
 .. code-block:: shell
 
-    $ python client.py
+    $ flower-client-app client:app --insecure
 
-Each client will have its own dataset.
-You should now see how the training does in the very first terminal (the one that started the server):
+In the above, we launch the :code:`app` object in the :code:`client.py` module.
+Open another terminal and start the second `SuperNode`:
 
 .. code-block:: shell
 
-    INFO flower 2021-02-25 14:00:27,227 | app.py:76 | Flower server running (insecure, 3 rounds)
-    INFO flower 2021-02-25 14:00:27,227 | server.py:72 | Getting initial parameters
-    INFO flower 2021-02-25 14:01:15,881 | server.py:74 | Evaluating initial parameters
-    INFO flower 2021-02-25 14:01:15,881 | server.py:87 | [TIME] FL starting
-    DEBUG flower 2021-02-25 14:01:41,310 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-02-25 14:02:00,256 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:02:00,262 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-02-25 14:02:03,047 | server.py:149 | evaluate received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:02:03,049 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-02-25 14:02:23,908 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:02:23,915 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-02-25 14:02:27,120 | server.py:149 | evaluate received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:02:27,122 | server.py:165 | fit_round: strategy sampled 2 clients (out of 2)
-    DEBUG flower 2021-02-25 14:03:04,660 | server.py:177 | fit_round received 2 results and 0 failures
-    DEBUG flower 2021-02-25 14:03:04,671 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-02-25 14:03:09,273 | server.py:149 | evaluate received 2 results and 0 failures
-    INFO flower 2021-02-25 14:03:09,273 | server.py:122 | [TIME] FL finished in 113.39180790000046
-    INFO flower 2021-02-25 14:03:09,274 | app.py:109 | app_fit: losses_distributed [(1, 650.9747924804688), (2, 526.2535400390625), (3, 473.76959228515625)]
-    INFO flower 2021-02-25 14:03:09,274 | app.py:110 | app_fit: accuracies_distributed []
-    INFO flower 2021-02-25 14:03:09,274 | app.py:111 | app_fit: losses_centralized []
-    INFO flower 2021-02-25 14:03:09,274 | app.py:112 | app_fit: accuracies_centralized []
-    DEBUG flower 2021-02-25 14:03:09,276 | server.py:139 | evaluate: strategy sampled 2 clients
-    DEBUG flower 2021-02-25 14:03:11,852 | server.py:149 | evaluate received 2 results and 0 failures
-    INFO flower 2021-02-25 14:03:11,852 | app.py:121 | app_evaluate: federated loss: 473.76959228515625
-    INFO flower 2021-02-25 14:03:11,852 | app.py:122 | app_evaluate: results [('ipv6:[::1]:36602', EvaluateRes(loss=351.4906005859375, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.6067})), ('ipv6:[::1]:36604', EvaluateRes(loss=353.92742919921875, num_examples=10000, accuracy=0.0, metrics={'accuracy': 0.6005}))]
-    INFO flower 2021-02-25 14:03:27,514 | app.py:127 | app_evaluate: failures []
+    $ flower-client-app client:app --insecure
+
+Finally, in another terminal window, we run the `ServerApp`. This starts the actual training run:
+
+.. code-block:: shell
+
+    $ flower-server-app server:app --insecure
+
+We should now see how the training does in the last terminal (the one that started the :code:`ServerApp`):
+
+.. code-block:: shell
+
+    WARNING :   Option `--insecure` was set. Starting insecure HTTP client connected to 0.0.0.0:9091.
+    INFO :      Starting Flower ServerApp, config: num_rounds=1, no round_timeout
+    INFO :
+    INFO :      [INIT]
+    INFO :      Requesting initial parameters from one random client
+    INFO :      Received initial parameters from one random client
+    INFO :      Evaluating initial global parameters
+    INFO :
+    INFO :      [ROUND 1]
+    INFO :      configure_fit: strategy sampled 2 clients (out of 2)
+    INFO :      aggregate_fit: received 2 results and 0 failures
+    WARNING :   No fit_metrics_aggregation_fn provided
+    INFO :      configure_evaluate: strategy sampled 2 clients (out of 2)
+    INFO :      aggregate_evaluate: received 2 results and 0 failures
+    WARNING :   No evaluate_metrics_aggregation_fn provided
+    INFO :
+    INFO :      [SUMMARY]
+    INFO :      Run finished 1 rounds in 15.08s
+    INFO :      History (loss, distributed):
+    INFO :          '\tround 1: 241.32427430152893\n'
+    INFO :
 
 Congratulations!
 You've successfully built and run your first federated learning system.
-The full `source code <https://github.com/adap/flower/blob/main/examples/quickstart-pytorch/client.py>`_ for this example can be found in :code:`examples/quickstart-pytorch`.
+The full source code for this example can be found in |quickstart_pt_link|_.
+
+.. |quickstart_pt_link| replace:: :code:`examples/quickstart-pytorch/client.py`
+.. _quickstart_pt_link: https://github.com/adap/flower/blob/main/examples/quickstart-pytorch/client.py
