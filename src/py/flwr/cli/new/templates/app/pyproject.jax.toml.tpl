@@ -11,7 +11,7 @@ authors = [
 ]
 license = {text = "Apache License (2.0)"}
 dependencies = [
-    "flwr[simulation]>=1.8.0,<2.0",
+    "flwr[simulation]>=1.9.0,<2.0",
     "jax==0.4.26",
     "jaxlib==0.4.26",
     "scikit-learn==1.4.2",

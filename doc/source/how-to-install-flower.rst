@@ -20,7 +20,7 @@ Stable releases are available on `PyPI <https://pypi.org/project/flwr/>`_::
 
 For simulations that use the Virtual Client Engine, ``flwr`` should be installed with the ``simulation`` extra::
 
-  python -m pip install flwr[simulation]
+  python -m pip install "flwr[simulation]"
 
 
 Using conda (or mamba)
@@ -48,7 +48,7 @@ Verify installation
 The following command can be used to verify if Flower was successfully installed. If everything worked, it should print the version of Flower to the command line::
 
   python -c "import flwr;print(flwr.__version__)"
-  1.8.0
+  1.9.0
 
 
 Advanced installation options
