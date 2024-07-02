@@ -174,6 +174,7 @@ The Flower community welcomes contributions. The following docs are intended to 
    :caption: Contributor explanations
 
    contributor-explanation-architecture
+   contributor-explanation-public-and-private-apis
 
 .. toctree::
    :maxdepth: 1
