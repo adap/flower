@@ -211,7 +211,6 @@ class TestRayBackend(TestCase):
                 client_app_loader=_load_from_module("raybackend_test:client_app"),
                 workdir="/?&%$^#%@$!",
             )
-        self.addAsyncCleanup(self.on_cleanup)
 
     def test_backend_creation_with_init_arguments(self) -> None:
         """Testing whether init args are properly parsed to Ray."""
@@ -242,5 +241,3 @@ class TestRayBackend(TestCase):
         nodes = ray.nodes()
 
         assert nodes[0]["Resources"]["CPU"] == backend_config_2["init_args"]["num_cpus"]
-
-        self.addAsyncCleanup(self.on_cleanup)
