@@ -1,3 +1,10 @@
+---
+title: Federated Variational Autoencoder using Pytorch
+labels: [basic, vision, fds]
+dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
+framework: [torch | https://pytorch.org/, torchvision | https://pytorch.org/vision/stable/index.html]
+---
+
 # Flower Example for Federated Variational Autoencoder using Pytorch
 
 This example demonstrates how a variational autoencoder (VAE) can be trained in a federated way using the Flower framework.

@@ -1,3 +1,10 @@
+---
+title: Example Flower App with Custom Metrics
+labels: [basic, vision, fds]
+dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
+framework: [tensorflow | https://www.tensorflow.org/]
+---
+
 # Flower Example using Custom Metrics
 
 This simple example demonstrates how to calculate custom metrics over multiple clients beyond the traditional ones available in the ML frameworks. In this case, it demonstrates the use of ready-available `scikit-learn` metrics: accuracy, recall, precision, and f1-score.
