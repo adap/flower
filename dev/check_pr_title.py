@@ -30,9 +30,15 @@ if __name__ == "__main__":
     ) as file:
         config = tomllib.load(file)
 
-    # Extract types, project, and scope from the config
+    # Extract projects
+    project_list = []
+    for project_key, _ in config["projects"].items():
+        project_list.append(project_key)
+
+    projects = "|".join(project_list) + "|\\*"
+
+    # Extract types and scope from the config
     types = "|".join(config["type"])
-    projects = "|".join(config["project"]) + "|\\*"
     scope = config["scope"]
     allowed_verbs = config["allowed_verbs"]
 
