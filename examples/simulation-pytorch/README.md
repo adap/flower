@@ -1,3 +1,10 @@
+---
+title: Flower Simulation Example using PyTorch
+tags: [basic, vision, fds, simulation]
+dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
+framework: [torch | https://pytorch.org/, torchvision | https://pytorch.org/vision/stable/index.html]
+---
+
 # Flower Simulation example using PyTorch
 
 This introductory example uses the simulation capabilities of Flower to simulate a large number of clients on a single machine. Take a look at the [Documentation](https://flower.ai/docs/framework/how-to-run-simulations.html) for a deep dive into how Flower simulation works. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the MNIST dataset. This examples uses 100 clients by default.
