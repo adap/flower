@@ -14,10 +14,11 @@
 # ==============================================================================
 """Execute and monitor a Flower run."""
 
+import threading
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from subprocess import Popen
-from typing import Optional
+from typing import List, Optional
 
 
 @dataclass
@@ -26,6 +27,8 @@ class RunTracker:
 
     run_id: int
     proc: Popen  # type: ignore
+    logs: List[str] = field(default_factory=list)
+    stop_event: threading.Event = field(default_factory=threading.Event)
 
 
 class Executor(ABC):

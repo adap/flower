@@ -15,6 +15,9 @@
 """SuperExec API servicer."""
 
 
+import select
+import threading
+import time
 from logging import ERROR, INFO
 from typing import Any, Dict, Generator
 
@@ -38,13 +41,14 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
     def __init__(self, executor: Executor) -> None:
         self.executor = executor
         self.runs: Dict[int, RunTracker] = {}
+        self.lock = threading.Lock()
+        self.select_timeout: int = 1
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
     ) -> StartRunResponse:
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
-
         run = self.executor.start_run(request.fab_file)
 
         if run is None:
@@ -53,13 +57,66 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
         self.runs[run.run_id] = run
 
+        # Start a background thread to capture the log output
+        capture_thread = threading.Thread(
+            target=self._capture_logs, args=(run,), daemon=True
+        )
+        capture_thread.start()
+
         return StartRunResponse(run_id=run.run_id)
 
-    def StreamLogs(
+    def _capture_logs(
+        self,
+        run: RunTracker,
+    ) -> None:
+        while not run.stop_event.is_set():
+            # Select streams only when ready to read
+            ready_to_read, _, _ = select.select(
+                [run.proc.stdout, run.proc.stderr],
+                [],
+                [],
+                self.select_timeout,
+            )
+            # Read from std* and append to RunTracker.logs
+            for stream in ready_to_read:
+                line = stream.readline().rstrip()
+                if line:
+                    with self.lock:
+                        run.logs.append(f"{line}")
+
+            # Close std* to prevent blocking
+            if run.proc.poll() is not None:
+                log(INFO, "Subprocess finished, exiting log capture")
+                if run.proc.stdout:
+                    run.proc.stdout.close()
+                if run.proc.stderr:
+                    run.proc.stderr.close()
+                run.stop_event.set()
+                break
+
+    def StreamLogs(  # pylint: disable=C0103
         self, request: StreamLogsRequest, context: grpc.ServicerContext
     ) -> Generator[StreamLogsResponse, Any, None]:
         """Get logs."""
-        logs = ["a", "b", "c"]
+        log(INFO, "ExecServicer.StreamLogs")
+
+        last_sent_index = 0
         while context.is_active():
-            for i in range(len(logs)):  # pylint: disable=C0200
-                yield StreamLogsResponse(log_output=logs[i])
+            # Exit if `run_id` not found
+            if request.run_id not in self.runs:
+                context.abort(grpc.StatusCode.NOT_FOUND, "Run ID not found")
+
+            # Yield n'th row of logs, if n'th row < len(logs)
+            logs = self.runs[request.run_id].logs
+            if last_sent_index < len(logs):
+                for i in range(last_sent_index, len(logs)):
+                    yield StreamLogsResponse(log_output=logs[i])
+                last_sent_index = len(logs)
+
+            # Shutdown context if process has completed. Previously stored
+            # logs will still be printed.
+            if self.runs[request.run_id].proc.poll() is not None:
+                log(INFO, "Run ID `%s` completed", request.run_id)
+                context.cancel()
+
+            time.sleep(0.1)  # Sleep briefly to avoid busy waiting
