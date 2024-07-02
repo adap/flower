@@ -17,13 +17,14 @@
 
 from flwr.common.version import package_version as _package_version
 
-from . import client, common, server, simulation
+from . import client, common, server, simulation, superexec
 
 __all__ = [
     "client",
     "common",
     "server",
     "simulation",
+    "superexec",
 ]
 
 __version__ = _package_version
