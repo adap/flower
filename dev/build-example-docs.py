@@ -85,7 +85,7 @@ def _read_metadata(example):
         raise ValueError("Metadata block not found")
     metadata = metadata_match.group(1)
 
-    title_match = re.search(r"^title:\s*(.+)$", metadata, re.MULTILINE)
+    title_match = re.search(r"^# (.+)$", content, re.MULTILINE)
     if not title_match:
         raise ValueError("Title not found in metadata")
     title = title_match.group(1).strip()
