@@ -57,7 +57,6 @@ async def worker(
     taskins_queue: "asyncio.Queue[TaskIns]",
     taskres_queue: "asyncio.Queue[TaskRes]",
     node_states: Dict[int, NodeState],
-    state_factory: StateFactory,
     backend: Backend,
 ) -> None:
     """Get TaskIns from queue and pass it to an actor in the pool to execute it."""
