@@ -1,6 +1,6 @@
 ---
 title: Simple Flower Example using MLX
-labels: [quickstart, vision]
+tags: [quickstart, vision]
 dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
 framework: [MLX | https://ml-explore.github.io/mlx/build/html/index.html]
 ---

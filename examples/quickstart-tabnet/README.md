@@ -1,6 +1,6 @@
 ---
 title: Simple Flower Example using Tabnet
-labels: [quickstart, tabular]
+tags: [quickstart, tabular]
 dataset: [Iris | https://scikit-learn.org/stable/auto_examples/datasets/plot_iris_dataset.html]
 framework: [tabnet | https://github.com/titu1994/tf-TabNet]
 ---

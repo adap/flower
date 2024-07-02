@@ -1,6 +1,6 @@
 ---
 title: Simple Flower Example using Pandas
-labels: [quickstart, tabular, federated analytics]
+tags: [quickstart, tabular, federated analytics]
 dataset: [Iris | https://scikit-learn.org/stable/auto_examples/datasets/plot_iris_dataset.html]
 framework: [pandas | https://pandas.pydata.org/]
 ---

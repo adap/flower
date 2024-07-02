@@ -1,6 +1,6 @@
 ---
 title: Federated LLM Fine-tuning with Flower
-labels: [llm, nlp, LLama2]
+tags: [llm, nlp, LLama2]
 dataset: [Alpaca-GPT4 | https://huggingface.co/datasets/vicgalle/alpaca-gpt4]
 framework: [PEFT | https://huggingface.co/docs/peft/index, torch | https://pytorch.org/]
 ---

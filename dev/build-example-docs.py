@@ -90,10 +90,10 @@ def _read_metadata(example):
         raise ValueError("Title not found in metadata")
     title = title_match.group(1).strip()
 
-    labels_match = re.search(r"^labels:\s*\[(.+?)\]$", metadata, re.MULTILINE)
-    if not labels_match:
-        raise ValueError("Labels not found in metadata")
-    labels = labels_match.group(1).strip()
+    tags_match = re.search(r"^tags:\s*\[(.+?)\]$", metadata, re.MULTILINE)
+    if not tags_match:
+        raise ValueError("Tags not found in metadata")
+    tags = tags_match.group(1).strip()
 
     dataset_match = re.search(
         r"^dataset:\s*\[(.*?)\]$", metadata, re.DOTALL | re.MULTILINE
@@ -111,17 +111,17 @@ def _read_metadata(example):
 
     dataset = _convert_to_link(re.sub(r"\s+", " ", dataset).strip())
     framework = _convert_to_link(re.sub(r"\s+", " ", framework).strip())
-    return title, labels, dataset, framework
+    return title, tags, dataset, framework
 
 
-def _add_table_entry(example, label, table_var):
-    title, labels, dataset, framework = _read_metadata(example)
+def _add_table_entry(example, tag, table_var):
+    title, tags, dataset, framework = _read_metadata(example)
     example_name = Path(example).stem
     table_entry = (
         f"   * - `{title} <{example_name}.html>`_ \n     "
-        f"- {framework} \n     - {dataset} \n     - {labels}\n\n"
+        f"- {framework} \n     - {dataset} \n     - {tags}\n\n"
     )
-    if label in labels:
+    if tag in tags:
         categories[table_var]["table"] += table_entry
         categories[table_var]["list"] += f"  {example_name}\n"
         return True

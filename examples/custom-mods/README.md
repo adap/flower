@@ -1,6 +1,6 @@
 ---
 title: Example Flower App with Custom Mods
-labels: [mods, monitoring, app]
+tags: [mods, monitoring, app]
 dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
 framework: [wandb | https://wandb.ai/home, tensorboard | https://www.tensorflow.org/tensorboard]
 ---
