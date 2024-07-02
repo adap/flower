@@ -23,11 +23,10 @@ import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from logging import DEBUG, ERROR, INFO, WARN
+from pathlib import Path
 from queue import Empty, Queue
 from time import sleep
 from typing import Callable, Dict, Optional
-from pathlib import Path
-from typing import Callable, Dict, List, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.node_state import NodeState
