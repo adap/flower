@@ -1,0 +1,1 @@
+{"instruction1": "convert a list of integers into a single integer", "instruction2": "how to convert a datetime string back to datetime object?", "solution1": "r = int(''.join(map(str, x)))", "solution2": "datetime.datetime.strptime(str, '%m/%d/%Y')"}

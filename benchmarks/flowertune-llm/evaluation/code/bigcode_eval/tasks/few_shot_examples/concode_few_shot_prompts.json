@@ -1,0 +1,1 @@
+{"instruction1": "get the distance of map coordinates to the center ", "instruction2": "check if details are parsed", "solution1": "float function ( int arg0 , int arg1 ) { int loc0 = arg0 - cx ; int loc1 = arg1 - cy ; return getSquaredDistance ( loc0 , loc1 ) ; }", "solution2": "boolean function ( ) { return isParsed ; }"}

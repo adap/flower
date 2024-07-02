@@ -1,0 +1,116 @@
+{
+    "medqa": {
+        "system": "You are a medical doctor taking the US Medical Licensing Examination. You need to demonstrate your understanding of basic and clinical science, medical knowledge, and mechanisms underlying health, disease, patient care, and modes of therapy. Show your ability to apply the knowledge essential for medical practice. For the following multiple-choice question, select one correct answer from A to E. Base your answer on the current and standard practices referenced in medical guidelines.",
+        "user": "The answer is:",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "medqa_cot": {
+        "system": "You are a medical doctor taking the US Medical Licensing Examination. You need to demonstrate your understanding of basic and clinical science, medical knowledge, and mechanisms underlying health, disease, patient care, and modes of therapy. Show your ability to apply the knowledge essential for medical practice. For the following multiple-choice question, select one correct answer from A to E. Base your answer on the current and standard practices referenced in medical guidelines.",
+        "user": "Let's think step by step.",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "truthfulqa": {
+        "system": "Please truthfully answer the following multiple-choice question. Please ensure that your choice is socially unbiased and positive. If you don't know the answer to a question, please don't share false information.",
+        "user": "The answer is:",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "truthfulqa_cot": {
+        "system": "",
+        "user": "Let's think step by step.",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "medmcqa": {
+        "system": "You are a medical doctor answering realworld medical entrance exam questions. Based on your understanding of basic and clinical science, medical knowledge, and mechanisms underlying health, disease, patient care, and modes of therapy, answer the following multiple-choice question. Select one correct answer from A to D. Base your answer on the current and standard practices referenced in medical guidelines.",
+        "user": "The answer is:",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "medmcqa_cot": {
+        "system": "You are a medical doctor answering realworld medical entrance exam questions. Based on your understanding of basic and clinical science, medical knowledge, and mechanisms underlying health, disease, patient care, and modes of therapy, answer the following multiple-choice question. Select one correct answer from A to D. Base your answer on the current and standard practices referenced in medical guidelines.",
+        "user": "Let's think step by step.",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "pubmedqa": {
+        "system": "As an expert doctor in clinical science and medical knowledge, can you tell me if the following statement is correct? Answer yes, no, or maybe.",
+        "user": "The answer is:",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "pubmedqa_cot": {
+        "system": "As an expert doctor in clinical science and medical knowledge, can you tell me if the following statement is correct? Answer yes, no, or maybe.",
+        "user": "Let’s think step by step.",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "medicationqa": {
+        "system": "As an expert in clinical science and pharmaceutical knowledge, answer the following question in detail, providing comprehensive information to address the query posed. Use factual information and evidence from the current and standard practices referenced in medical guidelines. Your answer should reflect the perspective of providing information to a consumer, ensuring clarity and safety for the general public.",
+        "user": "Let’s think step by step.",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "medicationqa_cot": {
+        "system": "As an expert in clinical science and pharmaceutical knowledge, answer the following question in detail, providing comprehensive information to address the query posed. Use factual information and evidence from the current and standard practices referenced in medical guidelines. Your answer should reflect the perspective of providing information to a consumer, ensuring clarity and safety for the general public.",
+        "user": "The answer is:",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "gsm8k": {
+        "system": "Answer the following math question.",
+        "user": "The answer is:",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "gsm8k_cot": {
+        "system": "Answer the following math question。",
+        "user": "Step-by-step reasoning:",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "mcq_tags": {
+        "system": "Answer the following multiple choice question.",
+        "user": "Then provide your final answer within the tags, <Answer>A/B/C/D</Answer>.",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "mcq_default": {
+        "system": "",
+        "user": "The answer is:",
+        "type": "default",
+        "source": ""
+    },
+    "mcq": {
+        "system": "Answer the following multiple choice question.",
+        "user": "The answer is:",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "mcq_cot": {
+        "system": "Answer the following multiple choice question.",
+        "user": "Let’s work this out in a step by step way to be sure that we have the right answer.",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "mcq_tags_cot": {
+        "system": "You are a helpful assistant for medical question answering.",
+        "user": "Step-by-step reasoning:",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "open_question": {
+        "system": "Answer the following question.",
+        "user": "The answer is:",
+        "type": "task-oriented",
+        "source": ""
+    },
+    "open_question_cot": {
+        "system": "Answer the following question.",
+        "user": "Let’s work this out in a step by step way to be sure that we have the right answer.",
+        "type": "task-oriented",
+        "source": ""
+    }
+}
