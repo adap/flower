@@ -39,6 +39,7 @@ from flwr.common.recordset_compat import (
     recordset_to_getpropertiesres,
 )
 from flwr.common.recordset_compat_test import _get_valid_getpropertiesins
+from flwr.simulation.app import _create_node_id_to_partition_mapping
 from flwr.simulation.ray_transport.ray_actor import (
     ClientAppActor,
     VirtualClientEngineActor,
@@ -68,9 +69,7 @@ def get_dummy_client(
     node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
 ) -> Client:
     """Return a DummyClient converted to Client type."""
-    if partition_id is None:
-        raise ValueError("`partition_id` is not set.")
-    return DummyClient(partition_id).to_client()
+    return DummyClient(node_id).to_client()
 
 
 def prep(
@@ -91,13 +90,15 @@ def prep(
 
     # Create 373 client proxies
     num_proxies = 373  # a prime number
+    mapping = _create_node_id_to_partition_mapping(num_proxies)
     proxies = [
         RayActorClientProxy(
             client_fn=get_dummy_client,
-            cid=str(cid),
+            node_id=node_id,
+            partition_id=partition_id,
             actor_pool=pool,
         )
-        for cid in range(num_proxies)
+        for node_id, partition_id in mapping.items()
     ]
 
     return proxies, pool
@@ -127,7 +128,7 @@ def test_cid_consistency_one_at_a_time() -> None:
 
         res = recordset_to_getpropertiesres(message_out.content)
 
-        assert int(prox.cid) * pi == res.properties["result"]
+        assert int(prox.node_id) * pi == res.properties["result"]
 
     ray.shutdown()
 
@@ -160,21 +161,21 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         )
         prox.actor_pool.submit_client_job(
             lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-            (prox.app_fn, message, prox.cid, state),
+            (prox.app_fn, message, str(prox.node_id), state),
         )
 
     # fetch results one at a time
     shuffle(proxies)
     for prox in proxies:
         message_out, updated_context = prox.actor_pool.get_client_result(
-            prox.cid, timeout=None
+            str(prox.node_id), timeout=None
         )
         prox.proxy_state.update_context(run_id, context=updated_context)
         res = recordset_to_getpropertiesres(message_out.content)
 
-        assert int(prox.cid) * pi == res.properties["result"]
+        assert prox.node_id * pi == res.properties["result"]
         assert (
-            str(int(prox.cid) * pi)
+            str(prox.node_id * pi)
             == prox.proxy_state.retrieve_context(run_id).state.configs_records[
                 "result"
             ]["result"]
@@ -187,7 +188,7 @@ def test_cid_consistency_without_proxies() -> None:
     """Test cid consistency of jobs submitted/retrieved to/from pool w/o ClientProxy."""
     proxies, pool = prep()
     num_clients = len(proxies)
-    cids = [str(cid) for cid in range(num_clients)]
+    node_ids = list(range(num_clients))
 
     getproperties_ins = _get_valid_getpropertiesins()
     recordset = getpropertiesins_to_recordset(getproperties_ins)
@@ -196,8 +197,8 @@ def test_cid_consistency_without_proxies() -> None:
         return ClientApp(client_fn=get_dummy_client)
 
     # submit all jobs (collect later)
-    shuffle(cids)
-    for cid in cids:
+    shuffle(node_ids)
+    for node_id in node_ids:
         message = Message(
             content=recordset,
             metadata=Metadata(
@@ -205,27 +206,27 @@ def test_cid_consistency_without_proxies() -> None:
                 message_id="",
                 group_id=str(0),
                 src_node_id=0,
-                dst_node_id=12345,
+                dst_node_id=node_id,
                 reply_to_message="",
                 ttl=DEFAULT_TTL,
                 message_type=MessageTypeLegacy.GET_PROPERTIES,
             ),
         )
         pool.submit_client_job(
-            lambda a, c_fn, j_fn, cid_, state: a.run.remote(c_fn, j_fn, cid_, state),
+            lambda a, c_fn, j_fn, nid_, state: a.run.remote(c_fn, j_fn, nid_, state),
             (
                 _load_app,
                 message,
-                cid,
-                Context(state=RecordSet(), partition_id=int(cid)),
+                str(node_id),
+                Context(state=RecordSet(), partition_id=node_id),
             ),
         )
 
     # fetch results one at a time
-    shuffle(cids)
-    for cid in cids:
-        message_out, _ = pool.get_client_result(cid, timeout=None)
+    shuffle(node_ids)
+    for node_id in node_ids:
+        message_out, _ = pool.get_client_result(str(node_id), timeout=None)
         res = recordset_to_getpropertiesres(message_out.content)
-        assert int(cid) * pi == res.properties["result"]
+        assert node_id * pi == res.properties["result"]
 
     ray.shutdown()
