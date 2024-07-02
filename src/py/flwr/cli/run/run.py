@@ -17,12 +17,14 @@
 import sys
 from enum import Enum
 from logging import DEBUG
+from pathlib import Path
 from typing import Optional
 
 import typer
 from typing_extensions import Annotated
 
 from flwr.cli import config_utils
+from flwr.cli.build import build
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -41,7 +43,10 @@ class Engine(str, Enum):
 def run(
     engine: Annotated[
         Optional[Engine],
-        typer.Option(case_sensitive=False, help="The ML framework to use"),
+        typer.Option(
+            case_sensitive=False,
+            help="The engine to run FL with (currently only simulation is supported).",
+        ),
     ] = None,
     use_superexec: Annotated[
         bool,
@@ -49,10 +54,14 @@ def run(
             case_sensitive=False, help="Use this flag to use the new SuperExec API"
         ),
     ] = False,
+    directory: Annotated[
+        Optional[Path],
+        typer.Option(help="Path of the Flower project to run"),
+    ] = None,
 ) -> None:
     """Run Flower project."""
     if use_superexec:
-        _start_superexec_run()
+        _start_superexec_run(directory)
         return
 
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
@@ -87,12 +96,16 @@ def run(
 
     if engine == Engine.SIMULATION:
         num_supernodes = config["flower"]["engine"]["simulation"]["supernode"]["num"]
+        backend_config = config["flower"]["engine"]["simulation"].get(
+            "backend_config", None
+        )
 
         typer.secho("Starting run... ", fg=typer.colors.BLUE)
         _run_simulation(
             server_app_attr=server_app_ref,
             client_app_attr=client_app_ref,
             num_supernodes=num_supernodes,
+            backend_config=backend_config,
         )
     else:
         typer.secho(
@@ -102,7 +115,7 @@ def run(
         )
 
 
-def _start_superexec_run() -> None:
+def _start_superexec_run(directory: Optional[Path]) -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
@@ -117,5 +130,8 @@ def _start_superexec_run() -> None:
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    req = StartRunRequest()
-    stub.StartRun(req)
+    fab_path = build(directory)
+
+    req = StartRunRequest(fab_file=Path(fab_path).read_bytes())
+    res = stub.StartRun(req)
+    typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)

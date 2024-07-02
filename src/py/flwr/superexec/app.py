@@ -164,7 +164,7 @@ def _load_executor(
     if not valid and error_msg:
         raise LoadExecutorError(error_msg) from None
 
-    executor = load_app(executor_ref, LoadExecutorError)
+    executor = load_app(executor_ref, LoadExecutorError, args.executor_dir)
 
     if not isinstance(executor, Executor):
         raise LoadExecutorError(

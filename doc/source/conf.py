@@ -108,6 +108,7 @@ extensions = [
     "sphinxcontrib.youtube",
     "sphinx_reredirects",
     "nbsphinx",
+    "sphinx_click",
 ]
 
 # Generate .rst files

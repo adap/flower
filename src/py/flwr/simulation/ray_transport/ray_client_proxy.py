@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ from logging import ERROR
 from typing import Optional
 
 from flwr import common
-from flwr.client import ClientFn
+from flwr.client import ClientFnExt
 from flwr.client.client_app import ClientApp
 from flwr.client.node_state import NodeState
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
@@ -44,7 +44,7 @@ class RayActorClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
     def __init__(
-        self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActorPool
+        self, client_fn: ClientFnExt, cid: str, actor_pool: VirtualClientEngineActorPool
     ):
         super().__init__(cid)
 
@@ -53,7 +53,7 @@ class RayActorClientProxy(ClientProxy):
 
         self.app_fn = _load_app
         self.actor_pool = actor_pool
-        self.proxy_state = NodeState()
+        self.proxy_state = NodeState(partition_id=int(self.cid))
 
     def _submit_job(self, message: Message, timeout: Optional[float]) -> Message:
         """Sumbit a message to the ActorPool."""
@@ -107,7 +107,6 @@ class RayActorClientProxy(ClientProxy):
                 reply_to_message="",
                 ttl=timeout if timeout else DEFAULT_TTL,
                 message_type=message_type,
-                partition_id=int(self.cid),
             ),
         )
 

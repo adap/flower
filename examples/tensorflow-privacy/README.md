@@ -1,3 +1,10 @@
+---
+title: Sample-Level DP using TensorFlow-Privacy Engine
+tags: [basic, vision, fds, privacy, dp]
+dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
+framework: [tensorflow | https://www.tensorflow.org/]
+---
+
 # Training with Sample-Level Differential Privacy using TensorFlow-Privacy Engine
 
 In this example, we demonstrate how to train a model with sample-level differential privacy (DP) using Flower. We employ TensorFlow and integrate the tensorflow-privacy Engine to achieve sample-level differential privacy. This setup ensures robust privacy guarantees during the client training phase.

@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,12 +55,13 @@ class StateTest(unittest.TestCase):
         run_id = state.create_run("Mock/mock", "v1.0.0")
 
         # Execute
-        actual_run_id, fab_id, fab_version = state.get_run(run_id)
+        run = state.get_run(run_id)
 
         # Assert
-        assert actual_run_id == run_id
-        assert fab_id == "Mock/mock"
-        assert fab_version == "v1.0.0"
+        assert run is not None
+        assert run.run_id == run_id
+        assert run.fab_id == "Mock/mock"
+        assert run.fab_version == "v1.0.0"
 
     def test_get_task_ins_empty(self) -> None:
         """Validate that a new state has no TaskIns."""

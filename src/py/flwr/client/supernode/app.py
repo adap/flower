@@ -20,7 +20,6 @@ from logging import DEBUG, INFO, WARN
 from pathlib import Path
 from typing import Callable, Optional, Tuple
 
-import tomli
 from cryptography.exceptions import UnsupportedAlgorithm
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.serialization import (
@@ -28,10 +27,14 @@ from cryptography.hazmat.primitives.serialization import (
     load_ssh_public_key,
 )
 
-from flwr.cli.config_utils import validate_fields
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
-from flwr.common.config import get_flwr_dir
+from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
+from flwr.common.constant import (
+    TRANSPORT_TYPE_GRPC_ADAPTER,
+    TRANSPORT_TYPE_GRPC_RERE,
+    TRANSPORT_TYPE_REST,
+)
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.object_ref import load_app, validate
@@ -56,14 +59,15 @@ def run_supernode() -> None:
     authentication_keys = _try_setup_client_authentication(args)
 
     _start_client_internal(
-        server_address=args.server,
+        server_address=args.superlink,
         load_client_app_fn=load_fn,
-        transport="rest" if args.rest else "grpc-rere",
+        transport=args.transport,
         root_certificates=root_certificates,
         insecure=args.insecure,
         authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
+        partition_id=args.partition_id,
     )
 
     # Graceful shutdown
@@ -89,7 +93,7 @@ def run_client_app() -> None:
     _start_client_internal(
         server_address=args.superlink,
         load_client_app_fn=load_fn,
-        transport="rest" if args.rest else "grpc-rere",
+        transport=args.transport,
         root_certificates=root_certificates,
         insecure=args.insecure,
         authentication_keys=authentication_keys,
@@ -172,9 +176,9 @@ def _get_load_client_app_fn(
         if args.flwr_dir is None:
             flwr_dir = get_flwr_dir()
         else:
-            flwr_dir = Path(args.flwr_dir)
+            flwr_dir = Path(args.flwr_dir).absolute()
 
-    sys.path.insert(0, str(flwr_dir))
+    sys.path.insert(0, str(flwr_dir.absolute()))
 
     default_app_ref: str = getattr(args, "client-app")
 
@@ -191,8 +195,8 @@ def _get_load_client_app_fn(
     def _load(fab_id: str, fab_version: str) -> ClientApp:
         # If multi-app feature is disabled
         if not multi_app:
-            # Set sys.path
-            sys.path[0] = args.dir
+            # Get sys path to be inserted
+            sys_path = Path(args.dir).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -204,51 +208,27 @@ def _get_load_client_app_fn(
                 ) from None
 
             log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
-            # Set sys.path
-            sys.path[0] = args.dir
+            # Get sys path to be inserted
+            sys_path = Path(args.dir).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
         # If multi-app feature is enabled
         else:
-            # Check the fab_id
-            if fab_id.count("/") != 1:
-                raise LoadClientAppError(
-                    f"Invalid FAB ID: {fab_id}",
-                ) from None
-            username, project_name = fab_id.split("/")
+            try:
+                project_dir = get_project_dir(fab_id, fab_version, flwr_dir)
+                config = get_project_config(project_dir)
+            except Exception as e:
+                raise LoadClientAppError("Failed to load ClientApp") from e
 
-            # Locate the directory
-            project_dir = flwr_dir / "apps" / username / project_name / fab_version
-
-            # Check if the directory exists
-            if not project_dir.exists():
-                raise LoadClientAppError(
-                    f"Invalid Flower App directory: {project_dir}",
-                ) from None
-
-            # Load pyproject.toml file
-            toml_path = project_dir / "pyproject.toml"
-            if not toml_path.is_file():
-                raise LoadClientAppError(
-                    f"Cannot find pyproject.toml in {project_dir}",
-                ) from None
-            with open(toml_path, encoding="utf-8") as toml_file:
-                config = tomli.loads(toml_file.read())
-
-            # Validate pyproject.toml fields
-            is_valid, errors, _ = validate_fields(config)
-            if not is_valid:
-                error_msg = "\n".join([f"  - {error}" for error in errors])
-                raise LoadClientAppError(
-                    f"Invalid pyproject.toml:\n{error_msg}",
-                ) from None
-
-            # Set sys.path
-            sys.path[0] = str(project_dir)
+            # Get sys path to be inserted
+            sys_path = Path(project_dir).absolute()
 
             # Set app reference
             client_app_ref = config["flower"]["components"]["clientapp"]
+
+        # Set sys.path
+        sys.path.insert(0, str(sys_path))
 
         # Load ClientApp
         log(
@@ -256,7 +236,7 @@ def _get_load_client_app_fn(
             "Loading ClientApp `%s`",
             client_app_ref,
         )
-        client_app = load_app(client_app_ref, LoadClientAppError)
+        client_app = load_app(client_app_ref, LoadClientAppError, sys_path)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
@@ -288,7 +268,7 @@ def _parse_args_run_supernode() -> argparse.ArgumentParser:
         "--flwr-dir",
         default=None,
         help="""The path containing installed Flower Apps.
-    By default, this value isequal to:
+    By default, this value is equal to:
 
         - `$FLWR_HOME/` if `$FLWR_HOME` is defined
         - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
@@ -321,9 +301,27 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         help="Run the client without HTTPS. By default, the client runs with "
         "HTTPS enabled. Use this flag only if you understand the risks.",
     )
-    parser.add_argument(
+    ex_group = parser.add_mutually_exclusive_group()
+    ex_group.add_argument(
+        "--grpc-rere",
+        action="store_const",
+        dest="transport",
+        const=TRANSPORT_TYPE_GRPC_RERE,
+        default=TRANSPORT_TYPE_GRPC_RERE,
+        help="Use grpc-rere as a transport layer for the client.",
+    )
+    ex_group.add_argument(
+        "--grpc-adapter",
+        action="store_const",
+        dest="transport",
+        const=TRANSPORT_TYPE_GRPC_ADAPTER,
+        help="Use grpc-adapter as a transport layer for the client.",
+    )
+    ex_group.add_argument(
         "--rest",
-        action="store_true",
+        action="store_const",
+        dest="transport",
+        const=TRANSPORT_TYPE_REST,
         help="Use REST as a transport layer for the client.",
     )
     parser.add_argument(
@@ -375,6 +373,13 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "--auth-supernode-public-key",
         type=str,
         help="The SuperNode's public key (as a path str) to enable authentication.",
+    )
+    parser.add_argument(
+        "--partition-id",
+        type=int,
+        help="The data partition index associated with this SuperNode. Better suited "
+        "for prototyping purposes where a SuperNode might only load a fraction of an "
+        "artificially partitioned dataset (e.g. using `flwr-datasets`)",
     )
 
 
