@@ -36,6 +36,7 @@ from flwr.common import (
     RecordSet,
     Scalar,
 )
+from flwr.common.constant import ErrorCode
 from flwr.common.object_ref import load_app
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
@@ -167,6 +168,10 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
             raise AssertionError("This shouldn't happen")
 
         out_mssg, updated_context = res
+
+        if out_mssg.has_error():
+            if out_mssg.error.code == ErrorCode.LOAD_CLIENT_APP_EXCEPTION:
+                raise LoadClientAppError()
 
         # Verify message content is as expected
         content = out_mssg.content
