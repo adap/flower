@@ -1,5 +1,4 @@
 ---
-title: Simple Flower Example on iOS
 tags: [mobile, vision, fds]
 dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
 framework: [Swift | https://www.swift.org/]

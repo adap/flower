@@ -1,5 +1,4 @@
 ---
-title: Simple Flower Example using C++
 tags: [quickstart, linear regression, tabular]
 dataset: [Synthetic]
 framework: [C++ | https://isocpp.org/]

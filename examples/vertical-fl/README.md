@@ -1,5 +1,4 @@
 ---
-title: Vertical FL Flower Example
 tags: [vertical, tabular, advanced]
 dataset: [Titanic | https://www.kaggle.com/competitions/titanic]
 framework: [torch | https://pytorch.org/, pandas | https://pandas.pydata.org/, scikit-learn

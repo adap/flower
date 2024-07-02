@@ -1,5 +1,4 @@
 ---
-title: Flower Simulation Example using TensorFlow/Keras
 tags: [basic, vision, fds, simulation]
 dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
 framework: [tensorflow | https://www.tensorflow.org/, Keras | https://keras.io/]

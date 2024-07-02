@@ -1,5 +1,4 @@
 ---
-title: Leveraging Flower and Docker for Device Heterogeneity Management in FL
 tags: [deployment, vision, tutorial]
 dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
 framework: [Docker | https://www.docker.com/, tensorflow | https://www.tensorflow.org/]
