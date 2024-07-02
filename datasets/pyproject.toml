@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "flwr-datasets"
-version = "0.1.0"
+version = "0.2.0"
 description = "Flower Datasets"
 license = "Apache-2.0"
 authors = ["The Flower Authors <hello@flower.ai>"]
@@ -54,7 +54,7 @@ exclude = [
 [tool.poetry.dependencies]
 python = "^3.8"
 numpy = "^1.21.0"
-datasets = "^2.14.6"
+datasets = ">=2.14.6 <2.20.0"
 pillow = { version = ">=6.2.1", optional = true }
 soundfile = { version = ">=0.12.1", optional = true }
 librosa = { version = ">=0.10.0.post2", optional = true }

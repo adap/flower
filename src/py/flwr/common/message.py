@@ -48,10 +48,6 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     message_type : str
         A string that encodes the action to be executed on
         the receiving end.
-    partition_id : Optional[int]
-        An identifier that can be used when loading a particular
-        data partition for a ClientApp. Making use of this identifier
-        is more relevant when conducting simulations.
     """
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -64,7 +60,6 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
         group_id: str,
         ttl: float,
         message_type: str,
-        partition_id: int | None = None,
     ) -> None:
         var_dict = {
             "_run_id": run_id,
@@ -75,7 +70,6 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
             "_group_id": group_id,
             "_ttl": ttl,
             "_message_type": message_type,
-            "_partition_id": partition_id,
         }
         self.__dict__.update(var_dict)
 
@@ -148,16 +142,6 @@ class Metadata:  # pylint: disable=too-many-instance-attributes
     def message_type(self, value: str) -> None:
         """Set message_type."""
         self.__dict__["_message_type"] = value
-
-    @property
-    def partition_id(self) -> int | None:
-        """An identifier telling which data partition a ClientApp should use."""
-        return cast(int, self.__dict__["_partition_id"])
-
-    @partition_id.setter
-    def partition_id(self, value: int) -> None:
-        """Set partition_id."""
-        self.__dict__["_partition_id"] = value
 
     def __repr__(self) -> str:
         """Return a string representation of this instance."""
@@ -398,5 +382,4 @@ def _create_reply_metadata(msg: Message, ttl: float) -> Metadata:
         group_id=msg.metadata.group_id,
         ttl=ttl,
         message_type=msg.metadata.message_type,
-        partition_id=msg.metadata.partition_id,
     )

@@ -1,3 +1,10 @@
+---
+title: Simple Flower Example using MLX
+tags: [quickstart, vision]
+dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
+framework: [MLX | https://ml-explore.github.io/mlx/build/html/index.html]
+---
+
 # Flower Example using MLX
 
 This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/build/html/index.html), but deep knowledge of MLX is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy.

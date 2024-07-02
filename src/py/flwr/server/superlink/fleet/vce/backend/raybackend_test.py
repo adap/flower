@@ -37,6 +37,7 @@ from flwr.common import (
 )
 from flwr.common.object_ref import load_app
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
+from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
 
 
@@ -52,7 +53,9 @@ class DummyClient(NumPyClient):
         return {"result": result}
 
 
-def get_dummy_client(cid: str) -> Client:  # pylint: disable=unused-argument
+def get_dummy_client(
+    node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
+) -> Client:
     """Return a DummyClient converted to Client type."""
     return DummyClient().to_client()
 
@@ -208,3 +211,36 @@ class TestRayBackend(TestCase):
                 client_app_loader=_load_from_module("raybackend_test:client_app"),
                 workdir="/?&%$^#%@$!",
             )
+        self.addAsyncCleanup(self.on_cleanup)
+
+    def test_backend_creation_with_init_arguments(self) -> None:
+        """Testing whether init args are properly parsed to Ray."""
+        backend_config_4: BackendConfig = {
+            "init_args": {"num_cpus": 4},
+            "client_resources": {"num_cpus": 1, "num_gpus": 0},
+        }
+
+        backend_config_2: BackendConfig = {
+            "init_args": {"num_cpus": 2},
+            "client_resources": {"num_cpus": 1, "num_gpus": 0},
+        }
+
+        RayBackend(
+            backend_config=backend_config_4,
+            work_dir="",
+        )
+        nodes = ray.nodes()
+
+        assert nodes[0]["Resources"]["CPU"] == backend_config_4["init_args"]["num_cpus"]
+
+        ray.shutdown()
+
+        RayBackend(
+            backend_config=backend_config_2,
+            work_dir="",
+        )
+        nodes = ray.nodes()
+
+        assert nodes[0]["Resources"]["CPU"] == backend_config_2["init_args"]["num_cpus"]
+
+        self.addAsyncCleanup(self.on_cleanup)

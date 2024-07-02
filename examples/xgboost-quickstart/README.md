@@ -1,3 +1,10 @@
+---
+title: Simple Flower Example using XGBoost
+tags: [quickstart, classification, tabular]
+dataset: [HIGGS | https://archive.ics.uci.edu/dataset/280/higgs]
+framework: [xgboost | https://xgboost.readthedocs.io/en/stable/]
+---
+
 # Flower Example using XGBoost
 
 This example demonstrates how to perform EXtreme Gradient Boosting (XGBoost) within Flower using `xgboost` package.
