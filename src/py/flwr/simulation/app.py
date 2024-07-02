@@ -123,10 +123,10 @@ def start_simulation(
     num_clients : int
         The total number of clients in this simulation.
     clients_ids : Optional[List[str]]
-        List `client_id`s for each client. This is only required if
+        DEPRECATED. List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
-        Deprecated in favour of `node_ids` argument. This argument is deprecated.
+        This argument is deprecated.
     client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1, "num_gpus": 0.0}`)
         CPU and GPU resources for a single client. Supported keys
         are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
