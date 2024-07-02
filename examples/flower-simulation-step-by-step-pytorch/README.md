@@ -1,6 +1,6 @@
 ---
 title: Flower Simulation Step-by-Step
-labels: [basic, vision, simulation]
+tags: [basic, vision, simulation]
 dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
 framework: [torch | https://pytorch.org/]
 ---

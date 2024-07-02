@@ -1,6 +1,6 @@
 ---
 title: Flower Embedded Devices Example
-labels: [basic, vision, fds]
+tags: [basic, vision, fds]
 dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10, MNIST | https://huggingface.co/datasets/ylecun/mnist]
 framework: [torch | https://pytorch.org/, tensorflow | https://www.tensorflow.org/]
 ---
