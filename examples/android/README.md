@@ -1,3 +1,11 @@
+---
+title: Flower Android Example using Java and TF Lite
+tags: [basic, vision, fds]
+dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
+framework: [Android | https://www.android.com/, Java | https://www.java.com/, TensorFlowLite
+      | https://www.tensorflow.org/lite]
+---
+
 # Flower Android Example (TensorFlowLite)
 
 This example demonstrates a federated learning setup with Android clients in a background thread. The training on Android is done on a CIFAR10 dataset using TensorFlow Lite. The setup is as follows:

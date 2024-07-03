@@ -55,6 +55,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get -y --no-install-recommends install \
     libsqlite3-0 \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=python /usr/local/bin/python /usr/local/bin/python

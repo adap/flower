@@ -1,3 +1,10 @@
+---
+title: Simple Flower Example using TensorFlow
+tags: [quickstart, vision, fds]
+dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
+framework: [tensorflow | https://www.tensorflow.org/]
+---
+
 # Flower Example using TensorFlow/Keras
 
 This introductory example to Flower uses Keras but deep knowledge of Keras is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.

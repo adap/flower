@@ -39,7 +39,6 @@ def _plot_heatmap(
     plot_kwargs: Optional[Dict[str, Any]],
     legend_kwargs: Optional[Dict[str, Any]],
 ) -> Axes:
-
     if axis is None:
         if figsize is None:
             figsize = _initialize_figsize(
@@ -92,7 +91,6 @@ def _initialize_figsize(
     num_partitions: int,
     num_labels: int,
 ) -> Tuple[float, float]:
-
     figsize = (0.0, 0.0)
     if partition_id_axis == "x":
         figsize = (3 * np.sqrt(num_partitions), np.sqrt(num_labels))

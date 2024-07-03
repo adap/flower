@@ -26,11 +26,12 @@ from grpc import RpcError
 
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.client.typing import ClientFn
+from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
+    TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -41,6 +42,7 @@ from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 
+from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
@@ -49,7 +51,7 @@ from .numpy_client import NumPyClient
 
 
 def _check_actionable_client(
-    client: Optional[Client], client_fn: Optional[ClientFn]
+    client: Optional[Client], client_fn: Optional[ClientFnExt]
 ) -> None:
     if client_fn is None and client is None:
         raise ValueError(
@@ -70,7 +72,7 @@ def _check_actionable_client(
 def start_client(
     *,
     server_address: str,
-    client_fn: Optional[ClientFn] = None,
+    client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
@@ -90,7 +92,7 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    client_fn : Optional[ClientFn]
+    client_fn : Optional[ClientFnExt]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
         An implementation of the abstract base
@@ -134,7 +136,7 @@ def start_client(
 
     Starting an SSL-enabled gRPC client using system certificates:
 
-    >>> def client_fn(cid: str):
+    >>> def client_fn(node_id: int, partition_id: Optional[int]):
     >>>     return FlowerClient()
     >>>
     >>> start_client(
@@ -178,7 +180,7 @@ def _start_client_internal(
     *,
     server_address: str,
     load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
-    client_fn: Optional[ClientFn] = None,
+    client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
@@ -189,6 +191,7 @@ def _start_client_internal(
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
+    partition_id: Optional[int] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -200,7 +203,7 @@ def _start_client_internal(
         would be `"[::]:8080"`.
     load_client_app_fn : Optional[Callable[[], ClientApp]] (default: None)
         A function that can be used to load a `ClientApp` instance.
-    client_fn : Optional[ClientFn]
+    client_fn : Optional[ClientFnExt]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
         An implementation of the abstract base
@@ -232,6 +235,9 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
+    partitioni_id: Optional[int] (default: None)
+        The data partition index associated with this node. Better suited for
+        prototyping purposes.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -242,7 +248,8 @@ def _start_client_internal(
         if client_fn is None:
             # Wrap `Client` instance in `client_fn`
             def single_client_factory(
-                cid: str,  # pylint: disable=unused-argument
+                node_id: int,  # pylint: disable=unused-argument
+                partition_id: Optional[int],  # pylint: disable=unused-argument
             ) -> Client:
                 if client is None:  # Added this to keep mypy happy
                     raise ValueError(
@@ -307,7 +314,7 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    node_state = NodeState()
+    node_state = NodeState(partition_id=partition_id)
     # run_id -> (fab_id, fab_version)
     run_info: Dict[int, Tuple[str, str]] = {}
 
@@ -600,6 +607,8 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         connection, error_type = http_request_response, RequestsConnectionError
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
         connection, error_type = grpc_request_response, RpcError
+    elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
+        connection, error_type = grpc_adapter, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
         connection, error_type = grpc_connection, RpcError
     else:
