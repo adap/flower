@@ -107,17 +107,18 @@ urls = {
 
 
 def _convert_to_link(search_result):
-    if "|" in search_result:
-        if "," in search_result:
-            result = ""
-            for part in search_result.split(","):
-                result += f"{_convert_to_link(part)}, "
-            return result[:-2]
-
-        name, url = search_result.replace('"', "").split("|")
-        return f"`{name.strip()} <{url.strip()}>`_"
-
-    return search_result
+    if "," in search_result:
+        result = ""
+        for part in search_result.split(","):
+            result += f"{_convert_to_link(part)}, "
+        return result[:-2]
+    else:
+        search_result = search_result.strip()
+        name, url = search_result, urls.get(search_result, None)
+        if url:
+            return f"`{name.strip()} <{url.strip()}>`_"
+        else:
+            return search_result
 
 
 def _read_metadata(example):
@@ -207,7 +208,7 @@ def _copy_images(example):
                 )
 
 
-def _add_all_entries(index_file):
+def _add_all_entries():
     examples_dir = os.path.join(ROOT, "examples")
     for example in sorted(os.listdir(examples_dir)):
         example_path = os.path.join(examples_dir, example)
