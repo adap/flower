@@ -90,6 +90,7 @@ RUN pip install -U --no-cache-dir \
 # add non-root user
 RUN adduser \
     --no-create-home \
+    --home /app \
     --disabled-password \
     --gecos "" \
     --uid 49999 app \

@@ -58,6 +58,7 @@ RUN apk add --no-cache \
     # add non-root user
     && adduser \
     --no-create-home \
+    --home /app \
     --disabled-password \
     --gecos "" \
     --uid 49999 app \
