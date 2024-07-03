@@ -1,7 +1,7 @@
 ---
 tags: [quickstart, vision, deployment]
 dataset: [MNIST]
-framework: [tensorflow, Keras]
+framework: [mlcube, tensorflow, Keras]
 ---
 
 # Flower Example using TensorFlow/Keras + MLCube
