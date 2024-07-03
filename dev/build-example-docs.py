@@ -256,7 +256,7 @@ def _main():
         )
         index_file.write(categories["other"]["table"])
 
-        _add_all_entries(index_file)
+        _add_all_entries()
 
         index_file.write(
             "\n.. toctree::\n  :maxdepth: 1\n  :caption: Quickstart\n  :hidden:\n\n"
