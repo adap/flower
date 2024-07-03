@@ -1,4 +1,5 @@
 ---
+title: Leveraging Flower and Docker for Device Heterogeneity Management in FL
 tags: [deployment, vision, tutorial]
 dataset: [CIFAR-10]
 framework: [Docker, tensorflow]
@@ -33,7 +34,7 @@ In this example, we tackle device heterogeneity in federated learning, arising f
            {"mem_limit": "6g", "batch_size": 256, "cpus": 1, "learning_rate": 0.05},
            {"mem_limit": "4g", "batch_size": 64, "cpus": 3, "learning_rate": 0.02},
            {"mem_limit": "5g", "batch_size": 128, "cpus": 2.5, "learning_rate": 0.09},
-    ]
+     ]
      ```
 
 ## Prerequisites

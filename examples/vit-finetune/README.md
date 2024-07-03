@@ -1,4 +1,5 @@
 ---
+title: Federated finetuning of a ViT
 tags: [finetuneing, vision, fds]
 dataset: [Oxford Flower-102]
 framework: [torch, torchvision]
@@ -64,28 +65,28 @@ You can adjust the `client_resources` passed to `start_simulation()` so more/les
 
 ```bash
 +---------------------------------------------------------------------------------------+
-
-
-
-
-
-
-
-
-
+| NVIDIA-SMI 535.161.07             Driver Version: 535.161.07   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA GeForce RTX 3090 Ti     Off | 00000000:0B:00.0 Off |                  Off |
+| 44%   74C    P2             441W / 450W |   7266MiB / 24564MiB |    100%      Default |
+|                                         |                      |                  N/A |
 +-----------------------------------------+----------------------+----------------------+
 
 +---------------------------------------------------------------------------------------+
-
-
-
-
-
-
-
-
-
-
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|    0   N/A  N/A    173812      C   python                                     1966MiB |
+|    0   N/A  N/A    174510      C   ray::ClientAppActor.run                    1056MiB |
+|    0   N/A  N/A    174512      C   ray::ClientAppActor.run                    1056MiB |
+|    0   N/A  N/A    174513      C   ray::ClientAppActor.run                    1056MiB |
+|    0   N/A  N/A    174514      C   ray::ClientAppActor.run                    1056MiB |
+|    0   N/A  N/A    174516      C   ray::ClientAppActor.run                    1056MiB |
 +---------------------------------------------------------------------------------------+
 ```
 

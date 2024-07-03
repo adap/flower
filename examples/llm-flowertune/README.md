@@ -1,4 +1,5 @@
 ---
+title: Federated LLM Fine-tuning with Flower
 tags: [llm, nlp, LLama2]
 dataset: [Alpaca-GPT4]
 framework: [PEFT, torch]
@@ -78,9 +79,9 @@ python main.py --multirun model.name="openlm-research/open_llama_7b_v2","openlm-
 
 ## VRAM Consumption
 
-
-
-
+| Models | 7-billion (8-bit) | 7-billion (4-bit) | 3-billion (8-bit) | 3-billion (4-bit) |
+| :----: | :---------------: | :---------------: | :---------------: | :---------------: |
+|  VRAM  |     ~22.00 GB     |     ~16.50 GB     |     ~13.50 GB     |     ~10.60 GB     |
 
 We make use of the [bitsandbytes](https://huggingface.co/docs/bitsandbytes/main/en/index) library in conjunction with [PEFT](https://huggingface.co/docs/peft/en/index) to derive LLMs that can be fine-tuned efficiently.
 The above table shows the VRAM consumption per client for the different models considered in this example.

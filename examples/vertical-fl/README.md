@@ -1,6 +1,7 @@
 ---
+title: Vertical FL Flower Example
 tags: [vertical, tabular, advanced]
-dataset: [Titanic]
+dataset: [Titanic | https://www.kaggle.com/competitions/titanic]
 framework: [torch, pandas, scikit-learn]
 ---
 
@@ -96,16 +97,16 @@ seconds to run as the model is very small.
 
 ### Vertical FL vs Horizontal FL
 
+|                       | Horizontal Federated Learning (HFL or just FL)                                                                                                                                                           | Vertical Federated Learning (VFL)                                                                                                                                                                                                                                                                                                                                        |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Data Distribution     | Clients have different data instances but share the same feature space.  Think of different hospitals having different patients' data (samples)  but recording the same types of information (features). | Each client holds different features for the same instances.  Imagine different institutions holding various tests or  measurements for the same group of patients.                                                                                                                                                                                                      |
+| Model Training        | Each client trains a model on their local data,  which contains all the feature columns for its samples.                                                                                                 | Clients train models on their respective features without  having access to the complete feature set.  Each model only sees a vertical slice of the data (hence the name 'Vertical').                                                                                                                                                                                    |
+| Aggregation           | The server aggregates these local models by averaging  the parameters or gradients to update a global model.                                                                                             | The server aggregates the updates such as gradients or parameters,  which are then used to update the global model.  However, since each client sees only a part of the features,  the server typically has a more complex role,  sometimes needing to coordinate more sophisticated aggregation strategies  that may involve secure multi-party computation techniques. |
+| Privacy Consideration | The raw data stays on the client's side, only model updates are shared,  which helps in maintaining privacy.                                                                                             | VFL is designed to ensure that no participant can access  the complete feature set of any sample,  thereby preserving the privacy of data.                                                                                                                                                                                                                               |
 
-
-
-
-
-
-
-
-
-](_static/hfl.jpg)](_static/vfl.jpg) 
+|               HFL               |               VFL               |
+| :-----------------------------: | :-----------------------------: |
+| ![HFL diagram](_static/hfl.jpg) | ![VFL diagram](_static/vfl.jpg) |
 
 Those diagrams illustrate HFL vs VFL using a simplified version of what we will be building in this example. Note that on the VFL side, the server holds the labels (the `Survived` column) and will be the only one capable of performing evaluation.
 
@@ -213,7 +214,7 @@ def _partition_data(df, all_keywords):
                         if kw in col or "Survived" in col
                     }
                 )
-           ]
+            ]
         )
 
     return partitions
@@ -340,7 +341,7 @@ def aggregate_fit(
     embedding_results = [
         torch.from_numpy(parameters_to_ndarrays(fit_res.parameters)[0])
         for _, fit_res in results
-   ]
+    ]
     embeddings_aggregated = torch.cat(embedding_results, dim=1)
     embedding_server = embeddings_aggregated.detach().requires_grad_()
     output = self.model(embedding_server)
