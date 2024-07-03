@@ -1,8 +1,8 @@
 ---
 title: Example Flower App with Custom Metrics
 tags: [basic, vision, fds]
-dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
-framework: [tensorflow | https://www.tensorflow.org/]
+dataset: [CIFAR-10]
+framework: [tensorflow]
 ---
 
 # Flower Example using Custom Metrics
@@ -103,7 +103,7 @@ You will see that Keras is starting a federated training. Have a look to the [Fl
 Running `run.sh` will result in the following output (after 3 rounds):
 
 ```shell
-INFO flwr 2024-01-17 17:45:23,794 | app.py:228 | app_fit: metrics_distributed {
+INFO flwr 2024-01-17 17:45:23,794 
     'accuracy': [(1, 0.10000000149011612), (2, 0.10000000149011612), (3, 0.3393000066280365)],
     'acc': [(1, 0.1), (2, 0.1), (3, 0.3393)],
     'rec': [(1, 0.1), (2, 0.1), (3, 0.3393)],

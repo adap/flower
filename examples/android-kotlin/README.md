@@ -1,9 +1,8 @@
 ---
 title: Flower Android Example using Kotlin and TF Lite
-tags: [basic, vision, fds]
-dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
-framework: [Android | https://www.android.com/, Kotlin | https://kotlinlang.org/,
-  TensorFlowLite | https://www.tensorflow.org/lite]
+tags: [mobile, vision, sdk]
+dataset: [CIFAR-10]
+framework: [Android, Kotlin, TensorFlowLite]
 ---
 
 # Flower Android Client Example with Kotlin and TensorFlow Lite 2022

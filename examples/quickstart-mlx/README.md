@@ -1,8 +1,8 @@
 ---
 title: Simple Flower Example using MLX
 tags: [quickstart, vision]
-dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
-framework: [MLX | https://ml-explore.github.io/mlx/build/html/index.html]
+dataset: [MNIST]
+framework: [MLX]
 ---
 
 # Flower Example using MLX
@@ -148,7 +148,7 @@ class MLP(mlx.nn.Module):
         self.layers = [
             mlx.nn.Linear(idim, odim)
             for idim, odim in zip(layer_sizes[:-1], layer_sizes[1:])
-        ]
+       ]
 
     def __call__(self, x):
         for l in self.layers[:-1]:
@@ -192,7 +192,7 @@ The way MLX stores its parameters is as follows:
     {"weight": mlx.core.array, "bias": mlx.core.array},
     ...,
     {"weight": mlx.core.array, "bias": mlx.core.array}
-  ]
+ ]
 }
 ```
 
@@ -216,7 +216,7 @@ def set_parameters(self, parameters):
     new_params["layers"] = [
         {"weight": mlx.core.array(parameters[i]), "bias": mlx.core.array(parameters[i + 1])}
         for i in range(0, len(parameters), 2)
-    ]
+   ]
     self.model.update(new_params)
 ```
 
@@ -274,7 +274,7 @@ class FlowerClient(fl.client.NumPyClient):
         new_params["layers"] = [
             {"weight": mlx.core.array(parameters[i]), "bias": mlx.core.array(parameters[i + 1])}
             for i in range(0, len(parameters), 2)
-        ]
+       ]
         self.model.update(new_params)
 
     def fit(self, parameters, config):

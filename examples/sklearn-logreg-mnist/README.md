@@ -1,8 +1,8 @@
 ---
 title: Flower LogReg Example using Scikit-Learn
 tags: [basic, vision, logistic regression, fds]
-dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
-framework: [scikit-learn | https://scikit-learn.org/]
+dataset: [MNIST]
+framework: [scikit-learn]
 ---
 
 # Flower Example using scikit-learn

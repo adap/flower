@@ -1,8 +1,8 @@
 ---
 title: Example Flower App with Custom Mods
 tags: [mods, monitoring, app]
-dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
-framework: [wandb | https://wandb.ai/home, tensorboard | https://www.tensorflow.org/tensorboard]
+dataset: [CIFAR-10]
+framework: [wandb, tensorboard]
 ---
 
 # Using custom mods 🧪
@@ -214,7 +214,7 @@ app = fl.client.ClientApp(
     client_fn=client_fn,
     mods=[
         get_wandb_mod("Custom mods example"),
-     ],
+    ],
 )
 ```
 
