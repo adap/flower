@@ -1,5 +1,4 @@
 ---
-title: Example Flower App with Secure Aggregation
 tags: [basic, vision, fds]
 dataset: []
 framework: [numpy]

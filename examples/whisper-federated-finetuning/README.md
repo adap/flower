@@ -1,5 +1,4 @@
 ---
-title: On-device Federated Finetuning for Speech Classification
 tags: [finetuning, speech, transformers]
 dataset: [SpeechCommands]
 framework: [transformers, whisper]

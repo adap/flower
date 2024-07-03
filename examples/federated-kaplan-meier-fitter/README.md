@@ -1,5 +1,4 @@
 ---
-title: Flower Example using KaplanMeierFitter
 tags: [estimator, medical]
 dataset: [Waltons]
 framework: [lifelines]

@@ -1,5 +1,4 @@
 ---
-title: Comprehensive Flower Example using XGBoost
 tags: [advanced, classification, tabular]
 dataset: [HIGGS]
 framework: [xgboost]

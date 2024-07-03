@@ -1,5 +1,4 @@
 ---
-title: Example Flower App using PyTorch
 tags: [basic, vision, fds]
 dataset: [CIFAR-10]
 framework: [torch, torchvision]

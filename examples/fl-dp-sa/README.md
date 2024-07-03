@@ -1,5 +1,4 @@
 ---
-title: Example of Flower App with DP and SA
 tags: [basic, vision, fds]
 dataset: [MNIST]
 framework: [torch, torchvision]

@@ -1,5 +1,4 @@
 ---
-title: Example Flower App with Custom Mods
 tags: [mods, monitoring, app]
 dataset: [CIFAR-10]
 framework: [wandb, tensorboard]

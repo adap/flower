@@ -1,5 +1,4 @@
 ---
-title: Flower Simulation Step-by-Step
 tags: [basic, vision, simulation]
 dataset: [MNIST]
 framework: [torch]

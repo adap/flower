@@ -1,5 +1,4 @@
 ---
-title: Simple Flower Example using Tabnet
 tags: [quickstart, tabular]
 dataset: [Iris]
 framework: [tabnet]

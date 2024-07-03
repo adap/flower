@@ -1,5 +1,4 @@
 ---
-title: PyTorch, From Centralized To Federated
 tags: [basic, vision, fds]
 dataset: [CIFAR-10]
 framework: [torch]

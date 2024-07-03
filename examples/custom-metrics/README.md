@@ -1,5 +1,4 @@
 ---
-title: Example Flower App with Custom Metrics
 tags: [basic, vision, fds]
 dataset: [CIFAR-10]
 framework: [tensorflow]

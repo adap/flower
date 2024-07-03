@@ -1,5 +1,4 @@
 ---
-title: Flower Android Example using Kotlin and TF Lite
 tags: [mobile, vision, sdk]
 dataset: [CIFAR-10]
 framework: [Android, Kotlin, TensorFlowLite]

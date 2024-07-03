@@ -1,5 +1,4 @@
 ---
-title: Simple Flower Example using PyTorch-Lightning
 tags: [quickstart, vision, fds]
 dataset: [MNIST]
 framework: [lightning]

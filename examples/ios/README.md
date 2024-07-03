@@ -1,5 +1,4 @@
 ---
-title: Simple Flower Example on iOS
 tags: [mobile, vision, sdk]
 dataset: [MNIST]
 framework: [Swift]

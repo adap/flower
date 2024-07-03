@@ -1,5 +1,4 @@
 ---
-title: Flower Example using MONAI
 tags: [quickstart, medical, vision]
 dataset: [MedNIST]
 framework: [MONAI]

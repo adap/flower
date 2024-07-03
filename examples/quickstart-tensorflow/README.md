@@ -1,5 +1,4 @@
 ---
-title: Simple Flower Example using TensorFlow
 tags: [quickstart, vision, fds]
 dataset: [CIFAR-10]
 framework: [tensorflow]

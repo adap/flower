@@ -1,5 +1,4 @@
 ---
-title: Flower Transformers Example using HuggingFace
 tags: [quickstart, llm, nlp, sentiment]
 dataset: [IMDB]
 framework: [transformers]

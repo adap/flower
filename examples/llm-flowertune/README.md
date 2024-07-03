@@ -1,5 +1,4 @@
 ---
-title: Federated LLM Fine-tuning with Flower
 tags: [llm, nlp, LLama2]
 dataset: [Alpaca-GPT4]
 framework: [PEFT, torch]

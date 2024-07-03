@@ -1,5 +1,4 @@
 ---
-title: Flower Embedded Devices Example
 tags: [basic, vision, fds]
 dataset: [CIFAR-10, MNIST]
 framework: [torch, tensorflow]

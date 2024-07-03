@@ -1,5 +1,4 @@
 ---
-title: Sample-Level Differential Privacy using Opacus
 tags: [dp, security, fds]
 dataset: [CIFAR-10]
 framework: [opacus, torch]

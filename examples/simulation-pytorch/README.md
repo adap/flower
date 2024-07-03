@@ -1,5 +1,4 @@
 ---
-title: Flower Simulation Example using PyTorch
 tags: [basic, vision, fds, simulation]
 dataset: [MNIST]
 framework: [torch, torchvision]

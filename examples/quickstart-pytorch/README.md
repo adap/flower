@@ -1,5 +1,4 @@
 ---
-title: Simple Flower Example using PyTorch
 tags: [quickstart, vision, fds]
 dataset: [CIFAR-10]
 framework: [torch, torchvision]

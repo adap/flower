@@ -1,5 +1,4 @@
 ---
-title: Simple Flower Example using Pandas
 tags: [quickstart, tabular, federated analytics]
 dataset: [Iris]
 framework: [pandas]

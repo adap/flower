@@ -1,5 +1,4 @@
 ---
-title: Simple Flower Example using XGBoost
 tags: [quickstart, classification, tabular]
 dataset: [HIGGS]
 framework: [xgboost]

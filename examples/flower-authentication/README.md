@@ -1,5 +1,4 @@
 ---
-title: Flower Example with Authentication
 tags: [advanced, vision, fds]
 dataset: [CIFAR-10]
 framework: [torch, torchvision]

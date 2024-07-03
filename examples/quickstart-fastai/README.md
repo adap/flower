@@ -1,5 +1,4 @@
 ---
-title: Simple Flower Example using fastai
 tags: [quickstart, vision]
 dataset: [MNIST]
 framework: [fastai]
