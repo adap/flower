@@ -16,13 +16,14 @@
 
 
 from dataclasses import dataclass
+from typing import Optional
 
 from .record import RecordSet
 
 
 @dataclass
 class Context:
-    """State of your run.
+    """Context of your run.
 
     Parameters
     ----------
@@ -33,6 +34,15 @@ class Context:
         executing mods. It can also be used as a memory to access
         at different points during the lifecycle of this entity (e.g. across
         multiple rounds)
+    partition_id : Optional[int] (default: None)
+        An index that specifies the data partition that the ClientApp using this Context
+        object should make use of. Setting this attribute is better suited for
+        simulation or proto typing setups.
     """
 
     state: RecordSet
+    partition_id: Optional[int]
+
+    def __init__(self, state: RecordSet, partition_id: Optional[int] = None) -> None:
+        self.state = state
+        self.partition_id = partition_id

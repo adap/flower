@@ -1,3 +1,10 @@
+---
+title: Flower Example using TensorFlow/Keras + MLCube
+tags: [quickstart, vision, deployment]
+dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
+framework: [tensorflow | https://www.tensorflow.org/, Keras | https://keras.io/]
+---
+
 # Flower Example using TensorFlow/Keras + MLCube
 
 This introductory example to Flower uses MLCube together with Keras, but deep knowledge of Keras is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use-cases with MLCube. Running this example in itself is quite easy.
