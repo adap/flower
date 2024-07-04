@@ -23,8 +23,8 @@ packages = ["."]
 publisher = "$username"
 
 [flower.components]
-serverapp = "vertical_fl.serverapp:app"
-clientapp = "vertical_fl.clientapp:app"
+serverapp = "vertical_fl.server_app:app"
+clientapp = "vertical_fl.client_app:app"
 
 [flower.engine]
 name = "simulation"
