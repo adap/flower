@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import torch.nn as nn
 import numpy as np
 import pandas as pd
@@ -48,7 +50,7 @@ def _create_features(df):
 
 
 def get_partitions_and_label():
-    df = pd.read_csv("_static/data/train.csv")
+    df = pd.read_csv(Path(__file__).parents[1] / "_static/data/train.csv")
     processed_df = df.dropna(subset=["Embarked", "Fare"]).copy()
     processed_df, all_keywords = _create_features(processed_df)
     raw_partitions = _partition_data(processed_df, all_keywords)

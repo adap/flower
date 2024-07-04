@@ -27,71 +27,42 @@ This will create a new directory called `vertical-fl` containing the
 following files:
 
 ```shell
--- pyproject.toml
--- requirements.txt
--- _static/data/train.csv
--- client.py
--- plot.py
--- simulation.py
--- strategy.py
--- task.py
--- README.md
+├── vertical_fl
+|         ├── __init__.py
+|         ├── client_app.py
+|         ├── server_app.py
+|         ├── strategy.py
+|         └── task.py
+|                             
+├── pyproject.toml
+├── _static/data/train.csv 
+└── README.md 
 ```
 
-### Installing Dependencies
+## Installing Dependencies
 
-Project dependencies (such as `torch` and `flwr`) are defined in
-`pyproject.toml` and `requirements.txt`. We recommend
-[Poetry](https://python-poetry.org/docs/) to install those dependencies and
-manage your virtual environment ([Poetry
-installation](https://python-poetry.org/docs/#installation)) or
-[pip](https://pip.pypa.io/en/latest/development/), but feel free to use a
-different way of installing dependencies and managing virtual environments if
-you have other preferences.
-
-#### Poetry
+Project dependencies are defined in `pyproject.toml`.
+You can install the dependencies by invoking `pip`:
 
 ```shell
-poetry install
-poetry shell
+# From a new python environment, run:
+pip install -e .
 ```
 
-Poetry will install all your dependencies in a newly created virtual
-environment. To verify that everything works correctly you can run the following
-command:
+## Run the Example
 
-```shell
-poetry run python3 -c "import flwr"
+You can run your `ClientApp` and `ServerApp` in both _simulation_ and
+_deployment_ mode without making changes to the code. If you are starting
+with Flower, we recommend you using the _simulation_ model as it requires
+fewer components to be launched manually.
+
+### Run with the Simulation Engine
+
+In the same directory as the `pyproject.toml`, and after activating your Python environment:
+
+```bash
+flwr run
 ```
-
-If you don't see any errors you're good to go!
-
-#### pip
-
-Write the command below in your terminal to install the dependencies according
-to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
-```
-
-## Usage
-
-Once everything is installed, you can just run:
-
-```shell
-poetry run python3 simulation.py
-```
-
-for `poetry`, otherwise just run:
-
-```shell
-python3 simulation.py
-```
-
-This will start the Vertical FL training for 1000 rounds with 3 clients.
-Eventhough the number of rounds is quite high, this should only take a few
-seconds to run as the model is very small.
 
 ## Explanations
 
@@ -245,7 +216,7 @@ Note that our final data processing function looks like that:
 
 ```python
 def get_partitions_and_label():
-    df = pd.read_csv("_static/data/train.csv")
+    df = pd.read_csv(Path(__file__).parents[1] / "_static/data/train.csv")
     processed_df = df.dropna(subset=["Embarked", "Fare"]).copy()
     processed_df, all_keywords = _create_features(processed_df)
     raw_partitions = _partition_data(processed_df, all_keywords)
@@ -423,7 +394,7 @@ def aggregate_evaluate(
     return None, {}
 ```
 
-### Client class and function
+### Client App
 
 Our `FlowerClient` class is going to be quite straight forward.
 
@@ -463,17 +434,20 @@ gradients sent by the server and then update our local model's parameters based
 on those new gradients. Note that the `loss` and `num_examples` we return in our
 evaluate function are bogus, as they won't be used on the server side.
 
-The `client_fn` we will use in our `start_simulation` function to generate our 3
-clients will be very basic:
+The `client_fn` to generate our 3 clients will be very basic:
 
 ```python3
 partitions, label = get_partitions_and_label()
 
-def client_fn(cid):
-    return FlowerClient(cid, partitions[int(cid)]).to_client()
+def client_fn(node_id, partition_id):
+    return FlowerClient(partition_id, partitions[int(cid)]).to_client()
+
+app = ClientApp(
+    client_fn=client_fn,
+)
 ```
 
-We pass a `client_id` and its corresponding partition to each client.
+We pass the `partition_id` and its corresponding partition to each client.
 
 ### Evaluation
 
@@ -489,15 +463,15 @@ send them back to the clients using this `evaluate` function and perform the
 backpropagation. This is not done for evaluation, hence why we return `None` in
 the `aggregate_evaluate` function of the strategy.
 
-### Starting the simulation
+### Server App
 
 Putting everything together, to start our simulation we use the following
 function:
 
 ```python
-hist = fl.simulation.start_simulation(
-    client_fn=client_fn,
-    num_clients=3,
+_, label = get_partitions_and_label()
+
+app = ServerApp(
     config=fl.server.ServerConfig(num_rounds=1000),
     strategy=Strategy(label),
 )
@@ -505,10 +479,6 @@ hist = fl.simulation.start_simulation(
 
 As mentioned before, we train for 1000 rounds but it should still last only
 a few seconds.
-
-Note that we store the results of the simulation into `hist`, this will allow us
-to use the `plot.py` file to plot the accuracy as a function of the number of
-rounds.
 
 ## Results
 

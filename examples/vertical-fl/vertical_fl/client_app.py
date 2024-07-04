@@ -1,11 +1,11 @@
-import flwr as fl
+from flwr.client import ClientApp, NumPyClient
 import torch
 from sklearn.preprocessing import StandardScaler
 
-from task import ClientModel
+from vertical_fl.task import ClientModel, get_partitions_and_label
 
 
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def __init__(self, cid, data):
         self.cid = cid
         self.train = torch.tensor(StandardScaler().fit_transform(data)).float()
@@ -25,3 +25,15 @@ class FlowerClient(fl.client.NumPyClient):
         self.embedding.backward(torch.from_numpy(parameters[int(self.cid)]))
         self.optimizer.step()
         return 0.0, 1, {}
+
+
+partitions, label = get_partitions_and_label()
+
+
+def client_fn(node_id, partition_id):
+    return FlowerClient(partition_id, partitions[partition_id]).to_client()
+
+
+app = ClientApp(
+    client_fn=client_fn,
+)
