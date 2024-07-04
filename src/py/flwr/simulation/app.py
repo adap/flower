@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ from typing import Any, Dict, List, Optional, Type, Union
 import ray
 from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 
-from flwr.client import ClientFn
+from flwr.client import ClientFnExt
 from flwr.common import EventType, event
 from flwr.common.logger import log, set_logger_propagation
 from flwr.server.client_manager import ClientManager
@@ -74,7 +74,7 @@ REASON:
 # pylint: disable=too-many-arguments,too-many-statements,too-many-branches
 def start_simulation(
     *,
-    client_fn: ClientFn,
+    client_fn: ClientFnExt,
     num_clients: Optional[int] = None,
     clients_ids: Optional[List[str]] = None,
     client_resources: Optional[Dict[str, float]] = None,
@@ -92,16 +92,16 @@ def start_simulation(
 
     Parameters
     ----------
-    client_fn : ClientFn
-        A function creating client instances. The function must take a single
-        `str` argument called `cid`. It should return a single client instance
-        of type Client. Note that the created client instances are ephemeral
-        and will often be destroyed after a single method invocation. Since client
-        instances are not long-lived, they should not attempt to carry state over
-        method invocations. Any state required by the instance (model, dataset,
-        hyperparameters, ...) should be (re-)created in either the call to `client_fn`
-        or the call to any of the client methods (e.g., load evaluation data in the
-        `evaluate` method itself).
+    client_fn : ClientFnExt
+        A function creating Client instances. The function must have the signature
+        `client_fn(node_id: int, partition_id: Optional[int]). It should return
+        a single client instance of type Client. Note that the created client
+        instances are ephemeral and will often be destroyed after a single method
+        invocation. Since client instances are not long-lived, they should not attempt
+        to carry state over method invocations. Any state required by the instance
+        (model, dataset, hyperparameters, ...) should be (re-)created in either the
+        call to `client_fn` or the call to any of the client methods (e.g., load
+        evaluation data in the `evaluate` method itself).
     num_clients : Optional[int]
         The total number of clients in this simulation. This must be set if
         `clients_ids` is not set and vice-versa.
