@@ -1,5 +1,6 @@
-import flwr as fl
 import numpy as np
+from flwr.server import ServerApp, ServerConfig
+
 from fedavg_cpp import FedAvgCpp, weights_to_parameters
 
 model_size = 2
@@ -10,7 +11,7 @@ initial_weights = [
 initial_parameters = weights_to_parameters(initial_weights)
 strategy = FedAvgCpp(initial_parameters=initial_parameters)
 
-app = fl.server.ServerApp(
-    config=fl.server.ServerConfig(num_rounds=3),
+app = ServerApp(
+    config=ServerConfig(num_rounds=3),
     strategy=strategy,
 )
