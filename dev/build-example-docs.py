@@ -61,19 +61,65 @@ categories = {
     "other": {"table": table_headers, "list": ""},
 }
 
+urls = {
+    # Frameworks
+    "Android": "https://www.android.com/",
+    "C++": "https://isocpp.org/",
+    "Docker": "https://www.docker.com/",
+    "JAX": "https://jax.readthedocs.io/en/latest/",
+    "Java": "https://www.java.com/",
+    "Keras": "https://keras.io/",
+    "Kotlin": "https://kotlinlang.org/",
+    "mlcube": "https://docs.mlcommons.org/mlcube/",
+    "MLX": "https://ml-explore.github.io/mlx/build/html/index.html",
+    "MONAI": "https://monai.io/",
+    "PEFT": "https://huggingface.co/docs/peft/index",
+    "Swift": "https://www.swift.org/",
+    "TensorFlowLite": "https://www.tensorflow.org/lite",
+    "fastai": "https://fast.ai/",
+    "lifelines": "https://lifelines.readthedocs.io/en/latest/index.html",
+    "lightning": "https://lightning.ai/docs/pytorch/stable/",
+    "numpy": "https://numpy.org/",
+    "opacus": "https://opacus.ai/",
+    "pandas": "https://pandas.pydata.org/",
+    "scikit-learn": "https://scikit-learn.org/",
+    "tabnet": "https://github.com/titu1994/tf-TabNet",
+    "tensorboard": "https://www.tensorflow.org/tensorboard",
+    "tensorflow": "https://www.tensorflow.org/",
+    "torch": "https://pytorch.org/",
+    "torchvision": "https://pytorch.org/vision/stable/index.html",
+    "transformers": "https://huggingface.co/docs/transformers/index",
+    "wandb": "https://wandb.ai/home",
+    "whisper": "https://huggingface.co/openai/whisper-tiny",
+    "xgboost": "https://xgboost.readthedocs.io/en/stable/",
+    # Datasets
+    "Adult Census Income": "https://www.kaggle.com/datasets/uciml/adult-census-income/data",
+    "Alpaca-GPT4": "https://huggingface.co/datasets/vicgalle/alpaca-gpt4",
+    "CIFAR-10": "https://huggingface.co/datasets/uoft-cs/cifar10",
+    "HIGGS": "https://archive.ics.uci.edu/dataset/280/higgs",
+    "IMDB": "https://huggingface.co/datasets/stanfordnlp/imdb",
+    "Iris": "https://scikit-learn.org/stable/auto_examples/datasets/plot_iris_dataset.html",
+    "MNIST": "https://huggingface.co/datasets/ylecun/mnist",
+    "MedNIST": "https://medmnist.com/",
+    "Oxford Flower-102": "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/",
+    "SpeechCommands": "https://huggingface.co/datasets/google/speech_commands",
+    "Titanic": "https://www.kaggle.com/competitions/titanic",
+}
+
 
 def _convert_to_link(search_result):
-    if "|" in search_result:
-        if "," in search_result:
-            result = ""
-            for part in search_result.split(","):
-                result += f"{_convert_to_link(part)}, "
-            return result[:-2]
-
-        name, url = search_result.replace('"', "").split("|")
-        return f"`{name.strip()} <{url.strip()}>`_"
-
-    return search_result
+    if "," in search_result:
+        result = ""
+        for part in search_result.split(","):
+            result += f"{_convert_to_link(part)}, "
+        return result[:-2]
+    else:
+        search_result = search_result.strip()
+        name, url = search_result, urls.get(search_result, None)
+        if url:
+            return f"`{name.strip()} <{url.strip()}>`_"
+        else:
+            return search_result
 
 
 def _read_metadata(example):
@@ -85,7 +131,7 @@ def _read_metadata(example):
         raise ValueError("Metadata block not found")
     metadata = metadata_match.group(1)
 
-    title_match = re.search(r"^title:\s*(.+)$", metadata, re.MULTILINE)
+    title_match = re.search(r"^# (.+)$", content, re.MULTILINE)
     if not title_match:
         raise ValueError("Title not found in metadata")
     title = title_match.group(1).strip()
@@ -163,7 +209,7 @@ def _copy_images(example):
                 )
 
 
-def _add_all_entries(index_file):
+def _add_all_entries():
     examples_dir = os.path.join(ROOT, "examples")
     for example in sorted(os.listdir(examples_dir)):
         example_path = os.path.join(examples_dir, example)
@@ -211,7 +257,7 @@ def _main():
         )
         index_file.write(categories["other"]["table"])
 
-        _add_all_entries(index_file)
+        _add_all_entries()
 
         index_file.write(
             "\n.. toctree::\n  :maxdepth: 1\n  :caption: Quickstart\n  :hidden:\n\n"
