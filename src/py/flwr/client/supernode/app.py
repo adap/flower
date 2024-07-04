@@ -85,7 +85,6 @@ def run_supernode() -> None:
     )
 
 
-
 def run_client_app() -> None:
     """Run Flower client app."""
     log(INFO, "Long-running Flower client starting")
