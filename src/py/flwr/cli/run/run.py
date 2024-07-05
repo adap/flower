@@ -30,7 +30,6 @@ from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.common.serde import record_value_dict_to_proto
 from flwr.common.typing import ConfigsRecordValues
-
 from flwr.proto.common_pb2 import ConfigsRecordValue as PCRV  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
