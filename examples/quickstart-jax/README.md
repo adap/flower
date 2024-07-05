@@ -1,8 +1,7 @@
 ---
-title: Simple Flower Example using Jax
 tags: [quickstart, linear regression]
 dataset: [Synthetic]
-framework: [JAX | https://jax.readthedocs.io/en/latest/]
+framework: [JAX]
 ---
 
 # JAX: From Centralized To Federated
