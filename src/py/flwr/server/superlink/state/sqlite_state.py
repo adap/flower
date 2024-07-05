@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS run(
     run_id          INTEGER UNIQUE,
     fab_id          TEXT,
     fab_version     TEXT,
-    overrides       BLOB
+    overrides       TEXT
 );
 """
 

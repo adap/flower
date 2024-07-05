@@ -18,7 +18,7 @@ import sys
 from enum import Enum
 from logging import DEBUG
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import typer
 from typing_extensions import Annotated
@@ -149,11 +149,11 @@ def _start_superexec_run(
                 float,
                 str,
                 bytes,
-                list[int],
-                list[float],
-                list[str],
-                list[bytes],
-                list[bool],
+                List[int],
+                List[float],
+                List[str],
+                List[bytes],
+                List[bool],
             ],
             ProtoConfigsRecordValue,
         ),

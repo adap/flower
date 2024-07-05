@@ -17,7 +17,7 @@
 import subprocess
 import sys
 from logging import ERROR, INFO
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from typing_extensions import override
 
@@ -80,11 +80,11 @@ class DeploymentEngine(Executor):
                     float,
                     str,
                     bytes,
-                    list[int],
-                    list[float],
-                    list[str],
-                    list[bytes],
-                    list[bool],
+                    List[int],
+                    List[float],
+                    List[str],
+                    List[bytes],
+                    List[bool],
                 ],
                 ProtoConfigsRecordValue,
             ),
