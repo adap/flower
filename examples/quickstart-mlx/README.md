@@ -7,10 +7,6 @@ framework: [MLX]
 
 # Flower Example using MLX
 
-> \[!TIP\]
-> An example created from `flwr new`'s `MLX` template with updated `client_fn` signature.
-
-
 ## Project Setup
 
 Start by cloning the example project:
@@ -29,11 +25,10 @@ following files:
        |
        ├── <mlxexample>
        |        ├── __init__.py
-       |        ├── client_app.py
-       |        ├── server_app.py
+       |        ├── client_app.py    # defines your ClientApp
+       |        ├── server_app.py    # defines your ServerApp
        |        └── task.py
-       ├── pyproject.toml            # contains user config
-       |                             # uses flwr-nightly[simulation]
+       ├── pyproject.toml            # builds your FAB, includes dependencies and configs
        └── README.md
 ```
 
@@ -43,42 +38,20 @@ following files:
 pip install .
 ```
 
-## Run (Simulation Engine)
+## Run the Example
+
+You can run your `ClientApp` and `ServerApp` in both _simulation_ and
+_deployment_ mode without making changes to the code. If you are starting
+with Flower, we recommend you using the _simulation_ model as it requires
+fewer components to be launched manually. By default, `flwr run` will make
+use of the Simluation Engine. Refer to alternative ways of running your
+Flower application including Deployment, with TLS certificates, or with
+Docker later in this readme.
+
+### Run with the Simulation Engine
 
 ```bash
 flwr run
 ```
 
-## Run (Deployment Engine)
-
-### Start the SuperExec
-
-```bash
-flower-superexec flwr.superexec.deployment:executor --insecure
-```
-
-### Start the SuperLink
-
-```bash
-flower-superlink --insecure
-```
-
-### Start the long-running Flower client
-
-In a new terminal window, start the first long-running Flower client:
-
-```bash
-flower-supernode mlxexample.client:app --insecure --partition-id=0
-```
-
-In yet another new terminal window, start the second long-running Flower client:
-
-```bash
-flower-supernode mlxexample.client:app --insecure --partition-id=1
-```
-
-### Start the Run
-
-```bash
-flwr run --use-superexec
-```
+### Alternativ
