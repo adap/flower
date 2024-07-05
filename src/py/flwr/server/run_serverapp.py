@@ -178,7 +178,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         server_app_dir = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
         config = get_project_config(server_app_dir)
         server_app_attr = config["flower"]["components"]["serverapp"]
-        server_config = get_fused_config(run_)
+        server_config = get_fused_config(run_, flwr_dir)
     else:
         # User provided `server-app`, but not `--run-id`
         server_app_dir = str(Path(args.dir).absolute())

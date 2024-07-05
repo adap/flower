@@ -19,6 +19,7 @@ import sys
 import time
 from dataclasses import dataclass
 from logging import DEBUG, ERROR, INFO, WARN
+from pathlib import Path
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -194,6 +195,7 @@ def _start_client_internal(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     partition_id: Optional[int] = None,
+    flwr_dir: Optional[Path] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -237,9 +239,16 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
-    partitioni_id: Optional[int] (default: None)
+    partition_id: Optional[int] (default: None)
         The data partition index associated with this node. Better suited for
         prototyping purposes.
+    flwr_dir: Optional[Path] (default: None)
+        The path containing installed Flower Apps.
+        By default, this value is equal to:
+
+            - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+            - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+            - `$HOME/.flwr/` in all other cases
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -379,7 +388,7 @@ def _start_client_internal(
 
                     # Retrieve context for this run
                     context = node_state.retrieve_context(run_id=run_id)
-                    context.run_config = get_fused_config(run_info[run_id])
+                    context.run_config = get_fused_config(run_info[run_id], flwr_dir)
 
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error

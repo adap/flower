@@ -68,6 +68,7 @@ def run_supernode() -> None:
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
         partition_id=args.partition_id,
+        flwr_dir=get_flwr_dir(args.flwr_dir),
     )
 
     # Graceful shutdown

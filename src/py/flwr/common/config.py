@@ -16,7 +16,7 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Union, cast
 
 import tomli
 
@@ -74,8 +74,19 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def get_fused_config(run: Run) -> Dict[str, ConfigsRecordValues]:
+def get_fused_config(run: Run, flwr_dir: Path) -> Dict[str, ConfigsRecordValues]:
     """Get the config using the fab_id and the fab_version, remove the nesting by adding
     the nested keys as prefixes separated by dots, and fuse it with the override
     dict."""
-    return {}
+    final_config = {}
+    default_config = get_project_config(
+        get_project_dir(run.fab_id, run.fab_version, flwr_dir)
+    )["flower"]["config"]
+
+    for key in default_config.keys():
+        if key in run.overrides:
+            final_config[key] = run.overrides[key]
+        else:
+            final_config[key] = default_config[key]
+
+    return cast(Dict[str, ConfigsRecordValues], final_config)
