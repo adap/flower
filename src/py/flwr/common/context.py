@@ -16,7 +16,9 @@
 
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict, Optional
+
+from flwr.common.typing import ConfigsRecordValues
 
 from .record import RecordSet
 
@@ -38,11 +40,20 @@ class Context:
         An index that specifies the data partition that the ClientApp using this Context
         object should make use of. Setting this attribute is better suited for
         simulation or proto typing setups.
+    config : Dict[str, ConfigsRecordValues]
+        A config (key/value mapping) held by the entity in a given run and that will
+        stay local. It can be used at any point during the lifecycle of this entity
+        (e.g. across multiple rounds)
     """
 
     state: RecordSet
     partition_id: Optional[int]
+    config: Dict[str, ConfigsRecordValues]
 
-    def __init__(self, state: RecordSet, partition_id: Optional[int] = None) -> None:
+    def __init__(
+        self,
+        state: RecordSet,
+        partition_id: Optional[int] = None,
+    ) -> None:
         self.state = state
         self.partition_id = partition_id

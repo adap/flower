@@ -18,7 +18,7 @@ import sys
 from enum import Enum
 from logging import DEBUG
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 import typer
 from typing_extensions import Annotated
@@ -28,8 +28,11 @@ from flwr.cli.build import build
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
+from flwr.common.serde import record_value_dict_to_proto
+from flwr.common.typing import ConfigsRecordValues
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.proto.recordset_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
 from flwr.simulation.run_simulation import _run_simulation
 
 
@@ -61,7 +64,7 @@ def run(
 ) -> None:
     """Run Flower project."""
     if use_superexec:
-        _start_superexec_run(directory)
+        _start_superexec_run({}, directory)
         return
 
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
@@ -115,7 +118,9 @@ def run(
         )
 
 
-def _start_superexec_run(directory: Optional[Path]) -> None:
+def _start_superexec_run(
+    override_config: Dict[str, ConfigsRecordValues], directory: Optional[Path]
+) -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
@@ -132,6 +137,13 @@ def _start_superexec_run(directory: Optional[Path]) -> None:
 
     fab_path = build(directory)
 
-    req = StartRunRequest(fab_file=Path(fab_path).read_bytes())
+    req = StartRunRequest(
+        fab_file=Path(fab_path).read_bytes(),
+        override_config=record_value_dict_to_proto(
+            override_config,
+            [bool, int, float, str, bytes],
+            ProtoConfigsRecordValue,
+        ),
+    )
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)

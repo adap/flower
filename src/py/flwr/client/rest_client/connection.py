@@ -24,6 +24,7 @@ from logging import ERROR, INFO, WARN
 from typing import Callable, Iterator, Optional, Tuple, Type, TypeVar, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
+from flwr.common.typing import Run
 from google.protobuf.message import Message as GrpcMessage
 
 from flwr.client.heartbeat import start_ping_loop
@@ -40,7 +41,11 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_from_taskins, message_to_taskres
+from flwr.common.serde import (
+    message_from_taskins,
+    message_to_taskres,
+    record_value_dict_from_proto,
+)
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -91,7 +96,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
-        Optional[Callable[[int], Tuple[str, str]]],
+        Optional[Callable[[int], Run]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -344,16 +349,21 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
             res.results,  # pylint: disable=no-member
         )
 
-    def get_run(run_id: int) -> Tuple[str, str]:
+    def get_run(run_id: int) -> Run:
         # Construct the request
         req = GetRunRequest(run_id=run_id)
 
         # Send the request
         res = _request(req, GetRunResponse, PATH_GET_RUN)
         if res is None:
-            return "", ""
+            return Run(run_id, "", "", {})
 
-        return res.run.fab_id, res.run.fab_version
+        return Run(
+            run_id,
+            res.run.fab_id,
+            res.run.fab_version,
+            record_value_dict_from_proto(res.run.override_config),
+        )
 
     try:
         # Yield methods

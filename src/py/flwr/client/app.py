@@ -22,6 +22,7 @@ from logging import DEBUG, ERROR, INFO, WARN
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
+from flwr.common.config import get_fused_config
 from grpc import RpcError
 
 from flwr.client.client import Client
@@ -41,6 +42,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
+from flwr.common.typing import Run
 
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
@@ -315,8 +317,7 @@ def _start_client_internal(
     )
 
     node_state = NodeState(partition_id=partition_id)
-    # run_id -> (fab_id, fab_version)
-    run_info: Dict[int, Tuple[str, str]] = {}
+    run_info: Dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
@@ -371,13 +372,14 @@ def _start_client_internal(
                             run_info[run_id] = get_run(run_id)
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
-                            run_info[run_id] = ("", "")
+                            run_info[run_id] = Run(run_id, "", "", {})
 
                     # Register context for this run
                     node_state.register_context(run_id=run_id)
 
                     # Retrieve context for this run
                     context = node_state.retrieve_context(run_id=run_id)
+                    context.config = get_fused_config(run_info[run_id])
 
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error
@@ -388,7 +390,9 @@ def _start_client_internal(
                     # Handle app loading and task message
                     try:
                         # Load ClientApp instance
-                        client_app: ClientApp = load_client_app_fn(*run_info[run_id])
+                        client_app: ClientApp = load_client_app_fn(
+                            run_info[run_id].fab_id, run_info[run_id].fab_version
+                        )
 
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)
@@ -573,7 +577,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
                 Callable[[Message], None],
                 Optional[Callable[[], None]],
                 Optional[Callable[[], None]],
-                Optional[Callable[[int], Tuple[str, str]]],
+                Optional[Callable[[int], Run]],
             ]
         ],
     ],

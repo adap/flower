@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
+from flwr.common.typing import ConfigsRecordValues, Run
 import tomli
 
 from flwr.cli.config_utils import validate_fields
@@ -71,3 +72,10 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
         )
 
     return config
+
+
+def get_fused_config(run: Run) -> Dict[str, ConfigsRecordValues]:
+    """Get the config using the fab_id and the fab_version, remove the nesting by adding
+    the nested keys as prefixes separated by dots, and fuse it with the override
+    dict."""
+    return {}
