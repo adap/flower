@@ -7,29 +7,35 @@ framework: [MLX]
 
 # Flower Example using MLX
 
+This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/build/html/index.html), but deep knowledge of MLX is not necessarily to run the example. This example will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy.
+
+[MLX](https://ml-explore.github.io/mlx/build/html/index.html) is a NumPy-like array framework designed for efficient and flexible machine learning on Apple silicon.
+
+In this example, we will train a simple 2 layers MLP on MNIST data (handwritten digits recognition) that's downloaded and partitioned using [Flower Datasets](https://flower.ai/docs/datasets/)
+
 ## Project Setup
 
 Start by cloning the example project:
 
 ```shell
 git clone --depth=1 https://github.com/adap/flower.git _tmp \
-		&& mv _tmp/examples/<example-name> . \
-		&& rm -rf _tmp && cd <example-name>
+              && mv _tmp/examples/quickstart-mlx . \
+              && rm -rf _tmp && cd quickstart-mlx
 ```
 
 This will create a new directory called `quickstart-mlx` containing the
 following files:
 
 ```shell
-<quickstart-mlx>
-       |
-       ├── <mlxexample>
-       |        ├── __init__.py
-       |        ├── client_app.py    # defines your ClientApp
-       |        ├── server_app.py    # defines your ServerApp
-       |        └── task.py
-       ├── pyproject.toml            # builds your FAB, includes dependencies and configs
-       └── README.md
+quickstart-mlx
+      |
+      ├── mlxexample
+      |        ├── __init__.py
+      |        ├── client_app.py    # defines your ClientApp
+      |        ├── server_app.py    # defines your ServerApp
+      |        └── task.py
+      ├── pyproject.toml            # builds your FAB, includes dependencies and configs
+      └── README.md
 ```
 
 ## Install dependencies
@@ -54,4 +60,6 @@ Docker later in this readme.
 flwr run
 ```
 
-### Alternativ
+### Alternative wasy of running the example
+
+TODO: point to docs
