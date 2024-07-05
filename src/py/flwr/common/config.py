@@ -74,7 +74,9 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def get_fused_config(run: Run, flwr_dir: Path) -> Dict[str, ConfigsRecordValues]:
+def get_fused_config(
+    run: Run, flwr_dir: Optional[Path]
+) -> Dict[str, ConfigsRecordValues]:
     """Get the config using the fab_id and the fab_version, remove the nesting by adding
     the nested keys as prefixes separated by dots, and fuse it with the override
     dict."""
