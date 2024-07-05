@@ -28,8 +28,8 @@ from flwr.common.logger import log
 from flwr.common.serde import record_value_dict_to_proto
 from flwr.common.typing import ConfigsRecordValues
 from flwr.proto.common_pb2 import (
-    ConfigsRecordValue as ProtoConfigsRecordValue,
-)  # pylint: disable=E0611
+    ConfigsRecordValue as ProtoConfigsRecordValue,  # pylint: disable=E0611
+)
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
 from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
