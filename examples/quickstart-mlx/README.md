@@ -1,3 +1,10 @@
+---
+title: Simple Flower Example using MLX
+tags: [quickstart, vision]
+dataset: [MNIST]
+framework: [MLX]
+---
+
 # Flower Example using MLX
 
 > \[!TIP\]
