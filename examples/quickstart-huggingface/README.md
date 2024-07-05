@@ -15,66 +15,84 @@ Like `quickstart-pytorch`, running this example in itself is also meant to be qu
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/examples/quickstart-huggingface . && rm -rf flower && cd quickstart-huggingface
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+		&& mv _tmp/examples/quickstart-huggingface . \
+		&& rm -rf _tmp && cd quickstart-huggingface
 ```
 
 This will create a new directory called `quickstart-huggingface` containing the following files:
 
 ```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- README.md
+├── huggingface_example
+|         ├── __init__.py
+|         ├── client_app.py
+|         ├── server_app.py
+|         ├── strategy.py
+|         └── task.py
+|                             
+├── pyproject.toml
+└── README.md 
 ```
 
 ### Installing Dependencies
 
-Project dependencies (such as `torch` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### Poetry
-
-```shell
-poetry install
-poetry shell
-```
-
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+Project dependencies are defined in `pyproject.toml`.
+You can install the dependencies by invoking `pip`:
 
 ```shell
-poetry run python3 -c "import flwr"
+# From a new python environment, run:
+pip install -e .
 ```
 
-If you don't see any errors you're good to go!
+## Run the Example
 
-#### pip
+You can run your `ClientApp` and `ServerApp` in both _simulation_ and
+_deployment_ mode without making changes to the code. If you are starting
+with Flower, we recommend you using the _simulation_ model as it requires
+fewer components to be launched manually.
 
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+### Run with the Simulation Engine
 
-```shell
-pip install -r requirements.txt
+First, launch the [SuperExec](<link-to-docs>).
+
+```bash
+flower-superexec flwr.superexec.simulation:executor --insecure
 ```
 
-## Run Federated Learning with Flower
-
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
-
-```shell
-python3 server.py
+In a new terminal, and after activating your Python environment:
+```bash
+flwr run --use-superexec
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the following commands.
 
-Start client 1 in the first terminal:
+### Run with the Deployment Engine
 
-```shell
-python3 client.py --partition-id 0
+Launch the the infrastructure needed for a `Run` to run. This means:
+the [`SuperLink`](https://flower.ai/docs/framework/ref-api-cli.html#flower-superlink) and at least two [`SuperNode`](<docs>) instances.
+You will need a few terminal windows (consider using [tmux](https://github.com/tmux/tmux/wiki)), remember
+to activate your environment in each of them.
+
+1. On a new terminal, launch the `SuperLink`:
+	```bash
+	flower-superlink --insecure
+	```
+2. On a new terminal, launch a `SuperNode`:
+	```bash
+	flower-supernode --insecure --partition-id=0
+	```
+3. On a new terminal, launch another `SuperNode`:
+	```bash
+	flower-supernode --insecure --partition-id=1
+	```
+
+With everything ready and idling, launch the [SuperExec](<link-to-docs>).
+
+```bash
+flower-superexec flwr.superexec.deployment:executor --insecure
 ```
 
-Start client 2 in the second terminal:
+Then, 
 
-```shell
-python3 client.py --partition-id 1
+```bash
+flwr run --user-superexec
 ```
-
-You will see that PyTorch is starting a federated training.
