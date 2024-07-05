@@ -28,7 +28,7 @@ def make_label(x):
 
 def test_fiqa(args, model, tokenizer, prompt_fun=add_instructions):
     batch_size = args.batch_size
-    dataset = datasets.load_dataset('pauri32/fiqa-2018')
+    dataset = datasets.load_dataset('pauri32/fiqa-2018', trust_remote_code=True)
     dataset = datasets.concatenate_datasets([dataset["train"], dataset["validation"], dataset["test"]])
     dataset = dataset.train_test_split(0.226, seed=42)['test']
     dataset = dataset.to_pandas()
@@ -47,23 +47,26 @@ def test_fiqa(args, model, tokenizer, prompt_fun=add_instructions):
     print(f"\n\nPrompt example:\n{dataset['context'][0]}\n\n")
 
     context = dataset['context'].tolist()
+
+    last_batch = dataset.shape[0] % batch_size
     total_steps = dataset.shape[0] // batch_size + 1
     print(f"Total len: {len(context)}. Batchsize: {batch_size}. Total steps: {total_steps}")
 
     out_text_list = []
 
     for i in tqdm(range(total_steps)):
-        tmp_context = context[i * batch_size:(i + 1) * batch_size]
-        tokens = tokenizer(tmp_context, return_tensors='pt', padding=True, max_length=512, return_token_type_ids=False)
-        for k in tokens.keys():
-            tokens[k] = tokens[k].cuda()
-
-        res = model.generate(**tokens, max_length=512, eos_token_id=tokenizer.eos_token_id)
-        res_sentences = [tokenizer.decode(i, skip_special_tokens=True) for i in res]
-        tqdm.write(f'{i}: {res_sentences[0]}')
-        out_text = [o.split("Answer: ")[1] for o in res_sentences]
-        out_text_list += out_text
-        torch.cuda.empty_cache()
+        idx_s = i * batch_size
+        tmp_context = context[idx_s:idx_s + last_batch] if i == total_steps - 1 else context[idx_s:idx_s + batch_size]
+        
+        if tmp_context:
+            tokens = tokenizer(tmp_context, return_tensors='pt', padding=True, max_length=512, return_token_type_ids=False)
+            for k in tokens.keys():
+                tokens[k] = tokens[k].cuda()
+            res = model.generate(**tokens, max_length=512, eos_token_id=tokenizer.eos_token_id)
+            res_sentences = [tokenizer.decode(i, skip_special_tokens=True) for i in res]
+            out_text = [o.split("Answer: ")[1] for o in res_sentences]
+            out_text_list += out_text
+            torch.cuda.empty_cache()
 
     dataset["out_text"] = out_text_list
     dataset["new_target"] = dataset["target"].apply(change_target)
@@ -75,5 +78,7 @@ def test_fiqa(args, model, tokenizer, prompt_fun=add_instructions):
     f1_weighted = f1_score(dataset["new_target"], dataset["new_out"], average="weighted")
 
     print(f"Acc: {acc}. F1 macro: {f1_macro}. F1 micro: {f1_micro}. F1 weighted (BloombergGPT): {f1_weighted}. ")
+    with open(f"fiqa_{args.run_name}.txt", "w") as f:
+        f.write(f"Acc: {acc}. F1 macro: {f1_macro}. F1 micro: {f1_micro}. F1 weighted (BloombergGPT): {f1_weighted}. ")
 
     return dataset

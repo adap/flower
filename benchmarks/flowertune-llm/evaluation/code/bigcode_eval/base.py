@@ -25,7 +25,7 @@ class Task(ABC):
         self.stop_words = stop_words
         self.requires_execution = requires_execution
         try:
-            self.dataset = load_dataset(path=self.DATASET_PATH, name=self.DATASET_NAME)
+            self.dataset = load_dataset(path=self.DATASET_PATH, name=self.DATASET_NAME, trust_remote_code=True)
         except Exception as e:
             warn(
                 f"Loading the dataset failed with {str(e)}. This task will use a locally downloaded dataset, not from the HF hub. \

@@ -95,12 +95,14 @@ class Benchmark:
             if self.subsets is None:
                 load_dataset(self.hub_name,
                              cache_dir=os.path.join(ROOT_DIR, 'benchmarks', 'datasets'),
+                             trust_remote_code=True,
                              download_mode='force_redownload')
             else:
                 for subset in self.subsets:
                     load_dataset(self.hub_name,
                                  subset,
                                  cache_dir=os.path.join(ROOT_DIR, 'benchmarks', 'datasets'),
+                                 trust_remote_code=True,
                                  download_mode='force_redownload')
         except:
             raise ValueError("Default Huggingface loader failed for benchmark {}. \

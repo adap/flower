@@ -89,7 +89,8 @@ class GeneralMultiPLE(Task):
         self.dataset = load_dataset(
             GeneralMultiPLE.DATASET_PATH,
             self.DATASET_NAME,
-            revision=self.DATASET_REVISION)
+            revision=self.DATASET_REVISION,
+            trust_remote_code=True)
         stop_words = self.dataset["test"][0]["stop_tokens"] + ["<file_sep>"]
         super().__init__(
             stop_words=stop_words,

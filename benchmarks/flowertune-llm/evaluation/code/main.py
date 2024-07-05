@@ -19,6 +19,10 @@ from bigcode_eval.evaluator import Evaluator
 from bigcode_eval.tasks import ALL_TASKS
 
 
+# Fixed seed
+torch.manual_seed(2024)
+
+
 class MultiChoice:
     def __init__(self, choices):
         self.choices = choices
