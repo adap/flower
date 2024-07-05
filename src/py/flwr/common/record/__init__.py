@@ -22,9 +22,9 @@ from .recordset import RecordSet
 
 __all__ = [
     "Array",
-    "array_from_numpy",
     "ConfigsRecord",
     "MetricsRecord",
     "ParametersRecord",
     "RecordSet",
+    "array_from_numpy",
 ]
