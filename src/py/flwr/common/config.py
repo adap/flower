@@ -18,11 +18,11 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-from flwr.common.typing import ConfigsRecordValues, Run
 import tomli
 
 from flwr.cli.config_utils import validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
+from flwr.common.typing import ConfigsRecordValues, Run
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:

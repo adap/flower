@@ -22,7 +22,6 @@ from logging import DEBUG, ERROR, INFO, WARN
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
-from flwr.common.config import get_fused_config
 from grpc import RpcError
 
 from flwr.client.client import Client
@@ -30,6 +29,7 @@ from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
+from flwr.common.config import get_fused_config
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_ADAPTER,

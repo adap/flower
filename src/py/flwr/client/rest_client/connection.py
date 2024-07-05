@@ -24,7 +24,6 @@ from logging import ERROR, INFO, WARN
 from typing import Callable, Iterator, Optional, Tuple, Type, TypeVar, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
-from flwr.common.typing import Run
 from google.protobuf.message import Message as GrpcMessage
 
 from flwr.client.heartbeat import start_ping_loop
@@ -46,6 +45,7 @@ from flwr.common.serde import (
     message_to_taskres,
     record_value_dict_from_proto,
 )
+from flwr.common.typing import Run
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
