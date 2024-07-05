@@ -24,8 +24,8 @@ packages = ["."]
 publisher = "flowerteam"
 
 [flower.components]
-serverapp = "mlxexample.server:app"
-clientapp = "mlxexample.client:app"
+serverapp = "mlxexample.server_app:app"
+clientapp = "mlxexample.client_app:app"
 
 [flower.engine]
 name = "simulation"
