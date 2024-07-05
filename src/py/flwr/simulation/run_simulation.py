@@ -337,7 +337,6 @@ def _run_simulation(
         update_console_handler(level=DEBUG, timestamps=True, colored=True)
     else:
         backend_config["init_args"]["logging_level"] = WARNING
-        backend_config["init_args"]["log_to_driver"] = True
 
     if enable_tf_gpu_growth:
         # Check that Backend config has also enabled using GPU growth
