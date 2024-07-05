@@ -17,7 +17,7 @@
 import time
 import warnings
 from logging import DEBUG, ERROR, WARNING
-from typing import Iterable, List, Optional, Tuple, cast
+from typing import Iterable, List, Optional, cast
 
 import grpc
 
@@ -170,36 +170,68 @@ class GrpcDriver(Driver):
     ----------
     run_id : int
         The identifier of the run.
-    stub : Optional[GrpcDriverStub] (default: None)
-        The ``GrpcDriverStub`` instance used to communicate with the SuperLink.
-        If None, an instance connected to "[::]:9091" will be created.
+    driver_service_address : str (default: "[::]:9091")
+        The IPv4 or IPv6 address of the Driver API server.
+    root_certificates : Optional[bytes] (default: None)
+        The PEM-encoded root certificates as a byte string.
+        If provided, a secure connection using the certificates will be
+        established to an SSL-enabled Flower server.
     """
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
         run_id: int,
-        stub: Optional[GrpcDriverStub] = None,
+        driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
+        root_certificates: Optional[bytes] = None,
     ) -> None:
         self._run_id = run_id
         self._run: Optional[Run] = None
-        self.stub = stub if stub is not None else GrpcDriverStub()
+        self._addr = driver_service_address
+        self._cert = root_certificates
+        self._stub: Optional[DriverStub] = None
+        self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=0, anonymous=True)
 
     @property
-    def run(self) -> Run:
-        """Run information."""
-        self._get_stub_and_run_id()
-        return Run(**vars(cast(Run, self._run)))
+    def _is_connected(self) -> bool:
+        """Check if connected to the Driver API server."""
+        return self._channel is not None
 
-    def _get_stub_and_run_id(self) -> Tuple[GrpcDriverStub, int]:
+    def _connect(self) -> None:
+        """Connect to the Driver API.
+
+        This will not call GetRun.
+        """
+        event(EventType.DRIVER_CONNECT)
+        if self._is_connected:
+            log(WARNING, "Already connected")
+            return
+        self._channel = create_channel(
+            server_address=self._addr,
+            insecure=(self._cert is None),
+            root_certificates=self._cert,
+        )
+        self._stub = DriverStub(self._channel)
+        log(DEBUG, "[Driver] Connected to %s", self._addr)
+
+    def _disconnect(self) -> None:
+        """Disconnect from the Driver API."""
+        event(EventType.DRIVER_DISCONNECT)
+        if not self._is_connected:
+            log(DEBUG, "Already disconnected")
+            return
+        channel = self._channel
+        self._channel = None
+        self._stub = None
+        channel.close()
+        log(DEBUG, "[Driver] Disconnected")
+
+    def _init_run(self) -> None:
         # Check if is initialized
         if self._run is None:
-            # Connect
-            if not self.stub.is_connected():
-                self.stub.connect()
             # Get the run info
             req = GetRunRequest(run_id=self._run_id)
-            res = self.stub.get_run(req)
+            res: GetRunResponse = self.stub.GetRun(req)
             if not res.HasField("run"):
                 raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
             self._run = Run(
@@ -208,12 +240,24 @@ class GrpcDriver(Driver):
                 fab_version=res.run.fab_version,
             )
 
-        return self.stub, self._run.run_id
+    @property
+    def run(self) -> Run:
+        """Run information."""
+        self._init_run()
+        return Run(**vars(self._run))
+
+    @property
+    def stub(self) -> DriverStub:
+        """Driver stub."""
+        if not self._is_connected:
+            self._connect()
+        return cast(DriverStub, self._stub)
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
         if not (
-            message.metadata.run_id == cast(Run, self._run).run_id
+            # Assume self._run being initialized
+            message.metadata.run_id == self._run_id
             and message.metadata.src_node_id == self.node.node_id
             and message.metadata.message_id == ""
             and message.metadata.reply_to_message == ""
@@ -234,7 +278,7 @@ class GrpcDriver(Driver):
         This method constructs a new `Message` with given content and metadata.
         The `run_id` and `src_node_id` will be set automatically.
         """
-        _, run_id = self._get_stub_and_run_id()
+        self._init_run()
         if ttl:
             warnings.warn(
                 "A custom TTL was set, but note that the SuperLink does not enforce "
@@ -245,7 +289,7 @@ class GrpcDriver(Driver):
 
         ttl_ = DEFAULT_TTL if ttl is None else ttl
         metadata = Metadata(
-            run_id=run_id,
+            run_id=self._run_id,
             message_id="",  # Will be set by the server
             src_node_id=self.node.node_id,
             dst_node_id=dst_node_id,
@@ -258,9 +302,9 @@ class GrpcDriver(Driver):
 
     def get_node_ids(self) -> List[int]:
         """Get node IDs."""
-        stub, run_id = self._get_stub_and_run_id()
+        self._init_run()
         # Call GrpcDriverStub method
-        res = stub.get_nodes(GetNodesRequest(run_id=run_id))
+        res: GetNodesResponse = self.stub.GetNodes(GetNodesRequest(run_id=self._run_id))
         return [node.node_id for node in res.nodes]
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
@@ -269,7 +313,7 @@ class GrpcDriver(Driver):
         This method takes an iterable of messages and sends each message
         to the node specified in `dst_node_id`.
         """
-        stub, _ = self._get_stub_and_run_id()
+        self._init_run()
         # Construct TaskIns
         task_ins_list: List[TaskIns] = []
         for msg in messages:
@@ -280,7 +324,9 @@ class GrpcDriver(Driver):
             # Add to list
             task_ins_list.append(taskins)
         # Call GrpcDriverStub method
-        res = stub.push_task_ins(PushTaskInsRequest(task_ins_list=task_ins_list))
+        res: PushTaskInsResponse = self.stub.PushTaskIns(
+            PushTaskInsRequest(task_ins_list=task_ins_list)
+        )
         return list(res.task_ids)
 
     def pull_messages(self, message_ids: Iterable[str]) -> Iterable[Message]:
@@ -289,9 +335,9 @@ class GrpcDriver(Driver):
         This method is used to collect messages from the SuperLink that correspond to a
         set of given message IDs.
         """
-        stub, _ = self._get_stub_and_run_id()
+        self._init_run()
         # Pull TaskRes
-        res = stub.pull_task_res(
+        res: PullTaskResResponse = self.stub.PullTaskRes(
             PullTaskResRequest(node=self.node, task_ids=message_ids)
         )
         # Convert TaskRes to Message
@@ -331,7 +377,7 @@ class GrpcDriver(Driver):
     def close(self) -> None:
         """Disconnect from the SuperLink if connected."""
         # Check if `connect` was called before
-        if not self.stub.is_connected():
+        if not self._is_connected:
             return
         # Disconnect
-        self.stub.disconnect()
+        self._disconnect()
