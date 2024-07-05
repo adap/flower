@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 """SQLite based implemenation of server state."""
 
 
-import os
 import re
 import sqlite3
 import time
@@ -24,13 +23,15 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
+from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
+from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .state import State
-from .utils import make_node_unavailable_taskres
+from .utils import generate_rand_int_from_bytes, make_node_unavailable_taskres
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
@@ -540,7 +541,7 @@ class SqliteState(State):  # pylint: disable=R0904
     ) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
-        node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
+        node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
 
         query = "SELECT node_id FROM node WHERE public_key = :public_key;"
         row = self.query(query, {"public_key": public_key})
@@ -615,7 +616,7 @@ class SqliteState(State):  # pylint: disable=R0904
     def create_run(self, fab_id: str, fab_version: str) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
-        run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
+        run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
         # Check conflicts
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
@@ -680,15 +681,17 @@ class SqliteState(State):  # pylint: disable=R0904
         result: Set[bytes] = {row["public_key"] for row in rows}
         return result
 
-    def get_run(self, run_id: int) -> Tuple[int, str, str]:
+    def get_run(self, run_id: int) -> Optional[Run]:
         """Retrieve information about the run with the specified `run_id`."""
         query = "SELECT * FROM run WHERE run_id = ?;"
         try:
             row = self.query(query, (run_id,))[0]
-            return run_id, row["fab_id"], row["fab_version"]
+            return Run(
+                run_id=run_id, fab_id=row["fab_id"], fab_version=row["fab_version"]
+            )
         except sqlite3.IntegrityError:
             log(ERROR, "`run_id` does not exist.")
-            return 0, "", ""
+            return None
 
     def acknowledge_ping(self, node_id: int, ping_interval: float) -> bool:
         """Acknowledge a ping received from a node, serving as a heartbeat."""
