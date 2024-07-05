@@ -379,7 +379,7 @@ def _start_client_internal(
 
                     # Retrieve context for this run
                     context = node_state.retrieve_context(run_id=run_id)
-                    context.config = get_fused_config(run_info[run_id])
+                    context.run_config = get_fused_config(run_info[run_id])
 
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error

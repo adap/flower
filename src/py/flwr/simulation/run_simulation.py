@@ -209,7 +209,8 @@ def _main_loop(
     serverapp_th = None
     try:
         # Create run (with empty fab_id and fab_version)
-        run_id_ = state_factory.state().create_run("", "")
+        # TODO Replace empty dict with config
+        run_id_ = state_factory.state().create_run("", "", {})
 
         if run_id:
             _override_run_id(state_factory, run_id_to_replace=run_id_, run_id=run_id)
