@@ -80,6 +80,7 @@ def get_fused_config(
     """Get the config using the fab_id and the fab_version, remove the nesting by adding
     the nested keys as prefixes separated by dots, and fuse it with the override
     dict."""
+    print("DEBUGGGG", run.fab_id, run.fab_version)
     final_config = {}
     default_config = get_project_config(
         get_project_dir(run.fab_id, run.fab_version, flwr_dir)
