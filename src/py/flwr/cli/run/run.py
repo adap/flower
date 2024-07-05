@@ -143,7 +143,18 @@ def _start_superexec_run(
         fab_file=Path(fab_path).read_bytes(),
         override_config=record_value_dict_to_proto(
             override_config,
-            [bool, int, float, str, bytes],
+            [
+                bool,
+                int,
+                float,
+                str,
+                bytes,
+                list[int],
+                list[float],
+                list[str],
+                list[bytes],
+                list[bool],
+            ],
             ProtoConfigsRecordValue,
         ),
     )
