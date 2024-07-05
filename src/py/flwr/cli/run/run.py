@@ -30,8 +30,8 @@ from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.common.serde import record_value_dict_to_proto
 from flwr.common.typing import ConfigsRecordValues
-# pylint: disable-next=E0611
-from flwr.proto.common_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
+
+from flwr.proto.common_pb2 import ConfigsRecordValue as PCRV  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
@@ -154,7 +154,7 @@ def _start_superexec_run(
                 List[bytes],
                 List[bool],
             ],
-            ProtoConfigsRecordValue,
+            PCRV,
         ),
     )
     res = stub.StartRun(req)

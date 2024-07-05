@@ -27,8 +27,7 @@ from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.serde import record_value_dict_to_proto
 from flwr.common.typing import ConfigsRecordValues
-# pylint: disable-next=E0611
-from flwr.proto.common_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
+from flwr.proto.common_pb2 import ConfigsRecordValue as PCRV  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
 from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
@@ -85,7 +84,7 @@ class DeploymentEngine(Executor):
                     List[bytes],
                     List[bool],
                 ],
-                ProtoConfigsRecordValue,
+                PCRV,
             ),
         )
         res = self.stub.CreateRun(request=req)
