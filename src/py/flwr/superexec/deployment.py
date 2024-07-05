@@ -17,7 +17,7 @@
 import subprocess
 import sys
 from logging import ERROR, INFO
-from typing import Optional
+from typing import Dict, Optional
 
 from typing_extensions import override
 
@@ -25,6 +25,7 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.typing import ConfigsRecordValues
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
 from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
@@ -64,7 +65,9 @@ class DeploymentEngine(Executor):
         return int(res.run_id)
 
     @override
-    def start_run(self, fab_file: bytes) -> Optional[RunTracker]:
+    def start_run(
+        self, fab_file: bytes, config: Optional[Dict[str, ConfigsRecordValues]]
+    ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
             # Install FAB to flwr dir

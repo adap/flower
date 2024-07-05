@@ -15,12 +15,13 @@
 """SuperExec gRPC API."""
 
 from logging import INFO
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import grpc
 
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
+from flwr.common.typing import ConfigsRecordValues
 from flwr.proto.exec_pb2_grpc import add_ExecServicer_to_server
 from flwr.server.superlink.fleet.grpc_bidi.grpc_server import generic_create_grpc_server
 
@@ -32,10 +33,12 @@ def run_superexec_api_grpc(
     address: str,
     executor: Executor,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
+    config: Optional[Dict[str, ConfigsRecordValues]],
 ) -> grpc.Server:
     """Run SuperExec API (gRPC, request-response)."""
     exec_servicer: grpc.Server = ExecServicer(
         executor=executor,
+        config=config,
     )
     superexec_add_servicer_to_server_fn = add_ExecServicer_to_server
     superexec_grpc_server = generic_create_grpc_server(

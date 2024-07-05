@@ -16,11 +16,12 @@
 
 
 from logging import ERROR, INFO
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator, Optional
 
 import grpc
 
 from flwr.common.logger import log
+from flwr.common.typing import ConfigsRecordValues
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
@@ -35,9 +36,12 @@ from .executor import Executor, RunTracker
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """SuperExec API servicer."""
 
-    def __init__(self, executor: Executor) -> None:
+    def __init__(
+        self, executor: Executor, config: Optional[Dict[str, ConfigsRecordValues]]
+    ) -> None:
         self.executor = executor
         self.runs: Dict[int, RunTracker] = {}
+        self.config = config
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
@@ -45,7 +49,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
 
-        run = self.executor.start_run(request.fab_file)
+        run = self.executor.start_run(request.fab_file, self.config)
 
         if run is None:
             log(ERROR, "Executor failed to start run")

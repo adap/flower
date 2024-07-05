@@ -55,6 +55,7 @@ def run_superexec() -> None:
         address=address,
         executor=_load_executor(args),
         certificates=certificates,
+        config=args.config,
     )
 
     grpc_servers = [superexec_server]
@@ -87,6 +88,10 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
         "--executor-dir",
         help="The directory for the executor.",
         default=".",
+    )
+    parser.add_argument(
+        "--config",
+        help="Key-value pairs for the executor config.",
     )
     parser.add_argument(
         "--insecure",
