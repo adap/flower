@@ -81,7 +81,7 @@ def test_flatten_dict() -> None:
 
 def test_parse_config_args_none() -> None:
     """Test parse_config_args with None as input."""
-    assert parse_config_args(None) == {}
+    assert not parse_config_args(None)
 
 
 def test_parse_config_args_overrides() -> None:
