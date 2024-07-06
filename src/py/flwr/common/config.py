@@ -74,7 +74,9 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def _flatten_dict(raw_dict, sep="."):
+def _flatten_dict(
+    raw_dict: Dict[str, Any], sep: str = "."
+) -> Dict[str, ConfigsRecordValues]:
     items = []
     for k, v in raw_dict.items():
         if isinstance(v, dict):
