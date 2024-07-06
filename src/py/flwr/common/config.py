@@ -16,7 +16,7 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import tomli
 
@@ -77,7 +77,7 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
 def _flatten_dict(
     raw_dict: Dict[str, Any], sep: str = "."
 ) -> Dict[str, ConfigsRecordValues]:
-    items = []
+    items: List[Tuple[str, ConfigsRecordValues]] = []
     for k, v in raw_dict.items():
         if isinstance(v, dict):
             items.extend(_flatten_dict(v, sep=sep).items())
@@ -108,4 +108,4 @@ def get_fused_config(
         else:
             final_config[key] = default_config[key]
 
-    return cast(Dict[str, ConfigsRecordValues], final_config)
+    return final_config
