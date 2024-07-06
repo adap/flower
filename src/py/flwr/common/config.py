@@ -14,8 +14,8 @@
 # ==============================================================================
 """Provide functions for managing global Flower config."""
 
-from logging import WARNING
 import os
+from logging import WARNING
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
