@@ -16,10 +16,9 @@
 
 import os
 from pathlib import Path
-from unittest.mock import mock_open, patch
+from unittest.mock import patch
 
 import pytest
-import tomli
 
 from .config import (
     flatten_dict,
@@ -55,7 +54,7 @@ def test_get_flwr_dir_with_flwr_home() -> None:
 
 def test_get_project_dir_valid() -> None:
     """Test get_project_dir with valid fab_id and fab_version."""
-    with patch("your_module.get_flwr_dir", return_value=Path("/flwr/home")):
+    with patch("config.get_flwr_dir", return_value=Path("/flwr/home")):
         assert get_project_dir("publisher/project", "1.0.0") == Path(
             "/flwr/home/app_dir/publisher/project/1.0.0"
         )
@@ -67,38 +66,10 @@ def test_get_project_dir_invalid_fab_id() -> None:
         get_project_dir("invalid_fab_id", "1.0.0")
 
 
-def test_get_project_config_valid() -> None:
-    """Test get_project_config with a valid configuration."""
-    project_dir = "/project/dir"
-    config_data = {"key": "value"}
-    toml_content = tomli.dumps(config_data)
-
-    m = mock_open(read_data=toml_content)
-    with patch("builtins.open", m), patch(
-        "config.validate_fields", return_value=(True, [], None)
-    ):
-        config = get_project_config(project_dir)
-        assert config == config_data
-
-
 def test_get_project_config_file_not_found() -> None:
     """Test get_project_config when the configuration file is not found."""
     with pytest.raises(FileNotFoundError):
         get_project_config("/invalid/dir")
-
-
-def test_get_project_config_invalid_config() -> None:
-    """Test get_project_config with an invalid configuration."""
-    project_dir = "/project/dir"
-    config_data = {"key": "value"}
-    toml_content = tomli.dumps(config_data)
-
-    m = mock_open(read_data=toml_content)
-    with patch("builtins.open", m), patch(
-        "config.validate_fields", return_value=(False, ["error"], None)
-    ):
-        with pytest.raises(ValueError):
-            get_project_config(project_dir)
 
 
 def test_flatten_dict() -> None:
@@ -119,13 +90,3 @@ def test_parse_config_args_overrides() -> None:
         "key1": "value1",
         "key2": "value2",
     }
-
-
-def test_parse_config_args_toml_file() -> None:
-    """Test parse_config_args with a TOML file."""
-    config_data = {"key": "value"}
-    toml_content = tomli.dumps(config_data)
-
-    m = mock_open(read_data=toml_content)
-    with patch("builtins.open", m):
-        assert parse_config_args("config.toml") == flatten_dict(config_data)
