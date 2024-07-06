@@ -17,8 +17,6 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/common.proto";
-
 service Exec {
   // Start run upon request
   rpc StartRun(StartRunRequest) returns (StartRunResponse) {}
@@ -29,7 +27,7 @@ service Exec {
 
 message StartRunRequest {
   bytes fab_file = 1;
-  map<string, ConfigsRecordValue> override_config = 2;
+  map<string, string> override_config = 2;
 }
 message StartRunResponse { sint64 run_id = 1; }
 message StreamLogsRequest { sint64 run_id = 1; }

@@ -22,7 +22,7 @@ import tomli
 
 from flwr.cli.config_utils import validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
-from flwr.common.typing import ConfigsRecordValues, Run
+from flwr.common.typing import Run
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
@@ -74,10 +74,8 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def _flatten_dict(
-    raw_dict: Dict[str, Any], sep: str = "."
-) -> Dict[str, ConfigsRecordValues]:
-    items: List[Tuple[str, ConfigsRecordValues]] = []
+def _flatten_dict(raw_dict: Dict[str, Any], sep: str = ".") -> Dict[str, str]:
+    items: List[Tuple[str, str]] = []
     for k, v in raw_dict.items():
         if isinstance(v, dict):
             items.extend(_flatten_dict(v, sep=sep).items())
@@ -86,9 +84,7 @@ def _flatten_dict(
     return dict(items)
 
 
-def get_fused_config(
-    run: Run, flwr_dir: Optional[Path]
-) -> Dict[str, ConfigsRecordValues]:
+def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
     """Get the config using the fab_id and the fab_version, remove the nesting by adding
     the nested keys as prefixes separated by dots, and fuse it with the override
     dict."""

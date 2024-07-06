@@ -28,41 +28,21 @@ from flwr.cli.build import build
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.common.serde import record_value_dict_to_proto
-from flwr.common.typing import ConfigsRecordValues, ValueList
-from flwr.proto.common_pb2 import ConfigsRecordValue as PCRV  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
 
 
-def _convert_to_type(arg: str) -> Union[bool, int, float, str]:
-    # Check for boolean values
-    if arg.lower() in ["true", "false"]:
-        return arg.lower() == "true"
-
-    try:
-        # Try converting to an integer
-        return int(arg)
-    except ValueError:
-        try:
-            # Try converting to a float
-            return float(arg)
-        except ValueError:
-            # If it fails to convert to an int or float, return the original string
-            return str(arg)
-
-
 def _parse_config_overrides(
     config_overrides: Optional[List[str]],
-) -> Dict[str, ConfigsRecordValues]:
+) -> Dict[str, str]:
     """Parse the -c arguments and return the overrides as a dict."""
-    overrides: Dict[str, ConfigsRecordValues] = {}
+    overrides: Dict[str, str] = {}
 
     if config_overrides is not None:
         for kv_pair in config_overrides:
             key, value = kv_pair.split("=")
-            overrides[key] = _convert_to_type(value)
+            overrides[key] = value
 
     return overrides
 
@@ -158,7 +138,7 @@ def run(
 
 
 def _start_superexec_run(
-    override_config: Dict[str, ConfigsRecordValues], directory: Optional[Path]
+    override_config: Dict[str, str], directory: Optional[Path]
 ) -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
@@ -178,11 +158,7 @@ def _start_superexec_run(
 
     req = StartRunRequest(
         fab_file=Path(fab_path).read_bytes(),
-        override_config=record_value_dict_to_proto(
-            override_config,
-            ValueList,
-            PCRV,
-        ),
+        override_config=override_config,
     )
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)

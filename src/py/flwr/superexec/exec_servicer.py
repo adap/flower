@@ -21,7 +21,6 @@ from typing import Any, Dict, Generator
 import grpc
 
 from flwr.common.logger import log
-from flwr.common.serde import record_value_dict_from_proto
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
@@ -47,7 +46,8 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         log(INFO, "ExecServicer.StartRun")
 
         run = self.executor.start_run(
-            request.fab_file, record_value_dict_from_proto(request.override_config)
+            request.fab_file,
+            dict(request.override_config.items()),
         )
 
         if run is None:

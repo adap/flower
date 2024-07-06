@@ -18,8 +18,6 @@
 from dataclasses import dataclass
 from typing import Dict, Optional
 
-from flwr.common.typing import ConfigsRecordValues
-
 from .record import RecordSet
 
 
@@ -48,7 +46,7 @@ class Context:
 
     state: RecordSet
     partition_id: Optional[int]
-    run_config: Dict[str, ConfigsRecordValues]
+    run_config: Dict[str, str]
 
     def __init__(
         self,

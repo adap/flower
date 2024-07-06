@@ -23,7 +23,6 @@ from uuid import UUID
 import grpc
 
 from flwr.common.logger import log
-from flwr.common.serde import record_value_dict_from_proto
 from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -73,7 +72,7 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         run_id = state.create_run(
             request.fab_id,
             request.fab_version,
-            record_value_dict_from_proto(request.override_config),
+            dict(request.override_config.items()),
         )
         return CreateRunResponse(run_id=run_id)
 
