@@ -35,25 +35,25 @@ FAB_CONFIG_FILE = "pyproject.toml"
 FLWR_HOME = "FLWR_HOME"
 
 
-def test_get_flwr_dir_with_provided_path():
+def test_get_flwr_dir_with_provided_path() -> None:
     """Test get_flwr_dir with a provided valid path."""
     provided_path = "/some/path"
     assert get_flwr_dir(provided_path) == Path(provided_path).absolute()
 
 
-def test_get_flwr_dir_without_provided_path():
+def test_get_flwr_dir_without_provided_path() -> None:
     """Test get_flwr_dir without a provided path, using default home directory."""
     with patch.dict(os.environ, {"HOME": "/home/user"}):
         assert get_flwr_dir() == Path("/home/user/.flwr")
 
 
-def test_get_flwr_dir_with_flwr_home():
+def test_get_flwr_dir_with_flwr_home() -> None:
     """Test get_flwr_dir with FLWR_HOME environment variable set."""
     with patch.dict(os.environ, {FLWR_HOME: "/custom/flwr/home"}):
         assert get_flwr_dir() == Path("/custom/flwr/home")
 
 
-def test_get_project_dir_valid():
+def test_get_project_dir_valid() -> None:
     """Test get_project_dir with valid fab_id and fab_version."""
     with patch("your_module.get_flwr_dir", return_value=Path("/flwr/home")):
         assert get_project_dir("publisher/project", "1.0.0") == Path(
@@ -61,13 +61,13 @@ def test_get_project_dir_valid():
         )
 
 
-def test_get_project_dir_invalid_fab_id():
+def test_get_project_dir_invalid_fab_id() -> None:
     """Test get_project_dir with an invalid fab_id."""
     with pytest.raises(ValueError):
         get_project_dir("invalid_fab_id", "1.0.0")
 
 
-def test_get_project_config_valid():
+def test_get_project_config_valid() -> None:
     """Test get_project_config with a valid configuration."""
     project_dir = "/project/dir"
     config_data = {"key": "value"}
@@ -81,13 +81,13 @@ def test_get_project_config_valid():
         assert config == config_data
 
 
-def test_get_project_config_file_not_found():
+def test_get_project_config_file_not_found() -> None:
     """Test get_project_config when the configuration file is not found."""
     with pytest.raises(FileNotFoundError):
         get_project_config("/invalid/dir")
 
 
-def test_get_project_config_invalid_config():
+def test_get_project_config_invalid_config() -> None:
     """Test get_project_config with an invalid configuration."""
     project_dir = "/project/dir"
     config_data = {"key": "value"}
@@ -101,19 +101,19 @@ def test_get_project_config_invalid_config():
             get_project_config(project_dir)
 
 
-def test_flatten_dict():
+def test_flatten_dict() -> None:
     """Test flatten_dict with a nested dictionary."""
     raw_dict = {"a": {"b": {"c": "d"}}, "e": "f"}
     expected = {"a.b.c": "d", "e": "f"}
     assert flatten_dict(raw_dict) == expected
 
 
-def test_parse_config_args_none():
+def test_parse_config_args_none() -> None:
     """Test parse_config_args with None as input."""
     assert parse_config_args(None) == {}
 
 
-def test_parse_config_args_overrides():
+def test_parse_config_args_overrides() -> None:
     """Test parse_config_args with key-value pairs."""
     assert parse_config_args("key1=value1,key2=value2") == {
         "key1": "value1",
@@ -121,7 +121,7 @@ def test_parse_config_args_overrides():
     }
 
 
-def test_parse_config_args_toml_file():
+def test_parse_config_args_toml_file() -> None:
     """Test parse_config_args with a TOML file."""
     config_data = {"key": "value"}
     toml_content = tomli.dumps(config_data)
