@@ -40,7 +40,7 @@ class Context:
         An index that specifies the data partition that the ClientApp using this Context
         object should make use of. Setting this attribute is better suited for
         simulation or proto typing setups.
-    config : Dict[str, ConfigsRecordValues]
+    run_config : Dict[str, ConfigsRecordValues]
         A config (key/value mapping) held by the entity in a given run and that will
         stay local. It can be used at any point during the lifecycle of this entity
         (e.g. across multiple rounds)
