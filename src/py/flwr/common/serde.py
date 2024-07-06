@@ -15,7 +15,17 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, cast
+from typing import (
+    Any,
+    Dict,
+    List,
+    MutableMapping,
+    OrderedDict,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from google.protobuf.message import Message as GrpcMessage
 
@@ -412,27 +422,7 @@ def _record_value_from_proto(value_proto: GrpcMessage) -> Any:
 
 
 def record_value_dict_to_proto(
-    value_dict: Dict[str, ConfigsRecordValues],
-    allowed_types: List[type],
-    value_proto_class: Type[T],
-) -> Dict[str, T]:
-    """Serialize the record value dict to ProtoBuf.
-
-    Note: `bool` MUST be put in the front of allowd_types if it exists.
-    """
-    # Move bool to the front
-    if bool in allowed_types and allowed_types[0] != bool:
-        allowed_types.remove(bool)
-        allowed_types.insert(0, bool)
-
-    def proto(_v: Any) -> T:
-        return _record_value_to_proto(_v, allowed_types, value_proto_class)
-
-    return {k: proto(v) for k, v in value_dict.items()}
-
-
-def _record_value_dict_to_proto(
-    value_dict: TypedDict[str, Any],
+    value_dict: Union[TypedDict[str, Any], Dict[str, ConfigsRecordValues]],
     allowed_types: List[type],
     value_proto_class: Type[T],
 ) -> Dict[str, T]:
@@ -496,7 +486,7 @@ def parameters_record_from_proto(
 def metrics_record_to_proto(record: MetricsRecord) -> ProtoMetricsRecord:
     """Serialize MetricsRecord to ProtoBuf."""
     return ProtoMetricsRecord(
-        data=_record_value_dict_to_proto(record, [float, int], ProtoMetricsRecordValue)
+        data=record_value_dict_to_proto(record, [float, int], ProtoMetricsRecordValue)
     )
 
 
@@ -514,7 +504,7 @@ def metrics_record_from_proto(record_proto: ProtoMetricsRecord) -> MetricsRecord
 def configs_record_to_proto(record: ConfigsRecord) -> ProtoConfigsRecord:
     """Serialize ConfigsRecord to ProtoBuf."""
     return ProtoConfigsRecord(
-        data=_record_value_dict_to_proto(
+        data=record_value_dict_to_proto(
             record,
             [bool, int, float, str, bytes],
             ProtoConfigsRecordValue,

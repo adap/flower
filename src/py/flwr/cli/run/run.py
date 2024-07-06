@@ -29,11 +29,25 @@ from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.common.serde import record_value_dict_to_proto
-from flwr.common.typing import ConfigsRecordValues
+from flwr.common.typing import ConfigsRecordValues, ValueList
 from flwr.proto.common_pb2 import ConfigsRecordValue as PCRV  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
+
+
+def _parse_config_overrides(
+    config_overrides: Optional[List[str]],
+) -> Dict[str, ConfigsRecordValues]:
+    """Parse the -c arguments and return the overrides as a dict."""
+    overrides: Dict[str, ConfigsRecordValues] = {}
+
+    if config_overrides is not None:
+        for kv_pair in config_overrides:
+            key, value = kv_pair.split("=")
+            overrides[key] = value
+
+    return overrides
 
 
 class Engine(str, Enum):
@@ -61,10 +75,18 @@ def run(
         Optional[Path],
         typer.Option(help="Path of the Flower project to run"),
     ] = None,
+    config_overrides: Annotated[
+        Optional[List[str]],
+        typer.Option(
+            "--config",
+            "-c",
+            help="Override configuration key-value pairs",
+        ),
+    ] = None,
 ) -> None:
     """Run Flower project."""
     if use_superexec:
-        _start_superexec_run({}, directory)
+        _start_superexec_run(_parse_config_overrides(config_overrides), directory)
         return
 
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
@@ -141,18 +163,7 @@ def _start_superexec_run(
         fab_file=Path(fab_path).read_bytes(),
         override_config=record_value_dict_to_proto(
             override_config,
-            [
-                bool,
-                int,
-                float,
-                str,
-                bytes,
-                List[int],
-                List[float],
-                List[str],
-                List[bytes],
-                List[bool],
-            ],
+            ValueList,
             PCRV,
         ),
     )

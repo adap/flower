@@ -74,6 +74,16 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
+def _flatten_dict(raw_dict, sep="."):
+    items = []
+    for k, v in raw_dict.items():
+        if isinstance(v, dict):
+            items.extend(_flatten_dict(v, sep=sep).items())
+        else:
+            items.append((k, v))
+    return dict(items)
+
+
 def get_fused_config(
     run: Run, flwr_dir: Optional[Path]
 ) -> Dict[str, ConfigsRecordValues]:
@@ -84,9 +94,11 @@ def get_fused_config(
         return {}
 
     final_config = {}
-    default_config = get_project_config(
-        get_project_dir(run.fab_id, run.fab_version, flwr_dir)
-    )["flower"]["config"]
+    default_config = _flatten_dict(
+        get_project_config(get_project_dir(run.fab_id, run.fab_version, flwr_dir))[
+            "flower"
+        ]["config"]
+    )
 
     for key in default_config.keys():
         if key in run.override_config:

@@ -44,6 +44,19 @@ Value = Union[
     List[int],
     List[str],
 ]
+ValueList = [
+    bool,
+    bytes,
+    float,
+    int,
+    str,
+    List[bool],
+    List[bytes],
+    List[float],
+    List[int],
+    List[str],
+]
+
 
 # Value types for common.MetricsRecord
 MetricsScalar = Union[int, float]
