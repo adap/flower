@@ -90,7 +90,7 @@ def flatten_dict(
 def parse_config_args(
     config_overrides: Optional[str],
 ) -> Dict[str, str]:
-    """Parse key-value pairs separated by commas."""
+    """Parse comma separated list of key-value pairs separated by '='."""
     overrides: Dict[str, str] = {}
 
     if config_overrides is not None:
