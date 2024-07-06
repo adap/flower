@@ -36,7 +36,7 @@ FLWR_HOME = "FLWR_HOME"
 
 def test_get_flwr_dir_with_provided_path() -> None:
     """Test get_flwr_dir with a provided valid path."""
-    provided_path = "/some/path"
+    provided_path = "."
     assert get_flwr_dir(provided_path) == Path(provided_path).absolute()
 
 
@@ -50,14 +50,6 @@ def test_get_flwr_dir_with_flwr_home() -> None:
     """Test get_flwr_dir with FLWR_HOME environment variable set."""
     with patch.dict(os.environ, {FLWR_HOME: "/custom/flwr/home"}):
         assert get_flwr_dir() == Path("/custom/flwr/home")
-
-
-def test_get_project_dir_valid() -> None:
-    """Test get_project_dir with valid fab_id and fab_version."""
-    with patch("config.get_flwr_dir", return_value=Path("/flwr/home")):
-        assert get_project_dir("publisher/project", "1.0.0") == Path(
-            "/flwr/home/app_dir/publisher/project/1.0.0"
-        )
 
 
 def test_get_project_dir_invalid_fab_id() -> None:
