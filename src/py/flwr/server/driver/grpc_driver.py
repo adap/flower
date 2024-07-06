@@ -24,10 +24,7 @@ import grpc
 from flwr.common import DEFAULT_TTL, EventType, Message, Metadata, RecordSet, event
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.serde import (
-    message_from_taskres,
-    message_to_taskins,
-)
+from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,

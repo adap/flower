@@ -40,10 +40,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import (
-    message_from_taskins,
-    message_to_taskres,
-)
+from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.common.typing import Run
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,

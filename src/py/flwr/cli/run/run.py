@@ -18,7 +18,7 @@ import sys
 from enum import Enum
 from logging import DEBUG
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import typer
 from typing_extensions import Annotated
