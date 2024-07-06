@@ -108,7 +108,7 @@ class GrpcDriver(Driver):
         if not self._is_connected:
             log(DEBUG, "Already disconnected")
             return
-        channel = self._channel
+        channel: grpc.Channel = self._channel
         self._channel = None
         self._stub = None
         channel.close()
