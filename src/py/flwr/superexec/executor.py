@@ -19,8 +19,6 @@ from dataclasses import dataclass
 from subprocess import Popen
 from typing import Dict, Optional
 
-from flwr.common.typing import ConfigsRecordValues
-
 
 @dataclass
 class RunTracker:

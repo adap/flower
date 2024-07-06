@@ -21,7 +21,6 @@ from typing import Any, Dict, Generator, Optional
 import grpc
 
 from flwr.common.logger import log
-from flwr.common.typing import ConfigsRecordValues
 from flwr.proto import exec_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.exec_pb2 import (  # pylint: disable=E0611
     StartRunRequest,
