@@ -89,7 +89,7 @@ class TestInMemoryDriver(unittest.TestCase):
             run_id=61016,
             fab_id="mock/mock",
             fab_version="v1.0.0",
-            overrides={"test_key": "test_value"},
+            override_config={"test_key": "test_value"},
         )
         state_factory = MagicMock(state=lambda: self.state)
         self.driver = InMemoryDriver(run_id=61016, state_factory=state_factory)
@@ -101,7 +101,7 @@ class TestInMemoryDriver(unittest.TestCase):
         self.assertEqual(self.driver.run.run_id, 61016)
         self.assertEqual(self.driver.run.fab_id, "mock/mock")
         self.assertEqual(self.driver.run.fab_version, "v1.0.0")
-        self.assertEqual(self.driver.run.overrides["test_key"], "test_value")
+        self.assertEqual(self.driver.run.override_config["test_key"], "test_value")
 
     def test_get_nodes(self) -> None:
         """Test retrieval of nodes."""

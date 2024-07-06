@@ -62,7 +62,7 @@ class StateTest(unittest.TestCase):
         assert run.run_id == run_id
         assert run.fab_id == "Mock/mock"
         assert run.fab_version == "v1.0.0"
-        assert run.overrides["test_key"] == "test_value"
+        assert run.override_config["test_key"] == "test_value"
 
     def test_get_task_ins_empty(self) -> None:
         """Validate that a new state has no TaskIns."""

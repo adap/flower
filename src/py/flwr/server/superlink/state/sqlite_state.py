@@ -700,7 +700,7 @@ class SqliteState(State):  # pylint: disable=R0904
                 run_id=run_id,
                 fab_id=row["fab_id"],
                 fab_version=row["fab_version"],
-                overrides=literal_eval(row["overrides"]),
+                override_config=literal_eval(row["overrides"]),
             )
         except sqlite3.IntegrityError:
             log(ERROR, "`run_id` does not exist.")

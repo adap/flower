@@ -210,7 +210,7 @@ class GrpcDriver(Driver):
                 run_id=res.run.run_id,
                 fab_id=res.run.fab_id,
                 fab_version=res.run.fab_version,
-                overrides=record_value_dict_from_proto(res.run.override_config),
+                override_config=record_value_dict_from_proto(res.run.override_config),
             )
 
         return self.stub, self._run.run_id

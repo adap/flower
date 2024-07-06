@@ -83,7 +83,7 @@ def register_messages_into_state(
     """Register `num_messages` into the state factory."""
     state: InMemoryState = state_factory.state()  # type: ignore
     state.run_ids[run_id] = Run(
-        run_id=run_id, fab_id="Mock/mock", fab_version="v1.0.0", overrides={}
+        run_id=run_id, fab_id="Mock/mock", fab_version="v1.0.0", override_config={}
     )
     # Artificially add TaskIns to state so they can be processed
     # by the Simulation Engine logic

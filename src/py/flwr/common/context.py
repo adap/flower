@@ -48,7 +48,7 @@ class Context:
 
     state: RecordSet
     partition_id: Optional[int]
-    run_config: Dict[str, ConfigsRecordValues]
+    run_config: Dict[str, ConfigsRecordValues] = {}
 
     def __init__(
         self,

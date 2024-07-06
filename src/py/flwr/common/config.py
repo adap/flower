@@ -89,8 +89,8 @@ def get_fused_config(
     )["flower"]["config"]
 
     for key in default_config.keys():
-        if key in run.overrides:
-            final_config[key] = run.overrides[key]
+        if key in run.override_config:
+            final_config[key] = run.override_config[key]
         else:
             final_config[key] = default_config[key]
 

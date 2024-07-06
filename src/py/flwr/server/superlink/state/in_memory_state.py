@@ -291,7 +291,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
                     run_id=run_id,
                     fab_id=fab_id,
                     fab_version=fab_version,
-                    overrides=override_config,
+                    override_config=override_config,
                 )
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
