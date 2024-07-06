@@ -18,7 +18,7 @@ import sys
 from enum import Enum
 from logging import DEBUG
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import typer
 from typing_extensions import Annotated
@@ -36,6 +36,23 @@ from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
 
 
+def _convert_to_type(arg: str) -> Union[bool, int, float, str]:
+    # Check for boolean values
+    if arg.lower() in ["true", "false"]:
+        return arg.lower() == "true"
+
+    try:
+        # Try converting to an integer
+        return int(arg)
+    except ValueError:
+        try:
+            # Try converting to a float
+            return float(arg)
+        except ValueError:
+            # If it fails to convert to an int or float, return the original string
+            return str(arg)
+
+
 def _parse_config_overrides(
     config_overrides: Optional[List[str]],
 ) -> Dict[str, ConfigsRecordValues]:
@@ -45,7 +62,7 @@ def _parse_config_overrides(
     if config_overrides is not None:
         for kv_pair in config_overrides:
             key, value = kv_pair.split("=")
-            overrides[key] = value
+            overrides[key] = _convert_to_type(value)
 
     return overrides
 
