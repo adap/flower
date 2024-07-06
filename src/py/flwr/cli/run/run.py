@@ -20,11 +20,13 @@ from logging import DEBUG
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import tomli
 import typer
 from typing_extensions import Annotated
 
 from flwr.cli import config_utils
 from flwr.cli.build import build
+from flwr.common.config import flatten_dict
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -40,9 +42,16 @@ def _parse_config_overrides(
     overrides: Dict[str, str] = {}
 
     if config_overrides is not None:
-        for kv_pair in config_overrides:
-            key, value = kv_pair.split("=")
-            overrides[key] = value
+        if (
+            len(config_overrides) == 1
+            and "=" not in config_overrides
+            and config_overrides[0].endswith(".toml")
+        ):
+            overrides = flatten_dict(tomli.load(Path(config_overrides[0]).open("rb")))
+        else:
+            for kv_pair in config_overrides:
+                key, value = kv_pair.split("=")
+                overrides[key] = value
 
     return overrides
 

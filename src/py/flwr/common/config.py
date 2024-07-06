@@ -76,16 +76,17 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def _flatten_dict(
+def flatten_dict(
     raw_dict: Dict[str, Any], parent_key: str = "", sep: str = "."
 ) -> Dict[str, str]:
+    """Flatten dict by joining nested keys with a given separator."""
     items: List[Tuple[str, str]] = []
     for k, v in raw_dict.items():
         new_key = f"{parent_key}{sep}{k}" if parent_key else k
         if isinstance(v, dict):
-            items.extend(_flatten_dict(v, parent_key=new_key, sep=sep).items())
+            items.extend(flatten_dict(v, parent_key=new_key, sep=sep).items())
         else:
-            items.append((new_key, v))
+            items.append((new_key, str(v)))
     return dict(items)
 
 
@@ -96,7 +97,7 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
     if not run.fab_id or not run.fab_version:
         return {}
 
-    default_config = _flatten_dict(
+    default_config = flatten_dict(
         get_project_config(get_project_dir(run.fab_id, run.fab_version, flwr_dir))[
             "flower"
         ]["config"]
