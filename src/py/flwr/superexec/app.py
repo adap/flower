@@ -24,6 +24,7 @@ import grpc
 
 from flwr.common import EventType, event, log
 from flwr.common.address import parse_address
+from flwr.common.config import parse_config_args
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.exit_handlers import register_exit_handlers
 from flwr.common.object_ref import load_app, validate
@@ -55,7 +56,7 @@ def run_superexec() -> None:
         address=address,
         executor=_load_executor(args),
         certificates=certificates,
-        config=args.config,
+        config=parse_config_args(args.config),
     )
 
     grpc_servers = [superexec_server]
@@ -91,7 +92,7 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--config",
-        help="Key-value pairs for the executor config.",
+        help="Key-value pairs for the executor config, separated by commas.",
     )
     parser.add_argument(
         "--insecure",

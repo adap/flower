@@ -36,9 +36,7 @@ from .executor import Executor, RunTracker
 class ExecServicer(exec_pb2_grpc.ExecServicer):
     """SuperExec API servicer."""
 
-    def __init__(
-        self, executor: Executor, config: Optional[Dict[str, ConfigsRecordValues]]
-    ) -> None:
+    def __init__(self, executor: Executor, config: Optional[Dict[str, str]]) -> None:
         self.executor = executor
         self.runs: Dict[int, RunTracker] = {}
         self.config = config

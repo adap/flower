@@ -66,9 +66,10 @@ class DeploymentEngine(Executor):
 
     @override
     def start_run(
-        self, fab_file: bytes, config: Optional[Dict[str, ConfigsRecordValues]]
+        self, fab_file: bytes, config: Optional[Dict[str, str]]
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
+        print(config)
         try:
             # Install FAB to flwr dir
             fab_version, fab_id = get_fab_metadata(fab_file)
