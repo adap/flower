@@ -17,7 +17,7 @@
 import subprocess
 import sys
 from logging import ERROR, INFO
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 from typing_extensions import override
 
