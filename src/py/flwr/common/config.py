@@ -102,10 +102,10 @@ def get_fused_config(
         ]["config"]
     )
 
-    for key in default_config.keys():
+    for key, value in default_config.items():
         if key in run.override_config:
             final_config[key] = run.override_config[key]
         else:
-            final_config[key] = default_config[key]
+            final_config[key] = value
 
     return final_config
