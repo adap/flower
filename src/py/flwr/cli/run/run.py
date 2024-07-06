@@ -36,21 +36,22 @@ from flwr.simulation.run_simulation import _run_simulation
 
 
 def _parse_config_overrides(
-    config_overrides: Optional[List[str]],
+    config_overrides: Optional[str],
 ) -> Dict[str, str]:
     """Parse the -c arguments and return the overrides as a dict."""
     overrides: Dict[str, str] = {}
 
     if config_overrides is not None:
+        overrides_list = config_overrides.split(",")
         if (
-            len(config_overrides) == 1
-            and "=" not in config_overrides
-            and config_overrides[0].endswith(".toml")
+            len(overrides_list) == 1
+            and "=" not in overrides_list
+            and overrides_list[0].endswith(".toml")
         ):
-            with Path(config_overrides[0]).open("rb") as config_file:
+            with Path(overrides_list[0]).open("rb") as config_file:
                 overrides = flatten_dict(tomli.load(config_file))
         else:
-            for kv_pair in config_overrides:
+            for kv_pair in overrides_list:
                 key, value = kv_pair.split("=")
                 overrides[key] = value
 
@@ -83,11 +84,11 @@ def run(
         typer.Option(help="Path of the Flower project to run"),
     ] = None,
     config_overrides: Annotated[
-        Optional[List[str]],
+        Optional[str],
         typer.Option(
             "--config",
             "-c",
-            help="Override configuration key-value pairs",
+            help="Override configuration with key-value pairs separated by commas",
         ),
     ] = None,
 ) -> None:
