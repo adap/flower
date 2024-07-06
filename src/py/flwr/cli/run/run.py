@@ -14,114 +14,82 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
-import sys
-from enum import Enum
 from logging import DEBUG
 from pathlib import Path
 from typing import Optional
 
+import tomli
 import typer
 from typing_extensions import Annotated
 
-from flwr.cli import config_utils
 from flwr.cli.build import build
+from flwr.common.config import get_flwr_dir
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
-from flwr.simulation.run_simulation import _run_simulation
-
-
-class Engine(str, Enum):
-    """Enum defining the engine to run on."""
-
-    SIMULATION = "simulation"
 
 
 # pylint: disable-next=too-many-locals
 def run(
-    engine: Annotated[
-        Optional[Engine],
-        typer.Option(
-            case_sensitive=False,
-            help="The engine to run FL with (currently only simulation is supported).",
-        ),
+    directory: Annotated[
+        Path,
+        typer.Argument(help="Path of the Flower project to run"),
+    ] = Path("."),
+    federation: Annotated[
+        Optional[str],
+        typer.Argument(help="Name of the federation to run FL on"),
     ] = None,
-    use_superexec: Annotated[
+    verbose: Annotated[
         bool,
         typer.Option(
-            case_sensitive=False, help="Use this flag to use the new SuperExec API"
+            case_sensitive=False, help="Use this flag to print logs at `DEBUG` level"
         ),
     ] = False,
-    directory: Annotated[
-        Optional[Path],
-        typer.Option(help="Path of the Flower project to run"),
+    flwr_dir: Annotated[
+        Optional[str],
+        typer.Argument(
+            help="""Path of the Flower root.
+
+                    By default ``flwr-dir`` is equal to:
+
+                    - ``$FLWR_HOME/`` if ``$FLWR_HOME`` is defined
+                    - ``$XDG_DATA_HOME/.flwr/`` if ``$XDG_DATA_HOME`` is defined
+                    - ``$HOME/.flwr/`` in all other cases"""
+        ),
     ] = None,
 ) -> None:
     """Run Flower project."""
-    if use_superexec:
-        _start_superexec_run(directory)
-        return
+    global_config_path = get_flwr_dir(flwr_dir) / "config.toml"
 
-    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
+    if global_config_path.exists():
+        with global_config_path.open("rb") as global_config_file:
+            global_config = tomli.load(global_config_file)
 
-    config, errors, warnings = config_utils.load_and_validate()
-
-    if config is None:
-        typer.secho(
-            "Project configuration could not be loaded.\n"
-            "pyproject.toml is invalid:\n"
-            + "\n".join([f"- {line}" for line in errors]),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        sys.exit()
-
-    if warnings:
-        typer.secho(
-            "Project configuration is missing the following "
-            "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
-            fg=typer.colors.RED,
-            bold=True,
-        )
-
-    typer.secho("Success", fg=typer.colors.GREEN)
-
-    server_app_ref = config["flower"]["components"]["serverapp"]
-    client_app_ref = config["flower"]["components"]["clientapp"]
-
-    if engine is None:
-        engine = config["flower"]["engine"]["name"]
-
-    if engine == Engine.SIMULATION:
-        num_supernodes = config["flower"]["engine"]["simulation"]["supernode"]["num"]
-        backend_config = config["flower"]["engine"]["simulation"].get(
-            "backend_config", None
-        )
-
-        typer.secho("Starting run... ", fg=typer.colors.BLUE)
-        _run_simulation(
-            server_app_attr=server_app_ref,
-            client_app_attr=client_app_ref,
-            num_supernodes=num_supernodes,
-            backend_config=backend_config,
-        )
+        if federation is None:
+            superexec_address = global_config["federations"][
+                global_config["federation"]["default"]
+            ]["address"]
+        else:
+            if federation in global_config["federations"]:
+                superexec_address = global_config["federations"][federation]["address"]
+            else:
+                typer.secho(
+                    f"❌ {federation} is not defined in {str(global_config_path)}.",
+                    fg=typer.colors.RED,
+                    bold=True,
+                )
+                raise typer.Exit(code=1)
     else:
-        typer.secho(
-            f"Engine '{engine}' is not yet supported in `flwr run`",
-            fg=typer.colors.RED,
-            bold=True,
-        )
+        superexec_address = SUPEREXEC_DEFAULT_ADDRESS
 
-
-def _start_superexec_run(directory: Optional[Path]) -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
 
     channel = create_channel(
-        server_address=SUPEREXEC_DEFAULT_ADDRESS,
+        server_address=superexec_address,
         insecure=True,
         root_certificates=None,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
