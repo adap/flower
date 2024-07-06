@@ -47,7 +47,8 @@ def _parse_config_overrides(
             and "=" not in config_overrides
             and config_overrides[0].endswith(".toml")
         ):
-            overrides = flatten_dict(tomli.load(Path(config_overrides[0]).open("rb")))
+            with Path(config_overrides[0]).open("rb") as config_file:
+                overrides = flatten_dict(tomli.load(config_file))
         else:
             for kv_pair in config_overrides:
                 key, value = kv_pair.split("=")
