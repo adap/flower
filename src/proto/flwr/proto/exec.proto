@@ -25,7 +25,10 @@ service Exec {
   rpc StreamLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
 }
 
-message StartRunRequest { bytes fab_file = 1; }
+message StartRunRequest {
+  bytes fab_file = 1;
+  bool verbose = 2;
+}
 message StartRunResponse { sint64 run_id = 1; }
 message StreamLogsRequest { sint64 run_id = 1; }
 message StreamLogsResponse { string log_output = 1; }

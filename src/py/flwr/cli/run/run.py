@@ -100,6 +100,6 @@ def run(
 
     fab_path = build(directory)
 
-    req = StartRunRequest(fab_file=Path(fab_path).read_bytes())
+    req = StartRunRequest(fab_file=Path(fab_path).read_bytes(), verbose=verbose)
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)

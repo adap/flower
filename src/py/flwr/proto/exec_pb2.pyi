@@ -13,12 +13,15 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 class StartRunRequest(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
     FAB_FILE_FIELD_NUMBER: builtins.int
+    VERBOSE_FIELD_NUMBER: builtins.int
     fab_file: builtins.bytes
+    verbose: builtins.bool
     def __init__(self,
         *,
         fab_file: builtins.bytes = ...,
+        verbose: builtins.bool = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_file",b"fab_file"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab_file",b"fab_file","verbose",b"verbose"]) -> None: ...
 global___StartRunRequest = StartRunRequest
 
 class StartRunResponse(google.protobuf.message.Message):

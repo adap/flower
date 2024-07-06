@@ -35,6 +35,7 @@ class Executor(ABC):
     def start_run(
         self,
         fab_file: bytes,
+        verbose: bool,
     ) -> Optional[RunTracker]:
         """Start a run using the given Flower FAB ID and version.
 
@@ -45,6 +46,8 @@ class Executor(ABC):
         ----------
         fab_file : bytes
             The Flower App Bundle file bytes.
+        verbose : bool
+            If True, the logs will be set to DEBUG.
 
         Returns
         -------

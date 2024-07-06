@@ -64,7 +64,7 @@ class DeploymentEngine(Executor):
         return int(res.run_id)
 
     @override
-    def start_run(self, fab_file: bytes) -> Optional[RunTracker]:
+    def start_run(self, fab_file: bytes, verbose: bool) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
             # Install FAB to flwr dir
@@ -88,6 +88,7 @@ class DeploymentEngine(Executor):
                     "flower-server-app",
                     "--run-id",
                     str(run_id),
+                    "--verbose" if verbose else "",
                     "--insecure",
                 ],
                 stdout=subprocess.PIPE,
