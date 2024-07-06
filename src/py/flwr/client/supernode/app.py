@@ -68,6 +68,7 @@ def run_supernode() -> None:
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
         partition_id=args.partition_id,
+        persist_client=args.persist_client,
     )
 
     # Graceful shutdown
@@ -380,6 +381,12 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         help="The data partition index associated with this SuperNode. Better suited "
         "for prototyping purposes where a SuperNode might only load a fraction of an "
         "artificially partitioned dataset (e.g. using `flwr-datasets`)",
+    )
+    parser.add_argument(
+        "--persist-client",
+        action="store_true",
+        help="Experimental! When set, the Client object is persisted in the Context and"
+        "thefore not re instantiated with each new message arriving to the SuperNode.",
     )
 
 

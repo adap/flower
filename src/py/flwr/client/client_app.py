@@ -95,9 +95,11 @@ class ClientApp:
 
         # Create wrapper function for `handle`
         self._call: Optional[ClientAppCallable] = None
+        self._client_fn: Optional[ClientFnExt] = client_fn
         if client_fn is not None:
 
             client_fn = _inspect_maybe_adapt_client_fn_signature(client_fn)
+            self._client_fn = client_fn
 
             def ffn(
                 message: Message,

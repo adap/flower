@@ -192,6 +192,7 @@ def _start_client_internal(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     partition_id: Optional[int] = None,
+    persist_client: bool = False,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -238,6 +239,8 @@ def _start_client_internal(
     partitioni_id: Optional[int] (default: None)
         The data partition index associated with this node. Better suited for
         prototyping purposes.
+    persist_client: bool (default: False)
+        Persists client in Context so it's not re-initialized with each new message.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -315,6 +318,25 @@ def _start_client_internal(
     )
 
     node_state = NodeState(partition_id=partition_id)
+
+    if persist_client:
+        print("persisting client init!")
+        # Load ClientApp
+        client_app: ClientApp = load_client_app_fn("", "")
+        # Call client_fn to return the Client obj we want to persist
+        client_that_persists: Client = client_app._client_fn(
+            0, 0
+        )  # TODO: do you care about what gets passed to your client_fn?
+        # Now replace the `client_fn` with one that returns the object above
+
+        def dummy_client_fn(node_id: int, partition_id: Optional[int]):
+            return client_that_persists
+
+        def _load_client_app(_1: str, _2: str) -> ClientApp:
+            return ClientApp(client_fn=dummy_client_fn)
+
+        load_client_app_fn = _load_client_app
+
     # run_id -> (fab_id, fab_version)
     run_info: Dict[int, Tuple[str, str]] = {}
 
