@@ -42,6 +42,7 @@ service Driver {
 message CreateRunRequest {
   string fab_id = 1;
   string fab_version = 2;
+  map<string, string> override_config = 3;
 }
 message CreateRunResponse { sint64 run_id = 1; }
 
