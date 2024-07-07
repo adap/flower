@@ -19,7 +19,6 @@ import sys
 import time
 from dataclasses import dataclass
 from logging import DEBUG, ERROR, INFO, WARN
-from pathlib import Path
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
