@@ -1,5 +1,6 @@
-import flwr as fl
+"""huggingface_example: A Flower / Hugging Face app."""
 
+import flwr as fl
 
 if __name__ == "__main__":
     # Define strategy
