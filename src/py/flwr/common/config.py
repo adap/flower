@@ -30,7 +30,7 @@ def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
         return Path(
             os.getenv(
                 FLWR_HOME,
-                f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
+                Path(f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}") / ".flwr",
             )
         )
     return Path(provided_path).absolute()
