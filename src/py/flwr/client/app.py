@@ -19,6 +19,7 @@ import sys
 import time
 from dataclasses import dataclass
 from logging import DEBUG, ERROR, INFO, WARN
+from pathlib import Path
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -29,6 +30,7 @@ from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
+from flwr.common.config import get_fused_config
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -41,6 +43,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
+from flwr.common.typing import Run
 
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
@@ -192,6 +195,7 @@ def _start_client_internal(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     partition_id: Optional[int] = None,
+    flwr_dir: Optional[Path] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -235,9 +239,16 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
-    partitioni_id: Optional[int] (default: None)
+    partition_id: Optional[int] (default: None)
         The data partition index associated with this node. Better suited for
         prototyping purposes.
+    flwr_dir: Optional[Path] (default: None)
+        The path containing installed Flower Apps.
+        By default, this value is equal to:
+
+            - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+            - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+            - `$HOME/.flwr/` in all other cases
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -315,8 +326,7 @@ def _start_client_internal(
     )
 
     node_state = NodeState(partition_id=partition_id)
-    # run_id -> (fab_id, fab_version)
-    run_info: Dict[int, Tuple[str, str]] = {}
+    run_info: Dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
@@ -371,13 +381,14 @@ def _start_client_internal(
                             run_info[run_id] = get_run(run_id)
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
-                            run_info[run_id] = ("", "")
+                            run_info[run_id] = Run(run_id, "", "", {})
 
                     # Register context for this run
                     node_state.register_context(run_id=run_id)
 
                     # Retrieve context for this run
                     context = node_state.retrieve_context(run_id=run_id)
+                    context.run_config = get_fused_config(run_info[run_id], flwr_dir)
 
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error
@@ -388,7 +399,9 @@ def _start_client_internal(
                     # Handle app loading and task message
                     try:
                         # Load ClientApp instance
-                        client_app: ClientApp = load_client_app_fn(*run_info[run_id])
+                        client_app: ClientApp = load_client_app_fn(
+                            run_info[run_id].fab_id, run_info[run_id].fab_version
+                        )
 
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)
@@ -573,7 +586,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
                 Callable[[Message], None],
                 Optional[Callable[[], None]],
                 Optional[Callable[[], None]],
-                Optional[Callable[[int], Tuple[str, str]]],
+                Optional[Callable[[int], Run]],
             ]
         ],
     ],
