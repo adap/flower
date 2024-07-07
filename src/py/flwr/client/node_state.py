@@ -15,7 +15,7 @@
 """Node state."""
 
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from flwr.common import Context, RecordSet
 
@@ -23,14 +23,17 @@ from flwr.common import Context, RecordSet
 class NodeState:
     """State of a node where client nodes execute runs."""
 
-    def __init__(self) -> None:
+    def __init__(self, partition_id: Optional[int]) -> None:
         self._meta: Dict[str, Any] = {}  # holds metadata about the node
         self.run_contexts: Dict[int, Context] = {}
+        self._partition_id = partition_id
 
     def register_context(self, run_id: int) -> None:
         """Register new run context for this node."""
         if run_id not in self.run_contexts:
-            self.run_contexts[run_id] = Context(state=RecordSet())
+            self.run_contexts[run_id] = Context(
+                state=RecordSet(), partition_id=self._partition_id
+            )
 
     def retrieve_context(self, run_id: int) -> Context:
         """Get run context given a run_id."""
