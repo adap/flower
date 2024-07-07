@@ -194,7 +194,6 @@ def _start_client_internal(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     partition_id: Optional[int] = None,
-    flwr_dir: Optional[Path] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -241,13 +240,6 @@ def _start_client_internal(
     partition_id: Optional[int] (default: None)
         The data partition index associated with this node. Better suited for
         prototyping purposes.
-    flwr_dir: Optional[Path] (default: None)
-        The path containing installed Flower Apps.
-        By default, this value is equal to:
-
-            - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-            - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-            - `$HOME/.flwr/` in all other cases
     """
     if insecure is None:
         insecure = root_certificates is None
