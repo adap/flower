@@ -15,6 +15,7 @@
 """Test util functions handling Flower config."""
 
 import os
+import textwrap
 from pathlib import Path
 from unittest.mock import patch
 
@@ -29,9 +30,7 @@ from .config import (
 )
 
 # Mock constants
-APP_DIR = "app_dir"
 FAB_CONFIG_FILE = "pyproject.toml"
-FLWR_HOME = "FLWR_HOME"
 
 
 def test_get_flwr_dir_with_provided_path() -> None:
@@ -48,8 +47,14 @@ def test_get_flwr_dir_without_provided_path() -> None:
 
 def test_get_flwr_dir_with_flwr_home() -> None:
     """Test get_flwr_dir with FLWR_HOME environment variable set."""
-    with patch.dict(os.environ, {FLWR_HOME: "/custom/flwr/home"}):
+    with patch.dict(os.environ, {"FLWR_HOME": "/custom/flwr/home"}):
         assert get_flwr_dir() == Path("/custom/flwr/home")
+
+
+def test_get_flwr_dir_with_xdg_data_home() -> None:
+    """Test get_flwr_dir with FLWR_HOME environment variable set."""
+    with patch.dict(os.environ, {"XDG_DATA_HOME": "/custom/data/home/flwr"}):
+        assert get_flwr_dir() == Path("/custom/data/home/flwr")
 
 
 def test_get_project_dir_invalid_fab_id() -> None:
@@ -58,10 +63,85 @@ def test_get_project_dir_invalid_fab_id() -> None:
         get_project_dir("invalid_fab_id", "1.0.0")
 
 
+def test_get_project_dir_valid() -> None:
+    """Test get_project_dir with an valid fab_id and version."""
+    app_path = get_project_dir("app_name/user", "1.0.0", flwr_dir=".")
+    assert app_path == Path(".") / ".flwr" / "apps" / "app_name" / "user" / "1.0.0"
+
+
 def test_get_project_config_file_not_found() -> None:
     """Test get_project_config when the configuration file is not found."""
     with pytest.raises(FileNotFoundError):
         get_project_config("/invalid/dir")
+
+
+def test_get_project_config_file_valid(tmp_path: Path) -> None:
+    """Test get_project_config when the configuration file is not found."""
+    pyproject_toml_content = """
+        [build-system]
+        requires = ["hatchling"]
+        build-backend = "hatchling.build"
+
+        [project]
+        name = "fedgpt"
+        version = "1.0.0"
+        description = ""
+        license = {text = "Apache License (2.0)"}
+        dependencies = [
+            "flwr[simulation]>=1.9.0,<2.0",
+            "numpy>=1.21.0",
+        ]
+
+        [flower]
+        publisher = "flwrlabs"
+
+        [flower.components]
+        serverapp = "fedgpt.server:app"
+        clientapp = "fedgpt.client:app"
+
+        [flower.engine]
+        name = "simulation" # optional
+
+        [flower.engine.simulation.supernode]
+        count = 10 # optional
+    """
+    expected_config = {
+        "build-system": {"build-backend": "hatchling.build", "requires": ["hatchling"]},
+        "project": {
+            "name": "fedgpt",
+            "version": "1.0.0",
+            "description": "",
+            "license": {"text": "Apache License (2.0)"},
+            "dependencies": ["flwr[simulation]>=1.9.0,<2.0", "numpy>=1.21.0"],
+        },
+        "flower": {
+            "publisher": "flwrlabs",
+            "components": {
+                "serverapp": "fedgpt.server:app",
+                "clientapp": "fedgpt.client:app",
+            },
+            "engine": {
+                "name": "simulation",
+                "simulation": {"supernode": {"count": 10}},
+            },
+        },
+    }
+    # Current directory
+    origin = Path.cwd()
+
+    try:
+        # Change into the temporary directory
+        os.chdir(tmp_path)
+        with open(FAB_CONFIG_FILE, "w", encoding="utf-8") as f:
+            f.write(textwrap.dedent(pyproject_toml_content))
+
+        # Execute
+        config = get_project_config(origin)
+
+        # Assert
+        assert config == expected_config
+    finally:
+        os.chdir(origin)
 
 
 def test_flatten_dict() -> None:
