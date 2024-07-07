@@ -30,7 +30,7 @@ from ray.util.scheduling_strategies import NodeAffinitySchedulingStrategy
 from flwr.client import ClientFnExt
 from flwr.common import EventType, event
 from flwr.common.constant import NODE_ID_NUM_BYTES
-from flwr.common.logger import log, set_logger_propagation, warn_deprecated_feature
+from flwr.common.logger import log, set_logger_propagation, warn_unsupported_feature
 from flwr.server.client_manager import ClientManager
 from flwr.server.history import History
 from flwr.server.server import Server, init_defaults, run_fl
@@ -94,7 +94,7 @@ def start_simulation(
     *,
     client_fn: ClientFnExt,
     num_clients: int,
-    clients_ids: Optional[List[str]] = None,
+    clients_ids: Optional[List[str]] = None,  # UNSUPPORTED, WILL BE REMOVED
     client_resources: Optional[Dict[str, float]] = None,
     server: Optional[Server] = None,
     config: Optional[ServerConfig] = None,
@@ -123,10 +123,11 @@ def start_simulation(
     num_clients : int
         The total number of clients in this simulation.
     clients_ids : Optional[List[str]]
-        DEPRECATED. List `client_id`s for each client. This is only required if
+        UNSUPPORTED, WILL BE REMOVED. USE `num_clients` INSTEAD.
+        List `client_id`s for each client. This is only required if
         `num_clients` is not set. Setting both `num_clients` and `clients_ids`
         with `len(clients_ids)` not equal to `num_clients` generates an error.
-        This argument is deprecated.
+        Using this argument will raise an error.
     client_resources : Optional[Dict[str, float]] (default: `{"num_cpus": 1, "num_gpus": 0.0}`)
         CPU and GPU resources for a single client. Supported keys
         are `num_cpus` and `num_gpus`. To understand the GPU utilization caused by
@@ -188,7 +189,7 @@ def start_simulation(
     )
 
     if clients_ids is not None:
-        warn_deprecated_feature(
+        warn_unsupported_feature(
             "Passing `clients_ids` to `start_simulation` is deprecated and not longer "
             "used by `start_simulation`. Use `num_clients` exclusively instead."
         )
