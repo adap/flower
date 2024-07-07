@@ -136,7 +136,7 @@ def test_get_project_config_file_valid(tmp_path: Path) -> None:
             f.write(textwrap.dedent(pyproject_toml_content))
 
         # Execute
-        print(origin.read_text(encoding="utf-8"))
+        print((origin / FAB_CONFIG_FILE).read_text(encoding="utf-8"))
         config = get_project_config(origin)
 
         # Assert
