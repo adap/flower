@@ -30,7 +30,6 @@ from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
 from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
 from flwr.common.address import parse_address
-from flwr.common.config import get_fused_config
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -388,7 +387,6 @@ def _start_client_internal(
 
                     # Retrieve context for this run
                     context = node_state.retrieve_context(run_id=run_id)
-                    context.run_config = get_fused_config(run_info[run_id], flwr_dir)
 
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error
