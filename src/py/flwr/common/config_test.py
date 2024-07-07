@@ -53,8 +53,8 @@ def test_get_flwr_dir_with_flwr_home() -> None:
 
 def test_get_flwr_dir_with_xdg_data_home() -> None:
     """Test get_flwr_dir with FLWR_HOME environment variable set."""
-    with patch.dict(os.environ, {"XDG_DATA_HOME": "/custom/data/home/flwr"}):
-        assert get_flwr_dir() == Path("/custom/data/home/flwr")
+    with patch.dict(os.environ, {"XDG_DATA_HOME": "/custom/data/home"}):
+        assert get_flwr_dir() == Path("/custom/data/home/.flwr")
 
 
 def test_get_project_dir_invalid_fab_id() -> None:
@@ -66,7 +66,7 @@ def test_get_project_dir_invalid_fab_id() -> None:
 def test_get_project_dir_valid() -> None:
     """Test get_project_dir with an valid fab_id and version."""
     app_path = get_project_dir("app_name/user", "1.0.0", flwr_dir=".")
-    assert app_path == Path(".") / ".flwr" / "apps" / "app_name" / "user" / "1.0.0"
+    assert app_path == Path("apps") / "app_name" / "user" / "1.0.0"
 
 
 def test_get_project_config_file_not_found() -> None:
