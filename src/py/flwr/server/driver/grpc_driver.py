@@ -52,14 +52,14 @@ Call `connect()` on the `GrpcDriverStub` instance before calling any of the othe
 
 
 class GrpcDriver(Driver):
-    """`Driver` class provides an interface to the Driver API.
+    """`GrpcDriver` provides an interface to the Driver API.
 
     Parameters
     ----------
     run_id : int
         The identifier of the run.
     driver_service_address : str (default: "[::]:9091")
-        The IPv4 or IPv6 address of the Driver API server.
+        The address (URL, IPv6, IPv4) of the SuperLink Driver API service.
     root_certificates : Optional[bytes] (default: None)
         The PEM-encoded root certificates as a byte string.
         If provided, a secure connection using the certificates will be
