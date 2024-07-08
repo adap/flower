@@ -102,9 +102,13 @@ class ClientApp:
             def ffn(
                 message: Message,
                 context: Context,
+                dataconn: DataConnector,
             ) -> Message:  # pylint: disable=invalid-name
                 out_message = handle_legacy_message_from_msgtype(
-                    client_fn=client_fn, message=message, context=context
+                    client_fn=client_fn,
+                    message=message,
+                    context=context,
+                    dataconn=dataconn,
                 )
                 return out_message
 

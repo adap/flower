@@ -15,6 +15,7 @@
 """Flower SuperNode."""
 
 import argparse
+import importlib
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
@@ -28,7 +29,7 @@ from cryptography.hazmat.primitives.serialization import (
 )
 
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.common import EventType, event
+from flwr.common import DataConnector, EventType, event
 from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
 from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
@@ -58,6 +59,16 @@ def run_supernode() -> None:
     load_fn = _get_load_client_app_fn(args, multi_app=True)
     authentication_keys = _try_setup_client_authentication(args)
 
+    # Simple load dataconnector module
+    sys_path = Path(args.dir).absolute()
+    sys.path.insert(0, str(sys_path))
+    module, node = args.dataconnector.split(":")
+    data_connector: DataConnector = importlib.import_module(module).__getattribute__(
+        node
+    )
+    log(INFO, "Loaded dataconnector object!")
+    log(INFO, f"{data_connector.data.keys()}")
+
     _start_client_internal(
         server_address=args.superlink,
         load_client_app_fn=load_fn,
@@ -68,6 +79,7 @@ def run_supernode() -> None:
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
         partition_id=args.partition_id,
+        data_connector=data_connector,
     )
 
     # Graceful shutdown
@@ -380,6 +392,11 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         help="The data partition index associated with this SuperNode. Better suited "
         "for prototyping purposes where a SuperNode might only load a fraction of an "
         "artificially partitioned dataset (e.g. using `flwr-datasets`)",
+    )
+    parser.add_argument(
+        "--dataconnector",
+        type=str,
+        help="path to data connector",
     )
 
 

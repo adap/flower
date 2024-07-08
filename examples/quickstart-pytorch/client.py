@@ -1,6 +1,7 @@
 import argparse
 import warnings
 from collections import OrderedDict
+from flwr.common import DataConnector
 
 from flwr.client import NumPyClient, ClientApp
 from flwr_datasets import FederatedDataset
@@ -69,71 +70,41 @@ def test(net, testloader):
     return loss, accuracy
 
 
-def load_data(partition_id):
-    """Load partition CIFAR10 data."""
-    fds = FederatedDataset(dataset="cifar10", partitioners={"train": 2})
-    partition = fds.load_partition(partition_id)
-    # Divide data on each node: 80% train, 20% test
-    partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
-    pytorch_transforms = Compose(
-        [ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-    )
-
-    def apply_transforms(batch):
-        """Apply transforms to the partition from FederatedDataset."""
-        batch["img"] = [pytorch_transforms(img) for img in batch["img"]]
-        return batch
-
-    partition_train_test = partition_train_test.with_transform(apply_transforms)
-    trainloader = DataLoader(partition_train_test["train"], batch_size=32, shuffle=True)
-    testloader = DataLoader(partition_train_test["test"], batch_size=32)
-    return trainloader, testloader
-
-
 # #############################################################################
 # 2. Federation of the pipeline with Flower
 # #############################################################################
 
-# Get partition id
-parser = argparse.ArgumentParser(description="Flower")
-parser.add_argument(
-    "--partition-id",
-    choices=[0, 1],
-    default=0,
-    type=int,
-    help="Partition of the dataset divided into 2 iid partitions created artificially.",
-)
-partition_id = parser.parse_known_args()[0].partition_id
-
-# Load model and data (simple CNN, CIFAR-10)
-net = Net().to(DEVICE)
-trainloader, testloader = load_data(partition_id=partition_id)
-
-
 # Define Flower client
 class FlowerClient(NumPyClient):
+
+    def __init__(self, trainloader, testloader):
+        self.net = Net().to(DEVICE)
+        self.trainloader = trainloader
+        self.testloader = testloader
     def get_parameters(self, config):
-        return [val.cpu().numpy() for _, val in net.state_dict().items()]
+        return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
 
     def set_parameters(self, parameters):
-        params_dict = zip(net.state_dict().keys(), parameters)
+        params_dict = zip(self.net.state_dict().keys(), parameters)
         state_dict = OrderedDict({k: torch.tensor(v) for k, v in params_dict})
-        net.load_state_dict(state_dict, strict=True)
+        self.net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
         self.set_parameters(parameters)
-        train(net, trainloader, epochs=1)
-        return self.get_parameters(config={}), len(trainloader.dataset), {}
+        train(self.net, self.trainloader, epochs=1)
+        return self.get_parameters(config={}), len(self.trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
-        loss, accuracy = test(net, testloader)
-        return loss, len(testloader.dataset), {"accuracy": accuracy}
+        loss, accuracy = test(self.net, self.testloader)
+        return loss, len(self.testloader.dataset), {"accuracy": accuracy}
 
 
-def client_fn(cid: str):
+def client_fn(node_id: int, partition_id: int, dataconnector: DataConnector):
     """Create and return an instance of Flower `Client`."""
-    return FlowerClient().to_client()
+    trainloader = dataconnector.data['train']
+    testloader = dataconnector.data['test']
+    return FlowerClient(trainloader, testloader).to_client()
 
 
 # Flower ClientApp

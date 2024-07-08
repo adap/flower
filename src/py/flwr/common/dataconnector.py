@@ -15,16 +15,17 @@
 """DataConnector."""
 
 
-from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 
-@dataclass
 class DataConnector:
     data: Dict[str, Any]
 
-    def __init__(self) -> None:
-        self.data = {}
+    def __init__(self, dataset_dict: Optional[Dict[str, Any]]) -> None:
+        """Pass datasets/dataloaders ready to be used."""
+        self.data = dataset_dict
 
-    def register_dataset(self, name: str, dataset: Any) -> None:
-        self.data[name] = dataset
+
+class DataConnectorWithPartitioning(DataConnector):
+
+    num_partitions: int

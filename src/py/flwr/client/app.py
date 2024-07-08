@@ -27,7 +27,13 @@ from grpc import RpcError
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
+from flwr.common import (
+    GRPC_MAX_MESSAGE_LENGTH,
+    DataConnector,
+    EventType,
+    Message,
+    event,
+)
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
@@ -193,6 +199,7 @@ def _start_client_internal(
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
     partition_id: Optional[int] = None,
+    data_connector: Optional[DataConnector] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -318,6 +325,10 @@ def _start_client_internal(
     node_state = NodeState(partition_id=partition_id)
     run_info: Dict[int, Run] = {}
 
+    # Load DataConnectors
+    if data_connector is None:
+        raise ValueError("Specify a DataConnector")
+
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
         with connection(
@@ -394,7 +405,9 @@ def _start_client_internal(
                         )
 
                         # Execute ClientApp
-                        reply_message = client_app(message=message, context=context)
+                        reply_message = client_app(
+                            message=message, context=context, dataconn=data_connector
+                        )
                     except Exception as ex:  # pylint: disable=broad-exception-caught
 
                         # Legacy grpc-bidi
