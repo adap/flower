@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -112,6 +112,6 @@ def get_run(
     request: GetRunRequest, state: State  # pylint: disable=W0613
 ) -> GetRunResponse:
     """Get run information."""
-    run_id, fab_id, fab_version = state.get_run(request.run_id)
-    run = Run(run_id=run_id, fab_id=fab_id, fab_version=fab_version)
-    return GetRunResponse(run=run)
+    run = state.get_run(request.run_id)
+    run_proto = None if run is None else Run(**vars(run))
+    return GetRunResponse(run=run_proto)
