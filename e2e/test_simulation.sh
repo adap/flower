@@ -8,7 +8,18 @@ fi
 
 framework=$1
 
-timeout 2m flower-simulation --server-app server:app --client-app ${framework}.client:app --num-supernodes 2 --app-dir ./.. &
+case "$framework" in
+  pandas)
+    server_app="$framework.server:app"
+    ;;
+  *)
+    server_app="server:app"
+    ;;
+esac
+
+echo flower-simulation --server-app $server_app --client-app ${framework}.client:app --num-supernodes 2 --app-dir ./..
+
+timeout 2m flower-simulation --server-app $server_app --client-app ${framework}.client:app --num-supernodes 2 --app-dir ./.. &
 pid=$!
 
 wait $pid
