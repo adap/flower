@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import builtins
+import flwr.proto.common_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.message
@@ -10,66 +11,6 @@ import typing
 import typing_extensions
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
-
-class DoubleList(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    VALS_FIELD_NUMBER: builtins.int
-    @property
-    def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.float]: ...
-    def __init__(self,
-        *,
-        vals: typing.Optional[typing.Iterable[builtins.float]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-global___DoubleList = DoubleList
-
-class Sint64List(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    VALS_FIELD_NUMBER: builtins.int
-    @property
-    def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
-    def __init__(self,
-        *,
-        vals: typing.Optional[typing.Iterable[builtins.int]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-global___Sint64List = Sint64List
-
-class BoolList(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    VALS_FIELD_NUMBER: builtins.int
-    @property
-    def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bool]: ...
-    def __init__(self,
-        *,
-        vals: typing.Optional[typing.Iterable[builtins.bool]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-global___BoolList = BoolList
-
-class StringList(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    VALS_FIELD_NUMBER: builtins.int
-    @property
-    def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
-    def __init__(self,
-        *,
-        vals: typing.Optional[typing.Iterable[typing.Text]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-global___StringList = StringList
-
-class BytesList(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    VALS_FIELD_NUMBER: builtins.int
-    @property
-    def vals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.bytes]: ...
-    def __init__(self,
-        *,
-        vals: typing.Optional[typing.Iterable[builtins.bytes]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["vals",b"vals"]) -> None: ...
-global___BytesList = BytesList
 
 class Array(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -103,71 +44,22 @@ class MetricsRecordValue(google.protobuf.message.Message):
 
     sint64: builtins.int
     @property
-    def double_list(self) -> global___DoubleList:
+    def double_list(self) -> flwr.proto.common_pb2.DoubleList:
         """List types"""
         pass
     @property
-    def sint64_list(self) -> global___Sint64List: ...
+    def sint64_list(self) -> flwr.proto.common_pb2.Sint64List: ...
     def __init__(self,
         *,
         double: builtins.float = ...,
         sint64: builtins.int = ...,
-        double_list: typing.Optional[global___DoubleList] = ...,
-        sint64_list: typing.Optional[global___Sint64List] = ...,
+        double_list: typing.Optional[flwr.proto.common_pb2.DoubleList] = ...,
+        sint64_list: typing.Optional[flwr.proto.common_pb2.Sint64List] = ...,
         ) -> None: ...
     def HasField(self, field_name: typing_extensions.Literal["double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","value",b"value"]) -> builtins.bool: ...
     def ClearField(self, field_name: typing_extensions.Literal["double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","value",b"value"]) -> None: ...
     def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","double_list","sint64_list"]]: ...
 global___MetricsRecordValue = MetricsRecordValue
-
-class ConfigsRecordValue(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
-    DOUBLE_FIELD_NUMBER: builtins.int
-    SINT64_FIELD_NUMBER: builtins.int
-    BOOL_FIELD_NUMBER: builtins.int
-    STRING_FIELD_NUMBER: builtins.int
-    BYTES_FIELD_NUMBER: builtins.int
-    DOUBLE_LIST_FIELD_NUMBER: builtins.int
-    SINT64_LIST_FIELD_NUMBER: builtins.int
-    BOOL_LIST_FIELD_NUMBER: builtins.int
-    STRING_LIST_FIELD_NUMBER: builtins.int
-    BYTES_LIST_FIELD_NUMBER: builtins.int
-    double: builtins.float
-    """Single element"""
-
-    sint64: builtins.int
-    bool: builtins.bool
-    string: typing.Text
-    bytes: builtins.bytes
-    @property
-    def double_list(self) -> global___DoubleList:
-        """List types"""
-        pass
-    @property
-    def sint64_list(self) -> global___Sint64List: ...
-    @property
-    def bool_list(self) -> global___BoolList: ...
-    @property
-    def string_list(self) -> global___StringList: ...
-    @property
-    def bytes_list(self) -> global___BytesList: ...
-    def __init__(self,
-        *,
-        double: builtins.float = ...,
-        sint64: builtins.int = ...,
-        bool: builtins.bool = ...,
-        string: typing.Text = ...,
-        bytes: builtins.bytes = ...,
-        double_list: typing.Optional[global___DoubleList] = ...,
-        sint64_list: typing.Optional[global___Sint64List] = ...,
-        bool_list: typing.Optional[global___BoolList] = ...,
-        string_list: typing.Optional[global___StringList] = ...,
-        bytes_list: typing.Optional[global___BytesList] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","value",b"value"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal["bool",b"bool","bool_list",b"bool_list","bytes",b"bytes","bytes_list",b"bytes_list","double",b"double","double_list",b"double_list","sint64",b"sint64","sint64_list",b"sint64_list","string",b"string","string_list",b"string_list","value",b"value"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal["value",b"value"]) -> typing.Optional[typing_extensions.Literal["double","sint64","bool","string","bytes","double_list","sint64_list","bool_list","string_list","bytes_list"]]: ...
-global___ConfigsRecordValue = ConfigsRecordValue
 
 class ParametersRecord(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
@@ -220,21 +112,21 @@ class ConfigsRecord(google.protobuf.message.Message):
         VALUE_FIELD_NUMBER: builtins.int
         key: typing.Text
         @property
-        def value(self) -> global___ConfigsRecordValue: ...
+        def value(self) -> flwr.proto.common_pb2.ConfigsRecordValue: ...
         def __init__(self,
             *,
             key: typing.Text = ...,
-            value: typing.Optional[global___ConfigsRecordValue] = ...,
+            value: typing.Optional[flwr.proto.common_pb2.ConfigsRecordValue] = ...,
             ) -> None: ...
         def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
     DATA_FIELD_NUMBER: builtins.int
     @property
-    def data(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, global___ConfigsRecordValue]: ...
+    def data(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.common_pb2.ConfigsRecordValue]: ...
     def __init__(self,
         *,
-        data: typing.Optional[typing.Mapping[typing.Text, global___ConfigsRecordValue]] = ...,
+        data: typing.Optional[typing.Mapping[typing.Text, flwr.proto.common_pb2.ConfigsRecordValue]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["data",b"data"]) -> None: ...
 global___ConfigsRecord = ConfigsRecord
