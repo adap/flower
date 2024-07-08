@@ -3,7 +3,9 @@
 isort:skip_file
 """
 import builtins
+import flwr.proto.common_pb2
 import google.protobuf.descriptor
+import google.protobuf.internal.containers
 import google.protobuf.message
 import typing
 import typing_extensions
@@ -12,19 +14,38 @@ DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
 
 class Run(google.protobuf.message.Message):
     DESCRIPTOR: google.protobuf.descriptor.Descriptor
+    class OverrideConfigEntry(google.protobuf.message.Message):
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+        KEY_FIELD_NUMBER: builtins.int
+        VALUE_FIELD_NUMBER: builtins.int
+        key: typing.Text
+        @property
+        def value(self) -> flwr.proto.common_pb2.ConfigsRecordValue: ...
+        def __init__(self,
+            *,
+            key: typing.Text = ...,
+            value: typing.Optional[flwr.proto.common_pb2.ConfigsRecordValue] = ...,
+            ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
+
     RUN_ID_FIELD_NUMBER: builtins.int
     FAB_ID_FIELD_NUMBER: builtins.int
     FAB_VERSION_FIELD_NUMBER: builtins.int
+    OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
     run_id: builtins.int
     fab_id: typing.Text
     fab_version: typing.Text
+    @property
+    def override_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.common_pb2.ConfigsRecordValue]: ...
     def __init__(self,
         *,
         run_id: builtins.int = ...,
         fab_id: typing.Text = ...,
         fab_version: typing.Text = ...,
+        override_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.common_pb2.ConfigsRecordValue]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_id",b"fab_id","fab_version",b"fab_version","run_id",b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab_id",b"fab_id","fab_version",b"fab_version","override_config",b"override_config","run_id",b"run_id"]) -> None: ...
 global___Run = Run
 
 class GetRunRequest(google.protobuf.message.Message):

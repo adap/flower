@@ -17,20 +17,26 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/common.proto";
+message DoubleList { repeated double vals = 1; }
+message Sint64List { repeated sint64 vals = 1; }
+message BoolList { repeated bool vals = 1; }
+message StringList { repeated string vals = 1; }
+message BytesList { repeated bytes vals = 1; }
 
-service Exec {
-  // Start run upon request
-  rpc StartRun(StartRunRequest) returns (StartRunResponse) {}
+message ConfigsRecordValue {
+  oneof value {
+    // Single element
+    double double = 1;
+    sint64 sint64 = 2;
+    bool bool = 3;
+    string string = 4;
+    bytes bytes = 5;
 
-  // Start log stream upon request
-  rpc StreamLogs(StreamLogsRequest) returns (stream StreamLogsResponse) {}
+    // List types
+    DoubleList double_list = 21;
+    Sint64List sint64_list = 22;
+    BoolList bool_list = 23;
+    StringList string_list = 24;
+    BytesList bytes_list = 25;
+  }
 }
-
-message StartRunRequest {
-  bytes fab_file = 1;
-  map<string, ConfigsRecordValue> override_config = 2;
-}
-message StartRunResponse { sint64 run_id = 1; }
-message StreamLogsRequest { sint64 run_id = 1; }
-message StreamLogsResponse { string log_output = 1; }
