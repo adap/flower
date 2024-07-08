@@ -99,11 +99,10 @@ def test_get_project_config_file_valid(tmp_path: Path) -> None:
         serverapp = "fedgpt.server:app"
         clientapp = "fedgpt.client:app"
 
-        [flower.engine]
-        name = "simulation" # optional
-
-        [flower.engine.simulation.supernode]
-        count = 10 # optional
+        [flower.config]
+        num_server_rounds = "10"
+        momentum = "0.1"
+        lr = "0.01"
     """
     expected_config = {
         "build-system": {"build-backend": "hatchling.build", "requires": ["hatchling"]},
@@ -120,9 +119,10 @@ def test_get_project_config_file_valid(tmp_path: Path) -> None:
                 "serverapp": "fedgpt.server:app",
                 "clientapp": "fedgpt.client:app",
             },
-            "engine": {
-                "name": "simulation",
-                "simulation": {"supernode": {"count": 10}},
+            "config": {
+                "num_server_rounds": "10",
+                "momentum": "0.1",
+                "lr": "0.01",
             },
         },
     }
