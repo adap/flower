@@ -73,9 +73,9 @@ class GrpcDriver(Driver):
         root_certificates: Optional[bytes] = None,
     ) -> None:
         self._run_id = run_id
-        self._run: Optional[Run] = None
         self._addr = driver_service_address
         self._cert = root_certificates
+        self._run: Optional[Run] = None
         self._stub: Optional[DriverStub] = None
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=0, anonymous=True)
