@@ -22,6 +22,7 @@ from unittest.mock import patch
 import pytest
 
 from .config import (
+    _fuse_dicts,
     flatten_dict,
     get_flwr_dir,
     get_project_config,
@@ -73,6 +74,71 @@ def test_get_project_config_file_not_found() -> None:
     """Test get_project_config when the configuration file is not found."""
     with pytest.raises(FileNotFoundError):
         get_project_config("/invalid/dir")
+
+
+def test_get_fused_config_valid(tmp_path: Path) -> None:
+    """Test get_project_config when the configuration file is not found."""
+    pyproject_toml_content = """
+        [build-system]
+        requires = ["hatchling"]
+        build-backend = "hatchling.build"
+
+        [project]
+        name = "fedgpt"
+        version = "1.0.0"
+        description = ""
+        license = {text = "Apache License (2.0)"}
+        dependencies = [
+            "flwr[simulation]>=1.9.0,<2.0",
+            "numpy>=1.21.0",
+        ]
+
+        [flower]
+        publisher = "flwrlabs"
+
+        [flower.components]
+        serverapp = "fedgpt.server:app"
+        clientapp = "fedgpt.client:app"
+
+        [flower.config]
+        num_server_rounds = "10"
+        momentum = "0.1"
+        lr = "0.01"
+        serverapp.test = "key"
+
+        [flower.config.clientapp]
+        test = "key"
+    """
+    overrides = {
+        "num_server_rounds": "5",
+        "lr": "0.2",
+        "serverapp.test": "overriden",
+    }
+    expected_config = {
+        "num_server_rounds": "5",
+        "momentum": "0.1",
+        "lr": "0.2",
+        "serverapp.test": "overriden",
+        "clientapp.test": "key",
+    }
+    # Current directory
+    origin = Path.cwd()
+
+    try:
+        # Change into the temporary directory
+        os.chdir(tmp_path)
+        with open(FAB_CONFIG_FILE, "w", encoding="utf-8") as f:
+            f.write(textwrap.dedent(pyproject_toml_content))
+
+        # Execute
+        default_config = get_project_config(tmp_path)["flower"].get("config", {})
+
+        config = _fuse_dicts(flatten_dict(default_config), overrides)
+
+        # Assert
+        assert config == expected_config
+    finally:
+        os.chdir(origin)
 
 
 def test_get_project_config_file_valid(tmp_path: Path) -> None:
