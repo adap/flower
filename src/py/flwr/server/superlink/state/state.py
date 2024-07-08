@@ -16,7 +16,7 @@
 
 
 import abc
-from typing import List, Optional, Set
+from typing import Dict, List, Optional, Set
 from uuid import UUID
 
 from flwr.common.typing import Run
@@ -157,7 +157,12 @@ class State(abc.ABC):  # pylint: disable=R0904
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
 
     @abc.abstractmethod
-    def create_run(self, fab_id: str, fab_version: str) -> int:
+    def create_run(
+        self,
+        fab_id: str,
+        fab_version: str,
+        override_config: Dict[str, str],
+    ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
 
     @abc.abstractmethod
