@@ -1,6 +1,6 @@
 """Flower client example using JAX for linear regression."""
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import jax
 import jax_training
@@ -48,7 +48,7 @@ class FlowerClient(fl.client.NumPyClient):
         return float(loss), num_examples, {"loss": float(loss)}
 
 
-def client_fn(cid):
+def client_fn(node_id: int, partition_id: Optional[int]):
     return FlowerClient().to_client()
 
 

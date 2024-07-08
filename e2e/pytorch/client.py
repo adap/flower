@@ -1,6 +1,7 @@
 import warnings
 from collections import OrderedDict
 from datetime import datetime
+from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -136,7 +137,7 @@ def set_parameters(model, parameters):
     return
 
 
-def client_fn(cid):
+def client_fn(node_id: int, partition_id: Optional[int]):
     return FlowerClient().to_client()
 
 

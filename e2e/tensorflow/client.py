@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import tensorflow as tf
 
@@ -33,7 +34,7 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(x_test), {"accuracy": accuracy}
 
 
-def client_fn(cid):
+def client_fn(node_id: int, partition_id: Optional[int]):
     return FlowerClient().to_client()
 
 
