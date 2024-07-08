@@ -206,4 +206,4 @@ class Run:
     run_id: int
     fab_id: str
     fab_version: str
-    override_config: Dict[str, str]
+    override_config: Dict[str, ConfigsRecordValues]

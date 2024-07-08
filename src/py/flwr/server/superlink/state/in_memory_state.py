@@ -23,7 +23,7 @@ from uuid import UUID, uuid4
 
 from flwr.common import log, now
 from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
-from flwr.common.typing import Run
+from flwr.common.typing import ConfigsRecordValues, Run
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
@@ -279,7 +279,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         self,
         fab_id: str,
         fab_version: str,
-        override_config: Dict[str, str],
+        override_config: Dict[str, ConfigsRecordValues],
     ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
