@@ -60,6 +60,7 @@ from .typing import ReconnectIns as ReconnectIns
 from .typing import Scalar as Scalar
 from .typing import ServerMessage as ServerMessage
 from .typing import Status as Status
+from .dataconnector import DataConnector as DataConnector
 
 __all__ = [
     "Array",
@@ -68,6 +69,7 @@ __all__ = [
     "Config",
     "ConfigsRecord",
     "Context",
+    "DataConnector",
     "DEFAULT_TTL",
     "DisconnectRes",
     "Error",

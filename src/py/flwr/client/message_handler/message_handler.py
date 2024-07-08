@@ -25,7 +25,7 @@ from flwr.client.client import (
 )
 from flwr.client.numpy_client import NumPyClient
 from flwr.client.typing import ClientFnExt
-from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet, log
+from flwr.common import ConfigsRecord, Context, Message, Metadata, RecordSet, log, DataConnector
 from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.recordset_compat import (
     evaluateres_to_recordset,
@@ -89,10 +89,11 @@ def handle_control_message(message: Message) -> Tuple[Optional[Message], int]:
 
 
 def handle_legacy_message_from_msgtype(
-    client_fn: ClientFnExt, message: Message, context: Context
+    client_fn: ClientFnExt, message: Message, context: Context,
+    dataconn: DataConnector,
 ) -> Message:
     """Handle legacy message in the inner most mod."""
-    client = client_fn(message.metadata.dst_node_id, context.partition_id)
+    client = client_fn(message.metadata.dst_node_id, context.partition_id, dataconn)
 
     # Check if NumPyClient is returend
     if isinstance(client, NumPyClient):

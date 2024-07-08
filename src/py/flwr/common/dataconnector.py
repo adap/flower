@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Custom types for Flower clients."""
+"""DataConnector."""
 
 
-from typing import Callable, Optional
+from dataclasses import dataclass
+from typing import Dict, Any
 
-from flwr.common import Context, Message, DataConnector
 
-from .client import Client as Client
+@dataclass
+class DataConnector:
+    data: Dict[str, Any]
 
-# Compatibility
-ClientFn = Callable[[str], Client]
-ClientFnExt = Callable[[int, Optional[int], DataConnector], Client]
-
-ClientAppCallable = Callable[[Message, Context, DataConnector], Message]
-Mod = Callable[[Message, Context, DataConnector, ClientAppCallable], Message]
+    def __init__(self) -> None:
+        self.data = {}
+    
+    def register_dataset(self, name: str, dataset: Any) -> None:
+        self.data[name] = dataset

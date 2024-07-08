@@ -24,7 +24,7 @@ from flwr.client.message_handler.message_handler import (
 )
 from flwr.client.mod.utils import make_ffn
 from flwr.client.typing import ClientFnExt, Mod
-from flwr.common import Context, Message, MessageType
+from flwr.common import Context, Message, MessageType, DataConnector
 from flwr.common.logger import warn_deprecated_feature, warn_preview_feature
 
 from .typing import ClientAppCallable
@@ -116,11 +116,11 @@ class ClientApp:
         self._evaluate: Optional[ClientAppCallable] = None
         self._query: Optional[ClientAppCallable] = None
 
-    def __call__(self, message: Message, context: Context) -> Message:
+    def __call__(self, message: Message, context: Context, dataconn: DataConnector) -> Message:
         """Execute `ClientApp`."""
         # Execute message using `client_fn`
         if self._call:
-            return self._call(message, context)
+            return self._call(message, context, dataconn)
 
         # Execute message using a new
         if message.metadata.message_type == MessageType.TRAIN:
