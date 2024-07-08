@@ -46,7 +46,7 @@ class TestGrpcDriver(unittest.TestCase):
         self.mock_stub.GetRun.return_value = mock_response
         mock_response.HasField.return_value = True
         self.driver = GrpcDriver(run_id=61016)
-        self.driver._stub = self.mock_stub  # pylint: disable=protected-access
+        self.driver._grpc_stub = self.mock_stub  # pylint: disable=protected-access
         self.driver._channel = self.mock_channel  # pylint: disable=protected-access
 
     def test_init_grpc_driver(self) -> None:
@@ -194,7 +194,7 @@ class TestGrpcDriver(unittest.TestCase):
     def test_del_with_uninitialized_driver(self) -> None:
         """Test cleanup behavior when Driver is not initialized."""
         # Prepare
-        self.driver._stub = None  # pylint: disable=protected-access
+        self.driver._grpc_stub = None  # pylint: disable=protected-access
         self.driver._channel = None  # pylint: disable=protected-access
 
         # Execute

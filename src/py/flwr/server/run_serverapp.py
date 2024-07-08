@@ -165,9 +165,9 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         )
         # Create run
         req = CreateRunRequest(fab_id=args.fab_id, fab_version=args.fab_version)
-        res: CreateRunResponse = driver.stub.CreateRun(req)
+        res: CreateRunResponse = driver._stub.CreateRun(req)  # pylint: disable=W0212
         # Overwrite driver._run_id
-        driver._run_id = res.run_id  # pylint: disable=protected-access
+        driver._run_id = res.run_id  # pylint: disable=W0212
 
     # Dynamically obtain ServerApp path based on run_id
     if args.run_id is not None:

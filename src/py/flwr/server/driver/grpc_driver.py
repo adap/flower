@@ -76,7 +76,7 @@ class GrpcDriver(Driver):
         self._addr = driver_service_address
         self._cert = root_certificates
         self._run: Optional[Run] = None
-        self._stub: Optional[DriverStub] = None
+        self._grpc_stub: Optional[DriverStub] = None
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=0, anonymous=True)
 
@@ -99,7 +99,7 @@ class GrpcDriver(Driver):
             insecure=(self._cert is None),
             root_certificates=self._cert,
         )
-        self._stub = DriverStub(self._channel)
+        self._grpc_stub = DriverStub(self._channel)
         log(DEBUG, "[Driver] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:
@@ -110,7 +110,7 @@ class GrpcDriver(Driver):
             return
         channel: grpc.Channel = self._channel
         self._channel = None
-        self._stub = None
+        self._grpc_stub = None
         channel.close()
         log(DEBUG, "[Driver] Disconnected")
 
@@ -119,7 +119,7 @@ class GrpcDriver(Driver):
         if self._run is None:
             # Get the run info
             req = GetRunRequest(run_id=self._run_id)
-            res: GetRunResponse = self.stub.GetRun(req)
+            res: GetRunResponse = self._stub.GetRun(req)
             if not res.HasField("run"):
                 raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
             self._run = Run(
@@ -135,11 +135,11 @@ class GrpcDriver(Driver):
         return Run(**vars(self._run))
 
     @property
-    def stub(self) -> DriverStub:
+    def _stub(self) -> DriverStub:
         """Driver stub."""
         if not self._is_connected:
             self._connect()
-        return cast(DriverStub, self._stub)
+        return cast(DriverStub, self._grpc_stub)
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid
@@ -192,7 +192,9 @@ class GrpcDriver(Driver):
         """Get node IDs."""
         self._init_run()
         # Call GrpcDriverStub method
-        res: GetNodesResponse = self.stub.GetNodes(GetNodesRequest(run_id=self._run_id))
+        res: GetNodesResponse = self._stub.GetNodes(
+            GetNodesRequest(run_id=self._run_id)
+        )
         return [node.node_id for node in res.nodes]
 
     def push_messages(self, messages: Iterable[Message]) -> Iterable[str]:
@@ -212,7 +214,7 @@ class GrpcDriver(Driver):
             # Add to list
             task_ins_list.append(taskins)
         # Call GrpcDriverStub method
-        res: PushTaskInsResponse = self.stub.PushTaskIns(
+        res: PushTaskInsResponse = self._stub.PushTaskIns(
             PushTaskInsRequest(task_ins_list=task_ins_list)
         )
         return list(res.task_ids)
@@ -225,7 +227,7 @@ class GrpcDriver(Driver):
         """
         self._init_run()
         # Pull TaskRes
-        res: PullTaskResResponse = self.stub.PullTaskRes(
+        res: PullTaskResResponse = self._stub.PullTaskRes(
             PullTaskResRequest(node=self.node, task_ids=message_ids)
         )
         # Convert TaskRes to Message
