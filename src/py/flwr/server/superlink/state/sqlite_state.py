@@ -15,10 +15,10 @@
 """SQLite based implemenation of server state."""
 
 
+import json
 import re
 import sqlite3
 import time
-from ast import literal_eval
 from logging import DEBUG, ERROR
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
@@ -62,10 +62,10 @@ CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
-    run_id          INTEGER UNIQUE,
-    fab_id          TEXT,
-    fab_version     TEXT,
-    overrides       TEXT
+    run_id                INTEGER UNIQUE,
+    fab_id                TEXT,
+    fab_version           TEXT,
+    override_config       TEXT
 );
 """
 
@@ -630,10 +630,12 @@ class SqliteState(State):  # pylint: disable=R0904
         # If run_id does not exist
         if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
             query = (
-                "INSERT INTO run (run_id, fab_id, fab_version, overrides)"
+                "INSERT INTO run (run_id, fab_id, fab_version, override_config)"
                 "VALUES (?, ?, ?, ?);"
             )
-            self.query(query, (run_id, fab_id, fab_version, str(override_config)))
+            self.query(
+                query, (run_id, fab_id, fab_version, json.dumps(override_config))
+            )
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -700,7 +702,7 @@ class SqliteState(State):  # pylint: disable=R0904
                 run_id=run_id,
                 fab_id=row["fab_id"],
                 fab_version=row["fab_version"],
-                override_config=literal_eval(row["overrides"]),
+                override_config=json.loads(row["override_config"]),
             )
         except sqlite3.IntegrityError:
             log(ERROR, "`run_id` does not exist.")
