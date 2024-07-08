@@ -15,6 +15,7 @@
 """SQLite based implemenation of server state."""
 
 
+import json
 import re
 import sqlite3
 import time
@@ -61,9 +62,10 @@ CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
-    run_id          INTEGER UNIQUE,
-    fab_id          TEXT,
-    fab_version     TEXT
+    run_id                INTEGER UNIQUE,
+    fab_id                TEXT,
+    fab_version           TEXT,
+    override_config       TEXT
 );
 """
 
@@ -613,7 +615,12 @@ class SqliteState(State):  # pylint: disable=R0904
             return node_id
         return None
 
-    def create_run(self, fab_id: str, fab_version: str) -> int:
+    def create_run(
+        self,
+        fab_id: str,
+        fab_version: str,
+        override_config: Dict[str, str],
+    ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
         run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
@@ -622,8 +629,13 @@ class SqliteState(State):  # pylint: disable=R0904
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
         # If run_id does not exist
         if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
-            query = "INSERT INTO run (run_id, fab_id, fab_version) VALUES (?, ?, ?);"
-            self.query(query, (run_id, fab_id, fab_version))
+            query = (
+                "INSERT INTO run (run_id, fab_id, fab_version, override_config)"
+                "VALUES (?, ?, ?, ?);"
+            )
+            self.query(
+                query, (run_id, fab_id, fab_version, json.dumps(override_config))
+            )
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -687,7 +699,10 @@ class SqliteState(State):  # pylint: disable=R0904
         try:
             row = self.query(query, (run_id,))[0]
             return Run(
-                run_id=run_id, fab_id=row["fab_id"], fab_version=row["fab_version"]
+                run_id=run_id,
+                fab_id=row["fab_id"],
+                fab_version=row["fab_version"],
+                override_config=json.loads(row["override_config"]),
             )
         except sqlite3.IntegrityError:
             log(ERROR, "`run_id` does not exist.")
