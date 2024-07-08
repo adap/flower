@@ -23,6 +23,7 @@ from uuid import UUID
 import grpc
 
 from flwr.common.logger import log
+from flwr.common.serde import record_value_dict_from_proto
 from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -69,7 +70,11 @@ class DriverServicer(driver_pb2_grpc.DriverServicer):
         """Create run ID."""
         log(DEBUG, "DriverServicer.CreateRun")
         state: State = self.state_factory.state()
-        run_id = state.create_run(request.fab_id, request.fab_version)
+        run_id = state.create_run(
+            request.fab_id,
+            request.fab_version,
+            record_value_dict_from_proto(request.override_config),
+        )
         return CreateRunResponse(run_id=run_id)
 
     def PushTaskIns(

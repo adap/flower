@@ -40,7 +40,11 @@ from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
-from flwr.common.serde import message_from_taskins, message_to_taskres
+from flwr.common.serde import (
+    message_from_taskins,
+    message_to_taskres,
+    record_value_dict_from_proto,
+)
 from flwr.common.typing import Run
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
@@ -280,6 +284,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
             run_id,
             get_run_response.run.fab_id,
             get_run_response.run.fab_version,
+            record_value_dict_from_proto(get_run_response.run.override_config),
         )
 
     try:

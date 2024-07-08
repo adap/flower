@@ -23,7 +23,7 @@ from uuid import UUID, uuid4
 
 from flwr.common import log, now
 from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
-from flwr.common.typing import Run
+from flwr.common.typing import ConfigsRecordValues, Run
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
@@ -275,7 +275,12 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
         return self.public_key_to_node_id.get(client_public_key)
 
-    def create_run(self, fab_id: str, fab_version: str) -> int:
+    def create_run(
+        self,
+        fab_id: str,
+        fab_version: str,
+        override_config: Dict[str, ConfigsRecordValues],
+    ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
         with self.lock:
@@ -283,7 +288,10 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
 
             if run_id not in self.run_ids:
                 self.run_ids[run_id] = Run(
-                    run_id=run_id, fab_id=fab_id, fab_version=fab_version
+                    run_id=run_id,
+                    fab_id=fab_id,
+                    fab_version=fab_version,
+                    override_config=override_config,
                 )
                 return run_id
         log(ERROR, "Unexpected run creation failure.")
