@@ -17,7 +17,7 @@
 
 from typing import Callable, Optional
 
-from flwr.common import Context, Message, DataConnector
+from flwr.common import Context, DataConnector, Message
 
 from .client import Client as Client
 

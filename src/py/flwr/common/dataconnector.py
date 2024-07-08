@@ -16,7 +16,7 @@
 
 
 from dataclasses import dataclass
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 @dataclass
@@ -25,6 +25,6 @@ class DataConnector:
 
     def __init__(self) -> None:
         self.data = {}
-    
+
     def register_dataset(self, name: str, dataset: Any) -> None:
         self.data[name] = dataset

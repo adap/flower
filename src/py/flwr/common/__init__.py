@@ -18,6 +18,7 @@
 from .constant import MessageType as MessageType
 from .constant import MessageTypeLegacy as MessageTypeLegacy
 from .context import Context as Context
+from .dataconnector import DataConnector as DataConnector
 from .date import now as now
 from .grpc import GRPC_MAX_MESSAGE_LENGTH
 from .logger import configure as configure
@@ -60,7 +61,6 @@ from .typing import ReconnectIns as ReconnectIns
 from .typing import Scalar as Scalar
 from .typing import ServerMessage as ServerMessage
 from .typing import Status as Status
-from .dataconnector import DataConnector as DataConnector
 
 __all__ = [
     "Array",
@@ -69,8 +69,8 @@ __all__ = [
     "Config",
     "ConfigsRecord",
     "Context",
-    "DataConnector",
     "DEFAULT_TTL",
+    "DataConnector",
     "DisconnectRes",
     "Error",
     "EvaluateIns",
