@@ -15,6 +15,6 @@ wait $pid
 res=$?
 
 if [[ "$res" = "0" ]];
-  then echo "Training worked correctly"; kill $cl1_pid; kill $cl2_pid; kill $sl_pid;
+  then echo "Training worked correctly";
   else echo "Training had an issue" && exit 1;
 fi
