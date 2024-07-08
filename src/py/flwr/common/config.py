@@ -82,7 +82,7 @@ def flatten_dict(
         new_key = f"{parent_key}{sep}{k}" if parent_key else k
         if isinstance(v, dict):
             items.extend(flatten_dict(v, parent_key=new_key, sep=sep).items())
-        if isinstance(v, str):
+        elif isinstance(v, str):
             items.append((new_key, v))
         else:
             raise ValueError(
