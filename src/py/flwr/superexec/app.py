@@ -77,6 +77,7 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     parser.add_argument(
         "executor",
         help="For example: `deployment:exec` or `project.package.module:wrapper.exec`.",
+        default="flwr.superexec.deployment:executor",
     )
     parser.add_argument(
         "--address",
