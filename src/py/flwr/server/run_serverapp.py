@@ -177,7 +177,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         driver._run_id = res.run_id  # pylint: disable=W0212
 
     server_config = {}
-    
+
     # Dynamically obtain ServerApp path based on run_id
     if args.run_id is not None:
         # User provided `--run-id`, but not `server-app`
