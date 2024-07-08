@@ -15,13 +15,16 @@
 """Provide functions for managing global Flower config."""
 
 import os
+from logging import WARNING
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import tomli
 
 from flwr.cli.config_utils import validate_fields
+from flwr.common import log
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
+from flwr.common.typing import Run
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
@@ -71,6 +74,41 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
         )
 
     return config
+
+
+def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
+    """Get the config using the fab_id and the fab_version, remove the nesting by adding
+    the nested keys as prefixes separated by dots, and fuse it with the override
+    dict."""
+    if not run.fab_id or not run.fab_version:
+        return {}
+
+    default_config = flatten_dict(
+        get_project_config(get_project_dir(run.fab_id, run.fab_version, flwr_dir))[
+            "flower"
+        ]["config"]
+    )
+    final_config = default_config.copy()
+
+    for key, value in run.override_config.items():
+        if key in default_config:
+            final_config[key] = value
+        else:
+            if key[0] == "+":
+                final_config[key[1:]] = value
+            else:
+                log(
+                    WARNING,
+                    "The following override key: '%s' doesn't exist in the "
+                    "original config and thus it will be ignored, if this wasn't "
+                    "and mistake and you want to add a new key to the config, "
+                    "you must prepend the key with '+'. For example: "
+                    "`flwr run --config +newkey=1` will add a new key "
+                    "named 'newkey' to the config.",
+                    key,
+                )
+
+    return final_config
 
 
 def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, str]:
