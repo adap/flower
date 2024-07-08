@@ -25,6 +25,11 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.serde import record_value_dict_to_proto
+from flwr.common.typing import ConfigsRecordValues, ValueList
+
+# pylint: disable=E0611
+from flwr.proto.common_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
 from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
@@ -57,7 +62,7 @@ class DeploymentEngine(Executor):
         self,
         fab_id: str,
         fab_version: str,
-        override_config: Dict[str, str],
+        override_config: Dict[str, ConfigsRecordValues],
     ) -> int:
         if self.stub is None:
             self._connect()
@@ -67,14 +72,16 @@ class DeploymentEngine(Executor):
         req = CreateRunRequest(
             fab_id=fab_id,
             fab_version=fab_version,
-            override_config=override_config,
+            override_config=record_value_dict_to_proto(
+                override_config, ValueList, ProtoConfigsRecordValue
+            ),
         )
         res = self.stub.CreateRun(request=req)
         return int(res.run_id)
 
     @override
     def start_run(
-        self, fab_file: bytes, override_config: Dict[str, str]
+        self, fab_file: bytes, override_config: Dict[str, ConfigsRecordValues]
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
