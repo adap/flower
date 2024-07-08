@@ -116,17 +116,18 @@ class GrpcDriver(Driver):
 
     def _init_run(self) -> None:
         # Check if is initialized
-        if self._run is None:
-            # Get the run info
-            req = GetRunRequest(run_id=self._run_id)
-            res: GetRunResponse = self._stub.GetRun(req)
-            if not res.HasField("run"):
-                raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
-            self._run = Run(
-                run_id=res.run.run_id,
-                fab_id=res.run.fab_id,
-                fab_version=res.run.fab_version,
-            )
+        if self._run is not None:
+            return
+        # Get the run info
+        req = GetRunRequest(run_id=self._run_id)
+        res: GetRunResponse = self._stub.GetRun(req)
+        if not res.HasField("run"):
+            raise RuntimeError(f"Cannot find the run with ID: {self._run_id}")
+        self._run = Run(
+            run_id=res.run.run_id,
+            fab_id=res.run.fab_id,
+            fab_version=res.run.fab_version,
+        )
 
     @property
     def run(self) -> Run:
