@@ -18,6 +18,10 @@ find src/proto/flwr/proto -name *.proto | grep "\.proto" | xargs clang-format -i
 python -m black -q examples
 python -m docformatter -i -r examples
 
+# Benchmarks
+python -m black -q benchmarks
+python -m docformatter -i -r benchmarks
+
 # E2E
 python -m isort e2e
 python -m black -q e2e
