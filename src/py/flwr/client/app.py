@@ -388,8 +388,9 @@ def _start_client_internal(
                     # Handle app loading and task message
                     try:
                         # Load ClientApp instance
+                        run: Run = run_info[run_id]
                         client_app: ClientApp = load_client_app_fn(
-                            run_info[run_id].fab_id, run_info[run_id].fab_version
+                            run.fab_id, run.fab_version
                         )
 
                         # Execute ClientApp
