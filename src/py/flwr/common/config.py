@@ -97,18 +97,20 @@ def parse_config_args(
     """Parse comma separated list of key-value pairs separated by '='."""
     overrides: Dict[str, str] = {}
 
-    if config_overrides is not None:
-        overrides_list = config_overrides.split(",")
-        if (
-            len(overrides_list) == 1
-            and "=" not in overrides_list
-            and overrides_list[0].endswith(".toml")
-        ):
-            with Path(overrides_list[0]).open("rb") as config_file:
-                overrides = flatten_dict(tomli.load(config_file))
-        else:
-            for kv_pair in overrides_list:
-                key, value = kv_pair.split("=")
-                overrides[key] = value
+    if config_overrides is None:
+        return overrides
+
+    overrides_list = config_overrides.split(",")
+    if (
+        len(overrides_list) == 1
+        and "=" not in overrides_list
+        and overrides_list[0].endswith(".toml")
+    ):
+        with Path(overrides_list[0]).open("rb") as config_file:
+            overrides = flatten_dict(tomli.load(config_file))
+    else:
+        for kv_pair in overrides_list:
+            key, value = kv_pair.split("=")
+            overrides[key] = value
 
     return overrides
