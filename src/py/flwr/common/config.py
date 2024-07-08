@@ -77,9 +77,11 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
 
 
 def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
-    """Get the config using the fab_id and the fab_version, remove the nesting by adding
-    the nested keys as prefixes separated by dots, and fuse it with the override
-    dict."""
+    """Merge the overrides from a `Run` with the config from a FAB.
+
+    Get the config using the fab_id and the fab_version, remove the nesting by adding
+    the nested keys as prefixes separated by dots, and fuse it with the override dict.
+    """
     if not run.fab_id or not run.fab_version:
         return {}
 
