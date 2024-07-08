@@ -15,14 +15,12 @@
 """Provide functions for managing global Flower config."""
 
 import os
-from logging import WARNING
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import tomli
 
 from flwr.cli.config_utils import validate_fields
-from flwr.common import log
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
 from flwr.common.typing import Run
 
