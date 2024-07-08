@@ -85,15 +85,14 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
     if not run.fab_id or not run.fab_version:
         return {}
 
-    default_config = flatten_dict(
-        get_project_config(get_project_dir(run.fab_id, run.fab_version, flwr_dir))[
-            "flower"
-        ]["config"]
-    )
-    final_config = default_config.copy()
+    project_dir = get_project_dir(run.fab_id, run.fab_version, flwr_dir)
+
+    default_config = get_project_config(project_dir)["flower"]["config"]
+    flat_default_config = flatten_dict(default_config)
+    final_config = flat_default_config.copy()
 
     for key, value in run.override_config.items():
-        if key in default_config:
+        if key in flat_default_config:
             final_config[key] = value
         else:
             if key[0] == "+":
