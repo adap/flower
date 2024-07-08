@@ -84,20 +84,6 @@ def _fuse_dicts(
     for key, value in override_dict.items():
         if key in main_dict:
             fused_dict[key] = value
-        else:
-            if key[0] == "+":
-                fused_dict[key[1:]] = value
-            else:
-                log(
-                    WARNING,
-                    "The following override key: '%s' doesn't exist in the "
-                    "original config and thus it will be ignored, if this wasn't "
-                    "and mistake and you want to add a new key to the config, "
-                    "you must prepend the key with '+'. For example: "
-                    "`flwr run --config +newkey=1` will add a new key "
-                    "named 'newkey' to the config.",
-                    key,
-                )
 
     return fused_dict
 
