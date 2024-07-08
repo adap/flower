@@ -87,7 +87,7 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
 
     project_dir = get_project_dir(run.fab_id, run.fab_version, flwr_dir)
 
-    default_config = get_project_config(project_dir)["flower"]["config"]
+    default_config = get_project_config(project_dir)["flower"].get("config", {})
     flat_default_config = flatten_dict(default_config)
     final_config = flat_default_config.copy()
 
