@@ -88,7 +88,7 @@ def flatten_dict(
             items.append((new_key, v))
         else:
             raise ValueError(
-                f"The value for {k} needs to be a string.",
+                f"The value for key {k} needs to be a `str` or a `dict`.",
             )
     return dict(items)
 
