@@ -17,7 +17,7 @@
 import subprocess
 import sys
 from logging import ERROR, INFO
-from typing import Optional
+from typing import Dict, Optional
 
 from typing_extensions import override
 
@@ -65,7 +65,9 @@ class DeploymentEngine(Executor):
 
         assert self.stub is not None
 
-        req = CreateRunRequest(fab_id=fab_id, fab_version=fab_version)
+        req = CreateRunRequest(
+            fab_id=fab_id, fab_version=fab_version, override_config=override_config
+        )
         res = self.stub.CreateRun(request=req)
         return int(res.run_id)
 
@@ -87,7 +89,7 @@ class DeploymentEngine(Executor):
             )
 
             # Call SuperLink to create run
-            run_id: int = self._create_run(fab_id, fab_version)
+            run_id: int = self._create_run(fab_id, fab_version, override_config)
             log(INFO, "Created run %s", str(run_id))
 
             # Start ServerApp

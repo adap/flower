@@ -17,7 +17,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from subprocess import Popen
-from typing import Optional
+from typing import Dict, Optional
 
 from flwr.common.typing import ConfigsRecordValues
 
