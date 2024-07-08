@@ -73,17 +73,14 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def flatten_dict(
-    raw_dict: Dict[str, Any], parent_key: str = "", separator: str = "."
-) -> Dict[str, str]:
+def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, str]:
     """Flatten dict by joining nested keys with a given separator."""
     items: List[Tuple[str, str]] = []
+    separator: str = "."
     for k, v in raw_dict.items():
         new_key = f"{parent_key}{separator}{k}" if parent_key else k
         if isinstance(v, dict):
-            items.extend(
-                flatten_dict(v, parent_key=new_key, separator=separator).items()
-            )
+            items.extend(flatten_dict(v, parent_key=new_key).items())
         elif isinstance(v, str):
             items.append((new_key, v))
         else:
