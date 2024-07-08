@@ -93,8 +93,6 @@ class DeploymentEngine(Executor):
             run_id: int = self._create_run(fab_id, fab_version, override_config)
             log(INFO, "Created run %s", str(run_id))
 
-            # log_to_db(run_id, "overrides", override_config)
-
             # Start ServerApp
             proc = subprocess.Popen(  # pylint: disable=consider-using-with
                 [
