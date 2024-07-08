@@ -76,6 +76,32 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
+def _fuse_dicts(
+    main_dict: Dict[str, str], override_dict: Dict[str, str]
+) -> Dict[str, str]:
+    fused_dict = main_dict.copy()
+
+    for key, value in override_dict.items():
+        if key in main_dict:
+            fused_dict[key] = value
+        else:
+            if key[0] == "+":
+                fused_dict[key[1:]] = value
+            else:
+                log(
+                    WARNING,
+                    "The following override key: '%s' doesn't exist in the "
+                    "original config and thus it will be ignored, if this wasn't "
+                    "and mistake and you want to add a new key to the config, "
+                    "you must prepend the key with '+'. For example: "
+                    "`flwr run --config +newkey=1` will add a new key "
+                    "named 'newkey' to the config.",
+                    key,
+                )
+
+    return fused_dict
+
+
 def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
     """Merge the overrides from a `Run` with the config from a FAB.
 
@@ -89,27 +115,8 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
 
     default_config = get_project_config(project_dir)["flower"].get("config", {})
     flat_default_config = flatten_dict(default_config)
-    final_config = flat_default_config.copy()
 
-    for key, value in run.override_config.items():
-        if key in flat_default_config:
-            final_config[key] = value
-        else:
-            if key[0] == "+":
-                final_config[key[1:]] = value
-            else:
-                log(
-                    WARNING,
-                    "The following override key: '%s' doesn't exist in the "
-                    "original config and thus it will be ignored, if this wasn't "
-                    "and mistake and you want to add a new key to the config, "
-                    "you must prepend the key with '+'. For example: "
-                    "`flwr run --config +newkey=1` will add a new key "
-                    "named 'newkey' to the config.",
-                    key,
-                )
-
-    return final_config
+    return _fuse_dicts(flat_default_config, run.override_config)
 
 
 def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, str]:
