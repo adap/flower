@@ -1,5 +1,6 @@
 import warnings
 from collections import OrderedDict
+from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -7,7 +8,6 @@ import torch.nn.functional as F
 from flwr_datasets import FederatedDataset
 from torch.utils.data import DataLoader, Subset
 from torchvision.transforms import Compose, Normalize, ToTensor
-from typing import Optional
 
 from flwr.client import ClientApp, NumPyClient
 

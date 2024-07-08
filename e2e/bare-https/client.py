@@ -1,9 +1,9 @@
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 
 import flwr as fl
-from typing import Optional
 
 model_params = np.array([1])
 objective = 5

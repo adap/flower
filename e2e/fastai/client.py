@@ -1,10 +1,10 @@
 import warnings
 from collections import OrderedDict
+from typing import Optional
 
 import numpy as np
 import torch
 from fastai.vision.all import *
-from typing import Optional
 
 import flwr as fl
 

@@ -1,10 +1,10 @@
 from datetime import datetime
+from typing import Optional
 
 import numpy as np
 
 import flwr as fl
 from flwr.common import ConfigsRecord
-from typing import Optional
 
 SUBSET_SIZE = 1000
 STATE_VAR = "timestamp"
