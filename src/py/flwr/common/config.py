@@ -33,7 +33,7 @@ def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
         return Path(
             os.getenv(
                 FLWR_HOME,
-                f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}/.flwr",
+                Path(f"{os.getenv('XDG_DATA_HOME', os.getenv('HOME'))}") / ".flwr",
             )
         )
     return Path(provided_path).absolute()
@@ -76,20 +76,6 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
     return config
 
 
-def flatten_dict(
-    raw_dict: Dict[str, Any], parent_key: str = "", sep: str = "."
-) -> Dict[str, str]:
-    """Flatten dict by joining nested keys with a given separator."""
-    items: List[Tuple[str, str]] = []
-    for k, v in raw_dict.items():
-        new_key = f"{parent_key}{sep}{k}" if parent_key else k
-        if isinstance(v, dict):
-            items.extend(flatten_dict(v, parent_key=new_key, sep=sep).items())
-        else:
-            items.append((new_key, str(v)))
-    return dict(items)
-
-
 def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
     """Get the config using the fab_id and the fab_version, remove the nesting by adding
     the nested keys as prefixes separated by dots, and fuse it with the override
@@ -123,3 +109,46 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
                 )
 
     return final_config
+
+
+def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, str]:
+    """Flatten dict by joining nested keys with a given separator."""
+    items: List[Tuple[str, str]] = []
+    separator: str = "."
+    for k, v in raw_dict.items():
+        new_key = f"{parent_key}{separator}{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, parent_key=new_key).items())
+        elif isinstance(v, str):
+            items.append((new_key, v))
+        else:
+            raise ValueError(
+                f"The value for key {k} needs to be a `str` or a `dict`.",
+            )
+    return dict(items)
+
+
+def parse_config_args(
+    config_overrides: Optional[str],
+    separator: str = ",",
+) -> Dict[str, str]:
+    """Parse separator separated list of key-value pairs separated by '='."""
+    overrides: Dict[str, str] = {}
+
+    if config_overrides is None:
+        return overrides
+
+    overrides_list = config_overrides.split(separator)
+    if (
+        len(overrides_list) == 1
+        and "=" not in overrides_list
+        and overrides_list[0].endswith(".toml")
+    ):
+        with Path(overrides_list[0]).open("rb") as config_file:
+            overrides = flatten_dict(tomli.load(config_file))
+    else:
+        for kv_pair in overrides_list:
+            key, value = kv_pair.split("=")
+            overrides[key] = value
+
+    return overrides
