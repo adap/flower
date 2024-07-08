@@ -280,6 +280,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
             run_id,
             get_run_response.run.fab_id,
             get_run_response.run.fab_version,
+            dict(get_run_response.run.override_config.items()),
         )
 
     try:
