@@ -74,14 +74,16 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
 
 
 def flatten_dict(
-    raw_dict: Dict[str, Any], parent_key: str = "", sep: str = "."
+    raw_dict: Dict[str, Any], parent_key: str = "", separator: str = "."
 ) -> Dict[str, str]:
     """Flatten dict by joining nested keys with a given separator."""
     items: List[Tuple[str, str]] = []
     for k, v in raw_dict.items():
-        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        new_key = f"{parent_key}{separator}{k}" if parent_key else k
         if isinstance(v, dict):
-            items.extend(flatten_dict(v, parent_key=new_key, sep=sep).items())
+            items.extend(
+                flatten_dict(v, parent_key=new_key, separator=separator).items()
+            )
         elif isinstance(v, str):
             items.append((new_key, v))
         else:
@@ -93,14 +95,15 @@ def flatten_dict(
 
 def parse_config_args(
     config_overrides: Optional[str],
+    separator: str = ",",
 ) -> Dict[str, str]:
-    """Parse comma separated list of key-value pairs separated by '='."""
+    """Parse separator separated list of key-value pairs separated by '='."""
     overrides: Dict[str, str] = {}
 
     if config_overrides is None:
         return overrides
 
-    overrides_list = config_overrides.split(",")
+    overrides_list = config_overrides.split(separator)
     if (
         len(overrides_list) == 1
         and "=" not in overrides_list
