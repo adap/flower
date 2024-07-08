@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from flwr_datasets import FederatedDataset
 from torch.utils.data import DataLoader, Subset
 from torchvision.transforms import Compose, Normalize, ToTensor
+from typing import Optional
 
 from flwr.client import ClientApp, NumPyClient
 
@@ -122,7 +123,7 @@ class FlowerClient(NumPyClient):
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
-def client_fn(cid: str):
+def client_fn(node_id: int, partition_id: Optional[int]):
     """Create and return an instance of Flower `Client`."""
     return FlowerClient().to_client()
 

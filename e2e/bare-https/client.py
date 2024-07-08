@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 
 import flwr as fl
+from typing import Optional
 
 model_params = np.array([1])
 objective = 5
@@ -25,7 +26,7 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, 1, {"accuracy": accuracy}
 
 
-def client_fn(cid):
+def client_fn(node_id: int, partition_id: Optional[int]):
     return FlowerClient().to_client()
 
 

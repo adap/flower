@@ -4,6 +4,7 @@ import numpy as np
 
 import flwr as fl
 from flwr.common import ConfigsRecord
+from typing import Optional
 
 SUBSET_SIZE = 1000
 STATE_VAR = "timestamp"
@@ -51,7 +52,7 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
-def client_fn(cid):
+def client_fn(node_id: int, partition_id: Optional[int]):
     return FlowerClient().to_client()
 
 
