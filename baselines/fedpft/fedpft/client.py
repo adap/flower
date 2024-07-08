@@ -139,7 +139,7 @@ def generate_client_fn(
     feature_extractor: torch.nn.Module,
     num_classes: int,
     device: torch.device,
-) -> Callable[[str], fl.client.NumPyClient]:
+) -> Callable[[str], fl.client.Client]:
     """Generate the client function that creates the Flower Clients.
 
     Parameters
@@ -158,7 +158,7 @@ def generate_client_fn(
         Device to load the `feature_extractor`
     """
 
-    def client_fn(cid: str) -> fl.client.NumPyClient:
+    def client_fn(cid: str) -> fl.client.Client:
         """Create a FedPFT client."""
         return instantiate(
             client_cfg,
@@ -167,6 +167,6 @@ def generate_client_fn(
             feature_extractor=feature_extractor,
             num_classes=num_classes,
             device=device,
-        )
+        ).to_client()
 
     return client_fn

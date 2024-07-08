@@ -4,8 +4,10 @@ import pickle
 from pathlib import Path
 
 import flwr as fl
+from flwr.client import ClientApp
 import hydra
 import torch
+from flwr.server import ServerApp, ServerConfig
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from omegaconf import DictConfig, OmegaConf
@@ -48,6 +50,15 @@ def main(cfg: DictConfig) -> None:
 
     # Setup strategy
     strategy = instantiate(cfg.strategy)
+
+    client_app = ClientApp(
+        client_fn=client_fn,
+    )
+
+    server_app = ServerApp(
+        config=ServerConfig(num_rounds=cfg.num_rounds),
+        strategy=strategy,
+    )
 
     # Start simulation
     history = fl.simulation.start_simulation(
