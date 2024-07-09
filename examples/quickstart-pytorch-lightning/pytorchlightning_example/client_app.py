@@ -6,24 +6,26 @@ Source: pytorchlightning.ai (2021/02/04)
 """
 
 from collections import OrderedDict
+from typing import Any
 
 import pytorch_lightning as pl
 import torch
 from flwr_datasets import FederatedDataset
 from torch import nn
 from torch.nn import functional as F
+from torch.optim.adam import Adam
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
 import flwr as fl
 from datasets.utils.logging import disable_progress_bar
-from flwr.client import Client, ClientApp
+from flwr.client import Client, ClientApp, NumPyClient
 
 disable_progress_bar()
 
 
 class LitAutoEncoder(pl.LightningModule):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.encoder = nn.Sequential(
             nn.Linear(28 * 28, 64),
@@ -36,15 +38,15 @@ class LitAutoEncoder(pl.LightningModule):
             nn.Linear(64, 28 * 28),
         )
 
-    def forward(self, x):
+    def forward(self, x) -> Any:
         embedding = self.encoder(x)
         return embedding
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> Adam:
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
 
-    def training_step(self, train_batch, batch_idx):
+    def training_step(self, train_batch, batch_idx) -> torch.Tensor:
         x, y = train_batch
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
@@ -53,13 +55,13 @@ class LitAutoEncoder(pl.LightningModule):
         self.log("train_loss", loss)
         return loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch, batch_idx) -> None:
         self._evaluate(batch, "val")
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch, batch_idx) -> None:
         self._evaluate(batch, "test")
 
-    def _evaluate(self, batch, stage=None):
+    def _evaluate(self, batch, stage=None) -> None:
         x, y = batch
         x = x.view(x.size(0), -1)
         z = self.encoder(x)
@@ -86,9 +88,9 @@ def apply_transforms(batch):
     return batch
 
 
-def load_data(partition):
+def load_data(partition_id):
     fds = FederatedDataset(dataset="mnist", partitioners={"train": 10})
-    partition = fds.load_partition(partition, "train")
+    partition = fds.load_partition(partition_id, "train")
 
     partition = partition.with_transform(apply_transforms)
     # 20 % for on federated evaluation
@@ -116,7 +118,7 @@ def load_data(partition):
     return trainloader, valloader, testloader
 
 
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def __init__(self, model, train_loader, val_loader, test_loader):
         self.model = model
         self.train_loader = train_loader
@@ -165,33 +167,10 @@ model = LitAutoEncoder()
 
 def client_fn(node_id, partition_id) -> Client:
     """Client function to return an instance of Client()."""
-    train_loader, val_loader, test_loader = load_data(partition=partition_id)
+    train_loader, val_loader, test_loader = load_data(partition_id=partition_id)
     return FlowerClient(model, train_loader, val_loader, test_loader).to_client()
 
 
 app = ClientApp(
     client_fn=client_fn,
 )
-# def main() -> None:
-#     parser = argparse.ArgumentParser(description="Flower")
-#     parser.add_argument(
-#         "--partition-id",
-#         type=int,
-#         choices=range(0, 10),
-#         required=True,
-#         help="Specifies the artificial data partition",
-#     )
-#     args = parser.parse_args()
-#     partition_id = args.partition_id
-#
-#     # Model and data
-#     model = mnist.LitAutoEncoder()
-#     train_loader, val_loader, test_loader = mnist.load_data(partition_id)
-#
-#     # Flower client
-#     client = FlowerClient(model, train_loader, val_loader, test_loader).to_client()
-#     fl.client.start_client(server_address="127.0.0.1:8080", client=client)
-#
-#
-# if __name__ == "__main__":
-#     main()
