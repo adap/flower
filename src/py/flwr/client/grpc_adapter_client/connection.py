@@ -27,6 +27,7 @@ from flwr.common import GRPC_MAX_MESSAGE_LENGTH
 from flwr.common.logger import log
 from flwr.common.message import Message
 from flwr.common.retry_invoker import RetryInvoker
+from flwr.common.typing import Run
 
 
 @contextmanager
@@ -45,7 +46,7 @@ def grpc_adapter(  # pylint: disable=R0913
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
-        Optional[Callable[[int], Tuple[str, str]]],
+        Optional[Callable[[int], Run]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server via GrpcAdapter.
