@@ -19,10 +19,15 @@ import argparse
 import sys
 from logging import DEBUG, INFO, WARN
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 from flwr.common import Context, EventType, RecordSet, event
-from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
+from flwr.common.config import (
+    get_flwr_dir,
+    get_fused_config,
+    get_project_config,
+    get_project_dir,
+)
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
@@ -40,6 +45,7 @@ ADDRESS_DRIVER_API = "0.0.0.0:9091"
 def run(
     driver: Driver,
     server_app_dir: str,
+    server_app_run_config: Dict[str, str],
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
 ) -> None:
@@ -72,7 +78,7 @@ def run(
     server_app = _load()
 
     # Initialize Context
-    context = Context(state=RecordSet(), run_config={})
+    context = Context(state=RecordSet(), run_config=server_app_run_config)
 
     # Call ServerApp
     server_app(driver=driver, context=context)
@@ -169,6 +175,8 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         # Overwrite driver._run_id
         driver._run_id = res.run_id  # pylint: disable=W0212
 
+    server_app_run_config = {}
+
     # Dynamically obtain ServerApp path based on run_id
     if args.run_id is not None:
         # User provided `--run-id`, but not `server-app`
@@ -177,6 +185,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         server_app_dir = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
         config = get_project_config(server_app_dir)
         server_app_attr = config["flower"]["components"]["serverapp"]
+        server_app_run_config = get_fused_config(run_, flwr_dir)
     else:
         # User provided `server-app`, but not `--run-id`
         server_app_dir = str(Path(args.dir).absolute())
@@ -190,7 +199,12 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
     )
 
     # Run the ServerApp with the Driver
-    run(driver=driver, server_app_dir=server_app_dir, server_app_attr=server_app_attr)
+    run(
+        driver=driver,
+        server_app_dir=server_app_dir,
+        server_app_run_config=server_app_run_config,
+        server_app_attr=server_app_attr,
+    )
 
     # Clean up
     driver.close()
