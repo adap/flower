@@ -6,16 +6,16 @@ build-backend = "hatchling.build"
 name = "quickstart-pytorch"
 version = "0.1.0"
 description = "PyTorch Federated Learning Quickstart with Flower"
-authors = [
-    { name = "The Flower Authors", email = "hello@flower.ai" },
-]
+authors = [{ name = "The Flower Authors", email = "hello@flower.ai" }]
 dependencies = [
     "flwr>=1.8.0,<2.0",
     "flwr-datasets[vision]>=0.0.2,<1.0.0",
     "torch==2.1.1",
     "torchvision==0.16.1",
-    "tqdm==4.66.3"
+    "tqdm==4.66.3",
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
+
+[flower]

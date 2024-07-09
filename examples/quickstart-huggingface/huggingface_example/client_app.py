@@ -17,6 +17,7 @@ from transformers import (
 )
 
 import flwr as fl
+from flwr.client import Client, ClientApp
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cpu")
@@ -84,50 +85,60 @@ def test(net, testloader) -> tuple[Any | float, Any]:
     return loss, accuracy
 
 
-def main(partition_id) -> None:
-    net = AutoModelForSequenceClassification.from_pretrained(
-        CHECKPOINT, num_labels=2
-    ).to(DEVICE)
+net = AutoModelForSequenceClassification.from_pretrained(CHECKPOINT, num_labels=2).to(
+    DEVICE
+)
 
+
+# Flower client
+class IMDBClient(fl.client.NumPyClient):
+    def __init__(self, partition_id, net, trainloader, testloader):
+        self.net = net
+        self.partition_id = partition_id
+        self.trainloader = trainloader
+        self.testloader = testloader
+
+    def get_parameters(self, config) -> list:
+        return [val.cpu().numpy() for _, val in self.net.state_dict().items()]
+
+    def set_parameters(self, parameters) -> None:
+        params_dict = zip(self.net.state_dict().keys(), parameters)
+        state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
+        self.net.load_state_dict(state_dict, strict=True)
+
+    def fit(self, parameters, config) -> tuple[list, int, dict]:
+        self.set_parameters(parameters)
+        print("Training Started...")
+        train(self.net, self.trainloader, epochs=1)
+        print("Training Finished.")
+        return self.get_parameters(config={}), len(self.trainloader), {}
+
+    def evaluate(self, parameters, config):
+        self.set_parameters(parameters)
+        loss, accuracy = test(self.net, self.testloader)
+        return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
+
+
+def client_fn(node_id, partition_id) -> Client:
     trainloader, testloader = load_data(partition_id)
-
-    # Flower client
-    class IMDBClient(fl.client.NumPyClient):
-        def get_parameters(self, config) -> list:
-            return [val.cpu().numpy() for _, val in net.state_dict().items()]
-
-        def set_parameters(self, parameters) -> None:
-            params_dict = zip(net.state_dict().keys(), parameters)
-            state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
-            net.load_state_dict(state_dict, strict=True)
-
-        def fit(self, parameters, config) -> tuple[list, int, dict]:
-            self.set_parameters(parameters)
-            print("Training Started...")
-            train(net, trainloader, epochs=1)
-            print("Training Finished.")
-            return self.get_parameters(config={}), len(trainloader), {}
-
-        def evaluate(self, parameters, config):
-            self.set_parameters(parameters)
-            loss, accuracy = test(net, testloader)
-            return float(loss), len(testloader), {"accuracy": float(accuracy)}
-
-    # Start client
-    fl.client.start_client(
-        server_address="127.0.0.1:8080", client=IMDBClient().to_client()
-    )
+    return IMDBClient(partition_id, net, trainloader, testloader).to_client()
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Flower")
-    parser.add_argument(
-        "--partition-id",
-        choices=list(range(1_000)),
-        required=True,
-        type=int,
-        help="Partition of the dataset divided into 1,000 iid partitions created "
-        "artificially.",
-    )
-    partition_id = parser.parse_args().partition_id
-    main(partition_id)
+app = ClientApp(client_fn=client_fn)
+
+# # Start client
+# fl.client.start_client(server_address="127.0.0.1:8080", client=IMDBClient().to_client())
+#
+#
+# if __name__ == "__main__":
+#     parser = argparse.ArgumentParser(description="Flower")
+#     parser.add_argument(
+#         "--partition-id",
+#         choices=list(range(1_000)),
+#         required=True,
+#         type=int,
+#         help="Partition of the dataset divided into 1,000 iid partitions created "
+#         "artificially.",
+#     )
+#     partition_id = parser.parse_args().partition_id
+#     main(partition_id)
