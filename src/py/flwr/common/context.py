@@ -16,7 +16,7 @@
 
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict, Optional
 
 from .record import RecordSet
 
@@ -42,7 +42,13 @@ class Context:
 
     state: RecordSet
     partition_id: Optional[int]
+    run_config: Dict[str, str]
 
-    def __init__(self, state: RecordSet, partition_id: Optional[int] = None) -> None:
+    def __init__(
+        self,
+        state: RecordSet,
+        partition_id: Optional[int] = None,
+    ) -> None:
         self.state = state
         self.partition_id = partition_id
+        self.run_config = {}
