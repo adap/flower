@@ -72,7 +72,7 @@ def run(
     server_app = _load()
 
     # Initialize Context
-    context = Context(state=RecordSet())
+    context = Context(state=RecordSet(), run_config={})
 
     # Call ServerApp
     server_app(driver=driver, context=context)
