@@ -16,7 +16,7 @@
 
 
 import warnings
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
 import numpy as np
 
@@ -50,8 +50,8 @@ class ClassConstrainedPartitioner(Partitioner):
         Column name of the labels (targets) based on which partitioning works.
     num_classes_per_partition: int
         The (exact) number of unique classes that a partition each partition will have.
-    first_class_deterministic_assignment: bool
-        Whether, to deterministically assign first class to each partition.
+    class_assignment_mode: Literal["random", "deterministic", "first-deterministic"]
+        The way how the classes are assigned to the partitions. The default is "random".
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to partitions.
@@ -77,7 +77,10 @@ class ClassConstrainedPartitioner(Partitioner):
         num_partitions: int,
         partition_by: str,
         num_classes_per_partition: int,
-        first_class_deterministic_assignment: bool = False,
+        class_assignment_mode: Literal[
+            "random", "deterministic", "first-deterministic"
+        ] = "random",
+        # first_class_deterministic_assignment: bool = False,
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
@@ -85,9 +88,10 @@ class ClassConstrainedPartitioner(Partitioner):
         self._num_partitions = num_partitions
         self._partition_by = partition_by
         self._num_classes_per_partition = num_classes_per_partition
-        self._first_class_deterministic_assignment = (
-            first_class_deterministic_assignment
-        )
+        # self._first_class_deterministic_assignment = (
+        #     first_class_deterministic_assignment
+        # )
+        self._class_assignment_mode = class_assignment_mode
         self._shuffle = shuffle
         self._seed = seed
         self._rng = np.random.default_rng(seed=self._seed)
@@ -138,6 +142,7 @@ class ClassConstrainedPartitioner(Partitioner):
         self._determine_unique_label_to_times_used()
 
         labels = np.asarray(self.dataset[self._partition_by])
+        self._check_correctness_of_unique_label_to_times_used_counter(labels)
         for partition_id in range(self._num_partitions):
             self._partition_id_to_indices[partition_id] = []
 
@@ -195,12 +200,12 @@ class ClassConstrainedPartitioner(Partitioner):
             raise ValueError(
                 f"The specified `num_classes_per_partition`"
                 f"={self._num_classes_per_partition} which is greater than the number "
-                f"of unique classes in the given dataset. Reduce the "
-                f"`num_classes_per_partition` or make use different dataset to do this "
-                f"partitioning."
+                f"of unique classes in the given dataset={num_unique_classes}. "
+                f"Reduce the `num_classes_per_partition` or make use different dataset "
+                f"to apply this partitioning."
             )
-
-        if self._first_class_deterministic_assignment:
+        if self._class_assignment_mode == "first-deterministic":
+            # if self._first_class_deterministic_assignment:
             for partition_id in range(self._num_partitions):
                 label = partition_id % num_unique_classes
                 self._partition_id_to_unique_labels[partition_id].append(label)
@@ -212,8 +217,16 @@ class ClassConstrainedPartitioner(Partitioner):
                     label = self._rng.choice(self._unique_labels, size=1)[0]
                     if label not in self._partition_id_to_unique_labels[partition_id]:
                         self._partition_id_to_unique_labels[partition_id].append(label)
-
-        else:
+        elif self._class_assignment_mode == "deterministic":
+            for partition_id in range(self._num_partitions):
+                labels = []
+                for i in range(self._num_classes_per_partition):
+                    label = self._unique_labels[
+                        (partition_id + i) % len(self._unique_labels)
+                    ]
+                    labels.append(label)
+                self._partition_id_to_unique_labels[partition_id] = labels
+        elif self._class_assignment_mode == "random":
             for partition_id in range(self._num_partitions):
                 labels = self._rng.choice(
                     self._unique_labels,
@@ -221,6 +234,11 @@ class ClassConstrainedPartitioner(Partitioner):
                     replace=False,
                 ).tolist()
                 self._partition_id_to_unique_labels[partition_id] = labels
+        else:
+            raise ValueError(
+                f"The supported class_assignment_mode are: 'random', 'deterministic', "
+                f"'first-deterministic'. You provided: {self._class_assignment_mode}."
+            )
 
     def _determine_unique_label_to_times_used(self) -> None:
         for unique_label in self._unique_labels:
@@ -228,3 +246,22 @@ class ClassConstrainedPartitioner(Partitioner):
         for unique_labels in self._partition_id_to_unique_labels.values():
             for unique_label in unique_labels:
                 self._unique_label_to_times_used_counter[unique_label] += 1
+
+    def _check_correctness_of_unique_label_to_times_used_counter(
+        self, labels: np.ndarray
+    ) -> None:
+        for unique_label in self._unique_labels:
+            num_unique = np.sum(labels == unique_label)
+            if self._unique_label_to_times_used_counter[unique_label] > num_unique:
+                raise ValueError(
+                    f"Label: {unique_label} is needed to be assigned to more "
+                    f"partitions "
+                    f"({self._unique_label_to_times_used_counter[unique_label]})"
+                    f" than there are samples (corresponding to this label) in the "
+                    f"dataset ({num_unique}). Please decrease the `num_partitions`, "
+                    f"`num_classes_per_partition` to avoid this situation, "
+                    f"or try `class_assigment_mode='deterministic'` to create a more "
+                    f"even distribution of classes along the partitions. "
+                    f"Alternatively use a different dataset if you can not adjust"
+                    f" the any of these parameters."
+                )
