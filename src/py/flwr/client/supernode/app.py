@@ -67,6 +67,7 @@ def run_supernode() -> None:
         authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
+        partition_id=args.partition_id,
     )
 
     # Graceful shutdown
@@ -344,8 +345,8 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "--max-retries",
         type=int,
         default=None,
-        help="The maximum number of times the client will try to connect to the"
-        "server before giving up in case of a connection error. By default,"
+        help="The maximum number of times the client will try to reconnect to the"
+        "SuperLink before giving up in case of a connection error. By default,"
         "it is set to None, meaning there is no limit to the number of tries.",
     )
     parser.add_argument(
@@ -353,7 +354,7 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         type=float,
         default=None,
         help="The maximum duration before the client stops trying to"
-        "connect to the server in case of connection error. By default, it"
+        "connect to the SuperLink in case of connection error. By default, it"
         "is set to None, meaning there is no limit to the total time.",
     )
     parser.add_argument(
@@ -372,6 +373,13 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "--auth-supernode-public-key",
         type=str,
         help="The SuperNode's public key (as a path str) to enable authentication.",
+    )
+    parser.add_argument(
+        "--partition-id",
+        type=int,
+        help="The data partition index associated with this SuperNode. Better suited "
+        "for prototyping purposes where a SuperNode might only load a fraction of an "
+        "artificially partitioned dataset (e.g. using `flwr-datasets`)",
     )
 
 

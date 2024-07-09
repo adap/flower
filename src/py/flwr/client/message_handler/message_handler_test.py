@@ -19,10 +19,10 @@ import time
 import unittest
 import uuid
 from copy import copy
-from typing import List
+from typing import List, Optional
 
 from flwr.client import Client
-from flwr.client.typing import ClientFn
+from flwr.client.typing import ClientFnExt
 from flwr.common import (
     DEFAULT_TTL,
     Code,
@@ -113,8 +113,10 @@ class ClientWithProps(Client):
         )
 
 
-def _get_client_fn(client: Client) -> ClientFn:
-    def client_fn(cid: str) -> Client:  # pylint: disable=unused-argument
+def _get_client_fn(client: Client) -> ClientFnExt:
+    def client_fn(
+        node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
+    ) -> Client:
         return client
 
     return client_fn
