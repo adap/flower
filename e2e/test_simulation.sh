@@ -9,7 +9,7 @@ fi
 framework=$1
 
 case "$framework" in
-  pandas)
+  pandas-framework)
     server_app="$framework.server:app"
     ;;
   *)
