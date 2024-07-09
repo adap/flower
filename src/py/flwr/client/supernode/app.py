@@ -345,8 +345,8 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "--max-retries",
         type=int,
         default=None,
-        help="The maximum number of times the client will try to connect to the"
-        "server before giving up in case of a connection error. By default,"
+        help="The maximum number of times the client will try to reconnect to the"
+        "SuperLink before giving up in case of a connection error. By default,"
         "it is set to None, meaning there is no limit to the number of tries.",
     )
     parser.add_argument(
@@ -354,7 +354,7 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         type=float,
         default=None,
         help="The maximum duration before the client stops trying to"
-        "connect to the server in case of connection error. By default, it"
+        "connect to the SuperLink in case of connection error. By default, it"
         "is set to None, meaning there is no limit to the total time.",
     )
     parser.add_argument(
