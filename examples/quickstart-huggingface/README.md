@@ -24,12 +24,9 @@ This will create a new directory called `quickstart-huggingface` containing the 
 
 ```shell
 ├── huggingface_example
-|         ├── __init__.py
-|         ├── client_app.py
-|         ├── server_app.py
-|         ├── strategy.py
-|         └── task.py
-|                             
+|   ├── __init__.py
+|   ├── client_app.py
+|   └── server_app.py
 ├── pyproject.toml
 └── README.md 
 ```
