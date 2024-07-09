@@ -64,6 +64,9 @@ class PathologicalPartitioner(Partitioner):
           where i in {0, ..., num_classes_per_partition}. So, partition 0 will have
           classes 0, 1, 2, ..., `num_classes_per_partition`-1, partition 1 will have
           classes 1, 2, 3, ...,`num_classes_per_partition`, ....
+
+        `class_assignment_mode="first-deterministic"` was used in the orginal paper,
+        here we provide the option to use the other modes as well.
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to partitions.
@@ -72,6 +75,9 @@ class PathologicalPartitioner(Partitioner):
 
     Examples
     --------
+    In order to mimic the original behavior of the paper follow the setup below
+    (the `class_assignment_mode="first-deterministic"`):
+
     >>> from flwr_datasets.partitioner import PathologicalPartitioner
     >>> from flwr_datasets import FederatedDataset
     >>>
