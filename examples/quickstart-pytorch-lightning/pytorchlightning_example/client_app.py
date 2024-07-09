@@ -1,14 +1,119 @@
-import argparse
+"""pytorchlightning_example: A Flower / PyTorch Lightning app.
+
+Adapted from the PyTorch Lightning quickstart example.
+
+Source: pytorchlightning.ai (2021/02/04)
+"""
+
 from collections import OrderedDict
 
 import pytorch_lightning as pl
 import torch
-from datasets.utils.logging import disable_progress_bar
+from flwr_datasets import FederatedDataset
+from torch import nn
+from torch.nn import functional as F
+from torch.utils.data import DataLoader
+from torchvision import transforms
 
 import flwr as fl
-import mnist
+from datasets.utils.logging import disable_progress_bar
+from flwr.client import Client, ClientApp
 
 disable_progress_bar()
+
+
+class LitAutoEncoder(pl.LightningModule):
+    def __init__(self):
+        super().__init__()
+        self.encoder = nn.Sequential(
+            nn.Linear(28 * 28, 64),
+            nn.ReLU(),
+            nn.Linear(64, 3),
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(3, 64),
+            nn.ReLU(),
+            nn.Linear(64, 28 * 28),
+        )
+
+    def forward(self, x):
+        embedding = self.encoder(x)
+        return embedding
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        return optimizer
+
+    def training_step(self, train_batch, batch_idx):
+        x, y = train_batch
+        x = x.view(x.size(0), -1)
+        z = self.encoder(x)
+        x_hat = self.decoder(z)
+        loss = F.mse_loss(x_hat, x)
+        self.log("train_loss", loss)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        self._evaluate(batch, "val")
+
+    def test_step(self, batch, batch_idx):
+        self._evaluate(batch, "test")
+
+    def _evaluate(self, batch, stage=None):
+        x, y = batch
+        x = x.view(x.size(0), -1)
+        z = self.encoder(x)
+        x_hat = self.decoder(z)
+        loss = F.mse_loss(x_hat, x)
+        if stage:
+            self.log(f"{stage}_loss", loss, prog_bar=True)
+
+
+def collate_fn(batch):
+    """Change the dictionary to tuple to keep the exact dataloader behavior."""
+    images = [item["image"] for item in batch]
+    labels = [item["label"] for item in batch]
+
+    images_tensor = torch.stack(images)
+    labels_tensor = torch.tensor(labels)
+
+    return images_tensor, labels_tensor
+
+
+def apply_transforms(batch):
+    """Apply transforms to the partition from FederatedDataset."""
+    batch["image"] = [transforms.functional.to_tensor(img) for img in batch["image"]]
+    return batch
+
+
+def load_data(partition):
+    fds = FederatedDataset(dataset="mnist", partitioners={"train": 10})
+    partition = fds.load_partition(partition, "train")
+
+    partition = partition.with_transform(apply_transforms)
+    # 20 % for on federated evaluation
+    partition_full = partition.train_test_split(test_size=0.2, seed=42)
+    # 60 % for the federated train and 20 % for the federated validation (both in fit)
+    partition_train_valid = partition_full["train"].train_test_split(
+        train_size=0.75, seed=42
+    )
+    trainloader = DataLoader(
+        partition_train_valid["train"],
+        batch_size=32,
+        shuffle=True,
+        collate_fn=collate_fn,
+        num_workers=1,
+    )
+    valloader = DataLoader(
+        partition_train_valid["test"],
+        batch_size=32,
+        collate_fn=collate_fn,
+        num_workers=1,
+    )
+    testloader = DataLoader(
+        partition_full["test"], batch_size=32, collate_fn=collate_fn, num_workers=1
+    )
+    return trainloader, valloader, testloader
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -55,26 +160,38 @@ def _set_parameters(model, parameters):
     model.load_state_dict(state_dict, strict=True)
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Flower")
-    parser.add_argument(
-        "--partition-id",
-        type=int,
-        choices=range(0, 10),
-        required=True,
-        help="Specifies the artificial data partition",
-    )
-    args = parser.parse_args()
-    partition_id = args.partition_id
-
-    # Model and data
-    model = mnist.LitAutoEncoder()
-    train_loader, val_loader, test_loader = mnist.load_data(partition_id)
-
-    # Flower client
-    client = FlowerClient(model, train_loader, val_loader, test_loader).to_client()
-    fl.client.start_client(server_address="127.0.0.1:8080", client=client)
+model = LitAutoEncoder()
 
 
-if __name__ == "__main__":
-    main()
+def client_fn(node_id, partition_id) -> Client:
+    """Client function to return an instance of Client()."""
+    train_loader, val_loader, test_loader = load_data(partition=partition_id)
+    return FlowerClient(model, train_loader, val_loader, test_loader).to_client()
+
+
+app = ClientApp(
+    client_fn=client_fn,
+)
+# def main() -> None:
+#     parser = argparse.ArgumentParser(description="Flower")
+#     parser.add_argument(
+#         "--partition-id",
+#         type=int,
+#         choices=range(0, 10),
+#         required=True,
+#         help="Specifies the artificial data partition",
+#     )
+#     args = parser.parse_args()
+#     partition_id = args.partition_id
+#
+#     # Model and data
+#     model = mnist.LitAutoEncoder()
+#     train_loader, val_loader, test_loader = mnist.load_data(partition_id)
+#
+#     # Flower client
+#     client = FlowerClient(model, train_loader, val_loader, test_loader).to_client()
+#     fl.client.start_client(server_address="127.0.0.1:8080", client=client)
+#
+#
+# if __name__ == "__main__":
+#     main()
