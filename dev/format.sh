@@ -19,6 +19,7 @@ python -m black -q examples
 python -m docformatter -i -r examples
 
 # Benchmarks
+python -m isort benchmarks
 python -m black -q benchmarks
 python -m docformatter -i -r benchmarks
 
