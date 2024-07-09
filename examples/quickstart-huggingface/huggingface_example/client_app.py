@@ -3,6 +3,7 @@
 import argparse
 import warnings
 from collections import OrderedDict
+from typing import Any
 
 import torch
 from evaluate import load as load_metric
@@ -22,7 +23,7 @@ DEVICE = torch.device("cpu")
 CHECKPOINT = "distilbert-base-uncased"  # transformer model checkpoint
 
 
-def load_data(partition_id):
+def load_data(partition_id) -> tuple[DataLoader[Any], DataLoader[Any]]:
     """Load IMDB data (training and eval)"""
     fds = FederatedDataset(dataset="imdb", partitioners={"train": 1_000})
     partition = fds.load_partition(partition_id)
@@ -53,7 +54,7 @@ def load_data(partition_id):
     return trainloader, testloader
 
 
-def train(net, trainloader, epochs):
+def train(net, trainloader, epochs) -> None:
     optimizer = AdamW(net.parameters(), lr=5e-5)
     net.train()
     for _ in range(epochs):
@@ -66,7 +67,7 @@ def train(net, trainloader, epochs):
             optimizer.zero_grad()
 
 
-def test(net, testloader):
+def test(net, testloader) -> tuple[Any | float, Any]:
     metric = load_metric("accuracy")
     loss = 0
     net.eval()
@@ -83,7 +84,7 @@ def test(net, testloader):
     return loss, accuracy
 
 
-def main(partition_id):
+def main(partition_id) -> None:
     net = AutoModelForSequenceClassification.from_pretrained(
         CHECKPOINT, num_labels=2
     ).to(DEVICE)
@@ -92,15 +93,15 @@ def main(partition_id):
 
     # Flower client
     class IMDBClient(fl.client.NumPyClient):
-        def get_parameters(self, config):
+        def get_parameters(self, config) -> list:
             return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
-        def set_parameters(self, parameters):
+        def set_parameters(self, parameters) -> None:
             params_dict = zip(net.state_dict().keys(), parameters)
             state_dict = OrderedDict({k: torch.Tensor(v) for k, v in params_dict})
             net.load_state_dict(state_dict, strict=True)
 
-        def fit(self, parameters, config):
+        def fit(self, parameters, config) -> tuple[list, int, dict]:
             self.set_parameters(parameters)
             print("Training Started...")
             train(net, trainloader, epochs=1)
