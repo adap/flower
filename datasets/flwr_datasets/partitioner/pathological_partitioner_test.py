@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Test cases for ClassConstrainedPartitioner."""
+"""Test cases for PathologicalPartitioner."""
 
 
 import unittest
@@ -23,9 +23,7 @@ from parameterized import parameterized
 
 import datasets
 from datasets import Dataset
-from flwr_datasets.partitioner.class_constrained_partitioner import (
-    ClassConstrainedPartitioner,
-)
+from flwr_datasets.partitioner.pathological_partitioner import PathologicalPartitioner
 
 
 def _dummy_dataset_setup(
@@ -55,7 +53,7 @@ def _dummy_heterogeneous_dataset_setup(
 
 
 class TestClassConstrainedPartitioner(unittest.TestCase):
-    """Unit tests for ClassConstrainedPartitioner."""
+    """Unit tests for PathologicalPartitioner."""
 
     @parameterized.expand(  # type: ignore
         [
@@ -75,7 +73,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
     ) -> None:
         """Test correct number of unique classes."""
         dataset = _dummy_dataset_setup(num_samples, "labels", num_unique_classes)
-        partitioner = ClassConstrainedPartitioner(
+        partitioner = PathologicalPartitioner(
             num_partitions=num_partitions,
             partition_by="labels",
             num_classes_per_partition=num_classes_per_partition,
@@ -98,7 +96,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
         >= than the number of unique classes).
         """
         dataset = _dummy_dataset_setup(100, "labels", 10)
-        partitioner = ClassConstrainedPartitioner(
+        partitioner = PathologicalPartitioner(
             num_partitions=10,
             partition_by="labels",
             num_classes_per_partition=2,
@@ -125,7 +123,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
     ):
         """Test deterministic assignment of classes to partitions."""
         dataset = _dummy_dataset_setup(num_samples, "labels", num_unique_classes)
-        partitioner = ClassConstrainedPartitioner(
+        partitioner = PathologicalPartitioner(
             num_partitions=num_partitions,
             partition_by="labels",
             num_classes_per_partition=num_classes_per_partition,
@@ -173,7 +171,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
         dataset = datasets.concatenate_datasets([dataset_1, dataset_2])
         print(dataset[:])
 
-        partitioner = ClassConstrainedPartitioner(
+        partitioner = PathologicalPartitioner(
             num_partitions=num_partitions,
             partition_by="labels",
             num_classes_per_partition=num_classes_per_partition,
@@ -212,7 +210,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
         """Test more num_classes_per_partition > num_unique_classes in the dataset."""
         dataset = _dummy_dataset_setup(num_samples, "labels", num_unique_classes)
         with self.assertRaises(ValueError) as context:
-            partitioner = ClassConstrainedPartitioner(
+            partitioner = PathologicalPartitioner(
                 num_partitions=num_partitions,
                 partition_by="labels",
                 num_classes_per_partition=num_classes_per_partition,
@@ -248,7 +246,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
         # exception should be raised at the very beginning
         dataset = _dummy_dataset_setup(num_samples, "labels", num_unique_classes=5)
         with self.assertRaises(ValueError) as context:
-            partitioner = ClassConstrainedPartitioner(
+            partitioner = PathologicalPartitioner(
                 num_partitions=num_partitions,
                 partition_by="labels",
                 num_classes_per_partition=num_classes_per_partition,

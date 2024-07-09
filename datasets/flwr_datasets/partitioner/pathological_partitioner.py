@@ -26,22 +26,17 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 # pylint: disable=too-many-arguments, too-many-instance-attributes
-class ClassConstrainedPartitioner(Partitioner):
+class PathologicalPartitioner(Partitioner):
     """Partition dataset such that each partition has a chosen number of classes.
 
     Implementation based on Federated Learning on Non-IID Data Silos: An Experimental
     Study https://arxiv.org/pdf/2102.02079.
 
     The algorithm firstly determines which classe will be assigned to which partitions.
-    For each partition `num_classes_per_partition` are sampled randomly (without
-    repetition) chosen. Given the information about the required classes for each
+    For each partition `num_classes_per_partition` are sampled in a way chosen in
+    `class_assignment_mode`. Given the information about the required classes for each
     partition, it is determined into how many parts the samples corresponding to this
     label should be divided. Such division is performed for each class.
-
-    The first class to partition_id assignment can be performed deterministically
-    (`first_class_deterministic_assignment=True`), as in the referenced paper,
-    which will ensure that each class was used at least once if the number of class
-    is <= `num_partitions`.
 
     Parameters
     ----------
@@ -74,10 +69,10 @@ class ClassConstrainedPartitioner(Partitioner):
 
     Examples
     --------
-    >>> from flwr_datasets.partitioner import ClassConstrainedPartitioner
+    >>> from flwr_datasets.partitioner import PathologicalPartitioner
     >>> from flwr_datasets import FederatedDataset
     >>>
-    >>> partitioner = ClassConstrainedPartitioner(
+    >>> partitioner = PathologicalPartitioner(
     >>>     num_partitions=10,
     >>>     partition_by="label",
     >>>     num_classes_per_partition=2,
