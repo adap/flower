@@ -7,7 +7,7 @@ name = "quickstart-pytorch"
 version = "0.1.0"
 description = "PyTorch Federated Learning Quickstart with Flower"
 authors = [
-    { name = "The Flower Authors", email = "hello@flower.ai" }
+    { name = "The Flower Authors", email = "hello@flower.ai" },
 ]
 dependencies = [
     "flwr>=1.8.0,<2.0",
