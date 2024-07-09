@@ -1,6 +1,8 @@
-______________________________________________________________________
-
-## tags: \[quickstart, llm, nlp, sentiment\] dataset: \[IMDB\] framework: \[transformers\]
+---
+tags: [quickstart, llm, nlp, sentiment]
+dataset: [IMDB]
+framework: [transformers]
+---
 
 # Federated HuggingFace Transformers using Flower and PyTorch
 
