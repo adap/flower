@@ -48,19 +48,22 @@ class PathologicalPartitioner(Partitioner):
         The (exact) number of unique classes that a partition each partition will have.
     class_assignment_mode: Literal["random", "deterministic", "first-deterministic"]
         The way how the classes are assigned to the partitions. The default is "random".
-        - "random": Randomly assign classes to the partitions.
+        The possible values are:
+
+        - "random": Randomly assign classes to the partitions. For each partition choose
+          the `num_classes_per_partition` classes without replacement.
         - "first-deterministic": Assign the first class for each partition in a
-        deterministic way (class is the partition_id%num_unique_classes).
-        The rest of the classes are assigned randomly. In case the number of partitions
-        is smaller than the number of unique classes, not all classes will be used in
-        the first iteration, otherwise all the classes will be used (such it will
-        be present in at least one partition).
+          deterministic way (class is the partition_id%num_unique_classes).
+          The rest of the classes are assigned randomly. In case the number of
+          partitions is smaller than the number of unique classes, not all classes will
+          be used in the first iteration, otherwise all the classes will be used (such
+          it will be present in at least one partition).
         - "deterministic": Assign all the classes to the partitions in a deterministic
-        way. Classes are assigned based on the formula: partion_id has classes
-        identified by the index: (partition_id + i) % num_unique_classes
-        where i in {0, ..., num_classes_per_partition}. So, partition 0 will have
-        classes 0, 1, 2, ..., `num_classes_per_partition`-1, partition 1 will have
-        classes 1, 2, 3, ...,`num_classes_per_partition`, ....
+          way. Classes are assigned based on the formula: partion_id has classes
+          identified by the index: (partition_id + i) % num_unique_classes
+          where i in {0, ..., num_classes_per_partition}. So, partition 0 will have
+          classes 0, 1, 2, ..., `num_classes_per_partition`-1, partition 1 will have
+          classes 1, 2, 3, ...,`num_classes_per_partition`, ....
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to partitions.
