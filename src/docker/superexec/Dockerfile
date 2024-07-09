@@ -17,4 +17,4 @@ ARG BASE_REPOSITORY=flwr/base
 ARG BASE_IMAGE
 FROM $BASE_REPOSITORY:$BASE_IMAGE
 
-ENTRYPOINT ["flower-supernode"]
+ENTRYPOINT ["flower-superexec"]
