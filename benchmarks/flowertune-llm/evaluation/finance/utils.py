@@ -1,3 +1,5 @@
+import os
+from datasets import Dataset
 
 
 def format_example(example: dict) -> dict:
@@ -18,61 +20,19 @@ def change_target(x):
         return 'neutral'
 
 
-# A dictionary to store various prompt templates.
-template_dict = {
-    'default': 'Instruction: {instruction}\nInput: {input}\nAnswer: '
-}
-
-
-def test_mapping(args, feature):
-    """
-    Generate a mapping for testing purposes by constructing a prompt based on given instructions and input.
-
-    Args:
-    args (Namespace): A namespace object that holds various configurations, including the instruction template.
-    feature (dict): A dictionary containing 'instruction' and 'input' fields used to construct the prompt.
-
-    Returns:
-    dict: A dictionary containing the generated prompt.
-
-    Raises:
-    ValueError: If 'instruction' or 'input' are not provided in the feature dictionary.
-    """
-    # Ensure 'instruction' and 'input' are present in the feature dictionary.
-    if 'instruction' not in feature or 'input' not in feature:
-        raise ValueError("Both 'instruction' and 'input' need to be provided in the feature dictionary.")
-
-    # Construct the prompt using the provided instruction and input.
-    prompt = get_prompt(
-        args.instruct_template,
-        feature['instruction'],
-        feature['input']
-    )
-
-    return {
-        "prompt": prompt,
-    }
-
-
-def get_prompt(template, instruction, input_text):
-    """
-    Generates a prompt based on a predefined template, instruction, and input.
-
-    Args:
-    template (str): The key to select the prompt template from the predefined dictionary.
-    instruction (str): The instruction text to be included in the prompt.
-    input_text (str): The input text to be included in the prompt.
-
-    Returns:
-    str: The generated prompt.
-
-    Raises:
-    KeyError: If the provided template key is not found in the template dictionary.
-    """
-    if not instruction:
-        return input_text
-
-    if template not in template_dict:
-        raise KeyError(f"Template '{template}' not found. Available templates: {', '.join(template_dict.keys())}")
-
-    return template_dict[template].format(instruction=instruction, input=input_text)
+def save_results(dataset_name, run_name, dataset, acc):
+    path = './benchmarks/'
+    if not os.path.exists(path):
+        os.makedirs(path)
+    
+    # Save results    
+    results_path = os.path.join(path, f"results_{dataset_name}_{run_name}.txt")
+    with open(results_path, "w") as f:
+        f.write(f"Accuracy: {acc}. ")
+    print(f"Accuracy: {acc}. ")
+    
+    # Save generations 
+    generation_path = os.path.join(path, f"generation_{dataset_name}_{run_name}.jsonl")
+    dataset = Dataset.from_pandas(dataset)
+    dataset = dataset.remove_columns(["input", "output", "instruction", "target", "out_text"])
+    dataset.to_json(generation_path, orient="records")

@@ -24,15 +24,7 @@ def benchmark_factory(name):
     factories = {
         "medmcqa": MedMCQA,
         "pubmedqa": ClosedPubMedQA,
-        "open_pubmedqa": PubMedQA,
         "medqa": MedQA,
-        "medqa4": MedQA4,
-        "blurb": Blurb,
-        "medicationqa": MedicationQA,
-        "mmlu_medical": MMLU,
-        "mmlu_general": MMLU,
-        "truthfulqa": TruthfulQA,
-        "gsm8k": GSM8K
     }
     if name not in factories:
         raise ValueError("Benchmark {} not found. \
@@ -70,8 +62,6 @@ class Benchmark:
         :param test_data: HuggingFace Dataset, the test data.
         :param generations: HuggingFace Dataset, the generations.
         :param subsets: list of str (optional), the subsets of the data to download from the HuggingFace hub.
-        :param has_instruction: bool, whether the dataset already contains instructions.
-        :param local_path: str (optional), the path to a directory holding train and test json local data files.
         """
         self.name = name
         self.path = None
@@ -82,8 +72,6 @@ class Benchmark:
         self.test_data = None
         self.generations = None
         self.subsets = None
-        self.has_instructions = False
-        self.local_path = None
 
     def load_from_hub(self):
         """
@@ -138,20 +126,6 @@ class Benchmark:
             print(e)
             raise ValueError("Couldn't load benchmark {} from local path.".format(self.name))
 
-    def save_data(self, partition='train'):
-        """
-        Saves any preprocessing data partition.
-
-        :param data: pd.DataFrame
-        :param file_name: str
-        """
-        path = os.path.join('benchmarks', 'preprocessing', f"{self.name}_{partition}")
-        print("Saving {} data to the following path: {}".format(self.name, path))
-        if partition == 'train':
-            pd.to_pickle(self.train_data, path)
-        elif partition == 'test':
-            pd.to_pickle(self.test_data, path)
-
     def preprocessing(self, partition='train'):
         """
         Applies a custom pre-processing over the partition.
@@ -173,13 +147,13 @@ class Benchmark:
             raise ValueError("Error when pre-processing {} {} data.".format(self.name, partition))
 
     def custom_preprocessing(self):
-            """
-            Wraps a pre-processing function (dict -> dict) specific to the benchmark.
-            Needs to be overriden in the extended class.
+        """
+        Wraps a pre-processing function (dict -> dict) specific to the benchmark.
+        Needs to be overriden in the extended class.
 
-            The return dictionary must contains keys 'prompt' & 'answer' for inference to work.
-            """
-            raise NotImplementedError('Implement custom_preprocessing() in a child class.')
+        The return dictionary must contains keys 'prompt' & 'answer' for inference to work.
+        """
+        raise NotImplementedError('Implement custom_preprocessing() in a child class.')
 
     def add_instruction(self, instruction=None, partition='train'):
         """
@@ -202,7 +176,6 @@ class Benchmark:
         else:
             raise ValueError("Please provide a valid partition split: {}".format(self.splits))
 
-
     def add_generations(self, data):
         """
         Adds the generations to the respective class attribute as a HuggingFace Dataset.
@@ -214,7 +187,6 @@ class Benchmark:
         elif isinstance(data, Dataset):
             self.generations = data
 
-    
     def save_generations(self, dataset_name, run_name):
         """
         Saves the generations in the respective directory.
@@ -226,18 +198,6 @@ class Benchmark:
 
         self.generations.to_json(gen_path, orient="records")
         print("Stored {} generations to the following path: {}".format(self.name, gen_path))
-
-
-    def load_generations(self, benchmark_name):
-        """
-        Loads the generations from the respective directory.
-        """
-        path = os.path.join(ROOT_DIR, 'benchmarks', 'generations', f"{self.name}_{benchmark_name}.json")
-        if not os.path.exists(path):
-            raise ValueError("No generations found for {} at path: {}. \
-                             Please run inference first.".format(self.name, path))
-        print("Loading {} generations from the following path: {}".format(self.name, path))
-        self.generations = pd.read_json(path)
 
 
 class MedMCQA(Benchmark):
@@ -264,30 +224,6 @@ class MedMCQA(Benchmark):
         return row
 
 
-class PubMedQA(Benchmark):
-    '''
-    PubMedQA is a novel biomedical question answering (QA) dataset.
-    Its task is to answer research biomedical questions with yes/no/maybe using PubMed abstracts.
-
-    Huggingface card: https://huggingface.co/datasets/bigbio/pubmed_qa
-    '''
-    def __init__(self, name='pubmedqa') -> None:
-        super().__init__(name)
-        self.hub_name = "bigbio/pubmed_qa"
-        self.dir_name = 'bigbio___pubmed_qa'
-        self.path = os.path.join(ROOT_DIR, 'benchmarks', 'datasets', self.dir_name)
-        self.splits = ['train', 'validation', 'test']
-        self.subsets = ['pubmed_qa_labeled_fold0_source']
-        self.num_options = 3
-
-    @staticmethod
-    def custom_preprocessing(row):
-
-        row["prompt"] = row['QUESTION'] #  f"{row['CONTEXTS'][0]}\n{row['QUESTION']}"
-        row["gold"] = row['final_decision']
-        row["long_answer"] = row["LONG_ANSWER"]
-        return row
-
 class ClosedPubMedQA(Benchmark):
     '''
     PubMedQA is a novel biomedical question answering (QA) dataset.
@@ -310,29 +246,6 @@ class ClosedPubMedQA(Benchmark):
         row["prompt"] = f"{context}\n{row['QUESTION']}"
         row["gold"] = row['final_decision']
         row["long_answer"] = row["LONG_ANSWER"]
-        return row
-
-class PubMedQAValidation(Benchmark):
-    '''
-    PubMedQA is a novel biomedical question answering (QA) dataset.
-    Its task is to answer research biomedical questions with yes/no/maybe using PubMed abstracts.
-
-    Huggingface card: https://huggingface.co/datasets/bigbio/pubmed_qa
-    '''
-    def __init__(self, name='pubmedqa') -> None:
-        super().__init__(name)
-        self.hub_name = "bigbio/pubmed_qa"
-        self.dir_name = 'bigbio___pubmed_qa'
-        self.path = os.path.join(ROOT_DIR, 'benchmarks', 'datasets', self.dir_name)
-        self.splits = ['validation']
-        # self.subsets = ['pubmed_qa_labeled_fold1_bigbio_qa'] + ['pubmed_qa_artificial_source']
-        self.num_options = 3
-        self.local_path = os.path.join(ROOT_DIR, 'benchmarks', 'datasets', 'pubmedqa_pubmedqa_validation.jsonl')
-
-    @staticmethod
-    def custom_preprocessing(row):
-        row["prompt"] = row['QUESTION']
-        row["gold"] = row['final_decision']
         return row
 
 
@@ -360,187 +273,6 @@ class MedQA(Benchmark):
                 row['gold'] = opt['key']
                 break
         return row
-
-class MedQA4(Benchmark):
-    '''
-    MedQA is a dataset for solving medical problems collected from the professional medical board exams.
-
-    Huggingface card: https://huggingface.co/datasets/GBaker/MedQA-USMLE-4-options
-    '''
-    def __init__(self, name='medqa4') -> None:
-        super().__init__(name)
-        self.hub_name = 'GBaker/MedQA-USMLE-4-options'
-        self.dir_name = 'GBaker___med_qa-usmle-4-options'
-        self.path = os.path.join(ROOT_DIR, 'benchmarks', 'datasets', self.dir_name)
-        self.splits = ['train', 'test']
-        self.num_options = 4
-
-    @staticmethod
-    def custom_preprocessing(row):
-        choices = [row['options'][opt] for opt in row['options']]
-        row["prompt"] = format_mcq(row['question'], choices)
-        for opt in row['options']:
-            if row['options'][opt] == row['answer']:
-                row['gold'] = opt
-                break
-        return row
-
-
-class MedicationQA(Benchmark):
-    '''
-    MedicationQA is a benchmark to measure whether a language model is truthful in generating answers to questions
-    Huggingface card: https://huggingface.co/datasets/truthful_qa
-    '''
-    def __init__(self, name='medicationqa') -> None:
-        super().__init__(name)
-        self.hub_name = 'truehealth/medicationqa'
-        self.dir_name = 'truehealth___parquet'
-        self.path = os.path.join(ROOT_DIR, 'benchmarks', 'datasets', self.dir_name)
-        self.splits = ['train']
-
-    @staticmethod
-    def custom_preprocessing(row):
-        """
-        Wraps a pre-processing function (dict -> dict) specific to the benchmark.
-        Probably will need to be overriden in the extended class.
-        """
-        row["prompt"] = row['Question'],
-        row["gold"] = row['Answer']
-        return row
-
-
-class TruthfulQA(Benchmark):
-    '''
-    TruthfulQA is a dataset of consumer health questions about medications.
-    Huggingface card: https://huggingface.co/datasets/truehealth/medicationqa
-    '''
-    def __init__(self, name='truthfulqa') -> None:
-        super().__init__(name)
-        self.hub_name = 'truthful_qa'
-        self.dir_name = 'truthful_qa'
-        self.path = os.path.join(ROOT_DIR, 'benchmarks', 'datasets', self.dir_name)
-        self.splits = ['validation']
-        self.subsets = ['multiple_choice']
-        self.num_options = 4
-
-    @staticmethod
-    def custom_preprocessing(row):
-        options = row['mc1_targets']['choices']
-        labels = row['mc1_targets']['labels']
-        gold_option = options[labels.index(1)]
-        options.remove(gold_option)
-        wrong_options = random.choices(options, k=3)
-        choices = [gold_option] + wrong_options
-        random.shuffle(choices)
-        gold_id = choices.index(gold_option)
-        row["prompt"] = format_mcq(row['question'], choices)
-        row["gold"] = ['A', 'B', 'C', 'D'][gold_id]
-        return row
-
-class MMLU(Benchmark):
-    '''
-    Measuring Massive Multitask Language Understanding
-    Huggingface card: https://huggingface.co/datasets/lukaemon/mmlu
-    '''
-    def __init__(self, name) -> None:
-        super().__init__(name)
-        self.hub_name = 'lukaemon/mmlu'
-        self.dir_name = 'lukaemon___mmlu'
-        self.path = os.path.join(ROOT_DIR, 'benchmarks', 'datasets', self.dir_name)
-        self.splits = ['train', 'validation', 'test']
-        self.subsets_general = ['college_computer_science', 'college_mathematics', 'elementary_mathematics',
-                        'high_school_computer_science', 'high_school_mathematics',
-                        'high_school_statistics','machine_learning', 'global_facts']
-        self.subsets_medical = [
-            'anatomy',
-            'college_biology',
-            'college_medicine',
-            'professional_medicine',
-            'medical_genetics',
-            'virology',
-            'clinical_knowledge',
-            'high_school_biology',
-            'high_school_chemistry',
-            'nutrition',
-            'college_chemistry'
-        ]
-        self.subsets = self.subsets_medical
-        if name == 'mmlu_general':
-            self.subsets = self.subsets_general
-        self.num_options = 4
-
-    @staticmethod
-    def custom_preprocessing(row):
-        options = [row['A'], row['B'], row['C'], row['D']]
-        row["prompt"] = format_mcq(row['input'], options)
-        row["gold"] = row['target']
-        row["subset"] = row["subset"]
-        return row
-
-
-class GSM8K(Benchmark):
-    '''
-    GSM8K (Grade School Math 8K) is a dataset of 8.5K grade school math word problems.
-    Huggingface card: https://huggingface.co/datasets/gsm8k
-    '''
-    def __init__(self, name='gsm8k') -> None:
-        super().__init__(name)
-        self.hub_name = 'gsm8k'
-        self.dir_name = 'gsm8k'
-        self.path = os.path.join(ROOT_DIR, 'benchmarks', 'datasets', self.dir_name)
-        self.splits = ['train', 'test']
-        self.subsets = ['main']
-
-    @staticmethod
-    def custom_preprocessing(row):
-        row["prompt"] = row['question']
-        row["gold"] = row['answer'].split('####')[1].strip()
-        row["steps"] = row['answer'].split('####')[0].strip()
-        return row
-
-class Blurb(Benchmark):
-    '''
-    BLURB is a collection of resources for biomedical natural language processing.
-    Huggingface card: https://huggingface.co/datasets/bigbio/blurb
-    '''
-    def __init__(self, name="blurb") -> None:
-        super().__init__(name)
-        self.hub_name = "bigbio/blurb"
-        self.dir_name = "bigbio___blurb"
-        self.path = os.path.join(ROOT_DIR, 'benchmarks', 'datasets', self.dir_name)
-        self.splits = ["train", "validation", "test"]
-        self.subsets = ["bc2gm", "bc5chem", "bc5disease", "jnlpba", "ncbi_disease"]
-
-    @staticmethod
-    def custom_preprocessing(row):
-        tokens = row["tokens"]
-        tags = row["ner_tags"]
-        entity_type = row["type"]
-
-        instruction = f"Given the following sentence, tell me which part of this sentence is a {entity_type} expression. There may be multiple expressions in this sentence."
-        prompt = f"{instruction}\n\n Sentence: {' '.join(tokens)}"
-        row["prompt"] = prompt
-        row["gold"] = "#".join(Blurb.get_entities(tokens, tags))
-        return row
-
-    @staticmethod
-    def get_entities(tokens, tags):
-        entities = []
-        entity = []
-        for token, tag in zip(tokens, tags):
-            if tag == 1:
-                if entity:
-                    entities.append(' '.join(entity))
-                entity = [token]
-            elif tag == 2:
-                entity.append(token)
-            elif tag == 0 and entity:
-                entities.append(' '.join(entity))
-                entity = []
-        if entity:
-            entities.append(' '.join(entity))
-        return entities
-
 
 
 def format_mcq(question, options):

@@ -1,10 +1,10 @@
 import warnings
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score
 from tqdm import tqdm
 import datasets
 import torch
 
-from utils import format_example, change_target
+from utils import format_example, change_target, save_results
 
 
 warnings.filterwarnings("ignore")
@@ -17,7 +17,9 @@ dic = {
 
 
 def test_tfns(args, model, tokenizer, prompt_fun=None):
+    name = "tfns"
     batch_size = args.batch_size
+    
     dataset = datasets.load_dataset('zeroshot/twitter-financial-news-sentiment', trust_remote_code=True)
     dataset = dataset['validation']
     dataset = dataset.to_pandas()
@@ -61,12 +63,6 @@ def test_tfns(args, model, tokenizer, prompt_fun=None):
     dataset["new_out"] = dataset["out_text"].apply(change_target)
 
     acc = accuracy_score(dataset["new_target"], dataset["new_out"])
-    f1_macro = f1_score(dataset["new_target"], dataset["new_out"], average="macro")
-    f1_micro = f1_score(dataset["new_target"], dataset["new_out"], average="micro")
-    f1_weighted = f1_score(dataset["new_target"], dataset["new_out"], average="weighted")
 
-    print(f"Acc: {acc}. F1 macro: {f1_macro}. F1 micro: {f1_micro}. F1 weighted (BloombergGPT): {f1_weighted}. ")
-    with open(f"tfns_{args.run_name}.txt", "w") as f:
-        f.write(f"Acc: {acc}. F1 macro: {f1_macro}. F1 micro: {f1_micro}. F1 weighted (BloombergGPT): {f1_weighted}. ")
-
-    return dataset
+    # Save results and generations
+    save_results(name, args.run_name, dataset, acc)

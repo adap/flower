@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import argparse
 import numpy as np
 import pandas as pd
 import torch
@@ -45,27 +46,14 @@ def tokenizer_param(tokenizer, target, task_type="mcq"):
     return max_new_tokens, stop_seq
 
 
-def format_prompt(prompt, args):
-    if "medical" in args.benchmark:
-        system_msg = "You are a helpful, respectful and honest assistant." + \
-        "Always answer as helpfully as possible, while being safe." + \
-        "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content." + \
-        "Please ensure that your responses are socially unbiased and positive in nature.\n\n" + \
-        "If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct." + \
-        "If you don't know the answer to a question, please don't share false information."""
-        return f"<|im_start|> system\n{system_msg}<|im_end|>\n <|im_start|> user\n{prompt}<|im_end|>\n <|im_start|> assistant\n"
-    elif np.any([x in args.benchmark for x in ["medmcqa", "medqa", "pubmedqa"]]):
-        return f"<|im_start|>question\n{prompt}<|im_end|>\n<|im_start|>answer\n"
-    else:
-        return prompt
-
-
 def benchmark_infer(model, tokenizer, data, device):
     """
     Runs inference on a benchmark and stores generations in a pd.DataFrame.
-
+    
+    :param model: HuggingFace model, the model to use for inference
     :param tokenizer: transformers.PreTrainedTokenizer, the tokenizer to use for inference
     :param data: HuggingFace Dataset, the dataset to run inference on
+    :param device: str, the device to run inference on, cpu or cuda
 
     return: pd.DataFrame, a DataFrame containing the scores for each answer
     """
@@ -105,9 +93,10 @@ def benchmark_infer(model, tokenizer, data, device):
 
 def benchmark_preparation(data_obj, dataset_name, partition):
     """
-    Runs the benchmark preparation pipeline on a given benchmark.
+    Runs the benchmark preparation pipeline on a given dataset.
 
     :param data_obj: benchmark.Benchmark, the benchmark to run the preparation pipeline on
+    :param dataset_name: str, the dataset used for benchmark preparation
     :param partition: str, the partition to run the preparation pipeline on
     """
     data_obj.load_data(partition=partition)
@@ -115,7 +104,6 @@ def benchmark_preparation(data_obj, dataset_name, partition):
     prompt_name = INSTRUCTIONS[dataset_name]['instructions']
 
     instruction = load_instruction(prompt_name)
-
     print(f'Instruction used for evaluation: \n\t{instruction["system"]}\n\t{instruction["user"]}\n')
 
     data_obj.add_instruction(
@@ -124,7 +112,7 @@ def benchmark_preparation(data_obj, dataset_name, partition):
     return prompt_name
 
 
-def inference(base_model_name_path="mistralai/Mistral-7B-v0.3", peft_path=None, dataset_name="pubmedqa", run_name="fl", quantization=4):
+def main(base_model_name_path="mistralai/Mistral-7B-v0.3", peft_path=None, dataset_name="pubmedqa", run_name="fl", quantization=4):
     # Load model and tokenizer
     if quantization == 4:
         quantization_config = BitsAndBytesConfig(load_in_4bit=True)
@@ -164,3 +152,30 @@ def inference(base_model_name_path="mistralai/Mistral-7B-v0.3", peft_path=None, 
     data_obj.add_generations(data=predictions)
     data_obj.save_generations(dataset_name=dataset_name, run_name=run_name)
     print(f'{len(predictions)} generations store.')
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--base-model-name-path',
+                        type=str,
+                        default='mistralai/Mistral-7B-v0.3',
+                        help="Base model name used for fine-tuning")
+    parser.add_argument('--peft-path',
+                        type=str,
+                        help="Path for saved PEFT model")
+    parser.add_argument('--dataset-name',
+                        type=str,
+                        default='pubmedqa',
+                        help="The dataset to infer on: [pubmedqa, medqa, medmcqa]")
+    parser.add_argument('--run-name',
+                        type=str,
+                        default='fl',
+                        help="The experiment name")
+    parser.add_argument('--quantization',
+                        type=int,
+                        default=4,
+                        help="Quantization value for inference chosen from [4, 8]")
+    args = parser.parse_args()
+    
+    main(base_model_name_path=args.base_model_name_path, peft_path=args.peft_path, dataset_name=args.dataset_name,
+         run_name=args.run_name, quantization=args.quantization)

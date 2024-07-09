@@ -1,10 +1,10 @@
 import warnings
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score
 from tqdm import tqdm
 import datasets
 import torch
 
-from utils import format_example, change_target
+from utils import format_example, change_target, save_results
 
 
 warnings.filterwarnings("ignore")
@@ -27,7 +27,9 @@ def make_label(x):
 
 
 def test_fiqa(args, model, tokenizer, prompt_fun=add_instructions):
+    name = "fiqa"
     batch_size = args.batch_size
+    
     dataset = datasets.load_dataset('pauri32/fiqa-2018', trust_remote_code=True)
     dataset = datasets.concatenate_datasets([dataset["train"], dataset["validation"], dataset["test"]])
     dataset = dataset.train_test_split(0.226, seed=42)['test']
@@ -73,12 +75,6 @@ def test_fiqa(args, model, tokenizer, prompt_fun=add_instructions):
     dataset["new_out"] = dataset["out_text"].apply(change_target)
 
     acc = accuracy_score(dataset["new_target"], dataset["new_out"])
-    f1_macro = f1_score(dataset["new_target"], dataset["new_out"], average="macro")
-    f1_micro = f1_score(dataset["new_target"], dataset["new_out"], average="micro")
-    f1_weighted = f1_score(dataset["new_target"], dataset["new_out"], average="weighted")
 
-    print(f"Acc: {acc}. F1 macro: {f1_macro}. F1 micro: {f1_micro}. F1 weighted (BloombergGPT): {f1_weighted}. ")
-    with open(f"fiqa_{args.run_name}.txt", "w") as f:
-        f.write(f"Acc: {acc}. F1 macro: {f1_macro}. F1 micro: {f1_micro}. F1 weighted (BloombergGPT): {f1_weighted}. ")
-
-    return dataset
+    # Save results and generations
+    save_results(name, args.run_name, dataset, acc)

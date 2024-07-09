@@ -4,24 +4,15 @@ import os
 import argparse
 
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import precision_recall_fscore_support
 
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-
 
 benchmark_output_type = {
     'pubmedqa': 'boolean',
     'medmcqa': 'mcq',
     'medqa': 'mcq',
 }
-
-
-def load_json(filename):
-    """Load json file"""
-    with open(filename, 'r') as read_file:
-        data = json.load(read_file)
-    return data
 
 
 def load_jsonl(filename):
@@ -33,13 +24,6 @@ def load_jsonl(filename):
             except json.JSONDecodeError:
                 print(f"Error decoding JSON for line: {line}")
     return data
-
-
-def save_dictlist_to_json(mydictlist, filename):
-    """Save a list of dictionaries to json file"""
-    f = open(filename, 'w', encoding='utf-8')
-    json.dump(mydictlist, f, ensure_ascii=False, indent=4)
-    f.close()
 
 
 def clean_mcq_answer(output):
@@ -135,16 +119,11 @@ def accuracy_metric(data, **kwargs):
             counter += 1
 
     accuracy =  accuracy_score(preds, golds)
-    precision, recall, f1, _ = precision_recall_fscore_support(
-        preds, golds, average='weighted', zero_division=0)
     assert accuracy == acc / len(data)
 
     return {
         "accuracy": accuracy_score(preds, golds),
         "accuracy_calibrate": acc / counter,
-        "precision": precision,
-        "recall": recall,
-        "f1": f1,
         "correct": acc,
         "counted": counter,
         "ignored": ignored_prompts,
@@ -153,40 +132,13 @@ def accuracy_metric(data, **kwargs):
     }
 
 
-def sort_predictions(data, run_name):
-    if "mmlu_medical" in run_name:
-        subsets = [
-            'anatomy',
-            'college_biology',
-            'college_medicine',
-            'professional_medicine',
-            'medical_genetics',
-            'virology',
-            'clinical_knowledge',
-            'high_school_biology',
-            'nutrition',
-        ]
-    subset_acc_dict = {subset: {'data': [], 'acc': 0} for subset in subsets}
-
-    for item in data:
-        if item['subset'] in subset_acc_dict:
-            subset_acc_dict[item['subset']]['data'].append(item)
-    return subset_acc_dict
-
-
-def display(metric_dict, run_name, benchmark, subset=None, verbose=False):
+def display(metric_dict, run_name, benchmark, verbose=False):
     print("====================================")
-    if subset is not None:
-        print(f'Report accuracy for {run_name} on {benchmark}-{subset}:')
-    else:
-        print(f'Report accuracy for {run_name} on {benchmark}:')
+    print(f'Report accuracy for {run_name} on {benchmark}:')
     print(f'# Accuracy: {metric_dict["accuracy"]}')
 
     if verbose:
         print(f'# Accuracy (calibrated): {metric_dict["accuracy_calibrate"]}')
-        print(f'# Precision: {metric_dict["precision"]}')
-        print(f'# Recall: {metric_dict["recall"]}')
-        print(f'# F1: {metric_dict["f1"]}')
         print("------------------------------------")
         print(f'# Correct: {metric_dict["correct"]}')
         print(f'# Counted: {metric_dict["counted"]}')
@@ -196,19 +148,30 @@ def display(metric_dict, run_name, benchmark, subset=None, verbose=False):
     print("====================================")
 
 
-def evaluate(gen_dir=f'{ROOT_DIR}/benchmarks/generations', dataset_name='pubmedqa', run_name='fl', verbose=True):
+def main(gen_dir=f'{ROOT_DIR}/benchmarks/generations', dataset_name='pubmedqa', run_name='fl', verbose=True):
     # Load data
     path = f'{gen_dir}/{dataset_name}-{run_name}.jsonl'
     run_name_ = path.split('/')[-1].split('.')[0]
     answer_type = benchmark_output_type[dataset_name]
     data = load_jsonl(path)
 
-    accuracy_kwargs = {
-        'answer_type': answer_type
-    }
-
+    accuracy_kwargs = {'answer_type': answer_type}
     metrics = accuracy_metric(data, **accuracy_kwargs)
     display(
-        metrics, run_name_, dataset_name,
-        subset=None, verbose=verbose
+        metrics, run_name_, dataset_name, verbose=verbose
     )
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--gen-dir', type=str, default=f'{ROOT_DIR}/benchmarks/generations',
+                        help="The directory to save the generations")
+    parser.add_argument('--dataset-name', type=str, default='pubmedqa',
+                        help="The benchmark to evaluate on: [pubmedqa, medqa, medmcqa]")
+    parser.add_argument('--run-name', type=str, default='fl',
+                        help="The experiment name used for inference")
+    parser.add_argument('--verbose', action='store_true',
+                        help="Whether to print detailed results")
+    args = parser.parse_args()
+
+    main(gen_dir=args.gen_dir, dataset_name=args.dataset_name, run_name=args.run_name, verbose=args.verbose)

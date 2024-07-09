@@ -36,18 +36,12 @@ else:
         f"Use 4-bit or 8-bit quantization. You passed: {quantization}/"
     )
 
-# Check device
-device = "cuda" if torch.cuda.is_available() else "cpu"
-if device == "cpu":
-    quantization_config = None
-    print(f"{quantization} bit quantization is chosen, but a GPU is not found, running on CPU without quantization.")
-
 model = AutoModelForCausalLM.from_pretrained(
     args.base_model_name_path,
     quantization_config=quantization_config,
     torch_dtype=torch_dtype)
 if args.peft_path is not None:
-    model = PeftModel.from_pretrained(model, args.peft_path, torch_dtype=torch_dtype).to(device)
+    model = PeftModel.from_pretrained(model, args.peft_path, torch_dtype=torch_dtype).to("cuda")
 
 tokenizer = AutoTokenizer.from_pretrained(args.base_model_name_path)
 
