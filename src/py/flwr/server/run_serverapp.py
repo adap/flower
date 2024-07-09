@@ -78,8 +78,7 @@ def run(
     server_app = _load()
 
     # Initialize Context
-    context = Context(state=RecordSet())
-    context.run_config = server_config
+    context = Context(state=RecordSet(), run_config=server_config)
 
     # Call ServerApp
     server_app(driver=driver, context=context)
