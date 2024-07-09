@@ -1,6 +1,5 @@
 """huggingface_example: A Flower / Hugging Face app."""
 
-import argparse
 import warnings
 from collections import OrderedDict
 from typing import Any
@@ -92,7 +91,7 @@ net = AutoModelForSequenceClassification.from_pretrained(CHECKPOINT, num_labels=
 
 # Flower client
 class IMDBClient(fl.client.NumPyClient):
-    def __init__(self, partition_id, net, trainloader, testloader):
+    def __init__(self, partition_id, net, trainloader, testloader) -> None:
         self.net = net
         self.partition_id = partition_id
         self.trainloader = trainloader
@@ -113,32 +112,18 @@ class IMDBClient(fl.client.NumPyClient):
         print("Training Finished.")
         return self.get_parameters(config={}), len(self.trainloader), {}
 
-    def evaluate(self, parameters, config):
+    def evaluate(self, parameters, config) -> tuple[float, int, dict[str, float]]:
         self.set_parameters(parameters)
         loss, accuracy = test(self.net, self.testloader)
         return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
 
 
 def client_fn(node_id, partition_id) -> Client:
+    """Client function to return an instance of Client()."""
     trainloader, testloader = load_data(partition_id)
     return IMDBClient(partition_id, net, trainloader, testloader).to_client()
 
 
-app = ClientApp(client_fn=client_fn)
-
-# # Start client
-# fl.client.start_client(server_address="127.0.0.1:8080", client=IMDBClient().to_client())
-#
-#
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser(description="Flower")
-#     parser.add_argument(
-#         "--partition-id",
-#         choices=list(range(1_000)),
-#         required=True,
-#         type=int,
-#         help="Partition of the dataset divided into 1,000 iid partitions created "
-#         "artificially.",
-#     )
-#     partition_id = parser.parse_args().partition_id
-#     main(partition_id)
+app = ClientApp(
+    client_fn=client_fn,
+)
