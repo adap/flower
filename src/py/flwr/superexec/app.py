@@ -77,6 +77,7 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     parser.add_argument(
         "executor",
         help="For example: `deployment:exec` or `project.package.module:wrapper.exec`.",
+        default="flwr.superexec.deployment:executor",
     )
     parser.add_argument(
         "--address",
@@ -164,7 +165,7 @@ def _load_executor(
     if not valid and error_msg:
         raise LoadExecutorError(error_msg) from None
 
-    executor = load_app(executor_ref, LoadExecutorError)
+    executor = load_app(executor_ref, LoadExecutorError, args.executor_dir)
 
     if not isinstance(executor, Executor):
         raise LoadExecutorError(

@@ -17,7 +17,7 @@
 
 import uuid
 from contextlib import contextmanager
-from logging import DEBUG
+from logging import DEBUG, ERROR
 from pathlib import Path
 from queue import Queue
 from typing import Callable, Iterator, Optional, Tuple, Union, cast
@@ -38,6 +38,7 @@ from flwr.common.constant import MessageType, MessageTypeLegacy
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.retry_invoker import RetryInvoker
+from flwr.common.typing import Run
 from flwr.proto.transport_pb2 import (  # pylint: disable=E0611
     ClientMessage,
     Reason,
@@ -73,7 +74,7 @@ def grpc_connection(  # pylint: disable=R0913, R0915
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
-        Optional[Callable[[int], Tuple[str, str]]],
+        Optional[Callable[[int], Run]],
     ]
 ]:
     """Establish a gRPC connection to a gRPC server.
@@ -101,6 +102,8 @@ def grpc_connection(  # pylint: disable=R0913, R0915
         The PEM-encoded root certificates as a byte string or a path string.
         If provided, a secure connection using the certificates will be
         established to an SSL-enabled Flower server.
+    authentication_keys : Optional[Tuple[PrivateKey, PublicKey]] (default: None)
+        Client authentication is not supported for this transport type.
 
     Returns
     -------
@@ -123,6 +126,8 @@ def grpc_connection(  # pylint: disable=R0913, R0915
     """
     if isinstance(root_certificates, str):
         root_certificates = Path(root_certificates).read_bytes()
+    if authentication_keys is not None:
+        log(ERROR, "Client authentication is not supported for this transport type.")
 
     channel = create_channel(
         server_address=server_address,
