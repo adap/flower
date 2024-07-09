@@ -152,7 +152,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
             )
 
     @parameterized.expand(
-        [
+        [  # type: ignore
             # num_partitions, num_classes_per_partition, num_samples, num_unique_classes
             (10, 3, 20, 3),
         ]
