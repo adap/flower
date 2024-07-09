@@ -32,7 +32,7 @@ class NodeState:
         """Register new run context for this node."""
         if run_id not in self.run_contexts:
             self.run_contexts[run_id] = Context(
-                state=RecordSet(), partition_id=self._partition_id
+                state=RecordSet(), run_config={}, partition_id=self._partition_id
             )
 
     def retrieve_context(self, run_id: int) -> Context:
