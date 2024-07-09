@@ -243,12 +243,7 @@ def _start_client_internal(
         The data partition index associated with this node. Better suited for
         prototyping purposes.
     flwr_dir: Optional[Path] (default: None)
-        The path containing installed Flower Apps.
-        By default, this value is equal to:
-
-            - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-            - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-            - `$HOME/.flwr/` in all other cases
+        The fully resolved path containing installed Flower Apps.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -384,11 +379,12 @@ def _start_client_internal(
                             run_info[run_id] = Run(run_id, "", "", {})
 
                     # Register context for this run
-                    node_state.register_context(run_id=run_id)
+                    node_state.register_context(
+                        run_id=run_id, run_info=run_info[run_id], flwr_dir=flwr_dir
+                    )
 
                     # Retrieve context for this run
                     context = node_state.retrieve_context(run_id=run_id)
-                    context.run_config = get_fused_config(run_info[run_id], flwr_dir)
 
                     # Create an error reply message that will never be used to prevent
                     # the used-before-assignment linting error

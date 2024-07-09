@@ -15,9 +15,12 @@
 """Node state."""
 
 
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from flwr.common import Context, RecordSet
+from flwr.common.config import get_fused_config
+from flwr.common.typing import Run
 
 
 class NodeState:
@@ -28,11 +31,22 @@ class NodeState:
         self.run_contexts: Dict[int, Context] = {}
         self._partition_id = partition_id
 
-    def register_context(self, run_id: int) -> None:
+    def register_context(
+        self,
+        run_id: int,
+        run_info: Optional[Run] = None,
+        flwr_dir: Optional[Path] = None,
+    ) -> None:
         """Register new run context for this node."""
         if run_id not in self.run_contexts:
+            if run_info is None:
+                run_config = {}
+            else:
+                run_config = get_fused_config(run_info, flwr_dir)
             self.run_contexts[run_id] = Context(
-                state=RecordSet(), run_config={}, partition_id=self._partition_id
+                state=RecordSet(),
+                run_config=run_config,
+                partition_id=self._partition_id,
             )
 
     def retrieve_context(self, run_id: int) -> Context:
