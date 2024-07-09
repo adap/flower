@@ -269,9 +269,9 @@ class ClassConstrainedPartitioner(Partitioner):
     ) -> None:
         """Check if the number of times the label is possible to execute.
 
-         The number of times the label can be used must be smaller or equal to the
-         number of times that the label is present in the dataset.
-         """
+        The number of times the label can be used must be smaller or equal to the number
+        of times that the label is present in the dataset.
+        """
         for unique_label in self._unique_labels:
             num_unique = np.sum(labels == unique_label)
             if self._unique_label_to_times_used_counter[unique_label] > num_unique:
