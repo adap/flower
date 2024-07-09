@@ -17,7 +17,6 @@ from torch.optim.adam import Adam
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
-import flwr as fl
 from datasets.utils.logging import disable_progress_bar
 from flwr.client import Client, ClientApp, NumPyClient
 
