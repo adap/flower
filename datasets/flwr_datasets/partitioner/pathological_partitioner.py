@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Class constrained partitioner class that works with Hugging Face Datasets."""
+"""Pathological partitioner class that works with Hugging Face Datasets."""
 
 
 import warnings
