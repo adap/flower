@@ -15,8 +15,7 @@ from transformers import (
     DataCollatorWithPadding,
 )
 
-import flwr as fl
-from flwr.client import Client, ClientApp
+from flwr.client import Client, ClientApp, NumPyClient
 
 warnings.filterwarnings("ignore", category=UserWarning)
 DEVICE = torch.device("cpu")
@@ -90,7 +89,7 @@ net = AutoModelForSequenceClassification.from_pretrained(CHECKPOINT, num_labels=
 
 
 # Flower client
-class IMDBClient(fl.client.NumPyClient):
+class IMDBClient(NumPyClient):
     def __init__(self, partition_id, net, trainloader, testloader) -> None:
         self.net = net
         self.partition_id = partition_id
