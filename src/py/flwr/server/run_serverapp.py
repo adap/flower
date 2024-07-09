@@ -45,7 +45,7 @@ ADDRESS_DRIVER_API = "0.0.0.0:9091"
 def run(
     driver: Driver,
     server_app_dir: str,
-    run_config: Dict[str, str],
+    server_app_run_config: Dict[str, str],
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
 ) -> None:
@@ -78,7 +78,7 @@ def run(
     server_app = _load()
 
     # Initialize Context
-    context = Context(state=RecordSet(), run_config=run_config)
+    context = Context(state=RecordSet(), run_config=server_app_run_config)
 
     # Call ServerApp
     server_app(driver=driver, context=context)
@@ -175,7 +175,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         # Overwrite driver._run_id
         driver._run_id = res.run_id  # pylint: disable=W0212
 
-    run_config = {}
+    server_app_run_config = {}
 
     # Dynamically obtain ServerApp path based on run_id
     if args.run_id is not None:
@@ -185,7 +185,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
         server_app_dir = str(get_project_dir(run_.fab_id, run_.fab_version, flwr_dir))
         config = get_project_config(server_app_dir)
         server_app_attr = config["flower"]["components"]["serverapp"]
-        run_config = get_fused_config(run_, flwr_dir)
+        server_app_run_config = get_fused_config(run_, flwr_dir)
     else:
         # User provided `server-app`, but not `--run-id`
         server_app_dir = str(Path(args.dir).absolute())
@@ -202,7 +202,7 @@ def run_server_app() -> None:  # pylint: disable=too-many-branches
     run(
         driver=driver,
         server_app_dir=server_app_dir,
-        run_config=run_config,
+        server_app_run_config=server_app_run_config,
         server_app_attr=server_app_attr,
     )
 
