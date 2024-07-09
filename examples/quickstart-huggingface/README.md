@@ -1,8 +1,6 @@
----
-tags: [quickstart, llm, nlp, sentiment]
-dataset: [IMDB]
-framework: [transformers]
----
+______________________________________________________________________
+
+## tags: \[quickstart, llm, nlp, sentiment\] dataset: \[IMDB\] framework: \[transformers\]
 
 # Federated HuggingFace Transformers using Flower and PyTorch
 
@@ -50,45 +48,45 @@ fewer components to be launched manually.
 
 ### Run with the Simulation Engine
 
-First, launch the [SuperExec](<link-to-docs>).
+First, launch the [SuperExec](link-to-docs).
 
 ```bash
 flower-superexec flwr.superexec.simulation:executor --insecure
 ```
 
 In a new terminal, and after activating your Python environment:
+
 ```bash
 flwr run --use-superexec
 ```
 
-
 ### Run with the Deployment Engine
 
 Launch the the infrastructure needed for a `Run` to run. This means:
-the [`SuperLink`](https://flower.ai/docs/framework/ref-api-cli.html#flower-superlink) and at least two [`SuperNode`](<docs>) instances.
+the [`SuperLink`](https://flower.ai/docs/framework/ref-api-cli.html#flower-superlink) and at least two [`SuperNode`](docs) instances.
 You will need a few terminal windows (consider using [tmux](https://github.com/tmux/tmux/wiki)), remember
 to activate your environment in each of them.
 
 1. On a new terminal, launch the `SuperLink`:
-	```bash
-	flower-superlink --insecure
-	```
-2. On a new terminal, launch a `SuperNode`:
-	```bash
-	flower-supernode --insecure --partition-id=0
-	```
-3. On a new terminal, launch another `SuperNode`:
-	```bash
-	flower-supernode --insecure --partition-id=1
-	```
+   ```bash
+   flower-superlink --insecure
+   ```
+1. On a new terminal, launch a `SuperNode`:
+   ```bash
+   flower-supernode --insecure --partition-id=0
+   ```
+1. On a new terminal, launch another `SuperNode`:
+   ```bash
+   flower-supernode --insecure --partition-id=1
+   ```
 
-With everything ready and idling, launch the [SuperExec](<link-to-docs>).
+With everything ready and idling, launch the [SuperExec](link-to-docs).
 
 ```bash
 flower-superexec flwr.superexec.deployment:executor --insecure
 ```
 
-Then, 
+Then,
 
 ```bash
 flwr run --user-superexec
