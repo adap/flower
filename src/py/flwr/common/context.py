@@ -38,6 +38,10 @@ class Context:
         An index that specifies the data partition that the ClientApp using this Context
         object should make use of. Setting this attribute is better suited for
         simulation or proto typing setups.
+    run_config : Dict[str, str] (default: {})
+        A config (key/value mapping) held by the entity in a given run and that will
+        stay local. It can be used at any point during the lifecycle of this entity
+        (e.g. across multiple rounds)
     """
 
     state: RecordSet
@@ -48,7 +52,8 @@ class Context:
         self,
         state: RecordSet,
         partition_id: Optional[int] = None,
+        run_config: Dict[str, str] = {},
     ) -> None:
         self.state = state
         self.partition_id = partition_id
-        self.run_config = {}
+        self.run_config = run_config
