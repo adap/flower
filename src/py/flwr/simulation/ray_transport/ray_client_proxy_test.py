@@ -218,7 +218,7 @@ def test_cid_consistency_without_proxies() -> None:
                 _load_app,
                 message,
                 str(node_id),
-                Context(state=RecordSet(), partition_id=node_id),
+                Context(state=RecordSet(), run_config={}, partition_id=node_id),
             ),
         )
 
