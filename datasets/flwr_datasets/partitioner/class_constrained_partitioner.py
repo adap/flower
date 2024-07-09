@@ -21,6 +21,7 @@ from typing import Dict, List, Literal, Optional
 import numpy as np
 
 import datasets
+from flwr_datasets.common.typing import NDArray
 from flwr_datasets.partitioner.partitioner import Partitioner
 
 
@@ -52,6 +53,19 @@ class ClassConstrainedPartitioner(Partitioner):
         The (exact) number of unique classes that a partition each partition will have.
     class_assignment_mode: Literal["random", "deterministic", "first-deterministic"]
         The way how the classes are assigned to the partitions. The default is "random".
+        - "random": Randomly assign classes to the partitions.
+        - "first-deterministic": Assign the first class for each partition in a
+        deterministic way (class is the partition_id%num_unique_classes).
+        The rest of the classes are assigned randomly. In case the number of partitions
+        is smaller than the number of unique classes, not all classes will be used in
+        the first iteration, otherwise all the classes will be used (such it will
+        be present in at least one partition).
+        - "deterministic": Assign all the classes to the partitions in a deterministic
+        way. Classes are assigned based on the formula: partion_id has classes
+        identified by the index: (partition_id + i) % num_unique_classes
+        where i in {0, ..., num_classes_per_partition}. So, partition 0 will have
+        classes 0, 1, 2, ..., `num_classes_per_partition`-1, partition 1 will have
+        classes 1, 2, 3, ...,`num_classes_per_partition`, ....
     shuffle: bool
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to partitions.
@@ -66,7 +80,8 @@ class ClassConstrainedPartitioner(Partitioner):
     >>> partitioner = ClassConstrainedPartitioner(
     >>>     num_partitions=10,
     >>>     partition_by="label",
-    >>>     num_classes_per_partition=2
+    >>>     num_classes_per_partition=2,
+    >>>     class_assignment_mode="first-deterministic"
     >>> )
     >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
     >>> partition = fds.load_partition(0)
@@ -80,7 +95,6 @@ class ClassConstrainedPartitioner(Partitioner):
         class_assignment_mode: Literal[
             "random", "deterministic", "first-deterministic"
         ] = "random",
-        # first_class_deterministic_assignment: bool = False,
         shuffle: bool = True,
         seed: Optional[int] = 42,
     ) -> None:
@@ -88,9 +102,6 @@ class ClassConstrainedPartitioner(Partitioner):
         self._num_partitions = num_partitions
         self._partition_by = partition_by
         self._num_classes_per_partition = num_classes_per_partition
-        # self._first_class_deterministic_assignment = (
-        #     first_class_deterministic_assignment
-        # )
         self._class_assignment_mode = class_assignment_mode
         self._shuffle = shuffle
         self._seed = seed
@@ -193,6 +204,7 @@ class ClassConstrainedPartitioner(Partitioner):
                 )
 
     def _determine_partition_id_to_unique_labels(self) -> None:
+        """Determine the assignment of unique labels to the partitions."""
         self._unique_labels = self.dataset.unique(self._partition_by)
         num_unique_classes = len(self._unique_labels)
 
@@ -241,6 +253,11 @@ class ClassConstrainedPartitioner(Partitioner):
             )
 
     def _determine_unique_label_to_times_used(self) -> None:
+        """Determine how many times the label is used in the partitions.
+
+        This computation is based on the assigment of the label to the partition_id in
+        the `_determine_partition_id_to_unique_labels` method.
+        """
         for unique_label in self._unique_labels:
             self._unique_label_to_times_used_counter[unique_label] = 0
         for unique_labels in self._partition_id_to_unique_labels.values():
@@ -248,8 +265,13 @@ class ClassConstrainedPartitioner(Partitioner):
                 self._unique_label_to_times_used_counter[unique_label] += 1
 
     def _check_correctness_of_unique_label_to_times_used_counter(
-        self, labels: np.ndarray
+        self, labels: NDArray
     ) -> None:
+        """Check if the number of times the label is possible to execute.
+
+         The number of times the label can be used must be smaller or equal to the
+         number of times that the label is present in the dataset.
+         """
         for unique_label in self._unique_labels:
             num_unique = np.sum(labels == unique_label)
             if self._unique_label_to_times_used_counter[unique_label] > num_unique:
