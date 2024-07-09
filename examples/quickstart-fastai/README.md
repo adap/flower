@@ -14,67 +14,83 @@ Running this example in itself is quite easy.
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/quickstart-fastai . && rm -rf _tmp && cd quickstart-fastai
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+		&& mv _tmp/examples/quickstart-fastai . \
+		&& rm -rf _tmp && cd quickstart-fastai
 ```
 
 This will create a new directory called `quickstart-fastai` containing the following files:
 
 ```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- run.sh
--- README.md
+├── fastai_example
+|   ├── __init__.py
+|   ├── client_app.py
+|   └── server_app.py
+├── pyproject.toml
+└── README.md 
 ```
 
 ### Installing Dependencies
 
-Project dependencies (such as `fastai` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### Poetry
+Project dependencies are defined in `pyproject.toml`.
+You can install the dependencies by invoking `pip`:
 
 ```shell
-poetry install
-poetry shell
+# From a new python environment, run:
+pip install -e .
 ```
 
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+## Run the Example
 
-```shell
-poetry run python3 -c "import flwr"
+You can run your `ClientApp` and `ServerApp` in both _simulation_ and
+_deployment_ mode without making changes to the code. If you are starting
+with Flower, we recommend you using the _simulation_ model as it requires
+fewer components to be launched manually.
+
+### Run with the Simulation Engine
+
+First, launch the [SuperExec](link-to-docs).
+
+```bash
+flower-superexec flwr.superexec.simulation:executor --insecure
 ```
 
-If you don't see any errors you're good to go!
+In a new terminal, and after activating your Python environment:
 
-#### pip
-
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
-
-```shell
-pip install -r requirements.txt
+```bash
+flwr run --use-superexec
 ```
 
-## Run Federated Learning with fastai and Flower
+### Run with the Deployment Engine
 
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
+Launch the the infrastructure needed for a `Run` to run. This means:
+the [`SuperLink`](https://flower.ai/docs/framework/ref-api-cli.html#flower-superlink) and at least two [`SuperNode`](docs) instances.
+You will need a few terminal windows (consider using [tmux](https://github.com/tmux/tmux/wiki)), remember
+to activate your environment in each of them.
 
-```shell
-python3 server.py
+1. On a new terminal, launch the `SuperLink`:
+   ```bash
+   flower-superlink --insecure
+   ```
+1. On a new terminal, launch a `SuperNode`:
+   ```bash
+   flower-supernode --insecure --partition-id=0
+   ```
+1. On a new terminal, launch another `SuperNode`:
+   ```bash
+   flower-supernode --insecure --partition-id=1
+   ```
+
+With everything ready and idling, launch the [SuperExec](link-to-docs).
+
+```bash
+flower-superexec flwr.superexec.deployment:executor --insecure
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the following commands.
+Then,
 
-Start client 1 in the first terminal:
-
-```shell
-python3 client.py
-```
-
-Start client 2 in the second terminal:
-
-```shell
-python3 client.py
+```bash
+flwr run --user-superexec
 ```
 
 You will see that fastai is starting a federated training. For a more in-depth look, be sure to check out the code on our [repo](https://github.com/adap/flower/tree/main/examples/quickstart-fastai).
