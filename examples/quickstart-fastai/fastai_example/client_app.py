@@ -2,10 +2,18 @@ import warnings
 from collections import OrderedDict
 
 import torch
-from fastai.vision.all import *
+
+# from fastai.vision.all import *
+from fastai.vision.all import (
+    ImageDataLoaders,
+    URLs,
+    error_rate,
+    squeezenet1_1,
+    untar_data,
+    vision_learner,
+)
 
 import flwr as fl
-
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
