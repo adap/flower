@@ -29,8 +29,8 @@ class NodeState:
     def __init__(self, partition_id: Optional[int]) -> None:
         self._meta: Dict[str, Any] = {}  # holds metadata about the node
         self.run_contexts: Dict[int, Context] = {}
+        self._initial_run_config: Dict[str, str] = {}
         self._partition_id = partition_id
-        self._initial_run_config = {}
 
     def register_context(
         self,
