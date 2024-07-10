@@ -30,7 +30,7 @@ from flwr.common.logger import log
 from flwr.common.message import Error
 from flwr.common.object_ref import load_app
 from flwr.common.serde import message_from_taskins, message_to_taskres
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import StateFactory
 
 from .backend import Backend, error_messages_backends, supported_backends
@@ -54,17 +54,16 @@ def _register_nodes(
 # pylint: disable=too-many-arguments,too-many-locals
 async def worker(
     app_fn: Callable[[], ClientApp],
-    queue: "asyncio.Queue[TaskIns]",
+    taskins_queue: "asyncio.Queue[TaskIns]",
+    taskres_queue: "asyncio.Queue[TaskRes]",
     node_states: Dict[int, NodeState],
-    state_factory: StateFactory,
     backend: Backend,
 ) -> None:
     """Get TaskIns from queue and pass it to an actor in the pool to execute it."""
-    state = state_factory.state()
     while True:
         out_mssg = None
         try:
-            task_ins: TaskIns = await queue.get()
+            task_ins: TaskIns = await taskins_queue.get()
             node_id = task_ins.task.consumer.node_id
 
             # Register and retrieve runstate
@@ -111,7 +110,7 @@ async def worker(
                 task_res = message_to_taskres(out_mssg)
                 # Store TaskRes in state
                 task_res.task.pushed_at = time.time()
-                state.store_task_res(task_res)
+                await taskres_queue.put(task_res)
 
 
 async def add_taskins_to_queue(
@@ -162,6 +161,21 @@ async def add_taskins_to_queue(
     log(DEBUG, "Async producer: Stopped pulling from StateFactory.")
 
 
+async def put_taskres_into_state(
+    queue: "asyncio.Queue[TaskRes]",
+    state_factory: StateFactory,
+    f_stop: asyncio.Event,
+) -> None:
+    """Remove TaskRes from queue and add into State."""
+    state = state_factory.state()
+    while not f_stop.is_set():
+        if queue.qsize():
+            task_res = await queue.get()
+            state.store_task_res(task_res)
+        else:
+            await asyncio.sleep(0.1)
+
+
 async def run(
     app_fn: Callable[[], ClientApp],
     backend_fn: Callable[[], Backend],
@@ -171,7 +185,8 @@ async def run(
     f_stop: asyncio.Event,
 ) -> None:
     """Run the VCE async."""
-    queue: "asyncio.Queue[TaskIns]" = asyncio.Queue(128)
+    taskins_queue: "asyncio.Queue[TaskIns]" = asyncio.Queue(128)
+    taskres_queue: "asyncio.Queue[TaskRes]" = asyncio.Queue(128)
 
     try:
 
@@ -184,22 +199,37 @@ async def run(
         # Add workers (they submit Messages to Backend)
         worker_tasks = [
             asyncio.create_task(
-                worker(app_fn, queue, node_states, state_factory, backend)
+                worker(
+                    app_fn,
+                    taskins_queue,
+                    taskres_queue,
+                    node_states,
+                    backend,
+                )
             )
             for _ in range(backend.num_workers)
         ]
         # Create producer (adds TaskIns into Queue)
-        producer = asyncio.create_task(
+        taskins_producer = asyncio.create_task(
             add_taskins_to_queue(
-                queue, state_factory, nodes_mapping, backend, worker_tasks, f_stop
+                taskins_queue,
+                state_factory,
+                nodes_mapping,
+                backend,
+                worker_tasks,
+                f_stop,
             )
         )
 
-        # Wait for producer to finish
-        # The producer runs forever until f_stop is set or until
+        taskres_consumer = asyncio.create_task(
+            put_taskres_into_state(taskres_queue, state_factory, f_stop)
+        )
+
+        # Wait for asyncio taks pulling/pushing TaskIns/TaskRes.
+        # These run forever until f_stop is set or until
         # all worker (consumer) coroutines are completed. Workers
         # also run forever and only end if an exception is raised.
-        await asyncio.gather(producer)
+        await asyncio.gather(*(taskins_producer, taskres_consumer))
 
     except Exception as ex:
 

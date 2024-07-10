@@ -33,7 +33,10 @@ class Executor(ABC):
 
     @abstractmethod
     def start_run(
-        self, fab_file: bytes, config: Optional[Dict[str, str]]
+        self,
+        fab_file: bytes,
+        override_config: Dict[str, str],
+        config: Optional[Dict[str, str]],
     ) -> Optional[RunTracker]:
         """Start a run using the given Flower FAB ID and version.
 
@@ -44,7 +47,7 @@ class Executor(ABC):
         ----------
         fab_file : bytes
             The Flower App Bundle file bytes.
-        config : Optional[Dict[str, ConfigsRecordValues]]
+        config : Optional[Dict[str, str]]
             An optional dictionary containing key-value pairs to configure the
             executor.
 
