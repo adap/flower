@@ -221,7 +221,7 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
         self.assertEqual(
             str(context.exception),
             "The specified "
-            f"`num_classes_per_partition`={num_classes_per_partition} which is "
+            f"`num_classes_per_partition`={num_classes_per_partition} is "
             f"greater than the number of unique classes in the given "
             f"dataset={len(dataset.unique('labels'))}. Reduce the "
             f"`num_classes_per_partition` or make use different dataset "
