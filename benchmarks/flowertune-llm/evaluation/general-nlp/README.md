@@ -1,4 +1,4 @@
-## Evaluation using MT-Bench
+## Evaluation for General NLP challenge
 
 We leverage MT-bench metric provided by [FastChat](https://github.com/lm-sys/FastChat) to evaluate our trained LLMs.
 MT-bench represents a comprehensive suite of multi-turn, open-ended questions designed to evaluate chat assistants.
