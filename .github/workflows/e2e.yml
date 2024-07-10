@@ -78,11 +78,6 @@ jobs:
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
 
-          - directory: tabnet
-            dataset: |
-              import tensorflow_datasets as tfds
-              tfds.load(name='iris', split=tfds.Split.TRAIN)
-
           - directory: opacus
             dataset: |
               from torchvision.datasets import CIFAR10
@@ -145,7 +140,7 @@ jobs:
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
         if: ${{ matrix.directory != 'bare-client-auth' }}
-        run: ./../test.sh "${{ matrix.directory }}"
+        run: ./../test_legacy.sh "${{ matrix.directory }}"
       - name: Run virtual client test
         if: ${{ matrix.directory != 'bare-client-auth' }}
         run: python simulation.py
@@ -154,16 +149,19 @@ jobs:
         run: python simulation_next.py
       - name: Run driver test
         if: ${{ matrix.directory != 'bare-client-auth' }}
-        run: ./../test_driver.sh "${{ matrix.directory }}"
+        run: ./../test_superlink.sh "${{ matrix.directory }}"
       - name: Run driver test with REST
         if: ${{ matrix.directory == 'bare' }}
-        run: ./../test_driver.sh bare rest
+        run: ./../test_superlink.sh bare rest
       - name: Run driver test with SQLite database
         if: ${{ matrix.directory == 'bare' }}
-        run: ./../test_driver.sh bare sqlite
+        run: ./../test_superlink.sh bare sqlite
       - name: Run driver test with client authentication
         if: ${{ matrix.directory == 'bare-client-auth' }}
-        run: ./../test_driver.sh bare client-auth
+        run: ./../test_superlink.sh bare client-auth
+      - name: Run reconnection test with SQLite database
+        if: ${{ matrix.directory == 'bare' }}
+        run: ./../test_reconnection.sh sqlite
       - name: Cache save Python location
         id: cache-save-python
         uses: actions/cache/save@v4
