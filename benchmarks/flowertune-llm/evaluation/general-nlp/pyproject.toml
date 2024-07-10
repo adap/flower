@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "general-nlp-eval"
+version = "0.1.0"
+description = "Evaluation on general NLP challenge"
+authors = [
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+]
+dependencies = [
+    "peft==0.6.2",
+    "sentencepiece==0.2.0",
+    "protobuf==5.27.1",
+    "fschat[model_worker,webui]==0.2.35",
+    "openai==0.28.0",
+    "anthropic==0.18.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
