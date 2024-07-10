@@ -86,7 +86,7 @@ copyright = f"{datetime.date.today().year} Flower Labs GmbH"
 author = "The Flower Authors"
 
 # The full version, including alpha/beta/rc tags
-release = "1.9.0"
+release = "1.10.0"
 
 # -- General configuration ---------------------------------------------------
 
@@ -108,6 +108,7 @@ extensions = [
     "sphinxcontrib.youtube",
     "sphinx_reredirects",
     "nbsphinx",
+    "sphinx_click",
 ]
 
 # Generate .rst files
@@ -248,6 +249,8 @@ redirects = {
     "quickstart-mxnet": "index.html",
     "tutorial-quickstart-mxnet": "index.html",
     "example-mxnet-walk-through": "index.html",
+    "ref-api/flwr.simulation.run_simulation_from_cli": "index.html",
+    "contributor-how-to-create-new-messages": "index.html",
 }
 
 # -- Options for HTML output -------------------------------------------------

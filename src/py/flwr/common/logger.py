@@ -197,6 +197,19 @@ def warn_deprecated_feature(name: str) -> None:
     )
 
 
+def warn_unsupported_feature(name: str) -> None:
+    """Warn the user when they use an unsupported feature."""
+    log(
+        WARN,
+        """UNSUPPORTED FEATURE: %s
+
+            This is an unsupported feature. It will be removed
+            entirely in future versions of Flower.
+        """,
+        name,
+    )
+
+
 def set_logger_propagation(
     child_logger: logging.Logger, value: bool = True
 ) -> logging.Logger:

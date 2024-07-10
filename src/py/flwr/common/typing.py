@@ -185,3 +185,13 @@ class ClientMessage:
     get_parameters_res: Optional[GetParametersRes] = None
     fit_res: Optional[FitRes] = None
     evaluate_res: Optional[EvaluateRes] = None
+
+
+@dataclass
+class Run:
+    """Run details."""
+
+    run_id: int
+    fab_id: str
+    fab_version: str
+    override_config: Dict[str, str]

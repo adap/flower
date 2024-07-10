@@ -22,6 +22,7 @@ import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from logging import DEBUG, ERROR, INFO, WARN
+from pathlib import Path
 from queue import Empty, Queue
 from time import sleep
 from typing import Callable, Dict, Optional
@@ -57,10 +58,9 @@ def _register_nodes(
 # pylint: disable=too-many-arguments,too-many-locals
 def worker(
     app_fn: Callable[[], ClientApp],
-    taskins_queue: Queue[TaskIns],
-    taskres_queue: Queue[TaskRes],
+    taskins_queue: "Queue[TaskIns]",
+    taskres_queue: "Queue[TaskRes]",
     node_states: Dict[int, NodeState],
-    nodes_mapping: NodeToPartitionMapping,
     backend: Backend,
     f_stop: threading.Event,
 ) -> None:
@@ -79,8 +79,6 @@ def worker(
 
             # Convert TaskIns to Message
             message = message_from_taskins(task_ins)
-            # Set partition_id
-            message.metadata.partition_id = nodes_mapping[node_id]
 
             # Let backend process message
             out_mssg, updated_context = backend.process_message(
@@ -122,7 +120,7 @@ def worker(
 
 def add_taskins_to_queue(
     state: State,
-    queue: Queue[TaskIns],
+    queue: "Queue[TaskIns]",
     nodes_mapping: NodeToPartitionMapping,
     f_stop: threading.Event,
 ) -> None:
@@ -136,7 +134,7 @@ def add_taskins_to_queue(
 
 
 def put_taskres_into_state(
-    state: State, queue: Queue[TaskRes], f_stop: threading.Event
+    state: State, queue: "Queue[TaskRes]", f_stop: threading.Event
 ) -> None:
     """Put TaskRes into State from a queue."""
     while not f_stop.is_set():
@@ -200,7 +198,6 @@ def run(
                     taskins_queue,
                     taskres_queue,
                     node_states,
-                    nodes_mapping,
                     backend,
                     f_stop,
                 )
@@ -270,6 +267,7 @@ def start_vce(
         # Use mapping constructed externally. This also means nodes
         # have previously being registered.
         nodes_mapping = existing_nodes_mapping
+    app_dir = str(Path(app_dir).absolute())
 
     if not state_factory:
         log(INFO, "A StateFactory was not supplied to the SimulationEngine.")
@@ -285,8 +283,8 @@ def start_vce(
 
     # Construct mapping of NodeStates
     node_states: Dict[int, NodeState] = {}
-    for node_id in nodes_mapping:
-        node_states[node_id] = NodeState()
+    for node_id, partition_id in nodes_mapping.items():
+        node_states[node_id] = NodeState(partition_id=partition_id)
 
     # Load backend config
     log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
@@ -319,7 +317,7 @@ def start_vce(
             if app_dir is not None:
                 sys.path.insert(0, app_dir)
 
-            app: ClientApp = load_app(client_app_attr, LoadClientAppError)
+            app: ClientApp = load_app(client_app_attr, LoadClientAppError, app_dir)
 
             if not isinstance(app, ClientApp):
                 raise LoadClientAppError(

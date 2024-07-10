@@ -39,7 +39,7 @@ class ServerApp:
     >>> server_config = ServerConfig(num_rounds=3)
     >>> strategy = FedAvg()
     >>>
-    >>> app = ServerApp()
+    >>> app = ServerApp(
     >>>     server_config=server_config,
     >>>     strategy=strategy,
     >>> )
@@ -80,7 +80,7 @@ class ServerApp:
             return
 
         # New execution mode
-        context = Context(state=RecordSet())
+        context = Context(state=RecordSet(), run_config={})
         self._main(driver, context)
 
     def main(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
@@ -106,7 +106,7 @@ class ServerApp:
                     >>> server_config = ServerConfig(num_rounds=3)
                     >>> strategy = FedAvg()
                     >>>
-                    >>> app = ServerApp()
+                    >>> app = ServerApp(
                     >>>     server_config=server_config,
                     >>>     strategy=strategy,
                     >>> )
