@@ -136,7 +136,10 @@ def run_serverapp_th(
     """Run SeverApp in a thread."""
 
     def server_th_with_start_checks(  # type: ignore
-        tf_gpu_growth: bool, stop_event: asyncio.Event, **kwargs
+        tf_gpu_growth: bool,
+        stop_event: asyncio.Event,
+        exception_event: threading.Event,
+        **kwargs,
     ) -> None:
         """Run SeverApp, after check if GPU memory growth has to be set.
 
@@ -152,7 +155,7 @@ def run_serverapp_th(
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, "ServerApp thread raised an exception: %s", ex)
             log(ERROR, traceback.format_exc())
-            has_exception.set()
+            exception_event.set()
             raise
         finally:
             log(DEBUG, "ServerApp finished running.")
@@ -163,7 +166,7 @@ def run_serverapp_th(
 
     serverapp_th = threading.Thread(
         target=server_th_with_start_checks,
-        args=(enable_tf_gpu_growth, f_stop),
+        args=(enable_tf_gpu_growth, f_stop, has_exception),
         kwargs={
             "server_app_attr": server_app_attr,
             "loaded_server_app": server_app,
@@ -259,7 +262,7 @@ def _main_loop(
         event(EventType.RUN_SUPERLINK_LEAVE)
         if serverapp_th:
             serverapp_th.join()
-            if server_app_thread_has_exception:
+            if server_app_thread_has_exception.is_set():
                 raise RuntimeError("Exception in ServerApp thread")
 
     log(DEBUG, "Stopping Simulation Engine now.")
