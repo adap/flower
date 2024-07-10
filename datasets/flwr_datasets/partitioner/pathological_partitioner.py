@@ -16,7 +16,7 @@
 
 
 import warnings
-from typing import Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 import numpy as np
 
@@ -113,12 +113,12 @@ class PathologicalPartitioner(Partitioner):
 
         # Utility attributes
         self._partition_id_to_indices: Dict[int, List[int]] = {}
-        self._partition_id_to_unique_labels: Dict[int, List[int]] = {
+        self._partition_id_to_unique_labels: Dict[int, List[Any]] = {
             pid: [] for pid in range(self._num_partitions)
         }
-        self._unique_labels: List[int] = []
+        self._unique_labels: List[Any] = []
         # Count in how many partitions the label is used
-        self._unique_label_to_times_used_counter: Dict[int, int] = {}
+        self._unique_label_to_times_used_counter: Dict[Any, int] = {}
         self._partition_id_to_indices_determined = False
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
