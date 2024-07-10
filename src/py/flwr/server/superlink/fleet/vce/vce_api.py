@@ -122,7 +122,7 @@ def add_taskins_to_queue(
     state: State,
     queue: "Queue[TaskIns]",
     nodes_mapping: NodeToPartitionMapping,
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
 ) -> None:
     """Put TaskIns in a queue from State."""
     while not f_stop.is_set():
