@@ -1,8 +1,9 @@
+"""pandas_example: A Flower / Pandas app."""
+
 from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
-import flwr as fl
 from flwr.common import (
     EvaluateIns,
     EvaluateRes,
@@ -13,6 +14,7 @@ from flwr.common import (
     ndarrays_to_parameters,
     parameters_to_ndarrays,
 )
+from flwr.server import ServerApp, ServerConfig
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy import Strategy
@@ -74,9 +76,9 @@ class FedAnalytics(Strategy):
         pass
 
 
-# Start Flower server
-fl.server.start_server(
-    server_address="0.0.0.0:8080",
-    config=fl.server.ServerConfig(num_rounds=1),
+config = ServerConfig(num_rounds=1)
+
+app = ServerApp(
+    config=config,
     strategy=FedAnalytics(),
 )

@@ -1,13 +1,12 @@
-import argparse
+"""pandas_example: A Flower / Pandas app."""
+
 from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
-
-import flwr as fl
-
 from flwr_datasets import FederatedDataset
 
+from flwr.client import Client, ClientApp, NumPyClient
 
 column_names = ["sepal_length", "sepal_width"]
 
@@ -18,7 +17,7 @@ def compute_hist(df: pd.DataFrame, col_name: str) -> np.ndarray:
 
 
 # Define Flower client
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def __init__(self, X: pd.DataFrame):
         self.X = X
 
@@ -37,20 +36,11 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
-if __name__ == "__main__":
-    N_CLIENTS = 2
+N_CLIENTS = 2
 
-    parser = argparse.ArgumentParser(description="Flower")
-    parser.add_argument(
-        "--partition-id",
-        type=int,
-        choices=range(0, N_CLIENTS),
-        required=True,
-        help="Specifies the partition id of artificially partitioned datasets.",
-    )
-    args = parser.parse_args()
-    partition_id = args.partition_id
 
+def client_fn(node_id, partition_id) -> Client:
+    """Client function to return an instance of Client()."""
     # Load the partition data
     fds = FederatedDataset(dataset="hitorilabs/iris", partitioners={"train": N_CLIENTS})
 
@@ -58,8 +48,7 @@ if __name__ == "__main__":
     # Use just the specified columns
     X = dataset[column_names]
 
-    # Start Flower client
-    fl.client.start_client(
-        server_address="127.0.0.1:8080",
-        client=FlowerClient(X).to_client(),
-    )
+    return FlowerClient(X).to_client()
+
+
+app = ClientApp(client_fn=client_fn)
