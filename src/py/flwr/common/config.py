@@ -22,7 +22,7 @@ import tomli
 
 from flwr.cli.config_utils import validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
-from flwr.common.typing import Run
+from flwr.common.typing import ConfigsRecordValues, Run
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
@@ -75,8 +75,9 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
 
 
 def _fuse_dicts(
-    main_dict: Dict[str, str], override_dict: Dict[str, str]
-) -> Dict[str, str]:
+    main_dict: Dict[str, ConfigsRecordValues],
+    override_dict: Dict[str, ConfigsRecordValues],
+) -> Dict[str, ConfigsRecordValues]:
     fused_dict = main_dict.copy()
 
     for key, value in override_dict.items():
@@ -86,7 +87,9 @@ def _fuse_dicts(
     return fused_dict
 
 
-def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
+def get_fused_config(
+    run: Run, flwr_dir: Optional[Path]
+) -> Dict[str, ConfigsRecordValues]:
     """Merge the overrides from a `Run` with the config from a FAB.
 
     Get the config using the fab_id and the fab_version, remove the nesting by adding
@@ -103,14 +106,17 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
     return _fuse_dicts(flat_default_config, run.override_config)
 
 
-def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, str]:
+def flatten_dict(
+    raw_dict: Dict[str, Any], parent_key: str = ""
+) -> Dict[str, ConfigsRecordValues]:
     """Flatten dict by joining nested keys with a given separator."""
-    items: List[Tuple[str, str]] = []
+    items: List[Tuple[str, ConfigsRecordValues]] = []
     separator: str = "."
     for k, v in raw_dict.items():
         new_key = f"{parent_key}{separator}{k}" if parent_key else k
         if isinstance(v, dict):
             items.extend(flatten_dict(v, parent_key=new_key).items())
+        # TODO: Handle types
         elif isinstance(v, str):
             items.append((new_key, v))
         else:
@@ -123,9 +129,9 @@ def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, st
 def parse_config_args(
     config_overrides: Optional[str],
     separator: str = ",",
-) -> Dict[str, str]:
+) -> Dict[str, ConfigsRecordValues]:
     """Parse separator separated list of key-value pairs separated by '='."""
-    overrides: Dict[str, str] = {}
+    overrides: Dict[str, ConfigsRecordValues] = {}
 
     if config_overrides is None:
         return overrides
@@ -139,6 +145,7 @@ def parse_config_args(
         with Path(overrides_list[0]).open("rb") as config_file:
             overrides = flatten_dict(tomli.load(config_file))
     else:
+        # TODO: Handle types
         for kv_pair in overrides_list:
             key, value = kv_pair.split("=")
             overrides[key] = value
