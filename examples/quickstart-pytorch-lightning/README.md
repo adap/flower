@@ -1,8 +1,7 @@
 ---
-title: Simple Flower Example using PyTorch-Lightning
 tags: [quickstart, vision, fds]
-dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
-framework: [lightning | https://lightning.ai/docs/pytorch/stable/]
+dataset: [MNIST]
+framework: [lightning]
 ---
 
 # Flower Example using PyTorch Lightning

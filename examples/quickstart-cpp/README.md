@@ -1,8 +1,7 @@
 ---
-title: Simple Flower Example using C++
 tags: [quickstart, linear regression, tabular]
 dataset: [Synthetic]
-framework: [C++ | https://isocpp.org/]
+framework: [C++]
 ---
 
 # Flower Clients in C++ (under development)

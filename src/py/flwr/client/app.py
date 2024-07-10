@@ -41,6 +41,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
+from flwr.common.typing import Run
 
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
@@ -235,7 +236,7 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
-    partitioni_id: Optional[int] (default: None)
+    partition_id: Optional[int] (default: None)
         The data partition index associated with this node. Better suited for
         prototyping purposes.
     """
@@ -298,7 +299,7 @@ def _start_client_internal(
     retry_invoker = RetryInvoker(
         wait_gen_factory=exponential,
         recoverable_exceptions=connection_error_type,
-        max_tries=max_retries,
+        max_tries=max_retries + 1 if max_retries is not None else None,
         max_time=max_wait_time,
         on_giveup=lambda retry_state: (
             log(
@@ -315,8 +316,7 @@ def _start_client_internal(
     )
 
     node_state = NodeState(partition_id=partition_id)
-    # run_id -> (fab_id, fab_version)
-    run_info: Dict[int, Tuple[str, str]] = {}
+    run_info: Dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
@@ -371,7 +371,7 @@ def _start_client_internal(
                             run_info[run_id] = get_run(run_id)
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
-                            run_info[run_id] = ("", "")
+                            run_info[run_id] = Run(run_id, "", "", {})
 
                     # Register context for this run
                     node_state.register_context(run_id=run_id)
@@ -388,7 +388,10 @@ def _start_client_internal(
                     # Handle app loading and task message
                     try:
                         # Load ClientApp instance
-                        client_app: ClientApp = load_client_app_fn(*run_info[run_id])
+                        run: Run = run_info[run_id]
+                        client_app: ClientApp = load_client_app_fn(
+                            run.fab_id, run.fab_version
+                        )
 
                         # Execute ClientApp
                         reply_message = client_app(message=message, context=context)
@@ -573,7 +576,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
                 Callable[[Message], None],
                 Optional[Callable[[], None]],
                 Optional[Callable[[], None]],
-                Optional[Callable[[int], Tuple[str, str]]],
+                Optional[Callable[[int], Run]],
             ]
         ],
     ],
