@@ -20,7 +20,7 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
 # Define strategy
 strategy = FedAvg(evaluate_metrics_aggregation_fn=weighted_average)
 
-config = ServerConfig(num_rounds=3)
+config = ServerConfig(num_rounds=1)
 
 app = ServerApp(
     config=config,
