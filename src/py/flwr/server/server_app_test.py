@@ -29,7 +29,7 @@ def test_server_app_custom_mode() -> None:
     # Prepare
     app = ServerApp()
     driver = MagicMock()
-    context = Context(state=RecordSet())
+    context = Context(state=RecordSet(), run_config={})
 
     called = {"called": False}
 
