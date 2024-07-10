@@ -59,8 +59,8 @@ def _register_nodes(
 # pylint: disable=too-many-arguments,too-many-locals
 def worker(
     app_fn: Callable[[], ClientApp],
-    taskins_queue: Queue[TaskIns],
-    taskres_queue: Queue[TaskRes],
+    taskins_queue: "Queue[TaskIns]",
+    taskres_queue: "Queue[TaskRes]",
     node_states: Dict[int, NodeState],
     backend: Backend,
     f_stop: asyncio.Event,
@@ -121,7 +121,7 @@ def worker(
 
 def add_taskins_to_queue(
     state: State,
-    queue: Queue[TaskIns],
+    queue: "Queue[TaskIns]",
     nodes_mapping: NodeToPartitionMapping,
     f_stop: asyncio.Event,
 ) -> None:
@@ -135,7 +135,7 @@ def add_taskins_to_queue(
 
 
 def put_taskres_into_state(
-    state: State, queue: Queue[TaskRes], f_stop: threading.Event
+    state: State, queue: "Queue[TaskRes]", f_stop: threading.Event
 ) -> None:
     """Put TaskRes into State from a queue."""
     while not f_stop.is_set():
