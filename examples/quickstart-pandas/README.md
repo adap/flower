@@ -15,74 +15,81 @@ Running this example in itself is quite easy.
 Start by cloning the example project. We prepared a single-line command that you can copy into your shell which will checkout the example for you:
 
 ```shell
-$ git clone --depth=1 https://github.com/adap/flower.git _tmp && mv _tmp/examples/quickstart-pandas . && rm -rf _tmp && cd quickstart-pandas
+git clone --depth=1 https://github.com/adap/flower.git _tmp \
+		&& mv _tmp/examples/quickstart-pandas . \
+		&& rm -rf _tmp && cd quickstart-pandas
 ```
 
 This will create a new directory called `quickstart-pandas` containing the following files:
 
 ```shell
--- pyproject.toml
--- requirements.txt
--- client.py
--- server.py
--- start.sh
--- README.md
-```
-
-If you don't plan on using the `run.sh` script that automates the run, you should first download the data and put it in a `data` folder, this can be done by executing:
-
-```shell
-$ mkdir -p ./data
-$ python -c "from sklearn.datasets import load_iris; load_iris(as_frame=True)['data'].to_csv('./data/client.csv')"
+├── pandas_example
+|   ├── __init__.py
+|   ├── client_app.py
+|   └── server_app.py
+├── pyproject.toml
+└── README.md 
 ```
 
 ### Installing Dependencies
 
-Project dependencies (such as `pandas` and `flwr`) are defined in `pyproject.toml` and `requirements.txt`. We recommend [Poetry](https://python-poetry.org/docs/) to install those dependencies and manage your virtual environment ([Poetry installation](https://python-poetry.org/docs/#installation)) or [pip](https://pip.pypa.io/en/latest/development/), but feel free to use a different way of installing dependencies and managing virtual environments if you have other preferences.
-
-#### Poetry
-
-```shell
-poetry install
-poetry shell
-```
-
-Poetry will install all your dependencies in a newly created virtual environment. To verify that everything works correctly you can run the following command:
+Project dependencies are defined in `pyproject.toml`.
+You can install the dependencies by invoking `pip`:
 
 ```shell
-poetry run python3 -c "import flwr"
+# From a new python environment, run:
+pip install -e .
 ```
 
-If you don't see any errors you're good to go!
+## Run the Example
 
-#### pip
+You can run your `ClientApp` and `ServerApp` in both _simulation_ and
+_deployment_ mode without making changes to the code. If you are starting
+with Flower, we recommend you using the _simulation_ model as it requires
+fewer components to be launched manually.
 
-Write the command below in your terminal to install the dependencies according to the configuration file requirements.txt.
+### Run with the Simulation Engine
 
-```shell
-pip install -r requirements.txt
+First, launch the [SuperExec](link-to-docs).
+
+```bash
+flower-superexec flwr.superexec.simulation:executor --insecure
 ```
 
-## Run Federated Analytics with Pandas and Flower
+In a new terminal, and after activating your Python environment:
 
-Afterwards you are ready to start the Flower server as well as the clients. You can simply start the server in a terminal as follows:
-
-```shell
-$ python3 server.py
+```bash
+flwr run --use-superexec
 ```
 
-Now you are ready to start the Flower clients which will participate in the learning. To do so simply open two more terminal windows and run the following commands.
+### Run with the Deployment Engine
 
-Start client 1 in the first terminal:
+Launch the the infrastructure needed for a `Run` to run. This means:
+the [`SuperLink`](https://flower.ai/docs/framework/ref-api-cli.html#flower-superlink) and at least two [`SuperNode`](docs) instances.
+You will need a few terminal windows (consider using [tmux](https://github.com/tmux/tmux/wiki)), remember
+to activate your environment in each of them.
 
-```shell
-$ python3 client.py --partition-id 0
+1. On a new terminal, launch the `SuperLink`:
+   ```bash
+   flower-superlink --insecure
+   ```
+1. On a new terminal, launch a `SuperNode`:
+   ```bash
+   flower-supernode --insecure --partition-id=0
+   ```
+1. On a new terminal, launch another `SuperNode`:
+   ```bash
+   flower-supernode --insecure --partition-id=1
+   ```
+
+With everything ready and idling, launch the [SuperExec](link-to-docs).
+
+```bash
+flower-superexec flwr.superexec.deployment:executor --insecure
 ```
 
-Start client 2 in the second terminal:
+Then,
 
-```shell
-$ python3 client.py --partition-id 1
+```bash
+flwr run --user-superexec
 ```
-
-You will see that the server is printing aggregated statistics about the dataset distributed amongst clients. Have a look to the [Flower Quickstarter documentation](https://flower.ai/docs/quickstart-pandas.html) for a detailed explanation.
