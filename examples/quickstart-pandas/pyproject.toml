@@ -1,17 +1,21 @@
 [build-system]
-requires = ["poetry-core>=1.4.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "quickstart-pandas"
 version = "0.1.0"
-description = "Pandas Federated Analytics Quickstart with Flower"
-authors = ["Ragy Haddad <ragy202@gmail.com>"]
-maintainers = ["The Flower Authors <hello@flower.ai>"]
+description = "Federated Analytics Quickstart with Flower and Pandas"
+authors = [
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+    { name = "Ragy Haddad", email = "ragy202@gmail.com" },
+]
+dependencies = [
+    "flwr>=1.9.0,<2.0",
+    "flwr-datasets[vision]>=0.0.2,<1.0.0",
+    "numpy==1.23.2",
+    "pandas==2.0.0",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-flwr = ">=1.0,<2.0"
-flwr-datasets = { extras = ["vision"], version = ">=0.0.2,<1.0.0" }
-numpy = "1.23.2"
-pandas = "2.0.0"
+[tool.hatch.build.targets.wheel]
+packages = ["."]
