@@ -136,7 +136,7 @@ def run_serverapp_th(
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
 
-    def server_th_with_start_checks(  # type: ignore
+    def server_th_with_start_checks(
         tf_gpu_growth: bool,
         stop_event: asyncio.Event,
         _driver: Driver,
@@ -230,7 +230,7 @@ def _main_loop(
     try:
         # Create run (with empty fab_id and fab_version)
         run_id_ = state_factory.state().create_run("", "", {})
-        server_app_run_config = {}
+        server_app_run_config: Dict[str, str] = {}
 
         if run_id:
             _override_run_id(state_factory, run_id_to_replace=run_id_, run_id=run_id)
