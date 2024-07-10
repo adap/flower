@@ -130,6 +130,7 @@ def run_serverapp_th(
     driver: Driver,
     app_dir: str,
     f_stop: asyncio.Event,
+    has_exception: threading.Event,
     enable_tf_gpu_growth: bool,
     delay_launch: int = 3,
 ) -> threading.Thread:
@@ -164,7 +165,8 @@ def run_serverapp_th(
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, "ServerApp thread raised an exception: %s", ex)
             log(ERROR, traceback.format_exc())
-            raise RuntimeError("Exception found when running ServerApp thread") from ex
+            has_exception.set()
+            raise
         finally:
             log(DEBUG, "ServerApp finished running.")
             # Upon completion, trigger stop event if one was passed
@@ -222,6 +224,8 @@ def _main_loop(
     state_factory = StateFactory(":flwr-in-memory-state:")
 
     f_stop = asyncio.Event()
+    # A Threading event to indicate if an exception was raised in the ServerApp thread
+    server_app_thread_has_exception = threading.Event()
     serverapp_th = None
     try:
         # Create run (with empty fab_id and fab_version)
@@ -243,6 +247,7 @@ def _main_loop(
             driver=driver,
             app_dir=app_dir,
             f_stop=f_stop,
+            has_exception=server_app_thread_has_exception,
             enable_tf_gpu_growth=enable_tf_gpu_growth,
         )
 
@@ -271,6 +276,8 @@ def _main_loop(
         event(EventType.RUN_SUPERLINK_LEAVE)
         if serverapp_th:
             serverapp_th.join()
+            if server_app_thread_has_exception:
+                raise RuntimeError("Exception in ServerApp thread")
 
     log(DEBUG, "Stopping Simulation Engine now.")
 
