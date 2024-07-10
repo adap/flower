@@ -209,7 +209,7 @@ class PathologicalPartitioner(Partitioner):
 
     def _determine_partition_id_to_unique_labels(self) -> None:
         """Determine the assignment of unique labels to the partitions."""
-        self._unique_labels = self.dataset.unique(self._partition_by)
+        self._unique_labels = sorted(self.dataset.unique(self._partition_by))
         num_unique_classes = len(self._unique_labels)
 
         if self._num_classes_per_partition > num_unique_classes:
