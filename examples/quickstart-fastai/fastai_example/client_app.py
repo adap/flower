@@ -5,46 +5,33 @@ from collections import OrderedDict
 from typing import Any
 
 import torch
-
-# from fastai.vision.all import *
-from fastai.vision.all import (
-    ImageDataLoaders,
-    URLs,
-    error_rate,
-    squeezenet1_1,
-    untar_data,
-    vision_learner,
-)
+from fastai.learner import Learner
+from fastai.losses import CrossEntropyLossFlat
+from fastai.vision.all import error_rate, squeezenet1_1
 from fastai.vision.data import DataLoaders
 from flwr_datasets import FederatedDataset
 from torch.utils.data import DataLoader
-from torchvision import transforms
+from torchvision.transforms import Compose, Lambda, Resize, ToTensor
 
 from flwr.client import Client, ClientApp, NumPyClient
 
 warnings.filterwarnings("ignore", category=UserWarning)
-
-# Download MNIST dataset
-# path = untar_data(URLs.MNIST)
-
-# # Load dataset
-# dls = ImageDataLoaders.from_folder(
-#     path, valid_pct=0.5, train="training", valid="testing", num_workers=0
-# )
-#
-# # Define model
-# learn = vision_learner(dls, squeezenet1_1, metrics=error_rate)
 
 
 def load_data(partition_id) -> tuple[DataLoader, DataLoader, DataLoader]:
     fds = FederatedDataset(dataset="mnist", partitioners={"train": 10})
     partition = fds.load_partition(partition_id, "train")
 
+    # Resize and repeat channels to use MNIST, which have grayscale images,
+    # with squeezenet, which expects 3 channels.
+    # Ref: https://discuss.pytorch.org/t/fine-tuning-squeezenet-for-mnist-dataset/31221/2
+    pytorch_transforms = Compose(
+        [Resize(224), ToTensor(), Lambda(lambda x: x.expand(3, -1, -1))]
+    )
+
     def apply_transforms(batch):
         """Apply transforms to the partition from FederatedDataset."""
-        batch["image"] = [
-            transforms.functional.to_tensor(img) for img in batch["image"]
-        ]
+        batch["image"] = [pytorch_transforms(img) for img in batch["image"]]
         return batch
 
     def collate_fn(batch):
@@ -112,14 +99,14 @@ def client_fn(node_id, partition_id) -> Client:
     """Client function to return an instance of Client()."""
     trainloader, valloader, _ = load_data(partition_id=partition_id)
     dls = DataLoaders(trainloader, valloader)
-    learn = vision_learner(dls, squeezenet1_1, metrics=error_rate, n_out=10)
+    model = squeezenet1_1()
+    learn = Learner(
+        dls,
+        model,
+        loss_func=CrossEntropyLossFlat(),
+        metrics=error_rate,
+    )
     return FlowerClient(learn, dls).to_client()
 
 
 app = ClientApp(client_fn=client_fn)
-
-# # Start Flower client
-# fl.client.start_client(
-#     server_address="127.0.0.1:8080",
-#     client=FlowerClient().to_client(),
-# )
