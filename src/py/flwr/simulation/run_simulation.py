@@ -139,6 +139,7 @@ def run_serverapp_th(
     def server_th_with_start_checks(
         tf_gpu_growth: bool,
         stop_event: asyncio.Event,
+        exception_event: threading.Event,
         _driver: Driver,
         _server_app_dir: str,
         _server_app_run_config: Dict[str, str],
@@ -165,7 +166,7 @@ def run_serverapp_th(
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, "ServerApp thread raised an exception: %s", ex)
             log(ERROR, traceback.format_exc())
-            has_exception.set()
+            exception_event.set()
             raise
         finally:
             log(DEBUG, "ServerApp finished running.")
@@ -179,6 +180,7 @@ def run_serverapp_th(
         args=(
             enable_tf_gpu_growth,
             f_stop,
+            has_exception,
             driver,
             app_dir,
             server_app_run_config,
@@ -276,7 +278,7 @@ def _main_loop(
         event(EventType.RUN_SUPERLINK_LEAVE)
         if serverapp_th:
             serverapp_th.join()
-            if server_app_thread_has_exception:
+            if server_app_thread_has_exception.is_set():
                 raise RuntimeError("Exception in ServerApp thread")
 
     log(DEBUG, "Stopping Simulation Engine now.")
