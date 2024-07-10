@@ -151,6 +151,7 @@ def run_serverapp_th(
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, "ServerApp thread raised an exception: %s", ex)
             log(ERROR, traceback.format_exc())
+            raise RuntimeError("Exception found when running ServerApp thread") from ex
         finally:
             log(DEBUG, "ServerApp finished running.")
             # Upon completion, trigger stop event if one was passed
