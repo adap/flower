@@ -45,7 +45,7 @@ class PathologicalPartitioner(Partitioner):
     partition_by : str
         Column name of the labels (targets) based on which partitioning works.
     num_classes_per_partition: int
-        The (exact) number of unique classes that a partition each partition will have.
+        The (exact) number of unique classes that each partition will have.
     class_assignment_mode: Literal["random", "deterministic", "first-deterministic"]
         The way how the classes are assigned to the partitions. The default is "random".
         The possible values are:
@@ -127,12 +127,12 @@ class PathologicalPartitioner(Partitioner):
         Parameters
         ----------
         partition_id : int
-            the index that corresponds to the requested partition
+            The index that corresponds to the requested partition.
 
         Returns
         -------
         dataset_partition : Dataset
-            single partition of a dataset
+            Single partition of a dataset.
         """
         # The partitioning is done lazily - only when the first partition is
         # requested. Only the first call creates the indices assignments for all the
@@ -215,7 +215,7 @@ class PathologicalPartitioner(Partitioner):
         if self._num_classes_per_partition > num_unique_classes:
             raise ValueError(
                 f"The specified `num_classes_per_partition`"
-                f"={self._num_classes_per_partition} which is greater than the number "
+                f"={self._num_classes_per_partition} is greater than the number "
                 f"of unique classes in the given dataset={num_unique_classes}. "
                 f"Reduce the `num_classes_per_partition` or make use different dataset "
                 f"to apply this partitioning."
