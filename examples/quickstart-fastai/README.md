@@ -1,8 +1,7 @@
 ---
-title: Simple Flower Example using fastai
-labels: [quickstart, vision]
-dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
-framework: [fastai | https://fast.ai]
+tags: [quickstart, vision]
+dataset: [MNIST]
+framework: [fastai]
 ---
 
 # Flower Example using fastai

@@ -1,8 +1,7 @@
 ---
-title: Flower Transformers Example using HuggingFace
-labels: [quickstart, llm, nlp, sentiment]
-dataset: [IMDB | https://huggingface.co/datasets/stanfordnlp/imdb]
-framework: [transformers | https://huggingface.co/docs/transformers/index]
+tags: [quickstart, llm, nlp, sentiment]
+dataset: [IMDB]
+framework: [transformers]
 ---
 
 # Federated HuggingFace Transformers using Flower and PyTorch

@@ -1,8 +1,7 @@
 ---
-title: PyTorch, From Centralized To Federated
-labels: [basic, vision, fds]
-dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10]
-framework: [torch | https://pytorch.org/]
+tags: [basic, vision, fds]
+dataset: [CIFAR-10]
+framework: [torch]
 ---
 
 # PyTorch: From Centralized To Federated

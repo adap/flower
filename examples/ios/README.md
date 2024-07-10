@@ -1,8 +1,7 @@
 ---
-title: Simple Flower Example on iOS
-labels: [mobile, vision, fds]
-dataset: [MNIST | https://huggingface.co/datasets/ylecun/mnist]
-framework: [Swift | https://www.swift.org/]
+tags: [mobile, vision, sdk]
+dataset: [MNIST]
+framework: [Swift]
 ---
 
 # FLiOS - A Flower SDK for iOS Devices with Example

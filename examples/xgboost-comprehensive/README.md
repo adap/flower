@@ -1,8 +1,7 @@
 ---
-title: Flower Example using XGBoost
-labels: [advanced, classification, tabular]
-dataset: [HIGGS | https://archive.ics.uci.edu/dataset/280/higgs]
-framework: [xgboost | https://xgboost.readthedocs.io/en/stable/]
+tags: [advanced, classification, tabular]
+dataset: [HIGGS]
+framework: [xgboost]
 ---
 
 # Flower Example using XGBoost (Comprehensive)

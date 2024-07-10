@@ -1,8 +1,7 @@
 ---
-title: Flower Embedded Devices Example
-labels: [basic, vision, fds]
-dataset: [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10, MNIST | https://huggingface.co/datasets/ylecun/mnist]
-framework: [torch | https://pytorch.org/, tensorflow | https://www.tensorflow.org/]
+tags: [basic, vision, fds]
+dataset: [CIFAR-10, MNIST]
+framework: [torch, tensorflow]
 ---
 
 # Federated Learning on Embedded Devices with Flower
@@ -187,7 +186,7 @@ If you are working on this tutorial on your laptop or desktop, it can host the F
 
 ## Running Embedded FL with Flower
 
-For this demo, we'll be using [CIFAR-10 | https://huggingface.co/datasets/uoft-cs/cifar10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. The clients do the same. The dataset is by default split into 50 partitions (each to be assigned to a different client). This can be controlled with the `NUM_CLIENTS` global variable in the client scripts. In this example, each device will play the role of a specific user (specified via `--cid` -- we'll show this later) and therefore only do local training with that portion of the data. For CIFAR-10, clients will be training a MobileNet-v2/3 model.
+For this demo, we'll be using [CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html), a popular dataset for image classification comprised of 10 classes (e.g. car, bird, airplane) and a total of 60K `32x32` RGB images. The training set contains 50K images. The server will automatically download the dataset should it not be found in `./data`. The clients do the same. The dataset is by default split into 50 partitions (each to be assigned to a different client). This can be controlled with the `NUM_CLIENTS` global variable in the client scripts. In this example, each device will play the role of a specific user (specified via `--cid` -- we'll show this later) and therefore only do local training with that portion of the data. For CIFAR-10, clients will be training a MobileNet-v2/3 model.
 
 You can run this example using MNIST and a smaller CNN model by passing flag `--mnist`. This is useful if you are using devices with a very limited amount of memory (e.g. RaspberryPi Zero) or if you want the training taking place on the embedded devices to be much faster (specially if these are CPU-only). The partitioning of the dataset is done in the same way.
 

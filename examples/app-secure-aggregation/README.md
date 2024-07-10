@@ -1,8 +1,7 @@
 ---
-title: Example Flower App with Secure Aggregation
-labels: [basic, vision, fds]
+tags: [basic, vision, fds]
 dataset: []
-framework: [numpy | https://numpy.org/]
+framework: [numpy]
 ---
 
 # Secure aggregation with Flower (the SecAgg+ protocol) 🧪
