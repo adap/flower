@@ -53,7 +53,7 @@ class PathologicalPartitioner(Partitioner):
         - "random": Randomly assign classes to the partitions. For each partition choose
           the `num_classes_per_partition` classes without replacement.
         - "first-deterministic": Assign the first class for each partition in a
-          deterministic way (class is the partition_id%num_unique_classes).
+          deterministic way (class id is the partition_id % num_unique_classes).
           The rest of the classes are assigned randomly. In case the number of
           partitions is smaller than the number of unique classes, not all classes will
           be used in the first iteration, otherwise all the classes will be used (such
@@ -65,6 +65,8 @@ class PathologicalPartitioner(Partitioner):
           classes 0, 1, 2, ..., `num_classes_per_partition`-1, partition 1 will have
           classes 1, 2, 3, ...,`num_classes_per_partition`, ....
 
+        The list representing the unique lables is sorted in ascending order. In case
+        of numbers starting from zero the class id corresponds to the number itself.
         `class_assignment_mode="first-deterministic"` was used in the orginal paper,
         here we provide the option to use the other modes as well.
     shuffle: bool
