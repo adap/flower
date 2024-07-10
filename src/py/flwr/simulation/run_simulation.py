@@ -22,7 +22,7 @@ import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
 from time import sleep
-from typing import Optional
+from typing import Dict, Optional
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
@@ -126,6 +126,7 @@ def run_simulation(
 def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
+    server_app_run_config: Dict[str, str],
     driver: Driver,
     app_dir: str,
     f_stop: asyncio.Event,
@@ -135,7 +136,13 @@ def run_serverapp_th(
     """Run SeverApp in a thread."""
 
     def server_th_with_start_checks(  # type: ignore
-        tf_gpu_growth: bool, stop_event: asyncio.Event, **kwargs
+        tf_gpu_growth: bool,
+        stop_event: asyncio.Event,
+        _driver: Driver,
+        _server_app_dir: str,
+        _server_app_run_config: Dict[str, str],
+        _server_app_attr: Optional[str],
+        _server_app: Optional[ServerApp],
     ) -> None:
         """Run SeverApp, after check if GPU memory growth has to be set.
 
@@ -147,7 +154,13 @@ def run_serverapp_th(
                 enable_gpu_growth()
 
             # Run ServerApp
-            run(**kwargs)
+            run(
+                driver=_driver,
+                server_app_dir=_server_app_dir,
+                server_app_run_config=_server_app_run_config,
+                server_app_attr=_server_app_attr,
+                loaded_server_app=_server_app,
+            )
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, "ServerApp thread raised an exception: %s", ex)
             log(ERROR, traceback.format_exc())
@@ -161,13 +174,15 @@ def run_serverapp_th(
 
     serverapp_th = threading.Thread(
         target=server_th_with_start_checks,
-        args=(enable_tf_gpu_growth, f_stop),
-        kwargs={
-            "server_app_attr": server_app_attr,
-            "loaded_server_app": server_app,
-            "driver": driver,
-            "server_app_dir": app_dir,
-        },
+        args=(
+            enable_tf_gpu_growth,
+            f_stop,
+            driver,
+            app_dir,
+            server_app_run_config,
+            server_app_attr,
+            server_app,
+        ),
     )
     sleep(delay_launch)
     serverapp_th.start()
@@ -211,6 +226,7 @@ def _main_loop(
     try:
         # Create run (with empty fab_id and fab_version)
         run_id_ = state_factory.state().create_run("", "", {})
+        server_app_run_config = {}
 
         if run_id:
             _override_run_id(state_factory, run_id_to_replace=run_id_, run_id=run_id)
@@ -223,6 +239,7 @@ def _main_loop(
         serverapp_th = run_serverapp_th(
             server_app_attr=server_app_attr,
             server_app=server_app,
+            server_app_run_config=server_app_run_config,
             driver=driver,
             app_dir=app_dir,
             f_stop=f_stop,
