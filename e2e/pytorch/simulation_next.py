@@ -14,4 +14,4 @@ server_app = fl.server.ServerApp(
 # )
 
 
-raise ValueError('error')
+raise ValueError("error")
