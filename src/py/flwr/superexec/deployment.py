@@ -80,7 +80,11 @@ class DeploymentEngine(Executor):
         config: Optional[Dict[str, str]],
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
-        print(config)
+        if config:
+            superlink_address = config.get("superlink_address", None)
+            if superlink_address:
+                self.address = superlink_address
+
         try:
             # Install FAB to flwr dir
             fab_version, fab_id = get_fab_metadata(fab_file)
