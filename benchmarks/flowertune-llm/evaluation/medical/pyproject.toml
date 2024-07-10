@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "medical-eval"
+version = "0.1.0"
+description = "Evaluation on Medical challenge"
+authors = [
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+]
+dependencies = [
+    "peft==0.6.2",
+    "pandas==2.2.2",
+    "scikit-learn==1.5.0",
+    "datasets==2.20.0",
+    "sentencepiece==0.2.0",
+    "protobuf==5.27.1",
+    "bitsandbytes==0.43.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
