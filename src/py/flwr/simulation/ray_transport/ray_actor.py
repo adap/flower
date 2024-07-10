@@ -398,12 +398,6 @@ class VirtualClientEngineActorPool(ActorPool):
         return self._fetch_future_result(cid)
 
 
-def init_ray(*args: Any, **kwargs: Any) -> None:
-    """Intialises Ray if not already initialised."""
-    if not ray.is_initialized():
-        ray.init(*args, **kwargs)
-
-
 class BasicActorPool:
     """A basic actor pool."""
 
