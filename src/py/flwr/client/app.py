@@ -243,12 +243,7 @@ def _start_client_internal(
         The data partition index associated with this node. Better suited for
         prototyping purposes.
     flwr_dir: Optional[Path] (default: None)
-        The path containing installed Flower Apps.
-        By default, this value is equal to:
-
-            - `$FLWR_HOME/` if `$FLWR_HOME` is defined
-            - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
-            - `$HOME/.flwr/` in all other cases
+        The fully resolved path containing installed Flower Apps.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -326,7 +321,7 @@ def _start_client_internal(
     )
 
     node_state = NodeState(partition_id=partition_id)
-    run_info: Dict[int, Run] = {}
+    runs: Dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
@@ -376,15 +371,17 @@ def _start_client_internal(
 
                     # Get run info
                     run_id = message.metadata.run_id
-                    if run_id not in run_info:
+                    if run_id not in runs:
                         if get_run is not None:
-                            run_info[run_id] = get_run(run_id)
+                            runs[run_id] = get_run(run_id)
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
-                            run_info[run_id] = Run(run_id, "", "", {})
+                            runs[run_id] = Run(run_id, "", "", {})
 
                     # Register context for this run
-                    node_state.register_context(run_id=run_id)
+                    node_state.register_context(
+                        run_id=run_id, run=runs[run_id], flwr_dir=flwr_dir
+                    )
 
                     # Retrieve context for this run
                     context = node_state.retrieve_context(run_id=run_id)
@@ -399,7 +396,7 @@ def _start_client_internal(
                     # Handle app loading and task message
                     try:
                         # Load ClientApp instance
-                        run: Run = run_info[run_id]
+                        run: Run = runs[run_id]
                         client_app: ClientApp = load_client_app_fn(
                             run.fab_id, run.fab_version
                         )
