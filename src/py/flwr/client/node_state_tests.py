@@ -59,7 +59,7 @@ def test_multirun_in_node_state() -> None:
         node_state.update_context(run_id=run_id, context=updated_state)
 
     # Verify values
-    for run_id, run_info in node_state.run_info_dict.items():
+    for run_id, run_info in node_state.run_info.items():
         assert (
             run_info.context.state.configs_records["counter"]["count"]
             == expected_values[run_id]
