@@ -6,9 +6,6 @@ import pandas as pd
 
 import flwr as fl
 
-for entry in os.listdir("."):
-    print(entry)
-
 df = pd.read_csv("./framework-pandas/data/client.csv")
 
 column_names = ["sepal length (cm)", "sepal width (cm)"]
@@ -37,6 +34,8 @@ class FlowerClient(fl.client.NumPyClient):
 
 
 def client_fn(cid):
+    for entry in os.listdir("."):
+        print(entry)
     return FlowerClient().to_client()
 
 
