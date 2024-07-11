@@ -25,7 +25,7 @@ from .strategy import Strategy
 
 
 @dataclass
-class ServerAppComponents:
+class ServerAppComponents:  # pylint: disable=too-many-instance-attributes
     """Components to construct a ServerApp.
 
     Parameters
