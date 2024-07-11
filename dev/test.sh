@@ -11,7 +11,7 @@ clang-format --Werror --dry-run src/proto/flwr/proto/*
 echo "- clang-format:  done"
 
 echo "- isort: start"
-python -m isort --check-only --skip src/py/flwr/proto src/py/flwr e2e
+python -m isort --check-only --skip src/py/flwr/proto src/py/flwr benchmarks e2e
 echo "- isort: done"
 
 echo "- black: start"

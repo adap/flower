@@ -66,44 +66,39 @@ jobs:
 
           - directory: bare-client-auth
 
-          - directory: jax-framework
+          - directory: framework-jax
 
-          - directory: pytorch-framework
+          - directory: framework-pytorch
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
-          - directory: tensorflow-framework
+          - directory: framework-tensorflow
             dataset: |
               import tensorflow as tf
               tf.keras.datasets.cifar10.load_data()
 
-          - directory: tabnet-framework
-            dataset: |
-              import tensorflow_datasets as tfds
-              tfds.load(name='iris', split=tfds.Split.TRAIN)
-
-          - directory: opacus-framework
+          - directory: framework-opacus
             dataset: |
               from torchvision.datasets import CIFAR10
               CIFAR10('./data', download=True)
 
-          - directory: pytorch-lightning-framework
+          - directory: framework-pytorch-lightning
             dataset: |
               from torchvision.datasets import MNIST
               MNIST('./data', download=True)
 
-          - directory: scikit-learn-framework
+          - directory: framework-scikit-learn
             dataset: |
               import openml
               openml.datasets.get_dataset(554)
 
-          - directory: fastai-framework
+          - directory: framework-fastai
             dataset: |
               from fastai.vision.all import untar_data, URLs
               untar_data(URLs.MNIST)
 
-          - directory: pandas-framework
+          - directory: framework-pandas
             dataset: |
               from pathlib import Path
               from sklearn.datasets import load_iris
