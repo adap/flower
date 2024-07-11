@@ -6,7 +6,7 @@ import pandas as pd
 
 import flwr as fl
 
-contents = os.listdir(".")
+contents = os.listdir("./data")
 raise ValueError((f"Directory contents: {', '.join(contents)}"))
 
 df = pd.read_csv("./framework-pandas/data/client.csv")
