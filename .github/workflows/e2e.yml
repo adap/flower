@@ -139,7 +139,7 @@ jobs:
         if: ${{ matrix.dataset }}
         run: python -c "${{ matrix.dataset }}"
       - name: Run edge client test
-        if: ${{ matrix.directory != 'bare-client-auth' && matrix.directory != 'framework-pandas'}}
+        if: ${{ matrix.directory != 'bare-client-auth'}}
         run: ./../test_legacy.sh "${{ matrix.directory }}"
       - name: Run virtual client test
         if: ${{ matrix.directory != 'bare-client-auth' && matrix.directory != 'bare-https'}}
