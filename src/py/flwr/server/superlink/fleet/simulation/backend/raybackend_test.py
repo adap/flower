@@ -37,8 +37,8 @@ from flwr.common import (
 )
 from flwr.common.object_ref import load_app
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
-from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
-from flwr.server.superlink.fleet.vce.backend.raybackend import RayBackend
+from flwr.server.superlink.fleet.simulation.backend.backend import BackendConfig
+from flwr.server.superlink.fleet.simulation.backend.raybackend import RayBackend
 
 
 class DummyClient(NumPyClient):

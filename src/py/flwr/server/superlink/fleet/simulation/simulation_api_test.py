@@ -37,10 +37,10 @@ from flwr.common import (
 from flwr.common.recordset_compat import getpropertiesins_to_recordset
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run
-from flwr.server.superlink.fleet.vce.vce_api import (
+from flwr.server.superlink.fleet.simulation.simulation_api import (
     NodeToPartitionMapping,
     _register_nodes,
-    start_vce,
+    start_simulation,
 )
 from flwr.server.superlink.state import InMemoryState, StateFactory
 
@@ -165,7 +165,7 @@ def start_and_shutdown(
     if not app_dir:
         app_dir = _autoresolve_app_dir()
 
-    start_vce(
+    start_simulation(
         num_supernodes=num_supernodes,
         client_app_attr=client_app_attr,
         backend_name=backend,

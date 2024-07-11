@@ -31,8 +31,8 @@ from flwr.common.typing import Run
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
-from flwr.server.superlink.fleet import vce
-from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
+from flwr.server.superlink.fleet import simulation
+from flwr.server.superlink.fleet.simulation.backend.backend import BackendConfig
 from flwr.server.superlink.state import StateFactory
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
@@ -250,7 +250,7 @@ def _main_loop(
 
         # SuperLink with Simulation Engine
         event(EventType.RUN_SUPERLINK_ENTER)
-        vce.start_vce(
+        simulation.start_simulation(
             num_supernodes=num_supernodes,
             client_app_attr=client_app_attr,
             client_app=client_app,
