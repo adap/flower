@@ -17,7 +17,7 @@
 
 from typing import Callable, Optional
 
-from flwr.common import Context, RecordSet
+from flwr.common import Context
 from flwr.common.logger import (
     warn_deprecated_feature_with_example,
     warn_preview_feature,
