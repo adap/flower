@@ -156,7 +156,7 @@ class PathologicalPartitioner(Partitioner):
             return
         self._determine_partition_id_to_unique_labels()
         assert self._unique_labels is not None
-        self._determine_unique_label_to_times_used()
+        self._count_partitions_having_each_unique_label()
 
         labels = np.asarray(self.dataset[self._partition_by])
         self._check_correctness_of_unique_label_to_times_used_counter(labels)
@@ -258,8 +258,8 @@ class PathologicalPartitioner(Partitioner):
                 f"'first-deterministic'. You provided: {self._class_assignment_mode}."
             )
 
-    def _determine_unique_label_to_times_used(self) -> None:
-        """Determine how many times the label is used in the partitions.
+    def _count_partitions_having_each_unique_label(self) -> None:
+        """Count the number of partitions that have each unique label.
 
         This computation is based on the assigment of the label to the partition_id in
         the `_determine_partition_id_to_unique_labels` method.
