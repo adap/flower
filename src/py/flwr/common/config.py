@@ -16,13 +16,13 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast, get_args
 
 import tomli
 
 from flwr.cli.config_utils import validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
-from flwr.common.typing import ConfigsRecordValues, Run, ValueList
+from flwr.common.typing import ConfigsRecordValues, ConfigsScalarList, Run
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
@@ -116,12 +116,13 @@ def flatten_dict(
         new_key = f"{parent_key}{separator}{k}" if parent_key else k
         if isinstance(v, dict):
             items.extend(flatten_dict(v, parent_key=new_key).items())
-        valid = False
-        for value_type in ValueList:
-            if isinstance(v, value_type):
-                valid = True
-                items.append((new_key, cast(ConfigsRecordValues, v)))
-        if not valid:
+        elif isinstance(v, get_args(ConfigsRecordValues)):
+            items.append((new_key, cast(ConfigsRecordValues, v)))
+        elif isinstance(v, list) and any(
+            isinstance(v, list_type) for list_type in get_args(ConfigsScalarList)
+        ):
+            items.append((new_key, cast(ConfigsRecordValues, v)))
+        else:
             raise ValueError(
                 f"The value for key {k} needs to be of type `int`, `float`, "
                 "`bool, `str`, a `list` of those, or  a `dict` of those.",
@@ -148,9 +149,8 @@ def parse_config_args(
         with Path(overrides_list[0]).open("rb") as config_file:
             overrides = flatten_dict(tomli.load(config_file))
     else:
-        # TODO: Handle types
-        for kv_pair in overrides_list:
-            key, value = kv_pair.split("=")
-            overrides[key] = value
+        toml_str = "\n".join(overrides_list)
+        overrides = tomli.loads(toml_str)
+        print(overrides)
 
     return overrides

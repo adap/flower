@@ -29,8 +29,12 @@ from flwr.common.config import parse_config_args
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
-from flwr.common.typing import ConfigsRecordValues
-from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
+from flwr.common.serde import record_value_dict_to_proto
+from flwr.common.typing import ConfigsRecordValues, ValueList
+
+# pylint: disable=E0611
+from flwr.proto.common_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
+from flwr.proto.exec_pb2 import StartRunRequest
 from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
 
@@ -149,7 +153,9 @@ def _start_superexec_run(
 
     req = StartRunRequest(
         fab_file=Path(fab_path).read_bytes(),
-        override_config=override_config,
+        override_config=record_value_dict_to_proto(
+            override_config, ValueList, ProtoConfigsRecordValue
+        ),
     )
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
