@@ -112,9 +112,7 @@ def _validate_run_config(config_dict: Dict[str, Any], errors: List[str]) -> None
     for key, value in config_dict.items():
         if isinstance(value, dict):
             _validate_run_config(config_dict[key], errors)
-        if isinstance(value, str):
-            continue
-        else:
+        elif not isinstance(value, str):
             errors.append(f"Config value of key {key} is not of type `str`.")
 
 
