@@ -6,7 +6,31 @@ import pandas as pd
 
 import flwr as fl
 
-df = pd.read_csv("./data/client.csv")
+class FileNotFoundErrorWithDirContents(Exception):
+    def __init__(self, message):
+        super().__init__(message)
+
+def read_csv_with_error_handling(file_path):
+    try:
+        df = pd.read_csv(file_path)
+        return df
+    except FileNotFoundError as e:
+        directory = os.path.dirname(file_path)
+        try:
+            contents = os.listdir(directory)
+            raise FileNotFoundErrorWithDirContents(
+                f"{str(e)}\nDirectory contents: {', '.join(contents)}"
+            ) from e
+        except Exception as dir_error:
+            raise FileNotFoundErrorWithDirContents(
+                f"{str(e)}\nCould not list directory contents due to: {str(dir_error)}"
+            ) from e
+
+# Example usage
+try:
+    df = read_csv_with_error_handling("./data/client.csv")
+except FileNotFoundErrorWithDirContents as e:
+    print(e)
 
 column_names = ["sepal length (cm)", "sepal width (cm)"]
 
