@@ -17,7 +17,7 @@
 import subprocess
 import sys
 from logging import ERROR, INFO
-from typing import Optional
+from typing import Dict, Optional
 
 from typing_extensions import override
 
@@ -53,18 +53,32 @@ class DeploymentEngine(Executor):
             )
             self.stub = DriverStub(channel)
 
-    def _create_run(self, fab_id: str, fab_version: str) -> int:
+    def _create_run(
+        self,
+        fab_id: str,
+        fab_version: str,
+        override_config: Dict[str, str],
+    ) -> int:
         if self.stub is None:
             self._connect()
 
         assert self.stub is not None
 
-        req = CreateRunRequest(fab_id=fab_id, fab_version=fab_version)
+        req = CreateRunRequest(
+            fab_id=fab_id,
+            fab_version=fab_version,
+            override_config=override_config,
+        )
         res = self.stub.CreateRun(request=req)
         return int(res.run_id)
 
     @override
-    def start_run(self, fab_file: bytes, verbose: bool) -> Optional[RunTracker]:
+    def start_run(
+        self,
+        fab_file: bytes,
+        override_config: Dict[str, str],
+        verbose: bool
+    ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
             # Install FAB to flwr dir
@@ -79,7 +93,7 @@ class DeploymentEngine(Executor):
             )
 
             # Call SuperLink to create run
-            run_id: int = self._create_run(fab_id, fab_version)
+            run_id: int = self._create_run(fab_id, fab_version, override_config)
             log(INFO, "Created run %s", str(run_id))
 
             # Start ServerApp

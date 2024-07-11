@@ -17,7 +17,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from subprocess import Popen
-from typing import Optional
+from typing import Dict, Optional
 
 
 @dataclass
@@ -35,6 +35,7 @@ class Executor(ABC):
     def start_run(
         self,
         fab_file: bytes,
+        override_config: Dict[str, str]
         verbose: bool,
     ) -> Optional[RunTracker]:
         """Start a run using the given Flower FAB ID and version.
