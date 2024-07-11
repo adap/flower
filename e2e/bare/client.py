@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 import numpy as np
 
@@ -52,7 +51,7 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(cid):
     return FlowerClient().to_client()
 
 

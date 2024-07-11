@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 
 import flwr as fl
@@ -25,7 +23,7 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, 1, {"accuracy": accuracy}
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(cid):
     return FlowerClient().to_client()
 
 
