@@ -1,10 +1,13 @@
-import flwr as fl
-import utils
-from sklearn.metrics import log_loss
-from sklearn.linear_model import LogisticRegression
+"""sklearn_example: A Flower / scikit-learn app."""
+
 from typing import Dict
 
+import utils
 from flwr_datasets import FederatedDataset
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import log_loss
+
+import flwr as fl
 
 
 def fit_round(server_round: int) -> Dict:
