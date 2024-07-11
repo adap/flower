@@ -39,8 +39,10 @@ class ServerApp:
     >>> def server_fn(context: Context):
     >>>     server_config = ServerConfig(num_rounds=3)
     >>>     strategy = FedAvg()
-    >>>     return ServerAppComponents(strategy=strategy,
-    >>>                                server_config=server_config)
+    >>>     return ServerAppComponents(
+    >>>         strategy=strategy,
+    >>>         server_config=server_config,
+    >>>    )
     >>> app = ServerApp(
     >>>     server_fn=server_fn
     >>> )
