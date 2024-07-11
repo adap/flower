@@ -46,19 +46,7 @@ class ServerAppComponents:  # pylint: disable=too-many-instance-attributes
         will be used.
     """
 
-    server: Optional[Server]
-    config: Optional[ServerConfig]
-    strategy: Optional[Strategy]
-    client_manager: Optional[ClientManager]
-
-    def __init__(
-        self,
-        server: Optional[Server] = None,
-        config: Optional[ServerConfig] = None,
-        strategy: Optional[Strategy] = None,
-        client_manager: Optional[ClientManager] = None,
-    ) -> None:
-        self.server = server
-        self.config = config
-        self.strategy = strategy
-        self.client_manager = client_manager
+    server: Optional[Server] = None
+    config: Optional[ServerConfig] = None
+    strategy: Optional[Strategy] = None
+    client_manager: Optional[ClientManager] = None
