@@ -129,7 +129,7 @@ def run_serverapp_th(
     server_app_run_config: Dict[str, str],
     driver: Driver,
     app_dir: str,
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
     has_exception: threading.Event,
     enable_tf_gpu_growth: bool,
     delay_launch: int = 3,
@@ -138,7 +138,7 @@ def run_serverapp_th(
 
     def server_th_with_start_checks(
         tf_gpu_growth: bool,
-        stop_event: asyncio.Event,
+        stop_event: threading.Event,
         exception_event: threading.Event,
         _driver: Driver,
         _server_app_dir: str,
@@ -225,7 +225,7 @@ def _main_loop(
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
 
-    f_stop = asyncio.Event()
+    f_stop = threading.Event()
     # A Threading event to indicate if an exception was raised in the ServerApp thread
     server_app_thread_has_exception = threading.Event()
     serverapp_th = None
