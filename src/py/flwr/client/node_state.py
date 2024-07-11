@@ -29,7 +29,7 @@ class NodeState:
     def __init__(self, partition_id: Optional[int]) -> None:
         self._meta: Dict[str, Any] = {}  # holds metadata about the node
         self.run_contexts: Dict[int, Context] = {}
-        self._initial_run_config: Dict[str, str] = {}
+        self._initial_run_configs: Dict[int, Dict[str, str]] = {}
         self._partition_id = partition_id
 
     def register_context(
@@ -41,10 +41,10 @@ class NodeState:
         """Register new run context for this node."""
         if run_id not in self.run_contexts:
             if run_info is not None:
-                self._initial_run_config = get_fused_config(run_info, flwr_dir)
+                self._initial_run_configs[run_id] = get_fused_config(run_info, flwr_dir)
             self.run_contexts[run_id] = Context(
                 state=RecordSet(),
-                run_config=self._initial_run_config.copy(),
+                run_config=self._initial_run_configs[run_id].copy(),
                 partition_id=self._partition_id,
             )
 
@@ -61,7 +61,7 @@ class NodeState:
 
     def update_context(self, run_id: int, context: Context) -> None:
         """Update run context."""
-        if context.run_config != self._initial_run_config:
+        if context.run_config != self._initial_run_configs[run_id]:
             raise ValueError(
                 "The `run_config` field of the `Context` object cannot be "
                 f"modified (run_id: {run_id})."
