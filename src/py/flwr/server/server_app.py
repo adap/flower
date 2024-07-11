@@ -18,10 +18,7 @@
 from typing import Callable, Optional
 
 from flwr.common import Context
-from flwr.common.logger import (
-    warn_deprecated_feature_with_example,
-    warn_preview_feature,
-)
+from flwr.common.logger import warn_deprecated_feature, warn_preview_feature
 from flwr.server.strategy import Strategy
 
 from .client_manager import ClientManager
@@ -81,15 +78,14 @@ class ServerApp:
         server_fn: Optional[ServerFn] = None,
     ) -> None:
         if any([server, config, strategy, client_manager]):
-            warn_deprecated_feature_with_example(
-                deprecation_message="Passing either `server`, `config`, `strategy` or "
+            warn_deprecated_feature(
+                "Passing either `server`, `config`, `strategy` or "
                 "`client_manager` directly to the ServerApp "
-                "constructor is deprecated.",
-                example_message="Pass `ServerApp` arguments wrapped "
+                "constructor is deprecated. Pass them instead wrapped "
                 "in a `flwr.server.ServerAppComponents` object that gets "
                 "returned by a function passed as the `server_fn` argument "
-                "to the `ServerApp` constructor. For example: ",
-                code_example=SERVER_FN_USAGE_EXAMPLE,
+                "to the `ServerApp` constructor. For example: "
+                f"{SERVER_FN_USAGE_EXAMPLE}"
             )
 
             if server_fn:
