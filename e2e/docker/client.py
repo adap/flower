@@ -122,7 +122,7 @@ class FlowerClient(NumPyClient):
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(cid):
     """Create and return an instance of Flower `Client`."""
     return FlowerClient().to_client()
 
