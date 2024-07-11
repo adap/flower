@@ -40,8 +40,9 @@ class NodeState:
     ) -> None:
         """Register new run context for this node."""
         if run_id not in self.run_contexts:
-            if run_info is not None:
-                self._initial_run_configs[run_id] = get_fused_config(run_info, flwr_dir)
+            self._initial_run_configs[run_id] = (
+                get_fused_config(run_info, flwr_dir) if run_info else {}
+            )
             self.run_contexts[run_id] = Context(
                 state=RecordSet(),
                 run_config=self._initial_run_configs[run_id].copy(),
