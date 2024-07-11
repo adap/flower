@@ -14,8 +14,8 @@
 # ==============================================================================
 """Fleet Simulation Engine side."""
 
-from .vce_api import start_vce
+from .simulation_api import start_simulation
 
 __all__ = [
-    "start_vce",
+    "start_simulation",
 ]
