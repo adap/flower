@@ -16,14 +16,15 @@
 
 import time
 import warnings
-from logging import DEBUG, WARNING
-from typing import Iterable, List, Optional, cast
+from logging import DEBUG, INFO, WARN, WARNING
+from typing import Any, Callable, Iterable, List, Optional, cast
 
 import grpc
 
 from flwr.common import DEFAULT_TTL, EventType, Message, Metadata, RecordSet, event
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
+from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
 from flwr.common.serde import message_from_taskres, message_to_taskins
 from flwr.common.typing import Run
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
@@ -51,7 +52,68 @@ Call `connect()` on the `GrpcDriverStub` instance before calling any of the othe
 """
 
 
-class GrpcDriver(Driver):
+def _on_sucess(retry_state: RetryState) -> None:
+    if retry_state.tries > 1:
+        log(
+            INFO,
+            "Connection successful after %.2f seconds and %s tries.",
+            retry_state.elapsed_time,
+            retry_state.tries,
+        )
+
+
+def _on_backoff(retry_state: RetryState) -> None:
+    if retry_state.tries == 1:
+        log(WARN, "Connection attempt failed, retrying...")
+    else:
+        log(
+            DEBUG,
+            "Connection attempt failed, retrying in %.2f seconds",
+            retry_state.actual_wait,
+        )
+
+
+def _on_giveup(retry_state: RetryState) -> None:
+    if retry_state.tries > 1:
+        log(
+            WARN,
+            "Giving up reconnection after %.2f seconds and %s tries.",
+            retry_state.elapsed_time,
+            retry_state.tries,
+        )
+
+
+class ReliableStub:
+    """Wrapper around the `DriverStub` class."""
+
+    CreateRun: Callable[..., Any]
+    GetNodes: Callable[..., Any]
+    PushTaskIns: Callable[..., Any]
+    PullTaskRes: Callable[..., Any]
+    GetRun: Callable[..., Any]
+
+    def __init__(self, retrier: RetryInvoker, stub: DriverStub) -> None:
+        self.retrier = retrier
+        self.stub = stub
+
+    def __getattribute__(self, name: str) -> Any:
+        """Use `RetryInvoker` for GRPC calls."""
+        if name in ("stub", "retrier"):
+            return super().__getattribute__(name)
+
+        if name not in (
+            "CreateRun",
+            "GetNodes",
+            "PushTaskIns",
+            "PullTaskRes",
+            "GetRun",
+        ):
+            raise NotImplementedError(f"Invalid Driver GRPC call: {name}")
+        method = getattr(self.stub, name)
+        return lambda *args, **kwargs: self.retrier.invoke(method, *args, **kwargs)
+
+
+class GrpcDriver(Driver):  # pylint: disable=too-many-instance-attributes
     """`GrpcDriver` provides an interface to the Driver API.
 
     Parameters
@@ -71,14 +133,25 @@ class GrpcDriver(Driver):
         run_id: int,
         driver_service_address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
         root_certificates: Optional[bytes] = None,
+        max_retries: Optional[int] = None,
+        max_wait_time: Optional[float] = None,
     ) -> None:
         self._run_id = run_id
         self._addr = driver_service_address
         self._cert = root_certificates
         self._run: Optional[Run] = None
-        self._grpc_stub: Optional[DriverStub] = None
+        self._reliable_stub: Optional[ReliableStub] = None
         self._channel: Optional[grpc.Channel] = None
         self.node = Node(node_id=0, anonymous=True)
+        self._retrier = RetryInvoker(
+            wait_gen_factory=exponential,
+            recoverable_exceptions=grpc.RpcError,
+            max_tries=max_retries + 1 if max_retries is not None else None,
+            max_time=max_wait_time,
+            on_success=_on_sucess,
+            on_backoff=_on_backoff,
+            on_giveup=_on_giveup,
+        )
 
     @property
     def _is_connected(self) -> bool:
@@ -99,7 +172,9 @@ class GrpcDriver(Driver):
             insecure=(self._cert is None),
             root_certificates=self._cert,
         )
-        self._grpc_stub = DriverStub(self._channel)
+        stub = DriverStub(self._channel)
+        self._reliable_stub = ReliableStub(self._retrier, stub)
+
         log(DEBUG, "[Driver] Connected to %s", self._addr)
 
     def _disconnect(self) -> None:
@@ -110,7 +185,7 @@ class GrpcDriver(Driver):
             return
         channel: grpc.Channel = self._channel
         self._channel = None
-        self._grpc_stub = None
+        self._reliable_stub = None
         channel.close()
         log(DEBUG, "[Driver] Disconnected")
 
@@ -137,11 +212,11 @@ class GrpcDriver(Driver):
         return Run(**vars(self._run))
 
     @property
-    def _stub(self) -> DriverStub:
+    def _stub(self) -> ReliableStub:
         """Driver stub."""
         if not self._is_connected:
             self._connect()
-        return cast(DriverStub, self._grpc_stub)
+        return cast(ReliableStub, self._reliable_stub)
 
     def _check_message(self, message: Message) -> None:
         # Check if the message is valid

@@ -32,6 +32,8 @@ from flwr.proto.task_pb2 import Task, TaskRes  # pylint: disable=E0611
 
 from .grpc_driver import GrpcDriver
 
+MODULE = "flwr.server.driver.grpc_driver"
+
 
 class TestGrpcDriver(unittest.TestCase):
     """Tests for `GrpcDriver` class."""
@@ -42,12 +44,15 @@ class TestGrpcDriver(unittest.TestCase):
             run=Run(run_id=61016, fab_id="mock/mock", fab_version="v1.0.0")
         )
         self.mock_stub = Mock()
-        self.mock_channel = Mock()
         self.mock_stub.GetRun.return_value = mock_response
         mock_response.HasField.return_value = True
         self.driver = GrpcDriver(run_id=61016)
-        self.driver._grpc_stub = self.mock_stub  # pylint: disable=protected-access
-        self.driver._channel = self.mock_channel  # pylint: disable=protected-access
+        self.patcher = patch(f"{MODULE}.DriverStub", return_value=self.mock_stub)
+        self.patcher.start()
+
+    def tearDown(self) -> None:
+        """Cleanup."""
+        self.patcher.stop()
 
     def test_init_grpc_driver(self) -> None:
         """Test GrpcDriverStub initialization."""
@@ -185,20 +190,25 @@ class TestGrpcDriver(unittest.TestCase):
 
     def test_del_with_initialized_driver(self) -> None:
         """Test cleanup behavior when Driver is initialized."""
+        # Prepare
+        mock_channel = Mock()
+
         # Execute
-        self.driver.close()
+        with patch(f"{MODULE}.create_channel", return_value=mock_channel):
+            self.driver._connect()  # pylint: disable=protected-access
+            self.driver.close()
 
         # Assert
-        self.mock_channel.close.assert_called_once()
+        mock_channel.close.assert_called_once()
 
     def test_del_with_uninitialized_driver(self) -> None:
         """Test cleanup behavior when Driver is not initialized."""
         # Prepare
-        self.driver._grpc_stub = None  # pylint: disable=protected-access
-        self.driver._channel = None  # pylint: disable=protected-access
+        mock_channel = Mock()
 
         # Execute
-        self.driver.close()
+        with patch(f"{MODULE}.create_channel", return_value=mock_channel):
+            self.driver.close()
 
         # Assert
-        self.mock_channel.close.assert_not_called()
+        mock_channel.close.assert_not_called()
