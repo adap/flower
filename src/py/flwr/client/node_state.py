@@ -21,7 +21,7 @@ from typing import Any, Dict, Optional
 
 from flwr.common import Context, RecordSet
 from flwr.common.config import get_fused_config
-from flwr.common.typing import Value, Run
+from flwr.common.typing import Run, Value
 
 
 @dataclass()
