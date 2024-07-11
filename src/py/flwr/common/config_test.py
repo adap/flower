@@ -17,10 +17,11 @@
 import os
 import textwrap
 from pathlib import Path
-from unittest.mock import patch
 from typing import Dict
+from unittest.mock import patch
 
 import pytest
+
 from flwr.common.typing import ConfigsRecordValues
 
 from .config import (
