@@ -15,21 +15,42 @@
 """ServerAppComponents for the ServerApp."""
 
 
-
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Optional
 
-from .server import Server, ServerConfig
-from .strategy import Strategy
 from .client_manager import ClientManager
+from .server import Server
+from .server_config import ServerConfig
+from .strategy import Strategy
+
 
 @dataclass
 class ServerAppComponents:
+    """Components to construct a ServerApp.
+
+    Parameters
+    ----------
+    server : Optional[Server] (default: None)
+        A server implementation, either `flwr.server.Server` or a subclass
+        thereof. If no instance is provided, one will be created internally.
+    config : Optional[ServerConfig] (default: None)
+        Currently supported values are `num_rounds` (int, default: 1) and
+        `round_timeout` in seconds (float, default: None).
+    strategy : Optional[Strategy] (default: None)
+        An implementation of the abstract base class
+        `flwr.server.strategy.Strategy`. If no strategy is provided, then
+        `flwr.server.strategy.FedAvg` will be used.
+    client_manager : Optional[ClientManager] (default: None)
+        An implementation of the class `flwr.server.ClientManager`. If no
+        implementation is provided, then `flwr.server.SimpleClientManager`
+        will be used.
+    """
+
     server: Optional[Server]
     config: Optional[ServerConfig]
     strategy: Optional[Strategy]
     client_manager: Optional[ClientManager]
-    
+
     def __init__(
         self,
         server: Optional[Server] = None,
