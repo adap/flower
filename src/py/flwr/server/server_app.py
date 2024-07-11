@@ -28,6 +28,19 @@ from .server import Server
 from .server_config import ServerConfig
 from .typing import ServerAppCallable, ServerFn
 
+SERVER_FN_USAGE_EXAMPLE = """
+
+        def server_fn(context: Context):
+            server_config = ServerConfig(num_rounds=3)
+            strategy = FedAvg()
+            return ServerAppComponents(
+                strategy=strategy,
+                server_config=server_config,
+        )
+
+        app = ServerApp(server_fn=server_fn)
+"""
+
 
 class ServerApp:
     """Flower ServerApp.
@@ -43,9 +56,8 @@ class ServerApp:
     >>>         strategy=strategy,
     >>>         server_config=server_config,
     >>>    )
-    >>> app = ServerApp(
-    >>>     server_fn=server_fn
-    >>> )
+    >>>
+    >>> app = ServerApp(server_fn=server_fn)
 
     Use the `ServerApp` with a custom main function:
 
@@ -72,7 +84,8 @@ class ServerApp:
                 "constructor is deprecated. Pass them instead wrapped "
                 "in a `flwr.server.ServerAppComponents` object that gets "
                 "returned by a function passed as the `server_fn` argument "
-                "to the `ServerApp` constructor."
+                "to the `ServerApp` constructor. For example: "
+                f"{SERVER_FN_USAGE_EXAMPLE}"
             )
 
             if server_fn:
