@@ -55,7 +55,7 @@ With a new project directory created, running a baseline challenge can be done b
 
 3. Run the challenge as indicated in the `Running the challenge` section in the `README.md`.
 
-## Evaluate pre-trained LLMs
+## Evaluate fine-tuned LLMs
 
 After the LLM fine-tuning finished, evaluate the performance of your pre-trained LLMs
 following the `README.md` in `evaluation` directory.

@@ -7,7 +7,7 @@ Strong LLMs, such as GPT-4, serve as judges to assess the quality of responses p
 ### Step 0. Set up Environment
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/benchmarks/flowertune-llm/evaluation/general-nlp . && rm -rf flower && cd general-nlp
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/benchmarks/flowertune-llm/evaluation/general-nlp ./flowertune-eval-general-nlp && rm -rf flower && cd flowertune-eval-general-nlp
 ```
 
 Create a new Python environment (we recommend Python 3.10), activate it, then install dependencies with:
