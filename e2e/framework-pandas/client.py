@@ -28,7 +28,7 @@ def read_csv_with_error_handling(file_path):
 
 # Example usage
 try:
-    df = read_csv_with_error_handling("./data/client.csv")
+    df = read_csv_with_error_handling("./framework-pandas/data/client.csv")
 except FileNotFoundErrorWithDirContents as e:
     print(e)
 
