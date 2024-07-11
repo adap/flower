@@ -10,16 +10,20 @@ framework=$1
 
 case "$framework" in
   framework-pandas)
-    server_app="$framework.server:app"
+    server_app="server:app"
+    client_app="client:app"
+    app_dir="./"
     ;;
   *)
     server_app="server:app"
+    client_app="${framework}.client:app"
+    app_dir="./.."
     ;;
 esac
 
-echo flower-simulation --server-app $server_app --client-app ${framework}.client:app --num-supernodes 2 --app-dir ./..
+echo flower-simulation --server-app $server_app --client-app $client_app --num-supernodes 2 --app-dir $app_dir
 
-timeout 2m flower-simulation --server-app $server_app --client-app ${framework}.client:app --num-supernodes 2 --app-dir ./.. &
+timeout 2m flower-simulation --server-app $server_app --client-app $client_app --num-supernodes 2 --app-dir $app_dir &
 pid=$!
 
 wait $pid
