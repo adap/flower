@@ -20,6 +20,7 @@ from logging import DEBUG
 from pathlib import Path
 from typing import Dict, Optional
 
+from py.flwr.common.typing import ConfigsRecordValues
 import typer
 from typing_extensions import Annotated
 
@@ -128,7 +129,7 @@ def run(
 
 
 def _start_superexec_run(
-    override_config: Dict[str, str], directory: Optional[Path]
+    override_config: Dict[str, ConfigsRecordValues], directory: Optional[Path]
 ) -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
