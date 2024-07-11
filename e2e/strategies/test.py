@@ -1,4 +1,5 @@
 from sys import argv
+from typing import Optional
 
 import tensorflow as tf
 from client import SUBSET_SIZE, FlowerClient, get_model
@@ -42,8 +43,7 @@ def get_strat(name):
 init_model = get_model()
 
 
-def client_fn(cid):
-    _ = cid
+def client_fn(node_id: int, partition_id: Optional[int]):
     return FlowerClient()
 
 

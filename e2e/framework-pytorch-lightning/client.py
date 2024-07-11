@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Optional
 
 import mnist
 import pytorch_lightning as pl
@@ -51,7 +52,7 @@ def _set_parameters(model, parameters):
     model.load_state_dict(state_dict, strict=True)
 
 
-def client_fn(cid):
+def client_fn(node_id: int, partition_id: Optional[int]):
     model = mnist.LitAutoEncoder()
     train_loader, val_loader, test_loader = mnist.load_data()
 

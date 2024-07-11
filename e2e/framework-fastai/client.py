@@ -1,5 +1,6 @@
 import warnings
 from collections import OrderedDict
+from typing import Optional
 
 import numpy as np
 import torch
@@ -49,7 +50,7 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(dls.valid), {"accuracy": 1 - error_rate}
 
 
-def client_fn(cid):
+def client_fn(node_id: int, partition_id: Optional[int]):
     return FlowerClient().to_client()
 
 

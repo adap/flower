@@ -1,5 +1,6 @@
 import math
 from collections import OrderedDict
+from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -139,7 +140,7 @@ class FlowerClient(fl.client.NumPyClient):
         return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
 
-def client_fn(cid):
+def client_fn(node_id: int, partition_id: Optional[int]):
     model = Net()
     return FlowerClient(model).to_client()
 

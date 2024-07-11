@@ -1,5 +1,6 @@
 import warnings
 from collections import OrderedDict
+from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -122,7 +123,7 @@ class FlowerClient(NumPyClient):
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
-def client_fn(cid: str):
+def client_fn(node_id: int, partition_id: Optional[int]):
     """Create and return an instance of Flower `Client`."""
     return FlowerClient().to_client()
 

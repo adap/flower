@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 
@@ -25,7 +26,7 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, 1, {"accuracy": accuracy}
 
 
-def client_fn(cid):
+def client_fn(node_id: int, partition_id: Optional[int]):
     return FlowerClient().to_client()
 
 
