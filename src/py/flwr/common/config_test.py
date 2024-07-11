@@ -18,8 +18,10 @@ import os
 import textwrap
 from pathlib import Path
 from unittest.mock import patch
+from typing import Dict
 
 import pytest
+from flwr.common.typing import ConfigsRecordValues
 
 from .config import (
     _fuse_dicts,
@@ -101,23 +103,23 @@ def test_get_fused_config_valid(tmp_path: Path) -> None:
         clientapp = "fedgpt.client:app"
 
         [flower.config]
-        num_server_rounds = "10"
-        momentum = "0.1"
-        lr = "0.01"
+        num_server_rounds = 10
+        momentum = 0.1
+        lr = 0.01
         serverapp.test = "key"
 
         [flower.config.clientapp]
         test = "key"
     """
-    overrides = {
-        "num_server_rounds": "5",
-        "lr": "0.2",
+    overrides: Dict[str, ConfigsRecordValues] = {
+        "num_server_rounds": 5,
+        "lr": 0.2,
         "serverapp.test": "overriden",
     }
     expected_config = {
-        "num_server_rounds": "5",
-        "momentum": "0.1",
-        "lr": "0.2",
+        "num_server_rounds": 5,
+        "momentum": 0.1,
+        "lr": 0.2,
         "serverapp.test": "overriden",
         "clientapp.test": "key",
     }

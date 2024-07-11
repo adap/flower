@@ -16,13 +16,13 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import tomli
 
 from flwr.cli.config_utils import validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
-from flwr.common.typing import ConfigsRecordValues, Run
+from flwr.common.typing import ConfigsRecordValues, Run, ValueList
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
@@ -116,12 +116,15 @@ def flatten_dict(
         new_key = f"{parent_key}{separator}{k}" if parent_key else k
         if isinstance(v, dict):
             items.extend(flatten_dict(v, parent_key=new_key).items())
-        # TODO: Handle types
-        elif isinstance(v, str):
-            items.append((new_key, v))
-        else:
+        valid = False
+        for value_type in ValueList:
+            if isinstance(v, value_type):
+                valid = True
+                items.append((new_key, cast(ConfigsRecordValues, v)))
+        if not valid:
             raise ValueError(
-                f"The value for key {k} needs to be a `str` or a `dict`.",
+                f"The value for key {k} needs to be of type `int`, `float`, "
+                "`bool, `str`, a `list` of those, or  a `dict` of those.",
             )
     return dict(items)
 
