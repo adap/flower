@@ -32,19 +32,21 @@ from .typing import ClientAppCallable
 
 def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFnExt:
     client_fn_args = inspect.signature(client_fn).parameters
+    first_arg = list(client_fn_args.keys())[0]
 
-    if not all(key in client_fn_args for key in ["node_id", "partition_id"]):
+    if len(client_fn_args) != 1 or client_fn_args[first_arg] is not Context:
         warn_deprecated_feature(
-            "`client_fn` now expects a signature `def client_fn(node_id: int, "
-            "partition_id: Optional[int])`.\nYou provided `client_fn` with signature: "
+            "`client_fn` now expects a signature `def client_fn(context: Context)`."
+            "\nYou provided `client_fn` with signature: "
             f"{dict(client_fn_args.items())}"
         )
 
         # Wrap depcreated client_fn inside a function with the expected signature
-        def adaptor_fn(
-            node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
-        ) -> Client:
-            return client_fn(str(partition_id))  # type: ignore
+        def adaptor_fn(context: Context) -> Client:  # pylint: disable=unused-argument
+            # if patition-id is defined, pass it. Else pass node_id that should always
+            # be defined during Context init.
+            cid = context.node_config.get("partition-id", context.node_id) #TODO: missing
+            return client_fn(str(cid))  # type: ignore
 
         return adaptor_fn
 

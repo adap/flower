@@ -28,7 +28,7 @@ from grpc import RpcError
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
@@ -138,7 +138,7 @@ def start_client(
 
     Starting an SSL-enabled gRPC client using system certificates:
 
-    >>> def client_fn(node_id: int, partition_id: Optional[int]):
+    >>> def client_fn(context: Context):
     >>>     return FlowerClient()
     >>>
     >>> start_client(
@@ -253,8 +253,7 @@ def _start_client_internal(
         if client_fn is None:
             # Wrap `Client` instance in `client_fn`
             def single_client_factory(
-                node_id: int,  # pylint: disable=unused-argument
-                partition_id: Optional[int],  # pylint: disable=unused-argument
+                context: Context,  # pylint: disable=unused-argument
             ) -> Client:
                 if client is None:  # Added this to keep mypy happy
                     raise ValueError(
