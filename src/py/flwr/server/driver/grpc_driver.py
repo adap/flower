@@ -16,7 +16,7 @@
 
 import time
 import warnings
-from logging import DEBUG, INFO, WARN, WARNING
+from logging import DEBUG, INFO, WARNING
 from typing import Any, Callable, Iterable, List, Optional, cast
 
 import grpc
@@ -64,7 +64,7 @@ def _on_sucess(retry_state: RetryState) -> None:
 
 def _on_backoff(retry_state: RetryState) -> None:
     if retry_state.tries == 1:
-        log(WARN, "Connection attempt failed, retrying...")
+        log(WARNING, "Connection attempt failed, retrying...")
     else:
         log(
             DEBUG,
@@ -76,7 +76,7 @@ def _on_backoff(retry_state: RetryState) -> None:
 def _on_giveup(retry_state: RetryState) -> None:
     if retry_state.tries > 1:
         log(
-            WARN,
+            WARNING,
             "Giving up reconnection after %.2f seconds and %s tries.",
             retry_state.elapsed_time,
             retry_state.tries,
