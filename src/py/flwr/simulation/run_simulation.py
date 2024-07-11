@@ -216,12 +216,7 @@ def _main_loop(
     server_app: Optional[ServerApp] = None,
     server_app_attr: Optional[str] = None,
 ) -> None:
-    """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread.
-
-    Everything runs on the main thread or a separate one, depending on whether the main
-    thread already contains a running Asyncio event loop. This is the case if running
-    the Simulation Engine on a Jupyter/Colab notebook.
-    """
+    """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread."""
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
 
@@ -376,7 +371,6 @@ def _run_simulation(
     # Convert config to original JSON-stream format
     backend_config_stream = json.dumps(backend_config)
 
-    simulation_engine_th = None
     args = (
         num_supernodes,
         backend_name,
@@ -390,31 +384,26 @@ def _run_simulation(
         server_app_attr,
     )
     # Detect if there is an Asyncio event loop already running.
-    # If yes, run everything on a separate thread. In environments
-    # like Jupyter/Colab notebooks, there is an event loop present.
-    run_in_thread = False
+    # If yes, disable logger propagation. In environmnets
+    # like Jupyter/Colab notebooks, it's often better to do this.
+    asyncio_loop_running = False
     try:
         _ = (
             asyncio.get_running_loop()
         )  # Raises RuntimeError if no event loop is present
         log(DEBUG, "Asyncio event loop already running.")
 
-        run_in_thread = True
+        asyncio_loop_running = True
 
     except RuntimeError:
-        log(DEBUG, "No asyncio event loop running")
+        pass
 
     finally:
-        if run_in_thread:
+        if asyncio_loop_running:
             # Set logger propagation to False to prevent duplicated log output in Colab.
             logger = set_logger_propagation(logger, False)
-            log(DEBUG, "Starting Simulation Engine on a new thread.")
-            simulation_engine_th = threading.Thread(target=_main_loop, args=args)
-            simulation_engine_th.start()
-            simulation_engine_th.join()
-        else:
-            log(DEBUG, "Starting Simulation Engine on the main thread.")
-            _main_loop(*args)
+
+        _main_loop(*args)
 
 
 def _parse_args_run_simulation() -> argparse.ArgumentParser:
