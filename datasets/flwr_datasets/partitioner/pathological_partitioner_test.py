@@ -169,7 +169,6 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
         }
         dataset_2 = Dataset.from_dict(data)
         dataset = datasets.concatenate_datasets([dataset_1, dataset_2])
-        print(dataset[:])
 
         partitioner = PathologicalPartitioner(
             num_partitions=num_partitions,
@@ -217,7 +216,6 @@ class TestClassConstrainedPartitioner(unittest.TestCase):
             )
             partitioner.dataset = dataset
             partitioner.load_partition(0)
-        print(context.exception)
         self.assertEqual(
             str(context.exception),
             "The specified "
