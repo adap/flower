@@ -16,7 +16,7 @@
 
 
 import logging
-from logging import INFO, WARN, LogRecord
+from logging import WARN, LogRecord
 from logging.handlers import HTTPHandler
 from typing import TYPE_CHECKING, Any, Dict, Optional, TextIO, Tuple
 
