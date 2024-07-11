@@ -96,7 +96,7 @@ def run(
 
     if use_superexec:
         _start_superexec_run(
-            parse_config_args(config_overrides, separator=";"), directory
+            parse_config_args(config_overrides, separator=","), directory
         )
         return
 
