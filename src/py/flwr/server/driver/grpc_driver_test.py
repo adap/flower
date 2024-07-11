@@ -215,7 +215,7 @@ class TestGrpcDriver(unittest.TestCase):
         # Assert
         mock_channel.close.assert_not_called()
 
-    def test_retry_mechanism(self):
+    def test_retry_mechanism(self) -> None:
         """Test if the GrpcDriver is robust to network failures."""
         methods = ("CreateRun", "GetNodes", "PushTaskIns", "PullTaskRes", "GetRun")
         sleep_fn = time.sleep
@@ -226,7 +226,7 @@ class TestGrpcDriver(unittest.TestCase):
             # Prepare
             # Assume all communication is going through the GrpcDriver._stub
             mock_method = getattr(self.mock_stub, method_name)
-            method = getattr(self.driver._stub, method_name)
+            method = getattr(self.driver._stub, method_name)  # pylint: disable=W0212
             mock_response = Mock()
             mock_method.side_effect = [RpcError(), RpcError(), mock_response]
 
