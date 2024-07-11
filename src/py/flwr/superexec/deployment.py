@@ -26,7 +26,7 @@ from flwr.cli.install import install_from_fab
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
 from flwr.common.serde import record_value_dict_to_proto
-from flwr.common.typing import ConfigsRecordValues, ValueList
+from flwr.common.typing import Value, ValueList
 
 # pylint: disable=E0611
 from flwr.proto.common_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
@@ -62,7 +62,7 @@ class DeploymentEngine(Executor):
         self,
         fab_id: str,
         fab_version: str,
-        override_config: Dict[str, ConfigsRecordValues],
+        override_config: Dict[str, Value],
     ) -> int:
         if self.stub is None:
             self._connect()
@@ -81,7 +81,7 @@ class DeploymentEngine(Executor):
 
     @override
     def start_run(
-        self, fab_file: bytes, override_config: Dict[str, ConfigsRecordValues]
+        self, fab_file: bytes, override_config: Dict[str, Value]
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:

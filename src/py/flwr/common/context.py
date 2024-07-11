@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 
 from .record import RecordSet
-from .typing import ConfigsRecordValues
+from .typing import Value
 
 
 @dataclass
@@ -35,7 +35,7 @@ class Context:
         executing mods. It can also be used as a memory to access
         at different points during the lifecycle of this entity (e.g. across
         multiple rounds)
-    run_config : Dict[str, ConfigsRecordValues]
+    run_config : Dict[str, Value]
         A config (key/value mapping) held by the entity in a given run and that will
         stay local. It can be used at any point during the lifecycle of this entity
         (e.g. across multiple rounds)
@@ -47,12 +47,12 @@ class Context:
 
     state: RecordSet
     partition_id: Optional[int]
-    run_config: Dict[str, ConfigsRecordValues]
+    run_config: Dict[str, Value]
 
     def __init__(
         self,
         state: RecordSet,
-        run_config: Dict[str, ConfigsRecordValues],
+        run_config: Dict[str, Value],
         partition_id: Optional[int] = None,
     ) -> None:
         self.state = state

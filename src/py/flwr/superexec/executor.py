@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from subprocess import Popen
 from typing import Dict, Optional
 
-from flwr.common.typing import ConfigsRecordValues
+from flwr.common.typing import Value
 
 
 @dataclass
@@ -35,7 +35,7 @@ class Executor(ABC):
 
     @abstractmethod
     def start_run(
-        self, fab_file: bytes, override_config: Dict[str, ConfigsRecordValues]
+        self, fab_file: bytes, override_config: Dict[str, Value]
     ) -> Optional[RunTracker]:
         """Start a run using the given Flower FAB ID and version.
 
@@ -46,7 +46,7 @@ class Executor(ABC):
         ----------
         fab_file : bytes
             The Flower App Bundle file bytes.
-        override_config : Dict[str, ConfigsRecordValues]
+        override_config : Dict[str, Value]
             A dict containing key-value pairs to override the FAB config.
 
         Returns

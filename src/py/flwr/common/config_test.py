@@ -22,7 +22,7 @@ from unittest.mock import patch
 
 import pytest
 
-from flwr.common.typing import ConfigsRecordValues
+from flwr.common.typing import Value
 
 from .config import (
     _fuse_dicts,
@@ -112,7 +112,7 @@ def test_get_fused_config_valid(tmp_path: Path) -> None:
         [flower.config.clientapp]
         test = "key"
     """
-    overrides: Dict[str, ConfigsRecordValues] = {
+    overrides: Dict[str, Value] = {
         "num_server_rounds": 5,
         "lr": 0.2,
         "serverapp.test": "overriden",

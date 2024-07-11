@@ -30,7 +30,7 @@ from flwr.common.config import (
 )
 from flwr.common.logger import log, update_console_handler, warn_deprecated_feature
 from flwr.common.object_ref import load_app
-from flwr.common.typing import ConfigsRecordValues
+from flwr.common.typing import Value
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
     CreateRunResponse,
@@ -46,7 +46,7 @@ ADDRESS_DRIVER_API = "0.0.0.0:9091"
 def run(
     driver: Driver,
     server_app_dir: str,
-    server_app_run_config: Dict[str, ConfigsRecordValues],
+    server_app_run_config: Dict[str, Value],
     server_app_attr: Optional[str] = None,
     loaded_server_app: Optional[ServerApp] = None,
 ) -> None:

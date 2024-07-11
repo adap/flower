@@ -30,7 +30,7 @@ from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.common.serde import record_value_dict_to_proto
-from flwr.common.typing import ConfigsRecordValues, ValueList
+from flwr.common.typing import Value, ValueList
 
 # pylint: disable=E0611
 from flwr.proto.common_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
@@ -133,7 +133,7 @@ def run(
 
 
 def _start_superexec_run(
-    override_config: Dict[str, ConfigsRecordValues], directory: Optional[Path]
+    override_config: Dict[str, Value], directory: Optional[Path]
 ) -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
