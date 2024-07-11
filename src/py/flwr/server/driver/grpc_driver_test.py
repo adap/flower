@@ -19,6 +19,8 @@ import time
 import unittest
 from unittest.mock import Mock, patch
 
+from grpc import RpcError
+
 from flwr.common import DEFAULT_TTL, RecordSet
 from flwr.common.message import Error
 from flwr.common.serde import error_to_proto, recordset_to_proto
@@ -212,3 +214,27 @@ class TestGrpcDriver(unittest.TestCase):
 
         # Assert
         mock_channel.close.assert_not_called()
+
+    def test_retry_mechanism(self):
+        """Test if the GrpcDriver is robust to network failures."""
+        methods = ("CreateRun", "GetNodes", "PushTaskIns", "PullTaskRes", "GetRun")
+        sleep_fn = time.sleep
+        sleep_patch = patch("time.sleep", side_effect=lambda t: sleep_fn(t * 0.01))
+        sleep_patch.start()
+
+        for method_name in methods:
+            # Prepare
+            # Assume all communication is going through the GrpcDriver._stub
+            mock_method = getattr(self.mock_stub, method_name)
+            method = getattr(self.driver._stub, method_name)
+            mock_response = Mock()
+            mock_method.side_effect = [RpcError(), RpcError(), mock_response]
+
+            # Execute
+            res = method()
+
+            # Assert
+            assert res is mock_response
+            self.assertEqual(mock_method.call_count, 3)
+
+        sleep_patch.stop()
