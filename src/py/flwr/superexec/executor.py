@@ -35,7 +35,7 @@ class Executor(ABC):
     def start_run(
         self,
         fab_file: bytes,
-        override_config: Dict[str, str]
+        override_config: Dict[str, str],
         verbose: bool,
     ) -> Optional[RunTracker]:
         """Start a run using the given Flower FAB ID and version.

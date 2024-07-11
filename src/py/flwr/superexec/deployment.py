@@ -74,10 +74,7 @@ class DeploymentEngine(Executor):
 
     @override
     def start_run(
-        self,
-        fab_file: bytes,
-        override_config: Dict[str, str],
-        verbose: bool
+        self, fab_file: bytes, override_config: Dict[str, str], verbose: bool
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
