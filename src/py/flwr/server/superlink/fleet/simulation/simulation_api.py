@@ -154,7 +154,7 @@ def run(
     node_states: Dict[int, NodeState],
     f_stop: threading.Event,
 ) -> None:
-    """Run the VCE."""
+    """Run the Simulation Engine."""
     taskins_queue: "Queue[TaskIns]" = Queue()
     taskres_queue: "Queue[TaskRes]" = Queue()
 
