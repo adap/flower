@@ -58,7 +58,7 @@ class ServerAppComponents:  # pylint: disable=too-many-instance-attributes
         strategy: Optional[Strategy] = None,
         client_manager: Optional[ClientManager] = None,
     ) -> None:
-        self._server = server
-        self._config = config
-        self._strategy = strategy
-        self._client_manager = client_manager
+        self.server = server
+        self.config = config
+        self.strategy = strategy
+        self.client_manager = client_manager
