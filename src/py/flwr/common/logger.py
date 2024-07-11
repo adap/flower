@@ -16,7 +16,7 @@
 
 
 import logging
-from logging import WARN, LogRecord
+from logging import INFO, WARN, LogRecord
 from logging.handlers import HTTPHandler
 from typing import TYPE_CHECKING, Any, Dict, Optional, TextIO, Tuple
 
@@ -194,6 +194,32 @@ def warn_deprecated_feature(name: str) -> None:
             entirely in future versions of Flower.
         """,
         name,
+    )
+
+
+def warn_deprecated_feature_with_example(
+    deprecation_message: str, example_message: str, code_example: str
+) -> None:
+    """Warn if a feature is deprecated and show code example of preferred
+    alternative."""
+    log(
+        WARN,
+        """DEPRECATED FEATURE: %s
+
+            Check the following `FEATURE UPDATE` warning message for the preferred
+            new mechanism to use this feature in Flower.
+        """,
+        deprecation_message,
+    )
+    log(
+        WARN,
+        """FEATURE UPDATE: %s
+        ------------------------------------------------------------
+        %s
+        ------------------------------------------------------------
+        """,
+        example_message,
+        code_example,
     )
 
 
