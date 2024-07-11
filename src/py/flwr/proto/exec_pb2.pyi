@@ -27,16 +27,19 @@ class StartRunRequest(google.protobuf.message.Message):
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
     FAB_FILE_FIELD_NUMBER: builtins.int
+    VERBOSE_FIELD_NUMBER: builtins.int
     OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
     fab_file: builtins.bytes
+    verbose: builtins.bool
     @property
     def override_config(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
     def __init__(self,
         *,
         fab_file: builtins.bytes = ...,
+        verbose: builtins.bool = ...,
         override_config: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_file",b"fab_file","override_config",b"override_config"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab_file",b"fab_file","override_config",b"override_config","verbose",b"verbose"]) -> None: ...
 global___StartRunRequest = StartRunRequest
 
 class StartRunResponse(google.protobuf.message.Message):
