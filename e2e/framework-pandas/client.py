@@ -6,6 +6,9 @@ import pandas as pd
 
 import flwr as fl
 
+contents = os.listdir(".")
+raise ValueError((f"Directory contents: {', '.join(contents)}"))
+
 df = pd.read_csv("./framework-pandas/data/client.csv")
 
 column_names = ["sepal length (cm)", "sepal width (cm)"]
