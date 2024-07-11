@@ -1,9 +1,13 @@
+import os
 from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
 
 import flwr as fl
+
+for entry in os.listdir("."):
+    print(entry)
 
 df = pd.read_csv("./framework-pandas/data/client.csv")
 
