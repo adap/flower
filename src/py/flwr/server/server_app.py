@@ -58,7 +58,7 @@ class ServerApp:
     >>>     return ServerAppComponents(
     >>>         strategy=strategy,
     >>>         server_config=server_config,
-    >>>    )
+    >>>     )
     >>>
     >>> app = ServerApp(server_fn=server_fn)
 
