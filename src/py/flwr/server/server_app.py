@@ -127,7 +127,6 @@ class ServerApp:
             return
 
         # New execution mode
-        context = Context(state=RecordSet(), run_config={})
         self._main(driver, context)
 
     def main(self) -> Callable[[ServerAppCallable], ServerAppCallable]:
