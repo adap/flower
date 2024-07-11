@@ -2,6 +2,7 @@
 
 from typing import Dict
 
+import numpy as np
 from flwr_datasets import FederatedDataset
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
