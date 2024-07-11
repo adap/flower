@@ -179,7 +179,7 @@ def _get_load_client_app_fn(
         else:
             flwr_dir = Path(args.flwr_dir).absolute()
 
-    sys.path.insert(0, str(flwr_dir.absolute()))
+    inserted_path = None
 
     default_app_ref: str = getattr(args, "client-app")
 
@@ -189,6 +189,11 @@ def _get_load_client_app_fn(
             "Flower SuperNode will load and validate ClientApp `%s`",
             getattr(args, "client-app"),
         )
+        # Insert sys.path
+        dir_path = Path(args.dir).absolute()
+        sys.path.insert(0, str(dir_path))
+        inserted_path = str(dir_path)
+
         valid, error_msg = validate(default_app_ref)
         if not valid and error_msg:
             raise LoadClientAppError(error_msg) from None
@@ -197,7 +202,7 @@ def _get_load_client_app_fn(
         # If multi-app feature is disabled
         if not multi_app:
             # Get sys path to be inserted
-            sys_path = Path(args.dir).absolute()
+            dir_path = Path(args.dir).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -210,7 +215,7 @@ def _get_load_client_app_fn(
 
             log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
             # Get sys path to be inserted
-            sys_path = Path(args.dir).absolute()
+            dir_path = Path(args.dir).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -223,13 +228,21 @@ def _get_load_client_app_fn(
                 raise LoadClientAppError("Failed to load ClientApp") from e
 
             # Get sys path to be inserted
-            sys_path = Path(project_dir).absolute()
+            dir_path = Path(project_dir).absolute()
 
             # Set app reference
             client_app_ref = config["flower"]["components"]["clientapp"]
 
         # Set sys.path
-        sys.path.insert(0, str(sys_path))
+        nonlocal inserted_path
+        if inserted_path != str(dir_path):
+            # Remove the previously inserted path
+            if inserted_path is not None:
+                sys.path.remove(inserted_path)
+            # Insert the new path
+            sys.path.insert(0, str(dir_path))
+
+        inserted_path = str(dir_path)
 
         # Load ClientApp
         log(
@@ -237,7 +250,7 @@ def _get_load_client_app_fn(
             "Loading ClientApp `%s`",
             client_app_ref,
         )
-        client_app = load_app(client_app_ref, LoadClientAppError, sys_path)
+        client_app = load_app(client_app_ref, LoadClientAppError, dir_path)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(

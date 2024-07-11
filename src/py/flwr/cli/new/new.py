@@ -264,9 +264,11 @@ def new(
             bold=True,
         )
     )
+
+    _add = "	huggingface-cli login\n" if framework_str == "flowertune" else ""
     print(
         typer.style(
-            f"	cd {package_name}\n" + "	pip install -e .\n	flwr run\n",
+            f"	cd {package_name}\n" + "	pip install -e .\n" + _add + "	flwr run\n",
             fg=typer.colors.BRIGHT_CYAN,
             bold=True,
         )
