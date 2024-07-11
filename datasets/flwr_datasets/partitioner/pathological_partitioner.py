@@ -263,6 +263,16 @@ class PathologicalPartitioner(Partitioner):
 
         This computation is based on the assigment of the label to the partition_id in
         the `_determine_partition_id_to_unique_labels` method.
+        Given:
+        * partition 0 has only labels: 0,1 (not necessarily just two samples it can have
+          many samples but either from 0 or 1)
+        *  partition 1 has only labels: 1, 2 (same count note as above)
+        * and there are only two partitions then the following will be computed:
+        {
+          0: 1,
+          1: 2,
+          2: 1
+        }
         """
         for unique_label in self._unique_labels:
             self._unique_label_to_times_used_counter[unique_label] = 0
