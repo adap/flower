@@ -108,6 +108,16 @@ def load(path: Optional[Path] = None) -> Optional[Dict[str, Any]]:
         return load_from_string(toml_file.read())
 
 
+def _validate_run_config(config_dict: Dict[str, Any], errors: List[str]) -> None:
+    for key, value in config_dict.items():
+        if isinstance(value, dict):
+            _validate_run_config(config_dict[key], errors)
+        if isinstance(value, str):
+            continue
+        else:
+            errors.append(f"Config value of key {key} is not of type `str`.")
+
+
 # pylint: disable=too-many-branches
 def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]:
     """Validate pyproject.toml fields."""
@@ -133,6 +143,8 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
     else:
         if "publisher" not in config["flower"]:
             errors.append('Property "publisher" missing in [flower]')
+        if "config" in config["flower"]:
+            _validate_run_config(config["flower"]["config"], errors)
         if "components" not in config["flower"]:
             errors.append("Missing [flower.components] section")
         else:

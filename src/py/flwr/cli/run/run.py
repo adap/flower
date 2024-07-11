@@ -20,41 +20,18 @@ from logging import DEBUG
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import tomli
 import typer
 from typing_extensions import Annotated
 
 from flwr.cli import config_utils
 from flwr.cli.build import build
-from flwr.common.config import flatten_dict
+from flwr.common.config import parse_config_args
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
-
-
-def _parse_config_overrides(
-    config_overrides: Optional[List[str]],
-) -> Dict[str, str]:
-    """Parse the -c arguments and return the overrides as a dict."""
-    overrides: Dict[str, str] = {}
-
-    if config_overrides is not None:
-        if (
-            len(config_overrides) == 1
-            and "=" not in config_overrides
-            and config_overrides[0].endswith(".toml")
-        ):
-            with Path(config_overrides[0]).open("rb") as config_file:
-                overrides = flatten_dict(tomli.load(config_file))
-        else:
-            for kv_pair in config_overrides:
-                key, value = kv_pair.split("=")
-                overrides[key] = value
-
-    return overrides
 
 
 class Engine(str, Enum):
@@ -83,7 +60,7 @@ def run(
         typer.Option(help="Path of the Flower project to run"),
     ] = None,
     config_overrides: Annotated[
-        Optional[List[str]],
+        Optional[str],
         typer.Option(
             "--config",
             "-c",
@@ -92,13 +69,10 @@ def run(
     ] = None,
 ) -> None:
     """Run Flower project."""
-    if use_superexec:
-        _start_superexec_run(_parse_config_overrides(config_overrides), directory)
-        return
-
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    config, errors, warnings = config_utils.load_and_validate()
+    pyproject_path = directory / "pyproject.toml" if directory else None
+    config, errors, warnings = config_utils.load_and_validate(path=pyproject_path)
 
     if config is None:
         typer.secho(
@@ -119,6 +93,12 @@ def run(
         )
 
     typer.secho("Success", fg=typer.colors.GREEN)
+
+    if use_superexec:
+        _start_superexec_run(
+            parse_config_args(config_overrides, separator=";"), directory
+        )
+        return
 
     server_app_ref = config["flower"]["components"]["serverapp"]
     client_app_ref = config["flower"]["components"]["clientapp"]
