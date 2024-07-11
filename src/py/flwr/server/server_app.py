@@ -80,7 +80,7 @@ class ServerApp:
             return
 
         # New execution mode
-        context = Context(state=RecordSet(), run_config={})
+        context = Context(node_id=0, node_config={}, state=RecordSet(), run_config={})
         self._main(driver, context)
 
     def main(self) -> Callable[[ServerAppCallable], ServerAppCallable]:

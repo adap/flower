@@ -44,7 +44,7 @@ def grpc_adapter(  # pylint: disable=R0913
     Tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
-        Optional[Callable[[], None]],
+        Optional[Callable[[], int]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
     ]

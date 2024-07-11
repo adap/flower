@@ -319,7 +319,7 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    node_state = NodeState(partition_id=partition_id)
+    node_state = NodeState(node_id=-1, node_config={}, partition_id=partition_id)
     runs: Dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
@@ -336,7 +336,9 @@ def _start_client_internal(
 
             # Register node
             if create_node is not None:
-                create_node()  # pylint: disable=not-callable
+                node_id = create_node()  # pylint: disable=not-callable
+                if transport in ["grpc-rere", None]:
+                    node_state.node_id = node_id  # type: ignore
 
             app_state_tracker.register_signal_handler()
             while not app_state_tracker.interrupt:
@@ -580,7 +582,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
             Tuple[
                 Callable[[], Optional[Message]],
                 Callable[[Message], None],
-                Optional[Callable[[], None]],
+                Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
             ]
