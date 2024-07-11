@@ -15,6 +15,7 @@
 """Node state."""
 
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -23,13 +24,20 @@ from flwr.common.config import get_fused_config
 from flwr.common.typing import Run
 
 
+@dataclass()
+class RunInfo:
+    """Contains the Context and initial run_config of a Run."""
+
+    context: Context
+    initial_run_config: Dict[str, str]
+
+
 class NodeState:
     """State of a node where client nodes execute runs."""
 
     def __init__(self, partition_id: Optional[int]) -> None:
         self._meta: Dict[str, Any] = {}  # holds metadata about the node
-        self.run_contexts: Dict[int, Context] = {}
-        self._initial_run_configs: Dict[int, Dict[str, str]] = {}
+        self.run_info_dict: Dict[int, RunInfo] = {}
         self._partition_id = partition_id
 
     def register_context(
@@ -39,20 +47,23 @@ class NodeState:
         flwr_dir: Optional[Path] = None,
     ) -> None:
         """Register new run context for this node."""
-        if run_id not in self.run_contexts:
-            self._initial_run_configs[run_id] = (
+        if run_id not in self.run_info_dict:
+            initial_run_config = (
                 get_fused_config(run_info, flwr_dir) if run_info else {}
             )
-            self.run_contexts[run_id] = Context(
-                state=RecordSet(),
-                run_config=self._initial_run_configs[run_id].copy(),
-                partition_id=self._partition_id,
+            self.run_info_dict[run_id] = RunInfo(
+                initial_run_config=initial_run_config,
+                context=Context(
+                    state=RecordSet(),
+                    run_config=initial_run_config.copy(),
+                    partition_id=self._partition_id,
+                ),
             )
 
     def retrieve_context(self, run_id: int) -> Context:
         """Get run context given a run_id."""
-        if run_id in self.run_contexts:
-            return self.run_contexts[run_id]
+        if run_id in self.run_info_dict:
+            return self.run_info_dict[run_id].context
 
         raise RuntimeError(
             f"Context for run_id={run_id} doesn't exist."
@@ -62,9 +73,9 @@ class NodeState:
 
     def update_context(self, run_id: int, context: Context) -> None:
         """Update run context."""
-        if context.run_config != self._initial_run_configs[run_id]:
+        if context.run_config != self.run_info_dict[run_id].initial_run_config:
             raise ValueError(
                 "The `run_config` field of the `Context` object cannot be "
                 f"modified (run_id: {run_id})."
             )
-        self.run_contexts[run_id] = context
+        self.run_info_dict[run_id].context = context
