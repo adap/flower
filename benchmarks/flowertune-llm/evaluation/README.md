@@ -5,7 +5,7 @@ Evaluating your LLM is the final step prior to have your submission added to the
 The evaluation scores generated here will be displayed as the definitive values on the LLM Leaderboard.
 
 ## How to run
-Please check out the individual directory corresponding to your selected challenge (general NLP, finance, medical, and code) to learn how to execute the evaluations.
+Navigate to the individual directory corresponding to your selected challenge (`general NLP`, `finance`, `medical`, or `code`) and follow the instructions there to execute the evaluation.
 
 > [!NOTE]  
 > If you wish to participate in the LLM Leaderboard, you must not modify the evaluation code and should use the exact command provided in the respective directory to run the evaluation.
