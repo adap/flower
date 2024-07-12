@@ -17,6 +17,7 @@
 import argparse
 import sys
 from logging import INFO, WARN
+from os.path import isfile
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -127,11 +128,11 @@ def _try_obtain_certificates(
         return None
     # Check if certificates are provided
     if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_certfile:
-        if not Path.is_file(args.ssl_ca_certfile):
+        if not isfile(args.ssl_ca_certfile):
             sys.exit("Path argument `--ssl-ca-certfile` does not point to a file.")
-        if not Path.is_file(args.ssl_certfile):
+        if not isfile(args.ssl_certfile):
             sys.exit("Path argument `--ssl-certfile` does not point to a file.")
-        if not Path.is_file(args.ssl_keyfile):
+        if not isfile(args.ssl_keyfile):
             sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
         certificates = (
             Path(args.ssl_ca_certfile).read_bytes(),  # CA certificate
