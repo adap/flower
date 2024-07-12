@@ -29,7 +29,12 @@ from cryptography.hazmat.primitives.serialization import (
 
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
-from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
+from flwr.common.config import (
+    get_flwr_dir,
+    get_project_config,
+    get_project_dir,
+    parse_config_args,
+)
 from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -67,7 +72,7 @@ def run_supernode() -> None:
         authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
-        partition_id=args.partition_id,
+        node_config=parse_config_args(args.node_config),
         flwr_dir=get_flwr_dir(args.flwr_dir),
     )
 
@@ -93,6 +98,7 @@ def run_client_app() -> None:
 
     _start_client_internal(
         server_address=args.superlink,
+        node_config=parse_config_args(args.node_config),
         load_client_app_fn=load_fn,
         transport=args.transport,
         root_certificates=root_certificates,
@@ -389,11 +395,11 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         help="The SuperNode's public key (as a path str) to enable authentication.",
     )
     parser.add_argument(
-        "--partition-id",
-        type=int,
-        help="The data partition index associated with this SuperNode. Better suited "
-        "for prototyping purposes where a SuperNode might only load a fraction of an "
-        "artificially partitioned dataset (e.g. using `flwr-datasets`)",
+        "--node-config",
+        type=str,
+        help="A comma separated list of key/value pairs (separated by `=`) to "
+        "configure the SuperNode. "
+        "E.g. --node-config 'key1=\"value1\",partition-id=0,num-partitions=100'",
     )
 
 
