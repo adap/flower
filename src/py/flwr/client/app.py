@@ -160,6 +160,7 @@ def start_client(
     event(EventType.START_CLIENT_ENTER)
     _start_client_internal(
         server_address=server_address,
+        node_config={},
         load_client_app_fn=None,
         client_fn=client_fn,
         client=client,
