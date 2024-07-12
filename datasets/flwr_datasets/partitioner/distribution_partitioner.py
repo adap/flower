@@ -18,9 +18,9 @@ from collections import Counter
 from typing import Dict, List, Optional
 
 import numpy as np
-from flwr_datasets.partitioner.partitioner import Partitioner
 
 import datasets
+from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
