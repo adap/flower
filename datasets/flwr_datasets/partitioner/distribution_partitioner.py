@@ -62,6 +62,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     --------
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import DistributionPartitioner
+    >>> from pprint import pprint
     >>>
     >>> num_clients = 1_000
     >>> num_unique_labels_per_client = 2
@@ -85,7 +86,27 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
     >>> partition = fds.load_partition(0)
     >>> print(partition[0])  # Print the first example
-    ...
+    {'image': <PIL.PngImagePlugin.PngImageFile image mode=L size=28x28 at 0x169DD54D0>,
+    'label': 0}
+    >>> distributions = {
+    >>>                     partition_id: fds
+    >>>                                   .load_partition(partition_id=partition_id)
+    >>>                                   .to_pandas()['label']
+    >>>                                   .value_counts()
+    >>>                                   .to_dict()
+    >>>                     for partition_id in range(10)
+    >>>                 }
+    >>> pprint(distributions)
+    {0: {0: 40, 1: 5},
+     1: {2: 36, 1: 5},
+     2: {3: 52, 2: 7},
+     3: {3: 14, 4: 6},
+     4: {4: 47, 5: 28},
+     5: {6: 30, 5: 5},
+     6: {6: 19, 7: 11},
+     7: {8: 22, 7: 11},
+     8: {9: 11, 8: 5},
+     9: {0: 124, 9: 13}}
     """
 
     def __init__(  # pylint: disable=R0913
