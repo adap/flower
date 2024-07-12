@@ -253,19 +253,22 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     def _check_distribution_array_shape_if_needed(self) -> None:
         """Test distribution array shape correctness."""
         if not self._partition_id_to_indices_determined:
-            # Infer the number of unique labels from the size of the 1st dimension
-            # in distribution array
-            self._num_unique_labels = np.shape(self._distribution_array)[0]
-            expected_num_columns = (
+            if not isinstance(self._distribution_array, np.ndarray):
+                raise TypeError("Input must be a numpy array.")
+
+            if self._distribution_array.ndim != 2:
+                raise ValueError("The distribution array is not 2-dimensional.")
+
+            self._num_unique_labels = len(self.dataset.unique(self._partition_by))
+            num_columns = (
                 self._num_unique_labels_per_partition
                 * self._num_partitions
                 / self._num_unique_labels
             )
-            if expected_num_columns != np.shape(self._distribution_array)[1]:
+            if self._distribution_array.shape != (self._num_unique_labels, num_columns):
                 raise ValueError(
-                    "The size of the 2nd dimension in the distribution array needs to be "
-                    "equal to "
-                    "`num_unique_labels_per_partition*num_partitions/num_unique_labels`."
+                    f"The distribution array shape is {self._distribution_array.shape},"
+                    f" but it should be ({self._num_unique_labels}, {num_columns})."
                 )
 
     def _check_num_partitions_correctness_if_needed(self) -> None:
