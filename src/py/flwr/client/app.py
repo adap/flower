@@ -319,7 +319,14 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    node_state = NodeState(node_id=-1, node_config={}, partition_id=partition_id)
+    def _create_node_state(node_id: int, node_config: Dict[str, str]) -> NodeState:
+        """Create NodeState after node has received a node-id."""
+        return NodeState(
+            node_id=node_id, node_config=node_config, partition_id=partition_id
+        )
+
+    node_state: NodeState = None  # type: ignore
+    node_config: Dict[str, str] = {}
     runs: Dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
@@ -339,8 +346,15 @@ def _start_client_internal(
                 node_id = (  # pylint: disable=assignment-from-none
                     create_node()
                 )  # pylint: disable=not-callable
-                if transport in ["grpc-rere", None]:
-                    node_state.node_id = node_id  # type: ignore
+                if node_id is None:
+                    # node_id is None always for grpc-bidi but it
+                    # can be None in Rest if request fails
+                    if transport == "grpc-bidi":
+                        # gRPC-bidi doesn't have the concept of node_id
+                        node_id = -1
+                    else:
+                        raise ValueError("Node Registration failed")
+                node_state = _create_node_state(node_id, node_config=node_config)
 
             app_state_tracker.register_signal_handler()
             while not app_state_tracker.interrupt:
