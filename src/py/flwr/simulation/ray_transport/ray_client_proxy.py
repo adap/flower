@@ -74,7 +74,7 @@ class RayActorClientProxy(ClientProxy):
 
         # Retrieve context
         context = self.proxy_state.retrieve_context(run_id=run_id)
-        partition_id_str = str(context.partition_id)
+        partition_id_str = context.node_config["partition-id"]
 
         try:
             self.actor_pool.submit_client_job(
