@@ -343,7 +343,7 @@ def _start_client_internal(
             # Register node when connecting the first time
             if node_state is None:
                 if create_node is None:
-                    if transport != "grpc-bidi":
+                    if transport not in ["grpc-bidi", None]:
                         raise NotImplementedError(
                             "There is no transport other than grpc-bidi that "
                             "does not implement `create_node()`.'"
