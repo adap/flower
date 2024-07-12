@@ -92,6 +92,7 @@ def run(
                     bold=True,
                 )
                 raise typer.Exit(code=1)
+
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = directory / "pyproject.toml" if directory else None
