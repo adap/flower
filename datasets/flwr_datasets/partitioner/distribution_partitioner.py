@@ -14,6 +14,7 @@
 # ==============================================================================
 
 """ Distribution partitioner."""
+from collections import Counter
 from typing import Dict, List, Optional
 
 import numpy as np
@@ -155,6 +156,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # requested. Only the first call creates the indices assignments for all the
         # partition indices.
         self._check_distribution_array_shape_if_needed()
+        self._check_distribution_array_sum_if_needed()
         self._check_num_partitions_correctness_if_needed()
         self._check_num_partitions_greater_than_zero()
         self._determine_partition_id_to_indices_if_needed()
@@ -291,6 +293,19 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                 raise ValueError(
                     f"The distribution array shape is {self._distribution_array.shape},"
                     f" but it should be ({self._num_unique_labels}, {num_columns})."
+                )
+
+    def _check_distribution_array_sum_if_needed(self) -> None:
+        """Test correctness of distribution array sum."""
+        if not self._partition_id_to_indices_determined:
+            labels = self.dataset[self._partition_by]
+            distribution = sorted(Counter(labels).items())
+            distribution = [v for _, v in distribution]
+
+            if any(self._distribution_array > distribution):
+                raise ValueError(
+                    "The sum of at least one label distribution array "
+                    "exceeds the original class label distribution."
                 )
 
     def _check_num_partitions_correctness_if_needed(self) -> None:
