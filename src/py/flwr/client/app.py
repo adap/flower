@@ -160,6 +160,7 @@ def start_client(
     event(EventType.START_CLIENT_ENTER)
     _start_client_internal(
         server_address=server_address,
+        node_config={},
         load_client_app_fn=None,
         client_fn=client_fn,
         client=client,
@@ -181,6 +182,7 @@ def start_client(
 def _start_client_internal(
     *,
     server_address: str,
+    node_config: Dict[str, str],
     load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
     client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
@@ -193,7 +195,6 @@ def _start_client_internal(
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
-    partition_id: Optional[int] = None,
     flwr_dir: Optional[Path] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
@@ -204,6 +205,8 @@ def _start_client_internal(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
+    node_config: Dict[str, str]
+        The configuration of the node.
     load_client_app_fn : Optional[Callable[[], ClientApp]] (default: None)
         A function that can be used to load a `ClientApp` instance.
     client_fn : Optional[ClientFnExt]
@@ -238,9 +241,6 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
-    partition_id: Optional[int] (default: None)
-        The data partition index associated with this node. Better suited for
-        prototyping purposes.
     flwr_dir: Optional[Path] (default: None)
         The fully resolved path containing installed Flower Apps.
     """
@@ -318,10 +318,6 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    # Empty dict (for now)
-    # This will be removed once users can pass node_config via flower-supernode
-    node_config: Dict[str, str] = {}
-
     # NodeState gets initialized when the first connection is established
     node_state: Optional[NodeState] = None
 
@@ -352,7 +348,7 @@ def _start_client_internal(
                     node_state = NodeState(
                         node_id=-1,
                         node_config={},
-                        partition_id=partition_id,
+                        partition_id=None,
                     )
                 else:
                     # Call create_node fn to register node
@@ -364,7 +360,7 @@ def _start_client_internal(
                     node_state = NodeState(
                         node_id=node_id,
                         node_config=node_config,
-                        partition_id=partition_id,
+                        partition_id=None,
                     )
 
             app_state_tracker.register_signal_handler()
