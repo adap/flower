@@ -7,7 +7,7 @@ Three datasets have been selected for this evaluation: [FPB](https://huggingface
 ### Step 0. Set up Environment
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/benchmarks/flowertune-llm/evaluation/finance . && rm -rf flower && cd finance
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/benchmarks/flowertune-llm/evaluation/finance ./flowertune-eval-finance && rm -rf flower && cd flowertune-eval-finance
 ```
 
 Then, install dependencies with:
