@@ -283,7 +283,7 @@ class PathologicalPartitioner(Partitioner):
     def _check_correctness_of_unique_label_to_times_used_counter(
         self, labels: NDArray
     ) -> None:
-        "Check if partitioning is possible given the presence requirements.
+        """Check if partitioning is possible given the presence requirements.
 
         The number of times the label can be used must be smaller or equal to the number
         of times that the label is present in the dataset.
