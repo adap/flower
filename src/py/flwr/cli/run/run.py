@@ -14,15 +14,17 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
+import sys
 from logging import DEBUG
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 import tomli
 import typer
 from typing_extensions import Annotated
 
 from flwr.cli.build import build
+from flwr.cli.config_utils import load_and_validate
 from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
@@ -69,6 +71,7 @@ def run(
     ] = None,
 ) -> None:
     """Run Flower project."""
+    superexec_address = SUPEREXEC_DEFAULT_ADDRESS
     global_config_path = get_flwr_dir(flwr_dir) / "config.toml"
 
     if global_config_path.exists():
@@ -92,7 +95,7 @@ def run(
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = directory / "pyproject.toml" if directory else None
-    config, errors, warnings = config_utils.load_and_validate(path=pyproject_path)
+    config, errors, warnings = load_and_validate(path=pyproject_path)
 
     if config is None:
         typer.secho(
@@ -114,12 +117,6 @@ def run(
 
     typer.secho("Success", fg=typer.colors.GREEN)
 
-    _start_superexec_run(parse_config_args(config_overrides, separator=","), directory)
-
-
-def _start_superexec_run(
-    override_config: Dict[str, str], directory: Optional[Path]
-) -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
@@ -138,7 +135,7 @@ def _start_superexec_run(
 
     req = StartRunRequest(
         fab_file=Path(fab_path).read_bytes(),
-        override_config=override_config,
+        override_config=parse_config_args(config_overrides, separator=","),
         verbose=verbose,
     )
     res = stub.StartRun(req)
