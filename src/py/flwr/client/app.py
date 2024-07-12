@@ -345,8 +345,8 @@ def _start_client_internal(
                 if create_node is None:
                     if transport not in ["grpc-bidi", None]:
                         raise NotImplementedError(
-                            "There is no transport other than grpc-bidi that "
-                            "does not implement `create_node()`.'"
+                            "All transports except `grpc-bidi` require "
+                            "an implementation for `create_node()`.'"
                         )
                     # gRPC-bidi doesn't have the concept of node_id,
                     # so we set it to -1
