@@ -237,19 +237,20 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
         if not ping_stop_event.is_set():
             ping_stop_event.wait(next_interval)
 
-    def create_node() -> None:
+    def create_node() -> Optional[int]:
         """Set create_node."""
         req = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
 
         # Send the request
         res = _request(req, CreateNodeResponse, PATH_CREATE_NODE)
         if res is None:
-            return
+            return None
 
         # Remember the node and the ping-loop thread
         nonlocal node, ping_thread
         node = res.node
         ping_thread = start_ping_loop(ping, ping_stop_event)
+        return node.node_id
 
     def delete_node() -> None:
         """Set delete_node."""
