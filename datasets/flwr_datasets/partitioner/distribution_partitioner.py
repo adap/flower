@@ -68,17 +68,17 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     >>> # Generate a vector from a log-normal probability distribution
     >>> rng = np.random.default_rng(2024)
     >>> mu, sigma = 0., 2.
-    >>> distribution_proba = rng.lognormal(
-    >>>    mu,
-    >>>    sigma,
-    >>>    (num_clients*num_unique_labels_per_client),
+    >>> lognormal_distribution = rng.lognormal(
+    >>>     mu,
+    >>>     sigma,
+    >>>     (num_clients*num_unique_labels_per_client),
     >>> )
     >>>
     >>> partitioner = DistributionPartitioner(
-    >>>     distribution_array=distribution_proba,
+    >>>     distribution_array=lognormal_distribution,
     >>>     num_partitions=num_clients,
-    >>>     num_unique_labels_per_partition=num_labels_per_client,
-    >>>     partition_by="label",  # Dataset has a target column `label`
+    >>>     num_unique_labels_per_partition=num_unique_labels_per_client,
+    >>>     partition_by="label",  # MNIST dataset has a target column `label`
     >>>     preassigned_num_samples_per_label=5,
     >>> )
     >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
@@ -166,11 +166,11 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             )
 
             # Compute the total preassigned number of samples per label for all labels
-            # and partitions. This sum will be subtracted
-            # from the label distribution from the original dataset, and added back later.
-            # It ensures that (1) each partition will have at least
-            # `self._preassigned_num_samples_per_label` and (2) there is sufficient
-            # indices to sample from the dataset.
+            # and partitions. This sum will be subtracted from the label distribution
+            # of the original dataset, and added back later. It ensures that
+            # (1) each partition will have at least
+            #     `self._preassigned_num_samples_per_label`, and
+            # (2) there is sufficient indices to sample from the dataset.
             total_preassigned_samples = int(
                 self._preassigned_num_samples_per_label
                 * self._num_unique_labels_per_partition
@@ -221,6 +221,11 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # which will be sampled. Once a sample is taken from a label/key,
         # increment the value (index) by 1.
         tracker_dict = {k: 0 for k, _ in label_samples.items()}
+
+        # Prepare data structure to store indices assigned to partition ids
+        self._partition_id_to_indices = {
+            partition_id: [] for partition_id in range(self._num_partitions)
+        }
 
         for partition_id in range(self._num_partitions):
             # Get the `num_unique_labels_per_partition` labels for each partition. Use
