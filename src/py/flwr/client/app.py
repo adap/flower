@@ -42,7 +42,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Run
+from flwr.common.typing import Run, Value
 
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
@@ -181,6 +181,7 @@ def start_client(
 def _start_client_internal(
     *,
     server_address: str,
+    node_config: Dict[str, str],
     load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
     client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
@@ -193,7 +194,6 @@ def _start_client_internal(
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
-    partition_id: Optional[int] = None,
     flwr_dir: Optional[Path] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
@@ -319,7 +319,7 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    node_state = NodeState(node_id=-1, node_config={}, partition_id=partition_id)
+    node_state = NodeState(node_id=-1, node_config=node_config, partition_id=-1)
     runs: Dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
