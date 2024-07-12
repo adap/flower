@@ -17,6 +17,7 @@
 import subprocess
 import sys
 from logging import ERROR, INFO
+from pathlib import Path
 from typing import Dict, Optional
 
 from typing_extensions import override
@@ -33,21 +34,33 @@ from .executor import Executor, RunTracker
 
 
 class DeploymentEngine(Executor):
-    """Deployment engine executor."""
+    """Deployment engine executor.
+
+    superlink: str (Default: "0.0.0.0:9091")
+        Address of the `SuperLink` to connect to.
+    root_certificates: Optional[str] (Default: None)
+        Specifies the path to the PEM-encoded root certificate file for
+        establishing secure HTTPS connections.
+    """
 
     def __init__(
         self,
-        address: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        root_certificates: Optional[bytes] = None,
+        superlink: str = DEFAULT_SERVER_ADDRESS_DRIVER,
+        cert_path: Optional[str] = None,
     ) -> None:
-        self.address = address
-        self.root_certificates = root_certificates
+        self.superlink = superlink
+        if cert_path is None:
+            self.cert_path = None
+            self.root_certificates = None
+        else:
+            self.cert_path = cert_path
+            self.root_certificates = Path(cert_path).read_bytes()
         self.stub: Optional[DriverStub] = None
 
     def _connect(self) -> None:
         if self.stub is None:
             channel = create_channel(
-                server_address=self.address,
+                server_address=self.superlink,
                 insecure=(self.root_certificates is None),
                 root_certificates=self.root_certificates,
             )
@@ -80,8 +93,11 @@ class DeploymentEngine(Executor):
         config: Optional[Dict[str, str]],
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
-        if config and (superlink_address := config.get("superlink_address")):
-            self.address = superlink_address
+        if config:
+            if superlink_address := config.get("superlink"):
+                self.superlink = superlink_address
+            if cert_path := config.get("root-certificates"):
+                self.cert_path = cert_path
 
         try:
             # Install FAB to flwr dir
@@ -106,8 +122,12 @@ class DeploymentEngine(Executor):
                     "--run-id",
                     str(run_id),
                     "--superlink",
-                    self.address,
-                    "--insecure",
+                    self.superlink,
+                    (
+                        "--insecure"
+                        if self.cert_path is None
+                        else f"--root-certificates {self.cert_path}"
+                    ),
                 ],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
