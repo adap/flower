@@ -79,7 +79,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     Tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
-        Optional[Callable[[], int]],
+        Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
     ]

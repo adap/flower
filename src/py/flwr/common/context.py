@@ -28,10 +28,10 @@ class Context:
     Parameters
     ----------
     node_id : int
-        A UUID that identifies the node.
+        The ID that identifies the node.
     node_config : Dict[str, str]
         A config (key/value mapping) unique to the node and independent of the
-        `run_config`. This config persist across runs this node participates in.
+        `run_config`. This config persists across all runs this node participates in.
     state : RecordSet
         Holds records added by the entity in a given run and that will stay local.
         This means that the data it holds will never leave the system it's running from.
