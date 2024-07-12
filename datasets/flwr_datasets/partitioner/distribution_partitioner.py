@@ -141,17 +141,20 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     ) -> None:
         """Create an assignment of indices to the partition indices."""
         if self._partition_id_to_indices_determined:
-            # Will this ever get triggered since partition is recreated every round?
             return
 
         # Compute the label distribution from the dataset
-        # TODO: Possibly refactor so that it's lazily loaded
-        df = self.dataset.to_pandas()
-        if self._partition_by not in df:
-            raise ValueError(
-                f"Target label `{self._partition_by}` does not exist in this dataset"
+        unique_labels = self.dataset.unique(self._partition_by)
+        labels = np.asarray(self.dataset[self._partition_by])
+        unique_label_to_indices = {}
+        label_distribution_dict = {}
+
+        for unique_label in unique_labels:
+            unique_label_to_indices[unique_label] = np.where(labels == unique_label)[0]
+            label_distribution_dict[unique_label] = len(
+                unique_label_to_indices[unique_label]
             )
-        label_distribution_dict = df[self._partition_by].value_counts().to_dict()
+
         label_distribution = np.fromiter(label_distribution_dict.values(), dtype=float)
 
         # Compute the normalized distribution for each class label
@@ -192,13 +195,16 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             k: v for k, v in zip(label_distribution_dict.keys(), label_sampling_matrix)
         }
 
-        # CREATE PARTITION SAMPLING DICTIONARY
-        partition_id_to_samples: Dict[int, Dict[int, int]] = {
-            k: {} for k in range(self._num_partitions)
-        }
-
         # Create encoded class label to get the correct labels.
-        encoded_class_label = np.asarray(sorted(self.dataset.unique('label')))
+        encoded_class_label = np.asarray(sorted(self.dataset.unique("label")))
+
+        split_indices_per_label = {}
+        for unique_label in unique_labels:
+            cumsum_division_numbers = np.cumsum(label_samples[unique_label])
+            split_indices = np.split(
+                unique_label_to_indices[unique_label], cumsum_division_numbers
+            )
+            split_indices_per_label[unique_label] = split_indices
 
         # Initialize sample tracker. Keys are the same as the class labels.
         # Values are the smallest indices of each array in `label_sampling_dict`
@@ -206,35 +212,22 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # increment the value (index) by 1.
         tracker_dict = {k: 0 for k, _ in label_samples.items()}
 
+        # Prepare data structure to store indices assigned to partition ids
+        partition_id_to_indices = {
+            partition_id: [] for partition_id in range(self._num_partitions)
+        }
         for partition_id in range(self._num_partitions):
-            # Get the `num_unique_labels_per_partition` labels for each client.
-            # Use roll to get the correct index labels for the client (for pathological split).
-            labels = np.roll(encoded_class_label, -partition_id)[
+            # Get the `num_unique_labels_per_partition` labels for each partition. Use
+            # `numpy.roll` to get the indices of adjacent labels for pathological split.
+            labels_per_client = np.roll(encoded_class_label, -partition_id)[
                 : self._num_unique_labels_per_partition
             ]
-            for label in labels:
+            for label in labels_per_client:
                 index_to_sample = tracker_dict[label]
-                partition_id_to_samples[partition_id][label] = label_samples[label][
-                    index_to_sample
-                ]
-                # Increment index to the next value in the sample array
+                partition_id_to_indices[partition_id].extend(
+                    split_indices_per_label[label][index_to_sample]
+                )
                 tracker_dict[label] += 1
-
-        # LAST STEP
-        # Prepare data structure to store indices assigned to partition ids
-        partition_id_to_indices: Dict[int, List[int]] = {}
-        for nid in range(self._num_partitions):
-            partition_id_to_indices[nid] = []
-
-        # Reference mapping is this:
-        # {0: {0: 4570, 1: 1185},
-        #  1: {1: 4029, 2: 30},
-        #  2: {2: 4494, 3: 5003},
-        # ...
-        # Loop over unique labels
-        # Loop over each client
-        for unique_label in self._num_unique_labels:
-            for partition_id in self._num_partitions:
 
         # Shuffle the indices not to have the datasets with targets in sequences like
         # [00000, 11111, ...]) if the shuffle is True
