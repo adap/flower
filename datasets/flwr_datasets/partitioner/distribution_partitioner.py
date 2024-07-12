@@ -144,6 +144,83 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             # Will this ever get triggered since partition is recreated every round?
             return
 
+        # Compute the label distribution from the dataset
+        # TODO: Possibly refactor so that it's lazily loaded
+        df = self.dataset.to_pandas()
+        if self._partition_by not in df:
+            raise ValueError(
+                f"Target label `{self._partition_by}` does not exist in this dataset"
+            )
+        label_distribution_dict = df[self._partition_by].value_counts().to_dict()
+        label_distribution = np.fromiter(label_distribution_dict.values(), dtype=float)
+
+        # Compute the normalized distribution for each class label
+        self._distribution_array = self._distribution_array / np.sum(
+            self._distribution_array, axis=-1, keepdims=True
+        )
+
+        # Compute the total preassigned number of samples per label for all labels
+        # and partitions. This sum will be subtracted
+        # from the label distribution from the original dataset, and added back later.
+        # It ensures that (1) each partition will have at least
+        # `self._preassigned_num_samples_per_label` and (2) there is sufficient
+        # indices to sample from the dataset.
+        total_preassigned_samples = int(
+            self._preassigned_num_samples_per_label
+            * self._num_unique_labels_per_partition
+            * self._num_partitions
+            / self._num_unique_labels
+        )
+
+        # Subtract the preassigned total amount from the label distribution,
+        # we'll add these back later.
+        label_distribution -= total_preassigned_samples
+
+        # Rescale normalized distribution with the actual label distribution.
+        # Each row represents the number of samples to be taken for that class label
+        # and the sum of each row equals the total of each class label.
+        # TODO: Skip this step if rescale = False
+        label_sampling_matrix = np.floor(
+            (self._distribution_array * label_distribution[:, np.newaxis])
+        ).astype(int)
+
+        # Add back the preassigned total amount
+        label_sampling_matrix += self._preassigned_num_samples_per_label
+
+        # Create the label sampling dictionary
+        label_samples = {
+            k: v for k, v in zip(label_distribution_dict.keys(), label_sampling_matrix)
+        }
+
+        # CREATE PARTITION SAMPLING DICTIONARY
+        partition_id_to_samples: Dict[int, Dict[int, int]] = {
+            k: {} for k in range(self._num_partitions)
+        }
+
+        # Create encoded class label to get the correct labels.
+        encoded_class_label = np.asarray(sorted(self.dataset.unique('label')))
+
+        # Initialize sample tracker. Keys are the same as the class labels.
+        # Values are the smallest indices of each array in `label_sampling_dict`
+        # which will be sampled. Once a sample is taken from a label/key,
+        # increment the value (index) by 1.
+        tracker_dict = {k: 0 for k, _ in label_samples.items()}
+
+        for partition_id in range(self._num_partitions):
+            # Get the `num_unique_labels_per_partition` labels for each client.
+            # Use roll to get the correct index labels for the client (for pathological split).
+            labels = np.roll(encoded_class_label, -partition_id)[
+                : self._num_unique_labels_per_partition
+            ]
+            for label in labels:
+                index_to_sample = tracker_dict[label]
+                partition_id_to_samples[partition_id][label] = label_samples[label][
+                    index_to_sample
+                ]
+                # Increment index to the next value in the sample array
+                tracker_dict[label] += 1
+
+        # LAST STEP
         # Prepare data structure to store indices assigned to partition ids
         partition_id_to_indices: Dict[int, List[int]] = {}
         for nid in range(self._num_partitions):
@@ -156,6 +233,8 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # ...
         # Loop over unique labels
         # Loop over each client
+        for unique_label in self._num_unique_labels:
+            for partition_id in self._num_partitions:
 
         # Shuffle the indices not to have the datasets with targets in sequences like
         # [00000, 11111, ...]) if the shuffle is True
