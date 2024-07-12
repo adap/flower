@@ -143,7 +143,7 @@ def test_client_without_get_properties() -> None:
     actual_msg = handle_legacy_message_from_msgtype(
         client_fn=_get_client_fn(client),
         message=message,
-        context=Context(state=RecordSet(), run_config={}),
+        context=Context(node_id=1123, node_config={}, state=RecordSet(), run_config={}),
     )
 
     # Assert
@@ -207,7 +207,7 @@ def test_client_with_get_properties() -> None:
     actual_msg = handle_legacy_message_from_msgtype(
         client_fn=_get_client_fn(client),
         message=message,
-        context=Context(state=RecordSet(), run_config={}),
+        context=Context(node_id=1123, node_config={}, state=RecordSet(), run_config={}),
     )
 
     # Assert
