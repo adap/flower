@@ -151,11 +151,11 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         unique_labels = self.dataset.unique(self._partition_by)
         labels = np.asarray(self.dataset[self._partition_by])
         unique_label_to_indices = {}
-        label_distribution_dict = {}
+        unique_label_distribution = {}
 
         for unique_label in unique_labels:
             unique_label_to_indices[unique_label] = np.where(labels == unique_label)[0]
-            label_distribution_dict[unique_label] = len(
+            unique_label_distribution[unique_label] = len(
                 unique_label_to_indices[unique_label]
             )
 
@@ -179,7 +179,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             )
 
             label_distribution = np.fromiter(
-                label_distribution_dict.values(),
+                unique_label_distribution.values(),
                 dtype=float,
             )
 
@@ -200,12 +200,12 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             label_sampling_matrix = self._distribution_array.astype(int)
 
         # Create the label sampling dictionary
-        label_samples = {
-            k: v for k, v in zip(label_distribution_dict.keys(), label_sampling_matrix)
-        }
+        label_samples = dict(
+            zip(unique_label_distribution.keys(), label_sampling_matrix)
+        )
 
         # Create encoded class label to get the correct labels.
-        encoded_class_label = np.asarray(sorted(self.dataset.unique("label")))
+        sorted_unique_labels = sorted(unique_labels)
 
         # Create indices split from dataset
         split_indices_per_label = {}
@@ -230,7 +230,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         for partition_id in range(self._num_partitions):
             # Get the `num_unique_labels_per_partition` labels for each partition. Use
             # `numpy.roll` to get the indices of adjacent labels for pathological split.
-            labels_per_client = np.roll(encoded_class_label, -partition_id)[
+            labels_per_client = np.roll(sorted_unique_labels, -partition_id)[
                 : self._num_unique_labels_per_partition
             ]
             for label in labels_per_client:
