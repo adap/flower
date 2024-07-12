@@ -105,7 +105,7 @@ class DeploymentEngine(Executor):
                     "flower-server-app",
                     "--run-id",
                     str(run_id),
-                    "--address",
+                    "--superlink",
                     self.address,
                     "--insecure",
                 ],
