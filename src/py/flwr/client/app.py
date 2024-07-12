@@ -319,7 +319,13 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    node_state = NodeState(partition_id=partition_id)
+    # Empty dict (for now)
+    # This will be removed once users can pass node_config via flower-supernode
+    node_config: Dict[str, str] = {}
+
+    # NodeState gets initialized when the first connection is established
+    node_state: Optional[NodeState] = None
+
     runs: Dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
@@ -334,9 +340,33 @@ def _start_client_internal(
         ) as conn:
             receive, send, create_node, delete_node, get_run = conn
 
-            # Register node
-            if create_node is not None:
-                create_node()  # pylint: disable=not-callable
+            # Register node when connecting the first time
+            if node_state is None:
+                if create_node is None:
+                    if transport not in ["grpc-bidi", None]:
+                        raise NotImplementedError(
+                            "All transports except `grpc-bidi` require "
+                            "an implementation for `create_node()`.'"
+                        )
+                    # gRPC-bidi doesn't have the concept of node_id,
+                    # so we set it to -1
+                    node_state = NodeState(
+                        node_id=-1,
+                        node_config={},
+                        partition_id=partition_id,
+                    )
+                else:
+                    # Call create_node fn to register node
+                    node_id: Optional[int] = (  # pylint: disable=assignment-from-none
+                        create_node()
+                    )  # pylint: disable=not-callable
+                    if node_id is None:
+                        raise ValueError("Node registration failed")
+                    node_state = NodeState(
+                        node_id=node_id,
+                        node_config=node_config,
+                        partition_id=partition_id,
+                    )
 
             app_state_tracker.register_signal_handler()
             while not app_state_tracker.interrupt:
@@ -580,7 +610,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
             Tuple[
                 Callable[[], Optional[Message]],
                 Callable[[Message], None],
-                Optional[Callable[[], None]],
+                Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
             ]

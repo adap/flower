@@ -17,7 +17,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
 from flwr.common import Context, RecordSet
 from flwr.common.config import get_fused_config
@@ -35,8 +35,11 @@ class RunInfo:
 class NodeState:
     """State of a node where client nodes execute runs."""
 
-    def __init__(self, partition_id: Optional[int]) -> None:
-        self._meta: Dict[str, Any] = {}  # holds metadata about the node
+    def __init__(
+        self, node_id: int, node_config: Dict[str, str], partition_id: Optional[int]
+    ) -> None:
+        self.node_id = node_id
+        self.node_config = node_config
         self.run_infos: Dict[int, RunInfo] = {}
         self._partition_id = partition_id
 
@@ -52,6 +55,8 @@ class NodeState:
             self.run_infos[run_id] = RunInfo(
                 initial_run_config=initial_run_config,
                 context=Context(
+                    node_id=self.node_id,
+                    node_config=self.node_config,
                     state=RecordSet(),
                     run_config=initial_run_config.copy(),
                     partition_id=self._partition_id,
