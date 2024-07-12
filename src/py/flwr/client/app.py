@@ -319,14 +319,11 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    def _create_node_state(node_id: int, node_config: Dict[str, str]) -> NodeState:
-        """Create NodeState after node has received a node-id."""
-        return NodeState(
-            node_id=node_id, node_config=node_config, partition_id=partition_id
-        )
-
-    node_state: NodeState = None  # type: ignore
+    node_state_set = False
     node_config: Dict[str, str] = {}
+    node_state = NodeState(
+        node_id=-1, node_config=node_config, partition_id=partition_id
+    )
     runs: Dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
@@ -342,19 +339,24 @@ def _start_client_internal(
             receive, send, create_node, delete_node, get_run = conn
 
             # Register node
-            if create_node is not None:
-                node_id = (  # pylint: disable=assignment-from-none
-                    create_node()
-                )  # pylint: disable=not-callable
-                if node_id is None:
-                    # node_id is None always for grpc-bidi but it
-                    # can be None in Rest if request fails
+            if not node_state_set:
+                if create_node is not None:
+                    node_id = (  # pylint: disable=assignment-from-none
+                        create_node()
+                    )  # pylint: disable=not-callable
+                    if node_id is None:
+                        raise ValueError("Node Registration failed")
+                else:
                     if transport == "grpc-bidi":
                         # gRPC-bidi doesn't have the concept of node_id
                         node_id = -1
                     else:
-                        raise ValueError("Node Registration failed")
-                node_state = _create_node_state(node_id, node_config=node_config)
+                        raise NotImplementedError(
+                            "There is no transport other than grpc-bidi that "
+                            "does not implement `create_node()`.'"
+                        )
+                node_state.node_id = node_id
+                node_state_set = True
 
             app_state_tracker.register_signal_handler()
             while not app_state_tracker.interrupt:
