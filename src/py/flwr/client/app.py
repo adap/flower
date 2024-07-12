@@ -349,7 +349,8 @@ def _start_client_internal(
                     if node_id is None:
                         raise ValueError("Node Registration failed")
                 else:
-                    if transport == "grpc-bidi":
+                    print(transport)
+                    if transport in ["grpc-bidi", None]:
                         # gRPC-bidi doesn't have the concept of node_id
                         node_id = -1
                     else:
