@@ -7,7 +7,7 @@ Three datasets have been selected for this evaluation: [PubMedQA](https://huggin
 ### Step 0. Set up Environment
 
 ```shell
-git clone --depth=1 https://github.com/adap/flower.git && mv flower/benchmarks/flowertune-llm/evaluation/medical . && rm -rf flower && cd medical
+git clone --depth=1 https://github.com/adap/flower.git && mv flower/benchmarks/flowertune-llm/evaluation/medical ./flowertune-eval-medical && rm -rf flower && cd flowertune-eval-medical
 ```
 
 Then, install dependencies with:
