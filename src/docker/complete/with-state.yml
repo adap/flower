@@ -1,0 +1,7 @@
+services:
+  superlink:
+    command:
+      - --insecure
+      - --database=state/state.db
+    volumes:
+      - ./state/:/app/state/:rw

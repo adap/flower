@@ -1,0 +1,41 @@
+services:
+  superlink:
+    command:
+      - --ssl-ca-certfile=certificates/ca.crt
+      - --ssl-certfile=certificates/server.pem
+      - --ssl-keyfile=certificates/server.key
+    secrets:
+      - source: ca-certfile
+        target: /app/certificates/ca.crt
+      - source: certfile
+        target: /app/certificates/server.pem
+      - source: keyfile
+        target: /app/certificates/server.key
+
+  supernode:
+    command:
+      - --superlink
+      - superlink:9092
+      - --root-certificates
+      - certificates/ca.crt
+    secrets:
+      - source: ca-certfile
+        target: /app/certificates/ca.crt
+
+  serverapp:
+    command:
+      - --superlink
+      - superlink:9091
+      - --root-certificates
+      - certificates/ca.crt
+    secrets:
+      - source: ca-certfile
+        target: /app/certificates/ca.crt
+
+secrets:
+  ca-certfile:
+    file: ./certificates/ca.crt
+  certfile:
+    file: ./certificates/server.pem
+  keyfile:
+    file: ./certificates/server.key

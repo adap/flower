@@ -1,0 +1,168 @@
+services:
+  # create a SuperLink service
+  superlink:
+    image: flwr/superlink:1.10.0.dev20240709
+    command:
+      - --insecure
+
+  # create a SuperNode service with two containers
+  supernode:
+    user: root
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM flwr/supernode:1.10.0.dev20240709
+
+        WORKDIR /app
+        RUN python -m pip install -U --no-cache-dir \
+            "flwr-datasets[vision]>==0.1.0,<0.2.0" \
+            torch==2.2.1 \
+            torchvision==0.17.1 \
+            tqdm==4.66.3
+        ENTRYPOINT ["flower-supernode", "client:app"]
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "2"
+    command:
+      - --superlink
+      - superlink:9092
+      - --insecure
+    depends_on:
+      - superlink
+    volumes:
+      - apps-volume:/app/.flwr/apps/:ro
+
+  # create a SuperExec service
+  superexec:
+    user: root
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM flwr/superexec:1.10.0.dev20240709
+
+        COPY <<-EOF deployment.py
+        import subprocess
+        import sys
+        from logging import ERROR, INFO
+        from typing import Dict, Optional
+
+        from typing_extensions import override
+
+        from flwr.cli.config_utils import get_fab_metadata
+        from flwr.cli.install import install_from_fab
+        from flwr.common.grpc import create_channel
+        from flwr.common.logger import log
+        from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
+        from flwr.proto.driver_pb2_grpc import DriverStub
+
+        from flwr.superexec.executor import Executor, RunTracker
+
+
+        class DeploymentEngine(Executor):
+            """Deployment engine executor."""
+
+            def __init__(
+                self,
+                address: str = "superlink:9091",
+                root_certificates: Optional[bytes] = None,
+            ) -> None:
+                self.address = address
+                self.root_certificates = root_certificates
+                self.stub: Optional[DriverStub] = None
+
+            def _connect(self) -> None:
+                if self.stub is None:
+                    channel = create_channel(
+                        server_address=self.address,
+                        insecure=(self.root_certificates is None),
+                        root_certificates=self.root_certificates,
+                    )
+                    self.stub = DriverStub(channel)
+
+            def _create_run(
+                self,
+                fab_id: str,
+                fab_version: str,
+                override_config: Dict[str, str],
+            ) -> int:
+                if self.stub is None:
+                    self._connect()
+
+                assert self.stub is not None
+
+                req = CreateRunRequest(
+                    fab_id=fab_id,
+                    fab_version=fab_version,
+                    override_config=override_config,
+                )
+                res = self.stub.CreateRun(request=req)
+                return int(res.run_id)
+
+            @override
+            def start_run(
+                self, fab_file: bytes, override_config: Dict[str, str]
+            ) -> Optional[RunTracker]:
+                """Start run using the Flower Deployment Engine."""
+                try:
+                    # Install FAB to flwr dir
+                    fab_version, fab_id = get_fab_metadata(fab_file)
+                    fab_path = install_from_fab(fab_file, None, True)
+
+                    # Install FAB Python package
+                    process = subprocess.check_call(
+                        [sys.executable, "-m", "pip", "install", str(fab_path)],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                    )
+
+                    # Call SuperLink to create run
+                    run_id: int = self._create_run(fab_id, fab_version, override_config)
+                    log(INFO, "Created run %s", str(run_id))
+
+                    # Start ServerApp
+                    proc = subprocess.Popen(  # pylint: disable=consider-using-with
+                        [
+                            "flower-server-app",
+                            "--run-id",
+                            str(run_id),
+                            "--insecure",
+                            "--superlink",
+                            "superlink:9091"
+                        ],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                    )
+                    log(INFO, "Started run %s", str(run_id))
+
+                    stdout, stderr = proc.communicate()
+                    print(stdout, stderr)
+
+                    return RunTracker(
+                        run_id=run_id,
+                        proc=proc,
+                    )
+                # pylint: disable-next=broad-except
+                except Exception as e:
+                    log(ERROR, "Could not start run: %s", str(e))
+                    return None
+
+
+        executor = DeploymentEngine()
+        EOF
+
+        ENTRYPOINT ["flower-superexec"]
+    ports:
+      - 9093:9093
+    command:
+      - deployment:executor
+      - --insecure
+    depends_on:
+      - superlink
+    volumes:
+      - apps-volume:/app/.flwr/apps/:rw
+
+volumes:
+     apps-volume:

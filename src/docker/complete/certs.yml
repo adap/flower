@@ -1,0 +1,93 @@
+services:
+  gen-certs:
+    build:
+      context: .
+      pull: true
+      dockerfile_inline: |
+        FROM ubuntu:latest
+
+        RUN apt-get update \
+            && apt-get -y --no-install-recommends install \
+            openssl
+
+        WORKDIR /app/script
+
+        COPY <<-EOF certificate.conf
+        [req]
+        default_bits = 4096
+        prompt = no
+        default_md = sha256
+        req_extensions = req_ext
+        distinguished_name = dn
+
+        [dn]
+        C = DE
+        ST = HH
+        O = Flower
+        CN = localhost
+
+        [req_ext]
+        subjectAltName = @alt_names
+
+        [alt_names]
+        DNS.1 = superlink
+        IP.1 = ::1
+        IP.2 = 127.0.0.1
+        EOF
+
+        COPY --chmod=744 <<-'EOF' generate.sh
+        #!/bin/bash
+        # This script will generate all certificates if ca.crt does not exist
+
+        set -e
+        cd "$$( cd "$$( dirname "$${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/../
+
+        CA_PASSWORD=notsafe
+
+        # Generate directories if not exists
+        mkdir -p certificates
+
+        if [ -f "certificates/ca.crt" ]; then
+            echo "Skipping certificate generation as they already exist."
+            exit 0
+        fi
+
+        # Generate the root certificate authority key and certificate based on key
+        openssl genrsa -out certificates/ca.key 4096
+        openssl req \
+            -new \
+            -x509 \
+            -key certificates/ca.key \
+            -sha256 \
+            -subj "/C=DE/ST=HH/O=CA, Inc." \
+            -days 365 -out certificates/ca.crt
+
+        # Generate a new private key for the server
+        openssl genrsa -out certificates/server.key 4096
+
+        # Create a signing CSR
+        openssl req \
+            -new \
+            -key certificates/server.key \
+            -out certificates/server.csr \
+            -config ./script/certificate.conf
+
+        # Generate a certificate for the server
+        openssl x509 \
+            -req \
+            -in certificates/server.csr \
+            -CA certificates/ca.crt \
+            -CAkey certificates/ca.key \
+            -CAcreateserial \
+            -out certificates/server.pem \
+            -days 365 \
+            -sha256 \
+            -extfile ./script/certificate.conf \
+            -extensions req_ext
+        EOF
+
+        WORKDIR /app
+
+        ENTRYPOINT ["./script/generate.sh"]
+    volumes:
+      - ./certificates/:/app/certificates/:rw
