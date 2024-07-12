@@ -217,11 +217,11 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             )
             split_indices_per_label[unique_label] = split_indices
 
-        # Initialize sampling tracker. Keys are the same as the class labels.
-        # Values are the smallest indices of each array in `label_sampling_dict`
-        # which will be sampled. Once a sample is taken from a label/key,
+        # Initialize sampling tracker. Keys are the unique class labels.
+        # Values are the smallest indices of each array in `label_samples`
+        # which will be sampled next. Once a sample is taken from a label/key,
         # increment the value (index) by 1.
-        index_tracker = {k: 0 for k, _ in label_samples.items()}
+        index_tracker = {k: 0 for k in sorted_unique_labels}
 
         # Prepare data structure to store indices assigned to partition ids
         self._partition_id_to_indices = {
@@ -230,7 +230,8 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
 
         for partition_id in range(self._num_partitions):
             # Get the `num_unique_labels_per_partition` labels for each partition. Use
-            # `numpy.roll` to get the indices of adjacent labels for pathological split.
+            # `numpy.roll` to get indices of adjacent sorted labels for pathological
+            # label distributions.
             labels_per_client = np.roll(sorted_unique_labels, -partition_id)[
                 : self._num_unique_labels_per_partition
             ]
@@ -241,7 +242,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                 )
                 index_tracker[label] += 1
 
-        # Shuffle the indices not to have the datasets with targets in sequences like
+        # Shuffle the indices to avoid datasets with targets in sequences like
         # [00000, 11111, ...]) if the shuffle is True
         if self._shuffle:
             for indices in self._partition_id_to_indices.values():
