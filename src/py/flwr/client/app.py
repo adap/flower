@@ -206,8 +206,7 @@ def _start_client_internal(
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
     node_config: Dict[str, str]
-        The configuration of the node, it must contain at least a `num-partitions`
-        and a `partition-id` key.
+        The configuration of the node.
     load_client_app_fn : Optional[Callable[[], ClientApp]] (default: None)
         A function that can be used to load a `ClientApp` instance.
     client_fn : Optional[ClientFnExt]
