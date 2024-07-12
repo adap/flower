@@ -319,12 +319,12 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
+    # Empty dict for now
+    # This will be remove once users can pass node_config via flower-supernode
     node_config: Dict[str, str] = {}
 
-    node_state_set = False
-    node_state = NodeState(
-        node_id=-1, node_config=node_config, partition_id=partition_id
-    )
+    # NodeState gets initialized when the first connection is established
+    node_state: Optional[NodeState] = None
 
     runs: Dict[int, Run] = {}
 
@@ -340,25 +340,33 @@ def _start_client_internal(
         ) as conn:
             receive, send, create_node, delete_node, get_run = conn
 
-            # Register node
-            if not node_state_set:
-                if create_node is not None:
-                    node_id = (  # pylint: disable=assignment-from-none
-                        create_node()
-                    )  # pylint: disable=not-callable
-                    if node_id is None:
-                        raise ValueError("Node Registration failed")
-                else:
-                    if transport == "grpc-bidi":
-                        # gRPC-bidi doesn't have the concept of node_id
-                        node_id = -1
-                    else:
+            # Register node when connecting the first time
+            if node_state is None:
+                if create_node is None:
+                    if transport != "grpc-bidi":
                         raise NotImplementedError(
                             "There is no transport other than grpc-bidi that "
                             "does not implement `create_node()`.'"
                         )
-                node_state.node_id = node_id
-                node_state_set = True
+                    # gRPC-bidi doesn't have the concept of node_id,
+                    # so we set it to -1
+                    node_state = NodeState(
+                        node_id=-1,
+                        node_config={},
+                        partition_id=partition_id,
+                    )
+                else:
+                    # Call create_node fn to register node
+                    node_id: Optional[int] = (  # pylint: disable=assignment-from-none
+                        create_node()
+                    )  # pylint: disable=not-callable
+                    if node_id is None:
+                        raise ValueError("Node registration failed")
+                    node_state = NodeState(
+                        node_id=node_id,
+                        node_config=node_config,
+                        partition_id=partition_id,
+                    )
 
             app_state_tracker.register_signal_handler()
             while not app_state_tracker.interrupt:
@@ -398,6 +406,10 @@ def _start_client_internal(
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
                             runs[run_id] = Run(run_id, "", "", {})
+
+                    # NodeState must be initialized at this point
+                    if node_state is None:
+                        raise ValueError("NodeState is not initialized")
 
                     # Register context for this run
                     node_state.register_context(
