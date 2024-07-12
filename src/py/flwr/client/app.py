@@ -42,7 +42,7 @@ from flwr.common.constant import (
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
 from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
-from flwr.common.typing import Run, Value
+from flwr.common.typing import Run
 
 from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
