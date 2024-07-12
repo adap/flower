@@ -336,7 +336,9 @@ def _start_client_internal(
 
             # Register node
             if create_node is not None:
-                node_id = create_node()  # pylint: disable=not-callable
+                node_id = (  # pylint: disable=assignment-from-none
+                    create_node()
+                )  # pylint: disable=not-callable
                 if transport in ["grpc-rere", None]:
                     node_state.node_id = node_id  # type: ignore
 
