@@ -39,7 +39,10 @@ from flwr.common.recordset_compat import (
     recordset_to_getpropertiesres,
 )
 from flwr.common.recordset_compat_test import _get_valid_getpropertiesins
-from flwr.simulation.app import _create_node_id_to_partition_mapping
+from flwr.simulation.app import (
+    NodeToPartitionMapping,
+    _create_node_id_to_partition_mapping,
+)
 from flwr.simulation.ray_transport.ray_actor import (
     ClientAppActor,
     VirtualClientEngineActor,
@@ -72,7 +75,9 @@ def get_dummy_client(context: Context) -> Client:
 
 def prep(
     actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
-) -> Tuple[List[RayActorClientProxy], VirtualClientEngineActorPool]:  # pragma: no cover
+) -> Tuple[
+    List[RayActorClientProxy], VirtualClientEngineActorPool, NodeToPartitionMapping
+]:  # pragma: no cover
     """Prepare ClientProxies and pool for tests."""
     client_resources = {"num_cpus": 1, "num_gpus": 0.0}
 
