@@ -88,7 +88,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     ...
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=R0913
         self,
         distribution_array: np.ndarray,
         num_partitions: int,
