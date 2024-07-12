@@ -66,6 +66,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     >>>
     >>> num_clients = 1_000
     >>> num_unique_labels_per_client = 2
+    >>> num_unique_labels = 10
     >>>
     >>> # Generate a vector from a log-normal probability distribution
     >>> rng = np.random.default_rng(2024)
@@ -75,6 +76,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     >>>     sigma,
     >>>     (num_clients*num_unique_labels_per_client),
     >>> )
+    >>> lognormal_distribution = lognormal_distribution.reshape((num_unique_labels, -1))
     >>>
     >>> partitioner = DistributionPartitioner(
     >>>     distribution_array=lognormal_distribution,
