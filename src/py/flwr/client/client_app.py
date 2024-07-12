@@ -37,7 +37,7 @@ def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFn
     if len(client_fn_args) != 1 or client_fn_args[first_arg].annotation is not Context:
         warn_deprecated_feature(
             "`client_fn` now expects a signature `def client_fn(context: Context)`."
-            "\nYou provided `client_fn` with signature: "
+            "\The provided `client_fn` has signature: "
             f"{dict(client_fn_args.items())}"
         )
 
