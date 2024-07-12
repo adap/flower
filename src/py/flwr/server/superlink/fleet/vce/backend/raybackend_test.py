@@ -53,9 +53,7 @@ class DummyClient(NumPyClient):
         return {"result": result}
 
 
-def get_dummy_client(
-    node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
-) -> Client:
+def get_dummy_client(context: Context) -> Client:  # pylint: disable=unused-argument
     """Return a DummyClient converted to Client type."""
     return DummyClient().to_client()
 

@@ -45,7 +45,7 @@ def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFn
         def adaptor_fn(context: Context) -> Client:  # pylint: disable=unused-argument
             # if patition-id is defined, pass it. Else pass node_id that should always
             # be defined during Context init.
-            cid = context.node_config.get("partition-id", context.node_id) #TODO: missing
+            cid = context.node_config.get("partition-id", context.node_id)
             return client_fn(str(cid))  # type: ignore
 
         return adaptor_fn

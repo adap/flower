@@ -17,7 +17,7 @@
 
 from math import pi
 from random import shuffle
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Dict, List, Tuple, Type
 
 import ray
 
@@ -65,11 +65,9 @@ class DummyClient(NumPyClient):
         return {"result": result}
 
 
-def get_dummy_client(
-    node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
-) -> Client:
+def get_dummy_client(context: Context) -> Client:
     """Return a DummyClient converted to Client type."""
-    return DummyClient(node_id).to_client()
+    return DummyClient(context.node_id).to_client()
 
 
 def prep(
