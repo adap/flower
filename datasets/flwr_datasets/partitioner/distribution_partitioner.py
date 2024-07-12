@@ -17,9 +17,9 @@
 from typing import Dict, List, Optional
 
 import numpy as np
+from flwr_datasets.partitioner.partitioner import Partitioner
 
 import datasets
-from flwr_datasets.partitioner.partitioner import Partitioner
 
 
 class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
@@ -154,8 +154,9 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # The partitioning is done lazily - only when the first partition is
         # requested. Only the first call creates the indices assignments for all the
         # partition indices.
-        self._check_num_partitions_correctness_if_needed()
         self._check_distribution_array_shape_if_needed()
+        self._check_num_partitions_correctness_if_needed()
+        self._check_num_partitions_greater_than_zero()
         self._determine_partition_id_to_indices_if_needed()
         return self.dataset.select(self._partition_id_to_indices[partition_id])
 
@@ -299,6 +300,11 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                 raise ValueError(
                     "The number of partitions needs to be smaller than the number of "
                     "samples in the dataset."
+                )
+            if self._num_partitions % self._num_unique_labels != 0:
+                raise ValueError(
+                    f"The number of partitions {self._num_partitions} is not divisible "
+                    f"by the number of unique labels {self._num_unique_labels}."
                 )
 
     def _check_num_partitions_greater_than_zero(self) -> None:
