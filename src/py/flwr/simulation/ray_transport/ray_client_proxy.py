@@ -53,6 +53,7 @@ class RayActorClientProxy(ClientProxy):
         super().__init__(cid=str(node_id))
         self.node_id = node_id
         self.partition_id = partition_id
+        print(node_id, partition_id)
 
         def _load_app() -> ClientApp:
             return ClientApp(client_fn=client_fn)
