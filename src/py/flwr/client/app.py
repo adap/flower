@@ -295,7 +295,7 @@ def _start_client_internal(
             log(WARN, "Connection attempt failed, retrying...")
         else:
             log(
-                DEBUG,
+                WARN,
                 "Connection attempt failed, retrying in %.2f seconds",
                 retry_state.actual_wait,
             )
