@@ -27,6 +27,11 @@ class Context:
 
     Parameters
     ----------
+    node_id : int
+        The ID that identifies the node.
+    node_config : Dict[str, str]
+        A config (key/value mapping) unique to the node and independent of the
+        `run_config`. This config persists across all runs this node participates in.
     state : RecordSet
         Holds records added by the entity in a given run and that will stay local.
         This means that the data it holds will never leave the system it's running from.
@@ -44,16 +49,22 @@ class Context:
         simulation or proto typing setups.
     """
 
+    node_id: int
+    node_config: Dict[str, str]
     state: RecordSet
-    partition_id: Optional[int]
     run_config: Dict[str, str]
+    partition_id: Optional[int]
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
+        node_id: int,
+        node_config: Dict[str, str],
         state: RecordSet,
         run_config: Dict[str, str],
         partition_id: Optional[int] = None,
     ) -> None:
+        self.node_id = node_id
+        self.node_config = node_config
         self.state = state
         self.run_config = run_config
         self.partition_id = partition_id
