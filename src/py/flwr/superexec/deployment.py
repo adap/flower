@@ -41,12 +41,15 @@ class DeploymentEngine(Executor):
     root_certificates: Optional[str] (Default: None)
         Specifies the path to the PEM-encoded root certificate file for
         establishing secure HTTPS connections.
+    flwr_dir: Optional[str] (Default: None)
+        The path containing installed Flower Apps.
     """
 
     def __init__(
         self,
         superlink: str = DEFAULT_SERVER_ADDRESS_DRIVER,
         cert_path: Optional[str] = None,
+        flwr_dir: Optional[str] = None,
     ) -> None:
         self.superlink = superlink
         if cert_path is None:
@@ -55,6 +58,7 @@ class DeploymentEngine(Executor):
         else:
             self.cert_path = cert_path
             self.root_certificates = Path(cert_path).read_bytes()
+        self.flwr_dir = flwr_dir
         self.stub: Optional[DriverStub] = None
 
     def _connect(self) -> None:
@@ -96,8 +100,12 @@ class DeploymentEngine(Executor):
         if config:
             if superlink_address := config.get("superlink"):
                 self.superlink = superlink_address
-            if cert_path := config.get("root-certificates"):
+            if cert_path := config.get(
+                "root-certificates", config.get("root_certificates")
+            ):
                 self.cert_path = cert_path
+            if flwr_dir := config.get("flwr-dir", config.get("flwr_dir")):
+                self.flwr_dir = flwr_dir
 
         try:
             # Install FAB to flwr dir
@@ -121,6 +129,7 @@ class DeploymentEngine(Executor):
                     "flower-server-app",
                     "--run-id",
                     str(run_id),
+                    f"--flwr-dir {self.flwr_dir}" if self.flwr_dir else "",
                     "--superlink",
                     self.superlink,
                     (
