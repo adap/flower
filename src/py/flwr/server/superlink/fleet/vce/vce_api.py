@@ -14,14 +14,18 @@
 # ==============================================================================
 """Fleet Simulation Engine API."""
 
-import asyncio
+
 import json
 import sys
+import threading
 import time
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from logging import DEBUG, ERROR, INFO, WARN
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from queue import Empty, Queue
+from time import sleep
+from typing import Callable, Dict, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.node_state import NodeState
@@ -30,8 +34,8 @@ from flwr.common.logger import log
 from flwr.common.message import Error
 from flwr.common.object_ref import load_app
 from flwr.common.serde import message_from_taskins, message_to_taskres
-from flwr.proto.task_pb2 import TaskIns  # pylint: disable=E0611
-from flwr.server.superlink.state import StateFactory
+from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
+from flwr.server.superlink.state import State, StateFactory
 
 from .backend import Backend, error_messages_backends, supported_backends
 
@@ -52,20 +56,21 @@ def _register_nodes(
 
 
 # pylint: disable=too-many-arguments,too-many-locals
-async def worker(
+def worker(
     app_fn: Callable[[], ClientApp],
-    queue: "asyncio.Queue[TaskIns]",
+    taskins_queue: "Queue[TaskIns]",
+    taskres_queue: "Queue[TaskRes]",
     node_states: Dict[int, NodeState],
-    state_factory: StateFactory,
-    nodes_mapping: NodeToPartitionMapping,
     backend: Backend,
+    f_stop: threading.Event,
 ) -> None:
     """Get TaskIns from queue and pass it to an actor in the pool to execute it."""
-    state = state_factory.state()
-    while True:
+    while not f_stop.is_set():
         out_mssg = None
         try:
-            task_ins: TaskIns = await queue.get()
+            # Fetch from queue with timeout. We use a timeout so
+            # the stopping event can be evaluated even when the queue is empty.
+            task_ins: TaskIns = taskins_queue.get(timeout=1.0)
             node_id = task_ins.task.consumer.node_id
 
             # Register and retrieve runstate
@@ -74,11 +79,9 @@ async def worker(
 
             # Convert TaskIns to Message
             message = message_from_taskins(task_ins)
-            # Set partition_id
-            message.metadata.partition_id = nodes_mapping[node_id]
 
             # Let backend process message
-            out_mssg, updated_context = await backend.process_message(
+            out_mssg, updated_context = backend.process_message(
                 app_fn, message, context
             )
 
@@ -86,11 +89,9 @@ async def worker(
             node_states[node_id].update_context(
                 task_ins.run_id, context=updated_context
             )
-
-        except asyncio.CancelledError as e:
-            log(DEBUG, "Terminating async worker: %s", e)
-            break
-
+        except Empty:
+            # An exception raised if queue.get times out
+            pass
         # Exceptions aren't raised but reported as an error message
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, ex)
@@ -114,67 +115,48 @@ async def worker(
                 task_res = message_to_taskres(out_mssg)
                 # Store TaskRes in state
                 task_res.task.pushed_at = time.time()
-                state.store_task_res(task_res)
+                taskres_queue.put(task_res)
 
 
-async def add_taskins_to_queue(
-    queue: "asyncio.Queue[TaskIns]",
-    state_factory: StateFactory,
+def add_taskins_to_queue(
+    state: State,
+    queue: "Queue[TaskIns]",
     nodes_mapping: NodeToPartitionMapping,
-    backend: Backend,
-    consumers: List["asyncio.Task[None]"],
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
 ) -> None:
-    """Retrieve TaskIns and add it to the queue."""
-    state = state_factory.state()
-    num_initial_consumers = len(consumers)
+    """Put TaskIns in a queue from State."""
     while not f_stop.is_set():
         for node_id in nodes_mapping.keys():
-            task_ins = state.get_task_ins(node_id=node_id, limit=1)
-            if task_ins:
-                await queue.put(task_ins[0])
-
-        # Count consumers that are running
-        num_active = sum(not (cc.done()) for cc in consumers)
-
-        # Alert if number of consumers decreased by half
-        if num_active < num_initial_consumers // 2:
-            log(
-                WARN,
-                "Number of active workers has more than halved: (%i/%i active)",
-                num_active,
-                num_initial_consumers,
-            )
-
-        # Break if consumers died
-        if num_active == 0:
-            raise RuntimeError("All workers have died. Ending Simulation.")
-
-        # Log some stats
-        log(
-            DEBUG,
-            "Simulation Engine stats: "
-            "Active workers: (%i/%i) | %s (%i workers) | Tasks in queue: %i)",
-            num_active,
-            num_initial_consumers,
-            backend.__class__.__name__,
-            backend.num_workers,
-            queue.qsize(),
-        )
-        await asyncio.sleep(1.0)
-    log(DEBUG, "Async producer: Stopped pulling from StateFactory.")
+            task_ins_list = state.get_task_ins(node_id=node_id, limit=1)
+            for task_ins in task_ins_list:
+                queue.put(task_ins)
+        sleep(0.1)
 
 
-async def run(
+def put_taskres_into_state(
+    state: State, queue: "Queue[TaskRes]", f_stop: threading.Event
+) -> None:
+    """Put TaskRes into State from a queue."""
+    while not f_stop.is_set():
+        try:
+            taskres = queue.get(timeout=1.0)
+            state.store_task_res(taskres)
+        except Empty:
+            # queue is empty when timeout was triggered
+            pass
+
+
+def run(
     app_fn: Callable[[], ClientApp],
     backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
     state_factory: StateFactory,
     node_states: Dict[int, NodeState],
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
 ) -> None:
-    """Run the VCE async."""
-    queue: "asyncio.Queue[TaskIns]" = asyncio.Queue(128)
+    """Run the VCE."""
+    taskins_queue: "Queue[TaskIns]" = Queue()
+    taskres_queue: "Queue[TaskRes]" = Queue()
 
     try:
 
@@ -182,29 +164,48 @@ async def run(
         backend = backend_fn()
 
         # Build backend
-        await backend.build()
+        backend.build()
 
         # Add workers (they submit Messages to Backend)
-        worker_tasks = [
-            asyncio.create_task(
-                worker(
-                    app_fn, queue, node_states, state_factory, nodes_mapping, backend
-                )
-            )
-            for _ in range(backend.num_workers)
-        ]
-        # Create producer (adds TaskIns into Queue)
-        producer = asyncio.create_task(
-            add_taskins_to_queue(
-                queue, state_factory, nodes_mapping, backend, worker_tasks, f_stop
-            )
-        )
+        state = state_factory.state()
 
-        # Wait for producer to finish
-        # The producer runs forever until f_stop is set or until
-        # all worker (consumer) coroutines are completed. Workers
-        # also run forever and only end if an exception is raised.
-        await asyncio.gather(producer)
+        extractor_th = threading.Thread(
+            target=add_taskins_to_queue,
+            args=(
+                state,
+                taskins_queue,
+                nodes_mapping,
+                f_stop,
+            ),
+        )
+        extractor_th.start()
+
+        injector_th = threading.Thread(
+            target=put_taskres_into_state,
+            args=(
+                state,
+                taskres_queue,
+                f_stop,
+            ),
+        )
+        injector_th.start()
+
+        with ThreadPoolExecutor() as executor:
+            _ = [
+                executor.submit(
+                    worker,
+                    app_fn,
+                    taskins_queue,
+                    taskres_queue,
+                    node_states,
+                    backend,
+                    f_stop,
+                )
+                for _ in range(backend.num_workers)
+            ]
+
+        extractor_th.join()
+        injector_th.join()
 
     except Exception as ex:
 
@@ -219,18 +220,9 @@ async def run(
         raise RuntimeError("Simulation Engine crashed.") from ex
 
     finally:
-        # Produced task terminated, now cancel worker tasks
-        for w_t in worker_tasks:
-            _ = w_t.cancel()
-
-        while not all(w_t.done() for w_t in worker_tasks):
-            log(DEBUG, "Terminating async workers...")
-            await asyncio.sleep(0.5)
-
-        await asyncio.gather(*[w_t for w_t in worker_tasks if not w_t.done()])
 
         # Terminate backend
-        await backend.terminate()
+        backend.terminate()
 
 
 # pylint: disable=too-many-arguments,unused-argument,too-many-locals,too-many-branches
@@ -239,7 +231,7 @@ def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
     app_dir: str,
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     num_supernodes: Optional[int] = None,
@@ -291,8 +283,10 @@ def start_vce(
 
     # Construct mapping of NodeStates
     node_states: Dict[int, NodeState] = {}
-    for node_id in nodes_mapping:
-        node_states[node_id] = NodeState()
+    for node_id, partition_id in nodes_mapping.items():
+        node_states[node_id] = NodeState(
+            node_id=node_id, node_config={}, partition_id=partition_id
+        )
 
     # Load backend config
     log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
@@ -325,7 +319,7 @@ def start_vce(
             if app_dir is not None:
                 sys.path.insert(0, app_dir)
 
-            app: ClientApp = load_app(client_app_attr, LoadClientAppError)
+            app: ClientApp = load_app(client_app_attr, LoadClientAppError, app_dir)
 
             if not isinstance(app, ClientApp):
                 raise LoadClientAppError(
@@ -343,15 +337,13 @@ def start_vce(
         _ = app_fn()
 
         # Run main simulation loop
-        asyncio.run(
-            run(
-                app_fn,
-                backend_fn,
-                nodes_mapping,
-                state_factory,
-                node_states,
-                f_stop,
-            )
+        run(
+            app_fn,
+            backend_fn,
+            nodes_mapping,
+            state_factory,
+            node_states,
+            f_stop,
         )
     except LoadClientAppError as loadapp_ex:
         f_stop_delay = 10

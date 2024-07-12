@@ -17,12 +17,15 @@
 import sys
 from enum import Enum
 from logging import DEBUG
-from typing import Optional
+from pathlib import Path
+from typing import Dict, Optional
 
 import typer
 from typing_extensions import Annotated
 
 from flwr.cli import config_utils
+from flwr.cli.build import build
+from flwr.common.config import parse_config_args
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -41,7 +44,10 @@ class Engine(str, Enum):
 def run(
     engine: Annotated[
         Optional[Engine],
-        typer.Option(case_sensitive=False, help="The execution engine to run the app"),
+        typer.Option(
+            case_sensitive=False,
+            help="The engine to run FL with (currently only simulation is supported).",
+        ),
     ] = None,
     use_superexec: Annotated[
         bool,
@@ -49,15 +55,24 @@ def run(
             case_sensitive=False, help="Use this flag to use the new SuperExec API"
         ),
     ] = False,
+    directory: Annotated[
+        Optional[Path],
+        typer.Option(help="Path of the Flower project to run"),
+    ] = None,
+    config_overrides: Annotated[
+        Optional[str],
+        typer.Option(
+            "--config",
+            "-c",
+            help="Override configuration key-value pairs",
+        ),
+    ] = None,
 ) -> None:
     """Run Flower project."""
-    if use_superexec:
-        _start_superexec_run()
-        return
-
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    config, errors, warnings = config_utils.load_and_validate()
+    pyproject_path = directory / "pyproject.toml" if directory else None
+    config, errors, warnings = config_utils.load_and_validate(path=pyproject_path)
 
     if config is None:
         typer.secho(
@@ -79,6 +94,12 @@ def run(
 
     typer.secho("Success", fg=typer.colors.GREEN)
 
+    if use_superexec:
+        _start_superexec_run(
+            parse_config_args(config_overrides, separator=","), directory
+        )
+        return
+
     server_app_ref = config["flower"]["components"]["serverapp"]
     client_app_ref = config["flower"]["components"]["clientapp"]
 
@@ -87,12 +108,16 @@ def run(
 
     if engine == Engine.SIMULATION:
         num_supernodes = config["flower"]["engine"]["simulation"]["supernode"]["num"]
+        backend_config = config["flower"]["engine"]["simulation"].get(
+            "backend_config", None
+        )
 
         typer.secho("Starting run... ", fg=typer.colors.BLUE)
         _run_simulation(
             server_app_attr=server_app_ref,
             client_app_attr=client_app_ref,
             num_supernodes=num_supernodes,
+            backend_config=backend_config,
         )
     else:
         typer.secho(
@@ -102,7 +127,9 @@ def run(
         )
 
 
-def _start_superexec_run() -> None:
+def _start_superexec_run(
+    override_config: Dict[str, str], directory: Optional[Path]
+) -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
@@ -117,5 +144,11 @@ def _start_superexec_run() -> None:
     channel.subscribe(on_channel_state_change)
     stub = ExecStub(channel)
 
-    req = StartRunRequest()
-    stub.StartRun(req)
+    fab_path = build(directory)
+
+    req = StartRunRequest(
+        fab_file=Path(fab_path).read_bytes(),
+        override_config=override_config,
+    )
+    res = stub.StartRun(req)
+    typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)

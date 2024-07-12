@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2021 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ from logging import ERROR
 from typing import Optional
 
 from flwr import common
-from flwr.client import ClientFn
+from flwr.client import ClientFnExt
 from flwr.client.client_app import ClientApp
 from flwr.client.node_state import NodeState
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
@@ -44,16 +44,24 @@ class RayActorClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
     def __init__(
-        self, client_fn: ClientFn, cid: str, actor_pool: VirtualClientEngineActorPool
+        self,
+        client_fn: ClientFnExt,
+        node_id: int,
+        partition_id: int,
+        actor_pool: VirtualClientEngineActorPool,
     ):
-        super().__init__(cid)
+        super().__init__(cid=str(node_id))
+        self.node_id = node_id
+        self.partition_id = partition_id
 
         def _load_app() -> ClientApp:
             return ClientApp(client_fn=client_fn)
 
         self.app_fn = _load_app
         self.actor_pool = actor_pool
-        self.proxy_state = NodeState()
+        self.proxy_state = NodeState(
+            node_id=node_id, node_config={}, partition_id=self.partition_id
+        )
 
     def _submit_job(self, message: Message, timeout: Optional[float]) -> Message:
         """Sumbit a message to the ActorPool."""
@@ -67,11 +75,13 @@ class RayActorClientProxy(ClientProxy):
 
         try:
             self.actor_pool.submit_client_job(
-                lambda a, a_fn, mssg, cid, state: a.run.remote(a_fn, mssg, cid, state),
-                (self.app_fn, message, self.cid, state),
+                lambda a, a_fn, mssg, partition_id, state: a.run.remote(
+                    a_fn, mssg, partition_id, state
+                ),
+                (self.app_fn, message, str(self.partition_id), state),
             )
             out_mssg, updated_context = self.actor_pool.get_client_result(
-                self.cid, timeout
+                str(self.partition_id), timeout
             )
 
             # Update state
@@ -103,11 +113,10 @@ class RayActorClientProxy(ClientProxy):
                 message_id="",
                 group_id=str(group_id) if group_id is not None else "",
                 src_node_id=0,
-                dst_node_id=int(self.cid),
+                dst_node_id=self.node_id,
                 reply_to_message="",
                 ttl=timeout if timeout else DEFAULT_TTL,
                 message_type=message_type,
-                partition_id=int(self.cid),
             ),
         )
 

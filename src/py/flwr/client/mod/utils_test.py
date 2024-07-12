@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ class TestMakeApp(unittest.TestCase):
 
         state = RecordSet()
         state.metrics_records[METRIC] = MetricsRecord({COUNTER: 0.0})
-        context = Context(state=state)
+        context = Context(node_id=0, node_config={}, state=state, run_config={})
         message = _get_dummy_flower_message()
 
         # Execute
@@ -129,7 +129,7 @@ class TestMakeApp(unittest.TestCase):
         # Prepare
         footprint: List[str] = []
         mock_app = make_mock_app("app", footprint)
-        context = Context(state=RecordSet())
+        context = Context(node_id=0, node_config={}, state=RecordSet(), run_config={})
         message = _get_dummy_flower_message()
 
         def filter_mod(

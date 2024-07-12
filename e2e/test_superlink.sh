@@ -2,7 +2,7 @@
 set -e
 
 case "$1" in
-  pandas)
+  framework-pandas)
     server_arg="--insecure"
     client_arg="--insecure"
     server_dir="./"
@@ -70,11 +70,11 @@ timeout 2m flower-superlink $server_arg $db_arg $rest_arg_superlink $server_auth
 sl_pid=$!
 sleep 3
 
-timeout 2m flower-client-app client:app $client_arg $rest_arg_supernode --superlink $server_address $client_auth_1 &
+timeout 2m flower-supernode client:app $client_arg $rest_arg_supernode --superlink $server_address $client_auth_1 &
 cl1_pid=$!
 sleep 3
 
-timeout 2m flower-client-app client:app $client_arg $rest_arg_supernode --superlink $server_address $client_auth_2 &
+timeout 2m flower-supernode client:app $client_arg $rest_arg_supernode --superlink $server_address $client_auth_2 &
 cl2_pid=$!
 sleep 3
 
