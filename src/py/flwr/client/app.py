@@ -319,8 +319,8 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    # Empty dict for now
-    # This will be remove once users can pass node_config via flower-supernode
+    # Empty dict (for now)
+    # This will be removed once users can pass node_config via flower-supernode
     node_config: Dict[str, str] = {}
 
     # NodeState gets initialized when the first connection is established
