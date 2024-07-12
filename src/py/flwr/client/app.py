@@ -319,11 +319,13 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    node_state_set = False
     node_config: Dict[str, str] = {}
+
+    node_state_set = False
     node_state = NodeState(
         node_id=-1, node_config=node_config, partition_id=partition_id
     )
+
     runs: Dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
