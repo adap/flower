@@ -105,6 +105,8 @@ class DeploymentEngine(Executor):
                     "flower-server-app",
                     "--run-id",
                     str(run_id),
+                    "--address",
+                    self.address,
                     "--insecure",
                 ],
                 stdout=subprocess.PIPE,
