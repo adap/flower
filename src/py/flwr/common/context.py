@@ -55,7 +55,7 @@ class Context:
     run_config: Dict[str, str]
     partition_id: Optional[int]
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         node_id: int,
         node_config: Dict[str, str],
