@@ -34,7 +34,8 @@ def _alert_erroneous_client_fn() -> None:
     raise ValueError(
         "A `ClientApp` cannot make use of a `client_fn` that does "
         "not have a signature in the form: `def client_fn(context: "
-        "Context)`. You can import the `Context` type from `flwr.common`."
+        "Context)`. You can import the `Context` like this: "
+        "`from flwr.common import Context`"
     )
 
 
@@ -52,8 +53,8 @@ def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFn
         warn_deprecated_feature(
             "`client_fn` now expects a signature `def client_fn(context: Context)`."
             "The provided `client_fn` has signature: "
-            f"{dict(client_fn_args.items())}. You can import the `Context` type "
-            "from `flwr.common`."
+            f"{dict(client_fn_args.items())}. You can import the `Context` like this:"
+            " `from flwr.common import Context`"
         )
 
         # Wrap depcreated client_fn inside a function with the expected signature
