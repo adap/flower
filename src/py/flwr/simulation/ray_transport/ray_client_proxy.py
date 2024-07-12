@@ -53,7 +53,6 @@ class RayActorClientProxy(ClientProxy):
         super().__init__(cid=str(node_id))
         self.node_id = node_id
         self.partition_id = partition_id
-        print(node_id, partition_id)
 
         def _load_app() -> ClientApp:
             return ClientApp(client_fn=client_fn)
@@ -61,7 +60,9 @@ class RayActorClientProxy(ClientProxy):
         self.app_fn = _load_app
         self.actor_pool = actor_pool
         self.proxy_state = NodeState(
-            node_id=node_id, node_config={}, partition_id=partition_id
+            node_id=node_id,
+            node_config={"partition-id": str(partition_id)},
+            partition_id=None,
         )
 
     def _submit_job(self, message: Message, timeout: Optional[float]) -> Message:
@@ -73,17 +74,17 @@ class RayActorClientProxy(ClientProxy):
 
         # Retrieve context
         context = self.proxy_state.retrieve_context(run_id=run_id)
-        partition_id = str(context.partition_id)
+        partition_id_str = str(context.partition_id)
 
         try:
             self.actor_pool.submit_client_job(
                 lambda a, a_fn, mssg, partition_id, context: a.run.remote(
                     a_fn, mssg, partition_id, context
                 ),
-                (self.app_fn, message, partition_id, context),
+                (self.app_fn, message, partition_id_str, context),
             )
             out_mssg, updated_context = self.actor_pool.get_client_result(
-                partition_id, timeout
+                partition_id_str, timeout
             )
 
             # Update state
