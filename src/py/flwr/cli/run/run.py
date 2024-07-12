@@ -16,14 +16,14 @@
 
 from logging import DEBUG
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 import tomli
 import typer
 from typing_extensions import Annotated
 
 from flwr.cli.build import build
-from flwr.common.config import get_flwr_dir
+from flwr.common.config import get_flwr_dir, parse_config_args
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -59,6 +59,14 @@ def run(
                     - ``$HOME/.flwr/`` in all other cases"""
         ),
     ] = None,
+    config_overrides: Annotated[
+        Optional[str],
+        typer.Option(
+            "--config",
+            "-c",
+            help="Override configuration key-value pairs",
+        ),
+    ] = None,
 ) -> None:
     """Run Flower project."""
     global_config_path = get_flwr_dir(flwr_dir) / "config.toml"
@@ -81,9 +89,39 @@ def run(
                     bold=True,
                 )
                 raise typer.Exit(code=1)
-    else:
-        superexec_address = SUPEREXEC_DEFAULT_ADDRESS
+    typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
+    pyproject_path = directory / "pyproject.toml" if directory else None
+    config, errors, warnings = config_utils.load_and_validate(path=pyproject_path)
+
+    if config is None:
+        typer.secho(
+            "Project configuration could not be loaded.\n"
+            "pyproject.toml is invalid:\n"
+            + "\n".join([f"- {line}" for line in errors]),
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        sys.exit()
+
+    if warnings:
+        typer.secho(
+            "Project configuration is missing the following "
+            "recommended properties:\n" + "\n".join([f"- {line}" for line in warnings]),
+            fg=typer.colors.RED,
+            bold=True,
+        )
+
+    typer.secho("Success", fg=typer.colors.GREEN)
+
+    _start_superexec_run(
+        parse_config_args(config_overrides, separator=","), directory
+    )
+
+
+def _start_superexec_run(
+    override_config: Dict[str, str], directory: Optional[Path]
+) -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
@@ -100,6 +138,10 @@ def run(
 
     fab_path = build(directory)
 
-    req = StartRunRequest(fab_file=Path(fab_path).read_bytes(), verbose=verbose)
+    req = StartRunRequest(
+        fab_file=Path(fab_path).read_bytes(),
+        override_config=override_config,
+        verbose=verbose,
+    )
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
