@@ -14,11 +14,10 @@
 # ==============================================================================
 """Test for Ray backend for the Fleet API using the Simulation Engine."""
 
-import asyncio
 from math import pi
 from pathlib import Path
 from typing import Callable, Dict, Optional, Tuple, Union
-from unittest import IsolatedAsyncioTestCase
+from unittest import TestCase
 
 import ray
 
@@ -84,18 +83,18 @@ def _load_from_module(client_app_module_name: str) -> Callable[[], ClientApp]:
     return _load_app
 
 
-async def backend_build_process_and_termination(
+def backend_build_process_and_termination(
     backend: RayBackend,
     process_args: Optional[Tuple[Callable[[], ClientApp], Message, Context]] = None,
 ) -> Union[Tuple[Message, Context], None]:
     """Build, process job and terminate RayBackend."""
-    await backend.build()
+    backend.build()
     to_return = None
 
     if process_args:
-        to_return = await backend.process_message(*process_args)
+        to_return = backend.process_message(*process_args)
 
-    await backend.terminate()
+    backend.terminate()
 
     return to_return
 
@@ -121,7 +120,7 @@ def _create_message_and_context() -> Tuple[Message, Context, float]:
     )
 
     # Construct emtpy Context
-    context = Context(state=RecordSet())
+    context = Context(state=RecordSet(), run_config={})
 
     # Expected output
     expected_output = pi * mult_factor
@@ -129,10 +128,10 @@ def _create_message_and_context() -> Tuple[Message, Context, float]:
     return message, context, expected_output
 
 
-class AsyncTestRayBackend(IsolatedAsyncioTestCase):
-    """A basic class that allows runnig multliple asyncio tests."""
+class TestRayBackend(TestCase):
+    """A basic class that allows runnig multliple tests."""
 
-    async def on_cleanup(self) -> None:
+    def doCleanups(self) -> None:
         """Ensure Ray has shutdown."""
         if ray.is_initialized():
             ray.shutdown()
@@ -140,9 +139,7 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
     def test_backend_creation_and_termination(self) -> None:
         """Test creation of RayBackend and its termination."""
         backend = RayBackend(backend_config={}, work_dir="")
-        asyncio.run(
-            backend_build_process_and_termination(backend=backend, process_args=None)
-        )
+        backend_build_process_and_termination(backend=backend, process_args=None)
 
     def test_backend_creation_submit_and_termination(
         self,
@@ -157,10 +154,8 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
 
         message, context, expected_output = _create_message_and_context()
 
-        res = asyncio.run(
-            backend_build_process_and_termination(
-                backend=backend, process_args=(client_app_callable, message, context)
-            )
+        res = backend_build_process_and_termination(
+            backend=backend, process_args=(client_app_callable, message, context)
         )
 
         if res is None:
@@ -189,7 +184,6 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
             self.test_backend_creation_submit_and_termination(
                 client_app_loader=_load_from_module("a_non_existing_module:app")
             )
-        self.addAsyncCleanup(self.on_cleanup)
 
     def test_backend_creation_submit_and_termination_existing_client_app(
         self,
@@ -217,7 +211,6 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
                 client_app_loader=_load_from_module("raybackend_test:client_app"),
                 workdir="/?&%$^#%@$!",
             )
-        self.addAsyncCleanup(self.on_cleanup)
 
     def test_backend_creation_with_init_arguments(self) -> None:
         """Testing whether init args are properly parsed to Ray."""
@@ -248,5 +241,3 @@ class AsyncTestRayBackend(IsolatedAsyncioTestCase):
         nodes = ray.nodes()
 
         assert nodes[0]["Resources"]["CPU"] == backend_config_2["init_args"]["num_cpus"]
-
-        self.addAsyncCleanup(self.on_cleanup)
