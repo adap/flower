@@ -1,4 +1,4 @@
-# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 """SQLite based implemenation of server state."""
 
 
-import os
+import json
 import re
 import sqlite3
 import time
@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
+from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
 from flwr.common.typing import Run
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.recordset_pb2 import RecordSet  # pylint: disable=E0611
@@ -31,7 +32,7 @@ from flwr.proto.task_pb2 import Task, TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.utils.validator import validate_task_ins_or_res
 
 from .state import State
-from .utils import make_node_unavailable_taskres
+from .utils import generate_rand_int_from_bytes, make_node_unavailable_taskres
 
 SQL_CREATE_TABLE_NODE = """
 CREATE TABLE IF NOT EXISTS node(
@@ -61,9 +62,10 @@ CREATE INDEX IF NOT EXISTS idx_online_until ON node (online_until);
 
 SQL_CREATE_TABLE_RUN = """
 CREATE TABLE IF NOT EXISTS run(
-    run_id          INTEGER UNIQUE,
-    fab_id          TEXT,
-    fab_version     TEXT
+    run_id                INTEGER UNIQUE,
+    fab_id                TEXT,
+    fab_version           TEXT,
+    override_config       TEXT
 );
 """
 
@@ -541,7 +543,7 @@ class SqliteState(State):  # pylint: disable=R0904
     ) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
-        node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
+        node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
 
         query = "SELECT node_id FROM node WHERE public_key = :public_key;"
         row = self.query(query, {"public_key": public_key})
@@ -613,17 +615,27 @@ class SqliteState(State):  # pylint: disable=R0904
             return node_id
         return None
 
-    def create_run(self, fab_id: str, fab_version: str) -> int:
+    def create_run(
+        self,
+        fab_id: str,
+        fab_version: str,
+        override_config: Dict[str, str],
+    ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
-        run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
+        run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
         # Check conflicts
         query = "SELECT COUNT(*) FROM run WHERE run_id = ?;"
         # If run_id does not exist
         if self.query(query, (run_id,))[0]["COUNT(*)"] == 0:
-            query = "INSERT INTO run (run_id, fab_id, fab_version) VALUES (?, ?, ?);"
-            self.query(query, (run_id, fab_id, fab_version))
+            query = (
+                "INSERT INTO run (run_id, fab_id, fab_version, override_config)"
+                "VALUES (?, ?, ?, ?);"
+            )
+            self.query(
+                query, (run_id, fab_id, fab_version, json.dumps(override_config))
+            )
             return run_id
         log(ERROR, "Unexpected run creation failure.")
         return 0
@@ -687,7 +699,10 @@ class SqliteState(State):  # pylint: disable=R0904
         try:
             row = self.query(query, (run_id,))[0]
             return Run(
-                run_id=run_id, fab_id=row["fab_id"], fab_version=row["fab_version"]
+                run_id=run_id,
+                fab_id=row["fab_id"],
+                fab_version=row["fab_version"],
+                override_config=json.loads(row["override_config"]),
             )
         except sqlite3.IntegrityError:
             log(ERROR, "`run_id` does not exist.")

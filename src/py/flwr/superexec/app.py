@@ -77,6 +77,7 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
     parser.add_argument(
         "executor",
         help="For example: `deployment:exec` or `project.package.module:wrapper.exec`.",
+        default="flwr.superexec.deployment:executor",
     )
     parser.add_argument(
         "--address",
@@ -126,11 +127,11 @@ def _try_obtain_certificates(
         return None
     # Check if certificates are provided
     if args.ssl_certfile and args.ssl_keyfile and args.ssl_ca_certfile:
-        if not Path.is_file(args.ssl_ca_certfile):
+        if not Path(args.ssl_ca_certfile).is_file():
             sys.exit("Path argument `--ssl-ca-certfile` does not point to a file.")
-        if not Path.is_file(args.ssl_certfile):
+        if not Path(args.ssl_certfile).is_file():
             sys.exit("Path argument `--ssl-certfile` does not point to a file.")
-        if not Path.is_file(args.ssl_keyfile):
+        if not Path(args.ssl_keyfile).is_file():
             sys.exit("Path argument `--ssl-keyfile` does not point to a file.")
         certificates = (
             Path(args.ssl_ca_certfile).read_bytes(),  # CA certificate

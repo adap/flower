@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2023 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ from flwr.common.logger import log
 from flwr.common.message import Message, Metadata
 from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.serde import message_from_taskins, message_to_taskres
+from flwr.common.typing import Run
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     DeleteNodeRequest,
@@ -80,7 +81,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         Callable[[Message], None],
         Optional[Callable[[], None]],
         Optional[Callable[[], None]],
-        Optional[Callable[[int], Tuple[str, str]]],
+        Optional[Callable[[int], Run]],
     ]
 ]:
     """Primitives for request/response-based interaction with a server.
@@ -266,7 +267,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         # Cleanup
         metadata = None
 
-    def get_run(run_id: int) -> Tuple[str, str]:
+    def get_run(run_id: int) -> Run:
         # Call FleetAPI
         get_run_request = GetRunRequest(run_id=run_id)
         get_run_response: GetRunResponse = retry_invoker.invoke(
@@ -275,7 +276,12 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         )
 
         # Return fab_id and fab_version
-        return get_run_response.run.fab_id, get_run_response.run.fab_version
+        return Run(
+            run_id,
+            get_run_response.run.fab_id,
+            get_run_response.run.fab_version,
+            dict(get_run_response.run.override_config.items()),
+        )
 
     try:
         # Yield methods

@@ -1,4 +1,10 @@
-# Flower Example using scikit-learn
+---
+tags: [basic, vision, logistic regression, fds]
+dataset: [MNIST]
+framework: [scikit-learn]
+---
+
+# Flower Logistic Regression Example using scikit-learn
 
 This example of Flower uses `scikit-learn`'s `LogisticRegression` model to train a federated learning system. It will help you understand how to adapt Flower for use with `scikit-learn`.
 Running this example in itself is quite easy. This example uses [Flower Datasets](https://flower.ai/docs/datasets/) to download, partition and preprocess the MNIST dataset.
