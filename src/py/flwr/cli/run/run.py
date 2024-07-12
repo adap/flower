@@ -114,9 +114,7 @@ def run(
 
     typer.secho("Success", fg=typer.colors.GREEN)
 
-    _start_superexec_run(
-        parse_config_args(config_overrides, separator=","), directory
-    )
+    _start_superexec_run(parse_config_args(config_overrides, separator=","), directory)
 
 
 def _start_superexec_run(
