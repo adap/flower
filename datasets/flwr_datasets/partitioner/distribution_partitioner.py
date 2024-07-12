@@ -210,6 +210,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # Create indices split from dataset
         split_indices_per_label = {}
         for unique_label in unique_labels:
+            # Compute cumulative sum of samples to identify splitting points
             cumsum_division_numbers = np.cumsum(label_samples[unique_label])
             split_indices = np.split(
                 unique_label_to_indices[unique_label], cumsum_division_numbers
@@ -220,7 +221,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # Values are the smallest indices of each array in `label_sampling_dict`
         # which will be sampled. Once a sample is taken from a label/key,
         # increment the value (index) by 1.
-        tracker_dict = {k: 0 for k, _ in label_samples.items()}
+        index_tracker = {k: 0 for k, _ in label_samples.items()}
 
         # Prepare data structure to store indices assigned to partition ids
         self._partition_id_to_indices = {
@@ -234,11 +235,11 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                 : self._num_unique_labels_per_partition
             ]
             for label in labels_per_client:
-                index_to_sample = tracker_dict[label]
+                index_to_sample = index_tracker[label]
                 self._partition_id_to_indices[partition_id].extend(
                     split_indices_per_label[label][index_to_sample]
                 )
-                tracker_dict[label] += 1
+                index_tracker[label] += 1
 
         # Shuffle the indices not to have the datasets with targets in sequences like
         # [00000, 11111, ...]) if the shuffle is True
