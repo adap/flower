@@ -302,7 +302,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             distribution = sorted(Counter(labels).items())
             distribution = [v for _, v in distribution]
 
-            if any(self._distribution_array > distribution):
+            if any(self._distribution_array.sum(1) > distribution):
                 raise ValueError(
                     "The sum of at least one label distribution array "
                     "exceeds the original class label distribution."
