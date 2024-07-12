@@ -42,35 +42,30 @@ def _inspect_maybe_adapt_client_fn_signature(client_fn: ClientFnExt) -> ClientFn
     client_fn_args = inspect.signature(client_fn).parameters
     first_arg = list(client_fn_args.keys())[0]
 
-    if len(client_fn_args) == 1:
-
-        first_arg_type = client_fn_args[first_arg].annotation
-
-        if first_arg_type is str:
-            # Warn previous signature for `client_fn` seems to be used
-            warn_deprecated_feature(
-                "`client_fn` now expects a signature `def client_fn(context: Context)`."
-                "The provided `client_fn` has signature: "
-                f"{dict(client_fn_args.items())}. You can import the `Context` type "
-                "from `flwr.common`."
-            )
-
-            # Wrap depcreated client_fn inside a function with the expected signature
-            def adaptor_fn(
-                context: Context,
-            ) -> Client:  # pylint: disable=unused-argument
-                # if patition-id is defined, pass it. Else pass node_id that should
-                # always be defined during Context init.
-                cid = context.node_config.get("partition-id", context.node_id)
-                return client_fn(str(cid))  # type: ignore
-
-            return adaptor_fn
-
-        if first_arg_type is not Context:
-            _alert_erroneous_client_fn()
-
-    else:
+    if len(client_fn_args) != 1:
         _alert_erroneous_client_fn()
+
+    first_arg_type = client_fn_args[first_arg].annotation
+
+    if first_arg_type is str or first_arg == "cid":
+        # Warn previous signature for `client_fn` seems to be used
+        warn_deprecated_feature(
+            "`client_fn` now expects a signature `def client_fn(context: Context)`."
+            "The provided `client_fn` has signature: "
+            f"{dict(client_fn_args.items())}. You can import the `Context` type "
+            "from `flwr.common`."
+        )
+
+        # Wrap depcreated client_fn inside a function with the expected signature
+        def adaptor_fn(
+            context: Context,
+        ) -> Client:  # pylint: disable=unused-argument
+            # if patition-id is defined, pass it. Else pass node_id that should
+            # always be defined during Context init.
+            cid = context.node_config.get("partition-id", context.node_id)
+            return client_fn(str(cid))  # type: ignore
+
+        return adaptor_fn
 
     return client_fn
 
