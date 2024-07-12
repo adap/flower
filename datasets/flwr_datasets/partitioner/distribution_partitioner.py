@@ -32,14 +32,15 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     Parameters
     ----------
     distribution_array : numpy.ndarray
-        Sample distribution for all labels in all partitions. The array shape
-        must be of dimension `num_unique_labels` x
-        `num_unique_labels_per_partition*(num_partitions/num_unique_labels)`.
-        The values may be scaled per label such that the sum of the label
-        distributions across all partitions equal to the original unpartitioned
-        label distribution - see the `rescale` argument. The final per-label
-        sum will be padded to ensure each are equal to the original unpartitioned
-        label distribution.
+        A 2-dimensional numpy array of the probability distribution of samples
+        for all labels in all partitions. The array shape should be
+        (`num_unique_labels`,
+        `num_unique_labels_per_partition*num_partitions/num_unique_labels`),
+        such that the first row of the array corresponds to the sample distribution
+        of the first unique label (in ascending order). The values may be scaled per
+        label such that the sum of the label distributions across all partitions are
+        equal (or close to) to the original unpartitioned label distribution
+        - see the `rescale` argument.
     num_partitions : int
         The total number of partitions that the data will be divided into.
     num_unique_labels_per_partition : int
@@ -148,7 +149,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             return
 
         # Compute the label distribution from the dataset
-        unique_labels = self.dataset.unique(self._partition_by)
+        unique_labels = sorted(self.dataset.unique(self._partition_by))
         labels = np.asarray(self.dataset[self._partition_by])
         unique_label_to_indices = {}
         unique_label_distribution = {}
@@ -204,9 +205,6 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             zip(unique_label_distribution.keys(), label_sampling_matrix)
         )
 
-        # Create encoded class label to get the correct labels.
-        sorted_unique_labels = sorted(unique_labels)
-
         # Create indices split from dataset
         split_indices_per_label = {}
         for unique_label in unique_labels:
@@ -221,7 +219,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # Values are the smallest indices of each array in `label_samples`
         # which will be sampled next. Once a sample is taken from a label/key,
         # increment the value (index) by 1.
-        index_tracker = {k: 0 for k in sorted_unique_labels}
+        index_tracker = {k: 0 for k in unique_labels}
 
         # Prepare data structure to store indices assigned to partition ids
         self._partition_id_to_indices = {
@@ -232,7 +230,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             # Get the `num_unique_labels_per_partition` labels for each partition. Use
             # `numpy.roll` to get indices of adjacent sorted labels for pathological
             # label distributions.
-            labels_per_client = np.roll(sorted_unique_labels, -partition_id)[
+            labels_per_client = np.roll(unique_labels, -partition_id)[
                 : self._num_unique_labels_per_partition
             ]
             for label in labels_per_client:
