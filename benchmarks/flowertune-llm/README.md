@@ -57,5 +57,10 @@ With a new project directory created, running a baseline challenge can be done b
 
 ## Evaluate fine-tuned LLMs
 
-After the LLM fine-tuning finished, evaluate the performance of your pre-trained LLMs
+After the LLM fine-tuning finished, evaluate the performance of your fine-tuned LLMs
 following the `README.md` in `evaluation` directory.
+
+
+If you have any questions about running FlowerTune LLM challenges or evaluation, 
+please feel free to make posts at [Flower Discuss](https://discuss.flower.ai) forum, 
+or join our [Slack channel](https://flower.ai/join-slack/) to ask questions in the `#flowertune-llm-leaderboard` channel.

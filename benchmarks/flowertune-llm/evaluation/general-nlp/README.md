@@ -29,7 +29,11 @@ python gen_model_answer.py --peft-path=/path/to/pre-trained-model-dir/ # e.g., .
 The answers will be saved to `data/mt_bench/model_answer/[base_model_name].jsonl` in default.
 
 
-### Step 2. Generate judgments using GPT-4 
+### Step 2. Generate judgments using GPT-4
+
+Please follow this [instruction](https://platform.openai.com/docs/quickstart/developer-quickstart) to create a OpenAI API key.
+The estimated costs of running this evaluation is ~$10.
+
 ```bash
 export OPENAI_API_KEY=XXXXXX  # set the OpenAI API key
 python gen_judgement.py --model-list Mistral-7B-v0.3
@@ -46,4 +50,5 @@ python show_result.py --model-list Mistral-7B-v0.3
 GPT-4 will give a score on a scale of 10 to the first-turn (MT-1) and second-turn (MT-2) of the conversations, along with an average value as the third score.
 
 > [!NOTE]
-> Please ensure that you provide all **three scores** when submitting to the LLM Leaderboard.
+> Please ensure that you provide all **three scores** when submitting to the LLM Leaderboard (see the [`Make Submission`](https://github.com/adap/flower/tree/main/benchmarks/flowertune-llm/evaluation#make-submission-on-flowertune-llm-leaderboard) section).
+
