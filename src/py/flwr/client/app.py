@@ -18,7 +18,7 @@ import signal
 import sys
 import time
 from dataclasses import dataclass
-from logging import DEBUG, ERROR, INFO, WARN
+from logging import ERROR, INFO, WARN
 from pathlib import Path
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
