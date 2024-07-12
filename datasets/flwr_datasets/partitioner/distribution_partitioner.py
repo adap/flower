@@ -49,9 +49,9 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     preassigned_num_samples_per_label : int
         The minimum number of samples that each label in each partition will have.
     rescale : bool, default=True
-                    Whether to partition samples according to the values in
-                    `distribution_array` or rescale based on the original unpartitioned
-                    class label distribution. `float` values are rounded to the nearest `int`.
+        Whether to partition samples according to the values in
+        `distribution_array` or rescale based on the original unpartitioned
+        class label distribution. `float` values are rounded to the nearest `int`.
     shuffle : bool, default=True
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to nodes.
@@ -126,8 +126,8 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # The partitioning is done lazily - only when the first partition is
         # requested. Only the first call creates the indices assignments for all the
         # partition indices.
-        # self._check_num_partitions_correctness_if_needed()
-        self._check_distribution_array_shape()
+        self._check_num_partitions_correctness_if_needed()
+        self._check_distribution_array_shape_if_needed()
         self._determine_partition_id_to_indices_if_needed()
         return self.dataset.select(self._partition_id_to_indices[partition_id])
 
@@ -198,6 +198,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # Create encoded class label to get the correct labels.
         encoded_class_label = np.asarray(sorted(self.dataset.unique("label")))
 
+        # Create indices split from dataset
         split_indices_per_label = {}
         for unique_label in unique_labels:
             cumsum_division_numbers = np.cumsum(label_samples[unique_label])
@@ -206,16 +207,12 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             )
             split_indices_per_label[unique_label] = split_indices
 
-        # Initialize sample tracker. Keys are the same as the class labels.
+        # Initialize sampling tracker. Keys are the same as the class labels.
         # Values are the smallest indices of each array in `label_sampling_dict`
         # which will be sampled. Once a sample is taken from a label/key,
         # increment the value (index) by 1.
         tracker_dict = {k: 0 for k, _ in label_samples.items()}
 
-        # Prepare data structure to store indices assigned to partition ids
-        partition_id_to_indices = {
-            partition_id: [] for partition_id in range(self._num_partitions)
-        }
         for partition_id in range(self._num_partitions):
             # Get the `num_unique_labels_per_partition` labels for each partition. Use
             # `numpy.roll` to get the indices of adjacent labels for pathological split.
@@ -224,7 +221,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             ]
             for label in labels_per_client:
                 index_to_sample = tracker_dict[label]
-                partition_id_to_indices[partition_id].extend(
+                self._partition_id_to_indices[partition_id].extend(
                     split_indices_per_label[label][index_to_sample]
                 )
                 tracker_dict[label] += 1
@@ -232,28 +229,28 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # Shuffle the indices not to have the datasets with targets in sequences like
         # [00000, 11111, ...]) if the shuffle is True
         if self._shuffle:
-            for indices in partition_id_to_indices.values():
+            for indices in self._partition_id_to_indices.values():
                 # In place shuffling
                 self._rng.shuffle(indices)
-        self._partition_id_to_indices = partition_id_to_indices
         self._partition_id_to_indices_determined = True
 
-    def _check_distribution_array_shape(self) -> None:
+    def _check_distribution_array_shape_if_needed(self) -> None:
         """Test distribution array shape correctness."""
-        # Infer the number of unique labels from the size of the 1st dimension
-        # in distribution array
-        self._num_unique_labels = np.shape(self._distribution_array)[0]
-        expected_num_columns = (
-            self._num_unique_labels_per_partition
-            * self._num_partitions
-            / self._num_unique_labels
-        )
-        if expected_num_columns != np.shape(self._distribution_array)[1]:
-            raise ValueError(
-                "The size of the 2nd dimension in the distribution array needs to be "
-                "equal to "
-                "`num_unique_labels_per_partition*num_partitions/num_unique_labels`."
+        if not self._partition_id_to_indices_determined:
+            # Infer the number of unique labels from the size of the 1st dimension
+            # in distribution array
+            self._num_unique_labels = np.shape(self._distribution_array)[0]
+            expected_num_columns = (
+                self._num_unique_labels_per_partition
+                * self._num_partitions
+                / self._num_unique_labels
             )
+            if expected_num_columns != np.shape(self._distribution_array)[1]:
+                raise ValueError(
+                    "The size of the 2nd dimension in the distribution array needs to be "
+                    "equal to "
+                    "`num_unique_labels_per_partition*num_partitions/num_unique_labels`."
+                )
 
     def _check_num_partitions_correctness_if_needed(self) -> None:
         """Test num_partitions when the dataset is given (in load_partition)."""
