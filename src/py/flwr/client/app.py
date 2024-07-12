@@ -204,6 +204,9 @@ def _start_client_internal(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
+    node_config: Dict[str, str]
+        The configuration of the node, it must contain at least a `num-partitions`
+        and a `partition-id` key.
     load_client_app_fn : Optional[Callable[[], ClientApp]] (default: None)
         A function that can be used to load a `ClientApp` instance.
     client_fn : Optional[ClientFnExt]
@@ -238,9 +241,6 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
-    partition_id: Optional[int] (default: None)
-        The data partition index associated with this node. Better suited for
-        prototyping purposes.
     flwr_dir: Optional[Path] (default: None)
         The fully resolved path containing installed Flower Apps.
     """
