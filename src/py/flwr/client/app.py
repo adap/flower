@@ -407,10 +407,6 @@ def _start_client_internal(
                         else:
                             runs[run_id] = Run(run_id, "", "", {})
 
-                    # NodeState must be initialized at this point
-                    if node_state is None:
-                        raise ValueError("NodeState is not initialized")
-
                     # Register context for this run
                     node_state.register_context(
                         run_id=run_id, run=runs[run_id], flwr_dir=flwr_dir
