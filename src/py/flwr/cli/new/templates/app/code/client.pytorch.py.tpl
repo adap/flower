@@ -1,6 +1,7 @@
 """$project_name: A Flower / PyTorch app."""
 
 from flwr.client import NumPyClient, ClientApp
+from flwr.common import Context
 
 from $import_name.task import (
     Net,
@@ -31,10 +32,12 @@ class FlowerClient(NumPyClient):
         return loss, len(self.valloader.dataset), {"accuracy": accuracy}
 
 
-def client_fn(cid):
+def client_fn(context: Context):
     # Load model and data
     net = Net().to(DEVICE)
-    trainloader, valloader = load_data(int(cid), 2)
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+    trainloader, valloader = load_data(partition_id, num_partitions)
 
     # Return Client instance
     return FlowerClient(net, trainloader, valloader).to_client()
