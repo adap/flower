@@ -29,7 +29,12 @@ from cryptography.hazmat.primitives.serialization import (
 
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.common import EventType, event
-from flwr.common.config import get_flwr_dir, get_project_config, get_project_dir
+from flwr.common.config import (
+    get_flwr_dir,
+    get_project_config,
+    get_project_dir,
+    parse_config_args,
+)
 from flwr.common.constant import (
     TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_RERE,
@@ -67,6 +72,8 @@ def run_supernode() -> None:
         authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
+        node_config=parse_config_args(args.node_config),
+        flwr_dir=get_flwr_dir(args.flwr_dir),
     )
 
     # Graceful shutdown
@@ -91,6 +98,7 @@ def run_client_app() -> None:
 
     _start_client_internal(
         server_address=args.superlink,
+        node_config=parse_config_args(args.node_config),
         load_client_app_fn=load_fn,
         transport=args.transport,
         root_certificates=root_certificates,
@@ -177,7 +185,7 @@ def _get_load_client_app_fn(
         else:
             flwr_dir = Path(args.flwr_dir).absolute()
 
-    sys.path.insert(0, str(flwr_dir.absolute()))
+    inserted_path = None
 
     default_app_ref: str = getattr(args, "client-app")
 
@@ -187,6 +195,11 @@ def _get_load_client_app_fn(
             "Flower SuperNode will load and validate ClientApp `%s`",
             getattr(args, "client-app"),
         )
+        # Insert sys.path
+        dir_path = Path(args.dir).absolute()
+        sys.path.insert(0, str(dir_path))
+        inserted_path = str(dir_path)
+
         valid, error_msg = validate(default_app_ref)
         if not valid and error_msg:
             raise LoadClientAppError(error_msg) from None
@@ -195,7 +208,7 @@ def _get_load_client_app_fn(
         # If multi-app feature is disabled
         if not multi_app:
             # Get sys path to be inserted
-            sys_path = Path(args.dir).absolute()
+            dir_path = Path(args.dir).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -208,7 +221,7 @@ def _get_load_client_app_fn(
 
             log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
             # Get sys path to be inserted
-            sys_path = Path(args.dir).absolute()
+            dir_path = Path(args.dir).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -221,13 +234,21 @@ def _get_load_client_app_fn(
                 raise LoadClientAppError("Failed to load ClientApp") from e
 
             # Get sys path to be inserted
-            sys_path = Path(project_dir).absolute()
+            dir_path = Path(project_dir).absolute()
 
             # Set app reference
             client_app_ref = config["flower"]["components"]["clientapp"]
 
         # Set sys.path
-        sys.path.insert(0, str(sys_path))
+        nonlocal inserted_path
+        if inserted_path != str(dir_path):
+            # Remove the previously inserted path
+            if inserted_path is not None:
+                sys.path.remove(inserted_path)
+            # Insert the new path
+            sys.path.insert(0, str(dir_path))
+
+        inserted_path = str(dir_path)
 
         # Load ClientApp
         log(
@@ -235,7 +256,7 @@ def _get_load_client_app_fn(
             "Loading ClientApp `%s`",
             client_app_ref,
         )
-        client_app = load_app(client_app_ref, LoadClientAppError, sys_path)
+        client_app = load_app(client_app_ref, LoadClientAppError, dir_path)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
@@ -344,8 +365,8 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "--max-retries",
         type=int,
         default=None,
-        help="The maximum number of times the client will try to connect to the"
-        "server before giving up in case of a connection error. By default,"
+        help="The maximum number of times the client will try to reconnect to the"
+        "SuperLink before giving up in case of a connection error. By default,"
         "it is set to None, meaning there is no limit to the number of tries.",
     )
     parser.add_argument(
@@ -353,7 +374,7 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         type=float,
         default=None,
         help="The maximum duration before the client stops trying to"
-        "connect to the server in case of connection error. By default, it"
+        "connect to the SuperLink in case of connection error. By default, it"
         "is set to None, meaning there is no limit to the total time.",
     )
     parser.add_argument(
@@ -372,6 +393,13 @@ def _parse_args_common(parser: argparse.ArgumentParser) -> None:
         "--auth-supernode-public-key",
         type=str,
         help="The SuperNode's public key (as a path str) to enable authentication.",
+    )
+    parser.add_argument(
+        "--node-config",
+        type=str,
+        help="A comma separated list of key/value pairs (separated by `=`) to "
+        "configure the SuperNode. "
+        "E.g. --node-config 'key1=\"value1\",partition-id=0,num-partitions=100'",
     )
 
 

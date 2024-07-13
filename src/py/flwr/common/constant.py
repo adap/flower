@@ -46,6 +46,9 @@ PING_BASE_MULTIPLIER = 0.8
 PING_RANDOM_RANGE = (-0.1, 0.1)
 PING_MAX_INTERVAL = 1e300
 
+# IDs
+RUN_ID_NUM_BYTES = 8
+NODE_ID_NUM_BYTES = 8
 GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
 GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
 
@@ -54,6 +57,9 @@ APP_DIR = "apps"
 FAB_CONFIG_FILE = "pyproject.toml"
 FLWR_HOME = "FLWR_HOME"
 
+# Constants entries in Node config for Simulation
+PARTITION_ID_KEY = "partition-id"
+NUM_PARTITIONS_KEY = "num-partitions"
 
 GRPC_ADAPTER_METADATA_FLOWER_VERSION_KEY = "flower-version"
 GRPC_ADAPTER_METADATA_SHOULD_EXIT_KEY = "should-exit"
