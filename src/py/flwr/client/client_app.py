@@ -91,7 +91,7 @@ class ClientApp:
     >>> class FlowerClient(NumPyClient):
     >>>     # ...
     >>>
-    >>> def client_fn(node_id: int, partition_id: Optional[int]):
+    >>> def client_fn(context: Context):
     >>>    return FlowerClient().to_client()
     >>>
     >>> app = ClientApp(client_fn)
