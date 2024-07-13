@@ -127,16 +127,16 @@ def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, Va
 
 
 def parse_config_args(
-    config_overrides: Optional[str],
+    config: Optional[str],
     separator: str = ",",
 ) -> Dict[str, Value]:
     """Parse separator separated list of key-value pairs separated by '='."""
     overrides: Dict[str, Value] = {}
 
-    if config_overrides is None:
+    if config is None:
         return overrides
 
-    overrides_list = config_overrides.split(separator)
+    overrides_list = config.split(separator)
     if (
         len(overrides_list) == 1
         and "=" not in overrides_list
