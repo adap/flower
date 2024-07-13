@@ -34,7 +34,7 @@ from flwr.common import (
     Metadata,
     Scalar,
 )
-from flwr.common.constant import PARTITION_ID_KEY
+from flwr.common.constant import NUM_PARTITIONS_KEY, PARTITION_ID_KEY
 from flwr.common.recordset_compat import (
     getpropertiesins_to_recordset,
     recordset_to_getpropertiesres,
@@ -100,6 +100,7 @@ def prep(
             client_fn=get_dummy_client,
             node_id=node_id,
             partition_id=partition_id,
+            num_partitions=num_proxies,
             actor_pool=pool,
         )
         for node_id, partition_id in mapping.items()
@@ -198,7 +199,10 @@ def test_cid_consistency_without_proxies() -> None:
     for node_id, partition_id in mapping.items():
         node_states[node_id] = NodeState(
             node_id=node_id,
-            node_config={PARTITION_ID_KEY: str(partition_id)},
+            node_config={
+                PARTITION_ID_KEY: str(partition_id),
+                NUM_PARTITIONS_KEY: str(len(node_ids)),
+            },
         )
 
     getproperties_ins = _get_valid_getpropertiesins()

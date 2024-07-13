@@ -24,7 +24,12 @@ from flwr.client import ClientFnExt
 from flwr.client.client_app import ClientApp
 from flwr.client.node_state import NodeState
 from flwr.common import DEFAULT_TTL, Message, Metadata, RecordSet
-from flwr.common.constant import PARTITION_ID_KEY, MessageType, MessageTypeLegacy
+from flwr.common.constant import (
+    NUM_PARTITIONS_KEY,
+    PARTITION_ID_KEY,
+    MessageType,
+    MessageTypeLegacy,
+)
 from flwr.common.logger import log
 from flwr.common.recordset_compat import (
     evaluateins_to_recordset,
@@ -43,11 +48,12 @@ from flwr.simulation.ray_transport.ray_actor import VirtualClientEngineActorPool
 class RayActorClientProxy(ClientProxy):
     """Flower client proxy which delegates work using Ray."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         client_fn: ClientFnExt,
         node_id: int,
         partition_id: int,
+        num_partitions: int,
         actor_pool: VirtualClientEngineActorPool,
     ):
         super().__init__(cid=str(node_id))
@@ -61,7 +67,10 @@ class RayActorClientProxy(ClientProxy):
         self.actor_pool = actor_pool
         self.proxy_state = NodeState(
             node_id=node_id,
-            node_config={PARTITION_ID_KEY: str(partition_id)},
+            node_config={
+                PARTITION_ID_KEY: str(partition_id),
+                NUM_PARTITIONS_KEY: str(num_partitions),
+            },
         )
 
     def _submit_job(self, message: Message, timeout: Optional[float]) -> Message:
