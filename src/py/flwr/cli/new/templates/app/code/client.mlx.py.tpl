@@ -3,6 +3,7 @@
 import mlx.core as mx
 import mlx.nn as nn
 import mlx.optimizers as optim
+from flwr.common import Context
 from flwr.client import NumPyClient, ClientApp
 
 from $import_name.task import (
@@ -57,8 +58,11 @@ class FlowerClient(NumPyClient):
         return loss.item(), len(self.test_images), {"accuracy": accuracy.item()}
 
 
-def client_fn(cid):
-    data = load_data(int(cid), 2)
+def client_fn(context: Context):
+
+    partition_id = int(context.node_config['partition-id'])
+    num_partitions = int(context.node_config['num-partitions])
+    data = load_data(partition_id, num_partitions)
 
     # Return Client instance
     return FlowerClient(data).to_client()

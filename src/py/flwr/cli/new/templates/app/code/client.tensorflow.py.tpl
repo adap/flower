@@ -1,6 +1,7 @@
 """$project_name: A Flower / TensorFlow app."""
 
 from flwr.client import NumPyClient, ClientApp
+from flwr.common import Context
 
 from $import_name.task import load_data, load_model
 
@@ -28,10 +29,12 @@ class FlowerClient(NumPyClient):
         return loss, len(self.x_test), {"accuracy": accuracy}
 
 
-def client_fn(cid):
+def client_fn(context: Context):
     # Load model and data
     net = load_model()
-    x_train, y_train, x_test, y_test = load_data(int(cid), 2)
+
+    partition_id = int(context.node_config['partition-id'])
+    x_train, y_train, x_test, y_test = load_data(partition_id, 2)
 
     # Return Client instance
     return FlowerClient(net, x_train, y_train, x_test, y_test).to_client()
