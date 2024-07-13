@@ -109,7 +109,7 @@ class FlowerClient(fl.client.NumPyClient):
             self.net.state_dict(),
             os.path.join(self.model_dir, str(self.net_id), "prev_net.pt"),
         )
-        return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
+        return self.get_parameters({}), len(self.trainloader.dataset), {"is_straggler": False}
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]

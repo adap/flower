@@ -92,13 +92,13 @@ class FlowerClient(fl.client.NumPyClient):
                 "val_accuracy": val_acc,
             }
 
-        return get_parameters(self.net), len(self.trainloader), return_dict
+        return get_parameters(self.net), len(self.trainloader.dataset), return_dict
 
     def evaluate(self, parameters, config) -> Tuple[float, int, Dict[str, Scalar]]:
         """Evaluate locally training model."""
         set_parameters(self.net, parameters)
         loss, accuracy = test(self.net, self.testloader, device=self.device)
-        return float(loss), len(self.testloader), {"accuracy": float(accuracy)}
+        return float(loss), len(self.testloader.dataset), {"accuracy": float(accuracy)}
 
 
 # pylint: disable=too-many-arguments

@@ -57,7 +57,7 @@ class FlowerClient(fl.client.NumPyClient):
         # to clutter your code with if/else statements all over the place :)
         train(self.model, self.trainloader, optim, epochs, self.device)
 
-        return self.get_parameters({}), len(self.trainloader), {}
+        return self.get_parameters({}), len(self.trainloader.dataset), {}
 
     def evaluate(self, parameters: NDArrays, config: Dict[str, Scalar]):
         self.set_parameters(parameters)

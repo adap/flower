@@ -71,7 +71,7 @@ class FlowerClient(fl.client.NumPyClient):
         # of examples in the client (although this depends a bit on your choice of aggregation
         # strategy), and a dictionary of metrics (here you can add any additional data, but these
         # are ideally small data structures)
-        return self.get_parameters({}), len(self.trainloader), {}
+        return self.get_parameters({}), len(self.trainloader.dataset), {}
 
     def evaluate(self, parameters: NDArrays, config: Dict[str, Scalar]):
         self.set_parameters(parameters)

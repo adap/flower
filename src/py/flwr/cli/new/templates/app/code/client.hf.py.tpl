@@ -30,12 +30,12 @@ class FlowerClient(NumPyClient):
     def fit(self, parameters, config):
         self.set_parameters(parameters)
         train(self.net, self.trainloader, epochs=1)
-        return self.get_parameters(config={}), len(self.trainloader), {}
+        return self.get_parameters(config={}), len(self.trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
         self.set_parameters(parameters)
         loss, accuracy = test(self.net, self.testloader)
-        return float(loss), len(self.testloader), {"accuracy": accuracy}
+        return float(loss), len(self.testloader.dataset), {"accuracy": accuracy}
 
 
 def client_fn(cid):

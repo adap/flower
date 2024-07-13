@@ -106,7 +106,7 @@ class FedAvgClient(
 
         self.set_parameters(parameters)
         loss, metrics = test(self.net, self.trainloader, self.device)
-        return float(loss), len(self.trainloader), metrics
+        return float(loss), len(self.trainloader.dataset), metrics
 
 
 def gen_clients_fedavg(  # pylint: disable=too-many-arguments

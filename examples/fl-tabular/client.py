@@ -14,12 +14,12 @@ class FlowerClient(NumPyClient):
     def fit(self, parameters, config):
         set_weights(self.net, parameters)
         train(self.net, self.trainloader)
-        return get_weights(self.net), len(self.trainloader), {}
+        return get_weights(self.net), len(self.trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
         set_weights(self.net, parameters)
         loss, accuracy = evaluate(self.net, self.testloader)
-        return loss, len(self.testloader), {"accuracy": accuracy}
+        return loss, len(self.testloader.dataset), {"accuracy": accuracy}
 
 
 def get_client_fn(dataset: FederatedDataset):

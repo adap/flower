@@ -95,7 +95,7 @@ class TamunaClient(fl.client.NumPyClient):
 
         self.__save_state(mask)
 
-        return self.get_parameters({}), len(self.trainloader), {}
+        return self.get_parameters({}), len(self.trainloader.dataset), {}
 
     def __save_state(self, mask):
         """Save client state."""
@@ -156,7 +156,7 @@ class FedAvgClient(fl.client.NumPyClient):
             learning_rate=self.learning_rate,
             device=self.device,
         )
-        return self.get_parameters({}), len(self.trainloader), {}
+        return self.get_parameters({}), len(self.trainloader.dataset), {}
 
 
 def gen_tamuna_client_fn(

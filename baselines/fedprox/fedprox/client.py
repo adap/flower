@@ -74,7 +74,7 @@ class FlowerClient(
                 # to discard the model upon aggregation
                 return (
                     self.get_parameters({}),
-                    len(self.trainloader),
+                    len(self.trainloader.dataset),
                     {"is_straggler": True},
                 )
 
@@ -90,7 +90,7 @@ class FlowerClient(
             proximal_mu=float(config["proximal_mu"]),
         )
 
-        return self.get_parameters({}), len(self.trainloader), {"is_straggler": False}
+        return self.get_parameters({}), len(self.trainloader.dataset), {"is_straggler": False}
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]

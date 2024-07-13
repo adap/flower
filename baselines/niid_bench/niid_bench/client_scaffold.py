@@ -96,7 +96,7 @@ class FlowerClientScaffold(fl.client.NumPyClient):
             c_i_n.append(
                 c_i_j
                 - c_j
-                + (1.0 / (self.learning_rate * self.num_epochs * len(self.trainloader)))
+                + (1.0 / (self.learning_rate * self.num_epochs * len(self.trainloader.dataset)))
                 * (x_j - y_i_j)
             )
             # y_i - x, c_i_n - c_i for the server

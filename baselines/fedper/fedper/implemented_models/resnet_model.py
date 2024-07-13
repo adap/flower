@@ -262,12 +262,12 @@ class ResNetModelManager(ModelManager):
 
     def train_dataset_size(self) -> int:
         """Return train data set size."""
-        return len(self.trainloader)
+        return len(self.trainloader.dataset)
 
     def test_dataset_size(self) -> int:
         """Return test data set size."""
-        return len(self.testloader)
+        return len(self.testloader.dataset)
 
     def total_dataset_size(self) -> int:
         """Return total data set size."""
-        return len(self.trainloader) + len(self.testloader)
+        return len(self.trainloader.dataset) + len(self.testloader.dataset)

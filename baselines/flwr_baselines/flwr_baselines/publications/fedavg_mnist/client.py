@@ -55,7 +55,7 @@ class FlowerClient(fl.client.NumPyClient):
             epochs=self.num_epochs,
             learning_rate=self.learning_rate,
         )
-        return self.get_parameters({}), len(self.trainloader), {}
+        return self.get_parameters({}), len(self.trainloader.dataset), {}
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]

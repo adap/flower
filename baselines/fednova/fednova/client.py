@@ -93,7 +93,7 @@ class FedNovaClient(
         # We use this scaling factor to aggregate the gradients on the server
         grad_scaling_factor: Dict[str, float] = self.optimizer.get_gradient_scaling()
 
-        return self.get_parameters({}), len(self.trainloader), grad_scaling_factor
+        return self.get_parameters({}), len(self.trainloader.dataset), grad_scaling_factor
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
@@ -110,7 +110,7 @@ class FedNovaClient(
 
         self.set_parameters(parameters)
         loss, metrics = test(self.net, self.trainloader, self.device)
-        return float(loss), len(self.trainloader), metrics
+        return float(loss), len(self.trainloader.dataset), metrics
 
 
 def gen_clients_fednova(  # pylint: disable=too-many-arguments

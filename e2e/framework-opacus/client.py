@@ -130,7 +130,7 @@ class FlowerClient(NumPyClient):
         print(f"epsilon = {epsilon:.2f}")
         return (
             self.get_parameters(config={}),
-            len(self.trainloader),
+            len(self.trainloader.dataset),
             {"epsilon": epsilon},
         )
 

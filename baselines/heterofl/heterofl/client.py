@@ -55,7 +55,7 @@ class FlowerNumPyClient(fl.client.NumPyClient):
             self.label_split,
             self.client_train_settings,
         )
-        return get_parameters(self.net), len(self.trainloader), {}
+        return get_parameters(self.net), len(self.trainloader.dataset), {}
 
     def evaluate(self, parameters, config) -> Tuple[float, int, Dict]:
         """Implement distributed evaluation for a given client."""

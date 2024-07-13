@@ -101,7 +101,7 @@ class FlowerClient(
         with open(f"prev_grads/client_{self.cid}", "wb") as prev_grads_file:
             pickle.dump(self.prev_grads, prev_grads_file)
 
-        return self.get_parameters({}), len(self.trainloader), {"cid": self.cid}
+        return self.get_parameters({}), len(self.trainloader.dataset), {"cid": self.cid}
 
     def evaluate(
         self, parameters: NDArrays, config: Dict[str, Scalar]
