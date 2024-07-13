@@ -43,7 +43,7 @@ def batch_iterate(batch_size, X, y):
         yield X[ids], y[ids]
 
 
-def load_data(partition_id:int, num_partitions: int):
+def load_data(partition_id: int, num_partitions: int):
     fds = FederatedDataset(dataset="mnist", partitioners={"train": num_partitions})
     partition = fds.load_partition(partition_id)
     partition_splits = partition.train_test_split(test_size=0.2, seed=42)

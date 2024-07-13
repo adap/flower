@@ -33,7 +33,7 @@ def client_fn(context: Context):
     # Load model and data
     net = load_model()
 
-    partition_id = int(context.node_config['partition-id'])
+    partition_id = int(context.node_config["partition-id"])
     x_train, y_train, x_test, y_test = load_data(partition_id, 2)
 
     # Return Client instance
