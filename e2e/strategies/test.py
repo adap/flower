@@ -1,11 +1,10 @@
 from sys import argv
-from typing import Optional
 
 import tensorflow as tf
 from client import SUBSET_SIZE, FlowerClient, get_model
 
-import flwr as fl
 from flwr.common import Context, ndarrays_to_parameters
+from flwr.server import ServerConfig
 from flwr.server.strategy import (
     FaultTolerantFedAvg,
     FedAdagrad,
@@ -16,6 +15,7 @@ from flwr.server.strategy import (
     FedYogi,
     QFedAvg,
 )
+from flwr.simulation import start_simulation
 
 STRATEGY_LIST = [
     FedMedian,
@@ -71,10 +71,10 @@ start_idx, strategy = get_strat(strat)
 if start_idx >= OPT_IDX:
     strat_args["tau"] = 0.01
 
-hist = fl.simulation.start_simulation(
+hist = start_simulation(
     client_fn=client_fn,
     num_clients=2,
-    config=fl.server.ServerConfig(num_rounds=3),
+    config=ServerConfig(num_rounds=3),
     strategy=strategy(**strat_args),
 )
 

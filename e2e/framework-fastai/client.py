@@ -1,12 +1,11 @@
 import warnings
 from collections import OrderedDict
-from typing import Optional
 
 import numpy as np
 import torch
 from fastai.vision.all import *
 
-import flwr as fl
+from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
 
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -31,7 +30,7 @@ learn = vision_learner(dls, squeezenet1_1, metrics=error_rate)
 
 
 # Define Flower client
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in learn.model.state_dict().items()]
 
@@ -55,14 +54,14 @@ def client_fn(context: Context):
     return FlowerClient().to_client()
 
 
-app = fl.client.ClientApp(
+app = ClientApp(
     client_fn=client_fn,
 )
 
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_client(
+    start_client(
         server_address="127.0.0.1:8080",
         client=FlowerClient().to_client(),
     )

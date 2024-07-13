@@ -1,15 +1,14 @@
 from collections import OrderedDict
-from typing import Optional
 
 import mnist
 import pytorch_lightning as pl
 import torch
 
-import flwr as fl
+from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
 
 
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def __init__(self, model, train_loader, val_loader, test_loader):
         self.model = model
         self.train_loader = train_loader
@@ -61,7 +60,7 @@ def client_fn(context: Context):
     return FlowerClient(model, train_loader, val_loader, test_loader).to_client()
 
 
-app = fl.client.ClientApp(
+app = ClientApp(
     client_fn=client_fn,
 )
 
@@ -73,7 +72,7 @@ def main() -> None:
 
     # Flower client
     client = FlowerClient(model, train_loader, val_loader, test_loader).to_client()
-    fl.client.start_client(server_address="127.0.0.1:8080", client=client)
+    start_client(server_address="127.0.0.1:8080", client=client)
 
 
 if __name__ == "__main__":

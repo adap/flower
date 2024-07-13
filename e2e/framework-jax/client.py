@@ -1,12 +1,12 @@
 """Flower client example using JAX for linear regression."""
 
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 import jax
 import jax_training
 import numpy as np
 
-import flwr as fl
+from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
 
 # Load data and determine model shape
@@ -15,7 +15,7 @@ grad_fn = jax.grad(jax_training.loss_fn)
 model_shape = train_x.shape[1:]
 
 
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def __init__(self):
         self.params = jax_training.load_model(model_shape)
 
@@ -53,12 +53,10 @@ def client_fn(context: Context):
     return FlowerClient().to_client()
 
 
-app = fl.client.ClientApp(
+app = ClientApp(
     client_fn=client_fn,
 )
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_client(
-        server_address="127.0.0.1:8080", client=FlowerClient().to_client()
-    )
+    start_client(server_address="127.0.0.1:8080", client=FlowerClient().to_client())

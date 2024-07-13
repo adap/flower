@@ -1,9 +1,8 @@
 import os
-from typing import Optional
 
 import tensorflow as tf
 
-import flwr as fl
+from flwr.client import ClientApp, NumPyClient, start_client
 from flwr.common import Context
 
 SUBSET_SIZE = 1000
@@ -35,7 +34,7 @@ x_test, y_test = x_test[:SUBSET_SIZE], y_test[:SUBSET_SIZE]
 
 
 # Define Flower client
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def get_parameters(self, config):
         return model.get_weights()
 
@@ -54,13 +53,11 @@ def client_fn(context: Context):
     return FlowerClient().to_client()
 
 
-app = fl.client.ClientApp(
+app = ClientApp(
     client_fn=client_fn,
 )
 
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_client(
-        server_address="127.0.0.1:8080", client=FlowerClient().to_client()
-    )
+    start_client(server_address="127.0.0.1:8080", client=FlowerClient().to_client())
