@@ -77,14 +77,14 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
         description="Start a Flower SuperExec",
     )
     parser.add_argument(
-        "executor",
-        help="For example: `deployment:exec` or `project.package.module:wrapper.exec`.",
-        default="flwr.superexec.deployment:executor",
-    )
-    parser.add_argument(
         "--address",
         help="SuperExec (gRPC) server address (IPv4, IPv6, or a domain name)",
         default=SUPEREXEC_DEFAULT_ADDRESS,
+    )
+    parser.add_argument(
+        "--executor",
+        help="For example: `deployment:exec` or `project.package.module:wrapper.exec`.",
+        default="flwr.superexec.deployment:executor",
     )
     parser.add_argument(
         "--executor-dir",
