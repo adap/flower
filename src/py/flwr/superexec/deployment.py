@@ -39,7 +39,7 @@ class DeploymentEngine(Executor):
     Parameters
     ----------
     superlink: str (default: "0.0.0.0:9091")
-        Address of the `SuperLink` to connect to.
+        Address of the SuperLink to connect to.
     root_certificates: Optional[str] (default: None)
         Specifies the path to the PEM-encoded root certificate file for
         establishing secure HTTPS connections.
@@ -68,7 +68,7 @@ class DeploymentEngine(Executor):
         self,
         config: Dict[str, str],
     ) -> None:
-        """Set config arguments.
+        """Set executor config arguments.
 
         Parameters
         ----------
