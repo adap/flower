@@ -16,7 +16,7 @@
 
 
 from logging import ERROR, INFO
-from typing import Any, Dict, Generator, Optional
+from typing import Any, Dict, Generator
 
 import grpc
 
