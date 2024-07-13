@@ -1,6 +1,5 @@
 """Dataset preparation."""
 
-import random
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, Union
@@ -8,6 +7,7 @@ from typing import Any, Dict, List, Union
 import numpy as np
 import torch
 import torchvision
+from flwr.common.typing import NDArrayInt
 from torch.utils.data import Dataset
 from torchvision import transforms
 
@@ -109,6 +109,7 @@ def call_dataset(dataset_name, root, **kwargs):
     raise ValueError(f"Dataset {dataset_name} not supported.")
 
 
+# pylint: disable=R0914
 def randomly_assign_classes(
     dataset: Dataset, client_num: int, class_num: int
 ) -> Dict[str, Union[Dict[Any, Any], List[Any]]]:
@@ -116,17 +117,24 @@ def randomly_assign_classes(
     """Randomly assign number classes to clients."""
     partition: Dict[str, Union[Dict, List]] = {"separation": {}, "data_indices": []}
     data_indices: List[List[int]] = [[] for _ in range(client_num)]
-    targets_numpy = np.array(dataset.targets, dtype=np.int32)
-    label_list = list(range(len(dataset.classes)))
+    targets_numpy = np.array(dataset.targets)
+    label_list = np.arange(len(dataset.classes))
 
-    data_idx_for_each_label = [
-        np.where(targets_numpy == i)[0].tolist() for i in label_list
-    ]
+    data_idx_for_each_label: List[NDArrayInt] = []
+    # Do the shuffle here.
+    # So we don't need to sample shards and do the list(set(...) - set(...)) stuffs
+    # in _get_data_indices().
+    for i in label_list:
+        data_idx_for_label_i = np.where(targets_numpy == i)[0]
+        np.random.shuffle(data_idx_for_label_i)
+        data_idx_for_each_label.append(data_idx_for_label_i)
 
-    assigned_labels = []
+    assigned_labels: List[NDArrayInt] = []
     selected_times = [0 for _ in label_list]
     for _ in range(client_num):
-        sampled_labels = random.sample(label_list, class_num)
+        sampled_labels = np.random.choice(
+            len(dataset.classes), class_num, replace=False
+        )
         assigned_labels.append(sampled_labels)
         for j in sampled_labels:
             selected_times[j] += 1
@@ -151,8 +159,8 @@ def randomly_assign_classes(
 
 
 def _get_batch_sizes(
-    targets_numpy: np.ndarray, label_list: List[int], selected_times: List[int]
-) -> np.ndarray:
+    targets_numpy: NDArrayInt, label_list: NDArrayInt, selected_times: List[int]
+) -> NDArrayInt:
     """Get batch sizes for each label."""
     labels_count = Counter(targets_numpy)
     batch_sizes = np.zeros_like(label_list)
@@ -165,30 +173,27 @@ def _get_batch_sizes(
 
 
 def _get_data_indices(
-    batch_sizes: np.ndarray,
+    batch_sizes: NDArrayInt,
     data_indices: List[List[int]],
-    data_idx_for_each_label: List[List[int]],
-    assigned_labels: List[List[int]],
+    data_idx_for_each_label: List[NDArrayInt],
+    assigned_labels: List[NDArrayInt],
     client_num: int,
 ) -> List[List[int]]:
     for i in range(client_num):
+        data_indices_i = np.array([], dtype=np.int64)
         for cls in assigned_labels[i]:
+            # Boundary treatment
             if len(data_idx_for_each_label[cls]) < 2 * batch_sizes[cls]:
-                batch_size = len(data_idx_for_each_label[cls])
+                selected_idx = data_idx_for_each_label[cls]
             else:
-                batch_size = batch_sizes[cls]
-            selected_idx = random.sample(data_idx_for_each_label[cls], batch_size)
-            data_indices_use: np.ndarray = np.concatenate(
-                [data_indices[i], selected_idx], axis=0
-            ).astype(np.int64)
-            data_indices[i] = data_indices_use.tolist()
-            # data_indices[i]: np.ndarray = np.concatenate(
-            #    [data_indices[i], selected_idx], axis=0
-            # ).astype(np.int64)
-            data_idx_for_each_label[cls] = list(
-                set(data_idx_for_each_label[cls]) - set(selected_idx)
-            )
+                selected_idx = data_idx_for_each_label[cls][: batch_sizes[cls]]
+            data_indices_i = np.concatenate([data_indices_i, selected_idx], axis=0)
 
-        data_indices[i] = data_indices[i]
+            # Like a linked list, pop the first chunk.
+            data_idx_for_each_label[cls] = data_idx_for_each_label[cls][
+                batch_sizes[cls] :
+            ]
+
+        data_indices[i] = data_indices_i.tolist()
 
     return data_indices
