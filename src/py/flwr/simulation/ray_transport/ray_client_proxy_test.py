@@ -17,7 +17,7 @@
 
 from math import pi
 from random import shuffle
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Dict, List, Tuple, Type
 
 import ray
 
@@ -39,7 +39,10 @@ from flwr.common.recordset_compat import (
     recordset_to_getpropertiesres,
 )
 from flwr.common.recordset_compat_test import _get_valid_getpropertiesins
-from flwr.simulation.app import _create_node_id_to_partition_mapping
+from flwr.simulation.app import (
+    NodeToPartitionMapping,
+    _create_node_id_to_partition_mapping,
+)
 from flwr.simulation.ray_transport.ray_actor import (
     ClientAppActor,
     VirtualClientEngineActor,
@@ -65,16 +68,16 @@ class DummyClient(NumPyClient):
         return {"result": result}
 
 
-def get_dummy_client(
-    node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
-) -> Client:
+def get_dummy_client(context: Context) -> Client:
     """Return a DummyClient converted to Client type."""
-    return DummyClient(node_id).to_client()
+    return DummyClient(context.node_id).to_client()
 
 
 def prep(
     actor_type: Type[VirtualClientEngineActor] = ClientAppActor,
-) -> Tuple[List[RayActorClientProxy], VirtualClientEngineActorPool]:  # pragma: no cover
+) -> Tuple[
+    List[RayActorClientProxy], VirtualClientEngineActorPool, NodeToPartitionMapping
+]:  # pragma: no cover
     """Prepare ClientProxies and pool for tests."""
     client_resources = {"num_cpus": 1, "num_gpus": 0.0}
 
@@ -101,7 +104,7 @@ def prep(
         for node_id, partition_id in mapping.items()
     ]
 
-    return proxies, pool
+    return proxies, pool, mapping
 
 
 def test_cid_consistency_one_at_a_time() -> None:
@@ -109,7 +112,7 @@ def test_cid_consistency_one_at_a_time() -> None:
 
     Submit one job and waits for completion. Then submits the next and so on
     """
-    proxies, _ = prep()
+    proxies, _, _ = prep()
 
     getproperties_ins = _get_valid_getpropertiesins()
     recordset = getpropertiesins_to_recordset(getproperties_ins)
@@ -139,7 +142,7 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
     All jobs are submitted at the same time. Then fetched one at a time. This also tests
     NodeState (at each Proxy) and RunState basic functionality.
     """
-    proxies, _ = prep()
+    proxies, _, _ = prep()
     run_id = 0
 
     getproperties_ins = _get_valid_getpropertiesins()
@@ -186,9 +189,8 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
 
 def test_cid_consistency_without_proxies() -> None:
     """Test cid consistency of jobs submitted/retrieved to/from pool w/o ClientProxy."""
-    proxies, pool = prep()
-    num_clients = len(proxies)
-    node_ids = list(range(num_clients))
+    _, pool, mapping = prep()
+    node_ids = list(mapping.keys())
 
     getproperties_ins = _get_valid_getpropertiesins()
     recordset = getpropertiesins_to_recordset(getproperties_ins)
@@ -219,11 +221,11 @@ def test_cid_consistency_without_proxies() -> None:
                 message,
                 str(node_id),
                 Context(
-                    node_id=0,
+                    node_id=node_id,
                     node_config={},
                     state=RecordSet(),
                     run_config={},
-                    partition_id=node_id,
+                    partition_id=mapping[node_id],
                 ),
             ),
         )
