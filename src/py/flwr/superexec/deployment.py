@@ -38,12 +38,12 @@ class DeploymentEngine(Executor):
 
     Parameters
     ----------
-    superlink: str (Default: "0.0.0.0:9091")
+    superlink: str (default: "0.0.0.0:9091")
         Address of the `SuperLink` to connect to.
-    root_certificates: Optional[str] (Default: None)
+    root_certificates: Optional[str] (default: None)
         Specifies the path to the PEM-encoded root certificate file for
         establishing secure HTTPS connections.
-    flwr_dir: Optional[str] (Default: None)
+    flwr_dir: Optional[str] (default: None)
         The path containing installed Flower Apps.
     """
 
