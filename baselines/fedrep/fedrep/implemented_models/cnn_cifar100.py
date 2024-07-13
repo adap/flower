@@ -1,4 +1,4 @@
-"""MobileNet-v1 model, model manager and model split."""
+"""CNNCifar100 model, model manager and model split."""
 
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -38,7 +38,14 @@ class CNNCifar100(nn.Module):
         """Forward pass of the model."""
         x = self.body(x)
         x = self.head(x)
-        return x
+        # Basically we don't need to do log softmax explicitly,
+        # as it is done by nn.CrossEntropyLoss()
+        # So we actually should just return the x directly.
+        # return x
+
+        # However the official implementation did that,
+        # so I leave this as it is.
+        return torch.nn.functional.log_softmax(x, dim=1)
 
 
 class CNNCifar100ModelSplit(ModelSplit):
@@ -58,7 +65,7 @@ class CNNCifar100ModelManager(ModelManager):
         trainloader: DataLoader,
         testloader: DataLoader,
         client_save_path: Optional[str] = "",
-        learning_rate: float = 0.01,
+        learning_rate: float = 0.1,
     ):
         """Initialize the attributes of the model manager.
 
@@ -106,8 +113,15 @@ class CNNCifar100ModelManager(ModelManager):
                 pass
         head_epochs = epochs - rep_epochs
         criterion = torch.nn.CrossEntropyLoss()
+        weights = [v for k, v in self.model.named_parameters() if "weight" in k]
+        biases = [v for k, v in self.model.named_parameters() if "bias" in k]
         optimizer = torch.optim.SGD(
-            self.model.parameters(), lr=self.learning_rate, momentum=0.9
+            [
+                {"params": weights, "weight_decay": 0.0001},
+                {"params": biases, "weight_decay": 0},
+            ],
+            lr=self.learning_rate,
+            momentum=0.5,
         )
         correct, total = 0, 0
         loss: torch.Tensor = 0.0
