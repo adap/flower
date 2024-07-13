@@ -39,7 +39,6 @@ def run_superexec_api_grpc(
 
     exec_servicer: grpc.Server = ExecServicer(
         executor=executor,
-        config=config,
     )
     superexec_add_servicer_to_server_fn = add_ExecServicer_to_server
     superexec_grpc_server = generic_create_grpc_server(
