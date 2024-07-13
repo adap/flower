@@ -59,9 +59,8 @@ class FlowerClient(NumPyClient):
 
 
 def client_fn(context: Context):
-
-    partition_id = int(context.node_config['partition-id'])
-    num_partitions = int(context.node_config['num-partitions])
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
     data = load_data(partition_id, num_partitions)
 
     # Return Client instance
