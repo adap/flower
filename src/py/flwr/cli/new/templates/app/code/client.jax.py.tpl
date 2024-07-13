@@ -3,6 +3,7 @@
 import jax
 from flwr.client import NumPyClient, ClientApp
 from flwr.common import Context
+
 from $import_name.task import (
     evaluation,
     get_params,
