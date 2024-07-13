@@ -59,6 +59,8 @@ class Executor(ABC):
         ----------
         fab_file : bytes
             The Flower App Bundle file bytes.
+        override_config: Dict[str, str]
+            The config overrides Dict sent by the user (using `flwr run`).
 
         Returns
         -------
