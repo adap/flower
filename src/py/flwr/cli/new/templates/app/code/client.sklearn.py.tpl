@@ -70,7 +70,6 @@ class FlowerClient(NumPyClient):
 fds = FederatedDataset(dataset="mnist", partitioners={"train": 2})
 
 def client_fn(context: Context):
-
     partition_id = int(context.node_config["partition-id"])
     dataset = fds.load_partition(partition_id, "train").with_format("numpy")
 
