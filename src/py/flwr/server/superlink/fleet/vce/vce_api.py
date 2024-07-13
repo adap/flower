@@ -285,7 +285,9 @@ def start_vce(
     node_states: Dict[int, NodeState] = {}
     for node_id, partition_id in nodes_mapping.items():
         node_states[node_id] = NodeState(
-            node_id=node_id, node_config={}, partition_id=partition_id
+            node_id=node_id,
+            node_config={"partition-id": str(partition_id)},
+            partition_id=None,
         )
 
     # Load backend config
