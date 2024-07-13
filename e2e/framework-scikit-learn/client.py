@@ -7,6 +7,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 
 import flwr as fl
+from flwr.common import Context
 
 # Load MNIST dataset from https://www.openml.org/d/554
 (X_train, y_train), (X_test, y_test) = utils.load_mnist()
@@ -46,7 +47,7 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(X_test), {"accuracy": accuracy}
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(context: Context):
     return FlowerClient().to_client()
 
 

@@ -7,6 +7,7 @@ import torch
 from fastai.vision.all import *
 
 import flwr as fl
+from flwr.common import Context
 
 warnings.filterwarnings("ignore", category=UserWarning)
 
@@ -50,7 +51,7 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(dls.valid), {"accuracy": 1 - error_rate}
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(context: Context):
     return FlowerClient().to_client()
 
 

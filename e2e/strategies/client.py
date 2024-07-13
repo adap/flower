@@ -4,6 +4,7 @@ from typing import Optional
 import tensorflow as tf
 
 import flwr as fl
+from flwr.common import Context
 
 SUBSET_SIZE = 1000
 
@@ -49,7 +50,7 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, len(x_test), {"accuracy": accuracy}
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(context: Context):
     return FlowerClient().to_client()
 
 

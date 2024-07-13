@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 import flwr as fl
+from flwr.common import Context
 
 df = pd.read_csv("./data/client.csv")
 
@@ -32,7 +33,7 @@ class FlowerClient(fl.client.NumPyClient):
         )
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(context: Context):
     return FlowerClient().to_client()
 
 

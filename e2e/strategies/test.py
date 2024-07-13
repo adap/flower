@@ -5,7 +5,7 @@ import tensorflow as tf
 from client import SUBSET_SIZE, FlowerClient, get_model
 
 import flwr as fl
-from flwr.common import ndarrays_to_parameters
+from flwr.common import Context, ndarrays_to_parameters
 from flwr.server.strategy import (
     FaultTolerantFedAvg,
     FedAdagrad,
@@ -43,7 +43,7 @@ def get_strat(name):
 init_model = get_model()
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(context: Context):
     return FlowerClient()
 
 

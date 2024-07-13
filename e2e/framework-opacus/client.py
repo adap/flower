@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 
 import flwr as fl
+from flwr.common import Context
 
 # Define parameters.
 PARAMS = {
@@ -140,7 +141,7 @@ class FlowerClient(fl.client.NumPyClient):
         return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(context: Context):
     model = Net()
     return FlowerClient(model).to_client()
 

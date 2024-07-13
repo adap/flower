@@ -4,6 +4,7 @@ from typing import Optional
 import numpy as np
 
 import flwr as fl
+from flwr.common import Context
 
 model_params = np.array([1])
 objective = 5
@@ -26,7 +27,7 @@ class FlowerClient(fl.client.NumPyClient):
         return loss, 1, {"accuracy": accuracy}
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(context: Context):
     return FlowerClient().to_client()
 
 

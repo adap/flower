@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader, Subset
 from torchvision.transforms import Compose, Normalize, ToTensor
 
 from flwr.client import ClientApp, NumPyClient
+from flwr.common import Context
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -123,7 +124,7 @@ class FlowerClient(NumPyClient):
         return loss, len(testloader.dataset), {"accuracy": accuracy}
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(context: Context):
     """Create and return an instance of Flower `Client`."""
     return FlowerClient().to_client()
 

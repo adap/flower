@@ -7,6 +7,7 @@ import jax_training
 import numpy as np
 
 import flwr as fl
+from flwr.common import Context
 
 # Load data and determine model shape
 train_x, train_y, test_x, test_y = jax_training.load_data()
@@ -48,7 +49,7 @@ class FlowerClient(fl.client.NumPyClient):
         return float(loss), num_examples, {"loss": float(loss)}
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(context: Context):
     return FlowerClient().to_client()
 
 

@@ -6,6 +6,7 @@ import pytorch_lightning as pl
 import torch
 
 import flwr as fl
+from flwr.common import Context
 
 
 class FlowerClient(fl.client.NumPyClient):
@@ -52,7 +53,7 @@ def _set_parameters(model, parameters):
     model.load_state_dict(state_dict, strict=True)
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
+def client_fn(context: Context):
     model = mnist.LitAutoEncoder()
     train_loader, val_loader, test_loader = mnist.load_data()
 
