@@ -50,16 +50,16 @@ class DeploymentEngine(Executor):
     def __init__(
         self,
         superlink: str = DEFAULT_SERVER_ADDRESS_DRIVER,
-        cert_path: Optional[str] = None,
+        root_certificates: Optional[str] = None,
         flwr_dir: Optional[str] = None,
     ) -> None:
         self.superlink = superlink
-        if cert_path is None:
-            self.cert_path = None
+        if root_certificates is None:
             self.root_certificates = None
+            self.root_certificates_bytes = None
         else:
-            self.cert_path = cert_path
-            self.root_certificates = Path(cert_path).read_bytes()
+            self.root_certificates = root_certificates
+            self.root_certificates_bytes = Path(root_certificates).read_bytes()
         self.flwr_dir = flwr_dir
         self.stub: Optional[DriverStub] = None
 
@@ -68,25 +68,39 @@ class DeploymentEngine(Executor):
         self,
         config: Dict[str, str],
     ) -> None:
-        """Update config arguments."""
-        if config:
-            if superlink_address := config.get("superlink"):
-                self.superlink = superlink_address
-            if cert_path := config.get(
-                "root-certificates", config.get("root_certificates")
-            ):
-                self.cert_path = cert_path
-            if flwr_dir := config.get("flwr-dir", config.get("flwr_dir")):
-                self.flwr_dir = flwr_dir
+        """Set config arguments.
+
+        Parameters
+        ----------
+        config : Dict[str, str]
+            A dictionary for configuration values.
+            Supported configuration key/value pairs:
+            - "superlink": str
+                The address of the SuperLink Driver API.
+            - "root-certificates": str
+                The path to the root certificates.
+            - "flwr-dir": str
+                The path to the Flower directory.
+        """
+        if not config:
+            return
+        if superlink_address := config.get("superlink"):
+            self.superlink = superlink_address
+        if root_certificates := config.get("root-certificates"):
+            self.root_certificates = root_certificates
+            self.root_certificates_bytes = Path(root_certificates).read_bytes()
+        if flwr_dir := config.get("flwr-dir"):
+            self.flwr_dir = flwr_dir
 
     def _connect(self) -> None:
-        if self.stub is None:
-            channel = create_channel(
-                server_address=self.superlink,
-                insecure=(self.root_certificates is None),
-                root_certificates=self.root_certificates,
-            )
-            self.stub = DriverStub(channel)
+        if self.stub is not None:
+            return
+        channel = create_channel(
+            server_address=self.superlink,
+            insecure=(self.root_certificates_bytes is None),
+            root_certificates=self.root_certificates_bytes,
+        )
+        self.stub = DriverStub(channel)
 
     def _create_run(
         self,
@@ -141,8 +155,8 @@ class DeploymentEngine(Executor):
                     self.superlink,
                     (
                         "--insecure"
-                        if self.cert_path is None
-                        else f"--root-certificates {self.cert_path}"
+                        if self.root_certificates is None
+                        else f"--root-certificates {self.root_certificates}"
                     ),
                 ],
                 stdout=subprocess.PIPE,
