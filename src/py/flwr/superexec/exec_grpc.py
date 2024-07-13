@@ -32,9 +32,11 @@ def run_superexec_api_grpc(
     address: str,
     executor: Executor,
     certificates: Optional[Tuple[bytes, bytes, bytes]],
-    config: Optional[Dict[str, str]],
+    config: Dict[str, str],
 ) -> grpc.Server:
     """Run SuperExec API (gRPC, request-response)."""
+    executor.set_config(config)
+
     exec_servicer: grpc.Server = ExecServicer(
         executor=executor,
         config=config,

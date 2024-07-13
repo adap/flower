@@ -66,7 +66,7 @@ class DeploymentEngine(Executor):
     @override
     def set_config(
         self,
-        config: Optional[Dict[str, str]],
+        config: Dict[str, str],
     ) -> None:
         """Update config arguments."""
         if config:
