@@ -52,7 +52,7 @@ class SimulationEngine(Executor):
                 return None
 
             # Install FAB to flwr dir
-            fab_version, fab_id = get_fab_metadata(fab_file)
+            _, fab_id = get_fab_metadata(fab_file)
             fab_path = install_from_fab(fab_file, None, True)
 
             # Install FAB Python package
@@ -69,24 +69,23 @@ class SimulationEngine(Executor):
             fab_name = Path(fab_id).name
 
             # Start Simulation
-            proc = (
-                subprocess.Popen(
-                    [
-                        "flower-simulation",
-                        "--client-app",
-                        f"{fab_name}.client:app",
-                        "--server-app",
-                        f"{fab_name}.server:app",
-                        "--num-supernodes",
-                        f"{num_supernodes}",
-                        "--run-id",
-                        str(run_id),
-                    ],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                ),
+            proc = subprocess.Popen(  # pylint: disable=consider-using-with
+                [
+                    "flower-simulation",
+                    "--client-app",
+                    f"{fab_name}.client:app",
+                    "--server-app",
+                    f"{fab_name}.server:app",
+                    "--num-supernodes",
+                    f"{num_supernodes}",
+                    "--run-id",
+                    str(run_id),
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
             )
+
             log(INFO, "Started run %s", str(run_id))
 
             return RunTracker(
