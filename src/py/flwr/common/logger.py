@@ -197,6 +197,31 @@ def warn_deprecated_feature(name: str) -> None:
     )
 
 
+def warn_deprecated_feature_with_example(
+    deprecation_message: str, example_message: str, code_example: str
+) -> None:
+    """Warn if a feature is deprecated and show code example."""
+    log(
+        WARN,
+        """DEPRECATED FEATURE: %s
+
+            Check the following `FEATURE UPDATE` warning message for the preferred
+            new mechanism to use this feature in Flower.
+        """,
+        deprecation_message,
+    )
+    log(
+        WARN,
+        """FEATURE UPDATE: %s
+        ------------------------------------------------------------
+        %s
+        ------------------------------------------------------------
+        """,
+        example_message,
+        code_example,
+    )
+
+
 def warn_unsupported_feature(name: str) -> None:
     """Warn the user when they use an unsupported feature."""
     log(

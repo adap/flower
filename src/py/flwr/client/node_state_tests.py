@@ -41,7 +41,7 @@ def test_multirun_in_node_state() -> None:
     expected_values = {0: "1", 1: "1" * 3, 2: "1" * 2, 3: "1", 5: "1"}
 
     # NodeState
-    node_state = NodeState(partition_id=None)
+    node_state = NodeState(node_id=0, node_config={}, partition_id=None)
 
     for task in tasks:
         run_id = task.run_id
@@ -59,7 +59,8 @@ def test_multirun_in_node_state() -> None:
         node_state.update_context(run_id=run_id, context=updated_state)
 
     # Verify values
-    for run_id, context in node_state.run_contexts.items():
+    for run_id, run_info in node_state.run_infos.items():
         assert (
-            context.state.configs_records["counter"]["count"] == expected_values[run_id]
+            run_info.context.state.configs_records["counter"]["count"]
+            == expected_values[run_id]
         )
