@@ -17,9 +17,13 @@
 
 import os
 import subprocess
+from logging import ERROR, INFO
 import sys
 from pathlib import Path
-from typing import Optional
+from flwr.common.logger import log
+from typing import Optional, Dict
+
+from typing_extensions import override
 
 from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
@@ -30,12 +34,21 @@ from .executor import Executor, RunTracker
 class SimulationEngine(Executor):
     """Simulation engine executor."""
 
-    def start_run(self, fab_file: bytes, ttl: Optional[float] = None) -> RunTracker:
+    @override
+    def start_run(
+        self, fab_file: bytes, override_config: Dict[str, str]
+    ) -> Optional[RunTracker]:
         """Start run using the Flower Simulation Engine."""
-        _ = ttl
+
+        num_supernodes = override_config.get('num-supernodes')
+        if num_supernodes is None:
+            log(ERROR, "To start a run with the simulation plugin, please specify the number of supernodes. You can do this by using the `--config` argumet of `flwr run`.")
+            return None
+
         _, fab_id = get_fab_metadata(fab_file)
 
         run_id = int.from_bytes(os.urandom(8), "little", signed=True)
+        log(INFO, "Created run %s", str(run_id))
 
         fab_path = install_from_fab(fab_file, None, True)
 
@@ -47,10 +60,6 @@ class SimulationEngine(Executor):
 
         fab_name = Path(fab_id).name
 
-        # TODO: return engine_conf from `get_fab_metadata`
-        # num_nodes = engine_conf["simulation"]["supernode"]["num"]
-        num_nodes = 2
-
         return RunTracker(
             run_id=run_id,
             proc=subprocess.Popen(
@@ -61,7 +70,7 @@ class SimulationEngine(Executor):
                     "--server-app",
                     f"{fab_name}.server:app",
                     "--num-supernodes",
-                    f"{num_nodes}",
+                    f"{num_supernodes}",
                     "--run-id",
                     str(run_id),
                 ],
