@@ -16,7 +16,7 @@
 
 
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict
 
 from .record import RecordSet
 
@@ -43,17 +43,12 @@ class Context:
         A config (key/value mapping) held by the entity in a given run and that will
         stay local. It can be used at any point during the lifecycle of this entity
         (e.g. across multiple rounds)
-    partition_id : Optional[int] (default: None)
-        An index that specifies the data partition that the ClientApp using this Context
-        object should make use of. Setting this attribute is better suited for
-        simulation or proto typing setups.
     """
 
     node_id: int
     node_config: Dict[str, str]
     state: RecordSet
     run_config: Dict[str, str]
-    partition_id: Optional[int]
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
@@ -61,10 +56,8 @@ class Context:
         node_config: Dict[str, str],
         state: RecordSet,
         run_config: Dict[str, str],
-        partition_id: Optional[int] = None,
     ) -> None:
         self.node_id = node_id
         self.node_config = node_config
         self.state = state
         self.run_config = run_config
-        self.partition_id = partition_id

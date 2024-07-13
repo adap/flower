@@ -348,7 +348,6 @@ def _start_client_internal(
                     node_state = NodeState(
                         node_id=-1,
                         node_config={},
-                        partition_id=None,
                     )
                 else:
                     # Call create_node fn to register node
@@ -360,7 +359,6 @@ def _start_client_internal(
                     node_state = NodeState(
                         node_id=node_id,
                         node_config=node_config,
-                        partition_id=None,
                     )
 
             app_state_tracker.register_signal_handler()

@@ -327,6 +327,7 @@ def start_simulation(
             client_fn=client_fn,
             node_id=node_id,
             partition_id=partition_id,
+            num_partitions=num_clients,
             actor_pool=pool,
         )
         initialized_server.client_manager().register(client=client_proxy)
