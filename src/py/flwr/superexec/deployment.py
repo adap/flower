@@ -36,6 +36,8 @@ from .executor import Executor, RunTracker
 class DeploymentEngine(Executor):
     """Deployment engine executor.
 
+    Parameters
+    ----------
     superlink: str (Default: "0.0.0.0:9091")
         Address of the `SuperLink` to connect to.
     root_certificates: Optional[str] (Default: None)
@@ -60,6 +62,22 @@ class DeploymentEngine(Executor):
             self.root_certificates = Path(cert_path).read_bytes()
         self.flwr_dir = flwr_dir
         self.stub: Optional[DriverStub] = None
+
+    @override
+    def set_config(
+        self,
+        config: Optional[Dict[str, str]],
+    ) -> None:
+        """Update config arguments."""
+        if config:
+            if superlink_address := config.get("superlink"):
+                self.superlink = superlink_address
+            if cert_path := config.get(
+                "root-certificates", config.get("root_certificates")
+            ):
+                self.cert_path = cert_path
+            if flwr_dir := config.get("flwr-dir", config.get("flwr_dir")):
+                self.flwr_dir = flwr_dir
 
     def _connect(self) -> None:
         if self.stub is None:
@@ -94,19 +112,8 @@ class DeploymentEngine(Executor):
         self,
         fab_file: bytes,
         override_config: Dict[str, str],
-        config: Optional[Dict[str, str]],
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
-        if config:
-            if superlink_address := config.get("superlink"):
-                self.superlink = superlink_address
-            if cert_path := config.get(
-                "root-certificates", config.get("root_certificates")
-            ):
-                self.cert_path = cert_path
-            if flwr_dir := config.get("flwr-dir", config.get("flwr_dir")):
-                self.flwr_dir = flwr_dir
-
         try:
             # Install FAB to flwr dir
             fab_version, fab_id = get_fab_metadata(fab_file)

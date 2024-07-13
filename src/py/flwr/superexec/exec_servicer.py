@@ -37,8 +37,8 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
 
     def __init__(self, executor: Executor, config: Optional[Dict[str, str]]) -> None:
         self.executor = executor
+        self.executor.set_config(config)
         self.runs: Dict[int, RunTracker] = {}
-        self.config = config
 
     def StartRun(
         self, request: StartRunRequest, context: grpc.ServicerContext
@@ -49,7 +49,6 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         run = self.executor.start_run(
             request.fab_file,
             dict(request.override_config.items()),
-            self.config,
         )
 
         if run is None:
