@@ -3,8 +3,8 @@
 import mlx.core as mx
 import mlx.nn as nn
 import mlx.optimizers as optim
-from flwr.common import Context
 from flwr.client import NumPyClient, ClientApp
+from flwr.common import Context
 
 from $import_name.task import (
     batch_iterate,
