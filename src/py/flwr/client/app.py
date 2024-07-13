@@ -18,7 +18,8 @@ import signal
 import sys
 import time
 from dataclasses import dataclass
-from logging import DEBUG, ERROR, INFO, WARN
+from logging import ERROR, INFO, WARN
+from pathlib import Path
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -27,7 +28,7 @@ from grpc import RpcError
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
@@ -137,8 +138,8 @@ def start_client(
 
     Starting an SSL-enabled gRPC client using system certificates:
 
-    >>> def client_fn(node_id: int, partition_id: Optional[int]):
-    >>>     return FlowerClient()
+    >>> def client_fn(context: Context):
+    >>>     return FlowerClient().to_client()
     >>>
     >>> start_client(
     >>>     server_address=localhost:8080,
@@ -159,6 +160,7 @@ def start_client(
     event(EventType.START_CLIENT_ENTER)
     _start_client_internal(
         server_address=server_address,
+        node_config={},
         load_client_app_fn=None,
         client_fn=client_fn,
         client=client,
@@ -180,6 +182,7 @@ def start_client(
 def _start_client_internal(
     *,
     server_address: str,
+    node_config: Dict[str, str],
     load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
     client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
@@ -192,7 +195,7 @@ def _start_client_internal(
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
-    partition_id: Optional[int] = None,
+    flwr_dir: Optional[Path] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -202,6 +205,8 @@ def _start_client_internal(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
+    node_config: Dict[str, str]
+        The configuration of the node.
     load_client_app_fn : Optional[Callable[[], ClientApp]] (default: None)
         A function that can be used to load a `ClientApp` instance.
     client_fn : Optional[ClientFnExt]
@@ -236,9 +241,8 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
-    partition_id: Optional[int] (default: None)
-        The data partition index associated with this node. Better suited for
-        prototyping purposes.
+    flwr_dir: Optional[Path] (default: None)
+        The fully resolved path containing installed Flower Apps.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -249,8 +253,7 @@ def _start_client_internal(
         if client_fn is None:
             # Wrap `Client` instance in `client_fn`
             def single_client_factory(
-                node_id: int,  # pylint: disable=unused-argument
-                partition_id: Optional[int],  # pylint: disable=unused-argument
+                context: Context,  # pylint: disable=unused-argument
             ) -> Client:
                 if client is None:  # Added this to keep mypy happy
                     raise ValueError(
@@ -291,7 +294,7 @@ def _start_client_internal(
             log(WARN, "Connection attempt failed, retrying...")
         else:
             log(
-                DEBUG,
+                WARN,
                 "Connection attempt failed, retrying in %.2f seconds",
                 retry_state.actual_wait,
             )
@@ -315,8 +318,10 @@ def _start_client_internal(
         on_backoff=_on_backoff,
     )
 
-    node_state = NodeState(partition_id=partition_id)
-    run_info: Dict[int, Run] = {}
+    # NodeState gets initialized when the first connection is established
+    node_state: Optional[NodeState] = None
+
+    runs: Dict[int, Run] = {}
 
     while not app_state_tracker.interrupt:
         sleep_duration: int = 0
@@ -330,9 +335,31 @@ def _start_client_internal(
         ) as conn:
             receive, send, create_node, delete_node, get_run = conn
 
-            # Register node
-            if create_node is not None:
-                create_node()  # pylint: disable=not-callable
+            # Register node when connecting the first time
+            if node_state is None:
+                if create_node is None:
+                    if transport not in ["grpc-bidi", None]:
+                        raise NotImplementedError(
+                            "All transports except `grpc-bidi` require "
+                            "an implementation for `create_node()`.'"
+                        )
+                    # gRPC-bidi doesn't have the concept of node_id,
+                    # so we set it to -1
+                    node_state = NodeState(
+                        node_id=-1,
+                        node_config={},
+                    )
+                else:
+                    # Call create_node fn to register node
+                    node_id: Optional[int] = (  # pylint: disable=assignment-from-none
+                        create_node()
+                    )  # pylint: disable=not-callable
+                    if node_id is None:
+                        raise ValueError("Node registration failed")
+                    node_state = NodeState(
+                        node_id=node_id,
+                        node_config=node_config,
+                    )
 
             app_state_tracker.register_signal_handler()
             while not app_state_tracker.interrupt:
@@ -366,15 +393,17 @@ def _start_client_internal(
 
                     # Get run info
                     run_id = message.metadata.run_id
-                    if run_id not in run_info:
+                    if run_id not in runs:
                         if get_run is not None:
-                            run_info[run_id] = get_run(run_id)
+                            runs[run_id] = get_run(run_id)
                         # If get_run is None, i.e., in grpc-bidi mode
                         else:
-                            run_info[run_id] = Run(run_id, "", "")
+                            runs[run_id] = Run(run_id, "", "", {})
 
                     # Register context for this run
-                    node_state.register_context(run_id=run_id)
+                    node_state.register_context(
+                        run_id=run_id, run=runs[run_id], flwr_dir=flwr_dir
+                    )
 
                     # Retrieve context for this run
                     context = node_state.retrieve_context(run_id=run_id)
@@ -388,7 +417,7 @@ def _start_client_internal(
                     # Handle app loading and task message
                     try:
                         # Load ClientApp instance
-                        run: Run = run_info[run_id]
+                        run: Run = runs[run_id]
                         client_app: ClientApp = load_client_app_fn(
                             run.fab_id, run.fab_version
                         )
@@ -574,7 +603,7 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
             Tuple[
                 Callable[[], Optional[Message]],
                 Callable[[Message], None],
-                Optional[Callable[[], None]],
+                Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
                 Optional[Callable[[int], Run]],
             ]

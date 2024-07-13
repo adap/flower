@@ -19,7 +19,7 @@ import time
 import unittest
 import uuid
 from copy import copy
-from typing import List, Optional
+from typing import List
 
 from flwr.client import Client
 from flwr.client.typing import ClientFnExt
@@ -114,9 +114,7 @@ class ClientWithProps(Client):
 
 
 def _get_client_fn(client: Client) -> ClientFnExt:
-    def client_fn(
-        node_id: int, partition_id: Optional[int]  # pylint: disable=unused-argument
-    ) -> Client:
+    def client_fn(contex: Context) -> Client:  # pylint: disable=unused-argument
         return client
 
     return client_fn
@@ -145,7 +143,7 @@ def test_client_without_get_properties() -> None:
     actual_msg = handle_legacy_message_from_msgtype(
         client_fn=_get_client_fn(client),
         message=message,
-        context=Context(state=RecordSet()),
+        context=Context(node_id=1123, node_config={}, state=RecordSet(), run_config={}),
     )
 
     # Assert
@@ -209,7 +207,7 @@ def test_client_with_get_properties() -> None:
     actual_msg = handle_legacy_message_from_msgtype(
         client_fn=_get_client_fn(client),
         message=message,
-        context=Context(state=RecordSet()),
+        context=Context(node_id=1123, node_config={}, state=RecordSet(), run_config={}),
     )
 
     # Assert

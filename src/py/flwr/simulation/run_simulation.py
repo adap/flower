@@ -22,7 +22,7 @@ import threading
 import traceback
 from logging import DEBUG, ERROR, INFO, WARNING
 from time import sleep
-from typing import Optional
+from typing import Dict, Optional
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
@@ -126,16 +126,25 @@ def run_simulation(
 def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
+    server_app_run_config: Dict[str, str],
     driver: Driver,
     app_dir: str,
-    f_stop: asyncio.Event,
+    f_stop: threading.Event,
+    has_exception: threading.Event,
     enable_tf_gpu_growth: bool,
     delay_launch: int = 3,
 ) -> threading.Thread:
     """Run SeverApp in a thread."""
 
-    def server_th_with_start_checks(  # type: ignore
-        tf_gpu_growth: bool, stop_event: asyncio.Event, **kwargs
+    def server_th_with_start_checks(
+        tf_gpu_growth: bool,
+        stop_event: threading.Event,
+        exception_event: threading.Event,
+        _driver: Driver,
+        _server_app_dir: str,
+        _server_app_run_config: Dict[str, str],
+        _server_app_attr: Optional[str],
+        _server_app: Optional[ServerApp],
     ) -> None:
         """Run SeverApp, after check if GPU memory growth has to be set.
 
@@ -147,10 +156,18 @@ def run_serverapp_th(
                 enable_gpu_growth()
 
             # Run ServerApp
-            run(**kwargs)
+            run(
+                driver=_driver,
+                server_app_dir=_server_app_dir,
+                server_app_run_config=_server_app_run_config,
+                server_app_attr=_server_app_attr,
+                loaded_server_app=_server_app,
+            )
         except Exception as ex:  # pylint: disable=broad-exception-caught
             log(ERROR, "ServerApp thread raised an exception: %s", ex)
             log(ERROR, traceback.format_exc())
+            exception_event.set()
+            raise
         finally:
             log(DEBUG, "ServerApp finished running.")
             # Upon completion, trigger stop event if one was passed
@@ -160,13 +177,16 @@ def run_serverapp_th(
 
     serverapp_th = threading.Thread(
         target=server_th_with_start_checks,
-        args=(enable_tf_gpu_growth, f_stop),
-        kwargs={
-            "server_app_attr": server_app_attr,
-            "loaded_server_app": server_app,
-            "driver": driver,
-            "server_app_dir": app_dir,
-        },
+        args=(
+            enable_tf_gpu_growth,
+            f_stop,
+            has_exception,
+            driver,
+            app_dir,
+            server_app_run_config,
+            server_app_attr,
+            server_app,
+        ),
     )
     sleep(delay_launch)
     serverapp_th.start()
@@ -196,20 +216,18 @@ def _main_loop(
     server_app: Optional[ServerApp] = None,
     server_app_attr: Optional[str] = None,
 ) -> None:
-    """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread.
-
-    Everything runs on the main thread or a separate one, depending on whether the main
-    thread already contains a running Asyncio event loop. This is the case if running
-    the Simulation Engine on a Jupyter/Colab notebook.
-    """
+    """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread."""
     # Initialize StateFactory
     state_factory = StateFactory(":flwr-in-memory-state:")
 
-    f_stop = asyncio.Event()
+    f_stop = threading.Event()
+    # A Threading event to indicate if an exception was raised in the ServerApp thread
+    server_app_thread_has_exception = threading.Event()
     serverapp_th = None
     try:
         # Create run (with empty fab_id and fab_version)
-        run_id_ = state_factory.state().create_run("", "")
+        run_id_ = state_factory.state().create_run("", "", {})
+        server_app_run_config: Dict[str, str] = {}
 
         if run_id:
             _override_run_id(state_factory, run_id_to_replace=run_id_, run_id=run_id)
@@ -222,9 +240,11 @@ def _main_loop(
         serverapp_th = run_serverapp_th(
             server_app_attr=server_app_attr,
             server_app=server_app,
+            server_app_run_config=server_app_run_config,
             driver=driver,
             app_dir=app_dir,
             f_stop=f_stop,
+            has_exception=server_app_thread_has_exception,
             enable_tf_gpu_growth=enable_tf_gpu_growth,
         )
 
@@ -253,6 +273,8 @@ def _main_loop(
         event(EventType.RUN_SUPERLINK_LEAVE)
         if serverapp_th:
             serverapp_th.join()
+            if server_app_thread_has_exception.is_set():
+                raise RuntimeError("Exception in ServerApp thread")
 
     log(DEBUG, "Stopping Simulation Engine now.")
 
@@ -349,7 +371,6 @@ def _run_simulation(
     # Convert config to original JSON-stream format
     backend_config_stream = json.dumps(backend_config)
 
-    simulation_engine_th = None
     args = (
         num_supernodes,
         backend_name,
@@ -363,31 +384,26 @@ def _run_simulation(
         server_app_attr,
     )
     # Detect if there is an Asyncio event loop already running.
-    # If yes, run everything on a separate thread. In environments
-    # like Jupyter/Colab notebooks, there is an event loop present.
-    run_in_thread = False
+    # If yes, disable logger propagation. In environmnets
+    # like Jupyter/Colab notebooks, it's often better to do this.
+    asyncio_loop_running = False
     try:
         _ = (
             asyncio.get_running_loop()
         )  # Raises RuntimeError if no event loop is present
         log(DEBUG, "Asyncio event loop already running.")
 
-        run_in_thread = True
+        asyncio_loop_running = True
 
     except RuntimeError:
-        log(DEBUG, "No asyncio event loop running")
+        pass
 
     finally:
-        if run_in_thread:
+        if asyncio_loop_running:
             # Set logger propagation to False to prevent duplicated log output in Colab.
             logger = set_logger_propagation(logger, False)
-            log(DEBUG, "Starting Simulation Engine on a new thread.")
-            simulation_engine_th = threading.Thread(target=_main_loop, args=args)
-            simulation_engine_th.start()
-            simulation_engine_th.join()
-        else:
-            log(DEBUG, "Starting Simulation Engine on the main thread.")
-            _main_loop(*args)
+
+        _main_loop(*args)
 
 
 def _parse_args_run_simulation() -> argparse.ArgumentParser:
