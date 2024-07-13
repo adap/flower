@@ -27,8 +27,11 @@ publisher = "flowerteam"
 serverapp = "mlxexample.server_app:app"
 clientapp = "mlxexample.client_app:app"
 
-[flower.engine]
-name = "simulation"
 
-[flower.engine.simulation.supernode]
-num = 2
+[flower.config.serverapp]
+num_server_rounds = 3
+
+[flower.config.clientapp]
+num_layers = 2
+hidden_dim = 32
+batch_size = 256

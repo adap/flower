@@ -1,11 +1,10 @@
 """mlxexample: A Flower / MLX app."""
 
-from typing import Optional
-
+from flwr.common import Context
 import mlx.core as mx
 import mlx.nn as nn
 import mlx.optimizers as optim
-from flwr.client import NumPyClient, ClientApp
+from flwr.client import NumPyClient, ClientApp, Client
 
 from mlxexample.task import (
     batch_iterate,
@@ -20,12 +19,11 @@ from mlxexample.task import (
 
 # Define Flower Client and client_fn
 class FlowerClient(NumPyClient):
-    def __init__(self, data):
-        # TODO: all these params could come from a run-config.yaml
-        num_layers = 2
-        hidden_dim = 32
+    def __init__(self, num_layers, hidden_dim, batch_size, data):
+        num_layers = num_layers
+        hidden_dim = hidden_dim
+        batch_size = batch_size
         num_classes = 10
-        batch_size = 256
         num_epochs = 1
         learning_rate = 1e-1
 
@@ -62,12 +60,25 @@ class FlowerClient(NumPyClient):
         return loss.item(), len(self.test_images), {"accuracy": accuracy.item()}
 
 
-def client_fn(node_id: int, partition_id: Optional[int]):
-    # TODO: handle specifying total number of partitions
-    data = load_data(partition_id, 2)
+def client_fn(context: Context) -> Client:
+    """Construct a Client that will be run in a ClientApp.
 
+    You can use settings in `context.run_config` to parameterize the
+    construction of your Client. You could use the `context.node_config` to
+    , for example, indicate which dataset to load (e.g accesing the partition-id).
+    """
+
+    # Read the node_config to fetch data partition associated to this node
+    partition_id = int(context.node_config["partition-id"])
+    num_partitions = int(context.node_config["num-partitions"])
+    data = load_data(partition_id, num_partitions)
+
+    # Read the run config to get settings to configure the Client
+    num_layers = context.run_config["num_layers"]
+    hidden_dim = context.run_config["hidden_dim"]
+    batch_size = context.run_config["batch_size"]
     # Return Client instance
-    return FlowerClient(data).to_client()
+    return FlowerClient(num_layers, hidden_dim, batch_size, data).to_client()
 
 
 # Flower ClientApp
