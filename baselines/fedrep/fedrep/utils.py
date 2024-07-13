@@ -79,25 +79,25 @@ def get_create_model_fn(
 ]:
     """Get create model function."""
     device = config.server_device
-    split: Union[Type[CNNCifar10ModelSplit], Type[CNNCifar100ModelSplit]] = (
-        CNNCifar10ModelSplit
-    )
-    if config.dataset.name.lower() == "cifar10":
+    if config.model_name.lower() == "cnncifar10":
+        split = CNNCifar10ModelSplit
 
-        def create_model() -> Union[Type[CNNCifar10], Type[CNNCifar100]]:
-            """Create initial CNNCifar10-v1 model."""
+        def create_cnncifar10() -> Type[CNNCifar10]:
+            """Create initial CNNCifar10 model."""
             return CNNCifar10().to(device)
 
-    elif config.dataset.name.lower() == "cifar100":
+        return create_cnncifar10, split
+
+    if config.model_name.lower() == "cnncifar100":
         split = CNNCifar100ModelSplit
 
-        def create_model() -> Union[Type[CNNCifar10], Type[CNNCifar100]]:
+        def create_cnncifar100() -> Type[CNNCifar100]:
             """Create initial CNNCifar100 model."""
             return CNNCifar100().to(device)
 
-    else:
-        raise NotImplementedError("Model not implemented, check name.")
-    return create_model, split
+        return create_cnncifar100, split
+
+    raise NotImplementedError("Model not implemented. Check name.")
 
 
 def plot_metric_from_history(
@@ -122,19 +122,17 @@ def plot_metric_from_history(
     )
     _, values = zip(*metric_dict["accuracy"])
 
-    # let's extract decentralized loss (main metric reported in FedProx paper)
     rounds_loss, values_loss = zip(*hist.losses_distributed)
 
-    _, axs = plt.subplots(nrows=2, ncols=1, sharex="row")
-    axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))
-    axs[1].plot(np.asarray(rounds_loss), np.asarray(values))
+    _, axs = plt.subplots(nrows=2, ncols=1, sharex="row")  # type: ignore
+    axs[0].plot(np.asarray(rounds_loss), np.asarray(values_loss))  # type: ignore
+    axs[1].plot(np.asarray(rounds_loss), np.asarray(values))  # type: ignore
 
-    axs[0].set_ylabel("Loss")
-    axs[1].set_ylabel("Accuracy")
+    axs[0].set_ylabel("Loss")  # type: ignore
+    axs[1].set_ylabel("Accuracy")  # type: ignore
 
-    axs[0].grid()
-    axs[1].grid()
-    # plt.title(f"{metric_type.capitalize()} Validation - MNIST")
+    axs[0].grid()  # type: ignore
+    axs[1].grid()  # type: ignore
     plt.xlabel("Rounds")
     # plt.legend(loc="lower right")
 
