@@ -56,7 +56,7 @@ def run_superexec() -> None:
         address=address,
         executor=_load_executor(args),
         certificates=certificates,
-        config=parse_config_args(args.config),
+        config=parse_config_args(args.executor_config),
     )
 
     grpc_servers = [superexec_server]
@@ -92,7 +92,7 @@ def _parse_args_run_superexec() -> argparse.ArgumentParser:
         default=".",
     )
     parser.add_argument(
-        "--config",
+        "--executor-config",
         help="Key-value pairs for the executor config, separated by commas.",
     )
     parser.add_argument(
