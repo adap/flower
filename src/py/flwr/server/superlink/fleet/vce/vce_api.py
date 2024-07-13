@@ -29,7 +29,12 @@ from typing import Callable, Dict, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.node_state import NodeState
-from flwr.common.constant import PING_MAX_INTERVAL, ErrorCode
+from flwr.common.constant import (
+    NUM_PARTITIONS_KEY,
+    PARTITION_ID_KEY,
+    PING_MAX_INTERVAL,
+    ErrorCode,
+)
 from flwr.common.logger import log
 from flwr.common.message import Error
 from flwr.common.object_ref import load_app
@@ -73,7 +78,7 @@ def worker(
             task_ins: TaskIns = taskins_queue.get(timeout=1.0)
             node_id = task_ins.task.consumer.node_id
 
-            # Register and retrieve runstate
+            # Register and retrieve context
             node_states[node_id].register_context(run_id=task_ins.run_id)
             context = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
 
@@ -283,11 +288,15 @@ def start_vce(
 
     # Construct mapping of NodeStates
     node_states: Dict[int, NodeState] = {}
+    # Number of unique partitions
+    num_partitions = len(set(nodes_mapping.values()))
     for node_id, partition_id in nodes_mapping.items():
         node_states[node_id] = NodeState(
             node_id=node_id,
-            node_config={"partition-id": str(partition_id)},
-            partition_id=None,
+            node_config={
+                PARTITION_ID_KEY: str(partition_id),
+                NUM_PARTITIONS_KEY: str(num_partitions),
+            },
         )
 
     # Load backend config

@@ -23,6 +23,7 @@ import ray
 
 from flwr.client import Client, NumPyClient
 from flwr.client.client_app import ClientApp
+from flwr.client.node_state import NodeState
 from flwr.common import (
     DEFAULT_TTL,
     Config,
@@ -31,9 +32,9 @@ from flwr.common import (
     Message,
     MessageTypeLegacy,
     Metadata,
-    RecordSet,
     Scalar,
 )
+from flwr.common.constant import PARTITION_ID_KEY
 from flwr.common.recordset_compat import (
     getpropertiesins_to_recordset,
     recordset_to_getpropertiesres,
@@ -192,6 +193,14 @@ def test_cid_consistency_without_proxies() -> None:
     _, pool, mapping = prep()
     node_ids = list(mapping.keys())
 
+    # register node states
+    node_states: Dict[int, NodeState] = {}
+    for node_id, partition_id in mapping.items():
+        node_states[node_id] = NodeState(
+            node_id=node_id,
+            node_config={PARTITION_ID_KEY: str(partition_id)},
+        )
+
     getproperties_ins = _get_valid_getpropertiesins()
     recordset = getpropertiesins_to_recordset(getproperties_ins)
 
@@ -200,11 +209,12 @@ def test_cid_consistency_without_proxies() -> None:
 
     # submit all jobs (collect later)
     shuffle(node_ids)
+    run_id = 0
     for node_id in node_ids:
         message = Message(
             content=recordset,
             metadata=Metadata(
-                run_id=0,
+                run_id=run_id,
                 message_id="",
                 group_id=str(0),
                 src_node_id=0,
@@ -214,26 +224,20 @@ def test_cid_consistency_without_proxies() -> None:
                 message_type=MessageTypeLegacy.GET_PROPERTIES,
             ),
         )
+        # register and retrieve context
+        node_states[node_id].register_context(run_id=run_id)
+        context = node_states[node_id].retrieve_context(run_id=run_id)
+        partition_id_str = context.node_config[PARTITION_ID_KEY]
         pool.submit_client_job(
             lambda a, c_fn, j_fn, nid_, state: a.run.remote(c_fn, j_fn, nid_, state),
-            (
-                _load_app,
-                message,
-                str(node_id),
-                Context(
-                    node_id=node_id,
-                    node_config={},
-                    state=RecordSet(),
-                    run_config={},
-                    partition_id=mapping[node_id],
-                ),
-            ),
+            (_load_app, message, partition_id_str, context),
         )
 
     # fetch results one at a time
     shuffle(node_ids)
     for node_id in node_ids:
-        message_out, _ = pool.get_client_result(str(node_id), timeout=None)
+        partition_id_str = str(mapping[node_id])
+        message_out, _ = pool.get_client_result(partition_id_str, timeout=None)
         res = recordset_to_getpropertiesres(message_out.content)
         assert node_id * pi == res.properties["result"]
 
