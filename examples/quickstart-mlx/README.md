@@ -56,8 +56,16 @@ Docker later in this readme.
 
 ### Run with the Simulation Engine
 
+Start the `SuperExec` in the terminal:
+
 ```bash
-flwr run
+flower-superexec --executor flwr.superexec.simulation:executor --insecure --executor-config 'num-supernodes=10'
+```
+
+Open a new terminal, activate your environment and run the app:
+
+```bash
+flwr run --use-superexec
 ```
 
 ### Alternative wasy of running the example
