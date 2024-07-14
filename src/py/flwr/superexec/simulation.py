@@ -67,21 +67,22 @@ class SimulationEngine(Executor):
         if num_supernodes := config.get("num-supernodes"):
             self.num_supernodes = num_supernodes
 
+        # Validate config
+        if self.num_supernodes is None:
+            log(
+                ERROR,
+                "To start a run with the simulation plugin, please specify "
+                "the number of SuperNodes. This can be done by using the "
+                "`--executor-config` argument when launching the SuperExec.",
+            )
+            raise ValueError("`num-supernodes` must not be `None`")
+
     @override
     def start_run(
         self, fab_file: bytes, override_config: Dict[str, str]
     ) -> Optional[RunTracker]:
         """Start run using the Flower Simulation Engine."""
         try:
-            if self.num_supernodes is None:
-                log(
-                    ERROR,
-                    "To start a run with the simulation plugin, please specify "
-                    "the number of supernodes. You can do this by using the "
-                    "`--executor-config` argument when launching the SuperExec.",
-                )
-                raise ValueError("Need to set `num-supernodes`.")
-
             if override_config:
                 raise ValueError(
                     "Overriding the run config is not yet supported with the "
@@ -94,7 +95,7 @@ class SimulationEngine(Executor):
 
             # Install FAB Python package
             subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", str(fab_path)],
+                [sys.executable, "-m", "pip", "install", "--no-deps", str(fab_path)],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
