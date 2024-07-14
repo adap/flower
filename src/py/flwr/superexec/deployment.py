@@ -135,7 +135,7 @@ class DeploymentEngine(Executor):
 
             # Install FAB Python package
             subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", str(fab_path)],
+                [sys.executable, "-m", "pip", "install", "--no-deps", str(fab_path)],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
