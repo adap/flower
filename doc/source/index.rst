@@ -164,7 +164,6 @@ The Flower community welcomes contributions. The following docs are intended to 
    contributor-how-to-install-development-versions
    contributor-how-to-set-up-a-virtual-env
    contributor-how-to-develop-in-vscode-dev-containers
-   contributor-how-to-create-new-messages
    contributor-how-to-write-documentation
    contributor-how-to-release-flower
    contributor-how-to-contribute-translations

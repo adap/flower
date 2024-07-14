@@ -1,3 +1,9 @@
+---
+tags: [quickstart, medical, vision]
+dataset: [MedNIST]
+framework: [MONAI]
+---
+
 # Flower Example using MONAI
 
 This introductory example to Flower uses MONAI, but deep knowledge of MONAI is not necessarily required to run the example. However, it will help you understand how to adapt Flower to your use case.

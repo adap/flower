@@ -52,4 +52,4 @@ class LegacyContext(Context):
         self.strategy = strategy
         self.client_manager = client_manager
         self.history = History()
-        super().__init__(state)
+        super().__init__(node_id=0, node_config={}, state=state, run_config={})
