@@ -60,7 +60,7 @@ It can change in a breaking way, it can be renamed (for example, ``flwr.cli`` co
 Therefore, as a Flower user:
 
 - ``from flwr import client`` ✅ Ok, you're importing a public API.
-- ``from flwr import proto`` ❌ Not ok, you're importing a private API.
+- ``from flwr import proto`` ❌ Not recommended, you're importing a private API.
 
 What about components that are nested deeper in the hierarchy? Let's look at Flower strategies to see another typical pattern.
 Flower strategies like ``FedAvg`` are often imported using ``from flwr.server.strategy import FedAvg``.
@@ -84,7 +84,7 @@ This allows us to move the definition of ``FedAvg`` into a different module (or 
 Therefore:
 
 - ``from flwr.server.strategy import FedAvg`` ✅ Ok, you're importing a class that is part of the public API.
-- ``from flwr.server.strategy import fedavg`` ❌ Not ok, you're importing a private module.
+- ``from flwr.server.strategy import fedavg`` ❌ Not recommended, you're importing a private module.
 
 This approach is also implemented in the tooling that automatically builds API reference docs.
 
