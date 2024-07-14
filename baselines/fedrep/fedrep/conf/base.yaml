@@ -1,12 +1,13 @@
 ---
-num_clients: 10 # total number of clients
-num_epochs: 4 # number of local epochs
-batch_size: 10
+num_clients: 100 # total number of clients
+num_local_epochs: 10 # number of local epochs
+num_rep_epochs: 1 # number of representation epochs (only for FedRep)
+batch_size: 50
 num_rounds: 100
 clients_per_round: 10
-learning_rate: 0.01
+learning_rate: 0.1
 algorithm: fedrep
-model_name: resnet
+model_name: cnncifar10
 
 client_resources:
   num_cpus: 4
@@ -16,8 +17,8 @@ server_device: cuda:0
 
 dataset:
   name : cifar10
-  split: user
-  num_classes: 10
+  split: sample
+  num_classes: 2
   seed: 42
   num_clients: ${num_clients}
   fraction: 0.83
@@ -27,7 +28,7 @@ model:
 
 fit_config:
   drop_client: false
-  epochs : ${num_epochs}
+  epochs : ${num_local_epochs}
   batch_size: ${batch_size}
 
 strategy:

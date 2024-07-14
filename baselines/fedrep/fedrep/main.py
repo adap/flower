@@ -102,7 +102,7 @@ def main(cfg: DictConfig) -> None:
         f"_{strategy_name}"
         f"_C={cfg.num_clients}"
         f"_B={cfg.batch_size}"
-        f"_E={cfg.num_epochs}"
+        f"_E={cfg.num_local_epochs}"
         f"_R={cfg.num_rounds}"
         f"_lr={cfg.learning_rate}"
     )
