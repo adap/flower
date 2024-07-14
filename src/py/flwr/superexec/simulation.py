@@ -85,7 +85,7 @@ class SimulationEngine(Executor):
             if override_config:
                 raise ValueError(
                     "Overriding the run config is not yet supported with the "
-                    "simulation plugin.",
+                    "simulation executor.",
                 )
 
             # Install FAB to flwr dir
