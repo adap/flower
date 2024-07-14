@@ -27,7 +27,7 @@ from typing import Dict, Optional
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.logger import set_logger_propagation, update_console_handler
-from flwr.common.typing import ConfigsRecordValues, Run
+from flwr.common.typing import ConfigsRecordValues, Run, UserConfig
 from flwr.server.driver import Driver, InMemoryDriver
 from flwr.server.run_serverapp import run
 from flwr.server.server_app import ServerApp
@@ -126,7 +126,7 @@ def run_simulation(
 def run_serverapp_th(
     server_app_attr: Optional[str],
     server_app: Optional[ServerApp],
-    server_app_run_config: Dict[str, str],
+    server_app_run_config: UserConfig,
     driver: Driver,
     app_dir: str,
     f_stop: threading.Event,
@@ -142,7 +142,7 @@ def run_serverapp_th(
         exception_event: threading.Event,
         _driver: Driver,
         _server_app_dir: str,
-        _server_app_run_config: Dict[str, ConfigsRecordValues],
+        _server_app_run_config: UserConfig,
         _server_app_attr: Optional[str],
         _server_app: Optional[ServerApp],
     ) -> None:
@@ -227,7 +227,7 @@ def _main_loop(
     try:
         # Create run (with empty fab_id and fab_version)
         run_id_ = state_factory.state().create_run("", "", {})
-        server_app_run_config: Dict[str, str] = {}
+        server_app_run_config: UserConfig = {}
 
         if run_id:
             _override_run_id(state_factory, run_id_to_replace=run_id_, run_id=run_id)
