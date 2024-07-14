@@ -38,7 +38,7 @@ class NodeState:
     def __init__(
         self,
         node_id: int,
-        node_config: Dict[str, str],
+        node_config: Dict[str, Value],
     ) -> None:
         self.node_id = node_id
         self.node_config = node_config

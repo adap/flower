@@ -30,7 +30,7 @@ class Context:
     ----------
     node_id : int
         The ID that identifies the node.
-    node_config : Dict[str, str]
+    node_config : Dict[str, Value]
         A config (key/value mapping) unique to the node and independent of the
         `run_config`. This config persists across all runs this node participates in.
     state : RecordSet
@@ -47,14 +47,14 @@ class Context:
     """
 
     node_id: int
-    node_config: Dict[str, str]
+    node_config: Dict[str, Value]
     state: RecordSet
     run_config: Dict[str, Value]
 
     def __init__(  # pylint: disable=too-many-arguments
         self,
         node_id: int,
-        node_config: Dict[str, str],
+        node_config: Dict[str, Value],
         state: RecordSet,
         run_config: Dict[str, Value],
     ) -> None:
