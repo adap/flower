@@ -19,6 +19,7 @@ import time
 from typing import List, Optional
 from uuid import UUID
 
+from flwr.common.serde import user_config_to_proto
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
     CreateNodeRequest,
     CreateNodeResponse,
@@ -40,7 +41,6 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State
-from py.flwr.common.serde import user_config_to_proto
 
 
 def create_node(
