@@ -139,7 +139,7 @@ def start_client(
     Starting an SSL-enabled gRPC client using system certificates:
 
     >>> def client_fn(context: Context):
-    >>>     return FlowerClient()
+    >>>     return FlowerClient().to_client()
     >>>
     >>> start_client(
     >>>     server_address=localhost:8080,
