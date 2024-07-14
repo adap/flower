@@ -160,7 +160,7 @@ class TestRayBackend(TestCase):
         if res is None:
             raise AssertionError("This shouldn't happen")
 
-        out_mssg, updated_context = res
+        out_mssg, _ = res
 
         # Verify message content is as expected
         content = out_mssg.content
