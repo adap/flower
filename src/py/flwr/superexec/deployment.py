@@ -149,36 +149,25 @@ class DeploymentEngine(Executor):
             run_id: int = self._create_run(fab_id, fab_version, override_config)
             log(INFO, "Created run %s", str(run_id))
 
-            print(
-                [
-                    "flower-server-app",
-                    "--run-id",
-                    str(run_id),
-                    f"--flwr-dir {str(self.flwr_dir)}" if self.flwr_dir else "",
-                    "--superlink",
-                    str(self.superlink),
-                    (
-                        "--insecure"
-                        if self.root_certificates is None
-                        else f"--root-certificates {str(self.root_certificates)}"
-                    ),
-                ],
-            )
-            # Start ServerApp
+            command = [
+                "flower-server-app",
+                "--run-id",
+                str(run_id),
+                "--superlink",
+                str(self.superlink),
+            ]
+
+            if self.flwr_dir:
+                command.append(f"--flwr-dir {self.flwr_dir}")
+
+            if self.root_certificates is None:
+                command.append("--insecure")
+            else:
+                command.append(f"--root-certificates {self.root_certificates}")
+
+            # Execute the command
             proc = subprocess.Popen(  # pylint: disable=consider-using-with
-                [
-                    "flower-server-app",
-                    "--run-id",
-                    str(run_id),
-                    f"--flwr-dir {str(self.flwr_dir)}" if str(self.flwr_dir) else "",
-                    "--superlink",
-                    str(self.superlink),
-                    (
-                        "--insecure"
-                        if str(self.root_certificates) is None
-                        else f"--root-certificates {str(self.root_certificates)}"
-                    ),
-                ],
+                command,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
