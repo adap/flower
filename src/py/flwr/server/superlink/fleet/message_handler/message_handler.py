@@ -40,6 +40,7 @@ from flwr.proto.run_pb2 import (  # pylint: disable=E0611
 )
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State
+from py.flwr.common.serde import user_config_to_proto
 
 
 def create_node(
@@ -113,5 +114,14 @@ def get_run(
 ) -> GetRunResponse:
     """Get run information."""
     run = state.get_run(request.run_id)
-    run_proto = None if run is None else Run(**vars(run))
+    run_proto = (
+        None
+        if run is None
+        else Run(
+            run_id=run.run_id,
+            fab_id=run.fab_id,
+            fab_version=run.fab_version,
+            override_config=user_config_to_proto(run.override_config),
+        )
+    )
     return GetRunResponse(run=run_proto)
