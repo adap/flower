@@ -15,7 +15,7 @@
 """SuperExec gRPC API."""
 
 from logging import INFO
-from typing import Dict, Optional, Tuple
+from typing import Optional, Tuple
 
 import grpc
 
