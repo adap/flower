@@ -68,6 +68,12 @@ Open a new terminal, activate your environment and run the app:
 flwr run --use-superexec
 ```
 
+You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
+
+```bash
+flwr run --user-superexec --config 'hidden_dim=64,num_server_rounds=5'
+```
+
 ### Alternative wasy of running the example
 
 TODO: point to docs
