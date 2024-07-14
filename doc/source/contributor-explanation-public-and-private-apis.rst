@@ -2,7 +2,7 @@ Public and private APIs
 =======================
 
 In Python, everything is public.
-To enable developers to understand which components can be relied upcon, Flower declares a public API.
+To enable developers to understand which components can be relied upon, Flower declares a public API.
 Components that are part of the public API can be relied upon.
 Changes to the public API are announced in the release notes and are subject to deprecation policies.
 
