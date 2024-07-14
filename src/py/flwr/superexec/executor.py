@@ -34,8 +34,23 @@ class Executor(ABC):
     """Execute and monitor a Flower run."""
 
     @abstractmethod
+    def set_config(
+        self,
+        config: Dict[str, str],
+    ) -> None:
+        """Register provided config as class attributes.
+
+        Parameters
+        ----------
+        config : Optional[Dict[str, str]]
+            A dictionary for configuration values.
+        """
+
+    @abstractmethod
     def start_run(
-        self, fab_file: bytes, override_config: Dict[str, Value]
+        self,
+        fab_file: bytes,
+        override_config: Dict[str, Value],
     ) -> Optional[RunTracker]:
         """Start a run using the given Flower FAB ID and version.
 
@@ -46,8 +61,8 @@ class Executor(ABC):
         ----------
         fab_file : bytes
             The Flower App Bundle file bytes.
-        override_config : Dict[str, Value]
-            A dict containing key-value pairs to override the FAB config.
+        override_config: Dict[str, Value]
+            The config overrides dict sent by the user (using `flwr run`).
 
         Returns
         -------
