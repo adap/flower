@@ -15,7 +15,6 @@
 """In-memory State implementation."""
 
 
-import os
 import threading
 import time
 from logging import ERROR
@@ -23,12 +22,13 @@ from typing import Dict, List, Optional, Set, Tuple
 from uuid import UUID, uuid4
 
 from flwr.common import log, now
+from flwr.common.constant import NODE_ID_NUM_BYTES, RUN_ID_NUM_BYTES
 from flwr.common.typing import Run
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state.state import State
 from flwr.server.utils import validate_task_ins_or_res
 
-from .utils import make_node_unavailable_taskres
+from .utils import generate_rand_int_from_bytes, make_node_unavailable_taskres
 
 
 class InMemoryState(State):  # pylint: disable=R0902,R0904
@@ -216,7 +216,7 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
     ) -> int:
         """Create, store in state, and return `node_id`."""
         # Sample a random int64 as node_id
-        node_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
+        node_id = generate_rand_int_from_bytes(NODE_ID_NUM_BYTES)
 
         with self.lock:
             if node_id in self.node_ids:
@@ -275,15 +275,23 @@ class InMemoryState(State):  # pylint: disable=R0902,R0904
         """Retrieve stored `node_id` filtered by `client_public_keys`."""
         return self.public_key_to_node_id.get(client_public_key)
 
-    def create_run(self, fab_id: str, fab_version: str) -> int:
+    def create_run(
+        self,
+        fab_id: str,
+        fab_version: str,
+        override_config: Dict[str, str],
+    ) -> int:
         """Create a new run for the specified `fab_id` and `fab_version`."""
         # Sample a random int64 as run_id
         with self.lock:
-            run_id: int = int.from_bytes(os.urandom(8), "little", signed=True)
+            run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
 
             if run_id not in self.run_ids:
                 self.run_ids[run_id] = Run(
-                    run_id=run_id, fab_id=fab_id, fab_version=fab_version
+                    run_id=run_id,
+                    fab_id=fab_id,
+                    fab_version=fab_version,
+                    override_config=override_config,
                 )
                 return run_id
         log(ERROR, "Unexpected run creation failure.")

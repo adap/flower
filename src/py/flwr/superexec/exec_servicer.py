@@ -45,7 +45,10 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         """Create run ID."""
         log(INFO, "ExecServicer.StartRun")
 
-        run = self.executor.start_run(request.fab_file)
+        run = self.executor.start_run(
+            request.fab_file,
+            dict(request.override_config.items()),
+        )
 
         if run is None:
             log(ERROR, "Executor failed to start run")
