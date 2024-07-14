@@ -19,12 +19,11 @@ from flwr.common import (
 from flwr.server.client_manager import ClientManager
 from flwr.server.client_proxy import ClientProxy
 from flwr.server.strategy.fedavg import FedAvg
-from torch import nn as nn
+from torch import nn
 
 from fedrep.constants import Algorithms
 from fedrep.implemented_models.cnn_cifar10 import CNNCifar10ModelSplit
 from fedrep.implemented_models.cnn_cifar100 import CNNCifar100ModelSplit
-from fedrep.models import ModelSplit
 
 
 class ServerInitializationStrategy(FedAvg):
@@ -35,7 +34,7 @@ class ServerInitializationStrategy(FedAvg):
         self,
         *args: Any,
         model_split_class: Union[
-            Type[CNNCifar10ModelSplit], Type[ModelSplit], Type[CNNCifar100ModelSplit]
+            Type[CNNCifar10ModelSplit], Type[CNNCifar100ModelSplit]
         ],
         create_model: Callable[[], nn.Module],
         initial_parameters: Optional[Parameters] = None,
@@ -359,7 +358,7 @@ class AggregateBodyStrategy(ServerInitializationStrategy):
             server_round: The current round of federated learning.
             results: Successful updates from the previously selected and configured
                 clients. Each pair of `(ClientProxy, FitRes)` constitutes a
-                successful update from one of the previously selected clients. Not
+                successful update from one of the previously selected clients. Note
                 that not all previously selected clients are necessarily included in
                 this list: a client might drop out and not submit a result. For each
                 client that did not submit an update, there should be an `Exception`
