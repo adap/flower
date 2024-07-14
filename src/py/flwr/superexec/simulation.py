@@ -33,7 +33,39 @@ from .executor import Executor, RunTracker
 
 
 class SimulationEngine(Executor):
-    """Simulation engine executor."""
+    """Simulation engine executor.
+
+    Parameters
+    ----------
+    num_supernodes: Opitonal[str] (default: None)
+        Total number of nodes to involve in the simulation.
+    """
+
+    def __init__(
+        self,
+        num_supernodes: Optional[str] = None,
+    ) -> None:
+        self.num_supernodes = num_supernodes
+
+    @override
+    def set_config(
+        self,
+        config: Dict[str, str],
+    ) -> None:
+        """Set executor config arguments.
+
+        Parameters
+        ----------
+        config : Dict[str, str]
+            A dictionary for configuration values.
+            Supported configuration key/value pairs:
+            - "num-supernodes": str
+                Number of nodes to register for the Simulation.
+        """
+        if not config:
+            return
+        if num_supernodes := config.get("num-supernodes"):
+            self.num_supernodes = num_supernodes
 
     @override
     def start_run(
@@ -41,15 +73,20 @@ class SimulationEngine(Executor):
     ) -> Optional[RunTracker]:
         """Start run using the Flower Simulation Engine."""
         try:
-            num_supernodes = override_config.get("num-supernodes")
-            if num_supernodes is None:
+            if self.num_supernodes is None:
                 log(
                     ERROR,
                     "To start a run with the simulation plugin, please specify "
                     "the number of supernodes. You can do this by using the "
-                    "`--config` argument of `flwr run`.",
+                    "`--executor-config` argument when launching the SuperExec.",
                 )
-                return None
+                raise ValueError("Need to set `num-supernodes`.")
+
+            if override_config:
+                raise ValueError(
+                    "Overriding the run config is not yet supported with the "
+                    "simulation plugin.",
+                )
 
             # Install FAB to flwr dir
             _, fab_id = get_fab_metadata(fab_file)
@@ -77,7 +114,7 @@ class SimulationEngine(Executor):
                     "--server-app",
                     f"{fab_name}.server:app",
                     "--num-supernodes",
-                    f"{num_supernodes}",
+                    f"{self.num_supernodes}",
                     "--run-id",
                     str(run_id),
                 ],
