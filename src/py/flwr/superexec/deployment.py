@@ -26,11 +26,8 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.serde import (
-    user_config_to_proto,
-)
+from flwr.common.serde import user_config_to_proto
 from flwr.common.typing import UserConfig
-
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
 from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
@@ -90,18 +87,18 @@ class DeploymentEngine(Executor):
         if not config:
             return
         if superlink_address := config.get("superlink"):
-            self.superlink = superlink_address
+            self.superlink = str(superlink_address)
         if root_certificates := config.get("root-certificates"):
-            self.root_certificates = root_certificates
+            self.root_certificates = str(root_certificates)
             self.root_certificates_bytes = Path(str(root_certificates)).read_bytes()
         if flwr_dir := config.get("flwr-dir"):
-            self.flwr_dir = flwr_dir
+            self.flwr_dir = str(flwr_dir)
 
     def _connect(self) -> None:
         if self.stub is not None:
             return
         channel = create_channel(
-            server_address=str(self.superlink),
+            server_address=self.superlink,
             insecure=(self.root_certificates_bytes is None),
             root_certificates=self.root_certificates_bytes,
         )
@@ -154,7 +151,7 @@ class DeploymentEngine(Executor):
                 "--run-id",
                 str(run_id),
                 "--superlink",
-                str(self.superlink),
+                self.superlink,
             ]
 
             if self.flwr_dir:

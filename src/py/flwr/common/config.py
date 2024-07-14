@@ -22,11 +22,7 @@ import tomli
 
 from flwr.cli.config_utils import validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
-from flwr.common.typing import (
-    Run,
-    UserConfig,
-    UserConfigValue,
-)
+from flwr.common.typing import Run, UserConfig, UserConfigValue
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
