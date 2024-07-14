@@ -422,7 +422,7 @@ def _record_value_from_proto(value_proto: GrpcMessage) -> Any:
     return value
 
 
-def record_value_dict_to_proto(
+def _record_value_dict_to_proto(
     value_dict: Union[TypedDict[str, Any], Dict[str, ConfigsRecordValues]],
     allowed_types: List[type],
     value_proto_class: Type[T],
@@ -442,7 +442,7 @@ def record_value_dict_to_proto(
     return {k: proto(v) for k, v in value_dict.items()}
 
 
-def record_value_dict_from_proto(
+def _record_value_dict_from_proto(
     value_dict_proto: MutableMapping[str, Any]
 ) -> Dict[str, Any]:
     """Deserialize the record value dict from ProtoBuf."""
@@ -487,7 +487,7 @@ def parameters_record_from_proto(
 def metrics_record_to_proto(record: MetricsRecord) -> ProtoMetricsRecord:
     """Serialize MetricsRecord to ProtoBuf."""
     return ProtoMetricsRecord(
-        data=record_value_dict_to_proto(record, [float, int], ProtoMetricsRecordValue)
+        data=_record_value_dict_to_proto(record, [float, int], ProtoMetricsRecordValue)
     )
 
 
@@ -496,7 +496,7 @@ def metrics_record_from_proto(record_proto: ProtoMetricsRecord) -> MetricsRecord
     return MetricsRecord(
         metrics_dict=cast(
             Dict[str, typing.MetricsRecordValues],
-            record_value_dict_from_proto(record_proto.data),
+            _record_value_dict_from_proto(record_proto.data),
         ),
         keep_input=False,
     )
@@ -505,7 +505,7 @@ def metrics_record_from_proto(record_proto: ProtoMetricsRecord) -> MetricsRecord
 def configs_record_to_proto(record: ConfigsRecord) -> ProtoConfigsRecord:
     """Serialize ConfigsRecord to ProtoBuf."""
     return ProtoConfigsRecord(
-        data=record_value_dict_to_proto(
+        data=_record_value_dict_to_proto(
             record,
             [bool, int, float, str, bytes],
             ProtoConfigsRecordValue,
@@ -518,7 +518,7 @@ def configs_record_from_proto(record_proto: ProtoConfigsRecord) -> ConfigsRecord
     return ConfigsRecord(
         configs_dict=cast(
             Dict[str, typing.ConfigsRecordValues],
-            record_value_dict_from_proto(record_proto.data),
+            _record_value_dict_from_proto(record_proto.data),
         ),
         keep_input=False,
     )

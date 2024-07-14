@@ -143,6 +143,5 @@ def parse_config_args(
     else:
         toml_str = "\n".join(overrides_list)
         overrides = tomli.loads(toml_str)
-        print(overrides)
 
     return overrides
