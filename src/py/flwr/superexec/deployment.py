@@ -151,16 +151,18 @@ class DeploymentEngine(Executor):
                 "--run-id",
                 str(run_id),
                 "--superlink",
-                self.superlink,
+                str(self.superlink),
             ]
 
             if self.flwr_dir:
-                command.append(f"--flwr-dir {self.flwr_dir}")
+                command.append("--flwr-dir")
+                command.append(self.flwr_dir)
 
             if self.root_certificates is None:
                 command.append("--insecure")
             else:
-                command.append(f"--root-certificates {self.root_certificates}")
+                command.append("--root-certificates")
+                command.append(self.root_certificates)
 
             # Execute the command
             proc = subprocess.Popen(  # pylint: disable=consider-using-with
