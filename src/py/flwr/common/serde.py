@@ -15,17 +15,7 @@
 """ProtoBuf serialization and deserialization."""
 
 
-from typing import (
-    Any,
-    Dict,
-    List,
-    MutableMapping,
-    OrderedDict,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Dict, List, MutableMapping, OrderedDict, Type, TypeVar, cast
 
 from google.protobuf.message import Message as GrpcMessage
 
@@ -57,7 +47,6 @@ from flwr.proto.transport_pb2 import (
 from . import Array, ConfigsRecord, MetricsRecord, ParametersRecord, RecordSet, typing
 from .message import Error, Message, Metadata
 from .record.typeddict import TypedDict
-from .typing import ConfigsRecordValues
 
 #  === Parameters message ===
 
@@ -423,7 +412,7 @@ def _record_value_from_proto(value_proto: GrpcMessage) -> Any:
 
 
 def _record_value_dict_to_proto(
-    value_dict: Union[TypedDict[str, Any], Dict[str, ConfigsRecordValues]],
+    value_dict: TypedDict[str, Any],
     allowed_types: List[type],
     value_proto_class: Type[T],
 ) -> Dict[str, T]:
