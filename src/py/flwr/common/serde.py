@@ -30,8 +30,13 @@ from typing import (
 from google.protobuf.message import Message as GrpcMessage
 
 # pylint: disable=E0611
-from flwr.proto.common_pb2 import BoolList, BytesList
-from flwr.proto.common_pb2 import DoubleList, Sint64List, StringList
+from flwr.proto.common_pb2 import (
+    BoolList,
+    BytesList,
+    DoubleList,
+    Sint64List,
+    StringList,
+)
 from flwr.proto.error_pb2 import Error as ProtoError
 from flwr.proto.node_pb2 import Node
 from flwr.proto.recordset_pb2 import Array as ProtoArray
