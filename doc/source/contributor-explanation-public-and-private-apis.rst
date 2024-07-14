@@ -21,9 +21,11 @@ This document explains how Flower maintainers define the public API and how you 
 Flower public API
 -----------------
 
-Flower has a well-defined public API.
-The gist is: every component that is reachable by recursively following ``__init__.__all__`` starting from the root package (``flwr``) is part of the public API.
-Let's look at this in more detail.
+Flower has a well-defined public API. Let's look at this in more detail.
+
+.. important::
+
+  Every component that is reachable by recursively following ``__init__.__all__`` starting from the root package (``flwr``) is part of the public API.
 
 If you want to determine whether a component (class/function/generator/...) is part of the public API or not, you need to start at the root of the ``flwr`` package.
 Let's use ``tree -L 1 -d src/py/flwr`` to look at the Python sub-packages contained ``flwr``:
