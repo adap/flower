@@ -21,7 +21,7 @@ from typing import Dict, Optional
 
 from flwr.common import Context, RecordSet
 from flwr.common.config import get_fused_config
-from flwr.common.typing import Run, Value
+from flwr.common.typing import Run, UserConfig
 
 
 @dataclass()
@@ -29,7 +29,7 @@ class RunInfo:
     """Contains the Context and initial run_config of a Run."""
 
     context: Context
-    initial_run_config: Dict[str, Value]
+    initial_run_config: UserConfig
 
 
 class NodeState:
@@ -38,7 +38,7 @@ class NodeState:
     def __init__(
         self,
         node_id: int,
-        node_config: Dict[str, Value],
+        node_config: UserConfig,
     ) -> None:
         self.node_id = node_id
         self.node_config = node_config

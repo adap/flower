@@ -27,7 +27,7 @@ from flwr.common.logger import log
 from flwr.common.serde import (
     message_from_taskres,
     message_to_taskins,
-    record_value_dict_from_proto,
+    user_config_from_proto,
 )
 from flwr.common.typing import Run
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
@@ -131,7 +131,7 @@ class GrpcDriver(Driver):
             run_id=res.run.run_id,
             fab_id=res.run.fab_id,
             fab_version=res.run.fab_version,
-            override_config=record_value_dict_from_proto(res.run.override_config),
+            override_config=user_config_from_proto(res.run.override_config),
         )
 
     @property

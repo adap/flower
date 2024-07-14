@@ -22,7 +22,11 @@ import tomli
 
 from flwr.cli.config_utils import validate_fields
 from flwr.common.constant import APP_DIR, FAB_CONFIG_FILE, FLWR_HOME
-from flwr.common.typing import ConfigsScalarList, Run, Value
+from flwr.common.typing import (
+    Run,
+    UserConfig,
+    UserConfigValue,
+)
 
 
 def get_flwr_dir(provided_path: Optional[str] = None) -> Path:
@@ -75,9 +79,9 @@ def get_project_config(project_dir: Union[str, Path]) -> Dict[str, Any]:
 
 
 def _fuse_dicts(
-    main_dict: Dict[str, Value],
-    override_dict: Dict[str, Value],
-) -> Dict[str, Value]:
+    main_dict: UserConfig,
+    override_dict: UserConfig,
+) -> UserConfig:
     fused_dict = main_dict.copy()
 
     for key, value in override_dict.items():
@@ -87,7 +91,7 @@ def _fuse_dicts(
     return fused_dict
 
 
-def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, Value]:
+def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> UserConfig:
     """Merge the overrides from a `Run` with the config from a FAB.
 
     Get the config using the fab_id and the fab_version, remove the nesting by adding
@@ -104,20 +108,16 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, Value]:
     return _fuse_dicts(flat_default_config, run.override_config)
 
 
-def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, Value]:
+def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> UserConfig:
     """Flatten dict by joining nested keys with a given separator."""
-    items: List[Tuple[str, Value]] = []
+    items: List[Tuple[str, UserConfigValue]] = []
     separator: str = "."
     for k, v in raw_dict.items():
         new_key = f"{parent_key}{separator}{k}" if parent_key else k
         if isinstance(v, dict):
             items.extend(flatten_dict(v, parent_key=new_key).items())
-        elif isinstance(v, get_args(Value)):
-            items.append((new_key, cast(Value, v)))
-        elif isinstance(v, list) and any(
-            isinstance(v, list_type) for list_type in get_args(ConfigsScalarList)
-        ):
-            items.append((new_key, cast(Value, v)))
+        elif isinstance(v, get_args(UserConfigValue)):
+            items.append((new_key, cast(UserConfigValue, v)))
         else:
             raise ValueError(
                 f"The value for key {k} needs to be of type `int`, `float`, "
@@ -129,9 +129,9 @@ def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, Va
 def parse_config_args(
     config: Optional[str],
     separator: str = ",",
-) -> Dict[str, Value]:
+) -> UserConfig:
     """Parse separator separated list of key-value pairs separated by '='."""
-    overrides: Dict[str, Value] = {}
+    overrides: UserConfig = {}
 
     if config is None:
         return overrides

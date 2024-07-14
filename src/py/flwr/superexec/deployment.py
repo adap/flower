@@ -18,7 +18,7 @@ import subprocess
 import sys
 from logging import ERROR, INFO
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 from typing_extensions import override
 
@@ -26,11 +26,11 @@ from flwr.cli.config_utils import get_fab_metadata
 from flwr.cli.install import install_from_fab
 from flwr.common.grpc import create_channel
 from flwr.common.logger import log
-from flwr.common.serde import record_value_dict_to_proto
-from flwr.common.typing import Value, ValueList
+from flwr.common.serde import (
+    user_config_to_proto,
+)
+from flwr.common.typing import UserConfig
 
-# pylint: disable=E0611
-from flwr.proto.common_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
 from flwr.proto.driver_pb2 import CreateRunRequest  # pylint: disable=E0611
 from flwr.proto.driver_pb2_grpc import DriverStub
 from flwr.server.driver.grpc_driver import DEFAULT_SERVER_ADDRESS_DRIVER
@@ -71,13 +71,13 @@ class DeploymentEngine(Executor):
     @override
     def set_config(
         self,
-        config: Dict[str, str],
+        config: UserConfig,
     ) -> None:
         """Set executor config arguments.
 
         Parameters
         ----------
-        config : Dict[str, str]
+        config : UserConfig
             A dictionary for configuration values.
             Supported configuration key/value pairs:
             - "superlink": str
@@ -93,7 +93,7 @@ class DeploymentEngine(Executor):
             self.superlink = superlink_address
         if root_certificates := config.get("root-certificates"):
             self.root_certificates = root_certificates
-            self.root_certificates_bytes = Path(root_certificates).read_bytes()
+            self.root_certificates_bytes = Path(str(root_certificates)).read_bytes()
         if flwr_dir := config.get("flwr-dir"):
             self.flwr_dir = flwr_dir
 
@@ -101,7 +101,7 @@ class DeploymentEngine(Executor):
         if self.stub is not None:
             return
         channel = create_channel(
-            server_address=self.superlink,
+            server_address=str(self.superlink),
             insecure=(self.root_certificates_bytes is None),
             root_certificates=self.root_certificates_bytes,
         )
@@ -111,7 +111,7 @@ class DeploymentEngine(Executor):
         self,
         fab_id: str,
         fab_version: str,
-        override_config: Dict[str, Value],
+        override_config: UserConfig,
     ) -> int:
         if self.stub is None:
             self._connect()
@@ -121,9 +121,7 @@ class DeploymentEngine(Executor):
         req = CreateRunRequest(
             fab_id=fab_id,
             fab_version=fab_version,
-            override_config=record_value_dict_to_proto(
-                override_config, ValueList, ProtoConfigsRecordValue
-            ),
+            override_config=user_config_to_proto(override_config),
         )
         res = self.stub.CreateRun(request=req)
         return int(res.run_id)
@@ -132,7 +130,7 @@ class DeploymentEngine(Executor):
     def start_run(
         self,
         fab_file: bytes,
-        override_config: Dict[str, Value],
+        override_config: UserConfig,
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
@@ -151,19 +149,34 @@ class DeploymentEngine(Executor):
             run_id: int = self._create_run(fab_id, fab_version, override_config)
             log(INFO, "Created run %s", str(run_id))
 
+            print(
+                [
+                    "flower-server-app",
+                    "--run-id",
+                    str(run_id),
+                    f"--flwr-dir {str(self.flwr_dir)}" if self.flwr_dir else "",
+                    "--superlink",
+                    str(self.superlink),
+                    (
+                        "--insecure"
+                        if self.root_certificates is None
+                        else f"--root-certificates {str(self.root_certificates)}"
+                    ),
+                ],
+            )
             # Start ServerApp
             proc = subprocess.Popen(  # pylint: disable=consider-using-with
                 [
                     "flower-server-app",
                     "--run-id",
                     str(run_id),
-                    f"--flwr-dir {self.flwr_dir}" if self.flwr_dir else "",
+                    f"--flwr-dir {str(self.flwr_dir)}" if str(self.flwr_dir) else "",
                     "--superlink",
-                    self.superlink,
+                    str(self.superlink),
                     (
                         "--insecure"
-                        if self.root_certificates is None
-                        else f"--root-certificates {self.root_certificates}"
+                        if str(self.root_certificates) is None
+                        else f"--root-certificates {str(self.root_certificates)}"
                     ),
                 ],
                 stdout=subprocess.PIPE,

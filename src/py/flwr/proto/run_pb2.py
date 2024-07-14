@@ -12,10 +12,10 @@ from google.protobuf.internal import builder as _builder
 _sym_db = _symbol_database.Default()
 
 
-from flwr.proto import common_pb2 as flwr_dot_proto_dot_common__pb2
+from flwr.proto import transport_pb2 as flwr_dot_proto_dot_transport__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x66lwr/proto/run.proto\x12\nflwr.proto\x1a\x17\x66lwr/proto/common.proto\"\xcf\x01\n\x03Run\x12\x0e\n\x06run_id\x18\x01 \x01(\x12\x12\x0e\n\x06\x66\x61\x62_id\x18\x02 \x01(\t\x12\x13\n\x0b\x66\x61\x62_version\x18\x03 \x01(\t\x12<\n\x0foverride_config\x18\x04 \x03(\x0b\x32#.flwr.proto.Run.OverrideConfigEntry\x1aU\n\x13OverrideConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12-\n\x05value\x18\x02 \x01(\x0b\x32\x1e.flwr.proto.ConfigsRecordValue:\x02\x38\x01\"\x1f\n\rGetRunRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x12\".\n\x0eGetRunResponse\x12\x1c\n\x03run\x18\x01 \x01(\x0b\x32\x0f.flwr.proto.Runb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14\x66lwr/proto/run.proto\x12\nflwr.proto\x1a\x1a\x66lwr/proto/transport.proto\"\xc3\x01\n\x03Run\x12\x0e\n\x06run_id\x18\x01 \x01(\x12\x12\x0e\n\x06\x66\x61\x62_id\x18\x02 \x01(\t\x12\x13\n\x0b\x66\x61\x62_version\x18\x03 \x01(\t\x12<\n\x0foverride_config\x18\x04 \x03(\x0b\x32#.flwr.proto.Run.OverrideConfigEntry\x1aI\n\x13OverrideConfigEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12!\n\x05value\x18\x02 \x01(\x0b\x32\x12.flwr.proto.Scalar:\x02\x38\x01\"\x1f\n\rGetRunRequest\x12\x0e\n\x06run_id\x18\x01 \x01(\x12\".\n\x0eGetRunResponse\x12\x1c\n\x03run\x18\x01 \x01(\x0b\x32\x0f.flwr.proto.Runb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -24,12 +24,12 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _globals['_RUN_OVERRIDECONFIGENTRY']._options = None
   _globals['_RUN_OVERRIDECONFIGENTRY']._serialized_options = b'8\001'
-  _globals['_RUN']._serialized_start=62
-  _globals['_RUN']._serialized_end=269
-  _globals['_RUN_OVERRIDECONFIGENTRY']._serialized_start=184
-  _globals['_RUN_OVERRIDECONFIGENTRY']._serialized_end=269
-  _globals['_GETRUNREQUEST']._serialized_start=271
-  _globals['_GETRUNREQUEST']._serialized_end=302
-  _globals['_GETRUNRESPONSE']._serialized_start=304
-  _globals['_GETRUNRESPONSE']._serialized_end=350
+  _globals['_RUN']._serialized_start=65
+  _globals['_RUN']._serialized_end=260
+  _globals['_RUN_OVERRIDECONFIGENTRY']._serialized_start=187
+  _globals['_RUN_OVERRIDECONFIGENTRY']._serialized_end=260
+  _globals['_GETRUNREQUEST']._serialized_start=262
+  _globals['_GETRUNREQUEST']._serialized_end=293
+  _globals['_GETRUNRESPONSE']._serialized_start=295
+  _globals['_GETRUNRESPONSE']._serialized_end=341
 # @@protoc_insertion_point(module_scope)

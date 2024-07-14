@@ -3,7 +3,7 @@
 isort:skip_file
 """
 import builtins
-import flwr.proto.common_pb2
+import flwr.proto.transport_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.message
@@ -20,11 +20,11 @@ class Run(google.protobuf.message.Message):
         VALUE_FIELD_NUMBER: builtins.int
         key: typing.Text
         @property
-        def value(self) -> flwr.proto.common_pb2.ConfigsRecordValue: ...
+        def value(self) -> flwr.proto.transport_pb2.Scalar: ...
         def __init__(self,
             *,
             key: typing.Text = ...,
-            value: typing.Optional[flwr.proto.common_pb2.ConfigsRecordValue] = ...,
+            value: typing.Optional[flwr.proto.transport_pb2.Scalar] = ...,
             ) -> None: ...
         def HasField(self, field_name: typing_extensions.Literal["value",b"value"]) -> builtins.bool: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
@@ -37,13 +37,13 @@ class Run(google.protobuf.message.Message):
     fab_id: typing.Text
     fab_version: typing.Text
     @property
-    def override_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.common_pb2.ConfigsRecordValue]: ...
+    def override_config(self) -> google.protobuf.internal.containers.MessageMap[typing.Text, flwr.proto.transport_pb2.Scalar]: ...
     def __init__(self,
         *,
         run_id: builtins.int = ...,
         fab_id: typing.Text = ...,
         fab_version: typing.Text = ...,
-        override_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.common_pb2.ConfigsRecordValue]] = ...,
+        override_config: typing.Optional[typing.Mapping[typing.Text, flwr.proto.transport_pb2.Scalar]] = ...,
         ) -> None: ...
     def ClearField(self, field_name: typing_extensions.Literal["fab_id",b"fab_id","fab_version",b"fab_version","override_config",b"override_config","run_id",b"run_id"]) -> None: ...
 global___Run = Run

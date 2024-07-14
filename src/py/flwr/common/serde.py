@@ -681,3 +681,48 @@ def message_from_taskres(taskres: TaskRes) -> Message:
     )
     message.metadata.created_at = taskres.task.created_at
     return message
+
+
+# === User configs ===
+
+
+def user_config_to_proto(user_config: typing.UserConfig) -> Any:
+    """Serialize `UserConfig` to ProtoBuf."""
+    proto = {}
+    for key, value in user_config.items():
+        proto[key] = user_config_value_to_proto(value)
+    return proto
+
+
+def user_config_from_proto(proto: Any) -> typing.UserConfig:
+    """Deserialize `UserConfig` from ProtoBuf."""
+    metrics = {}
+    for key, value in proto.items():
+        metrics[key] = user_config_value_from_proto(value)
+    return metrics
+
+
+def user_config_value_to_proto(user_config_value: typing.UserConfigValue) -> Scalar:
+    """Serialize `UserConfigValue` to ProtoBuf."""
+    if isinstance(user_config_value, bool):
+        return Scalar(bool=user_config_value)
+
+    if isinstance(user_config_value, float):
+        return Scalar(double=user_config_value)
+
+    if isinstance(user_config_value, int):
+        return Scalar(sint64=user_config_value)
+
+    if isinstance(user_config_value, str):
+        return Scalar(string=user_config_value)
+
+    raise ValueError(
+        f"Accepted types: {bool, float, int, str} (but not {type(user_config_value)})"
+    )
+
+
+def user_config_value_from_proto(scalar_msg: Scalar) -> typing.UserConfigValue:
+    """Deserialize `UserConfigValue` from ProtoBuf."""
+    scalar_field = scalar_msg.WhichOneof("scalar")
+    scalar = getattr(scalar_msg, cast(str, scalar_field))
+    return cast(typing.UserConfigValue, scalar)

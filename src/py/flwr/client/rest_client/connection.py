@@ -43,7 +43,7 @@ from flwr.common.retry_invoker import RetryInvoker
 from flwr.common.serde import (
     message_from_taskins,
     message_to_taskres,
-    record_value_dict_from_proto,
+    user_config_from_proto,
 )
 from flwr.common.typing import Run
 from flwr.proto.fleet_pb2 import (  # pylint: disable=E0611
@@ -363,7 +363,7 @@ def http_request_response(  # pylint: disable=,R0913, R0914, R0915
             run_id,
             res.run.fab_id,
             res.run.fab_version,
-            record_value_dict_from_proto(res.run.override_config),
+            user_config_from_proto(res.run.override_config),
         )
 
     try:

@@ -17,7 +17,7 @@ syntax = "proto3";
 
 package flwr.proto;
 
-import "flwr/proto/common.proto";
+import "flwr/proto/transport.proto";
 
 service Exec {
   // Start run upon request
@@ -29,7 +29,7 @@ service Exec {
 
 message StartRunRequest {
   bytes fab_file = 1;
-  map<string, ConfigsRecordValue> override_config = 2;
+  map<string, Scalar> override_config = 2;
 }
 message StartRunResponse { sint64 run_id = 1; }
 message StreamLogsRequest { sint64 run_id = 1; }
