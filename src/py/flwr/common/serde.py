@@ -29,23 +29,20 @@ from typing import (
 
 from google.protobuf.message import Message as GrpcMessage
 
-# pylint: disable=E0611
-from flwr.proto.common_pb2 import (
-    BoolList,
-    BytesList,
-    DoubleList,
-    Sint64List,
-    StringList,
-)
 from flwr.proto.error_pb2 import Error as ProtoError
 from flwr.proto.node_pb2 import Node
+
+# pylint: disable=E0611
 from flwr.proto.recordset_pb2 import Array as ProtoArray
+from flwr.proto.recordset_pb2 import BoolList, BytesList
 from flwr.proto.recordset_pb2 import ConfigsRecord as ProtoConfigsRecord
 from flwr.proto.recordset_pb2 import ConfigsRecordValue as ProtoConfigsRecordValue
+from flwr.proto.recordset_pb2 import DoubleList
 from flwr.proto.recordset_pb2 import MetricsRecord as ProtoMetricsRecord
 from flwr.proto.recordset_pb2 import MetricsRecordValue as ProtoMetricsRecordValue
 from flwr.proto.recordset_pb2 import ParametersRecord as ProtoParametersRecord
 from flwr.proto.recordset_pb2 import RecordSet as ProtoRecordSet
+from flwr.proto.recordset_pb2 import Sint64List, StringList
 from flwr.proto.task_pb2 import Task, TaskIns, TaskRes
 from flwr.proto.transport_pb2 import (
     ClientMessage,
