@@ -60,7 +60,7 @@ class SimulationEngine(Executor):
             A dictionary for configuration values.
             Supported configuration key/value pairs:
             - "num-supernodes": str
-                Number of nodes to register for the Simulation.
+                Number of nodes to register for the simulation.
         """
         if not config:
             return
