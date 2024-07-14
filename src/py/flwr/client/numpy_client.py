@@ -16,7 +16,7 @@
 
 
 from abc import ABC
-from typing import Callable, Dict, Tuple
+from typing import Callable, Dict, Optional, Tuple
 
 from flwr.client.client import Client
 from flwr.common import (
@@ -70,7 +70,7 @@ Example
 class NumPyClient(ABC):
     """Abstract base class for Flower clients using NumPy."""
 
-    context: Context
+    _context: Optional[Context] = None
 
     def get_properties(self, config: Config) -> Dict[str, Scalar]:
         """Return a client's set of properties.
@@ -174,13 +174,9 @@ class NumPyClient(ABC):
         _ = (self, parameters, config)
         return 0.0, 0, {}
 
-    def get_context(self) -> Context:
-        """Get the run context from this client."""
-        return self.context
-
     def set_context(self, context: Context) -> None:
         """Apply a run context to this client."""
-        self.context = context
+        self._context = context
 
     def to_client(self) -> Client:
         """Convert to object to Client type and return it."""
@@ -278,11 +274,6 @@ def _evaluate(self: Client, ins: EvaluateIns) -> EvaluateRes:
     )
 
 
-def _get_context(self: Client) -> Context:
-    """Return context of underlying NumPyClient."""
-    return self.numpy_client.get_context()  # type: ignore
-
-
 def _set_context(self: Client, context: Context) -> None:
     """Apply context to underlying NumPyClient."""
     self.numpy_client.set_context(context)  # type: ignore
@@ -291,7 +282,6 @@ def _set_context(self: Client, context: Context) -> None:
 def _wrap_numpy_client(client: NumPyClient) -> Client:
     member_dict: Dict[str, Callable] = {  # type: ignore
         "__init__": _constructor,
-        "get_context": _get_context,
         "set_context": _set_context,
     }
 

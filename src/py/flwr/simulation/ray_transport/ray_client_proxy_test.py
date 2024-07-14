@@ -27,7 +27,6 @@ from flwr.client.node_state import NodeState
 from flwr.common import (
     DEFAULT_TTL,
     Config,
-    ConfigsRecord,
     Context,
     Message,
     MessageTypeLegacy,
@@ -62,10 +61,6 @@ class DummyClient(NumPyClient):
         """Return properties by doing a simple calculation."""
         result = self.node_id * pi
 
-        # store something in context
-        self.context.state.configs_records["result"] = ConfigsRecord(
-            {"result": str(result)}
-        )
         return {"result": result}
 
 
@@ -179,12 +174,6 @@ def test_cid_consistency_all_submit_first_run_consistency() -> None:
         res = recordset_to_getpropertiesres(message_out.content)
 
         assert prox.node_id * pi == res.properties["result"]
-        assert (
-            str(prox.node_id * pi)
-            == prox.proxy_state.retrieve_context(run_id).state.configs_records[
-                "result"
-            ]["result"]
-        )
 
     ray.shutdown()
 
