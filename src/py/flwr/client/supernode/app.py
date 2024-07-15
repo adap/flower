@@ -248,7 +248,7 @@ def _get_load_client_app_fn(
             dir_path = Path(project_dir).absolute()
 
             # Set app reference
-            client_app_ref = config["flower"]["components"]["clientapp"]
+            client_app_ref = config["tool"]["flwr"]["components"]["clientapp"]
 
         # Set sys.path
         nonlocal inserted_path

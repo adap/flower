@@ -112,7 +112,7 @@ class SimulationEngine(Executor):
                 )
 
             # Get ClientApp and SeverApp components
-            flower_components = config["flower"]["components"]
+            flower_components = config["tool"]["flwr"]["components"]
             clientapp = flower_components["clientapp"]
             serverapp = flower_components["serverapp"]
 

@@ -74,8 +74,8 @@ def run(
     typer.secho("Success", fg=typer.colors.GREEN)
 
     try:
-        federation_name = config["flower"]["federations"]["default"]
-        federation = config["flower"]["federations"][federation_name]
+        federation_name = config["tool"]["flwr"]["federations"]["default"]
+        federation = config["tool"]["flwr"]["federations"][federation_name]
     except KeyError as err:
         typer.secho(
             "❌ The project's `pyproject.toml` needs to declare "
@@ -125,8 +125,8 @@ def _run_with_superexec(
 def _run_without_superexec(
     config: Dict[str, Any], federation: Dict[str, Any], federation_name: str
 ) -> None:
-    server_app_ref = config["flower"]["components"]["serverapp"]
-    client_app_ref = config["flower"]["components"]["clientapp"]
+    server_app_ref = config["tool"]["flwr"]["components"]["serverapp"]
+    client_app_ref = config["tool"]["flwr"]["components"]["clientapp"]
 
     try:
         num_supernodes = federation["options"]["num-supernodes"]
@@ -135,7 +135,7 @@ def _run_without_superexec(
             "❌ The project's `pyproject.toml` needs to declare the number of"
             " SuperNodes in the simulation. To simulate 10 SuperNodes,"
             " use the following notation:\n\n"
-            f"[flower.federations.{federation_name}]\n"
+            f"[tool.flwr.federations.{federation_name}]\n"
             "options.num-supernodes = 10\n",
             fg=typer.colors.RED,
             bold=True,
