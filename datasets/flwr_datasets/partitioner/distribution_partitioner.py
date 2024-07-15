@@ -19,9 +19,9 @@ from collections import Counter
 from typing import Dict, List, Optional
 
 import numpy as np
-import numpy.typing as npt
 
 import datasets
+from flwr_datasets.common.typing import NDArrayFloat, NDArrayInt
 from flwr_datasets.partitioner.partitioner import Partitioner
 
 
@@ -34,7 +34,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
 
     Parameters
     ----------
-    distribution_array : numpy.ndarray
+    distribution_array : Union[NDArrayInt, NDArrayFloat]
         A 2-dimensional numpy array of the probability distribution of samples
         for all labels in all partitions. The array shape should be
         (`num_unique_labels`,
@@ -120,7 +120,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
 
     def __init__(  # pylint: disable=R0913
         self,
-        distribution_array: npt.NDArray[np.int_] | npt.NDArray[np.float_],
+        distribution_array: NDArrayInt | NDArrayFloat,
         num_partitions: int,
         num_unique_labels_per_partition: int,
         partition_by: str,
