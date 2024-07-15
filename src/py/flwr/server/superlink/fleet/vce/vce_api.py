@@ -16,7 +16,6 @@
 
 
 import json
-import sys
 import threading
 import time
 import traceback
@@ -29,6 +28,7 @@ from typing import Callable, Dict, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.node_state import NodeState
+from flwr.client.supernode.app import _get_load_client_app_fn
 from flwr.common.constant import (
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -37,7 +37,6 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log
 from flwr.common.message import Error
-from flwr.common.object_ref import load_app
 from flwr.common.serde import message_from_taskins, message_to_taskres
 from flwr.common.typing import Run
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
@@ -259,6 +258,7 @@ def start_vce(
     app_dir: str,
     f_stop: threading.Event,
     run: Run,
+    flwr_dir: Optional[str] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     num_supernodes: Optional[int] = None,
@@ -338,16 +338,12 @@ def start_vce(
     def _load() -> ClientApp:
 
         if client_app_attr:
-
-            if app_dir is not None:
-                sys.path.insert(0, app_dir)
-
-            app: ClientApp = load_app(client_app_attr, LoadClientAppError, app_dir)
-
-            if not isinstance(app, ClientApp):
-                raise LoadClientAppError(
-                    f"Attribute {client_app_attr} is not of type {ClientApp}",
-                ) from None
+            app = _get_load_client_app_fn(
+                default_app_ref=client_app_attr,
+                dir_arg=app_dir,
+                flwr_dir_arg=flwr_dir,
+                multi_app=True,
+            )(run.fab_id, run.fab_version)
 
         if client_app:
             app = client_app
