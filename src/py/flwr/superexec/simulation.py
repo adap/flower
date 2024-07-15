@@ -66,9 +66,7 @@ class SimulationEngine(Executor):
             return
         if num_supernodes := config.get("num-supernodes"):
             self.num_supernodes = num_supernodes
-
-        # Validate config
-        if self.num_supernodes is None:
+        else:
             log(
                 ERROR,
                 "To start a run with the simulation plugin, please specify "
