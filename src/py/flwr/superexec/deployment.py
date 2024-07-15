@@ -162,7 +162,7 @@ class DeploymentEngine(Executor):
             else:
                 command.append("--root-certificates")
                 command.append(self.root_certificates)
-            
+
             if verbose:
                 command.append("--verbose")
 
