@@ -64,8 +64,7 @@ def _register_nodes(
 def _register_node_states(
     nodes_mapping: NodeToPartitionMapping, run: Run
 ) -> Dict[int, NodeState]:
-    """Create a NodeState object for each node and pre-register the context for the
-    run."""
+    """Create NodeState objects and pre-register the context for the run."""
     node_states: Dict[int, NodeState] = {}
     num_partitions = len(set(nodes_mapping.values()))
     for node_id, partition_id in nodes_mapping.items():
