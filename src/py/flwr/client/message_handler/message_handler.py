@@ -92,7 +92,7 @@ def handle_legacy_message_from_msgtype(
     client_fn: ClientFnExt, message: Message, context: Context
 ) -> Message:
     """Handle legacy message in the inner most mod."""
-    client = client_fn(message.metadata.dst_node_id, context.partition_id)
+    client = client_fn(context)
 
     # Check if NumPyClient is returend
     if isinstance(client, NumPyClient):

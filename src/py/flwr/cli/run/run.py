@@ -18,13 +18,14 @@ import sys
 from enum import Enum
 from logging import DEBUG
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 import typer
 from typing_extensions import Annotated
 
 from flwr.cli import config_utils
 from flwr.cli.build import build
+from flwr.common.config import parse_config_args
 from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
@@ -58,15 +59,20 @@ def run(
         Optional[Path],
         typer.Option(help="Path of the Flower project to run"),
     ] = None,
+    config_overrides: Annotated[
+        Optional[str],
+        typer.Option(
+            "--run-config",
+            "-c",
+            help="Override configuration key-value pairs",
+        ),
+    ] = None,
 ) -> None:
     """Run Flower project."""
-    if use_superexec:
-        _start_superexec_run(directory)
-        return
-
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
-    config, errors, warnings = config_utils.load_and_validate()
+    pyproject_path = directory / "pyproject.toml" if directory else None
+    config, errors, warnings = config_utils.load_and_validate(path=pyproject_path)
 
     if config is None:
         typer.secho(
@@ -87,6 +93,12 @@ def run(
         )
 
     typer.secho("Success", fg=typer.colors.GREEN)
+
+    if use_superexec:
+        _start_superexec_run(
+            parse_config_args(config_overrides, separator=","), directory
+        )
+        return
 
     server_app_ref = config["flower"]["components"]["serverapp"]
     client_app_ref = config["flower"]["components"]["clientapp"]
@@ -115,7 +127,9 @@ def run(
         )
 
 
-def _start_superexec_run(directory: Optional[Path]) -> None:
+def _start_superexec_run(
+    override_config: Dict[str, str], directory: Optional[Path]
+) -> None:
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
@@ -132,6 +146,9 @@ def _start_superexec_run(directory: Optional[Path]) -> None:
 
     fab_path = build(directory)
 
-    req = StartRunRequest(fab_file=Path(fab_path).read_bytes())
+    req = StartRunRequest(
+        fab_file=Path(fab_path).read_bytes(),
+        override_config=override_config,
+    )
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)

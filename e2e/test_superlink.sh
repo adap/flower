@@ -2,7 +2,7 @@
 set -e
 
 case "$1" in
-  pandas)
+  framework-pandas)
     server_arg="--insecure"
     client_arg="--insecure"
     server_dir="./"

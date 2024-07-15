@@ -42,11 +42,12 @@ Create **custom partitioning schemes** or choose from the **implemented [partiti
 * IID partitioning `IidPartitioner(num_partitions)`
 * Dirichlet partitioning `DirichletPartitioner(num_partitions, partition_by, alpha)`
 * InnerDirichlet partitioning `InnerDirichletPartitioner(partition_sizes, partition_by, alpha)`
-* Natural ID partitioner `NaturalIdPartitioner(partition_by)`
-* Size partitioner (the abstract base class for the partitioners dictating the division based the number of samples) `SizePartitioner`
-* Linear partitioner `LinearPartitioner(num_partitions)`
-* Square partitioner `SquarePartitioner(num_partitions)`
-* Exponential partitioner `ExponentialPartitioner(num_partitions)`
+* Pathological partitioning `PathologicalPartitioner(num_partitions, partition_by, num_classes_per_partition, class_assignment_mode)`
+* Natural ID partitioning `NaturalIdPartitioner(partition_by)`
+* Size based partitioning (the abstract base class for the partitioners dictating the division based the number of samples) `SizePartitioner`
+* Linear partitioning `LinearPartitioner(num_partitions)`
+* Square partitioning `SquarePartitioner(num_partitions)`
+* Exponential partitioning `ExponentialPartitioner(num_partitions)`
 * more to come in the future releases (contributions are welcome).
 <p align="center">
   <img src="./doc/source/_static/readme/comparison_of_partitioning_schemes.png" alt="Comparison of partitioning schemes."/>
