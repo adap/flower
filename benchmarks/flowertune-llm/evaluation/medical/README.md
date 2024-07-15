@@ -1,6 +1,6 @@
 ## Evaluation for Medical challenge
 
-We leverage the medical question answering (QA) metric provided by [Meditron](https://github.com/epfLLM/meditron/tree/main/evaluation) to evaluate our trained LLMs.
+We leverage the medical question answering (QA) metric provided by [Meditron](https://github.com/epfLLM/meditron/tree/main/evaluation) to evaluate our fined-tuned LLMs.
 Three datasets have been selected for this evaluation: [PubMedQA](https://huggingface.co/datasets/bigbio/pubmed_qa), [MedMCQA](https://huggingface.co/datasets/medmcqa), and [MedQA](https://huggingface.co/datasets/bigbio/med_qa). 
 
 
@@ -24,7 +24,7 @@ huggingface-cli login
 
 ```bash
 python inference.py \
---peft-path=/path/to/pre-trained-model-dir/  # e.g., ./peft_1
+--peft-path=/path/to/fine-tuned-peft-model-dir/  # e.g., ./peft_1
 --dataset-name=pubmedqa  # chosen from [pubmedqa, medmcqa, medqa]
 --run-name=fl  # arbitrary name for this run 
 ```
