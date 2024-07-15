@@ -1,6 +1,6 @@
 ## Evaluation for General NLP challenge
 
-We leverage MT-bench metric provided by [FastChat](https://github.com/lm-sys/FastChat) to evaluate our trained LLMs.
+We leverage MT-bench metric provided by [FastChat](https://github.com/lm-sys/FastChat) to evaluate our fine-tuned LLMs.
 MT-bench represents a comprehensive suite of multi-turn, open-ended questions designed to evaluate chat assistants.
 Strong LLMs, such as GPT-4, serve as judges to assess the quality of responses provided by the chat assistants under examination.
 
@@ -24,7 +24,7 @@ huggingface-cli login
 ### Step 1. Generate model answers to MT-bench questions
 
 ```bash
-python gen_model_answer.py --peft-path=/path/to/pre-trained-model-dir/ # e.g., ./peft_1
+python gen_model_answer.py --peft-path=/path/to/fine-tuned-peft-model-dir/ # e.g., ./peft_1
 ```
 The answers will be saved to `data/mt_bench/model_answer/[base_model_name].jsonl` in default.
 
