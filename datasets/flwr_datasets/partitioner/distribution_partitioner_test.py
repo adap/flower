@@ -15,11 +15,11 @@
 """Test cases for DistributionPartitioner."""
 
 from collections import Counter
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
 import pytest
-from flwr.common.typing import NDArrayFloat
+from flwr.common.typing import NDArrayFloat, NDArrayInt
 
 from datasets import Dataset
 from flwr_datasets.partitioner.distribution_partitioner import DistributionPartitioner
@@ -43,7 +43,7 @@ def _dummy_distribution_setup(
     num_unique_labels_per_partition: int,
     num_unique_labels: int,
     random_mode: bool = False,
-) -> NDArrayFloat:
+) -> Union[NDArrayFloat, NDArrayInt]:
     """Create a dummy distribution for testing."""
     num_columns = num_unique_labels_per_partition * num_partitions / num_unique_labels
     if random_mode:
@@ -141,7 +141,7 @@ class TestDistributionPartitioner:
             preassigned_num_samples_per_label=preassigned_num_samples_per_label,
         )
 
-        partitioned_distribution: Dict[Any, List] = {
+        partitioned_distribution: Dict[Any, List[Any]] = {
             label: [] for label in partitioner.dataset.unique("labels")
         }
 
@@ -173,7 +173,7 @@ class TestDistributionPartitioner:
             preassigned_num_samples_per_label=preassigned_num_samples_per_label,
             rescale_mode=False,
         )
-        partitioned_distribution: Dict[Any, List] = {
+        partitioned_distribution: Dict[Any, List[Any]] = {
             label: [] for label in partitioner.dataset.unique("labels")
         }
 
