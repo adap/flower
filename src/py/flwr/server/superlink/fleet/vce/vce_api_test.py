@@ -165,7 +165,7 @@ def start_and_shutdown(
     if not app_dir:
         app_dir = _autoresolve_app_dir()
 
-    run = Run(run_id=1234, fab_id="Mock/mock", fab_version="v1.0.0", override_config={})
+    run = Run(run_id=1234, fab_id="", fab_version="", override_config={})
 
     start_vce(
         num_supernodes=num_supernodes,
