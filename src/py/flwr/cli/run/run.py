@@ -17,7 +17,7 @@
 import sys
 from logging import DEBUG
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import typer
 from typing_extensions import Annotated
@@ -87,48 +87,61 @@ def run(
         raise typer.Exit(code=1) from err
 
     if "address" in federation:
-
-        def on_channel_state_change(channel_connectivity: str) -> None:
-            """Log channel connectivity."""
-            log(DEBUG, channel_connectivity)
-
-        channel = create_channel(
-            server_address=federation["address"],
-            insecure=True,
-            root_certificates=None,
-            max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-            interceptors=None,
-        )
-        channel.subscribe(on_channel_state_change)
-        stub = ExecStub(channel)
-
-        fab_path = build(directory)
-
-        req = StartRunRequest(
-            fab_file=Path(fab_path).read_bytes(),
-            override_config=parse_config_args(config_overrides, separator=","),
-        )
-        res = stub.StartRun(req)
-        typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
-
+        _run_with_superexec(federation, directory, config_overrides)
     else:
-        server_app_ref = config["flower"]["components"]["serverapp"]
-        client_app_ref = config["flower"]["components"]["clientapp"]
+        _run_without_superexec(config, federation, federation_name)
 
-        try:
-            num_supernodes = federation["options"]["num-supernodes"]
-        except KeyError as err:
-            typer.secho(
-                "❌ The project's `pyproject.toml` needs to declare "
-                "`flower.federations.localhost.options.num-supernodes` if a "
-                "SuperExec address is not provided.",
-                fg=typer.colors.RED,
-                bold=True,
-            )
-            raise typer.Exit(code=1) from err
 
-        _run_simulation(
-            server_app_attr=server_app_ref,
-            client_app_attr=client_app_ref,
-            num_supernodes=num_supernodes,
+def _run_with_superexec(
+    federation: Dict[str, str],
+    directory: Optional[Path],
+    config_overrides: Optional[str],
+) -> None:
+
+    def on_channel_state_change(channel_connectivity: str) -> None:
+        """Log channel connectivity."""
+        log(DEBUG, channel_connectivity)
+
+    channel = create_channel(
+        server_address=federation["address"],
+        insecure=True,
+        root_certificates=None,
+        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+        interceptors=None,
+    )
+    channel.subscribe(on_channel_state_change)
+    stub = ExecStub(channel)
+
+    fab_path = build(directory)
+
+    req = StartRunRequest(
+        fab_file=Path(fab_path).read_bytes(),
+        override_config=parse_config_args(config_overrides, separator=","),
+    )
+    res = stub.StartRun(req)
+    typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+
+
+def _run_without_superexec(
+    config: Dict[str, Any], federation: Dict[str, Any], federation_name: str
+) -> None:
+    server_app_ref = config["flower"]["components"]["serverapp"]
+    client_app_ref = config["flower"]["components"]["clientapp"]
+
+    try:
+        num_supernodes = federation["options"]["num-supernodes"]
+    except KeyError as err:
+        typer.secho(
+            "❌ The project's `pyproject.toml` needs to declare "
+            f"`flower.federations.{federation_name}.options.num-supernodes` if a "
+            "SuperExec address is not provided.",
+            fg=typer.colors.RED,
+            bold=True,
         )
+        raise typer.Exit(code=1) from err
+
+    _run_simulation(
+        server_app_attr=server_app_ref,
+        client_app_attr=client_app_ref,
+        num_supernodes=num_supernodes,
+    )
