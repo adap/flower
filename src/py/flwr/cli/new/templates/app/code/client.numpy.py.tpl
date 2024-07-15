@@ -1,6 +1,7 @@
 """$project_name: A Flower / NumPy app."""
 
 from flwr.client import NumPyClient, ClientApp
+from flwr.common import Context
 import numpy as np
 
 
@@ -15,7 +16,7 @@ class FlowerClient(NumPyClient):
         return float(0.0), 1, {"accuracy": float(1.0)}
 
 
-def client_fn(cid: str):
+def client_fn(context: Context):
     return FlowerClient().to_client()
 
 
