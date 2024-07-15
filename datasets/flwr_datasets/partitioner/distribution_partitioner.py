@@ -60,6 +60,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         samples assignment to nodes.
     seed : int, default=42
         Seed used for dataset shuffling. It has no effect if `shuffle` is False.
+
     Examples
     --------
     >>> from flwr_datasets import FederatedDataset
