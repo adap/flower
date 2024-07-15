@@ -252,6 +252,7 @@ def _main_loop(
             app_dir=app_dir,
             state_factory=state_factory,
             f_stop=f_stop,
+            run=run,
         )
 
     except Exception as ex:
