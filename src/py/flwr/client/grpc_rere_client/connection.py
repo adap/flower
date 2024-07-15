@@ -79,7 +79,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
     Tuple[
         Callable[[], Optional[Message]],
         Callable[[Message], None],
-        Optional[Callable[[], None]],
+        Optional[Callable[[], Optional[int]]],
         Optional[Callable[[], None]],
         Optional[Callable[[int], Run]],
     ]
@@ -176,7 +176,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         if not ping_stop_event.is_set():
             ping_stop_event.wait(next_interval)
 
-    def create_node() -> None:
+    def create_node() -> Optional[int]:
         """Set create_node."""
         # Call FleetAPI
         create_node_request = CreateNodeRequest(ping_interval=PING_DEFAULT_INTERVAL)
@@ -189,6 +189,7 @@ def grpc_request_response(  # pylint: disable=R0913, R0914, R0915
         nonlocal node, ping_thread
         node = cast(Node, create_node_response.node)
         ping_thread = start_ping_loop(ping, ping_stop_event)
+        return node.node_id
 
     def delete_node() -> None:
         """Set delete_node."""
