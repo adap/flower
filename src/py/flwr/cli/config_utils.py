@@ -60,7 +60,7 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
 
         return (
             conf["project"]["version"],
-            f"{conf['flower']['publisher']}/{conf['project']['name']}",
+            f"{conf['tool']['flwr']['publisher']}/{conf['project']['name']}",
         )
 
 
@@ -128,18 +128,18 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
         if "authors" not in config["project"]:
             warnings.append('Recommended property "authors" missing in [project]')
 
-    if "flower" not in config:
-        errors.append("Missing [flower] section")
+    if "tool" not in config or "flwr" not in config["tool"]:
+        errors.append("Missing [tool.flwr] section")
     else:
-        if "publisher" not in config["flower"]:
-            errors.append('Property "publisher" missing in [flower]')
-        if "components" not in config["flower"]:
-            errors.append("Missing [flower.components] section")
+        if "publisher" not in config["tool"]["flwr"]:
+            errors.append('Property "publisher" missing in [tool.flwr]')
+        if "components" not in config["tool"]["flwr"]:
+            errors.append("Missing [tool.flwr.components] section")
         else:
-            if "serverapp" not in config["flower"]["components"]:
-                errors.append('Property "serverapp" missing in [flower.components]')
-            if "clientapp" not in config["flower"]["components"]:
-                errors.append('Property "clientapp" missing in [flower.components]')
+            if "serverapp" not in config["tool"]["flwr"]["components"]:
+                errors.append('Property "serverapp" missing in [tool.flwr.components]')
+            if "clientapp" not in config["tool"]["flwr"]["components"]:
+                errors.append('Property "clientapp" missing in [tool.flwr.components]')
 
     return len(errors) == 0, errors, warnings
 
@@ -155,14 +155,14 @@ def validate(
 
     # Validate serverapp
     is_valid, reason = object_ref.validate(
-        config["flower"]["components"]["serverapp"], check_module
+        config["tool"]["flwr"]["components"]["serverapp"], check_module
     )
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
 
     # Validate clientapp
     is_valid, reason = object_ref.validate(
-        config["flower"]["components"]["clientapp"], check_module
+        config["tool"]["flwr"]["components"]["clientapp"], check_module
     )
 
     if not is_valid and isinstance(reason, str):

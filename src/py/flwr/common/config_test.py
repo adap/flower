@@ -95,20 +95,20 @@ def test_get_fused_config_valid(tmp_path: Path) -> None:
             "numpy>=1.21.0",
         ]
 
-        [flower]
+        [tool.flwr]
         publisher = "flwrlabs"
 
-        [flower.components]
+        [tool.flwr.components]
         serverapp = "fedgpt.server:app"
         clientapp = "fedgpt.client:app"
 
-        [flower.config]
+        [tool.flwr.config]
         num_server_rounds = 10
         momentum = 0.1
         lr = 0.01
         serverapp.test = "key"
 
-        [flower.config.clientapp]
+        [tool.flwr.config.clientapp]
         test = "key"
     """
     overrides: UserConfig = {
@@ -133,7 +133,7 @@ def test_get_fused_config_valid(tmp_path: Path) -> None:
             f.write(textwrap.dedent(pyproject_toml_content))
 
         # Execute
-        default_config = get_project_config(tmp_path)["flower"].get("config", {})
+        default_config = get_project_config(tmp_path)["tool"]["flwr"].get("config", {})
 
         config = _fuse_dicts(flatten_dict(default_config), overrides)
 
@@ -160,16 +160,16 @@ def test_get_project_config_file_valid(tmp_path: Path) -> None:
             "numpy>=1.21.0",
         ]
 
-        [flower]
+        [tool.flwr]
         publisher = "flwrlabs"
 
-        [flower.components]
+        [tool.flwr.components]
         serverapp = "fedgpt.server:app"
         clientapp = "fedgpt.client:app"
 
-        [flower.config]
-        num_server_rounds = "10"
-        momentum = "0.1"
+        [tool.flwr.config]
+        num_server_rounds = 10
+        momentum = 0.1
         lr = "0.01"
     """
     expected_config = {
@@ -181,16 +181,18 @@ def test_get_project_config_file_valid(tmp_path: Path) -> None:
             "license": {"text": "Apache License (2.0)"},
             "dependencies": ["flwr[simulation]>=1.9.0,<2.0", "numpy>=1.21.0"],
         },
-        "flower": {
-            "publisher": "flwrlabs",
-            "components": {
-                "serverapp": "fedgpt.server:app",
-                "clientapp": "fedgpt.client:app",
-            },
-            "config": {
-                "num_server_rounds": "10",
-                "momentum": "0.1",
-                "lr": "0.01",
+        "tool": {
+            "flwr": {
+                "publisher": "flwrlabs",
+                "components": {
+                    "serverapp": "fedgpt.server:app",
+                    "clientapp": "fedgpt.client:app",
+                },
+                "config": {
+                    "num_server_rounds": 10,
+                    "momentum": 0.1,
+                    "lr": "0.01",
+                },
             },
         },
     }
