@@ -22,12 +22,13 @@ services:
       - source: ca-certfile
         target: /app/certificates/ca.crt
 
-  serverapp:
+  superexec:
     command:
-      - --superlink
-      - superlink:9091
-      - --root-certificates
-      - certificates/ca.crt
+      - --executor
+      - flwr.superexec.deployment:executor
+      - --executor-config
+      - superlink=superlink:9091,root-certificates=certificates/ca.crt
+      - --insecure
     secrets:
       - source: ca-certfile
         target: /app/certificates/ca.crt
