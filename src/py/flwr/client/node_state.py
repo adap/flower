@@ -36,12 +36,13 @@ class NodeState:
     """State of a node where client nodes execute runs."""
 
     def __init__(
-        self, node_id: int, node_config: Dict[str, str], partition_id: Optional[int]
+        self,
+        node_id: int,
+        node_config: Dict[str, str],
     ) -> None:
         self.node_id = node_id
         self.node_config = node_config
         self.run_infos: Dict[int, RunInfo] = {}
-        self._partition_id = partition_id
 
     def register_context(
         self,
@@ -59,7 +60,6 @@ class NodeState:
                     node_config=self.node_config,
                     state=RecordSet(),
                     run_config=initial_run_config.copy(),
-                    partition_id=self._partition_id,
                 ),
             )
 
