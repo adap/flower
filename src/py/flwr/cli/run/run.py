@@ -77,7 +77,9 @@ def run(
 
     typer.secho("Success", fg=typer.colors.GREEN)
 
-    federation_name = federation_name or config["tool"]["flwr"]["federations"].get("default")
+    federation_name = federation_name or config["tool"]["flwr"]["federations"].get(
+        "default"
+    )
 
     if federation_name is None:
         typer.secho(
