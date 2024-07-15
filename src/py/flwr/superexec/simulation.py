@@ -18,7 +18,7 @@
 import subprocess
 import sys
 from logging import ERROR, INFO, WARN
-from typing import Dict, Optional
+from typing import Optional
 
 from typing_extensions import override
 
@@ -26,6 +26,7 @@ from flwr.cli.config_utils import load_and_validate
 from flwr.cli.install import install_from_fab
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
+from flwr.common.typing import UserConfig
 from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 
 from .executor import Executor, RunTracker
@@ -49,13 +50,13 @@ class SimulationEngine(Executor):
     @override
     def set_config(
         self,
-        config: Dict[str, str],
+        config: UserConfig,
     ) -> None:
         """Set executor config arguments.
 
         Parameters
         ----------
-        config : Dict[str, str]
+        config : UserConfig
             A dictionary for configuration values.
             Supported configuration key/value pairs:
             - "num-supernodes": str
@@ -78,7 +79,7 @@ class SimulationEngine(Executor):
 
     @override
     def start_run(
-        self, fab_file: bytes, override_config: Dict[str, str]
+        self, fab_file: bytes, override_config: UserConfig
     ) -> Optional[RunTracker]:
         """Start run using the Flower Simulation Engine."""
         try:
