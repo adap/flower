@@ -15,7 +15,6 @@
 """Test Fleet Simulation Engine API."""
 
 
-import asyncio
 import threading
 import time
 from itertools import cycle
@@ -24,7 +23,7 @@ from math import pi
 from pathlib import Path
 from time import sleep
 from typing import Dict, Optional, Set, Tuple
-from unittest import IsolatedAsyncioTestCase
+from unittest import TestCase
 from uuid import UUID
 
 from flwr.client.client_app import LoadClientAppError
@@ -46,7 +45,7 @@ from flwr.server.superlink.fleet.vce.vce_api import (
 from flwr.server.superlink.state import InMemoryState, StateFactory
 
 
-def terminate_simulation(f_stop: asyncio.Event, sleep_duration: int) -> None:
+def terminate_simulation(f_stop: threading.Event, sleep_duration: int) -> None:
     """Set event to terminate Simulation Engine after `sleep_duration` seconds."""
     sleep(sleep_duration)
     f_stop.set()
@@ -148,15 +147,15 @@ def start_and_shutdown(
 ) -> None:
     """Start Simulation Engine and terminate after specified number of seconds.
 
-    Some tests need to be terminated by triggering externally an asyncio.Event. This
-    is enabled whtn passing `duration`>0.
+    Some tests need to be terminated by triggering externally an threading.Event. This
+    is enabled when passing `duration`>0.
     """
-    f_stop = asyncio.Event()
+    f_stop = threading.Event()
 
     if duration:
 
         # Setup thread that will set the f_stop event, triggering the termination of all
-        # asyncio logic in the Simulation Engine. It will also terminate the Backend.
+        # logic in the Simulation Engine. It will also terminate the Backend.
         termination_th = threading.Thread(
             target=terminate_simulation, args=(f_stop, duration)
         )
@@ -181,8 +180,8 @@ def start_and_shutdown(
         termination_th.join()
 
 
-class AsyncTestFleetSimulationEngineRayBackend(IsolatedAsyncioTestCase):
-    """A basic class that enables testing asyncio functionalities."""
+class TestFleetSimulationEngineRayBackend(TestCase):
+    """A basic class that enables testing functionalities."""
 
     def test_erroneous_no_supernodes_client_mapping(self) -> None:
         """Test with unset arguments."""
