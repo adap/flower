@@ -39,6 +39,7 @@ from flwr.common.logger import log
 from flwr.common.message import Error
 from flwr.common.object_ref import load_app
 from flwr.common.serde import message_from_taskins, message_to_taskres
+from flwr.common.typing import Run
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State, StateFactory
 
@@ -60,6 +61,27 @@ def _register_nodes(
     return nodes_mapping
 
 
+def _register_node_states(
+    nodes_mapping: NodeToPartitionMapping, run: Run
+) -> Dict[int, NodeState]:
+    """Create NodeState objects and pre-register the context for the run."""
+    node_states: Dict[int, NodeState] = {}
+    num_partitions = len(set(nodes_mapping.values()))
+    for node_id, partition_id in nodes_mapping.items():
+        node_states[node_id] = NodeState(
+            node_id=node_id,
+            node_config={
+                PARTITION_ID_KEY: str(partition_id),
+                NUM_PARTITIONS_KEY: str(num_partitions),
+            },
+        )
+
+        # Pre-register Context objects
+        node_states[node_id].register_context(run_id=run.run_id, run=run)
+
+    return node_states
+
+
 # pylint: disable=too-many-arguments,too-many-locals
 def worker(
     app_fn: Callable[[], ClientApp],
@@ -78,8 +100,7 @@ def worker(
             task_ins: TaskIns = taskins_queue.get(timeout=1.0)
             node_id = task_ins.task.consumer.node_id
 
-            # Register and retrieve context
-            node_states[node_id].register_context(run_id=task_ins.run_id)
+            # Retrieve context
             context = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
 
             # Convert TaskIns to Message
@@ -151,7 +172,7 @@ def put_taskres_into_state(
             pass
 
 
-def run(
+def run_api(
     app_fn: Callable[[], ClientApp],
     backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
@@ -237,6 +258,7 @@ def start_vce(
     backend_config_json_stream: str,
     app_dir: str,
     f_stop: threading.Event,
+    run: Run,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     num_supernodes: Optional[int] = None,
@@ -287,17 +309,7 @@ def start_vce(
         )
 
     # Construct mapping of NodeStates
-    node_states: Dict[int, NodeState] = {}
-    # Number of unique partitions
-    num_partitions = len(set(nodes_mapping.values()))
-    for node_id, partition_id in nodes_mapping.items():
-        node_states[node_id] = NodeState(
-            node_id=node_id,
-            node_config={
-                PARTITION_ID_KEY: str(partition_id),
-                NUM_PARTITIONS_KEY: str(num_partitions),
-            },
-        )
+    node_states = _register_node_states(nodes_mapping=nodes_mapping, run=run)
 
     # Load backend config
     log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
@@ -348,7 +360,7 @@ def start_vce(
         _ = app_fn()
 
         # Run main simulation loop
-        run(
+        run_api(
             app_fn,
             backend_fn,
             nodes_mapping,
