@@ -18,8 +18,10 @@ import argparse
 import asyncio
 import json
 import logging
+import sys
 import threading
 import traceback
+from argparse import Namespace
 from logging import DEBUG, ERROR, INFO, WARNING
 from time import sleep
 from typing import Dict, Optional
@@ -41,10 +43,43 @@ from flwr.simulation.ray_transport.utils import (
 )
 
 
+def _check_args_do_not_interfere(args: Namespace) -> bool:
+    """Ensure decoupling of flags for different ways to start the simulation."""
+    keys = ["app", "config-override"]
+    conflict_keys = ["num-supernodes", "client-app", "server-app"]
+    for key_ in keys:
+        if getattr(args, key_) and any(getattr(args, key) for key in conflict_keys):
+            resolve_log_message = ",".join([f"--{key}" for key in conflict_keys])
+            log(
+                ERROR,
+                "Passing `--%s` alongside with any of %s",
+                key_,
+                resolve_log_message,
+            )
+            return False
+
+    # Ensure all args are set (required for the non-FAB mode of execution)
+    if not all(getattr(args, key) for key in conflict_keys):
+        resolve_log_message = ",".join([f"--{key}" for key in conflict_keys])
+        log(ERROR, "Passing all of %s keys are required.", resolve_log_message)
+        return False
+
+    return True
+
+
 # Entry point from CLI
 def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
+
+    # We are supporting two modes for the CLI entrypoint:
+    # 1) Running a FAB or FAB-like dir containing a pyproject.toml
+    # 2) Running any ClinetApp and SeverApp w/o pyproject.toml being present
+    # For 2) some CLI args are cumpolsory but these aren't for 1)
+    # We first do these checks
+    args_check_pass = _check_args_do_not_interfere(args)
+    if not args_check_pass:
+        sys.exit("Simulation Engine cannot start.")
 
     # Load JSON config
     backend_config_dict = json.loads(args.backend_config)
@@ -419,19 +454,27 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--server-app",
-        required=True,
         help="For example: `server:app` or `project.package.module:wrapper.app`",
     )
     parser.add_argument(
         "--client-app",
-        required=True,
         help="For example: `client:app` or `project.package.module:wrapper.app`",
     )
     parser.add_argument(
         "--num-supernodes",
         type=int,
-        required=True,
         help="Number of simulated SuperNodes.",
+    )
+    parser.add_argument(
+        "--app",
+        default=None,
+        help="Either a path to a FAB (.fab) file or path to a directory "
+        "containing a FAB-like structure and a pyproject.toml.",
+    )
+    parser.add_argument(
+        "--config-override",
+        default=None,
+        help="Override configuration key-value pairs.",
     )
     parser.add_argument(
         "--backend",
