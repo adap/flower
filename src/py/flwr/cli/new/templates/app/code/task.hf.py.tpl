@@ -16,9 +16,9 @@ DEVICE = torch.device("cpu")
 CHECKPOINT = "distilbert-base-uncased"  # transformer model checkpoint
 
 
-def load_data(partition_id, num_clients):
+def load_data(partition_id: int, num_partitions: int):
     """Load IMDB data (training and eval)"""
-    fds = FederatedDataset(dataset="imdb", partitioners={"train": num_clients})
+    fds = FederatedDataset(dataset="imdb", partitioners={"train": num_partitions})
     partition = fds.load_partition(partition_id)
     # Divide data: 80% train, 20% test
     partition_train_test = partition.train_test_split(test_size=0.2, seed=42)
