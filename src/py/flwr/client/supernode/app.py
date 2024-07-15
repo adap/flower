@@ -178,10 +178,10 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
 
 def _get_load_client_app_fn(
     default_app_ref: str,
-    load_dir: str,
+    dir_arg: str,
     multi_app: bool,
     load_for_supernode: bool,
-    flwr_dir: Optional[str] = None,
+    flwr_dir_arg: Optional[str] = None,
 ) -> Callable[[str, str], ClientApp]:
     """Get the load_client_app_fn function.
 
@@ -196,10 +196,10 @@ def _get_load_client_app_fn(
     if not load_for_supernode:
         flwr_dir = Path("")
     else:
-        if flwr_dir is None:
+        if flwr_dir_arg is None:
             flwr_dir = get_flwr_dir()
         else:
-            flwr_dir = Path(flwr_dir).absolute()
+            flwr_dir = Path(flwr_dir_arg).absolute()
 
     inserted_path = None
 
@@ -210,7 +210,7 @@ def _get_load_client_app_fn(
             default_app_ref,
         )
         # Insert sys.path
-        dir_path = Path(load_dir).absolute()
+        dir_path = Path(dir_arg).absolute()
         sys.path.insert(0, str(dir_path))
         inserted_path = str(dir_path)
 
@@ -222,7 +222,7 @@ def _get_load_client_app_fn(
         # If multi-app feature is disabled
         if not multi_app:
             # Get sys path to be inserted
-            dir_path = Path(load_dir).absolute()
+            dir_path = Path(dir_arg).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -235,7 +235,7 @@ def _get_load_client_app_fn(
 
             log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
             # Get sys path to be inserted
-            dir_path = Path(load_dir).absolute()
+            dir_path = Path(dir_arg).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
