@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-
-""" Distribution partitioner."""
+"""Distribution partitioner."""
 from collections import Counter
 from typing import Dict, List, Optional
 
@@ -143,6 +142,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
 
     def load_partition(self, partition_id: int) -> datasets.Dataset:
         """Load a partition based on the partition index.
+
         Parameters
         ----------
         partition_id : int
@@ -309,7 +309,8 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                 )
 
     def _check_num_partitions_correctness_if_needed(self) -> None:
-        """Test num_partitions when the dataset is given (in load_partition)."""
+        """Test num_partitions when the dataset is given (in
+        load_partition)."""
         if not self._partition_id_to_indices_determined:
             if self._num_partitions > self.dataset.num_rows:
                 raise ValueError(
