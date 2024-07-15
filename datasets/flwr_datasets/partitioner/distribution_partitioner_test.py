@@ -97,7 +97,7 @@ def _get_partitioner(
         (20, 1, 200, 10, 5),
     ],
 )
-# pylint: disable=R0913
+# pylint: disable=R0913,R0201
 class TestDistributionPartitioner:
     """Unit tests for DistributionPartitioner."""
 
