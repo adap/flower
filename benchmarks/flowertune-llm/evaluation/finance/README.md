@@ -1,6 +1,6 @@
 ## Evaluation for Finance challenge
 
-We leverage the sentiment classification pipeline on finance-related text provided by [FinGPT](https://github.com/AI4Finance-Foundation/FinGPT/tree/master) to evaluate our trained LLMs.
+We leverage the sentiment classification pipeline on finance-related text provided by [FinGPT](https://github.com/AI4Finance-Foundation/FinGPT/tree/master) to evaluate our fine-tuned LLMs.
 Three datasets have been selected for this evaluation: [FPB](https://huggingface.co/datasets/takala/financial_phrasebank), [FIQA](https://huggingface.co/datasets/pauri32/fiqa-2018), and [TFNS](https://huggingface.co/datasets/zeroshot/twitter-financial-news-sentiment). 
 
 
@@ -24,7 +24,7 @@ huggingface-cli login
 
 ```bash
 python eval.py \
---peft-path=/path/to/pre-trained-model-dir/ # e.g., ./peft_1
+--peft-path=/path/to/fine-tuned-peft-model-dir/ # e.g., ./peft_1
 --run-name=fl  # arbitrary name for this run  
 --batch-size=32 
 --quantization=4 
