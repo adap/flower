@@ -40,7 +40,7 @@ def run(
     ] = Path("."),
     federation_name: Annotated[
         Optional[str],
-        typer.Argument(help="Name of the federation to run FL on"),
+        typer.Argument(help="Name of the federation to run the app on"),
     ] = None,
     config_overrides: Annotated[
         Optional[str],
