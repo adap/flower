@@ -16,9 +16,10 @@
 
 
 from collections import Counter
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
+import numpy.typing as npt
 
 import datasets
 from flwr_datasets.partitioner.partitioner import Partitioner
@@ -116,7 +117,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
 
     def __init__(  # pylint: disable=R0913
         self,
-        distribution_array: np.ndarray,
+        distribution_array: npt.NDArray[np.int_] | npt.NDArray[np.float_],
         num_partitions: int,
         num_unique_labels_per_partition: int,
         partition_by: str,
@@ -139,7 +140,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
 
         # Utility attributes
         # The attributes below are determined during the first call to load_partition
-        self._num_unique_labels: int = None
+        self._num_unique_labels: int = 0
         self._partition_id_to_indices_determined = False
         self._partition_id_to_indices: Dict[int, List[int]] = {}
 
@@ -150,6 +151,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         ----------
         partition_id : int
             the index that corresponds to the requested partition
+
         Returns
         -------
         dataset_partition : Dataset
@@ -221,7 +223,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             # Each row represents the number of samples to be taken for that class label
             # and the sum of each row equals the total of each class label.
             label_sampling_matrix = np.floor(
-                (self._distribution_array * label_distribution[:, np.newaxis])
+                self._distribution_array * label_distribution[:, np.newaxis]
             ).astype(int)
 
             # Add back the preassigned total amount
@@ -303,9 +305,9 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         if not self._partition_id_to_indices_determined:
             labels = self.dataset[self._partition_by]
             distribution = sorted(Counter(labels).items())
-            distribution = [v for _, v in distribution]
+            distribution_vals = [v for _, v in distribution]
 
-            if any(self._distribution_array.sum(1) > distribution):
+            if any(self._distribution_array.sum(1) > distribution_vals):
                 raise ValueError(
                     "The sum of at least one label distribution array "
                     "exceeds the original class label distribution."
