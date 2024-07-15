@@ -139,7 +139,7 @@ def _run_with_superexec(
                 bold=True,
             )
             raise typer.Exit(code=1)
-        elif not bool(insecure_str):
+        if not bool(insecure_str):
             typer.secho(
                 "❌ No certificate were given yet `insecure` is set to `False`.",
                 fg=typer.colors.RED,
