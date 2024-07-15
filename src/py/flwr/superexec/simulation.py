@@ -17,13 +17,12 @@
 
 import subprocess
 import sys
-from logging import ERROR, INFO
-from pathlib import Path
+from logging import ERROR, INFO, WARN
 from typing import Dict, Optional
 
 from typing_extensions import override
 
-from flwr.cli.config_utils import get_fab_metadata
+from flwr.cli.config_utils import get_fab_metadata, load_and_validate
 from flwr.cli.install import install_from_fab
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
@@ -100,20 +99,36 @@ class SimulationEngine(Executor):
                 stderr=subprocess.DEVNULL,
             )
 
+            # Load and validate config
+            config, errors, warnings = load_and_validate(fab_path / "pyproject.toml")
+            if errors:
+                raise ValueError(errors)
+
+            if warnings:
+                log(WARN, warnings)
+
+            if config is None:
+                raise ValueError(
+                    "Config extracted from FAB's pyproject.toml is not valid"
+                )
+
+            # Get ClientApp and SeverApp components
+            flower_components = config["flower"]["components"]
+            clientapp = flower_components["clientapp"]
+            serverapp = flower_components["serverapp"]
+
             # In Simulation there is no SuperLink, still we create a run_id
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
             log(INFO, "Created run %s", str(run_id))
-
-            fab_name = Path(fab_id).name
 
             # Start Simulation
             proc = subprocess.Popen(  # pylint: disable=consider-using-with
                 [
                     "flower-simulation",
                     "--client-app",
-                    f"{fab_name}.client:app",
+                    f"{clientapp}",
                     "--server-app",
-                    f"{fab_name}.server:app",
+                    f"{serverapp}",
                     "--num-supernodes",
                     f"{self.num_supernodes}",
                     "--run-id",
