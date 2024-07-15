@@ -22,7 +22,7 @@ from typing import Dict, Optional
 
 from typing_extensions import override
 
-from flwr.cli.config_utils import get_fab_metadata, load_and_validate
+from flwr.cli.config_utils import load_and_validate
 from flwr.cli.install import install_from_fab
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import log
@@ -89,7 +89,6 @@ class SimulationEngine(Executor):
                 )
 
             # Install FAB to flwr dir
-            _, fab_id = get_fab_metadata(fab_file)
             fab_path = install_from_fab(fab_file, None, True)
 
             # Install FAB Python package
@@ -121,19 +120,22 @@ class SimulationEngine(Executor):
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
             log(INFO, "Created run %s", str(run_id))
 
+            # Prepare commnand
+            command = [
+                "flower-simulation",
+                "--client-app",
+                f"{clientapp}",
+                "--server-app",
+                f"{serverapp}",
+                "--num-supernodes",
+                f"{self.num_supernodes}",
+                "--run-id",
+                str(run_id),
+            ]
+
             # Start Simulation
             proc = subprocess.Popen(  # pylint: disable=consider-using-with
-                [
-                    "flower-simulation",
-                    "--client-app",
-                    f"{clientapp}",
-                    "--server-app",
-                    f"{serverapp}",
-                    "--num-supernodes",
-                    f"{self.num_supernodes}",
-                    "--run-id",
-                    str(run_id),
-                ],
+                command,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
