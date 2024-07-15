@@ -305,7 +305,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
 
     def _check_distribution_array_sum_if_needed(self) -> None:
         """Test correctness of distribution array sum."""
-        if not self._partition_id_to_indices_determined:
+        if not self._partition_id_to_indices_determined and not self._rescale:
             labels = self.dataset[self._partition_by]
             distribution = sorted(Counter(labels).items())
             distribution_vals = [v for _, v in distribution]
