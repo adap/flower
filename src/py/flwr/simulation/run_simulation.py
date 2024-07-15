@@ -207,6 +207,7 @@ def _main_loop(
     app_dir: str,
     enable_tf_gpu_growth: bool,
     run: Run,
+    flwr_dir: Optional[str] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
@@ -253,6 +254,7 @@ def _main_loop(
             state_factory=state_factory,
             f_stop=f_stop,
             run=run,
+            flwr_dir=flwr_dir,
         )
 
     except Exception as ex:
@@ -283,6 +285,7 @@ def _run_simulation(
     client_app_attr: Optional[str] = None,
     server_app_attr: Optional[str] = None,
     app_dir: str = "",
+    flwr_dir: Optional[str] = None,
     run: Optional[Run] = None,
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
@@ -325,6 +328,9 @@ def _run_simulation(
     app_dir : str
         Add specified directory to the PYTHONPATH and load `ClientApp` from there.
         (Default: current working directory.)
+
+    flwr_dir : Optional[str]
+        The path containing installed Flower Apps.
 
     run : Optional[Run]
         An object carrying details about the run.
@@ -377,6 +383,7 @@ def _run_simulation(
         app_dir,
         enable_tf_gpu_growth,
         run,
+        flwr_dir,
         client_app,
         client_app_attr,
         server_app,
@@ -463,6 +470,17 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         help="Add specified directory to the PYTHONPATH and load"
         "ClientApp and ServerApp from there."
         " Default: current working directory.",
+    )
+    parser.add_argument(
+        "--flwr-dir",
+        default=None,
+        help="""The path containing installed Flower Apps.
+    By default, this value is equal to:
+
+        - `$FLWR_HOME/` if `$FLWR_HOME` is defined
+        - `$XDG_DATA_HOME/.flwr/` if `$XDG_DATA_HOME` is defined
+        - `$HOME/.flwr/` in all other cases
+    """,
     )
     parser.add_argument(
         "--run-id",
