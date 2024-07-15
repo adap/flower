@@ -23,11 +23,14 @@ import threading
 import traceback
 from argparse import Namespace
 from logging import DEBUG, ERROR, INFO, WARNING
+from pathlib import Path
 from time import sleep
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
+from flwr.cli.config_utils import get_fab_metadata, load_and_validate
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
+from flwr.common.config import get_fused_config
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import set_logger_propagation, update_console_handler
 from flwr.common.typing import Run
@@ -45,61 +48,136 @@ from flwr.simulation.ray_transport.utils import (
 
 def _check_args_do_not_interfere(args: Namespace) -> bool:
     """Ensure decoupling of flags for different ways to start the simulation."""
-    keys = ["app", "config_override"]
-    conflict_keys = ["num_supernodes", "client_app", "server_app"]
+    mode_one_args = ["app", "config_override"]
+    mode_two_args = ["num_supernodes", "client_app", "server_app"]
 
-    def _resolve_message() -> str:
+    def _resolve_message(conflict_keys: List[str]) -> str:
         return ",".join([f"`--{key}`".replace("_", "-") for key in conflict_keys])
 
-    for key_ in keys:
-        if getattr(args, key_) and any(getattr(args, key) for key in conflict_keys):
+    if any(getattr(args, key) for key in mode_one_args):
+        if any(getattr(args, key) for key in mode_two_args):
             log(
                 ERROR,
-                "Passing `--%s` alongside with any of {%s}",
-                key_,
-                _resolve_message(),
+                "Passing any of {%s} alongside with any of {%s}",
+                _resolve_message(mode_one_args),
+                _resolve_message(mode_two_args),
             )
             return False
 
+        if not args.app:
+            log(ERROR, "You need to pass --app")
+            return False
+
+        return True
+
     # Ensure all args are set (required for the non-FAB mode of execution)
-    if not all(getattr(args, key) for key in conflict_keys):
-        log(ERROR, "Passing all of %s keys are required.", _resolve_message())
+    if not all(getattr(args, key) for key in mode_two_args):
+        log(
+            ERROR,
+            "Passing all of %s keys are required.",
+            _resolve_message(mode_two_args),
+        )
         return False
 
     return True
 
 
 # Entry point from CLI
+# pytlint: disable=too-many-locals
 def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
 
     # We are supporting two modes for the CLI entrypoint:
     # 1) Running a FAB or FAB-like dir containing a pyproject.toml
-    # 2) Running any ClinetApp and SeverApp w/o pyproject.toml being present
+    # 2) Running any ClientApp and SeverApp w/o pyproject.toml being present
     # For 2) some CLI args are cumpolsory but these aren't for 1)
     # We first do these checks
     args_check_pass = _check_args_do_not_interfere(args)
     if not args_check_pass:
         sys.exit("Simulation Engine cannot start.")
 
+    client_app_attr = None
+    server_app_attr = None
+    fab_version = ""
+    fab_id = ""
+    run_id = (
+        generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+        if args.run_id is None
+        else args.run_id
+    )
+    fused_config = None
+    if args.app:
+        # mode 1
+        app = Path(args.app)
+        if app.suffix == ".fab":
+            fab_version, fab_id = get_fab_metadata(app)
+            # TODO: how to continue here? the idea is to support:
+            # TODO: `flower-simulation <>.fab`
+        else:
+
+            # Load pyproject.toml
+            config, errors, warnings = load_and_validate(app / "pyproject.toml")
+            if errors:
+                raise ValueError(errors)
+
+            if warnings:
+                log(WARNING, warnings)
+
+            if config is None:
+                raise ValueError(
+                    "Config extracted from FAB's pyproject.toml is not valid"
+                )
+
+            # Get ClientApp and SeverApp components
+            flower_components = config["tool"]["flwr"]["components"]
+            client_app_attr = flower_components["clientapp"]
+            server_app_attr = flower_components["serverapp"]
+
+            # Read number of supernodes to simulate
+            fed_config = config["tool"]["flwr"]["federations"]
+            num_supernodes = fed_config[fed_config["default"]]["options"][
+                "num-supernodes"
+            ]
+
+        override_config = args.config_override if args.config_override else {}
+
+    else:
+        # mode 2
+        client_app_attr = args.client_app
+        server_app_attr = args.server_app
+        num_supernodes = args.num_supernodes
+        override_config = {}
+
+    # Create run
+    run = Run(
+        run_id=run_id,
+        fab_id=fab_id,
+        fab_version=fab_version,
+        override_config=override_config,
+    )
+
+    print(override_config)
+    # Override config if in fab-mode
+    if args.app and args.config_override:
+        # Fuse configs, this is needed for the serverapp
+        fused_config = get_fused_config(run, args.flwr_dir)
+        # TODO: this does nothing unless there is a fab-id/version, relax?
+
     # Load JSON config
     backend_config_dict = json.loads(args.backend_config)
 
     _run_simulation(
-        server_app_attr=args.server_app,
-        client_app_attr=args.client_app,
-        num_supernodes=args.num_supernodes,
+        server_app_attr=server_app_attr,
+        client_app_attr=client_app_attr,
+        num_supernodes=num_supernodes,
         backend_name=args.backend,
         backend_config=backend_config_dict,
         app_dir=args.app_dir,
-        run=(
-            Run(run_id=args.run_id, fab_id="", fab_version="", override_config={})
-            if args.run_id
-            else None
-        ),
+        run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
         verbose_logging=args.verbose,
+        server_app_run_config=fused_config,
     )
 
 
@@ -249,6 +327,7 @@ def _main_loop(
     client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
     server_app_attr: Optional[str] = None,
+    server_app_run_config: Optional[Dict[str, str]] = None,
 ) -> None:
     """Launch SuperLink with Simulation Engine, then ServerApp on a separate thread."""
     # Initialize StateFactory
@@ -262,7 +341,9 @@ def _main_loop(
         # Register run
         log(DEBUG, "Pre-registering run with id %s", run.run_id)
         state_factory.state().run_ids[run.run_id] = run  # type: ignore
-        server_app_run_config: Dict[str, str] = {}
+
+        if server_app_run_config is None:
+            server_app_run_config = {}
 
         # Initialize Driver
         driver = InMemoryDriver(run_id=run.run_id, state_factory=state_factory)
@@ -321,6 +402,7 @@ def _run_simulation(
     backend_config: Optional[BackendConfig] = None,
     client_app_attr: Optional[str] = None,
     server_app_attr: Optional[str] = None,
+    server_app_run_config: Optional[Dict[str, str]] = None,
     app_dir: str = "",
     flwr_dir: Optional[str] = None,
     run: Optional[Run] = None,
@@ -354,13 +436,17 @@ def _run_simulation(
         parameters. Values supported in <value> are those included by
         `flwr.common.typing.ConfigsRecordValues`.
 
-    client_app_attr : str
+    client_app_attr : Optional[str]
         A path to a `ClientApp` module to be loaded: For example: `client:app` or
         `project.package.module:wrapper.app`."
 
-    server_app_attr : str
+    server_app_attr : Optional[str]
         A path to a `ServerApp` module to be loaded: For example: `server:app` or
         `project.package.module:wrapper.app`."
+
+    server_app_run_config : Optional[Dict[str, str]]
+        Config dictionary that parameterizes the run config. It will be made accesible
+        to the ServerApp.
 
     app_dir : str
         Add specified directory to the PYTHONPATH and load `ClientApp` from there.
@@ -425,6 +511,7 @@ def _run_simulation(
         client_app_attr,
         server_app,
         server_app_attr,
+        server_app_run_config,
     )
     # Detect if there is an Asyncio event loop already running.
     # If yes, disable logger propagation. In environmnets
@@ -469,6 +556,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--app",
+        type=str,
         default=None,
         help="Either a path to a FAB (.fab) file or path to a directory "
         "containing a FAB-like structure and a pyproject.toml.",
