@@ -15,7 +15,7 @@
 """Test cases for DistributionPartitioner."""
 
 from collections import Counter
-from typing import Dict, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import pytest
@@ -141,7 +141,7 @@ class TestDistributionPartitioner:
             preassigned_num_samples_per_label=preassigned_num_samples_per_label,
         )
 
-        partitioned_distribution = {
+        partitioned_distribution: Dict[Any, List] = {
             label: [] for label in partitioner.dataset.unique("labels")
         }
 
@@ -173,7 +173,7 @@ class TestDistributionPartitioner:
             preassigned_num_samples_per_label=preassigned_num_samples_per_label,
             rescale_mode=False,
         )
-        partitioned_distribution = {
+        partitioned_distribution: Dict[Any, List] = {
             label: [] for label in partitioner.dataset.unique("labels")
         }
 
