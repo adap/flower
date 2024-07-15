@@ -129,8 +129,7 @@ def _run_with_superexec(
                 bold=True,
             )
             raise typer.Exit(code=1)
-        else:
-            insecure = False
+        insecure = False
     else:
         root_certificates_bytes = None
         if insecure_str is None:
@@ -147,8 +146,7 @@ def _run_with_superexec(
                 bold=True,
             )
             raise typer.Exit(code=1)
-        else:
-            insecure = True
+        insecure = True
 
     channel = create_channel(
         server_address=federation["address"],
