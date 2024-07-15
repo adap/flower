@@ -77,7 +77,7 @@ def _register_node_states(
             },
         )
 
-        # pre-registering the contexts
+        # Pre-register Context objects
         node_states[node_id].register_context(run_id=run.run_id, run=run)
 
     return node_states
