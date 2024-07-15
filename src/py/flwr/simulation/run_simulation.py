@@ -365,7 +365,7 @@ def _run_simulation(
     # Convert config to original JSON-stream format
     backend_config_stream = json.dumps(backend_config)
 
-    # If no Run object is set, create one.
+    # If no `Run` object is set, create one
     if run is None:
         run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
         run = Run(run_id=run_id, fab_id="", fab_version="", override_config={})
