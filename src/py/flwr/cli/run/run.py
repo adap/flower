@@ -102,17 +102,17 @@ def _run_with_superexec(
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
 
-    if cert_path := federation.get("root-certificates"):
-        root_certificates = Path(cert_path).read_bytes()
+    if root_certificates := federation.get("root-certificates"):
+        root_certificates_bytes = Path(root_certificates).read_bytes()
         insecure = False
     else:
-        root_certificates = None
+        root_certificates_bytes = None
         insecure = True
 
     channel = create_channel(
         server_address=federation["address"],
         insecure=insecure,
-        root_certificates=root_certificates,
+        root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         interceptors=None,
     )
