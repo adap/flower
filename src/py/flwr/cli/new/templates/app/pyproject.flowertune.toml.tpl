@@ -28,3 +28,6 @@ publisher = "$username"
 [flower.components]
 serverapp = "$import_name.app:server"
 clientapp = "$import_name.app:client"
+
+[flower.federations.localhost]
+options.num-supernodes = 10

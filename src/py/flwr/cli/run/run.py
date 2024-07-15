@@ -22,18 +22,22 @@ from typing import Optional
 import typer
 from typing_extensions import Annotated
 
-from flwr.cli import config_utils
 from flwr.cli.build import build
+from flwr.cli.config_utils import load_and_validate
 from flwr.common.config import parse_config_args
-from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.simulation.run_simulation import _run_simulation
 
 
 # pylint: disable-next=too-many-locals
 def run(
+    address: Annotated[
+        Optional[str],
+        typer.Option(help="The address of the SuperExec to run on"),
+    ] = None,
     directory: Annotated[
         Optional[Path],
         typer.Option(help="Path of the Flower project to run"),
@@ -51,7 +55,7 @@ def run(
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = directory / "pyproject.toml" if directory else None
-    config, errors, warnings = config_utils.load_and_validate(path=pyproject_path)
+    config, errors, warnings = load_and_validate(path=pyproject_path)
 
     if config is None:
         typer.secho(
@@ -73,25 +77,51 @@ def run(
 
     typer.secho("Success", fg=typer.colors.GREEN)
 
-    def on_channel_state_change(channel_connectivity: str) -> None:
-        """Log channel connectivity."""
-        log(DEBUG, channel_connectivity)
+    if address:
 
-    channel = create_channel(
-        server_address=SUPEREXEC_DEFAULT_ADDRESS,
-        insecure=True,
-        root_certificates=None,
-        max_message_length=GRPC_MAX_MESSAGE_LENGTH,
-        interceptors=None,
-    )
-    channel.subscribe(on_channel_state_change)
-    stub = ExecStub(channel)
+        def on_channel_state_change(channel_connectivity: str) -> None:
+            """Log channel connectivity."""
+            log(DEBUG, channel_connectivity)
 
-    fab_path = build(directory)
+        channel = create_channel(
+            server_address=address,
+            insecure=True,
+            root_certificates=None,
+            max_message_length=GRPC_MAX_MESSAGE_LENGTH,
+            interceptors=None,
+        )
+        channel.subscribe(on_channel_state_change)
+        stub = ExecStub(channel)
 
-    req = StartRunRequest(
-        fab_file=Path(fab_path).read_bytes(),
-        override_config=parse_config_args(config_overrides, separator=","),
-    )
-    res = stub.StartRun(req)
-    typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+        fab_path = build(directory)
+
+        req = StartRunRequest(
+            fab_file=Path(fab_path).read_bytes(),
+            override_config=parse_config_args(config_overrides, separator=","),
+        )
+        res = stub.StartRun(req)
+        typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+
+    else:
+        server_app_ref = config["flower"]["components"]["serverapp"]
+        client_app_ref = config["flower"]["components"]["clientapp"]
+
+        try:
+            num_supernodes = config["flower"]["federations"]["localhost"]["options"][
+                "num-supernodes"
+            ]
+        except KeyError as err:
+            typer.secho(
+                "❌ The project's `pyproject.toml` needs to declare "
+                "`flower.federations.localhost.options.num-supernodes` if a "
+                "SuperExec address is not provided.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1) from err
+
+        _run_simulation(
+            server_app_attr=server_app_ref,
+            client_app_attr=client_app_ref,
+            num_supernodes=num_supernodes,
+        )
