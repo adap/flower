@@ -15,6 +15,7 @@
 """Flower command line interface `run` command."""
 
 import sys
+import os
 from enum import Enum
 from logging import DEBUG
 from pathlib import Path
@@ -32,6 +33,9 @@ from flwr.common.logger import log
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
 from flwr.simulation.run_simulation import _run_simulation
+
+
+SUPEREXEC_ADDRESS = os.getenv("FLWR_SUPEREXEC_ADDRESS", SUPEREXEC_DEFAULT_ADDRESS)
 
 
 class Engine(str, Enum):
@@ -135,7 +139,7 @@ def _start_superexec_run(
         log(DEBUG, channel_connectivity)
 
     channel = create_channel(
-        server_address=SUPEREXEC_DEFAULT_ADDRESS,
+        server_address=SUPEREXEC_ADDRESS,
         insecure=True,
         root_certificates=None,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
