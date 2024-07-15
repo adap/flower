@@ -64,6 +64,8 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
 
     Examples
     --------
+    In order to reproduce the power-law distrbution of the paper, follow this setup:
+
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import DistributionPartitioner
     >>> from pprint import pprint
@@ -71,6 +73,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     >>> num_clients = 1_000
     >>> num_unique_labels_per_client = 2
     >>> num_unique_labels = 10
+    >>> preassigned_num_samples_per_label = 5
     >>>
     >>> # Generate a vector from a log-normal probability distribution
     >>> rng = np.random.default_rng(2024)
@@ -87,7 +90,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     >>>     num_partitions=num_clients,
     >>>     num_unique_labels_per_partition=num_unique_labels_per_client,
     >>>     partition_by="label",  # MNIST dataset has a target column `label`
-    >>>     preassigned_num_samples_per_label=5,
+    >>>     preassigned_num_samples_per_label=preassigned_num_samples_per_label,
     >>> )
     >>> fds = FederatedDataset(dataset="mnist", partitioners={"train": partitioner})
     >>> partition = fds.load_partition(0)
