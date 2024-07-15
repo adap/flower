@@ -60,7 +60,12 @@ def run_supernode() -> None:
     _warn_deprecated_server_arg(args)
 
     root_certificates = _get_certificates(args)
-    load_fn = _get_load_client_app_fn(args, multi_app=True)
+    load_fn = _get_load_client_app_fn(
+        default_app_ref=args.client_app,
+        load_dir=args.dir,
+        flwr_dir=args.flwr_dir,
+        multi_app=True,
+    )
     authentication_keys = _try_setup_client_authentication(args)
 
     _start_client_internal(
@@ -93,7 +98,12 @@ def run_client_app() -> None:
     _warn_deprecated_server_arg(args)
 
     root_certificates = _get_certificates(args)
-    load_fn = _get_load_client_app_fn(args, multi_app=False)
+    load_fn = _get_load_client_app_fn(
+        default_app_ref=args.client_app,
+        load_dir=args.dir,
+        flwr_dir=args.flwr_dir,
+        multi_app=False,
+    )
     authentication_keys = _try_setup_client_authentication(args)
 
     _start_client_internal(
@@ -166,7 +176,10 @@ def _get_certificates(args: argparse.Namespace) -> Optional[bytes]:
 
 
 def _get_load_client_app_fn(
-    args: argparse.Namespace, multi_app: bool
+    default_app_ref: str,
+    load_dir: str,
+    multi_app: bool,
+    flwr_dir: Optional[str] = None,
 ) -> Callable[[str, str], ClientApp]:
     """Get the load_client_app_fn function.
 
@@ -179,24 +192,22 @@ def _get_load_client_app_fn(
     """
     # Find the Flower directory containing Flower Apps (only for multi-app)
     flwr_dir = Path("")
-    if "flwr_dir" in args:
-        if args.flwr_dir is None:
-            flwr_dir = get_flwr_dir()
-        else:
-            flwr_dir = Path(args.flwr_dir).absolute()
+
+    if flwr_dir is None:
+        flwr_dir = get_flwr_dir()
+    else:
+        flwr_dir = Path(flwr_dir).absolute()
 
     inserted_path = None
-
-    default_app_ref: str = getattr(args, "client-app")
 
     if not multi_app:
         log(
             DEBUG,
             "Flower SuperNode will load and validate ClientApp `%s`",
-            getattr(args, "client-app"),
+            default_app_ref,
         )
         # Insert sys.path
-        dir_path = Path(args.dir).absolute()
+        dir_path = Path(load_dir).absolute()
         sys.path.insert(0, str(dir_path))
         inserted_path = str(dir_path)
 
@@ -208,7 +219,7 @@ def _get_load_client_app_fn(
         # If multi-app feature is disabled
         if not multi_app:
             # Get sys path to be inserted
-            dir_path = Path(args.dir).absolute()
+            dir_path = Path(load_dir).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
@@ -221,7 +232,7 @@ def _get_load_client_app_fn(
 
             log(WARN, "FAB ID is not provided; the default ClientApp will be loaded.")
             # Get sys path to be inserted
-            dir_path = Path(args.dir).absolute()
+            dir_path = Path(load_dir).absolute()
 
             # Set app reference
             client_app_ref = default_app_ref
