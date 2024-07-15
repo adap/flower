@@ -311,8 +311,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                 )
 
     def _check_num_partitions_correctness_if_needed(self) -> None:
-        """Test num_partitions when the dataset is given (in
-        load_partition)."""
+        """Test num_partitions when the dataset is given (in load_partition)."""
         if not self._partition_id_to_indices_determined:
             if self._num_partitions > self.dataset.num_rows:
                 raise ValueError(
