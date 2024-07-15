@@ -77,7 +77,9 @@ def run(
 
     typer.secho("Success", fg=typer.colors.GREEN)
 
-    federation_name = federation_name or config["flower"]["federations"].get("default")
+    federation_name = federation_name or config["tool"]["flwr"]["federations"].get(
+        "default"
+    )
 
     if federation_name is None:
         typer.secho(
@@ -90,9 +92,9 @@ def run(
         raise typer.Exit(code=1)
 
     # Validate the federation exists in the configuration
-    federation = config["flower"]["federations"].get(federation_name)
+    federation = config["tool"]["flwr"]["federations"].get(federation_name)
     if federation is None:
-        available_feds = list(config["flower"]["federations"])
+        available_feds = list(config["tool"]["flwr"]["federations"])
         typer.secho(
             f"❌ There is no `{federation_name}` federation declared in the "
             "`pyproject.toml`.\n The following federations were found:\n\n"
@@ -171,8 +173,8 @@ def _run_with_superexec(
 def _run_without_superexec(
     config: Dict[str, Any], federation: Dict[str, Any], federation_name: str
 ) -> None:
-    server_app_ref = config["flower"]["components"]["serverapp"]
-    client_app_ref = config["flower"]["components"]["clientapp"]
+    server_app_ref = config["tool"]["flwr"]["components"]["serverapp"]
+    client_app_ref = config["tool"]["flwr"]["components"]["clientapp"]
 
     try:
         num_supernodes = federation["options"]["num-supernodes"]
@@ -181,7 +183,7 @@ def _run_without_superexec(
             "❌ The project's `pyproject.toml` needs to declare the number of"
             " SuperNodes in the simulation. To simulate 10 SuperNodes,"
             " use the following notation:\n\n"
-            f"[flower.federations.{federation_name}]\n"
+            f"[tool.flwr.federations.{federation_name}]\n"
             "options.num-supernodes = 10\n",
             fg=typer.colors.RED,
             bold=True,
