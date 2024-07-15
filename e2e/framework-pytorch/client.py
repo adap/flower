@@ -10,8 +10,8 @@ from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from tqdm import tqdm
 
-import flwr as fl
-from flwr.common import ConfigsRecord
+from flwr.client import ClientApp, NumPyClient, start_client
+from flwr.common import ConfigsRecord, Context
 
 # #############################################################################
 # 1. Regular PyTorch pipeline: nn.Module, train, test, and DataLoader
@@ -89,7 +89,7 @@ trainloader, testloader = load_data()
 
 
 # Define Flower client
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def get_parameters(self, config):
         return [val.cpu().numpy() for _, val in net.state_dict().items()]
 
@@ -136,18 +136,18 @@ def set_parameters(model, parameters):
     return
 
 
-def client_fn(cid):
+def client_fn(context: Context):
     return FlowerClient().to_client()
 
 
-app = fl.client.ClientApp(
+app = ClientApp(
     client_fn=client_fn,
 )
 
 
 if __name__ == "__main__":
     # Start Flower client
-    fl.client.start_client(
+    start_client(
         server_address="127.0.0.1:8080",
         client=FlowerClient().to_client(),
     )
