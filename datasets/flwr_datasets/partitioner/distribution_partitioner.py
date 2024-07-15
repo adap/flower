@@ -13,6 +13,8 @@
 # limitations under the License.
 # ==============================================================================
 """Distribution partitioner."""
+
+
 from collections import Counter
 from typing import Dict, List, Optional
 
@@ -26,7 +28,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     """Partitioner based on a distribution.
 
     Inspired from implementations of Li et al.
-    "Federated Optimization in Heterogeneous Networks" (2020)
+    Federated Optimization in Heterogeneous Networks (2020)
     https://arxiv.org/abs/1812.06127.
 
     Parameters
