@@ -43,7 +43,7 @@ class SimulationEngine(Executor):
 
     def __init__(
         self,
-        num_supernodes: Optional[str] = None,
+        num_supernodes: Optional[int] = None,
     ) -> None:
         self.num_supernodes = num_supernodes
 
@@ -59,12 +59,13 @@ class SimulationEngine(Executor):
         config : UserConfig
             A dictionary for configuration values.
             Supported configuration key/value pairs:
-            - "num-supernodes": str
+            - "num-supernodes": int
                 Number of nodes to register for the simulation.
         """
         if not config:
             return
-        if num_supernodes := config.get("num-supernodes"):
+        num_supernodes = config.get("num-supernodes")
+        if num_supernodes and isinstance(num_supernodes, int):
             self.num_supernodes = num_supernodes
         else:
             log(
@@ -73,7 +74,10 @@ class SimulationEngine(Executor):
                 "the number of SuperNodes. This can be done by using the "
                 "`--executor-config` argument when launching the SuperExec.",
             )
-            raise ValueError("`num-supernodes` must not be `None`")
+            raise ValueError(
+                "`num-supernodes` must not be `None`, it must be a valid "
+                "positive integer."
+            )
 
     @override
     def start_run(
