@@ -177,7 +177,6 @@ from flwr.server import ServerAppComponents
 
 
 def server_fn(context):
-
     # Configure the strategy
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=0.1,  # Sample 10% of available clients for training
