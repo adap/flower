@@ -61,7 +61,7 @@ def run_supernode() -> None:
 
     root_certificates = _get_certificates(args)
     load_fn = _get_load_client_app_fn(
-        default_app_ref=args.client_app,
+        default_app_ref=getattr(args, "client-app"),
         dir_arg=args.dir,
         flwr_dir_arg=args.flwr_dir,
         load_for_supernode=True,
@@ -100,7 +100,7 @@ def run_client_app() -> None:
 
     root_certificates = _get_certificates(args)
     load_fn = _get_load_client_app_fn(
-        default_app_ref=args.client_app,
+        default_app_ref=getattr(args, "client-app"),
         dir_arg=args.dir,
         load_for_supernode=False,
         multi_app=False,
