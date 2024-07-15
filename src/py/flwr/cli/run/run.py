@@ -81,8 +81,8 @@ def run(
 
     if federation_name is None:
         typer.secho(
-            "❌ The project's `pyproject.toml` needs to declare "
-            "a default federation (with a SuperExec address or an "
+            "❌ No federation name was provided and the project's `pyproject.toml` "
+            "doesn't declare a default federation (with a SuperExec address or an "
             "`options.num-supernodes` value).",
             fg=typer.colors.RED,
             bold=True,
@@ -92,9 +92,11 @@ def run(
     # Validate the federation exists in the configuration
     federation = config["flower"]["federations"].get(federation_name)
     if federation is None:
+        available_feds = list(config["flower"]["federations"])
         typer.secho(
             f"❌ There is no `{federation_name}` federation declared in the "
-            "`pyproject.toml`.",
+            "`pyproject.toml`.\n The following federations were found:\n\n"
+            "\n".join(available_feds) + "\n\n",
             fg=typer.colors.RED,
             bold=True,
         )
