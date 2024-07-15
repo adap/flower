@@ -16,7 +16,7 @@
 
 
 from collections import Counter
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 
@@ -120,7 +120,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
 
     def __init__(  # pylint: disable=R0913
         self,
-        distribution_array: NDArrayInt | NDArrayFloat,
+        distribution_array: Union[NDArrayInt, NDArrayFloat],
         num_partitions: int,
         num_unique_labels_per_partition: int,
         partition_by: str,
