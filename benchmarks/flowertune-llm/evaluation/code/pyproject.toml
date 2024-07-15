@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "code-eval"
+version = "0.1.0"
+description = "Evaluation on Code challenge"
+authors = [
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+]
+dependencies = [
+    "peft==0.6.2",
+    "datasets==2.20.0",
+    "evaluate==0.3.0",
+    "sentencepiece==0.2.0",
+    "protobuf==5.27.1",
+    "bitsandbytes==0.43.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
