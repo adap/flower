@@ -26,14 +26,16 @@ from typing import Dict, Optional
 
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
+from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import set_logger_propagation, update_console_handler
 from flwr.common.typing import Run
 from flwr.server.driver import Driver, InMemoryDriver
-from flwr.server.run_serverapp import run
+from flwr.server.run_serverapp import run as run_server_app
 from flwr.server.server_app import ServerApp
 from flwr.server.superlink.fleet import vce
 from flwr.server.superlink.fleet.vce.backend.backend import BackendConfig
 from flwr.server.superlink.state import StateFactory
+from flwr.server.superlink.state.utils import generate_rand_int_from_bytes
 from flwr.simulation.ray_transport.utils import (
     enable_tf_gpu_growth as enable_gpu_growth,
 )
@@ -54,7 +56,11 @@ def run_simulation_from_cli() -> None:
         backend_name=args.backend,
         backend_config=backend_config_dict,
         app_dir=args.app_dir,
-        run_id=args.run_id,
+        run=(
+            Run(run_id=args.run_id, fab_id="", fab_version="", override_config={})
+            if args.run_id
+            else None
+        ),
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
         verbose_logging=args.verbose,
     )
@@ -156,7 +162,7 @@ def run_serverapp_th(
                 enable_gpu_growth()
 
             # Run ServerApp
-            run(
+            run_server_app(
                 driver=_driver,
                 server_app_dir=_server_app_dir,
                 server_app_run_config=_server_app_run_config,
@@ -193,16 +199,6 @@ def run_serverapp_th(
     return serverapp_th
 
 
-def _override_run_id(state: StateFactory, run_id_to_replace: int, run_id: int) -> None:
-    """Override the run_id of an existing Run."""
-    log(DEBUG, "Pre-registering run with id %s", run_id)
-    # Remove run
-    run_info: Run = state.state().run_ids.pop(run_id_to_replace)  # type: ignore
-    # Update with new run_id and insert back in state
-    run_info.run_id = run_id
-    state.state().run_ids[run_id] = run_info  # type: ignore
-
-
 # pylint: disable=too-many-locals
 def _main_loop(
     num_supernodes: int,
@@ -210,7 +206,7 @@ def _main_loop(
     backend_config_stream: str,
     app_dir: str,
     enable_tf_gpu_growth: bool,
-    run_id: Optional[int] = None,
+    run: Run,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     server_app: Optional[ServerApp] = None,
@@ -225,16 +221,13 @@ def _main_loop(
     server_app_thread_has_exception = threading.Event()
     serverapp_th = None
     try:
-        # Create run (with empty fab_id and fab_version)
-        run_id_ = state_factory.state().create_run("", "", {})
+        # Register run
+        log(DEBUG, "Pre-registering run with id %s", run.run_id)
+        state_factory.state().run_ids[run.run_id] = run  # type: ignore
         server_app_run_config: Dict[str, str] = {}
 
-        if run_id:
-            _override_run_id(state_factory, run_id_to_replace=run_id_, run_id=run_id)
-            run_id_ = run_id
-
         # Initialize Driver
-        driver = InMemoryDriver(run_id=run_id_, state_factory=state_factory)
+        driver = InMemoryDriver(run_id=run.run_id, state_factory=state_factory)
 
         # Get and run ServerApp thread
         serverapp_th = run_serverapp_th(
@@ -259,6 +252,7 @@ def _main_loop(
             app_dir=app_dir,
             state_factory=state_factory,
             f_stop=f_stop,
+            run=run,
         )
 
     except Exception as ex:
@@ -289,7 +283,7 @@ def _run_simulation(
     client_app_attr: Optional[str] = None,
     server_app_attr: Optional[str] = None,
     app_dir: str = "",
-    run_id: Optional[int] = None,
+    run: Optional[Run] = None,
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
 ) -> None:
@@ -332,8 +326,8 @@ def _run_simulation(
         Add specified directory to the PYTHONPATH and load `ClientApp` from there.
         (Default: current working directory.)
 
-    run_id : Optional[int]
-        An integer specifying the ID of the run started when running this function.
+    run : Optional[Run]
+        An object carrying details about the run.
 
     enable_tf_gpu_growth : bool (default: False)
         A boolean to indicate whether to enable GPU growth on the main thread. This is
@@ -371,13 +365,18 @@ def _run_simulation(
     # Convert config to original JSON-stream format
     backend_config_stream = json.dumps(backend_config)
 
+    # If no `Run` object is set, create one
+    if run is None:
+        run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
+        run = Run(run_id=run_id, fab_id="", fab_version="", override_config={})
+
     args = (
         num_supernodes,
         backend_name,
         backend_config_stream,
         app_dir,
         enable_tf_gpu_growth,
-        run_id,
+        run,
         client_app,
         client_app_attr,
         server_app,
