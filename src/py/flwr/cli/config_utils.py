@@ -60,7 +60,7 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
 
         return (
             conf["project"]["version"],
-            f"{conf['tool"]["flwr']['publisher']}/{conf['project']['name']}",
+            f"{conf['tool']['flwr']['publisher']}/{conf['project']['name']}",
         )
 
 
