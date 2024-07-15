@@ -16,7 +16,7 @@
 
 
 from collections import Counter
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional
 
 import numpy as np
 import numpy.typing as npt
@@ -172,7 +172,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         """Total number of partitions."""
         return self._num_partitions
 
-    def _determine_partition_id_to_indices_if_needed(
+    def _determine_partition_id_to_indices_if_needed(  # pylint: disable=R0914
         self,
     ) -> None:
         """Create an assignment of indices to the partition indices."""
