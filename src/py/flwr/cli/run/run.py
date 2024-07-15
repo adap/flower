@@ -132,9 +132,11 @@ def _run_without_superexec(
         num_supernodes = federation["options"]["num-supernodes"]
     except KeyError as err:
         typer.secho(
-            "❌ The project's `pyproject.toml` needs to declare "
-            f"`flower.federations.{federation_name}.options.num-supernodes` if a "
-            "SuperExec address is not provided.",
+            "❌ The project's `pyproject.toml` needs to declare the number of"
+            " SuperNodes in the simulation. To simulate 10 SuperNodes,"
+            " use the following notation:\n\n"
+            f"[flower.federations.{federation_name}]\n"
+            "options.num-supernodes = 10\n",
             fg=typer.colors.RED,
             bold=True,
         )
