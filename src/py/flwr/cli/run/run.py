@@ -123,7 +123,7 @@ def _run_with_superexec(
     insecure_str = federation.get("insecure")
     if root_certificates := federation.get("root-certificates"):
         root_certificates_bytes = Path(root_certificates).read_bytes()
-        if bool(insecure_str):
+        if insecure := bool(insecure_str):
             typer.secho(
                 "❌ `root_certificates` were provided but the `insecure` parameter"
                 "is set to `True`.",
@@ -131,24 +131,22 @@ def _run_with_superexec(
                 bold=True,
             )
             raise typer.Exit(code=1)
-        insecure = False
     else:
         root_certificates_bytes = None
         if insecure_str is None:
             typer.secho(
-                "❌ The insecure parameter must be set in the `pyproject.toml`.",
+                "❌ To disable TLS, set `insecure = true` in `pyproject.toml`.",
                 fg=typer.colors.RED,
                 bold=True,
             )
             raise typer.Exit(code=1)
-        if not bool(insecure_str):
+        if not (insecure := bool(insecure_str)):
             typer.secho(
                 "❌ No certificate were given yet `insecure` is set to `False`.",
                 fg=typer.colors.RED,
                 bold=True,
             )
             raise typer.Exit(code=1)
-        insecure = True
 
     channel = create_channel(
         server_address=federation["address"],
