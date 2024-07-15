@@ -64,7 +64,7 @@ def run(
     config_overrides: Annotated[
         Optional[str],
         typer.Option(
-            "--config",
+            "--run-config",
             "-c",
             help="Override configuration key-value pairs",
         ),
