@@ -64,6 +64,7 @@ def run_supernode() -> None:
         default_app_ref=args.client_app,
         load_dir=args.dir,
         flwr_dir=args.flwr_dir,
+        load_for_supernode=True,
         multi_app=True,
     )
     authentication_keys = _try_setup_client_authentication(args)
@@ -101,7 +102,7 @@ def run_client_app() -> None:
     load_fn = _get_load_client_app_fn(
         default_app_ref=args.client_app,
         load_dir=args.dir,
-        flwr_dir=args.flwr_dir,
+        load_for_supernode=False,
         multi_app=False,
     )
     authentication_keys = _try_setup_client_authentication(args)
@@ -179,6 +180,7 @@ def _get_load_client_app_fn(
     default_app_ref: str,
     load_dir: str,
     multi_app: bool,
+    load_for_supernode: bool,
     flwr_dir: Optional[str] = None,
 ) -> Callable[[str, str], ClientApp]:
     """Get the load_client_app_fn function.
@@ -191,12 +193,13 @@ def _get_load_client_app_fn(
     loads a default ClientApp.
     """
     # Find the Flower directory containing Flower Apps (only for multi-app)
-    flwr_dir = Path("")
-
-    if flwr_dir is None:
-        flwr_dir = get_flwr_dir()
+    if not load_for_supernode:
+        flwr_dir = Path("")
     else:
-        flwr_dir = Path(flwr_dir).absolute()
+        if flwr_dir is None:
+            flwr_dir = get_flwr_dir()
+        else:
+            flwr_dir = Path(flwr_dir).absolute()
 
     inserted_path = None
 
