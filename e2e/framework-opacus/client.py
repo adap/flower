@@ -9,7 +9,8 @@ from opacus import PrivacyEngine
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 
-import flwr as fl
+from flwr.client import ClientApp, NumPyClient, start_client
+from flwr.common import Context
 
 # Define parameters.
 PARAMS = {
@@ -95,7 +96,7 @@ trainloader, testloader, sample_rate = load_data()
 
 
 # Define Flower client.
-class FlowerClient(fl.client.NumPyClient):
+class FlowerClient(NumPyClient):
     def __init__(self, model) -> None:
         super().__init__()
         # Create a privacy engine which will add DP and keep track of the privacy budget.
@@ -139,16 +140,16 @@ class FlowerClient(fl.client.NumPyClient):
         return float(loss), len(testloader), {"accuracy": float(accuracy)}
 
 
-def client_fn(cid):
+def client_fn(context: Context):
     model = Net()
     return FlowerClient(model).to_client()
 
 
-app = fl.client.ClientApp(
+app = ClientApp(
     client_fn=client_fn,
 )
 
 if __name__ == "__main__":
-    fl.client.start_client(
+    start_client(
         server_address="127.0.0.1:8080", client=FlowerClient(model).to_client()
     )
