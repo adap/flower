@@ -355,12 +355,14 @@ def start_vce(
         # Test if ClientApp can be loaded
         client_app = app_fn()
 
-        # Now wrap the loaded ClientApp in a dummy function
-        # this prevent unnecesary low-level loading of ClientApp
-        def _load_client_app() -> ClientApp:
-            return client_app
+        # Cache `ClientApp`
+        if client_app_attr:
+            # Now wrap the loaded ClientApp in a dummy function
+            # this prevent unnecesary low-level loading of ClientApp
+            def _load_client_app() -> ClientApp:
+                return client_app
 
-        app_fn = _load_client_app
+            app_fn = _load_client_app
 
         # Run main simulation loop
         run_api(
