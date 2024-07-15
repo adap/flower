@@ -34,14 +34,10 @@ from flwr.simulation.run_simulation import _run_simulation
 
 # pylint: disable-next=too-many-locals
 def run(
-    address: Annotated[
-        Optional[str],
-        typer.Option(help="The address of the SuperExec to run on"),
-    ] = None,
     directory: Annotated[
-        Optional[Path],
-        typer.Option(help="Path of the Flower project to run"),
-    ] = None,
+        Path,
+        typer.Argument(help="Path of the Flower project to run"),
+    ] = Path("."),
     config_overrides: Annotated[
         Optional[str],
         typer.Option(
@@ -77,14 +73,27 @@ def run(
 
     typer.secho("Success", fg=typer.colors.GREEN)
 
-    if address:
+    try:
+        federation_name = config["flower"]["federations"]["default"]
+        federation = config["flower"]["federations"][federation_name]
+    except KeyError as err:
+        typer.secho(
+            "❌ The project's `pyproject.toml` needs to declare "
+            "a default federation (with a SuperExec address or an "
+            "`options.num-supernodes` value).",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from err
+
+    if "address" in federation:
 
         def on_channel_state_change(channel_connectivity: str) -> None:
             """Log channel connectivity."""
             log(DEBUG, channel_connectivity)
 
         channel = create_channel(
-            server_address=address,
+            server_address=federation["address"],
             insecure=True,
             root_certificates=None,
             max_message_length=GRPC_MAX_MESSAGE_LENGTH,
@@ -107,9 +116,7 @@ def run(
         client_app_ref = config["flower"]["components"]["clientapp"]
 
         try:
-            num_supernodes = config["flower"]["federations"]["localhost"]["options"][
-                "num-supernodes"
-            ]
+            num_supernodes = federation["options"]["num-supernodes"]
         except KeyError as err:
             typer.secho(
                 "❌ The project's `pyproject.toml` needs to declare "

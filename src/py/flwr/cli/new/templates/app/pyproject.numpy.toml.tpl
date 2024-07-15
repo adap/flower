@@ -22,5 +22,8 @@ publisher = "$username"
 serverapp = "$import_name.server:app"
 clientapp = "$import_name.client:app"
 
+[flower.federations]
+default = "localhost"
+
 [flower.federations.localhost]
 options.num-supernodes = 10
