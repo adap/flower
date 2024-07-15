@@ -45,23 +45,25 @@ from flwr.simulation.ray_transport.utils import (
 
 def _check_args_do_not_interfere(args: Namespace) -> bool:
     """Ensure decoupling of flags for different ways to start the simulation."""
-    keys = ["app", "config-override"]
-    conflict_keys = ["num-supernodes", "client-app", "server-app"]
+    keys = ["app", "config_override"]
+    conflict_keys = ["num_supernodes", "client_app", "server_app"]
+
+    def _resolve_message() -> str:
+        return ",".join([f"`--{key}`".replace("_", "-") for key in conflict_keys])
+
     for key_ in keys:
         if getattr(args, key_) and any(getattr(args, key) for key in conflict_keys):
-            resolve_log_message = ",".join([f"--{key}" for key in conflict_keys])
             log(
                 ERROR,
-                "Passing `--%s` alongside with any of %s",
+                "Passing `--%s` alongside with any of {%s}",
                 key_,
-                resolve_log_message,
+                _resolve_message(),
             )
             return False
 
     # Ensure all args are set (required for the non-FAB mode of execution)
     if not all(getattr(args, key) for key in conflict_keys):
-        resolve_log_message = ",".join([f"--{key}" for key in conflict_keys])
-        log(ERROR, "Passing all of %s keys are required.", resolve_log_message)
+        log(ERROR, "Passing all of %s keys are required.", _resolve_message())
         return False
 
     return True
