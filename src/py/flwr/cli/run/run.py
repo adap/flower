@@ -38,6 +38,10 @@ def run(
         Path,
         typer.Argument(help="Path of the Flower project to run"),
     ] = Path("."),
+    federation_name: Annotated[
+        Optional[str],
+        typer.Argument(help="Name of the federation to run FL on"),
+    ] = None,
     config_overrides: Annotated[
         Optional[str],
         typer.Option(
@@ -73,10 +77,9 @@ def run(
 
     typer.secho("Success", fg=typer.colors.GREEN)
 
-    try:
-        federation_name = config["flower"]["federations"]["default"]
-        federation = config["flower"]["federations"][federation_name]
-    except KeyError as err:
+    federation_name = federation_name or config["flower"]["federations"].get("default")
+
+    if federation_name is None:
         typer.secho(
             "❌ The project's `pyproject.toml` needs to declare "
             "a default federation (with a SuperExec address or an "
@@ -84,7 +87,18 @@ def run(
             fg=typer.colors.RED,
             bold=True,
         )
-        raise typer.Exit(code=1) from err
+        raise typer.Exit(code=1)
+
+    # Validate the federation exists in the configuration
+    federation = config["flower"]["federations"].get(federation_name)
+    if federation is None:
+        typer.secho(
+            f"❌ There is no `{federation_name}` federation declared in the "
+            "`pyproject.toml`.",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
 
     if "address" in federation:
         _run_with_superexec(federation, directory, config_overrides)
