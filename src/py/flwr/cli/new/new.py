@@ -181,7 +181,7 @@ def new(
 
     if (
         subprocess.run(
-            ["pip", "install", "-e", project_dir],
+            ["pip", "install", "-e", project_dir, "--no-deps"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             check=False,
