@@ -199,7 +199,7 @@ def test_validate_pyproject_toml_fields_no_flower_components() -> None:
             "license": "",
             "authors": [],
         },
-        "tool": {"flwr": {}},
+        "tool": {"flwr": {"app": {}}},
     }
 
     # Execute
