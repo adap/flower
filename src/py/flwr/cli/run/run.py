@@ -182,8 +182,8 @@ def _run_without_superexec(
     federation_name: str,
     verbose: bool,
 ) -> None:
-    server_app_ref = config["tool"]["flwr"]["components"]["serverapp"]
-    client_app_ref = config["tool"]["flwr"]["components"]["clientapp"]
+    server_app_ref = config["tool"]["flwr"]["app"]["components"]["serverapp"]
+    client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
 
     try:
         num_supernodes = federation["options"]["num-supernodes"]
