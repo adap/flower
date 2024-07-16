@@ -15,7 +15,7 @@ Before you start, make sure that:
 - The ``flwr`` CLI is installed locally.
 - The Docker daemon is running.
 
-Step 1: Set up
+Step 1: Set Up
 --------------
 
 #. Create a new Flower project (PyTorch):
@@ -79,7 +79,7 @@ Open your terminal and run:
          --detach \
          flwr/superlink:|latest_version_docker| --insecure
 
-.. dropdown:: Understanding the command
+.. dropdown:: Understand the command
 
    * ``docker run``: This tells Docker to run a container from an image.
    * ``--rm``: Remove the container once it is stopped or the command exits.
@@ -141,8 +141,8 @@ building your own SuperNode image.
       ...
 
    After the line 4, paste the dependencies copied from the previous step.
-   Make sure to remove the ``,`` at the end of each line and add a whitespace and a  ``\`` at the
-   end except the last one.
+   Make sure to remove the comma at the end of each line and add a space and a backslash at the
+   end, except the last one.
 
    .. code-block:: dockerfile
       :linenos:
@@ -154,13 +154,13 @@ building your own SuperNode image.
 
       WORKDIR /app
       RUN python -m pip install -U --no-cache-dir \
-          "flwr-datasets[vision]>=0.1.0,<0.2.0" \
+          "flwr-datasets[vision]>=0.0.2,<1.0.0" \
           "torch==2.2.1" \
           "torchvision==0.17.1"
 
       ENTRYPOINT ["flower-supernode"]
 
-   .. dropdown:: Understanding the Dockerfile
+   .. dropdown:: Understand the Dockerfile
 
       * :substitution-code:`FROM flwr/supernode:|latest_version_docker|`: This line specifies that
         | the Docker image to be built from is the ``flwr/supernode image``, version
@@ -200,7 +200,7 @@ building your own SuperNode image.
           --insecure \
           --superlink superlink:9092
 
-   .. dropdown:: Understanding the command
+   .. dropdown:: Understand the command
 
       * ``docker run``: This tells Docker to run a container from an image.
       * ``--rm``: Remove the container once it is stopped or the command exits.
@@ -265,8 +265,8 @@ Flower and serves as a base for building your own SuperExec image.
       ...
 
    After the line 4, paste the dependencies copied from the previous step.
-   Make sure to remove the ``,`` at the end of each line and add a whitespace and a  ``\`` at the
-   end except the last one.
+   Make sure to remove the comma at the end of each line and add a space and a backslash at the
+   end, except the last one.
 
    .. code-block:: dockerfile
       :linenos:
@@ -278,13 +278,13 @@ Flower and serves as a base for building your own SuperExec image.
 
       WORKDIR /app
       RUN python -m pip install -U --no-cache-dir \
-          "flwr-datasets[vision]>=0.1.0,<0.2.0" \
+          "flwr-datasets[vision]>=0.0.2,<1.0.0" \
           "torch==2.2.1" \
           "torchvision==0.17.1"
 
       ENTRYPOINT ["flower-superexec", "--executor", "flwr.superexec.deployment:executor"]
 
-   .. dropdown:: Understanding the Dockerfile
+   .. dropdown:: Understand the Dockerfile
 
       * :substitution-code:`FROM flwr/superexec:|latest_version_docker|`: This line specifies that
         | the Docker image to be built from is the ``flwr/superexec image``, version
@@ -324,7 +324,7 @@ Flower and serves as a base for building your own SuperExec image.
           --executor-config \
           superlink=superlink:9091
 
-   .. dropdown:: Understanding the command
+   .. dropdown:: Understand the command
 
       * ``docker run``: This tells Docker to run a container from an image.
       * ``--rm``: Remove the container once it is stopped or the command exits.
@@ -347,7 +347,7 @@ Step 5: Run the Quickstart Project
 
    .. code-block:: bash
 
-      $ flwr run --use-superexec
+      $ flwr run
 
 #. Wait until the run is complete
 
@@ -365,6 +365,7 @@ Step 6: Clean Up
 
       $ docker stop $(docker ps -a -q  --filter ancestor=flwr_supernode:0.0.1) \
          $(docker ps -a -q  --filter ancestor=flwr_superexec:0.0.1) \
+         superlink
       $ docker network rm flwr
 
 Where to Go Next

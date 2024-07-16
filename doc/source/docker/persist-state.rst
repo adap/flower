@@ -1,4 +1,4 @@
-Persist the state of the SuperLink
+Persist the State of the SuperLink
 ==================================
 
 By default, the Flower SuperLink keeps state in-memory. When using the Docker flag ``--rm``, the

@@ -7,7 +7,7 @@ and ``arm64v8`` architectures.
 Our Quickstart guide walks you through containerizing a Flower project and running it end to
 end using Docker.
 
-Getting started
+Getting Started
 ---------------
 
 .. toctree::
