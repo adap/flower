@@ -124,7 +124,7 @@ def run_simulation_from_cli() -> None:
                 )
 
             # Get ClientApp and SeverApp components
-            flower_components = config["tool"]["flwr"]["components"]
+            flower_components = config["tool"]["flwr"]["app"]["components"]
             client_app_attr = flower_components["clientapp"]
             server_app_attr = flower_components["serverapp"]
 
