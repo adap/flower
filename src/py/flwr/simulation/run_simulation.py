@@ -108,7 +108,7 @@ def run_simulation_from_cli() -> None:
         else args.run_id
     )
     if args.app:
-        # mode 1
+        # Mode 1
         app_path = Path(args.app)
         if app_path.is_dir():
             # Load pyproject.toml
