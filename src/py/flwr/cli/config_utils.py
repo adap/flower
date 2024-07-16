@@ -60,7 +60,7 @@ def get_fab_metadata(fab_file: Union[Path, bytes]) -> Tuple[str, str]:
 
         return (
             conf["project"]["version"],
-            f"{conf['tool']['flwr']['publisher']}/{conf['project']['name']}",
+            f"{conf['tool']['flwr']['app']['publisher']}/{conf['project']['name']}",
         )
 
 
@@ -128,18 +128,26 @@ def validate_fields(config: Dict[str, Any]) -> Tuple[bool, List[str], List[str]]
         if "authors" not in config["project"]:
             warnings.append('Recommended property "authors" missing in [project]')
 
-    if "tool" not in config or "flwr" not in config["tool"]:
-        errors.append("Missing [tool.flwr] section")
+    if (
+        "tool" not in config
+        or "flwr" not in config["tool"]
+        or "app" not in config["tool"]["flwr"]
+    ):
+        errors.append("Missing [tool.flwr.app] section")
     else:
-        if "publisher" not in config["tool"]["flwr"]:
-            errors.append('Property "publisher" missing in [tool.flwr]')
-        if "components" not in config["tool"]["flwr"]:
-            errors.append("Missing [tool.flwr.components] section")
+        if "publisher" not in config["tool"]["flwr"]["app"]:
+            errors.append('Property "publisher" missing in [tool.flwr.app]')
+        if "components" not in config["tool"]["flwr"]["app"]:
+            errors.append("Missing [tool.flwr.app.components] section")
         else:
-            if "serverapp" not in config["tool"]["flwr"]["components"]:
-                errors.append('Property "serverapp" missing in [tool.flwr.components]')
-            if "clientapp" not in config["tool"]["flwr"]["components"]:
-                errors.append('Property "clientapp" missing in [tool.flwr.components]')
+            if "serverapp" not in config["tool"]["flwr"]["app"]["components"]:
+                errors.append(
+                    'Property "serverapp" missing in [tool.flwr.app.components]'
+                )
+            if "clientapp" not in config["tool"]["flwr"]["app"]["components"]:
+                errors.append(
+                    'Property "clientapp" missing in [tool.flwr.app.components]'
+                )
 
     return len(errors) == 0, errors, warnings
 
@@ -155,14 +163,14 @@ def validate(
 
     # Validate serverapp
     is_valid, reason = object_ref.validate(
-        config["tool"]["flwr"]["components"]["serverapp"], check_module
+        config["tool"]["flwr"]["app"]["components"]["serverapp"], check_module
     )
     if not is_valid and isinstance(reason, str):
         return False, [reason], []
 
     # Validate clientapp
     is_valid, reason = object_ref.validate(
-        config["tool"]["flwr"]["components"]["clientapp"], check_module
+        config["tool"]["flwr"]["app"]["components"]["clientapp"], check_module
     )
 
     if not is_valid and isinstance(reason, str):
