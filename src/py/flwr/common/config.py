@@ -97,7 +97,9 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
 
     project_dir = get_project_dir(run.fab_id, run.fab_version, flwr_dir)
 
-    default_config = get_project_config(project_dir)["tool"]["flwr"].get("config", {})
+    default_config = get_project_config(project_dir)["tool"]["flwr"]["app"].get(
+        "config", {}
+    )
     flat_default_config = flatten_dict(default_config)
 
     return _fuse_dicts(flat_default_config, run.override_config)
