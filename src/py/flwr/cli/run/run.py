@@ -171,8 +171,8 @@ def _run_with_superexec(
 def _run_without_superexec(
     config: Dict[str, Any], federation: Dict[str, Any], federation_name: str
 ) -> None:
-    server_app_ref = config["tool"]["flwr"]["components"]["serverapp"]
-    client_app_ref = config["tool"]["flwr"]["components"]["clientapp"]
+    server_app_ref = config["tool"]["flwr"]["app"]["components"]["serverapp"]
+    client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
 
     try:
         num_supernodes = federation["options"]["num-supernodes"]
