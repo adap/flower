@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "quickstart-pandas"
+version = "0.1.0"
+description = "Pandas E2E test with Flower"
+authors = [
+    { name = "Ragy Haddad", email = "ragy202@gmail.com" },
+]
+maintainers = [
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+]
+dependencies = [
+    "flwr[simulation] @ {root:parent:parent:uri}",
+    "numpy>=1.21.0,<2.0.0",
+    "pandas>=2.0.0,<3.0.0",
+    "scikit-learn>=1.1.1,<2.0.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.hatch.metadata]
+allow-direct-references = true

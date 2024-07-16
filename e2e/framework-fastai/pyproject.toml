@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "quickstart-fastai"
+version = "0.1.0"
+description = "Fastai Federated Learning E2E test with Flower"
+authors = [
+    { name = "The Flower Authors", email = "hello@flower.ai" },
+]
+dependencies = [
+    "flwr[simulation] @ {root:parent:parent:uri}",
+    "fastai>=2.7.12,<3.0.0",
+    "torch>=2.0.0,!=2.0.1,<2.1.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.hatch.metadata]
+allow-direct-references = true

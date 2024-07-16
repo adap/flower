@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # Store the current branch in a variable
 current_branch=$(git rev-parse --abbrev-ref HEAD)
@@ -25,10 +26,8 @@ for current_version in ${versions}; do
  
   # Make the current language available to conf.py
   export current_version
-  git checkout ${current_version}
+  git checkout --force ${current_version}
   echo "INFO: Building sites for ${current_version}"
- 
-  changed=false
  
   for current_language in ${languages}; do
 
@@ -48,7 +47,7 @@ for current_version in ${versions}; do
 
       # Copy updated version of locales
       cp -r ${tmp_dir}/locales/$current_language locales/
-      changed=true
+
     fi
 
     # Only for v1.5.0, update the versions listed in the switcher
@@ -74,17 +73,8 @@ END
     # Actually building the docs for a given language and version
     sphinx-build -b html source/ build/html/${current_version}/${current_language} -A lang=True -D language=${current_language}
 
-    # Restore branch as it was to avoid conflicts
-    git restore source/_templates
-    git restore source/_templates/autosummary || rm -rf source/_templates/autosummary
-    rm source/ref-api/*.rst
-
-    if [ "$current_version" = "v1.5.0" ]; then
-      git restore source/conf.py
-    fi
-    if [ changed ]; then
-      git restore locales/${current_language} || rm -rf locales/${current_language}
-    fi
+    # Clean the history of the checked-out branch to remove conflicts
+    git clean -fd
 
   done
 done
@@ -92,9 +82,9 @@ done
 # Build the main version (main for GH CI, local branch for local) 
 if [ $GITHUB_ACTIONS ]
 then
-  git switch main
+  git checkout --force main
 else
-  git switch $current_branch
+  git checkout --force $current_branch
 fi
 
 current_version=main

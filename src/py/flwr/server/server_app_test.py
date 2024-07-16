@@ -1,4 +1,4 @@
-# Copyright 2020 Flower Labs GmbH. All Rights Reserved.
+# Copyright 2024 Flower Labs GmbH. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ def test_server_app_custom_mode() -> None:
     # Prepare
     app = ServerApp()
     driver = MagicMock()
-    context = Context(state=RecordSet())
+    context = Context(node_id=0, node_config={}, state=RecordSet(), run_config={})
 
     called = {"called": False}
 
