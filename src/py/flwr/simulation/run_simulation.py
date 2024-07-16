@@ -96,7 +96,7 @@ def run_simulation_from_cli() -> None:
     # We are supporting two modes for the CLI entrypoint:
     # 1) Running a FAB or FAB-like dir containing a pyproject.toml
     # 2) Running any ClientApp and SeverApp w/o pyproject.toml being present
-    # For 2) some CLI args are cumpolsory but these aren't for 1)
+    # For 2), some CLI args are compulsory, but they are not required for 1)
     # We first do these checks
     args_check_pass = _check_args_do_not_interfere(args)
     if not args_check_pass:
