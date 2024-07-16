@@ -169,7 +169,7 @@ def _run_with_superexec(
 
 
 def _run_without_superexec(
-    directory: Optional[Path], federation: Dict[str, Any], federation_name: str
+    app_path: Optional[Path], federation: Dict[str, Any], federation_name: str
 ) -> None:
 
     try:
