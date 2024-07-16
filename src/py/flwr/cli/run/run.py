@@ -194,4 +194,7 @@ def _run_without_superexec(
     ]
 
     # Run the simulation
-    subprocess.run(command)
+    subprocess.run(
+        command,
+        check=True,
+    )
