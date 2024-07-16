@@ -194,9 +194,10 @@ def _run_without_superexec(
         f"{app_path}",
         "--num-supernodes",
         f"{num_supernodes}",
-        "--run-config",
-        f"{config_overrides}",
     ]
+
+    if config_overrides:
+        command.extend(["--run-config", f"{config_overrides}"])
 
     # Run the simulation
     subprocess.run(
