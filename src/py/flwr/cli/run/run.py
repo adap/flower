@@ -14,6 +14,7 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
+import subprocess
 import sys
 from logging import DEBUG
 from pathlib import Path
@@ -29,7 +30,6 @@ from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
-from flwr.simulation.run_simulation import _run_simulation
 
 
 # pylint: disable-next=too-many-locals
@@ -107,7 +107,7 @@ def run(
     if "address" in federation:
         _run_with_superexec(federation, directory, config_overrides)
     else:
-        _run_without_superexec(config, federation, federation_name)
+        _run_without_superexec(directory, federation, federation_name)
 
 
 def _run_with_superexec(
@@ -169,10 +169,8 @@ def _run_with_superexec(
 
 
 def _run_without_superexec(
-    config: Dict[str, Any], federation: Dict[str, Any], federation_name: str
+    directory: Optional[Path], federation: Dict[str, Any], federation_name: str
 ) -> None:
-    server_app_ref = config["tool"]["flwr"]["components"]["serverapp"]
-    client_app_ref = config["tool"]["flwr"]["components"]["clientapp"]
 
     try:
         num_supernodes = federation["options"]["num-supernodes"]
@@ -188,8 +186,18 @@ def _run_without_superexec(
         )
         raise typer.Exit(code=1) from err
 
-    _run_simulation(
-        server_app_attr=server_app_ref,
-        client_app_attr=client_app_ref,
-        num_supernodes=num_supernodes,
+    command = [
+        "flower-simulation",
+        "--app",
+        f"{directory}",
+        "--num-supernodes",
+        f"{num_supernodes}",
+    ]
+    proc = subprocess.Popen(  # pylint: disable=consider-using-with
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
     )
+
+    # TODO: how to show logs?
