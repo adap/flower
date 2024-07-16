@@ -139,7 +139,7 @@ def run_simulation_from_cli() -> None:
         is_app = True
 
     else:
-        # mode 2
+        # Mode 2
         client_app_attr = args.client_app
         server_app_attr = args.server_app
         override_config = {}
