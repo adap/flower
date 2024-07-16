@@ -197,4 +197,5 @@ def _run_without_superexec(
     subprocess.run(
         command,
         check=True,
+        text=True,
     )
