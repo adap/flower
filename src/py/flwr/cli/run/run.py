@@ -192,11 +192,6 @@ def _run_without_superexec(
         "--num-supernodes",
         f"{num_supernodes}",
     ]
-    proc = subprocess.Popen(  # pylint: disable=consider-using-with
-        command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
 
-    # TODO: how to show logs?
+    # Run the simulation
+    subprocess.run(command)
