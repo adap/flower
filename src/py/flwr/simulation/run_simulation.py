@@ -27,7 +27,7 @@ from pathlib import Path
 from time import sleep
 from typing import Dict, List, Optional
 
-from flwr.cli.config_utils import get_fab_metadata, load_and_validate
+from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
 from flwr.common.config import get_fused_config
@@ -110,12 +110,7 @@ def run_simulation_from_cli() -> None:
     if args.app:
         # mode 1
         app = Path(args.app)
-        if app.suffix == ".fab":
-            fab_version, fab_id = get_fab_metadata(app)
-            # TODO: how to continue here? the idea is to support:
-            # TODO: `flower-simulation <>.fab`
-        else:
-
+        if app.is_dir():
             # Load pyproject.toml
             config, errors, warnings = load_and_validate(app / "pyproject.toml")
             if errors:
@@ -139,6 +134,9 @@ def run_simulation_from_cli() -> None:
             num_supernodes = fed_config[fed_config["default"]]["options"][
                 "num-supernodes"
             ]
+        else:
+            log(ERROR, "--app is not a directory")
+            sys.exit("Simulation Engine cannot start.")
 
         override_config = args.config_override if args.config_override else {}
 
@@ -558,8 +556,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         "--app",
         type=str,
         default=None,
-        help="Either a path to a FAB (.fab) file or path to a directory "
-        "containing a FAB-like structure and a pyproject.toml.",
+        help="Path to a directory containing a FAB-like structure with a pyproject.toml.",
     )
     parser.add_argument(
         "--config-override",
