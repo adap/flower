@@ -54,6 +54,11 @@ def _check_args_do_not_interfere(args: Namespace) -> bool:
     def _resolve_message(conflict_keys: List[str]) -> str:
         return ",".join([f"`--{key}`".replace("_", "-") for key in conflict_keys])
 
+    # When passing `--app`, `--app-dir` is ignored
+    if args.app and args.app_dir:
+        log(ERROR, "Either `--app` or `--app-dir` can be set, but not both.")
+        return False
+
     if any(getattr(args, key) for key in mode_one_args):
         if any(getattr(args, key) for key in mode_two_args):
             log(
@@ -83,7 +88,7 @@ def _check_args_do_not_interfere(args: Namespace) -> bool:
 
 
 # Entry point from CLI
-# pytlint: disable=too-many-locals
+# pylint: disable=too-many-locals
 def run_simulation_from_cli() -> None:
     """Run Simulation Engine from the CLI."""
     args = _parse_args_run_simulation().parse_args()
@@ -97,10 +102,6 @@ def run_simulation_from_cli() -> None:
     if not args_check_pass:
         sys.exit("Simulation Engine cannot start.")
 
-    client_app_attr = None
-    server_app_attr = None
-    fab_version = ""
-    fab_id = ""
     run_id = (
         generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
         if args.run_id is None
@@ -108,10 +109,10 @@ def run_simulation_from_cli() -> None:
     )
     if args.app:
         # mode 1
-        app = Path(args.app)
-        if app.is_dir():
+        app_path = Path(args.app)
+        if app_path.is_dir():
             # Load pyproject.toml
-            config, errors, warnings = load_and_validate(app / "pyproject.toml")
+            config, errors, warnings = load_and_validate(app_path / "pyproject.toml")
             if errors:
                 raise ValueError(errors)
 
@@ -138,7 +139,9 @@ def run_simulation_from_cli() -> None:
             sys.exit("Simulation Engine cannot start.")
 
         override_config = parse_config_args(args.config_override)
-        fused_config = get_fused_config_from_dir(app, override_config)
+        fused_config = get_fused_config_from_dir(app_path, override_config)
+        app_dir = args.app
+        is_app = True
 
     else:
         # mode 2
@@ -147,12 +150,14 @@ def run_simulation_from_cli() -> None:
         num_supernodes = args.num_supernodes
         override_config = {}
         fused_config = None
+        app_dir = args.app_dir
+        is_app = False
 
     # Create run
     run = Run(
         run_id=run_id,
-        fab_id=fab_id,
-        fab_version=fab_version,
+        fab_id="",
+        fab_version="",
         override_config=override_config,
     )
 
@@ -165,11 +170,12 @@ def run_simulation_from_cli() -> None:
         num_supernodes=num_supernodes,
         backend_name=args.backend,
         backend_config=backend_config_dict,
-        app_dir=args.app_dir,
+        app_dir=app_dir,
         run=run,
         enable_tf_gpu_growth=args.enable_tf_gpu_growth,
         verbose_logging=args.verbose,
         server_app_run_config=fused_config,
+        is_app=is_app,
     )
 
 
@@ -312,6 +318,7 @@ def _main_loop(
     backend_name: str,
     backend_config_stream: str,
     app_dir: str,
+    is_app: bool,
     enable_tf_gpu_growth: bool,
     run: Run,
     flwr_dir: Optional[str] = None,
@@ -361,6 +368,7 @@ def _main_loop(
             backend_name=backend_name,
             backend_config_json_stream=backend_config_stream,
             app_dir=app_dir,
+            is_app=is_app,
             state_factory=state_factory,
             f_stop=f_stop,
             run=run,
@@ -400,6 +408,7 @@ def _run_simulation(
     run: Optional[Run] = None,
     enable_tf_gpu_growth: bool = False,
     verbose_logging: bool = False,
+    is_app: bool = False,
 ) -> None:
     r"""Launch the Simulation Engine.
 
@@ -461,6 +470,11 @@ def _run_simulation(
     verbose_logging : bool (default: False)
         When disabled, only INFO, WARNING and ERROR log messages will be shown. If
         enabled, DEBUG-level logs will be displayed.
+
+    is_app : bool (default: False)
+        A flag that indicates whether the simulation is running an app or not. This is
+        needed in order to attempt loading an app's pyproject.toml when nodes register
+        a context object.
     """
     if backend_config is None:
         backend_config = {}
@@ -496,6 +510,7 @@ def _run_simulation(
         backend_name,
         backend_config_stream,
         app_dir,
+        is_app,
         enable_tf_gpu_growth,
         run,
         flwr_dir,
