@@ -12,6 +12,10 @@ config = ServerConfig(num_rounds=3)
 parameters = ndarrays_to_parameters(load_model().get_weights())
 
 def server_fn(context: Context):
+
+    # Read from config
+    num_rounds = int(context.run_config["num-server-rounds"])
+
     # Define strategy
     strategy = strategy = FedAvg(
         fraction_fit=1.0,
@@ -19,7 +23,7 @@ def server_fn(context: Context):
         min_available_clients=2,
         initial_parameters=parameters,
     )
-    config = ServerConfig(num_rounds=3)
+    config = ServerConfig(num_rounds=num_round)
 
     return ServerAppComponents(strategy=strategy, config=config)
 
