@@ -55,13 +55,15 @@ class NodeState:
         if run_id not in self.run_infos:
             initial_run_config = {}
             if app_dir:
-                # Load from FAB-like directory
+                # Load from app directory
                 app_path = Path(app_dir)
                 if app_path.is_dir():
                     override_config = run.override_config if run else {}
                     initial_run_config = get_fused_config_from_dir(
                         app_path, override_config
                     )
+                else:
+                    raise ValueError("The specified `app_dir` must be a directory.")
             else:
                 # Load from .fab
                 initial_run_config = get_fused_config(run, flwr_path) if run else {}
