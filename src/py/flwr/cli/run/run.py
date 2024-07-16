@@ -107,7 +107,7 @@ def run(
     if "address" in federation:
         _run_with_superexec(federation, directory, config_overrides)
     else:
-        _run_without_superexec(directory, federation, federation_name)
+        _run_without_superexec(directory, federation, federation_name, config_overrides)
 
 
 def _run_with_superexec(
@@ -169,7 +169,10 @@ def _run_with_superexec(
 
 
 def _run_without_superexec(
-    app_path: Optional[Path], federation: Dict[str, Any], federation_name: str
+    app_path: Optional[Path],
+    federation: Dict[str, Any],
+    federation_name: str,
+    config_overrides: Optional[str],
 ) -> None:
     try:
         num_supernodes = federation["options"]["num-supernodes"]
@@ -191,6 +194,8 @@ def _run_without_superexec(
         f"{app_path}",
         "--num-supernodes",
         f"{num_supernodes}",
+        "--run-config",
+        f"{config_overrides}",
     ]
 
     # Run the simulation
