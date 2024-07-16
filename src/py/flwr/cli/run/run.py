@@ -189,7 +189,7 @@ def _run_without_superexec(
     command = [
         "flower-simulation",
         "--app",
-        f"{directory}",
+        f"{app_path}",
         "--num-supernodes",
         f"{num_supernodes}",
     ]
