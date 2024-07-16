@@ -54,17 +54,17 @@ class NodeState:
         """Register new run context for this node."""
         if run_id not in self.run_infos:
             initial_run_config = {}
-            if fab_dir:
+            if app_dir:
                 # Load from FAB-like directory
-                fab_path = Path(fab_dir)
-                if fab_path.is_dir():
+                app_path = Path(app_dir)
+                if app_path.is_dir():
                     override_config = run.override_config if run else {}
                     initial_run_config = get_fused_config_from_dir(
-                        fab_path, override_config
+                        app_path, override_config
                     )
             else:
                 # Load from .fab
-                initial_run_config = get_fused_config(run, flwr_dir) if run else {}
+                initial_run_config = get_fused_config(run, flwr_path) if run else {}
             self.run_infos[run_id] = RunInfo(
                 initial_run_config=initial_run_config,
                 context=Context(
