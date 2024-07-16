@@ -48,8 +48,8 @@ from flwr.simulation.ray_transport.utils import (
 
 def _check_args_do_not_interfere(args: Namespace) -> bool:
     """Ensure decoupling of flags for different ways to start the simulation."""
-    mode_one_args = ["app", "config_override"]
-    mode_two_args = ["num_supernodes", "client_app", "server_app"]
+    mode_one_args = ["app", "run_config"]
+    mode_two_args = ["client_app", "server_app"]
 
     def _resolve_message(conflict_keys: List[str]) -> str:
         return ",".join([f"`--{key}`".replace("_", "-") for key in conflict_keys])
@@ -129,16 +129,11 @@ def run_simulation_from_cli() -> None:
             client_app_attr = flower_components["clientapp"]
             server_app_attr = flower_components["serverapp"]
 
-            # Read number of supernodes to simulate
-            fed_config = config["tool"]["flwr"]["federations"]
-            num_supernodes = fed_config[fed_config["default"]]["options"][
-                "num-supernodes"
-            ]
         else:
             log(ERROR, "--app is not a directory")
             sys.exit("Simulation Engine cannot start.")
 
-        override_config = parse_config_args(args.config_override)
+        override_config = parse_config_args(args.run_config)
         fused_config = get_fused_config_from_dir(app_path, override_config)
         app_dir = args.app
         is_app = True
@@ -147,7 +142,6 @@ def run_simulation_from_cli() -> None:
         # mode 2
         client_app_attr = args.client_app
         server_app_attr = args.server_app
-        num_supernodes = args.num_supernodes
         override_config = {}
         fused_config = None
         app_dir = args.app_dir
@@ -167,7 +161,7 @@ def run_simulation_from_cli() -> None:
     _run_simulation(
         server_app_attr=server_app_attr,
         client_app_attr=client_app_attr,
-        num_supernodes=num_supernodes,
+        num_supernodes=args.num_supernodes,
         backend_name=args.backend,
         backend_config=backend_config_dict,
         app_dir=app_dir,
@@ -559,6 +553,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
     parser.add_argument(
         "--num-supernodes",
         type=int,
+        required=True,
         help="Number of simulated SuperNodes.",
     )
     parser.add_argument(
@@ -569,7 +564,7 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         "pyproject.toml.",
     )
     parser.add_argument(
-        "--config-override",
+        "--run-config",
         default=None,
         help="Override configuration key-value pairs.",
     )
