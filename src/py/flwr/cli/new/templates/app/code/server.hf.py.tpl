@@ -15,7 +15,6 @@ def server_fn(context: Context):
         fraction_fit=1.0,
         fraction_evaluate=1.0,
     )
-
     config = ServerConfig(num_rounds=num_rounds)
 
     return ServerAppComponents(strategy=strategy, config=config)
