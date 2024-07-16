@@ -195,7 +195,7 @@ def _start_client_internal(
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
-    flwr_dir: Optional[Path] = None,
+    flwr_path: Optional[Path] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -241,7 +241,7 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
-    flwr_dir: Optional[Path] (default: None)
+    flwr_path: Optional[Path] (default: None)
         The fully resolved path containing installed Flower Apps.
     """
     if insecure is None:
@@ -402,7 +402,7 @@ def _start_client_internal(
 
                     # Register context for this run
                     node_state.register_context(
-                        run_id=run_id, run=runs[run_id], flwr_dir=flwr_dir
+                        run_id=run_id, run=runs[run_id], flwr_path=flwr_path
                     )
 
                     # Retrieve context for this run
