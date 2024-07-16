@@ -59,6 +59,7 @@ pillow = { version = ">=6.2.1", optional = true }
 soundfile = { version = ">=0.12.1", optional = true }
 librosa = { version = ">=0.10.0.post2", optional = true }
 tqdm ="^4.66.1"
+pyarrow = "==16.1.0"
 matplotlib = "^3.7.5"
 seaborn = "^0.13.0"
 
