@@ -22,7 +22,7 @@ def server_fn(context: Context):
         min_available_clients=2,
         initial_parameters=parameters,
     )
-    config = ServerConfig(num_rounds=num_round)
+    config = ServerConfig(num_rounds=num_rounds)
 
     return ServerAppComponents(strategy=strategy, config=config)
 
