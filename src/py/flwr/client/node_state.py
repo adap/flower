@@ -48,8 +48,8 @@ class NodeState:
         self,
         run_id: int,
         run: Optional[Run] = None,
-        flwr_dir: Optional[Path] = None,
-        fab_dir: Optional[str] = None,
+        flwr_path: Optional[Path] = None,
+        app_dir: Optional[str] = None,
     ) -> None:
         """Register new run context for this node."""
         if run_id not in self.run_infos:
