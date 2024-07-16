@@ -28,6 +28,8 @@ from flwr.common.config import get_flwr_dir
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log as logger
 
+CONN_REFRESH_PERIOD = 60  # Connection refresh period for log streaming (seconds)
+
 
 # pylint: disable=unused-argument
 def stream_logs(run_id: int, channel: grpc.Channel, period: int) -> None:
@@ -48,13 +50,6 @@ def log(
         Optional[str],
         typer.Option(case_sensitive=False, help="The address of the SuperExec server"),
     ] = None,
-    period: Annotated[
-        int,
-        typer.Option(
-            case_sensitive=False,
-            help="Use this to set connection refresh time period (in seconds)",
-        ),
-    ] = 60,
     follow: Annotated[
         bool,
         typer.Option(case_sensitive=False, help="Use this flag to follow logstream"),
@@ -93,7 +88,7 @@ def log(
         try:
             while True:
                 logger(INFO, "Starting logstream for run_id `%s`", run_id)
-                stream_logs(run_id, channel, period)
+                stream_logs(run_id, channel, CONN_REFRESH_PERIOD)
                 time.sleep(2)
                 logger(INFO, "Reconnecting to logstream")
         except KeyboardInterrupt:
