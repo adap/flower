@@ -56,22 +56,16 @@ Docker later in this readme.
 
 ### Run with the Simulation Engine
 
-Start the `SuperExec` in the terminal:
+Run:
 
 ```bash
-flower-superexec --executor flwr.superexec.simulation:executor --insecure --executor-config 'num-supernodes=10'
-```
-
-Open a new terminal, activate your environment and run the app:
-
-```bash
-flwr run --use-superexec
+flwr run
 ```
 
 You can also override some of the settings for your `ClientApp` and `ServerApp` defined in `pyproject.toml`. For example
 
 ```bash
-flwr run --user-superexec --config 'hidden_dim=64,num_server_rounds=5'
+flwr run --run-config 'hidden_dim=64,num_server_rounds=5'
 ```
 
 ### Alternative wasy of running the example
