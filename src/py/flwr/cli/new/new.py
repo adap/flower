@@ -257,16 +257,20 @@ def new(
             context=context,
         )
 
-    if (
+    try:
         subprocess.run(
             ["pip", "install", "-e", project_dir, "--no-deps"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            check=False,
-        ).returncode
-        != 0
-    ):
-        raise typer.Exit(code=1)
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as e:
+        typer.secho(
+            f"❌ Failed to install the package from {project_dir}:\n{e.stderr}",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from e
 
     print(
         typer.style(
