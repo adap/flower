@@ -25,7 +25,7 @@ from argparse import Namespace
 from logging import DEBUG, ERROR, INFO, WARNING
 from pathlib import Path
 from time import sleep
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
