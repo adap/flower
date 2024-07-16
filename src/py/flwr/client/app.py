@@ -14,21 +14,25 @@
 # ==============================================================================
 """Flower client app."""
 
+import signal
 import sys
 import time
-from logging import DEBUG, ERROR, INFO, WARN
-from typing import Callable, ContextManager, Optional, Tuple, Type, Union
+from dataclasses import dataclass
+from logging import ERROR, INFO, WARN
+from pathlib import Path
+from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from grpc import RpcError
 
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
-from flwr.client.typing import ClientFn
-from flwr.common import GRPC_MAX_MESSAGE_LENGTH, EventType, Message, event
+from flwr.client.typing import ClientFnExt
+from flwr.common import GRPC_MAX_MESSAGE_LENGTH, Context, EventType, Message, event
 from flwr.common.address import parse_address
 from flwr.common.constant import (
     MISSING_EXTRA_REST,
+    TRANSPORT_TYPE_GRPC_ADAPTER,
     TRANSPORT_TYPE_GRPC_BIDI,
     TRANSPORT_TYPE_GRPC_RERE,
     TRANSPORT_TYPE_REST,
@@ -37,8 +41,10 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log, warn_deprecated_feature
 from flwr.common.message import Error
-from flwr.common.retry_invoker import RetryInvoker, exponential
+from flwr.common.retry_invoker import RetryInvoker, RetryState, exponential
+from flwr.common.typing import Run
 
+from .grpc_adapter_client.connection import grpc_adapter
 from .grpc_client.connection import grpc_connection
 from .grpc_rere_client.connection import grpc_request_response
 from .message_handler.message_handler import handle_control_message
@@ -47,7 +53,7 @@ from .numpy_client import NumPyClient
 
 
 def _check_actionable_client(
-    client: Optional[Client], client_fn: Optional[ClientFn]
+    client: Optional[Client], client_fn: Optional[ClientFnExt]
 ) -> None:
     if client_fn is None and client is None:
         raise ValueError(
@@ -68,7 +74,7 @@ def _check_actionable_client(
 def start_client(
     *,
     server_address: str,
-    client_fn: Optional[ClientFn] = None,
+    client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
@@ -88,7 +94,7 @@ def start_client(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
-    client_fn : Optional[ClientFn]
+    client_fn : Optional[ClientFnExt]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
         An implementation of the abstract base
@@ -132,8 +138,8 @@ def start_client(
 
     Starting an SSL-enabled gRPC client using system certificates:
 
-    >>> def client_fn(cid: str):
-    >>>     return FlowerClient()
+    >>> def client_fn(context: Context):
+    >>>     return FlowerClient().to_client()
     >>>
     >>> start_client(
     >>>     server_address=localhost:8080,
@@ -154,6 +160,7 @@ def start_client(
     event(EventType.START_CLIENT_ENTER)
     _start_client_internal(
         server_address=server_address,
+        node_config={},
         load_client_app_fn=None,
         client_fn=client_fn,
         client=client,
@@ -175,8 +182,9 @@ def start_client(
 def _start_client_internal(
     *,
     server_address: str,
-    load_client_app_fn: Optional[Callable[[], ClientApp]] = None,
-    client_fn: Optional[ClientFn] = None,
+    node_config: Dict[str, str],
+    load_client_app_fn: Optional[Callable[[str, str], ClientApp]] = None,
+    client_fn: Optional[ClientFnExt] = None,
     client: Optional[Client] = None,
     grpc_max_message_length: int = GRPC_MAX_MESSAGE_LENGTH,
     root_certificates: Optional[Union[bytes, str]] = None,
@@ -187,6 +195,7 @@ def _start_client_internal(
     ] = None,
     max_retries: Optional[int] = None,
     max_wait_time: Optional[float] = None,
+    flwr_dir: Optional[Path] = None,
 ) -> None:
     """Start a Flower client node which connects to a Flower server.
 
@@ -196,9 +205,11 @@ def _start_client_internal(
         The IPv4 or IPv6 address of the server. If the Flower
         server runs on the same machine on port 8080, then `server_address`
         would be `"[::]:8080"`.
+    node_config: Dict[str, str]
+        The configuration of the node.
     load_client_app_fn : Optional[Callable[[], ClientApp]] (default: None)
         A function that can be used to load a `ClientApp` instance.
-    client_fn : Optional[ClientFn]
+    client_fn : Optional[ClientFnExt]
         A callable that instantiates a Client. (default: None)
     client : Optional[flwr.client.Client]
         An implementation of the abstract base
@@ -230,6 +241,8 @@ def _start_client_internal(
         The maximum duration before the client stops trying to
         connect to the server in case of connection error.
         If set to None, there is no limit to the total time.
+    flwr_dir: Optional[Path] (default: None)
+        The fully resolved path containing installed Flower Apps.
     """
     if insecure is None:
         insecure = root_certificates is None
@@ -240,7 +253,7 @@ def _start_client_internal(
         if client_fn is None:
             # Wrap `Client` instance in `client_fn`
             def single_client_factory(
-                cid: str,  # pylint: disable=unused-argument
+                context: Context,  # pylint: disable=unused-argument
             ) -> Client:
                 if client is None:  # Added this to keep mypy happy
                     raise ValueError(
@@ -250,7 +263,7 @@ def _start_client_internal(
 
             client_fn = single_client_factory
 
-        def _load_client_app() -> ClientApp:
+        def _load_client_app(_1: str, _2: str) -> ClientApp:
             return ClientApp(client_fn=client_fn)
 
         load_client_app_fn = _load_client_app
@@ -263,10 +276,33 @@ def _start_client_internal(
         transport, server_address
     )
 
+    app_state_tracker = _AppStateTracker()
+
+    def _on_sucess(retry_state: RetryState) -> None:
+        app_state_tracker.is_connected = True
+        if retry_state.tries > 1:
+            log(
+                INFO,
+                "Connection successful after %.2f seconds and %s tries.",
+                retry_state.elapsed_time,
+                retry_state.tries,
+            )
+
+    def _on_backoff(retry_state: RetryState) -> None:
+        app_state_tracker.is_connected = False
+        if retry_state.tries == 1:
+            log(WARN, "Connection attempt failed, retrying...")
+        else:
+            log(
+                WARN,
+                "Connection attempt failed, retrying in %.2f seconds",
+                retry_state.actual_wait,
+            )
+
     retry_invoker = RetryInvoker(
         wait_gen_factory=exponential,
         recoverable_exceptions=connection_error_type,
-        max_tries=max_retries,
+        max_tries=max_retries + 1 if max_retries is not None else None,
         max_time=max_wait_time,
         on_giveup=lambda retry_state: (
             log(
@@ -278,30 +314,16 @@ def _start_client_internal(
             if retry_state.tries > 1
             else None
         ),
-        on_success=lambda retry_state: (
-            log(
-                INFO,
-                "Connection successful after %.2f seconds and %s tries.",
-                retry_state.elapsed_time,
-                retry_state.tries,
-            )
-            if retry_state.tries > 1
-            else None
-        ),
-        on_backoff=lambda retry_state: (
-            log(WARN, "Connection attempt failed, retrying...")
-            if retry_state.tries == 1
-            else log(
-                DEBUG,
-                "Connection attempt failed, retrying in %.2f seconds",
-                retry_state.actual_wait,
-            )
-        ),
+        on_success=_on_sucess,
+        on_backoff=_on_backoff,
     )
 
-    node_state = NodeState()
+    # NodeState gets initialized when the first connection is established
+    node_state: Optional[NodeState] = None
 
-    while True:
+    runs: Dict[int, Run] = {}
+
+    while not app_state_tracker.interrupt:
         sleep_duration: int = 0
         with connection(
             address,
@@ -311,106 +333,152 @@ def _start_client_internal(
             root_certificates,
             authentication_keys,
         ) as conn:
-            # pylint: disable-next=W0612
             receive, send, create_node, delete_node, get_run = conn
 
-            # Register node
-            if create_node is not None:
-                create_node()  # pylint: disable=not-callable
-
-            while True:
-                # Receive
-                message = receive()
-                if message is None:
-                    time.sleep(3)  # Wait for 3s before asking again
-                    continue
-
-                log(INFO, "")
-                if len(message.metadata.group_id) > 0:
-                    log(
-                        INFO,
-                        "[RUN %s, ROUND %s]",
-                        message.metadata.run_id,
-                        message.metadata.group_id,
-                    )
-                log(
-                    INFO,
-                    "Received: %s message %s",
-                    message.metadata.message_type,
-                    message.metadata.message_id,
-                )
-
-                # Handle control message
-                out_message, sleep_duration = handle_control_message(message)
-                if out_message:
-                    send(out_message)
-                    break
-
-                # Register context for this run
-                node_state.register_context(run_id=message.metadata.run_id)
-
-                # Retrieve context for this run
-                context = node_state.retrieve_context(run_id=message.metadata.run_id)
-
-                # Create an error reply message that will never be used to prevent
-                # the used-before-assignment linting error
-                reply_message = message.create_error_reply(
-                    error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
-                )
-
-                # Handle app loading and task message
-                try:
-                    # Load ClientApp instance
-                    client_app: ClientApp = load_client_app_fn()
-
-                    # Execute ClientApp
-                    reply_message = client_app(message=message, context=context)
-                except Exception as ex:  # pylint: disable=broad-exception-caught
-
-                    # Legacy grpc-bidi
-                    if transport in ["grpc-bidi", None]:
-                        log(ERROR, "Client raised an exception.", exc_info=ex)
-                        # Raise exception, crash process
-                        raise ex
-
-                    # Don't update/change NodeState
-
-                    e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
-                    # Reason example: "<class 'ZeroDivisionError'>:<'division by zero'>"
-                    reason = str(type(ex)) + ":<'" + str(ex) + "'>"
-                    exc_entity = "ClientApp"
-                    if isinstance(ex, LoadClientAppError):
-                        reason = (
-                            "An exception was raised when attempting to load "
-                            "`ClientApp`"
+            # Register node when connecting the first time
+            if node_state is None:
+                if create_node is None:
+                    if transport not in ["grpc-bidi", None]:
+                        raise NotImplementedError(
+                            "All transports except `grpc-bidi` require "
+                            "an implementation for `create_node()`.'"
                         )
-                        e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
-                        exc_entity = "SuperNode"
-
-                    log(ERROR, "%s raised an exception", exc_entity, exc_info=ex)
-
-                    # Create error message
-                    reply_message = message.create_error_reply(
-                        error=Error(code=e_code, reason=reason)
+                    # gRPC-bidi doesn't have the concept of node_id,
+                    # so we set it to -1
+                    node_state = NodeState(
+                        node_id=-1,
+                        node_config={},
                     )
                 else:
-                    # No exception, update node state
-                    node_state.update_context(
-                        run_id=message.metadata.run_id,
-                        context=context,
+                    # Call create_node fn to register node
+                    node_id: Optional[int] = (  # pylint: disable=assignment-from-none
+                        create_node()
+                    )  # pylint: disable=not-callable
+                    if node_id is None:
+                        raise ValueError("Node registration failed")
+                    node_state = NodeState(
+                        node_id=node_id,
+                        node_config=node_config,
                     )
 
-                # Send
-                send(reply_message)
-                log(INFO, "Sent reply")
+            app_state_tracker.register_signal_handler()
+            while not app_state_tracker.interrupt:
+                try:
+                    # Receive
+                    message = receive()
+                    if message is None:
+                        time.sleep(3)  # Wait for 3s before asking again
+                        continue
+
+                    log(INFO, "")
+                    if len(message.metadata.group_id) > 0:
+                        log(
+                            INFO,
+                            "[RUN %s, ROUND %s]",
+                            message.metadata.run_id,
+                            message.metadata.group_id,
+                        )
+                    log(
+                        INFO,
+                        "Received: %s message %s",
+                        message.metadata.message_type,
+                        message.metadata.message_id,
+                    )
+
+                    # Handle control message
+                    out_message, sleep_duration = handle_control_message(message)
+                    if out_message:
+                        send(out_message)
+                        break
+
+                    # Get run info
+                    run_id = message.metadata.run_id
+                    if run_id not in runs:
+                        if get_run is not None:
+                            runs[run_id] = get_run(run_id)
+                        # If get_run is None, i.e., in grpc-bidi mode
+                        else:
+                            runs[run_id] = Run(run_id, "", "", {})
+
+                    # Register context for this run
+                    node_state.register_context(
+                        run_id=run_id, run=runs[run_id], flwr_dir=flwr_dir
+                    )
+
+                    # Retrieve context for this run
+                    context = node_state.retrieve_context(run_id=run_id)
+
+                    # Create an error reply message that will never be used to prevent
+                    # the used-before-assignment linting error
+                    reply_message = message.create_error_reply(
+                        error=Error(code=ErrorCode.UNKNOWN, reason="Unknown")
+                    )
+
+                    # Handle app loading and task message
+                    try:
+                        # Load ClientApp instance
+                        run: Run = runs[run_id]
+                        client_app: ClientApp = load_client_app_fn(
+                            run.fab_id, run.fab_version
+                        )
+
+                        # Execute ClientApp
+                        reply_message = client_app(message=message, context=context)
+                    except Exception as ex:  # pylint: disable=broad-exception-caught
+
+                        # Legacy grpc-bidi
+                        if transport in ["grpc-bidi", None]:
+                            log(ERROR, "Client raised an exception.", exc_info=ex)
+                            # Raise exception, crash process
+                            raise ex
+
+                        # Don't update/change NodeState
+
+                        e_code = ErrorCode.CLIENT_APP_RAISED_EXCEPTION
+                        # Ex fmt: "<class 'ZeroDivisionError'>:<'division by zero'>"
+                        reason = str(type(ex)) + ":<'" + str(ex) + "'>"
+                        exc_entity = "ClientApp"
+                        if isinstance(ex, LoadClientAppError):
+                            reason = (
+                                "An exception was raised when attempting to load "
+                                "`ClientApp`"
+                            )
+                            e_code = ErrorCode.LOAD_CLIENT_APP_EXCEPTION
+                            exc_entity = "SuperNode"
+
+                        if not app_state_tracker.interrupt:
+                            log(
+                                ERROR, "%s raised an exception", exc_entity, exc_info=ex
+                            )
+
+                        # Create error message
+                        reply_message = message.create_error_reply(
+                            error=Error(code=e_code, reason=reason)
+                        )
+                    else:
+                        # No exception, update node state
+                        node_state.update_context(
+                            run_id=run_id,
+                            context=context,
+                        )
+
+                    # Send
+                    send(reply_message)
+                    log(INFO, "Sent reply")
+
+                except StopIteration:
+                    sleep_duration = 0
+                    break
 
             # Unregister node
-            if delete_node is not None:
+            if delete_node is not None and app_state_tracker.is_connected:
                 delete_node()  # pylint: disable=not-callable
 
         if sleep_duration == 0:
             log(INFO, "Disconnect and shut down")
+            del app_state_tracker
             break
+
         # Sleep and reconnect afterwards
         log(
             INFO,
@@ -535,9 +603,9 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
             Tuple[
                 Callable[[], Optional[Message]],
                 Callable[[Message], None],
+                Optional[Callable[[], Optional[int]]],
                 Optional[Callable[[], None]],
-                Optional[Callable[[], None]],
-                Optional[Callable[[int], Tuple[str, str]]],
+                Optional[Callable[[int], Run]],
             ]
         ],
     ],
@@ -571,6 +639,8 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         connection, error_type = http_request_response, RequestsConnectionError
     elif transport == TRANSPORT_TYPE_GRPC_RERE:
         connection, error_type = grpc_request_response, RpcError
+    elif transport == TRANSPORT_TYPE_GRPC_ADAPTER:
+        connection, error_type = grpc_adapter, RpcError
     elif transport == TRANSPORT_TYPE_GRPC_BIDI:
         connection, error_type = grpc_connection, RpcError
     else:
@@ -579,3 +649,20 @@ def _init_connection(transport: Optional[str], server_address: str) -> Tuple[
         )
 
     return connection, address, error_type
+
+
+@dataclass
+class _AppStateTracker:
+    interrupt: bool = False
+    is_connected: bool = False
+
+    def register_signal_handler(self) -> None:
+        """Register handlers for exit signals."""
+
+        def signal_handler(sig, frame):  # type: ignore
+            # pylint: disable=unused-argument
+            self.interrupt = True
+            raise StopIteration from None
+
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
