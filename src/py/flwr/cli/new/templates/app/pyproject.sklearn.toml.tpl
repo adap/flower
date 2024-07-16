@@ -16,10 +16,10 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[tool.flwr]
+[tool.flwr.app]
 publisher = "$username"
 
-[tool.flwr.components]
+[tool.flwr.app.components]
 serverapp = "$import_name.server:app"
 clientapp = "$import_name.client:app"
 

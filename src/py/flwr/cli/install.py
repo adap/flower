@@ -149,7 +149,7 @@ def validate_and_install(
         )
         raise typer.Exit(code=1)
 
-    publisher = config["tool"]["flwr"]["publisher"]
+    publisher = config["tool"]["flwr"]["app"]["publisher"]
     project_name = config["project"]["name"]
     version = config["project"]["version"]
 

@@ -40,10 +40,10 @@ def test_load_pyproject_toml_load_from_cwd(tmp_path: Path) -> None:
             "numpy>=1.21.0",
         ]
 
-        [tool.flwr]
+        [tool.flwr.app]
         publisher = "flwrlabs"
 
-        [tool.flwr.components]
+        [tool.flwr.app.components]
         serverapp = "fedgpt.server:app"
         clientapp = "fedgpt.client:app"
     """
@@ -58,10 +58,12 @@ def test_load_pyproject_toml_load_from_cwd(tmp_path: Path) -> None:
         },
         "tool": {
             "flwr": {
-                "publisher": "flwrlabs",
-                "components": {
-                    "serverapp": "fedgpt.server:app",
-                    "clientapp": "fedgpt.client:app",
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "fedgpt.server:app",
+                        "clientapp": "fedgpt.client:app",
+                    },
                 },
             },
         },
@@ -103,10 +105,10 @@ def test_load_pyproject_toml_from_path(tmp_path: Path) -> None:
             "numpy>=1.21.0",
         ]
 
-        [tool.flwr]
+        [tool.flwr.app]
         publisher = "flwrlabs"
 
-        [tool.flwr.components]
+        [tool.flwr.app.components]
         serverapp = "fedgpt.server:app"
         clientapp = "fedgpt.client:app"
     """
@@ -121,10 +123,12 @@ def test_load_pyproject_toml_from_path(tmp_path: Path) -> None:
         },
         "tool": {
             "flwr": {
-                "publisher": "flwrlabs",
-                "components": {
-                    "serverapp": "fedgpt.server:app",
-                    "clientapp": "fedgpt.client:app",
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "fedgpt.server:app",
+                        "clientapp": "fedgpt.client:app",
+                    },
                 },
             },
         },
@@ -195,7 +199,7 @@ def test_validate_pyproject_toml_fields_no_flower_components() -> None:
             "license": "",
             "authors": [],
         },
-        "tool": {"flwr": {}},
+        "tool": {"flwr": {"app": {}}},
     }
 
     # Execute
@@ -218,7 +222,7 @@ def test_validate_pyproject_toml_fields_no_server_and_client_app() -> None:
             "license": "",
             "authors": [],
         },
-        "tool": {"flwr": {"components": {}}},
+        "tool": {"flwr": {"app": {"components": {}}}},
     }
 
     # Execute
@@ -243,8 +247,10 @@ def test_validate_pyproject_toml_fields() -> None:
         },
         "tool": {
             "flwr": {
-                "publisher": "flwrlabs",
-                "components": {"serverapp": "", "clientapp": ""},
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {"serverapp": "", "clientapp": ""},
+                },
             },
         },
     }
@@ -271,10 +277,12 @@ def test_validate_pyproject_toml() -> None:
         },
         "tool": {
             "flwr": {
-                "publisher": "flwrlabs",
-                "components": {
-                    "serverapp": "flwr.cli.run:run",
-                    "clientapp": "flwr.cli.run:run",
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:run",
+                    },
                 },
             },
         },
@@ -302,10 +310,12 @@ def test_validate_pyproject_toml_fail() -> None:
         },
         "tool": {
             "flwr": {
-                "publisher": "flwrlabs",
-                "components": {
-                    "serverapp": "flwr.cli.run:run",
-                    "clientapp": "flwr.cli.run:runa",
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "flwr.cli.run:run",
+                        "clientapp": "flwr.cli.run:runa",
+                    },
                 },
             },
         },
