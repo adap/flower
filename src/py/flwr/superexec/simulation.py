@@ -78,7 +78,7 @@ class SimulationEngine(Executor):
 
     @override
     def start_run(
-        self, fab_file: bytes, override_config: Dict[str, str]
+        self, fab_file: bytes, override_config: Dict[str, str], verbose: bool
     ) -> Optional[RunTracker]:
         """Start run using the Flower Simulation Engine."""
         try:
@@ -132,6 +132,9 @@ class SimulationEngine(Executor):
                 "--run-id",
                 str(run_id),
             ]
+
+            if verbose:
+                command.append("--verbose")
 
             # Start Simulation
             proc = subprocess.Popen(  # pylint: disable=consider-using-with

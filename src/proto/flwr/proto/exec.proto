@@ -27,7 +27,8 @@ service Exec {
 
 message StartRunRequest {
   bytes fab_file = 1;
-  map<string, string> override_config = 2;
+  bool verbose = 2;
+  map<string, string> override_config = 3;
 }
 message StartRunResponse { sint64 run_id = 1; }
 message StreamLogsRequest { sint64 run_id = 1; }

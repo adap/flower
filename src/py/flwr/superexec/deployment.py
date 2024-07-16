@@ -126,6 +126,7 @@ class DeploymentEngine(Executor):
         self,
         fab_file: bytes,
         override_config: Dict[str, str],
+        verbose: bool,
     ) -> Optional[RunTracker]:
         """Start run using the Flower Deployment Engine."""
         try:
@@ -161,6 +162,9 @@ class DeploymentEngine(Executor):
             else:
                 command.append("--root-certificates")
                 command.append(self.root_certificates)
+
+            if verbose:
+                command.append("--verbose")
 
             # Execute the command
             proc = subprocess.Popen(  # pylint: disable=consider-using-with

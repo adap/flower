@@ -50,6 +50,12 @@ def run(
             help="Override configuration key-value pairs",
         ),
     ] = None,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            case_sensitive=False, help="Use this flag to print logs at `DEBUG` level"
+        ),
+    ] = False,
 ) -> None:
     """Run Flower project."""
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
@@ -105,15 +111,16 @@ def run(
         raise typer.Exit(code=1)
 
     if "address" in federation:
-        _run_with_superexec(federation, directory, config_overrides)
+        _run_with_superexec(federation, directory, config_overrides, verbose)
     else:
-        _run_without_superexec(config, federation, federation_name)
+        _run_without_superexec(config, federation, federation_name, verbose)
 
 
 def _run_with_superexec(
     federation: Dict[str, str],
     directory: Optional[Path],
     config_overrides: Optional[str],
+    verbose: bool,
 ) -> None:
 
     def on_channel_state_change(channel_connectivity: str) -> None:
@@ -163,13 +170,17 @@ def _run_with_superexec(
     req = StartRunRequest(
         fab_file=Path(fab_path).read_bytes(),
         override_config=parse_config_args(config_overrides, separator=","),
+        verbose=verbose,
     )
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
 
 
 def _run_without_superexec(
-    config: Dict[str, Any], federation: Dict[str, Any], federation_name: str
+    config: Dict[str, Any],
+    federation: Dict[str, Any],
+    federation_name: str,
+    verbose: bool,
 ) -> None:
     server_app_ref = config["tool"]["flwr"]["app"]["components"]["serverapp"]
     client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
@@ -192,4 +203,5 @@ def _run_without_superexec(
         server_app_attr=server_app_ref,
         client_app_attr=client_app_ref,
         num_supernodes=num_supernodes,
+        verbose_logging=verbose,
     )

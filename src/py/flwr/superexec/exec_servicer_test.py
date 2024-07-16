@@ -36,7 +36,7 @@ def test_start_run() -> None:
         run_res.proc = proc
 
     executor = MagicMock()
-    executor.start_run = lambda _, __: run_res
+    executor.start_run = lambda _, __, ___: run_res
 
     context_mock = MagicMock()
 

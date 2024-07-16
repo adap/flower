@@ -48,6 +48,7 @@ class ExecServicer(exec_pb2_grpc.ExecServicer):
         run = self.executor.start_run(
             request.fab_file,
             dict(request.override_config.items()),
+            request.verbose,
         )
 
         if run is None:
