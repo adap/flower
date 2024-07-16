@@ -6,13 +6,10 @@ build-backend = "hatchling.build"
 name = "mlxexample"
 version = "1.0.0"
 description = ""
-authors = [
-    { name = "The Flower Authors", email = "hello@flower.ai" },
-]
-license = { text = "Apache License (2.0)" }
+license = "Apache-2.0"
 dependencies = [
-    "flwr-nightly[simulation]",
-    "flwr-datasets[vision]>=0.2.0,<1.0.0",
+    "flwr[simulation]>=1.9.0,<2.0",
+    "flwr-datasets[vision]>=0.0.2,<1.0.0",
     "mlx==0.10.0",
     "numpy==1.24.4",
 ]
@@ -20,18 +17,25 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[flower]
+[tool.flwr.app]
 publisher = "flowerteam"
 
-[flower.components]
+[tool.flwr.app.components]
 serverapp = "mlxexample.server_app:app"
 clientapp = "mlxexample.client_app:app"
 
 
-[flower.config.serverapp]
+[tool.flwr.app.config]
+[serverapp]
 num_server_rounds = 3
 
-[flower.config.clientapp]
+[clientapp]
 num_layers = 2
 hidden_dim = 32
 batch_size = 256
+
+[tool.flwr.federations]
+default = "localhost"
+
+[tool.flwr.federations.localhost]
+options.num-supernodes = 10
