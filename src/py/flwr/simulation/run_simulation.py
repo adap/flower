@@ -110,28 +110,27 @@ def run_simulation_from_cli() -> None:
     if args.app:
         # Mode 1
         app_path = Path(args.app)
-        if app_path.is_dir():
-            # Load pyproject.toml
-            config, errors, warnings = load_and_validate(app_path / "pyproject.toml")
-            if errors:
-                raise ValueError(errors)
-
-            if warnings:
-                log(WARNING, warnings)
-
-            if config is None:
-                raise ValueError(
-                    "Config extracted from FAB's pyproject.toml is not valid"
-                )
-
-            # Get ClientApp and SeverApp components
-            flower_components = config["tool"]["flwr"]["app"]["components"]
-            client_app_attr = flower_components["clientapp"]
-            server_app_attr = flower_components["serverapp"]
-
-        else:
+        if not app_path.is_dir():
             log(ERROR, "--app is not a directory")
             sys.exit("Simulation Engine cannot start.")
+
+        # Load pyproject.toml
+        config, errors, warnings = load_and_validate(
+            app_path / "pyproject.toml", check_module=False
+        )
+        if errors:
+            raise ValueError(errors)
+
+        if warnings:
+            log(WARNING, warnings)
+
+        if config is None:
+            raise ValueError("Config extracted from FAB's pyproject.toml is not valid")
+
+        # Get ClientApp and SeverApp components
+        app_components = config["tool"]["flwr"]["app"]["components"]
+        client_app_attr = app_components["clientapp"]
+        server_app_attr = app_components["serverapp"]
 
         override_config = parse_config_args(args.run_config)
         fused_config = get_fused_config_from_dir(app_path, override_config)
