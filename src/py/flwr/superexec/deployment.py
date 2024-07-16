@@ -15,7 +15,6 @@
 """Deployment engine executor."""
 
 import subprocess
-import sys
 from logging import ERROR, INFO
 from pathlib import Path
 from typing import Dict, Optional
