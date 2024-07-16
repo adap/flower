@@ -58,8 +58,9 @@ class NodeState:
                 # Load from FAB-like directory
                 fab_path = Path(fab_dir)
                 if fab_path.is_dir():
+                    override_config = run.override_config if run else {}
                     initial_run_config = get_fused_config_from_dir(
-                        fab_path, run.override_config
+                        fab_path, override_config
                     )
             else:
                 # Load from .fab
