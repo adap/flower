@@ -15,9 +15,15 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[flower]
+[tool.flwr]
 publisher = "$username"
 
-[flower.components]
+[tool.flwr.components]
 serverapp = "$import_name.server:app"
 clientapp = "$import_name.client:app"
+
+[tool.flwr.federations]
+default = "localhost"
+
+[tool.flwr.federations.localhost]
+options.num-supernodes = 10

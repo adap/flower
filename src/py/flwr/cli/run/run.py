@@ -17,20 +17,19 @@
 import sys
 from logging import DEBUG
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
-import tomli
 import typer
 from typing_extensions import Annotated
 
 from flwr.cli.build import build
 from flwr.cli.config_utils import load_and_validate
-from flwr.common.config import get_flwr_dir, parse_config_args
-from flwr.common.constant import SUPEREXEC_DEFAULT_ADDRESS
+from flwr.common.config import parse_config_args
 from flwr.common.grpc import GRPC_MAX_MESSAGE_LENGTH, create_channel
 from flwr.common.logger import log
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
+from flwr.simulation.run_simulation import _run_simulation
 
 
 # pylint: disable-next=too-many-locals
@@ -39,27 +38,9 @@ def run(
         Path,
         typer.Argument(help="Path of the Flower project to run"),
     ] = Path("."),
-    federation: Annotated[
+    federation_name: Annotated[
         Optional[str],
-        typer.Argument(help="Name of the federation to run FL on"),
-    ] = None,
-    verbose: Annotated[
-        bool,
-        typer.Option(
-            case_sensitive=False, help="Use this flag to print logs at `DEBUG` level"
-        ),
-    ] = False,
-    flwr_dir: Annotated[
-        Optional[str],
-        typer.Argument(
-            help="""Path of the Flower root.
-
-                    By default ``flwr-dir`` is equal to:
-
-                    - ``$FLWR_HOME/`` if ``$FLWR_HOME`` is defined
-                    - ``$XDG_DATA_HOME/.flwr/`` if ``$XDG_DATA_HOME`` is defined
-                    - ``$HOME/.flwr/`` in all other cases"""
-        ),
+        typer.Argument(help="Name of the federation to run the app on"),
     ] = None,
     config_overrides: Annotated[
         Optional[str],
@@ -69,30 +50,14 @@ def run(
             help="Override configuration key-value pairs",
         ),
     ] = None,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            case_sensitive=False, help="Use this flag to print logs at `DEBUG` level"
+        ),
+    ] = False,
 ) -> None:
     """Run Flower project."""
-    superexec_address = SUPEREXEC_DEFAULT_ADDRESS
-    global_config_path = get_flwr_dir(flwr_dir) / "config.toml"
-
-    if global_config_path.exists():
-        with global_config_path.open("rb") as global_config_file:
-            global_config = tomli.load(global_config_file)
-
-        if federation is None:
-            superexec_address = global_config["federations"][
-                global_config["federation"]["default"]
-            ]["address"]
-        else:
-            if federation in global_config["federations"]:
-                superexec_address = global_config["federations"][federation]["address"]
-            else:
-                typer.secho(
-                    f"❌ {federation} is not defined in {str(global_config_path)}.",
-                    fg=typer.colors.RED,
-                    bold=True,
-                )
-                raise typer.Exit(code=1)
-
     typer.secho("Loading project configuration... ", fg=typer.colors.BLUE)
 
     pyproject_path = directory / "pyproject.toml" if directory else None
@@ -118,14 +83,82 @@ def run(
 
     typer.secho("Success", fg=typer.colors.GREEN)
 
+    federation_name = federation_name or config["tool"]["flwr"]["federations"].get(
+        "default"
+    )
+
+    if federation_name is None:
+        typer.secho(
+            "❌ No federation name was provided and the project's `pyproject.toml` "
+            "doesn't declare a default federation (with a SuperExec address or an "
+            "`options.num-supernodes` value).",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    # Validate the federation exists in the configuration
+    federation = config["tool"]["flwr"]["federations"].get(federation_name)
+    if federation is None:
+        available_feds = list(config["tool"]["flwr"]["federations"])
+        typer.secho(
+            f"❌ There is no `{federation_name}` federation declared in the "
+            "`pyproject.toml`.\n The following federations were found:\n\n"
+            "\n".join(available_feds) + "\n\n",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1)
+
+    if "address" in federation:
+        _run_with_superexec(federation, directory, config_overrides, verbose)
+    else:
+        _run_without_superexec(config, federation, federation_name, verbose)
+
+
+def _run_with_superexec(
+    federation: Dict[str, str],
+    directory: Optional[Path],
+    config_overrides: Optional[str],
+    verbose: bool,
+) -> None:
+
     def on_channel_state_change(channel_connectivity: str) -> None:
         """Log channel connectivity."""
         log(DEBUG, channel_connectivity)
 
+    insecure_str = federation.get("insecure")
+    if root_certificates := federation.get("root-certificates"):
+        root_certificates_bytes = Path(root_certificates).read_bytes()
+        if insecure := bool(insecure_str):
+            typer.secho(
+                "❌ `root_certificates` were provided but the `insecure` parameter"
+                "is set to `True`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+    else:
+        root_certificates_bytes = None
+        if insecure_str is None:
+            typer.secho(
+                "❌ To disable TLS, set `insecure = true` in `pyproject.toml`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+        if not (insecure := bool(insecure_str)):
+            typer.secho(
+                "❌ No certificate were given yet `insecure` is set to `False`.",
+                fg=typer.colors.RED,
+                bold=True,
+            )
+            raise typer.Exit(code=1)
+
     channel = create_channel(
-        server_address=superexec_address,
-        insecure=True,
-        root_certificates=None,
+        server_address=federation["address"],
+        insecure=insecure,
+        root_certificates=root_certificates_bytes,
         max_message_length=GRPC_MAX_MESSAGE_LENGTH,
         interceptors=None,
     )
@@ -141,3 +174,34 @@ def run(
     )
     res = stub.StartRun(req)
     typer.secho(f"🎊 Successfully started run {res.run_id}", fg=typer.colors.GREEN)
+
+
+def _run_without_superexec(
+    config: Dict[str, Any],
+    federation: Dict[str, Any],
+    federation_name: str,
+    verbose: bool,
+) -> None:
+    server_app_ref = config["tool"]["flwr"]["components"]["serverapp"]
+    client_app_ref = config["tool"]["flwr"]["components"]["clientapp"]
+
+    try:
+        num_supernodes = federation["options"]["num-supernodes"]
+    except KeyError as err:
+        typer.secho(
+            "❌ The project's `pyproject.toml` needs to declare the number of"
+            " SuperNodes in the simulation. To simulate 10 SuperNodes,"
+            " use the following notation:\n\n"
+            f"[tool.flwr.federations.{federation_name}]\n"
+            "options.num-supernodes = 10\n",
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        raise typer.Exit(code=1) from err
+
+    _run_simulation(
+        server_app_attr=server_app_ref,
+        client_app_attr=client_app_ref,
+        num_supernodes=num_supernodes,
+        verbose_logging=verbose,
+    )
