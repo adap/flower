@@ -30,7 +30,7 @@ from typing import Dict, List, Optional
 from flwr.cli.config_utils import load_and_validate
 from flwr.client import ClientApp
 from flwr.common import EventType, event, log
-from flwr.common.config import get_fused_config
+from flwr.common.config import get_fused_config_from_dir, parse_config_args
 from flwr.common.constant import RUN_ID_NUM_BYTES
 from flwr.common.logger import set_logger_propagation, update_console_handler
 from flwr.common.typing import Run
@@ -106,7 +106,6 @@ def run_simulation_from_cli() -> None:
         if args.run_id is None
         else args.run_id
     )
-    fused_config = None
     if args.app:
         # mode 1
         app = Path(args.app)
@@ -138,7 +137,8 @@ def run_simulation_from_cli() -> None:
             log(ERROR, "--app is not a directory")
             sys.exit("Simulation Engine cannot start.")
 
-        override_config = args.config_override if args.config_override else {}
+        override_config = parse_config_args(args.config_override)
+        fused_config = get_fused_config_from_dir(app, override_config)
 
     else:
         # mode 2
@@ -146,6 +146,7 @@ def run_simulation_from_cli() -> None:
         server_app_attr = args.server_app
         num_supernodes = args.num_supernodes
         override_config = {}
+        fused_config = None
 
     # Create run
     run = Run(
@@ -154,13 +155,6 @@ def run_simulation_from_cli() -> None:
         fab_version=fab_version,
         override_config=override_config,
     )
-
-    print(override_config)
-    # Override config if in fab-mode
-    if args.app and args.config_override:
-        # Fuse configs, this is needed for the serverapp
-        fused_config = get_fused_config(run, args.flwr_dir)
-        # TODO: this does nothing unless there is a fab-id/version, relax?
 
     # Load JSON config
     backend_config_dict = json.loads(args.backend_config)
@@ -556,7 +550,8 @@ def _parse_args_run_simulation() -> argparse.ArgumentParser:
         "--app",
         type=str,
         default=None,
-        help="Path to a directory containing a FAB-like structure with a pyproject.toml.",
+        help="Path to a directory containing a FAB-like structure with a "
+        "pyproject.toml.",
     )
     parser.add_argument(
         "--config-override",
