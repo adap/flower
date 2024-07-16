@@ -86,6 +86,18 @@ def _fuse_dicts(
     return fused_dict
 
 
+def get_fused_config_from_dir(
+    project_dir: Path, override_config: Dict[str, str]
+) -> Dict[str, str]:
+    """Merge the overrides from a given dict with the config from a Flower App."""
+    default_config = get_project_config(project_dir)["tool"]["flwr"]["app"].get(
+        "config", {}
+    )
+    flat_default_config = flatten_dict(default_config)
+
+    return _fuse_dicts(flat_default_config, override_config)
+
+
 def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
     """Merge the overrides from a `Run` with the config from a FAB.
 
@@ -97,10 +109,7 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
 
     project_dir = get_project_dir(run.fab_id, run.fab_version, flwr_dir)
 
-    default_config = get_project_config(project_dir)["tool"]["flwr"].get("config", {})
-    flat_default_config = flatten_dict(default_config)
-
-    return _fuse_dicts(flat_default_config, run.override_config)
+    return get_fused_config_from_dir(project_dir, run.override_config)
 
 
 def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, str]:
