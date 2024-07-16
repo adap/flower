@@ -6,7 +6,6 @@ from flwr.server.strategy import FedAvg
 
 
 def server_fn(context: Context):
-
     # Read from config
     num_rounds = int(context.run_config["num-server-rounds"])
 

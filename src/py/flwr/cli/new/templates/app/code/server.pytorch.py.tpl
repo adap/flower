@@ -12,7 +12,6 @@ ndarrays = get_weights(Net())
 parameters = ndarrays_to_parameters(ndarrays)
 
 def server_fn(context: Context):
-
     # Read from config
     num_rounds = int(context.run_config["num-server-rounds"])
 
