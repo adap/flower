@@ -171,7 +171,6 @@ def _run_with_superexec(
 def _run_without_superexec(
     app_path: Optional[Path], federation: Dict[str, Any], federation_name: str
 ) -> None:
-
     try:
         num_supernodes = federation["options"]["num-supernodes"]
     except KeyError as err:
