@@ -13,7 +13,7 @@ dataset: [MNIST, FashionMNIST]
 
 ## About this baseline
 
-**What’s implemented:** The code in this directory replicates the results of FLANDERS+\[baseline\] on MNIST and Fashion-MNIST under all attack settings: Gaussian, LIE, OPT, and AGR-MM; with $r=[0.2,0.6,0.8]$, specifically about tables 1, 3, 10, 11, 15, 17, 19, 20 and Figure 3.
+**What’s implemented:** The code in this directory replicates the results of FLANDERS+\[baseline\] on MNIST and Fashion-MNIST under all attack settings: Gaussian, LIE, OPT, and AGR-MM; with $r=[0.2,0.6,0.8]$ (i.e., the fraction of malicious clients), specifically about tables 1, 3, 10, 11, 15, 17, 19, 20 and Figure 3.
 
 **Datasets:** MNIST, FMNIST
 
@@ -62,10 +62,10 @@ Fashion-MNIST (multilabel classification, fully connected, feed forward NN):
 
 | Dataset | # of clients  | Clients per round | # of rounds | Batch size | Learning rate | Optimizer | Dropout | Alpha | Beta | # of clients to keep | Sampling |
 | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-| MNIST | 100 | 100 | 50 | 32 | $10^{-3}$ | Adam | 0.2 | 0.0 | 0.0 | $m - f$ | 500 |
-| FMNIST | 100 | 100 | 50 | 32 | $10^{-3}$ | Adam | 0.2 | 0.0 | 0.0 | $m - f$ | 500 |
+| MNIST | 100 | 100 | 50 | 32 | $10^{-3}$ | Adam | 0.2 | 0.0 | 0.0 | $m - b$ | 500 |
+| FMNIST | 100 | 100 | 50 | 32 | $10^{-3}$ | Adam | 0.2 | 0.0 | 0.0 | $m - b$ | 500 |
 
-Where $m$ is the number of clients partecipating during n-th round and $f$ is the number of malicious clients. The variable $sampling$ identifies how many parameters MAR analyzes.
+Where $m$ is the number of clients partecipating during n-th round and $b$ is the number of malicious clients. The variable $sampling$ identifies how many parameters MAR analyzes.
 
 
 ## Environment Setup
