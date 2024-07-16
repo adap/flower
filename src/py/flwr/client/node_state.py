@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from flwr.common import Context, RecordSet
-from flwr.common.config import get_fused_config
+from flwr.common.config import get_fused_config, get_fused_config_from_dir
 from flwr.common.typing import Run
 
 
@@ -49,10 +49,21 @@ class NodeState:
         run_id: int,
         run: Optional[Run] = None,
         flwr_dir: Optional[Path] = None,
+        fab_dir: Optional[str] = None,
     ) -> None:
         """Register new run context for this node."""
         if run_id not in self.run_infos:
-            initial_run_config = get_fused_config(run, flwr_dir) if run else {}
+            initial_run_config = {}
+            if fab_dir:
+                # Load from FAB-like directory
+                fab_path = Path(fab_dir)
+                if fab_path.is_dir():
+                    initial_run_config = get_fused_config_from_dir(
+                        fab_path, run.override_config
+                    )
+            else:
+                # Load from .fab
+                initial_run_config = get_fused_config(run, flwr_dir) if run else {}
             self.run_infos[run_id] = RunInfo(
                 initial_run_config=initial_run_config,
                 context=Context(
