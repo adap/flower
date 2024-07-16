@@ -108,7 +108,7 @@ def run_simulation_from_cli() -> None:
         else args.run_id
     )
     if args.app:
-        # mode 1
+        # Mode 1
         app_path = Path(args.app)
         if app_path.is_dir():
             # Load pyproject.toml
@@ -125,9 +125,9 @@ def run_simulation_from_cli() -> None:
                 )
 
             # Get ClientApp and SeverApp components
-            flower_components = config["tool"]["flwr"]["app"]["components"]
-            client_app_attr = flower_components["clientapp"]
-            server_app_attr = flower_components["serverapp"]
+            app_components = config["tool"]["flwr"]["app"]["components"]
+            client_app_attr = app_components["clientapp"]
+            server_app_attr = app_components["serverapp"]
 
         else:
             log(ERROR, "--app is not a directory")
@@ -139,7 +139,7 @@ def run_simulation_from_cli() -> None:
         is_app = True
 
     else:
-        # mode 2
+        # Mode 2
         client_app_attr = args.client_app
         server_app_attr = args.server_app
         override_config = {}
