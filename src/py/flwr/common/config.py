@@ -90,7 +90,7 @@ def get_fused_config_from_dir(
     project_dir: Path, override_config: Dict[str, str]
 ) -> Dict[str, str]:
     """Merge the overrides from a given dict with the config from a Flower App."""
-    default_config = get_project_config(project_dir)["tool"]["flwr"].get("config", {})
+    default_config = get_project_config(project_dir)["tool"]["flwr"]["app"].get("config", {})
     flat_default_config = flatten_dict(default_config)
 
     return _fuse_dicts(flat_default_config, override_config)
