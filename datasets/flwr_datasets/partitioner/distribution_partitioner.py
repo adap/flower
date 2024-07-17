@@ -16,12 +16,12 @@
 
 
 from collections import Counter
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 
 import datasets
-from flwr_datasets.common.typing import NDArrayFloat, NDArrayInt
+from flwr_datasets.common.typing import NDArray, NDArrayFloat, NDArrayInt
 from flwr_datasets.partitioner.partitioner import Partitioner
 
 
@@ -332,7 +332,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                 raise ValueError("The distribution array is not 2-dimensional.")
 
             self._num_unique_labels = len(self.dataset.unique(self._partition_by))
-            self._num_columns = (
+            self._num_columns = int(
                 self._num_unique_labels_per_partition
                 * self._num_partitions
                 / self._num_unique_labels
@@ -398,7 +398,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             raise ValueError("The number of partitions needs to be greater than zero.")
 
     def _check_total_preassigned_samples_within_limit(
-        self, label_distribution, total_preassigned_samples
+        self, label_distribution: NDArray[Any], total_preassigned_samples: int
     ) -> None:
         """Test total preassigned samples do not exceed minimum allowable."""
         if any(label_distribution - total_preassigned_samples < self._num_columns):
