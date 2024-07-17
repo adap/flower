@@ -147,10 +147,7 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
         expected_len = len(dataset[self.test_split]) // num_test_partitions
         mod = len(dataset[self.test_split]) % num_test_partitions
         expected_len += 1 if 0 < mod else 0
-        self.assertEqual(
-            len(dataset_test_partition0),
-            expected_len
-        )
+        self.assertEqual(len(dataset_test_partition0), expected_len)
 
     def test_no_need_for_split_keyword_if_one_partitioner(self) -> None:
         """Test if partitions got with and without split args are the same."""
