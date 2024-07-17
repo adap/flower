@@ -338,7 +338,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                 "The specified `num_unique_labels_per_partition`"
                 f"={self._num_unique_labels_per_partition} is greater than the number "
                 f"of unique classes in the given dataset={self._num_unique_labels}. "
-                "Reduce the `_num_unique_labels_per_partition` or make use different "
+                "Reduce the `num_unique_labels_per_partition` or make use different "
                 "dataset to apply this partitioning."
             )
 
