@@ -94,11 +94,13 @@ def run(
     # Validate the federation exists in the configuration
     federation = config["tool"]["flwr"]["federations"].get(federation_name)
     if federation is None:
-        available_feds = list(config["tool"]["flwr"]["federations"])
+        available_feds = {
+            fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
+        }
         typer.secho(
             f"❌ There is no `{federation_name}` federation declared in the "
             "`pyproject.toml`.\n The following federations were found:\n\n"
-            "\n".join(available_feds) + "\n\n",
+            + "\n".join(available_feds),
             fg=typer.colors.RED,
             bold=True,
         )
