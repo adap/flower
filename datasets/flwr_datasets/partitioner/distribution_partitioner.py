@@ -71,7 +71,8 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     partition_by : str
         Column name of the labels (targets) based on which sampling works.
     preassigned_num_samples_per_label : int
-        The minimum number of samples that each label in each partition will have.
+        The minimum number of samples that each unique label in each partition will
+        have.
     rescale : bool, default=True
         Whether to partition samples according to the values in
         `distribution_array` or rescale based on the original unpartitioned
@@ -164,6 +165,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # Utility attributes
         # The attributes below are determined during the first call to load_partition
         self._num_unique_labels: int = 0
+        self._num_columns: int = 0
         self._partition_id_to_indices_determined = False
         self._partition_id_to_indices: Dict[int, List[int]] = {}
 
@@ -227,15 +229,16 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             #     `self._preassigned_num_samples_per_label`, and
             # (2) there is sufficient indices to sample from the dataset.
             total_preassigned_samples = int(
-                self._preassigned_num_samples_per_label
-                * self._num_unique_labels_per_partition
-                * self._num_partitions
-                / self._num_unique_labels
+                self._preassigned_num_samples_per_label * self._num_columns
             )
 
             label_distribution = np.fromiter(
                 unique_label_distribution.values(),
                 dtype=float,
+            )
+
+            self._check_total_preassigned_samples_within_limit(
+                label_distribution, total_preassigned_samples
             )
 
             # Subtract the preassigned total amount from the label distribution,
@@ -312,15 +315,19 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                 raise ValueError("The distribution array is not 2-dimensional.")
 
             self._num_unique_labels = len(self.dataset.unique(self._partition_by))
-            num_columns = (
+            self._num_columns = (
                 self._num_unique_labels_per_partition
                 * self._num_partitions
                 / self._num_unique_labels
             )
-            if self._distribution_array.shape != (self._num_unique_labels, num_columns):
+            if self._distribution_array.shape != (
+                self._num_unique_labels,
+                self._num_columns,
+            ):
                 raise ValueError(
                     f"The distribution array shape is {self._distribution_array.shape},"
-                    f" but it should be ({self._num_unique_labels}, {num_columns})."
+                    f" but it should be ({self._num_unique_labels}, "
+                    f"{self._num_columns})."
                 )
 
     def _check_distribution_array_sum_if_needed(self) -> None:
@@ -354,3 +361,16 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         """Test num_partition left sides correctness."""
         if not self._num_partitions > 0:
             raise ValueError("The number of partitions needs to be greater than zero.")
+
+    def _check_total_preassigned_samples_within_limit(
+        self, label_distribution, total_preassigned_samples
+    ) -> None:
+        """Test total preassigned samples do not exceed minimum allowable."""
+        if any(label_distribution - total_preassigned_samples < self._num_columns):
+            raise ValueError(
+                "There is insufficient samples to partition by applying the specified "
+                "`preassigned_num_samples_per_label`"
+                f"={self._preassigned_num_samples_per_label}. Reduce the "
+                "`preassigned_num_samples_per_label` or use a different dataset with "
+                "more samples to apply this partition."
+            )
