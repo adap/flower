@@ -49,6 +49,7 @@ class Executor(ABC):
         self,
         fab_file: bytes,
         override_config: Dict[str, str],
+        options_config: Dict[str, str],
     ) -> Optional[RunTracker]:
         """Start a run using the given Flower FAB ID and version.
 
@@ -61,6 +62,8 @@ class Executor(ABC):
             The Flower App Bundle file bytes.
         override_config: Dict[str, str]
             The config overrides dict sent by the user (using `flwr run`).
+        options_config: Dict[str, str]
+            The federation options dict sent by the user (using `flwr run`).
 
         Returns
         -------
