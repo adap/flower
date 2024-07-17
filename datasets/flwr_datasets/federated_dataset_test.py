@@ -144,9 +144,12 @@ class BaseFederatedDatasetsTest(unittest.TestCase):
         dataset_test_partition0 = dataset_fds.load_partition(0, self.test_split)
 
         dataset = datasets.load_dataset(self.dataset_name)
+        expected_len = len(dataset[self.test_split]) // num_test_partitions
+        mod = len(dataset[self.test_split]) % num_test_partitions
+        expected_len += 1 if 0 < mod else 0
         self.assertEqual(
             len(dataset_test_partition0),
-            len(dataset[self.test_split]) // num_test_partitions,
+            expected_len
         )
 
     def test_no_need_for_split_keyword_if_one_partitioner(self) -> None:
