@@ -274,6 +274,17 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             split_indices = np.split(
                 unique_label_to_indices[unique_label], cumsum_division_numbers
             )
+            # Randomly append unassigned samples (which are in the last split that
+            # exceeds `self._num_columns`) to one of the `self._num_columns` partitions.
+            # Unassigned samples originate from float-to-int rounding errors of the
+            # normalizing algorithm.
+            if len(split_indices) > self._num_columns:
+                last_split = split_indices.pop()
+                random_index = self._rng.integers(0, self._num_columns)
+                split_indices[random_index] = np.append(
+                    split_indices[random_index], last_split
+                )
+            assert len(split_indices) == self._num_columns
             split_indices_per_label[unique_label] = split_indices
 
         # Initialize sampling tracker. Keys are the unique class labels.
