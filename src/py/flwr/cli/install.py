@@ -63,23 +63,25 @@ def install(
         source = Path(typer.prompt("Enter the source FAB file"))
 
     source = source.resolve()
-    if not source.exists() or not source.is_file():
+    if not source.exists():
         typer.secho(
-            f"❌ The source {source} does not exist or is not a file.",
+            f"❌ The source {source} does not exist.",
             fg=typer.colors.RED,
             bold=True,
         )
         raise typer.Exit(code=1)
 
-    if source.suffix != ".fab":
+    if source.is_dir():
+        validate_and_install(source, None, flwr_dir=flwr_dir)
+    elif source.suffix == ".fab":
+        install_from_fab(source, flwr_dir)
+    else:
         typer.secho(
-            f"❌ The source {source} is not a `.fab` file.",
+            f"❌ The source {source} is not a Flower App directory or a `.fab` file.",
             fg=typer.colors.RED,
             bold=True,
         )
         raise typer.Exit(code=1)
-
-    install_from_fab(source, flwr_dir)
 
 
 def install_from_fab(
