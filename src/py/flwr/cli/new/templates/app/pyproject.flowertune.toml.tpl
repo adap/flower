@@ -29,6 +29,9 @@ publisher = "$username"
 serverapp = "$import_name.app:server"
 clientapp = "$import_name.app:client"
 
+[tool.flwr.app.config]
+num-server-rounds = "3"
+
 [tool.flwr.federations]
 default = "localhost"
 
