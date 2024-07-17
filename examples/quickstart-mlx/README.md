@@ -7,7 +7,7 @@ framework: [MLX]
 
 # Flower Example using MLX
 
-This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/build/html/index.html), but deep knowledge of MLX is not necessarily to run the example. This example will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy.
+This introductory example to Flower uses [MLX](https://ml-explore.github.io/mlx/build/html/index.html), but deep knowledge of MLX is not necessary to run the example. This example will help you understand how to adapt Flower to your use case. Running this example in itself is quite easy.
 
 [MLX](https://ml-explore.github.io/mlx/build/html/index.html) is a NumPy-like array framework designed for efficient and flexible machine learning on Apple silicon.
 
