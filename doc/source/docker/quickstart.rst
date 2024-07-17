@@ -22,9 +22,7 @@ Step 1: Set Up
 
    .. code-block:: bash
 
-      $ flwr new
-
-      💬 Please provide the project name: quickstart-docker
+      $ flwr new quickstart-docker
 
       💬 Please provide your Flower username: flower
 
@@ -198,7 +196,9 @@ building your own SuperNode image.
           --detach \
           flwr_supernode:0.0.1 \
           --insecure \
-          --superlink superlink:9092
+          --superlink superlink:9092 \
+          --node-config \
+          partition-id=0,num-partitions=2
 
    .. dropdown:: Understand the command
 
@@ -222,7 +222,9 @@ building your own SuperNode image.
           --detach \
           flwr_supernode:0.0.1 \
           --insecure \
-          --superlink superlink:9092
+          --superlink superlink:9092 \
+          --node-config \
+          partition-id=1,num-partitions=2
 
 Step 4: Start the SuperExec
 ---------------------------

@@ -343,9 +343,9 @@ myst_heading_anchors = 3
 
 # -- Options for sphinx_substitution_extensions -------------------
 rst_prolog = """
-.. |latest_version_docker| replace:: 1.10.0.dev20240715
+.. |latest_version_docker| replace:: 1.10.0.dev20240717
 .. |latest_version_docker_sha| replace:: 985c24b2b337ab7f15a554fde9d860cede95079bcaa244fda8f12c0805e34c7d
 .. |ubuntu_version| replace:: 22.04
-.. |setuptools_version| replace:: 69.5.1
-.. |pip_version| replace:: 24.0.0
+.. |setuptools_version| replace:: 70.3.0
+.. |pip_version| replace:: 24.1.2
 """
