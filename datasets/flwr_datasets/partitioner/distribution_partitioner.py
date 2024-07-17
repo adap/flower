@@ -92,6 +92,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     >>> from flwr_datasets import FederatedDataset
     >>> from flwr_datasets.partitioner import DistributionPartitioner
     >>> from pprint import pprint
+    >>> import numpy as np
     >>>
     >>> num_clients = 1_000
     >>> num_unique_labels_per_client = 2
