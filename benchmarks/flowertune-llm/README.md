@@ -14,7 +14,7 @@ Assuming `flwr` package is already installed on your system (check [here](https:
 We provide a single-line command to create a new project directory based on your selected challenge:
 
 ```shell
-flwr new --framework=flwrtune --username=your_flower_account
+flwr new --framework=FlowerTune --username=your_flower_account
 ```
 
 Then you will see a prompt to ask your project name and the choice of LLM challenges from the set of general NLP, finance, medical and code.

@@ -1,6 +1,6 @@
 # FlowerTune LLM Evaluation
 
-This repository provides various evaluation metrics to measure the quality of your finetuned LLMs.
+This repository provides various evaluation metrics to measure the quality of your fine-tuned LLMs.
 Evaluating your LLM is the final step prior to have your submission added to the [LLM Leaderboard](https://flower.ai/benchmarks/llm-leaderboard#how-to-participate).
 The evaluation scores generated here will be displayed as the definitive values on the LLM Leaderboard.
 
