@@ -398,7 +398,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
             raise ValueError("The number of partitions needs to be greater than zero.")
 
     def _check_total_preassigned_samples_within_limit(
-        self, label_distribution: NDArray[Any], total_preassigned_samples: int
+        self, label_distribution: NDArray, total_preassigned_samples: int
     ) -> None:
         """Test total preassigned samples do not exceed minimum allowable."""
         if any(label_distribution - total_preassigned_samples < self._num_columns):
