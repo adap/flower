@@ -82,11 +82,6 @@ class SimulationEngine(Executor):
     ) -> Optional[RunTracker]:
         """Start run using the Flower Simulation Engine."""
         try:
-            if override_config:
-                raise ValueError(
-                    "Overriding the run config is not yet supported with the "
-                    "simulation executor.",
-                )
 
             # Install FAB to flwr dir
             fab_path = install_from_fab(fab_file, None, True)
