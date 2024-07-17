@@ -18,7 +18,7 @@ import subprocess
 import sys
 from logging import DEBUG
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import typer
 from typing_extensions import Annotated
@@ -43,7 +43,7 @@ def run(
         typer.Argument(help="Name of the federation to run the app on"),
     ] = None,
     config_overrides: Annotated[
-        Optional[str],
+        Optional[List[str]],
         typer.Option(
             "--run-config",
             "-c",
@@ -115,7 +115,7 @@ def run(
 def _run_with_superexec(
     federation: Dict[str, str],
     directory: Optional[Path],
-    config_overrides: Optional[str],
+    config_overrides: Optional[List[str]],
 ) -> None:
 
     def on_channel_state_change(channel_connectivity: str) -> None:
@@ -174,7 +174,7 @@ def _run_without_superexec(
     app_path: Optional[Path],
     federation: Dict[str, Any],
     federation_name: str,
-    config_overrides: Optional[str],
+    config_overrides: Optional[List[str]],
 ) -> None:
     try:
         num_supernodes = federation["options"]["num-supernodes"]
