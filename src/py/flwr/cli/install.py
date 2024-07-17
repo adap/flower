@@ -202,7 +202,7 @@ def validate_and_install(
         )
     except subprocess.CalledProcessError as e:
         typer.secho(
-            f"❌ Failed to install the package from {install_dir}:\n{e.stderr}",
+            f"❌ Failed to `pip install` the package(s) from {install_dir}:\n{e.stderr}",
             fg=typer.colors.RED,
             bold=True,
         )
