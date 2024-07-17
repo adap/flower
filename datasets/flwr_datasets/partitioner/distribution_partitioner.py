@@ -321,14 +321,21 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                 * self._num_partitions
                 / self._num_unique_labels
             )
-            if self._distribution_array.shape != (
-                self._num_unique_labels,
-                self._num_columns,
-            ):
+
+            if self._distribution_array.shape[0] != self._num_unique_labels:
                 raise ValueError(
-                    f"The distribution array shape is {self._distribution_array.shape},"
-                    f" but it should be ({self._num_unique_labels}, "
-                    f"{self._num_columns})."
+                    "The expected number of rows in `distribution_array` must equal to "
+                    "the number of unique labels in the dataset, which is "
+                    f"{self._num_unique_labels}, but the number of rows in "
+                    f"`distribution_array` is {self._distribution_array.shape[0]}."
+                )
+
+            if self._distribution_array.shape[1] != self._num_columns:
+                raise ValueError(
+                    "The expected number of columns in `distribution_array` is "
+                    f"{self._num_columns} (refer to the documentation for the "
+                    "expression), but the number of columns in `distribution_array` "
+                    f"is {self._distribution_array.shape[0]}."
                 )
 
     def _check_num_unique_labels_per_partition_if_needed(self) -> None:
