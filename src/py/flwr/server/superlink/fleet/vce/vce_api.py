@@ -16,7 +16,6 @@
 
 
 import json
-import sys
 import threading
 import time
 import traceback
@@ -29,6 +28,7 @@ from typing import Callable, Dict, Optional
 
 from flwr.client.client_app import ClientApp, ClientAppException, LoadClientAppError
 from flwr.client.node_state import NodeState
+from flwr.client.supernode.app import _get_load_client_app_fn
 from flwr.common.constant import (
     NUM_PARTITIONS_KEY,
     PARTITION_ID_KEY,
@@ -37,8 +37,8 @@ from flwr.common.constant import (
 )
 from flwr.common.logger import log
 from flwr.common.message import Error
-from flwr.common.object_ref import load_app
 from flwr.common.serde import message_from_taskins, message_to_taskres
+from flwr.common.typing import Run
 from flwr.proto.task_pb2 import TaskIns, TaskRes  # pylint: disable=E0611
 from flwr.server.superlink.state import State, StateFactory
 
@@ -60,6 +60,31 @@ def _register_nodes(
     return nodes_mapping
 
 
+def _register_node_states(
+    nodes_mapping: NodeToPartitionMapping,
+    run: Run,
+    app_dir: Optional[str] = None,
+) -> Dict[int, NodeState]:
+    """Create NodeState objects and pre-register the context for the run."""
+    node_states: Dict[int, NodeState] = {}
+    num_partitions = len(set(nodes_mapping.values()))
+    for node_id, partition_id in nodes_mapping.items():
+        node_states[node_id] = NodeState(
+            node_id=node_id,
+            node_config={
+                PARTITION_ID_KEY: str(partition_id),
+                NUM_PARTITIONS_KEY: str(num_partitions),
+            },
+        )
+
+        # Pre-register Context objects
+        node_states[node_id].register_context(
+            run_id=run.run_id, run=run, app_dir=app_dir
+        )
+
+    return node_states
+
+
 # pylint: disable=too-many-arguments,too-many-locals
 def worker(
     app_fn: Callable[[], ClientApp],
@@ -78,8 +103,7 @@ def worker(
             task_ins: TaskIns = taskins_queue.get(timeout=1.0)
             node_id = task_ins.task.consumer.node_id
 
-            # Register and retrieve context
-            node_states[node_id].register_context(run_id=task_ins.run_id)
+            # Retrieve context
             context = node_states[node_id].retrieve_context(run_id=task_ins.run_id)
 
             # Convert TaskIns to Message
@@ -151,7 +175,7 @@ def put_taskres_into_state(
             pass
 
 
-def run(
+def run_api(
     app_fn: Callable[[], ClientApp],
     backend_fn: Callable[[], Backend],
     nodes_mapping: NodeToPartitionMapping,
@@ -236,7 +260,10 @@ def start_vce(
     backend_name: str,
     backend_config_json_stream: str,
     app_dir: str,
+    is_app: bool,
     f_stop: threading.Event,
+    run: Run,
+    flwr_dir: Optional[str] = None,
     client_app: Optional[ClientApp] = None,
     client_app_attr: Optional[str] = None,
     num_supernodes: Optional[int] = None,
@@ -287,17 +314,9 @@ def start_vce(
         )
 
     # Construct mapping of NodeStates
-    node_states: Dict[int, NodeState] = {}
-    # Number of unique partitions
-    num_partitions = len(set(nodes_mapping.values()))
-    for node_id, partition_id in nodes_mapping.items():
-        node_states[node_id] = NodeState(
-            node_id=node_id,
-            node_config={
-                PARTITION_ID_KEY: str(partition_id),
-                NUM_PARTITIONS_KEY: str(num_partitions),
-            },
-        )
+    node_states = _register_node_states(
+        nodes_mapping=nodes_mapping, run=run, app_dir=app_dir if is_app else None
+    )
 
     # Load backend config
     log(DEBUG, "Supported backends: %s", list(supported_backends.keys()))
@@ -326,16 +345,12 @@ def start_vce(
     def _load() -> ClientApp:
 
         if client_app_attr:
-
-            if app_dir is not None:
-                sys.path.insert(0, app_dir)
-
-            app: ClientApp = load_app(client_app_attr, LoadClientAppError, app_dir)
-
-            if not isinstance(app, ClientApp):
-                raise LoadClientAppError(
-                    f"Attribute {client_app_attr} is not of type {ClientApp}",
-                ) from None
+            app = _get_load_client_app_fn(
+                default_app_ref=client_app_attr,
+                dir_arg=app_dir,
+                flwr_dir_arg=flwr_dir,
+                multi_app=True,
+            )(run.fab_id, run.fab_version)
 
         if client_app:
             app = client_app
@@ -345,10 +360,19 @@ def start_vce(
 
     try:
         # Test if ClientApp can be loaded
-        _ = app_fn()
+        client_app = app_fn()
+
+        # Cache `ClientApp`
+        if client_app_attr:
+            # Now wrap the loaded ClientApp in a dummy function
+            # this prevent unnecesary low-level loading of ClientApp
+            def _load_client_app() -> ClientApp:
+                return client_app
+
+            app_fn = _load_client_app
 
         # Run main simulation loop
-        run(
+        run_api(
             app_fn,
             backend_fn,
             nodes_mapping,

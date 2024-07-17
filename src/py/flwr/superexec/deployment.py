@@ -15,7 +15,6 @@
 """Deployment engine executor."""
 
 import subprocess
-import sys
 from logging import ERROR, INFO
 from pathlib import Path
 from typing import Dict, Optional
@@ -131,14 +130,7 @@ class DeploymentEngine(Executor):
         try:
             # Install FAB to flwr dir
             fab_version, fab_id = get_fab_metadata(fab_file)
-            fab_path = install_from_fab(fab_file, None, True)
-
-            # Install FAB Python package
-            subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", "--no-deps", str(fab_path)],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
+            install_from_fab(fab_file, None, True)
 
             # Call SuperLink to create run
             run_id: int = self._create_run(fab_id, fab_version, override_config)

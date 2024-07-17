@@ -12,10 +12,10 @@ from flwr.client import ClientApp
 from flwr.common import ndarrays_to_parameters
 from flwr.server import ServerApp, ServerConfig
 
-from $import_name.client import gen_client_fn, get_parameters
+from $import_name.client_app import gen_client_fn, get_parameters
 from $import_name.dataset import get_tokenizer_and_data_collator_and_propt_formatting
 from $import_name.models import get_model
-from $import_name.server import fit_weighted_average, get_evaluate_fn, get_on_fit_config
+from $import_name.server_app import fit_weighted_average, get_evaluate_fn, get_on_fit_config
 
 # Avoid warnings
 warnings.filterwarnings("ignore", category=UserWarning)

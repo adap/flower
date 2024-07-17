@@ -93,20 +93,20 @@ def test_get_fused_config_valid(tmp_path: Path) -> None:
             "numpy>=1.21.0",
         ]
 
-        [flower]
+        [tool.flwr.app]
         publisher = "flwrlabs"
 
-        [flower.components]
+        [tool.flwr.app.components]
         serverapp = "fedgpt.server:app"
         clientapp = "fedgpt.client:app"
 
-        [flower.config]
+        [tool.flwr.app.config]
         num_server_rounds = "10"
         momentum = "0.1"
         lr = "0.01"
         serverapp.test = "key"
 
-        [flower.config.clientapp]
+        [tool.flwr.app.config.clientapp]
         test = "key"
     """
     overrides = {
@@ -131,7 +131,9 @@ def test_get_fused_config_valid(tmp_path: Path) -> None:
             f.write(textwrap.dedent(pyproject_toml_content))
 
         # Execute
-        default_config = get_project_config(tmp_path)["flower"].get("config", {})
+        default_config = get_project_config(tmp_path)["tool"]["flwr"]["app"].get(
+            "config", {}
+        )
 
         config = _fuse_dicts(flatten_dict(default_config), overrides)
 
@@ -158,14 +160,14 @@ def test_get_project_config_file_valid(tmp_path: Path) -> None:
             "numpy>=1.21.0",
         ]
 
-        [flower]
+        [tool.flwr.app]
         publisher = "flwrlabs"
 
-        [flower.components]
+        [tool.flwr.app.components]
         serverapp = "fedgpt.server:app"
         clientapp = "fedgpt.client:app"
 
-        [flower.config]
+        [tool.flwr.app.config]
         num_server_rounds = "10"
         momentum = "0.1"
         lr = "0.01"
@@ -179,16 +181,20 @@ def test_get_project_config_file_valid(tmp_path: Path) -> None:
             "license": {"text": "Apache License (2.0)"},
             "dependencies": ["flwr[simulation]>=1.9.0,<2.0", "numpy>=1.21.0"],
         },
-        "flower": {
-            "publisher": "flwrlabs",
-            "components": {
-                "serverapp": "fedgpt.server:app",
-                "clientapp": "fedgpt.client:app",
-            },
-            "config": {
-                "num_server_rounds": "10",
-                "momentum": "0.1",
-                "lr": "0.01",
+        "tool": {
+            "flwr": {
+                "app": {
+                    "publisher": "flwrlabs",
+                    "components": {
+                        "serverapp": "fedgpt.server:app",
+                        "clientapp": "fedgpt.client:app",
+                    },
+                    "config": {
+                        "num_server_rounds": "10",
+                        "momentum": "0.1",
+                        "lr": "0.01",
+                    },
+                },
             },
         },
     }
@@ -224,7 +230,12 @@ def test_parse_config_args_none() -> None:
 
 def test_parse_config_args_overrides() -> None:
     """Test parse_config_args with key-value pairs."""
-    assert parse_config_args("key1=value1,key2=value2") == {
+    assert parse_config_args(
+        ["key1=value1,key2=value2", "key3=value3", "key4=value4,key5=value5"]
+    ) == {
         "key1": "value1",
         "key2": "value2",
+        "key3": "value3",
+        "key4": "value4",
+        "key5": "value5",
     }
