@@ -124,7 +124,7 @@ class SimulationEngine(Executor):
                 "--app",
                 f"{str(fab_path)}",
                 "--num-supernodes",
-                f"{options_config.get("num-supernodes", self.num_supernodes)}",
+                f"{options_config.get('num-supernodes', self.num_supernodes)}",
                 "--run-id",
                 str(run_id),
             ]
