@@ -28,9 +28,29 @@ from flwr_datasets.partitioner.partitioner import Partitioner
 class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     """Partitioner based on a distribution.
 
-    Inspired from implementations of Li et al.
-    Federated Optimization in Heterogeneous Networks (2020)
-    https://arxiv.org/abs/1812.06127.
+    Inspired from implementations of Li et al. Federated Optimization in
+    Heterogeneous Networks (2020) https://arxiv.org/abs/1812.06127.
+
+    Given a user-specified distribution, the algorithm splits the dataset for each
+    unique label per partition where each label is assigned to the partitions in a
+    deterministic pathological manner. That is, given a distribution array of shape,
+                           `num_unique_labels_per_partition` x `num_partitions`
+    ( `num_unique_labels`, ---------------------------------------------------- ),
+                                          `num_unique_labels`
+    the label_id at the i'th row is assigned to the partition_id based on the formula:
+        partition_id = alpha + beta
+    where,
+        alpha* = (i - num_unique_labels_per_partition + 1) \
+                 + (j % num_unique_labels_per_partition)
+        alpha = alpha* + (alpha* > 0 ? 0 : num_unique_labels)
+        beta = num_unique_labels * (j // num_unique_labels_per_partition)
+    and j in {0, 1, 2, ..., `num_columns`}. Each list representing the partition_ids for
+    the i'th row is sorted in ascending order. So, for a dataset with 10 unique labels
+    and a configuration with 20 partitions and 2 unique labels per partition, the 0'th
+    row of the distribution array (corresponding to class 0) will be assigned to
+    partitions [0, 9, 10, 19], 1st row (class 1) to [0, 1, 10, 11], 2nd row (class 2)
+    to [1, 2, 11, 12], 3rd row (class 3) to [2, 3, 12, 13], etc ...
+    The list representing the unique labels is sorted in ascending order.
 
     Parameters
     ----------
