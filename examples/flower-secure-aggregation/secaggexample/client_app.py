@@ -1,6 +1,7 @@
 import time
 
-from flwr.client import ClientApp, NumPyClient
+from flwr.common import Context
+from flwr.client import ClientApp, NumPyClient, Client
 from flwr.client.mod import secaggplus_mod
 import numpy as np
 
@@ -20,8 +21,13 @@ class FlowerClient(NumPyClient):
         return ret_vec, 1, {}
 
 
-def client_fn(cid: str):
-    """Create and return an instance of Flower `Client`."""
+def client_fn(context: Context) -> Client:
+    """Construct a Client that will be run in a ClientApp.
+
+    You can use settings in `context.run_config` to parameterize the
+    construction of your Client. You could use the `context.node_config` to
+    , for example, indicate which dataset to load (e.g accesing the partition-id).
+    """
     return FlowerClient().to_client()
 
 
