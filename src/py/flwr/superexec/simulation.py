@@ -119,12 +119,15 @@ class SimulationEngine(Executor):
             command = [
                 "flower-simulation",
                 "--app",
-                f"{fab_path}",
+                f"{str(fab_path)}",
                 "--num-supernodes",
                 f"{self.num_supernodes}",
                 "--run-id",
                 str(run_id),
             ]
+
+            if override_config:
+                command.extend(["--run-config", f"{override_config}"])
 
             # Start Simulation
             subprocess.run(  # pylint: disable=consider-using-with
