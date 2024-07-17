@@ -233,11 +233,12 @@ def test_parse_config_args_none() -> None:
 def test_parse_config_args_overrides() -> None:
     """Test parse_config_args with key-value pairs."""
     assert parse_config_args(
-        "key1='value1',key2='value2',key3=1,key4=2.0,key5=true"
+        ["key1=value1,key2=value2", "key3=1", "key4=2.0,key5=true,key6='value6'"]
     ) == {
         "key1": "value1",
         "key2": "value2",
         "key3": 1,
         "key4": 2.0,
         "key5": True,
+        "key6": "value6",
     }

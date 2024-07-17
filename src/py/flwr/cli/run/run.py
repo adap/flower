@@ -14,10 +14,11 @@
 # ==============================================================================
 """Flower command line interface `run` command."""
 
+import subprocess
 import sys
 from logging import DEBUG
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import typer
 from typing_extensions import Annotated
@@ -30,7 +31,6 @@ from flwr.common.logger import log
 from flwr.common.serde import user_config_to_proto
 from flwr.proto.exec_pb2 import StartRunRequest  # pylint: disable=E0611
 from flwr.proto.exec_pb2_grpc import ExecStub
-from flwr.simulation.run_simulation import _run_simulation
 
 
 # pylint: disable-next=too-many-locals
@@ -44,7 +44,7 @@ def run(
         typer.Argument(help="Name of the federation to run the app on"),
     ] = None,
     config_overrides: Annotated[
-        Optional[str],
+        Optional[List[str]],
         typer.Option(
             "--run-config",
             "-c",
@@ -95,11 +95,13 @@ def run(
     # Validate the federation exists in the configuration
     federation = config["tool"]["flwr"]["federations"].get(federation_name)
     if federation is None:
-        available_feds = list(config["tool"]["flwr"]["federations"])
+        available_feds = {
+            fed for fed in config["tool"]["flwr"]["federations"] if fed != "default"
+        }
         typer.secho(
             f"❌ There is no `{federation_name}` federation declared in the "
             "`pyproject.toml`.\n The following federations were found:\n\n"
-            "\n".join(available_feds) + "\n\n",
+            + "\n".join(available_feds),
             fg=typer.colors.RED,
             bold=True,
         )
@@ -108,13 +110,13 @@ def run(
     if "address" in federation:
         _run_with_superexec(federation, directory, config_overrides)
     else:
-        _run_without_superexec(config, federation, federation_name)
+        _run_without_superexec(directory, federation, federation_name, config_overrides)
 
 
 def _run_with_superexec(
     federation: Dict[str, str],
     directory: Optional[Path],
-    config_overrides: Optional[str],
+    config_overrides: Optional[List[str]],
 ) -> None:
 
     def on_channel_state_change(channel_connectivity: str) -> None:
@@ -172,11 +174,11 @@ def _run_with_superexec(
 
 
 def _run_without_superexec(
-    config: Dict[str, Any], federation: Dict[str, Any], federation_name: str
+    app_path: Optional[Path],
+    federation: Dict[str, Any],
+    federation_name: str,
+    config_overrides: Optional[List[str]],
 ) -> None:
-    server_app_ref = config["tool"]["flwr"]["app"]["components"]["serverapp"]
-    client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
-
     try:
         num_supernodes = federation["options"]["num-supernodes"]
     except KeyError as err:
@@ -191,8 +193,20 @@ def _run_without_superexec(
         )
         raise typer.Exit(code=1) from err
 
-    _run_simulation(
-        server_app_attr=server_app_ref,
-        client_app_attr=client_app_ref,
-        num_supernodes=num_supernodes,
+    command = [
+        "flower-simulation",
+        "--app",
+        f"{app_path}",
+        "--num-supernodes",
+        f"{num_supernodes}",
+    ]
+
+    if config_overrides:
+        command.extend(["--run-config", f"{config_overrides}"])
+
+    # Run the simulation
+    subprocess.run(
+        command,
+        check=True,
+        text=True,
     )
