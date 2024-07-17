@@ -127,7 +127,7 @@ class SimulationEngine(Executor):
             ]
 
             # Start Simulation
-            proc = subprocess.run(  # pylint: disable=consider-using-with
+            subprocess.run(  # pylint: disable=consider-using-with
                 command,
                 check=True,
                 text=True,
@@ -135,10 +135,7 @@ class SimulationEngine(Executor):
 
             log(INFO, "Started run %s", str(run_id))
 
-            return RunTracker(
-                run_id=run_id,
-                proc=proc,
-            )
+            return None
 
         # pylint: disable-next=broad-except
         except Exception as e:
