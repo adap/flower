@@ -186,6 +186,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         # requested. Only the first call creates the indices assignments for all the
         # partition indices.
         self._check_distribution_array_shape_if_needed()
+        self._check_num_unique_labels_per_partition_if_needed()
         self._check_distribution_array_sum_if_needed()
         self._check_num_partitions_correctness_if_needed()
         self._check_num_partitions_greater_than_zero()
@@ -329,6 +330,17 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
                     f" but it should be ({self._num_unique_labels}, "
                     f"{self._num_columns})."
                 )
+
+    def _check_num_unique_labels_per_partition_if_needed(self) -> None:
+        """Test number of unique labels do not exceed self.num_unique_labels."""
+        if self._num_unique_labels_per_partition > self._num_unique_labels:
+            raise ValueError(
+                "The specified `num_unique_labels_per_partition`"
+                f"={self._num_unique_labels_per_partition} is greater than the number "
+                f"of unique classes in the given dataset={self._num_unique_labels}. "
+                "Reduce the `_num_unique_labels_per_partition` or make use different "
+                "dataset to apply this partitioning."
+            )
 
     def _check_distribution_array_sum_if_needed(self) -> None:
         """Test correctness of distribution array sum."""
