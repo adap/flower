@@ -62,7 +62,7 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         such that the first row of the array corresponds to the sample distribution
         of the first unique label (in ascending order). The values may be scaled per
         label such that the sum of the label distributions across all partitions are
-        equal (or close to) to the original unpartitioned label distribution
+        equal to the original unpartitioned label distribution
         - see the `rescale` argument.
     num_partitions : int
         The total number of partitions that the data will be divided into. The number of
@@ -77,8 +77,10 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         have.
     rescale : bool, default=True
         Whether to partition samples according to the values in
-        `distribution_array` or rescale based on the original unpartitioned
-        class label distribution. `float` values are rounded to the nearest `int`.
+        `distribution_array` or rescale based on the original unpartitioned class label
+        distribution. `float` values are rounded to the nearest `int`. All samples for
+        any label_id are exhausted during the partitioning by randomly assigning any
+        unassigned samples from round-off errors to one of the label_id's partition_ids.
     shuffle : bool, default=True
         Whether to randomize the order of samples. Shuffling applied after the
         samples assignment to nodes.
