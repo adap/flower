@@ -77,7 +77,7 @@ def run_supernode() -> None:
         authentication_keys=authentication_keys,
         max_retries=args.max_retries,
         max_wait_time=args.max_wait_time,
-        node_config=parse_config_args(args.node_config),
+        node_config=parse_config_args([args.node_config]),
         flwr_path=get_flwr_dir(args.flwr_dir),
     )
 
@@ -107,7 +107,7 @@ def run_client_app() -> None:
 
     _start_client_internal(
         server_address=args.superlink,
-        node_config=parse_config_args(args.node_config),
+        node_config=parse_config_args([args.node_config]),
         load_client_app_fn=load_fn,
         transport=args.transport,
         root_certificates=root_certificates,
@@ -248,7 +248,7 @@ def _get_load_client_app_fn(
             dir_path = Path(project_dir).absolute()
 
             # Set app reference
-            client_app_ref = config["tool"]["flwr"]["components"]["clientapp"]
+            client_app_ref = config["tool"]["flwr"]["app"]["components"]["clientapp"]
 
         # Set sys.path
         nonlocal inserted_path

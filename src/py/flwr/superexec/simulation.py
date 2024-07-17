@@ -111,11 +111,6 @@ class SimulationEngine(Executor):
                     "Config extracted from FAB's pyproject.toml is not valid"
                 )
 
-            # Get ClientApp and SeverApp components
-            flower_components = config["tool"]["flwr"]["components"]
-            clientapp = flower_components["clientapp"]
-            serverapp = flower_components["serverapp"]
-
             # In Simulation there is no SuperLink, still we create a run_id
             run_id = generate_rand_int_from_bytes(RUN_ID_NUM_BYTES)
             log(INFO, "Created run %s", str(run_id))
@@ -123,15 +118,16 @@ class SimulationEngine(Executor):
             # Prepare commnand
             command = [
                 "flower-simulation",
-                "--client-app",
-                f"{clientapp}",
-                "--server-app",
-                f"{serverapp}",
+                "--app",
+                f"{str(fab_path)}",
                 "--num-supernodes",
                 f"{self.num_supernodes}",
                 "--run-id",
                 str(run_id),
             ]
+
+            if override_config:
+                command.extend(["--run-config", f"{override_config}"])
 
             # Start Simulation
             proc = subprocess.Popen(  # pylint: disable=consider-using-with
