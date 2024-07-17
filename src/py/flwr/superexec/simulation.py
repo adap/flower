@@ -125,7 +125,7 @@ class SimulationEngine(Executor):
                 command.extend(["--run-config", f"{override_config}"])
 
             # Start Simulation
-            subprocess.run(  # pylint: disable=consider-using-with
+            proc = subprocess.run(  # pylint: disable=consider-using-with
                 command,
                 check=True,
                 text=True,
@@ -133,7 +133,10 @@ class SimulationEngine(Executor):
 
             log(INFO, "Started run %s", str(run_id))
 
-            return None
+            return RunTracker(
+                run_id=run_id,
+                proc=proc,  # type:ignore
+            )
 
         # pylint: disable-next=broad-except
         except Exception as e:
