@@ -65,7 +65,9 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
         equal (or close to) to the original unpartitioned label distribution
         - see the `rescale` argument.
     num_partitions : int
-        The total number of partitions that the data will be divided into.
+        The total number of partitions that the data will be divided into. The number of
+        partitions must be an integer multiple of the number of unique labels in the
+        dataset.
     num_unique_labels_per_partition : int
         Number of unique labels assigned to a single partition.
     partition_by : str

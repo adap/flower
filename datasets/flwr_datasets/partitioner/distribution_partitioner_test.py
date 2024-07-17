@@ -18,14 +18,11 @@ from collections import Counter
 from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
-import numpy.typing as npt
 import pytest
 
 from datasets import Dataset
+from flwr_datasets.common.typing import NDArrayFloat, NDArrayInt
 from flwr_datasets.partitioner.distribution_partitioner import DistributionPartitioner
-
-NDArrayInt = npt.NDArray[np.int_]
-NDArrayFloat = npt.NDArray[np.float_]
 
 
 def _dummy_dataset_setup(
