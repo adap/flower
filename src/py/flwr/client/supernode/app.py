@@ -201,7 +201,7 @@ def _get_load_client_app_fn(
             raise LoadClientAppError(error_msg) from None
 
     def _load(fab_id: str, fab_version: str) -> ClientApp:
-        runtime_dir_path = Path(project_dir).absolute()
+        runtime_project_dir = Path(project_dir).absolute()
         # If multi-app feature is disabled
         if not multi_app:
             # Set app reference
@@ -220,10 +220,10 @@ def _get_load_client_app_fn(
         # If multi-app feature is enabled
         else:
             try:
-                runtime_dir_path = get_project_dir(
+                runtime_project_dir = get_project_dir(
                     fab_id, fab_version, get_flwr_dir(flwr_dir)
                 )
-                config = get_project_config(runtime_dir_path)
+                config = get_project_config(runtime_project_dir)
             except Exception as e:
                 raise LoadClientAppError("Failed to load ClientApp") from e
 
@@ -236,7 +236,7 @@ def _get_load_client_app_fn(
             "Loading ClientApp `%s`",
             client_app_ref,
         )
-        client_app = load_app(client_app_ref, LoadClientAppError, runtime_dir_path)
+        client_app = load_app(client_app_ref, LoadClientAppError, runtime_project_dir)
 
         if not isinstance(client_app, ClientApp):
             raise LoadClientAppError(
