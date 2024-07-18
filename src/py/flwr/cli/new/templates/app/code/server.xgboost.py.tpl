@@ -7,13 +7,6 @@ from flwr.server import ServerApp, ServerAppComponents, ServerConfig
 from flwr.server.strategy import FedXgbBagging
 
 
-# FL experimental settings
-pool_size = 2
-num_rounds = 3
-num_clients_per_round = 2
-num_evaluate_clients = 2
-
-
 def evaluate_metrics_aggregation(eval_metrics):
     """Return an aggregated metric (AUC) for evaluation."""
     total_num = sum([num for num, _ in eval_metrics])
@@ -35,6 +28,9 @@ def config_func(rnd: int) -> Dict[str, str]:
 def server_fn(context: Context):
     # Read from config
     num_rounds = int(context.run_config["num-server-rounds"])
+    pool_size = int(context.run_config["pool-size"])
+    num_clients_per_round = int(context.run_config["num-clients-per-round"])
+    num_evaluate_clients = int(context.run_config["num-evaluate-clients"])
 
     # Define strategy
     strategy = FedXgbBagging(

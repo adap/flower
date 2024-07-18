@@ -134,11 +134,11 @@ def client_fn(context: Context):
         partition_id, num_partitions
     )
 
-    num_local_round = 1
+    num_local_round = int(context.run_config["local-epochs"])
     params = {
         "objective": "binary:logistic",
-        "eta": 0.1,  # Learning rate
-        "max_depth": 8,
+        "eta": float(context.run_config["lr"]),  # Learning rate
+        "max_depth": int(context.run_config["max-depth"]),
         "eval_metric": "auc",
         "nthread": 16,
         "num_parallel_tree": 1,
