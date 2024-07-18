@@ -97,25 +97,25 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     >>> from pprint import pprint
     >>> import numpy as np
     >>>
-    >>> num_clients = 1_000
-    >>> num_unique_labels_per_client = 2
+    >>> num_partitions = 1_000
+    >>> num_unique_labels_per_partition = 2
     >>> num_unique_labels = 10
     >>> preassigned_num_samples_per_label = 5
     >>>
     >>> # Generate a vector from a log-normal probability distribution
     >>> rng = np.random.default_rng(2024)
     >>> mu, sigma = 0., 2.
-    >>> lognormal_distribution = rng.lognormal(
+    >>> distribution_array = rng.lognormal(
     >>>     mu,
     >>>     sigma,
-    >>>     (num_clients*num_unique_labels_per_client),
+    >>>     (num_partitions*num_unique_labels_per_partition),
     >>> )
-    >>> lognormal_distribution = lognormal_distribution.reshape((num_unique_labels, -1))
+    >>> distribution_array = distribution_array.reshape((num_unique_labels, -1))
     >>>
     >>> partitioner = DistributionPartitioner(
-    >>>     distribution_array=lognormal_distribution,
-    >>>     num_partitions=num_clients,
-    >>>     num_unique_labels_per_partition=num_unique_labels_per_client,
+    >>>     distribution_array=distribution_array,
+    >>>     num_partitions=num_partitions,
+    >>>     num_unique_labels_per_partition=num_unique_labels_per_partition,
     >>>     partition_by="label",  # MNIST dataset has a target column `label`
     >>>     preassigned_num_samples_per_label=preassigned_num_samples_per_label,
     >>> )
