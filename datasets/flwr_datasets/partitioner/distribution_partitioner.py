@@ -73,8 +73,9 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     partition_by : str
         Column name of the labels (targets) based on which sampling works.
     preassigned_num_samples_per_label : int
-        The minimum number of samples that each unique label in each partition will
-        have.
+        The number of samples that each unique label in each partition will first
+        be assigned before the `distribution_array` values are assigned. This
+        value has no effect if `rescale` is set to False.
     rescale : bool, default=True
         Whether to partition samples according to the values in
         `distribution_array` or rescale based on the original unpartitioned class label
