@@ -31,9 +31,12 @@ class DistributionPartitioner(Partitioner):  # pylint: disable=R0902
     Inspired from implementations of Li et al. Federated Optimization in
     Heterogeneous Networks (2020) https://arxiv.org/abs/1812.06127.
 
-    Given a user-specified distribution, the algorithm splits the dataset for each
-    unique label per partition where each label is assigned to the partitions in a
-    deterministic pathological manner. That is, given a distribution array of shape,
+    Given a 2-dimensional user-specified distribution, the algorithm splits the dataset
+    for each unique label per partition where each label is assigned to the partitions
+    in a deterministic pathological manner. The 1st dimension is the number of unique
+    labels and the 2nd-dimension is the number of buckets into which the samples
+    associated with each label will be divided. That is, given a distribution array of
+    shape,
                            `num_unique_labels_per_partition` x `num_partitions`
     ( `num_unique_labels`, ---------------------------------------------------- ),
                                           `num_unique_labels`
