@@ -112,8 +112,13 @@ def get_fused_config(run: Run, flwr_dir: Optional[Path]) -> Dict[str, str]:
     return get_fused_config_from_dir(project_dir, run.override_config)
 
 
-def flatten_dict(raw_dict: Dict[str, Any], parent_key: str = "") -> Dict[str, str]:
+def flatten_dict(
+    raw_dict: Optional[Dict[str, Any]], parent_key: str = ""
+) -> Dict[str, str]:
     """Flatten dict by joining nested keys with a given separator."""
+    if raw_dict is None:
+        return {}
+
     items: List[Tuple[str, str]] = []
     separator: str = "."
     for k, v in raw_dict.items():
