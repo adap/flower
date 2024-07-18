@@ -243,4 +243,5 @@ jobs:
           key: ${{ matrix.framework }}-template-datasets
       - name: Run project
         run: |
+          cd tmp-${{ matrix.framework }}
           flwr run --run-config num-server-rounds=1
