@@ -28,7 +28,7 @@ import datasets
 from datasets import Dataset, DatasetDict, concatenate_datasets
 from flwr_datasets.federated_dataset import FederatedDataset
 from flwr_datasets.mock_utils_test import _load_mocked_dataset
-from flwr_datasets.partitioner import IidPartitioner, Partitioner
+from flwr_datasets.partitioner import IidPartitioner, NaturalIdPartitioner, Partitioner
 
 mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
 
@@ -398,6 +398,39 @@ class PartitionersSpecificationForFederatedDatasets(unittest.TestCase):
             isinstance(fds._partitioners["test"], IidPartitioner)
             and fds._partitioners["test"]._num_partitions == num_test_partitions
         )
+
+
+natural_id_datasets = [
+    "flwrlabs/femnist",
+]
+
+
+@parameterized_class(
+    ("dataset_name", "test_split", "subset", "partition_by"),
+    [
+        ("flwrlabs/femnist", "", "", "writer_id"),
+    ],
+)
+class NaturalIdPartitionerIntegrationTest(unittest.TestCase):
+    """General FederatedDataset tests with NaturalIdPartitioner."""
+
+    dataset_name = ""
+    test_split = ""
+    subset = ""
+    partition_by = ""
+
+    def test_if_the_partitions_have_unique_values(self) -> None:
+        """Test if each partition has a single unique id value."""
+        fds = FederatedDataset(
+            dataset=self.dataset_name,
+            partitioners={
+                "train": NaturalIdPartitioner(partition_by=self.partition_by)
+            },
+        )
+        for partition_id in range(fds.partitioners["train"].num_partitions):
+            partition = fds.load_partition(partition_id)
+            unique_ids_in_partition = list(set(partition[self.partition_by]))
+            self.assertEqual(len(unique_ids_in_partition), 1)
 
 
 class IncorrectUsageFederatedDatasets(unittest.TestCase):
