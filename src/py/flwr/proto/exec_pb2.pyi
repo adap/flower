@@ -3,6 +3,7 @@
 isort:skip_file
 """
 import builtins
+import flwr.proto.fab_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.message
@@ -26,17 +27,19 @@ class StartRunRequest(google.protobuf.message.Message):
             ) -> None: ...
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
-    FAB_FILE_FIELD_NUMBER: builtins.int
+    FAB_FIELD_NUMBER: builtins.int
     OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
-    fab_file: builtins.bytes
+    @property
+    def fab(self) -> flwr.proto.fab_pb2.Fab: ...
     @property
     def override_config(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
     def __init__(self,
         *,
-        fab_file: builtins.bytes = ...,
+        fab: typing.Optional[flwr.proto.fab_pb2.Fab] = ...,
         override_config: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_file",b"fab_file","override_config",b"override_config"]) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["fab",b"fab"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab",b"fab","override_config",b"override_config"]) -> None: ...
 global___StartRunRequest = StartRunRequest
 
 class StartRunResponse(google.protobuf.message.Message):

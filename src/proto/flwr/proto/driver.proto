@@ -20,6 +20,7 @@ package flwr.proto;
 import "flwr/proto/node.proto";
 import "flwr/proto/task.proto";
 import "flwr/proto/run.proto";
+import "flwr/proto/fab.proto";
 
 service Driver {
   // Request run_id
@@ -36,13 +37,15 @@ service Driver {
 
   // Get run details
   rpc GetRun(GetRunRequest) returns (GetRunResponse) {}
+
+  // Get FAB
+  rpc GetFab(GetFabRequest) returns (GetFabResponse) {}
 }
 
 // CreateRun
 message CreateRunRequest {
-  string fab_id = 1;
-  string fab_version = 2;
-  map<string, string> override_config = 3;
+  Fab fab = 1;
+  map<string, string> override_config = 2;
 }
 message CreateRunResponse { sint64 run_id = 1; }
 

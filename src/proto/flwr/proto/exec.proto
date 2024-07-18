@@ -17,6 +17,8 @@ syntax = "proto3";
 
 package flwr.proto;
 
+import "flwr/proto/fab.proto";
+
 service Exec {
   // Start run upon request
   rpc StartRun(StartRunRequest) returns (StartRunResponse) {}
@@ -26,7 +28,7 @@ service Exec {
 }
 
 message StartRunRequest {
-  bytes fab_file = 1;
+  Fab fab = 1;
   map<string, string> override_config = 2;
 }
 message StartRunResponse { sint64 run_id = 1; }

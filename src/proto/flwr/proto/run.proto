@@ -19,9 +19,8 @@ package flwr.proto;
 
 message Run {
   sint64 run_id = 1;
-  string fab_id = 2;
-  string fab_version = 3;
-  map<string, string> override_config = 4;
+  string fab_hash = 2;
+  map<string, string> override_config = 3;
 }
 message GetRunRequest { sint64 run_id = 1; }
 message GetRunResponse { Run run = 1; }

@@ -27,22 +27,19 @@ class Run(google.protobuf.message.Message):
         def ClearField(self, field_name: typing_extensions.Literal["key",b"key","value",b"value"]) -> None: ...
 
     RUN_ID_FIELD_NUMBER: builtins.int
-    FAB_ID_FIELD_NUMBER: builtins.int
-    FAB_VERSION_FIELD_NUMBER: builtins.int
+    FAB_HASH_FIELD_NUMBER: builtins.int
     OVERRIDE_CONFIG_FIELD_NUMBER: builtins.int
     run_id: builtins.int
-    fab_id: typing.Text
-    fab_version: typing.Text
+    fab_hash: typing.Text
     @property
     def override_config(self) -> google.protobuf.internal.containers.ScalarMap[typing.Text, typing.Text]: ...
     def __init__(self,
         *,
         run_id: builtins.int = ...,
-        fab_id: typing.Text = ...,
-        fab_version: typing.Text = ...,
+        fab_hash: typing.Text = ...,
         override_config: typing.Optional[typing.Mapping[typing.Text, typing.Text]] = ...,
         ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal["fab_id",b"fab_id","fab_version",b"fab_version","override_config",b"override_config","run_id",b"run_id"]) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fab_hash",b"fab_hash","override_config",b"override_config","run_id",b"run_id"]) -> None: ...
 global___Run = Run
 
 class GetRunRequest(google.protobuf.message.Message):
