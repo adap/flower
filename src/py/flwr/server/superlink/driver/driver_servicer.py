@@ -20,11 +20,11 @@ from logging import DEBUG
 from typing import List, Optional, Set
 from uuid import UUID
 
-from flwr.common.serde import fab_to_proto
-from flwr.common.typing import Fab
 import grpc
 
 from flwr.common.logger import log
+from flwr.common.serde import fab_to_proto
+from flwr.common.typing import Fab
 from flwr.proto import driver_pb2_grpc  # pylint: disable=E0611
 from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     CreateRunRequest,
@@ -36,10 +36,7 @@ from flwr.proto.driver_pb2 import (  # pylint: disable=E0611
     PushTaskInsRequest,
     PushTaskInsResponse,
 )
-from flwr.proto.fab_pb2 import (  # pylint: disable=E0611
-    GetFabRequest,
-    GetFabResponse,
-)
+from flwr.proto.fab_pb2 import GetFabRequest, GetFabResponse  # pylint: disable=E0611
 from flwr.proto.node_pb2 import Node  # pylint: disable=E0611
 from flwr.proto.run_pb2 import (  # pylint: disable=E0611
     GetRunRequest,

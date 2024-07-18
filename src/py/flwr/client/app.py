@@ -23,9 +23,9 @@ from pathlib import Path
 from typing import Callable, ContextManager, Dict, Optional, Tuple, Type, Union
 
 from cryptography.hazmat.primitives.asymmetric import ec
-from flwr.cli.config_utils import get_fab_metadata_from_hash
 from grpc import RpcError
 
+from flwr.cli.config_utils import get_fab_metadata_from_hash
 from flwr.client.client import Client
 from flwr.client.client_app import ClientApp, LoadClientAppError
 from flwr.client.typing import ClientFnExt
