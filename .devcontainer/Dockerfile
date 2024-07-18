@@ -29,8 +29,8 @@ RUN apt-get install -y curl wget gnupg python3 python-is-python3 python3-pip git
     build-essential tmux vim
 
 RUN python -m pip install \
-    pip==24.0.0 \
-    setuptools==69.5.1 \
+    pip==24.1.2 \
+    setuptools==70.3.0 \
     poetry==1.7.1
 
 USER $USERNAME

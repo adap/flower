@@ -1,6 +1,7 @@
 """$project_name: A Flower / HuggingFace Transformers app."""
 
 from flwr.client import ClientApp, NumPyClient
+from flwr.common import Context
 from transformers import AutoModelForSequenceClassification
 
 from $import_name.task import (
@@ -38,12 +39,15 @@ class FlowerClient(NumPyClient):
         return float(loss), len(self.testloader), {"accuracy": accuracy}
 
 
-def client_fn(cid):
+def client_fn(context: Context):
     # Load model and data
     net = AutoModelForSequenceClassification.from_pretrained(
         CHECKPOINT, num_labels=2
     ).to(DEVICE)
-    trainloader, valloader = load_data(int(cid), 2)
+
+    partition_id = int(context.node_config['partition-id'])
+    num_partitions = int(context.node_config['num-partitions])
+    trainloader, valloader = load_data(partition_id, num_partitions)
 
     # Return Client instance
     return FlowerClient(net, trainloader, valloader).to_client()

@@ -14,36 +14,32 @@
 # ==============================================================================
 """Flower command line interface `build` command."""
 
-import hashlib
 import os
 import zipfile
 from pathlib import Path
 from typing import Optional
 
 import pathspec
+import tomli_w
 import typer
 from typing_extensions import Annotated
 
 from .config_utils import load_and_validate
-from .utils import is_valid_project_name
+from .utils import get_sha256_hash, is_valid_project_name
 
 
 # pylint: disable=too-many-locals
 def build(
     directory: Annotated[
         Optional[Path],
-        typer.Option(help="The Flower project directory to bundle into a FAB"),
+        typer.Option(help="Path of the Flower project to bundle into a FAB"),
     ] = None,
-) -> None:
+) -> str:
     """Build a Flower project into a Flower App Bundle (FAB).
 
-    You can run `flwr build` without any argument to bundle the current directory:
-
-        `flwr build`
-
-    You can also build a specific directory:
-
-        `flwr build --directory ./projects/flower-hello-world`
+    You can run ``flwr build`` without any arguments to bundle the current directory,
+    or you can use ``--directory`` to build a specific directory:
+    ``flwr build --directory ./projects/flower-hello-world``.
     """
     if directory is None:
         directory = Path.cwd()
@@ -90,7 +86,7 @@ def build(
 
     # Set the name of the zip file
     fab_filename = (
-        f"{conf['flower']['publisher']}"
+        f"{conf['tool']['flwr']['app']['publisher']}"
         f".{directory.name}"
         f".{conf['project']['version'].replace('.', '-')}.fab"
     )
@@ -98,15 +94,28 @@ def build(
 
     allowed_extensions = {".py", ".toml", ".md"}
 
+    # Remove the 'federations' field from 'tool.flwr' if it exists
+    if (
+        "tool" in conf
+        and "flwr" in conf["tool"]
+        and "federations" in conf["tool"]["flwr"]
+    ):
+        del conf["tool"]["flwr"]["federations"]
+
+    toml_contents = tomli_w.dumps(conf)
+
     with zipfile.ZipFile(fab_filename, "w", zipfile.ZIP_DEFLATED) as fab_file:
+        fab_file.writestr("pyproject.toml", toml_contents)
+
+        # Continue with adding other files
         for root, _, files in os.walk(directory, topdown=True):
-            # Filter directories and files based on .gitignore
             files = [
                 f
                 for f in files
                 if not ignore_spec.match_file(Path(root) / f)
                 and f != fab_filename
                 and Path(f).suffix in allowed_extensions
+                and f != "pyproject.toml"  # Exclude the original pyproject.toml
             ]
 
             for file in files:
@@ -115,7 +124,7 @@ def build(
                 fab_file.write(file_path, archive_path)
 
                 # Calculate file info
-                sha256_hash = _get_sha256_hash(file_path)
+                sha256_hash = get_sha256_hash(file_path)
                 file_size_bits = os.path.getsize(file_path) * 8  # size in bits
                 list_file_content += f"{archive_path},{sha256_hash},{file_size_bits}\n"
 
@@ -123,20 +132,10 @@ def build(
         fab_file.writestr(".info/CONTENT", list_file_content)
 
     typer.secho(
-        f"🎊 Successfully built {fab_filename}.", fg=typer.colors.GREEN, bold=True
+        f"🎊 Successfully built {fab_filename}", fg=typer.colors.GREEN, bold=True
     )
 
-
-def _get_sha256_hash(file_path: Path) -> str:
-    """Calculate the SHA-256 hash of a file."""
-    sha256 = hashlib.sha256()
-    with open(file_path, "rb") as f:
-        while True:
-            data = f.read(65536)  # Read in 64kB blocks
-            if not data:
-                break
-            sha256.update(data)
-    return sha256.hexdigest()
+    return fab_filename
 
 
 def _load_gitignore(directory: Path) -> pathspec.PathSpec:

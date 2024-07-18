@@ -53,9 +53,8 @@ exclude = [
 
 [tool.poetry.scripts]
 flwr = "flwr.cli.app:app"
-flower-driver-api = "flwr.server:run_driver_api"
-flower-fleet-api = "flwr.server:run_fleet_api"
 flower-superlink = "flwr.server:run_superlink"
+flower-superexec = "flwr.superexec:run_superexec"
 flower-supernode = "flwr.client:run_supernode"
 flower-client-app = "flwr.client:run_client_app"
 flower-server-app = "flwr.server:run_server_app"
@@ -65,13 +64,14 @@ flower-simulation = "flwr.simulation.run_simulation:run_simulation_from_cli"
 python = "^3.8"
 # Mandatory dependencies
 numpy = "^1.21.0"
-grpcio = "^1.60.0"
+grpcio = "^1.60.0,!=1.64.2,!=1.65.0"
 protobuf = "^4.25.2"
 cryptography = "^42.0.4"
 pycryptodome = "^3.18.0"
 iterators = "^0.0.2"
 typer = { version = "^0.9.0", extras=["all"] }
 tomli = "^2.0.1"
+tomli-w = "^1.0.0"
 pathspec = "^0.12.1"
 # Optional dependencies (Simulation Engine)
 ray = { version = "==2.10.0", optional = true, python = ">=3.8,<3.12" }
@@ -106,6 +106,7 @@ rope = "==1.11.0"
 semver = "==3.0.2"
 sphinx = "==6.2.1"
 sphinx-intl = "==2.2.0"
+sphinx-click = "==5.1.0"
 myst-parser = "==1.0.0"
 sphinx-design = "==0.5.0"
 sphinx-copybutton = "==0.5.2"
@@ -122,7 +123,7 @@ mdformat-gfm = "==0.3.5"
 mdformat-frontmatter = "==2.0.1"
 mdformat-beautysh = "==0.1.1"
 mdformat-myst = "==0.1.5"
-twine = "==4.0.2"
+twine = "==5.1.1"
 pyroma = "==4.2"
 check-wheel-contents = "==0.4.0"
 GitPython = "==3.1.32"
@@ -131,12 +132,7 @@ licensecheck = "==2024"
 pre-commit = "==3.5.0"
 
 [tool.isort]
-line_length = 88
-indent = "    "
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
+profile = "black"
 known_first_party = ["flwr", "flwr_tool"]
 
 [tool.black]
