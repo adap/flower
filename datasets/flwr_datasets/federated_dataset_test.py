@@ -43,6 +43,7 @@ mocked_datasets = ["cifar100", "svhn", "sentiment140", "speech_commands"]
         ("fashion_mnist", "test", ""),
         ("sasha/dog-food", "test", ""),
         ("zh-plus/tiny-imagenet", "valid", ""),
+        ("flwrlabs/usps", "test", ""),
         # Text
         ("scikit-learn/adult-census-income", None, ""),
         # Mocked
